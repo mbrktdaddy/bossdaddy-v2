@@ -30,19 +30,23 @@ const STATS = [
 export default async function HomePage() {
   const supabase = await createClient()
 
-  const { data: reviews } = await supabase
+  const { data: reviews, error: reviewsError } = await supabase
     .from('reviews')
     .select('id, slug, title, product_name, category, rating, excerpt, published_at')
     .eq('status', 'approved')
     .order('published_at', { ascending: false })
     .limit(6)
 
-  const { data: articles } = await supabase
+  if (reviewsError) console.error('Reviews query error:', reviewsError)
+
+  const { data: articles, error: articlesError } = await supabase
     .from('articles')
     .select('id, slug, title, category, excerpt, published_at')
     .eq('status', 'approved')
     .order('published_at', { ascending: false })
     .limit(3)
+
+  if (articlesError) console.error('Articles query error:', articlesError)
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">

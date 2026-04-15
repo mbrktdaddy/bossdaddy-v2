@@ -8,8 +8,12 @@ import { z } from 'zod'
 const UpdateSchema = z.object({
   title: z.string().min(10).max(120).optional(),
   product_name: z.string().min(2).max(120).optional(),
+  category: z.string().optional(),
+  excerpt: z.string().max(200).optional(),
   content: z.string().min(100).optional(),
   rating: z.number().int().min(1).max(5).optional(),
+  pros: z.array(z.string()).optional(),
+  cons: z.array(z.string()).optional(),
   disclosure_acknowledged: z.boolean().optional(),
 })
 
@@ -92,7 +96,11 @@ export async function PUT(
   const updates: Record<string, unknown> = {}
   if (parsed.data.title) updates.title = parsed.data.title
   if (parsed.data.product_name) updates.product_name = parsed.data.product_name
+  if (parsed.data.category) updates.category = parsed.data.category
+  if (parsed.data.excerpt !== undefined) updates.excerpt = parsed.data.excerpt
   if (parsed.data.rating) updates.rating = parsed.data.rating
+  if (parsed.data.pros) updates.pros = parsed.data.pros
+  if (parsed.data.cons) updates.cons = parsed.data.cons
   if (typeof parsed.data.disclosure_acknowledged === 'boolean') {
     updates.disclosure_acknowledged = parsed.data.disclosure_acknowledged
   }
