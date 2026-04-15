@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { CATEGORIES } from '@/lib/categories'
 import type { Metadata } from 'next'
@@ -32,7 +33,7 @@ export default async function HomePage() {
 
   const { data: reviews, error: reviewsError } = await supabase
     .from('reviews')
-    .select('id, slug, title, product_name, category, rating, excerpt, published_at')
+    .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
     .eq('status', 'approved')
     .order('published_at', { ascending: false })
     .limit(6)
@@ -162,25 +163,38 @@ export default async function HomePage() {
                 <Link
                   key={r.id}
                   href={`/reviews/${r.slug}`}
-                  className="group flex flex-col bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-orange-700/60 transition-all duration-200"
+                  className="group flex flex-col bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-orange-700/60 transition-all duration-200"
                 >
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2.5 py-1 rounded-full">
-                      {r.product_name}
-                    </span>
-                    <StarRating rating={r.rating} />
-                  </div>
-                  <h3 className="text-base font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
-                    {r.title}
-                  </h3>
-                  {r.excerpt && (
-                    <p className="text-gray-500 text-sm mt-2 line-clamp-2">{r.excerpt}</p>
+                  {r.image_url && (
+                    <div className="relative w-full h-44 bg-gray-800 shrink-0">
+                      <Image
+                        src={r.image_url}
+                        alt={r.product_name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                    </div>
                   )}
-                  <div className="flex items-center justify-between mt-5 pt-4 border-t border-gray-800">
-                    <span className="text-xs text-gray-600">
-                      {r.published_at ? new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
-                    </span>
-                    <span className="text-xs text-orange-500 font-medium">Read review →</span>
+                  <div className="p-5 flex flex-col flex-1">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
+                        {r.product_name}
+                      </span>
+                      <StarRating rating={r.rating} />
+                    </div>
+                    <h3 className="text-base font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
+                      {r.title}
+                    </h3>
+                    {r.excerpt && (
+                      <p className="text-gray-500 text-sm mt-2 line-clamp-2">{r.excerpt}</p>
+                    )}
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-800">
+                      <span className="text-xs text-gray-600">
+                        {r.published_at ? new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
+                      </span>
+                      <span className="text-xs text-orange-500 font-medium">Read review →</span>
+                    </div>
                   </div>
                 </Link>
               ))}

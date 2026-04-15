@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'cdn.sanity.io' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'm.media-amazon.com' },
+      { protocol: 'https', hostname: '*.supabase.co' },
     ],
   },
 
@@ -24,7 +25,7 @@ const nextConfig: NextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // unsafe-* required by Next.js & Sanity Studio
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: https://cdn.sanity.io https://images.unsplash.com https://m.media-amazon.com",
+              "img-src 'self' data: blob: https://cdn.sanity.io https://images.unsplash.com https://m.media-amazon.com https://*.supabase.co",
               "font-src 'self' data:",
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://cdn.sanity.io",
               "frame-ancestors 'none'",

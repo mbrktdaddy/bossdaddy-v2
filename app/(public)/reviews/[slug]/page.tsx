@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
@@ -47,7 +48,7 @@ export default async function ReviewPage({ params }: Props) {
 
   const { data: review } = await supabase
     .from('reviews')
-    .select('id, title, product_name, category, content, rating, pros, cons, excerpt, has_affiliate_links, published_at, profiles(username)')
+    .select('id, title, product_name, category, content, rating, pros, cons, excerpt, image_url, has_affiliate_links, published_at, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .single()
@@ -137,6 +138,20 @@ export default async function ReviewPage({ params }: Props) {
             </div>
           </div>
         </div>
+
+        {/* Hero image */}
+        {review.image_url && (
+          <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden mb-10 bg-gray-900">
+            <Image
+              src={review.image_url}
+              alt={review.product_name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 768px"
+              priority
+            />
+          </div>
+        )}
 
         {/* Pros / Cons */}
         {(pros.length > 0 || cons.length > 0) && (
