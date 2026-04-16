@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getResend, FROM_EMAIL } from '@/lib/resend'
 import { WelcomeEmail } from '@/emails/WelcomeEmail'
+import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 import * as React from 'react'
 
@@ -9,6 +10,15 @@ const Schema = z.object({ email: z.string().email() })
 
 export async function POST(request: NextRequest) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bossdaddylife.com'
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'anonymous'
+
+  const { success } = await checkRateLimit(`newsletter:${ip}`, 'newsletter')
+  if (!success) {
+    const contentType = request.headers.get('content-type') ?? ''
+    return contentType.includes('application/json')
+      ? NextResponse.json({ error: 'Too many requests. Try again later.' }, { status: 429 })
+      : NextResponse.redirect(new URL('/?newsletter=error', siteUrl))
+  }
 
   // Handle both JSON and form submissions
   let email = ''

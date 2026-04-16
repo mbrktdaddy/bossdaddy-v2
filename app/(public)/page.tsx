@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { CATEGORIES } from '@/lib/categories'
 import type { Metadata } from 'next'
 
+export const revalidate = 3600
+
 export const metadata: Metadata = {
   title: 'Boss Daddy — Dad-Tested Product Reviews',
   description: 'Honest, dad-tested product reviews. No corporate fluff — real results from a real dad.',
@@ -35,6 +37,7 @@ export default async function HomePage() {
     .from('reviews')
     .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
     .eq('status', 'approved')
+    .eq('is_visible', true)
     .order('published_at', { ascending: false })
     .limit(6)
 
@@ -44,36 +47,14 @@ export default async function HomePage() {
     .from('articles')
     .select('id, slug, title, category, excerpt, published_at')
     .eq('status', 'approved')
+    .eq('is_visible', true)
     .order('published_at', { ascending: false })
     .limit(3)
 
   if (articlesError) console.error('Articles query error:', articlesError)
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col">
-
-      {/* ── Header ──────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 bg-gray-950/90 backdrop-blur-sm border-b border-gray-800/60">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="font-black text-xl tracking-tight">
-            <span className="text-orange-500">BOSS</span>
-            <span className="text-white"> DADDY</span>
-          </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm text-gray-400">
-            <Link href="/reviews" className="hover:text-white transition-colors">Reviews</Link>
-            {CATEGORIES.map((c) => (
-              <Link key={c.slug} href={`/category/${c.slug}`} className="hover:text-white transition-colors">
-                {c.label}
-              </Link>
-            ))}
-          </nav>
-          <Link href="/login" className="text-sm px-4 py-2 rounded-lg border border-gray-700 text-gray-300 hover:border-orange-600 hover:text-white transition-colors">
-            Sign In
-          </Link>
-        </div>
-      </header>
-
-      <main className="flex-1">
+    <>
 
         {/* ── Hero ────────────────────────────────────────────────────────── */}
         <section className="relative overflow-hidden border-b border-gray-800/60">
@@ -279,25 +260,6 @@ export default async function HomePage() {
           </div>
         </section>
 
-      </main>
-
-      {/* ── Footer ──────────────────────────────────────────────────────── */}
-      <footer className="border-t border-gray-800/60 bg-gray-900/30">
-        <div className="max-w-6xl mx-auto px-6 py-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-600">
-            <span className="font-black text-gray-500 tracking-tight">BOSS DADDY LIFE</span>
-            <div className="flex items-center gap-6 flex-wrap justify-center">
-              <Link href="/reviews" className="hover:text-gray-400 transition-colors">Reviews</Link>
-              {CATEGORIES.map((c) => (
-                <Link key={c.slug} href={`/category/${c.slug}`} className="hover:text-gray-400 transition-colors">{c.label}</Link>
-              ))}
-              <Link href="/affiliate-disclosure" className="hover:text-gray-400 transition-colors">Disclosure</Link>
-            </div>
-            <span>© {new Date().getFullYear()} Boss Daddy Life</span>
-          </div>
-        </div>
-      </footer>
-
-    </div>
+    </>
   )
 }

@@ -1,5 +1,11 @@
 # Boss Daddy v2 — Claude Code Rules
 
+> **PRIMARY PROJECT** (as of 2026-04-15)
+> This is the active Boss Daddy rebuild. All new feature work, design, and content happens here.
+> The legacy WordPress site is at `~/boss-daddy/` — maintenance only.
+
+
+
 ## Stack
 - **Framework**: Next.js 16 App Router, TypeScript strict
 - **Auth + DB**: Supabase (`@supabase/ssr`) with Row-Level Security

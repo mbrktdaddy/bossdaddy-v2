@@ -2,31 +2,25 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sanitizeHtml } from '@/lib/sanitize'
-import { detectAffiliateLinks } from '@/lib/affiliate'
 import { computeReadingTime } from '@/lib/reading-time'
 import { getResend, FROM_EMAIL } from '@/lib/resend'
 import { ModerationResultEmail } from '@/emails/ModerationResultEmail'
 import * as React from 'react'
 import { z } from 'zod'
 
-const UpdateSchema = z.object({
-  title: z.string().min(10).max(120).optional(),
-  product_name: z.string().min(2).max(120).optional(),
-  category: z.string().optional(),
-  excerpt: z.string().max(200).optional(),
-  content: z.string().min(100).optional(),
-  rating: z.number().int().min(1).max(5).optional(),
-  pros: z.array(z.string()).optional(),
-  cons: z.array(z.string()).optional(),
-  disclosure_acknowledged: z.boolean().optional(),
-})
-
 const ModerateSchema = z.object({
-  action: z.enum(['approve', 'reject', 'request_edits', 'unpublish', 'toggle_visibility']),
+  action: z.enum(['approve', 'unpublish', 'toggle_visibility', 'reject', 'request_edits']),
   rejection_reason: z.string().optional(),
 })
 
-// GET /api/reviews/[id]
+const UpdateSchema = z.object({
+  title: z.string().min(10).max(120).optional(),
+  category: z.string().optional(),
+  excerpt: z.string().max(200).optional(),
+  content: z.string().min(100).optional(),
+})
+
+// GET /api/articles/[id]
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -35,31 +29,28 @@ export async function GET(
   const supabase = await createClient()
 
   const { data, error } = await supabase
-    .from('reviews')
+    .from('articles')
     .select('*')
     .eq('id', id)
     .single()
 
   if (error) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  return NextResponse.json({ review: data })
+  return NextResponse.json({ article: data })
 }
 
-// PUT /api/reviews/[id] — update draft or moderate (admin)
+// PUT /api/articles/[id] — admin moderation or author edit
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json().catch(() => null)
 
-  // Admin moderation action
+  // ── Admin moderation action ──────────────────────────────────────────────
   const modParsed = ModerateSchema.safeParse(body)
   if (modParsed.success) {
     const { data: profile } = await supabase
@@ -78,21 +69,22 @@ export async function PUT(
     if (modParsed.data.action === 'approve') {
       updateData.status = 'approved'
       updateData.published_at = new Date().toISOString()
-    } else if (modParsed.data.action === 'reject') {
-      updateData.status = 'rejected'
-      updateData.rejection_reason = modParsed.data.rejection_reason ?? ''
     } else if (modParsed.data.action === 'unpublish') {
       updateData.status = 'draft'
       updateData.published_at = null
     } else if (modParsed.data.action === 'toggle_visibility') {
-      const { data: current } = await admin.from('reviews').select('is_visible').eq('id', id).single()
+      const { data: current } = await admin.from('articles').select('is_visible').eq('id', id).single()
       updateData.is_visible = !(current?.is_visible ?? true)
+    } else if (modParsed.data.action === 'reject') {
+      updateData.status = 'rejected'
+      updateData.rejection_reason = modParsed.data.rejection_reason ?? ''
     } else {
+      // request_edits
       updateData.status = 'draft'
       updateData.rejection_reason = modParsed.data.rejection_reason ?? ''
     }
 
-    const { data, error } = await admin.from('reviews').update(updateData).eq('id', id).select('*, author_id').single()
+    const { data, error } = await admin.from('articles').update(updateData).eq('id', id).select('*, author_id').single()
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
     // Send email notification to author (non-blocking)
@@ -107,13 +99,13 @@ export async function PUT(
           from: FROM_EMAIL,
           to: email,
           subject: modParsed.data.action === 'approve'
-            ? '🎉 Your review is live on Boss Daddy Life'
+            ? '🎉 Your article is live on Boss Daddy Life'
             : modParsed.data.action === 'reject'
             ? 'Update on your Boss Daddy submission'
             : 'Edits requested on your Boss Daddy submission',
           react: React.createElement(ModerationResultEmail, {
             action: modParsed.data.action as 'approve' | 'reject' | 'request_edits',
-            contentType: 'review',
+            contentType: 'article',
             title: data.title,
             reason: modParsed.data.rejection_reason,
             siteUrl,
@@ -122,10 +114,10 @@ export async function PUT(
       }).catch((err: unknown) => console.error('Author lookup failed:', err))
     }
 
-    return NextResponse.json({ review: data })
+    return NextResponse.json({ article: data })
   }
 
-  // Author update
+  // ── Author update ────────────────────────────────────────────────────────
   const parsed = UpdateSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
@@ -133,25 +125,17 @@ export async function PUT(
 
   const updates: Record<string, unknown> = {}
   if (parsed.data.title) updates.title = parsed.data.title
-  if (parsed.data.product_name) updates.product_name = parsed.data.product_name
   if (parsed.data.category) updates.category = parsed.data.category
   if (parsed.data.excerpt !== undefined) updates.excerpt = parsed.data.excerpt
-  if (parsed.data.rating) updates.rating = parsed.data.rating
-  if (parsed.data.pros) updates.pros = parsed.data.pros
-  if (parsed.data.cons) updates.cons = parsed.data.cons
-  if (typeof parsed.data.disclosure_acknowledged === 'boolean') {
-    updates.disclosure_acknowledged = parsed.data.disclosure_acknowledged
-  }
   if (parsed.data.content) {
     const sanitized = sanitizeHtml(parsed.data.content)
     updates.content = sanitized
-    updates.has_affiliate_links = detectAffiliateLinks(sanitized)
     updates.reading_time_minutes = computeReadingTime(sanitized)
   }
 
-  // Only allow editing drafts or rejected reviews
+  // Only allow editing drafts or rejected articles
   const { data, error } = await supabase
-    .from('reviews')
+    .from('articles')
     .update(updates)
     .eq('id', id)
     .eq('author_id', user.id)
@@ -160,24 +144,21 @@ export async function PUT(
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ review: data })
+  return NextResponse.json({ article: data })
 }
 
-// DELETE /api/reviews/[id]
+// DELETE /api/articles/[id]
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { error } = await supabase
-    .from('reviews')
+    .from('articles')
     .delete()
     .eq('id', id)
     .eq('author_id', user.id)
@@ -186,5 +167,3 @@ export async function DELETE(
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ success: true })
 }
-
-// POST /api/reviews/[id]/submit handled via status transition

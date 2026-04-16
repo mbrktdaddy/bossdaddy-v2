@@ -1,6 +1,11 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getCategoryBySlug } from '@/lib/categories'
+import { UnpublishButton, VisibilityToggle, CommentModerationActions } from './_components/ModerationActions'
+
+interface Props {
+  searchParams: Promise<{ tab?: string }>
+}
 
 function RiskBadge({ score }: { score: number | null }) {
   if (score === null) return <span className="text-xs text-gray-600 font-mono">—</span>
@@ -21,98 +26,281 @@ function RiskBadge({ score }: { score: number | null }) {
   )
 }
 
-export default async function ModerationQueuePage() {
+export default async function ModerationQueuePage({ searchParams }: Props) {
+  const { tab } = await searchParams
+  const isPublished = tab === 'published'
+  const isComments  = tab === 'comments'
+  const isPending   = !isPublished && !isComments
   const supabase = await createClient()
 
-  const { data: queue } = await supabase
+  // ── Pending tab data ──────────────────────────────────────────────────
+  const { data: queue } = isPending ? await supabase
     .from('reviews')
     .select('id, title, product_name, category, moderation_score, moderation_flags, created_at, profiles(username)')
     .eq('status', 'pending')
-    .order('moderation_score', { ascending: false })
+    .order('moderation_score', { ascending: false }) : { data: null }
 
-  const highRisk = queue?.filter(r => (r.moderation_score ?? 0) >= 0.7).length ?? 0
-  const pending = queue?.length ?? 0
+  // ── Published tab data ────────────────────────────────────────────────
+  const { data: liveReviews } = isPublished ? await supabase
+    .from('reviews')
+    .select('id, title, product_name, category, is_visible, published_at')
+    .eq('status', 'approved')
+    .order('published_at', { ascending: false }) : { data: null }
+
+  const { data: liveArticles } = isPublished ? await supabase
+    .from('articles')
+    .select('id, title, category, is_visible, published_at')
+    .eq('status', 'approved')
+    .order('published_at', { ascending: false }) : { data: null }
+
+  // ── Comments tab data ─────────────────────────────────────────────────
+  const { data: pendingComments } = isComments ? await supabase
+    .from('comments')
+    .select('id, body, content_type, content_id, created_at, profiles(username)')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: true }) : { data: null }
+
+  const highRisk    = queue?.filter(r => (r.moderation_score ?? 0) >= 0.7).length ?? 0
+  const pending     = queue?.length ?? 0
+  const commentCount = pendingComments?.length ?? 0
 
   return (
     <div className="p-8 max-w-5xl">
 
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-black">Moderation Queue</h1>
-        <p className="text-gray-500 text-sm mt-1">Sorted by risk score — highest first</p>
+      <div className="mb-6">
+        <h1 className="text-2xl font-black">Moderation</h1>
+        <p className="text-gray-500 text-sm mt-1">Review queue and published content management</p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl px-5 py-4">
-          <p className="text-2xl font-black text-white">{pending}</p>
-          <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">Pending Review</p>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl px-5 py-4">
-          <p className="text-2xl font-black text-red-400">{highRisk}</p>
-          <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">High Risk</p>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl px-5 py-4">
-          <p className="text-2xl font-black text-yellow-400">{pending - highRisk}</p>
-          <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">Needs Review</p>
-        </div>
+      {/* Tabs */}
+      <div className="flex gap-1 mb-8 bg-gray-900 border border-gray-800 rounded-xl p-1 w-fit">
+        <Link
+          href="/dashboard/moderation"
+          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${
+            isPending ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-gray-300'
+          }`}
+        >
+          Pending
+          {pending > 0 && (
+            <span className="ml-2 px-1.5 py-0.5 text-xs bg-orange-600 text-white rounded-full">{pending}</span>
+          )}
+        </Link>
+        <Link
+          href="/dashboard/moderation?tab=published"
+          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${
+            isPublished ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-gray-300'
+          }`}
+        >
+          Published
+        </Link>
+        <Link
+          href="/dashboard/moderation?tab=comments"
+          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${
+            isComments ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-gray-300'
+          }`}
+        >
+          Comments
+          {commentCount > 0 && (
+            <span className="ml-2 px-1.5 py-0.5 text-xs bg-blue-600 text-white rounded-full">{commentCount}</span>
+          )}
+        </Link>
       </div>
 
-      {!queue?.length ? (
-        <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
-          <p className="text-2xl mb-2">✅</p>
-          <p className="text-gray-400 font-semibold">Queue is clear.</p>
-          <p className="text-gray-600 text-sm mt-1">Nice work, Boss.</p>
-        </div>
-      ) : (
+      {/* ── PENDING TAB ──────────────────────────────────────────────────── */}
+      {isPending && (
+        <>
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-4 mb-8">
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl px-5 py-4">
+              <p className="text-2xl font-black text-white">{pending}</p>
+              <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">Pending Review</p>
+            </div>
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl px-5 py-4">
+              <p className="text-2xl font-black text-red-400">{highRisk}</p>
+              <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">High Risk</p>
+            </div>
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl px-5 py-4">
+              <p className="text-2xl font-black text-yellow-400">{pending - highRisk}</p>
+              <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">Needs Review</p>
+            </div>
+          </div>
+
+          {!queue?.length ? (
+            <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
+              <p className="text-2xl mb-2">✅</p>
+              <p className="text-gray-400 font-semibold">Queue is clear.</p>
+              <p className="text-gray-600 text-sm mt-1">Nice work, Boss.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {queue.map((r) => {
+                const score = r.moderation_score ? Number(r.moderation_score) : null
+                const category = getCategoryBySlug(r.category)
+                const author = (Array.isArray(r.profiles) ? r.profiles[0] : r.profiles as unknown as { username: string } | null)?.username ?? 'unknown'
+                const flags = (r.moderation_flags as string[]) ?? []
+
+                return (
+                  <Link
+                    key={r.id}
+                    href={`/dashboard/moderation/${r.id}`}
+                    className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800 rounded-2xl hover:border-gray-700 transition-colors"
+                  >
+                    <div className="min-w-0 flex items-start gap-4">
+                      <div className={`w-1 self-stretch rounded-full shrink-0 ${
+                        score === null ? 'bg-gray-700'
+                        : score >= 0.7 ? 'bg-red-500'
+                        : score >= 0.4 ? 'bg-yellow-500'
+                        : 'bg-green-500'
+                      }`} />
+                      <div className="min-w-0">
+                        <p className="font-semibold text-sm truncate">{r.title}</p>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          <span className="text-xs text-gray-500">{r.product_name}</span>
+                          <span className="text-xs text-gray-700">by @{author}</span>
+                          {category && (
+                            <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>
+                          )}
+                        </div>
+                        {flags.length > 0 && (
+                          <p className="text-xs text-red-400/70 mt-1 truncate">
+                            ⚑ {flags.slice(0, 2).join(' · ')}{flags.length > 2 ? ` +${flags.length - 2} more` : ''}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="ml-4 shrink-0 flex items-center gap-3">
+                      <RiskBadge score={score} />
+                      <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ── PUBLISHED TAB ────────────────────────────────────────────────── */}
+      {isPublished && (
         <div className="space-y-2">
-          {queue.map((r) => {
-            const score = r.moderation_score ? Number(r.moderation_score) : null
+          {/* Reviews */}
+          {liveReviews?.map((r) => {
             const category = getCategoryBySlug(r.category)
-            const author = (Array.isArray(r.profiles) ? r.profiles[0] : r.profiles as unknown as { username: string } | null)?.username ?? 'unknown'
-            const flags = (r.moderation_flags as string[]) ?? []
-
             return (
-              <Link
+              <div
                 key={r.id}
-                href={`/dashboard/moderation/${r.id}`}
-                className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800 rounded-2xl hover:border-gray-700 transition-colors"
+                className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800 rounded-2xl"
               >
                 <div className="min-w-0 flex items-start gap-4">
-                  {/* Risk indicator */}
-                  <div className={`w-1 self-stretch rounded-full shrink-0 ${
-                    score === null ? 'bg-gray-700'
-                    : score >= 0.7 ? 'bg-red-500'
-                    : score >= 0.4 ? 'bg-yellow-500'
-                    : 'bg-green-500'
-                  }`} />
-
+                  <div className="w-1 self-stretch rounded-full shrink-0 bg-orange-500" />
                   <div className="min-w-0">
-                    <p className="font-semibold text-sm truncate">{r.title}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-sm truncate">{r.title}</p>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-orange-950/40 text-orange-400 border border-orange-900/30 shrink-0">Review</span>
+                    </div>
                     <div className="flex items-center gap-2 mt-1 flex-wrap">
                       <span className="text-xs text-gray-500">{r.product_name}</span>
-                      <span className="text-xs text-gray-700">by @{author}</span>
                       {category && (
                         <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>
                       )}
+                      {r.published_at && (
+                        <span className="text-xs text-gray-700">
+                          {new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </span>
+                      )}
                     </div>
-                    {flags.length > 0 && (
-                      <p className="text-xs text-red-400/70 mt-1 truncate">
-                        ⚑ {flags.slice(0, 2).join(' · ')}{flags.length > 2 ? ` +${flags.length - 2} more` : ''}
-                      </p>
-                    )}
                   </div>
                 </div>
-
                 <div className="ml-4 shrink-0 flex items-center gap-3">
-                  <RiskBadge score={score} />
-                  <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-                  </svg>
+                  <VisibilityToggle id={r.id} type="review" isVisible={r.is_visible ?? true} />
+                  <UnpublishButton id={r.id} type="review" />
                 </div>
-              </Link>
+              </div>
             )
           })}
+
+          {/* Articles */}
+          {liveArticles?.map((a) => {
+            const category = getCategoryBySlug(a.category)
+            return (
+              <div
+                key={a.id}
+                className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800 rounded-2xl"
+              >
+                <div className="min-w-0 flex items-start gap-4">
+                  <div className="w-1 self-stretch rounded-full shrink-0 bg-blue-500" />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-sm truncate">{a.title}</p>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-blue-950/40 text-blue-400 border border-blue-900/30 shrink-0">Article</span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      {category && (
+                        <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>
+                      )}
+                      {a.published_at && (
+                        <span className="text-xs text-gray-700">
+                          {new Date(a.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="ml-4 shrink-0 flex items-center gap-3">
+                  <VisibilityToggle id={a.id} type="article" isVisible={a.is_visible ?? true} />
+                  <UnpublishButton id={a.id} type="article" />
+                </div>
+              </div>
+            )
+          })}
+
+          {!liveReviews?.length && !liveArticles?.length && (
+            <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
+              <p className="text-gray-400 font-semibold">Nothing published yet.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── COMMENTS TAB ─────────────────────────────────────────────────── */}
+      {isComments && (
+        <div className="space-y-2">
+          {!pendingComments?.length ? (
+            <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
+              <p className="text-2xl mb-2">✅</p>
+              <p className="text-gray-400 font-semibold">No pending comments.</p>
+            </div>
+          ) : (
+            pendingComments.map((c) => {
+              const author = (Array.isArray(c.profiles) ? c.profiles[0] : c.profiles as unknown as { username: string } | null)?.username ?? 'unknown'
+              return (
+                <div key={c.id} className="p-4 bg-gray-900 border border-gray-800 rounded-2xl">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
+                          c.content_type === 'review'
+                            ? 'bg-orange-950/40 text-orange-400 border-orange-900/30'
+                            : 'bg-blue-950/40 text-blue-400 border-blue-900/30'
+                        }`}>
+                          {c.content_type === 'review' ? 'Review' : 'Article'}
+                        </span>
+                        <span className="text-xs text-gray-500">by @{author}</span>
+                        <span className="text-xs text-gray-700">
+                          {new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-300 leading-relaxed line-clamp-3">{c.body}</p>
+                    </div>
+                    <CommentModerationActions id={c.id} />
+                  </div>
+                </div>
+              )
+            })
+          )}
         </div>
       )}
     </div>

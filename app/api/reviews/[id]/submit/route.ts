@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 // POST /api/reviews/[id]/submit — transition draft → pending, trigger moderation
 export async function POST(
@@ -13,6 +14,11 @@ export async function POST(
   } = await supabase.auth.getUser()
 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { success } = await checkRateLimit(`submit:${user.id}`, 'submit')
+  if (!success) {
+    return NextResponse.json({ error: 'Too many submissions. Try again in an hour.' }, { status: 429 })
+  }
 
   // Verify ownership and current status
   const { data: review, error: fetchError } = await supabase

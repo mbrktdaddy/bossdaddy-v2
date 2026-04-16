@@ -5,6 +5,13 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
+import ShareButtons from '@/components/ShareButtons'
+import ViewTracker from '@/components/ViewTracker'
+import LikeButton from '@/components/LikeButton'
+import CommentForm from '@/components/CommentForm'
+import CommentList from '@/components/CommentList'
+
+export const revalidate = 3600
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -18,14 +25,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .select('title, product_name, excerpt')
     .eq('slug', slug)
     .eq('status', 'approved')
+    .eq('is_visible', true)
     .single()
 
   if (!data) return { title: 'Review Not Found' }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bossdaddylife.com'
+  const ogImage = `${siteUrl}/api/og?title=${encodeURIComponent(data.title)}&type=review`
+
   return {
     title: data.title,
     description: data.excerpt ?? `Dad-tested review of the ${data.product_name}. Honest pros, cons, and verdict.`,
-    openGraph: { title: data.title, type: 'article' },
+    openGraph: { title: data.title, type: 'article', images: [{ url: ogImage, width: 1200, height: 630 }] },
+    twitter: { card: 'summary_large_image', title: data.title, images: [ogImage] },
   }
 }
 
@@ -51,9 +63,21 @@ export default async function ReviewPage({ params }: Props) {
     .select('id, title, product_name, category, content, rating, pros, cons, excerpt, image_url, has_affiliate_links, published_at, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
+    .eq('is_visible', true)
     .single()
 
   if (!review) notFound()
+
+  // Related reviews — same category, exclude current
+  const { data: related } = await supabase
+    .from('reviews')
+    .select('id, slug, title, product_name, rating, excerpt')
+    .eq('status', 'approved')
+    .eq('is_visible', true)
+    .eq('category', review.category)
+    .neq('slug', slug)
+    .order('published_at', { ascending: false })
+    .limit(3)
 
   const profileData = Array.isArray(review.profiles)
     ? review.profiles[0]
@@ -75,25 +99,9 @@ export default async function ReviewPage({ params }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-gray-950/90 backdrop-blur-sm border-b border-gray-800/60">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="font-black text-xl tracking-tight">
-            <span className="text-orange-500">BOSS</span><span className="text-white"> DADDY</span>
-          </Link>
-          <div className="flex items-center gap-4 text-sm text-gray-500">
-            <Link href="/reviews" className="hover:text-white transition-colors">← All Reviews</Link>
-            {category && (
-              <Link href={`/category/${category.slug}`} className="hover:text-white transition-colors">
-                {category.icon} {category.label}
-              </Link>
-            )}
-          </div>
-        </div>
-      </header>
+      <ViewTracker id={review.id} type="review" />
 
       <main className="max-w-3xl mx-auto px-6 py-12">
 
@@ -127,7 +135,7 @@ export default async function ReviewPage({ params }: Props) {
           <div className="flex flex-wrap items-center gap-5 pb-6 border-b border-gray-800">
             <StarRating rating={review.rating} />
             <div className="flex items-center gap-4 text-sm text-gray-500">
-              <span>by <span className="text-gray-300">@{author}</span></span>
+              <span>by <Link href={`/author/${author}`} className="text-gray-300 hover:text-orange-400 transition-colors">@{author}</Link></span>
               {review.published_at && (
                 <span>
                   {new Date(review.published_at).toLocaleDateString('en-US', {
@@ -224,18 +232,44 @@ export default async function ReviewPage({ params }: Props) {
           </div>
         </div>
 
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-gray-800/60 mt-12">
-        <div className="max-w-6xl mx-auto px-6 py-8 flex items-center justify-between text-sm text-gray-600">
-          <span className="font-black text-gray-500">BOSS DADDY LIFE</span>
-          <Link href="/affiliate-disclosure" className="hover:text-gray-400 transition-colors">
-            Affiliate Disclosure
-          </Link>
-          <span>© {new Date().getFullYear()} Boss Daddy Life</span>
+        {/* Like + Share */}
+        <div className="mt-8 pt-6 border-t border-gray-800 flex items-center justify-between flex-wrap gap-4">
+          <LikeButton contentType="review" contentId={review.id} />
+          <ShareButtons title={review.title} />
         </div>
-      </footer>
-    </div>
+
+        {/* Comments */}
+        <div className="mt-12">
+          <h2 className="text-lg font-black mb-6">Comments</h2>
+          <CommentList contentType="review" contentId={review.id} />
+          <div className="mt-6">
+            <CommentForm contentType="review" contentId={review.id} />
+          </div>
+        </div>
+
+        {/* Related reviews */}
+        {related && related.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-lg font-black mb-4">More Reviews</h2>
+            <div className="space-y-2">
+              {related.map((r) => (
+                <Link
+                  key={r.id}
+                  href={`/reviews/${r.slug}`}
+                  className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800 hover:border-orange-700/50 rounded-2xl transition-colors group"
+                >
+                  <div className="min-w-0">
+                    <p className="text-xs text-orange-500/80 font-medium uppercase tracking-wide mb-1">{r.product_name}</p>
+                    <p className="text-sm font-semibold group-hover:text-orange-400 transition-colors truncate">{r.title}</p>
+                  </div>
+                  <span className="text-sm text-yellow-400 font-bold ml-4 shrink-0">{'★'.repeat(r.rating)}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+      </main>
+    </>
   )
 }

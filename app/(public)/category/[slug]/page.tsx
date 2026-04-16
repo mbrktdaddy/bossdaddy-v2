@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { getCategoryBySlug } from '@/lib/categories'
 import type { Metadata } from 'next'
 
+export const revalidate = 3600
+
 interface Props {
   params: Promise<{ slug: string }>
 }
@@ -40,22 +42,12 @@ export default async function CategoryPage({ params }: Props) {
     .from('reviews')
     .select('id, slug, title, product_name, rating, excerpt, published_at')
     .eq('status', 'approved')
+    .eq('is_visible', true)
     .eq('category', slug)
     .order('published_at', { ascending: false })
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      <header className="sticky top-0 z-50 bg-gray-950/90 backdrop-blur-sm border-b border-gray-800/60">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="font-black text-xl tracking-tight">
-            <span className="text-orange-500">BOSS</span><span className="text-white"> DADDY</span>
-          </Link>
-          <Link href="/login" className="text-sm px-4 py-2 rounded-lg border border-gray-700 text-gray-300 hover:border-orange-600 hover:text-white transition-colors">
-            Sign In
-          </Link>
-        </div>
-      </header>
-
+    <>
       {/* Category hero */}
       <div className={`bg-gradient-to-br ${cat.color} border-b border-gray-800/60`}>
         <div className="max-w-6xl mx-auto px-6 py-14">
@@ -109,6 +101,6 @@ export default async function CategoryPage({ params }: Props) {
           </div>
         )}
       </main>
-    </div>
+    </>
   )
 }

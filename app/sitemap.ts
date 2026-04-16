@@ -5,11 +5,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bossdaddylife.com'
   const supabase = await createClient()
 
-  const { data: reviews } = await supabase
-    .from('reviews')
-    .select('slug, published_at, updated_at')
-    .eq('status', 'approved')
-    .order('published_at', { ascending: false })
+  const [{ data: reviews }, { data: articles }] = await Promise.all([
+    supabase
+      .from('reviews')
+      .select('slug, published_at, updated_at')
+      .eq('status', 'approved')
+      .eq('is_visible', true)
+      .order('published_at', { ascending: false }),
+    supabase
+      .from('articles')
+      .select('slug, published_at, updated_at')
+      .eq('status', 'approved')
+      .eq('is_visible', true)
+      .order('published_at', { ascending: false }),
+  ])
 
   const reviewUrls: MetadataRoute.Sitemap = (reviews ?? []).map((r) => ({
     url: `${base}/reviews/${r.slug}`,
@@ -18,8 +27,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
+  const articleUrls: MetadataRoute.Sitemap = (articles ?? []).map((a) => ({
+    url: `${base}/articles/${a.slug}`,
+    lastModified: a.updated_at ?? a.published_at,
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }))
+
   return [
     { url: base, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },
+    { url: `${base}/reviews`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+    { url: `${base}/articles`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
     ...reviewUrls,
+    ...articleUrls,
   ]
 }
