@@ -1,35 +1,39 @@
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
 
-// Token bucket: 10 Claude draft requests per user per hour.
 // Falls back to no-op if Upstash env vars are missing (local dev without Redis).
-let _ratelimit: Ratelimit | null = null
+function hasUpstash() {
+  return !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
+}
 
-export function getRateLimiter(): Ratelimit | null {
-  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
-    return null // dev fallback — no rate limiting
+const limiters: Record<string, Ratelimit | null> = {}
+
+function getLimiter(type: string): Ratelimit | null {
+  if (!hasUpstash()) return null
+  if (limiters[type]) return limiters[type]!
+
+  const redis = Redis.fromEnv()
+  const configs: Record<string, Ratelimit> = {
+    draft:      new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1 h'), prefix: 'bd_draft' }),
+    submit:     new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5,  '1 h'), prefix: 'bd_submit' }),
+    newsletter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(3,  '1 h'), prefix: 'bd_newsletter' }),
   }
-  if (!_ratelimit) {
-    _ratelimit = new Ratelimit({
-      redis: Redis.fromEnv(),
-      limiter: Ratelimit.tokenBucket(10, '1 h', 10),
-      analytics: false,
-      prefix: 'bd_claude',
-    })
-  }
-  return _ratelimit
+
+  limiters[type] = configs[type] ?? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1 h'), prefix: `bd_${type}` })
+  return limiters[type]!
 }
 
 export async function checkRateLimit(
-  identifier: string
+  identifier: string,
+  type: 'draft' | 'submit' | 'newsletter' = 'draft'
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
-  const limiter = getRateLimiter()
+  const limiter = getLimiter(type)
   if (!limiter) return { success: true, remaining: 999, reset: 0 }
 
   const result = await limiter.limit(identifier)
   return {
-    success: result.success,
+    success:   result.success,
     remaining: result.remaining,
-    reset: result.reset,
+    reset:     result.reset,
   }
 }
