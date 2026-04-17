@@ -2,17 +2,16 @@
 
 > **PRIMARY PROJECT** (as of 2026-04-15)
 > This is the active Boss Daddy rebuild. All new feature work, design, and content happens here.
-> The legacy WordPress site is at `~/boss-daddy/` — maintenance only.
-
-
+> The legacy WordPress site is at `~/boss-daddy/` — maintenance-only archive.
 
 ## Stack
 - **Framework**: Next.js 16 App Router, TypeScript strict
 - **Auth + DB**: Supabase (`@supabase/ssr`) with Row-Level Security
-- **CMS**: Sanity v3 (Studio at `/studio`)
 - **AI**: Anthropic Claude API via `@anthropic-ai/sdk` (`claude-sonnet-4-6`)
-- **Styling**: Tailwind CSS v3
-- **Deployment**: Vercel
+- **Email**: Resend (templates in `emails/`)
+- **Rate limiting**: Upstash Redis
+- **Styling**: Tailwind CSS v4
+- **Deployment**: Vercel (auto-deploys from `master`)
 
 ---
 
@@ -34,8 +33,8 @@
 1. **RLS is enforced at DB level** — do not assume application-layer checks are sufficient.
 2. **Always sanitize HTML** with `sanitizeHtml()` from `@/lib/sanitize` before any DB write of user-generated content.
 3. **Affiliate disclosure is legally required** — the `disclosure_acknowledged` check in `/api/reviews/route.ts` must not be bypassed. Never remove this gate.
-4. **API keys stay server-side** — `ANTHROPIC_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SANITY_API_TOKEN` must never appear in client code or `NEXT_PUBLIC_*` vars.
-5. **Webhook signatures** — always verify HMAC before processing Sanity webhooks.
+4. **API keys stay server-side** — `ANTHROPIC_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY` must never appear in client code or `NEXT_PUBLIC_*` vars.
+5. **Middleware enforces auth** — `middleware.ts` at root protects `/dashboard` routes and redirects unauthenticated users to `/login`.
 
 ---
 
@@ -77,6 +76,16 @@ All Claude draft generation uses the Boss Daddy system prompt defined in `lib/cl
 - Confident, direct, no corporate speak
 - Always reference real testing ("I used this for 3 weekends...")
 - FTC disclosure auto-injected for all reviews with affiliate links
+
+---
+
+## Brand Assets
+
+Logo and placeholder images live in `public/images/`:
+- `bd-logo-final.png` — primary logo (full)
+- `bd-logo-nav.png` — compact nav logo
+- `bd-logo-final-favicon.png` — favicon source
+- `bd-placeholder.png` / `bd-placeholder.svg` — article image placeholder
 
 ---
 

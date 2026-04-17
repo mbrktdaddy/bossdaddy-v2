@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1A1A1A"/>
+      <stop offset="100%" style="stop-color:#2a2a2a"/>
+    </linearGradient>
+    <linearGradient id="badge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#D45A00"/>
+      <stop offset="100%" style="stop-color:#b84d00"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="600" fill="url(#bg)"/>
+
+  <!-- Subtle grid pattern -->
+  <g opacity="0.04">
+    <line x1="0" y1="0" x2="800" y2="600" stroke="#fff" stroke-width="1"/>
+    <line x1="800" y1="0" x2="0" y2="600" stroke="#fff" stroke-width="1"/>
+    <line x1="400" y1="0" x2="400" y2="600" stroke="#fff" stroke-width="0.5"/>
+    <line x1="0" y1="300" x2="800" y2="300" stroke="#fff" stroke-width="0.5"/>
+  </g>
+
+  <!-- Accent corner marks -->
+  <g stroke="#D45A00" stroke-width="2" fill="none" opacity="0.3">
+    <polyline points="40,80 40,40 80,40"/>
+    <polyline points="720,40 760,40 760,80"/>
+    <polyline points="760,520 760,560 720,560"/>
+    <polyline points="80,560 40,560 40,520"/>
+  </g>
+
+  <!-- BD Monogram circle -->
+  <circle cx="400" cy="250" r="72" fill="url(#badge)"/>
+  <text x="400" y="272" font-family="Arial Black, Arial, sans-serif" font-size="56" font-weight="900" fill="#fff" text-anchor="middle" letter-spacing="2">BD</text>
+
+  <!-- Brand text -->
+  <text x="400" y="360" font-family="Arial, sans-serif" font-size="28" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="6" text-transform="uppercase">BOSS DADDY</text>
+
+  <!-- Tagline -->
+  <text x="400" y="395" font-family="Arial, sans-serif" font-size="14" fill="#8A8D8F" text-anchor="middle" letter-spacing="4">DAD LIKE A BOSS</text>
+
+  <!-- Bottom bar -->
+  <rect x="340" y="425" width="120" height="3" fill="#D45A00" rx="1.5"/>
+
+  <!-- "Image Coming Soon" text -->
+  <text x="400" y="475" font-family="Arial, sans-serif" font-size="13" fill="#555" text-anchor="middle" letter-spacing="2">IMAGE COMING SOON</text>
+</svg>

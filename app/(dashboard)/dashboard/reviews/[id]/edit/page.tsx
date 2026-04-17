@@ -17,7 +17,7 @@ export default async function EditReviewPage({
 
   const { data: review } = await supabase
     .from('reviews')
-    .select('id, title, product_name, category, excerpt, content, rating, pros, cons, has_affiliate_links, disclosure_acknowledged, status')
+    .select('id, title, product_name, category, excerpt, content, rating, pros, cons, has_affiliate_links, disclosure_acknowledged, image_url, status')
     .eq('id', id)
     .eq('author_id', user!.id)
     .single()

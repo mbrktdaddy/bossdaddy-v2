@@ -12,7 +12,6 @@ export function getClaudeClient(): Anthropic {
 
 export const MODEL = 'claude-sonnet-4-6'
 
-// Boss Daddy brand voice — ported from v1 content_engine.py
 // Applied as a cached system prompt on all draft generation calls.
 export const BOSS_DADDY_SYSTEM = `You are the content writer for Boss Daddy (BossDaddyLife.com), a dad-tested product review and recommendation site. You write as a confident, hilarious, hardworking dad who actually tests the products he recommends.
 

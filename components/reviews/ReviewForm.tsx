@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { detectAffiliateLinks } from '@/lib/affiliate'
 import { CATEGORIES } from '@/lib/categories'
@@ -18,6 +18,7 @@ interface ReviewFormProps {
     cons: string[]
     has_affiliate_links: boolean
     disclosure_acknowledged: boolean
+    image_url: string | null
   }
 }
 
@@ -83,6 +84,7 @@ function ListEditor({
 export default function ReviewForm({ initialData }: ReviewFormProps) {
   const router = useRouter()
   const isEditing = !!initialData
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [title, setTitle] = useState(initialData?.title ?? '')
   const [productName, setProductName] = useState(initialData?.product_name ?? '')
@@ -92,6 +94,8 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
   const [rating, setRating] = useState(initialData?.rating ?? 5)
   const [pros, setPros] = useState<string[]>(initialData?.pros ?? [])
   const [cons, setCons] = useState<string[]>(initialData?.cons ?? [])
+  const [imageUrl, setImageUrl] = useState<string | null>(initialData?.image_url ?? null)
+  const [imageUploading, setImageUploading] = useState(false)
   const [disclosureAcknowledged, setDisclosureAcknowledged] = useState(
     initialData?.disclosure_acknowledged ?? false
   )
@@ -144,6 +148,25 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
       ].filter(Boolean).join('\n\n')
     )
     setDraftLoading(false)
+  }
+
+  async function handleImageUpload(file: File) {
+    if (!isEditing) {
+      setError('Save the review as a draft first, then upload an image.')
+      return
+    }
+    setImageUploading(true)
+    setError(null)
+    const formData = new FormData()
+    formData.append('file', file)
+    const res = await fetch(`/api/reviews/${initialData!.id}/image`, {
+      method: 'POST',
+      body: formData,
+    })
+    const json = await res.json()
+    if (!res.ok) { setError(json.error); setImageUploading(false); return }
+    setImageUrl(json.image_url)
+    setImageUploading(false)
   }
 
   async function save(submit = false) {
@@ -289,6 +312,62 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
             <option key={n} value={n}>{'★'.repeat(n)}{'☆'.repeat(5 - n)} ({n}/5)</option>
           ))}
         </select>
+      </div>
+
+      {/* ── Product Image ───────────────────────────────────────────────── */}
+      <div>
+        <label className="block text-sm text-gray-300 mb-1.5">
+          Product Image
+          {!isEditing && <span className="text-gray-600 ml-1">(save draft first to enable upload)</span>}
+        </label>
+
+        {imageUrl ? (
+          <div className="relative">
+            <img src={imageUrl} alt="Product" className="w-full h-48 object-cover rounded-xl border border-gray-700" />
+            <button
+              type="button"
+              onClick={() => { setImageUrl(null); if (fileInputRef.current) fileInputRef.current.value = '' }}
+              className="absolute top-2 right-2 p-1.5 bg-gray-900/80 hover:bg-red-900/80 text-gray-400 hover:text-red-400 rounded-lg transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        ) : (
+          <div
+            onClick={() => isEditing && fileInputRef.current?.click()}
+            className={`border-2 border-dashed border-gray-700 rounded-xl p-8 text-center transition-colors ${
+              isEditing ? 'hover:border-orange-600 cursor-pointer' : 'opacity-40 cursor-not-allowed'
+            }`}
+          >
+            {imageUploading ? (
+              <div className="flex items-center justify-center gap-2 text-gray-400">
+                <div className="w-4 h-4 border-2 border-gray-600 border-t-orange-500 rounded-full animate-spin" />
+                <span className="text-sm">Uploading...</span>
+              </div>
+            ) : (
+              <>
+                <svg className="w-8 h-8 text-gray-600 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p className="text-sm text-gray-500">Click to upload product image</p>
+                <p className="text-xs text-gray-700 mt-1">JPEG, PNG, WebP — max 5MB</p>
+              </>
+            )}
+          </div>
+        )}
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) handleImageUpload(file)
+          }}
+        />
       </div>
 
       {/* ── Pros / Cons ─────────────────────────────────────────────────── */}

@@ -11,9 +11,6 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.89.0",
     "@hookform/resolvers": "^5.2.2",
-    "@sanity/client": "^7.21.0",
-    "@sanity/image-url": "^2.1.1",
-    "@sanity/vision": "^5.20.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.103.1",
     "@tailwindcss/typography": "^0.5.19",
@@ -21,12 +18,10 @@
     "@upstash/redis": "^1.37.0",
     "isomorphic-dompurify": "^3.9.0",
     "next": "16.2.3",
-    "next-sanity": "^12.2.2",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hook-form": "^7.72.1",
     "resend": "^6.12.0",
-    "sanity": "^5.20.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

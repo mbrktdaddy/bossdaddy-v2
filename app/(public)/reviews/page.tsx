@@ -106,7 +106,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
                 href={`/reviews/${r.slug}`}
                 className="group flex flex-col bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-orange-700/60 transition-all duration-200"
               >
-                {r.image_url && (
+                {r.image_url ? (
                   <div className="relative w-full h-44 bg-gray-800 shrink-0">
                     <Image
                       src={r.image_url}
@@ -115,6 +115,21 @@ export default async function ReviewsPage({ searchParams }: Props) {
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
+                  </div>
+                ) : (
+                  <div className={`w-full h-44 shrink-0 bg-gradient-to-br ${
+                    r.category === 'bbq-grilling' ? 'from-red-900/60 to-orange-900/40' :
+                    r.category === 'diy-tools' ? 'from-blue-900/60 to-cyan-900/40' :
+                    r.category === 'kids-family' ? 'from-green-900/60 to-emerald-900/40' :
+                    r.category === 'health-fitness' ? 'from-purple-900/60 to-violet-900/40' :
+                    'from-gray-800 to-gray-900'
+                  } flex items-center justify-center`}>
+                    <span className="text-4xl opacity-40">
+                      {r.category === 'bbq-grilling' ? '🔥' :
+                       r.category === 'diy-tools' ? '🔧' :
+                       r.category === 'kids-family' ? '👨‍👧‍👦' :
+                       r.category === 'health-fitness' ? '💪' : '📦'}
+                    </span>
                   </div>
                 )}
                 <div className="p-5 flex flex-col flex-1">
