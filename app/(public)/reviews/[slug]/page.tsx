@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
 import ShareButtons from '@/components/ShareButtons'
+import BossApprovedBadge from '@/components/BossApprovedBadge'
 import ViewTracker from '@/components/ViewTracker'
 import LikeButton from '@/components/LikeButton'
 import CommentForm from '@/components/CommentForm'
@@ -134,6 +135,7 @@ export default async function ReviewPage({ params }: Props) {
           {/* Rating + meta */}
           <div className="flex flex-wrap items-center gap-5 pb-6 border-b border-gray-800">
             <StarRating rating={review.rating} />
+            {review.rating === 5 && <BossApprovedBadge size="lg" />}
             <div className="flex items-center gap-4 text-sm text-gray-500">
               <span>by <Link href={`/author/${author}`} className="text-gray-300 hover:text-orange-400 transition-colors">@{author}</Link></span>
               {review.published_at && (

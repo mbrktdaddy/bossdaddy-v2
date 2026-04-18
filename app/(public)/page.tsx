@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { CATEGORIES } from '@/lib/categories'
+import BossApprovedBadge from '@/components/BossApprovedBadge'
 import type { Metadata } from 'next'
 
 export const revalidate = 3600
@@ -205,6 +206,11 @@ export default async function HomePage() {
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
+                    {r.rating === 5 && (
+                      <div className="absolute top-3 right-3">
+                        <BossApprovedBadge size="sm" />
+                      </div>
+                    )}
                   </div>
                 )}
                 <div className="p-5 flex flex-col flex-1">

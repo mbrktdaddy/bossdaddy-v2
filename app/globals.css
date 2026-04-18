@@ -15,6 +15,9 @@
   --color-forest: #2E4A3D;
   --color-forest-50: rgba(46, 74, 61, 0.5);
   --color-forest-20: rgba(46, 74, 61, 0.2);
+  /* Brand burnt orange — overrides Tailwind defaults */
+  --color-orange-600: #CC5500;
+  --color-orange-500: #d96200;
 }
 
 @media (prefers-color-scheme: dark) {

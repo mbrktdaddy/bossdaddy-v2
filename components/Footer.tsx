@@ -15,7 +15,11 @@ const FOOTER_LINKS = [
 export default function Footer() {
   return (
     <footer className="border-t border-gray-800/60 bg-gray-900/30">
-      <div className="max-w-6xl mx-auto px-6 py-10">
+      <div className="max-w-6xl mx-auto px-6 pt-10 pb-4 text-center border-b border-gray-800/40">
+        <p className="text-gray-600 text-xs uppercase tracking-widest mb-1">Welcome to the crew.</p>
+        <p className="text-gray-500 text-sm font-semibold">Now let&apos;s dad like a boss — together.</p>
+      </div>
+      <div className="max-w-6xl mx-auto px-6 py-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-600">
           <Link href="/" className="font-black text-gray-500 tracking-tight hover:text-gray-400 transition-colors">
             BOSS DADDY LIFE
@@ -33,3 +37,4 @@ export default function Footer() {
     </footer>
   )
 }
+
