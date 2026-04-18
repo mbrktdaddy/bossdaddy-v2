@@ -285,7 +285,7 @@ export default async function HomePage() {
             Weekly reviews, gear picks, and dad-life wins from a real dad in the trenches.
             No spam. No sponsors. Just the crew.
           </p>
-          <form action="/api/newsletter/subscribe" method="POST" className="flex gap-3 max-w-md mx-auto">
+          <form action="/api/newsletter/subscribe" method="POST" className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
             <input
               type="email"
               name="email"
