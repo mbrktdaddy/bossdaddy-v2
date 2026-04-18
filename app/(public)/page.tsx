@@ -118,26 +118,38 @@ export default async function HomePage() {
 
 
       {/* ── Categories ────────────────────────────────────────────────────── */}
-      <section className="py-16 border-b border-gray-800/60">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="mb-6">
-            <h2 className="text-3xl font-black text-white mb-1">Browse by Category</h2>
-            <p className="text-gray-500 text-sm">Backyard tested. Boss approved.</p>
-          </div>
-          <div className="flex overflow-x-auto scrollbar-hide gap-3 pb-2 sm:grid sm:grid-cols-7">
+      <section className="py-16 border-b border-gray-800/60 overflow-hidden">
+        <div className="max-w-6xl mx-auto px-6 mb-6">
+          <h2 className="text-3xl font-black text-white mb-1">Browse by Category</h2>
+          <p className="text-gray-500 text-sm">Backyard tested. Boss approved.</p>
+        </div>
+        {/* Mobile: full-width scroll strip */}
+        <div className="overflow-x-auto scrollbar-hide sm:hidden">
+          <div className="flex gap-3 px-6 pb-2">
             {CATEGORIES.map((cat) => (
               <Link
                 key={cat.slug}
                 href={`/category/${cat.slug}`}
-                className={`group shrink-0 w-28 sm:w-auto flex flex-col items-center justify-center rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.color} hover:scale-[1.03] transition-transform duration-200 py-6 px-2`}
+                className={`group shrink-0 w-28 flex flex-col items-center justify-center rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.color} hover:scale-[1.03] transition-transform duration-200 py-6 px-2`}
               >
                 <div className="text-4xl mb-3">{cat.icon}</div>
-                <p className={`text-xs font-bold text-center leading-snug ${cat.accent}`}>
-                  {cat.label}
-                </p>
+                <p className={`text-xs font-bold text-center leading-snug ${cat.accent}`}>{cat.label}</p>
               </Link>
             ))}
           </div>
+        </div>
+        {/* Desktop: full-width grid */}
+        <div className="hidden sm:grid sm:grid-cols-7 gap-3 max-w-6xl mx-auto px-6">
+          {CATEGORIES.map((cat) => (
+            <Link
+              key={cat.slug}
+              href={`/category/${cat.slug}`}
+              className={`group flex flex-col items-center justify-center rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.color} hover:scale-[1.03] transition-transform duration-200 py-6 px-2`}
+            >
+              <div className="text-4xl mb-3">{cat.icon}</div>
+              <p className={`text-xs font-bold text-center leading-snug ${cat.accent}`}>{cat.label}</p>
+            </Link>
+          ))}
         </div>
       </section>
 

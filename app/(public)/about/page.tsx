@@ -136,17 +136,31 @@ export default function AboutPage() {
       <div className="mb-16">
         <h2 className="text-2xl font-black mb-2">What We Cover</h2>
         <p className="text-gray-500 text-sm mb-6">Real-world testing across everything modern dads actually love.</p>
-        <div className="flex overflow-x-auto scrollbar-hide gap-3 pb-2 sm:grid sm:grid-cols-7">
+        {/* Mobile: break out of parent padding, full-width scroll */}
+        <div className="-mx-6 overflow-x-auto scrollbar-hide sm:hidden">
+          <div className="flex gap-3 px-6 pb-2">
+            {CATEGORIES.map((cat) => (
+              <Link
+                key={cat.slug}
+                href={`/category/${cat.slug}`}
+                className={`group shrink-0 w-28 flex flex-col items-center justify-center rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.color} hover:scale-[1.03] transition-transform duration-200 py-6 px-2`}
+              >
+                <div className="text-4xl mb-3">{cat.icon}</div>
+                <p className={`text-xs font-bold text-center leading-snug ${cat.accent}`}>{cat.label}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+        {/* Desktop: full grid */}
+        <div className="hidden sm:grid sm:grid-cols-7 gap-3">
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.slug}
               href={`/category/${cat.slug}`}
-              className={`group shrink-0 w-28 sm:w-auto flex flex-col items-center justify-center rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.color} hover:scale-[1.03] transition-transform duration-200 py-6 px-2`}
+              className={`group flex flex-col items-center justify-center rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.color} hover:scale-[1.03] transition-transform duration-200 py-6 px-2`}
             >
               <div className="text-4xl mb-3">{cat.icon}</div>
-              <p className={`text-xs font-bold text-center leading-snug ${cat.accent}`}>
-                {cat.label}
-              </p>
+              <p className={`text-xs font-bold text-center leading-snug ${cat.accent}`}>{cat.label}</p>
             </Link>
           ))}
         </div>
