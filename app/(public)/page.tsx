@@ -1,16 +1,10 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Montserrat } from 'next/font/google'
 import { createClient } from '@/lib/supabase/server'
 import { CATEGORIES } from '@/lib/categories'
 import type { Metadata } from 'next'
 
 export const revalidate = 3600
-
-const montserrat = Montserrat({
-  subsets: ['latin'],
-  weight: ['900'],
-})
 
 export const metadata: Metadata = {
   title: 'Boss Daddy Life — Dad Like a Boss',
@@ -91,7 +85,6 @@ export default async function HomePage() {
             </div>
             <h1
               className="text-5xl md:text-7xl leading-[1.0] tracking-tight mb-4 text-white"
-              style={{ fontFamily: montserrat.style.fontFamily }}
             >
               Dad Like
               <br />
@@ -139,7 +132,6 @@ export default async function HomePage() {
                 <div className="text-2xl mb-4">{r.icon}</div>
                 <h3
                   className="text-base text-white mb-2 leading-snug"
-                  style={{ fontFamily: montserrat.style.fontFamily }}
                 >
                   {r.headline}
                 </h3>
@@ -154,12 +146,11 @@ export default async function HomePage() {
       <section className="max-w-6xl mx-auto px-6 py-16 border-b border-gray-800/60">
         <h2
           className="text-3xl text-white mb-2"
-          style={{ fontFamily: montserrat.style.fontFamily }}
         >
           Browse by Category
         </h2>
         <p className="text-gray-500 text-sm mb-8">Backyard tested. Boss approved.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.slug}
@@ -183,7 +174,6 @@ export default async function HomePage() {
           <div>
             <h2
               className="text-3xl text-white"
-              style={{ fontFamily: montserrat.style.fontFamily }}
             >
               Latest Reviews
             </h2>
@@ -250,7 +240,6 @@ export default async function HomePage() {
             <div>
               <h2
                 className="text-3xl text-white"
-                style={{ fontFamily: montserrat.style.fontFamily }}
               >
                 From the Blog
               </h2>
@@ -287,7 +276,6 @@ export default async function HomePage() {
           </p>
           <h2
             className="text-3xl text-white mb-3"
-            style={{ fontFamily: montserrat.style.fontFamily }}
           >
             Real Talk. Honest Reviews.<br />No BS Ever.
           </h2>
@@ -321,7 +309,6 @@ export default async function HomePage() {
             <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Boss Daddy Shop</p>
             <h2
               className="text-2xl text-white mb-2"
-              style={{ fontFamily: montserrat.style.fontFamily }}
             >
               The Boss Daddy Gear List
             </h2>
@@ -343,7 +330,6 @@ export default async function HomePage() {
         <p className="text-gray-600 text-sm uppercase tracking-widest mb-3">Welcome to the crew.</p>
         <p
           className="text-4xl md:text-5xl text-white"
-          style={{ fontFamily: montserrat.style.fontFamily }}
         >
           Now let&apos;s dad like a boss —{' '}
           <span className="text-orange-500">together.</span>
