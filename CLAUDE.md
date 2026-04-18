@@ -91,6 +91,7 @@ CSS vars also available: `--bd-orange`, `--bd-surface`, `--bd-border`, `--bd-tex
 - **Eyebrow labels:** `text-xs text-orange-500 uppercase tracking-widest`.
 - **Mobile tap targets:** minimum 44px. Use `py-2.5` on pills, `py-3` on buttons/pagination/nav links.
 - **Filter tabs** on listing pages: `overflow-x-auto scrollbar-hide` — never `flex-wrap`.
+- **Horizontal scroll sections:** Never use `overflow-x-auto` inside a padded container — it bleeds to page level and breaks the layout. Always split into `sm:hidden` scroll strip (with `overflow-x-auto` + padding inside the scrollable div) and `hidden sm:grid` desktop grid. If inside a padded parent, use `-mx-{n}` to break out and restore padding inside.
 
 ---
 
