@@ -31,23 +31,6 @@ const STATS = [
   { value: '0', label: 'Sponsored Posts' },
 ]
 
-const RTB = [
-  {
-    headline: 'Zero Fluff. Zero Sponsors. 100% Real.',
-    body: 'Every product bought with our own money. No brand deals, no paid placements — ever.',
-    icon: '🎯',
-  },
-  {
-    headline: 'Show Up. Get Better. Never Settle.',
-    body: "The founder's daily standard. The same standard every review is held to.",
-    icon: '💪',
-  },
-  {
-    headline: 'Real Dads + Smart Tech = Trust You Can Use.',
-    body: 'AI-assisted research. Human-verified verdicts. Depth without shortcuts.',
-    icon: '⚙️',
-  },
-]
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -124,24 +107,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── RTB Three Pillars ─────────────────────────────────────────────── */}
-      <section className="border-b border-gray-800/60">
-        <div className="max-w-6xl mx-auto px-6 py-14">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {RTB.map((r) => (
-              <div key={r.headline} className="bg-gray-900/60 border border-gray-800 rounded-2xl p-6">
-                <div className="text-2xl mb-4">{r.icon}</div>
-                <h3
-                  className="text-base text-white mb-2 leading-snug"
-                >
-                  {r.headline}
-                </h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{r.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── Categories ────────────────────────────────────────────────────── */}
       <section className="py-16 border-b border-gray-800/60">
