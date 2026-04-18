@@ -106,17 +106,10 @@ export default async function ArticlesPage({ searchParams }: Props) {
                   </div>
                 ) : (
                   <div className={`w-full h-40 shrink-0 bg-gradient-to-br ${
-                    a.category === 'bbq-grilling' ? 'from-red-900/60 to-orange-900/40' :
-                    a.category === 'diy-tools' ? 'from-blue-900/60 to-cyan-900/40' :
-                    a.category === 'kids-family' ? 'from-green-900/60 to-emerald-900/40' :
-                    a.category === 'health-fitness' ? 'from-purple-900/60 to-violet-900/40' :
-                    'from-gray-800 to-gray-900'
+                    getCategoryBySlug(a.category ?? '')?.color ?? 'from-gray-800 to-gray-900'
                   } flex items-center justify-center`}>
                     <span className="text-4xl opacity-40">
-                      {a.category === 'bbq-grilling' ? '🔥' :
-                       a.category === 'diy-tools' ? '🔧' :
-                       a.category === 'kids-family' ? '👨‍👧‍👦' :
-                       a.category === 'health-fitness' ? '💪' : '📄'}
+                      {getCategoryBySlug(a.category ?? '')?.icon ?? '📄'}
                     </span>
                   </div>
                 )}

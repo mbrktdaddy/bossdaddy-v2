@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
-import { CATEGORIES, getCategoryLabel } from '@/lib/categories'
+import { CATEGORIES, getCategoryLabel, getCategoryBySlug } from '@/lib/categories'
 import Pagination from '@/components/Pagination'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import type { Metadata } from 'next'
@@ -124,17 +124,10 @@ export default async function ReviewsPage({ searchParams }: Props) {
                   </div>
                 ) : (
                   <div className={`w-full h-44 shrink-0 bg-gradient-to-br ${
-                    r.category === 'bbq-grilling' ? 'from-red-900/60 to-orange-900/40' :
-                    r.category === 'diy-tools' ? 'from-blue-900/60 to-cyan-900/40' :
-                    r.category === 'kids-family' ? 'from-green-900/60 to-emerald-900/40' :
-                    r.category === 'health-fitness' ? 'from-purple-900/60 to-violet-900/40' :
-                    'from-gray-800 to-gray-900'
+                    getCategoryBySlug(r.category ?? '')?.color ?? 'from-gray-800 to-gray-900'
                   } flex items-center justify-center`}>
                     <span className="text-4xl opacity-40">
-                      {r.category === 'bbq-grilling' ? '🔥' :
-                       r.category === 'diy-tools' ? '🔧' :
-                       r.category === 'kids-family' ? '👨‍👧‍👦' :
-                       r.category === 'health-fitness' ? '💪' : '📦'}
+                      {getCategoryBySlug(r.category ?? '')?.icon ?? '📦'}
                     </span>
                   </div>
                 )}
