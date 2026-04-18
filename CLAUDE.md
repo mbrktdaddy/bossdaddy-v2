@@ -69,6 +69,31 @@ draft → pending → approved
 
 ---
 
+## Design System
+
+Tailwind v4 — no `tailwind.config.ts`. All tokens defined in `app/globals.css` via `@theme inline`.
+
+### Color Palette
+| Token | Value | Use |
+|---|---|---|
+| `orange-600` | `#CC5500` | Primary brand — CTAs, active nav, buttons |
+| `orange-500` | `#d96200` | Hover states |
+| `orange-400` | `#e87030` | Accent text on dark backgrounds |
+| `orange-700–950` | earthy scale | Borders, bg tints (`border-orange-700/60`, `bg-orange-950/40`) |
+
+CSS vars also available: `--bd-orange`, `--bd-surface`, `--bd-border`, `--bd-text`, `--bd-text-muted`, `--bd-text-faint`.
+
+### Rules
+- **No vivid orange.** Never use Tailwind's default `#f97316` — our `orange-600` overrides it to `#CC5500`.
+- **No per-category rainbow colors.** All categories use one unified treatment. Source of truth: `lib/categories.ts`.
+- **Section headings:** always `font-black`.
+- **Card titles** in pillar/feature grids: `text-orange-500`.
+- **Eyebrow labels:** `text-xs text-orange-500 uppercase tracking-widest`.
+- **Mobile tap targets:** minimum 44px. Use `py-2.5` on pills, `py-3` on buttons/pagination/nav links.
+- **Filter tabs** on listing pages: `overflow-x-auto scrollbar-hide` — never `flex-wrap`.
+
+---
+
 ## Brand Voice
 
 All Claude draft generation uses the Boss Daddy system prompt defined in `lib/claude/client.ts`. Key rules:
