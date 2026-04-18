@@ -144,26 +144,22 @@ export default async function HomePage() {
       </section>
 
       {/* ── Categories ────────────────────────────────────────────────────── */}
-      <section className="max-w-6xl mx-auto px-6 py-16 border-b border-gray-800/60">
-        <h2
-          className="text-3xl text-white mb-2"
-        >
-          Browse by Category
-        </h2>
-        <p className="text-gray-500 text-sm mb-8">Backyard tested. Boss approved.</p>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <section className="py-16 border-b border-gray-800/60">
+        <div className="max-w-6xl mx-auto px-6 mb-6">
+          <h2 className="text-3xl text-white mb-1">Browse by Category</h2>
+          <p className="text-gray-500 text-sm">Backyard tested. Boss approved.</p>
+        </div>
+        <div className="flex gap-4 overflow-x-auto scrollbar-hide px-6 pb-2 lg:justify-center">
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.slug}
               href={`/category/${cat.slug}`}
-              className={`group relative overflow-hidden rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.color} p-6 hover:scale-[1.02] transition-transform duration-200`}
+              className={`group flex-none flex flex-col items-center justify-center rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.color} hover:scale-[1.04] transition-transform duration-200 w-36 h-32`}
             >
-              <div className="text-3xl mb-3">{cat.icon}</div>
-              <h3 className={`font-bold text-base mb-1.5 ${cat.accent}`}>{cat.label}</h3>
-              <p className="text-gray-500 text-xs leading-relaxed">{cat.description}</p>
-              <span className="absolute bottom-4 right-4 text-xs text-gray-600 group-hover:text-gray-400 transition-colors">
-                Explore →
-              </span>
+              <div className="text-4xl mb-2">{cat.icon}</div>
+              <p className={`text-xs font-bold text-center leading-snug px-2 ${cat.accent}`}>
+                {cat.label}
+              </p>
             </Link>
           ))}
         </div>
