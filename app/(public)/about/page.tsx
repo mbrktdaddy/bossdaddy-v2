@@ -3,36 +3,51 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'About — Boss Daddy Life',
-  description: 'The dad behind Boss Daddy Life. Real reviews, zero corporate influence.',
+  description: 'The real story behind Boss Daddy Life. A first-time dad on a mission to be the best version of himself — and help other dads do the same.',
 }
 
 const PILLARS = [
   {
     icon: '🔥',
-    title: 'BBQ & Grilling',
-    description: 'From offset smokers to weekend grills — tested in the backyard, not a lab.',
+    title: 'Cooking & Grilling',
+    description: 'Backyard-tested smokers, grills, and recipes that turn weeknights into memories.',
   },
   {
     icon: '🔧',
-    title: 'DIY & Tools',
-    description: 'Power tools, hand tools, and garage gear that actually holds up.',
+    title: 'Tools & DIY / Home Improvement',
+    description: 'Gear that survives real dad projects with kids underfoot.',
   },
   {
-    icon: '👶',
-    title: 'Kids & Family',
-    description: 'Gear for the whole crew. Strollers, toys, and everything in between.',
+    icon: '🏕️',
+    title: 'Outdoors & Adventure',
+    description: 'Family camping, hiking, and gear that gets you off the couch and into the wild.',
   },
   {
     icon: '💪',
     title: 'Health & Fitness',
-    description: 'Supplements, equipment, and routines for dads who refuse to slow down.',
+    description: "Supplements, workouts, and routines built for busy dads who won't slow down.",
+  },
+  {
+    icon: '👶',
+    title: 'Kid Gear & Baby Gear',
+    description: 'Strollers, carriers, toys, and everything that actually survives real family chaos.',
+  },
+  {
+    icon: '👊',
+    title: 'Dad Life & Fatherhood Culture',
+    description: 'The mindset, the wins, the hard days, and the brotherhood.',
+  },
+  {
+    icon: '🏡',
+    title: 'Family Living & Lifestyle',
+    description: 'Building a home and legacy that lasts.',
   },
 ]
 
 const STATS = [
   { value: '20+', label: 'Products reviewed' },
   { value: '15+', label: 'Articles written' },
-  { value: '100%', label: 'Self-purchased' },
+  { value: '100%', label: 'Firsthand tested' },
   { value: '$0', label: 'Paid placements' },
 ]
 
@@ -44,17 +59,18 @@ export default function AboutPage() {
       <div className="mb-16">
         <div className="inline-flex items-center gap-2 bg-orange-950/50 border border-orange-800/50 rounded-full px-4 py-1.5 text-xs text-orange-400 font-medium mb-6">
           <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
-          The story behind Boss Daddy
+          The real story behind Boss Daddy
         </div>
         <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6">
-          Just a Dad Who Buys the Stuff,
+          The Dad Who Thought
           <br />
-          <span className="text-orange-500">Tests It, and Tells the Truth.</span>
+          <span className="text-orange-500">He&apos;d Never Be One.</span>
         </h1>
         <p className="text-gray-400 text-lg leading-relaxed max-w-2xl">
-          Boss Daddy Life started because I was tired of reading reviews written by people who&apos;d
-          never actually used the product. I buy everything myself, use it in real life with my
-          family, and give you the honest take — no brand deals, no sponsored posts, no BS.
+          After separating from my ex-wife of 13 years — who was unable to have children — and
+          being 46 years old, I had accepted that having kids probably wasn&apos;t in the cards for me.
+          After a rough couple of years and some serious soul-searching, I became dead serious about
+          making changes. I found something I hadn&apos;t had in a very long time: faith.
         </p>
       </div>
 
@@ -73,29 +89,89 @@ export default function AboutPage() {
         prose-p:text-gray-400 prose-p:leading-relaxed
         prose-h2:font-black prose-h2:text-white prose-h2:text-2xl
         prose-strong:text-white">
-        <h2>Why Boss Daddy?</h2>
+
         <p>
-          Being a dad means your time and money are always on the line. A bad tool purchase
-          means a weekend project that doesn&apos;t get finished. A bad supplement means wasted
-          money and no results. A bad baby product means frustrated kids and stressed parents.
+          What I didn&apos;t know at the time was that finding faith and doing some serious work on
+          myself would lead me to the most amazing woman, best friend, and mother of my first baby girl.
         </p>
         <p>
-          I started this site to cut through the noise. Every product I review I&apos;ve personally
-          purchased and used — often for months before writing about it. I don&apos;t accept free
-          products in exchange for reviews, and I don&apos;t take paid placements. If I recommend
-          something, it&apos;s because I actually think you should buy it.
+          One day the thought of being a dad was nonexistent — and the next, I was holding a tiny
+          human who looked up at me like I was the whole damn world. In that moment, everything
+          shifted. I went from &quot;probably never&quot; to &quot;this is everything&quot; in a single heartbeat.
         </p>
-        <h2>What You&apos;ll Find Here</h2>
         <p>
-          In-depth product reviews, buying guides, and how-to articles across the four categories
-          I care most about as a dad: BBQ & grilling, DIY & tools, kids & family gear, and
-          health & fitness. Real testing, honest ratings, clear verdicts.
+          Every single day since, I&apos;ve made a non-negotiable commitment: show up, get better, and
+          never settle. I pray. I grind. I work on being the best husband and father my family
+          deserves. That&apos;s what Boss Daddy means to me. It&apos;s not a cute title. It&apos;s a standard.
+          A daily decision to be strong, present, and proud — exactly the kind of man my daughter
+          deserves to look up to.
+        </p>
+        <p>
+          As a guy who was always a do-it-yourselfer with experience across construction, working on
+          cars, nutrition, fitness, and even captaining a towboat — with a deep love for building
+          things from the ground up with my own hands — I decided to build something of my own.
+          Why not create a hub for dads who love being a dad and show up every day ready to dad
+          like a boss?
+        </p>
+        <p>
+          That&apos;s where Boss Daddy was born — not in some boardroom, but in the middle of real life,
+          real struggle, and real redemption.
+        </p>
+
+        <h2>Why I Built This Site</h2>
+        <p>
+          Being a dad means your time and your money are sacred. A crappy tool turns a weekend
+          project into frustration. A weak grill ruins the backyard memories. A baby product that
+          fails at 2 a.m. steals sleep from the whole house.
+        </p>
+        <p>
+          I got tired of the fluff, the fake reviews, and the brand-sponsored noise. So I built
+          Boss Daddy as the place where real dads can go for reviews, articles, and gear from a
+          real dad in the trenches — no fluff, no paid placements, no compromises.
+        </p>
+        <p>
+          Every single product I review I&apos;ve bought with my own money, tested with my own hands,
+          or have firsthand knowledge of. I don&apos;t have sponsors. I don&apos;t run paid placements. If I
+          tell you to buy it, it&apos;s because it earned that Boss Daddy Approved recommendation in my
+          own backyard, garage, and living room.
+        </p>
+
+        <h2>Real Dad. Smart Tools.</h2>
+        <p>
+          We are still a founder-led operation — buying the gear, testing it in our own backyards,
+          sweating through the projects, and living the dad life every single day. But to deliver
+          the most comprehensive, up-to-date, and useful information possible, we also put AI to
+          work for you. We use advanced AI analysis, research models, and tools to dig through
+          specs, compare data, and surface the latest testing results — to create the most
+          comprehensive reviews, articles, and guides on the internet.
+        </p>
+        <p>
+          Every article, every review, and every recommendation still gets personally approved by
+          the Boss Daddy team. Whether you&apos;re shopping for a new grill, hunting for kid gear,
+          buying a new tool, or just looking for guidance on a home improvement project — Boss
+          Daddy uses every tool available to make sure you get straight answers from guys who
+          actually show up. That&apos;s the Boss Daddy way: real dads + smart tech = better decisions
+          for your family.
+        </p>
+
+        <h2>More Than Just Reviews</h2>
+        <p>
+          Boss Daddy started as a review and gear site, but quickly became something much bigger —
+          an AI-assisted gear and product review powerhouse, a place for honest advice, practical
+          skills, and epic family adventures, and a family-oriented brand that stands for
+          brotherhood, strength, honesty, and faith.
+        </p>
+        <p>
+          Whether you&apos;re a brand-new dad figuring out that first diaper change, a seasoned dad
+          leveling up your backyard, or a guy who just wants content from someone who actually
+          gets it — you&apos;re home.
         </p>
       </div>
 
       {/* Pillars */}
       <div className="mb-16">
-        <h2 className="text-2xl font-black mb-6">What I Cover</h2>
+        <h2 className="text-2xl font-black mb-2">What We Cover</h2>
+        <p className="text-gray-500 text-sm mb-6">Real-world testing across everything modern dads actually love.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {PILLARS.map((p) => (
             <div key={p.title} className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
@@ -109,8 +185,15 @@ export default function AboutPage() {
 
       {/* CTA */}
       <div className="bg-gradient-to-br from-orange-950/40 to-gray-900 border border-orange-800/30 rounded-3xl px-8 py-10 text-center">
-        <h2 className="text-2xl font-black mb-3">Ready to Find Your Next Gear?</h2>
-        <p className="text-gray-400 mb-6">Browse all reviews or jump into a category.</p>
+        <h2 className="text-2xl font-black mb-3">Built for Dads Who Show Up.</h2>
+        <p className="text-gray-400 mb-2">
+          This isn&apos;t just another review site. This is Boss Daddy — a resource, a community, and
+          a brand for every man who&apos;s decided that being a Boss Dad isn&apos;t a compromise of his
+          strength… it&apos;s the ultimate expression of it.
+        </p>
+        <p className="text-gray-500 text-sm mb-8">
+          Welcome to the Boss Daddy crew. Now let&apos;s dad like a boss — together.
+        </p>
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <Link href="/reviews" className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors">
             Browse Reviews
