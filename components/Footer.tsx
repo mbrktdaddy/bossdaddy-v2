@@ -21,12 +21,12 @@ export default function Footer() {
       </div>
       <div className="max-w-6xl mx-auto px-6 py-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-600">
-          <Link href="/" className="font-black text-gray-500 tracking-tight hover:text-gray-400 transition-colors">
+          <Link href="/" className="font-black text-gray-500 tracking-tight hover:text-gray-400 transition-colors py-2 inline-block">
             BOSS DADDY LIFE
           </Link>
-          <div className="flex items-center gap-6 flex-wrap justify-center">
+          <div className="flex items-center gap-4 flex-wrap justify-center">
             {FOOTER_LINKS.map(({ href, label }) => (
-              <Link key={href} href={href} className="hover:text-gray-400 transition-colors">
+              <Link key={href} href={href} className="py-2 inline-block hover:text-gray-400 transition-colors">
                 {label}
               </Link>
             ))}

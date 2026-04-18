@@ -1,48 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { CATEGORIES } from '@/lib/categories'
 
 export const metadata: Metadata = {
   title: 'About — Boss Daddy Life',
   description: 'The real story behind Boss Daddy Life. A first-time dad on a mission to be the best version of himself — and help other dads do the same.',
 }
 
-const PILLARS = [
-  {
-    icon: '🔥',
-    title: 'Cooking & Grilling',
-    description: 'Backyard-tested smokers, grills, and recipes that turn weeknights into memories.',
-  },
-  {
-    icon: '🔧',
-    title: 'Tools & DIY / Home Improvement',
-    description: 'Gear that survives real dad projects with kids underfoot.',
-  },
-  {
-    icon: '🏕️',
-    title: 'Outdoors & Adventure',
-    description: 'Family camping, hiking, and gear that gets you off the couch and into the wild.',
-  },
-  {
-    icon: '💪',
-    title: 'Health & Fitness',
-    description: "Supplements, workouts, and routines built for busy dads who won't slow down.",
-  },
-  {
-    icon: '👶',
-    title: 'Kid Gear & Baby Gear',
-    description: 'Strollers, carriers, toys, and everything that actually survives real family chaos.',
-  },
-  {
-    icon: '👊',
-    title: 'Dad Life & Fatherhood Culture',
-    description: 'The mindset, the wins, the hard days, and the brotherhood.',
-  },
-  {
-    icon: '🏡',
-    title: 'Family Living & Lifestyle',
-    description: 'Building a home and legacy that lasts.',
-  },
-]
 
 const STATS = [
   { value: '20+', label: 'Products reviewed' },
@@ -172,13 +136,18 @@ export default function AboutPage() {
       <div className="mb-16">
         <h2 className="text-2xl font-black mb-2">What We Cover</h2>
         <p className="text-gray-500 text-sm mb-6">Real-world testing across everything modern dads actually love.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {PILLARS.map((p) => (
-            <div key={p.title} className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-              <div className="text-3xl mb-3">{p.icon}</div>
-              <h3 className="font-bold text-base mb-2 text-white">{p.title}</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">{p.description}</p>
-            </div>
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-3">
+          {CATEGORIES.map((cat) => (
+            <Link
+              key={cat.slug}
+              href={`/category/${cat.slug}`}
+              className={`group flex flex-col items-center justify-center rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.color} hover:scale-[1.03] transition-transform duration-200 py-6 px-2`}
+            >
+              <div className="text-4xl mb-3">{cat.icon}</div>
+              <p className={`text-xs font-bold text-center leading-snug ${cat.accent}`}>
+                {cat.label}
+              </p>
+            </Link>
           ))}
         </div>
       </div>

@@ -139,16 +139,16 @@ export default function EditorialStandardsPage() {
       </div>
 
       <div className="mt-10 pt-8 border-t border-gray-800 flex items-center gap-6 flex-wrap text-sm">
-        <Link href="/how-we-test" className="text-gray-500 hover:text-gray-400 transition-colors">
+        <Link href="/how-we-test" className="py-2 inline-block text-gray-500 hover:text-gray-400 transition-colors">
           How We Test
         </Link>
-        <Link href="/affiliate-disclosure" className="text-gray-500 hover:text-gray-400 transition-colors">
+        <Link href="/affiliate-disclosure" className="py-2 inline-block text-gray-500 hover:text-gray-400 transition-colors">
           Affiliate Disclosure
         </Link>
-        <Link href="/privacy-policy" className="text-gray-500 hover:text-gray-400 transition-colors">
+        <Link href="/privacy-policy" className="py-2 inline-block text-gray-500 hover:text-gray-400 transition-colors">
           Privacy Policy
         </Link>
-        <Link href="/terms" className="text-gray-500 hover:text-gray-400 transition-colors">
+        <Link href="/terms" className="py-2 inline-block text-gray-500 hover:text-gray-400 transition-colors">
           Terms of Service
         </Link>
       </div>

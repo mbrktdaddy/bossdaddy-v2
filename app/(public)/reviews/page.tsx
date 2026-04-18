@@ -67,10 +67,10 @@ export default async function ReviewsPage({ searchParams }: Props) {
         </div>
 
         {/* Category filter tabs */}
-        <div className="flex items-center gap-2 flex-wrap mb-10">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide mb-10 pb-1">
           <Link
             href="/reviews"
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            className={`shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
               !category
                 ? 'bg-orange-600 text-white'
                 : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'
@@ -82,7 +82,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
             <Link
               key={c.slug}
               href={`/reviews?category=${c.slug}`}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              className={`shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
                 category === c.slug
                   ? 'bg-orange-600 text-white'
                   : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'

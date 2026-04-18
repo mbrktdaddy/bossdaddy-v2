@@ -78,11 +78,11 @@ export default async function ArticlePage({ params }: Props) {
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-3 text-sm text-gray-500 mb-8 flex-wrap">
-          <Link href="/articles" className="hover:text-white transition-colors">← Articles</Link>
+          <Link href="/articles" className="py-2 inline-block hover:text-white transition-colors">← Articles</Link>
           {category && (
             <>
               <span className="text-gray-700">/</span>
-              <Link href={`/articles?category=${category.slug}`} className={`hover:text-white transition-colors ${category.accent}`}>
+              <Link href={`/articles?category=${category.slug}`} className={`py-2 inline-block hover:text-white transition-colors ${category.accent}`}>
                 {category.icon} {category.label}
               </Link>
             </>
@@ -137,7 +137,7 @@ export default async function ArticlePage({ params }: Props) {
         <div className="mt-12 pt-8 border-t border-gray-800">
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 text-center">
             <p className="text-sm text-gray-400 mb-1">Want dad-tested product picks?</p>
-            <p className="font-bold text-lg mb-4">Browse the review catalog.</p>
+            <p className="font-black text-lg mb-4">Browse the review catalog.</p>
             <Link
               href="/reviews"
               className="inline-block px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors"

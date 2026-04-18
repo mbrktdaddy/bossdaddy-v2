@@ -30,12 +30,12 @@ export default function Pagination({ page, total, perPage, basePath, params = {}
       {page > 1 ? (
         <Link
           href={href(page - 1)}
-          className="px-3 py-2 text-sm text-gray-400 hover:text-white bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-lg transition-colors"
+          className="px-3 py-3 text-sm text-gray-400 hover:text-white bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-lg transition-colors"
         >
           ← Prev
         </Link>
       ) : (
-        <span className="px-3 py-2 text-sm text-gray-700 bg-gray-900 border border-gray-800 rounded-lg cursor-not-allowed">
+        <span className="px-3 py-3 text-sm text-gray-700 bg-gray-900 border border-gray-800 rounded-lg cursor-not-allowed">
           ← Prev
         </span>
       )}
@@ -43,7 +43,7 @@ export default function Pagination({ page, total, perPage, basePath, params = {}
       {/* Leading ellipsis */}
       {left > 1 && (
         <>
-          <Link href={href(1)} className="px-3 py-2 text-sm text-gray-400 hover:text-white bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-lg transition-colors">1</Link>
+          <Link href={href(1)} className="px-3 py-3 text-sm text-gray-400 hover:text-white bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-lg transition-colors">1</Link>
           {left > 2 && <span className="px-2 text-gray-600 text-sm">…</span>}
         </>
       )}
@@ -51,14 +51,14 @@ export default function Pagination({ page, total, perPage, basePath, params = {}
       {/* Page numbers */}
       {range.map((p) => (
         p === page ? (
-          <span key={p} className="px-3 py-2 text-sm font-semibold text-white bg-orange-600 border border-orange-600 rounded-lg">
+          <span key={p} className="px-3 py-3 text-sm font-semibold text-white bg-orange-600 border border-orange-600 rounded-lg">
             {p}
           </span>
         ) : (
           <Link
             key={p}
             href={href(p)}
-            className="px-3 py-2 text-sm text-gray-400 hover:text-white bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-lg transition-colors"
+            className="px-3 py-3 text-sm text-gray-400 hover:text-white bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-lg transition-colors"
           >
             {p}
           </Link>
@@ -69,7 +69,7 @@ export default function Pagination({ page, total, perPage, basePath, params = {}
       {right < totalPages && (
         <>
           {right < totalPages - 1 && <span className="px-2 text-gray-600 text-sm">…</span>}
-          <Link href={href(totalPages)} className="px-3 py-2 text-sm text-gray-400 hover:text-white bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-lg transition-colors">{totalPages}</Link>
+          <Link href={href(totalPages)} className="px-3 py-3 text-sm text-gray-400 hover:text-white bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-lg transition-colors">{totalPages}</Link>
         </>
       )}
 
@@ -77,12 +77,12 @@ export default function Pagination({ page, total, perPage, basePath, params = {}
       {page < totalPages ? (
         <Link
           href={href(page + 1)}
-          className="px-3 py-2 text-sm text-gray-400 hover:text-white bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-lg transition-colors"
+          className="px-3 py-3 text-sm text-gray-400 hover:text-white bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-lg transition-colors"
         >
           Next →
         </Link>
       ) : (
-        <span className="px-3 py-2 text-sm text-gray-700 bg-gray-900 border border-gray-800 rounded-lg cursor-not-allowed">
+        <span className="px-3 py-3 text-sm text-gray-700 bg-gray-900 border border-gray-800 rounded-lg cursor-not-allowed">
           Next →
         </span>
       )}

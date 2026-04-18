@@ -4,6 +4,21 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Brand */
+  --bd-orange: #CC5500;
+  --bd-orange-light: #d96200;
+
+  /* Surfaces (dark-first) */
+  --bd-bg: #0a0a0a;
+  --bd-surface: #141414;
+  --bd-surface-raised: #1f1f1f;
+  --bd-border: #2a2a2a;
+
+  /* Text */
+  --bd-text: #f0f0f0;
+  --bd-text-muted: #a1a1a1;
+  --bd-text-faint: #6b6b6b;
 }
 
 @theme inline {
@@ -12,12 +27,15 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-montserrat), system-ui, sans-serif;
-  --color-forest: #2E4A3D;
-  --color-forest-50: rgba(46, 74, 61, 0.5);
-  --color-forest-20: rgba(46, 74, 61, 0.2);
-  /* Brand burnt orange — overrides Tailwind defaults */
-  --color-orange-600: #CC5500;
+
+  /* Brand orange scale — earthy, not vivid */
+  --color-orange-400: #e87030;
   --color-orange-500: #d96200;
+  --color-orange-600: #CC5500;
+  --color-orange-700: #a34400;
+  --color-orange-800: #7d3300;
+  --color-orange-900: #5c2600;
+  --color-orange-950: #3d1a00;
 }
 
 @media (prefers-color-scheme: dark) {

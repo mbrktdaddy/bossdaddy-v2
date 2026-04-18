@@ -123,7 +123,7 @@ export default function HowWeTestPage() {
         {PILLAR_TESTING.map(({ icon, title, description }) => (
           <div key={title} className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
             <div className="text-2xl mb-3">{icon}</div>
-            <h3 className="font-bold text-white text-base mb-2">{title}</h3>
+            <h3 className="font-bold text-orange-500 text-base mb-2">{title}</h3>
             <p className="text-gray-500 text-sm leading-relaxed">{description}</p>
           </div>
         ))}
@@ -161,8 +161,8 @@ export default function HowWeTestPage() {
 
       </div>
 
-      <div className="not-prose bg-gradient-to-br from-orange-950/40 to-gray-900 border border-orange-800/30 rounded-3xl px-8 py-8 mb-12">
-        <div className="text-xs uppercase tracking-widest text-orange-400 font-bold mb-2">
+      <div className="not-prose bg-gradient-to-br from-orange-950/40 to-gray-900 border border-orange-800/30 rounded-3xl p-6 mb-12">
+        <div className="text-xs uppercase tracking-widest text-orange-500 font-bold mb-2">
           The Highest Designation
         </div>
         <h2 className="text-3xl font-black text-white mb-4">Boss Daddy Approved</h2>

@@ -147,13 +147,13 @@ export default function AffiliateDisclosurePage() {
       </div>
 
       <div className="mt-10 pt-8 border-t border-gray-800 flex items-center gap-6 flex-wrap text-sm">
-        <Link href="/editorial-standards" className="text-gray-500 hover:text-gray-400 transition-colors">
+        <Link href="/editorial-standards" className="py-2 inline-block text-gray-500 hover:text-gray-400 transition-colors">
           Editorial Standards
         </Link>
-        <Link href="/privacy-policy" className="text-gray-500 hover:text-gray-400 transition-colors">
+        <Link href="/privacy-policy" className="py-2 inline-block text-gray-500 hover:text-gray-400 transition-colors">
           Privacy Policy
         </Link>
-        <Link href="/terms" className="text-gray-500 hover:text-gray-400 transition-colors">
+        <Link href="/terms" className="py-2 inline-block text-gray-500 hover:text-gray-400 transition-colors">
           Terms of Service
         </Link>
       </div>

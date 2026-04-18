@@ -88,7 +88,7 @@ export default async function SearchPage({ searchParams }: Props) {
           {/* Review results */}
           {(reviews?.length ?? 0) > 0 && (
             <div className="mb-10">
-              <p className="text-xs text-gray-600 font-semibold uppercase tracking-widest mb-3">Reviews</p>
+              <p className="text-xs text-orange-500 font-semibold uppercase tracking-widest mb-3">Reviews</p>
               <div className="space-y-2">
                 {reviews!.map((r) => {
                   const cat = getCategoryBySlug(r.category)
@@ -121,7 +121,7 @@ export default async function SearchPage({ searchParams }: Props) {
           {/* Article results */}
           {(articles?.length ?? 0) > 0 && (
             <div>
-              <p className="text-xs text-gray-600 font-semibold uppercase tracking-widest mb-3">Articles</p>
+              <p className="text-xs text-orange-500 font-semibold uppercase tracking-widest mb-3">Articles</p>
               <div className="space-y-2">
                 {articles!.map((a) => {
                   const cat = getCategoryBySlug(a.category)

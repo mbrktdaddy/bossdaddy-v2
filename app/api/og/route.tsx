@@ -36,13 +36,13 @@ export async function GET(request: NextRequest) {
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'radial-gradient(ellipse at top left, rgba(234, 88, 12, 0.15) 0%, transparent 60%)',
+            background: 'radial-gradient(ellipse at top left, rgba(204, 85, 0, 0.15) 0%, transparent 60%)',
           }}
         />
 
         {/* Brand */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '40px' }}>
-          <span style={{ color: '#f97316', fontWeight: 900, fontSize: '22px', letterSpacing: '-0.5px' }}>
+          <span style={{ color: '#CC5500', fontWeight: 900, fontSize: '22px', letterSpacing: '-0.5px' }}>
             BOSS
           </span>
           <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '22px', letterSpacing: '-0.5px' }}>
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
         <div style={{ display: 'flex', gap: '10px', marginBottom: '28px' }}>
           <span
             style={{
-              backgroundColor: '#f97316',
+              backgroundColor: '#CC5500',
               color: '#ffffff',
               fontSize: '13px',
               fontWeight: 700,
@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
           }}
         >
           <span style={{ color: '#6b7280', fontSize: '16px' }}>bossdaddylife.com</span>
-          <span style={{ color: '#f97316', fontSize: '15px', fontWeight: 700 }}>
+          <span style={{ color: '#CC5500', fontSize: '15px', fontWeight: 700 }}>
             Dad-Tested · Honestly Rated
           </span>
         </div>

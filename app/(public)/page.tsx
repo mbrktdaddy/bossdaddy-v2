@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { CATEGORIES } from '@/lib/categories'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
+import HeroCarousel from '@/components/HeroCarousel'
 import type { Metadata } from 'next'
 
 export const revalidate = 3600
@@ -41,7 +42,7 @@ export default async function HomePage() {
     .eq('status', 'approved')
     .eq('is_visible', true)
     .order('published_at', { ascending: false })
-    .limit(6)
+    .limit(12)
 
   if (reviewsError) console.error('Reviews query error:', reviewsError)
 
@@ -62,33 +63,41 @@ export default async function HomePage() {
       <section className="relative overflow-hidden border-b border-gray-800/60">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-950/30 via-transparent to-transparent pointer-events-none" />
         <div className="relative max-w-6xl mx-auto px-6 py-20 md:py-28">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 bg-orange-950/50 border border-orange-800/50 rounded-full px-4 py-1.5 text-xs text-orange-400 font-medium mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-              Zero Sponsors. Zero Fluff. 100% Real.
+          <div className="flex flex-col md:flex-row items-center gap-12 lg:gap-20">
+
+            {/* Left: hero copy */}
+            <div className="flex-1">
+              <div className="inline-flex items-center gap-2 bg-orange-950/50 border border-orange-800/50 rounded-full px-4 py-1.5 text-xs text-orange-400 font-medium mb-6">
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+                Zero Sponsors. Zero Fluff. 100% Real.
+              </div>
+              <h1 className="text-5xl md:text-7xl leading-[1.0] tracking-tight mb-4 text-white">
+                Dad Like
+                <br />
+                <span className="text-orange-500">a Boss.</span>
+              </h1>
+              <p className="text-gray-400 text-base md:text-lg leading-relaxed mb-3 max-w-xl">
+                Honest gear reviews, real skills, and a brotherhood for dads who show up every single day —
+                strong, present, and proud.
+              </p>
+              <p className="text-orange-400/80 text-sm font-semibold tracking-wide mb-8">
+                Show Up. Get Better. Never Settle.
+              </p>
+              <div className="flex items-center gap-4 flex-wrap">
+                <Link href="/reviews" className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors">
+                  Browse Reviews
+                </Link>
+                <Link href="#crew" className="px-6 py-3 text-gray-300 hover:text-white font-medium transition-colors">
+                  Join the Crew →
+                </Link>
+              </div>
             </div>
-            <h1
-              className="text-5xl md:text-7xl leading-[1.0] tracking-tight mb-4 text-white"
-            >
-              Dad Like
-              <br />
-              <span className="text-orange-500">a Boss.</span>
-            </h1>
-            <p className="text-gray-400 text-base md:text-lg leading-relaxed mb-3 max-w-xl">
-              Honest gear reviews, real skills, and a brotherhood for dads who show up every single day —
-              strong, present, and proud.
-            </p>
-            <p className="text-orange-400/80 text-sm font-semibold tracking-wide mb-8">
-              Show Up. Get Better. Never Settle.
-            </p>
-            <div className="flex items-center gap-4 flex-wrap">
-              <Link href="/reviews" className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors">
-                Browse Reviews
-              </Link>
-              <Link href="#crew" className="px-6 py-3 text-gray-300 hover:text-white font-medium transition-colors">
-                Join the Crew →
-              </Link>
-            </div>
+
+            {/* Right: top picks carousel */}
+            {reviews && reviews.length > 0 && (
+              <HeroCarousel reviews={reviews.slice(0, 5)} />
+            )}
+
           </div>
         </div>
       </section>
@@ -110,23 +119,25 @@ export default async function HomePage() {
 
       {/* ── Categories ────────────────────────────────────────────────────── */}
       <section className="py-16 border-b border-gray-800/60">
-        <div className="max-w-6xl mx-auto px-6 mb-6">
-          <h2 className="text-3xl text-white mb-1">Browse by Category</h2>
-          <p className="text-gray-500 text-sm">Backyard tested. Boss approved.</p>
-        </div>
-        <div className="flex gap-4 overflow-x-auto scrollbar-hide px-6 pb-2 lg:justify-center">
-          {CATEGORIES.map((cat) => (
-            <Link
-              key={cat.slug}
-              href={`/category/${cat.slug}`}
-              className={`group flex-none flex flex-col items-center justify-center rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.color} hover:scale-[1.04] transition-transform duration-200 w-36 h-32`}
-            >
-              <div className="text-4xl mb-2">{cat.icon}</div>
-              <p className={`text-xs font-bold text-center leading-snug px-2 ${cat.accent}`}>
-                {cat.label}
-              </p>
-            </Link>
-          ))}
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="mb-6">
+            <h2 className="text-3xl font-black text-white mb-1">Browse by Category</h2>
+            <p className="text-gray-500 text-sm">Backyard tested. Boss approved.</p>
+          </div>
+          <div className="grid grid-cols-4 sm:grid-cols-7 gap-3">
+            {CATEGORIES.map((cat) => (
+              <Link
+                key={cat.slug}
+                href={`/category/${cat.slug}`}
+                className={`group flex flex-col items-center justify-center rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.color} hover:scale-[1.03] transition-transform duration-200 py-6 px-2`}
+              >
+                <div className="text-4xl mb-3">{cat.icon}</div>
+                <p className={`text-xs font-bold text-center leading-snug ${cat.accent}`}>
+                  {cat.label}
+                </p>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -134,11 +145,7 @@ export default async function HomePage() {
       <section className="max-w-6xl mx-auto px-6 py-16 border-b border-gray-800/60">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2
-              className="text-3xl text-white"
-            >
-              Latest Reviews
-            </h2>
+            <h2 className="text-3xl font-black text-white">Latest Reviews</h2>
             <p className="text-gray-500 text-sm mt-1">Bought, tested, and Boss Daddy Approved</p>
           </div>
           <Link href="/reviews" className="text-sm text-orange-400 hover:text-orange-300 transition-colors">
@@ -152,7 +159,7 @@ export default async function HomePage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {reviews.map((r) => (
+            {reviews.slice(0, 6).map((r) => (
               <Link
                 key={r.id}
                 href={`/reviews/${r.slug}`}
@@ -200,16 +207,55 @@ export default async function HomePage() {
         )}
       </section>
 
+      {/* ── Shop Teaser ───────────────────────────────────────────────────── */}
+      <section className="max-w-6xl mx-auto px-6 py-16 border-b border-gray-800/60">
+        <div className="bg-gray-900 border border-gray-800 rounded-3xl overflow-hidden px-8 py-10">
+
+          {/* Product image strip — horizontal, centered */}
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mb-8">
+            {reviews
+              ?.filter((r) => r.image_url)
+              .sort((a, b) => b.rating - a.rating)
+              .slice(0, 6)
+              .map((r) => (
+                <div key={r.id} className="relative w-full aspect-square rounded-xl overflow-hidden bg-gray-800">
+                  <Image
+                    src={r.image_url!}
+                    alt={r.product_name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 33vw, 16vw"
+                  />
+                </div>
+              ))}
+          </div>
+
+          {/* Copy + CTA */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Boss Daddy Shop</p>
+              <h2 className="text-2xl font-black text-white mb-2">The Boss Daddy Gear List</h2>
+              <p className="text-gray-400 text-sm max-w-sm">
+                Every product we&apos;ve tested and actually stand behind — all in one place.
+              </p>
+            </div>
+            <Link
+              href="/reviews"
+              className="shrink-0 px-8 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors"
+            >
+              Shop the List →
+            </Link>
+          </div>
+
+        </div>
+      </section>
+
       {/* ── Latest Articles ───────────────────────────────────────────────── */}
       {articles && articles.length > 0 && (
         <section className="max-w-6xl mx-auto px-6 py-16 border-b border-gray-800/60">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2
-                className="text-3xl text-white"
-              >
-                From the Blog
-              </h2>
+              <h2 className="text-3xl font-black text-white">From the Blog</h2>
               <p className="text-gray-500 text-sm mt-1">Guides, skills, and dad wisdom</p>
             </div>
           </div>
@@ -241,9 +287,7 @@ export default async function HomePage() {
           <p className="text-orange-400 text-xs font-semibold uppercase tracking-widest mb-3">
             Join the Boss Daddy Crew
           </p>
-          <h2
-            className="text-3xl text-white mb-3"
-          >
+          <h2 className="text-3xl font-black text-white mb-3">
             Real Talk. Honest Reviews.<br />No BS Ever.
           </h2>
           <p className="text-gray-400 mb-8">
@@ -269,35 +313,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Shop Teaser ───────────────────────────────────────────────────── */}
-      <section className="max-w-6xl mx-auto px-6 py-16 border-b border-gray-800/60">
-        <div className="bg-gray-900 border border-gray-800 rounded-3xl px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Boss Daddy Shop</p>
-            <h2
-              className="text-2xl text-white mb-2"
-            >
-              The Boss Daddy Gear List
-            </h2>
-            <p className="text-gray-400 text-sm max-w-md">
-              Every product we&apos;ve tested and actually stand behind — all in one place.
-            </p>
-          </div>
-          <Link
-            href="/reviews"
-            className="shrink-0 px-8 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors"
-          >
-            Shop the List →
-          </Link>
-        </div>
-      </section>
-
       {/* ── Closing Tagline ───────────────────────────────────────────────── */}
-      <section className="max-w-6xl mx-auto px-6 py-16 text-center">
-        <p className="text-gray-600 text-sm uppercase tracking-widest mb-3">Welcome to the crew.</p>
-        <p
-          className="text-4xl md:text-5xl text-white"
-        >
+      <section className="max-w-6xl mx-auto px-6 py-10 text-center">
+        <p className="text-4xl md:text-5xl font-black text-white">
           Now let&apos;s dad like a boss —{' '}
           <span className="text-orange-500">together.</span>
         </p>

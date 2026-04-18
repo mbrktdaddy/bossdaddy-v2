@@ -104,7 +104,11 @@ export default async function ReviewPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <ViewTracker id={review.id} type="review" />
 
-      <main className="max-w-3xl mx-auto px-6 py-12">
+      <div className="max-w-6xl mx-auto px-6 py-12">
+        <div className="flex gap-12 items-start">
+
+        {/* ── Main content ──────────────────────────────────────────────── */}
+        <main className="flex-1 min-w-0">
 
         {/* FTC Disclosure */}
         {review.has_affiliate_links && (
@@ -249,9 +253,9 @@ export default async function ReviewPage({ params }: Props) {
           </div>
         </div>
 
-        {/* Related reviews */}
+        {/* Related reviews — mobile only */}
         {related && related.length > 0 && (
-          <div className="mt-12">
+          <div className="mt-12 xl:hidden">
             <h2 className="text-lg font-black mb-4">More Reviews</h2>
             <div className="space-y-2">
               {related.map((r) => (
@@ -271,7 +275,82 @@ export default async function ReviewPage({ params }: Props) {
           </div>
         )}
 
-      </main>
+        </main>
+
+        {/* ── Sidebar ───────────────────────────────────────────────────── */}
+        <aside className="hidden xl:flex flex-col gap-4 w-72 shrink-0 sticky top-6 self-start">
+
+          {/* Quick Verdict */}
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Quick Verdict</p>
+            <p className="font-black text-base mb-3">{review.product_name}</p>
+            <StarRating rating={review.rating} />
+            {review.rating === 5 && (
+              <div className="mt-3">
+                <BossApprovedBadge size="sm" />
+              </div>
+            )}
+            {pros.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-gray-800">
+                <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">The Good</p>
+                <ul className="space-y-1.5">
+                  {pros.slice(0, 3).map((pro, i) => (
+                    <li key={i} className="flex items-start gap-1.5 text-xs text-gray-300">
+                      <span className="text-green-500 shrink-0 mt-0.5">+</span>
+                      {pro}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {cons.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-gray-800">
+                <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">The Bad</p>
+                <ul className="space-y-1.5">
+                  {cons.slice(0, 2).map((con, i) => (
+                    <li key={i} className="flex items-start gap-1.5 text-xs text-gray-300">
+                      <span className="text-red-500 shrink-0 mt-0.5">−</span>
+                      {con}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {category && (
+              <Link
+                href={`/category/${category.slug}`}
+                className="mt-4 pt-4 border-t border-gray-800 flex items-center gap-2 text-xs text-gray-500 hover:text-orange-400 transition-colors"
+              >
+                <span>{category.icon}</span>
+                <span>More {category.label} reviews →</span>
+              </Link>
+            )}
+          </div>
+
+          {/* Related Reviews */}
+          {related && related.length > 0 && (
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+              <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">More Reviews</p>
+              <div className="space-y-4">
+                {related.map((r) => (
+                  <Link
+                    key={r.id}
+                    href={`/reviews/${r.slug}`}
+                    className="block group"
+                  >
+                    <p className="text-xs text-orange-500/80 font-medium uppercase tracking-wide mb-0.5">{r.product_name}</p>
+                    <p className="text-sm font-semibold group-hover:text-orange-400 transition-colors leading-snug">{r.title}</p>
+                    <span className="text-xs text-yellow-400">{'★'.repeat(r.rating)}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+        </aside>
+
+        </div>
+      </div>
     </>
   )
 }

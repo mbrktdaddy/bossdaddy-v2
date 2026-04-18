@@ -52,8 +52,8 @@ export function ModerationResultEmail({ action, contentType, title, reason, site
 
                 {/* Header */}
                 <tr>
-                  <td style={{ backgroundColor: '#1a0a00', padding: '32px 40px', borderBottom: '1px solid #2a1a00' }}>
-                    <p style={{ margin: 0, color: '#f97316', fontWeight: 900, fontSize: '20px', letterSpacing: '-0.5px' }}>
+                  <td style={{ backgroundColor: '#1a0800', padding: '32px 40px', borderBottom: '1px solid #2a1000' }}>
+                    <p style={{ margin: 0, color: '#CC5500', fontWeight: 900, fontSize: '20px', letterSpacing: '-0.5px' }}>
                       BOSS DADDY LIFE
                     </p>
                   </td>
@@ -94,7 +94,7 @@ export function ModerationResultEmail({ action, contentType, title, reason, site
                     {/* CTA */}
                     <table cellPadding={0} cellSpacing={0} style={{ margin: '8px 0' }}>
                       <tr>
-                        <td style={{ backgroundColor: '#ea580c', borderRadius: '8px' }}>
+                        <td style={{ backgroundColor: '#CC5500', borderRadius: '8px' }}>
                           <a
                             href={dashboardUrl}
                             style={{ display: 'inline-block', padding: '14px 28px', color: '#ffffff', fontWeight: 700, fontSize: '15px', textDecoration: 'none' }}
