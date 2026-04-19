@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getCategoryBySlug } from '@/lib/categories'
+import RatingScore from '@/components/RatingScore'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -108,9 +109,7 @@ export default async function SearchPage({ searchParams }: Props) {
                         <p className="font-semibold text-sm group-hover:text-orange-400 transition-colors">{r.title}</p>
                         {r.excerpt && <p className="text-gray-500 text-xs mt-1 line-clamp-1">{r.excerpt}</p>}
                       </div>
-                      <span className="text-xs text-yellow-400 font-bold ml-4 shrink-0">
-                        {'★'.repeat(r.rating)}
-                      </span>
+                      <RatingScore rating={r.rating} />
                     </Link>
                   )
                 })}

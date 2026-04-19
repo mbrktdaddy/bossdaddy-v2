@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getCategoryBySlug } from '@/lib/categories'
+import RatingScore from '@/components/RatingScore'
 import type { Metadata } from 'next'
 
 export const revalidate = 3600
@@ -97,9 +98,7 @@ export default async function AuthorPage({ params }: Props) {
                       </p>
                     )}
                   </div>
-                  <span className="text-sm text-yellow-400 font-bold ml-4 shrink-0">
-                    {'★'.repeat(r.rating)}
-                  </span>
+                  <RatingScore rating={r.rating} />
                 </Link>
               )
             })}
