@@ -329,7 +329,7 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
             [1.5,  'Garbage'],
             [1.0,  'Avoid'],
           ].map(([val, label]) => (
-            <option key={val} value={val}>{val.toFixed(1)} / 10 — {label}</option>
+            <option key={val} value={val}>{Number(val).toFixed(1)} / 10 — {label}</option>
           ))}
         </select>
       </div>
