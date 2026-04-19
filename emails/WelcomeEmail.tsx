@@ -61,6 +61,12 @@ export function WelcomeEmail({ email }: Props) {
                 {/* Footer */}
                 <tr>
                   <td style={{ backgroundColor: '#0d0d0d', padding: '24px 40px', borderTop: '1px solid #1f1f1f' }}>
+                    <p style={{ color: '#4b5563', fontSize: '12px', margin: '0 0 12px 0', lineHeight: '1.6' }}>
+                      Follow us:{' '}
+                      <a href='https://x.com/bossdaddylife' style={{ color: '#6b7280', textDecoration: 'none' }}>
+                        @bossdaddylife on X
+                      </a>
+                    </p>
                     <p style={{ color: '#4b5563', fontSize: '12px', margin: 0, lineHeight: '1.6' }}>
                       You&apos;re receiving this because you signed up at BossDaddyLife.com.<br />
                       <a href='https://bossdaddylife.com' style={{ color: '#6b7280', textDecoration: 'none' }}>

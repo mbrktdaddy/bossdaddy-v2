@@ -110,8 +110,10 @@ export function ModerationResultEmail({ action, contentType, title, reason, site
                 {/* Footer */}
                 <tr>
                   <td style={{ backgroundColor: '#0d0d0d', padding: '24px 40px', borderTop: '1px solid #1f1f1f' }}>
-                    <p style={{ color: '#4b5563', fontSize: '12px', margin: 0, lineHeight: '1.6' }}>
+                    <p style={{ color: '#4b5563', fontSize: '12px', margin: '0 0 8px 0', lineHeight: '1.6' }}>
                       <a href={siteUrl} style={{ color: '#6b7280', textDecoration: 'none' }}>BossDaddyLife.com</a>
+                      {' · '}
+                      <a href='https://x.com/bossdaddylife' style={{ color: '#6b7280', textDecoration: 'none' }}>@bossdaddylife on X</a>
                     </p>
                   </td>
                 </tr>

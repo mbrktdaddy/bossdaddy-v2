@@ -32,6 +32,11 @@ export const metadata: Metadata = {
     siteName: 'Boss Daddy',
     type: 'website',
   },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@bossdaddylife',
+    creator: '@bossdaddylife',
+  },
 };
 
 export default function RootLayout({

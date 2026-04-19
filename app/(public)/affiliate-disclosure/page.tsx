@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: 'How Boss Daddy Life makes money, how affiliate links work, and why commissions never influence what we recommend.',
 }
 
-const LAST_UPDATED = 'April 17, 2026'
+const LAST_UPDATED = 'April 19, 2026'
 const CONTACT_EMAIL = 'hello@bossdaddylife.com'
 
 export default function AffiliateDisclosurePage() {
@@ -25,7 +25,7 @@ export default function AffiliateDisclosurePage() {
         prose-strong:text-white">
 
         <p>
-          Boss Daddy Life is reader-supported. We make money through affiliate commissions
+          Boss Daddy LLC (doing business as Boss Daddy Life) is reader-supported. We make money through affiliate commissions
           when you click certain links on this site and go on to buy something. No sponsors.
           No paid placements. No one paying us to say nice things about their product. This
           page explains exactly how it works.
