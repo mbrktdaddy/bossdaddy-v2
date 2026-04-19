@@ -89,8 +89,9 @@ export default function EditorialStandardsPage() {
 
         <h2>5. Rating Methodology</h2>
         <p>
-          Our ratings are not a black box. When we score a product, we&apos;re weighing a few
-          consistent factors:
+          We rate products on a <strong>1.0 – 10.0 scale</strong> in half-point increments.
+          More precision means more honesty — the difference between a 7.5 and an 8.5 is real,
+          and our scale reflects it. When we score a product, we&apos;re weighing five factors:
         </p>
         <ul>
           <li><strong>Build quality:</strong> Does it feel like it was made to last, or made to make a sale?</li>
@@ -98,6 +99,13 @@ export default function EditorialStandardsPage() {
           <li><strong>Value:</strong> At the price it sells for, is it a smart buy? This is not the same as &quot;cheapest.&quot;</li>
           <li><strong>Ease of use:</strong> Can a regular dad actually get the benefit out of this without a manual, an instructor, or a second trip to the hardware store?</li>
           <li><strong>Longevity:</strong> Based on firsthand use or reliable knowledge, will this still be working a year from now? Five?</li>
+        </ul>
+        <p>What the numbers mean:</p>
+        <ul>
+          <li><strong>9.0 – 10.0:</strong> Exceptional. Best in class. Earns the <strong>Boss Daddy Approved</strong> badge.</li>
+          <li><strong>7.0 – 8.9:</strong> Great to excellent. A confident buy for most dads.</li>
+          <li><strong>5.0 – 6.9:</strong> Average to above average. Has real limits or better alternatives.</li>
+          <li><strong>Below 5.0:</strong> Poor to avoid. We&apos;ll tell you why and what to buy instead.</li>
         </ul>
         <p>
           Ratings reflect the honest judgment of the person doing the testing. They are not

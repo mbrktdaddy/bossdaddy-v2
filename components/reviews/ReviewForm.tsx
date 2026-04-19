@@ -91,7 +91,7 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
   const [category, setCategory] = useState(initialData?.category ?? 'other')
   const [excerpt, setExcerpt] = useState(initialData?.excerpt ?? '')
   const [content, setContent] = useState(initialData?.content ?? '')
-  const [rating, setRating] = useState(initialData?.rating ?? 5)
+  const [rating, setRating] = useState(initialData?.rating ?? 7.0)
   const [pros, setPros] = useState<string[]>(initialData?.pros ?? [])
   const [cons, setCons] = useState<string[]>(initialData?.cons ?? [])
   const [imageUrl, setImageUrl] = useState<string | null>(initialData?.image_url ?? null)
@@ -308,8 +308,28 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
           onChange={(e) => setRating(Number(e.target.value))}
           className="px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
         >
-          {[5, 4, 3, 2, 1].map((n) => (
-            <option key={n} value={n}>{'★'.repeat(n)}{'☆'.repeat(5 - n)} ({n}/5)</option>
+          {[
+            [10.0, 'Flawless'],
+            [9.5,  'Outstanding'],
+            [9.0,  'Exceptional — Boss Daddy Approved'],
+            [8.5,  'Excellent'],
+            [8.0,  'Great'],
+            [7.5,  'Very Good'],
+            [7.0,  'Good'],
+            [6.5,  'Above Average'],
+            [6.0,  'Average'],
+            [5.5,  'Below Average'],
+            [5.0,  'Mediocre'],
+            [4.5,  'Poor'],
+            [4.0,  'Bad'],
+            [3.5,  'Very Bad'],
+            [3.0,  'Terrible'],
+            [2.5,  'Awful'],
+            [2.0,  'Dreadful'],
+            [1.5,  'Garbage'],
+            [1.0,  'Avoid'],
+          ].map(([val, label]) => (
+            <option key={val} value={val}>{val.toFixed(1)} / 10 — {label}</option>
           ))}
         </select>
       </div>

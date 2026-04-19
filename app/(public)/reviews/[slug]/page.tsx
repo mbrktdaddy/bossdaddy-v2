@@ -7,6 +7,7 @@ import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
 import ShareButtons from '@/components/ShareButtons'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
+import RatingScore from '@/components/RatingScore'
 import ViewTracker from '@/components/ViewTracker'
 import LikeButton from '@/components/LikeButton'
 import CommentForm from '@/components/CommentForm'
@@ -42,18 +43,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <div className="flex items-center gap-1">
-      {[1, 2, 3, 4, 5].map((n) => (
-        <svg key={n} className={`w-5 h-5 ${n <= rating ? 'text-yellow-400' : 'text-gray-700'}`} fill="currentColor" viewBox="0 0 20 20">
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-      ))}
-      <span className="ml-2 text-sm font-semibold text-white">{rating}/5</span>
-    </div>
-  )
-}
 
 export default async function ReviewPage({ params }: Props) {
   const { slug } = await params
@@ -93,7 +82,7 @@ export default async function ReviewPage({ params }: Props) {
     '@type': 'Review',
     name: review.title,
     reviewBody: review.content.replace(/<[^>]+>/g, '').slice(0, 500),
-    reviewRating: { '@type': 'Rating', ratingValue: review.rating, bestRating: 5 },
+    reviewRating: { '@type': 'Rating', ratingValue: review.rating, bestRating: 10, worstRating: 1 },
     author: { '@type': 'Person', name: author },
     itemReviewed: { '@type': 'Product', name: review.product_name },
     datePublished: review.published_at,
@@ -138,8 +127,8 @@ export default async function ReviewPage({ params }: Props) {
 
           {/* Rating + meta */}
           <div className="flex flex-wrap items-center gap-5 pb-6 border-b border-gray-800">
-            <StarRating rating={review.rating} />
-            {review.rating === 5 && <BossApprovedBadge size="lg" />}
+            <RatingScore rating={review.rating} size="lg" />
+            {review.rating >= 9 && <BossApprovedBadge size="lg" />}
             <div className="flex items-center gap-4 text-sm text-gray-500">
               <span>by <Link href={`/author/${author}`} className="text-gray-300 hover:text-orange-400 transition-colors">@{author}</Link></span>
               {review.published_at && (
@@ -268,7 +257,7 @@ export default async function ReviewPage({ params }: Props) {
                     <p className="text-xs text-orange-500/80 font-medium uppercase tracking-wide mb-1">{r.product_name}</p>
                     <p className="text-sm font-semibold group-hover:text-orange-400 transition-colors truncate">{r.title}</p>
                   </div>
-                  <span className="text-sm text-yellow-400 font-bold ml-4 shrink-0">{'★'.repeat(r.rating)}</span>
+                  <RatingScore rating={r.rating} size="sm" />
                 </Link>
               ))}
             </div>
@@ -284,8 +273,8 @@ export default async function ReviewPage({ params }: Props) {
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
             <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Quick Verdict</p>
             <p className="font-black text-base mb-3">{review.product_name}</p>
-            <StarRating rating={review.rating} />
-            {review.rating === 5 && (
+            <RatingScore rating={review.rating} size="sm" />
+            {review.rating >= 9 && (
               <div className="mt-3">
                 <BossApprovedBadge size="sm" />
               </div>
