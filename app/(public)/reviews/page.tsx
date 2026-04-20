@@ -89,7 +89,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
                 )}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
-                {items.map(r => <ReviewCard key={r.id} review={r} />)}
+                {items.map((r, i) => <ReviewCard key={r.id} review={r} priority={i < 3} />)}
               </div>
             </section>
           ))

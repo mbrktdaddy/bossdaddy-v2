@@ -5,7 +5,7 @@ import BossApprovedBadge from '@/components/BossApprovedBadge'
 import RatingScore from '@/components/RatingScore'
 import type { ReviewRow } from '../actions'
 
-export default function ReviewCard({ review: r }: { review: ReviewRow }) {
+export default function ReviewCard({ review: r, priority = false }: { review: ReviewRow; priority?: boolean }) {
   return (
     <Link
       href={`/reviews/${r.slug}`}
@@ -17,6 +17,7 @@ export default function ReviewCard({ review: r }: { review: ReviewRow }) {
             src={r.image_url}
             alt={r.product_name}
             fill
+            priority={priority}
             className="object-cover group-hover:scale-105 transition-transform duration-300"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
