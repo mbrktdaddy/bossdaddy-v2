@@ -139,10 +139,11 @@ export default function HowWeTestPage() {
 
         <h2>The Rating System</h2>
         <p>
-          We rate on a <strong>1 to 5 scale</strong>, in half-point increments. Simple on
-          purpose. A 5 is rare — reserved for gear that genuinely earned it across every
-          dimension. A 3 is honest: it works, it&apos;s fine, it might not be the one we&apos;d buy
-          again. Anything below a 3 is a product we&apos;re telling you to think twice about.
+          We rate on a <strong>1 to 10 scale</strong>, in half-point increments. Simple on
+          purpose. A 10 is rare — reserved for gear that genuinely earned it across every
+          dimension. An 8 or above earns the Boss Daddy Approved designation. A 5 is honest:
+          it works, it&apos;s fine, it might not be the one we&apos;d buy again. Anything below a 5
+          is a product we&apos;re telling you to think twice about.
         </p>
         <p>Every rating weighs five things:</p>
         <ul>
