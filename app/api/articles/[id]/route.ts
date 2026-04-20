@@ -90,6 +90,7 @@ export async function PUT(
 
     revalidatePath('/')
     revalidatePath('/articles')
+    revalidatePath('/about')
     if (data?.slug) revalidatePath(`/articles/${data.slug}`)
 
     // Send email notification to author (non-blocking)

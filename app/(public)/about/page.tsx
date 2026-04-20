@@ -1,21 +1,30 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CATEGORIES } from '@/lib/categories'
+import { createClient } from '@/lib/supabase/server'
+
+export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'About — Boss Daddy Life',
   description: 'The real story behind Boss Daddy Life. A first-time dad on a mission to be the best version of himself — and help other dads do the same.',
 }
 
+export default async function AboutPage() {
+  const supabase = await createClient()
 
-const STATS = [
-  { value: '20+', label: 'Products reviewed' },
-  { value: '15+', label: 'Articles written' },
-  { value: '100%', label: 'Firsthand tested' },
-  { value: '$0', label: 'Paid placements' },
-]
+  const [{ count: reviewCount }, { count: articleCount }] = await Promise.all([
+    supabase.from('reviews').select('*', { count: 'exact', head: true }).eq('status', 'approved').eq('is_visible', true),
+    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'approved').eq('is_visible', true),
+  ])
 
-export default function AboutPage() {
+  const STATS = [
+    { value: String(reviewCount ?? 0), label: 'Products reviewed' },
+    { value: String(articleCount ?? 0), label: 'Articles written' },
+    { value: '100%', label: 'Firsthand tested' },
+    { value: '$0', label: 'Paid placements' },
+  ]
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-16">
 
