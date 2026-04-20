@@ -32,7 +32,7 @@ export default function ArticleCard({ article: a, priority = false }: { article:
       )}
       <div className="p-5 flex flex-col flex-1">
         {cat && (
-          <span className={`text-xs font-medium mb-3 ${cat.accent}`}>
+          <span className="text-xs font-medium text-orange-500 uppercase tracking-widest mb-3">
             {cat.icon} {cat.label}
           </span>
         )}

@@ -82,7 +82,7 @@ export default async function ArticlesPage({ searchParams }: Props) {
                 {total > items.length && (
                   <Link
                     href={`/articles?category=${cat.slug}`}
-                    className="text-sm text-orange-500 hover:text-orange-400 font-medium shrink-0 ml-6 py-2 transition-colors"
+                    className="text-sm text-orange-400 hover:text-orange-300 font-medium shrink-0 ml-6 py-2 transition-colors"
                   >
                     View all {total} →
                   </Link>
@@ -136,7 +136,7 @@ export default async function ArticlesPage({ searchParams }: Props) {
           <Link
             key={c.slug}
             href={`/articles?category=${c.slug}`}
-            className={`shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
+            className={`shrink-0 whitespace-nowrap px-4 py-3 rounded-full text-sm font-medium transition-colors ${
               category === c.slug
                 ? 'bg-orange-600 text-white'
                 : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'

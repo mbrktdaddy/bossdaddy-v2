@@ -50,7 +50,7 @@ export default async function ShopPage({ searchParams }: Props) {
         <h1 className="text-3xl font-black mb-2">
           {cat ? `${cat.icon} ${cat.label} Gear` : 'The Boss Daddy Gear List'}
         </h1>
-        <p className="text-gray-500">
+        <p className="text-gray-500 text-sm">
           {topPicks.length} picks rated 8.0 or higher — sorted by rating
         </p>
       </div>

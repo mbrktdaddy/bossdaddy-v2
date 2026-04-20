@@ -208,7 +208,7 @@ export default async function ReviewPage({ params }: Props) {
         <div className="mt-12 pt-8 border-t border-gray-800">
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 text-center">
             <p className="text-sm text-gray-400 mb-1">Want more dad-tested picks?</p>
-            <p className="font-bold text-lg mb-4">Join the Boss Daddy crew.</p>
+            <p className="font-black text-lg mb-4">Join the Boss Daddy crew.</p>
             <form action="/api/newsletter/subscribe" method="POST" className="flex flex-col sm:flex-row gap-3 max-w-sm mx-auto">
               <input
                 type="email"

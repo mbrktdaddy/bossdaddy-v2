@@ -36,7 +36,7 @@ export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
       onMouseEnter={() => { paused.current = true }}
       onMouseLeave={() => { paused.current = false }}
     >
-      <p className="text-xs text-orange-500 uppercase tracking-widest mb-3">Top Picks</p>
+      <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">Top Picks</p>
       <Link
         href={`/reviews/${r.slug}`}
         className="group block bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-orange-700/60 transition-all duration-200"

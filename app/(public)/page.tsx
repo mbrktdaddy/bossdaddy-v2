@@ -252,7 +252,10 @@ export default async function HomePage() {
                   </div>
                 )}
                 <div className="p-5 flex flex-col flex-1">
-                  <h3 className="font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
+                  <span className="text-xs font-medium text-orange-500 uppercase tracking-widest mb-3">
+                    {a.category}
+                  </span>
+                  <h3 className="text-base font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
                     {a.title}
                   </h3>
                   {a.excerpt && (

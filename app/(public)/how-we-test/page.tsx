@@ -53,16 +53,16 @@ const PILLAR_TESTING = [
 
 export default function HowWeTestPage() {
   return (
-    <div className="max-w-4xl mx-auto px-6 py-16">
+    <div className="max-w-3xl mx-auto px-6 py-16">
 
-      <h1 className="text-4xl font-black mb-3 text-white">How We Test</h1>
-      <p className="text-gray-500 text-lg mb-12">
+      <h1 className="text-3xl font-black mb-2 text-white">How We Test</h1>
+      <p className="text-gray-500 text-sm mb-10">
         Real products. Real testing. Real dads. No lab coats, no paid placements, no shortcuts.
       </p>
 
       <div className="prose prose-invert prose-orange max-w-none
         prose-p:text-gray-400 prose-p:leading-relaxed
-        prose-h2:font-black prose-h2:text-white prose-h2:text-2xl
+        prose-h2:font-black prose-h2:text-white prose-h2:text-xl prose-h2:mt-10
         prose-h3:font-bold prose-h3:text-gray-200 prose-h3:text-lg prose-h3:mt-8
         prose-a:text-orange-400 prose-a:no-underline hover:prose-a:text-orange-300
         prose-strong:text-white
@@ -121,7 +121,7 @@ export default function HowWeTestPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 not-prose mb-12">
         {PILLAR_TESTING.map(({ icon, title, description }) => (
-          <div key={title} className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+          <div key={title} className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
             <div className="text-2xl mb-3">{icon}</div>
             <h3 className="font-bold text-orange-500 text-base mb-2">{title}</h3>
             <p className="text-gray-500 text-sm leading-relaxed">{description}</p>
@@ -131,7 +131,7 @@ export default function HowWeTestPage() {
 
       <div className="prose prose-invert prose-orange max-w-none
         prose-p:text-gray-400 prose-p:leading-relaxed
-        prose-h2:font-black prose-h2:text-white prose-h2:text-2xl
+        prose-h2:font-black prose-h2:text-white prose-h2:text-xl prose-h2:mt-10
         prose-h3:font-bold prose-h3:text-gray-200 prose-h3:text-lg prose-h3:mt-8
         prose-a:text-orange-400 prose-a:no-underline hover:prose-a:text-orange-300
         prose-strong:text-white
@@ -189,7 +189,7 @@ export default function HowWeTestPage() {
 
       <div className="prose prose-invert prose-orange max-w-none
         prose-p:text-gray-400 prose-p:leading-relaxed
-        prose-h2:font-black prose-h2:text-white prose-h2:text-2xl
+        prose-h2:font-black prose-h2:text-white prose-h2:text-xl prose-h2:mt-10
         prose-h3:font-bold prose-h3:text-gray-200 prose-h3:text-lg prose-h3:mt-8
         prose-a:text-orange-400 prose-a:no-underline hover:prose-a:text-orange-300
         prose-strong:text-white
@@ -239,13 +239,13 @@ export default function HowWeTestPage() {
       </div>
 
       <div className="mt-10 pt-8 border-t border-gray-800 flex items-center gap-6 flex-wrap text-sm">
-        <Link href="/editorial-standards" className="text-gray-500 hover:text-gray-400 transition-colors">
+        <Link href="/editorial-standards" className="py-2 inline-block text-gray-500 hover:text-gray-400 transition-colors">
           Editorial Standards
         </Link>
-        <Link href="/affiliate-disclosure" className="text-gray-500 hover:text-gray-400 transition-colors">
+        <Link href="/affiliate-disclosure" className="py-2 inline-block text-gray-500 hover:text-gray-400 transition-colors">
           Affiliate Disclosure
         </Link>
-        <Link href="/about" className="text-gray-500 hover:text-gray-400 transition-colors">
+        <Link href="/about" className="py-2 inline-block text-gray-500 hover:text-gray-400 transition-colors">
           About
         </Link>
       </div>
