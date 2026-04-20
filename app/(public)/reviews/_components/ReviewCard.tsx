@@ -20,7 +20,7 @@ export default function ReviewCard({ review: r }: { review: ReviewRow }) {
             className="object-cover group-hover:scale-105 transition-transform duration-300"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
-          {r.rating >= 9 && (
+          {r.rating >= 8 && (
             <div className="absolute top-3 right-3">
               <BossApprovedBadge size="sm" variant="card" />
             </div>

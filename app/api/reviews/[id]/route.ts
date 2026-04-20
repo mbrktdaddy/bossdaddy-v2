@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sanitizeHtml } from '@/lib/sanitize'
@@ -94,6 +95,10 @@ export async function PUT(
 
     const { data, error } = await admin.from('reviews').update(updateData).eq('id', id).select('*, author_id').single()
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    revalidatePath('/')
+    revalidatePath('/reviews')
+    if (data?.slug) revalidatePath(`/reviews/${data.slug}`)
 
     // Send email notification to author (non-blocking)
     const notifyActions = ['approve', 'reject', 'request_edits'] as const

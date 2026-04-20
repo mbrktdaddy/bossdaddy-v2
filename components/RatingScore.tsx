@@ -4,7 +4,7 @@ interface Props {
 }
 
 function scoreColor(r: number) {
-  if (r >= 9) return 'text-green-400'
+  if (r >= 8) return 'text-green-400'
   if (r >= 7) return 'text-orange-400'
   if (r >= 5) return 'text-yellow-500'
   return 'text-red-400'

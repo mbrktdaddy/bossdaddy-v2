@@ -50,7 +50,7 @@ export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
               className="object-cover group-hover:scale-105 transition-transform duration-300"
               sizes="(max-width: 768px) 100vw, 320px"
             />
-            {r.rating >= 9 && (
+            {r.rating >= 8 && (
               <div className="absolute top-3 right-3">
                 <BossApprovedBadge size="sm" variant="card" />
               </div>

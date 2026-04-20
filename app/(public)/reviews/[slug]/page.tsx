@@ -128,7 +128,7 @@ export default async function ReviewPage({ params }: Props) {
           {/* Rating + meta */}
           <div className="flex flex-wrap items-center gap-5 pb-6 border-b border-gray-800">
             <RatingScore rating={review.rating} size="lg" />
-            {review.rating >= 9 && <BossApprovedBadge size="lg" />}
+            {review.rating >= 8 && <BossApprovedBadge size="lg" />}
             <div className="flex items-center gap-4 text-sm text-gray-500">
               <span>by <Link href={`/author/${author}`} className="text-gray-300 hover:text-orange-400 transition-colors">@{author}</Link></span>
               {review.published_at && (
@@ -274,7 +274,7 @@ export default async function ReviewPage({ params }: Props) {
             <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Quick Verdict</p>
             <p className="font-black text-base mb-3">{review.product_name}</p>
             <RatingScore rating={review.rating} size="sm" />
-            {review.rating >= 9 && (
+            {review.rating >= 8 && (
               <div className="mt-3">
                 <BossApprovedBadge size="sm" />
               </div>

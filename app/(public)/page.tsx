@@ -15,36 +15,42 @@ export const metadata: Metadata = {
 }
 
 
-const STATS = [
-  { value: '20+', label: 'Products Tested' },
-  { value: '35+', label: 'Articles Written' },
+const STATIC_STATS = [
   { value: '100%', label: 'Self-Purchased' },
   { value: '0', label: 'Sponsored Posts' },
 ]
 
-
 export default async function HomePage() {
   const supabase = await createClient()
 
-  const { data: reviews, error: reviewsError } = await supabase
-    .from('reviews')
-    .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
-    .eq('status', 'approved')
-    .eq('is_visible', true)
-    .order('published_at', { ascending: false })
-    .limit(12)
+  const [
+    { data: reviews, count: reviewCount, error: reviewsError },
+    { data: articles, count: articleCount, error: articlesError },
+  ] = await Promise.all([
+    supabase
+      .from('reviews')
+      .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at', { count: 'exact' })
+      .eq('status', 'approved')
+      .eq('is_visible', true)
+      .order('published_at', { ascending: false })
+      .limit(12),
+    supabase
+      .from('articles')
+      .select('id, slug, title, category, excerpt, image_url, published_at, reading_time_minutes', { count: 'exact' })
+      .eq('status', 'approved')
+      .eq('is_visible', true)
+      .order('published_at', { ascending: false })
+      .limit(3),
+  ])
 
   if (reviewsError) console.error('Reviews query error:', reviewsError)
-
-  const { data: articles, error: articlesError } = await supabase
-    .from('articles')
-    .select('id, slug, title, category, excerpt, image_url, published_at, reading_time_minutes')
-    .eq('status', 'approved')
-    .eq('is_visible', true)
-    .order('published_at', { ascending: false })
-    .limit(3)
-
   if (articlesError) console.error('Articles query error:', articlesError)
+
+  const STATS = [
+    { value: String(reviewCount ?? 0), label: 'Products Tested' },
+    { value: String(articleCount ?? 0), label: 'Articles Written' },
+    ...STATIC_STATS,
+  ]
 
   return (
     <>
@@ -161,7 +167,7 @@ export default async function HomePage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {reviews.slice(0, 6).map((r) => (
+            {reviews.slice(0, 6).map((r, i) => (
               <Link
                 key={r.id}
                 href={`/reviews/${r.slug}`}
@@ -173,10 +179,11 @@ export default async function HomePage() {
                       src={r.image_url}
                       alt={r.product_name}
                       fill
+                      priority={i < 3}
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
-                    {r.rating >= 9 && (
+                    {r.rating >= 8 && (
                       <div className="absolute top-3 right-3">
                         <BossApprovedBadge size="sm" variant="card" />
                       </div>
@@ -222,7 +229,7 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {articles.map((a) => (
+            {articles.map((a, i) => (
               <Link
                 key={a.id}
                 href={`/articles/${a.slug}`}
@@ -234,6 +241,7 @@ export default async function HomePage() {
                       src={a.image_url}
                       alt={a.title}
                       fill
+                      priority={i === 0}
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                       sizes="(max-width: 768px) 100vw, 33vw"
                     />
