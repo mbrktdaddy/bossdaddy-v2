@@ -71,12 +71,12 @@ export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
       </Link>
 
       {/* Dot indicators */}
-      <div className="flex items-center justify-center gap-1.5 mt-3">
+      <div className="flex items-center justify-center gap-0 mt-3">
         {reviews.map((_, i) => (
           <button
             key={i}
             onClick={() => setCurrent(i)}
-            className="p-2 flex items-center justify-center"
+            className="p-3 flex items-center justify-center"
             aria-label={`Go to slide ${i + 1}`}
           >
             <span className={`rounded-full transition-all duration-200 block ${
