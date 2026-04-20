@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { CATEGORIES, getCategoryLabel } from '@/lib/categories'
+import { CATEGORIES, getCategoryLabel, getCategoryBySlug } from '@/lib/categories'
 import ReviewCard from './_components/ReviewCard'
 import ReviewsGrid from './_components/ReviewsGrid'
 const PER_PAGE = 12
@@ -99,6 +99,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
   }
 
   // ── Filtered view — flat grid + load more ─────────────────────────────
+  const cat = getCategoryBySlug(category)
   const { data, count } = await supabase
     .from('reviews')
     .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at', { count: 'exact' })
@@ -113,8 +114,13 @@ export default async function ReviewsPage({ searchParams }: Props) {
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
       <div className="mb-10">
-        <h1 className="text-3xl font-black mb-2">{getCategoryLabel(category)}</h1>
-        <p className="text-gray-500">
+        <h1 className="text-3xl font-black mb-2">
+          {cat?.icon} {getCategoryLabel(category)}
+        </h1>
+        {cat?.description && (
+          <p className="text-gray-400 mb-1">{cat.description}</p>
+        )}
+        <p className="text-gray-600 text-sm">
           {count ?? 0} dad-tested {(count ?? 0) === 1 ? 'review' : 'reviews'}
         </p>
       </div>

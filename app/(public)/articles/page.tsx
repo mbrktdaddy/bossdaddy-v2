@@ -117,7 +117,10 @@ export default async function ArticlesPage({ searchParams }: Props) {
         <h1 className="text-3xl font-black mb-2">
           {cat ? `${cat.icon} ${cat.label}` : 'Articles'}
         </h1>
-        <p className="text-gray-500">
+        {cat?.description && (
+          <p className="text-gray-400 mb-1">{cat.description}</p>
+        )}
+        <p className="text-gray-600 text-sm">
           {count ?? 0} {(count ?? 0) === 1 ? 'article' : 'articles'}{cat ? ` in ${cat.label}` : ''}
         </p>
       </div>

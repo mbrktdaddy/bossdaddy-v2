@@ -142,7 +142,7 @@ export default function AboutPage() {
             {CATEGORIES.map((cat) => (
               <Link
                 key={cat.slug}
-                href={`/category/${cat.slug}`}
+                href={`/reviews?category=${cat.slug}`}
                 className={`group shrink-0 w-28 flex flex-col items-center justify-center rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.color} hover:scale-[1.03] transition-transform duration-200 py-6 px-2`}
               >
                 <div className="text-4xl mb-3">{cat.icon}</div>
@@ -156,7 +156,7 @@ export default function AboutPage() {
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.slug}
-              href={`/category/${cat.slug}`}
+              href={`/reviews?category=${cat.slug}`}
               className={`group flex flex-col items-center justify-center rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.color} hover:scale-[1.03] transition-transform duration-200 py-6 px-2`}
             >
               <div className="text-4xl mb-3">{cat.icon}</div>
