@@ -1,12 +1,13 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { CATEGORIES, getCategoryBySlug } from '@/lib/categories'
-import Pagination from '@/components/Pagination'
+import ArticleCard from './_components/ArticleCard'
+import ArticlesGrid from './_components/ArticlesGrid'
+const PER_PAGE = 12
+import type { ArticleRow } from './actions'
 import type { Metadata } from 'next'
 
 export const revalidate = 3600
-
-const PER_PAGE = 12
 
 export const metadata: Metadata = {
   title: 'Articles — Boss Daddy Life',
@@ -14,54 +15,117 @@ export const metadata: Metadata = {
 }
 
 interface Props {
-  searchParams: Promise<{ category?: string; page?: string }>
+  searchParams: Promise<{ category?: string }>
 }
 
 export default async function ArticlesPage({ searchParams }: Props) {
-  const { category, page: pageParam } = await searchParams
-  const page = Math.max(1, parseInt(pageParam ?? '1', 10))
-  const from = (page - 1) * PER_PAGE
-  const to = from + PER_PAGE - 1
+  const { category } = await searchParams
   const supabase = await createClient()
 
-  let query = supabase
+  // ── All view — category sections ──────────────────────────────────────
+  if (!category) {
+    const { data } = await supabase
+      .from('articles')
+      .select('id, slug, title, category, excerpt, image_url, published_at, reading_time_minutes')
+      .eq('status', 'approved')
+      .eq('is_visible', true)
+      .order('published_at', { ascending: false })
+
+    const articles = (data ?? []) as ArticleRow[]
+
+    const sections = CATEGORIES
+      .map(cat => ({
+        cat,
+        items: articles.filter(a => a.category === cat.slug).slice(0, 3),
+        total: articles.filter(a => a.category === cat.slug).length,
+      }))
+      .filter(s => s.items.length > 0)
+
+    return (
+      <div className="max-w-6xl mx-auto px-6 py-12">
+        <div className="mb-10">
+          <h1 className="text-3xl font-black mb-2">Articles</h1>
+          <p className="text-gray-500">
+            {articles.length} {articles.length === 1 ? 'article' : 'articles'} — guides, tips, and dad wisdom
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide mb-12 pb-1">
+          <span className="shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-orange-600 text-white">
+            All
+          </span>
+          {CATEGORIES.map((c) => (
+            <Link
+              key={c.slug}
+              href={`/articles?category=${c.slug}`}
+              className="shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white transition-colors"
+            >
+              {c.icon} {c.label}
+            </Link>
+          ))}
+        </div>
+
+        {sections.length === 0 ? (
+          <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
+            <p className="text-gray-600 text-lg">No articles here yet.</p>
+            <p className="text-gray-700 text-sm mt-2">Check back soon, Boss.</p>
+          </div>
+        ) : (
+          sections.map(({ cat, items, total }, i) => (
+            <section key={cat.slug}>
+              {i > 0 && <div className="border-t border-gray-800 mb-12" />}
+              <div className="flex items-start justify-between mb-6">
+                <div className="border-l-2 border-orange-600 pl-4">
+                  <h2 className="text-xl font-black">{cat.icon} {cat.label}</h2>
+                  <p className="text-sm text-gray-500 mt-0.5">{cat.description}</p>
+                </div>
+                {total > items.length && (
+                  <Link
+                    href={`/articles?category=${cat.slug}`}
+                    className="text-sm text-orange-500 hover:text-orange-400 font-medium shrink-0 ml-6 mt-1 transition-colors"
+                  >
+                    View all {total} →
+                  </Link>
+                )}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
+                {items.map(a => <ArticleCard key={a.id} article={a} />)}
+              </div>
+            </section>
+          ))
+        )}
+      </div>
+    )
+  }
+
+  // ── Filtered view — flat grid + load more ─────────────────────────────
+  const cat = getCategoryBySlug(category)
+  const { data, count } = await supabase
     .from('articles')
     .select('id, slug, title, category, excerpt, image_url, published_at, reading_time_minutes', { count: 'exact' })
     .eq('status', 'approved')
     .eq('is_visible', true)
+    .eq('category', category)
     .order('published_at', { ascending: false })
-    .range(from, to)
+    .range(0, PER_PAGE - 1)
 
-  if (category) {
-    query = query.eq('category', category)
-  }
-
-  const { data: articles, count } = await query
-  const cat = category ? getCategoryBySlug(category) : null
+  const articles = (data ?? []) as ArticleRow[]
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
-
-      {/* Page title */}
       <div className="mb-10">
         <h1 className="text-3xl font-black mb-2">
           {cat ? `${cat.icon} ${cat.label}` : 'Articles'}
         </h1>
         <p className="text-gray-500">
-          {articles?.length ?? 0} {articles?.length === 1 ? 'article' : 'articles'}
-          {cat ? ` in ${cat.label}` : ' — guides, tips, and dad wisdom'}
+          {count ?? 0} {(count ?? 0) === 1 ? 'article' : 'articles'}{cat ? ` in ${cat.label}` : ''}
         </p>
       </div>
 
-      {/* Category filter tabs */}
       <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide mb-10 pb-1">
         <Link
           href="/articles"
-          className={`shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
-            !category
-              ? 'bg-orange-600 text-white'
-              : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'
-          }`}
+          className="shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white transition-colors"
         >
           All
         </Link>
@@ -80,78 +144,14 @@ export default async function ArticlesPage({ searchParams }: Props) {
         ))}
       </div>
 
-      {/* Articles grid */}
-      {!articles?.length ? (
+      {!articles.length ? (
         <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
           <p className="text-gray-600 text-lg">No articles here yet.</p>
           <p className="text-gray-700 text-sm mt-2">Check back soon, Boss.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {articles.map((a) => {
-            const articleCat = getCategoryBySlug(a.category)
-            return (
-              <Link
-                key={a.id}
-                href={`/articles/${a.slug}`}
-                className="group flex flex-col bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-orange-700/60 transition-all duration-200"
-              >
-                {a.image_url ? (
-                  <div className="relative w-full h-40 bg-gray-800 shrink-0 overflow-hidden">
-                    <img
-                      src={a.image_url}
-                      alt={a.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                ) : (
-                  <div className={`w-full h-40 shrink-0 bg-gradient-to-br ${
-                    getCategoryBySlug(a.category ?? '')?.color ?? 'from-gray-800 to-gray-900'
-                  } flex items-center justify-center`}>
-                    <span className="text-4xl opacity-40">
-                      {getCategoryBySlug(a.category ?? '')?.icon ?? '📄'}
-                    </span>
-                  </div>
-                )}
-                <div className="p-5 flex flex-col flex-1">
-                  {articleCat && (
-                    <span className={`text-xs font-medium mb-3 ${articleCat.accent}`}>
-                      {articleCat.icon} {articleCat.label}
-                    </span>
-                  )}
-                  <h2 className="text-base font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
-                    {a.title}
-                  </h2>
-                  {a.excerpt && (
-                    <p className="text-gray-500 text-sm mt-2 line-clamp-2">{a.excerpt}</p>
-                  )}
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-800">
-                    <span className="text-xs text-gray-600">
-                      {a.published_at
-                        ? new Date(a.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                        : ''}
-                    </span>
-                    <div className="flex items-center gap-3">
-                      {a.reading_time_minutes && (
-                        <span className="text-xs text-gray-600">{a.reading_time_minutes} min read</span>
-                      )}
-                      <span className="text-xs text-orange-500 font-medium">Read →</span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            )
-          })}
-        </div>
+        <ArticlesGrid initialItems={articles} total={count ?? 0} category={category} />
       )}
-
-      <Pagination
-        page={page}
-        total={count ?? 0}
-        perPage={PER_PAGE}
-        basePath="/articles"
-        params={category ? { category } : {}}
-      />
     </div>
   )
 }

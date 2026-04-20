@@ -38,7 +38,7 @@ export default async function HomePage() {
 
   const { data: articles, error: articlesError } = await supabase
     .from('articles')
-    .select('id, slug, title, category, excerpt, published_at')
+    .select('id, slug, title, category, excerpt, image_url, published_at, reading_time_minutes')
     .eq('status', 'approved')
     .eq('is_visible', true)
     .order('published_at', { ascending: false })
@@ -77,8 +77,8 @@ export default async function HomePage() {
                 <Link href="/reviews" className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors">
                   Browse Reviews
                 </Link>
-                <Link href="#crew" className="px-6 py-3 text-gray-300 hover:text-white font-medium transition-colors">
-                  Join the Crew →
+                <Link href="/articles" className="px-6 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white font-semibold rounded-xl transition-colors">
+                  Read the Blog →
                 </Link>
               </div>
             </div>
@@ -209,6 +209,65 @@ export default async function HomePage() {
         )}
       </section>
 
+      {/* ── Latest Articles ───────────────────────────────────────────────── */}
+      {articles && articles.length > 0 && (
+        <section className="max-w-6xl mx-auto px-6 py-16 border-b border-gray-800/60">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-black text-white">From the Blog</h2>
+              <p className="text-gray-500 text-sm mt-1">Guides, skills, and dad wisdom</p>
+            </div>
+            <Link href="/articles" className="text-sm text-orange-400 hover:text-orange-300 transition-colors">
+              View all →
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {articles.map((a) => (
+              <Link
+                key={a.id}
+                href={`/articles/${a.slug}`}
+                className="group flex flex-col bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-orange-700/60 transition-all duration-200"
+              >
+                {a.image_url ? (
+                  <div className="relative w-full h-44 bg-gray-800 shrink-0 overflow-hidden">
+                    <Image
+                      src={a.image_url}
+                      alt={a.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full h-44 shrink-0 bg-gradient-to-br from-gray-800/50 to-gray-900/40 flex items-center justify-center">
+                    <span className="text-4xl opacity-40">📝</span>
+                  </div>
+                )}
+                <div className="p-5 flex flex-col flex-1">
+                  <h3 className="font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
+                    {a.title}
+                  </h3>
+                  {a.excerpt && (
+                    <p className="text-gray-500 text-sm mt-2 line-clamp-2">{a.excerpt}</p>
+                  )}
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-800">
+                    <span className="text-xs text-gray-600">
+                      {a.published_at ? new Date(a.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
+                    </span>
+                    <div className="flex items-center gap-3">
+                      {a.reading_time_minutes && (
+                        <span className="text-xs text-gray-600">{a.reading_time_minutes} min read</span>
+                      )}
+                      <span className="text-xs text-orange-500 font-medium">Read →</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* ── Shop Teaser ───────────────────────────────────────────────────── */}
       <section className="max-w-6xl mx-auto px-6 py-16 border-b border-gray-800/60">
         <div className="bg-gray-900 border border-gray-800 rounded-3xl overflow-hidden px-8 py-10">
@@ -251,37 +310,6 @@ export default async function HomePage() {
 
         </div>
       </section>
-
-      {/* ── Latest Articles ───────────────────────────────────────────────── */}
-      {articles && articles.length > 0 && (
-        <section className="max-w-6xl mx-auto px-6 py-16 border-b border-gray-800/60">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-black text-white">From the Blog</h2>
-              <p className="text-gray-500 text-sm mt-1">Guides, skills, and dad wisdom</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {articles.map((a) => (
-              <Link
-                key={a.id}
-                href={`/articles/${a.slug}`}
-                className="group flex flex-col bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-gray-700 transition-all"
-              >
-                <h3 className="font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
-                  {a.title}
-                </h3>
-                {a.excerpt && (
-                  <p className="text-gray-500 text-sm mt-2 line-clamp-2">{a.excerpt}</p>
-                )}
-                <p className="text-xs text-gray-600 mt-4">
-                  {a.published_at ? new Date(a.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
-                </p>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
 
       {/* ── Join the Crew / Newsletter ────────────────────────────────────── */}
       <section id="crew" className="max-w-6xl mx-auto px-6 py-16 border-b border-gray-800/60">

@@ -1,158 +1,154 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
-import { CATEGORIES, getCategoryLabel, getCategoryBySlug } from '@/lib/categories'
-import Pagination from '@/components/Pagination'
-import BossApprovedBadge from '@/components/BossApprovedBadge'
-import RatingScore from '@/components/RatingScore'
+import { CATEGORIES, getCategoryLabel } from '@/lib/categories'
+import ReviewCard from './_components/ReviewCard'
+import ReviewsGrid from './_components/ReviewsGrid'
+const PER_PAGE = 12
+import type { ReviewRow } from './actions'
 import type { Metadata } from 'next'
 
 export const revalidate = 3600
-
-const PER_PAGE = 12
 
 export const metadata: Metadata = {
   title: 'All Reviews',
   description: 'Browse all dad-tested, honestly-rated product reviews from Boss Daddy Life.',
 }
 
-
 interface Props {
-  searchParams: Promise<{ category?: string; page?: string }>
+  searchParams: Promise<{ category?: string }>
 }
 
 export default async function ReviewsPage({ searchParams }: Props) {
-  const { category, page: pageParam } = await searchParams
-  const page = Math.max(1, parseInt(pageParam ?? '1', 10))
-  const from = (page - 1) * PER_PAGE
-  const to = from + PER_PAGE - 1
+  const { category } = await searchParams
   const supabase = await createClient()
 
-  let query = supabase
-    .from('reviews')
-    .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at', { count: 'exact' })
-    .eq('status', 'approved')
-    .eq('is_visible', true)
-    .order('published_at', { ascending: false })
-    .range(from, to)
+  // ── All view — category sections ──────────────────────────────────────
+  if (!category) {
+    const { data } = await supabase
+      .from('reviews')
+      .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
+      .eq('status', 'approved')
+      .eq('is_visible', true)
+      .order('published_at', { ascending: false })
 
-  if (category) {
-    query = query.eq('category', category)
-  }
+    const reviews = (data ?? []) as ReviewRow[]
 
-  const { data: reviews, count } = await query
+    const sections = CATEGORIES
+      .map(cat => ({
+        cat,
+        items: reviews.filter(r => r.category === cat.slug).slice(0, 3),
+        total: reviews.filter(r => r.category === cat.slug).length,
+      }))
+      .filter(s => s.items.length > 0)
 
-  return (
-    <div className="max-w-6xl mx-auto px-6 py-12">
-
-        {/* Page title */}
+    return (
+      <div className="max-w-6xl mx-auto px-6 py-12">
         <div className="mb-10">
-          <h1 className="text-3xl font-black mb-2">
-            {category ? getCategoryLabel(category) : 'All Reviews'}
-          </h1>
+          <h1 className="text-3xl font-black mb-2">All Reviews</h1>
           <p className="text-gray-500">
-            {reviews?.length ?? 0} dad-tested {reviews?.length === 1 ? 'review' : 'reviews'}
-            {category ? ` in ${getCategoryLabel(category)}` : ''}
+            {reviews.length} dad-tested {reviews.length === 1 ? 'review' : 'reviews'} across {sections.length} {sections.length === 1 ? 'category' : 'categories'}
           </p>
         </div>
 
-        {/* Category filter tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide mb-10 pb-1">
-          <Link
-            href="/reviews"
-            className={`shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
-              !category
-                ? 'bg-orange-600 text-white'
-                : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'
-            }`}
-          >
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide mb-12 pb-1">
+          <span className="shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-orange-600 text-white">
             All
-          </Link>
+          </span>
           {CATEGORIES.map((c) => (
             <Link
               key={c.slug}
               href={`/reviews?category=${c.slug}`}
-              className={`shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
-                category === c.slug
-                  ? 'bg-orange-600 text-white'
-                  : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'
-              }`}
+              className="shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white transition-colors"
             >
               {c.icon} {c.label}
             </Link>
           ))}
         </div>
 
-        {/* Reviews grid */}
-        {!reviews?.length ? (
+        {sections.length === 0 ? (
           <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
             <p className="text-gray-600 text-lg">No reviews here yet.</p>
             <p className="text-gray-700 text-sm mt-2">Check back soon, Boss.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {reviews.map((r) => (
-              <Link
-                key={r.id}
-                href={`/reviews/${r.slug}`}
-                className="group flex flex-col bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-orange-700/60 transition-all duration-200"
-              >
-                {r.image_url ? (
-                  <div className="relative w-full h-44 bg-gray-800 shrink-0">
-                    <Image
-                      src={r.image_url}
-                      alt={r.product_name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
-                    {r.rating >= 9 && (
-                      <div className="absolute top-3 right-3">
-                        <BossApprovedBadge size="sm" variant="card" />
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className={`w-full h-44 shrink-0 bg-gradient-to-br ${
-                    getCategoryBySlug(r.category ?? '')?.color ?? 'from-gray-800 to-gray-900'
-                  } flex items-center justify-center`}>
-                    <span className="text-4xl opacity-40">
-                      {getCategoryBySlug(r.category ?? '')?.icon ?? '📦'}
-                    </span>
-                  </div>
-                )}
-                <div className="p-5 flex flex-col flex-1">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
-                      {r.product_name}
-                    </span>
-                    <RatingScore rating={r.rating} />
-                  </div>
-                  <h2 className="text-base font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
-                    {r.title}
-                  </h2>
-                  {r.excerpt && (
-                    <p className="text-gray-500 text-sm mt-2 line-clamp-2">{r.excerpt}</p>
-                  )}
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-800">
-                    <span className="text-xs text-gray-600">
-                      {r.published_at ? new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
-                    </span>
-                    <span className="text-xs text-orange-500 font-medium">Read review →</span>
-                  </div>
+          sections.map(({ cat, items, total }, i) => (
+            <section key={cat.slug}>
+              {i > 0 && <div className="border-t border-gray-800 mb-12" />}
+              <div className="flex items-start justify-between mb-6">
+                <div className="border-l-2 border-orange-600 pl-4">
+                  <h2 className="text-xl font-black">{cat.icon} {cat.label}</h2>
+                  <p className="text-sm text-gray-500 mt-0.5">{cat.description}</p>
                 </div>
-              </Link>
-            ))}
-          </div>
+                {total > items.length && (
+                  <Link
+                    href={`/reviews?category=${cat.slug}`}
+                    className="text-sm text-orange-500 hover:text-orange-400 font-medium shrink-0 ml-6 mt-1 transition-colors"
+                  >
+                    View all {total} →
+                  </Link>
+                )}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
+                {items.map(r => <ReviewCard key={r.id} review={r} />)}
+              </div>
+            </section>
+          ))
         )}
+      </div>
+    )
+  }
 
-      <Pagination
-        page={page}
-        total={count ?? 0}
-        perPage={PER_PAGE}
-        basePath="/reviews"
-        params={category ? { category } : {}}
-      />
+  // ── Filtered view — flat grid + load more ─────────────────────────────
+  const { data, count } = await supabase
+    .from('reviews')
+    .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at', { count: 'exact' })
+    .eq('status', 'approved')
+    .eq('is_visible', true)
+    .eq('category', category)
+    .order('published_at', { ascending: false })
+    .range(0, PER_PAGE - 1)
+
+  const reviews = (data ?? []) as ReviewRow[]
+
+  return (
+    <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="mb-10">
+        <h1 className="text-3xl font-black mb-2">{getCategoryLabel(category)}</h1>
+        <p className="text-gray-500">
+          {count ?? 0} dad-tested {(count ?? 0) === 1 ? 'review' : 'reviews'}
+        </p>
+      </div>
+
+      <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide mb-10 pb-1">
+        <Link
+          href="/reviews"
+          className="shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white transition-colors"
+        >
+          All
+        </Link>
+        {CATEGORIES.map((c) => (
+          <Link
+            key={c.slug}
+            href={`/reviews?category=${c.slug}`}
+            className={`shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
+              category === c.slug
+                ? 'bg-orange-600 text-white'
+                : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'
+            }`}
+          >
+            {c.icon} {c.label}
+          </Link>
+        ))}
+      </div>
+
+      {!reviews.length ? (
+        <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
+          <p className="text-gray-600 text-lg">No reviews here yet.</p>
+          <p className="text-gray-700 text-sm mt-2">Check back soon, Boss.</p>
+        </div>
+      ) : (
+        <ReviewsGrid initialItems={reviews} total={count ?? 0} category={category} />
+      )}
     </div>
   )
 }

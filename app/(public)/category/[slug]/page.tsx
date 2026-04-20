@@ -2,7 +2,8 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getCategoryBySlug } from '@/lib/categories'
-import RatingScore from '@/components/RatingScore'
+import ReviewCard from '@/app/(public)/reviews/_components/ReviewCard'
+import type { ReviewRow } from '@/app/(public)/reviews/actions'
 import type { Metadata } from 'next'
 
 export const revalidate = 3600
@@ -28,13 +29,15 @@ export default async function CategoryPage({ params }: Props) {
   if (!cat) notFound()
 
   const supabase = await createClient()
-  const { data: reviews } = await supabase
+  const { data } = await supabase
     .from('reviews')
-    .select('id, slug, title, product_name, rating, excerpt, published_at')
+    .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
     .eq('status', 'approved')
     .eq('is_visible', true)
     .eq('category', slug)
     .order('published_at', { ascending: false })
+
+  const reviews = (data ?? []) as ReviewRow[]
 
   return (
     <>
@@ -45,7 +48,7 @@ export default async function CategoryPage({ params }: Props) {
           <h1 className={`text-4xl font-black mb-3 ${cat.accent}`}>{cat.label}</h1>
           <p className="text-gray-400 text-lg max-w-xl">{cat.description}</p>
           <p className="text-sm text-gray-600 mt-3">
-            {reviews?.length ?? 0} {reviews?.length === 1 ? 'review' : 'reviews'}
+            {reviews.length ?? 0} {reviews.length === 1 ? 'review' : 'reviews'}
           </p>
         </div>
       </div>
@@ -55,39 +58,14 @@ export default async function CategoryPage({ params }: Props) {
           <Link href="/reviews" className="text-sm text-gray-500 hover:text-white transition-colors">← All Reviews</Link>
         </div>
 
-        {!reviews?.length ? (
+        {!reviews.length ? (
           <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
             <p className="text-gray-600 text-lg">No {cat.label} reviews yet.</p>
             <p className="text-gray-700 text-sm mt-2">Gear is being tested. Check back soon.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {reviews.map((r) => (
-              <Link
-                key={r.id}
-                href={`/reviews/${r.slug}`}
-                className="group flex flex-col bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-orange-700/60 transition-all duration-200"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2.5 py-1 rounded-full">
-                    {r.product_name}
-                  </span>
-                  <RatingScore rating={r.rating} />
-                </div>
-                <h2 className="text-base font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
-                  {r.title}
-                </h2>
-                {r.excerpt && (
-                  <p className="text-gray-500 text-sm mt-2 line-clamp-2">{r.excerpt}</p>
-                )}
-                <div className="flex items-center justify-between mt-5 pt-4 border-t border-gray-800">
-                  <span className="text-xs text-gray-600">
-                    {r.published_at ? new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
-                  </span>
-                  <span className="text-xs text-orange-500 font-medium">Read review →</span>
-                </div>
-              </Link>
-            ))}
+            {reviews.map((r) => <ReviewCard key={r.id} review={r} />)}
           </div>
         )}
       </main>

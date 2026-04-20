@@ -60,6 +60,19 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
     .eq('status', 'pending')
     .order('created_at', { ascending: true }) : { data: null }
 
+  const reviewIds  = pendingComments?.filter(c => c.content_type === 'review').map(c => c.content_id)  ?? []
+  const articleIds = pendingComments?.filter(c => c.content_type === 'article').map(c => c.content_id) ?? []
+
+  const [{ data: reviewTitles }, { data: articleTitles }] = await Promise.all([
+    reviewIds.length  ? supabase.from('reviews').select('id, title, slug').in('id', reviewIds)   : Promise.resolve({ data: [] }),
+    articleIds.length ? supabase.from('articles').select('id, title, slug').in('id', articleIds) : Promise.resolve({ data: [] }),
+  ])
+
+  const contentMap = new Map<string, { title: string; slug: string; type: string }>([
+    ...(reviewTitles  ?? []).map(r => [r.id, { title: r.title, slug: r.slug, type: 'review' }]  as [string, { title: string; slug: string; type: string }]),
+    ...(articleTitles ?? []).map(a => [a.id, { title: a.title, slug: a.slug, type: 'article' }] as [string, { title: string; slug: string; type: string }]),
+  ])
+
   const highRisk    = queue?.filter(r => (r.moderation_score ?? 0) >= 0.7).length ?? 0
   const pending     = queue?.length ?? 0
   const commentCount = pendingComments?.length ?? 0
@@ -275,7 +288,9 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
             </div>
           ) : (
             pendingComments.map((c) => {
-              const author = (Array.isArray(c.profiles) ? c.profiles[0] : c.profiles as unknown as { username: string } | null)?.username ?? 'unknown'
+              const author  = (Array.isArray(c.profiles) ? c.profiles[0] : c.profiles as unknown as { username: string } | null)?.username ?? 'unknown'
+              const content = contentMap.get(c.content_id)
+              const href    = content ? `/${content.type}s/${content.slug}` : null
               return (
                 <div key={c.id} className="p-4 bg-gray-900 border border-gray-800 rounded-2xl">
                   <div className="flex items-start justify-between gap-4">
@@ -293,6 +308,16 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
                           {new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </span>
                       </div>
+                      {content && href && (
+                        <Link
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-gray-400 hover:text-orange-400 transition-colors truncate block mb-2"
+                        >
+                          ↗ {content.title}
+                        </Link>
+                      )}
                       <p className="text-sm text-gray-300 leading-relaxed line-clamp-3">{c.body}</p>
                     </div>
                     <CommentModerationActions id={c.id} />
