@@ -28,7 +28,7 @@ export default function ArticlesGrid({ initialItems, total, category }: Props) {
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {items.map(a => <ArticleCard key={a.id} article={a} />)}
+        {items.map((a, i) => <ArticleCard key={a.id} article={a} priority={i < 3} />)}
       </div>
       {hasMore && (
         <div className="mt-10 text-center">

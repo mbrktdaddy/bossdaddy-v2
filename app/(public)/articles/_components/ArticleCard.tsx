@@ -1,8 +1,9 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { getCategoryBySlug } from '@/lib/categories'
 import type { ArticleRow } from '../actions'
 
-export default function ArticleCard({ article: a }: { article: ArticleRow }) {
+export default function ArticleCard({ article: a, priority = false }: { article: ArticleRow; priority?: boolean }) {
   const cat = getCategoryBySlug(a.category)
   return (
     <Link
@@ -11,10 +12,13 @@ export default function ArticleCard({ article: a }: { article: ArticleRow }) {
     >
       {a.image_url ? (
         <div className="relative w-full h-40 bg-gray-800 shrink-0 overflow-hidden">
-          <img
+          <Image
             src={a.image_url}
             alt={a.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            fill
+            priority={priority}
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         </div>
       ) : (
