@@ -11,7 +11,7 @@ export default function ArticleCard({ article: a, priority = false }: { article:
       className="group flex flex-col bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-orange-700/60 transition-all duration-200"
     >
       {a.image_url ? (
-        <div className="relative w-full h-40 bg-gray-800 shrink-0 overflow-hidden">
+        <div className="relative w-full h-44 bg-gray-800 shrink-0 overflow-hidden">
           <Image
             src={a.image_url}
             alt={a.title}
@@ -22,7 +22,7 @@ export default function ArticleCard({ article: a, priority = false }: { article:
           />
         </div>
       ) : (
-        <div className={`w-full h-40 shrink-0 bg-gradient-to-br ${
+        <div className={`w-full h-44 shrink-0 bg-gradient-to-br ${
           getCategoryBySlug(a.category)?.color ?? 'from-gray-800 to-gray-900'
         } flex items-center justify-center`}>
           <span className="text-4xl opacity-40">

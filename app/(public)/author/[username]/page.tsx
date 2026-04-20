@@ -60,7 +60,7 @@ export default async function AuthorPage({ params }: Props) {
           {username[0].toUpperCase()}
         </div>
         <div>
-          <h1 className="text-2xl font-black mb-1">@{username}</h1>
+          <h1 className="text-3xl font-black mb-1">@{username}</h1>
           <p className="text-gray-500 text-sm">
             {profile.role === 'admin' ? 'Editor' : 'Contributor'} · Boss Daddy Life
           </p>
@@ -141,8 +141,8 @@ export default async function AuthorPage({ params }: Props) {
       )}
 
       {totalReviews === 0 && totalArticles === 0 && (
-        <div className="text-center py-16 border border-dashed border-gray-800 rounded-2xl">
-          <p className="text-gray-500">No published content yet.</p>
+        <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
+          <p className="text-gray-600">No published content yet.</p>
         </div>
       )}
 

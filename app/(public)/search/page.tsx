@@ -44,7 +44,7 @@ export default async function SearchPage({ searchParams }: Props) {
 
       {/* Search form */}
       <div className="mb-10">
-        <h1 className="text-2xl font-black mb-6">Search</h1>
+        <h1 className="text-3xl font-black mb-6">Search</h1>
         <form action="/search">
           <div className="flex gap-3">
             <div className="relative flex-1">
@@ -80,8 +80,8 @@ export default async function SearchPage({ searchParams }: Props) {
           </p>
 
           {total === 0 && (
-            <div className="text-center py-16 border border-dashed border-gray-800 rounded-2xl">
-              <p className="text-gray-500 mb-2">Nothing matched that search.</p>
+            <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
+              <p className="text-gray-600 mb-2">Nothing matched that search.</p>
               <p className="text-gray-700 text-sm">Try a product name, category, or topic.</p>
             </div>
           )}
@@ -151,8 +151,8 @@ export default async function SearchPage({ searchParams }: Props) {
       )}
 
       {query.length < 2 && !query && (
-        <div className="text-center py-16 border border-dashed border-gray-800 rounded-2xl">
-          <p className="text-gray-500">Type something above to search reviews and articles.</p>
+        <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
+          <p className="text-gray-600">Type something above to search reviews and articles.</p>
         </div>
       )}
     </div>

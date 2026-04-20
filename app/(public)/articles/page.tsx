@@ -88,7 +88,7 @@ export default async function ArticlesPage({ searchParams }: Props) {
                   </Link>
                 )}
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
                 {items.map((a, j) => <ArticleCard key={a.id} article={a} priority={i === 0 && j < 3} />)}
               </div>
             </section>

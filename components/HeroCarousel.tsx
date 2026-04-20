@@ -57,7 +57,7 @@ export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
             )}
           </div>
         )}
-        <div className="p-4">
+        <div className="p-5">
           <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest">
             {r.product_name}
           </span>

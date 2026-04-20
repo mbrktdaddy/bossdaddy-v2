@@ -190,7 +190,7 @@ export default async function AboutPage() {
           <Link href="/reviews" className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors">
             Browse Reviews
           </Link>
-          <Link href="/articles" className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-xl transition-colors">
+          <Link href="/articles" className="px-6 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 font-semibold rounded-xl transition-colors">
             Read Articles
           </Link>
         </div>

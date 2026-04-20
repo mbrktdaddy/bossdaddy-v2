@@ -219,7 +219,7 @@ export default async function ReviewPage({ params }: Props) {
               />
               <button
                 type="submit"
-                className="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors text-sm"
+                className="px-5 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors text-sm"
               >
                 Join
               </button>
