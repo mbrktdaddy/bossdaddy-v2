@@ -29,7 +29,8 @@ export default async function ProfilePage() {
     { count: reviewCount },
     { count: articleCount },
     { count: commentCount },
-    { count: pendingCount },
+    { count: draftCount },
+    { count: awaitingCount },
     { count: likesGiven },
     { data: myReviewIds },
     { data: myArticleIds },
@@ -44,7 +45,9 @@ export default async function ProfilePage() {
     supabase.from('comments').select('id', { count: 'exact', head: true })
       .eq('author_id', user!.id),
     supabase.from('reviews').select('id', { count: 'exact', head: true })
-      .eq('author_id', user!.id).in('status', ['draft', 'pending']),
+      .eq('author_id', user!.id).eq('status', 'draft'),
+    supabase.from('reviews').select('id', { count: 'exact', head: true })
+      .eq('author_id', user!.id).eq('status', 'pending'),
     supabase.from('likes').select('id', { count: 'exact', head: true })
       .eq('user_id', user!.id),
     supabase.from('reviews').select('id').eq('author_id', user!.id),
@@ -181,11 +184,26 @@ export default async function ProfilePage() {
               <p className="text-xs text-gray-500 mt-1">Content Likes</p>
             </div>
           )}
-          {isAuthor && (pendingCount ?? 0) > 0 && (
-            <div className="col-span-2 sm:col-span-3 pt-4 border-t border-gray-800 text-center">
-              <p className="text-sm text-yellow-400 font-semibold">
-                {pendingCount} item{pendingCount !== 1 ? 's' : ''} in draft / awaiting approval
-              </p>
+          {isAuthor && ((draftCount ?? 0) > 0 || (awaitingCount ?? 0) > 0) && (
+            <div className="col-span-2 sm:col-span-3 pt-4 border-t border-gray-800 flex items-center justify-center gap-3 flex-wrap">
+              {(draftCount ?? 0) > 0 && (
+                <Link
+                  href="/dashboard/reviews"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 border border-gray-700 hover:border-gray-500 rounded-lg text-xs font-medium text-gray-300 hover:text-white transition-colors"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 shrink-0" />
+                  {draftCount} Draft{draftCount !== 1 ? 's' : ''} →
+                </Link>
+              )}
+              {(awaitingCount ?? 0) > 0 && (
+                <Link
+                  href="/dashboard/reviews"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-950/50 border border-yellow-900/60 hover:border-yellow-700 rounded-lg text-xs font-medium text-yellow-400 hover:text-yellow-300 transition-colors"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 shrink-0" />
+                  {awaitingCount} Pending Approval →
+                </Link>
+              )}
             </div>
           )}
         </div>
