@@ -16,7 +16,7 @@ export default async function MyArticlesPage() {
 
   const { data: articles } = await supabase
     .from('articles')
-    .select('id, title, category, status, slug, created_at, updated_at, reading_time_minutes')
+    .select('id, title, category, status, slug, created_at, updated_at, reading_time_minutes, rejection_reason')
     .eq('author_id', user!.id)
     .order('updated_at', { ascending: false })
 
@@ -102,6 +102,11 @@ export default async function MyArticlesPage() {
                         {new Date(a.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </span>
                     </div>
+                    {a.rejection_reason && (
+                      <p className="text-xs text-yellow-400/80 mt-1.5 max-w-lg">
+                        ↩ Edits requested: {a.rejection_reason}
+                      </p>
+                    )}
                   </div>
                 </div>
 

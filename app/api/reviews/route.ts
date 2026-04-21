@@ -18,6 +18,7 @@ const CreateReviewSchema = z.object({
   pros: z.array(z.string()).default([]),
   cons: z.array(z.string()).default([]),
   disclosure_acknowledged: z.boolean(),
+  image_url: z.string().url().optional().nullable(),
 })
 
 export async function POST(request: NextRequest) {
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { title, product_name, category, excerpt, content, rating, pros, cons, disclosure_acknowledged } = parsed.data
+  const { title, product_name, category, excerpt, content, rating, pros, cons, disclosure_acknowledged, image_url } = parsed.data
   const sanitizedContent = sanitizeHtml(content)
   const hasAffiliateLinks = detectAffiliateLinks(sanitizedContent)
 
@@ -62,6 +63,7 @@ export async function POST(request: NextRequest) {
       category,
       excerpt: excerpt ?? null,
       content: sanitizedContent,
+      image_url: image_url ?? null,
       rating,
       pros,
       cons,

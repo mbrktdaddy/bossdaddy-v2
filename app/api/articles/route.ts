@@ -12,6 +12,7 @@ const CreateArticleSchema = z.object({
   category: CategorySchema,
   excerpt: z.string().max(200).optional(),
   content: z.string().min(100),
+  image_url: z.string().url().optional().nullable(),
 })
 
 export async function POST(request: NextRequest) {
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { title, category, excerpt, content } = parsed.data
+  const { title, category, excerpt, content, image_url } = parsed.data
   const sanitizedContent = sanitizeHtml(content)
 
   const slug =
@@ -47,6 +48,7 @@ export async function POST(request: NextRequest) {
       category,
       excerpt: excerpt ?? null,
       content: sanitizedContent,
+      image_url: image_url ?? null,
       reading_time_minutes: computeReadingTime(sanitizedContent),
       status: 'draft',
     })

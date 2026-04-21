@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getCategoryBySlug } from '@/lib/categories'
-import { UnpublishButton, VisibilityToggle, CommentModerationActions, PendingItemActions } from './_components/ModerationActions'
+import { UnpublishButton, VisibilityToggle, CommentModerationActions } from './_components/ModerationActions'
 
 interface Props {
   searchParams: Promise<{ tab?: string }>
@@ -202,7 +202,7 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
                 )
               })}
 
-              {/* Pending articles — inline approve/reject */}
+              {/* Pending articles — link to detail page */}
               {pendingArticles?.map((a) => {
                 const score = a.moderation_score ? Number(a.moderation_score) : null
                 const category = getCategoryBySlug(a.category)
@@ -210,9 +210,10 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
                 const flags = (a.moderation_flags as string[]) ?? []
 
                 return (
-                  <div
+                  <Link
                     key={a.id}
-                    className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800 rounded-2xl"
+                    href={`/dashboard/moderation/articles/${a.id}`}
+                    className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800 rounded-2xl hover:border-gray-700 transition-colors"
                   >
                     <div className="min-w-0 flex items-start gap-4">
                       <div className={`w-1 self-stretch rounded-full shrink-0 ${
@@ -241,9 +242,11 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
                     </div>
                     <div className="ml-4 shrink-0 flex items-center gap-3">
                       <RiskBadge score={score} />
-                      <PendingItemActions id={a.id} type="article" />
+                      <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                      </svg>
                     </div>
-                  </div>
+                  </Link>
                 )
               })}
             </div>

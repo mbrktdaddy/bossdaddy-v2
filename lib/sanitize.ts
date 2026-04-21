@@ -5,9 +5,10 @@ const ALLOWED_TAGS = [
   'ul', 'ol', 'li',
   'h2', 'h3', 'h4',
   'blockquote', 'pre', 'code',
+  'img', 'figure', 'figcaption',
 ]
 
-const ALLOWED_ATTR = ['href', 'rel', 'target', 'class', 'id']
+const ALLOWED_ATTR = ['href', 'rel', 'target', 'class', 'id', 'src', 'alt', 'width', 'height']
 
 export function sanitizeHtml(dirty: string): string {
   return DOMPurify.sanitize(dirty, {

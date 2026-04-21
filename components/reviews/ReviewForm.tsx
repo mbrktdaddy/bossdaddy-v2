@@ -19,6 +19,7 @@ interface ReviewFormProps {
     has_affiliate_links: boolean
     disclosure_acknowledged: boolean
     image_url: string | null
+    rejection_reason?: string | null
   }
 }
 
@@ -110,6 +111,13 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
   const [draftLoading, setDraftLoading] = useState(false)
   const [draftFeatures, setDraftFeatures] = useState('')
 
+  // AI refine
+  const [refineLoading, setRefineLoading] = useState(false)
+  const [refineInstruction, setRefineInstruction] = useState(initialData?.rejection_reason ?? '')
+
+  // Hero image regeneration
+  const [heroRegenLoading, setHeroRegenLoading] = useState(false)
+
   useEffect(() => {
     setHasAffiliateLinks(detectAffiliateLinks(content))
   }, [content])
@@ -132,12 +140,13 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
     const json = await res.json()
     if (!res.ok) { setError(json.error); setDraftLoading(false); return }
 
-    const { draft } = json
+    const { draft, images } = json
     if (draft.title) setTitle(draft.title)
     if (draft.rating) setRating(Math.round(draft.rating))
     if (draft.pros?.length) setPros(draft.pros)
     if (draft.cons?.length) setCons(draft.cons)
     if (draft.excerpt) setExcerpt(draft.excerpt)
+    if (images?.heroUrl) setImageUrl(images.heroUrl)
     setContent(
       [
         draft.introduction,
@@ -148,6 +157,52 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
       ].filter(Boolean).join('\n\n')
     )
     setDraftLoading(false)
+  }
+
+  async function refineContent() {
+    if (!refineInstruction.trim()) { setError('Enter refinement instructions first'); return }
+    if (!content) { setError('Generate or write content before refining'); return }
+    setRefineLoading(true)
+    setError(null)
+
+    const res = await fetch('/api/claude/review-refine', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, product_name: productName, category, content, instruction: refineInstruction }),
+    })
+    const json = await res.json()
+    if (!res.ok) { setError(json.error); setRefineLoading(false); return }
+
+    const { draft } = json
+    if (draft.title) setTitle(draft.title)
+    if (draft.excerpt) setExcerpt(draft.excerpt)
+    if (draft.rating) setRating(Math.round(draft.rating))
+    if (draft.pros?.length) setPros(draft.pros)
+    if (draft.cons?.length) setCons(draft.cons)
+    setContent(
+      [
+        draft.introduction,
+        ...(draft.sections ?? []).map(
+          (s: { heading: string; body: string }) => `<h2>${s.heading}</h2>\n<p>${s.body}</p>`
+        ),
+        draft.verdict ? `<h2>The Verdict</h2>\n<p>${draft.verdict}</p>` : '',
+      ].filter(Boolean).join('\n\n')
+    )
+    setRefineLoading(false)
+  }
+
+  async function regenerateHero() {
+    setHeroRegenLoading(true)
+    setError(null)
+    const res = await fetch('/api/images/hero', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, category, excerpt, content_type: 'review', product_name: productName }),
+    })
+    const json = await res.json()
+    if (!res.ok) { setError(json.error); setHeroRegenLoading(false); return }
+    setImageUrl(json.imageUrl)
+    setHeroRegenLoading(false)
   }
 
   async function handleImageUpload(file: File) {
@@ -179,6 +234,7 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
       category,
       excerpt,
       content,
+      image_url: imageUrl,
       rating,
       pros: pros.filter(Boolean),
       cons: cons.filter(Boolean),
@@ -241,6 +297,31 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
           </button>
         </div>
       </div>
+
+      {/* ── AI Refine ───────────────────────────────────────────────────── */}
+      {content && (
+        <div className="bg-gray-900 border border-yellow-900/40 rounded-xl p-5">
+          <p className="text-sm font-semibold text-yellow-400 mb-1">AI Refine</p>
+          <p className="text-xs text-gray-500 mb-3">Describe what to change — Claude edits only what you specify and preserves the rest</p>
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={refineInstruction}
+              onChange={(e) => setRefineInstruction(e.target.value)}
+              placeholder="e.g. Strengthen the verdict, add more detail to the pros, make the intro shorter"
+              className="flex-1 px-4 py-2.5 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            />
+            <button
+              type="button"
+              onClick={refineContent}
+              disabled={refineLoading || !refineInstruction.trim()}
+              className="px-4 py-2.5 bg-yellow-700 hover:bg-yellow-600 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
+            >
+              {refineLoading ? 'Refining...' : 'Apply Edits'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── Row: Product + Category ─────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -336,10 +417,22 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
 
       {/* ── Product Image ───────────────────────────────────────────────── */}
       <div>
-        <label className="block text-sm text-gray-300 mb-1.5">
-          Product Image
-          {!isEditing && <span className="text-gray-600 ml-1">(save draft first to enable upload)</span>}
-        </label>
+        <div className="flex items-center justify-between mb-1.5">
+          <label className="block text-sm text-gray-300">
+            Product Image
+            {!isEditing && <span className="text-gray-600 ml-1">(save draft first to enable upload)</span>}
+          </label>
+          {(title || productName) && (
+            <button
+              type="button"
+              onClick={regenerateHero}
+              disabled={heroRegenLoading}
+              className="text-xs px-3 py-1 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-gray-400 hover:text-white rounded-lg transition-colors"
+            >
+              {heroRegenLoading ? 'Generating...' : '↺ Regenerate Image'}
+            </button>
+          )}
+        </div>
 
         {imageUrl ? (
           <div className="relative">

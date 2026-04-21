@@ -2,9 +2,10 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getClaudeClient, MODEL, BOSS_DADDY_SYSTEM } from '@/lib/claude/client'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { generateAndUploadImage } from '@/lib/images/dalle'
 import { z } from 'zod'
 
-export const maxDuration = 60
+export const maxDuration = 90
 
 const DraftInput = z.object({
   productName: z.string().min(2).max(120),
@@ -14,7 +15,6 @@ const DraftInput = z.object({
 })
 
 export async function POST(request: NextRequest) {
-  // Auth check
   const supabase = await createClient()
   const {
     data: { user },
@@ -24,7 +24,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Rate limit by user ID
   const { success, remaining, reset } = await checkRateLimit(`draft:${user.id}`)
   if (!success) {
     return NextResponse.json(
@@ -39,7 +38,6 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  // Validate input
   const body = await request.json().catch(() => null)
   const parsed = DraftInput.safeParse(body)
   if (!parsed.success) {
@@ -64,19 +62,20 @@ Return JSON with this exact shape:
   "verdict": "string (1-2 paragraph summary with recommendation)",
   "rating": number (1-10 scale, decimals ok e.g. 8.5),
   "pros": ["string"],
-  "cons": ["string"]
+  "cons": ["string"],
+  "imagePrompt": "string (DALL-E 3 prompt — write as if describing a stock photo of the product: the product in a real-world setting, natural or warm lighting, clean composition, no people, no text, no artistic effects, under 200 chars. Style: editorial product photography.)"
 }`
 
   try {
     const claude = getClaudeClient()
     const message = await claude.messages.create({
       model: MODEL,
-      max_tokens: 2048,
+      max_tokens: 2500,
       system: [
         {
           type: 'text',
           text: BOSS_DADDY_SYSTEM,
-          cache_control: { type: 'ephemeral' }, // Cache the system prompt
+          cache_control: { type: 'ephemeral' },
         },
       ],
       messages: [{ role: 'user', content: prompt }],
@@ -84,14 +83,22 @@ Return JSON with this exact shape:
 
     const text = message.content.find((b) => b.type === 'text')?.text ?? ''
 
-    // Extract JSON — handle cases where Claude wraps in markdown
     const jsonMatch = text.match(/\{[\s\S]*\}/)
     if (!jsonMatch) {
       return NextResponse.json({ error: 'Model returned unexpected format' }, { status: 502 })
     }
 
     const draft = JSON.parse(jsonMatch[0])
-    return NextResponse.json({ draft, remaining })
+
+    const heroPrompt: string = draft.imagePrompt ?? `Photorealistic product photo of the ${productName} on a clean surface, natural lighting, no people`
+    const heroResult = await Promise.allSettled([
+      generateAndUploadImage(heroPrompt, 'review-images', '1792x1024'),
+    ])
+    const heroUrl = heroResult[0].status === 'fulfilled' ? heroResult[0].value : null
+
+    const { imagePrompt: _omit, ...cleanDraft } = draft
+
+    return NextResponse.json({ draft: cleanDraft, images: { heroUrl }, remaining })
   } catch (err) {
     console.error('Claude draft error:', err)
     return NextResponse.json({ error: 'Draft generation failed' }, { status: 502 })

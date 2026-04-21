@@ -23,6 +23,7 @@ const UpdateSchema = z.object({
   pros: z.array(z.string()).optional(),
   cons: z.array(z.string()).optional(),
   disclosure_acknowledged: z.boolean().optional(),
+  image_url: z.string().url().optional().nullable(),
 })
 
 const ModerateSchema = z.object({
@@ -145,6 +146,7 @@ export async function PUT(
   if (parsed.data.product_name) updates.product_name = parsed.data.product_name
   if (parsed.data.category) updates.category = parsed.data.category
   if (parsed.data.excerpt !== undefined) updates.excerpt = parsed.data.excerpt
+  if (parsed.data.image_url !== undefined) updates.image_url = parsed.data.image_url
   if (parsed.data.rating) updates.rating = parsed.data.rating
   if (parsed.data.pros) updates.pros = parsed.data.pros
   if (parsed.data.cons) updates.cons = parsed.data.cons

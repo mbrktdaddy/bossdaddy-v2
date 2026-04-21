@@ -29,10 +29,18 @@ export default async function EditArticlePage({ params }: Props) {
         </p>
       </div>
 
-      {/* Rejection feedback */}
-      {article.status === 'rejected' && article.rejection_reason && (
-        <div className="mb-6 bg-red-950/30 border border-red-900/40 rounded-2xl p-5">
-          <p className="text-red-400 text-xs font-semibold uppercase tracking-wide mb-2">Feedback from moderation</p>
+      {/* Moderation feedback */}
+      {article.rejection_reason && (
+        <div className={`mb-6 rounded-2xl p-5 ${
+          article.status === 'rejected'
+            ? 'bg-red-950/30 border border-red-900/40'
+            : 'bg-yellow-950/30 border border-yellow-900/40'
+        }`}>
+          <p className={`text-xs font-semibold uppercase tracking-wide mb-2 ${
+            article.status === 'rejected' ? 'text-red-400' : 'text-yellow-400'
+          }`}>
+            {article.status === 'rejected' ? 'Rejected — Feedback from moderation' : 'Edits requested by moderation'}
+          </p>
           <p className="text-gray-300 text-sm leading-relaxed">{article.rejection_reason}</p>
         </div>
       )}
@@ -45,6 +53,7 @@ export default async function EditArticlePage({ params }: Props) {
           content: article.content,
           excerpt: article.excerpt ?? '',
           image_url: article.image_url ?? null,
+          rejection_reason: article.rejection_reason ?? null,
         }}
       />
     </div>

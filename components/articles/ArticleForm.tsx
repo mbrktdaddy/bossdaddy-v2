@@ -12,6 +12,7 @@ interface ArticleFormProps {
     content: string
     excerpt: string
     image_url: string | null
+    rejection_reason?: string | null
   }
 }
 
@@ -35,6 +36,13 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
   const [draftTopic, setDraftTopic] = useState('')
   const [draftKeyPoints, setDraftKeyPoints] = useState('')
 
+  // AI refine
+  const [refineLoading, setRefineLoading] = useState(false)
+  const [refineInstruction, setRefineInstruction] = useState(initialData?.rejection_reason ?? '')
+
+  // Hero image regeneration
+  const [heroRegenLoading, setHeroRegenLoading] = useState(false)
+
   async function generateDraft() {
     if (!draftTopic) { setError('Enter a topic first'); return }
     setDraftLoading(true)
@@ -53,19 +61,78 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
     const json = await res.json()
     if (!res.ok) { setError(json.error); setDraftLoading(false); return }
 
-    const { draft } = json
+    const { draft, images } = json
     if (draft.title) setTitle(draft.title)
     if (draft.excerpt) setExcerpt(draft.excerpt)
+    if (images?.heroUrl) setImageUrl(images.heroUrl)
+    const sectionUrls: string[] = images?.sectionUrls ?? []
     setContent(
       [
         draft.introduction,
         ...(draft.sections ?? []).map(
-          (s: { heading: string; body: string }) => `<h2>${s.heading}</h2>\n<p>${s.body}</p>`
+          (s: { heading: string; body: string }, i: number) => {
+            const imgHtml = sectionUrls[i]
+              ? `\n<figure><img src="${sectionUrls[i]}" alt="${s.heading}" /></figure>`
+              : ''
+            return `<h2>${s.heading}</h2>\n<p>${s.body}</p>${imgHtml}`
+          }
         ),
         draft.conclusion ? `<h2>Wrapping Up</h2>\n<p>${draft.conclusion}</p>` : '',
       ].filter(Boolean).join('\n\n')
     )
     setDraftLoading(false)
+  }
+
+  async function refineContent() {
+    if (!refineInstruction.trim()) { setError('Enter refinement instructions first'); return }
+    if (!content) { setError('Generate or write content before refining'); return }
+    setRefineLoading(true)
+    setError(null)
+
+    const res = await fetch('/api/claude/article-refine', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, category, content, instruction: refineInstruction }),
+    })
+    const json = await res.json()
+    if (!res.ok) { setError(json.error); setRefineLoading(false); return }
+
+    const { draft } = json
+    if (draft.title) setTitle(draft.title)
+    if (draft.excerpt) setExcerpt(draft.excerpt)
+    const sectionUrls = [...content.matchAll(/<figure><img src="([^"]+)"/g)].map(m => m[1])
+    let urlIndex = 0
+    setContent(
+      [
+        draft.introduction,
+        ...(draft.sections ?? []).map(
+          (s: { heading: string; body: string }, i: number) => {
+            const existingUrl = sectionUrls[urlIndex]
+            const imgHtml = existingUrl
+              ? `\n<figure><img src="${existingUrl}" alt="${s.heading}" /></figure>`
+              : ''
+            if (existingUrl) urlIndex++
+            return `<h2>${s.heading}</h2>\n<p>${s.body}</p>${imgHtml}`
+          }
+        ),
+        draft.conclusion ? `<h2>Wrapping Up</h2>\n<p>${draft.conclusion}</p>` : '',
+      ].filter(Boolean).join('\n\n')
+    )
+    setRefineLoading(false)
+  }
+
+  async function regenerateHero() {
+    setHeroRegenLoading(true)
+    setError(null)
+    const res = await fetch('/api/images/hero', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, category, excerpt, content_type: 'article' }),
+    })
+    const json = await res.json()
+    if (!res.ok) { setError(json.error); setHeroRegenLoading(false); return }
+    setImageUrl(json.imageUrl)
+    setHeroRegenLoading(false)
   }
 
   async function handleImageUpload(file: File) {
@@ -91,7 +158,7 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
     setSaving(true)
     setError(null)
 
-    const payload = { title, category, excerpt, content }
+    const payload = { title, category, excerpt, content, image_url: imageUrl }
 
     let res: Response
     if (isEditing) {
@@ -164,6 +231,31 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
         </div>
       </div>
 
+      {/* ── AI Refine ───────────────────────────────────────────────────── */}
+      {content && (
+        <div className="bg-gray-900 border border-yellow-900/40 rounded-xl p-5">
+          <p className="text-sm font-semibold text-yellow-400 mb-1">AI Refine</p>
+          <p className="text-xs text-gray-500 mb-3">Describe what to change — Claude edits only what you specify and preserves the rest</p>
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={refineInstruction}
+              onChange={(e) => setRefineInstruction(e.target.value)}
+              placeholder="e.g. Make the intro more punchy, shorten section 2, add more practical tips"
+              className="flex-1 px-4 py-2.5 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            />
+            <button
+              type="button"
+              onClick={refineContent}
+              disabled={refineLoading || !refineInstruction.trim()}
+              className="px-4 py-2.5 bg-yellow-700 hover:bg-yellow-600 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
+            >
+              {refineLoading ? 'Refining...' : 'Apply Edits'}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── Row: Title + Category ───────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="sm:col-span-2">
@@ -209,10 +301,22 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
 
       {/* ── Hero Image ──────────────────────────────────────────────────── */}
       <div>
-        <label className="block text-sm text-gray-300 mb-1.5">
-          Hero Image
-          {!isEditing && <span className="text-gray-600 ml-1">(save draft first to enable upload)</span>}
-        </label>
+        <div className="flex items-center justify-between mb-1.5">
+          <label className="block text-sm text-gray-300">
+            Hero Image
+            {!isEditing && <span className="text-gray-600 ml-1">(save draft first to enable upload)</span>}
+          </label>
+          {title && (
+            <button
+              type="button"
+              onClick={regenerateHero}
+              disabled={heroRegenLoading}
+              className="text-xs px-3 py-1 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-gray-400 hover:text-white rounded-lg transition-colors"
+            >
+              {heroRegenLoading ? 'Generating...' : '↺ Regenerate Image'}
+            </button>
+          )}
+        </div>
 
         {imageUrl ? (
           <div className="relative">
