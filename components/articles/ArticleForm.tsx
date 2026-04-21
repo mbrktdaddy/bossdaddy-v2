@@ -216,6 +216,7 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
 
         {imageUrl ? (
           <div className="relative">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={imageUrl} alt="Hero" className="w-full h-48 object-cover rounded-xl border border-gray-700" />
             <button
               type="button"

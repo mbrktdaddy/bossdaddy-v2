@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 const LikeSchema = z.object({
@@ -47,6 +48,10 @@ export async function GET(request: NextRequest) {
 
 // POST /api/likes — toggle like (insert or delete)
 export async function POST(request: NextRequest) {
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'anonymous'
+  const { success } = await checkRateLimit(`like:${ip}`, 'submit')
+  if (!success) return NextResponse.json({ error: 'Too many requests.' }, { status: 429 })
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Sign in to like.' }, { status: 401 })

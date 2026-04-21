@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { getClaudeClient, MODEL, COMMENT_MODERATOR_SYSTEM } from '@/lib/claude/client'
+import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 const CreateCommentSchema = z.object({
@@ -104,6 +105,10 @@ async function checkTrustPromotion(supabase: Awaited<ReturnType<typeof createCli
 // ── POST /api/comments ───────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'anonymous'
+  const { success } = await checkRateLimit(`comment:${ip}`, 'submit')
+  if (!success) return NextResponse.json({ error: 'Too many comments. Try again later.' }, { status: 429 })
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Sign in to leave a comment.' }, { status: 401 })
