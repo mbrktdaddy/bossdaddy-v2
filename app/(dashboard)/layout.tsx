@@ -21,7 +21,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gray-950 text-white md:flex">
-      <DashboardNav username={profile?.username ?? 'Boss'} isAdmin={isAdmin} />
+      <DashboardNav username={profile?.username ?? 'Boss'} isAdmin={isAdmin} role={profile?.role ?? 'member'} />
 
       {/* pt-14 on mobile clears the fixed top bar; desktop uses normal flow */}
       <main className="flex-1 overflow-auto pt-14 md:pt-0">

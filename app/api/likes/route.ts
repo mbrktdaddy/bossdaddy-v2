@@ -3,12 +3,12 @@ import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 
 const LikeSchema = z.object({
-  content_type: z.enum(['review', 'article']),
+  content_type: z.enum(['review', 'article', 'comment']),
   content_id:   z.string().uuid(),
 })
 
 const GetSchema = z.object({
-  type: z.enum(['review', 'article']),
+  type: z.enum(['review', 'article', 'comment']),
   id:   z.string().uuid(),
 })
 

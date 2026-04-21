@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 const NAV_LINKS = [
   { href: '/',         label: 'Home' },
@@ -19,7 +20,39 @@ function isActive(pathname: string, href: string) {
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [username, setUsername]     = useState<string | null>(null)
   const pathname = usePathname()
+  const router   = useRouter()
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) { setUsername(null); return }
+      supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', user.id)
+        .single()
+        .then(({ data }) => setUsername(data?.username ?? user.email?.split('@')[0] ?? 'Account'))
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      if (!session) { setUsername(null); return }
+      supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', session.user.id)
+        .single()
+        .then(({ data }) => setUsername(data?.username ?? session.user.email?.split('@')[0] ?? 'Account'))
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  async function handleSignOut() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/')
+    router.refresh()
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-gray-950/95 backdrop-blur-sm border-b border-gray-800/60">
@@ -65,12 +98,29 @@ export default function Header() {
             </div>
           </form>
 
-          <Link
-            href="/login"
-            className="hidden md:block text-sm px-4 py-2 rounded-lg border border-gray-700 text-gray-300 hover:border-orange-500 hover:text-white transition-colors"
-          >
-            Sign In
-          </Link>
+          {username ? (
+            <div className="hidden md:flex items-center gap-2">
+              <Link
+                href="/dashboard/profile"
+                className="text-sm px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-900 transition-colors"
+              >
+                @{username}
+              </Link>
+              <button
+                onClick={handleSignOut}
+                className="text-sm px-4 py-2 rounded-lg border border-gray-700 text-gray-400 hover:border-red-700 hover:text-red-400 transition-colors"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="hidden md:block text-sm px-4 py-2 rounded-lg border border-gray-700 text-gray-300 hover:border-orange-500 hover:text-white transition-colors"
+            >
+              Sign In
+            </Link>
+          )}
 
           {/* Hamburger */}
           <button
@@ -124,13 +174,31 @@ export default function Header() {
                 {label}
               </Link>
             ))}
-            <Link
-              href="/login"
-              onClick={() => setMobileOpen(false)}
-              className="mt-2 px-4 py-3 rounded-xl text-sm font-semibold text-center bg-orange-600 hover:bg-orange-500 text-white transition-colors"
-            >
-              Sign In
-            </Link>
+            {username ? (
+              <>
+                <Link
+                  href="/dashboard/profile"
+                  onClick={() => setMobileOpen(false)}
+                  className="mt-2 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-900 transition-colors"
+                >
+                  @{username}
+                </Link>
+                <button
+                  onClick={() => { setMobileOpen(false); handleSignOut() }}
+                  className="px-4 py-3 rounded-xl text-sm font-semibold text-center border border-gray-700 text-gray-400 hover:border-red-700 hover:text-red-400 transition-colors"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setMobileOpen(false)}
+                className="mt-2 px-4 py-3 rounded-xl text-sm font-semibold text-center bg-orange-600 hover:bg-orange-500 text-white transition-colors"
+              >
+                Sign In
+              </Link>
+            )}
           </nav>
         </div>
       )}

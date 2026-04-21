@@ -193,16 +193,18 @@ export default async function ReviewPage({ params }: Props) {
         )}
 
         {/* Review body */}
-        <div
-          className="prose prose-invert prose-orange max-w-none
-            prose-headings:font-black prose-headings:tracking-tight
-            prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4
-            prose-p:text-gray-300 prose-p:leading-relaxed
-            prose-a:text-orange-400 prose-a:no-underline hover:prose-a:text-orange-300
-            prose-strong:text-white
-            prose-li:text-gray-300"
-          dangerouslySetInnerHTML={{ __html: review.content }}
-        />
+        <div className="overflow-x-auto">
+          <div
+            className="prose prose-invert prose-orange max-w-none
+              prose-headings:font-black prose-headings:tracking-tight
+              prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4
+              prose-p:text-gray-300 prose-p:leading-relaxed
+              prose-a:text-orange-400 prose-a:no-underline hover:prose-a:text-orange-300
+              prose-strong:text-white
+              prose-li:text-gray-300"
+            dangerouslySetInnerHTML={{ __html: review.content }}
+          />
+        </div>
 
         {/* Bottom CTA */}
         <div className="mt-12 pt-8 border-t border-gray-800">

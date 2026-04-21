@@ -7,9 +7,10 @@ import { usePathname } from 'next/navigation'
 interface Props {
   username: string
   isAdmin: boolean
+  role: string
 }
 
-function NavLinks({ isAdmin, onNav }: { isAdmin: boolean; onNav?: () => void }) {
+function NavLinks({ isAdmin, isAuthor, onNav }: { isAdmin: boolean; isAuthor: boolean; onNav?: () => void }) {
   const pathname = usePathname()
 
   const link = (href: string, label: string, icon: React.ReactNode) => (
@@ -30,20 +31,24 @@ function NavLinks({ isAdmin, onNav }: { isAdmin: boolean; onNav?: () => void }) 
 
   return (
     <>
-      <p className="text-xs text-gray-600 font-medium uppercase tracking-widest px-3 mb-2">Reviews</p>
-      {link('/dashboard/reviews', 'My Reviews',
-        <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-      )}
-      {link('/dashboard/reviews/new', 'New Review',
-        <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" /></svg>
-      )}
+      {isAuthor && (
+        <>
+          <p className="text-xs text-gray-600 font-medium uppercase tracking-widest px-3 mb-2">Reviews</p>
+          {link('/dashboard/reviews', 'My Reviews',
+            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+          )}
+          {link('/dashboard/reviews/new', 'New Review',
+            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" /></svg>
+          )}
 
-      <p className="text-xs text-gray-600 font-medium uppercase tracking-widest px-3 mb-2 mt-4">Articles</p>
-      {link('/dashboard/articles', 'My Articles',
-        <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" /></svg>
-      )}
-      {link('/dashboard/articles/new', 'New Article',
-        <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" /></svg>
+          <p className="text-xs text-gray-600 font-medium uppercase tracking-widest px-3 mb-2 mt-4">Articles</p>
+          {link('/dashboard/articles', 'My Articles',
+            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" /></svg>
+          )}
+          {link('/dashboard/articles/new', 'New Article',
+            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" /></svg>
+          )}
+        </>
       )}
 
       {isAdmin && (
@@ -61,8 +66,13 @@ function NavLinks({ isAdmin, onNav }: { isAdmin: boolean; onNav?: () => void }) 
   )
 }
 
-export default function DashboardNav({ username, isAdmin }: Props) {
+const ROLE_LABEL: Record<string, string> = {
+  admin: 'Admin', author: 'Author', member: 'Member',
+}
+
+export default function DashboardNav({ username, isAdmin, role }: Props) {
   const [open, setOpen] = useState(false)
+  const isAuthor = isAdmin || role === 'author'
 
   const sidebarContent = (onNav?: () => void) => (
     <>
@@ -74,20 +84,20 @@ export default function DashboardNav({ username, isAdmin }: Props) {
             <span className="text-white"> DADDY</span>
           </span>
         </Link>
-        <div className="flex items-center gap-2 mt-2">
+        <Link href="/dashboard/profile" onClick={onNav} className="flex items-center gap-2 mt-2 group">
           <div className="w-6 h-6 rounded-full bg-orange-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
             {username[0]?.toUpperCase() ?? 'B'}
           </div>
           <div className="min-w-0">
-            <p className="text-xs text-gray-300 truncate font-medium">@{username}</p>
-            <p className="text-xs text-gray-600">{isAdmin ? 'Admin' : 'Author'}</p>
+            <p className="text-xs text-gray-300 group-hover:text-white truncate font-medium transition-colors">@{username}</p>
+            <p className="text-xs text-gray-600">{ROLE_LABEL[role] ?? 'Member'}</p>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Nav links */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        <NavLinks isAdmin={isAdmin} onNav={onNav} />
+        <NavLinks isAdmin={isAdmin} isAuthor={isAuthor} onNav={onNav} />
       </nav>
 
       {/* Footer */}

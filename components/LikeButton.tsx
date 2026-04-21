@@ -4,16 +4,17 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface Props {
-  contentType: 'review' | 'article'
+  contentType: 'review' | 'article' | 'comment'
   contentId: string
+  size?: 'sm' | 'md'
 }
 
-export default function LikeButton({ contentType, contentId }: Props) {
+export default function LikeButton({ contentType, contentId, size = 'md' }: Props) {
   const router = useRouter()
-  const [count, setCount]   = useState(0)
-  const [liked, setLiked]   = useState(false)
+  const [count, setCount]     = useState(0)
+  const [liked, setLiked]     = useState(false)
   const [loading, setLoading] = useState(false)
-  const [ready, setReady]   = useState(false)
+  const [ready, setReady]     = useState(false)
 
   useEffect(() => {
     fetch(`/api/likes?type=${contentType}&id=${contentId}`)
@@ -41,6 +42,29 @@ export default function LikeButton({ contentType, contentId }: Props) {
   }
 
   if (!ready) return null
+
+  if (size === 'sm') {
+    return (
+      <button
+        onClick={toggle}
+        disabled={loading}
+        className={`flex items-center gap-1.5 text-xs transition-colors disabled:opacity-50 ${
+          liked ? 'text-red-400' : 'text-gray-600 hover:text-gray-400'
+        }`}
+      >
+        <svg
+          className={`w-3.5 h-3.5 transition-transform ${liked ? 'scale-110' : ''}`}
+          fill={liked ? 'currentColor' : 'none'}
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+        <span>{count > 0 ? count : liked ? 'Liked' : 'Like'}</span>
+      </button>
+    )
+  }
 
   return (
     <button
