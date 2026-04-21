@@ -4,6 +4,8 @@ import { getClaudeClient, MODEL, BOSS_DADDY_SYSTEM } from '@/lib/claude/client'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
+export const maxDuration = 60
+
 const ArticleDraftInput = z.object({
   topic: z.string().min(4).max(150),
   category: z.string().min(2).max(80),

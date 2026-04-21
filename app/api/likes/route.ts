@@ -7,15 +7,19 @@ const LikeSchema = z.object({
   content_id:   z.string().uuid(),
 })
 
+const GetSchema = z.object({
+  type: z.enum(['review', 'article']),
+  id:   z.string().uuid(),
+})
+
 // GET /api/likes?type=review&id=uuid — count + current user's like status
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const content_type = searchParams.get('type')
-  const content_id   = searchParams.get('id')
-
-  if (!content_type || !content_id) {
-    return NextResponse.json({ error: 'Missing type or id' }, { status: 400 })
+  const parsed = GetSchema.safeParse({ type: searchParams.get('type'), id: searchParams.get('id') })
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid type or id' }, { status: 400 })
   }
+  const { type: content_type, id: content_id } = parsed.data
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

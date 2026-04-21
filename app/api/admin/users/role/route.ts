@@ -32,6 +32,6 @@ export async function PUT(request: NextRequest) {
     .update({ role: parsed.data.role })
     .eq('id', parsed.data.userId)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Role update failed' }, { status: 500 })
   return NextResponse.json({ success: true })
 }

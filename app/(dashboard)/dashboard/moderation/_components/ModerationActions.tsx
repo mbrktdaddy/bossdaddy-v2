@@ -70,6 +70,41 @@ export function CommentModerationActions({ id }: { id: string }) {
   )
 }
 
+export function PendingItemActions({ id, type }: { id: string; type: 'review' | 'article' }) {
+  const router = useRouter()
+  const [loading, setLoading] = useState<'approve' | 'reject' | null>(null)
+
+  async function act(action: 'approve' | 'reject') {
+    setLoading(action)
+    await fetch(`/api/${type === 'review' ? 'reviews' : 'articles'}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action }),
+    })
+    router.refresh()
+    setLoading(null)
+  }
+
+  return (
+    <div className="flex items-center gap-2 shrink-0">
+      <button
+        onClick={() => act('approve')}
+        disabled={!!loading}
+        className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-green-950/50 hover:bg-green-900/60 disabled:opacity-50 text-green-400 border border-green-900/40 transition-colors"
+      >
+        {loading === 'approve' ? '...' : 'Approve'}
+      </button>
+      <button
+        onClick={() => act('reject')}
+        disabled={!!loading}
+        className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-950/50 hover:bg-red-900/60 disabled:opacity-50 text-red-400 border border-red-900/40 transition-colors"
+      >
+        {loading === 'reject' ? '...' : 'Reject'}
+      </button>
+    </div>
+  )
+}
+
 export function VisibilityToggle({ id, type, isVisible }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)

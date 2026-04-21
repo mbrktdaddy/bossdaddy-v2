@@ -49,7 +49,7 @@ export async function POST(
     .update({ status: 'pending' })
     .eq('id', id)
 
-  if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
+  if (updateError) return NextResponse.json({ error: 'Submission failed' }, { status: 500 })
 
   // Trigger Claude moderation asynchronously (fire and forget)
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'

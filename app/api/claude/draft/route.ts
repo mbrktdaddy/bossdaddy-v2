@@ -4,6 +4,8 @@ import { getClaudeClient, MODEL, BOSS_DADDY_SYSTEM } from '@/lib/claude/client'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
+export const maxDuration = 60
+
 const DraftInput = z.object({
   productName: z.string().min(2).max(120),
   category: z.string().min(2).max(80),
@@ -60,7 +62,7 @@ Return JSON with this exact shape:
     { "heading": "string", "body": "string (2-4 paragraphs)" }
   ],
   "verdict": "string (1-2 paragraph summary with recommendation)",
-  "rating": number (1-5, decimals ok e.g. 4.5),
+  "rating": number (1-10 scale, decimals ok e.g. 8.5),
   "pros": ["string"],
   "cons": ["string"]
 }`

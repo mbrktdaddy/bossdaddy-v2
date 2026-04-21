@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { z } from 'zod'
@@ -32,7 +33,16 @@ export async function PUT(
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Action failed' }, { status: 500 })
+
+  // Revalidate the parent content page so the approved comment appears immediately
+  if (parsed.data.action === 'approve' && data) {
+    const { content_type, content_id } = data as { content_type: string; content_id: string }
+    const table = content_type === 'review' ? 'reviews' : 'articles'
+    const { data: content } = await admin.from(table).select('slug').eq('id', content_id).single()
+    if (content?.slug) revalidatePath(`/${content_type}s/${content.slug}`)
+  }
+
   return NextResponse.json({ comment: data })
 }
 
@@ -60,7 +70,7 @@ export async function DELETE(
       .eq('author_id', user.id)
       .neq('status', 'approved')
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) return NextResponse.json({ error: 'Action failed' }, { status: 500 })
   }
 
   return NextResponse.json({ success: true })

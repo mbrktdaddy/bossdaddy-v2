@@ -2,11 +2,14 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { computeReadingTime } from '@/lib/reading-time'
+import { CATEGORY_SLUGS } from '@/lib/categories'
 import { z } from 'zod'
+
+const CategorySchema = z.enum(CATEGORY_SLUGS as [string, ...string[]])
 
 const CreateArticleSchema = z.object({
   title: z.string().min(10).max(120),
-  category: z.string().default('other'),
+  category: CategorySchema,
   excerpt: z.string().max(200).optional(),
   content: z.string().min(100),
 })
@@ -33,7 +36,7 @@ export async function POST(request: NextRequest) {
 
   const slug =
     title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) +
-    '-' + Math.random().toString(36).slice(2, 7)
+    '-' + crypto.randomUUID().replace(/-/g, '').slice(0, 8)
 
   const { data, error } = await supabase
     .from('articles')
@@ -50,6 +53,9 @@ export async function POST(request: NextRequest) {
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    if (error.code === '23505') return NextResponse.json({ error: 'An article with this title already exists. Try a slightly different title.' }, { status: 409 })
+    return NextResponse.json({ error: 'Failed to create article' }, { status: 500 })
+  }
   return NextResponse.json({ article: data }, { status: 201 })
 }

@@ -3,16 +3,24 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getClaudeClient, MODEL, MODERATOR_SYSTEM } from '@/lib/claude/client'
 import { z } from 'zod'
 
-const ModerateInput = z.object({
-  reviewId: z.string().uuid(),
+const ModerateInput = z.union([
+  z.object({ reviewId: z.string().uuid() }),
+  z.object({ articleId: z.string().uuid() }),
+])
+
+const ModerationResult = z.object({
+  score: z.number().min(0).max(1),
+  flags: z.array(z.string()),
+  recommendation: z.enum(['approve', 'review', 'reject']),
 })
 
-// Internal endpoint — called server-side when a review is submitted.
-// Authenticated via SUPABASE_SERVICE_ROLE_KEY implicitly (admin client).
-// Optionally accepts X-Internal-Secret header for added protection.
+// Internal endpoint — called server-side after review or article submission.
+// Requires X-Internal-Secret header matching INTERNAL_API_SECRET env var.
+export const maxDuration = 60
+
 export async function POST(request: NextRequest) {
   const secret = request.headers.get('x-internal-secret')
-  if (secret !== process.env.INTERNAL_API_SECRET && process.env.INTERNAL_API_SECRET) {
+  if (secret !== process.env.INTERNAL_API_SECRET) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -23,26 +31,32 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = createAdminClient()
-  const { data: review, error } = await supabase
-    .from('reviews')
+  const isArticle = 'articleId' in parsed.data
+  const contentId = isArticle
+    ? (parsed.data as { articleId: string }).articleId
+    : (parsed.data as { reviewId: string }).reviewId
+  const table = isArticle ? 'articles' : 'reviews'
+
+  const { data: content, error } = await supabase
+    .from(table)
     .select('id, title, content, has_affiliate_links, disclosure_acknowledged')
-    .eq('id', parsed.data.reviewId)
+    .eq('id', contentId)
     .single()
 
-  if (error || !review) {
-    return NextResponse.json({ error: 'Review not found' }, { status: 404 })
+  if (error || !content) {
+    return NextResponse.json({ error: 'Content not found' }, { status: 404 })
   }
 
   const prompt = `Review the following content submission:
 
-Title: ${review.title}
-Has affiliate links: ${review.has_affiliate_links}
-Disclosure acknowledged: ${review.disclosure_acknowledged}
+Title: ${content.title}
+Has affiliate links: ${content.has_affiliate_links ?? false}
+Disclosure acknowledged: ${content.disclosure_acknowledged ?? false}
 
 Content:
-${review.content.slice(0, 4000)}
+${content.content.slice(0, 4000)}
 
-Return JSON: { "score": number, "flags": string[], "recommendation": "approve"|"review"|"reject" }`
+Return JSON: { "score": number (0-1), "flags": string[], "recommendation": "approve"|"review"|"reject" }`
 
   try {
     const claude = getClaudeClient()
@@ -63,20 +77,18 @@ Return JSON: { "score": number, "flags": string[], "recommendation": "approve"|"
     const jsonMatch = text.match(/\{[\s\S]*\}/)
     if (!jsonMatch) throw new Error('No JSON in response')
 
-    const result = JSON.parse(jsonMatch[0]) as {
-      score: number
-      flags: string[]
-      recommendation: 'approve' | 'review' | 'reject'
-    }
+    const resultParsed = ModerationResult.safeParse(JSON.parse(jsonMatch[0]))
+    if (!resultParsed.success) throw new Error('Invalid moderation shape')
 
-    // Persist moderation result
+    const result = resultParsed.data
+
     await supabase
-      .from('reviews')
+      .from(table)
       .update({
         moderation_score: result.score,
         moderation_flags: result.flags,
       })
-      .eq('id', review.id)
+      .eq('id', content.id)
 
     return NextResponse.json(result)
   } catch (err) {

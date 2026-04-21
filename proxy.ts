@@ -39,8 +39,8 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Restrict moderation to admins only
-  if (pathname.startsWith('/dashboard/moderation') && user) {
+  // Restrict moderation and user management to admins only
+  if ((pathname.startsWith('/dashboard/moderation') || pathname.startsWith('/dashboard/users')) && user) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getCategoryBySlug } from '@/lib/categories'
-import { UnpublishButton, VisibilityToggle, CommentModerationActions } from './_components/ModerationActions'
+import { UnpublishButton, VisibilityToggle, CommentModerationActions, PendingItemActions } from './_components/ModerationActions'
 
 interface Props {
   searchParams: Promise<{ tab?: string }>
@@ -40,6 +40,12 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
     .eq('status', 'pending')
     .order('moderation_score', { ascending: false }) : { data: null }
 
+  const { data: pendingArticles } = isPending ? await supabase
+    .from('articles')
+    .select('id, title, category, moderation_score, moderation_flags, created_at, profiles(username)')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: true }) : { data: null }
+
   // ── Published tab data ────────────────────────────────────────────────
   const { data: liveReviews } = isPublished ? await supabase
     .from('reviews')
@@ -73,8 +79,8 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
     ...(articleTitles ?? []).map(a => [a.id, { title: a.title, slug: a.slug, type: 'article' }] as [string, { title: string; slug: string; type: string }]),
   ])
 
-  const highRisk    = queue?.filter(r => (r.moderation_score ?? 0) >= 0.7).length ?? 0
-  const pending     = queue?.length ?? 0
+  const highRisk     = queue?.filter(r => (r.moderation_score ?? 0) >= 0.7).length ?? 0
+  const pending      = (queue?.length ?? 0) + (pendingArticles?.length ?? 0)
   const commentCount = pendingComments?.length ?? 0
 
   return (
@@ -139,7 +145,7 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
             </div>
           </div>
 
-          {!queue?.length ? (
+          {!queue?.length && !pendingArticles?.length ? (
             <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
               <p className="text-2xl mb-2">✅</p>
               <p className="text-gray-400 font-semibold">Queue is clear.</p>
@@ -147,7 +153,8 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
             </div>
           ) : (
             <div className="space-y-2">
-              {queue.map((r) => {
+              {/* Pending reviews — link to detail page */}
+              {queue?.map((r) => {
                 const score = r.moderation_score ? Number(r.moderation_score) : null
                 const category = getCategoryBySlug(r.category)
                 const author = (Array.isArray(r.profiles) ? r.profiles[0] : r.profiles as unknown as { username: string } | null)?.username ?? 'unknown'
@@ -167,7 +174,10 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
                         : 'bg-green-500'
                       }`} />
                       <div className="min-w-0">
-                        <p className="font-semibold text-sm truncate">{r.title}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-sm truncate">{r.title}</p>
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-orange-950/40 text-orange-400 border border-orange-900/30 shrink-0">Review</span>
+                        </div>
                         <div className="flex items-center gap-2 mt-1 flex-wrap">
                           <span className="text-xs text-gray-500">{r.product_name}</span>
                           <span className="text-xs text-gray-700">by @{author}</span>
@@ -189,6 +199,51 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
                       </svg>
                     </div>
                   </Link>
+                )
+              })}
+
+              {/* Pending articles — inline approve/reject */}
+              {pendingArticles?.map((a) => {
+                const score = a.moderation_score ? Number(a.moderation_score) : null
+                const category = getCategoryBySlug(a.category)
+                const author = (Array.isArray(a.profiles) ? a.profiles[0] : a.profiles as unknown as { username: string } | null)?.username ?? 'unknown'
+                const flags = (a.moderation_flags as string[]) ?? []
+
+                return (
+                  <div
+                    key={a.id}
+                    className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800 rounded-2xl"
+                  >
+                    <div className="min-w-0 flex items-start gap-4">
+                      <div className={`w-1 self-stretch rounded-full shrink-0 ${
+                        score === null ? 'bg-gray-700'
+                        : score >= 0.7 ? 'bg-red-500'
+                        : score >= 0.4 ? 'bg-yellow-500'
+                        : 'bg-green-500'
+                      }`} />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-sm truncate">{a.title}</p>
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-blue-950/40 text-blue-400 border border-blue-900/30 shrink-0">Article</span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          <span className="text-xs text-gray-700">by @{author}</span>
+                          {category && (
+                            <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>
+                          )}
+                        </div>
+                        {flags.length > 0 && (
+                          <p className="text-xs text-red-400/70 mt-1 truncate">
+                            ⚑ {flags.slice(0, 2).join(' · ')}{flags.length > 2 ? ` +${flags.length - 2} more` : ''}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="ml-4 shrink-0 flex items-center gap-3">
+                      <RiskBadge score={score} />
+                      <PendingItemActions id={a.id} type="article" />
+                    </div>
+                  </div>
                 )
               })}
             </div>

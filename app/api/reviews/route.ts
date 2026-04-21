@@ -3,15 +3,18 @@ import { createClient } from '@/lib/supabase/server'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { detectAffiliateLinks } from '@/lib/affiliate'
 import { computeReadingTime } from '@/lib/reading-time'
+import { CATEGORY_SLUGS } from '@/lib/categories'
 import { z } from 'zod'
+
+const CategorySchema = z.enum(CATEGORY_SLUGS as [string, ...string[]])
 
 const CreateReviewSchema = z.object({
   title: z.string().min(10).max(120),
   product_name: z.string().min(2).max(120),
-  category: z.string().default('other'),
+  category: CategorySchema,
   excerpt: z.string().max(200).optional(),
   content: z.string().min(100),
-  rating: z.number().int().min(1).max(5),
+  rating: z.number().min(1).max(10),
   pros: z.array(z.string()).default([]),
   cons: z.array(z.string()).default([]),
   disclosure_acknowledged: z.boolean(),
@@ -47,7 +50,7 @@ export async function POST(request: NextRequest) {
 
   const slug =
     title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) +
-    '-' + Math.random().toString(36).slice(2, 7)
+    '-' + crypto.randomUUID().replace(/-/g, '').slice(0, 8)
 
   const { data, error } = await supabase
     .from('reviews')
@@ -70,6 +73,9 @@ export async function POST(request: NextRequest) {
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    if (error.code === '23505') return NextResponse.json({ error: 'A review with this title already exists. Try a slightly different title.' }, { status: 409 })
+    return NextResponse.json({ error: 'Failed to create review' }, { status: 500 })
+  }
   return NextResponse.json({ review: data }, { status: 201 })
 }

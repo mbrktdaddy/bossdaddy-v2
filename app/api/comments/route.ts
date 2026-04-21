@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { sanitizeHtml } from '@/lib/sanitize'
 import { z } from 'zod'
 
 const CreateCommentSchema = z.object({
@@ -26,12 +27,12 @@ export async function POST(request: NextRequest) {
       author_id:    user.id,
       content_type: parsed.data.content_type,
       content_id:   parsed.data.content_id,
-      body:         parsed.data.body.trim(),
+      body:         sanitizeHtml(parsed.data.body.trim()),
       status:       'pending',
     })
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Failed to post comment' }, { status: 500 })
   return NextResponse.json({ comment: data }, { status: 201 })
 }

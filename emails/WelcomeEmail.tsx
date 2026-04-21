@@ -2,9 +2,10 @@ import * as React from 'react'
 
 interface Props {
   email: string
+  siteUrl?: string
 }
 
-export function WelcomeEmail({ email }: Props) {
+export function WelcomeEmail({ email, siteUrl = 'https://bossdaddylife.com' }: Props) {
   return (
     <html>
       <head>
@@ -43,7 +44,7 @@ export function WelcomeEmail({ email }: Props) {
                       <tr>
                         <td style={{ backgroundColor: '#CC5500', borderRadius: '8px' }}>
                           <a
-                            href='https://bossdaddylife.com/reviews'
+                            href={`${siteUrl}/reviews`}
                             style={{ display: 'inline-block', padding: '14px 28px', color: '#ffffff', fontWeight: 700, fontSize: '15px', textDecoration: 'none' }}
                           >
                             Browse Dad-Tested Reviews →
@@ -63,17 +64,17 @@ export function WelcomeEmail({ email }: Props) {
                   <td style={{ backgroundColor: '#0d0d0d', padding: '24px 40px', borderTop: '1px solid #1f1f1f' }}>
                     <p style={{ color: '#4b5563', fontSize: '12px', margin: '0 0 12px 0', lineHeight: '1.6' }}>
                       Follow us:{' '}
-                      <a href='https://x.com/bossdaddylife' style={{ color: '#6b7280', textDecoration: 'none' }}>
+                      <a href={`https://x.com/bossdaddylife`} style={{ color: '#6b7280', textDecoration: 'none' }}>
                         @bossdaddylife on X
                       </a>
                     </p>
                     <p style={{ color: '#4b5563', fontSize: '12px', margin: 0, lineHeight: '1.6' }}>
                       You&apos;re receiving this because you signed up at BossDaddyLife.com.<br />
-                      <a href='https://bossdaddylife.com' style={{ color: '#6b7280', textDecoration: 'none' }}>
+                      <a href={siteUrl} style={{ color: '#6b7280', textDecoration: 'none' }}>
                         BossDaddyLife.com
                       </a>
                       {' · '}
-                      <a href='https://bossdaddylife.com/affiliate-disclosure' style={{ color: '#6b7280', textDecoration: 'none' }}>
+                      <a href={`${siteUrl}/affiliate-disclosure`} style={{ color: '#6b7280', textDecoration: 'none' }}>
                         Affiliate Disclosure
                       </a>
                     </p>

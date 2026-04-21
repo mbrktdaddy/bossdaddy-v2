@@ -1,11 +1,15 @@
 import type { NextConfig } from 'next'
 
+const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
+  : 'fsxbertkzcigvkdyqgep.supabase.co'
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'm.media-amazon.com' },
-      { protocol: 'https', hostname: 'fsxbertkzcigvkdyqgep.supabase.co' },
+      { protocol: 'https', hostname: supabaseHostname },
     ],
   },
 
@@ -24,7 +28,7 @@ const nextConfig: NextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // unsafe-* required by Next.js
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: https://images.unsplash.com https://m.media-amazon.com https://fsxbertkzcigvkdyqgep.supabase.co",
+              `img-src 'self' data: blob: https://images.unsplash.com https://m.media-amazon.com https://${supabaseHostname}`,
               "font-src 'self' data:",
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com",
               "frame-ancestors 'none'",

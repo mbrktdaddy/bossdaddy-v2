@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { checkRateLimit } from '@/lib/rate-limit'
 
-// POST /api/articles/[id]/submit — transition draft → pending
+// POST /api/articles/[id]/submit — transition draft → pending, trigger moderation
 export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -40,7 +40,18 @@ export async function POST(
     .update({ status: 'pending' })
     .eq('id', id)
 
-  if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
+  if (updateError) return NextResponse.json({ error: 'Submission failed' }, { status: 500 })
+
+  // Trigger Claude moderation asynchronously (fire and forget)
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+  fetch(`${baseUrl}/api/claude/moderate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-internal-secret': process.env.INTERNAL_API_SECRET ?? '',
+    },
+    body: JSON.stringify({ articleId: id }),
+  }).catch((err) => console.error('Article moderation trigger failed:', err))
 
   return NextResponse.json({ success: true, status: 'pending' })
 }

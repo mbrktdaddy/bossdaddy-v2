@@ -14,9 +14,10 @@ function getLimiter(type: string): Ratelimit | null {
 
   const redis = Redis.fromEnv()
   const configs: Record<string, Ratelimit> = {
-    draft:      new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1 h'), prefix: 'bd_draft' }),
-    submit:     new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5,  '1 h'), prefix: 'bd_submit' }),
-    newsletter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(3,  '1 h'), prefix: 'bd_newsletter' }),
+    draft:      new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10,  '1 h'),  prefix: 'bd_draft' }),
+    submit:     new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5,   '1 h'),  prefix: 'bd_submit' }),
+    newsletter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(3,   '1 h'),  prefix: 'bd_newsletter' }),
+    view:       new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(120, '1 m'),  prefix: 'bd_view' }),
   }
 
   limiters[type] = configs[type] ?? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1 h'), prefix: `bd_${type}` })
@@ -25,7 +26,7 @@ function getLimiter(type: string): Ratelimit | null {
 
 export async function checkRateLimit(
   identifier: string,
-  type: 'draft' | 'submit' | 'newsletter' = 'draft'
+  type: 'draft' | 'submit' | 'newsletter' | 'view' = 'draft'
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
   const limiter = getLimiter(type)
   if (!limiter) return { success: true, remaining: 999, reset: 0 }

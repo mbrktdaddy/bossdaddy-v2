@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       from: FROM_EMAIL,
       to: parsed.data.email,
       subject: "You're in, Boss. Welcome to the crew. 🔥",
-      react: React.createElement(WelcomeEmail, { email: parsed.data.email }),
+      react: React.createElement(WelcomeEmail, { email: parsed.data.email, siteUrl }),
     })
   } catch (err) {
     // Don't fail the signup if email sending fails — subscriber is already saved

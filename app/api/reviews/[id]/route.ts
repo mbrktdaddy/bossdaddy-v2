@@ -7,16 +7,19 @@ import { detectAffiliateLinks } from '@/lib/affiliate'
 import { computeReadingTime } from '@/lib/reading-time'
 import { getResend, FROM_EMAIL } from '@/lib/resend'
 import { ModerationResultEmail } from '@/emails/ModerationResultEmail'
+import { CATEGORY_SLUGS } from '@/lib/categories'
 import * as React from 'react'
 import { z } from 'zod'
+
+const CategorySchema = z.enum(CATEGORY_SLUGS as [string, ...string[]])
 
 const UpdateSchema = z.object({
   title: z.string().min(10).max(120).optional(),
   product_name: z.string().min(2).max(120).optional(),
-  category: z.string().optional(),
+  category: CategorySchema.optional(),
   excerpt: z.string().max(200).optional(),
   content: z.string().min(100).optional(),
-  rating: z.number().int().min(1).max(5).optional(),
+  rating: z.number().min(1).max(10).optional(),
   pros: z.array(z.string()).optional(),
   cons: z.array(z.string()).optional(),
   disclosure_acknowledged: z.boolean().optional(),
@@ -94,7 +97,7 @@ export async function PUT(
     }
 
     const { data, error } = await admin.from('reviews').update(updateData).eq('id', id).select('*, author_id').single()
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) return NextResponse.json({ error: 'Moderation action failed' }, { status: 500 })
 
     revalidatePath('/')
     revalidatePath('/reviews')
@@ -165,7 +168,7 @@ export async function PUT(
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Update failed' }, { status: 500 })
   return NextResponse.json({ review: data })
 }
 
@@ -189,7 +192,10 @@ export async function DELETE(
     .eq('author_id', user.id)
     .in('status', ['draft', 'rejected'])
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Delete failed' }, { status: 500 })
+
+  revalidatePath('/reviews')
+  revalidatePath('/')
   return NextResponse.json({ success: true })
 }
 
