@@ -24,15 +24,18 @@ export default async function ProfilePage() {
   const isAuthor = role === 'author' || isAdmin
   const roleCfg  = ROLE_CONFIG[role] ?? ROLE_CONFIG.member
 
-  // Fetch all stats in parallel
+  // ── Stats + liked content IDs — all in parallel ──────────────────────────
   const [
     { count: reviewCount },
     { count: articleCount },
     { count: commentCount },
     { count: pendingCount },
+    { count: likesGiven },
     { data: myReviewIds },
     { data: myArticleIds },
     { data: myCommentIds },
+    { data: likedReviewLinks },
+    { data: likedArticleLinks },
   ] = await Promise.all([
     supabase.from('reviews').select('id', { count: 'exact', head: true })
       .eq('author_id', user!.id).eq('status', 'approved'),
@@ -42,18 +45,35 @@ export default async function ProfilePage() {
       .eq('author_id', user!.id),
     supabase.from('reviews').select('id', { count: 'exact', head: true })
       .eq('author_id', user!.id).in('status', ['draft', 'pending', 'rejected']),
+    supabase.from('likes').select('id', { count: 'exact', head: true })
+      .eq('user_id', user!.id),
     supabase.from('reviews').select('id').eq('author_id', user!.id),
     supabase.from('articles').select('id').eq('author_id', user!.id),
     supabase.from('comments').select('id').eq('author_id', user!.id),
+    // Most recently liked reviews (ID list, ordered by like date)
+    supabase.from('likes').select('content_id, created_at')
+      .eq('user_id', user!.id).eq('content_type', 'review')
+      .order('created_at', { ascending: false }).limit(10),
+    // Most recently liked articles (ID list, ordered by like date)
+    supabase.from('likes').select('content_id, created_at')
+      .eq('user_id', user!.id).eq('content_type', 'article')
+      .order('created_at', { ascending: false }).limit(10),
   ])
 
-  const allContentIds = [
-    ...(myReviewIds?.map(r => r.id) ?? []),
-    ...(myArticleIds?.map(a => a.id) ?? []),
-  ]
+  const allContentIds  = [...(myReviewIds?.map(r => r.id) ?? []), ...(myArticleIds?.map(a => a.id) ?? [])]
   const myCommentIdList = myCommentIds?.map(c => c.id) ?? []
 
-  const [{ count: likesReceived }, { count: commentLikesReceived }, { count: sharesReceived }] = await Promise.all([
+  const likedReviewIds  = likedReviewLinks?.map(l => l.content_id) ?? []
+  const likedArticleIds = likedArticleLinks?.map(l => l.content_id) ?? []
+
+  // ── Received stats + liked content details ────────────────────────────────
+  const [
+    { count: likesReceived },
+    { count: commentLikesReceived },
+    { count: sharesReceived },
+    { data: likedReviews },
+    { data: likedArticles },
+  ] = await Promise.all([
     allContentIds.length
       ? supabase.from('likes').select('id', { count: 'exact', head: true })
           .in('content_type', ['review', 'article']).in('content_id', allContentIds)
@@ -63,9 +83,25 @@ export default async function ProfilePage() {
           .eq('content_type', 'comment').in('content_id', myCommentIdList)
       : Promise.resolve({ count: 0 }),
     myCommentIdList.length
-      ? supabase.from('comment_shares').select('id', { count: 'exact', head: true }).in('comment_id', myCommentIdList)
+      ? supabase.from('comment_shares').select('id', { count: 'exact', head: true })
+          .in('comment_id', myCommentIdList)
       : Promise.resolve({ count: 0 }),
+    likedReviewIds.length
+      ? supabase.from('reviews').select('id, slug, title, product_name')
+          .in('id', likedReviewIds).eq('status', 'approved').eq('is_visible', true)
+      : Promise.resolve({ data: [] }),
+    likedArticleIds.length
+      ? supabase.from('articles').select('id, slug, title')
+          .in('id', likedArticleIds).eq('status', 'approved').eq('is_visible', true)
+      : Promise.resolve({ data: [] }),
   ])
+
+  // Re-sort fetched content to match original like order
+  const reviewMap  = new Map(likedReviews?.map(r => [r.id, r]))
+  const articleMap = new Map(likedArticles?.map(a => [a.id, a]))
+  const orderedLikedReviews  = likedReviewIds.map(id => reviewMap.get(id)).filter(Boolean)
+  const orderedLikedArticles = likedArticleIds.map(id => articleMap.get(id)).filter(Boolean)
+  const hasLikedContent = orderedLikedReviews.length > 0 || orderedLikedArticles.length > 0
 
   const memberSince = profile?.created_at
     ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
@@ -101,7 +137,6 @@ export default async function ProfilePage() {
 
         <EditUsernameForm current={profile?.username ?? ''} />
 
-        {/* Email */}
         <div className="mt-5 pt-5 border-t border-gray-800">
           <label className="block text-xs text-gray-500 uppercase tracking-widest mb-2">Email</label>
           <EditEmailForm current={user!.email ?? ''} />
@@ -111,7 +146,7 @@ export default async function ProfilePage() {
       {/* Activity stats */}
       <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6">
         <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Activity</p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {isAuthor && (
             <>
               <div className="text-center">
@@ -129,11 +164,15 @@ export default async function ProfilePage() {
             <p className="text-xs text-gray-500 mt-1">Comments Left</p>
           </div>
           <div className="text-center">
+            <p className="text-2xl font-black text-orange-400">{likesGiven ?? 0}</p>
+            <p className="text-xs text-gray-500 mt-1">Likes Given</p>
+          </div>
+          <div className="text-center">
             <p className="text-2xl font-black text-red-400">{commentLikesReceived ?? 0}</p>
             <p className="text-xs text-gray-500 mt-1">Comment Likes</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-black text-orange-400">{sharesReceived ?? 0}</p>
+            <p className="text-2xl font-black text-gray-400">{sharesReceived ?? 0}</p>
             <p className="text-xs text-gray-500 mt-1">Comments Shared</p>
           </div>
           {isAuthor && (
@@ -143,7 +182,7 @@ export default async function ProfilePage() {
             </div>
           )}
           {isAuthor && (pendingCount ?? 0) > 0 && (
-            <div className="col-span-2 sm:col-span-4 pt-4 border-t border-gray-800 text-center">
+            <div className="col-span-2 sm:col-span-3 pt-4 border-t border-gray-800 text-center">
               <p className="text-sm text-yellow-400 font-semibold">
                 {pendingCount} item{pendingCount !== 1 ? 's' : ''} in draft / pending / rejected
               </p>
@@ -152,7 +191,63 @@ export default async function ProfilePage() {
         </div>
       </div>
 
-      {/* Author/Admin — public profile + quick content links */}
+      {/* Liked content — browsable history */}
+      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6">
+        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">
+          Liked Content
+        </p>
+
+        {!hasLikedContent ? (
+          <p className="text-sm text-gray-600 text-center py-4">
+            Nothing liked yet — heart a review or article and it will appear here.
+          </p>
+        ) : (
+          <div className="space-y-1">
+            {orderedLikedReviews.map((r) => r && (
+              <Link
+                key={r.id}
+                href={`/reviews/${r.slug}`}
+                className="flex items-center gap-3 p-3 bg-gray-950 border border-gray-800 hover:border-orange-700/50 rounded-xl transition-colors group"
+              >
+                <span className="text-xs px-2 py-0.5 rounded-full bg-orange-950/60 text-orange-400 border border-orange-900/60 shrink-0">
+                  Review
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm text-gray-300 group-hover:text-white transition-colors truncate">
+                    {r.title}
+                  </p>
+                  <p className="text-xs text-gray-600 truncate">{r.product_name}</p>
+                </div>
+                <svg className="w-4 h-4 text-gray-700 group-hover:text-orange-400 shrink-0 ml-auto transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            ))}
+
+            {orderedLikedArticles.map((a) => a && (
+              <Link
+                key={a.id}
+                href={`/articles/${a.slug}`}
+                className="flex items-center gap-3 p-3 bg-gray-950 border border-gray-800 hover:border-orange-700/50 rounded-xl transition-colors group"
+              >
+                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-950/60 text-blue-400 border border-blue-900/60 shrink-0">
+                  Article
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm text-gray-300 group-hover:text-white transition-colors truncate">
+                    {a.title}
+                  </p>
+                </div>
+                <svg className="w-4 h-4 text-gray-700 group-hover:text-orange-400 shrink-0 ml-auto transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Author/Admin — public profile + content management */}
       {isAuthor && (
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6">
           <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Content</p>
