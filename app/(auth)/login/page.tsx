@@ -9,7 +9,7 @@ function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const rawNext = searchParams.get('next') ?? ''
-  const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/dashboard/reviews'
+  const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -22,13 +22,22 @@ function LoginForm() {
     setError(null)
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
       setError(error.message)
       setLoading(false)
       return
     }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', data.user.id)
+      .single()
+
+    const username = profile?.username ?? email.split('@')[0]
+    sessionStorage.setItem('just_signed_in', username)
 
     router.push(next)
     router.refresh()

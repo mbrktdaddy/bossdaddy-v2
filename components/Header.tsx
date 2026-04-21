@@ -115,7 +115,7 @@ export default function Header() {
             </div>
           ) : (
             <Link
-              href="/login"
+              href={`/login?next=${encodeURIComponent(pathname)}`}
               className="hidden md:block text-sm px-4 py-2 rounded-lg border border-gray-700 text-gray-300 hover:border-orange-500 hover:text-white transition-colors"
             >
               Sign In
@@ -192,7 +192,7 @@ export default function Header() {
               </>
             ) : (
               <Link
-                href="/login"
+                href={`/login?next=${encodeURIComponent(pathname)}`}
                 onClick={() => setMobileOpen(false)}
                 className="mt-2 px-4 py-3 rounded-xl text-sm font-semibold text-center bg-orange-600 hover:bg-orange-500 text-white transition-colors"
               >
