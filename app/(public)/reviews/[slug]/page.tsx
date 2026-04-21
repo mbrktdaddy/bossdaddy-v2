@@ -94,7 +94,7 @@ export default async function ReviewPage({ params }: Props) {
       <ViewTracker id={review.id} type="review" />
 
       <div className="max-w-6xl mx-auto px-6 py-12">
-        <div className="flex flex-col xl:flex-row gap-12 items-start">
+        <div className="flex flex-col xl:flex-row gap-12 xl:items-start">
 
         {/* ── Main content ──────────────────────────────────────────────── */}
         <main className="flex-1 min-w-0">
