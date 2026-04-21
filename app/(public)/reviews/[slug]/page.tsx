@@ -93,7 +93,7 @@ export default async function ReviewPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <ViewTracker id={review.id} type="review" />
 
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="w-full max-w-6xl mx-auto px-6 py-12 overflow-x-clip">
         <div className="flex flex-col xl:flex-row gap-12 xl:items-start">
 
         {/* ── Main content ──────────────────────────────────────────────── */}
