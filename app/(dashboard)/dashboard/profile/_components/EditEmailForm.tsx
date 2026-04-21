@@ -45,7 +45,7 @@ export default function EditEmailForm({ current }: { current: string }) {
     const { error: verifyErr } = await supabase.auth.verifyOtp({
       email: current,
       token: otp.trim(),
-      type: 'reauthentication',
+      type: 'email' as const,
     })
 
     if (verifyErr) {
