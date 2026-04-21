@@ -20,19 +20,31 @@ export default function RegisterPage() {
     setError(null)
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { username } },
     })
 
     if (error) {
-      setError(error.message)
+      if (error.message.toLowerCase().includes('already registered') || error.message.toLowerCase().includes('already exists')) {
+        setError('already_exists')
+      } else {
+        setError(error.message)
+      }
       setLoading(false)
       return
     }
 
-    router.push('/dashboard/reviews')
+    // Supabase returns user: null when the email is already registered
+    // (silent duplicate to prevent enumeration)
+    if (!data.user) {
+      setError('already_exists')
+      setLoading(false)
+      return
+    }
+
+    router.push('/')
     router.refresh()
   }
 
@@ -91,9 +103,18 @@ export default function RegisterPage() {
           </div>
 
           {error && (
-            <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-2">
-              {error}
-            </p>
+            <div className="text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">
+              {error === 'already_exists' ? (
+                <p className="text-red-400">
+                  An account with that email already exists.{' '}
+                  <Link href={`/login?next=/dashboard/reviews`} className="text-orange-400 hover:text-orange-300 font-semibold">
+                    Sign in instead →
+                  </Link>
+                </p>
+              ) : (
+                <p className="text-red-400">{error}</p>
+              )}
+            </div>
           )}
 
           <button
