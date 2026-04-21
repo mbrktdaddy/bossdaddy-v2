@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 interface Props {
   contentType: 'review' | 'article'
@@ -11,6 +12,7 @@ interface Props {
 
 export default function CommentForm({ contentType, contentId }: Props) {
   const router = useRouter()
+  const pathname = usePathname()
   const [body, setBody]             = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted]   = useState<'approved' | 'pending' | false>(false)
@@ -20,9 +22,18 @@ export default function CommentForm({ contentType, contentId }: Props) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!body.trim()) return
-    setSubmitting(true)
     setError(null)
     setNeedsAuth(false)
+
+    // Check auth client-side before hitting the server
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      setNeedsAuth(true)
+      return
+    }
+
+    setSubmitting(true)
 
     try {
       const res = await fetch('/api/comments', {
@@ -78,7 +89,7 @@ export default function CommentForm({ contentType, contentId }: Props) {
         <p className="text-gray-400 text-sm mb-4">You need to be signed in to leave a comment.</p>
         <div className="flex items-center gap-3">
           <Link
-            href="/login"
+            href={`/login?next=${encodeURIComponent(pathname)}`}
             className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold rounded-xl transition-colors"
           >
             Sign In
