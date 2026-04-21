@@ -5,7 +5,7 @@ import { z } from 'zod'
 const Schema = z.object({ email: z.string().email() })
 
 export async function POST(request: NextRequest) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bossdaddylife.com'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
 
   let email = ''
   const contentType = request.headers.get('content-type') ?? ''
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
 // GET /api/newsletter/unsubscribe?email=xxx — one-click from email links
 export async function GET(request: NextRequest) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bossdaddylife.com'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   const { searchParams } = new URL(request.url)
   const email = searchParams.get('email') ?? ''
 

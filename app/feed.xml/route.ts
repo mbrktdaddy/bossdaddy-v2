@@ -4,7 +4,7 @@ export const revalidate = 3600
 
 export async function GET() {
   const supabase = await createClient()
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bossdaddylife.com'
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
 
   const [{ data: reviews }, { data: articles }] = await Promise.all([
     supabase

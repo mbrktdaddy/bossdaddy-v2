@@ -9,7 +9,7 @@ import * as React from 'react'
 const Schema = z.object({ email: z.string().email() })
 
 export async function POST(request: NextRequest) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bossdaddylife.com'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'anonymous'
 
   const { success } = await checkRateLimit(`newsletter:${ip}`, 'newsletter')

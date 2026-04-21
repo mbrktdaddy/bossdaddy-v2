@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!data) return { title: 'Article Not Found' }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bossdaddylife.com'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   const canonicalUrl = `${siteUrl}/articles/${slug}`
   const ogImage = `${siteUrl}/api/og?title=${encodeURIComponent(data.title)}&type=article`
 

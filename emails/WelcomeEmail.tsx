@@ -5,7 +5,7 @@ interface Props {
   siteUrl?: string
 }
 
-export function WelcomeEmail({ email, siteUrl = 'https://bossdaddylife.com' }: Props) {
+export function WelcomeEmail({ email, siteUrl = 'https://www.bossdaddylife.com' }: Props) {
   return (
     <html>
       <head>
