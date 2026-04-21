@@ -21,6 +21,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Dad Guides, Skills & Advice — Boss Daddy Life',
   },
+  alternates: { canonical: '/articles' },
 }
 
 interface Props {

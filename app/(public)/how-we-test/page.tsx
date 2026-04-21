@@ -4,6 +4,7 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'How We Test — Boss Daddy Life',
   description: 'Real products, real testing, real dads. Here\'s exactly how Boss Daddy Life reviews gear and earns the Boss Daddy Approved designation.',
+  alternates: { canonical: '/how-we-test' },
 }
 
 const PILLAR_TESTING = [

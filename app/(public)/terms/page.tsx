@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description: 'The ground rules for using bossdaddylife.com — content ownership, acceptable use, liability, and your rights as a reader. Straight talk, not legalese.',
   openGraph: { title: 'Terms of Use — Boss Daddy Life', images: [{ url: '/api/og?title=Terms+of+Use&type=article', width: 1200, height: 630 }] },
   twitter: { card: 'summary_large_image' },
+  alternates: { canonical: '/terms' },
 }
 
 const LAST_UPDATED = 'April 19, 2026'

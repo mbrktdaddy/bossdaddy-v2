@@ -8,6 +8,7 @@ export const revalidate = 3600
 export const metadata: Metadata = {
   title: 'About — Boss Daddy Life',
   description: 'The real story behind Boss Daddy Life. A first-time dad on a mission to be the best version of himself — and help other dads do the same.',
+  alternates: { canonical: '/about' },
 }
 
 export default async function AboutPage() {

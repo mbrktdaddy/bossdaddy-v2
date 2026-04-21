@@ -19,6 +19,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Boss Daddy Gear List — Top-Rated Dad Gear',
   },
+  alternates: { canonical: '/shop' },
 }
 
 

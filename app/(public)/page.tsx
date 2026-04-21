@@ -14,6 +14,7 @@ export const revalidate = 3600
 export const metadata: Metadata = {
   title: 'Boss Daddy Life — Dad Like a Boss',
   description: 'Honest gear reviews, real dad skills, and a brotherhood for men who show up every day. Zero sponsors. Zero fluff. Real dads + smart tech.',
+  alternates: { canonical: '/' },
 }
 
 

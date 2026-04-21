@@ -4,6 +4,7 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'Editorial Standards — Boss Daddy Life',
   description: 'How reviews earn "Boss Daddy Approved," how we use AI, and the rules every contributor follows. No paid placements, no sponsored ratings.',
+  alternates: { canonical: '/editorial-standards' },
 }
 
 const LAST_UPDATED = 'April 17, 2026'
