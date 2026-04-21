@@ -1,10 +1,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { CATEGORIES } from '@/lib/categories'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import RatingScore from '@/components/RatingScore'
 import HeroCarousel from '@/components/HeroCarousel'
+import CodeRedirect from './_components/CodeRedirect'
 import type { Metadata } from 'next'
 
 export const revalidate = 3600
@@ -54,6 +56,9 @@ export default async function HomePage() {
 
   return (
     <>
+      <Suspense fallback={null}>
+        <CodeRedirect />
+      </Suspense>
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden border-b border-gray-800/60">
