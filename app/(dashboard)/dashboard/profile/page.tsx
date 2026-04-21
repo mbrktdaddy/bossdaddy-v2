@@ -44,7 +44,7 @@ export default async function ProfilePage() {
     supabase.from('comments').select('id', { count: 'exact', head: true })
       .eq('author_id', user!.id),
     supabase.from('reviews').select('id', { count: 'exact', head: true })
-      .eq('author_id', user!.id).in('status', ['draft', 'pending', 'rejected']),
+      .eq('author_id', user!.id).in('status', ['draft', 'pending']),
     supabase.from('likes').select('id', { count: 'exact', head: true })
       .eq('user_id', user!.id),
     supabase.from('reviews').select('id').eq('author_id', user!.id),
@@ -184,7 +184,7 @@ export default async function ProfilePage() {
           {isAuthor && (pendingCount ?? 0) > 0 && (
             <div className="col-span-2 sm:col-span-3 pt-4 border-t border-gray-800 text-center">
               <p className="text-sm text-yellow-400 font-semibold">
-                {pendingCount} item{pendingCount !== 1 ? 's' : ''} in draft / pending / rejected
+                {pendingCount} item{pendingCount !== 1 ? 's' : ''} in draft / awaiting approval
               </p>
             </div>
           )}
