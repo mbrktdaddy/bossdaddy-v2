@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getCategoryBySlug } from '@/lib/categories'
+import ContentActions from '../_components/ContentActions'
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   draft:    { label: 'Draft',    className: 'bg-gray-800 text-gray-400 border border-gray-700' },
@@ -127,6 +128,8 @@ export default async function MyArticlesPage() {
                       View Live →
                     </Link>
                   )}
+
+                  <ContentActions id={a.id} status={a.status} contentType="articles" />
                 </div>
               </div>
             )

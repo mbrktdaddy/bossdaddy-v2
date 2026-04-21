@@ -199,4 +199,28 @@ export async function DELETE(
   return NextResponse.json({ success: true })
 }
 
+// PATCH /api/reviews/[id] — author recalls pending review back to draft
+export async function PATCH(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { error } = await supabase
+    .from('reviews')
+    .update({ status: 'draft' })
+    .eq('id', id)
+    .eq('author_id', user.id)
+    .eq('status', 'pending')
+
+  if (error) return NextResponse.json({ error: 'Recall failed' }, { status: 500 })
+
+  revalidatePath('/dashboard/reviews')
+  return NextResponse.json({ success: true })
+}
+
 // POST /api/reviews/[id]/submit handled via status transition
