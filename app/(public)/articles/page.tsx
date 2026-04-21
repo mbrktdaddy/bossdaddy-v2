@@ -10,8 +10,17 @@ import type { Metadata } from 'next'
 export const revalidate = 3600
 
 export const metadata: Metadata = {
-  title: 'Articles — Boss Daddy Life',
-  description: 'Dad guides, how-tos, and honest advice. No fluff — just what works.',
+  title: 'Dad Guides, Skills & Advice',
+  description: 'Real guides for real dads — gear how-tos, backyard projects, grilling tips, and practical advice from a dad who actually tested it. No fluff, just what works.',
+  openGraph: {
+    title: 'Dad Guides, Skills & Advice — Boss Daddy Life',
+    description: 'Real guides for real dads. Gear how-tos, backyard projects, grilling tips, and practical advice. No fluff.',
+    images: [{ url: '/api/og?title=Dad+Guides+%26+Advice&type=article', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Dad Guides, Skills & Advice — Boss Daddy Life',
+  },
 }
 
 interface Props {

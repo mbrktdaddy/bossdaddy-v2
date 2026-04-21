@@ -26,13 +26,14 @@ export const metadata: Metadata = {
     template: '%s | Boss Daddy',
   },
   description:
-    'Honest, dad-tested product reviews and recommendations. No corporate fluff — just real results from a real dad.',
+    'Honest, dad-tested product reviews and recommendations. No corporate fluff — just real results from a real dad who buys, tests, and tells it straight.',
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bossdaddylife.com'
+    process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   ),
   openGraph: {
-    siteName: 'Boss Daddy',
+    siteName: 'Boss Daddy Life',
     type: 'website',
+    images: [{ url: '/api/og?title=Boss+Daddy+Life&type=review', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',

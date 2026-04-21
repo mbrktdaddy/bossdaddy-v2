@@ -10,8 +10,17 @@ import type { Metadata } from 'next'
 export const revalidate = 3600
 
 export const metadata: Metadata = {
-  title: 'All Reviews',
-  description: 'Browse all dad-tested, honestly-rated product reviews from Boss Daddy Life.',
+  title: 'Dad-Tested Product Reviews',
+  description: 'Every product on Boss Daddy Life is bought with our own money, used in real life, and rated honestly. Browse gear reviews across tools, grills, outdoor, tech, and more.',
+  openGraph: {
+    title: 'Dad-Tested Product Reviews — Boss Daddy Life',
+    description: 'Every product bought with our own money, used in real life, and rated honestly. No sponsored posts. No fluff.',
+    images: [{ url: '/api/og?title=Dad-Tested+Product+Reviews&type=review', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Dad-Tested Product Reviews — Boss Daddy Life',
+  },
 }
 
 interface Props {

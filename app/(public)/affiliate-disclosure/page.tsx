@@ -3,7 +3,9 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Affiliate Disclosure — Boss Daddy Life',
-  description: 'How Boss Daddy Life makes money, how affiliate links work, and why commissions never influence what we recommend.',
+  description: 'How Boss Daddy Life makes money, how affiliate links work, and why commissions never influence our recommendations. We buy everything ourselves first.',
+  openGraph: { title: 'Affiliate Disclosure — Boss Daddy Life', images: [{ url: '/api/og?title=Affiliate+Disclosure&type=article', width: 1200, height: 630 }] },
+  twitter: { card: 'summary_large_image' },
 }
 
 const LAST_UPDATED = 'April 19, 2026'
