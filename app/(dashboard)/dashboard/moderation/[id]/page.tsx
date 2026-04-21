@@ -115,7 +115,7 @@ export default function ModerationDetailPage({
         <div className="min-w-0 pr-6">
           <h1 className="text-xl font-black leading-tight">{review.title}</h1>
           <p className="text-gray-400 text-sm mt-1">
-            {review.product_name} · {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+            {review.product_name} · {review.rating}/10
           </p>
         </div>
         {score !== null && <ScoreRing score={score} />}
