@@ -193,7 +193,7 @@ export default async function ReviewPage({ params }: Props) {
         )}
 
         {/* Review body */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto min-w-0 w-full">
           <div
             className="prose prose-invert prose-orange max-w-none
               prose-headings:font-black prose-headings:tracking-tight

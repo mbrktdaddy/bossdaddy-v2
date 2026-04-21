@@ -45,11 +45,15 @@
   }
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
-  overflow-x: clip;
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4 {
