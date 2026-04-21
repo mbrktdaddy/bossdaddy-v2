@@ -175,7 +175,7 @@ export default async function AboutPage() {
         </div>
       </div>
 
-      {/* CTA */}
+      {/* CTA + Newsletter */}
       <div className="bg-gradient-to-br from-orange-950/40 to-gray-900 border border-orange-800/30 rounded-3xl px-8 py-10 text-center">
         <h2 className="text-2xl font-black mb-3">Built for Dads Who Show Up.</h2>
         <p className="text-gray-400 mb-2">
@@ -186,11 +186,36 @@ export default async function AboutPage() {
         <p className="text-gray-500 text-sm mb-8">
           Welcome to the Boss Daddy crew. Now let&apos;s dad like a boss — together.
         </p>
-        <div className="flex items-center justify-center gap-4 flex-wrap">
-          <Link href="/reviews" className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors">
+
+        {/* Newsletter signup */}
+        <div className="mb-8">
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Join the Crew</p>
+          <p className="text-gray-400 text-sm mb-4">
+            Weekly gear picks, honest reviews, and dad-life wins. No spam. No sponsors. Just the crew.
+          </p>
+          <form action="/api/newsletter/subscribe" method="POST" className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <input
+              type="email"
+              name="email"
+              required
+              placeholder="your@email.com"
+              className="flex-1 px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+            />
+            <button
+              type="submit"
+              className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors text-sm whitespace-nowrap"
+            >
+              Join Free
+            </button>
+          </form>
+          <p className="text-xs text-gray-600 mt-3">Unsubscribe anytime. We mean it.</p>
+        </div>
+
+        <div className="border-t border-gray-800/60 pt-6 flex items-center justify-center gap-4 flex-wrap">
+          <Link href="/reviews" className="px-6 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 font-semibold rounded-xl transition-colors text-sm">
             Browse Reviews
           </Link>
-          <Link href="/articles" className="px-6 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 font-semibold rounded-xl transition-colors">
+          <Link href="/articles" className="px-6 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 font-semibold rounded-xl transition-colors text-sm">
             Read Articles
           </Link>
         </div>
