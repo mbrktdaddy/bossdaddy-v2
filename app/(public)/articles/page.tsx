@@ -50,19 +50,21 @@ export default async function ArticlesPage({ searchParams }: Props) {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide mb-12 pb-1">
-          <span className="shrink-0 whitespace-nowrap px-4 py-3 rounded-full text-sm font-medium bg-orange-600 text-white">
-            All
-          </span>
-          {CATEGORIES.map((c) => (
-            <Link
-              key={c.slug}
-              href={`/articles?category=${c.slug}`}
-              className="shrink-0 whitespace-nowrap px-4 py-3 rounded-full text-sm font-medium bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white transition-colors"
-            >
-              {c.icon} {c.label}
-            </Link>
-          ))}
+        <div className="-mx-6 overflow-x-auto scrollbar-hide mb-12">
+          <div className="flex items-center gap-2 px-6 pb-1">
+            <span className="shrink-0 whitespace-nowrap px-4 py-3 rounded-full text-sm font-medium bg-orange-600 text-white">
+              All
+            </span>
+            {CATEGORIES.map((c) => (
+              <Link
+                key={c.slug}
+                href={`/articles?category=${c.slug}`}
+                className="shrink-0 whitespace-nowrap px-4 py-3 rounded-full text-sm font-medium bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white transition-colors"
+              >
+                {c.icon} {c.label}
+              </Link>
+            ))}
+          </div>
         </div>
 
         {sections.length === 0 ? (
@@ -125,26 +127,28 @@ export default async function ArticlesPage({ searchParams }: Props) {
         </p>
       </div>
 
-      <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide mb-10 pb-1">
-        <Link
-          href="/articles"
-          className="shrink-0 whitespace-nowrap px-4 py-3 rounded-full text-sm font-medium bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white transition-colors"
-        >
-          All
-        </Link>
-        {CATEGORIES.map((c) => (
+      <div className="-mx-6 overflow-x-auto scrollbar-hide mb-10">
+        <div className="flex items-center gap-2 px-6 pb-1">
           <Link
-            key={c.slug}
-            href={`/articles?category=${c.slug}`}
-            className={`shrink-0 whitespace-nowrap px-4 py-3 rounded-full text-sm font-medium transition-colors ${
-              category === c.slug
-                ? 'bg-orange-600 text-white'
-                : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'
-            }`}
+            href="/articles"
+            className="shrink-0 whitespace-nowrap px-4 py-3 rounded-full text-sm font-medium bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white transition-colors"
           >
-            {c.icon} {c.label}
+            All
           </Link>
-        ))}
+          {CATEGORIES.map((c) => (
+            <Link
+              key={c.slug}
+              href={`/articles?category=${c.slug}`}
+              className={`shrink-0 whitespace-nowrap px-4 py-3 rounded-full text-sm font-medium transition-colors ${
+                category === c.slug
+                  ? 'bg-orange-600 text-white'
+                  : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'
+              }`}
+            >
+              {c.icon} {c.label}
+            </Link>
+          ))}
+        </div>
       </div>
 
       {!articles.length ? (

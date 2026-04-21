@@ -56,30 +56,32 @@ export default async function ShopPage({ searchParams }: Props) {
       </div>
 
       {/* Category filter tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide mb-10 pb-1">
-        <Link
-          href="/shop"
-          className={`shrink-0 whitespace-nowrap px-4 py-3 rounded-full text-sm font-medium transition-colors ${
-            !category
-              ? 'bg-orange-600 text-white'
-              : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'
-          }`}
-        >
-          All Gear
-        </Link>
-        {CATEGORIES.map((c) => (
+      <div className="-mx-6 overflow-x-auto scrollbar-hide mb-10">
+        <div className="flex items-center gap-2 px-6 pb-1">
           <Link
-            key={c.slug}
-            href={`/shop?category=${c.slug}`}
+            href="/shop"
             className={`shrink-0 whitespace-nowrap px-4 py-3 rounded-full text-sm font-medium transition-colors ${
-              category === c.slug
+              !category
                 ? 'bg-orange-600 text-white'
                 : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'
             }`}
           >
-            {c.icon} {c.label}
+            All Gear
           </Link>
-        ))}
+          {CATEGORIES.map((c) => (
+            <Link
+              key={c.slug}
+              href={`/shop?category=${c.slug}`}
+              className={`shrink-0 whitespace-nowrap px-4 py-3 rounded-full text-sm font-medium transition-colors ${
+                category === c.slug
+                  ? 'bg-orange-600 text-white'
+                  : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'
+              }`}
+            >
+              {c.icon} {c.label}
+            </Link>
+          ))}
+        </div>
       </div>
 
       {/* Gear grid */}
