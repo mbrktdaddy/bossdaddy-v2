@@ -35,24 +35,32 @@ export async function POST(request: NextRequest) {
 
   const { topic, category, keyPoints, targetAudience } = parsed.data
 
-  const prompt = `Write a helpful dad-focused article on the following topic:
+  const prompt = `Write a dad-focused article on this topic:
 
 Topic: ${topic}
 Category: ${category}
-Key Points to Cover: ${keyPoints.join(', ')}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}
+Key Points: ${keyPoints.join(', ')}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}
+
+STRUCTURE REQUIREMENTS:
+- Introduction: 2–3 sentences that hook the reader with a real scenario (first-person dad)
+- Sections: 3–5 sections, each 150–250 words, with a clear practical takeaway
+- Conclusion: 1–2 paragraphs with a specific next step or recommendation
+- Separate paragraphs within each section with \\n\\n
+
+SEO: Include the main topic phrase naturally in the intro and at least one section heading.
 
 Return JSON with this exact shape:
 {
-  "title": "string (compelling, specific title — max 80 chars)",
-  "excerpt": "string (1-2 sentence hook for the article card — max 160 chars)",
-  "introduction": "string (2-3 engaging opening sentences in first-person dad voice)",
+  "title": "string (specific, useful title — max 80 chars, include the topic keyword)",
+  "excerpt": "string (one punchy sentence for the article card — max 160 chars)",
+  "introduction": "string (2–3 sentences, first-person dad opening a real situation)",
   "sections": [
-    { "heading": "string", "body": "string (2-3 paragraphs of useful content)" }
+    { "heading": "string (clear, action-oriented heading)", "body": "string (150–250 words, paragraphs separated by \\n\\n)" }
   ],
-  "conclusion": "string (1-2 paragraph wrap-up with a clear takeaway or next step)",
+  "conclusion": "string (1–2 paragraphs with a clear next step, separated by \\n\\n if 2 paragraphs)",
   "imagePrompts": {
-    "hero": "string (DALL-E 3 prompt — write as if describing a stock photo: specific objects, real-world setting, natural daylight or warm indoor lighting, clean uncluttered composition, no people, no text, under 200 chars. Style: editorial photography, not illustration or fantasy.)",
-    "sections": ["string", ...] (one prompt per section — same stock-photo rules: real objects in realistic settings, natural lighting, no people, no text, no artistic effects, under 200 chars each)
+    "hero": "string (DALL-E 3 prompt: specific real-world objects, natural daylight or warm indoor light, clean composition, no people, no text, under 180 chars, style: editorial photography)",
+    "sections": ["string"] (one prompt for the first section only — same photo-realistic rules, no people, no text, under 180 chars)
   }
 }`
 
@@ -75,7 +83,7 @@ Return JSON with this exact shape:
 
     // Generate hero + section images in parallel (cap sections at 3)
     const heroPrompt: string = draft.imagePrompts?.hero ?? `Photorealistic lifestyle photo for a dad-focused article about ${topic}, no people, objects and setting only`
-    const sectionPrompts: string[] = (draft.imagePrompts?.sections ?? []).slice(0, 3)
+    const sectionPrompts: string[] = (draft.imagePrompts?.sections ?? []).slice(0, 1)
 
     const results = await Promise.allSettled([
       generateAndUploadImage(heroPrompt, 'article-images', '1792x1024'),

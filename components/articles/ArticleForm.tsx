@@ -33,8 +33,13 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
 
   // AI draft generation
   const [draftLoading, setDraftLoading] = useState(false)
+  const [draftStep, setDraftStep] = useState<'content' | 'images' | null>(null)
   const [draftTopic, setDraftTopic] = useState('')
   const [draftKeyPoints, setDraftKeyPoints] = useState('')
+
+  // Prompt helper
+  const [suggestInput, setSuggestInput] = useState('')
+  const [suggestLoading, setSuggestLoading] = useState(false)
 
   // AI refine
   const [refineLoading, setRefineLoading] = useState(false)
@@ -46,6 +51,7 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
   async function generateDraft() {
     if (!draftTopic) { setError('Enter a topic first'); return }
     setDraftLoading(true)
+    setDraftStep('content')
     setError(null)
 
     const res = await fetch('/api/claude/article-draft', {
@@ -58,8 +64,9 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
       }),
     })
 
+    setDraftStep('images')
     const json = await res.json()
-    if (!res.ok) { setError(json.error); setDraftLoading(false); return }
+    if (!res.ok) { setError(json.error); setDraftLoading(false); setDraftStep(null); return }
 
     const { draft, images } = json
     if (draft.title) setTitle(draft.title)
@@ -74,13 +81,32 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
             const imgHtml = sectionUrls[i]
               ? `\n<figure><img src="${sectionUrls[i]}" alt="${s.heading}" /></figure>`
               : ''
-            return `<h2>${s.heading}</h2>\n<p>${s.body}</p>${imgHtml}`
+            const bodyHtml = s.body.split(/\n\n+/).map((p: string) => `<p>${p.trim()}</p>`).join('\n')
+            return `<h2>${s.heading}</h2>\n${bodyHtml}${imgHtml}`
           }
         ),
         draft.conclusion ? `<h2>Wrapping Up</h2>\n<p>${draft.conclusion}</p>` : '',
       ].filter(Boolean).join('\n\n')
     )
     setDraftLoading(false)
+    setDraftStep(null)
+  }
+
+  async function suggestPrompt() {
+    if (!suggestInput.trim()) return
+    setSuggestLoading(true)
+    setError(null)
+    const res = await fetch('/api/claude/suggest-prompt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: suggestInput, type: 'article' }),
+    })
+    const json = await res.json()
+    if (!res.ok) { setError(json.error); setSuggestLoading(false); return }
+    if (json.topic) setDraftTopic(json.topic)
+    if (json.keyPoints?.length) setDraftKeyPoints(json.keyPoints.join(', '))
+    setSuggestInput('')
+    setSuggestLoading(false)
   }
 
   async function refineContent() {
@@ -203,6 +229,30 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
       <div className="bg-gray-900 border border-orange-900/40 rounded-xl p-5">
         <p className="text-sm font-semibold text-orange-400 mb-1">AI Draft Generator</p>
         <p className="text-xs text-gray-500 mb-3">Enter your topic and key points, then generate a full article draft</p>
+
+        {/* Prompt Helper */}
+        <div className="mb-3 pb-3 border-b border-gray-800">
+          <p className="text-xs text-gray-600 mb-2">Have a rough idea? Describe it and Claude will suggest the topic + key points for you.</p>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="text"
+              value={suggestInput}
+              onChange={(e) => setSuggestInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && suggestPrompt()}
+              placeholder="e.g. backyard BBQ tips for beginners, summer grilling"
+              className="flex-1 px-3 py-2 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+            />
+            <button
+              type="button"
+              onClick={suggestPrompt}
+              disabled={suggestLoading || !suggestInput.trim()}
+              className="px-3 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-gray-300 text-xs font-medium rounded-lg transition-colors sm:whitespace-nowrap"
+            >
+              {suggestLoading ? 'Suggesting...' : '✦ Suggest prompt'}
+            </button>
+          </div>
+        </div>
+
         <div className="space-y-3">
           <input
             type="text"
@@ -211,7 +261,7 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
             placeholder="Article topic (e.g. How to set up the perfect backyard BBQ)"
             className="w-full px-4 py-2.5 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <input
               type="text"
               value={draftKeyPoints}
@@ -223,9 +273,9 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
               type="button"
               onClick={generateDraft}
               disabled={draftLoading || !draftTopic}
-              className="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
+              className="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition-colors sm:whitespace-nowrap"
             >
-              {draftLoading ? 'Generating...' : 'Generate Draft'}
+              {draftStep === 'content' ? '✍️ Writing content...' : draftStep === 'images' ? '🖼️ Generating image...' : 'Generate Draft'}
             </button>
           </div>
         </div>
@@ -236,7 +286,7 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
         <div className="bg-gray-900 border border-yellow-900/40 rounded-xl p-5">
           <p className="text-sm font-semibold text-yellow-400 mb-1">AI Refine</p>
           <p className="text-xs text-gray-500 mb-3">Describe what to change — Claude edits only what you specify and preserves the rest</p>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <input
               type="text"
               value={refineInstruction}
@@ -248,7 +298,7 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
               type="button"
               onClick={refineContent}
               disabled={refineLoading || !refineInstruction.trim()}
-              className="px-4 py-2.5 bg-yellow-700 hover:bg-yellow-600 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
+              className="px-4 py-2.5 bg-yellow-700 hover:bg-yellow-600 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition-colors sm:whitespace-nowrap"
             >
               {refineLoading ? 'Refining...' : 'Apply Edits'}
             </button>

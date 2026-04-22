@@ -8,20 +8,20 @@ interface Props {
 }
 
 function RiskBadge({ score }: { score: number | null }) {
-  if (score === null) return <span className="text-xs text-gray-600 font-mono">—</span>
+  if (score === null) return <span className="hidden sm:inline text-xs text-gray-600 font-mono">—</span>
 
   const level = score >= 0.7 ? 'high' : score >= 0.4 ? 'medium' : 'low'
   const config = {
-    high:   { label: 'High Risk',   bar: 'bg-red-500',    text: 'text-red-400',    bg: 'bg-red-950/40 border-red-900/60' },
-    medium: { label: 'Review',      bar: 'bg-yellow-500', text: 'text-yellow-400', bg: 'bg-yellow-950/40 border-yellow-900/60' },
-    low:    { label: 'Low Risk',    bar: 'bg-green-500',  text: 'text-green-400',  bg: 'bg-green-950/40 border-green-900/60' },
+    high:   { label: 'High Risk', dot: 'bg-red-500',    text: 'text-red-400',    bg: 'bg-red-950/40 border-red-900/60' },
+    medium: { label: 'Review',    dot: 'bg-yellow-500', text: 'text-yellow-400', bg: 'bg-yellow-950/40 border-yellow-900/60' },
+    low:    { label: 'Low Risk',  dot: 'bg-green-500',  text: 'text-green-400',  bg: 'bg-green-950/40 border-green-900/60' },
   }[level]
 
   return (
-    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border ${config.bg}`}>
-      <div className={`w-1.5 h-1.5 rounded-full ${config.bar}`} />
-      <span className={`text-xs font-semibold ${config.text}`}>{config.label}</span>
-      <span className={`text-xs font-mono ${config.text} opacity-70`}>{score.toFixed(2)}</span>
+    <div className={`flex items-center gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl border ${config.bg}`}>
+      <div className={`w-2 h-2 rounded-full shrink-0 ${config.dot}`} />
+      <span className={`hidden sm:inline text-xs font-semibold ${config.text}`}>{config.label}</span>
+      <span className={`hidden sm:inline text-xs font-mono ${config.text} opacity-70`}>{score.toFixed(2)}</span>
     </div>
   )
 }
@@ -84,64 +84,66 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
   const commentCount = pendingComments?.length ?? 0
 
   return (
-    <div className="p-8 max-w-5xl">
+    <div className="p-4 sm:p-8 max-w-5xl">
 
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-5 sm:mb-6">
         <h1 className="text-2xl font-black">Moderation</h1>
         <p className="text-gray-500 text-sm mt-1">Review queue and published content management</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-8 bg-gray-900 border border-gray-800 rounded-xl p-1 w-fit">
-        <Link
-          href="/dashboard/moderation"
-          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${
-            isPending ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-gray-300'
-          }`}
-        >
-          Pending
-          {pending > 0 && (
-            <span className="ml-2 px-1.5 py-0.5 text-xs bg-orange-600 text-white rounded-full">{pending}</span>
-          )}
-        </Link>
-        <Link
-          href="/dashboard/moderation?tab=published"
-          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${
-            isPublished ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-gray-300'
-          }`}
-        >
-          Published
-        </Link>
-        <Link
-          href="/dashboard/moderation?tab=comments"
-          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${
-            isComments ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-gray-300'
-          }`}
-        >
-          Comments
-          {commentCount > 0 && (
-            <span className="ml-2 px-1.5 py-0.5 text-xs bg-blue-600 text-white rounded-full">{commentCount}</span>
-          )}
-        </Link>
+      <div className="mb-6 sm:mb-8 overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+        <div className="flex gap-1 bg-gray-900 border border-gray-800 rounded-xl p-1 w-fit min-w-max">
+          <Link
+            href="/dashboard/moderation"
+            className={`px-4 sm:px-5 py-2 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap ${
+              isPending ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-gray-300'
+            }`}
+          >
+            Pending
+            {pending > 0 && (
+              <span className="ml-2 px-1.5 py-0.5 text-xs bg-orange-600 text-white rounded-full">{pending}</span>
+            )}
+          </Link>
+          <Link
+            href="/dashboard/moderation?tab=published"
+            className={`px-4 sm:px-5 py-2 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap ${
+              isPublished ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-gray-300'
+            }`}
+          >
+            Published
+          </Link>
+          <Link
+            href="/dashboard/moderation?tab=comments"
+            className={`px-4 sm:px-5 py-2 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap ${
+              isComments ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-gray-300'
+            }`}
+          >
+            Comments
+            {commentCount > 0 && (
+              <span className="ml-2 px-1.5 py-0.5 text-xs bg-blue-600 text-white rounded-full">{commentCount}</span>
+            )}
+          </Link>
+        </div>
       </div>
 
       {/* ── PENDING TAB ──────────────────────────────────────────────────── */}
       {isPending && (
         <>
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl px-5 py-4">
-              <p className="text-2xl font-black text-white">{pending}</p>
-              <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">Pending Review</p>
+          <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl px-3 py-3 sm:px-5 sm:py-4">
+              <p className="text-xl sm:text-2xl font-black text-white">{pending}</p>
+              <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">Pending</p>
             </div>
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl px-5 py-4">
-              <p className="text-2xl font-black text-red-400">{highRisk}</p>
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl px-3 py-3 sm:px-5 sm:py-4">
+              <p className="text-xl sm:text-2xl font-black text-red-400">{highRisk}</p>
               <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">High Risk</p>
             </div>
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl px-5 py-4">
-              <p className="text-2xl font-black text-yellow-400">{pending - highRisk}</p>
-              <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">Needs Review</p>
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl px-3 py-3 sm:px-5 sm:py-4">
+              <p className="text-xl sm:text-2xl font-black text-yellow-400">{pending - highRisk}</p>
+              <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">To Review</p>
             </div>
           </div>
 
@@ -159,44 +161,42 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
                 const category = getCategoryBySlug(r.category)
                 const author = (Array.isArray(r.profiles) ? r.profiles[0] : r.profiles as unknown as { username: string } | null)?.username ?? 'unknown'
                 const flags = (r.moderation_flags as string[]) ?? []
+                const barColor = score === null ? 'bg-gray-700' : score >= 0.7 ? 'bg-red-500' : score >= 0.4 ? 'bg-yellow-500' : 'bg-green-500'
 
                 return (
                   <Link
                     key={r.id}
                     href={`/dashboard/moderation/${r.id}`}
-                    className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800 rounded-2xl hover:border-gray-700 transition-colors"
+                    className="flex items-start gap-3 p-3 sm:p-4 bg-gray-900 border border-gray-800 rounded-2xl hover:border-gray-700 transition-colors"
                   >
-                    <div className="min-w-0 flex items-start gap-4">
-                      <div className={`w-1 self-stretch rounded-full shrink-0 ${
-                        score === null ? 'bg-gray-700'
-                        : score >= 0.7 ? 'bg-red-500'
-                        : score >= 0.4 ? 'bg-yellow-500'
-                        : 'bg-green-500'
-                      }`} />
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold text-sm truncate">{r.title}</p>
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-orange-950/40 text-orange-400 border border-orange-900/30 shrink-0">Review</span>
-                        </div>
-                        <div className="flex items-center gap-2 mt-1 flex-wrap">
-                          <span className="text-xs text-gray-500">{r.product_name}</span>
-                          <span className="text-xs text-gray-700">by @{author}</span>
-                          {category && (
-                            <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>
+                    <div className={`w-1 self-stretch rounded-full shrink-0 mt-1 ${barColor}`} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <p className="font-semibold text-sm">{r.title}</p>
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-orange-950/40 text-orange-400 border border-orange-900/30 shrink-0">Review</span>
+                          </div>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            <span className="text-xs text-gray-500">{r.product_name}</span>
+                            <span className="text-xs text-gray-700">by @{author}</span>
+                            {category && (
+                              <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>
+                            )}
+                          </div>
+                          {flags.length > 0 && (
+                            <p className="text-xs text-red-400/70 mt-1">
+                              ⚑ {flags.slice(0, 2).join(' · ')}{flags.length > 2 ? ` +${flags.length - 2} more` : ''}
+                            </p>
                           )}
                         </div>
-                        {flags.length > 0 && (
-                          <p className="text-xs text-red-400/70 mt-1 truncate">
-                            ⚑ {flags.slice(0, 2).join(' · ')}{flags.length > 2 ? ` +${flags.length - 2} more` : ''}
-                          </p>
-                        )}
+                        <div className="flex items-center gap-2 shrink-0">
+                          <RiskBadge score={score} />
+                          <svg className="w-4 h-4 text-gray-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
                       </div>
-                    </div>
-                    <div className="ml-4 shrink-0 flex items-center gap-3">
-                      <RiskBadge score={score} />
-                      <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-                      </svg>
                     </div>
                   </Link>
                 )
@@ -208,43 +208,41 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
                 const category = getCategoryBySlug(a.category)
                 const author = (Array.isArray(a.profiles) ? a.profiles[0] : a.profiles as unknown as { username: string } | null)?.username ?? 'unknown'
                 const flags = (a.moderation_flags as string[]) ?? []
+                const barColor = score === null ? 'bg-gray-700' : score >= 0.7 ? 'bg-red-500' : score >= 0.4 ? 'bg-yellow-500' : 'bg-green-500'
 
                 return (
                   <Link
                     key={a.id}
                     href={`/dashboard/moderation/articles/${a.id}`}
-                    className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800 rounded-2xl hover:border-gray-700 transition-colors"
+                    className="flex items-start gap-3 p-3 sm:p-4 bg-gray-900 border border-gray-800 rounded-2xl hover:border-gray-700 transition-colors"
                   >
-                    <div className="min-w-0 flex items-start gap-4">
-                      <div className={`w-1 self-stretch rounded-full shrink-0 ${
-                        score === null ? 'bg-gray-700'
-                        : score >= 0.7 ? 'bg-red-500'
-                        : score >= 0.4 ? 'bg-yellow-500'
-                        : 'bg-green-500'
-                      }`} />
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold text-sm truncate">{a.title}</p>
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-blue-950/40 text-blue-400 border border-blue-900/30 shrink-0">Article</span>
-                        </div>
-                        <div className="flex items-center gap-2 mt-1 flex-wrap">
-                          <span className="text-xs text-gray-700">by @{author}</span>
-                          {category && (
-                            <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>
+                    <div className={`w-1 self-stretch rounded-full shrink-0 mt-1 ${barColor}`} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <p className="font-semibold text-sm">{a.title}</p>
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-blue-950/40 text-blue-400 border border-blue-900/30 shrink-0">Article</span>
+                          </div>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            <span className="text-xs text-gray-700">by @{author}</span>
+                            {category && (
+                              <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>
+                            )}
+                          </div>
+                          {flags.length > 0 && (
+                            <p className="text-xs text-red-400/70 mt-1">
+                              ⚑ {flags.slice(0, 2).join(' · ')}{flags.length > 2 ? ` +${flags.length - 2} more` : ''}
+                            </p>
                           )}
                         </div>
-                        {flags.length > 0 && (
-                          <p className="text-xs text-red-400/70 mt-1 truncate">
-                            ⚑ {flags.slice(0, 2).join(' · ')}{flags.length > 2 ? ` +${flags.length - 2} more` : ''}
-                          </p>
-                        )}
+                        <div className="flex items-center gap-2 shrink-0">
+                          <RiskBadge score={score} />
+                          <svg className="w-4 h-4 text-gray-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
                       </div>
-                    </div>
-                    <div className="ml-4 shrink-0 flex items-center gap-3">
-                      <RiskBadge score={score} />
-                      <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-                      </svg>
                     </div>
                   </Link>
                 )
@@ -263,31 +261,33 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
             return (
               <div
                 key={r.id}
-                className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800 rounded-2xl"
+                className="flex items-start gap-3 p-3 sm:p-4 bg-gray-900 border border-gray-800 rounded-2xl"
               >
-                <div className="min-w-0 flex items-start gap-4">
-                  <div className="w-1 self-stretch rounded-full shrink-0 bg-orange-500" />
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-sm truncate">{r.title}</p>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-orange-950/40 text-orange-400 border border-orange-900/30 shrink-0">Review</span>
+                <div className="w-1 self-stretch rounded-full shrink-0 mt-1 bg-orange-500" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <p className="font-semibold text-sm">{r.title}</p>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-orange-950/40 text-orange-400 border border-orange-900/30 shrink-0">Review</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        <span className="text-xs text-gray-500">{r.product_name}</span>
+                        {category && (
+                          <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>
+                        )}
+                        {r.published_at && (
+                          <span className="text-xs text-gray-700">
+                            {new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      <span className="text-xs text-gray-500">{r.product_name}</span>
-                      {category && (
-                        <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>
-                      )}
-                      {r.published_at && (
-                        <span className="text-xs text-gray-700">
-                          {new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                        </span>
-                      )}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <VisibilityToggle id={r.id} type="review" isVisible={r.is_visible ?? true} />
+                      <UnpublishButton id={r.id} type="review" />
                     </div>
                   </div>
-                </div>
-                <div className="ml-4 shrink-0 flex items-center gap-3">
-                  <VisibilityToggle id={r.id} type="review" isVisible={r.is_visible ?? true} />
-                  <UnpublishButton id={r.id} type="review" />
                 </div>
               </div>
             )
@@ -299,30 +299,32 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
             return (
               <div
                 key={a.id}
-                className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800 rounded-2xl"
+                className="flex items-start gap-3 p-3 sm:p-4 bg-gray-900 border border-gray-800 rounded-2xl"
               >
-                <div className="min-w-0 flex items-start gap-4">
-                  <div className="w-1 self-stretch rounded-full shrink-0 bg-blue-500" />
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-sm truncate">{a.title}</p>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-blue-950/40 text-blue-400 border border-blue-900/30 shrink-0">Article</span>
+                <div className="w-1 self-stretch rounded-full shrink-0 mt-1 bg-blue-500" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <p className="font-semibold text-sm">{a.title}</p>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-blue-950/40 text-blue-400 border border-blue-900/30 shrink-0">Article</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        {category && (
+                          <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>
+                        )}
+                        {a.published_at && (
+                          <span className="text-xs text-gray-700">
+                            {new Date(a.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      {category && (
-                        <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>
-                      )}
-                      {a.published_at && (
-                        <span className="text-xs text-gray-700">
-                          {new Date(a.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                        </span>
-                      )}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <VisibilityToggle id={a.id} type="article" isVisible={a.is_visible ?? true} />
+                      <UnpublishButton id={a.id} type="article" />
                     </div>
                   </div>
-                </div>
-                <div className="ml-4 shrink-0 flex items-center gap-3">
-                  <VisibilityToggle id={a.id} type="article" isVisible={a.is_visible ?? true} />
-                  <UnpublishButton id={a.id} type="article" />
                 </div>
               </div>
             )
@@ -350,36 +352,32 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
               const content = contentMap.get(c.content_id)
               const href    = content ? `/${content.type}s/${content.slug}` : null
               return (
-                <div key={c.id} className="p-4 bg-gray-900 border border-gray-800 rounded-2xl">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
-                          c.content_type === 'review'
-                            ? 'bg-orange-950/40 text-orange-400 border-orange-900/30'
-                            : 'bg-blue-950/40 text-blue-400 border-blue-900/30'
-                        }`}>
-                          {c.content_type === 'review' ? 'Review' : 'Article'}
-                        </span>
-                        <span className="text-xs text-gray-500">by @{author}</span>
-                        <span className="text-xs text-gray-700">
-                          {new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                        </span>
-                      </div>
-                      {content && href && (
-                        <Link
-                          href={href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-gray-400 hover:text-orange-400 transition-colors truncate block mb-2"
-                        >
-                          ↗ {content.title}
-                        </Link>
-                      )}
-                      <p className="text-sm text-gray-300 leading-relaxed line-clamp-3">{c.body}</p>
-                    </div>
-                    <CommentModerationActions id={c.id} />
+                <div key={c.id} className="p-3 sm:p-4 bg-gray-900 border border-gray-800 rounded-2xl">
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
+                      c.content_type === 'review'
+                        ? 'bg-orange-950/40 text-orange-400 border-orange-900/30'
+                        : 'bg-blue-950/40 text-blue-400 border-blue-900/30'
+                    }`}>
+                      {c.content_type === 'review' ? 'Review' : 'Article'}
+                    </span>
+                    <span className="text-xs text-gray-500">by @{author}</span>
+                    <span className="text-xs text-gray-700">
+                      {new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
                   </div>
+                  {content && href && (
+                    <Link
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-gray-400 hover:text-orange-400 transition-colors truncate block mb-2"
+                    >
+                      ↗ {content.title}
+                    </Link>
+                  )}
+                  <p className="text-sm text-gray-300 leading-relaxed line-clamp-3 mb-3">{c.body}</p>
+                  <CommentModerationActions id={c.id} />
                 </div>
               )
             })

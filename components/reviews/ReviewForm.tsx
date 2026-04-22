@@ -109,7 +109,12 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
 
   // Draft generation
   const [draftLoading, setDraftLoading] = useState(false)
+  const [draftStep, setDraftStep] = useState<'content' | 'images' | null>(null)
   const [draftFeatures, setDraftFeatures] = useState('')
+
+  // Prompt helper
+  const [suggestInput, setSuggestInput] = useState('')
+  const [suggestLoading, setSuggestLoading] = useState(false)
 
   // AI refine
   const [refineLoading, setRefineLoading] = useState(false)
@@ -125,6 +130,7 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
   async function generateDraft() {
     if (!productName) { setError('Enter a product name first'); return }
     setDraftLoading(true)
+    setDraftStep('content')
     setError(null)
 
     const res = await fetch('/api/claude/draft', {
@@ -137,8 +143,9 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
       }),
     })
 
+    setDraftStep('images')
     const json = await res.json()
-    if (!res.ok) { setError(json.error); setDraftLoading(false); return }
+    if (!res.ok) { setError(json.error); setDraftLoading(false); setDraftStep(null); return }
 
     const { draft, images } = json
     if (draft.title) setTitle(draft.title)
@@ -151,12 +158,33 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
       [
         draft.introduction,
         ...(draft.sections ?? []).map(
-          (s: { heading: string; body: string }) => `<h2>${s.heading}</h2>\n<p>${s.body}</p>`
+          (s: { heading: string; body: string }) => {
+            const bodyHtml = s.body.split(/\n\n+/).map((p: string) => `<p>${p.trim()}</p>`).join('\n')
+            return `<h2>${s.heading}</h2>\n${bodyHtml}`
+          }
         ),
         draft.verdict ? `<h2>The Verdict</h2>\n<p>${draft.verdict}</p>` : '',
       ].filter(Boolean).join('\n\n')
     )
     setDraftLoading(false)
+    setDraftStep(null)
+  }
+
+  async function suggestPrompt() {
+    if (!suggestInput.trim()) return
+    setSuggestLoading(true)
+    setError(null)
+    const res = await fetch('/api/claude/suggest-prompt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: suggestInput, type: 'review' }),
+    })
+    const json = await res.json()
+    if (!res.ok) { setError(json.error); setSuggestLoading(false); return }
+    if (json.productName) setProductName(json.productName)
+    if (json.keyFeatures?.length) setDraftFeatures(json.keyFeatures.join(', '))
+    setSuggestInput('')
+    setSuggestLoading(false)
   }
 
   async function refineContent() {
@@ -279,7 +307,31 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
       <div className="bg-gray-900 border border-orange-900/40 rounded-xl p-5">
         <p className="text-sm font-semibold text-orange-400 mb-1">AI Draft Generator</p>
         <p className="text-xs text-gray-500 mb-3">Fill in product name + category first, then enter key features</p>
-        <div className="flex gap-3">
+
+        {/* Prompt Helper */}
+        <div className="mb-3 pb-3 border-b border-gray-800">
+          <p className="text-xs text-gray-600 mb-2">Have a rough idea? Describe the product and Claude will suggest the name + key features for you.</p>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="text"
+              value={suggestInput}
+              onChange={(e) => setSuggestInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && suggestPrompt()}
+              placeholder="e.g. dewalt cordless drill, good battery life"
+              className="flex-1 px-3 py-2 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+            />
+            <button
+              type="button"
+              onClick={suggestPrompt}
+              disabled={suggestLoading || !suggestInput.trim()}
+              className="px-3 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-gray-300 text-xs font-medium rounded-lg transition-colors sm:whitespace-nowrap"
+            >
+              {suggestLoading ? 'Suggesting...' : '✦ Suggest prompt'}
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
             value={draftFeatures}
@@ -291,9 +343,9 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
             type="button"
             onClick={generateDraft}
             disabled={draftLoading || !productName}
-            className="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
+            className="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition-colors sm:whitespace-nowrap"
           >
-            {draftLoading ? 'Generating...' : 'Generate Draft'}
+            {draftStep === 'content' ? '✍️ Writing content...' : draftStep === 'images' ? '🖼️ Generating image...' : 'Generate Draft'}
           </button>
         </div>
       </div>
@@ -303,7 +355,7 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
         <div className="bg-gray-900 border border-yellow-900/40 rounded-xl p-5">
           <p className="text-sm font-semibold text-yellow-400 mb-1">AI Refine</p>
           <p className="text-xs text-gray-500 mb-3">Describe what to change — Claude edits only what you specify and preserves the rest</p>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <input
               type="text"
               value={refineInstruction}
@@ -315,7 +367,7 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
               type="button"
               onClick={refineContent}
               disabled={refineLoading || !refineInstruction.trim()}
-              className="px-4 py-2.5 bg-yellow-700 hover:bg-yellow-600 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
+              className="px-4 py-2.5 bg-yellow-700 hover:bg-yellow-600 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition-colors sm:whitespace-nowrap"
             >
               {refineLoading ? 'Refining...' : 'Apply Edits'}
             </button>

@@ -28,10 +28,10 @@ export default async function MyReviewsPage() {
   }
 
   return (
-    <div className="p-8 max-w-5xl">
+    <div className="p-4 sm:p-8 max-w-5xl">
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6 sm:mb-8">
         <div>
           <h1 className="text-2xl font-black">My Reviews</h1>
           <p className="text-gray-500 text-sm mt-1">Manage your content</p>
@@ -48,15 +48,15 @@ export default async function MyReviewsPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
         {[
           { label: 'Total', value: counts.total, color: 'text-white' },
           { label: 'Live', value: counts.live, color: 'text-green-400' },
           { label: 'Pending', value: counts.pending, color: 'text-yellow-400' },
           { label: 'Drafts', value: counts.draft, color: 'text-gray-400' },
         ].map((s) => (
-          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-2xl px-5 py-4">
-            <p className={`text-2xl font-black ${s.color}`}>{s.value}</p>
+          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-2xl px-4 py-3 sm:px-5 sm:py-4">
+            <p className={`text-xl sm:text-2xl font-black ${s.color}`}>{s.value}</p>
             <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">{s.label}</p>
           </div>
         ))}
@@ -79,17 +79,22 @@ export default async function MyReviewsPage() {
             return (
               <div
                 key={r.id}
-                className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800 rounded-2xl hover:border-gray-700 transition-colors"
+                className="p-4 bg-gray-900 border border-gray-800 rounded-2xl hover:border-gray-700 transition-colors"
               >
-                <div className="min-w-0 flex items-start gap-4">
+                <div className="flex items-start gap-3">
                   {/* Rating circle */}
-                  <div className="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center shrink-0 mt-0.5">
                     <span className="text-sm font-bold text-yellow-400">{r.rating}</span>
                   </div>
 
-                  <div className="min-w-0">
-                    <p className="font-semibold text-sm truncate">{r.title}</p>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <p className="font-semibold text-sm leading-snug">{r.title}</p>
+                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${status.className}`}>
+                        {status.label}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs text-gray-500">{r.product_name}</span>
                       {category && (
                         <span className={`text-xs ${category.accent}`}>
@@ -100,34 +105,28 @@ export default async function MyReviewsPage() {
                         {new Date(r.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </span>
                     </div>
+                    {/* Actions */}
+                    <div className="flex items-center gap-2 mt-3 flex-wrap">
+                      {['draft', 'rejected'].includes(r.status) && (
+                        <Link
+                          href={`/dashboard/reviews/${r.id}/edit`}
+                          className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg transition-colors"
+                        >
+                          Edit
+                        </Link>
+                      )}
+                      {r.status === 'approved' && (
+                        <Link
+                          href={`/reviews/${r.slug}`}
+                          target="_blank"
+                          className="text-xs px-3 py-1.5 bg-orange-950/50 hover:bg-orange-900/50 text-orange-400 hover:text-orange-300 rounded-lg transition-colors border border-orange-900/40"
+                        >
+                          View Live →
+                        </Link>
+                      )}
+                      <ContentActions id={r.id} status={r.status} contentType="reviews" />
+                    </div>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-3 ml-4 shrink-0">
-                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${status.className}`}>
-                    {status.label}
-                  </span>
-
-                  {['draft', 'rejected'].includes(r.status) && (
-                    <Link
-                      href={`/dashboard/reviews/${r.id}/edit`}
-                      className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg transition-colors"
-                    >
-                      Edit
-                    </Link>
-                  )}
-
-                  {r.status === 'approved' && (
-                    <Link
-                      href={`/reviews/${r.slug}`}
-                      target="_blank"
-                      className="text-xs px-3 py-1.5 bg-orange-950/50 hover:bg-orange-900/50 text-orange-400 hover:text-orange-300 rounded-lg transition-colors border border-orange-900/40"
-                    >
-                      View Live →
-                    </Link>
-                  )}
-
-                  <ContentActions id={r.id} status={r.status} contentType="reviews" />
                 </div>
               </div>
             )

@@ -46,24 +46,36 @@ export async function POST(request: NextRequest) {
 
   const { productName, category, keyFeatures, targetAudience } = parsed.data
 
-  const prompt = `Write a review for the following product:
+  const prompt = `Write a product review:
 
 Product: ${productName}
 Category: ${category}
 Key Features: ${keyFeatures.join(', ')}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}
 
+STRUCTURE REQUIREMENTS:
+- Introduction: 2–3 sentences that open with a real testing scenario (first-person dad)
+- Sections: 3–5 sections, each 150–250 words covering different aspects (performance, design, value, family use, etc.)
+- Separate paragraphs within each section with \\n\\n
+- Verdict: 1–2 paragraphs with a clear buy/skip recommendation
+- Pros: 3–6 short, specific items (not vague — "12V battery lasted 4 hours" not "long battery")
+- Cons: 2–4 honest, specific items — never skip the cons
+- Rating: honest 1–10 score; reserve 9+ for truly exceptional products
+
+SEO: Include the product name naturally in the intro and at least one section heading.
+
 Return JSON with this exact shape:
 {
-  "title": "string (compelling SEO-friendly title, max 70 chars)",
-  "introduction": "string (2-3 sentences hooking the reader, first person dad voice)",
+  "title": "string (SEO title including product name, max 70 chars — e.g. 'DeWalt 20V Drill Review: Built for Real Dad Projects')",
+  "excerpt": "string (one punchy sentence for the card — max 160 chars)",
+  "introduction": "string (2–3 sentences, first-person dad opening with a real use case)",
   "sections": [
-    { "heading": "string", "body": "string (2-4 paragraphs)" }
+    { "heading": "string (clear heading)", "body": "string (150–250 words, paragraphs separated by \\n\\n)" }
   ],
-  "verdict": "string (1-2 paragraph summary with recommendation)",
-  "rating": number (1-10 scale, decimals ok e.g. 8.5),
+  "verdict": "string (1–2 paragraphs, clear recommendation, separated by \\n\\n if 2 paragraphs)",
+  "rating": number (1–10, decimals ok),
   "pros": ["string"],
   "cons": ["string"],
-  "imagePrompt": "string (DALL-E 3 prompt — write as if describing a stock photo of the product: the product in a real-world setting, natural or warm lighting, clean composition, no people, no text, no artistic effects, under 200 chars. Style: editorial product photography.)"
+  "imagePrompt": "string (DALL-E 3 prompt: the product in a realistic setting, natural or warm lighting, clean composition, no people, no text, under 180 chars, style: editorial product photography)"
 }`
 
   try {

@@ -28,7 +28,7 @@ export function UnpublishButton({ id, type }: { id: string; type: 'review' | 'ar
     <button
       onClick={handleUnpublish}
       disabled={loading}
-      className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-950/50 hover:bg-red-900/60 disabled:opacity-50 text-red-400 border border-red-900/40 transition-colors"
+      className="px-3 py-2 text-xs font-semibold rounded-lg bg-red-950/50 hover:bg-red-900/60 disabled:opacity-50 text-red-400 border border-red-900/40 transition-colors min-h-[36px]"
     >
       {loading ? '...' : 'Unpublish'}
     </button>
@@ -51,18 +51,18 @@ export function CommentModerationActions({ id }: { id: string }) {
   }
 
   return (
-    <div className="flex items-center gap-2 shrink-0">
+    <div className="flex items-center gap-2">
       <button
         onClick={() => act('approve')}
         disabled={!!loading}
-        className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-green-950/50 hover:bg-green-900/60 disabled:opacity-50 text-green-400 border border-green-900/40 transition-colors"
+        className="px-3 py-2 text-xs font-semibold rounded-lg bg-green-950/50 hover:bg-green-900/60 disabled:opacity-50 text-green-400 border border-green-900/40 transition-colors min-h-[36px]"
       >
         {loading === 'approve' ? '...' : 'Approve'}
       </button>
       <button
         onClick={() => act('reject')}
         disabled={!!loading}
-        className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-950/50 hover:bg-red-900/60 disabled:opacity-50 text-red-400 border border-red-900/40 transition-colors"
+        className="px-3 py-2 text-xs font-semibold rounded-lg bg-red-950/50 hover:bg-red-900/60 disabled:opacity-50 text-red-400 border border-red-900/40 transition-colors min-h-[36px]"
       >
         {loading === 'reject' ? '...' : 'Reject'}
       </button>
@@ -86,18 +86,18 @@ export function PendingItemActions({ id, type }: { id: string; type: 'review' | 
   }
 
   return (
-    <div className="flex items-center gap-2 shrink-0">
+    <div className="flex items-center gap-2">
       <button
         onClick={() => act('approve')}
         disabled={!!loading}
-        className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-green-950/50 hover:bg-green-900/60 disabled:opacity-50 text-green-400 border border-green-900/40 transition-colors"
+        className="px-3 py-2 text-xs font-semibold rounded-lg bg-green-950/50 hover:bg-green-900/60 disabled:opacity-50 text-green-400 border border-green-900/40 transition-colors min-h-[36px]"
       >
         {loading === 'approve' ? '...' : 'Approve'}
       </button>
       <button
         onClick={() => act('reject')}
         disabled={!!loading}
-        className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-950/50 hover:bg-red-900/60 disabled:opacity-50 text-red-400 border border-red-900/40 transition-colors"
+        className="px-3 py-2 text-xs font-semibold rounded-lg bg-red-950/50 hover:bg-red-900/60 disabled:opacity-50 text-red-400 border border-red-900/40 transition-colors min-h-[36px]"
       >
         {loading === 'reject' ? '...' : 'Reject'}
       </button>
@@ -127,15 +127,19 @@ export function VisibilityToggle({ id, type, isVisible }: Props) {
       onClick={handleToggle}
       disabled={loading}
       title={visible ? 'Hide from public' : 'Show on public'}
-      className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
-        visible ? 'bg-green-600' : 'bg-gray-700'
-      }`}
+      className="flex items-center justify-center min-h-[36px] min-w-[44px] disabled:opacity-50"
     >
       <span
-        className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
-          visible ? 'translate-x-4' : 'translate-x-1'
+        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+          visible ? 'bg-green-600' : 'bg-gray-700'
         }`}
-      />
+      >
+        <span
+          className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
+            visible ? 'translate-x-4' : 'translate-x-1'
+          }`}
+        />
+      </span>
     </button>
   )
 }
