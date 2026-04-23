@@ -9,7 +9,7 @@ export const maxDuration = 90
 const DraftInput = z.object({
   productName: z.string().min(2).max(120),
   category: z.string().min(2).max(80),
-  keyFeatures: z.array(z.string()).max(10).default([]),
+  keyFeatures: z.array(z.string()).max(15).default([]),
   targetAudience: z.string().max(200).optional(),
 })
 

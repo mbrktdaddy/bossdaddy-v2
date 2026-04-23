@@ -154,7 +154,7 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
         body: JSON.stringify({
           productName,
           category,
-          keyFeatures: draftFeatures.split(',').map((f) => f.trim()).filter(Boolean),
+          keyFeatures: draftFeatures.split('\n').map((f) => f.trim()).filter(Boolean),
         }),
       })
     } catch {
@@ -212,7 +212,7 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
     const json = await res.json()
     if (!res.ok) { setError(json.error); setSuggestLoading(false); return }
     if (json.productName) setProductName(json.productName)
-    if (json.keyFeatures?.length) setDraftFeatures(json.keyFeatures.join(', '))
+    if (json.keyFeatures?.length) setDraftFeatures(json.keyFeatures.join('\n'))
     setSuggestInput('')
     setSuggestLoading(false)
   }
@@ -362,12 +362,12 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <input
-            type="text"
+          <textarea
             value={draftFeatures}
             onChange={(e) => setDraftFeatures(e.target.value)}
-            placeholder="Key features, comma separated (e.g. cordless, 2-hour battery, compact)"
-            className="flex-1 px-4 py-2.5 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            placeholder={"Key features — one per line (auto-filled by Suggest Prompt)\ne.g. cordless\n2-hour battery\ncompact design"}
+            rows={3}
+            className="flex-1 px-4 py-2.5 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
           />
           <button
             type="button"

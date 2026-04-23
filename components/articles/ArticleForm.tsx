@@ -75,7 +75,7 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
         body: JSON.stringify({
           topic: draftTopic,
           category,
-          keyPoints: draftKeyPoints.split(',').map(p => p.trim()).filter(Boolean),
+          keyPoints: draftKeyPoints.split('\n').map(p => p.trim()).filter(Boolean),
         }),
       })
     } catch {
@@ -130,7 +130,7 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
     const json = await res.json()
     if (!res.ok) { setError(json.error); setSuggestLoading(false); return }
     if (json.topic) setDraftTopic(json.topic)
-    if (json.keyPoints?.length) setDraftKeyPoints(json.keyPoints.join(', '))
+    if (json.keyPoints?.length) setDraftKeyPoints(json.keyPoints.join('\n'))
     setSuggestInput('')
     setSuggestLoading(false)
   }
@@ -288,12 +288,12 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
             className="w-full px-4 py-2.5 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
           <div className="flex flex-col sm:flex-row gap-3">
-            <input
-              type="text"
+            <textarea
               value={draftKeyPoints}
               onChange={(e) => setDraftKeyPoints(e.target.value)}
-              placeholder="Key points, comma separated (e.g. equipment setup, temperature control, timing)"
-              className="flex-1 px-4 py-2.5 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder={"Key points — one per line (auto-filled by Suggest Prompt)\ne.g. safety tips\nbudget options\nbest for beginners"}
+              rows={3}
+              className="flex-1 px-4 py-2.5 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
             />
             <button
               type="button"

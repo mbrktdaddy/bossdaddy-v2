@@ -9,7 +9,7 @@ export const maxDuration = 90
 const ArticleDraftInput = z.object({
   topic: z.string().min(4).max(150),
   category: z.string().min(2).max(80),
-  keyPoints: z.array(z.string()).max(10).default([]),
+  keyPoints: z.array(z.string()).max(15).default([]),
   targetAudience: z.string().max(200).optional(),
 })
 
