@@ -152,14 +152,12 @@ export default async function MyReviewsPage({ searchParams }: Props) {
                       </p>
                     )}
                     <div className="flex items-center gap-2 mt-3 flex-wrap">
-                      {['draft', 'rejected'].includes(r.status) && (
-                        <Link
-                          href={`/dashboard/reviews/${r.id}/edit`}
-                          className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg transition-colors"
-                        >
-                          Edit
-                        </Link>
-                      )}
+                      <Link
+                        href={`/dashboard/reviews/${r.id}`}
+                        className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg transition-colors"
+                      >
+                        {['draft', 'rejected'].includes(r.status) ? 'Edit' : 'Open'}
+                      </Link>
                       {r.status === 'approved' && (
                         <Link
                           href={`/reviews/${r.slug}`}
