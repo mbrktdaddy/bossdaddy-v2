@@ -63,8 +63,9 @@ export function SchedulePanel({ scheduledAt, onChange, disabled }: Props) {
           </button>
         )}
         <p className="text-xs text-gray-600">
-          Content will publish automatically at the scheduled time. The cron runs every 15 minutes —
-          actual publish may be up to 15 minutes after the scheduled moment.
+          Content will publish automatically at the scheduled time. The cron runs once daily at
+          noon UTC — your scheduled item will go live on the next daily run after the scheduled
+          time passes. (Vercel Hobby plan limitation; upgrade to Pro for more frequent checks.)
         </p>
       </div>
     </details>
