@@ -52,7 +52,24 @@ export async function proxy(request: NextRequest) {
   )
 
   // MUST happen before any auth checks — refreshes the session token.
-  const { data: { user } } = await supabase.auth.getUser()
+  // Wrap in try/catch because a stale/invalid refresh token throws AuthApiError,
+  // which would otherwise crash the middleware and surface as a generic 500
+  // HTML error page on every request (including API routes).
+  let user: Awaited<ReturnType<typeof supabase.auth.getUser>>['data']['user'] = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch (err) {
+    console.error('proxy.ts auth.getUser failed (treating as logged out):', err)
+    // Clear the bad session cookies so the next request starts fresh
+    const all = request.cookies.getAll()
+    all.forEach((c) => {
+      if (c.name.startsWith('sb-') && c.name.endsWith('-auth-token')) {
+        supabaseResponse.cookies.delete(c.name)
+      }
+    })
+  }
+
   const { pathname } = request.nextUrl
 
   // Redirect unauthenticated users away from protected routes
