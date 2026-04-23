@@ -3,6 +3,9 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { CATEGORIES } from '@/lib/categories'
+import dynamic from 'next/dynamic'
+
+const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
 interface ArticleFormProps {
   initialData?: {
@@ -49,6 +52,9 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
 
   // Hero image regeneration
   const [heroRegenLoading, setHeroRegenLoading] = useState(false)
+
+  // Media library picker
+  const [showMediaPicker, setShowMediaPicker] = useState(false)
 
   async function generateDraft() {
     if (!draftTopic) { setError('Enter a topic first'); return }
@@ -370,18 +376,27 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
         <div className="flex items-center justify-between mb-1.5">
           <label className="block text-sm text-gray-300">
             Hero Image
-            {!isEditing && <span className="text-gray-600 ml-1">(save draft first to enable upload)</span>}
+            {!isEditing && <span className="text-gray-600 ml-1">(save draft first to enable direct upload)</span>}
           </label>
-          {title && (
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={regenerateHero}
-              disabled={heroRegenLoading}
-              className="text-xs px-3 py-1 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-gray-400 hover:text-white rounded-lg transition-colors"
+              onClick={() => setShowMediaPicker(true)}
+              className="text-xs px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded-lg transition-colors"
             >
-              {heroRegenLoading ? 'Generating...' : '↺ Regenerate Image'}
+              📁 Library
             </button>
-          )}
+            {title && (
+              <button
+                type="button"
+                onClick={regenerateHero}
+                disabled={heroRegenLoading}
+                className="text-xs px-3 py-1 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-gray-400 hover:text-white rounded-lg transition-colors"
+              >
+                {heroRegenLoading ? 'Generating...' : '↺ Regenerate'}
+              </button>
+            )}
+          </div>
         </div>
 
         {imageUrl ? (
@@ -399,26 +414,35 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
             </button>
           </div>
         ) : (
-          <div
-            onClick={() => isEditing && fileInputRef.current?.click()}
-            className={`border-2 border-dashed border-gray-700 rounded-xl p-8 text-center transition-colors ${
-              isEditing ? 'hover:border-orange-600 cursor-pointer' : 'opacity-40 cursor-not-allowed'
-            }`}
-          >
-            {imageUploading ? (
-              <div className="flex items-center justify-center gap-2 text-gray-400">
-                <div className="w-4 h-4 border-2 border-gray-600 border-t-orange-500 rounded-full animate-spin" />
-                <span className="text-sm">Uploading...</span>
-              </div>
-            ) : (
-              <>
-                <svg className="w-8 h-8 text-gray-600 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <p className="text-sm text-gray-500">Click to upload image</p>
-                <p className="text-xs text-gray-700 mt-1">JPEG, PNG, WebP — max 5MB</p>
-              </>
-            )}
+          <div className="space-y-2">
+            <div
+              onClick={() => isEditing && fileInputRef.current?.click()}
+              className={`border-2 border-dashed border-gray-700 rounded-xl p-6 text-center transition-colors ${
+                isEditing ? 'hover:border-orange-600 cursor-pointer' : 'opacity-40 cursor-not-allowed'
+              }`}
+            >
+              {imageUploading ? (
+                <div className="flex items-center justify-center gap-2 text-gray-400">
+                  <div className="w-4 h-4 border-2 border-gray-600 border-t-orange-500 rounded-full animate-spin" />
+                  <span className="text-sm">Uploading...</span>
+                </div>
+              ) : (
+                <>
+                  <svg className="w-8 h-8 text-gray-600 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  <p className="text-sm text-gray-500">{isEditing ? 'Click to upload a file' : 'Save draft first to enable file upload'}</p>
+                  <p className="text-xs text-gray-700 mt-1">JPEG, PNG, WebP — max 5 MB</p>
+                </>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowMediaPicker(true)}
+              className="w-full py-2 border border-gray-700 hover:border-gray-600 rounded-xl text-sm text-gray-500 hover:text-gray-300 transition-colors"
+            >
+              📁 Pick from media library
+            </button>
           </div>
         )}
 
@@ -432,6 +456,13 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
             if (file) handleImageUpload(file)
           }}
         />
+
+        {showMediaPicker && (
+          <MediaPicker
+            onSelect={(url) => { setImageUrl(url); setShowMediaPicker(false) }}
+            onClose={() => setShowMediaPicker(false)}
+          />
+        )}
       </div>
 
       {/* ── Content ─────────────────────────────────────────────────────── */}
