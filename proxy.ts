@@ -1,6 +1,36 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// Non-admins who hit /dashboard get bounced to this page (a safe public page).
+const NON_ADMIN_HOME = '/'
+
+// Routes available only to admins (everything in /dashboard except /profile).
+function isAdminRoute(pathname: string) {
+  return pathname.startsWith('/dashboard') && !pathname.startsWith('/dashboard/profile')
+}
+
+// Legacy routes that now redirect to the unified workspace.
+function rewriteLegacyRoute(pathname: string): string | null {
+  // /dashboard/articles/[id]/edit → /dashboard/articles/[id]
+  const articleEdit = pathname.match(/^\/dashboard\/articles\/([^/]+)\/edit\/?$/)
+  if (articleEdit) return `/dashboard/articles/${articleEdit[1]}`
+
+  // /dashboard/reviews/[id]/edit → /dashboard/reviews/[id]
+  const reviewEdit = pathname.match(/^\/dashboard\/reviews\/([^/]+)\/edit\/?$/)
+  if (reviewEdit) return `/dashboard/reviews/${reviewEdit[1]}`
+
+  // /dashboard/moderation/* → unified workspace
+  const modArticle = pathname.match(/^\/dashboard\/moderation\/articles\/([^/]+)\/?$/)
+  if (modArticle) return `/dashboard/articles/${modArticle[1]}`
+  const modReview = pathname.match(/^\/dashboard\/moderation\/([^/]+)\/?$/)
+  if (modReview) return `/dashboard/reviews/${modReview[1]}`
+  if (pathname === '/dashboard/moderation' || pathname.startsWith('/dashboard/moderation/')) {
+    return '/dashboard'
+  }
+
+  return null
+}
+
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
@@ -9,9 +39,7 @@ export async function proxy(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
+        getAll() { return request.cookies.getAll() },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({ request })
@@ -23,12 +51,8 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  // Refresh session — MUST happen before any auth checks.
-  // Do not remove getUser() — it refreshes the token.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
+  // MUST happen before any auth checks — refreshes the session token.
+  const { data: { user } } = await supabase.auth.getUser()
   const { pathname } = request.nextUrl
 
   // Redirect unauthenticated users away from protected routes
@@ -39,8 +63,18 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Restrict moderation and user management to admins only
-  if ((pathname.startsWith('/dashboard/moderation') || pathname.startsWith('/dashboard/users')) && user) {
+  // Handle legacy route redirects (before role checks)
+  if (user) {
+    const rewrite = rewriteLegacyRoute(pathname)
+    if (rewrite) {
+      const url = request.nextUrl.clone()
+      url.pathname = rewrite
+      return NextResponse.redirect(url, { status: 308 })
+    }
+  }
+
+  // Admin-only dashboard (except profile which is self-serve for any authed user)
+  if (isAdminRoute(pathname) && user) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
@@ -49,22 +83,7 @@ export async function proxy(request: NextRequest) {
 
     if (profile?.role !== 'admin') {
       const url = request.nextUrl.clone()
-      url.pathname = '/dashboard/reviews'
-      return NextResponse.redirect(url)
-    }
-  }
-
-  // Restrict media library to admins and authors only (not members)
-  if (pathname.startsWith('/dashboard/media') && user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile || !['admin', 'author'].includes(profile.role)) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/dashboard/reviews'
+      url.pathname = NON_ADMIN_HOME
       return NextResponse.redirect(url)
     }
   }
@@ -72,7 +91,7 @@ export async function proxy(request: NextRequest) {
   // Redirect logged-in users away from auth pages
   if ((pathname === '/login' || pathname === '/register') && user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/dashboard/reviews'
+    url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
 
@@ -81,7 +100,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
