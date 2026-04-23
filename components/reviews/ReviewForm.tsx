@@ -167,9 +167,12 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
     clearTimeout(stepTimerRef.current!)
     const json = await res.json()
     if (!res.ok) {
-      const fieldErrors = json.details?.fieldErrors
-      const detail = fieldErrors ? Object.entries(fieldErrors).map(([k, v]) => `${k}: ${(v as string[]).join(', ')}`).join('; ') : ''
-      setError(detail ? `${json.error} — ${detail}` : (json.error ?? 'Generation failed — please try again.'))
+      const { fieldErrors, formErrors } = json.details ?? {}
+      const parts = [
+        ...(formErrors ?? []),
+        ...Object.entries(fieldErrors ?? {}).map(([k, v]) => `${k}: ${(v as string[]).join(', ')}`),
+      ]
+      setError(parts.length ? `${json.error} — ${parts.join('; ')}` : (json.error ?? 'Generation failed — please try again.'))
       setDraftLoading(false); setDraftStep(null); return
     }
 
