@@ -180,13 +180,21 @@ export async function DELETE(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { error } = await supabase
+  // Use admin client to bypass RLS; enforce ownership + status manually
+  const admin = createAdminClient()
+  const { data: article } = await admin
     .from('articles')
-    .delete()
+    .select('author_id, status')
     .eq('id', id)
-    .eq('author_id', user.id)
-    .in('status', ['draft', 'rejected'])
+    .single()
 
+  if (!article) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (article.author_id !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (!['draft', 'rejected'].includes(article.status)) {
+    return NextResponse.json({ error: 'Only draft or rejected articles can be deleted' }, { status: 422 })
+  }
+
+  const { error } = await admin.from('articles').delete().eq('id', id)
   if (error) return NextResponse.json({ error: 'Delete failed' }, { status: 500 })
 
   revalidatePath('/articles')
@@ -205,13 +213,18 @@ export async function PATCH(
 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { error } = await supabase
+  const admin = createAdminClient()
+  const { data: article } = await admin
     .from('articles')
-    .update({ status: 'draft' })
+    .select('author_id, status')
     .eq('id', id)
-    .eq('author_id', user.id)
-    .eq('status', 'pending')
+    .single()
 
+  if (!article) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (article.author_id !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (article.status !== 'pending') return NextResponse.json({ error: 'Only pending articles can be recalled' }, { status: 422 })
+
+  const { error } = await admin.from('articles').update({ status: 'draft' }).eq('id', id)
   if (error) return NextResponse.json({ error: 'Recall failed' }, { status: 500 })
 
   revalidatePath('/dashboard/articles')

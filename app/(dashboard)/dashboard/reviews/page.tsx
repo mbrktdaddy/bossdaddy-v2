@@ -16,7 +16,7 @@ export default async function MyReviewsPage() {
 
   const { data: reviews } = await supabase
     .from('reviews')
-    .select('id, title, product_name, category, status, rating, created_at, updated_at, slug')
+    .select('id, title, product_name, category, status, rating, created_at, updated_at, slug, rejection_reason')
     .eq('author_id', user!.id)
     .order('updated_at', { ascending: false })
 
@@ -105,6 +105,16 @@ export default async function MyReviewsPage() {
                         {new Date(r.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </span>
                     </div>
+                    {r.rejection_reason && ['draft', 'rejected'].includes(r.status) && (
+                      <p className="text-xs text-yellow-400/80 mt-1.5">
+                        ↩ Edits requested: {r.rejection_reason}
+                      </p>
+                    )}
+                    {r.status === 'pending' && (
+                      <p className="text-xs text-gray-500 mt-1.5">
+                        In review queue — use &ldquo;Recall to draft&rdquo; to pull it back and edit.
+                      </p>
+                    )}
                     {/* Actions */}
                     <div className="flex items-center gap-2 mt-3 flex-wrap">
                       {['draft', 'rejected'].includes(r.status) && (

@@ -107,9 +107,14 @@ export default async function MyArticlesPage() {
                         {new Date(a.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </span>
                     </div>
-                    {a.rejection_reason && (
+                    {a.rejection_reason && ['draft', 'rejected'].includes(a.status) && (
                       <p className="text-xs text-yellow-400/80 mt-1.5">
                         ↩ Edits requested: {a.rejection_reason}
+                      </p>
+                    )}
+                    {a.status === 'pending' && (
+                      <p className="text-xs text-gray-500 mt-1.5">
+                        In review queue — use &ldquo;Recall to draft&rdquo; to pull it back and edit.
                       </p>
                     )}
                     {/* Actions */}

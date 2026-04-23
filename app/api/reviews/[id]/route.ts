@@ -193,19 +193,23 @@ export async function DELETE(
 ) {
   const { id } = await params
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { error } = await supabase
+  const admin = createAdminClient()
+  const { data: review } = await admin
     .from('reviews')
-    .delete()
+    .select('author_id, status')
     .eq('id', id)
-    .eq('author_id', user.id)
-    .in('status', ['draft', 'rejected'])
+    .single()
 
+  if (!review) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (review.author_id !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (!['draft', 'rejected'].includes(review.status)) {
+    return NextResponse.json({ error: 'Only draft or rejected reviews can be deleted' }, { status: 422 })
+  }
+
+  const { error } = await admin.from('reviews').delete().eq('id', id)
   if (error) return NextResponse.json({ error: 'Delete failed' }, { status: 500 })
 
   revalidatePath('/reviews')
@@ -221,16 +225,20 @@ export async function PATCH(
   const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { error } = await supabase
+  const admin = createAdminClient()
+  const { data: review } = await admin
     .from('reviews')
-    .update({ status: 'draft' })
+    .select('author_id, status')
     .eq('id', id)
-    .eq('author_id', user.id)
-    .eq('status', 'pending')
+    .single()
 
+  if (!review) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (review.author_id !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (review.status !== 'pending') return NextResponse.json({ error: 'Only pending reviews can be recalled' }, { status: 422 })
+
+  const { error } = await admin.from('reviews').update({ status: 'draft' }).eq('id', id)
   if (error) return NextResponse.json({ error: 'Recall failed' }, { status: 500 })
 
   revalidatePath('/dashboard/reviews')
