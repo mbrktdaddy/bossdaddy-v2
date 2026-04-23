@@ -10,7 +10,7 @@ export const maxDuration = 90
 const ArticleDraftInput = z.object({
   topic: z.string().min(4).max(150),
   category: z.string().min(2).max(80),
-  keyPoints: z.array(z.string()).min(1).max(10),
+  keyPoints: z.array(z.string()).max(10).default([]),
   targetAudience: z.string().max(200).optional(),
 })
 
@@ -38,8 +38,7 @@ export async function POST(request: NextRequest) {
   const prompt = `Write a dad-focused article on this topic:
 
 Topic: ${topic}
-Category: ${category}
-Key Points: ${keyPoints.join(', ')}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}
+Category: ${category}${keyPoints.length ? `\nKey Points: ${keyPoints.join(', ')}` : ''}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}
 
 STRUCTURE REQUIREMENTS:
 - Introduction: 2–3 sentences that hook the reader with a real scenario (first-person dad)

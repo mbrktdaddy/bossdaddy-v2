@@ -10,7 +10,7 @@ export const maxDuration = 90
 const DraftInput = z.object({
   productName: z.string().min(2).max(120),
   category: z.string().min(2).max(80),
-  keyFeatures: z.array(z.string()).min(1).max(10),
+  keyFeatures: z.array(z.string()).max(10).default([]),
   targetAudience: z.string().max(200).optional(),
 })
 
@@ -49,8 +49,7 @@ export async function POST(request: NextRequest) {
   const prompt = `Write a product review:
 
 Product: ${productName}
-Category: ${category}
-Key Features: ${keyFeatures.join(', ')}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}
+Category: ${category}${keyFeatures.length ? `\nKey Features: ${keyFeatures.join(', ')}` : ''}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}
 
 STRUCTURE REQUIREMENTS:
 - Introduction: 2–3 sentences that open with a real testing scenario (first-person dad)
