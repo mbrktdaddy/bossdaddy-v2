@@ -154,14 +154,12 @@ export default async function MyArticlesPage({ searchParams }: Props) {
                       </p>
                     )}
                     <div className="flex items-center gap-2 mt-3 flex-wrap">
-                      {['draft', 'rejected'].includes(a.status) && (
-                        <Link
-                          href={`/dashboard/articles/${a.id}/edit`}
-                          className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg transition-colors"
-                        >
-                          Edit
-                        </Link>
-                      )}
+                      <Link
+                        href={`/dashboard/articles/${a.id}`}
+                        className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg transition-colors"
+                      >
+                        {['draft', 'rejected'].includes(a.status) ? 'Edit' : 'Open'}
+                      </Link>
                       {a.status === 'approved' && a.slug && (
                         <Link
                           href={`/articles/${a.slug}`}

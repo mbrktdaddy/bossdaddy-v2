@@ -182,13 +182,32 @@ export async function PUT(
   const adminForUpdate = createAdminClient()
   const { data: current } = await adminForUpdate.from('reviews').select('author_id, status').eq('id', id).single()
   if (!current) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  if (current.author_id !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  if (!['draft', 'rejected'].includes(current.status)) {
-    return NextResponse.json({ error: 'Only draft or rejected reviews can be edited' }, { status: 422 })
+
+  // Admin can edit any review at any status; authors only their own drafts/rejected
+  const { data: profileForUpdate } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  const isAdminEditor = profileForUpdate?.role === 'admin'
+
+  if (!isAdminEditor) {
+    if (current.author_id !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    if (!['draft', 'rejected'].includes(current.status)) {
+      return NextResponse.json({ error: 'Only draft or rejected reviews can be edited' }, { status: 422 })
+    }
   }
 
+  const wasApproved = current.status === 'approved'
+
   const { data, error } = await adminForUpdate.from('reviews').update(updates).eq('id', id).select().single()
-  if (error) return NextResponse.json({ error: 'Update failed' }, { status: 500 })
+  if (error) {
+    console.error('Review author/admin update failed:', error)
+    return NextResponse.json({ error: `Update failed: ${error.message}` }, { status: 500 })
+  }
+
+  if (wasApproved && data?.slug) {
+    revalidatePath('/')
+    revalidatePath('/reviews')
+    revalidatePath(`/reviews/${data.slug}`)
+  }
+
   return NextResponse.json({ review: data })
 }
 
