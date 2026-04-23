@@ -28,12 +28,14 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(initialData?.image_url ?? null)
   const [imageUploading, setImageUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [warning, setWarning] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
   // AI draft generation
   const [draftLoading, setDraftLoading] = useState(false)
   const [draftStep, setDraftStep] = useState<'content' | 'images' | null>(null)
+  const stepTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [draftTopic, setDraftTopic] = useState('')
   const [draftKeyPoints, setDraftKeyPoints] = useState('')
 
@@ -53,22 +55,36 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
     setDraftLoading(true)
     setDraftStep('content')
     setError(null)
+    setWarning(null)
 
-    const res = await fetch('/api/claude/article-draft', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        topic: draftTopic,
-        category,
-        keyPoints: draftKeyPoints.split(',').map(p => p.trim()).filter(Boolean),
-      }),
-    })
+    // Simulate progress: switch to "image" step after 20s (Claude takes ~15–25s)
+    stepTimerRef.current = setTimeout(() => setDraftStep('images'), 20000)
 
-    setDraftStep('images')
+    let res: Response
+    try {
+      res = await fetch('/api/claude/article-draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: draftTopic,
+          category,
+          keyPoints: draftKeyPoints.split(',').map(p => p.trim()).filter(Boolean),
+        }),
+      })
+    } catch {
+      clearTimeout(stepTimerRef.current!)
+      setError('Network error — check your connection and try again.')
+      setDraftLoading(false)
+      setDraftStep(null)
+      return
+    }
+
+    clearTimeout(stepTimerRef.current!)
     const json = await res.json()
-    if (!res.ok) { setError(json.error); setDraftLoading(false); setDraftStep(null); return }
+    if (!res.ok) { setError(json.error ?? 'Generation failed — please try again.'); setDraftLoading(false); setDraftStep(null); return }
 
-    const { draft, images } = json
+    const { draft, images, warnings } = json
+    if (warnings?.length) setWarning(warnings[0])
     if (draft.title) setTitle(draft.title)
     if (draft.excerpt) setExcerpt(draft.excerpt)
     if (images?.heroUrl) setImageUrl(images.heroUrl)
@@ -434,6 +450,12 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
       {error && (
         <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">
           {error}
+        </p>
+      )}
+
+      {warning && !error && (
+        <p className="text-yellow-300 text-sm bg-yellow-950/40 border border-yellow-800/50 rounded-lg px-4 py-3">
+          {warning}
         </p>
       )}
 

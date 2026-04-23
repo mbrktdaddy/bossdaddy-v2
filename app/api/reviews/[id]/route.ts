@@ -45,8 +45,20 @@ export async function GET(
     .eq('id', id)
     .single()
 
-  if (error) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  return NextResponse.json({ review: data })
+  if (!error) return NextResponse.json({ review: data })
+
+  // RLS may block pending reviews from non-authors — bypass for admins
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+    if (profile?.role === 'admin') {
+      const admin = createAdminClient()
+      const { data: adminData, error: adminErr } = await admin.from('reviews').select('*').eq('id', id).single()
+      if (!adminErr) return NextResponse.json({ review: adminData })
+    }
+  }
+
+  return NextResponse.json({ error: 'Not found' }, { status: 404 })
 }
 
 // PUT /api/reviews/[id] — update draft or moderate (admin)

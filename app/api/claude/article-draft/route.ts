@@ -64,44 +64,65 @@ Return JSON with this exact shape:
   }
 }`
 
-  try {
-    const claude = getClaudeClient()
-    const message = await claude.messages.create({
-      model: MODEL,
-      max_tokens: 3000,
-      system: [{ type: 'text', text: BOSS_DADDY_SYSTEM, cache_control: { type: 'ephemeral' } }],
-      messages: [{ role: 'user', content: prompt }],
-    })
+  const claudeResult = await getClaudeClient().messages.create({
+    model: MODEL,
+    max_tokens: 3000,
+    system: [{ type: 'text', text: BOSS_DADDY_SYSTEM, cache_control: { type: 'ephemeral' } }],
+    messages: [{ role: 'user', content: prompt }],
+  }).catch((err: unknown) => {
+    console.error('Claude API error (article-draft):', err)
+    return { _error: err instanceof Error ? err.message : String(err) } as const
+  })
 
-    const text = message.content.find((b) => b.type === 'text')?.text ?? ''
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) {
-      return NextResponse.json({ error: 'Model returned unexpected format' }, { status: 502 })
-    }
-
-    const draft = JSON.parse(jsonMatch[0])
-
-    // Generate hero + section images in parallel (cap sections at 3)
-    const heroPrompt: string = draft.imagePrompts?.hero ?? `Photorealistic lifestyle photo for a dad-focused article about ${topic}, no people, objects and setting only`
-    const sectionPrompts: string[] = (draft.imagePrompts?.sections ?? []).slice(0, 1)
-
-    const results = await Promise.allSettled([
-      generateAndUploadImage(heroPrompt, 'article-images', '1792x1024'),
-      ...sectionPrompts.map((p: string) => generateAndUploadImage(p, 'article-images', '1024x1024')),
-    ])
-
-    const [heroResult, ...sectionResults] = results
-    const heroUrl = heroResult.status === 'fulfilled' ? heroResult.value : null
-    const sectionUrls = sectionResults
-      .map(r => (r.status === 'fulfilled' ? r.value : null))
-      .filter((u): u is string => u !== null)
-
-    // Strip imagePrompts from draft before returning — not needed by client
-    const { imagePrompts: _omit, ...cleanDraft } = draft
-
-    return NextResponse.json({ draft: cleanDraft, images: { heroUrl, sectionUrls }, remaining })
-  } catch (err) {
-    console.error('Article draft error:', err)
-    return NextResponse.json({ error: 'Draft generation failed' }, { status: 502 })
+  if ('_error' in claudeResult) {
+    const msg = claudeResult._error
+    const isTimeout = /timeout|timed.?out|deadline/i.test(msg)
+    const isOverload = /overload|529|capacity/i.test(msg)
+    return NextResponse.json({
+      error: isTimeout
+        ? 'Generation timed out — the AI is busy. Please wait a moment and try again.'
+        : isOverload
+        ? 'The AI service is currently overloaded. Please try again in a minute.'
+        : `AI service error: ${msg.slice(0, 120)}`,
+    }, { status: 502 })
   }
+
+  const text = claudeResult.content.find((b) => b.type === 'text')?.text ?? ''
+  const jsonMatch = text.match(/\{[\s\S]*\}/)
+  if (!jsonMatch) {
+    return NextResponse.json({ error: 'AI returned an unexpected format — please try again.' }, { status: 502 })
+  }
+
+  let draft: Record<string, unknown>
+  try {
+    draft = JSON.parse(jsonMatch[0])
+  } catch {
+    return NextResponse.json({ error: 'AI returned malformed content — please try again.' }, { status: 502 })
+  }
+
+  // Generate hero + section images in parallel (cap sections at 1)
+  const heroPrompt: string = (draft.imagePrompts as Record<string, string>)?.hero ?? `Photorealistic lifestyle photo for a dad-focused article about ${topic}, no people, objects and setting only`
+  const sectionPrompts: string[] = ((draft.imagePrompts as Record<string, string[]>)?.sections ?? []).slice(0, 1)
+
+  const results = await Promise.allSettled([
+    generateAndUploadImage(heroPrompt, 'article-images', '1792x1024'),
+    ...sectionPrompts.map((p: string) => generateAndUploadImage(p, 'article-images', '1024x1024')),
+  ])
+
+  const [heroResult, ...sectionResults] = results
+  const heroUrl = heroResult.status === 'fulfilled' ? heroResult.value : null
+  const sectionUrls = sectionResults
+    .map(r => (r.status === 'fulfilled' ? r.value : null))
+    .filter((u): u is string => u !== null)
+
+  const warnings: string[] = []
+  if (heroResult.status === 'rejected') {
+    console.error('Hero image failed (article-draft):', heroResult.reason)
+    warnings.push('Hero image could not be generated — use the "Regenerate Image" button after saving.')
+  }
+
+  // Strip imagePrompts from draft before returning
+  const { imagePrompts: _omit, ...cleanDraft } = draft
+
+  return NextResponse.json({ draft: cleanDraft, images: { heroUrl, sectionUrls }, warnings, remaining })
 }

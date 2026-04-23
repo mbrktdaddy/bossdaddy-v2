@@ -39,8 +39,20 @@ export async function GET(
     .eq('id', id)
     .single()
 
-  if (error) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  return NextResponse.json({ article: data })
+  if (!error) return NextResponse.json({ article: data })
+
+  // RLS may block pending articles from non-authors — bypass for admins
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+    if (profile?.role === 'admin') {
+      const admin = createAdminClient()
+      const { data: adminData, error: adminErr } = await admin.from('articles').select('*').eq('id', id).single()
+      if (!adminErr) return NextResponse.json({ article: adminData })
+    }
+  }
+
+  return NextResponse.json({ error: 'Not found' }, { status: 404 })
 }
 
 // PUT /api/articles/[id] — admin moderation or author edit
