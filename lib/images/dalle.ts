@@ -1,8 +1,8 @@
 import OpenAI from 'openai'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-type Bucket = 'article-images' | 'review-images'
-type ImageSize = '1024x1024' | '1792x1024'
+type Bucket = 'article-images' | 'review-images' | 'media'
+type ImageSize = '1024x1024' | '1792x1024' | '1024x1792'
 
 const SAFE_FALLBACK_PROMPT =
   'Photorealistic lifestyle photography, tools and outdoor gear on a wooden surface, warm natural lighting, clean composition, high quality, no people'
