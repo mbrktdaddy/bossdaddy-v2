@@ -11,6 +11,7 @@ const DraftInput = z.object({
   category: z.string().min(2).max(80),
   keyFeatures: z.array(z.string()).max(15).default([]),
   targetAudience: z.string().max(200).optional(),
+  productSlug: z.string().regex(/^[a-z0-9-]+$/).max(80).optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -39,12 +40,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { productName, category, keyFeatures, targetAudience } = parsed.data
+  const { productName, category, keyFeatures, targetAudience, productSlug } = parsed.data
 
   const prompt = `Write a product review:
 
 Product: ${productName}
-Category: ${category}${keyFeatures.length ? `\nKey Features: ${keyFeatures.join(', ')}` : ''}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}
+Category: ${category}${keyFeatures.length ? `\nKey Features: ${keyFeatures.join(', ')}` : ''}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}${productSlug ? `\nProduct slug: ${productSlug}` : ''}
 
 STRUCTURE REQUIREMENTS:
 - Introduction: 2–3 sentences that open with a real testing scenario (first-person dad)

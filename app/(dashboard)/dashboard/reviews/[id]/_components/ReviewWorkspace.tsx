@@ -321,6 +321,9 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
         <div>
           <label className="block text-sm text-gray-300 mb-1.5">Content <span className="text-gray-600">(HTML)</span></label>
           <ContentEditor value={content} onChange={setContent} />
+          <p className="mt-1.5 text-xs text-gray-600">
+            Insert <code className="text-orange-400">[[BUY:product-slug]]</code> where you want an affiliate link — e.g. <code className="text-orange-400">[[BUY:enfamil-enspire]]</code>. Resolved on save using rows from <a href="/dashboard/admin/products" className="text-orange-400 hover:text-orange-300">Products</a>.
+          </p>
         </div>
 
         {/* Affiliate disclosure gate */}

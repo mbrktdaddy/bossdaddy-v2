@@ -27,5 +27,6 @@ export function extractAffiliateNetwork(url: string): string {
 
 export const FTC_DISCLOSURE_HTML =
   '<p class="bd-disclosure-inline">This article contains affiliate links. ' +
+  'As an Amazon Associate I earn from qualifying purchases. ' +
   'We may earn a small commission at no extra cost to you. ' +
   '<a href="/affiliate-disclosure/" rel="noopener">Learn more</a></p>'

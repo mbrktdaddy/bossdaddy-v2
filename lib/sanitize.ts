@@ -29,9 +29,14 @@ export function sanitizeHtml(dirty: string): string {
     allowedSchemesByTag:     { img: ['http', 'https', 'data'] },
     allowProtocolRelative:   false,
     disallowedTagsMode:      'discard',
-    // Restrict target/rel to only-safe values on <a>
+    // Merge incoming rel tokens with noopener/noreferrer so affiliate anchors
+    // can carry sponsored/nofollow without being stripped.
     transformTags: {
-      a: sanitize.simpleTransform('a', { rel: 'noopener noreferrer' }, false),
+      a: (tagName, attribs) => {
+        const incoming = (attribs.rel ?? '').split(/\s+/).filter(Boolean)
+        const merged = Array.from(new Set([...incoming, 'noopener', 'noreferrer']))
+        return { tagName, attribs: { ...attribs, rel: merged.join(' ') } }
+      },
     },
   })
 }

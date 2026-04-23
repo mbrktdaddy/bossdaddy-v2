@@ -14,6 +14,7 @@ export function ReviewCreateWizard() {
 
   const [description, setDescription]   = useState('')
   const [productName, setProductName]   = useState('')
+  const [productSlug, setProductSlug]   = useState('')
   const [keyFeatures, setKeyFeatures]   = useState('')
   const [category, setCategory]         = useState('other')
   const [suggesting, setSuggesting]     = useState(false)
@@ -49,6 +50,7 @@ export function ReviewCreateWizard() {
           productName,
           category,
           keyFeatures: keyFeatures.split('\n').map(f => f.trim()).filter(Boolean),
+          ...(productSlug.trim() ? { productSlug: productSlug.trim() } : {}),
         }),
       })
       const genJson = await genRes.json()
@@ -183,6 +185,23 @@ export function ReviewCreateWizard() {
             placeholder="What product is this?"
             className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-300 mb-1.5">
+            Product slug <span className="text-gray-600">(optional — auto-embeds a [[BUY:slug]] affiliate link)</span>
+          </label>
+          <input
+            type="text"
+            value={productSlug}
+            onChange={(e) => setProductSlug(e.target.value.toLowerCase())}
+            placeholder="e.g. enfamil-enspire"
+            pattern="[a-z0-9-]+"
+            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          <p className="mt-1 text-xs text-gray-600">
+            Must match a row in <code className="text-orange-400">/dashboard/admin/products</code>. Leave blank to skip.
+          </p>
         </div>
 
         <div>

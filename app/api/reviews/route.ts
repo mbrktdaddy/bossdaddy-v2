@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { detectAffiliateLinks } from '@/lib/affiliate'
+import { resolveProductTokens } from '@/lib/products'
 import { computeReadingTime } from '@/lib/reading-time'
 import { CATEGORY_SLUGS } from '@/lib/categories'
 import { z } from 'zod'
@@ -42,7 +43,8 @@ export async function POST(request: NextRequest) {
     let sanitizedContent: string
     try {
       const { sanitizeHtml } = await import('@/lib/sanitize')
-      sanitizedContent = sanitizeHtml(content)
+      const resolvedContent = await resolveProductTokens(content, supabase)
+      sanitizedContent = sanitizeHtml(resolvedContent)
     } catch (err) {
       console.error('sanitize import/call threw:', err)
       return NextResponse.json({

@@ -36,6 +36,12 @@ CONTENT PILLARS — hit at least 2:
 3. Honest Assessment — what it does NOT do well (no real cons = no trust)
 4. Value Play — is it worth the price, or is there a better option
 
+PRODUCT LINKS:
+- If and only if the user message includes a line starting with "Product slug:", embed exactly one token of the form [[BUY:that-slug]] inline — place it at the strongest purchase-intent moment, usually inside the verdict or a clear recommendation sentence.
+- Never write raw product URLs (no amazon.com, no geni.us, no shortened links).
+- Never emit more than one [[BUY:...]] token.
+- If no "Product slug:" line is present, write no product links at all.
+
 OUTPUT: Return valid JSON only. No markdown, no code fences, no explanation text.`
 
 // Moderator system prompt — for review content

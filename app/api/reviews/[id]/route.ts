@@ -5,6 +5,7 @@ import { snapshotRevision } from '@/lib/revisions'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { detectAffiliateLinks } from '@/lib/affiliate'
+import { resolveProductTokens } from '@/lib/products'
 import { computeReadingTime } from '@/lib/reading-time'
 import { getResend, FROM_EMAIL } from '@/lib/resend'
 import { ModerationResultEmail } from '@/emails/ModerationResultEmail'
@@ -179,7 +180,8 @@ export async function PUT(
   if (parsed.data.meta_description !== undefined) updates.meta_description = parsed.data.meta_description
   if (parsed.data.scheduled_publish_at !== undefined) updates.scheduled_publish_at = parsed.data.scheduled_publish_at
   if (parsed.data.content) {
-    const sanitized = sanitizeHtml(parsed.data.content)
+    const resolved = await resolveProductTokens(parsed.data.content, supabase)
+    const sanitized = sanitizeHtml(resolved)
     updates.content = sanitized
     updates.has_affiliate_links = detectAffiliateLinks(sanitized)
     updates.reading_time_minutes = computeReadingTime(sanitized)
