@@ -2,7 +2,6 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getClaudeClient, MODEL, BOSS_DADDY_SYSTEM } from '@/lib/claude/client'
 import { checkRateLimit } from '@/lib/rate-limit'
-import { generateAndUploadImage } from '@/lib/images/dalle'
 import { z } from 'zod'
 
 export const maxDuration = 90
@@ -114,19 +113,12 @@ Return JSON with this exact shape:
     return NextResponse.json({ error: 'AI returned malformed content — please try again.' }, { status: 502 })
   }
 
-  const heroPrompt: string = (draft.imagePrompt as string) ?? `Photorealistic product photo of the ${productName} on a clean surface, natural lighting, no people`
-  const [heroResult] = await Promise.allSettled([
-    generateAndUploadImage(heroPrompt, 'review-images', '1792x1024'),
-  ])
-  const heroUrl = heroResult.status === 'fulfilled' ? heroResult.value : null
-
-  const warnings: string[] = []
-  if (heroResult.status === 'rejected') {
-    console.error('Hero image failed (review-draft):', heroResult.reason)
-    warnings.push('Hero image could not be generated — use the "Regenerate Image" button after saving.')
-  }
+  // Extract the AI-suggested image prompt — return it so the form can pre-fill
+  // the editable prompt field. Images are generated separately.
+  const imagePrompt: string = (draft.imagePrompt as string)
+    ?? `Photorealistic product photo of the ${productName} on a clean surface, natural lighting, no people`
 
   const { imagePrompt: _omit, ...cleanDraft } = draft
 
-  return NextResponse.json({ draft: cleanDraft, images: { heroUrl }, warnings, remaining })
+  return NextResponse.json({ draft: cleanDraft, imagePrompt, remaining })
 }

@@ -127,6 +127,7 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
 
   // Hero image regeneration
   const [heroRegenLoading, setHeroRegenLoading] = useState(false)
+  const [imagePrompt, setImagePrompt] = useState('')
 
   // Media library picker
   const [showMediaPicker, setShowMediaPicker] = useState(false)
@@ -176,14 +177,13 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
       setDraftLoading(false); setDraftStep(null); return
     }
 
-    const { draft, images, warnings } = json
-    if (warnings?.length) setWarning(warnings[0])
+    const { draft, imagePrompt: suggestedPrompt } = json
+    if (suggestedPrompt) setImagePrompt(suggestedPrompt)
     if (draft.title) setTitle(draft.title)
     if (draft.rating) setRating(Math.round(draft.rating))
     if (draft.pros?.length) setPros(draft.pros)
     if (draft.cons?.length) setCons(draft.cons)
     if (draft.excerpt) setExcerpt(draft.excerpt)
-    if (images?.heroUrl) setImageUrl(images.heroUrl)
     setContent(
       [
         draft.introduction,
@@ -255,7 +255,7 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
     const res = await fetch('/api/images/hero', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, category, excerpt, content_type: 'review', product_name: productName }),
+      body: JSON.stringify({ title, category, excerpt, content_type: 'review', product_name: productName, custom_prompt: imagePrompt || null }),
     })
     const json = await res.json()
     if (!res.ok) { setError(json.error); setHeroRegenLoading(false); return }
@@ -504,25 +504,32 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
             Product Image
             {!isEditing && <span className="text-gray-600 ml-1">(save draft first to enable direct upload)</span>}
           </label>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowMediaPicker(true)}
-              className="text-xs px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded-lg transition-colors"
-            >
-              📁 Library
-            </button>
-            {(title || productName) && (
-              <button
-                type="button"
-                onClick={regenerateHero}
-                disabled={heroRegenLoading}
-                className="text-xs px-3 py-1 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-gray-400 hover:text-white rounded-lg transition-colors"
-              >
-                {heroRegenLoading ? 'Generating...' : '↺ Regenerate'}
-              </button>
-            )}
-          </div>
+          <button
+            type="button"
+            onClick={() => setShowMediaPicker(true)}
+            className="text-xs px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded-lg transition-colors"
+          >
+            📁 Library
+          </button>
+        </div>
+
+        {/* Editable image prompt */}
+        <div className="flex gap-2 mb-2">
+          <input
+            type="text"
+            value={imagePrompt}
+            onChange={(e) => setImagePrompt(e.target.value)}
+            placeholder="Image prompt — edit before generating (auto-filled after draft generation)"
+            className="flex-1 px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-xs text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500"
+          />
+          <button
+            type="button"
+            onClick={regenerateHero}
+            disabled={heroRegenLoading || (!title && !productName)}
+            className="shrink-0 text-xs px-3 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-gray-400 hover:text-white rounded-lg transition-colors"
+          >
+            {heroRegenLoading ? 'Generating…' : '↺ Generate'}
+          </button>
         </div>
 
         {imageUrl ? (

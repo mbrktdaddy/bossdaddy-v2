@@ -2,7 +2,6 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getClaudeClient, MODEL, BOSS_DADDY_SYSTEM } from '@/lib/claude/client'
 import { checkRateLimit } from '@/lib/rate-limit'
-import { generateAndUploadImage } from '@/lib/images/dalle'
 import { z } from 'zod'
 
 export const maxDuration = 90
@@ -100,29 +99,12 @@ Return JSON with this exact shape:
     return NextResponse.json({ error: 'AI returned malformed content — please try again.' }, { status: 502 })
   }
 
-  // Generate hero + section images in parallel (cap sections at 1)
-  const heroPrompt: string = (draft.imagePrompts as Record<string, string>)?.hero ?? `Photorealistic lifestyle photo for a dad-focused article about ${topic}, no people, objects and setting only`
-  const sectionPrompts: string[] = ((draft.imagePrompts as Record<string, string[]>)?.sections ?? []).slice(0, 1)
+  // Extract the AI-suggested image prompt for the hero — return it so the form
+  // can pre-fill the editable prompt field. Images are generated separately.
+  const imagePrompt: string = (draft.imagePrompts as Record<string, string>)?.hero
+    ?? `Photorealistic lifestyle photo for a dad-focused article about ${topic}, no people, objects and setting only`
 
-  const results = await Promise.allSettled([
-    generateAndUploadImage(heroPrompt, 'article-images', '1792x1024'),
-    ...sectionPrompts.map((p: string) => generateAndUploadImage(p, 'article-images', '1024x1024')),
-  ])
-
-  const [heroResult, ...sectionResults] = results
-  const heroUrl = heroResult.status === 'fulfilled' ? heroResult.value : null
-  const sectionUrls = sectionResults
-    .map(r => (r.status === 'fulfilled' ? r.value : null))
-    .filter((u): u is string => u !== null)
-
-  const warnings: string[] = []
-  if (heroResult.status === 'rejected') {
-    console.error('Hero image failed (article-draft):', heroResult.reason)
-    warnings.push('Hero image could not be generated — use the "Regenerate Image" button after saving.')
-  }
-
-  // Strip imagePrompts from draft before returning
   const { imagePrompts: _omit, ...cleanDraft } = draft
 
-  return NextResponse.json({ draft: cleanDraft, images: { heroUrl, sectionUrls }, warnings, remaining })
+  return NextResponse.json({ draft: cleanDraft, imagePrompt, remaining })
 }

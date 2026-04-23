@@ -6,11 +6,12 @@ import { z } from 'zod'
 export const maxDuration = 60
 
 const HeroInput = z.object({
-  title:        z.string().min(1).max(150),
-  category:     z.string().min(1).max(80),
-  excerpt:      z.string().max(200).optional().nullable(),
-  content_type: z.enum(['article', 'review']),
-  product_name: z.string().max(120).optional().nullable(),
+  title:         z.string().min(1).max(150),
+  category:      z.string().min(1).max(80),
+  excerpt:       z.string().max(200).optional().nullable(),
+  content_type:  z.enum(['article', 'review']),
+  product_name:  z.string().max(120).optional().nullable(),
+  custom_prompt: z.string().max(600).optional().nullable(),
 })
 
 export async function POST(request: NextRequest) {
@@ -24,9 +25,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { title, category, excerpt, content_type, product_name } = parsed.data
+  const { title, category, excerpt, content_type, product_name, custom_prompt } = parsed.data
 
-  const prompt = content_type === 'review'
+  const prompt = custom_prompt?.trim()
+    ? custom_prompt.trim()
+    : content_type === 'review'
     ? `Editorial stock photo of the ${product_name ?? title}. ${excerpt ?? ''} Category: ${category}. ` +
       `Product in a realistic real-world setting, natural lighting, clean composition, ` +
       `no people, no text. Style: professional product photography as seen on major review sites.`
@@ -41,6 +44,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ imageUrl })
   } catch (err) {
     console.error('Hero image generation error:', err)
-    return NextResponse.json({ error: 'Image generation failed' }, { status: 502 })
+    const msg = err instanceof Error ? err.message : String(err)
+    return NextResponse.json({ error: `Image generation failed: ${msg.slice(0, 120)}` }, { status: 502 })
   }
 }
