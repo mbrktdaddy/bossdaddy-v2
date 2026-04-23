@@ -143,9 +143,6 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
     setError(null)
     setWarning(null)
 
-    // Simulate progress: switch to "image" step after 20s (Claude takes ~15–25s)
-    stepTimerRef.current = setTimeout(() => setDraftStep('images'), 20000)
-
     let res: Response
     try {
       res = await fetch('/api/claude/draft', {
@@ -158,14 +155,11 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
         }),
       })
     } catch {
-      clearTimeout(stepTimerRef.current!)
       setError('Network error — check your connection and try again.')
       setDraftLoading(false)
       setDraftStep(null)
       return
     }
-
-    clearTimeout(stepTimerRef.current!)
     const json = await res.json()
     if (!res.ok) {
       const { fieldErrors, formErrors } = json.details ?? {}
@@ -322,10 +316,16 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
     if (submit) {
       setSubmitting(true)
       const subRes = await fetch(`/api/reviews/${reviewId}/submit`, { method: 'POST' })
-      const subJson = await subRes.json()
-      if (!subRes.ok) { setError(subJson.error); setSaving(false); setSubmitting(false); return }
+      const subJson = await subRes.json().catch(() => ({}))
+      if (!subRes.ok) { setError(subJson.error ?? 'Submission failed — please try again.'); setSaving(false); setSubmitting(false); return }
+      setSaving(false)
+      setSubmitting(false)
+      setWarning('Submitted for review! Redirecting…')
+      setTimeout(() => router.push('/dashboard/reviews'), 1200)
+      return
     }
 
+    setSaving(false)
     router.push('/dashboard/reviews')
     router.refresh()
   }

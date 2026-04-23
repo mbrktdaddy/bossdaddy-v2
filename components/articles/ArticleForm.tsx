@@ -64,9 +64,6 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
     setError(null)
     setWarning(null)
 
-    // Simulate progress: switch to "image" step after 20s (Claude takes ~15–25s)
-    stepTimerRef.current = setTimeout(() => setDraftStep('images'), 20000)
-
     let res: Response
     try {
       res = await fetch('/api/claude/article-draft', {
@@ -79,14 +76,11 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
         }),
       })
     } catch {
-      clearTimeout(stepTimerRef.current!)
       setError('Network error — check your connection and try again.')
       setDraftLoading(false)
       setDraftStep(null)
       return
     }
-
-    clearTimeout(stepTimerRef.current!)
     const json = await res.json()
     if (!res.ok) {
       const { fieldErrors, formErrors } = json.details ?? {}
@@ -235,12 +229,17 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
     if (submit) {
       setSubmitting(true)
       const subRes = await fetch(`/api/articles/${articleId}/submit`, { method: 'POST' })
-      const subJson = await subRes.json()
-      if (!subRes.ok) { setError(subJson.error); setSaving(false); setSubmitting(false); return }
+      const subJson = await subRes.json().catch(() => ({}))
+      if (!subRes.ok) { setError(subJson.error ?? 'Submission failed — please try again.'); setSaving(false); setSubmitting(false); return }
+      setSaving(false)
+      setSubmitting(false)
+      setWarning('Submitted for review! Redirecting…')
+      setTimeout(() => router.push('/dashboard/articles'), 1200)
+      return
     }
 
-    if (!isEditing && !submit) {
-      // Redirect to edit page so image upload becomes available
+    setSaving(false)
+    if (!isEditing) {
       router.push(`/dashboard/articles/${articleId}/edit`)
     } else {
       router.push('/dashboard/articles')

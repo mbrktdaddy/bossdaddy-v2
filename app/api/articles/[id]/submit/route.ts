@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { checkRateLimit } from '@/lib/rate-limit'
 
 // POST /api/articles/[id]/submit — transition draft → pending, trigger moderation
@@ -17,27 +18,22 @@ export async function POST(
     return NextResponse.json({ error: 'Too many submissions. Try again in an hour.' }, { status: 429 })
   }
 
-  const { data: article, error: fetchError } = await supabase
+  const admin = createAdminClient()
+  const { data: article } = await admin
     .from('articles')
-    .select('id, status')
+    .select('id, status, author_id')
     .eq('id', id)
-    .eq('author_id', user.id)
     .single()
 
-  if (fetchError || !article) {
-    return NextResponse.json({ error: 'Article not found' }, { status: 404 })
-  }
-
+  if (!article) return NextResponse.json({ error: 'Article not found' }, { status: 404 })
+  if (article.author_id !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   if (!['draft', 'rejected'].includes(article.status)) {
-    return NextResponse.json(
-      { error: 'Only drafts or rejected articles can be submitted' },
-      { status: 422 }
-    )
+    return NextResponse.json({ error: 'Only drafts or rejected articles can be submitted' }, { status: 422 })
   }
 
-  const { error: updateError } = await supabase
+  const { error: updateError } = await admin
     .from('articles')
-    .update({ status: 'pending' })
+    .update({ status: 'pending', rejection_reason: null })
     .eq('id', id)
 
   if (updateError) return NextResponse.json({ error: 'Submission failed' }, { status: 500 })
