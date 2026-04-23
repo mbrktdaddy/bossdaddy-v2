@@ -11,6 +11,7 @@ import { AIRefinePanel } from '@/components/workspace/AIRefinePanel'
 import { ModerationInfo } from '@/components/workspace/ModerationInfo'
 import { SEOPanel } from '@/components/workspace/SEOPanel'
 import { SchedulePanel } from '@/components/workspace/SchedulePanel'
+import { VersionHistoryPanel } from '@/components/workspace/VersionHistoryPanel'
 import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader'
 import { WorkspaceToolbar } from '@/components/workspace/WorkspaceToolbar'
 import { AutoSaveIndicator } from '@/components/workspace/AutoSaveIndicator'
@@ -354,6 +355,8 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
           onChangeTitle={setMetaTitle}
           onChangeDescription={setMetaDesc}
         />
+
+        <VersionHistoryPanel contentType="review" contentId={review.id} />
 
         <ModerationInfo score={review.moderation_score} flags={review.moderation_flags ?? []} />
 

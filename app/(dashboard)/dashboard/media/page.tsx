@@ -39,6 +39,22 @@ function AssetCard({
   const [deleting, setDeleting] = useState(false)
   const [savingAlt, setSavingAlt] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [generatingAlt, setGeneratingAlt] = useState(false)
+
+  async function handleAIGenerate() {
+    setGeneratingAlt(true)
+    const res = await fetch('/api/claude/alt-text', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image_url: asset.url }),
+    })
+    const json = await res.json()
+    if (res.ok && json.alt) {
+      setAltDraft(json.alt)
+      setEditingAlt(true)
+    }
+    setGeneratingAlt(false)
+  }
 
   async function handleDelete() {
     if (!confirmDelete) { setConfirmDelete(true); return }
@@ -116,13 +132,23 @@ function AssetCard({
             </button>
           </div>
         ) : (
-          <button
-            onClick={() => setEditingAlt(true)}
-            className="text-left text-xs text-gray-500 hover:text-gray-300 transition-colors truncate"
-            title="Click to edit alt text"
-          >
-            {asset.alt_text ? asset.alt_text : <span className="italic text-gray-600">Add alt text…</span>}
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setEditingAlt(true)}
+              className="flex-1 text-left text-xs text-gray-500 hover:text-gray-300 transition-colors truncate"
+              title="Click to edit alt text"
+            >
+              {asset.alt_text ? asset.alt_text : <span className="italic text-gray-600">Add alt text…</span>}
+            </button>
+            <button
+              onClick={handleAIGenerate}
+              disabled={generatingAlt}
+              title="Generate alt text with AI"
+              className="shrink-0 text-xs px-1.5 py-0.5 bg-blue-950/50 hover:bg-blue-900/60 text-blue-400 rounded transition-colors disabled:opacity-50"
+            >
+              {generatingAlt ? '…' : '✨ AI'}
+            </button>
+          </div>
         )}
 
         {/* Footer row */}

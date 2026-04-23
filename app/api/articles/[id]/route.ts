@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest, after } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { snapshotRevision } from '@/lib/revisions'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { computeReadingTime } from '@/lib/reading-time'
@@ -170,7 +171,7 @@ export async function PUT(
 
   // Use admin client — verify ownership + status manually to avoid RLS silent failures
   const admin = createAdminClient()
-  const { data: current } = await admin.from('articles').select('author_id, status').eq('id', id).single()
+  const { data: current } = await admin.from('articles').select('*').eq('id', id).single()
   if (!current) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   // Admin can edit any article at any status; authors only their own drafts/rejected
@@ -192,6 +193,11 @@ export async function PUT(
     console.error('Article author/admin update failed:', error)
     return NextResponse.json({ error: `Update failed: ${error.message}` }, { status: 500 })
   }
+
+  // Snapshot the PREVIOUS state for version history (fire-and-forget; don't block response)
+  snapshotRevision('article', id, current as Record<string, unknown>, user.id).catch((err) =>
+    console.error('Article revision snapshot failed:', err)
+  )
 
   if (wasApproved && data?.slug) {
     revalidatePath('/')

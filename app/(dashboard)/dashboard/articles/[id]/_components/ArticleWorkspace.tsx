@@ -10,6 +10,7 @@ import { AIRefinePanel } from '@/components/workspace/AIRefinePanel'
 import { ModerationInfo } from '@/components/workspace/ModerationInfo'
 import { SEOPanel } from '@/components/workspace/SEOPanel'
 import { SchedulePanel } from '@/components/workspace/SchedulePanel'
+import { VersionHistoryPanel } from '@/components/workspace/VersionHistoryPanel'
 import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader'
 import { WorkspaceToolbar } from '@/components/workspace/WorkspaceToolbar'
 import { AutoSaveIndicator } from '@/components/workspace/AutoSaveIndicator'
@@ -267,6 +268,9 @@ export function ArticleWorkspace({ article }: Props) {
           onChangeTitle={setMetaTitle}
           onChangeDescription={setMetaDesc}
         />
+
+        {/* Version history */}
+        <VersionHistoryPanel contentType="article" contentId={article.id} />
 
         {/* Moderation info */}
         <ModerationInfo score={article.moderation_score} flags={article.moderation_flags ?? []} />
