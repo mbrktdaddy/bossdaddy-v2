@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { sanitizeHtml } from '@/lib/sanitize'
 import { computeReadingTime } from '@/lib/reading-time'
 import { CATEGORY_SLUGS } from '@/lib/categories'
 import { z } from 'zod'
@@ -37,11 +36,12 @@ export async function POST(request: NextRequest) {
 
     let sanitizedContent: string
     try {
+      const { sanitizeHtml } = await import('@/lib/sanitize')
       sanitizedContent = sanitizeHtml(content)
     } catch (err) {
-      console.error('sanitizeHtml threw:', err)
+      console.error('sanitize import/call threw:', err)
       return NextResponse.json({
-        error: `Content sanitization failed: ${err instanceof Error ? err.message : String(err)}`,
+        error: `Content sanitization failed: ${err instanceof Error ? `${err.name}: ${err.message}` : String(err)}`,
       }, { status: 500 })
     }
 
