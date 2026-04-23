@@ -10,7 +10,12 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   rejected: { label: 'Rejected', className: 'bg-red-950/60 text-red-400 border border-red-900/60' },
 }
 
-export default async function MyArticlesPage() {
+interface Props {
+  searchParams: Promise<{ filter?: string }>
+}
+
+export default async function MyArticlesPage({ searchParams }: Props) {
+  const { filter } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -24,8 +29,20 @@ export default async function MyArticlesPage() {
     total:   articles?.length ?? 0,
     live:    articles?.filter(a => a.status === 'approved').length ?? 0,
     pending: articles?.filter(a => a.status === 'pending').length ?? 0,
-    draft:   articles?.filter(a => a.status === 'draft').length ?? 0,
+    draft:   articles?.filter(a => ['draft', 'rejected'].includes(a.status)).length ?? 0,
   }
+
+  const displayed = filter === 'live'    ? articles?.filter(a => a.status === 'approved')
+    : filter === 'pending' ? articles?.filter(a => a.status === 'pending')
+    : filter === 'drafts'  ? articles?.filter(a => ['draft', 'rejected'].includes(a.status))
+    : articles
+
+  const statCards = [
+    { label: 'Total',   value: counts.total,   color: 'text-white',        filterKey: null },
+    { label: 'Live',    value: counts.live,    color: 'text-green-400',    filterKey: 'live' },
+    { label: 'Pending', value: counts.pending, color: 'text-yellow-400',   filterKey: 'pending' },
+    { label: 'Drafts',  value: counts.draft,   color: 'text-gray-400',     filterKey: 'drafts' },
+  ]
 
   return (
     <div className="p-4 sm:p-8 max-w-5xl">
@@ -47,32 +64,57 @@ export default async function MyArticlesPage() {
         </Link>
       </div>
 
-      {/* Stats */}
+      {/* Stats — clickable filters */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-        {[
-          { label: 'Total',   value: counts.total,   color: 'text-white' },
-          { label: 'Live',    value: counts.live,    color: 'text-green-400' },
-          { label: 'Pending', value: counts.pending, color: 'text-yellow-400' },
-          { label: 'Drafts',  value: counts.draft,   color: 'text-gray-400' },
-        ].map((s) => (
-          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-2xl px-4 py-3 sm:px-5 sm:py-4">
-            <p className={`text-xl sm:text-2xl font-black ${s.color}`}>{s.value}</p>
-            <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">{s.label}</p>
-          </div>
-        ))}
+        {statCards.map((s) => {
+          const isActive = filter === s.filterKey || (!filter && s.filterKey === null)
+          const href = isActive && s.filterKey !== null
+            ? '/dashboard/articles'
+            : s.filterKey ? `/dashboard/articles?filter=${s.filterKey}` : '/dashboard/articles'
+          return (
+            <Link
+              key={s.label}
+              href={href}
+              className={`block bg-gray-900 rounded-2xl px-4 py-3 sm:px-5 sm:py-4 border transition-colors ${
+                isActive
+                  ? 'border-orange-600 bg-orange-950/20'
+                  : 'border-gray-800 hover:border-gray-600'
+              }`}
+            >
+              <p className={`text-xl sm:text-2xl font-black ${s.color}`}>{s.value}</p>
+              <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">{s.label}</p>
+            </Link>
+          )
+        })}
       </div>
 
+      {/* Active filter label */}
+      {filter && (
+        <div className="flex items-center gap-2 mb-4">
+          <p className="text-sm text-gray-500">
+            Showing: <span className="text-orange-400 font-medium capitalize">{filter}</span>
+          </p>
+          <Link href="/dashboard/articles" className="text-xs text-gray-600 hover:text-gray-400 underline">clear</Link>
+        </div>
+      )}
+
       {/* Articles list */}
-      {!articles?.length ? (
+      {!displayed?.length ? (
         <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
-          <p className="text-gray-500 text-lg mb-2">No articles yet, Boss.</p>
-          <Link href="/dashboard/articles/new" className="text-orange-400 hover:text-orange-300 text-sm">
-            Write your first one →
-          </Link>
+          {filter ? (
+            <p className="text-gray-500 text-lg">No {filter} articles.</p>
+          ) : (
+            <>
+              <p className="text-gray-500 text-lg mb-2">No articles yet, Boss.</p>
+              <Link href="/dashboard/articles/new" className="text-orange-400 hover:text-orange-300 text-sm">
+                Write your first one →
+              </Link>
+            </>
+          )}
         </div>
       ) : (
         <div className="space-y-2">
-          {articles.map((a) => {
+          {displayed.map((a) => {
             const status = STATUS_CONFIG[a.status] ?? STATUS_CONFIG.draft
             const category = getCategoryBySlug(a.category)
 
@@ -82,11 +124,9 @@ export default async function MyArticlesPage() {
                 className="p-4 bg-gray-900 border border-gray-800 rounded-2xl hover:border-gray-700 transition-colors"
               >
                 <div className="flex items-start gap-3">
-                  {/* Article icon */}
                   <div className="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center shrink-0 text-lg mt-0.5">
                     {category?.icon ?? '📝'}
                   </div>
-
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-2 mb-1">
                       <p className="font-semibold text-sm leading-snug">{a.title}</p>
@@ -96,9 +136,7 @@ export default async function MyArticlesPage() {
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       {category && (
-                        <span className={`text-xs ${category.accent}`}>
-                          {category.icon} {category.label}
-                        </span>
+                        <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>
                       )}
                       {a.reading_time_minutes && (
                         <span className="text-xs text-gray-600">{a.reading_time_minutes} min read</span>
@@ -108,16 +146,13 @@ export default async function MyArticlesPage() {
                       </span>
                     </div>
                     {a.rejection_reason && ['draft', 'rejected'].includes(a.status) && (
-                      <p className="text-xs text-yellow-400/80 mt-1.5">
-                        ↩ Edits requested: {a.rejection_reason}
-                      </p>
+                      <p className="text-xs text-yellow-400/80 mt-1.5">↩ Edits requested: {a.rejection_reason}</p>
                     )}
                     {a.status === 'pending' && (
                       <p className="text-xs text-gray-500 mt-1.5">
                         In review queue — use &ldquo;Recall to draft&rdquo; to pull it back and edit.
                       </p>
                     )}
-                    {/* Actions */}
                     <div className="flex items-center gap-2 mt-3 flex-wrap">
                       {['draft', 'rejected'].includes(a.status) && (
                         <Link

@@ -4,7 +4,7 @@ import { getCategoryBySlug } from '@/lib/categories'
 import { UnpublishButton, VisibilityToggle, CommentModerationActions } from './_components/ModerationActions'
 
 interface Props {
-  searchParams: Promise<{ tab?: string }>
+  searchParams: Promise<{ tab?: string; risk?: string }>
 }
 
 function RiskBadge({ score }: { score: number | null }) {
@@ -27,7 +27,7 @@ function RiskBadge({ score }: { score: number | null }) {
 }
 
 export default async function ModerationQueuePage({ searchParams }: Props) {
-  const { tab } = await searchParams
+  const { tab, risk } = await searchParams
   const isPublished = tab === 'published'
   const isComments  = tab === 'comments'
   const isPending   = !isPublished && !isComments
@@ -83,6 +83,14 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
   const pending      = (queue?.length ?? 0) + (pendingArticles?.length ?? 0)
   const commentCount = pendingComments?.length ?? 0
 
+  // Apply risk filter to displayed queue items
+  const displayedReviews  = risk === 'high'   ? queue?.filter(r => (r.moderation_score ?? 0) >= 0.7)
+    : risk === 'review' ? queue?.filter(r => (r.moderation_score ?? 0) < 0.7)
+    : queue
+  const displayedArticles = risk === 'high'   ? pendingArticles?.filter(a => (a.moderation_score ?? 0) >= 0.7)
+    : risk === 'review' ? pendingArticles?.filter(a => (a.moderation_score ?? 0) < 0.7)
+    : pendingArticles
+
   return (
     <div className="p-4 sm:p-8 max-w-5xl">
 
@@ -131,32 +139,50 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
       {/* ── PENDING TAB ──────────────────────────────────────────────────── */}
       {isPending && (
         <>
-          {/* Stats */}
+          {/* Stats — clickable risk filters */}
           <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl px-3 py-3 sm:px-5 sm:py-4">
-              <p className="text-xl sm:text-2xl font-black text-white">{pending}</p>
-              <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">Pending</p>
-            </div>
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl px-3 py-3 sm:px-5 sm:py-4">
-              <p className="text-xl sm:text-2xl font-black text-red-400">{highRisk}</p>
-              <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">High Risk</p>
-            </div>
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl px-3 py-3 sm:px-5 sm:py-4">
-              <p className="text-xl sm:text-2xl font-black text-yellow-400">{pending - highRisk}</p>
-              <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">To Review</p>
-            </div>
+            {[
+              { label: 'All Pending', value: pending,          color: 'text-white',        riskKey: null },
+              { label: 'High Risk',   value: highRisk,         color: 'text-red-400',      riskKey: 'high' },
+              { label: 'To Review',   value: pending - highRisk, color: 'text-yellow-400', riskKey: 'review' },
+            ].map((s) => {
+              const isActive = risk === s.riskKey || (!risk && s.riskKey === null)
+              const href = isActive && s.riskKey !== null
+                ? '/dashboard/moderation'
+                : s.riskKey ? `/dashboard/moderation?risk=${s.riskKey}` : '/dashboard/moderation'
+              return (
+                <Link
+                  key={s.label}
+                  href={href}
+                  className={`block bg-gray-900 rounded-2xl px-3 py-3 sm:px-5 sm:py-4 border transition-colors ${
+                    isActive ? 'border-orange-600 bg-orange-950/20' : 'border-gray-800 hover:border-gray-600'
+                  }`}
+                >
+                  <p className={`text-xl sm:text-2xl font-black ${s.color}`}>{s.value}</p>
+                  <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">{s.label}</p>
+                </Link>
+              )
+            })}
           </div>
+          {risk && (
+            <div className="flex items-center gap-2 mb-4">
+              <p className="text-sm text-gray-500">
+                Filtering: <span className="text-orange-400 font-medium">{risk === 'high' ? 'High Risk' : 'To Review'}</span>
+              </p>
+              <Link href="/dashboard/moderation" className="text-xs text-gray-600 hover:text-gray-400 underline">clear</Link>
+            </div>
+          )}
 
-          {!queue?.length && !pendingArticles?.length ? (
+          {!displayedReviews?.length && !displayedArticles?.length ? (
             <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
               <p className="text-2xl mb-2">✅</p>
-              <p className="text-gray-400 font-semibold">Queue is clear.</p>
-              <p className="text-gray-600 text-sm mt-1">Nice work, Boss.</p>
+              <p className="text-gray-400 font-semibold">{risk ? 'No items match this filter.' : 'Queue is clear.'}</p>
+              <p className="text-gray-600 text-sm mt-1">{risk ? '' : 'Nice work, Boss.'}</p>
             </div>
           ) : (
             <div className="space-y-2">
               {/* Pending reviews — link to detail page */}
-              {queue?.map((r) => {
+              {displayedReviews?.map((r) => {
                 const score = r.moderation_score ? Number(r.moderation_score) : null
                 const category = getCategoryBySlug(r.category)
                 const author = (Array.isArray(r.profiles) ? r.profiles[0] : r.profiles as unknown as { username: string } | null)?.username ?? 'unknown'
@@ -203,7 +229,7 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
               })}
 
               {/* Pending articles — link to detail page */}
-              {pendingArticles?.map((a) => {
+              {displayedArticles?.map((a) => {
                 const score = a.moderation_score ? Number(a.moderation_score) : null
                 const category = getCategoryBySlug(a.category)
                 const author = (Array.isArray(a.profiles) ? a.profiles[0] : a.profiles as unknown as { username: string } | null)?.username ?? 'unknown'
