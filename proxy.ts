@@ -54,6 +54,21 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  // Restrict media library to admins and authors only (not members)
+  if (pathname.startsWith('/dashboard/media') && user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile || !['admin', 'author'].includes(profile.role)) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard/reviews'
+      return NextResponse.redirect(url)
+    }
+  }
+
   // Redirect logged-in users away from auth pages
   if ((pathname === '/login' || pathname === '/register') && user) {
     const url = request.nextUrl.clone()
