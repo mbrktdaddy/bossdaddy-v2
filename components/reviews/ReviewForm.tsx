@@ -115,7 +115,6 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
   const [draftLoading, setDraftLoading] = useState(false)
   const [draftStep, setDraftStep] = useState<'content' | 'images' | null>(null)
   const [draftFeatures, setDraftFeatures] = useState('')
-  const stepTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Prompt helper
   const [suggestInput, setSuggestInput] = useState('')
@@ -326,7 +325,11 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
     }
 
     setSaving(false)
-    router.push('/dashboard/reviews')
+    if (!isEditing) {
+      router.push(`/dashboard/reviews/${reviewId}/edit`)
+    } else {
+      router.push('/dashboard/reviews')
+    }
     router.refresh()
   }
 
@@ -375,7 +378,7 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
             disabled={draftLoading || !productName}
             className="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition-colors sm:whitespace-nowrap"
           >
-            {draftStep === 'content' ? '✍️ Writing content...' : draftStep === 'images' ? '🖼️ Generating image...' : 'Generate Draft'}
+            {draftStep === 'content' ? '✍️ Writing content...' : 'Generate Draft'}
           </button>
         </div>
       </div>

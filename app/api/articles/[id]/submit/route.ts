@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest, after } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkRateLimit } from '@/lib/rate-limit'
@@ -38,16 +38,17 @@ export async function POST(
 
   if (updateError) return NextResponse.json({ error: 'Submission failed' }, { status: 500 })
 
-  // Trigger Claude moderation asynchronously (fire and forget)
+  // Trigger moderation after response so Vercel doesn't kill it
+  const secret = process.env.INTERNAL_API_SECRET
+  if (!secret) console.error('INTERNAL_API_SECRET not set — moderation will not run')
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
-  fetch(`${baseUrl}/api/claude/moderate`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-internal-secret': process.env.INTERNAL_API_SECRET ?? '',
-    },
-    body: JSON.stringify({ articleId: id }),
-  }).catch((err) => console.error('Article moderation trigger failed:', err))
+  after(async () => {
+    await fetch(`${baseUrl}/api/claude/moderate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-internal-secret': secret ?? '' },
+      body: JSON.stringify({ articleId: id }),
+    }).catch((err) => console.error('Article moderation trigger failed:', err))
+  })
 
   return NextResponse.json({ success: true, status: 'pending' })
 }

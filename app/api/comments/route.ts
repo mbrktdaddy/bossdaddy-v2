@@ -92,7 +92,7 @@ async function checkTrustPromotion(supabase: Awaited<ReturnType<typeof createCli
     .select('id', { count: 'exact', head: true })
     .eq('author_id', userId)
     .eq('status', 'approved')
-    .eq('moderation_flags', '[]')
+    .is('moderation_flags', null)
 
   if ((count ?? 0) >= 5) {
     await supabase

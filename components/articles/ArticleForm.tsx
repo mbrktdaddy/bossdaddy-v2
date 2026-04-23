@@ -38,7 +38,6 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
   // AI draft generation
   const [draftLoading, setDraftLoading] = useState(false)
   const [draftStep, setDraftStep] = useState<'content' | 'images' | null>(null)
-  const stepTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [draftTopic, setDraftTopic] = useState('')
   const [draftKeyPoints, setDraftKeyPoints] = useState('')
 
@@ -146,19 +145,13 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
     const { draft } = json
     if (draft.title) setTitle(draft.title)
     if (draft.excerpt) setExcerpt(draft.excerpt)
-    const sectionUrls = [...content.matchAll(/<figure><img src="([^"]+)"/g)].map(m => m[1])
-    let urlIndex = 0
     setContent(
       [
         draft.introduction,
         ...(draft.sections ?? []).map(
-          (s: { heading: string; body: string }, i: number) => {
-            const existingUrl = sectionUrls[urlIndex]
-            const imgHtml = existingUrl
-              ? `\n<figure><img src="${existingUrl}" alt="${s.heading}" /></figure>`
-              : ''
-            if (existingUrl) urlIndex++
-            return `<h2>${s.heading}</h2>\n<p>${s.body}</p>${imgHtml}`
+          (s: { heading: string; body: string }) => {
+            const bodyHtml = s.body.split(/\n\n+/).map((p: string) => `<p>${p.trim()}</p>`).join('\n')
+            return `<h2>${s.heading}</h2>\n${bodyHtml}`
           }
         ),
         draft.conclusion ? `<h2>Wrapping Up</h2>\n<p>${draft.conclusion}</p>` : '',
@@ -300,7 +293,7 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
               disabled={draftLoading || !draftTopic}
               className="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition-colors sm:whitespace-nowrap"
             >
-              {draftStep === 'content' ? '✍️ Writing content...' : draftStep === 'images' ? '🖼️ Generating image...' : 'Generate Draft'}
+              {draftStep === 'content' ? '✍️ Writing content...' : 'Generate Draft'}
             </button>
           </div>
         </div>

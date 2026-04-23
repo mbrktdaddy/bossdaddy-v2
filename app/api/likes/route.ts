@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       .eq('content_type', content_type)
       .eq('content_id', content_id)
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
     liked = !!data
   }
 
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     .eq('user_id', user.id)
     .eq('content_type', content_type)
     .eq('content_id', content_id)
-    .single()
+    .maybeSingle()
 
   if (existing) {
     // Unlike

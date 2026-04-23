@@ -1,0 +1,665 @@
+@charset "UTF-8";
+/* CSS Document */
+
+body {
+	background-color:#CCCCCC; /* Light Gray */
+	color: #333333;  /* Dark Gray */
+	font-family: 'Roboto', sans-serif;
+	font-size: 10pt;
+	font-weight: normal; }
+
+/* Default links - medum blue with dark blue hover  -used for links within a paragraph of text */
+a:link, a:active, a:visited { 
+   font-family: arial;
+   font-size: 10pt;
+   color: #1592ca; 
+   font-weight: normal; 
+   text-decoration: underline; }
+   
+a:hover { 
+   font-family: arial;
+   font-size: 10pt; 
+   font-family: arial; 
+   color: #BF0404; 
+   text-decoration: underline;}
+   
+   /* Main navigation bar */
+a.nav, a:active.nav, a:visited.nav { 
+   	color: #FFFFFF;
+	font-family: 'Roboto', sans-serif;
+	font-size: 8pt;
+	font-weight: normal;
+	text-decoration: none; }
+   
+a:hover.nav { 
+   	color: #BF0404;
+	font-family: 'Roboto', sans-serif;
+	font-size: 8pt;
+	font-weight: normal;
+	text-decoration: underline; }
+
+/* red  10pt */
+a.red10, a:active.red10, a:visited.red10 { 
+	font-size: 10pt;
+	font-weight: normal;  
+	font-family: arial;
+	color: #ff0000; 
+	text-decoration: none;  }
+
+a:hover.red10 { 
+	font-size: 10pt;
+	font-weight: normal;  
+	font-family: arial;
+	color: #ff0000; 
+	text-decoration: underline;  }
+
+/* red  10pt underline*/
+a.red10u, a:active.red10u, a:visited.red10u { 
+	font-size: 10pt;
+	font-weight: normal;  
+	font-family: arial;
+	color: #ff0000; 
+	text-decoration: underline;  }
+	
+a:hover.red10u { 
+	font-size: 10pt;
+	font-weight: normal;  	
+	font-family: arial;	
+	color: #ff0000; 
+	text-decoration: underline;  }
+	
+/* dark blue 8pt underline bold*/
+a.db8ub, a:active.db8ub, a:visited.db8ub { 
+	font-size: 8pt; 
+	font-family: arial;
+	color: #1592ca; 
+	text-decoration: underline;  }
+
+a:hover.db8ub { 
+	font-size: 8pt; 
+	font-family: arial;
+	color: #BF0404; 
+	text-decoration: underline;   }
+	
+/* medium blue 8pt underline bold*/
+a.mb8ub, a:active.mb8ub, a:visited.mb8ub { 
+	font-size: 8pt; 
+	font-family: arial; 
+	font-weight: bold;
+	color: #1592ca; 
+	text-decoration: underline;  }
+	
+a:hover.mb8ub { 	
+	font-size: 8pt; 
+	font-family: arial;
+	font-weight: bold;
+	color: #BF0404; 
+	text-decoration: underline;   }
+	
+	/* This is the default black paragraph text -  FOR PARAGRAPHS USE  P TAG! - use with ordered or unordered lists and in table cells -  */
+font.text { font-size: 10pt;  font-family: arial; color: #000000; }
+
+/* This is the default black paragraph text -  FOR PARAGRAPHS USE  P TAG! - use with ordered or unordered lists and in table cells -  */
+.text { font-size: 10pt;  font-family: arial; color: #000000; }
+
+	
+/* med blue bold text 12pt */
+font.mb12b { 
+	color: #1592ca; 
+	font-size: 12pt;  
+	font-family: arial; 
+	font-weight: bold; 
+	text-decoration: none; }
+	
+.mb12b { 
+	color: #1592ca; 
+	font-size: 12pt;  
+	font-family: arial; 
+	font-weight: bold; 
+	text-decoration: none; } 
+
+/* dark blue bold text 8pt */
+font.db8b {
+	 color: #1592ca; 
+	 font-size: 8pt;  
+	 font-family: arial; 
+	 font-weight: bold; 
+	 text-decoration: none; }
+	 
+.db8b { 
+	color: #1592ca; 
+	font-size: 8pt;  
+	font-family: arial; 
+	font-weight: bold; 
+	text-decoration: none; }
+
+/* dark blue bold text 9pt */
+.db9b { 
+	color: #003366;
+	font-size: 9pt;
+	font-family: arial;
+	font-weight: bold; }
+		
+	/* dark blue bold text 9pt */
+font.db9b { 
+	color: #003366;
+	font-size: 9pt;
+	font-family: arial;
+	font-weight: bold;
+	text-decoration: none; }
+	
+	/* dark blue bold text 10pt */
+font.db10b { 
+	color: #003366;
+	font-size: 10pt;
+	font-family: arial;
+	font-weight: bold;
+	text-decoration: none; }	
+	
+	/* dark blue bold text 12pt */
+font.db12b { 
+	color: #003366; 
+	font-size: 12pt;  
+	font-family: arial; 
+	font-weight: bold; 
+	text-decoration: none; }
+	
+.db12b { 
+	color: #003366; 
+	font-size: 12pt;  
+	font-family: arial; 
+	font-weight: bold; 
+	text-decoration: none; }	
+	
+	
+/* black bold text 8pt */
+font.black8b { 
+	color: #333333; 
+	font-size: 8pt;  
+	font-family: arial; 
+	font-weight: bold; 
+	text-decoration: none; }
+
+
+/* black text 8pt */
+.black8 { 
+	color: #333333; 
+	font-size: 8pt;  
+	font-family: arial; 
+	font-weight: normal; 
+	text-decoration: none; }
+	
+	/* black text 9pt */
+font.black9 { 
+	color: #333333;
+	font-size: 9pt;
+	font-family: arial;
+	font-weight: normal;
+	text-decoration: none; }
+	
+/* black text 9pt */
+.black9 { 
+	color: #333333;
+	font-size: 9pt;
+	font-family: arial;
+	font-weight: normal;
+	text-decoration: none; }
+
+
+/* black bold text 10pt */
+font.black10 { 
+	font-size: 10pt;
+	font-family: arial;
+	color: #333333;
+	text-decoration: none; }
+	
+/* black bold text 10pt */
+.black10 { 
+	font-size: 10pt;
+	font-family: arial;
+	color: #333333;
+	text-decoration: none; }
+
+/* black bold text 10pt */
+font.black10b { 
+	font-size: 10pt;
+	font-family: arial;
+	color: #333333;
+	text-decoration: none;
+	font-weight:bold; }
+	
+.black10b { 
+	font-size: 10pt;
+	font-family: arial;
+	color: #333333;
+	text-decoration: none; }
+	
+.mb10b { 
+	color: #BF0404; 
+	font-size: 10pt;  
+	font-family: arial; 
+	font-weight: bold; 
+	text-decoration: none; }
+	
+.mb8 { 
+	color: #1592ca; 
+	font-size: 8pt;  
+	font-family: arial;
+	text-decoration: none; }
+	
+/* white bold text 10pt */
+font.white10b { 
+	color: #ffffff;
+	font-size: 10pt;
+	font-family: arial;
+	font-weight: bold;
+	text-decoration: none; }
+	
+.white10b { 
+	color: #ffffff;
+	font-size: 10pt;
+	font-family: arial;
+	font-weight: bold;
+	text-decoration: none; }
+	
+.white12b { 
+	color: #ffffff; 
+	font-size: 12pt;  
+	font-family: arial; 
+	font-weight: bold; 
+	text-decoration: none; }
+	
+/* white bold text 14pt */
+font.white14b { 
+	color: #ffffff;
+	font-size: 14pt;
+	font-family: arial;
+	font-weight: bold;
+	text-decoration: none; }
+	
+.white14b { 
+	color: #ffffff;
+	font-size: 14pt;
+	font-family: arial;
+	font-weight: bold;
+	text-decoration: none; }
+	
+/* white bold text 16pt   - used for talking book & braille pages in the library*/
+font.white16b { 
+	color: #ffffff;
+	font-size: 16pt;
+	font-family: arial;
+	font-weight: bold;
+	text-decoration: none; }
+	
+/* white bold text 16pt   - used for talking book & braille pages in the library*/
+.white16b { 
+	color: #ffffff;
+	font-size: 16pt;
+	font-family: arial;
+	font-weight: bold;
+	text-decoration: none; }
+
+	
+	.black12b { 
+	color: #000000; 
+	font-size: 10pt;  
+	font-family: arial; 
+	font-weight: bold; 
+	text-decoration: none; }
+	
+	/* red text 10pt */
+font.red10 { 
+	color: #ff0000;
+	font-size: 10pt;
+	font-family: arial;
+	font-weight: normal;
+	text-decoration: none; }
+
+/* red bold text 10pt */
+font.red10b { 
+	color: #ff0000;
+	font-size: 10pt;
+	font-family: arial;
+	font-weight: bold;
+	text-decoration: none; }
+	
+.red10b { 
+	color: #ff0000;
+	font-size: 10pt;
+	font-family: arial;
+	font-weight: bold;
+	text-decoration: none; }
+
+	/* red text 9pt */
+font.red9 { 
+	color: #ff0000;
+	font-size: 9pt;
+	font-family: arial;
+	font-weight: normal;
+	text-decoration: none; }
+
+/* red bold text 9pt */
+font.red9b { 
+	color: #ff0000;
+	font-size: 9pt;
+	font-family: arial;
+	font-weight: bold;
+	text-decoration: none; }
+	
+.red9b { 
+	color: #ff0000;
+	font-size: 9pt;
+	font-family: arial;
+	font-weight: bold;
+	text-decoration: none; }
+
+	/* red text 8pt */
+font.red8 { 
+	color: #ff0000;
+	font-size: 8pt;
+	font-family: arial;
+	font-weight: normal;
+	text-decoration: none; }
+
+/* red bold text 8pt */
+font.red8b { 
+	color: #ff0000;
+	font-size: 8pt;
+	font-family: arial;
+	font-weight: bold;
+	text-decoration: none; }
+	
+.red8b { 
+	color: #ff0000;
+	font-size: 8pt;
+	font-family: arial;
+	font-weight: bold;
+	text-decoration: none; }
+
+/* dark blue bold text 14pt */
+font.db14b { 
+	color: #1592ca;
+	font-size: 14pt;font-family: arial;
+	font-weight: bold;
+	text-decoration: none; }
+	
+	/* dark red text 9pt  - report it now.net*/
+.dred9 { color: #cc0000; font-size: 9pt;  font-family: arial; font-weight: normal; text-decoration: none; }
+	
+.db14b { 
+color: #1592ca;
+font-size: 14pt;
+font-family: arial;
+font-weight: bold;
+text-decoration: none; }
+
+.headdb14 {  
+font-size: 14pt;  
+font-family: arial; 
+text-decoration: none; 
+font-weight: bold; 
+color: #1592ca; 
+margin-left: .5in; 
+margin-right: .5in; 
+padding-bottom: .01in; 
+padding-top: .1 in;}
+
+
+/* medium blue heading with margins */
+p.headmb12 { 
+	text-align:	justify;
+	font-size: 12pt;
+	font-family: arial;
+	text-decoration: none;
+	font-weight: bold;
+	color: #1592ca;
+	margin-left: .5in;
+	margin-right: .5in;
+	padding-bottom: .01in;
+	padding-top: .1 in; }
+
+
+/* dark blue heading with margins */
+p.headdb12 { 
+	text-align: justify;
+	font-size: 12pt;
+	font-family: arial;
+	text-decoration: none;
+	font-weight: bold;
+	color: #1592ca;
+	margin-left: .5in;
+	margin-right: .5in;
+	padding-bottom: .01in;
+	padding-top: .1 in; }
+
+/* dark blue heading with margins */
+p.headdb14 {  
+	color: #1592ca;
+	font-family:'Roboto', sans-serif;
+	font-size: 12pt;
+	font-weight: bold;
+	margin-left: .5in;
+	margin-right: .5in;
+	padding-bottom: .01in;
+	padding-top: .1 in; }
+	
+/* black heading with margins */
+p.headblack10 { 
+ text-align: justify;
+ font-size: 10pt;
+ font-family: arial;
+ text-decoration: none;
+ font-weight: bold;
+ color: #333333;
+ margin-left: .5in;
+ margin-right: .5in;
+ padding-bottom: .01in;
+ padding-top: .1 in; }
+	
+
+/* dark blue heading with margins */
+p.headdb10 { 
+	text-align: justify;
+	font-size: 10pt;
+	font-family: arial;
+	text-decoration: none;
+	color: #1592ca;
+	margin-left: .5in;
+	margin-right: .5in;
+	padding-bottom: .01in;
+	padding-top: .1 in; }
+
+/* page margins and justified text  - default font used */
+p.blocktext { 
+	font-size: 10pt;
+	font-family: arial;
+	color: #333333;
+	text-align: justify;
+	margin-left: .5in;
+	margin-right: .5in; }
+	
+/* page margins and justified text  - default font used */
+.blocktext { 
+	font-size: 10pt;
+	font-family: arial;
+	color: #333333;
+	text-align: justify;
+	margin-left: .5in;
+	margin-right: .5in; }
+	
+/* page margins and justified text  - default font used */
+p.blocktextnj {font-size: 10pt;  font-family: arial; color: #000000; margin-left: .5in; margin-right: .5in;}
+
+/* page margins and justified text  - default font used */
+p.blocktextright { text-align: justify; font-size: 10pt;  font-family: arial; color: #000000; margin-right: .5in;}
+
+/* page margins and justified text  - default font used */
+p.blocktextleftnj {font-size: 10pt;  font-family: arial; color: #000000; margin-left: .5in;}
+	
+p.block1 { 
+	margin-left: .5in; 
+	margin-right: .5in; }
+	
+.block1 { 
+	margin-left: .5in; 
+	margin-right: .5in; }
+
+/* page margins and justified text  - default font used */
+p.blocktextalignright { 
+	text-align: justify;
+	font-size: 10pt;
+	font-family: arial;
+	color: #333333;
+	margin-left: .5in;
+	margin-right: .5in;
+	text-align:right; }
+	
+.blocktextalignright { 
+	text-align: justify;
+	font-size: 10pt;
+	font-family: arial;
+	color: #333333;
+	margin-left: .5in;
+	margin-right: .5in;
+	text-align:right; }
+	
+/* page margins and justified text  - default font used */
+p.blocktextleft { 
+	font-size: 10pt;
+	font-family: arial;
+	color: #333333;
+	text-align: justify;
+	margin-left: .5in;}
+	
+/* page margins and justified text  - default font used */
+.blocktextleft { 
+	font-size: 10pt;
+	font-family: arial;
+	color: #333333;
+	text-align: justify;
+	margin-left: .5in;}
+	
+/* page margins and justified text  - NO font specified*/
+p.block1left { 
+	margin-left: .5in;
+	margin-right: 0in; }
+	
+.block1left { 
+	margin-left: .5in;
+	margin-right: 0in; }
+	
+/* page margins and justified text  - NO font specified*/
+p.block1right { 
+	margin-left: 0in;
+	margin-right: .5in; }
+	
+.block1right { 
+	margin-left: 0in;
+	margin-right: .5in; }
+	
+
+
+td.nav { 
+	background-color: #333333;
+   	width: 730px; 
+	height: 25px;
+	line-height: 23px;
+   	text-align: center;
+   	vertical-align: middle; }
+	
+td.navssl { 
+	background-color: #333333;
+  	width: 730px; 
+	height: 25px;
+	line-height: 23px;
+   	text-align: center;
+   	vertical-align: middle; }
+	
+/* hr tag used on all pages */
+hr.blue {
+	display:none !important;
+	/*width : 632px; 
+	padding-bottom : .01in; 
+	padding-top : .01in; 
+	color:#cccccc; 
+	size:1; 
+	margin-left : .5in; 
+	margin-right : .5in; */}
+	
+.formbutton {
+	background-color:#cccccc; 
+	color:#1592ca; 
+	font: bold 10pt arial; 
+	border: thin solid #333333;}
+	
+.formbutton9 {
+	background-color:#cccccc; 
+	color:#1592ca; 
+	font: bold 9pt arial; 
+	border: thin solid #333333;}
+	
+.formbutton8 {
+	background-color:#cccccc; 
+	color:#1592ca; 
+	font: bold 8pt arial; 
+	border: thin solid #333333;}
+	
+.formbuttonllc9 {
+	background-color:#cccccc; 
+	color:#1592ca; 
+	font: bold 9pt arial; 
+	border: thin solid #333333;
+	padding: 0px;
+	text-align: left;}
+	
+	/* Used for error messages on applications - dark red top and bottom border with a light red background - dark gray text*/
+.error {
+	width:620px;
+	color: #333333;  /* Dark Gray */
+	font-family: 'Roboto', sans-serif;
+	font-size: 10pt;
+	font-weight: normal; 
+	background-color:#f3d7d7;
+	border-top: 2px solid #cc0000;
+	border-bottom: 2px solid #cc0000;
+	padding: 4px;
+	text-align:left;
+	list-style:disc;
+}
+
+
+/* li tag */
+li {  list-style-position : outside; font-size: 10pt;  font-family: arial; color: #000000;  margin-left: .5in;  margin-right: .5in; padding-bottom : 12px; list-style-position: outside;}
+
+/* ol tag */
+ol { margin-left: .5in;	 margin-right: .5in; padding-bottom : .01in;	padding-top : .01in;}
+
+/* li tag none */
+li.nobullet { 
+			list-style-type: none;
+			list-style-position : outside; 
+			font-size: 10pt;  
+			font-family: arial; 
+			color: #000000;  
+			margin-left: .5in;  
+			margin-right: .1in; 
+			padding-bottom : 12px; 
+			}
+			
+			/* p class=notopmargin should be used for information below this tag for proper spacing*/
+h2 {
+	color: #BF0404;
+	font-family: 'Roboto', sans-serif;
+	font-size: 10pt;
+	font-weight: bold;
+	margin-bottom: 0px;
+	padding: 0px;
+}
+
+/* used in p tag under the h2 tage to reduce the amount of space between the subhead and the text */
+.notopmargin {
+	margin-top: 1px;
+}
+
+

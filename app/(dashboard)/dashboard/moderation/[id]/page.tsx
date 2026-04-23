@@ -62,6 +62,7 @@ export default function ModerationDetailPage({
   const [pendingAction, setPendingAction] = useState<'reject' | 'request_edits' | null>(null)
   const [reason, setReason] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch(`/api/reviews/${id}`)
@@ -72,11 +73,18 @@ export default function ModerationDetailPage({
 
   async function handleModerate(action: 'approve' | 'reject' | 'request_edits') {
     setSubmitting(true)
-    await fetch(`/api/reviews/${id}`, {
+    setActionError(null)
+    const res = await fetch(`/api/reviews/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action, rejection_reason: reason }),
     })
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}))
+      setActionError(json.error ?? 'Action failed. Please try again.')
+      setSubmitting(false)
+      return
+    }
     router.push('/dashboard/moderation')
     router.refresh()
   }
@@ -162,6 +170,9 @@ export default function ModerationDetailPage({
 
       {/* Decision panel */}
       <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+        {actionError && (
+          <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3 mb-4">{actionError}</p>
+        )}
         <p className="text-sm font-semibold text-gray-300 mb-4">Moderation Decision</p>
 
         {!pendingAction ? (

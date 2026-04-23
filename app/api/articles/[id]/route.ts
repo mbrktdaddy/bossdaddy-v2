@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest, after } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -109,31 +109,30 @@ export async function PUT(
     revalidatePath('/about')
     if (data?.slug) revalidatePath(`/articles/${data.slug}`)
 
-    // Send email notification to author (non-blocking)
+    // Send email notification to author — runs after response via after()
     const notifyActions = ['approve', 'reject', 'request_edits'] as const
-    if (notifyActions.includes(modParsed.data.action as typeof notifyActions[number]) && data?.author_id) {
+    if (notifyActions.includes(modParsed.data.action as typeof notifyActions[number]) && data?.author_id && process.env.RESEND_API_KEY) {
+      const authorId = data.author_id
+      const action = modParsed.data.action as 'approve' | 'reject' | 'request_edits'
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
-      admin.auth.admin.getUserById(data.author_id).then(({ data: authUser }) => {
-        const email = authUser?.user?.email
-        if (!email) return
-        const resend = getResend()
-        resend.emails.send({
-          from: FROM_EMAIL,
-          to: email,
-          subject: modParsed.data.action === 'approve'
-            ? '🎉 Your article is live on Boss Daddy Life'
-            : modParsed.data.action === 'reject'
-            ? 'Update on your Boss Daddy submission'
-            : 'Edits requested on your Boss Daddy submission',
-          react: React.createElement(ModerationResultEmail, {
-            action: modParsed.data.action as 'approve' | 'reject' | 'request_edits',
-            contentType: 'article',
-            title: data.title,
-            reason: modParsed.data.rejection_reason,
-            siteUrl,
-          }),
-        }).catch((err: unknown) => console.error('Email send failed:', err))
-      }).catch((err: unknown) => console.error('Author lookup failed:', err))
+      after(async () => {
+        try {
+          const { data: authUser } = await admin.auth.admin.getUserById(authorId)
+          const email = authUser?.user?.email
+          if (!email) return
+          await getResend().emails.send({
+            from: FROM_EMAIL,
+            to: email,
+            subject: action === 'approve' ? '🎉 Your article is live on Boss Daddy Life'
+              : action === 'reject' ? 'Update on your Boss Daddy submission'
+              : 'Edits requested on your Boss Daddy submission',
+            react: React.createElement(ModerationResultEmail, {
+              action, contentType: 'article', title: data.title,
+              reason: modParsed.data.rejection_reason, siteUrl,
+            }),
+          })
+        } catch (err) { console.error('Article notification failed:', err) }
+      })
     }
 
     return NextResponse.json({ article: data })
@@ -156,16 +155,16 @@ export async function PUT(
     updates.reading_time_minutes = computeReadingTime(sanitized)
   }
 
-  // Only allow editing drafts or rejected articles
-  const { data, error } = await supabase
-    .from('articles')
-    .update(updates)
-    .eq('id', id)
-    .eq('author_id', user.id)
-    .in('status', ['draft', 'rejected'])
-    .select()
-    .single()
+  // Use admin client — verify ownership + status manually to avoid RLS silent failures
+  const admin = createAdminClient()
+  const { data: current } = await admin.from('articles').select('author_id, status').eq('id', id).single()
+  if (!current) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (current.author_id !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (!['draft', 'rejected'].includes(current.status)) {
+    return NextResponse.json({ error: 'Only draft or rejected articles can be edited' }, { status: 422 })
+  }
 
+  const { data, error } = await admin.from('articles').update(updates).eq('id', id).select().single()
   if (error) return NextResponse.json({ error: 'Update failed' }, { status: 500 })
   return NextResponse.json({ article: data })
 }
