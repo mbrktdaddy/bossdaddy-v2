@@ -101,38 +101,45 @@ export async function PUT(
       updateData.rejection_reason = modParsed.data.rejection_reason ?? ''
     }
 
-    const { data, error } = await admin.from('articles').update(updateData).eq('id', id).select('*, author_id').single()
-    if (error) return NextResponse.json({ error: 'Moderation action failed' }, { status: 500 })
+    const { data, error } = await admin.from('articles').update(updateData).eq('id', id).select('*').single()
+    if (error) {
+      console.error('Article moderation update failed:', error)
+      return NextResponse.json({ error: `Moderation action failed: ${error.message}` }, { status: 500 })
+    }
 
     revalidatePath('/')
     revalidatePath('/articles')
     revalidatePath('/about')
     if (data?.slug) revalidatePath(`/articles/${data.slug}`)
 
-    // Send email notification to author — runs after response via after()
+    // Send email notification — scheduled via after() so it doesn't block the response
     const notifyActions = ['approve', 'reject', 'request_edits'] as const
     if (notifyActions.includes(modParsed.data.action as typeof notifyActions[number]) && data?.author_id && process.env.RESEND_API_KEY) {
-      const authorId = data.author_id
+      const authorId = data.author_id as string
       const action = modParsed.data.action as 'approve' | 'reject' | 'request_edits'
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
-      after(async () => {
-        try {
-          const { data: authUser } = await admin.auth.admin.getUserById(authorId)
-          const email = authUser?.user?.email
-          if (!email) return
-          await getResend().emails.send({
-            from: FROM_EMAIL,
-            to: email,
-            subject: action === 'approve' ? '🎉 Your article is live on Boss Daddy Life'
-              : action === 'reject' ? 'Update on your Boss Daddy submission'
-              : 'Edits requested on your Boss Daddy submission',
-            react: React.createElement(ModerationResultEmail, {
-              action, contentType: 'article', title: data.title,
-              reason: modParsed.data.rejection_reason, siteUrl,
-            }),
-          })
-        } catch (err) { console.error('Article notification failed:', err) }
-      })
+      const articleTitle = data.title as string
+      const rejectionReason = modParsed.data.rejection_reason
+      try {
+        after(async () => {
+          try {
+            const { data: authUser } = await admin.auth.admin.getUserById(authorId)
+            const email = authUser?.user?.email
+            if (!email) return
+            await getResend().emails.send({
+              from: FROM_EMAIL,
+              to: email,
+              subject: action === 'approve' ? '🎉 Your article is live on Boss Daddy Life'
+                : action === 'reject' ? 'Update on your Boss Daddy submission'
+                : 'Edits requested on your Boss Daddy submission',
+              react: React.createElement(ModerationResultEmail, {
+                action, contentType: 'article', title: articleTitle,
+                reason: rejectionReason, siteUrl,
+              }),
+            })
+          } catch (err) { console.error('Article notification failed:', err) }
+        })
+      } catch (err) { console.error('after() registration failed (article):', err) }
     }
 
     return NextResponse.json({ article: data })
