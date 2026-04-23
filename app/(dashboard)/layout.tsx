@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getUserSafe } from '@/lib/supabase/server'
 import DashboardNav from '@/components/DashboardNav'
 
 export default async function DashboardLayout({
@@ -8,7 +8,7 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { user } = await getUserSafe(supabase)
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase

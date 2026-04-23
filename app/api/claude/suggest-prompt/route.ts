@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { getClaudeClient, MODEL } from '@/lib/claude/client'
 import { z } from 'zod'
 
@@ -15,7 +15,7 @@ Return valid JSON only — no markdown, no code fences.`
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { user } = await getUserSafe(supabase)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json().catch(() => null)
