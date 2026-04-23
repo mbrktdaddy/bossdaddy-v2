@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = await createClient()
   const { data } = await supabase
     .from('reviews')
-    .select('title, product_name, excerpt')
+    .select('title, product_name, excerpt, meta_title, meta_description')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -32,16 +32,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!data) return { title: 'Review Not Found' }
 
+  const pageTitle       = data.meta_title?.trim()       || data.title
+  const pageDescription = data.meta_description?.trim() || data.excerpt
+    || `Dad-tested review of the ${data.product_name}. Honest pros, cons, and verdict.`
+
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   const canonicalUrl = `${siteUrl}/reviews/${slug}`
   const ogImage = `${siteUrl}/api/og?title=${encodeURIComponent(data.title)}&type=review`
 
   return {
-    title: data.title,
-    description: data.excerpt ?? `Dad-tested review of the ${data.product_name}. Honest pros, cons, and verdict.`,
+    title: pageTitle,
+    description: pageDescription,
     alternates: { canonical: canonicalUrl },
-    openGraph: { title: data.title, type: 'article', url: canonicalUrl, images: [{ url: ogImage, width: 1200, height: 630 }] },
-    twitter: { card: 'summary_large_image', title: data.title, images: [ogImage] },
+    openGraph: { title: pageTitle, description: pageDescription, type: 'article', url: canonicalUrl, images: [{ url: ogImage, width: 1200, height: 630 }] },
+    twitter: { card: 'summary_large_image', title: pageTitle, description: pageDescription, images: [ogImage] },
   }
 }
 

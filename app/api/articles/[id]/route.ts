@@ -18,11 +18,14 @@ const ModerateSchema = z.object({
 })
 
 const UpdateSchema = z.object({
-  title: z.string().min(10).max(120).optional(),
-  category: CategorySchema.optional(),
-  excerpt: z.string().max(200).optional(),
-  content: z.string().min(100).optional(),
-  image_url: z.string().url().optional().nullable(),
+  title:                z.string().min(10).max(120).optional(),
+  category:             CategorySchema.optional(),
+  excerpt:              z.string().max(200).optional(),
+  content:              z.string().min(100).optional(),
+  image_url:            z.string().url().optional().nullable(),
+  meta_title:           z.string().max(70).optional().nullable(),
+  meta_description:     z.string().max(200).optional().nullable(),
+  scheduled_publish_at: z.string().datetime().optional().nullable(),
 })
 
 // GET /api/articles/[id]
@@ -156,6 +159,9 @@ export async function PUT(
   if (parsed.data.category) updates.category = parsed.data.category
   if (parsed.data.excerpt !== undefined) updates.excerpt = parsed.data.excerpt
   if (parsed.data.image_url !== undefined) updates.image_url = parsed.data.image_url
+  if (parsed.data.meta_title !== undefined) updates.meta_title = parsed.data.meta_title
+  if (parsed.data.meta_description !== undefined) updates.meta_description = parsed.data.meta_description
+  if (parsed.data.scheduled_publish_at !== undefined) updates.scheduled_publish_at = parsed.data.scheduled_publish_at
   if (parsed.data.content) {
     const sanitized = sanitizeHtml(parsed.data.content)
     updates.content = sanitized

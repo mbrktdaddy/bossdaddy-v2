@@ -9,6 +9,8 @@ import { ContentEditor } from '@/components/workspace/ContentEditor'
 import { HeroImagePanel } from '@/components/workspace/HeroImagePanel'
 import { AIRefinePanel } from '@/components/workspace/AIRefinePanel'
 import { ModerationInfo } from '@/components/workspace/ModerationInfo'
+import { SEOPanel } from '@/components/workspace/SEOPanel'
+import { SchedulePanel } from '@/components/workspace/SchedulePanel'
 import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader'
 import { WorkspaceToolbar } from '@/components/workspace/WorkspaceToolbar'
 import { AutoSaveIndicator } from '@/components/workspace/AutoSaveIndicator'
@@ -37,6 +39,9 @@ interface ReviewData {
   updated_at: string
   reading_time_minutes: number | null
   rejection_reason: string | null
+  meta_title: string | null
+  meta_description: string | null
+  scheduled_publish_at: string | null
 }
 
 const RATING_OPTIONS = [
@@ -66,6 +71,9 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   const [cons, setCons]               = useState<string[]>(review.cons ?? [])
   const [disclosureAck, setDiscAck]   = useState<boolean>(review.disclosure_acknowledged ?? false)
   const [hasAffiliate, setHasAff]     = useState<boolean>(review.has_affiliate_links ?? false)
+  const [metaTitle, setMetaTitle]     = useState(review.meta_title ?? '')
+  const [metaDesc, setMetaDesc]       = useState(review.meta_description ?? '')
+  const [scheduledAt, setScheduled]   = useState<string | null>(review.scheduled_publish_at)
 
   const [busy, setBusy]   = useState(false)
   const [actionErr, setErr] = useState<string | null>(null)
@@ -89,7 +97,10 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
     pros: pros.filter(p => p.trim()),
     cons: cons.filter(c => c.trim()),
     disclosure_acknowledged: disclosureAck,
-  }), [title, productName, category, excerpt, content, imageUrl, rating, pros, cons, disclosureAck])
+    meta_title:           metaTitle || null,
+    meta_description:     metaDesc  || null,
+    scheduled_publish_at: scheduledAt,
+  }), [title, productName, category, excerpt, content, imageUrl, rating, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt])
 
   const save = async (p: typeof payload) => {
     const res = await fetch(`/api/reviews/${review.id}`, {
@@ -328,6 +339,21 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
             </label>
           </div>
         )}
+
+        {!isPublished && (
+          <SchedulePanel scheduledAt={scheduledAt} onChange={setScheduled} />
+        )}
+
+        <SEOPanel
+          metaTitle={metaTitle}
+          metaDescription={metaDesc}
+          fallbackTitle={title}
+          fallbackDescription={excerpt}
+          slug={review.slug}
+          contentType="review"
+          onChangeTitle={setMetaTitle}
+          onChangeDescription={setMetaDesc}
+        />
 
         <ModerationInfo score={review.moderation_score} flags={review.moderation_flags ?? []} />
 

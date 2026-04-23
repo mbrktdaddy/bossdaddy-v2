@@ -8,6 +8,8 @@ import { ContentEditor } from '@/components/workspace/ContentEditor'
 import { HeroImagePanel } from '@/components/workspace/HeroImagePanel'
 import { AIRefinePanel } from '@/components/workspace/AIRefinePanel'
 import { ModerationInfo } from '@/components/workspace/ModerationInfo'
+import { SEOPanel } from '@/components/workspace/SEOPanel'
+import { SchedulePanel } from '@/components/workspace/SchedulePanel'
 import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader'
 import { WorkspaceToolbar } from '@/components/workspace/WorkspaceToolbar'
 import { AutoSaveIndicator } from '@/components/workspace/AutoSaveIndicator'
@@ -29,6 +31,9 @@ interface ArticleData {
   updated_at: string
   reading_time_minutes: number | null
   rejection_reason: string | null
+  meta_title: string | null
+  meta_description: string | null
+  scheduled_publish_at: string | null
 }
 
 interface Props {
@@ -38,11 +43,14 @@ interface Props {
 export function ArticleWorkspace({ article }: Props) {
   const router = useRouter()
 
-  const [title, setTitle]       = useState(article.title)
-  const [category, setCategory] = useState(article.category)
-  const [excerpt, setExcerpt]   = useState(article.excerpt ?? '')
-  const [content, setContent]   = useState(article.content)
-  const [imageUrl, setImageUrl] = useState<string | null>(article.image_url)
+  const [title, setTitle]           = useState(article.title)
+  const [category, setCategory]     = useState(article.category)
+  const [excerpt, setExcerpt]       = useState(article.excerpt ?? '')
+  const [content, setContent]       = useState(article.content)
+  const [imageUrl, setImageUrl]     = useState<string | null>(article.image_url)
+  const [metaTitle, setMetaTitle]   = useState(article.meta_title ?? '')
+  const [metaDesc, setMetaDesc]     = useState(article.meta_description ?? '')
+  const [scheduledAt, setScheduled] = useState<string | null>(article.scheduled_publish_at)
 
   const [busy, setBusy]       = useState(false)
   const [actionErr, setErr]   = useState<string | null>(null)
@@ -58,7 +66,10 @@ export function ArticleWorkspace({ article }: Props) {
     excerpt: excerpt || undefined,
     content,
     image_url: imageUrl,
-  }), [title, category, excerpt, content, imageUrl])
+    meta_title:           metaTitle || null,
+    meta_description:     metaDesc  || null,
+    scheduled_publish_at: scheduledAt,
+  }), [title, category, excerpt, content, imageUrl, metaTitle, metaDesc, scheduledAt])
 
   // Auto-save — debounced 20s after last change
   const save = async (p: typeof payload) => {
@@ -239,6 +250,23 @@ export function ArticleWorkspace({ article }: Props) {
           <label className="block text-sm text-gray-300 mb-1.5">Content <span className="text-gray-600">(HTML)</span></label>
           <ContentEditor value={content} onChange={setContent} />
         </div>
+
+        {/* Schedule */}
+        {!isPublished && (
+          <SchedulePanel scheduledAt={scheduledAt} onChange={setScheduled} />
+        )}
+
+        {/* SEO */}
+        <SEOPanel
+          metaTitle={metaTitle}
+          metaDescription={metaDesc}
+          fallbackTitle={title}
+          fallbackDescription={excerpt}
+          slug={article.slug}
+          contentType="article"
+          onChangeTitle={setMetaTitle}
+          onChangeDescription={setMetaDesc}
+        />
 
         {/* Moderation info */}
         <ModerationInfo score={article.moderation_score} flags={article.moderation_flags ?? []} />

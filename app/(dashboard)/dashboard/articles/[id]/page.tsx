@@ -12,7 +12,7 @@ export default async function ArticleWorkspacePage({
 
   const { data: article } = await admin
     .from('articles')
-    .select('id, title, category, excerpt, content, image_url, status, slug, moderation_score, moderation_flags, created_at, updated_at, reading_time_minutes, rejection_reason')
+    .select('id, title, category, excerpt, content, image_url, status, slug, moderation_score, moderation_flags, created_at, updated_at, reading_time_minutes, rejection_reason, meta_title, meta_description, scheduled_publish_at')
     .eq('id', id)
     .single()
 

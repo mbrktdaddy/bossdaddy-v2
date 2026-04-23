@@ -14,16 +14,19 @@ import { z } from 'zod'
 const CategorySchema = z.enum(CATEGORY_SLUGS as [string, ...string[]])
 
 const UpdateSchema = z.object({
-  title: z.string().min(10).max(120).optional(),
-  product_name: z.string().min(2).max(120).optional(),
-  category: CategorySchema.optional(),
-  excerpt: z.string().max(200).optional(),
-  content: z.string().min(100).optional(),
-  rating: z.number().min(1).max(10).optional(),
-  pros: z.array(z.string()).optional(),
-  cons: z.array(z.string()).optional(),
-  disclosure_acknowledged: z.boolean().optional(),
-  image_url: z.string().url().optional().nullable(),
+  title:                    z.string().min(10).max(120).optional(),
+  product_name:             z.string().min(2).max(120).optional(),
+  category:                 CategorySchema.optional(),
+  excerpt:                  z.string().max(200).optional(),
+  content:                  z.string().min(100).optional(),
+  rating:                   z.number().min(1).max(10).optional(),
+  pros:                     z.array(z.string()).optional(),
+  cons:                     z.array(z.string()).optional(),
+  disclosure_acknowledged:  z.boolean().optional(),
+  image_url:                z.string().url().optional().nullable(),
+  meta_title:               z.string().max(70).optional().nullable(),
+  meta_description:         z.string().max(200).optional().nullable(),
+  scheduled_publish_at:     z.string().datetime().optional().nullable(),
 })
 
 const ModerateSchema = z.object({
@@ -171,6 +174,9 @@ export async function PUT(
   if (typeof parsed.data.disclosure_acknowledged === 'boolean') {
     updates.disclosure_acknowledged = parsed.data.disclosure_acknowledged
   }
+  if (parsed.data.meta_title !== undefined) updates.meta_title = parsed.data.meta_title
+  if (parsed.data.meta_description !== undefined) updates.meta_description = parsed.data.meta_description
+  if (parsed.data.scheduled_publish_at !== undefined) updates.scheduled_publish_at = parsed.data.scheduled_publish_at
   if (parsed.data.content) {
     const sanitized = sanitizeHtml(parsed.data.content)
     updates.content = sanitized
