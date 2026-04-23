@@ -1,14 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { getCategoryBySlug } from '@/lib/categories'
-import ContentActions from '../_components/ContentActions'
-
-const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  draft:    { label: 'Draft',    className: 'bg-gray-800 text-gray-400 border border-gray-700' },
-  pending:  { label: 'Pending',  className: 'bg-yellow-950/60 text-yellow-400 border border-yellow-900/60' },
-  approved: { label: 'Live',     className: 'bg-green-950/60 text-green-400 border border-green-900/60' },
-  rejected: { label: 'Rejected', className: 'bg-red-950/60 text-red-400 border border-red-900/60' },
-}
+import { BulkContentList } from '@/components/workspace/BulkContentList'
 
 interface Props {
   searchParams: Promise<{ filter?: string }>
@@ -98,83 +90,32 @@ export default async function MyReviewsPage({ searchParams }: Props) {
         </div>
       )}
 
-      {/* Reviews list */}
-      {!displayed?.length ? (
+      {/* Reviews list with bulk actions */}
+      {!displayed?.length && !filter && (
         <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
-          {filter ? (
-            <p className="text-gray-500 text-lg">No {filter} reviews.</p>
-          ) : (
-            <>
-              <p className="text-gray-500 text-lg mb-2">No reviews yet, Boss.</p>
-              <Link href="/dashboard/reviews/new" className="text-orange-400 hover:text-orange-300 text-sm">
-                Write your first one →
-              </Link>
-            </>
-          )}
+          <p className="text-gray-500 text-lg mb-2">No reviews yet, Boss.</p>
+          <Link href="/dashboard/reviews/new" className="text-orange-400 hover:text-orange-300 text-sm">
+            Write your first one →
+          </Link>
         </div>
-      ) : (
-        <div className="space-y-2">
-          {displayed.map((r) => {
-            const status = STATUS_CONFIG[r.status] ?? STATUS_CONFIG.draft
-            const category = getCategoryBySlug(r.category)
-
-            return (
-              <div
-                key={r.id}
-                className="p-4 bg-gray-900 border border-gray-800 rounded-2xl hover:border-gray-700 transition-colors"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center shrink-0 mt-0.5">
-                    <span className="text-sm font-bold text-yellow-400">{r.rating}</span>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <p className="font-semibold text-sm leading-snug">{r.title}</p>
-                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${status.className}`}>
-                        {status.label}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs text-gray-500">{r.product_name}</span>
-                      {category && (
-                        <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>
-                      )}
-                      <span className="text-xs text-gray-700">
-                        {new Date(r.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                      </span>
-                    </div>
-                    {r.rejection_reason && ['draft', 'rejected'].includes(r.status) && (
-                      <p className="text-xs text-yellow-400/80 mt-1.5">↩ Edits requested: {r.rejection_reason}</p>
-                    )}
-                    {r.status === 'pending' && (
-                      <p className="text-xs text-gray-500 mt-1.5">
-                        In review queue — use &ldquo;Recall to draft&rdquo; to pull it back and edit.
-                      </p>
-                    )}
-                    <div className="flex items-center gap-2 mt-3 flex-wrap">
-                      <Link
-                        href={`/dashboard/reviews/${r.id}`}
-                        className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg transition-colors"
-                      >
-                        {['draft', 'rejected'].includes(r.status) ? 'Edit' : 'Open'}
-                      </Link>
-                      {r.status === 'approved' && (
-                        <Link
-                          href={`/reviews/${r.slug}`}
-                          target="_blank"
-                          className="text-xs px-3 py-1.5 bg-orange-950/50 hover:bg-orange-900/50 text-orange-400 hover:text-orange-300 rounded-lg transition-colors border border-orange-900/40"
-                        >
-                          View Live →
-                        </Link>
-                      )}
-                      <ContentActions id={r.id} status={r.status} contentType="reviews" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
+      )}
+      {(displayed?.length || filter) && (
+        <BulkContentList
+          contentType="reviews"
+          items={(displayed ?? []).map((r) => ({
+            id:                   r.id,
+            title:                r.title,
+            category:             r.category,
+            status:               r.status,
+            slug:                 r.slug,
+            updated_at:           r.updated_at,
+            reading_time_minutes: null,
+            rejection_reason:     r.rejection_reason,
+            product_name:         r.product_name,
+            rating:               r.rating,
+          }))}
+          emptyMessage={filter ? `No ${filter} reviews.` : 'No reviews yet.'}
+        />
       )}
     </div>
   )

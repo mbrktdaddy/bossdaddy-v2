@@ -1,14 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { getCategoryBySlug } from '@/lib/categories'
-import ContentActions from '../_components/ContentActions'
-
-const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  draft:    { label: 'Draft',    className: 'bg-gray-800 text-gray-400 border border-gray-700' },
-  pending:  { label: 'Pending',  className: 'bg-yellow-950/60 text-yellow-400 border border-yellow-900/60' },
-  approved: { label: 'Live',     className: 'bg-green-950/60 text-green-400 border border-green-900/60' },
-  rejected: { label: 'Rejected', className: 'bg-red-950/60 text-red-400 border border-red-900/60' },
-}
+import { BulkContentList } from '@/components/workspace/BulkContentList'
 
 interface Props {
   searchParams: Promise<{ filter?: string }>
@@ -98,85 +90,30 @@ export default async function MyArticlesPage({ searchParams }: Props) {
         </div>
       )}
 
-      {/* Articles list */}
-      {!displayed?.length ? (
+      {/* Articles list with bulk actions */}
+      {!displayed?.length && !filter && (
         <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
-          {filter ? (
-            <p className="text-gray-500 text-lg">No {filter} articles.</p>
-          ) : (
-            <>
-              <p className="text-gray-500 text-lg mb-2">No articles yet, Boss.</p>
-              <Link href="/dashboard/articles/new" className="text-orange-400 hover:text-orange-300 text-sm">
-                Write your first one →
-              </Link>
-            </>
-          )}
+          <p className="text-gray-500 text-lg mb-2">No articles yet, Boss.</p>
+          <Link href="/dashboard/articles/new" className="text-orange-400 hover:text-orange-300 text-sm">
+            Write your first one →
+          </Link>
         </div>
-      ) : (
-        <div className="space-y-2">
-          {displayed.map((a) => {
-            const status = STATUS_CONFIG[a.status] ?? STATUS_CONFIG.draft
-            const category = getCategoryBySlug(a.category)
-
-            return (
-              <div
-                key={a.id}
-                className="p-4 bg-gray-900 border border-gray-800 rounded-2xl hover:border-gray-700 transition-colors"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center shrink-0 text-lg mt-0.5">
-                    {category?.icon ?? '📝'}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <p className="font-semibold text-sm leading-snug">{a.title}</p>
-                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${status.className}`}>
-                        {status.label}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {category && (
-                        <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>
-                      )}
-                      {a.reading_time_minutes && (
-                        <span className="text-xs text-gray-600">{a.reading_time_minutes} min read</span>
-                      )}
-                      <span className="text-xs text-gray-700">
-                        {new Date(a.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                      </span>
-                    </div>
-                    {a.rejection_reason && ['draft', 'rejected'].includes(a.status) && (
-                      <p className="text-xs text-yellow-400/80 mt-1.5">↩ Edits requested: {a.rejection_reason}</p>
-                    )}
-                    {a.status === 'pending' && (
-                      <p className="text-xs text-gray-500 mt-1.5">
-                        In review queue — use &ldquo;Recall to draft&rdquo; to pull it back and edit.
-                      </p>
-                    )}
-                    <div className="flex items-center gap-2 mt-3 flex-wrap">
-                      <Link
-                        href={`/dashboard/articles/${a.id}`}
-                        className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg transition-colors"
-                      >
-                        {['draft', 'rejected'].includes(a.status) ? 'Edit' : 'Open'}
-                      </Link>
-                      {a.status === 'approved' && a.slug && (
-                        <Link
-                          href={`/articles/${a.slug}`}
-                          target="_blank"
-                          className="text-xs px-3 py-1.5 bg-orange-950/50 hover:bg-orange-900/50 text-orange-400 hover:text-orange-300 rounded-lg transition-colors border border-orange-900/40"
-                        >
-                          View Live →
-                        </Link>
-                      )}
-                      <ContentActions id={a.id} status={a.status} contentType="articles" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
+      )}
+      {(displayed?.length || filter) && (
+        <BulkContentList
+          contentType="articles"
+          items={(displayed ?? []).map((a) => ({
+            id:                   a.id,
+            title:                a.title,
+            category:             a.category,
+            status:               a.status,
+            slug:                 a.slug,
+            updated_at:           a.updated_at,
+            reading_time_minutes: a.reading_time_minutes,
+            rejection_reason:     a.rejection_reason,
+          }))}
+          emptyMessage={filter ? `No ${filter} articles.` : 'No articles yet.'}
+        />
       )}
     </div>
   )
