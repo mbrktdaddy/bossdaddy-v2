@@ -227,7 +227,7 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
       setSaving(false)
       setSubmitting(false)
       setWarning('Submitted for review! Redirecting…')
-      setTimeout(() => router.push('/dashboard/articles'), 1200)
+      setTimeout(() => { router.push('/dashboard/articles'); router.refresh() }, 1200)
       return
     }
 

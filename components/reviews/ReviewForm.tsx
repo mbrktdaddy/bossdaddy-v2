@@ -320,7 +320,7 @@ export default function ReviewForm({ initialData }: ReviewFormProps) {
       setSaving(false)
       setSubmitting(false)
       setWarning('Submitted for review! Redirecting…')
-      setTimeout(() => router.push('/dashboard/reviews'), 1200)
+      setTimeout(() => { router.push('/dashboard/reviews'); router.refresh() }, 1200)
       return
     }
 

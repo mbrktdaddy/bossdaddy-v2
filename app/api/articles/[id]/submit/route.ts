@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest, after } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkRateLimit } from '@/lib/rate-limit'
@@ -37,6 +38,9 @@ export async function POST(
     .eq('id', id)
 
   if (updateError) return NextResponse.json({ error: 'Submission failed' }, { status: 500 })
+
+  revalidatePath('/dashboard/articles')
+  revalidatePath('/dashboard/moderation')
 
   // Trigger moderation after response so Vercel doesn't kill it
   const secret = process.env.INTERNAL_API_SECRET
