@@ -12,6 +12,7 @@ import { ModerationInfo } from '@/components/workspace/ModerationInfo'
 import { SEOPanel } from '@/components/workspace/SEOPanel'
 import { SchedulePanel } from '@/components/workspace/SchedulePanel'
 import { VersionHistoryPanel } from '@/components/workspace/VersionHistoryPanel'
+import { InternalLinkPanel } from '@/components/workspace/InternalLinkPanel'
 import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader'
 import { WorkspaceToolbar } from '@/components/workspace/WorkspaceToolbar'
 import { AutoSaveIndicator } from '@/components/workspace/AutoSaveIndicator'
@@ -354,6 +355,14 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
           contentType="review"
           onChangeTitle={setMetaTitle}
           onChangeDescription={setMetaDesc}
+        />
+
+        <InternalLinkPanel
+          title={title}
+          excerpt={excerpt}
+          category={category}
+          currentId={review.id}
+          onInsert={(markup) => setContent((c) => c + '\n' + markup)}
         />
 
         <VersionHistoryPanel contentType="review" contentId={review.id} />

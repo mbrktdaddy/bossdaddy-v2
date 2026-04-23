@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import GlobalSearch from './GlobalSearch'
 
 interface Props {
   username: string
@@ -93,14 +94,14 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
   const sidebarContent = (onNav?: () => void) => (
     <>
       {/* Brand + user */}
-      <div className="px-5 py-5 border-b border-gray-800/60">
+      <div className="px-5 py-5 border-b border-gray-800/60 space-y-3">
         <Link href="/" className="flex items-center gap-2">
           <span className="font-black text-base tracking-tight">
             <span className="text-orange-500">BOSS</span>
             <span className="text-white"> DADDY</span>
           </span>
         </Link>
-        <Link href="/dashboard/profile" onClick={onNav} className="flex items-center gap-2 mt-2 group">
+        <Link href="/dashboard/profile" onClick={onNav} className="flex items-center gap-2 group">
           <div className="w-6 h-6 rounded-full bg-orange-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
             {username[0]?.toUpperCase() ?? 'B'}
           </div>
@@ -109,6 +110,7 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
             <p className="text-xs text-gray-600">{ROLE_LABEL[role] ?? 'Member'}</p>
           </div>
         </Link>
+        {isAdmin && <GlobalSearch />}
       </div>
 
       {/* Nav */}

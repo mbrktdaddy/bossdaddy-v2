@@ -11,6 +11,7 @@ import { ModerationInfo } from '@/components/workspace/ModerationInfo'
 import { SEOPanel } from '@/components/workspace/SEOPanel'
 import { SchedulePanel } from '@/components/workspace/SchedulePanel'
 import { VersionHistoryPanel } from '@/components/workspace/VersionHistoryPanel'
+import { InternalLinkPanel } from '@/components/workspace/InternalLinkPanel'
 import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader'
 import { WorkspaceToolbar } from '@/components/workspace/WorkspaceToolbar'
 import { AutoSaveIndicator } from '@/components/workspace/AutoSaveIndicator'
@@ -267,6 +268,15 @@ export function ArticleWorkspace({ article }: Props) {
           contentType="article"
           onChangeTitle={setMetaTitle}
           onChangeDescription={setMetaDesc}
+        />
+
+        {/* Internal link helper */}
+        <InternalLinkPanel
+          title={title}
+          excerpt={excerpt}
+          category={category}
+          currentId={article.id}
+          onInsert={(markup) => setContent((c) => c + '\n' + markup)}
         />
 
         {/* Version history */}
