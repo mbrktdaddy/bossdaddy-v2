@@ -146,6 +146,28 @@ export default async function ProfilePage() {
         </div>
       </div>
 
+      {/* Writing settings — authors only */}
+      {isAuthor && (
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6">
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Writing Settings</p>
+          <Link
+            href="/dashboard/profile/voice"
+            className="flex items-center gap-3 p-4 bg-gray-950 border border-gray-800 hover:border-orange-700/50 rounded-xl transition-colors group"
+          >
+            <span className="text-xl shrink-0">🎙️</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-white group-hover:text-orange-400 transition-colors">Voice Profile</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Facts Claude uses as ground truth — family ages, occupation, values, and evolving notes.
+              </p>
+            </div>
+            <svg className="w-4 h-4 text-gray-700 group-hover:text-orange-400 shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </div>
+      )}
+
       {/* Activity stats */}
       <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6">
         <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Activity</p>

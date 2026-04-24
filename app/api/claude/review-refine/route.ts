@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getClaudeClient, MODEL, BOSS_DADDY_SYSTEM } from '@/lib/claude/client'
+import { getClaudeClient, MODEL } from '@/lib/claude/client'
+import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
 import { z } from 'zod'
 
 export const maxDuration = 60
@@ -61,10 +62,11 @@ Important: Only change what the instructions specify. Keep the first-person dad 
 
   try {
     const claude = getClaudeClient()
+    const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
     const message = await claude.messages.create({
       model: MODEL,
       max_tokens: 3000,
-      system: [{ type: 'text', text: BOSS_DADDY_SYSTEM, cache_control: { type: 'ephemeral' } }],
+      system: systemBlocks,
       messages: [{ role: 'user', content: prompt }],
     })
 

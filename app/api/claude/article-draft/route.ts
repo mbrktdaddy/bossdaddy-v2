@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { getClaudeClient, MODEL, BOSS_DADDY_SYSTEM } from '@/lib/claude/client'
+import { getClaudeClient, MODEL } from '@/lib/claude/client'
+import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
@@ -71,10 +72,11 @@ Return JSON with this exact shape:
   ]
 }`
 
+  const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
   const claudeResult = await getClaudeClient().messages.create({
     model: MODEL,
     max_tokens: 3000,
-    system: [{ type: 'text', text: BOSS_DADDY_SYSTEM, cache_control: { type: 'ephemeral' } }],
+    system: systemBlocks,
     messages: [{ role: 'user', content: prompt }],
   }).catch((err: unknown) => {
     console.error('Claude API error (article-draft):', err)
