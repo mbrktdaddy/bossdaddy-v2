@@ -13,6 +13,8 @@ import LikeButton from '@/components/LikeButton'
 import CommentForm from '@/components/CommentForm'
 import CommentList from '@/components/CommentList'
 import ImageLightbox from '@/components/ImageLightbox'
+import ProductCtaCard from '@/components/ProductCtaCard'
+import { getProductBySlug } from '@/lib/products'
 
 export const revalidate = 3600
 
@@ -57,7 +59,7 @@ export default async function ReviewPage({ params }: Props) {
 
   const { data: review } = await supabase
     .from('reviews')
-    .select('id, title, product_name, category, content, rating, pros, cons, excerpt, image_url, has_affiliate_links, published_at, profiles(username)')
+    .select('id, title, product_name, category, content, rating, pros, cons, excerpt, image_url, has_affiliate_links, product_slug, published_at, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -75,6 +77,10 @@ export default async function ReviewPage({ params }: Props) {
     .neq('slug', slug)
     .order('published_at', { ascending: false })
     .limit(3)
+
+  const product = review.product_slug
+    ? await getProductBySlug(supabase, review.product_slug)
+    : null
 
   const profileData = Array.isArray(review.profiles)
     ? review.profiles[0]
@@ -199,6 +205,11 @@ export default async function ReviewPage({ params }: Props) {
           </div>
         )}
 
+        {/* Primary product CTA — after pros/cons, before the article body */}
+        {product && (
+          <ProductCtaCard product={product} rating={review.rating} variant="prominent" />
+        )}
+
         {/* Review body */}
         <div className="overflow-x-auto min-w-0 w-full">
           <ImageLightbox className="bd-content">
@@ -214,6 +225,11 @@ export default async function ReviewPage({ params }: Props) {
             />
           </ImageLightbox>
         </div>
+
+        {/* Final product CTA — last chance to convert, before the newsletter box */}
+        {product && (
+          <ProductCtaCard product={product} rating={review.rating} variant="final" />
+        )}
 
         {/* Bottom CTA */}
         <div className="mt-12 pt-8 border-t border-gray-800">

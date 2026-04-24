@@ -46,13 +46,24 @@ export function ProductLinkPanel({ content, onInsert }: Props) {
         p.name.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q))
     : products
 
+  // After the first save, [[BUY:slug]] has been resolved into an <a href="…">
+  // anchor tag in the stored HTML — the raw token string is gone. Checking
+  // only `content.includes(token)` would falsely report "not inserted" and
+  // let editors paste a duplicate. Also match the resolved anchor by href.
+  function isAlreadyInserted(p: Product): boolean {
+    if (content.includes(`[[BUY:${p.slug}]]`)) return true
+    if (p.amazon_url && content.includes(p.amazon_url)) return true
+    if (p.non_affiliate_url && content.includes(p.non_affiliate_url)) return true
+    return false
+  }
+
   return (
     <details className="bg-gray-900 border border-gray-800 rounded-xl">
       <summary className="cursor-pointer px-4 py-3 text-sm font-semibold flex items-center justify-between">
         <span className="flex items-center gap-2">
-          <span className="text-orange-400">🛒</span> Insert product affiliate link
+          <span className="text-orange-400">🛒</span> Insert inline product mention
         </span>
-        <span className="text-xs text-gray-600">Adds a [[BUY:slug]] token</span>
+        <span className="text-xs text-gray-600">Optional — primary CTA is the Primary Product card</span>
       </summary>
 
       <div className="px-4 pb-4 space-y-3">
@@ -83,7 +94,7 @@ export function ProductLinkPanel({ content, onInsert }: Props) {
             <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
               {filtered.map((p) => {
                 const token = `[[BUY:${p.slug}]]`
-                const alreadyInserted = content.includes(token)
+                const alreadyInserted = isAlreadyInserted(p)
                 const tag = p.amazon_url ? { label: 'Amazon', cls: 'bg-orange-950/40 text-orange-400 border-orange-900/40' }
                   : p.non_affiliate_url ? { label: 'Link', cls: 'bg-gray-800 text-gray-300 border-gray-700' }
                   : { label: 'No URL', cls: 'bg-red-950/40 text-red-400 border-red-900/40' }

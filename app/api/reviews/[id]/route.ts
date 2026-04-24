@@ -29,6 +29,7 @@ const UpdateSchema = z.object({
   meta_title:               z.string().max(70).optional().nullable(),
   meta_description:         z.string().max(200).optional().nullable(),
   scheduled_publish_at:     z.string().datetime().optional().nullable(),
+  product_slug:             z.string().regex(/^[a-z0-9-]+$/).max(120).optional().nullable(),
 })
 
 const ModerateSchema = z.object({
@@ -179,6 +180,7 @@ export async function PUT(
   if (parsed.data.meta_title !== undefined) updates.meta_title = parsed.data.meta_title
   if (parsed.data.meta_description !== undefined) updates.meta_description = parsed.data.meta_description
   if (parsed.data.scheduled_publish_at !== undefined) updates.scheduled_publish_at = parsed.data.scheduled_publish_at
+  if (parsed.data.product_slug !== undefined) updates.product_slug = parsed.data.product_slug
   if (parsed.data.content) {
     const resolved = await resolveProductTokens(parsed.data.content, supabase)
     const sanitized = sanitizeHtml(resolved)
