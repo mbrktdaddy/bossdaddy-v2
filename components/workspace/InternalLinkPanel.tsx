@@ -16,10 +16,12 @@ interface Props {
   excerpt: string
   category: string
   currentId: string
+  contentType: 'article' | 'review'
+  content: string
   onInsert: (markup: string) => void
 }
 
-export function InternalLinkPanel({ title, excerpt, category, currentId, onInsert }: Props) {
+export function InternalLinkPanel({ title, excerpt, category, currentId, contentType, content, onInsert }: Props) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [loaded, setLoaded] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -31,7 +33,7 @@ export function InternalLinkPanel({ title, excerpt, category, currentId, onInser
       const res = await fetch('/api/claude/suggest-links', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, excerpt, category, current_id: currentId }),
+        body: JSON.stringify({ title, excerpt, category, current_id: currentId, content_type: contentType }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Failed to suggest links')
@@ -77,7 +79,9 @@ export function InternalLinkPanel({ title, excerpt, category, currentId, onInser
         )}
         {loaded && suggestions.length > 0 && (
           <div className="space-y-2">
-            {suggestions.map((s) => (
+            {suggestions.map((s) => {
+              const alreadyInserted = content.includes(`href="${s.url}"`)
+              return (
               <div key={`${s.type}-${s.id}`} className="flex items-center gap-3 p-3 bg-gray-950 border border-gray-800 rounded-lg">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-0.5">
@@ -92,14 +96,24 @@ export function InternalLinkPanel({ title, excerpt, category, currentId, onInser
                   </div>
                   {s.excerpt && <p className="text-xs text-gray-500 line-clamp-1">{s.excerpt}</p>}
                 </div>
-                <button
-                  onClick={() => insertLink(s)}
-                  className="shrink-0 text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
-                >
-                  + Insert link
-                </button>
+                {alreadyInserted ? (
+                  <span
+                    title="Already linked in content"
+                    className="shrink-0 text-xs px-3 py-1.5 bg-green-950/40 border border-green-900/40 text-green-400 rounded-lg"
+                  >
+                    ✓ Inserted
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => insertLink(s)}
+                    className="shrink-0 text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
+                  >
+                    + Insert link
+                  </button>
+                )}
               </div>
-            ))}
+              )
+            })}
             <button
               onClick={load}
               className="text-xs text-gray-500 hover:text-gray-300 transition-colors mt-1"

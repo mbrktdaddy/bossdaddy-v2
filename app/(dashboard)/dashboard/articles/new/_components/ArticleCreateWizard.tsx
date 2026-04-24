@@ -1,11 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { CATEGORIES } from '@/lib/categories'
 
 type Step = 'idea' | 'generating' | 'saving'
+
+interface ProductOption {
+  id: string
+  slug: string
+  name: string
+  amazon_url: string | null
+  non_affiliate_url: string | null
+}
 
 export function ArticleCreateWizard() {
   const router = useRouter()
@@ -18,6 +26,26 @@ export function ArticleCreateWizard() {
   const [keyPoints, setKeyPoints]     = useState('')
   const [category, setCategory]       = useState('other')
   const [suggesting, setSuggesting]   = useState(false)
+
+  // Products for multi-select picker (roundups, gift guides, etc.)
+  const [products, setProducts]             = useState<ProductOption[]>([])
+  const [productsLoaded, setProductsLoaded] = useState(false)
+  const [selectedSlugs, setSelectedSlugs]   = useState<string[]>([])
+  const [productFilter, setProductFilter]   = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/products')
+      .then((r) => r.json())
+      .then((json) => { if (!cancelled) setProducts(json.products ?? []) })
+      .catch(() => { /* non-blocking */ })
+      .finally(() => { if (!cancelled) setProductsLoaded(true) })
+    return () => { cancelled = true }
+  }, [])
+
+  function toggleSlug(slug: string) {
+    setSelectedSlugs((prev) => prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug])
+  }
 
   async function handleSuggest() {
     if (!description.trim()) { setError('Describe your idea first'); return }
@@ -51,6 +79,7 @@ export function ArticleCreateWizard() {
           topic,
           category,
           keyPoints: keyPoints.split('\n').map(p => p.trim()).filter(Boolean),
+          ...(selectedSlugs.length ? { productSlugs: selectedSlugs } : {}),
         }),
       })
       const genJson = await genRes.json()
@@ -63,12 +92,29 @@ export function ArticleCreateWizard() {
         throw new Error(parts.length ? `${genJson.error} — ${parts.join('; ')}` : (genJson.error ?? 'Generation failed'))
       }
 
-      const draft = genJson.draft as { title: string; excerpt: string; introduction: string; sections: { heading: string; body: string }[]; conclusion: string }
+      const draft = genJson.draft as {
+        title: string; excerpt: string; introduction: string
+        sections: { heading: string; body: string }[]
+        conclusion: string
+        inlineImages?: { afterHeading: string; prompt: string; altText: string; caption: string }[]
+      }
+
+      const slots = (draft.inlineImages ?? []).map((img, i) => ({ ...img, slotId: `slot-${i + 1}` }))
+
+      function escAttr(s: string): string {
+        return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      }
+      function placeholderFor(slot: typeof slots[number]): string {
+        return `<figure class="bd-image-placeholder" data-slot-id="${slot.slotId}" data-prompt="${escAttr(slot.prompt)}" data-alt="${escAttr(slot.altText)}" data-caption="${escAttr(slot.caption)}"><figcaption>🖼 Suggested: ${escAttr(slot.caption || slot.altText)}</figcaption></figure>`
+      }
+
       const content = [
         draft.introduction,
         ...(draft.sections ?? []).map((s) => {
           const bodyHtml = s.body.split(/\n\n+/).map((p) => `<p>${p.trim()}</p>`).join('\n')
-          return `<h2>${s.heading}</h2>\n${bodyHtml}`
+          const matched = slots.filter((sl) => sl.afterHeading.trim().toLowerCase() === s.heading.trim().toLowerCase())
+          const imgs = matched.map(placeholderFor).join('\n')
+          return `<h2>${s.heading}</h2>\n${bodyHtml}${imgs ? `\n${imgs}` : ''}`
         }),
         draft.conclusion ? `<h2>Wrapping Up</h2>\n<p>${draft.conclusion}</p>` : '',
       ].filter(Boolean).join('\n\n')
@@ -195,6 +241,60 @@ export function ArticleCreateWizard() {
           >
             {CATEGORIES.map(c => <option key={c.slug} value={c.slug}>{c.icon} {c.label}</option>)}
           </select>
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-300 mb-1.5">
+            Affiliate products <span className="text-gray-600">(optional — for roundups, gift guides)</span>
+          </label>
+          {!productsLoaded ? (
+            <div className="px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-sm text-gray-500">
+              Loading products…
+            </div>
+          ) : products.length === 0 ? (
+            <div className="px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-sm text-gray-500">
+              No products yet.{' '}
+              <Link href="/dashboard/admin/products/new" className="text-orange-400 hover:text-orange-300">Add one →</Link>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <input
+                type="text"
+                value={productFilter}
+                onChange={(e) => setProductFilter(e.target.value)}
+                placeholder="Filter by name or slug…"
+                className="w-full px-4 py-2 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+              <div className="max-h-56 overflow-y-auto bg-gray-900 border border-gray-700 rounded-lg divide-y divide-gray-800">
+                {products
+                  .filter((p) => {
+                    const q = productFilter.trim().toLowerCase()
+                    return !q || p.name.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q)
+                  })
+                  .map((p) => {
+                    const checked = selectedSlugs.includes(p.slug)
+                    const tag = p.amazon_url ? 'Amazon' : p.non_affiliate_url ? 'Link' : 'No URL'
+                    return (
+                      <label key={p.id} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-950">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleSlug(p.slug)}
+                          className="shrink-0"
+                        />
+                        <span className="min-w-0 flex-1 text-sm text-white truncate">{p.name}</span>
+                        <span className="shrink-0 text-xs text-gray-500">{tag}</span>
+                      </label>
+                    )
+                  })}
+              </div>
+              <p className="text-xs text-gray-600">
+                {selectedSlugs.length === 0
+                  ? 'Leave empty to skip affiliate links. Each selection embeds one [[BUY:slug]] into the draft.'
+                  : `${selectedSlugs.length} selected — Claude will embed one affiliate link per product, spaced across the article.`}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

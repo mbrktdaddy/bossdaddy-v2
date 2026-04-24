@@ -11,7 +11,9 @@ const ALLOWED_TAGS = [
 const ALLOWED_ATTRIBUTES: Record<string, string[]> = {
   a:      ['href', 'rel', 'target', 'class', 'id'],
   img:    ['src', 'alt', 'width', 'height', 'class', 'id'],
-  figure: ['class', 'id'],
+  // data-slot-id / data-prompt / data-alt / data-caption carry the metadata
+  // that Claude attaches to inline-image placeholder stubs in generated drafts.
+  figure: ['class', 'id', 'data-slot-id', 'data-prompt', 'data-alt', 'data-caption'],
   '*':    ['class', 'id'],
 }
 

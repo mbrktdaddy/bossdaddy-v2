@@ -37,10 +37,11 @@ CONTENT PILLARS — hit at least 2:
 4. Value Play — is it worth the price, or is there a better option
 
 PRODUCT LINKS:
-- If and only if the user message includes a line starting with "Product slug:", embed exactly one token of the form [[BUY:that-slug]] inline — place it at the strongest purchase-intent moment, usually inside the verdict or a clear recommendation sentence.
+- Look for a "Product slug:" line (single) or a "Product slugs:" line (comma-separated list) in the user message.
+- Single slug ("Product slug: x"): embed exactly one [[BUY:x]] token at the strongest purchase-intent moment, usually inside the verdict or a clear recommendation sentence.
+- Multiple slugs ("Product slugs: a, b, c"): embed exactly one [[BUY:slug]] per listed slug, each appearing once — no more, no less. Space them out across relevant sections; don't cluster, don't repeat, don't skip.
 - Never write raw product URLs (no amazon.com, no geni.us, no shortened links).
-- Never emit more than one [[BUY:...]] token.
-- If no "Product slug:" line is present, write no product links at all.
+- If neither line is present, write no product links at all.
 
 OUTPUT: Return valid JSON only. No markdown, no code fences, no explanation text.`
 

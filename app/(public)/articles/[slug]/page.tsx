@@ -3,12 +3,14 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
+import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
 import ShareButtons from '@/components/ShareButtons'
 import ViewTracker from '@/components/ViewTracker'
 import LikeButton from '@/components/LikeButton'
 import CommentForm from '@/components/CommentForm'
 import CommentList from '@/components/CommentList'
+import ImageLightbox from '@/components/ImageLightbox'
 
 export const revalidate = 3600
 
@@ -51,7 +53,7 @@ export default async function ArticlePage({ params }: Props) {
 
   const { data: article } = await supabase
     .from('articles')
-    .select('id, title, slug, category, content, excerpt, image_url, published_at, reading_time_minutes, profiles(username)')
+    .select('id, title, slug, category, content, excerpt, image_url, has_affiliate_links, published_at, reading_time_minutes, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -94,6 +96,14 @@ export default async function ArticlePage({ params }: Props) {
           )}
         </div>
 
+        {/* FTC Disclosure — rendered whenever the article contains affiliate links */}
+        {article.has_affiliate_links && (
+          <div
+            className="mb-8 text-xs text-gray-500 bg-gray-900 border border-gray-800 rounded-xl px-4 py-3"
+            dangerouslySetInnerHTML={{ __html: FTC_DISCLOSURE_HTML }}
+          />
+        )}
+
         {/* Header */}
         <div className="mb-10">
           <h1 className="text-3xl md:text-4xl font-black leading-tight mb-6">{article.title}</h1>
@@ -128,16 +138,18 @@ export default async function ArticlePage({ params }: Props) {
 
         {/* Article body */}
         <div className="overflow-x-auto min-w-0 w-full">
-          <div
-            className="prose prose-invert prose-orange max-w-none
-              prose-headings:font-black prose-headings:tracking-tight
-              prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4
-              prose-p:text-gray-300 prose-p:leading-relaxed
-              prose-a:text-orange-400 prose-a:no-underline hover:prose-a:text-orange-300
-              prose-strong:text-white
-              prose-li:text-gray-300"
-            dangerouslySetInnerHTML={{ __html: article.content }}
-          />
+          <ImageLightbox className="bd-content">
+            <div
+              className="prose prose-invert prose-orange max-w-none
+                prose-headings:font-black prose-headings:tracking-tight
+                prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4
+                prose-p:text-gray-300 prose-p:leading-relaxed
+                prose-a:text-orange-400 prose-a:no-underline hover:prose-a:text-orange-300
+                prose-strong:text-white
+                prose-li:text-gray-300"
+              dangerouslySetInnerHTML={{ __html: article.content }}
+            />
+          </ImageLightbox>
         </div>
 
         {/* Bottom CTA */}

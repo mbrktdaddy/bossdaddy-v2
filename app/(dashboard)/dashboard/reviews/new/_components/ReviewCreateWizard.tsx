@@ -1,11 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { CATEGORIES } from '@/lib/categories'
 
 type Step = 'idea' | 'generating' | 'saving'
+
+interface ProductOption {
+  id: string
+  slug: string
+  name: string
+  amazon_url: string | null
+  non_affiliate_url: string | null
+}
 
 export function ReviewCreateWizard() {
   const router = useRouter()
@@ -18,6 +26,26 @@ export function ReviewCreateWizard() {
   const [keyFeatures, setKeyFeatures]   = useState('')
   const [category, setCategory]         = useState('other')
   const [suggesting, setSuggesting]     = useState(false)
+
+  const [products, setProducts]         = useState<ProductOption[]>([])
+  const [productsLoaded, setProductsLoaded] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/products')
+      .then((r) => r.json())
+      .then((json) => { if (!cancelled) setProducts(json.products ?? []) })
+      .catch(() => { /* silent — user can still enter a review without picking */ })
+      .finally(() => { if (!cancelled) setProductsLoaded(true) })
+    return () => { cancelled = true }
+  }, [])
+
+  function handlePickProduct(slug: string) {
+    setProductSlug(slug)
+    if (!slug) return
+    const match = products.find((p) => p.slug === slug)
+    if (match) setProductName(match.name)
+  }
 
   async function handleSuggest() {
     if (!description.trim()) { setError('Describe your idea first'); return }
@@ -67,13 +95,25 @@ export function ReviewCreateWizard() {
         title: string; excerpt: string; introduction: string
         sections: { heading: string; body: string }[]
         verdict: string; rating: number; pros: string[]; cons: string[]
+        inlineImages?: { afterHeading: string; prompt: string; altText: string; caption: string }[]
+      }
+
+      const slots = (draft.inlineImages ?? []).map((img, i) => ({ ...img, slotId: `slot-${i + 1}` }))
+
+      function escAttr(s: string): string {
+        return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      }
+      function placeholderFor(slot: typeof slots[number]): string {
+        return `<figure class="bd-image-placeholder" data-slot-id="${slot.slotId}" data-prompt="${escAttr(slot.prompt)}" data-alt="${escAttr(slot.altText)}" data-caption="${escAttr(slot.caption)}"><figcaption>🖼 Suggested: ${escAttr(slot.caption || slot.altText)}</figcaption></figure>`
       }
 
       const content = [
         draft.introduction,
         ...(draft.sections ?? []).map((s) => {
           const bodyHtml = s.body.split(/\n\n+/).map((p) => `<p>${p.trim()}</p>`).join('\n')
-          return `<h2>${s.heading}</h2>\n${bodyHtml}`
+          const matched = slots.filter((sl) => sl.afterHeading.trim().toLowerCase() === s.heading.trim().toLowerCase())
+          const imgs = matched.map(placeholderFor).join('\n')
+          return `<h2>${s.heading}</h2>\n${bodyHtml}${imgs ? `\n${imgs}` : ''}`
         }),
         draft.verdict ? `<h2>The Verdict</h2>\n<p>${draft.verdict}</p>` : '',
       ].filter(Boolean).join('\n\n')
@@ -189,18 +229,29 @@ export function ReviewCreateWizard() {
 
         <div>
           <label className="block text-sm text-gray-300 mb-1.5">
-            Product slug <span className="text-gray-600">(optional — auto-embeds a [[BUY:slug]] affiliate link)</span>
+            Affiliate product <span className="text-gray-600">(optional — auto-embeds a [[BUY:slug]] link)</span>
           </label>
-          <input
-            type="text"
+          <select
             value={productSlug}
-            onChange={(e) => setProductSlug(e.target.value.toLowerCase())}
-            placeholder="e.g. enfamil-enspire"
-            pattern="[a-z0-9-]+"
-            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
+            onChange={(e) => handlePickProduct(e.target.value)}
+            disabled={!productsLoaded}
+            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
+          >
+            <option value="">
+              {productsLoaded ? '— None (no affiliate link) —' : 'Loading products…'}
+            </option>
+            {products.map((p) => {
+              const tag = p.amazon_url ? 'Amazon' : p.non_affiliate_url ? 'Link' : 'No URL'
+              return (
+                <option key={p.id} value={p.slug}>
+                  {p.name} · {tag}
+                </option>
+              )
+            })}
+          </select>
           <p className="mt-1 text-xs text-gray-600">
-            Must match a row in <code className="text-orange-400">/dashboard/admin/products</code>. Leave blank to skip.
+            Picking a product locks the product name to match and embeds one affiliate link in the draft. Manage the list at{' '}
+            <Link href="/dashboard/admin/products" className="text-orange-400 hover:text-orange-300">/dashboard/admin/products</Link>.
           </p>
         </div>
 

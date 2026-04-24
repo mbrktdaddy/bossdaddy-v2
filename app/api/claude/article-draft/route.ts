@@ -11,6 +11,7 @@ const ArticleDraftInput = z.object({
   category: z.string().min(2).max(80),
   keyPoints: z.array(z.string()).max(15).default([]),
   targetAudience: z.string().max(200).optional(),
+  productSlugs: z.array(z.string().regex(/^[a-z0-9-]+$/).max(80)).max(15).optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -33,12 +34,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { topic, category, keyPoints, targetAudience } = parsed.data
+  const { topic, category, keyPoints, targetAudience, productSlugs } = parsed.data
+  const slugs = (productSlugs ?? []).filter(Boolean)
 
   const prompt = `Write a dad-focused article on this topic:
 
 Topic: ${topic}
-Category: ${category}${keyPoints.length ? `\nKey Points: ${keyPoints.join(', ')}` : ''}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}
+Category: ${category}${keyPoints.length ? `\nKey Points: ${keyPoints.join(', ')}` : ''}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}${slugs.length ? `\nProduct slugs: ${slugs.join(', ')}` : ''}
 
 STRUCTURE REQUIREMENTS:
 - Introduction: 2–3 sentences that hook the reader with a real scenario (first-person dad)
@@ -47,6 +49,12 @@ STRUCTURE REQUIREMENTS:
 - Separate paragraphs within each section with \\n\\n
 
 SEO: Include the main topic phrase naturally in the intro and at least one section heading.
+
+INLINE IMAGES:
+- Suggest 2–3 inline image placements that would meaningfully improve the article. Each maps to a section heading you also generated above (use the exact heading text in "afterHeading").
+- Prompt style: editorial photography, warm/natural lighting, realistic setting, no people, no text. Under 180 chars.
+- "altText" is the a11y description (what a reader would describe if it were rendered). Keep under 120 chars.
+- "caption" is a short editorial sentence readers see under the image — human, not a restatement of the alt. Under 100 chars.
 
 Return JSON with this exact shape:
 {
@@ -57,10 +65,10 @@ Return JSON with this exact shape:
     { "heading": "string (clear, action-oriented heading)", "body": "string (150–250 words, paragraphs separated by \\n\\n)" }
   ],
   "conclusion": "string (1–2 paragraphs with a clear next step, separated by \\n\\n if 2 paragraphs)",
-  "imagePrompts": {
-    "hero": "string (DALL-E 3 prompt: specific real-world objects, natural daylight or warm indoor light, clean composition, no people, no text, under 180 chars, style: editorial photography)",
-    "sections": ["string"] (one prompt for the first section only — same photo-realistic rules, no people, no text, under 180 chars)
-  }
+  "heroImagePrompt": "string (DALL-E 3 prompt for the hero image: specific real-world objects, natural daylight or warm indoor light, no people, no text, under 180 chars, style: editorial photography)",
+  "inlineImages": [
+    { "afterHeading": "string (must match one of the section headings above)", "prompt": "string", "altText": "string", "caption": "string" }
+  ]
 }`
 
   const claudeResult = await getClaudeClient().messages.create({
@@ -99,12 +107,13 @@ Return JSON with this exact shape:
     return NextResponse.json({ error: 'AI returned malformed content — please try again.' }, { status: 502 })
   }
 
-  // Extract the AI-suggested image prompt for the hero — return it so the form
-  // can pre-fill the editable prompt field. Images are generated separately.
-  const imagePrompt: string = (draft.imagePrompts as Record<string, string>)?.hero
+  // Extract the hero image prompt — return it so the form can pre-fill the
+  // editable prompt field. Inline image prompts travel with the draft itself.
+  const imagePrompt: string = (draft.heroImagePrompt as string)
+    ?? (draft.imagePrompts as Record<string, string> | undefined)?.hero
     ?? `Photorealistic lifestyle photo for a dad-focused article about ${topic}, no people, objects and setting only`
 
-  const { imagePrompts: _omit, ...cleanDraft } = draft
+  const { heroImagePrompt: _heroOmit, imagePrompts: _legacyOmit, ...cleanDraft } = draft
 
   return NextResponse.json({ draft: cleanDraft, imagePrompt, remaining })
 }

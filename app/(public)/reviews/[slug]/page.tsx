@@ -12,6 +12,7 @@ import ViewTracker from '@/components/ViewTracker'
 import LikeButton from '@/components/LikeButton'
 import CommentForm from '@/components/CommentForm'
 import CommentList from '@/components/CommentList'
+import ImageLightbox from '@/components/ImageLightbox'
 
 export const revalidate = 3600
 
@@ -200,16 +201,18 @@ export default async function ReviewPage({ params }: Props) {
 
         {/* Review body */}
         <div className="overflow-x-auto min-w-0 w-full">
-          <div
-            className="prose prose-invert prose-orange max-w-none
-              prose-headings:font-black prose-headings:tracking-tight
-              prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4
-              prose-p:text-gray-300 prose-p:leading-relaxed
-              prose-a:text-orange-400 prose-a:no-underline hover:prose-a:text-orange-300
-              prose-strong:text-white
-              prose-li:text-gray-300"
-            dangerouslySetInnerHTML={{ __html: review.content }}
-          />
+          <ImageLightbox className="bd-content">
+            <div
+              className="prose prose-invert prose-orange max-w-none
+                prose-headings:font-black prose-headings:tracking-tight
+                prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4
+                prose-p:text-gray-300 prose-p:leading-relaxed
+                prose-a:text-orange-400 prose-a:no-underline hover:prose-a:text-orange-300
+                prose-strong:text-white
+                prose-li:text-gray-300"
+              dangerouslySetInnerHTML={{ __html: review.content }}
+            />
+          </ImageLightbox>
         </div>
 
         {/* Bottom CTA */}

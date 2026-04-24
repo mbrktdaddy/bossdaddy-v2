@@ -58,6 +58,12 @@ STRUCTURE REQUIREMENTS:
 
 SEO: Include the product name naturally in the intro and at least one section heading.
 
+INLINE IMAGES:
+- Suggest 2–3 inline image placements that would meaningfully improve the review. Each maps to a section heading you also generated above (use the exact heading text in "afterHeading").
+- Prompt style: editorial product photography, warm/natural lighting, realistic setting, no people, no text. Under 180 chars.
+- "altText" is the a11y description of the image (what a reader would describe if it were rendered). Keep under 120 chars.
+- "caption" is a short sentence the reader sees under the image — human, editorial, not a re-statement of the alt text. Under 100 chars.
+
 Return JSON with this exact shape:
 {
   "title": "string (SEO title including product name, max 70 chars — e.g. 'DeWalt 20V Drill Review: Built for Real Dad Projects')",
@@ -70,7 +76,10 @@ Return JSON with this exact shape:
   "rating": number (1–10, decimals ok),
   "pros": ["string"],
   "cons": ["string"],
-  "imagePrompt": "string (DALL-E 3 prompt: the product in a realistic setting, natural or warm lighting, clean composition, no people, no text, under 180 chars, style: editorial product photography)"
+  "imagePrompt": "string (DALL-E 3 prompt: the product in a realistic setting, natural or warm lighting, clean composition, no people, no text, under 180 chars, style: editorial product photography)",
+  "inlineImages": [
+    { "afterHeading": "string (must match one of the section headings above)", "prompt": "string", "altText": "string", "caption": "string" }
+  ]
 }`
 
   const claudeResult = await getClaudeClient().messages.create({

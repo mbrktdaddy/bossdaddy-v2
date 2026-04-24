@@ -12,6 +12,9 @@ import { SEOPanel } from '@/components/workspace/SEOPanel'
 import { SchedulePanel } from '@/components/workspace/SchedulePanel'
 import { VersionHistoryPanel } from '@/components/workspace/VersionHistoryPanel'
 import { InternalLinkPanel } from '@/components/workspace/InternalLinkPanel'
+import { MediaPickerPanel } from '@/components/workspace/MediaPickerPanel'
+import { ImageSlotsPanel } from '@/components/workspace/ImageSlotsPanel'
+import { ProductLinkPanel } from '@/components/workspace/ProductLinkPanel'
 import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader'
 import { WorkspaceToolbar } from '@/components/workspace/WorkspaceToolbar'
 import { AutoSaveIndicator } from '@/components/workspace/AutoSaveIndicator'
@@ -271,11 +274,28 @@ export function ArticleWorkspace({ article }: Props) {
         />
 
         {/* Internal link helper */}
+        <ImageSlotsPanel
+          content={content}
+          onChangeContent={setContent}
+        />
+
+        <ProductLinkPanel
+          content={content}
+          onInsert={(markup) => setContent((c) => c + '\n' + markup)}
+        />
+
+        <MediaPickerPanel
+          content={content}
+          onInsert={(markup) => setContent((c) => c + '\n' + markup)}
+        />
+
         <InternalLinkPanel
           title={title}
           excerpt={excerpt}
           category={category}
           currentId={article.id}
+          contentType="article"
+          content={content}
           onInsert={(markup) => setContent((c) => c + '\n' + markup)}
         />
 
