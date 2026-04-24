@@ -156,10 +156,24 @@ export function ProductForm({ product }: Props) {
           type="url"
           value={imageUrl}
           onChange={(e) => setImageUrl(e.target.value)}
-          placeholder="https://..."
+          placeholder="https://m.media-amazon.com/images/I/..."
           className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
         />
-        <p className="mt-1 text-xs text-gray-600">Optional — reserved for future use.</p>
+        <p className="mt-1 text-xs text-gray-600">
+          Shown on the public review page inside the Product CTA card. On the Amazon product page, right-click the main image → <em>Copy image address</em>. Must be an <code>m.media-amazon.com</code> URL or a Supabase-hosted image.
+        </p>
+        {imageUrl && (
+          <div className="mt-3">
+            <p className="text-xs text-gray-500 mb-1.5">Preview</p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={imageUrl}
+              alt="Product preview"
+              className="w-24 h-24 object-contain rounded-lg bg-gray-950 border border-gray-800 p-2"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+            />
+          </div>
+        )}
       </div>
 
       {error && (
