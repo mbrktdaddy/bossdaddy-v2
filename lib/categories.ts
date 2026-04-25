@@ -7,6 +7,7 @@ export const CATEGORIES = [
     color: 'from-gray-800/50 to-gray-900/40',
     border: 'border-gray-700/40',
     accent: 'text-orange-500',
+    targetWords: 1400,
   },
   {
     slug: 'diy-tools',
@@ -16,6 +17,7 @@ export const CATEGORIES = [
     color: 'from-gray-800/50 to-gray-900/40',
     border: 'border-gray-700/40',
     accent: 'text-orange-500',
+    targetWords: 1500,
   },
   {
     slug: 'kids-family',
@@ -25,6 +27,7 @@ export const CATEGORIES = [
     color: 'from-gray-800/50 to-gray-900/40',
     border: 'border-gray-700/40',
     accent: 'text-orange-500',
+    targetWords: 1200,
   },
   {
     slug: 'health-fitness',
@@ -34,6 +37,7 @@ export const CATEGORIES = [
     color: 'from-gray-800/50 to-gray-900/40',
     border: 'border-gray-700/40',
     accent: 'text-orange-500',
+    targetWords: 1300,
   },
   {
     slug: 'outdoors-adventure',
@@ -43,6 +47,7 @@ export const CATEGORIES = [
     color: 'from-gray-800/50 to-gray-900/40',
     border: 'border-gray-700/40',
     accent: 'text-orange-500',
+    targetWords: 1300,
   },
   {
     slug: 'dad-life',
@@ -52,6 +57,7 @@ export const CATEGORIES = [
     color: 'from-gray-800/50 to-gray-900/40',
     border: 'border-gray-700/40',
     accent: 'text-orange-500',
+    targetWords: 900,
   },
   {
     slug: 'family-lifestyle',
@@ -61,6 +67,7 @@ export const CATEGORIES = [
     color: 'from-gray-800/50 to-gray-900/40',
     border: 'border-gray-700/40',
     accent: 'text-orange-500',
+    targetWords: 1100,
   },
 ] as const
 

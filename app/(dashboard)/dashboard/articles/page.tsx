@@ -13,7 +13,7 @@ export default async function MyArticlesPage({ searchParams }: Props) {
 
   const { data: articles } = await supabase
     .from('articles')
-    .select('id, title, category, status, slug, created_at, updated_at, reading_time_minutes, rejection_reason')
+    .select('id, title, category, status, slug, created_at, updated_at, reading_time_minutes, rejection_reason, image_url')
     .eq('author_id', user!.id)
     .order('updated_at', { ascending: false })
 
@@ -108,9 +108,11 @@ export default async function MyArticlesPage({ searchParams }: Props) {
             category:             a.category,
             status:               a.status,
             slug:                 a.slug,
+            created_at:           a.created_at,
             updated_at:           a.updated_at,
             reading_time_minutes: a.reading_time_minutes,
             rejection_reason:     a.rejection_reason,
+            image_url:            a.image_url,
           }))}
           emptyMessage={filter ? `No ${filter} articles.` : 'No articles yet.'}
         />

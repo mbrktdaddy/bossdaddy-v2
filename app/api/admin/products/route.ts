@@ -7,7 +7,9 @@ const ProductSchema = z.object({
   slug:              z.string().min(2).max(80).regex(/^[a-z0-9-]+$/, 'lowercase letters, numbers, and hyphens only'),
   name:              z.string().min(2).max(160),
   asin:              z.string().max(20).optional().nullable(),
-  amazon_url:        z.string().url().max(2048).optional().nullable(),
+  store:             z.string().max(40).optional().default('amazon'),
+  custom_store_name: z.string().max(80).optional().nullable(),
+  affiliate_url:     z.string().url().max(2048).optional().nullable(),
   non_affiliate_url: z.string().url().max(2048).optional().nullable(),
   image_url:         z.string().url().max(2048).optional().nullable(),
 })
@@ -53,7 +55,9 @@ export async function POST(request: NextRequest) {
       slug:              parsed.data.slug,
       name:              parsed.data.name,
       asin:              parsed.data.asin ?? null,
-      amazon_url:        parsed.data.amazon_url ?? null,
+      store:             parsed.data.store ?? 'amazon',
+      custom_store_name: parsed.data.custom_store_name ?? null,
+      affiliate_url:     parsed.data.affiliate_url ?? null,
       non_affiliate_url: parsed.data.non_affiliate_url ?? null,
       image_url:         parsed.data.image_url ?? null,
     })

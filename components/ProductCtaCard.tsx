@@ -1,20 +1,23 @@
 import Image from 'next/image'
 import type { Product } from '@/lib/products'
+import { getStoreLabel } from '@/lib/products'
 import RatingScore from './RatingScore'
 
 interface Props {
-  product: Pick<Product, 'slug' | 'name' | 'amazon_url' | 'non_affiliate_url' | 'image_url'>
+  product: Pick<Product, 'slug' | 'name' | 'affiliate_url' | 'non_affiliate_url' | 'image_url' | 'store' | 'custom_store_name'>
   rating?: number
   variant?: 'prominent' | 'final'
 }
 
 export default function ProductCtaCard({ product, rating, variant = 'prominent' }: Props) {
-  const href = product.amazon_url ?? product.non_affiliate_url
+  const href = product.affiliate_url ?? product.non_affiliate_url
   if (!href) return null
 
-  const isAmazon = Boolean(product.amazon_url)
-  const rel = isAmazon ? 'sponsored nofollow noopener' : 'noopener'
-  const buttonLabel = isAmazon ? 'Check Price on Amazon' : `View ${product.name}`
+  const isAffiliate = Boolean(product.affiliate_url)
+  const isAmazon = isAffiliate && product.store === 'amazon'
+  const rel = isAffiliate ? 'sponsored nofollow noopener' : 'noopener'
+  const storeName = getStoreLabel(product.store, product.custom_store_name)
+  const buttonLabel = isAffiliate ? `Check Price at ${storeName}` : `View ${product.name}`
   const heading = variant === 'final' ? 'Ready to grab one?' : 'Get This Product'
 
   return (

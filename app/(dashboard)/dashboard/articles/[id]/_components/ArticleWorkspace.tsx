@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { CATEGORIES } from '@/lib/categories'
 import { StatusBadge } from '@/components/workspace/StatusBadge'
@@ -57,6 +57,15 @@ export function ArticleWorkspace({ article }: Props) {
   const [metaDesc, setMetaDesc]     = useState(article.meta_description ?? '')
   const [scheduledAt, setScheduled] = useState<string | null>(article.scheduled_publish_at)
 
+  const [heroPromptSuggestion, setHeroPromptSuggestion] = useState('')
+
+  useEffect(() => {
+    const key = `bd:hero-prompt:${article.id}`
+    const val = sessionStorage.getItem(key)
+    if (val) { setHeroPromptSuggestion(val); sessionStorage.removeItem(key) }
+  }, [article.id])
+
+  const [refineInstruction, setRefineInstruction] = useState('')
   const [busy, setBusy]       = useState(false)
   const [actionErr, setErr]   = useState<string | null>(null)
   const [actionMsg, setMsg]   = useState<string | null>(null)
@@ -183,7 +192,9 @@ export function ArticleWorkspace({ article }: Props) {
 
       <div className="space-y-6">
 
-        {/* Metadata */}
+        {/* ── CORE ─────────────────────────────────────────────────────── */}
+        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold">Core</p>
+
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="sm:col-span-2">
             <label className="block text-sm text-gray-300 mb-1.5">Title</label>
@@ -218,22 +229,13 @@ export function ArticleWorkspace({ article }: Props) {
           />
         </div>
 
-        {/* Hero image */}
-        <HeroImagePanel
-          imageUrl={imageUrl}
-          onChange={setImageUrl}
-          contentType="article"
-          title={title}
-          category={category}
-          excerpt={excerpt}
-        />
-
-        {/* AI Refine */}
         <AIRefinePanel
           title={title}
           category={category}
           content={content}
           contentType="article"
+          externalInstruction={refineInstruction}
+          onExternalInstructionUsed={() => setRefineInstruction('')}
           onRefined={(draft) => {
             if (draft.title) setTitle(draft.title)
             if (draft.excerpt) setExcerpt(draft.excerpt)
@@ -250,62 +252,103 @@ export function ArticleWorkspace({ article }: Props) {
           }}
         />
 
-        {/* Content */}
         <div>
           <label className="block text-sm text-gray-300 mb-1.5">Content <span className="text-gray-600">(HTML)</span></label>
-          <ContentEditor value={content} onChange={setContent} />
+          <ContentEditor
+            value={content}
+            onChange={setContent}
+            targetWords={CATEGORIES.find(c => c.slug === category)?.targetWords}
+          />
         </div>
 
-        {/* Schedule */}
-        {!isPublished && (
-          <SchedulePanel scheduledAt={scheduledAt} onChange={setScheduled} />
-        )}
+        {/* ── MEDIA ────────────────────────────────────────────────────── */}
+        <div className="pt-6 border-t border-gray-800/60">
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Media</p>
+          <div className="space-y-4">
+            <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4 space-y-1.5">
+              <p className="text-xs text-gray-500 font-medium uppercase tracking-widest mb-3">Hero image</p>
+              <HeroImagePanel
+                imageUrl={imageUrl}
+                onChange={setImageUrl}
+                contentType="article"
+                title={title}
+                category={category}
+                excerpt={excerpt}
+                initialPrompt={heroPromptSuggestion}
+              />
+            </div>
+            <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4">
+              <p className="text-xs text-gray-500 font-medium uppercase tracking-widest mb-3">Inline image slots</p>
+              <ImageSlotsPanel
+                content={content}
+                onChangeContent={setContent}
+              />
+            </div>
+            <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4">
+              <p className="text-xs text-gray-500 font-medium uppercase tracking-widest mb-3">Insert media</p>
+              <MediaPickerPanel
+                content={content}
+                onInsert={(markup) => setContent((c) => c + '\n' + markup)}
+              />
+            </div>
+          </div>
+        </div>
 
-        {/* SEO */}
-        <SEOPanel
-          metaTitle={metaTitle}
-          metaDescription={metaDesc}
-          fallbackTitle={title}
-          fallbackDescription={excerpt}
-          slug={article.slug}
-          contentType="article"
-          onChangeTitle={setMetaTitle}
-          onChangeDescription={setMetaDesc}
-        />
+        {/* ── PRODUCT & MONETIZATION ───────────────────────────────────── */}
+        <div className="pt-6 border-t border-gray-800/60">
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Product &amp; Monetization</p>
+          <ProductLinkPanel
+            content={content}
+            onInsert={(markup) => setContent((c) => c + '\n' + markup)}
+          />
+        </div>
 
-        {/* Internal link helper */}
-        <ImageSlotsPanel
-          content={content}
-          onChangeContent={setContent}
-        />
+        {/* ── DISTRIBUTION ─────────────────────────────────────────────── */}
+        <div className="pt-6 border-t border-gray-800/60">
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Distribution</p>
+          <div className="space-y-6">
+            <SEOPanel
+              metaTitle={metaTitle}
+              metaDescription={metaDesc}
+              fallbackTitle={title}
+              fallbackDescription={excerpt}
+              slug={article.slug}
+              contentType="article"
+              onChangeTitle={setMetaTitle}
+              onChangeDescription={setMetaDesc}
+            />
+            {!isPublished && (
+              <SchedulePanel scheduledAt={scheduledAt} onChange={setScheduled} />
+            )}
+            <InternalLinkPanel
+              title={title}
+              excerpt={excerpt}
+              category={category}
+              currentId={article.id}
+              contentType="article"
+              content={content}
+              onInsert={(markup) => setContent((c) => c + '\n' + markup)}
+            />
+          </div>
+        </div>
 
-        <ProductLinkPanel
-          content={content}
-          onInsert={(markup) => setContent((c) => c + '\n' + markup)}
-        />
+        {/* ── ADMIN ────────────────────────────────────────────────────── */}
+        <div className="pt-6 border-t border-gray-800/60">
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Admin</p>
+          <div className="space-y-6">
+            <VersionHistoryPanel contentType="article" contentId={article.id} />
+            <ModerationInfo
+              score={article.moderation_score}
+              flags={article.moderation_flags ?? []}
+              onAddressFlag={(flag) => {
+                setRefineInstruction(`Address this moderation flag: ${flag}`)
+                document.getElementById('ai-refine-instruction')?.focus()
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+              }}
+            />
+          </div>
+        </div>
 
-        <MediaPickerPanel
-          content={content}
-          onInsert={(markup) => setContent((c) => c + '\n' + markup)}
-        />
-
-        <InternalLinkPanel
-          title={title}
-          excerpt={excerpt}
-          category={category}
-          currentId={article.id}
-          contentType="article"
-          content={content}
-          onInsert={(markup) => setContent((c) => c + '\n' + markup)}
-        />
-
-        {/* Version history */}
-        <VersionHistoryPanel contentType="article" contentId={article.id} />
-
-        {/* Moderation info */}
-        <ModerationInfo score={article.moderation_score} flags={article.moderation_flags ?? []} />
-
-        {/* Status messages */}
         {actionErr && (
           <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">{actionErr}</p>
         )}
@@ -314,7 +357,7 @@ export function ArticleWorkspace({ article }: Props) {
         )}
 
         <p className="text-xs text-gray-600">
-          ⌨ <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘S</kbd> save · <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘↵</kbd> publish
+          ⌨ <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘S</kbd> save · <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘↵</kbd> publish · <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘⇧P</kbd> toggle preview
         </p>
 
       </div>

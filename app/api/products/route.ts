@@ -19,9 +19,9 @@ export async function GET() {
   const admin = createAdminClient()
   const { data, error } = await admin
     .from('products')
-    .select('id, slug, name, asin, amazon_url, non_affiliate_url, image_url')
+    .select('id, slug, name, asin, store, custom_store_name, affiliate_url, non_affiliate_url, image_url')
     .order('name', { ascending: true })
 
   if (error) return NextResponse.json({ error: `List failed: ${error.message}` }, { status: 500 })
-  return NextResponse.json({ products: (data ?? []) as Pick<Product, 'id' | 'slug' | 'name' | 'asin' | 'amazon_url' | 'non_affiliate_url' | 'image_url'>[] })
+  return NextResponse.json({ products: (data ?? []) as Pick<Product, 'id' | 'slug' | 'name' | 'asin' | 'store' | 'custom_store_name' | 'affiliate_url' | 'non_affiliate_url' | 'image_url'>[] })
 }

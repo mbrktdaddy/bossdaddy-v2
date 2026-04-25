@@ -9,6 +9,7 @@ interface Props {
   contentType: 'article' | 'review'
   onChangeTitle: (v: string) => void
   onChangeDescription: (v: string) => void
+  defaultOpen?: boolean
 }
 
 function countLabel(value: string, recommended: number) {
@@ -31,17 +32,23 @@ function countLabel(value: string, recommended: number) {
 
 export function SEOPanel({
   metaTitle, metaDescription, fallbackTitle, fallbackDescription, slug, contentType,
-  onChangeTitle, onChangeDescription,
+  onChangeTitle, onChangeDescription, defaultOpen = true,
 }: Props) {
   const displayTitle       = metaTitle.trim()       || fallbackTitle       || 'Untitled'
   const displayDescription = metaDescription.trim() || fallbackDescription || ''
   const previewUrl = `bossdaddylife.com/${contentType}s/${slug ?? 'slug-goes-here'}`
 
+  const suggestedTitle = fallbackTitle.slice(0, 60)
+  const suggestedDesc  = fallbackDescription.slice(0, 160)
+
   return (
-    <details className="bg-gray-900 border border-gray-800 rounded-xl" open={false}>
+    <details className="bg-gray-900 border border-gray-800 rounded-xl" open={defaultOpen}>
       <summary className="cursor-pointer px-4 py-3 text-sm font-semibold flex items-center justify-between">
         <span className="flex items-center gap-2">
           <span className="text-blue-400">🔍</span> SEO
+          {(!metaTitle && !metaDescription) && (
+            <span className="text-xs text-yellow-500/80 font-normal">· not filled in</span>
+          )}
         </span>
         <span className="text-xs text-gray-600">meta_title + meta_description</span>
       </summary>
@@ -52,7 +59,18 @@ export function SEOPanel({
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <label className="text-sm text-gray-300">Meta title</label>
-            {countLabel(metaTitle, 60)}
+            <div className="flex items-center gap-2">
+              {!metaTitle && suggestedTitle && (
+                <button
+                  type="button"
+                  onClick={() => onChangeTitle(suggestedTitle)}
+                  className="text-xs text-orange-400 hover:text-orange-300 transition-colors"
+                >
+                  ← Use title
+                </button>
+              )}
+              {countLabel(metaTitle, 60)}
+            </div>
           </div>
           <input
             type="text"
@@ -68,7 +86,18 @@ export function SEOPanel({
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <label className="text-sm text-gray-300">Meta description</label>
-            {countLabel(metaDescription, 160)}
+            <div className="flex items-center gap-2">
+              {!metaDescription && suggestedDesc && (
+                <button
+                  type="button"
+                  onClick={() => onChangeDescription(suggestedDesc)}
+                  className="text-xs text-orange-400 hover:text-orange-300 transition-colors"
+                >
+                  ← Use excerpt
+                </button>
+              )}
+              {countLabel(metaDescription, 160)}
+            </div>
           </div>
           <textarea
             value={metaDescription}

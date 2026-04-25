@@ -8,10 +8,19 @@ interface MediaAsset {
   filename: string
   alt_text: string | null
   file_size: number | null
+  product_id: string | null
+  label: string | null
+  is_primary: boolean
+}
+
+interface Product {
+  id: string
+  name: string
+  slug: string
 }
 
 interface MediaPickerProps {
-  onSelect: (url: string, altText: string) => void
+  onSelect: (url: string, altText: string, assetId?: string) => void
   onClose: () => void
 }
 
@@ -30,6 +39,10 @@ export default function MediaPicker({ onSelect, onClose }: MediaPickerProps) {
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Product filter
+  const [products, setProducts] = useState<Product[]>([])
+  const [filterProductId, setFilterProductId] = useState<string>('')
+
   // Generate state
   const [genPrompt, setGenPrompt] = useState('')
   const [genSize, setGenSize] = useState<'1024x1024' | '1792x1024' | '1024x1792'>('1792x1024')
@@ -38,9 +51,19 @@ export default function MediaPicker({ onSelect, onClose }: MediaPickerProps) {
 
   const LIMIT = 40
 
-  const fetchAssets = useCallback(async (p: number) => {
+  // Fetch products for the filter dropdown once
+  useEffect(() => {
+    fetch('/api/products')
+      .then((r) => r.ok ? r.json() : { products: [] })
+      .then((j) => setProducts(j.products ?? []))
+      .catch(() => {})
+  }, [])
+
+  const fetchAssets = useCallback(async (p: number, productId: string) => {
     setLoading(true)
-    const res = await fetch(`/api/media?page=${p}`)
+    const qs = new URLSearchParams({ page: String(p) })
+    if (productId) qs.set('product_id', productId)
+    const res = await fetch(`/api/media?${qs}`)
     if (res.ok) {
       const json = await res.json()
       setAssets(json.assets)
@@ -49,13 +72,20 @@ export default function MediaPicker({ onSelect, onClose }: MediaPickerProps) {
     setLoading(false)
   }, [])
 
-  useEffect(() => { fetchAssets(page) }, [fetchAssets, page])
+  useEffect(() => { fetchAssets(page, filterProductId) }, [fetchAssets, page, filterProductId])
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
+
+  // Reset to page 1 when filter changes
+  function handleFilterChange(productId: string) {
+    setFilterProductId(productId)
+    setPage(1)
+    setSelected(null)
+  }
 
   async function uploadFiles(files: FileList | File[]) {
     const list = Array.from(files)
@@ -101,13 +131,15 @@ export default function MediaPicker({ onSelect, onClose }: MediaPickerProps) {
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Generation failed')
-      // Prepend to assets, auto-select it, switch to library tab so user sees it
       const newAsset: MediaAsset = {
         id: json.asset.id ?? `gen-${Date.now()}`,
         url: json.asset.url,
         filename: json.asset.filename ?? 'generated.png',
         alt_text: json.asset.alt_text ?? null,
         file_size: null,
+        product_id: null,
+        label: null,
+        is_primary: false,
       }
       setAssets((prev) => [newAsset, ...prev])
       setTotal((t) => t + 1)
@@ -123,10 +155,13 @@ export default function MediaPicker({ onSelect, onClose }: MediaPickerProps) {
   function handleConfirm() {
     if (!selected) return
     const asset = assets.find((a) => a.url === selected)
-    onSelect(selected, asset?.alt_text ?? '')
+    onSelect(selected, asset?.alt_text ?? '', asset?.id)
   }
 
   const totalPages = Math.ceil(total / LIMIT)
+
+  // Map product_id → name for badge display
+  const productMap = Object.fromEntries(products.map((p) => [p.id, p.name]))
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70" onClick={onClose}>
@@ -138,25 +173,42 @@ export default function MediaPicker({ onSelect, onClose }: MediaPickerProps) {
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-800 shrink-0">
           <div className="flex items-center gap-1 bg-gray-900 border border-gray-800 rounded-xl p-1">
             <button
+              type="button"
               onClick={() => setTab('library')}
               className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
                 tab === 'library' ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              📁 Library
+              Library
             </button>
             <button
+              type="button"
               onClick={() => setTab('generate')}
               className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
                 tab === 'generate' ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              ✨ Generate
+              Generate
             </button>
           </div>
           <div className="flex items-center gap-2">
+            {/* Product filter */}
+            {tab === 'library' && products.length > 0 && (
+              <select
+                value={filterProductId}
+                onChange={(e) => handleFilterChange(e.target.value)}
+                className="px-2 py-1.5 bg-gray-800 border border-gray-700 text-xs text-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
+              >
+                <option value="">All images</option>
+                <option value="__none__">Unassigned only</option>
+                {products.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            )}
             {tab === 'library' && (
               <button
+                type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg transition-colors"
@@ -171,7 +223,7 @@ export default function MediaPicker({ onSelect, onClose }: MediaPickerProps) {
                 Upload
               </button>
             )}
-            <button onClick={onClose} className="p-1.5 text-gray-500 hover:text-white transition-colors rounded-lg hover:bg-gray-800">
+            <button type="button" onClick={onClose} className="p-1.5 text-gray-500 hover:text-white transition-colors rounded-lg hover:bg-gray-800">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -207,31 +259,46 @@ export default function MediaPicker({ onSelect, onClose }: MediaPickerProps) {
                 <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <p className="text-sm">No images yet — click to generate one</p>
+                <p className="text-sm">{filterProductId ? 'No images for this product yet' : 'No images yet — click to generate one'}</p>
               </div>
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                {assets.map((asset) => (
-                  <button
-                    key={asset.id}
-                    onClick={() => setSelected(asset.url === selected ? null : asset.url)}
-                    className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all ${
-                      selected === asset.url
-                        ? 'border-orange-500 ring-2 ring-orange-500/30'
-                        : 'border-transparent hover:border-gray-600'
-                    }`}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={asset.url} alt={asset.alt_text ?? asset.filename} className="w-full h-full object-cover" loading="lazy" />
-                    {selected === asset.url && (
-                      <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
-                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                    )}
-                  </button>
-                ))}
+                {assets.map((asset) => {
+                  const productName = asset.product_id ? productMap[asset.product_id] : null
+                  return (
+                    <button
+                      key={asset.id}
+                      type="button"
+                      onClick={() => setSelected(asset.url === selected ? null : asset.url)}
+                      className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all ${
+                        selected === asset.url
+                          ? 'border-orange-500 ring-2 ring-orange-500/30'
+                          : 'border-transparent hover:border-gray-600'
+                      }`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={asset.url} alt={asset.alt_text ?? asset.filename} className="w-full h-full object-cover" loading="lazy" />
+
+                      {selected === asset.url && (
+                        <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
+                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      )}
+
+                      {/* Product badge */}
+                      {productName && (
+                        <div className="absolute bottom-0 left-0 right-0 px-1.5 py-1 bg-black/70">
+                          <p className="text-[9px] text-orange-400 font-semibold truncate leading-tight">
+                            {asset.is_primary && <span className="text-orange-300">★ </span>}
+                            {asset.label ?? productName}
+                          </p>
+                        </div>
+                      )}
+                    </button>
+                  )
+                })}
               </div>
             )
           ) : (
@@ -275,7 +342,7 @@ export default function MediaPicker({ onSelect, onClose }: MediaPickerProps) {
                 disabled={genLoading || !genPrompt.trim()}
                 className="w-full px-5 py-3 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white font-semibold rounded-xl transition-colors"
               >
-                {genLoading ? '✨ Generating…' : '✨ Generate & Use'}
+                {genLoading ? 'Generating…' : 'Generate & Use'}
               </button>
               {genError && (
                 <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">{genError}</p>
@@ -289,12 +356,14 @@ export default function MediaPicker({ onSelect, onClose }: MediaPickerProps) {
         {tab === 'library' && totalPages > 1 && (
           <div className="flex items-center justify-center gap-2 px-5 py-2 border-t border-gray-800 shrink-0">
             <button
+              type="button"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
               className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-xs text-white rounded-lg transition-colors"
             >← Prev</button>
             <span className="text-xs text-gray-500">{page} / {totalPages}</span>
             <button
+              type="button"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
               className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-xs text-white rounded-lg transition-colors"
@@ -309,10 +378,12 @@ export default function MediaPicker({ onSelect, onClose }: MediaPickerProps) {
           </p>
           <div className="flex gap-2">
             <button
+              type="button"
               onClick={onClose}
               className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
             >Cancel</button>
             <button
+              type="button"
               onClick={handleConfirm}
               disabled={!selected}
               className="px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition-colors"

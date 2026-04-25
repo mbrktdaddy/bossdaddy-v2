@@ -7,7 +7,8 @@ interface Product {
   id: string
   slug: string
   name: string
-  amazon_url: string | null
+  store: string
+  affiliate_url: string | null
   non_affiliate_url: string | null
 }
 
@@ -52,7 +53,7 @@ export function ProductLinkPanel({ content, onInsert }: Props) {
   // let editors paste a duplicate. Also match the resolved anchor by href.
   function isAlreadyInserted(p: Product): boolean {
     if (content.includes(`[[BUY:${p.slug}]]`)) return true
-    if (p.amazon_url && content.includes(p.amazon_url)) return true
+    if (p.affiliate_url && content.includes(p.affiliate_url)) return true
     if (p.non_affiliate_url && content.includes(p.non_affiliate_url)) return true
     return false
   }
@@ -95,7 +96,8 @@ export function ProductLinkPanel({ content, onInsert }: Props) {
               {filtered.map((p) => {
                 const token = `[[BUY:${p.slug}]]`
                 const alreadyInserted = isAlreadyInserted(p)
-                const tag = p.amazon_url ? { label: 'Amazon', cls: 'bg-orange-950/40 text-orange-400 border-orange-900/40' }
+                const tag = p.affiliate_url
+                  ? { label: p.store === 'amazon' ? 'Amazon' : 'Affiliate', cls: 'bg-orange-950/40 text-orange-400 border-orange-900/40' }
                   : p.non_affiliate_url ? { label: 'Link', cls: 'bg-gray-800 text-gray-300 border-gray-700' }
                   : { label: 'No URL', cls: 'bg-red-950/40 text-red-400 border-red-900/40' }
 

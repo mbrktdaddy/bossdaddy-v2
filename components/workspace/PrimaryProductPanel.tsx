@@ -8,7 +8,7 @@ interface Product {
   id: string
   slug: string
   name: string
-  amazon_url: string | null
+  affiliate_url: string | null
   non_affiliate_url: string | null
   image_url: string | null
 }
@@ -87,14 +87,28 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
 
       {!loading && selected && !picking && (
         <div className="flex items-center gap-3 p-3 bg-gray-950 border border-orange-900/40 rounded-lg">
-          {selected.image_url && (
+          {selected.image_url ? (
             <div className="relative w-14 h-14 shrink-0 rounded-lg overflow-hidden bg-gray-900 border border-gray-800">
               <Image src={selected.image_url} alt={selected.name} fill className="object-contain p-1" sizes="56px" />
+            </div>
+          ) : (
+            <div className="w-14 h-14 shrink-0 rounded-lg border-2 border-dashed border-gray-700 bg-gray-900 flex items-center justify-center">
+              <span className="text-xs text-gray-600">No img</span>
             </div>
           )}
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-white truncate">{selected.name}</p>
-            <p className="text-xs text-gray-500 truncate">{selected.slug}</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <p className="text-xs text-gray-500 truncate">{selected.slug}</p>
+              <a
+                href={`/dashboard/admin/products/${selected.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-orange-400 hover:text-orange-300 shrink-0 transition-colors"
+              >
+                Edit product →
+              </a>
+            </div>
           </div>
           <button
             onClick={() => setPicking(true)}
@@ -126,13 +140,15 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
                     <Image src={p.image_url} alt="" fill className="object-contain p-0.5" sizes="40px" />
                   </div>
                 ) : (
-                  <div className="w-10 h-10 shrink-0 rounded bg-gray-900 border border-gray-800" />
+                  <div className="w-10 h-10 shrink-0 rounded border border-dashed border-gray-700 bg-gray-900 flex items-center justify-center">
+                    <span className="text-[9px] text-gray-600">No img</span>
+                  </div>
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="text-sm text-white truncate">{p.name}</p>
                   <p className="text-xs text-gray-600 truncate">{p.slug}</p>
                 </div>
-                {!p.amazon_url && !p.non_affiliate_url && (
+                {!p.affiliate_url && !p.non_affiliate_url && (
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-950/40 border border-red-900/40 text-red-400 shrink-0">
                     No URL
                   </span>

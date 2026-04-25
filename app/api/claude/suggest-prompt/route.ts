@@ -29,24 +29,33 @@ export async function POST(request: NextRequest) {
   const prompt = type === 'review'
     ? `A Boss Daddy content creator wants to write a product review. Their rough idea: "${description}"
 
-Expand this into a structured review prompt. Return JSON:
+Give 3 distinct angles they could take on this review. Each angle should have a different emphasis (e.g. hands-on dad use, value for money, safety focus, long-term durability, comparison with alternatives). Return JSON:
 {
-  "productName": "string (full proper product name, brand + model if you can infer it)",
-  "keyFeatures": ["string", ...] (4–6 specific testable features a dad would care about — battery life, durability, ease of use, kid-safety, value, etc.)
+  "suggestions": [
+    {
+      "productName": "string (full proper product name, brand + model if you can infer it)",
+      "angle": "string (one phrase describing the editorial angle — max 60 chars)",
+      "keyFeatures": ["string"] (4–6 specific testable features a dad would care about)
+    }
+  ]
 }`
     : `A Boss Daddy content creator wants to write a dad-focused article. Their rough idea: "${description}"
 
-Expand this into a structured article prompt. Return JSON:
+Give 3 distinct angles they could take on this article — different in scope, audience level, or approach (e.g. beginner guide vs. expert tips vs. personal story). Return JSON:
 {
-  "topic": "string (a clear, specific article title or topic — max 80 chars)",
-  "keyPoints": ["string", ...] (4–6 concrete points the article should cover)
+  "suggestions": [
+    {
+      "topic": "string (a clear, specific article title or topic — max 80 chars)",
+      "angle": "string (one phrase describing the editorial angle — max 60 chars)",
+      "keyPoints": ["string"] (4–6 concrete points the article should cover)
+    }
+  ]
 }`
 
   try {
-    const claude = getClaudeClient()
-    const message = await claude.messages.create({
+    const message = await getClaudeClient().messages.create({
       model: MODEL,
-      max_tokens: 400,
+      max_tokens: 900,
       system: [{ type: 'text', text: SUGGEST_SYSTEM, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: prompt }],
     })

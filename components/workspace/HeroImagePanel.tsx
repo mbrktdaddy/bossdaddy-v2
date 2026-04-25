@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
@@ -10,19 +10,25 @@ interface Props {
   onChange: (url: string | null) => void
   label?: string
   contentType: 'article' | 'review'
-  // For generating: we pass title/category so image gen has context
   title?: string
   category?: string
   excerpt?: string
   productName?: string
+  initialPrompt?: string
 }
 
 export function HeroImagePanel({
   imageUrl, onChange, label = 'Hero Image',
-  contentType, title, category, excerpt, productName,
+  contentType, title, category, excerpt, productName, initialPrompt,
 }: Props) {
   const [showPicker, setShowPicker] = useState(false)
   const [imagePrompt, setImagePrompt] = useState('')
+
+  // When the workspace reads its sessionStorage suggestion and passes it in,
+  // pre-fill the prompt field (only if the user hasn't typed anything yet).
+  useEffect(() => {
+    if (initialPrompt && !imagePrompt) setImagePrompt(initialPrompt)
+  }, [initialPrompt]) // eslint-disable-line react-hooks/exhaustive-deps
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 

@@ -83,6 +83,15 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   const [scheduledAt, setScheduled]   = useState<string | null>(review.scheduled_publish_at)
   const [productSlug, setProductSlug] = useState<string | null>(review.product_slug)
 
+  const [heroPromptSuggestion, setHeroPromptSuggestion] = useState('')
+
+  useEffect(() => {
+    const key = `bd:hero-prompt:${review.id}`
+    const val = sessionStorage.getItem(key)
+    if (val) { setHeroPromptSuggestion(val); sessionStorage.removeItem(key) }
+  }, [review.id])
+
+  const [refineInstruction, setRefineInstruction] = useState('')
   const [busy, setBusy]   = useState(false)
   const [actionErr, setErr] = useState<string | null>(null)
   const [actionMsg, setMsg] = useState<string | null>(null)
@@ -226,7 +235,9 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
 
       <div className="space-y-6">
 
-        {/* Title + product + category */}
+        {/* ── CORE ─────────────────────────────────────────────────────── */}
+        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold">Core</p>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm text-gray-300 mb-1.5">Product Name</label>
@@ -283,25 +294,14 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
           </div>
         </div>
 
-        <HeroImagePanel
-          imageUrl={imageUrl}
-          onChange={setImageUrl}
-          contentType="review"
-          title={title}
-          category={category}
-          excerpt={excerpt}
-          productName={productName}
-          label="Product Image"
-        />
-
-        <PrimaryProductPanel value={productSlug} onChange={setProductSlug} />
-
         <AIRefinePanel
           title={title}
           category={category}
           content={content}
           productName={productName}
           contentType="review"
+          externalInstruction={refineInstruction}
+          onExternalInstructionUsed={() => setRefineInstruction('')}
           onRefined={(draft) => {
             if (draft.title) setTitle(draft.title)
             if (draft.excerpt) setExcerpt(draft.excerpt)
@@ -321,7 +321,6 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
           }}
         />
 
-        {/* Pros/Cons */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <ListEditor label="The Good (Pros)" items={pros} onChange={setPros} placeholder="e.g. Long battery life" accent="text-green-400" />
           <ListEditor label="The Not-So-Good (Cons)" items={cons} onChange={setCons} placeholder="e.g. Runs hot under load" accent="text-red-400" />
@@ -329,74 +328,125 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
 
         <div>
           <label className="block text-sm text-gray-300 mb-1.5">Content <span className="text-gray-600">(HTML)</span></label>
-          <ContentEditor value={content} onChange={setContent} />
+          <ContentEditor
+            value={content}
+            onChange={setContent}
+            targetWords={CATEGORIES.find(c => c.slug === category)?.targetWords}
+          />
           <p className="mt-1.5 text-xs text-gray-600">
-            Primary CTA is set via the Primary Product panel above. Use <code className="text-orange-400">[[BUY:product-slug]]</code> inline only for natural mid-article mentions.
+            Primary CTA is set via the Product &amp; Monetization section below. Use <code className="text-orange-400">[[BUY:product-slug]]</code> inline only for natural mid-article mentions.
           </p>
         </div>
 
-        {/* Affiliate disclosure gate */}
-        {hasAffiliate && (
-          <div className="bg-orange-950/40 border border-orange-900/40 rounded-xl p-4">
-            <p className="text-sm text-orange-300 font-semibold mb-2">⚠ Affiliate links detected</p>
-            <label className="flex items-start gap-2 text-sm text-gray-300 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={disclosureAck}
-                onChange={(e) => setDiscAck(e.target.checked)}
-                className="mt-0.5"
+        {/* ── MEDIA ────────────────────────────────────────────────────── */}
+        <div className="pt-6 border-t border-gray-800/60">
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Media</p>
+          <div className="space-y-4">
+            <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4">
+              <p className="text-xs text-gray-500 font-medium uppercase tracking-widest mb-3">Product / hero image</p>
+              <HeroImagePanel
+                imageUrl={imageUrl}
+                onChange={setImageUrl}
+                contentType="review"
+                title={title}
+                category={category}
+                excerpt={excerpt}
+                productName={productName}
+                label="Product Image"
+                initialPrompt={heroPromptSuggestion}
               />
-              <span>
-                I confirm this review contains affiliate links. FTC disclosure will be auto-inserted before publishing.
-                <a href="/affiliate-disclosure" target="_blank" className="ml-1 text-orange-400 hover:text-orange-300">Learn more →</a>
-              </span>
-            </label>
+            </div>
+            <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4">
+              <p className="text-xs text-gray-500 font-medium uppercase tracking-widest mb-3">Inline image slots</p>
+              <ImageSlotsPanel
+                content={content}
+                onChangeContent={setContent}
+              />
+            </div>
+            <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4">
+              <p className="text-xs text-gray-500 font-medium uppercase tracking-widest mb-3">Insert media</p>
+              <MediaPickerPanel
+                content={content}
+                onInsert={(markup) => setContent((c) => c + '\n' + markup)}
+              />
+            </div>
           </div>
-        )}
+        </div>
 
-        {!isPublished && (
-          <SchedulePanel scheduledAt={scheduledAt} onChange={setScheduled} />
-        )}
+        {/* ── PRODUCT & MONETIZATION ───────────────────────────────────── */}
+        <div className="pt-6 border-t border-gray-800/60">
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Product &amp; Monetization</p>
+          <div className="space-y-6">
+            <PrimaryProductPanel value={productSlug} onChange={setProductSlug} />
+            <ProductLinkPanel
+              content={content}
+              onInsert={(markup) => setContent((c) => c + '\n' + markup)}
+            />
+            {hasAffiliate && (
+              <div className="bg-orange-950/40 border border-orange-900/40 rounded-xl p-4">
+                <p className="text-sm text-orange-300 font-semibold mb-2">⚠ Affiliate links detected</p>
+                <label className="flex items-start gap-2 text-sm text-gray-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={disclosureAck}
+                    onChange={(e) => setDiscAck(e.target.checked)}
+                    className="mt-0.5"
+                  />
+                  <span>
+                    I confirm this review contains affiliate links. FTC disclosure will be auto-inserted before publishing.
+                    <a href="/affiliate-disclosure" target="_blank" className="ml-1 text-orange-400 hover:text-orange-300">Learn more →</a>
+                  </span>
+                </label>
+              </div>
+            )}
+          </div>
+        </div>
 
-        <SEOPanel
-          metaTitle={metaTitle}
-          metaDescription={metaDesc}
-          fallbackTitle={title}
-          fallbackDescription={excerpt}
-          slug={review.slug}
-          contentType="review"
-          onChangeTitle={setMetaTitle}
-          onChangeDescription={setMetaDesc}
-        />
+        {/* ── DISTRIBUTION ─────────────────────────────────────────────── */}
+        <div className="pt-6 border-t border-gray-800/60">
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Distribution</p>
+          <div className="space-y-6">
+            <SEOPanel
+              metaTitle={metaTitle}
+              metaDescription={metaDesc}
+              fallbackTitle={title}
+              fallbackDescription={excerpt}
+              slug={review.slug}
+              contentType="review"
+              onChangeTitle={setMetaTitle}
+              onChangeDescription={setMetaDesc}
+            />
+            {!isPublished && (
+              <SchedulePanel scheduledAt={scheduledAt} onChange={setScheduled} />
+            )}
+            <InternalLinkPanel
+              title={title}
+              excerpt={excerpt}
+              category={category}
+              currentId={review.id}
+              contentType="review"
+              content={content}
+              onInsert={(markup) => setContent((c) => c + '\n' + markup)}
+            />
+          </div>
+        </div>
 
-        <ImageSlotsPanel
-          content={content}
-          onChangeContent={setContent}
-        />
-
-        <ProductLinkPanel
-          content={content}
-          onInsert={(markup) => setContent((c) => c + '\n' + markup)}
-        />
-
-        <MediaPickerPanel
-          content={content}
-          onInsert={(markup) => setContent((c) => c + '\n' + markup)}
-        />
-
-        <InternalLinkPanel
-          title={title}
-          excerpt={excerpt}
-          category={category}
-          currentId={review.id}
-          contentType="review"
-          content={content}
-          onInsert={(markup) => setContent((c) => c + '\n' + markup)}
-        />
-
-        <VersionHistoryPanel contentType="review" contentId={review.id} />
-
-        <ModerationInfo score={review.moderation_score} flags={review.moderation_flags ?? []} />
+        {/* ── ADMIN ────────────────────────────────────────────────────── */}
+        <div className="pt-6 border-t border-gray-800/60">
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Admin</p>
+          <div className="space-y-6">
+            <VersionHistoryPanel contentType="review" contentId={review.id} />
+            <ModerationInfo
+              score={review.moderation_score}
+              flags={review.moderation_flags ?? []}
+              onAddressFlag={(flag) => {
+                setRefineInstruction(`Address this moderation flag: ${flag}`)
+                document.getElementById('ai-refine-instruction')?.focus()
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+              }}
+            />
+          </div>
+        </div>
 
         {actionErr && (
           <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">{actionErr}</p>
@@ -406,7 +456,7 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
         )}
 
         <p className="text-xs text-gray-600">
-          ⌨ <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘S</kbd> save · <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘↵</kbd> publish
+          ⌨ <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘S</kbd> save · <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘↵</kbd> publish · <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘⇧P</kbd> toggle preview
         </p>
 
       </div>

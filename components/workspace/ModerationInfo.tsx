@@ -1,9 +1,10 @@
 interface Props {
   score: number | null
   flags: string[]
+  onAddressFlag?: (flag: string) => void
 }
 
-export function ModerationInfo({ score, flags }: Props) {
+export function ModerationInfo({ score, flags, onAddressFlag }: Props) {
   if (score === null && (!flags || flags.length === 0)) {
     return (
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
@@ -37,11 +38,22 @@ export function ModerationInfo({ score, flags }: Props) {
         </div>
       </div>
       {flags && flags.length > 0 && (
-        <div className="space-y-1 mt-2">
+        <div className="space-y-2 mt-2">
           {flags.map((f, i) => (
-            <div key={i} className="flex items-start gap-2 text-sm text-gray-300">
-              <span className={`${levelConfig.text} mt-0.5 shrink-0`}>⚑</span>
-              {f}
+            <div key={i} className="flex items-start justify-between gap-2">
+              <div className="flex items-start gap-2 text-sm text-gray-300 flex-1">
+                <span className={`${levelConfig.text} mt-0.5 shrink-0`}>⚑</span>
+                {f}
+              </div>
+              {onAddressFlag && (
+                <button
+                  type="button"
+                  onClick={() => onAddressFlag(f)}
+                  className="shrink-0 text-xs px-2 py-1 bg-gray-800 hover:bg-orange-950/50 text-gray-400 hover:text-orange-400 border border-gray-700 hover:border-orange-800/50 rounded-lg transition-colors"
+                >
+                  ✨ Fix with AI
+                </button>
+              )}
             </div>
           ))}
         </div>

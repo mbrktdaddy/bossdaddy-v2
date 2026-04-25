@@ -45,11 +45,22 @@ const ACTIONS = [
     ),
     accent: 'text-purple-400 bg-purple-950/30 border-purple-900/40',
   },
+  {
+    href: '/dashboard/admin/products/new',
+    label: 'New Product',
+    description: 'Add a product for affiliate links',
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+      </svg>
+    ),
+    accent: 'text-green-400 bg-green-950/30 border-green-900/40',
+  },
 ]
 
 export function QuickActions() {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
       {ACTIONS.map((a) => (
         <Link
           key={a.href}

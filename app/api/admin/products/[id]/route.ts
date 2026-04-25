@@ -7,7 +7,9 @@ const UpdateSchema = z.object({
   slug:              z.string().min(2).max(80).regex(/^[a-z0-9-]+$/).optional(),
   name:              z.string().min(2).max(160).optional(),
   asin:              z.string().max(20).optional().nullable(),
-  amazon_url:        z.string().url().max(2048).optional().nullable(),
+  store:             z.string().max(40).optional(),
+  custom_store_name: z.string().max(80).optional().nullable(),
+  affiliate_url:     z.string().url().max(2048).optional().nullable(),
   non_affiliate_url: z.string().url().max(2048).optional().nullable(),
   image_url:         z.string().url().max(2048).optional().nullable(),
 })

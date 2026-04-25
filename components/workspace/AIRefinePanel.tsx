@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface Props {
   title: string
@@ -9,6 +9,8 @@ interface Props {
   productName?: string
   contentType: 'article' | 'review'
   onRefined: (draft: RefinedDraft) => void
+  externalInstruction?: string
+  onExternalInstructionUsed?: () => void
 }
 
 interface RefinedDraft {
@@ -23,10 +25,18 @@ interface RefinedDraft {
   cons?: string[]
 }
 
-export function AIRefinePanel({ title, category, content, productName, contentType, onRefined }: Props) {
+export function AIRefinePanel({ title, category, content, productName, contentType, onRefined, externalInstruction, onExternalInstructionUsed }: Props) {
   const [instruction, setInstruction] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // When a flag "Fix with AI" button sets an external instruction, adopt it
+  useEffect(() => {
+    if (externalInstruction) {
+      setInstruction(externalInstruction)
+      onExternalInstructionUsed?.()
+    }
+  }, [externalInstruction]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleRefine() {
     if (!instruction.trim()) { setError('Enter refinement instructions first.'); return }
@@ -63,6 +73,7 @@ export function AIRefinePanel({ title, category, content, productName, contentTy
       </div>
       <div className="flex gap-2">
         <input
+          id="ai-refine-instruction"
           type="text"
           value={instruction}
           onChange={(e) => setInstruction(e.target.value)}

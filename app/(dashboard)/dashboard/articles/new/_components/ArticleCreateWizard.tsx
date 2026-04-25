@@ -1,17 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { CATEGORIES } from '@/lib/categories'
 
-type Step = 'idea' | 'generating' | 'saving'
+const STORAGE_KEY = 'bd:article-wizard-draft'
+
+type Step = 'idea' | 'generating' | 'preview' | 'saving'
 
 interface ProductOption {
   id: string
   slug: string
   name: string
-  amazon_url: string | null
+  store: string
+  affiliate_url: string | null
   non_affiliate_url: string | null
 }
 
@@ -26,6 +29,35 @@ export function ArticleCreateWizard() {
   const [keyPoints, setKeyPoints]     = useState('')
   const [category, setCategory]       = useState('other')
   const [suggesting, setSuggesting]   = useState(false)
+  const [suggestions, setSuggestions] = useState<{ topic: string; angle: string; keyPoints: string[] }[]>([])
+
+  // Restore from localStorage on first mount
+  const restoredRef = useRef(false)
+  useEffect(() => {
+    if (restoredRef.current) return
+    restoredRef.current = true
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (!raw) return
+      const saved = JSON.parse(raw)
+      if (saved.topic)       setTopic(saved.topic)
+      if (saved.keyPoints)   setKeyPoints(saved.keyPoints)
+      if (saved.category)    setCategory(saved.category)
+      if (saved.description) setDescription(saved.description)
+    } catch { /* ignore */ }
+  }, [])
+
+  // Persist form state to localStorage on change
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, topic, keyPoints, category }))
+    } catch { /* ignore */ }
+  }, [description, topic, keyPoints, category])
+
+  // Holds generated draft between the preview step and the save step
+  const [previewDraft, setPreviewDraft] = useState<{
+    title: string; excerpt: string; content: string; imagePrompt: string
+  } | null>(null)
 
   // Products for multi-select picker (roundups, gift guides, etc.)
   const [products, setProducts]             = useState<ProductOption[]>([])
@@ -58,12 +90,23 @@ export function ArticleCreateWizard() {
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Suggest failed')
-      if (json.topic) setTopic(json.topic)
-      if (json.keyPoints?.length) setKeyPoints(json.keyPoints.join('\n'))
+      if (json.suggestions?.length) {
+        setSuggestions(json.suggestions)
+      } else {
+        // Fallback for single-suggestion response shape
+        if (json.topic) setTopic(json.topic)
+        if (json.keyPoints?.length) setKeyPoints(json.keyPoints.join('\n'))
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Suggest failed')
     }
     setSuggesting(false)
+  }
+
+  function pickSuggestion(s: { topic: string; keyPoints: string[] }) {
+    setTopic(s.topic)
+    setKeyPoints(s.keyPoints.join('\n'))
+    setSuggestions([])
   }
 
   async function handleGenerate() {
@@ -119,28 +162,40 @@ export function ArticleCreateWizard() {
         draft.conclusion ? `<h2>Wrapping Up</h2>\n<p>${draft.conclusion}</p>` : '',
       ].filter(Boolean).join('\n\n')
 
-      // 2. Save as draft
-      setStep('saving')
+      // 2. Show preview before committing to DB
+      setPreviewDraft({ title: draft.title, excerpt: draft.excerpt, content, imagePrompt: genJson.imagePrompt ?? '' })
+      setStep('preview')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Generation failed')
+      setStep('idea')
+    }
+  }
+
+  async function handleSaveDraft() {
+    if (!previewDraft) return
+    setStep('saving'); setError(null)
+    try {
       const saveRes = await fetch('/api/articles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: draft.title,
+          title: previewDraft.title,
           category,
-          excerpt: draft.excerpt,
-          content,
+          excerpt: previewDraft.excerpt,
+          content: previewDraft.content,
           image_url: null,
         }),
       })
       const saveJson = await saveRes.json()
       if (!saveRes.ok) throw new Error(saveJson.error ?? 'Save failed')
 
-      // 3. Navigate to workspace
+      sessionStorage.setItem(`bd:hero-prompt:${saveJson.article.id}`, previewDraft.imagePrompt)
+      try { localStorage.removeItem(STORAGE_KEY) } catch { /* ignore */ }
       router.push(`/dashboard/articles/${saveJson.article.id}`)
       router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Generation failed')
-      setStep('idea')
+      setError(err instanceof Error ? err.message : 'Save failed')
+      setStep('preview')
     }
   }
 
@@ -168,13 +223,56 @@ export function ArticleCreateWizard() {
     }
   }
 
-  if (step !== 'idea') {
+  if (step === 'generating' || step === 'saving') {
     const label = step === 'generating' ? '✍️ Writing full article with Claude…' : '💾 Saving draft…'
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <div className="w-8 h-8 border-4 border-gray-800 border-t-orange-500 rounded-full animate-spin" />
         <p className="text-gray-300 font-medium">{label}</p>
         <p className="text-xs text-gray-600">This can take 30–60 seconds</p>
+      </div>
+    )
+  }
+
+  if (step === 'preview' && previewDraft) {
+    const plainText = previewDraft.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+    const preview = plainText.length > 500 ? plainText.slice(0, 500) + '…' : plainText
+    return (
+      <div className="space-y-5">
+        <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5 space-y-3">
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold">Draft preview</p>
+          <h2 className="text-lg font-black text-white leading-snug">{previewDraft.title}</h2>
+          {previewDraft.excerpt && (
+            <p className="text-sm text-gray-400 italic">{previewDraft.excerpt}</p>
+          )}
+          <p className="text-sm text-gray-300 leading-relaxed">{preview}</p>
+        </div>
+        {error && (
+          <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">{error}</p>
+        )}
+        <div className="flex items-center gap-3 flex-wrap">
+          <button
+            type="button"
+            onClick={handleSaveDraft}
+            className="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold rounded-xl transition-colors"
+          >
+            ✓ Save &amp; open editor
+          </button>
+          <button
+            type="button"
+            onClick={() => { setPreviewDraft(null); setStep('generating'); handleGenerate() }}
+            className="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-xl transition-colors"
+          >
+            ↺ Regenerate
+          </button>
+          <button
+            type="button"
+            onClick={() => { setPreviewDraft(null); setStep('idea') }}
+            className="px-5 py-2.5 text-gray-500 hover:text-gray-300 text-sm transition-colors"
+          >
+            ← Edit inputs
+          </button>
+        </div>
       </div>
     )
   }
@@ -207,6 +305,39 @@ export function ArticleCreateWizard() {
           </button>
         </div>
       </div>
+
+      {/* Suggestion cards */}
+      {suggestions.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs text-gray-500">Pick an angle to fill the form — or dismiss to write your own:</p>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {suggestions.map((s, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => pickSuggestion(s)}
+                className="text-left p-3 bg-gray-950 border border-gray-700 hover:border-orange-600/60 rounded-xl transition-colors group"
+              >
+                <p className="text-xs text-orange-400 font-medium mb-1 group-hover:text-orange-300">{s.angle}</p>
+                <p className="text-sm text-white font-semibold leading-snug mb-2">{s.topic}</p>
+                <ul className="space-y-0.5">
+                  {s.keyPoints.slice(0, 3).map((kp, j) => (
+                    <li key={j} className="text-xs text-gray-500">· {kp}</li>
+                  ))}
+                  {s.keyPoints.length > 3 && <li className="text-xs text-gray-600">+{s.keyPoints.length - 3} more</li>}
+                </ul>
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => setSuggestions([])}
+            className="text-xs text-gray-600 hover:text-gray-400 transition-colors"
+          >
+            Dismiss — I&apos;ll write my own
+          </button>
+        </div>
+      )}
 
       {/* Step 2: Review / edit topic + key points, pick category */}
       <div className="space-y-4">
@@ -273,7 +404,7 @@ export function ArticleCreateWizard() {
                   })
                   .map((p) => {
                     const checked = selectedSlugs.includes(p.slug)
-                    const tag = p.amazon_url ? 'Amazon' : p.non_affiliate_url ? 'Link' : 'No URL'
+                    const tag = p.affiliate_url ? (p.store === 'amazon' ? 'Amazon' : 'Affiliate') : p.non_affiliate_url ? 'Link' : 'No URL'
                     return (
                       <label key={p.id} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-950">
                         <input

@@ -1,12 +1,34 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
+export type ProductStore =
+  | 'amazon' | 'walmart' | 'target' | 'kohls'
+  | 'home-depot' | 'lowes' | 'menards' | 'other'
+
+export const STORE_OPTIONS: { value: ProductStore; label: string }[] = [
+  { value: 'amazon',     label: 'Amazon' },
+  { value: 'walmart',    label: 'Walmart' },
+  { value: 'target',     label: 'Target' },
+  { value: 'kohls',      label: "Kohl's" },
+  { value: 'home-depot', label: 'Home Depot' },
+  { value: 'lowes',      label: "Lowe's" },
+  { value: 'menards',    label: 'Menards' },
+  { value: 'other',      label: 'Other / Unlisted' },
+]
+
+export function getStoreLabel(store: string, customName?: string | null): string {
+  if (store === 'other') return customName?.trim() || 'the store'
+  return STORE_OPTIONS.find((s) => s.value === store)?.label ?? store
+}
+
 export interface Product {
   id: string
   slug: string
   name: string
   asin: string | null
-  amazon_url: string | null
+  affiliate_url: string | null
   non_affiliate_url: string | null
+  store: string
+  custom_store_name: string | null
   image_url: string | null
   created_at: string
   updated_at: string
@@ -78,8 +100,9 @@ export async function resolveProductTokens(
       return `<span class="bd-link-missing" data-slug="${escapeHtml(slug)}">[link missing: ${escapeHtml(slug)}]</span>`
     }
 
-    if (product.amazon_url) {
-      return `<a href="${escapeHtml(product.amazon_url)}" rel="sponsored nofollow noopener" target="_blank">${escapeHtml(product.name)} on Amazon</a>`
+    if (product.affiliate_url) {
+      const storeLabel = getStoreLabel(product.store, product.custom_store_name)
+      return `<a href="${escapeHtml(product.affiliate_url)}" rel="sponsored nofollow noopener" target="_blank">${escapeHtml(product.name)} on ${escapeHtml(storeLabel)}</a>`
     }
 
     if (product.non_affiliate_url) {

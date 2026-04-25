@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { getCategoryBySlug } from '@/lib/categories'
@@ -12,13 +13,17 @@ export interface BulkListItem {
   category: string
   status: string
   slug: string | null
+  created_at: string
   updated_at: string
   reading_time_minutes: number | null
   rejection_reason: string | null
+  image_url?: string | null
   // Review-specific fields (optional)
   product_name?: string | null
   rating?: number | null
 }
+
+type SortKey = 'updated' | 'created' | 'az'
 
 interface Props {
   items: BulkListItem[]
@@ -31,8 +36,20 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [busy, setBusy] = useState<'publish' | 'unpublish' | 'delete' | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
+  const [sortKey, setSortKey] = useState<SortKey>('updated')
 
   const publicRoute = contentType === 'articles' ? '/articles' : '/reviews'
+
+  const filteredItems = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    const filtered = q ? items.filter((i) => i.title.toLowerCase().includes(q)) : items
+    return [...filtered].sort((a, b) => {
+      if (sortKey === 'az') return a.title.localeCompare(b.title)
+      if (sortKey === 'created') return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+    })
+  }, [items, search, sortKey])
 
   function toggle(id: string) {
     setSelected((s) => {
@@ -42,7 +59,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
     })
   }
   function toggleAll() {
-    setSelected((s) => s.size === items.length ? new Set() : new Set(items.map((i) => i.id)))
+    setSelected((s) => s.size === filteredItems.length ? new Set() : new Set(filteredItems.map((i) => i.id)))
   }
   function clear() { setSelected(new Set()) }
 
@@ -76,10 +93,48 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
     )
   }
 
-  const allSelected = selected.size === items.length
+  const allSelected = filteredItems.length > 0 && selected.size === filteredItems.length
+
+  const SORT_LABELS: Record<SortKey, string> = {
+    updated: 'Recently updated',
+    created: 'Newest first',
+    az: 'A–Z',
+  }
 
   return (
     <>
+      {/* Search + sort toolbar */}
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4">
+        <div className="relative flex-1">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by title…"
+            className="w-full pl-9 pr-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-600/60"
+          />
+        </div>
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
+          {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setSortKey(key)}
+              className={`shrink-0 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
+                sortKey === key
+                  ? 'bg-orange-950/40 text-orange-400 border border-orange-800/50'
+                  : 'bg-gray-900 text-gray-500 border border-gray-800 hover:border-gray-600 hover:text-gray-300'
+              }`}
+            >
+              {SORT_LABELS[key]}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Select all header */}
       <div className="flex items-center gap-3 mb-3 px-1">
         <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-500 hover:text-gray-300">
@@ -91,11 +146,21 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
           />
           {selected.size > 0 ? `${selected.size} selected` : 'Select all'}
         </label>
+        {search && (
+          <span className="text-xs text-gray-600">{filteredItems.length} result{filteredItems.length !== 1 ? 's' : ''}</span>
+        )}
       </div>
+
+      {/* No search results */}
+      {filteredItems.length === 0 && (
+        <div className="text-center py-16 border border-dashed border-gray-800 rounded-2xl">
+          <p className="text-gray-500">No results for &ldquo;{search}&rdquo;</p>
+        </div>
+      )}
 
       {/* List */}
       <div className="space-y-2">
-        {items.map((item) => {
+        {filteredItems.map((item) => {
           const category = getCategoryBySlug(item.category)
           const isSelected = selected.has(item.id)
 
@@ -116,10 +181,16 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
                   className="mt-1.5 rounded accent-orange-500 shrink-0"
                 />
 
-                <div className="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center shrink-0 text-lg mt-0.5">
-                  {contentType === 'reviews' && item.rating !== undefined && item.rating !== null
-                    ? <span className="text-sm font-bold text-yellow-400">{item.rating}</span>
-                    : (category?.icon ?? (contentType === 'articles' ? '📝' : '⭐'))}
+                <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-gray-800 border border-gray-700/50 shrink-0 mt-0.5">
+                  {item.image_url ? (
+                    <Image src={item.image_url} alt={item.title} fill className="object-cover" sizes="48px" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-lg">
+                      {contentType === 'reviews' && item.rating !== undefined && item.rating !== null
+                        ? <span className="text-sm font-bold text-yellow-400">{item.rating}</span>
+                        : (category?.icon ?? (contentType === 'articles' ? '📝' : '⭐'))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="min-w-0 flex-1">

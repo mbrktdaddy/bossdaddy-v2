@@ -13,7 +13,7 @@ export default async function MyReviewsPage({ searchParams }: Props) {
 
   const { data: reviews } = await supabase
     .from('reviews')
-    .select('id, title, product_name, category, status, rating, created_at, updated_at, slug, rejection_reason')
+    .select('id, title, product_name, category, status, rating, created_at, updated_at, slug, rejection_reason, image_url')
     .eq('author_id', user!.id)
     .order('updated_at', { ascending: false })
 
@@ -108,9 +108,11 @@ export default async function MyReviewsPage({ searchParams }: Props) {
             category:             r.category,
             status:               r.status,
             slug:                 r.slug,
+            created_at:           r.created_at,
             updated_at:           r.updated_at,
             reading_time_minutes: null,
             rejection_reason:     r.rejection_reason,
+            image_url:            r.image_url,
             product_name:         r.product_name,
             rating:               r.rating,
           }))}
