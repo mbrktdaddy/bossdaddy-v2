@@ -17,14 +17,6 @@ export function detectAffiliateLinks(content: string): boolean {
   return AFFILIATE_PATTERNS.some((pattern) => pattern.test(content))
 }
 
-export function extractAffiliateNetwork(url: string): string {
-  if (/amazon|amzn/i.test(url)) return 'amazon'
-  if (/shareasale/i.test(url)) return 'shareasale'
-  if (/clickbank/i.test(url)) return 'clickbank'
-  if (/jvzoo/i.test(url)) return 'jvzoo'
-  return 'other'
-}
-
 export const FTC_DISCLOSURE_HTML =
   '<p class="bd-disclosure-inline">This article contains affiliate links. ' +
   'As an Amazon Associate I earn from qualifying purchases. ' +

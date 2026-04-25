@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null)
   const parsed = DraftInput.safeParse(body)
   if (!parsed.success) {
-    console.error('review-draft validation failed. body:', JSON.stringify(body), 'errors:', JSON.stringify(parsed.error.flatten()))
+    console.error('review-draft validation failed:', parsed.error.flatten())
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 

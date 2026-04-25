@@ -31,7 +31,7 @@ function rewriteLegacyRoute(pathname: string): string | null {
   return null
 }
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -60,7 +60,7 @@ export async function proxy(request: NextRequest) {
     const { data } = await supabase.auth.getUser()
     user = data.user
   } catch (err) {
-    console.error('proxy.ts auth.getUser failed (treating as logged out):', err)
+    console.error('middleware auth.getUser failed (treating as logged out):', err)
     // Clear the bad session cookies so the next request starts fresh
     const all = request.cookies.getAll()
     all.forEach((c) => {

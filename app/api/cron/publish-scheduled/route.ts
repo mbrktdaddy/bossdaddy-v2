@@ -5,14 +5,20 @@ import { createAdminClient } from '@/lib/supabase/admin'
 // Secured by Vercel Cron secret. Hit manually with ?secret=... for testing.
 export async function GET(request: NextRequest) {
   const secret = process.env.CRON_SECRET
+  if (!secret) {
+    // Fail closed — never run unauthenticated
+    console.error('CRON_SECRET is not set — cron endpoint refusing to run')
+    return NextResponse.json({ error: 'Misconfigured' }, { status: 503 })
+  }
+
   const authHeader = request.headers.get('authorization')
   const qSecret = new URL(request.url).searchParams.get('secret')
 
   // Vercel Cron sends `Authorization: Bearer $CRON_SECRET` automatically
-  const isVercelCron = secret && authHeader === `Bearer ${secret}`
-  const isManual     = secret && qSecret === secret
+  const isVercelCron = authHeader === `Bearer ${secret}`
+  const isManual     = qSecret === secret
 
-  if (secret && !isVercelCron && !isManual) {
+  if (!isVercelCron && !isManual) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
