@@ -87,6 +87,9 @@ export async function POST(request: NextRequest) {
   const productId = (formData.get('product_id') as string | null)?.trim() || null
   const label = (formData.get('label') as string | null)?.trim() || null
   const isPrimary = formData.get('is_primary') === 'true'
+  const category = (formData.get('category') as string | null)?.trim() || null
+  const tagsRaw = (formData.get('tags') as string | null)?.trim() || ''
+  const tags = tagsRaw ? tagsRaw.split(',').map((t) => t.trim()).filter(Boolean) : []
 
   if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
   if (!ALLOWED_TYPES.includes(file.type)) {
@@ -151,8 +154,10 @@ export async function POST(request: NextRequest) {
       label,
       is_primary: isPrimary,
       position,
+      category,
+      tags,
     })
-    .select('id, url, filename, alt_text, uploaded_by, file_size, mime_type, created_at, product_id, label, is_primary, position')
+    .select('id, url, filename, alt_text, uploaded_by, file_size, mime_type, created_at, product_id, label, is_primary, position, category, tags')
     .single()
 
   if (dbError) {

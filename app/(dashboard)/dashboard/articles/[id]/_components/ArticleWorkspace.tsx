@@ -282,6 +282,7 @@ export function ArticleWorkspace({ article }: Props) {
               <ImageSlotsPanel
                 content={content}
                 onChangeContent={setContent}
+                category={category}
               />
             </div>
             <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4">

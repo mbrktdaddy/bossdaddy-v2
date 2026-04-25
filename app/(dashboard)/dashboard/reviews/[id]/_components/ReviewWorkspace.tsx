@@ -49,6 +49,7 @@ interface ReviewData {
   meta_description: string | null
   scheduled_publish_at: string | null
   product_slug: string | null
+  product_id: string | null
 }
 
 const RATING_OPTIONS = [
@@ -361,6 +362,8 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
               <ImageSlotsPanel
                 content={content}
                 onChangeContent={setContent}
+                category={category}
+                productId={review.product_id ?? undefined}
               />
             </div>
             <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4">

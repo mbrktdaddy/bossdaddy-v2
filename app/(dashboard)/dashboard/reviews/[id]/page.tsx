@@ -16,6 +16,17 @@ export default async function ReviewWorkspacePage({
     .eq('id', id)
     .single()
 
+  // Look up product_id from slug so the workspace can pre-filter the media picker
+  let productId: string | null = null
+  if (review?.product_slug) {
+    const { data: product } = await admin
+      .from('products')
+      .select('id')
+      .eq('slug', review.product_slug)
+      .single()
+    productId = product?.id ?? null
+  }
+
   if (!review) {
     return (
       <div className="p-8 max-w-3xl">
@@ -37,6 +48,7 @@ export default async function ReviewWorkspacePage({
         moderation_flags: (review.moderation_flags ?? []) as string[],
         pros: (review.pros ?? []) as string[],
         cons: (review.cons ?? []) as string[],
+        product_id: productId,
       }}
     />
   )

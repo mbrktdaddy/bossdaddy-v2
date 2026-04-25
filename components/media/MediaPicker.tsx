@@ -22,11 +22,13 @@ interface Product {
 interface MediaPickerProps {
   onSelect: (url: string, altText: string, assetId?: string) => void
   onClose: () => void
+  defaultProductId?: string
+  defaultCategory?: string
 }
 
 type Tab = 'library' | 'generate'
 
-export default function MediaPicker({ onSelect, onClose }: MediaPickerProps) {
+export default function MediaPicker({ onSelect, onClose, defaultProductId, defaultCategory }: MediaPickerProps) {
   const [tab, setTab] = useState<Tab>('library')
 
   // Library state
@@ -39,9 +41,12 @@ export default function MediaPicker({ onSelect, onClose }: MediaPickerProps) {
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Product filter
+  // Search
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // Product filter — pre-seeded from caller context
   const [products, setProducts] = useState<Product[]>([])
-  const [filterProductId, setFilterProductId] = useState<string>('')
+  const [filterProductId, setFilterProductId] = useState<string>(defaultProductId ?? '')
 
   // Generate state
   const [genPrompt, setGenPrompt] = useState('')
@@ -50,6 +55,18 @@ export default function MediaPicker({ onSelect, onClose }: MediaPickerProps) {
   const [genError, setGenError] = useState<string | null>(null)
 
   const LIMIT = 40
+
+  // Client-side search filter across filename, label, alt_text
+  const filteredAssets = searchQuery.trim()
+    ? assets.filter((a) => {
+        const q = searchQuery.toLowerCase()
+        return (
+          a.filename.toLowerCase().includes(q) ||
+          (a.label ?? '').toLowerCase().includes(q) ||
+          (a.alt_text ?? '').toLowerCase().includes(q)
+        )
+      })
+    : assets
 
   // Fetch products for the filter dropdown once
   useEffect(() => {
@@ -85,6 +102,7 @@ export default function MediaPicker({ onSelect, onClose }: MediaPickerProps) {
     setFilterProductId(productId)
     setPage(1)
     setSelected(null)
+    setSearchQuery('')
   }
 
   async function uploadFiles(files: FileList | File[]) {
@@ -191,7 +209,17 @@ export default function MediaPicker({ onSelect, onClose }: MediaPickerProps) {
               Generate
             </button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Search */}
+            {tab === 'library' && (
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search…"
+                className="w-28 sm:w-36 px-2 py-1.5 bg-gray-800 border border-gray-700 text-xs text-gray-300 placeholder-gray-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
+              />
+            )}
             {/* Product filter */}
             {tab === 'library' && products.length > 0 && (
               <select
@@ -251,19 +279,21 @@ export default function MediaPicker({ onSelect, onClose }: MediaPickerProps) {
                 <div className="w-4 h-4 border-2 border-gray-700 border-t-orange-500 rounded-full animate-spin" />
                 Loading…
               </div>
-            ) : assets.length === 0 ? (
+            ) : filteredAssets.length === 0 ? (
               <div
                 className="border-2 border-dashed border-gray-700 rounded-xl py-16 flex flex-col items-center gap-2 text-gray-600 cursor-pointer hover:border-gray-600 transition-colors"
-                onClick={() => setTab('generate')}
+                onClick={() => !searchQuery && setTab('generate')}
               >
                 <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <p className="text-sm">{filterProductId ? 'No images for this product yet' : 'No images yet — click to generate one'}</p>
+                <p className="text-sm">
+                  {searchQuery ? `No images match "${searchQuery}"` : filterProductId ? 'No images for this product yet' : 'No images yet — click to generate one'}
+                </p>
               </div>
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                {assets.map((asset) => {
+                {filteredAssets.map((asset) => {
                   const productName = asset.product_id ? productMap[asset.product_id] : null
                   return (
                     <button
