@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 
+export const maxDuration = 30
+
 // Secured by Vercel Cron secret. Hit manually with ?secret=... for testing.
 export async function GET(request: NextRequest) {
   const secret = process.env.CRON_SECRET
