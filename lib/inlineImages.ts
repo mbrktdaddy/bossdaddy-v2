@@ -372,3 +372,185 @@ export function insertAtPosition(content: string, markup: string, position: Inse
   if (!h) return content + sep + markup
   return content.slice(0, h.end) + sep + markup + content.slice(h.end)
 }
+
+// ---------------------------------------------------------------------------
+// Gallery types and utilities
+
+export type InlineItem =
+  | { kind: 'single';  slot: InlineSlot }
+  | { kind: 'gallery'; slotId: string; children: InlineSlot[]; start: number; end: number; raw: string }
+
+const GALLERY_DIV_RE = /<div\b[^>]*\bclass="bd-image-grid"[^>]*\bdata-slot-id="([^"]+)"[^>]*>([\s\S]*?)<\/div>/g
+
+/** Build the full gallery wrapper div from an array of child figure markup strings. */
+export function buildGalleryWrapper(children: string[], slotId?: string): string {
+  const id = slotId ?? ('gallery-' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4))
+  return `<div class="bd-image-grid" data-slot-id="${id}">\n${children.join('\n')}\n</div>`
+}
+
+/**
+ * Extract top-level inline items (singles + gallery wrappers) in document order.
+ * Gallery children are bundled inside the gallery item, not listed separately.
+ * `extractSlots` still works flat across all figures for bulk-fill operations.
+ */
+export function extractItems(content: string): InlineItem[] {
+  const items: InlineItem[] = []
+  const galleryRanges: Array<{ start: number; end: number }> = []
+
+  const re = new RegExp(GALLERY_DIV_RE.source, GALLERY_DIV_RE.flags)
+  let m: RegExpExecArray | null
+  while ((m = re.exec(content)) !== null) {
+    const raw         = m[0]
+    const slotId      = m[1]
+    const innerContent = m[2]
+    const start       = m.index
+    const end         = m.index + raw.length
+
+    galleryRanges.push({ start, end })
+
+    const openTagEnd  = raw.indexOf('>') + 1 // position within m[0] where inner content begins
+    const innerStart  = start + openTagEnd
+
+    const children = extractSlots(innerContent).map(slot => ({
+      ...slot,
+      start: slot.start + innerStart,
+      end:   slot.end   + innerStart,
+    }))
+
+    items.push({ kind: 'gallery', slotId, children, start, end, raw })
+  }
+
+  // Top-level singles (figures not inside any gallery div)
+  for (const slot of extractSlots(content)) {
+    const inside = galleryRanges.some(r => slot.start >= r.start && slot.end <= r.end)
+    if (!inside) items.push({ kind: 'single', slot })
+  }
+
+  items.sort((a, b) => {
+    const aStart = a.kind === 'single' ? a.slot.start : a.start
+    const bStart = b.kind === 'single' ? b.slot.start : b.start
+    return aStart - bStart
+  })
+
+  return items
+}
+
+/** Move a top-level item (single figure or gallery wrapper) to a new 1-based position. */
+export function moveItemToPosition(content: string, itemSlotId: string, targetPos: number): string {
+  const items = extractItems(content)
+  const sourceIdx = items.findIndex(i =>
+    i.kind === 'single' ? i.slot.slotId === itemSlotId : i.slotId === itemSlotId
+  )
+  if (sourceIdx === -1 || items.length <= 1) return content
+
+  const clamped = Math.max(1, Math.min(targetPos, items.length))
+  if (clamped === sourceIdx + 1) return content
+
+  const src    = items[sourceIdx]
+  const srcStart = src.kind === 'single' ? src.slot.start : src.start
+  const srcEnd   = src.kind === 'single' ? src.slot.end   : src.end
+  const srcRaw   = src.kind === 'single' ? src.slot.raw   : src.raw
+
+  const withoutSrc = content.slice(0, srcStart) + content.slice(srcEnd)
+  const remaining  = extractItems(withoutSrc)
+
+  let insertAt: number
+  if (clamped - 1 >= remaining.length) {
+    const last = remaining[remaining.length - 1]
+    insertAt = last ? (last.kind === 'single' ? last.slot.end : last.end) : withoutSrc.length
+  } else {
+    const tgt = remaining[clamped - 1]
+    insertAt = tgt.kind === 'single' ? tgt.slot.start : tgt.start
+  }
+
+  return withoutSrc.slice(0, insertAt) + srcRaw + withoutSrc.slice(insertAt)
+}
+
+/** Remove a top-level item — entire gallery div or a single figure. */
+export function removeItem(content: string, itemSlotId: string): string {
+  const re = new RegExp(
+    `<div\\b[^>]*\\bdata-slot-id="${escapeRegex(itemSlotId)}"[^>]*>[\\s\\S]*?</div>`,
+    'g'
+  )
+  const withoutGallery = content.replace(re, '')
+  if (withoutGallery !== content) return withoutGallery.replace(/\n{3,}/g, '\n\n')
+  return removeSlot(content, itemSlotId)
+}
+
+/** Append a new child figure inside an existing gallery div. */
+export function addToGallery(content: string, gallerySlotId: string, childMarkup: string): string {
+  const re = new RegExp(
+    `(<div\\b[^>]*\\bdata-slot-id="${escapeRegex(gallerySlotId)}"[^>]*>)([\\s\\S]*?)(</div>)`,
+    'g'
+  )
+  return content.replace(re, (_full, open, body, close) => {
+    return open + body.trimEnd() + '\n' + childMarkup + '\n' + close
+  })
+}
+
+/**
+ * Pull a child figure out of its gallery and insert it as a standalone figure
+ * immediately after the gallery div.
+ */
+export function detachFromGallery(content: string, childSlotId: string): string {
+  const items = extractItems(content)
+  let parentGallery: Extract<InlineItem, { kind: 'gallery' }> | undefined
+  let childSlot: InlineSlot | undefined
+
+  for (const item of items) {
+    if (item.kind === 'gallery') {
+      const c = item.children.find(ch => ch.slotId === childSlotId)
+      if (c) { parentGallery = item; childSlot = c; break }
+    }
+  }
+  if (!parentGallery || !childSlot) return content
+
+  const childRaw = childSlot.raw
+
+  const withoutChild = removeSlot(content, childSlotId)
+
+  const galleryRe = new RegExp(
+    `<div\\b[^>]*\\bdata-slot-id="${escapeRegex(parentGallery.slotId)}"[^>]*>[\\s\\S]*?</div>`,
+    'g'
+  )
+  let insertAt = withoutChild.length
+  let gm: RegExpExecArray | null
+  while ((gm = galleryRe.exec(withoutChild)) !== null) {
+    insertAt = gm.index + gm[0].length
+    break
+  }
+
+  return withoutChild.slice(0, insertAt) + '\n\n' + childRaw + withoutChild.slice(insertAt)
+}
+
+/** Swap a gallery child one step up or down within its gallery. */
+export function moveChildInGallery(
+  content: string,
+  gallerySlotId: string,
+  childSlotId: string,
+  direction: 'up' | 'down',
+): string {
+  const items   = extractItems(content)
+  const gallery = items.find(i => i.kind === 'gallery' && i.slotId === gallerySlotId)
+  if (!gallery || gallery.kind !== 'gallery') return content
+
+  const children  = gallery.children
+  const idx       = children.findIndex(c => c.slotId === childSlotId)
+  if (idx === -1) return content
+
+  const targetIdx = direction === 'up' ? idx - 1 : idx + 1
+  if (targetIdx < 0 || targetIdx >= children.length) return content
+
+  const a = children[idx]
+  const b = children[targetIdx]
+
+  const [first, second] = a.start < b.start ? [a, b] : [b, a]
+
+  return (
+    content.slice(0, first.start) +
+    second.raw +
+    content.slice(first.end, second.start) +
+    first.raw +
+    content.slice(second.end)
+  )
+}

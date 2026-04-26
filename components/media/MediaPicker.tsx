@@ -19,16 +19,25 @@ interface Product {
   slug: string
 }
 
+export interface MultiSelectItem {
+  url: string
+  altText: string
+  assetId?: string
+}
+
 interface MediaPickerProps {
   onSelect: (url: string, altText: string, assetId?: string) => void
   onClose: () => void
   defaultProductId?: string
   defaultCategory?: string
+  /** Enable multi-select mode — confirm fires onMultiSelect instead of onSelect */
+  multi?: boolean
+  onMultiSelect?: (items: MultiSelectItem[]) => void
 }
 
 type Tab = 'library' | 'generate'
 
-export default function MediaPicker({ onSelect, onClose, defaultProductId, defaultCategory }: MediaPickerProps) {
+export default function MediaPicker({ onSelect, onClose, defaultProductId, defaultCategory, multi, onMultiSelect }: MediaPickerProps) {
   const [tab, setTab] = useState<Tab>('library')
 
   // Library state
@@ -36,7 +45,8 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
-  const [selected, setSelected] = useState<string | null>(null)
+  const [selected, setSelected] = useState<string | null>(null)          // single mode
+  const [multiSelected, setMultiSelected] = useState<Set<string>>(new Set()) // multi mode
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -171,9 +181,26 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
   }
 
   function handleConfirm() {
-    if (!selected) return
-    const asset = assets.find((a) => a.url === selected)
-    onSelect(selected, asset?.alt_text ?? '', asset?.id)
+    if (multi) {
+      if (multiSelected.size === 0) return
+      const items: MultiSelectItem[] = Array.from(multiSelected).map((url) => {
+        const asset = assets.find((a) => a.url === url)
+        return { url, altText: asset?.alt_text ?? '', assetId: asset?.id }
+      })
+      onMultiSelect?.(items)
+    } else {
+      if (!selected) return
+      const asset = assets.find((a) => a.url === selected)
+      onSelect(selected, asset?.alt_text ?? '', asset?.id)
+    }
+  }
+
+  function toggleMultiSelect(url: string) {
+    setMultiSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(url)) next.delete(url); else next.add(url)
+      return next
+    })
   }
 
   const totalPages = Math.ceil(total / LIMIT)
@@ -294,14 +321,20 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                 {filteredAssets.map((asset) => {
-                  const productName = asset.product_id ? productMap[asset.product_id] : null
+                  const productName  = asset.product_id ? productMap[asset.product_id] : null
+                  const isSelected   = multi ? multiSelected.has(asset.url) : selected === asset.url
+                  const selectionIdx = multi ? Array.from(multiSelected).indexOf(asset.url) : -1
                   return (
                     <button
                       key={asset.id}
                       type="button"
-                      onClick={() => setSelected(asset.url === selected ? null : asset.url)}
+                      onClick={() =>
+                        multi
+                          ? toggleMultiSelect(asset.url)
+                          : setSelected(asset.url === selected ? null : asset.url)
+                      }
                       className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all ${
-                        selected === asset.url
+                        isSelected
                           ? 'border-orange-500 ring-2 ring-orange-500/30'
                           : 'border-transparent hover:border-gray-600'
                       }`}
@@ -309,11 +342,15 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={asset.url} alt={asset.alt_text ?? asset.filename} className="w-full h-full object-cover" loading="lazy" />
 
-                      {selected === asset.url && (
-                        <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
-                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
+                      {isSelected && (
+                        <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center shadow">
+                          {multi && selectionIdx >= 0 ? (
+                            <span className="text-[9px] text-white font-bold leading-none">{selectionIdx + 1}</span>
+                          ) : (
+                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
                         </div>
                       )}
 
@@ -404,7 +441,14 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
         {/* Footer */}
         <div className="flex items-center justify-between px-5 py-3 border-t border-gray-800 shrink-0">
           <p className="text-xs text-gray-600">
-            {selected ? '1 image selected' : 'Click an image to select it'}
+            {multi
+              ? multiSelected.size > 0
+                ? `${multiSelected.size} image${multiSelected.size === 1 ? '' : 's'} selected`
+                : 'Click images to select them'
+              : selected
+                ? '1 image selected'
+                : 'Click an image to select it'
+            }
           </p>
           <div className="flex gap-2">
             <button
@@ -415,9 +459,18 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
             <button
               type="button"
               onClick={handleConfirm}
-              disabled={!selected}
+              disabled={multi ? multiSelected.size === 0 : !selected}
               className="px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition-colors"
-            >Use this image</button>
+            >
+              {multi
+                ? multiSelected.size > 1
+                  ? `Use these ${multiSelected.size} images`
+                  : multiSelected.size === 1
+                    ? 'Use this image'
+                    : 'Use these images'
+                : 'Use this image'
+              }
+            </button>
           </div>
         </div>
       </div>
