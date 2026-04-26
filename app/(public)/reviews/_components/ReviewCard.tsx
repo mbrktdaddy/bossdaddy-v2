@@ -43,14 +43,14 @@ export default function ReviewCard({ review: r, priority = false }: { review: Re
           </span>
           <RatingScore rating={r.rating} />
         </div>
-        <h2 className="text-base font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
+        <h2 className="text-base font-bold leading-snug text-white group-hover:text-orange-400 transition-colors flex-1">
           {r.title}
         </h2>
         {r.excerpt && (
-          <p className="text-gray-500 text-sm mt-2 line-clamp-2">{r.excerpt}</p>
+          <p className="text-gray-400 text-sm mt-2 line-clamp-2">{r.excerpt}</p>
         )}
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-800">
-          <span className="text-xs text-gray-600">
+          <span className="text-xs text-gray-500">
             {r.published_at
               ? new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
               : ''}

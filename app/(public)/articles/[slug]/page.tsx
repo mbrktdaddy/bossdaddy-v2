@@ -89,7 +89,7 @@ export default async function ArticlePage({ params }: Props) {
       <div className="max-w-3xl mx-auto px-6 py-12">
 
         {/* Breadcrumb */}
-        <div className="flex items-center gap-3 text-sm text-gray-500 mb-8 flex-wrap">
+        <div className="flex items-center gap-3 text-sm text-gray-400 mb-8 flex-wrap">
           <Link href="/articles" className="py-2 inline-block hover:text-white transition-colors">← Articles</Link>
           {category && (
             <>
@@ -112,7 +112,7 @@ export default async function ArticlePage({ params }: Props) {
         {/* Header */}
         <div className="mb-10">
           <h1 className="text-3xl md:text-4xl font-black leading-tight mb-6">{article.title}</h1>
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 pb-6 border-b border-gray-800">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400 pb-6 border-b border-gray-800">
             <span>by <Link href={`/author/${author}`} className="text-gray-300 hover:text-orange-400 transition-colors">@{author}</Link></span>
             {article.published_at && (
               <span>
@@ -219,10 +219,10 @@ export default async function ArticlePage({ params }: Props) {
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-semibold group-hover:text-orange-400 transition-colors truncate">{a.title}</p>
-                    {a.excerpt && <p className="text-xs text-gray-500 mt-0.5 truncate">{a.excerpt}</p>}
+                    {a.excerpt && <p className="text-xs text-gray-400 mt-0.5 truncate">{a.excerpt}</p>}
                   </div>
                   {a.reading_time_minutes && (
-                    <span className="text-xs text-gray-600 ml-4 shrink-0">{a.reading_time_minutes} min</span>
+                    <span className="text-xs text-gray-500 ml-4 shrink-0">{a.reading_time_minutes} min</span>
                   )}
                 </Link>
               ))}

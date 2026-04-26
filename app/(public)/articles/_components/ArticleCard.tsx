@@ -36,21 +36,21 @@ export default function ArticleCard({ article: a, priority = false }: { article:
             {cat.icon} {cat.label}
           </span>
         )}
-        <h2 className="text-base font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
+        <h2 className="text-base font-bold leading-snug text-white group-hover:text-orange-400 transition-colors flex-1">
           {a.title}
         </h2>
         {a.excerpt && (
-          <p className="text-gray-500 text-sm mt-2 line-clamp-2">{a.excerpt}</p>
+          <p className="text-gray-400 text-sm mt-2 line-clamp-2">{a.excerpt}</p>
         )}
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-800">
-          <span className="text-xs text-gray-600">
+          <span className="text-xs text-gray-500">
             {a.published_at
               ? new Date(a.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
               : ''}
           </span>
           <div className="flex items-center gap-3">
             {a.reading_time_minutes && (
-              <span className="text-xs text-gray-600">{a.reading_time_minutes} min read</span>
+              <span className="text-xs text-gray-500">{a.reading_time_minutes} min read</span>
             )}
             <span className="text-xs text-orange-500 font-medium">Read →</span>
           </div>

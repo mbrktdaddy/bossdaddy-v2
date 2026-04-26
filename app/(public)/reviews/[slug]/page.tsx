@@ -146,7 +146,7 @@ export default async function ReviewPage({ params }: Props) {
           <div className="flex flex-wrap items-center gap-5 pb-6 border-b border-gray-800">
             <RatingScore rating={review.rating} size="lg" />
             {review.rating >= 8 && <BossApprovedBadge size="lg" />}
-            <div className="flex items-center gap-4 text-sm text-gray-500">
+            <div className="flex items-center gap-4 text-sm text-gray-400">
               <span>by <Link href={`/author/${author}`} className="text-gray-300 hover:text-orange-400 transition-colors">@{author}</Link></span>
               {review.published_at && (
                 <span>
@@ -309,7 +309,7 @@ export default async function ReviewPage({ params }: Props) {
             )}
             {pros.length > 0 && (
               <div className="mt-4 pt-4 border-t border-gray-800">
-                <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">The Good</p>
+                <p className="text-xs text-gray-400 uppercase tracking-wide mb-2">The Good</p>
                 <ul className="space-y-1.5">
                   {pros.slice(0, 3).map((pro, i) => (
                     <li key={i} className="flex items-start gap-1.5 text-xs text-gray-300">
@@ -322,7 +322,7 @@ export default async function ReviewPage({ params }: Props) {
             )}
             {cons.length > 0 && (
               <div className="mt-4 pt-4 border-t border-gray-800">
-                <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">The Bad</p>
+                <p className="text-xs text-gray-400 uppercase tracking-wide mb-2">The Bad</p>
                 <ul className="space-y-1.5">
                   {cons.slice(0, 2).map((con, i) => (
                     <li key={i} className="flex items-start gap-1.5 text-xs text-gray-300">
@@ -336,7 +336,7 @@ export default async function ReviewPage({ params }: Props) {
             {category && (
               <Link
                 href={`/reviews?category=${category.slug}`}
-                className="mt-4 pt-4 border-t border-gray-800 flex items-center gap-2 text-xs text-gray-500 hover:text-orange-400 transition-colors"
+                className="mt-4 pt-4 border-t border-gray-800 flex items-center gap-2 text-xs text-gray-400 hover:text-orange-400 transition-colors"
               >
                 <span>{category.icon}</span>
                 <span>More {category.label} reviews →</span>
