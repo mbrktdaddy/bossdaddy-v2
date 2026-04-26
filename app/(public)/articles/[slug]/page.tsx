@@ -150,13 +150,13 @@ export default async function ArticlePage({ params }: Props) {
         <div className="overflow-x-auto min-w-0 w-full">
           <ImageLightbox className="bd-content">
             <div
-              className="prose prose-invert prose-orange max-w-none
-                prose-headings:font-black prose-headings:tracking-tight
+              className="bd-editorial prose prose-lg prose-invert prose-orange max-w-none
+                prose-headings:font-black prose-headings:tracking-tight prose-headings:font-sans
                 prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4
-                prose-p:text-gray-300 prose-p:leading-relaxed
+                prose-p:text-gray-300 prose-p:leading-[1.75]
                 prose-a:text-orange-400 prose-a:no-underline hover:prose-a:text-orange-300
                 prose-strong:text-white
-                prose-li:text-gray-300"
+                prose-li:text-gray-300 prose-li:leading-[1.75]"
               dangerouslySetInnerHTML={{ __html: article.content }}
             />
           </ImageLightbox>
