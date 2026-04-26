@@ -7,7 +7,12 @@ const UpdateSchema = z.object({
     .string()
     .min(3, 'Username must be at least 3 characters')
     .max(20, 'Username must be 20 characters or less')
-    .regex(/^[a-zA-Z0-9_]+$/, 'Username may only contain letters, numbers, and underscores'),
+    .regex(/^[a-zA-Z0-9_]+$/, 'Username may only contain letters, numbers, and underscores')
+    .optional(),
+  display_name: z.string().min(1).max(60).optional().nullable(),
+  tagline:      z.string().max(120).optional().nullable(),
+  bio:          z.string().max(800).optional().nullable(),
+  avatar_url:   z.string().url().max(2048).optional().nullable(),
 })
 
 export async function PUT(request: NextRequest) {
@@ -24,9 +29,18 @@ export async function PUT(request: NextRequest) {
     )
   }
 
+  // Drop undefined keys so we only PATCH provided fields
+  const updates: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(parsed.data)) {
+    if (v !== undefined) updates[k] = v
+  }
+  if (Object.keys(updates).length === 0) {
+    return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
+  }
+
   const { error } = await supabase
     .from('profiles')
-    .update({ username: parsed.data.username })
+    .update(updates)
     .eq('id', user.id)
 
   if (error) {
@@ -36,5 +50,5 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: msg }, { status: 400 })
   }
 
-  return NextResponse.json({ username: parsed.data.username })
+  return NextResponse.json({ success: true })
 }

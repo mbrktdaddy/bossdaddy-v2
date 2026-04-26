@@ -12,6 +12,7 @@ import { SEOPanel } from '@/components/workspace/SEOPanel'
 import { SchedulePanel } from '@/components/workspace/SchedulePanel'
 import { VersionHistoryPanel } from '@/components/workspace/VersionHistoryPanel'
 import { InternalLinkPanel } from '@/components/workspace/InternalLinkPanel'
+import { SocialPostsPanel } from '@/components/workspace/SocialPostsPanel'
 import { MediaPickerPanel } from '@/components/workspace/MediaPickerPanel'
 import { ImageSlotsPanel } from '@/components/workspace/ImageSlotsPanel'
 import { ProductLinkPanel } from '@/components/workspace/ProductLinkPanel'
@@ -330,6 +331,7 @@ export function ArticleWorkspace({ article }: Props) {
               content={content}
               onInsert={(markup) => setContent((c) => c + '\n' + markup)}
             />
+            <SocialPostsPanel contentType="article" contentId={article.id} />
           </div>
         </div>
 

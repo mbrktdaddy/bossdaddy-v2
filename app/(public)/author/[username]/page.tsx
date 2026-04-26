@@ -25,7 +25,7 @@ export default async function AuthorPage({ params }: Props) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, username, role')
+    .select('id, username, role, display_name, tagline, bio, avatar_url')
     .eq('username', username)
     .single()
 
@@ -55,20 +55,41 @@ export default async function AuthorPage({ params }: Props) {
     <div className="max-w-4xl mx-auto px-6 py-12">
 
       {/* Profile header */}
-      <div className="flex items-start gap-5 mb-12 pb-10 border-b border-gray-800">
-        <div className="w-16 h-16 rounded-2xl bg-orange-600 flex items-center justify-center text-2xl font-black text-white shrink-0">
-          {username[0].toUpperCase()}
-        </div>
-        <div>
-          <h1 className="text-3xl font-black mb-1">@{username}</h1>
-          <p className="text-gray-500 text-sm">
-            {profile.role === 'admin' ? 'Editor' : 'Contributor'} · Boss Daddy Life
-          </p>
-          <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
-            <span><span className="text-white font-semibold">{totalReviews}</span> {totalReviews === 1 ? 'review' : 'reviews'}</span>
-            <span><span className="text-white font-semibold">{totalArticles}</span> {totalArticles === 1 ? 'article' : 'articles'}</span>
+      <div className="mb-12 pb-10 border-b border-gray-800">
+        <div className="flex items-start gap-5">
+          {profile.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={profile.avatar_url}
+              alt={profile.display_name ?? username}
+              className="w-16 h-16 rounded-2xl object-cover border border-gray-800 shrink-0"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-600 to-orange-800 flex items-center justify-center text-2xl font-black text-white shrink-0">
+              {(profile.display_name ?? username)[0].toUpperCase()}
+            </div>
+          )}
+          <div>
+            <h1 className="text-3xl font-black mb-1">{profile.display_name ?? `@${username}`}</h1>
+            <p className="text-sm text-gray-500">
+              <span className="text-orange-500">@{username}</span>
+              <span className="mx-2 text-gray-700">·</span>
+              {profile.role === 'admin' ? 'Editor' : 'Contributor'}
+            </p>
+            {profile.tagline && (
+              <p className="text-xs text-orange-500/80 uppercase tracking-widest font-semibold mt-2">
+                {profile.tagline}
+              </p>
+            )}
+            <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
+              <span><span className="text-white font-semibold">{totalReviews}</span> {totalReviews === 1 ? 'review' : 'reviews'}</span>
+              <span><span className="text-white font-semibold">{totalArticles}</span> {totalArticles === 1 ? 'article' : 'articles'}</span>
+            </div>
           </div>
         </div>
+        {profile.bio && (
+          <p className="mt-6 text-gray-400 text-sm leading-relaxed max-w-2xl">{profile.bio}</p>
+        )}
       </div>
 
       {/* Reviews */}

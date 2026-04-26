@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import EditUsernameForm from './_components/EditUsernameForm'
 import EditEmailForm from './_components/EditEmailForm'
+import BioForm from './_components/BioForm'
 
 const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
   admin:  { label: 'Admin',  className: 'bg-orange-950/60 text-orange-400 border border-orange-900/60' },
@@ -15,7 +16,7 @@ export default async function ProfilePage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('username, role, created_at')
+    .select('username, role, created_at, display_name, tagline, bio, avatar_url')
     .eq('id', user!.id)
     .single()
 
@@ -165,6 +166,22 @@ export default async function ProfilePage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </Link>
+        </div>
+      )}
+
+      {/* Public bio — authors + admins only */}
+      {isAuthor && (
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6">
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Public Bio</p>
+          <p className="text-xs text-gray-600 mb-4">
+            Shown at the bottom of every piece you publish, on your <Link href={`/author/${profile?.username}`} target="_blank" className="text-orange-500 hover:text-orange-400">public author page</Link>.
+          </p>
+          <BioForm
+            initialDisplayName={(profile as { display_name?: string | null } | null)?.display_name ?? null}
+            initialTagline={(profile as { tagline?: string | null } | null)?.tagline ?? null}
+            initialBio={(profile as { bio?: string | null } | null)?.bio ?? null}
+            initialAvatarUrl={(profile as { avatar_url?: string | null } | null)?.avatar_url ?? null}
+          />
         </div>
       )}
 

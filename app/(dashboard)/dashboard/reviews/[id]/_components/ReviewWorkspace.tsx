@@ -13,6 +13,7 @@ import { SEOPanel } from '@/components/workspace/SEOPanel'
 import { SchedulePanel } from '@/components/workspace/SchedulePanel'
 import { VersionHistoryPanel } from '@/components/workspace/VersionHistoryPanel'
 import { InternalLinkPanel } from '@/components/workspace/InternalLinkPanel'
+import { SocialPostsPanel } from '@/components/workspace/SocialPostsPanel'
 import { ProductLinkPanel } from '@/components/workspace/ProductLinkPanel'
 import { PrimaryProductPanel } from '@/components/workspace/PrimaryProductPanel'
 import { MediaPickerPanel } from '@/components/workspace/MediaPickerPanel'
@@ -431,6 +432,7 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
               content={content}
               onInsert={(markup) => setContent((c) => c + '\n' + markup)}
             />
+            <SocialPostsPanel contentType="review" contentId={review.id} />
           </div>
         </div>
 
