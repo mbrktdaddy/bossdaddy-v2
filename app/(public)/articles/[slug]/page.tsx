@@ -15,6 +15,7 @@ import { EmailSignup } from '@/components/EmailSignup'
 import ReadingProgressBar from '@/components/ReadingProgressBar'
 import TableOfContents from '@/components/TableOfContents'
 import AuthorBio from '@/components/AuthorBio'
+import EngagementTracker from '@/components/EngagementTracker'
 
 export const revalidate = 3600
 
@@ -85,6 +86,7 @@ export default async function ArticlePage({ params }: Props) {
   return (
     <>
       <ViewTracker id={article.id} type="article" />
+      <EngagementTracker contentType="article" contentId={article.id} />
       <ReadingProgressBar />
       <div className="max-w-3xl mx-auto px-6 py-12">
 

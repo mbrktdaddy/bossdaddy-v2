@@ -55,6 +55,7 @@ export default function ProductCtaCard({ product, rating, variant = 'prominent' 
             href={href}
             target="_blank"
             rel={rel}
+            data-product-slug={product.slug}
             className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl transition-colors min-h-[44px] w-full sm:w-auto"
           >
             {buttonLabel}

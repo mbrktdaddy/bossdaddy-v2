@@ -17,6 +17,7 @@ import ProductCtaCard from '@/components/ProductCtaCard'
 import { EmailSignup } from '@/components/EmailSignup'
 import ReadingProgressBar from '@/components/ReadingProgressBar'
 import AuthorBio from '@/components/AuthorBio'
+import EngagementTracker from '@/components/EngagementTracker'
 import { getProductBySlug } from '@/lib/products'
 
 export const revalidate = 3600
@@ -108,6 +109,7 @@ export default async function ReviewPage({ params }: Props) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <ViewTracker id={review.id} type="review" />
+      <EngagementTracker contentType="review" contentId={review.id} />
       <ReadingProgressBar />
 
       <div className="w-full max-w-6xl mx-auto px-6 py-12 overflow-x-clip">
