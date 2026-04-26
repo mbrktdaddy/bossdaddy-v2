@@ -6,7 +6,10 @@ import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 import * as React from 'react'
 
-const Schema = z.object({ email: z.string().email() })
+const Schema = z.object({
+  email: z.string().email(),
+  interests: z.array(z.string().max(40)).max(10).optional(),
+})
 
 export async function POST(request: NextRequest) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
@@ -22,17 +25,21 @@ export async function POST(request: NextRequest) {
 
   // Handle both JSON and form submissions
   let email = ''
+  let interests: string[] = []
   const contentType = request.headers.get('content-type') ?? ''
 
   if (contentType.includes('application/json')) {
     const body = await request.json().catch(() => ({}))
     email = body.email ?? ''
+    if (Array.isArray(body.interests)) interests = body.interests
   } else {
     const body = await request.formData().catch(() => null)
     email = body?.get('email')?.toString() ?? ''
+    const intRaw = body?.get('interests')?.toString()
+    if (intRaw) interests = intRaw.split(',').map((s) => s.trim()).filter(Boolean)
   }
 
-  const parsed = Schema.safeParse({ email })
+  const parsed = Schema.safeParse({ email, interests })
   if (!parsed.success) {
     const isForm = !contentType.includes('application/json')
     return isForm
@@ -42,10 +49,26 @@ export async function POST(request: NextRequest) {
 
   const supabase = createAdminClient()
 
-  // Upsert subscriber
+  // Upsert subscriber. Interests are merged with the existing array
+  // server-side (via a Postgres array union) so re-signing up doesn't
+  // overwrite previous opt-ins.
+  const newInterests = parsed.data.interests ?? []
+  const { data: existing } = await supabase
+    .from('newsletter_subscribers')
+    .select('interests')
+    .eq('email', parsed.data.email)
+    .maybeSingle()
+
+  const mergedInterests = Array.from(
+    new Set([...(existing?.interests ?? []), ...newInterests]),
+  )
+
   const { error: dbError } = await supabase
     .from('newsletter_subscribers')
-    .upsert({ email: parsed.data.email, confirmed: true }, { onConflict: 'email' })
+    .upsert(
+      { email: parsed.data.email, confirmed: true, interests: mergedInterests },
+      { onConflict: 'email' },
+    )
 
   if (dbError) {
     console.error('Newsletter DB error:', dbError)
