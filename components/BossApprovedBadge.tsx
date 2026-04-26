@@ -4,7 +4,7 @@ interface Props {
 }
 
 export default function BossApprovedBadge({ size = 'sm', variant = 'page' }: Props) {
-  const cardBg = 'bg-gray-950 border-orange-600'
+  const cardBg = 'bg-orange-950/90 border-orange-600/80'
   const pageBg = size === 'lg' ? 'bg-orange-950/40 border-orange-600' : 'bg-orange-950/50 border-orange-600/80'
   const bg = variant === 'card' ? cardBg : pageBg
 

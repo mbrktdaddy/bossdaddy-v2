@@ -356,7 +356,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
 
                       {/* Product badge */}
                       {productName && (
-                        <div className="absolute bottom-0 left-0 right-0 px-1.5 py-1 bg-black/70">
+                        <div className="absolute bottom-0 left-0 right-0 px-1.5 py-1 bg-gray-950/80">
                           <p className="text-[9px] text-orange-400 font-semibold truncate leading-tight">
                             {asset.is_primary && <span className="text-orange-300">★ </span>}
                             {asset.label ?? productName}

@@ -19,6 +19,10 @@
   --bd-text: #f0f0f0;
   --bd-text-muted: #a1a1a1;
   --bd-text-faint: #6b6b6b;
+
+  /* Cream — second voice for editorial moments */
+  --bd-paper: #EDE6D3;
+  --bd-paper-muted: #C9BFA8;
 }
 
 @theme inline {
@@ -61,6 +65,8 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   overflow-x: hidden;
+  /* Subtle paper grain — 3% opacity, imperceptible individually but warms the whole page */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 }
 
 h1, h2, h3, h4 {
@@ -80,6 +86,19 @@ h1, h2, h3, h4 {
 .bd-editorial li,
 .bd-editorial blockquote {
   font-family: var(--font-editorial);
+}
+
+/* Pull-quote / blockquote — cream paper treatment */
+.bd-editorial blockquote {
+  border-left-color: var(--bd-orange);
+  background: color-mix(in srgb, var(--bd-paper) 6%, transparent);
+  border-radius: 0 0.5rem 0.5rem 0;
+  padding: 1rem 1.25rem;
+}
+.bd-editorial blockquote p {
+  color: var(--bd-paper);
+  font-style: italic;
+  font-size: 1.05em;
 }
 
 /* ── Inline image grid (replaces a carousel) ──────────────────────────── */
