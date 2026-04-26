@@ -40,6 +40,15 @@ export const metadata: Metadata = {
     site: '@bossdaddylife',
     creator: '@bossdaddylife',
   },
+  alternates: {
+    types: {
+      'application/rss+xml': [
+        { url: '/feed.xml',           title: 'Boss Daddy Life — All' },
+        { url: '/feed/reviews.xml',   title: 'Boss Daddy Life — Reviews' },
+        { url: '/feed/articles.xml',  title: 'Boss Daddy Life — Articles' },
+      ],
+    },
+  },
 };
 
 export const viewport: Viewport = {

@@ -12,6 +12,7 @@ const FOOTER_LINKS = [
   { href: '/editorial-standards',  label: 'Standards' },
   { href: '/privacy-policy',       label: 'Privacy' },
   { href: '/terms',                label: 'Terms' },
+  { href: '/feed.xml',             label: 'RSS' },
 ]
 
 const SOCIAL_ICONS = [
