@@ -11,6 +11,7 @@ import LikeButton from '@/components/LikeButton'
 import CommentForm from '@/components/CommentForm'
 import CommentList from '@/components/CommentList'
 import ImageLightbox from '@/components/ImageLightbox'
+import { EmailSignup } from '@/components/EmailSignup'
 
 export const revalidate = 3600
 
@@ -152,16 +153,28 @@ export default async function ArticlePage({ params }: Props) {
           </ImageLightbox>
         </div>
 
-        {/* Bottom CTA */}
+        {/* Bottom CTA — email signup */}
         <div className="mt-12 pt-8 border-t border-gray-800">
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 text-center">
-            <p className="text-sm text-gray-400 mb-1">Want dad-tested product picks?</p>
-            <p className="font-black text-lg mb-4">Browse the review catalog.</p>
+          <div className="bg-gradient-to-br from-gray-900 to-gray-950 border border-orange-900/30 rounded-2xl p-6 sm:p-8 text-center">
+            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Liked this article?</p>
+            <h3 className="text-xl font-black mb-2">Get the next one in your inbox</h3>
+            <p className="text-sm text-gray-400 mb-5 max-w-md mx-auto">
+              One email when there&apos;s actually something worth saying. Plus dad-tested gear picks before they go up.
+            </p>
+            <div className="max-w-md mx-auto">
+              <EmailSignup
+                heading={null}
+                description={null}
+                buttonLabel="Sign me up"
+                successMessage="You're in. Welcome to the crew."
+                interests={['newsletter']}
+              />
+            </div>
             <Link
               href="/reviews"
-              className="inline-block px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors"
+              className="inline-block mt-5 text-sm text-orange-500 hover:text-orange-400 font-medium transition-colors"
             >
-              Browse Reviews →
+              Or browse the review catalog →
             </Link>
           </div>
         </div>

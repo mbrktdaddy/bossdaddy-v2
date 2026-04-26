@@ -14,6 +14,7 @@ import CommentForm from '@/components/CommentForm'
 import CommentList from '@/components/CommentList'
 import ImageLightbox from '@/components/ImageLightbox'
 import ProductCtaCard from '@/components/ProductCtaCard'
+import { EmailSignup } from '@/components/EmailSignup'
 import { getProductBySlug } from '@/lib/products'
 
 export const revalidate = 3600
@@ -231,26 +232,20 @@ export default async function ReviewPage({ params }: Props) {
           <ProductCtaCard product={product} rating={review.rating} variant="final" />
         )}
 
-        {/* Bottom CTA */}
+        {/* Bottom CTA — email signup */}
         <div className="mt-12 pt-8 border-t border-gray-800">
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 text-center">
-            <p className="text-sm text-gray-400 mb-1">Want more dad-tested picks?</p>
-            <p className="font-black text-lg mb-4">Join the Boss Daddy crew.</p>
-            <form action="/api/newsletter/subscribe" method="POST" className="flex flex-col sm:flex-row gap-3 max-w-sm mx-auto">
-              <input
-                type="email"
-                name="email"
-                required
-                placeholder="your@email.com"
-                className="flex-1 px-4 py-2.5 bg-gray-950 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+          <div className="bg-gradient-to-br from-gray-900 to-gray-950 border border-orange-900/30 rounded-2xl p-6 sm:p-8 text-center">
+            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Liked this review?</p>
+            <h3 className="text-xl font-black mb-4">Get the next one in your inbox</h3>
+            <div className="max-w-md mx-auto">
+              <EmailSignup
+                heading={null}
+                description={null}
+                buttonLabel="Sign me up"
+                successMessage="You're in. Welcome to the crew."
+                interests={['newsletter', 'review_alerts']}
               />
-              <button
-                type="submit"
-                className="px-5 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors text-sm"
-              >
-                Join
-              </button>
-            </form>
+            </div>
           </div>
         </div>
 

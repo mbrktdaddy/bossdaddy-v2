@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { SOCIAL } from '@/lib/social'
+import { EmailSignup } from '@/components/EmailSignup'
 
 const FOOTER_LINKS = [
   { href: '/reviews',              label: 'Reviews' },
@@ -69,9 +70,24 @@ const SOCIAL_ICONS = [
 export default function Footer() {
   return (
     <footer className="border-t border-gray-800/60 bg-gray-900/30">
-      <div className="max-w-6xl mx-auto px-6 pt-10 pb-6 text-center border-b border-gray-800/40">
-        <p className="text-gray-600 text-xs uppercase tracking-widest mb-1">Welcome to the crew.</p>
-        <p className="text-gray-500 text-sm font-semibold mb-6">Now let&apos;s dad like a boss — together.</p>
+      {/* Newsletter band */}
+      <div className="max-w-2xl mx-auto px-6 pt-12 pb-8 text-center">
+        <p className="text-gray-600 text-xs uppercase tracking-widest mb-2">Welcome to the crew.</p>
+        <h3 className="text-2xl font-black mb-2">Get dad-tested gear in your inbox</h3>
+        <p className="text-gray-400 text-sm mb-6">
+          One email when there&apos;s actually something worth saying. No daily spam, no fluff.
+        </p>
+        <EmailSignup
+          heading={null}
+          description={null}
+          buttonLabel="Sign me up"
+          successMessage="You're in. Welcome to the crew."
+          interests={['newsletter']}
+        />
+      </div>
+
+      {/* Social */}
+      <div className="max-w-6xl mx-auto px-6 pb-6 text-center border-b border-gray-800/40">
         <div className="flex items-center justify-center gap-5">
           {SOCIAL_ICONS.map(({ key, label, href, icon }) =>
             href ? (
