@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next'
+import { withSentryConfig } from '@sentry/nextjs'
 
 const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
@@ -30,7 +31,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               `img-src 'self' data: blob: https://images.unsplash.com https://m.media-amazon.com https://${supabaseHostname}`,
               "font-src 'self' data:",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://*.sentry.io https://*.ingest.sentry.io",
               "frame-ancestors 'none'",
             ].join('; '),
           },
@@ -40,4 +41,22 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default nextConfig
+// Only wrap with Sentry if a DSN is configured. Until you create your Sentry
+// project and set NEXT_PUBLIC_SENTRY_DSN (and optionally SENTRY_AUTH_TOKEN
+// for source map uploads), this is a no-op.
+const sentryEnabled = !!process.env.NEXT_PUBLIC_SENTRY_DSN
+
+export default sentryEnabled
+  ? withSentryConfig(nextConfig, {
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+
+      // Tunnel Sentry events through a same-origin route to bypass adblockers
+      // that frequently block sentry.io requests directly.
+      tunnelRoute: '/monitoring',
+
+      silent: !process.env.CI,
+      disableLogger: true,
+    })
+  : nextConfig
