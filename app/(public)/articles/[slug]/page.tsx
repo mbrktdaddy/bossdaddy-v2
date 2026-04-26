@@ -12,6 +12,9 @@ import CommentForm from '@/components/CommentForm'
 import CommentList from '@/components/CommentList'
 import ImageLightbox from '@/components/ImageLightbox'
 import { EmailSignup } from '@/components/EmailSignup'
+import ReadingProgressBar from '@/components/ReadingProgressBar'
+import TableOfContents from '@/components/TableOfContents'
+import AuthorBio from '@/components/AuthorBio'
 
 export const revalidate = 3600
 
@@ -82,6 +85,7 @@ export default async function ArticlePage({ params }: Props) {
   return (
     <>
       <ViewTracker id={article.id} type="article" />
+      <ReadingProgressBar />
       <div className="max-w-3xl mx-auto px-6 py-12">
 
         {/* Breadcrumb */}
@@ -137,6 +141,11 @@ export default async function ArticlePage({ params }: Props) {
           </div>
         )}
 
+        {/* Table of contents — only renders if the article has 3+ H2/H3 headings */}
+        <div className="mb-10">
+          <TableOfContents />
+        </div>
+
         {/* Article body */}
         <div className="overflow-x-auto min-w-0 w-full">
           <ImageLightbox className="bd-content">
@@ -184,6 +193,9 @@ export default async function ArticlePage({ params }: Props) {
           <LikeButton contentType="article" contentId={article.id} />
           <ShareButtons title={article.title} />
         </div>
+
+        {/* Author bio */}
+        <AuthorBio username={author} />
 
         {/* Comments */}
         <div className="mt-12">
