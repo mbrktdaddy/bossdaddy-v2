@@ -13,7 +13,27 @@ const DraftInput = z.object({
   keyFeatures: z.array(z.string()).max(15).default([]),
   targetAudience: z.string().max(200).optional(),
   productSlug: z.string().regex(/^[a-z0-9-]+$/).max(80).optional(),
+  // 'auto' lets Claude pick (2–3 images); a number forces exactly that many.
+  imageSlots: z.union([z.literal('auto'), z.number().int().min(0).max(6)]).default('auto'),
 })
+
+function inlineImagesInstruction(slots: number | 'auto'): string {
+  if (slots === 0) {
+    return 'INLINE IMAGES:\n- Do not include any inline images. Return an empty array for "inlineImages".'
+  }
+  if (slots === 'auto') {
+    return `INLINE IMAGES:
+- Suggest 2–3 inline image placements that would meaningfully improve the review. Each maps to a section heading you also generated above (use the exact heading text in "afterHeading").
+- Prompt style: editorial product photography, warm/natural lighting, realistic setting, no people, no text. Under 180 chars.
+- "altText" is the a11y description of the image (what a reader would describe if it were rendered). Keep under 120 chars.
+- "caption" is a short sentence the reader sees under the image — human, editorial, not a re-statement of the alt text. Under 100 chars.`
+  }
+  return `INLINE IMAGES:
+- Suggest exactly ${slots} inline image placement${slots === 1 ? '' : 's'} that would meaningfully improve the review. Each maps to a section heading you also generated above (use the exact heading text in "afterHeading").
+- Prompt style: editorial product photography, warm/natural lighting, realistic setting, no people, no text. Under 180 chars.
+- "altText" is the a11y description of the image (what a reader would describe if it were rendered). Keep under 120 chars.
+- "caption" is a short sentence the reader sees under the image — human, editorial, not a re-statement of the alt text. Under 100 chars.`
+}
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -41,7 +61,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { productName, category, keyFeatures, targetAudience, productSlug } = parsed.data
+  const { productName, category, keyFeatures, targetAudience, productSlug, imageSlots } = parsed.data
 
   const prompt = `Write a product review:
 
@@ -59,11 +79,7 @@ STRUCTURE REQUIREMENTS:
 
 SEO: Include the product name naturally in the intro and at least one section heading.
 
-INLINE IMAGES:
-- Suggest 2–3 inline image placements that would meaningfully improve the review. Each maps to a section heading you also generated above (use the exact heading text in "afterHeading").
-- Prompt style: editorial product photography, warm/natural lighting, realistic setting, no people, no text. Under 180 chars.
-- "altText" is the a11y description of the image (what a reader would describe if it were rendered). Keep under 120 chars.
-- "caption" is a short sentence the reader sees under the image — human, editorial, not a re-statement of the alt text. Under 100 chars.
+${inlineImagesInstruction(imageSlots)}
 
 Return JSON with this exact shape:
 {

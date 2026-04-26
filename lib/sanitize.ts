@@ -6,15 +6,24 @@ const ALLOWED_TAGS = [
   'h2', 'h3', 'h4',
   'blockquote', 'pre', 'code',
   'img', 'figure', 'figcaption',
+  'div',
 ]
 
 const ALLOWED_ATTRIBUTES: Record<string, string[]> = {
-  a:      ['href', 'rel', 'target', 'class', 'id'],
-  img:    ['src', 'alt', 'width', 'height', 'class', 'id'],
+  a:      ['href', 'rel', 'target', 'class', 'id', 'data-product-slug'],
+  img:    ['src', 'alt', 'width', 'height', 'class', 'id', 'data-slot-id'],
   // data-slot-id / data-prompt / data-alt / data-caption carry the metadata
-  // that Claude attaches to inline-image placeholder stubs in generated drafts.
+  // that Claude attaches to inline-image placeholder stubs in generated drafts,
+  // and that the InlineMediaPanel uses to manage every inline image.
   figure: ['class', 'id', 'data-slot-id', 'data-prompt', 'data-alt', 'data-caption'],
+  div:    ['class', 'id', 'data-slot-id'],
   '*':    ['class', 'id'],
+}
+
+// `div` is allowed only when it carries one of our gallery classes — keeps
+// user-pasted layout junk out. Other tags (figure, etc.) are left unrestricted.
+const ALLOWED_CLASSES: Record<string, string[]> = {
+  div: ['bd-image-grid'],
 }
 
 /**
@@ -26,6 +35,7 @@ export function sanitizeHtml(dirty: string): string {
   return sanitize(dirty, {
     allowedTags:       ALLOWED_TAGS,
     allowedAttributes: ALLOWED_ATTRIBUTES,
+    allowedClasses:    ALLOWED_CLASSES,
     // Only allow http(s) hrefs and relative paths in <a href>
     allowedSchemes:          ['http', 'https', 'mailto'],
     allowedSchemesByTag:     { img: ['http', 'https', 'data'] },

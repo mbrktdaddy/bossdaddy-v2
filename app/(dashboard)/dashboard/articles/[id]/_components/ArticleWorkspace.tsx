@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { CATEGORIES } from '@/lib/categories'
+import { preserveImagesAcrossRefine } from '@/lib/inlineImages'
 import { StatusBadge } from '@/components/workspace/StatusBadge'
 import { ContentEditor } from '@/components/workspace/ContentEditor'
 import { HeroImagePanel } from '@/components/workspace/HeroImagePanel'
@@ -13,8 +14,7 @@ import { SchedulePanel } from '@/components/workspace/SchedulePanel'
 import { VersionHistoryPanel } from '@/components/workspace/VersionHistoryPanel'
 import { InternalLinkPanel } from '@/components/workspace/InternalLinkPanel'
 import { SocialPostsPanel } from '@/components/workspace/SocialPostsPanel'
-import { MediaPickerPanel } from '@/components/workspace/MediaPickerPanel'
-import { ImageSlotsPanel } from '@/components/workspace/ImageSlotsPanel'
+import { InlineMediaPanel } from '@/components/workspace/InlineMediaPanel'
 import { ProductLinkPanel } from '@/components/workspace/ProductLinkPanel'
 import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader'
 import { WorkspaceToolbar } from '@/components/workspace/WorkspaceToolbar'
@@ -240,16 +240,23 @@ export function ArticleWorkspace({ article }: Props) {
           onRefined={(draft) => {
             if (draft.title) setTitle(draft.title)
             if (draft.excerpt) setExcerpt(draft.excerpt)
-            setContent(
-              [
-                draft.introduction,
-                ...(draft.sections ?? []).map((s) => {
-                  const bodyHtml = s.body.split(/\n\n+/).map((p) => `<p>${p.trim()}</p>`).join('\n')
-                  return `<h2>${s.heading}</h2>\n${bodyHtml}`
-                }),
-                draft.conclusion ? `<h2>Wrapping Up</h2>\n<p>${draft.conclusion}</p>` : '',
-              ].filter(Boolean).join('\n\n')
-            )
+            const refinedContent = [
+              draft.introduction,
+              ...(draft.sections ?? []).map((s) => {
+                const bodyHtml = s.body.split(/\n\n+/).map((p) => `<p>${p.trim()}</p>`).join('\n')
+                return `<h2>${s.heading}</h2>\n${bodyHtml}`
+              }),
+              draft.conclusion ? `<h2>Wrapping Up</h2>\n<p>${draft.conclusion}</p>` : '',
+            ].filter(Boolean).join('\n\n')
+            const { content: merged, preservedCount, appendedCount } = preserveImagesAcrossRefine(content, refinedContent)
+            setContent(merged)
+            if (preservedCount > 0) {
+              const note = appendedCount > 0
+                ? `Refined • Preserved ${preservedCount} inline image${preservedCount === 1 ? '' : 's'} (${appendedCount} appended at end — re-position from the panel)`
+                : `Refined • Preserved ${preservedCount} inline image${preservedCount === 1 ? '' : 's'}`
+              setMsg(note)
+              setTimeout(() => setMsg(null), 5000)
+            }
           }}
         />
 
@@ -279,18 +286,11 @@ export function ArticleWorkspace({ article }: Props) {
               />
             </div>
             <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4">
-              <p className="text-xs text-gray-500 font-medium uppercase tracking-widest mb-3">Inline image slots</p>
-              <ImageSlotsPanel
+              <p className="text-xs text-gray-500 font-medium uppercase tracking-widest mb-3">Inline images</p>
+              <InlineMediaPanel
                 content={content}
                 onChangeContent={setContent}
                 category={category}
-              />
-            </div>
-            <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4">
-              <p className="text-xs text-gray-500 font-medium uppercase tracking-widest mb-3">Insert media</p>
-              <MediaPickerPanel
-                content={content}
-                onInsert={(markup) => setContent((c) => c + '\n' + markup)}
               />
             </div>
           </div>
@@ -301,7 +301,7 @@ export function ArticleWorkspace({ article }: Props) {
           <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Product &amp; Monetization</p>
           <ProductLinkPanel
             content={content}
-            onInsert={(markup) => setContent((c) => c + '\n' + markup)}
+            onChangeContent={setContent}
           />
         </div>
 
@@ -329,7 +329,7 @@ export function ArticleWorkspace({ article }: Props) {
               currentId={article.id}
               contentType="article"
               content={content}
-              onInsert={(markup) => setContent((c) => c + '\n' + markup)}
+              onChangeContent={setContent}
             />
             <SocialPostsPanel contentType="article" contentId={article.id} />
           </div>

@@ -31,11 +31,11 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
   const [selected, setSelected] = useState<Platform[]>(DEFAULT_PLATFORMS)
   const [loading,  setLoading]  = useState(true)
   const [busy,     setBusy]     = useState(false)
+  const [busyPlatform, setBusyPlatform] = useState<Platform | null>(null)
   const [error,    setError]    = useState<string | null>(null)
   const [instr,    setInstr]    = useState('')
   const [copied,   setCopied]   = useState<Platform | null>(null)
 
-  // Initial fetch — load any saved posts
   useEffect(() => {
     let active = true
     setLoading(true)
@@ -51,9 +51,10 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
     setSelected((s) => s.includes(p) ? s.filter((x) => x !== p) : [...s, p])
   }
 
-  async function handleGenerate() {
-    if (selected.length === 0) { setError('Select at least one platform.'); return }
+  async function handleGenerate(platforms: Platform[], regen: boolean) {
+    if (platforms.length === 0) { setError('Select at least one platform.'); return }
     setBusy(true); setError(null)
+    if (platforms.length === 1) setBusyPlatform(platforms[0])
     try {
       const res = await fetch('/api/claude/social-copy', {
         method: 'POST',
@@ -61,13 +62,12 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
         body: JSON.stringify({
           content_type: contentType,
           content_id:   contentId,
-          platforms:    selected,
+          platforms,
           instruction:  instr.trim() || null,
         }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Generation failed')
-      // Merge new posts with existing ones (replacing same-platform)
       setPosts((prev) => {
         const map = new Map(prev.map((p) => [p.platform, p]))
         for (const p of (json.posts ?? []) as SocialPost[]) map.set(p.platform, p)
@@ -77,6 +77,44 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
       setError(err instanceof Error ? err.message : 'Generation failed')
     }
     setBusy(false)
+    setBusyPlatform(null)
+    if (!regen) setInstr('')
+  }
+
+  async function patchPost(platform: Platform, patch: Partial<Pick<SocialPost, 'body' | 'hashtags'>>) {
+    setError(null)
+    try {
+      const res = await fetch('/api/social-posts', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content_type: contentType, content_id: contentId, platform, ...patch }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Update failed')
+      setPosts((prev) => prev.map((p) => p.platform === platform ? json.post : p))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Update failed')
+    }
+  }
+
+  async function deletePost(platform: Platform) {
+    if (!confirm(`Delete the ${PLATFORM_META[platform].label} post?`)) return
+    setError(null); setBusyPlatform(platform)
+    try {
+      const res = await fetch('/api/social-posts', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content_type: contentType, content_id: contentId, platform }),
+      })
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}))
+        throw new Error(json.error ?? 'Delete failed')
+      }
+      setPosts((prev) => prev.filter((p) => p.platform !== platform))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Delete failed')
+    }
+    setBusyPlatform(null)
   }
 
   async function handleCopy(post: SocialPost) {
@@ -122,7 +160,7 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
                   key={p}
                   type="button"
                   onClick={() => togglePlatform(p)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors border ${
+                  className={`px-3 py-2 rounded-lg text-xs font-semibold transition-colors border min-h-[36px] ${
                     isOn
                       ? 'bg-orange-600 hover:bg-orange-500 text-white border-orange-700'
                       : 'bg-gray-900 hover:bg-gray-800 text-gray-400 border-gray-800'
@@ -139,7 +177,7 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
             onChange={(e) => setInstr(e.target.value)}
             placeholder="Optional nudge — e.g. 'lead with the price', 'casual tone', 'focus on the kid angle'"
             className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500"
-            onKeyDown={(e) => { if (e.key === 'Enter' && !busy) handleGenerate() }}
+            onKeyDown={(e) => { if (e.key === 'Enter' && !busy) handleGenerate(selected, false) }}
           />
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <p className="text-xs text-gray-600">
@@ -147,11 +185,11 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
             </p>
             <button
               type="button"
-              onClick={handleGenerate}
+              onClick={() => handleGenerate(selected, false)}
               disabled={busy || selected.length === 0}
-              className="px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-xs font-semibold rounded-lg transition-colors"
+              className="px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-xs font-semibold rounded-lg min-h-[36px] transition-colors"
             >
-              {busy ? 'Generating…' : posts.length > 0 ? '↺ Regenerate' : '✨ Generate'}
+              {busy && busyPlatform === null ? 'Generating…' : posts.length > 0 ? '↺ Regenerate selected' : '✨ Generate'}
             </button>
           </div>
           {error && (
@@ -170,42 +208,145 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
           <div className="space-y-3">
             {posts
               .sort((a, b) => Object.keys(PLATFORM_META).indexOf(a.platform) - Object.keys(PLATFORM_META).indexOf(b.platform))
-              .map((post) => {
-                const m = PLATFORM_META[post.platform]
-                const total = post.body.length + (post.hashtags.length > 0 ? post.hashtags.join(' ').length + post.hashtags.length + 2 : 0)
-                const overLimit = m.charLimit != null && total > m.charLimit
-                return (
-                  <div key={post.platform} className="p-3 bg-gray-950 border border-gray-800 rounded-lg space-y-2">
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <p className="text-xs font-semibold text-gray-300 flex items-center gap-2">
-                        <span className="text-orange-400 font-bold">{m.icon}</span>
-                        {m.label}
-                        {m.charLimit != null && (
-                          <span className={`text-xs font-mono ${overLimit ? 'text-red-400' : 'text-gray-600'}`}>
-                            {total}/{m.charLimit}
-                          </span>
-                        )}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => handleCopy(post)}
-                        className="text-xs px-2 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-md transition-colors"
-                      >
-                        {copied === post.platform ? '✓ Copied' : 'Copy'}
-                      </button>
-                    </div>
-                    <p className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">{post.body}</p>
-                    {post.hashtags.length > 0 && (
-                      <p className="text-xs text-orange-400/70 font-mono">
-                        {post.hashtags.map((t) => `#${t}`).join(' ')}
-                      </p>
-                    )}
-                  </div>
-                )
-              })}
+              .map((post) => (
+                <PostCard
+                  key={post.platform}
+                  post={post}
+                  busy={busyPlatform === post.platform}
+                  copied={copied === post.platform}
+                  onCopy={() => handleCopy(post)}
+                  onBodyCommit={(next) => patchPost(post.platform, { body: next })}
+                  onHashtagsCommit={(next) => patchPost(post.platform, { hashtags: next })}
+                  onRegenerate={() => handleGenerate([post.platform], true)}
+                  onDelete={() => deletePost(post.platform)}
+                />
+              ))}
           </div>
         )}
       </div>
     </details>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+interface PostCardProps {
+  post: SocialPost
+  busy: boolean
+  copied: boolean
+  onCopy: () => void
+  onBodyCommit: (next: string) => void
+  onHashtagsCommit: (next: string[]) => void
+  onRegenerate: () => void
+  onDelete: () => void
+}
+
+function PostCard({ post, busy, copied, onCopy, onBodyCommit, onHashtagsCommit, onRegenerate, onDelete }: PostCardProps) {
+  const m = PLATFORM_META[post.platform]
+  const [body, setBody]       = useState(post.body)
+  const [tagInput, setTagInput] = useState('')
+
+  useEffect(() => { setBody(post.body) }, [post.body])
+
+  const total = body.length + (post.hashtags.length > 0
+    ? post.hashtags.join(' ').length + post.hashtags.length + 2  // " #" prefixes + leading "\n\n"
+    : 0)
+  const overLimit = m.charLimit != null && total > m.charLimit
+
+  function commitBody() {
+    if (body.trim() && body !== post.body) onBodyCommit(body)
+    else if (!body.trim()) setBody(post.body)
+  }
+  function addTag() {
+    const t = tagInput.trim().replace(/^#/, '')
+    if (!t || post.hashtags.includes(t)) { setTagInput(''); return }
+    onHashtagsCommit([...post.hashtags, t])
+    setTagInput('')
+  }
+  function removeTag(t: string) {
+    onHashtagsCommit(post.hashtags.filter((x) => x !== t))
+  }
+
+  return (
+    <div className="p-3 bg-gray-950 border border-gray-800 rounded-lg space-y-2">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <p className="text-xs font-semibold text-gray-300 flex items-center gap-2">
+          <span className="text-orange-400 font-bold">{m.icon}</span>
+          {m.label}
+          {m.charLimit != null && (
+            <span className={`text-xs font-mono ${overLimit ? 'text-red-400' : 'text-gray-600'}`}>
+              {total}/{m.charLimit}
+            </span>
+          )}
+        </p>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={onCopy}
+            disabled={busy}
+            className="px-2.5 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xs rounded-lg min-h-[36px] transition-colors"
+            title="Copy body + hashtags to clipboard"
+          >{copied ? '✓ Copied' : 'Copy'}</button>
+          <button
+            type="button"
+            onClick={onRegenerate}
+            disabled={busy}
+            className="px-2.5 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs rounded-lg min-h-[36px] transition-colors"
+            title="Regenerate just this platform"
+          >{busy ? '…' : '🔄'}</button>
+          <button
+            type="button"
+            onClick={onDelete}
+            disabled={busy}
+            className="px-2.5 py-1.5 bg-transparent hover:bg-red-950/40 text-gray-500 hover:text-red-400 text-xs rounded-lg min-h-[36px] transition-colors"
+            title="Delete this post"
+          >🗑</button>
+        </div>
+      </div>
+
+      <textarea
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+        onBlur={commitBody}
+        rows={Math.max(3, Math.min(10, body.split('\n').length))}
+        disabled={busy}
+        className="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-sm text-gray-200 leading-relaxed focus:outline-none focus:ring-1 focus:ring-orange-500 resize-y"
+      />
+
+      <div>
+        <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Hashtags</p>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {post.hashtags.map((t) => (
+            <span
+              key={t}
+              className="inline-flex items-center gap-1 px-2 py-1 bg-orange-950/40 border border-orange-900/40 text-orange-400 text-xs rounded-full"
+            >
+              <span className="font-mono">#{t}</span>
+              <button
+                type="button"
+                onClick={() => removeTag(t)}
+                disabled={busy}
+                className="text-orange-300 hover:text-red-400 -mr-0.5 px-1"
+                title={`Remove #${t}`}
+              >×</button>
+            </span>
+          ))}
+          <input
+            type="text"
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ',' || e.key === ' ') {
+                e.preventDefault()
+                addTag()
+              }
+            }}
+            onBlur={() => { if (tagInput.trim()) addTag() }}
+            placeholder="+ tag"
+            disabled={busy}
+            className="px-2 py-1 bg-gray-900 border border-gray-800 rounded-full text-xs text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 w-20"
+          />
+        </div>
+      </div>
+    </div>
   )
 }

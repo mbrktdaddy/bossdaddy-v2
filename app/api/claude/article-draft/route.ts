@@ -13,7 +13,27 @@ const ArticleDraftInput = z.object({
   keyPoints: z.array(z.string()).max(15).default([]),
   targetAudience: z.string().max(200).optional(),
   productSlugs: z.array(z.string().regex(/^[a-z0-9-]+$/).max(80)).max(15).optional(),
+  // 'auto' lets Claude pick (2–3 images); a number forces exactly that many.
+  imageSlots: z.union([z.literal('auto'), z.number().int().min(0).max(6)]).default('auto'),
 })
+
+function inlineImagesInstruction(slots: number | 'auto'): string {
+  if (slots === 0) {
+    return 'INLINE IMAGES:\n- Do not include any inline images. Return an empty array for "inlineImages".'
+  }
+  if (slots === 'auto') {
+    return `INLINE IMAGES:
+- Suggest 2–3 inline image placements that would meaningfully improve the article. Each maps to a section heading you also generated above (use the exact heading text in "afterHeading").
+- Prompt style: editorial photography, warm/natural lighting, realistic setting, no people, no text. Under 180 chars.
+- "altText" is the a11y description (what a reader would describe if it were rendered). Keep under 120 chars.
+- "caption" is a short editorial sentence readers see under the image — human, not a restatement of the alt. Under 100 chars.`
+  }
+  return `INLINE IMAGES:
+- Suggest exactly ${slots} inline image placement${slots === 1 ? '' : 's'} that would meaningfully improve the article. Each maps to a section heading you also generated above (use the exact heading text in "afterHeading").
+- Prompt style: editorial photography, warm/natural lighting, realistic setting, no people, no text. Under 180 chars.
+- "altText" is the a11y description (what a reader would describe if it were rendered). Keep under 120 chars.
+- "caption" is a short editorial sentence readers see under the image — human, not a restatement of the alt. Under 100 chars.`
+}
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -35,7 +55,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { topic, category, keyPoints, targetAudience, productSlugs } = parsed.data
+  const { topic, category, keyPoints, targetAudience, productSlugs, imageSlots } = parsed.data
   const slugs = (productSlugs ?? []).filter(Boolean)
 
   const prompt = `Write a dad-focused article on this topic:
@@ -51,11 +71,7 @@ STRUCTURE REQUIREMENTS:
 
 SEO: Include the main topic phrase naturally in the intro and at least one section heading.
 
-INLINE IMAGES:
-- Suggest 2–3 inline image placements that would meaningfully improve the article. Each maps to a section heading you also generated above (use the exact heading text in "afterHeading").
-- Prompt style: editorial photography, warm/natural lighting, realistic setting, no people, no text. Under 180 chars.
-- "altText" is the a11y description (what a reader would describe if it were rendered). Keep under 120 chars.
-- "caption" is a short editorial sentence readers see under the image — human, not a restatement of the alt. Under 100 chars.
+${inlineImagesInstruction(imageSlots)}
 
 Return JSON with this exact shape:
 {

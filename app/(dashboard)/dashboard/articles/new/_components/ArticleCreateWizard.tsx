@@ -28,6 +28,7 @@ export function ArticleCreateWizard() {
   const [topic, setTopic]             = useState('')
   const [keyPoints, setKeyPoints]     = useState('')
   const [category, setCategory]       = useState('other')
+  const [imageSlots, setImageSlots]   = useState<number | 'auto'>('auto')
   const [suggesting, setSuggesting]   = useState(false)
   const [suggestions, setSuggestions] = useState<{ topic: string; angle: string; keyPoints: string[] }[]>([])
 
@@ -44,15 +45,16 @@ export function ArticleCreateWizard() {
       if (saved.keyPoints)   setKeyPoints(saved.keyPoints)
       if (saved.category)    setCategory(saved.category)
       if (saved.description) setDescription(saved.description)
+      if (saved.imageSlots !== undefined) setImageSlots(saved.imageSlots)
     } catch { /* ignore */ }
   }, [])
 
   // Persist form state to localStorage on change
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, topic, keyPoints, category }))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, topic, keyPoints, category, imageSlots }))
     } catch { /* ignore */ }
-  }, [description, topic, keyPoints, category])
+  }, [description, topic, keyPoints, category, imageSlots])
 
   // Holds generated draft between the preview step and the save step
   const [previewDraft, setPreviewDraft] = useState<{
@@ -122,6 +124,7 @@ export function ArticleCreateWizard() {
           topic,
           category,
           keyPoints: keyPoints.split('\n').map(p => p.trim()).filter(Boolean),
+          imageSlots,
           ...(selectedSlugs.length ? { productSlugs: selectedSlugs } : {}),
         }),
       })
@@ -372,6 +375,33 @@ export function ArticleCreateWizard() {
           >
             {CATEGORIES.map(c => <option key={c.slug} value={c.slug}>{c.icon} {c.label}</option>)}
           </select>
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-300 mb-1.5">
+            Inline image slots <span className="text-gray-600">(empty placeholders to fill from the editor)</span>
+          </label>
+          <div className="flex flex-wrap gap-1.5">
+            {([
+              { v: 'auto', l: 'Let Claude pick' },
+              { v: 0,      l: '0 (none)' },
+              { v: 2,      l: '2' },
+              { v: 3,      l: '3' },
+              { v: 4,      l: '4' },
+            ] as Array<{ v: number | 'auto'; l: string }>).map((opt) => (
+              <button
+                key={String(opt.v)}
+                type="button"
+                onClick={() => setImageSlots(opt.v)}
+                className={`px-3 py-2 text-xs font-semibold rounded-lg min-h-[36px] transition-colors ${
+                  imageSlots === opt.v
+                    ? 'bg-orange-600 text-white'
+                    : 'bg-gray-900 border border-gray-800 text-gray-300 hover:border-orange-700/60'
+                }`}
+              >{opt.l}</button>
+            ))}
+          </div>
+          <p className="mt-1 text-xs text-gray-600">Fill or replace each one from the inline-images panel after the draft is created.</p>
         </div>
 
         <div>

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { CATEGORIES } from '@/lib/categories'
 import { detectAffiliateLinks } from '@/lib/affiliate'
+import { preserveImagesAcrossRefine } from '@/lib/inlineImages'
 import { StatusBadge } from '@/components/workspace/StatusBadge'
 import { ContentEditor } from '@/components/workspace/ContentEditor'
 import { HeroImagePanel } from '@/components/workspace/HeroImagePanel'
@@ -16,8 +17,7 @@ import { InternalLinkPanel } from '@/components/workspace/InternalLinkPanel'
 import { SocialPostsPanel } from '@/components/workspace/SocialPostsPanel'
 import { ProductLinkPanel } from '@/components/workspace/ProductLinkPanel'
 import { PrimaryProductPanel } from '@/components/workspace/PrimaryProductPanel'
-import { MediaPickerPanel } from '@/components/workspace/MediaPickerPanel'
-import { ImageSlotsPanel } from '@/components/workspace/ImageSlotsPanel'
+import { InlineMediaPanel } from '@/components/workspace/InlineMediaPanel'
 import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader'
 import { WorkspaceToolbar } from '@/components/workspace/WorkspaceToolbar'
 import { AutoSaveIndicator } from '@/components/workspace/AutoSaveIndicator'
@@ -310,16 +310,23 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
             if (draft.rating) setRating(Math.round(draft.rating))
             if (draft.pros?.length) setPros(draft.pros)
             if (draft.cons?.length) setCons(draft.cons)
-            setContent(
-              [
-                draft.introduction,
-                ...(draft.sections ?? []).map((s) => {
-                  const bodyHtml = s.body.split(/\n\n+/).map((p) => `<p>${p.trim()}</p>`).join('\n')
-                  return `<h2>${s.heading}</h2>\n${bodyHtml}`
-                }),
-                draft.verdict ? `<h2>The Verdict</h2>\n<p>${draft.verdict}</p>` : '',
-              ].filter(Boolean).join('\n\n')
-            )
+            const refinedContent = [
+              draft.introduction,
+              ...(draft.sections ?? []).map((s) => {
+                const bodyHtml = s.body.split(/\n\n+/).map((p) => `<p>${p.trim()}</p>`).join('\n')
+                return `<h2>${s.heading}</h2>\n${bodyHtml}`
+              }),
+              draft.verdict ? `<h2>The Verdict</h2>\n<p>${draft.verdict}</p>` : '',
+            ].filter(Boolean).join('\n\n')
+            const { content: merged, preservedCount, appendedCount } = preserveImagesAcrossRefine(content, refinedContent)
+            setContent(merged)
+            if (preservedCount > 0) {
+              const note = appendedCount > 0
+                ? `Refined • Preserved ${preservedCount} inline image${preservedCount === 1 ? '' : 's'} (${appendedCount} appended at end — re-position from the panel)`
+                : `Refined • Preserved ${preservedCount} inline image${preservedCount === 1 ? '' : 's'}`
+              setMsg(note)
+              setTimeout(() => setMsg(null), 5000)
+            }
           }}
         />
 
@@ -359,19 +366,12 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
               />
             </div>
             <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4">
-              <p className="text-xs text-gray-500 font-medium uppercase tracking-widest mb-3">Inline image slots</p>
-              <ImageSlotsPanel
+              <p className="text-xs text-gray-500 font-medium uppercase tracking-widest mb-3">Inline images</p>
+              <InlineMediaPanel
                 content={content}
                 onChangeContent={setContent}
                 category={category}
                 productId={review.product_id ?? undefined}
-              />
-            </div>
-            <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4">
-              <p className="text-xs text-gray-500 font-medium uppercase tracking-widest mb-3">Insert media</p>
-              <MediaPickerPanel
-                content={content}
-                onInsert={(markup) => setContent((c) => c + '\n' + markup)}
               />
             </div>
           </div>
@@ -384,7 +384,7 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
             <PrimaryProductPanel value={productSlug} onChange={setProductSlug} />
             <ProductLinkPanel
               content={content}
-              onInsert={(markup) => setContent((c) => c + '\n' + markup)}
+              onChangeContent={setContent}
             />
             {hasAffiliate && (
               <div className="bg-orange-950/40 border border-orange-900/40 rounded-xl p-4">
@@ -430,7 +430,7 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
               currentId={review.id}
               contentType="review"
               content={content}
-              onInsert={(markup) => setContent((c) => c + '\n' + markup)}
+              onChangeContent={setContent}
             />
             <SocialPostsPanel contentType="review" contentId={review.id} />
           </div>
