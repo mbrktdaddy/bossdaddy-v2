@@ -9,11 +9,11 @@
   --bd-orange: #CC5500;
   --bd-orange-light: #d96200;
 
-  /* Surfaces (dark-first) */
-  --bd-bg: #0a0a0a;
-  --bd-surface: #141414;
-  --bd-surface-raised: #1f1f1f;
-  --bd-border: #2a2a2a;
+  /* Surfaces (dark-first, warm-shifted) */
+  --bd-bg: #0d0b08;
+  --bd-surface: #19160d;
+  --bd-surface-raised: #242018;
+  --bd-border: #302b22;
 
   /* Text */
   --bd-text: #f0f0f0;
@@ -36,11 +36,17 @@
   --color-orange-800: #7d3300;
   --color-orange-900: #5c2600;
   --color-orange-950: #3d1a00;
+
+  /* Warm dark gray scale — brown-shifted surfaces and borders */
+  --color-gray-950: #0d0b08;
+  --color-gray-900: #19160d;
+  --color-gray-800: #242018;
+  --color-gray-700: #302b22;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #0d0b08;
     --foreground: #ededed;
   }
 }
