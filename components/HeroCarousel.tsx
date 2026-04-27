@@ -15,7 +15,7 @@ interface Review {
   image_url: string | null
 }
 
-const SWIPE_THRESHOLD = 50
+const SWIPE_THRESHOLD = 30
 
 export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
   const [current, setCurrent] = useState(0)
@@ -64,7 +64,7 @@ export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
 
   return (
     <div
-      className="w-full md:w-72 lg:w-80 shrink-0 select-none"
+      className="w-full md:w-72 lg:w-80 shrink-0 select-none touch-pan-y"
       onMouseEnter={() => { paused.current = true }}
       onMouseLeave={() => { paused.current = false }}
       onTouchStart={onTouchStart}
@@ -85,6 +85,7 @@ export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
                 src={r.image_url}
                 alt={r.product_name}
                 fill
+                draggable={false}
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
                 sizes="(max-width: 768px) 100vw, 320px"
               />
