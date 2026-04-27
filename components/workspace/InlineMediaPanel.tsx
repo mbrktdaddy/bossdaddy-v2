@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import MediaPicker, { type MultiSelectItem } from '@/components/media/MediaPicker'
 import {
+  type H2Heading,
   type InlineItem,
   type InlineSlot,
   type InsertPosition,
@@ -18,6 +19,7 @@ import {
   insertAtPosition,
   moveChildInGallery,
   moveItemToPosition,
+  moveSlotToSection,
   promoteUntaggedFigures,
   removeItem,
   removeSlot,
@@ -97,6 +99,9 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
 
   function handleMoveItem(slotId: string, targetPos: number) {
     onChangeContent(moveItemToPosition(content, slotId, targetPos))
+  }
+  function handleMoveToSection(slotId: string, position: InsertPosition) {
+    onChangeContent(moveSlotToSection(content, slotId, position))
   }
   function handleRemoveItem(slotId: string) {
     if (!confirm('Remove this image (or gallery) from the article?')) return
@@ -506,8 +511,10 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
               slot={item.slot}
               position={idx + 1}
               total={items.length}
+              headings={headings}
               busy={busySlotId === item.slot.slotId}
               onMove={(toPos) => handleMoveItem(item.slot.slotId, toPos)}
+              onMoveToSection={(pos) => handleMoveToSection(item.slot.slotId, pos)}
               onRemove={() => handleRemoveItem(item.slot.slotId)}
               onRevert={() => handleRevert(item.slot.slotId)}
               onFieldChange={(field, value) => handleFieldChange(item.slot.slotId, field, value)}
@@ -785,8 +792,10 @@ interface SlotCardProps {
   slot: InlineSlot
   position: number
   total: number
+  headings: H2Heading[]
   busy: boolean
   onMove: (toPos: number) => void
+  onMoveToSection: (pos: InsertPosition) => void
   onRemove: () => void
   onRevert: () => void
   onFieldChange: (field: 'caption' | 'alt' | 'prompt', value: string) => void
@@ -796,8 +805,17 @@ interface SlotCardProps {
 }
 
 function SlotCard(p: SlotCardProps) {
-  const { slot, position, total, busy } = p
+  const { slot, position, total, headings, busy } = p
   const filled = slot.filled
+
+  const sectionOptions: Array<{ label: string; pos: InsertPosition }> = [
+    { label: 'Start of article', pos: { kind: 'start' } },
+    ...headings.map((h, i) => ({
+      label: `After: ${h.text.length > 38 ? h.text.slice(0, 38) + '…' : h.text}`,
+      pos: { kind: 'afterHeading' as const, index: i },
+    })),
+    { label: 'End of article', pos: { kind: 'end' } },
+  ]
 
   return (
     <div className={`p-3 rounded-lg space-y-3 ${
@@ -808,7 +826,7 @@ function SlotCard(p: SlotCardProps) {
 
       {/* Header: position + reorder + remove */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className={`text-xs font-semibold ${filled ? 'text-green-400' : 'text-orange-400'}`}>
             {filled ? '✓ Image' : '🎯 Slot'}
           </span>
@@ -817,12 +835,31 @@ function SlotCard(p: SlotCardProps) {
             onChange={(e) => p.onMove(Number(e.target.value))}
             disabled={busy || total <= 1}
             className="px-2 py-1.5 bg-gray-900 border border-gray-700 rounded-lg text-xs text-white min-h-[36px] focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-50"
-            title="Move to position"
+            title="Reorder among images"
           >
             {Array.from({ length: total }, (_, i) => i + 1).map(n => (
-              <option key={n} value={n}>Position {n} of {total}</option>
+              <option key={n} value={n}>#{n} of {total}</option>
             ))}
           </select>
+          {sectionOptions.length > 2 && (
+            <select
+              defaultValue=""
+              onChange={(e) => {
+                if (!e.target.value) return
+                const opt = sectionOptions[Number(e.target.value)]
+                if (opt) p.onMoveToSection(opt.pos)
+                e.target.value = ''
+              }}
+              disabled={busy}
+              className="px-2 py-1.5 bg-gray-900 border border-orange-900/40 rounded-lg text-xs text-orange-300 min-h-[36px] focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-50"
+              title="Move to article section"
+            >
+              <option value="">Move to section…</option>
+              {sectionOptions.map((opt, i) => (
+                <option key={i} value={i}>{opt.label}</option>
+              ))}
+            </select>
+          )}
         </div>
         <div className="flex items-center gap-1">
           <button type="button" onClick={() => p.onMove(position - 1)} disabled={busy || position === 1}

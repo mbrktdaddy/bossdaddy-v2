@@ -358,6 +358,18 @@ export function preserveImagesAcrossRefine(
   return { content: next, preservedCount: preserved, appendedCount: appended }
 }
 
+/**
+ * Move an existing slot to a heading-based or boundary position.
+ * Removes it from wherever it currently sits, then re-splices at the target.
+ */
+export function moveSlotToSection(content: string, slotId: string, position: InsertPosition): string {
+  const slots = extractSlots(content)
+  const slot = slots.find(s => s.slotId === slotId)
+  if (!slot) return content
+  const withoutSlot = removeSlot(content, slotId)
+  return insertAtPosition(withoutSlot, slot.raw, position)
+}
+
 /** Insert raw HTML markup at a chosen position. */
 export function insertAtPosition(content: string, markup: string, position: InsertPosition): string {
   const sep = '\n\n'
