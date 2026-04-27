@@ -357,7 +357,6 @@ export default async function ReviewPage({ params }: Props) {
                     href={`/reviews/${r.slug}`}
                     className="block group"
                   >
-                    <p className="text-xs text-orange-500/80 font-medium uppercase tracking-wide mb-0.5">{r.product_name}</p>
                     <p className="text-sm font-semibold group-hover:text-orange-400 transition-colors leading-snug">{r.title}</p>
                     <RatingScore rating={r.rating} />
                   </Link>
