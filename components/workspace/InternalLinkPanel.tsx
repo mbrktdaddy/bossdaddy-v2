@@ -175,7 +175,7 @@ export function InternalLinkPanel({
               </div>
               <div className="space-y-2">
                 {suggestions.map((s) => {
-                  const alreadyInserted = existing.some((l) => l.href === s.url)
+                  const alreadyInserted = existing.some((l) => l.path === s.url)
                   return (
                     <div key={`${s.type}-${s.id}`} className="flex items-center gap-3 p-3 bg-gray-950 border border-gray-800 rounded-lg">
                       <div className="min-w-0 flex-1">

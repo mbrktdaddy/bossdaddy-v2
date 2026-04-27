@@ -14,6 +14,10 @@ export { extractH2Headings }
 
 export interface InternalLink {
   href: string
+  /** Normalized pathname — same value regardless of whether the original
+   *  href was absolute (`https://site.com/reviews/x`) or relative (`/reviews/x`).
+   *  Use this for equality checks; use `href` only for display. */
+  path: string
   text: string
   /** 1-based position within the ordered list of internal links in body */
   position: number
@@ -28,9 +32,19 @@ export interface InternalLink {
 // out of scope on purpose (would also catch external shares).
 const ANCHOR_RE = /<a\b[^>]*\bhref="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g
 
+function hrefToPath(href: string): string {
+  try {
+    return new URL(href).pathname
+  } catch {
+    // already a relative path — use as-is
+    return href
+  }
+}
+
 function classifyHref(href: string): InternalLink['type'] {
-  if (/^\/articles\//.test(href)) return 'article'
-  if (/^\/reviews\//.test(href))  return 'review'
+  const pathname = hrefToPath(href)
+  if (pathname.startsWith('/articles/')) return 'article'
+  if (pathname.startsWith('/reviews/'))  return 'review'
   return 'other'
 }
 
@@ -49,6 +63,7 @@ export function extractInternalLinks(content: string): InternalLink[] {
     position += 1
     out.push({
       href: m[1],
+      path: hrefToPath(m[1]),
       text: m[2].replace(/<[^>]*>/g, '').trim(),
       position,
       start: m.index,
