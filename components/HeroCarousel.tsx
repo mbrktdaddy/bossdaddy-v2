@@ -37,18 +37,16 @@ export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
     setTimeout(() => { paused.current = false }, 4000)
   }
 
-  // Touch-only swipe handlers
-  function onPointerDown(e: React.PointerEvent) {
-    if (e.pointerType !== 'touch') return
-    startX.current = e.clientX
-    startY.current = e.clientY
+  // Touch swipe handlers (more reliable than pointer events on mobile)
+  function onTouchStart(e: React.TouchEvent) {
+    startX.current = e.touches[0].clientX
+    startY.current = e.touches[0].clientY
     didSwipe.current = false
   }
 
-  function onPointerUp(e: React.PointerEvent) {
-    if (e.pointerType !== 'touch') return
-    const dx = startX.current - e.clientX
-    const dy = startY.current - e.clientY
+  function onTouchEnd(e: React.TouchEvent) {
+    const dx = startX.current - e.changedTouches[0].clientX
+    const dy = startY.current - e.changedTouches[0].clientY
     if (Math.abs(dx) > SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy)) {
       didSwipe.current = true
       navigate(dx > 0 ? 1 : -1)
@@ -69,8 +67,8 @@ export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
       className="w-full md:w-72 lg:w-80 shrink-0 select-none"
       onMouseEnter={() => { paused.current = true }}
       onMouseLeave={() => { paused.current = false }}
-      onPointerDown={onPointerDown}
-      onPointerUp={onPointerUp}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
     >
       <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">Top Picks</p>
 
