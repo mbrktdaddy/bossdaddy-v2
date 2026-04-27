@@ -283,10 +283,7 @@ export default async function ReviewPage({ params }: Props) {
                   href={`/reviews/${r.slug}`}
                   className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800 hover:border-orange-700/50 rounded-2xl transition-colors group"
                 >
-                  <div className="min-w-0">
-                    <p className="text-xs text-orange-500/80 font-medium uppercase tracking-wide mb-1">{r.product_name}</p>
-                    <p className="text-sm font-semibold group-hover:text-orange-400 transition-colors truncate">{r.title}</p>
-                  </div>
+                  <p className="text-sm font-semibold group-hover:text-orange-400 transition-colors truncate min-w-0 mr-4">{r.title}</p>
                   <RatingScore rating={r.rating} size="sm" />
                 </Link>
               ))}
