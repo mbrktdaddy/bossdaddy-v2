@@ -12,6 +12,7 @@ import ViewTracker from '@/components/ViewTracker'
 import LikeButton from '@/components/LikeButton'
 import CommentForm from '@/components/CommentForm'
 import CommentList from '@/components/CommentList'
+import RatingWidget from '@/components/RatingWidget'
 import ImageLightbox from '@/components/ImageLightbox'
 import ProductCtaCard from '@/components/ProductCtaCard'
 import { EmailSignup } from '@/components/EmailSignup'
@@ -265,7 +266,8 @@ export default async function ReviewPage({ params }: Props) {
         <div className="mt-12">
           <h2 className="text-lg font-black mb-6">Comments</h2>
           <CommentList contentType="review" contentId={review.id} />
-          <div className="mt-6">
+          <div className="mt-6 space-y-4">
+            <RatingWidget reviewId={review.id} />
             <CommentForm contentType="review" contentId={review.id} />
           </div>
         </div>
