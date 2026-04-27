@@ -70,7 +70,7 @@ export function EmailSignup({
       {description && (
         <p className={`text-gray-400 ${compact ? 'text-xs' : 'text-sm'}`}>{description}</p>
       )}
-      <form onSubmit={handleSubmit} className={`flex gap-2 ${compact ? '' : 'mt-3'}`}>
+      <form onSubmit={handleSubmit} className={`flex gap-2 ${compact ? '' : 'flex-col sm:flex-row mt-3'}`}>
         <input
           type="email"
           required
@@ -83,7 +83,7 @@ export function EmailSignup({
         <button
           type="submit"
           disabled={state === 'submitting' || !email.trim()}
-          className={`shrink-0 ${compact ? 'px-4 py-2 text-sm' : 'px-5 py-3'} bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white font-semibold rounded-xl transition-colors`}
+          className={`${compact ? 'shrink-0 px-4 py-2 text-sm' : 'w-full sm:w-auto px-5 py-3'} bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white font-semibold rounded-xl transition-colors`}
         >
           {state === 'submitting' ? 'Sending…' : buttonLabel}
         </button>
