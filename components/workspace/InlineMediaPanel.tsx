@@ -817,6 +817,16 @@ function SlotCard(p: SlotCardProps) {
     { label: 'End of article', pos: { kind: 'end' } },
   ]
 
+  // Derive which section the slot currently sits in, so the dropdown reflects reality
+  const currentSectionIdx = (() => {
+    let nearest = -1
+    for (let i = 0; i < headings.length; i++) {
+      if (headings[i].end <= slot.start) nearest = i
+    }
+    if (nearest === -1) return 0 // before any heading → Start
+    return nearest + 1           // after heading[nearest] → After: H2[nearest]
+  })()
+
   return (
     <div className={`p-3 rounded-lg space-y-3 ${
       filled
@@ -843,18 +853,15 @@ function SlotCard(p: SlotCardProps) {
           </select>
           {sectionOptions.length > 2 && (
             <select
-              defaultValue=""
+              value={currentSectionIdx}
               onChange={(e) => {
-                if (!e.target.value) return
                 const opt = sectionOptions[Number(e.target.value)]
                 if (opt) p.onMoveToSection(opt.pos)
-                e.target.value = ''
               }}
               disabled={busy}
               className="px-2 py-1.5 bg-gray-900 border border-orange-900/40 rounded-lg text-xs text-orange-300 min-h-[36px] focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-50"
               title="Move to article section"
             >
-              <option value="">Move to section…</option>
               {sectionOptions.map((opt, i) => (
                 <option key={i} value={i}>{opt.label}</option>
               ))}
