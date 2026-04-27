@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default function ProductCtaCard({ product, rating, variant = 'prominent' }: Props) {
-  const href = product.affiliate_url ?? product.non_affiliate_url
+  const href = product.affiliate_url ? `/go/${product.slug}` : product.non_affiliate_url
   if (!href) return null
 
   const isAffiliate = Boolean(product.affiliate_url)

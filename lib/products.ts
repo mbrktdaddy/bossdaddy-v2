@@ -102,7 +102,7 @@ export async function resolveProductTokens(
 
     if (product.affiliate_url) {
       const storeLabel = getStoreLabel(product.store, product.custom_store_name)
-      return `<a href="${escapeHtml(product.affiliate_url)}" rel="sponsored nofollow noopener" target="_blank" data-product-slug="${escapeHtml(product.slug)}">${escapeHtml(product.name)} on ${escapeHtml(storeLabel)}</a>`
+      return `<a href="/go/${escapeHtml(product.slug)}" rel="sponsored nofollow noopener" target="_blank" data-product-slug="${escapeHtml(product.slug)}">${escapeHtml(product.name)} on ${escapeHtml(storeLabel)}</a>`
     }
 
     if (product.non_affiliate_url) {
