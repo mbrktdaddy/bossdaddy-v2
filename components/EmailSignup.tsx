@@ -78,7 +78,7 @@ export function EmailSignup({
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
           disabled={state === 'submitting'}
-          className={`flex-1 ${compact ? 'px-3 py-2 text-sm' : 'px-4 py-3'} bg-gray-900 border border-gray-700 focus:border-orange-500 rounded-xl text-white placeholder-gray-500 focus:outline-none transition-colors disabled:opacity-60`}
+          className={`min-w-0 ${compact ? 'flex-1 px-3 py-2 text-sm' : 'w-full sm:flex-1 px-4 py-3'} bg-gray-900 border border-gray-700 focus:border-orange-500 rounded-xl text-white placeholder-gray-500 focus:outline-none transition-colors disabled:opacity-60`}
         />
         <button
           type="submit"
