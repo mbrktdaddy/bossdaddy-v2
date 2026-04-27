@@ -85,7 +85,7 @@ export default async function HomePage() {
               <p className="text-orange-400/80 text-sm font-semibold tracking-wide mb-8">
                 Show Up. Get Better. Never Settle.
               </p>
-              <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-3">
                 <Link href="/reviews" className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors">
                   Browse Reviews
                 </Link>
