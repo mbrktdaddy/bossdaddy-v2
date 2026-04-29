@@ -156,6 +156,57 @@ export async function PUT(
       } catch (err) { console.error('after() registration failed (review):', err) }
     }
 
+    // Notify wishlist subscribers when a linked review goes live
+    if (modParsed.data.action === 'approve' && data && process.env.RESEND_API_KEY) {
+      const reviewId = id
+      const reviewTitle = data.title as string
+      const reviewSlug = data.slug as string
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+      try {
+        after(async () => {
+          try {
+            // Find the wishlist item linked to this review
+            const { data: wishlistItem } = await admin
+              .from('wishlist_items')
+              .select('id, title')
+              .eq('review_id', reviewId)
+              .maybeSingle()
+            if (!wishlistItem) return
+
+            // Fetch unnotified subscribers
+            const { data: subs } = await admin
+              .from('wishlist_subscriptions')
+              .select('id, user_id')
+              .eq('wishlist_item_id', wishlistItem.id)
+              .eq('notified', false)
+            if (!subs || subs.length === 0) return
+
+            // Send each subscriber an email and mark notified
+            for (const sub of subs) {
+              try {
+                const { data: authUser } = await admin.auth.admin.getUserById(sub.user_id as string)
+                const email = authUser?.user?.email
+                if (email) {
+                  await getResend().emails.send({
+                    from: FROM_EMAIL,
+                    to: email,
+                    subject: `Boss Daddy reviewed ${reviewTitle} — read it now`,
+                    html: `<p>Hey! You asked to be notified when Boss Daddy reviewed <strong>${reviewTitle}</strong>.</p>
+<p><a href="${siteUrl}/reviews/${reviewSlug}" style="background:#CC5500;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:bold;">Read the review</a></p>
+<p style="color:#888;font-size:12px;">You're receiving this because you subscribed to this item on the Boss Daddy wishlist.</p>`,
+                  })
+                  await admin
+                    .from('wishlist_subscriptions')
+                    .update({ notified: true, notified_at: new Date().toISOString() })
+                    .eq('id', sub.id)
+                }
+              } catch (err) { console.error('Wishlist subscriber notify failed for', sub.user_id, err) }
+            }
+          } catch (err) { console.error('Wishlist subscriber batch notify failed:', err) }
+        })
+      } catch (err) { console.error('after() registration failed (wishlist notify):', err) }
+    }
+
     return NextResponse.json({ review: data })
   }
 

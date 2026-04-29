@@ -1,12 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 export default function RegisterPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const nextParam = searchParams.get('next')
+  // Only allow relative paths to prevent open-redirect
+  const redirectTo = nextParam && nextParam.startsWith('/') ? nextParam : '/'
 
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
@@ -44,7 +48,7 @@ export default function RegisterPage() {
       return
     }
 
-    router.push('/')
+    router.push(redirectTo)
     router.refresh()
   }
 
@@ -107,7 +111,7 @@ export default function RegisterPage() {
               {error === 'already_exists' ? (
                 <p className="text-red-400">
                   An account with that email already exists.{' '}
-                  <Link href={`/login?next=/dashboard/reviews`} className="text-orange-400 hover:text-orange-300 font-semibold">
+                  <Link href={`/login?next=${encodeURIComponent(redirectTo)}`} className="text-orange-400 hover:text-orange-300 font-semibold">
                     Sign in instead →
                   </Link>
                 </p>

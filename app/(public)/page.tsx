@@ -2,11 +2,13 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { CATEGORIES } from '@/lib/categories'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import RatingScore from '@/components/RatingScore'
 import HeroCarousel from '@/components/HeroCarousel'
 import CodeRedirect from './_components/CodeRedirect'
+import type { WishlistItem } from '@/lib/wishlist'
 import type { Metadata } from 'next'
 
 export const revalidate = 3600
@@ -25,10 +27,12 @@ const STATIC_STATS = [
 
 export default async function HomePage() {
   const supabase = await createClient()
+  const adminClient = createAdminClient()
 
   const [
     { data: reviews, count: reviewCount, error: reviewsError },
     { data: articles, count: articleCount, error: articlesError },
+    { data: testingNow },
   ] = await Promise.all([
     supabase
       .from('reviews')
@@ -43,6 +47,12 @@ export default async function HomePage() {
       .eq('status', 'approved')
       .eq('is_visible', true)
       .order('published_at', { ascending: false })
+      .limit(3),
+    adminClient
+      .from('wishlist_items')
+      .select('id, slug, title, image_url, status')
+      .eq('status', 'testing')
+      .order('priority', { ascending: false })
       .limit(3),
   ])
 
@@ -118,6 +128,45 @@ export default async function HomePage() {
         </div>
       </section>
 
+
+      {/* ── What I'm Testing Now ──────────────────────────────────────────── */}
+      {testingNow && testingNow.length > 0 && (
+        <section className="border-b border-gray-800/60 bg-gray-900/20">
+          <div className="max-w-6xl mx-auto px-6 py-6">
+            <div className="flex items-center justify-between gap-4 mb-4">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                <span className="text-xs font-black uppercase tracking-widest text-green-400">Testing Now</span>
+              </div>
+              <Link href="/wishlist" className="text-xs text-gray-500 hover:text-orange-400 transition-colors font-medium">
+                Vote on what&apos;s next →
+              </Link>
+            </div>
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide sm:overflow-visible sm:grid sm:grid-cols-3">
+              {(testingNow as WishlistItem[]).map((item) => (
+                <Link
+                  key={item.id}
+                  href={`/wishlist/${item.slug}`}
+                  className="shrink-0 w-48 sm:w-auto flex items-center gap-3 p-3 bg-gray-900 hover:bg-gray-800 border border-gray-800 hover:border-orange-800/50 rounded-xl transition-colors"
+                >
+                  <div className="relative w-10 h-10 shrink-0 rounded-lg overflow-hidden bg-gray-950 border border-gray-800">
+                    {item.image_url ? (
+                      <Image src={item.image_url} alt={item.title} fill className="object-contain p-1" sizes="40px" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs font-semibold text-gray-300 line-clamp-2 leading-snug">{item.title}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── Categories ────────────────────────────────────────────────────── */}
       <section className="py-16 border-b border-gray-800/60 overflow-hidden">
