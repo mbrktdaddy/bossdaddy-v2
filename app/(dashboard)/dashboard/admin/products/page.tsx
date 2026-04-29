@@ -1,18 +1,13 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAdmin } from '@/lib/auth-cache'
 import type { Product } from '@/lib/products'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ProductsListPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) notFound()
-  const { data: me } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (me?.role !== 'admin') notFound()
+  await requireAdmin()
 
   const admin = createAdminClient()
   const { data: products } = await admin

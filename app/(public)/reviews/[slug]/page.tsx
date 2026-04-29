@@ -1,4 +1,5 @@
 import { cache } from 'react'
+import dynamic from 'next/dynamic'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -19,8 +20,9 @@ import ImageLightbox from '@/components/ImageLightbox'
 import ProductCtaCard from '@/components/ProductCtaCard'
 import { EmailSignup } from '@/components/EmailSignup'
 import AuthorBio from '@/components/AuthorBio'
-import EngagementTracker from '@/components/EngagementTracker'
 import { getProductBySlug } from '@/lib/products'
+
+const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
 
 export const revalidate = 3600
 

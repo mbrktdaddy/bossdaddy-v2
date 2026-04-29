@@ -56,14 +56,16 @@ export default async function AuthorPage({ params }: Props) {
       .eq('author_id', profile.id)
       .eq('status', 'approved')
       .eq('is_visible', true)
-      .order('published_at', { ascending: false }),
+      .order('published_at', { ascending: false })
+      .limit(100),
     supabase
       .from('articles')
       .select('id, slug, title, category, excerpt, published_at, reading_time_minutes')
       .eq('author_id', profile.id)
       .eq('status', 'approved')
       .eq('is_visible', true)
-      .order('published_at', { ascending: false }),
+      .order('published_at', { ascending: false })
+      .limit(100),
   ])
 
   const totalReviews = reviews?.length ?? 0

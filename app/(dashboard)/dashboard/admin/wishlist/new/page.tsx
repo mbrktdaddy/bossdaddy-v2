@@ -1,16 +1,11 @@
-import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/auth-cache'
 import { WishlistForm } from '../_components/WishlistForm'
 
 export const dynamic = 'force-dynamic'
 
 export default async function NewWishlistItemPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) notFound()
-  const { data: me } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (me?.role !== 'admin') notFound()
+  await requireAdmin()
 
   return (
     <div className="p-4 sm:p-8 max-w-2xl">

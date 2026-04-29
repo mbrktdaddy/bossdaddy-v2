@@ -1,6 +1,5 @@
-import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAdmin } from '@/lib/auth-cache'
 import { NewsletterDigestTrigger } from './_components/NewsletterDigestTrigger'
 
 export const dynamic = 'force-dynamic'
@@ -13,11 +12,7 @@ interface Subscriber {
 }
 
 export default async function AdminNewsletterPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) notFound()
-  const { data: me } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (me?.role !== 'admin') notFound()
+  await requireAdmin()
 
   const admin = createAdminClient()
   const { data, count } = await admin

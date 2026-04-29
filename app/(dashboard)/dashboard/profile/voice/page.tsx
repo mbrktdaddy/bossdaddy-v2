@@ -1,15 +1,14 @@
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { requireUser } from '@/lib/auth-cache'
 import { getVoiceProfile, emptyVoiceProfile } from '@/lib/voiceProfile'
 import { VoiceProfileForm } from './_components/VoiceProfileForm'
 
 export const dynamic = 'force-dynamic'
 
 export default async function VoiceProfilePage() {
+  const user = await requireUser()
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) notFound()
 
   const profile = await getVoiceProfile(supabase, user.id)
   const initial = profile ?? { user_id: user.id, ...emptyVoiceProfile() }

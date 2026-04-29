@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAdmin } from '@/lib/auth-cache'
 import type { WishlistItem } from '@/lib/wishlist'
 import { WishlistForm } from '../_components/WishlistForm'
 
@@ -13,11 +13,7 @@ export default async function EditWishlistItemPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) notFound()
-  const { data: me } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (me?.role !== 'admin') notFound()
+  await requireAdmin()
 
   const admin = createAdminClient()
   const { data: item } = await admin.from('wishlist_items').select('*').eq('id', id).single()

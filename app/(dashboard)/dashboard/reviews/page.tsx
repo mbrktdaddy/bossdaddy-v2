@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { requireUser } from '@/lib/auth-cache'
 import { BulkContentList } from '@/components/workspace/BulkContentList'
 
 interface Props {
@@ -8,13 +9,13 @@ interface Props {
 
 export default async function MyReviewsPage({ searchParams }: Props) {
   const { filter } = await searchParams
+  const user = await requireUser()
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
 
   const { data: reviews } = await supabase
     .from('reviews')
     .select('id, title, product_name, category, status, rating, created_at, updated_at, slug, rejection_reason, image_url')
-    .eq('author_id', user!.id)
+    .eq('author_id', user.id)
     .order('updated_at', { ascending: false })
 
   const counts = {

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { requireUser, getCurrentProfile } from '@/lib/auth-cache'
 import EditUsernameForm from './_components/EditUsernameForm'
 import EditEmailForm from './_components/EditEmailForm'
 import BioForm from './_components/BioForm'
@@ -11,14 +12,9 @@ const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
 }
 
 export default async function ProfilePage() {
+  const user = await requireUser()
+  const profile = await getCurrentProfile()
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('username, role, created_at, display_name, tagline, bio, avatar_url')
-    .eq('id', user!.id)
-    .single()
 
   const role     = profile?.role ?? 'member'
   const isAdmin  = role === 'admin'
@@ -40,27 +36,27 @@ export default async function ProfilePage() {
     { data: likedArticleLinks },
   ] = await Promise.all([
     supabase.from('reviews').select('id', { count: 'exact', head: true })
-      .eq('author_id', user!.id).eq('status', 'approved'),
+      .eq('author_id', user.id).eq('status', 'approved'),
     supabase.from('articles').select('id', { count: 'exact', head: true })
-      .eq('author_id', user!.id).eq('status', 'approved'),
+      .eq('author_id', user.id).eq('status', 'approved'),
     supabase.from('comments').select('id', { count: 'exact', head: true })
-      .eq('author_id', user!.id),
+      .eq('author_id', user.id),
     supabase.from('reviews').select('id', { count: 'exact', head: true })
-      .eq('author_id', user!.id).eq('status', 'draft'),
+      .eq('author_id', user.id).eq('status', 'draft'),
     supabase.from('reviews').select('id', { count: 'exact', head: true })
-      .eq('author_id', user!.id).eq('status', 'pending'),
+      .eq('author_id', user.id).eq('status', 'pending'),
     supabase.from('likes').select('id', { count: 'exact', head: true })
-      .eq('user_id', user!.id),
-    supabase.from('reviews').select('id').eq('author_id', user!.id),
-    supabase.from('articles').select('id').eq('author_id', user!.id),
-    supabase.from('comments').select('id').eq('author_id', user!.id),
+      .eq('user_id', user.id),
+    supabase.from('reviews').select('id').eq('author_id', user.id),
+    supabase.from('articles').select('id').eq('author_id', user.id),
+    supabase.from('comments').select('id').eq('author_id', user.id),
     // Most recently liked reviews (ID list, ordered by like date)
     supabase.from('likes').select('content_id, created_at')
-      .eq('user_id', user!.id).eq('content_type', 'review')
+      .eq('user_id', user.id).eq('content_type', 'review')
       .order('created_at', { ascending: false }).limit(10),
     // Most recently liked articles (ID list, ordered by like date)
     supabase.from('likes').select('content_id, created_at')
-      .eq('user_id', user!.id).eq('content_type', 'article')
+      .eq('user_id', user.id).eq('content_type', 'article')
       .order('created_at', { ascending: false }).limit(10),
   ])
 
@@ -143,7 +139,7 @@ export default async function ProfilePage() {
 
         <div className="mt-5 pt-5 border-t border-gray-800">
           <label className="block text-xs text-gray-500 uppercase tracking-widest mb-2">Email</label>
-          <EditEmailForm current={user!.email ?? ''} />
+          <EditEmailForm current={user.email ?? ''} />
         </div>
       </div>
 

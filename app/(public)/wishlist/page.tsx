@@ -19,6 +19,7 @@ export default async function WishlistPage() {
     .select('*, vote_count:wishlist_votes(count)')
     .order('priority', { ascending: false })
     .order('created_at', { ascending: false })
+    .limit(150)
 
   const items = ((data ?? []) as (WishlistItem & { vote_count: { count: number }[] })[]).map((i) => ({
     ...i,

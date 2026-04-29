@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAdmin } from '@/lib/auth-cache'
 import type { ShopProduct } from '@/lib/shop'
 import { ShopProductForm } from '../_components/ShopProductForm'
 
@@ -14,11 +14,7 @@ export default async function AdminShopDetailPage({
 }) {
   const { id } = await params
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) notFound()
-  const { data: me } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (me?.role !== 'admin') notFound()
+  await requireAdmin()
 
   const isNew = id === 'new'
   let product: ShopProduct | null = null

@@ -35,8 +35,10 @@ export default async function GearListPage({ searchParams }: Props) {
     .select('id, slug, title, product_name, category, rating, excerpt, image_url')
     .eq('status', 'approved')
     .eq('is_visible', true)
+    .gte('rating', 8)
     .order('rating', { ascending: false })
     .order('published_at', { ascending: false })
+    .limit(120)
 
   if (category) {
     query = query.eq('category', category)
@@ -44,7 +46,7 @@ export default async function GearListPage({ searchParams }: Props) {
 
   const { data: reviews } = await query
 
-  const topPicks = reviews?.filter(r => r.rating >= 8) ?? []
+  const topPicks = reviews ?? []
   const cat = category ? getCategoryBySlug(category) : null
 
   return (

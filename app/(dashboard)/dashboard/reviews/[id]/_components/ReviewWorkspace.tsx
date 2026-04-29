@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import { CATEGORIES } from '@/lib/categories'
 import { detectAffiliateLinks } from '@/lib/affiliate'
 import { preserveImagesAcrossRefine } from '@/lib/inlineImages'
@@ -17,7 +18,11 @@ import { InternalLinkPanel } from '@/components/workspace/InternalLinkPanel'
 import { SocialPostsPanel } from '@/components/workspace/SocialPostsPanel'
 import { ProductLinkPanel } from '@/components/workspace/ProductLinkPanel'
 import { PrimaryProductPanel } from '@/components/workspace/PrimaryProductPanel'
-import { InlineMediaPanel } from '@/components/workspace/InlineMediaPanel'
+
+const InlineMediaPanel = dynamic(
+  () => import('@/components/workspace/InlineMediaPanel').then((m) => ({ default: m.InlineMediaPanel })),
+  { ssr: false, loading: () => <div className="h-32 bg-gray-950 border border-gray-800 rounded-xl animate-pulse" /> },
+)
 import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader'
 import { WorkspaceToolbar } from '@/components/workspace/WorkspaceToolbar'
 import { AutoSaveIndicator } from '@/components/workspace/AutoSaveIndicator'

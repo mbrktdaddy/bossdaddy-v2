@@ -1,7 +1,6 @@
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAdmin } from '@/lib/auth-cache'
 import { getCategoryBySlug } from '@/lib/categories'
 
 export const dynamic = 'force-dynamic'
@@ -22,11 +21,7 @@ interface ContentRow {
 }
 
 export default async function EngagementPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) notFound()
-  const { data: me } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (me?.role !== 'admin') notFound()
+  await requireAdmin()
 
   const admin = createAdminClient()
 

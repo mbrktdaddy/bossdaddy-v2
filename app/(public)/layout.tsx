@@ -1,6 +1,8 @@
+import dynamic from 'next/dynamic'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import WelcomeToast from '@/components/WelcomeToast'
+
+const WelcomeToast = dynamic(() => import('@/components/WelcomeToast'))
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (

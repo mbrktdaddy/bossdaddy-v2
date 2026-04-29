@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
+import { subscribeToNewsletter } from '@/app/actions/newsletter'
 
 interface Props {
   /** Heading shown above the form. Pass null to hide. */
@@ -28,27 +29,22 @@ export function EmailSignup({
   const [email, setEmail] = useState('')
   const [state, setState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
   const [error, setError] = useState<string | null>(null)
+  const [, startTransition] = useTransition()
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!email.trim()) return
     setState('submitting'); setError(null)
-    try {
-      const res = await fetch('/api/newsletter/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), interests }),
-      })
-      if (!res.ok) {
-        const json = await res.json().catch(() => ({}))
-        throw new Error(json.error ?? 'Signup failed')
+    startTransition(async () => {
+      const result = await subscribeToNewsletter({ email: email.trim(), interests })
+      if (!result.ok) {
+        setState('error')
+        setError(result.error)
+        return
       }
       setState('success')
       setEmail('')
-    } catch (err) {
-      setState('error')
-      setError(err instanceof Error ? err.message : 'Signup failed')
-    }
+    })
   }
 
   if (state === 'success') {

@@ -40,6 +40,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
       .eq('status', 'approved')
       .eq('is_visible', true)
       .order('published_at', { ascending: false })
+      .limit(200)
 
     const reviews = (data ?? []) as ReviewRow[]
 

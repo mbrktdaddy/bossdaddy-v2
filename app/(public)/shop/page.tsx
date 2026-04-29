@@ -28,7 +28,7 @@ export default async function ShopPage({ searchParams }: Props) {
 
   let query = supabase
     .from('shop_products')
-    .select('*')
+    .select('id, name, slug, description, image_url, price_cents, status, category, position, external_url')
     .in('status', ['coming_soon', 'available'])
     .order('position', { ascending: true })
 

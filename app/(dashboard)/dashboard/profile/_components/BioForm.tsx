@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { updateProfile } from '../actions'
 
 interface Props {
   initialDisplayName: string | null
@@ -21,39 +22,30 @@ export default function BioForm({
   const [tagline,     setTagline]     = useState(initialTagline ?? '')
   const [bio,         setBio]         = useState(initialBio ?? '')
   const [avatarUrl,   setAvatarUrl]   = useState(initialAvatarUrl ?? '')
-  const [saving,      setSaving]      = useState(false)
+  const [pending,     startTransition] = useTransition()
   const [success,     setSuccess]     = useState(false)
   const [error,       setError]       = useState<string | null>(null)
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setSaving(true); setError(null); setSuccess(false)
-
-    try {
-      const res = await fetch('/api/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          display_name: displayName.trim() || null,
-          tagline:      tagline.trim()     || null,
-          bio:          bio.trim()         || null,
-          avatar_url:   avatarUrl.trim()   || null,
-        }),
+    setError(null); setSuccess(false)
+    startTransition(async () => {
+      const result = await updateProfile({
+        display_name: displayName.trim() || null,
+        tagline:      tagline.trim()     || null,
+        bio:          bio.trim()         || null,
+        avatar_url:   avatarUrl.trim()   || null,
       })
-      const json = await res.json()
-      if (!res.ok) {
-        setError(json.error ?? 'Save failed')
-        setSaving(false)
+      if (!result.ok) {
+        setError(result.error)
         return
       }
       setSuccess(true)
-      setSaving(false)
       router.refresh()
-    } catch {
-      setError('Could not reach the server. Try again.')
-      setSaving(false)
-    }
+    })
   }
+
+  const saving = pending
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

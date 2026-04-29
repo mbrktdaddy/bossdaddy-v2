@@ -1,38 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { updateProfile } from '../actions'
 
 export default function EditUsernameForm({ current }: { current: string }) {
   const router = useRouter()
   const [username, setUsername] = useState(current)
-  const [saving, setSaving]     = useState(false)
+  const [pending, startTransition] = useTransition()
   const [success, setSuccess]   = useState(false)
   const [error, setError]       = useState<string | null>(null)
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (username.trim() === current) return
-    setSaving(true)
     setError(null)
     setSuccess(false)
-
-    try {
-      const res = await fetch('/api/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username.trim() }),
-      })
-      const json = await res.json()
-      if (!res.ok) { setError(json.error); setSaving(false); return }
+    startTransition(async () => {
+      const result = await updateProfile({ username: username.trim() })
+      if (!result.ok) { setError(result.error); return }
       setSuccess(true)
-      setSaving(false)
       router.refresh()
-    } catch {
-      setError('Could not reach the server. Please try again.')
-      setSaving(false)
-    }
+    })
   }
+
+  const saving = pending
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">

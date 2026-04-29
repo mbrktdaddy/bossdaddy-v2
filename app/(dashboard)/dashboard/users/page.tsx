@@ -1,13 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
+import { requireAdmin } from '@/lib/auth-cache'
 import RoleSelector from './_components/RoleSelector'
 
 export default async function UsersPage() {
+  const me = await requireAdmin()
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  const { data: me } = await supabase.from('profiles').select('role').eq('id', user!.id).single()
-  if (me?.role !== 'admin') notFound()
 
   const { data: users } = await supabase
     .from('profiles')
@@ -77,7 +74,7 @@ export default async function UsersPage() {
                 </p>
               </div>
             </div>
-            <RoleSelector userId={u.id} currentRole={u.role} isSelf={u.id === user!.id} />
+            <RoleSelector userId={u.id} currentRole={u.role} isSelf={u.id === me.id} />
           </div>
         ))}
       </div>
