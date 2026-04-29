@@ -1,8 +1,10 @@
+import { cache } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
 import ShareButtons from '@/components/ShareButtons'
@@ -26,16 +28,31 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params
+export async function generateStaticParams() {
+  const admin = createAdminClient()
+  const { data } = await admin
+    .from('reviews')
+    .select('slug')
+    .eq('status', 'approved')
+    .eq('is_visible', true)
+  return (data ?? []).map(({ slug }) => ({ slug }))
+}
+
+const getReview = cache(async (slug: string) => {
   const supabase = await createClient()
   const { data } = await supabase
     .from('reviews')
-    .select('title, product_name, excerpt, meta_title, meta_description')
+    .select('id, title, product_name, category, content, rating, pros, cons, excerpt, image_url, has_affiliate_links, product_slug, published_at, meta_title, meta_description, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
     .single()
+  return data
+})
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params
+  const data = await getReview(slug)
 
   if (!data) return { title: 'Review Not Found' }
 
@@ -59,17 +76,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ReviewPage({ params }: Props) {
   const { slug } = await params
-  const supabase = await createClient()
-
-  const { data: review } = await supabase
-    .from('reviews')
-    .select('id, title, product_name, category, content, rating, pros, cons, excerpt, image_url, has_affiliate_links, product_slug, published_at, profiles(username)')
-    .eq('slug', slug)
-    .eq('status', 'approved')
-    .eq('is_visible', true)
-    .single()
+  const review = await getReview(slug)
 
   if (!review) notFound()
+
+  const supabase = await createClient()
 
   // Related reviews — same category, exclude current
   const { data: related } = await supabase

@@ -1,8 +1,10 @@
+import { cache } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
 import ShareButtons from '@/components/ShareButtons'
@@ -22,16 +24,31 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params
+export async function generateStaticParams() {
+  const admin = createAdminClient()
+  const { data } = await admin
+    .from('articles')
+    .select('slug')
+    .eq('status', 'approved')
+    .eq('is_visible', true)
+  return (data ?? []).map(({ slug }) => ({ slug }))
+}
+
+const getArticle = cache(async (slug: string) => {
   const supabase = await createClient()
   const { data } = await supabase
     .from('articles')
-    .select('title, excerpt, meta_title, meta_description')
+    .select('id, title, slug, category, content, excerpt, image_url, has_affiliate_links, published_at, reading_time_minutes, meta_title, meta_description, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
     .single()
+  return data
+})
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params
+  const data = await getArticle(slug)
 
   if (!data) return { title: 'Article Not Found' }
 
@@ -53,17 +70,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ArticlePage({ params }: Props) {
   const { slug } = await params
-  const supabase = await createClient()
-
-  const { data: article } = await supabase
-    .from('articles')
-    .select('id, title, slug, category, content, excerpt, image_url, has_affiliate_links, published_at, reading_time_minutes, profiles(username)')
-    .eq('slug', slug)
-    .eq('status', 'approved')
-    .eq('is_visible', true)
-    .single()
+  const article = await getArticle(slug)
 
   if (!article) notFound()
+
+  const supabase = await createClient()
 
   // Related articles — same category, exclude current
   const { data: related } = await supabase

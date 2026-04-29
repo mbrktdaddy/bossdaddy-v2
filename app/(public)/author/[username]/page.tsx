@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getCategoryBySlug } from '@/lib/categories'
 import RatingScore from '@/components/RatingScore'
 import type { Metadata } from 'next'
@@ -9,6 +10,23 @@ export const revalidate = 3600
 
 interface Props {
   params: Promise<{ username: string }>
+}
+
+export async function generateStaticParams() {
+  const admin = createAdminClient()
+  const [{ data: reviews }, { data: articles }] = await Promise.all([
+    admin.from('reviews').select('author_id').eq('status', 'approved').eq('is_visible', true),
+    admin.from('articles').select('author_id').eq('status', 'approved').eq('is_visible', true),
+  ])
+  const ids = new Set<string>()
+  for (const r of reviews ?? []) if (r.author_id) ids.add(r.author_id)
+  for (const a of articles ?? []) if (a.author_id) ids.add(a.author_id)
+  if (ids.size === 0) return []
+  const { data: profiles } = await admin
+    .from('profiles')
+    .select('username')
+    .in('id', Array.from(ids))
+  return (profiles ?? []).map(({ username }) => ({ username }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -16,10 +17,25 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
+export async function generateStaticParams() {
+  const admin = createAdminClient()
+  const { data } = await admin.from('wishlist_items').select('slug')
+  return (data ?? []).map(({ slug }) => ({ slug }))
+}
+
+const getWishlistItem = cache(async (slug: string) => {
+  const admin = createAdminClient()
+  const { data } = await admin
+    .from('wishlist_items')
+    .select('*, vote_count:wishlist_votes(count)')
+    .eq('slug', slug)
+    .single()
+  return data
+})
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const admin = createAdminClient()
-  const { data } = await admin.from('wishlist_items').select('title, description').eq('slug', slug).single()
+  const data = await getWishlistItem(slug)
   if (!data) return {}
   return {
     title: `${data.title} — Boss Daddy Wishlist`,
@@ -30,15 +46,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function WishlistDetailPage({ params }: Props) {
   const { slug } = await params
-  const admin = createAdminClient()
-
-  const { data: item } = await admin
-    .from('wishlist_items')
-    .select('*, vote_count:wishlist_votes(count)')
-    .eq('slug', slug)
-    .single()
+  const item = await getWishlistItem(slug)
 
   if (!item) notFound()
+
+  const admin = createAdminClient()
 
   const wishlistItem = {
     ...(item as WishlistItem),
