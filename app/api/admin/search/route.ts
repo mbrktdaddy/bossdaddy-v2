@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 
   const [{ data: articles }, { data: reviews }, { data: media }] = await Promise.all([
     admin
-      .from('articles')
+      .from('guides')
       .select('id, title, slug, status, category')
       .or(`title.ilike.${like},excerpt.ilike.${like}`)
       .order('updated_at', { ascending: false })

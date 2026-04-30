@@ -7,7 +7,7 @@ import { CATEGORIES } from '@/lib/categories'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import RatingScore from '@/components/RatingScore'
 import CodeRedirect from './_components/CodeRedirect'
-import { LatestArticlesSection } from './_components/LatestArticlesSection'
+import { LatestGuidesSection } from './_components/LatestGuidesSection'
 import { getStatusColor, getStatusLabel, type WishlistItem } from '@/lib/wishlist'
 import type { Metadata } from 'next'
 
@@ -85,7 +85,7 @@ export default async function HomePage() {
             <Link href="/reviews" className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-2xl transition-colors">
               Browse Reviews
             </Link>
-            <Link href="/articles" className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white font-semibold rounded-2xl transition-colors">
+            <Link href="/guides" className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white font-semibold rounded-2xl transition-colors">
               Read the Blog →
             </Link>
           </div>
@@ -206,9 +206,9 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ── Latest Articles ───────────────────────────────────────────────── */}
+      {/* ── Latest Guides ───────────────────────────────────────────────── */}
       <Suspense fallback={<LatestArticlesSkeleton />}>
-        <LatestArticlesSection />
+        <LatestGuidesSection />
       </Suspense>
 
       {/* ── Categories ────────────────────────────────────────────────────── */}

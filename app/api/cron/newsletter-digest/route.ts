@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       .order('published_at', { ascending: false })
       .limit(8),
     admin
-      .from('articles')
+      .from('guides')
       .select('title, slug, excerpt, image_url, category, published_at')
       .eq('status', 'approved')
       .eq('is_visible', true)

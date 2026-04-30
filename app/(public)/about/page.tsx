@@ -16,7 +16,7 @@ export default async function AboutPage() {
 
  const [{ count: reviewCount }, { count: articleCount }] = await Promise.all([
  supabase.from('reviews').select('*', { count: 'exact', head: true }).eq('status', 'approved').eq('is_visible', true),
- supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'approved').eq('is_visible', true),
+ supabase.from('guides').select('*', { count: 'exact', head: true }).eq('status', 'approved').eq('is_visible', true),
  ])
 
  const STATS = [
@@ -216,7 +216,7 @@ export default async function AboutPage() {
  <Link href="/reviews" className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-2xl transition-colors text-sm">
  Browse Reviews
  </Link>
- <Link href="/articles" className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-2xl transition-colors text-sm">
+ <Link href="/guides" className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-2xl transition-colors text-sm">
  Read Articles
  </Link>
  </div>

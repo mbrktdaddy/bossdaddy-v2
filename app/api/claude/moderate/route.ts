@@ -5,7 +5,8 @@ import { z } from 'zod'
 
 const ModerateInput = z.union([
   z.object({ reviewId: z.string().uuid() }),
-  z.object({ articleId: z.string().uuid() }),
+  z.object({ guideId: z.string().uuid() }),
+  z.object({ articleId: z.string().uuid() }), // legacy alias
 ])
 
 const ModerationResult = z.object({
@@ -31,11 +32,11 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = createAdminClient()
-  const isArticle = 'articleId' in parsed.data
-  const contentId = isArticle
-    ? (parsed.data as { articleId: string }).articleId
+  const isGuide = 'guideId' in parsed.data || 'articleId' in parsed.data
+  const contentId = isGuide
+    ? (('guideId' in parsed.data ? (parsed.data as { guideId: string }).guideId : (parsed.data as { articleId: string }).articleId))
     : (parsed.data as { reviewId: string }).reviewId
-  const table = isArticle ? 'articles' : 'reviews'
+  const table = isGuide ? 'guides' : 'reviews'
 
   const { data: content, error } = await supabase
     .from(table)

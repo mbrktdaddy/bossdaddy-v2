@@ -16,7 +16,7 @@ export default async function DashboardHome() {
     { count: mediaCount },
     { data: latestPendingComments },
   ] = await Promise.all([
-    admin.from('articles').select('id, title, slug, category, status, moderation_score, moderation_flags, created_at, view_count, published_at, image_url').order('created_at', { ascending: false }).limit(300),
+    admin.from('guides').select('id, title, slug, category, status, moderation_score, moderation_flags, created_at, view_count, published_at, image_url').order('created_at', { ascending: false }).limit(300),
     admin.from('reviews').select('id, title, slug, category, status, moderation_score, moderation_flags, created_at, view_count, published_at, image_url').order('created_at', { ascending: false }).limit(300),
     admin.from('comments').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
     admin.from('media_assets').select('id', { count: 'exact', head: true }),

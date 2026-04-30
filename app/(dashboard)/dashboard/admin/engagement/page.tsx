@@ -31,7 +31,7 @@ export default async function EngagementPage() {
     { data: clicks },
     { data: recentClicks },
   ] = await Promise.all([
-    admin.from('articles')
+    admin.from('guides')
       .select('id, title, slug, category, view_count, scroll_25_count, scroll_50_count, scroll_75_count, scroll_100_count, published_at')
       .eq('status', 'approved')
       .eq('is_visible', true),
@@ -133,7 +133,7 @@ export default async function EngagementPage() {
                     <tr key={`${r.type}-${r.id}`} className="hover:bg-gray-950/40">
                       <td className="px-5 py-2.5 max-w-md">
                         <Link
-                          href={r.type === 'article' ? `/articles/${r.slug}` : `/reviews/${r.slug}`}
+                          href={r.type === 'article' ? `/guides/${r.slug}` : `/reviews/${r.slug}`}
                           className="text-gray-200 hover:text-orange-400 truncate block"
                         >
                           {r.title}

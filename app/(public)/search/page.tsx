@@ -28,7 +28,7 @@ export default async function SearchPage({ searchParams }: Props) {
  .textSearch('search_vector', query, { type: 'websearch', config: 'english' })
  .limit(10),
  supabase
- .from('articles')
+ .from('guides')
  .select('id, slug, title, category, excerpt, published_at, reading_time_minutes')
  .eq('status', 'approved')
  .eq('is_visible', true)
@@ -127,7 +127,7 @@ export default async function SearchPage({ searchParams }: Props) {
  return (
  <Link
  key={a.id}
- href={`/articles/${a.slug}`}
+ href={`/guides/${a.slug}`}
  className="flex items-start justify-between p-4 bg-gray-900 rounded-2xl transition-colors group"
  >
  <div className="min-w-0">

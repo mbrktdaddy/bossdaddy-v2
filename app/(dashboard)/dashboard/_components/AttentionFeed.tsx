@@ -54,7 +54,7 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
         const category = getCategoryBySlug(item.category)
         const isHighRisk = score !== null && score >= 0.7
         const href = item.type === 'article'
-          ? `/dashboard/articles/${item.id}`
+          ? `/dashboard/guides/${item.id}`
           : `/dashboard/reviews/${item.id}`
 
         return (
