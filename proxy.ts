@@ -29,6 +29,11 @@ function rewriteLegacyRoute(pathname: string): string | null {
   const dashArticle = pathname.match(/^\/dashboard\/articles\/(.+)$/)
   if (dashArticle) return `/dashboard/guides/${dashArticle[1]}`
 
+  // /dashboard/admin/shop/* → /dashboard/admin/merch/*
+  if (pathname === '/dashboard/admin/shop') return '/dashboard/admin/merch'
+  const dashAdminShop = pathname.match(/^\/dashboard\/admin\/shop\/(.+)$/)
+  if (dashAdminShop) return `/dashboard/admin/merch/${dashAdminShop[1]}`
+
   // /dashboard/guides/[id]/edit → /dashboard/guides/[id]
   const guideEdit = pathname.match(/^\/dashboard\/guides\/([^/]+)\/edit\/?$/)
   if (guideEdit) return `/dashboard/guides/${guideEdit[1]}`

@@ -2,36 +2,36 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
-import { SHOP_CATEGORIES, SHOP_STATUSES, formatPrice, type ShopProduct } from '@/lib/shop'
+import { MERCH_CATEGORIES, MERCH_STATUSES, formatPrice, type Merch } from '@/lib/merch'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AdminShopListPage() {
+export default async function AdminMerchListPage() {
   await requireAdmin()
 
   const admin = createAdminClient()
   const { data } = await admin
-    .from('shop_products')
+    .from('merch')
     .select('*')
     .order('position', { ascending: true })
     .order('created_at', { ascending: false })
 
-  const rows = (data ?? []) as ShopProduct[]
+  const rows = (data ?? []) as Merch[]
 
-  const visibleCount = rows.filter((r) => SHOP_STATUSES.find((s) => s.value === r.status)?.publiclyVisible).length
+  const visibleCount = rows.filter((r) => MERCH_STATUSES.find((s) => s.value === r.status)?.publiclyVisible).length
 
   return (
     <div className="p-8 max-w-5xl">
 
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black">Shop</h1>
+          <h1 className="text-2xl font-black">Merch</h1>
           <p className="text-gray-500 text-sm mt-1">
             Boss Daddy branded merch. {rows.length} item{rows.length === 1 ? '' : 's'} total · {visibleCount} publicly visible.
           </p>
         </div>
         <Link
-          href="/dashboard/admin/shop/new"
+          href="/dashboard/admin/merch/new"
           className="shrink-0 px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold rounded-xl transition-colors"
         >
           + New item
@@ -40,20 +40,20 @@ export default async function AdminShopListPage() {
 
       {rows.length === 0 ? (
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center">
-          <p className="text-gray-400 mb-2">No shop items yet.</p>
+          <p className="text-gray-400 mb-2">No merch items yet.</p>
           <p className="text-xs text-gray-600">
-            Add your first item — set status to <code className="text-orange-400">coming_soon</code> to show it on /shop with a "Notify me" CTA.
+            Add your first item — set status to <code className="text-orange-400">coming_soon</code> to show it on /gear with a "Notify me" CTA.
           </p>
         </div>
       ) : (
         <div className="space-y-2">
           {rows.map((p) => {
-            const cat = SHOP_CATEGORIES.find((c) => c.slug === p.category)
-            const stat = SHOP_STATUSES.find((s) => s.value === p.status)
+            const cat = MERCH_CATEGORIES.find((c) => c.slug === p.category)
+            const stat = MERCH_STATUSES.find((s) => s.value === p.status)
             return (
               <Link
                 key={p.id}
-                href={`/dashboard/admin/shop/${p.id}`}
+                href={`/dashboard/admin/merch/${p.id}`}
                 className="flex items-center gap-4 p-4 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-2xl transition-colors"
               >
                 {/* Thumbnail */}

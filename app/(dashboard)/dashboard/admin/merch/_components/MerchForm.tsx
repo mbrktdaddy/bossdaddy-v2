@@ -3,31 +3,31 @@
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { SHOP_CATEGORIES, SHOP_STATUSES, type ShopProduct, type ShopProductCategory, type ShopProductStatus } from '@/lib/shop'
+import { MERCH_CATEGORIES, MERCH_STATUSES, type Merch, type MerchCategory, type MerchStatus } from '@/lib/merch'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
 interface Props {
-  product: ShopProduct | null
+  item: Merch | null
 }
 
-export function ShopProductForm({ product }: Props) {
+export function MerchForm({ item }: Props) {
   const router = useRouter()
-  const isNew = !product
+  const isNew = !item
 
-  const [slug, setSlug]               = useState(product?.slug ?? '')
-  const [name, setName]               = useState(product?.name ?? '')
-  const [description, setDescription] = useState(product?.description ?? '')
+  const [slug, setSlug]               = useState(item?.slug ?? '')
+  const [name, setName]               = useState(item?.name ?? '')
+  const [description, setDescription] = useState(item?.description ?? '')
   const [priceDollars, setPrice]      = useState<string>(
-    product?.price_cents != null ? (product.price_cents / 100).toFixed(2) : ''
+    item?.price_cents != null ? (item.price_cents / 100).toFixed(2) : ''
   )
-  const [imageUrl, setImageUrl]       = useState(product?.image_url ?? '')
-  const [category, setCategory]       = useState<ShopProductCategory | ''>(
-    (product?.category as ShopProductCategory) ?? ''
+  const [imageUrl, setImageUrl]       = useState(item?.image_url ?? '')
+  const [category, setCategory]       = useState<MerchCategory | ''>(
+    (item?.category as MerchCategory) ?? ''
   )
-  const [status, setStatus]           = useState<ShopProductStatus>(product?.status ?? 'coming_soon')
-  const [externalUrl, setExternalUrl] = useState(product?.external_url ?? '')
-  const [position, setPosition]       = useState<number>(product?.position ?? 0)
+  const [status, setStatus]           = useState<MerchStatus>(item?.status ?? 'coming_soon')
+  const [externalUrl, setExternalUrl] = useState(item?.external_url ?? '')
+  const [position, setPosition]       = useState<number>(item?.position ?? 0)
 
   const [busy, setBusy]               = useState(false)
   const [deleting, setDeleting]       = useState(false)
@@ -62,7 +62,7 @@ export function ShopProductForm({ product }: Props) {
 
     try {
       const res = await fetch(
-        isNew ? '/api/admin/shop' : `/api/admin/shop/${product!.id}`,
+        isNew ? '/api/admin/merch' : `/api/admin/merch/${item!.id}`,
         {
           method: isNew ? 'POST' : 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -71,7 +71,7 @@ export function ShopProductForm({ product }: Props) {
       )
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Save failed')
-      router.push('/dashboard/admin/shop')
+      router.push('/dashboard/admin/merch')
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')
@@ -94,16 +94,16 @@ export function ShopProductForm({ product }: Props) {
   }
 
   async function handleDelete() {
-    if (!product) return
-    if (!confirm(`Delete "${product.name}" from the shop? This cannot be undone.`)) return
+    if (!item) return
+    if (!confirm(`Delete "${item.name}" from merch? This cannot be undone.`)) return
     setDeleting(true); setError(null)
     try {
-      const res = await fetch(`/api/admin/shop/${product.id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/admin/merch/${item.id}`, { method: 'DELETE' })
       if (!res.ok) {
         const json = await res.json().catch(() => ({}))
         throw new Error(json.error ?? 'Delete failed')
       }
-      router.push('/dashboard/admin/shop')
+      router.push('/dashboard/admin/merch')
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Delete failed')
@@ -174,11 +174,11 @@ export function ShopProductForm({ product }: Props) {
           <label className="block text-sm text-gray-300 mb-1.5">Category</label>
           <select
             value={category}
-            onChange={(e) => setCategory(e.target.value as ShopProductCategory | '')}
+            onChange={(e) => setCategory(e.target.value as MerchCategory | '')}
             className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
             <option value="">— none —</option>
-            {SHOP_CATEGORIES.map((c) => (
+            {MERCH_CATEGORIES.map((c) => (
               <option key={c.slug} value={c.slug}>{c.icon} {c.label}</option>
             ))}
           </select>
@@ -187,10 +187,10 @@ export function ShopProductForm({ product }: Props) {
           <label className="block text-sm text-gray-300 mb-1.5">Status</label>
           <select
             value={status}
-            onChange={(e) => setStatus(e.target.value as ShopProductStatus)}
+            onChange={(e) => setStatus(e.target.value as MerchStatus)}
             className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
-            {SHOP_STATUSES.map((s) => (
+            {MERCH_STATUSES.map((s) => (
               <option key={s.value} value={s.value}>{s.label}</option>
             ))}
           </select>

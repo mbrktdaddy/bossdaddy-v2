@@ -10,14 +10,9 @@ interface Counts {
 
 export function HomeStats({ counts }: { counts: Counts }) {
   const cards = [
-    { label: 'Live Guides',      value: counts.guides.live,      href: '/dashboard/guides?filter=live',      color: 'text-green-400' },
+    { label: 'Live Guides',      value: counts.articles.live,    href: '/dashboard/guides?filter=live',      color: 'text-green-400' },
     { label: 'Live Reviews',     value: counts.reviews.live,     href: '/dashboard/reviews?filter=live',     color: 'text-green-400' },
-    { label: 'Guide Drafts',     value: counts.guides.draft,     href: '/dashboard/guides?filter=drafts',    color: 'text-gray-300' },
-=======
-    { label: 'Live Articles',    value: counts.articles.live,    href: '/dashboard/guides?filter=live',    color: 'text-green-400' },
-    { label: 'Live Reviews',     value: counts.reviews.live,     href: '/dashboard/reviews?filter=live',     color: 'text-green-400' },
-    { label: 'Article Drafts',   value: counts.articles.draft,   href: '/dashboard/guides?filter=drafts',  color: 'text-gray-300' },
->>>>>>> worktree-agent-a6bd05f5c24d2a0a2
+    { label: 'Guide Drafts',     value: counts.articles.draft,   href: '/dashboard/guides?filter=drafts',    color: 'text-gray-300' },
     { label: 'Review Drafts',    value: counts.reviews.draft,    href: '/dashboard/reviews?filter=drafts',   color: 'text-gray-300' },
     { label: 'Pending Review',   value: counts.articles.pending + counts.reviews.pending, href: '/dashboard/guides?filter=pending', color: 'text-yellow-400' },
     { label: 'Flagged Content',  value: counts.flagged,          href: '/dashboard/guides?filter=pending', color: 'text-red-400' },

@@ -1,33 +1,33 @@
-export type ShopProductCategory =
+export type MerchCategory =
   | 'apparel'
   | 'drinkware'
   | 'accessories'
   | 'stickers'
   | 'other'
 
-export type ShopProductStatus =
+export type MerchStatus =
   | 'concept'
   | 'coming_soon'
   | 'available'
   | 'sold_out'
   | 'discontinued'
 
-export interface ShopProduct {
+export interface Merch {
   id: string
   slug: string
   name: string
   description: string | null
   price_cents: number | null
   image_url: string | null
-  category: ShopProductCategory | null
-  status: ShopProductStatus
+  category: MerchCategory | null
+  status: MerchStatus
   external_url: string | null
   position: number
   created_at: string
   updated_at: string
 }
 
-export const SHOP_CATEGORIES: { slug: ShopProductCategory; label: string; icon: string }[] = [
+export const MERCH_CATEGORIES: { slug: MerchCategory; label: string; icon: string }[] = [
   { slug: 'apparel',     label: 'Apparel',     icon: '👕' },
   { slug: 'drinkware',   label: 'Drinkware',   icon: '🥤' },
   { slug: 'accessories', label: 'Accessories', icon: '🧰' },
@@ -35,7 +35,7 @@ export const SHOP_CATEGORIES: { slug: ShopProductCategory; label: string; icon: 
   { slug: 'other',       label: 'Other',       icon: '📦' },
 ]
 
-export const SHOP_STATUSES: { value: ShopProductStatus; label: string; publiclyVisible: boolean }[] = [
+export const MERCH_STATUSES: { value: MerchStatus; label: string; publiclyVisible: boolean }[] = [
   { value: 'concept',       label: 'Concept (hidden)',      publiclyVisible: false },
   { value: 'coming_soon',   label: 'Coming soon',           publiclyVisible: true  },
   { value: 'available',     label: 'Available',             publiclyVisible: true  },
@@ -48,6 +48,6 @@ export function formatPrice(cents: number | null): string {
   return `$${(cents / 100).toFixed(2)}`
 }
 
-export function getShopCategoryBySlug(slug: string) {
-  return SHOP_CATEGORIES.find((c) => c.slug === slug)
+export function getMerchCategoryBySlug(slug: string) {
+  return MERCH_CATEGORIES.find((c) => c.slug === slug)
 }

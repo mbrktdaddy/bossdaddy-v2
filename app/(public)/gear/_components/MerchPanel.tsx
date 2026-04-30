@@ -2,7 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { EmailSignup } from '@/components/EmailSignup'
-import { SHOP_CATEGORIES, formatPrice, type ShopProduct } from '@/lib/shop'
+import { MERCH_CATEGORIES, formatPrice, type Merch } from '@/lib/merch'
 
 /**
  * MerchPanel — featured "Made by Boss Daddy" section on the unified /gear page.
@@ -16,13 +16,13 @@ export async function MerchPanel() {
   const supabase = await createClient()
 
   const { data } = await supabase
-    .from('shop_products')
+    .from('merch')
     .select('id, name, slug, description, image_url, price_cents, status, category, position, external_url')
     .in('status', ['coming_soon', 'available'])
     .order('position', { ascending: true })
     .limit(3)
 
-  const products = (data ?? []) as ShopProduct[]
+  const products = (data ?? []) as Merch[]
   const isEmpty = products.length === 0
 
   return (
@@ -80,7 +80,7 @@ export async function MerchPanel() {
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <span className="text-6xl opacity-40">
-                          {SHOP_CATEGORIES.find((c) => c.slug === p.category)?.icon ?? '📦'}
+                          {MERCH_CATEGORIES.find((c) => c.slug === p.category)?.icon ?? '📦'}
                         </span>
                       </div>
                     )}
