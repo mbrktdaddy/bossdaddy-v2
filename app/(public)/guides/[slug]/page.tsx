@@ -97,8 +97,8 @@ export default async function GuidePage({ params }: Props) {
 
   return (
     <>
-      <ViewTracker id={guide.id} type="article" />
-      <EngagementTracker contentType="article" contentId={guide.id} />
+      <ViewTracker id={guide.id} type="guide" />
+      <EngagementTracker contentType="guide" contentId={guide.id} />
       <div className="max-w-3xl mx-auto px-6 py-12">
 
         {/* Breadcrumb */}
@@ -203,7 +203,7 @@ export default async function GuidePage({ params }: Props) {
 
         {/* Like + Share */}
         <div className="mt-8 pt-6 flex items-center justify-between flex-wrap gap-4">
-          <LikeButton contentType="article" contentId={guide.id} />
+          <LikeButton contentType="guide" contentId={guide.id} />
           <ShareButtons title={guide.title} />
         </div>
 
@@ -213,9 +213,9 @@ export default async function GuidePage({ params }: Props) {
         {/* Comments */}
         <div className="mt-12">
           <h2 className="text-lg font-black mb-6">Comments</h2>
-          <CommentList contentType="article" contentId={guide.id} />
+          <CommentList contentType="guide" contentId={guide.id} />
           <div className="mt-6">
-            <CommentForm contentType="article" contentId={guide.id} />
+            <CommentForm contentType="guide" contentId={guide.id} />
           </div>
         </div>
 

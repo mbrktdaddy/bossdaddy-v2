@@ -1,7 +1,7 @@
 import * as React from 'react'
 
 interface DigestItem {
-  type: 'review' | 'article'
+  type: 'review' | 'guide'
   title: string
   slug: string
   excerpt: string | null
@@ -27,7 +27,7 @@ const FAINT  = '#6b7280'
 
 export function WeeklyDigestEmail({ email, items, weekLabel, siteUrl = 'https://www.bossdaddylife.com' }: Props) {
   const reviews  = items.filter((i) => i.type === 'review')
-  const articles = items.filter((i) => i.type === 'article')
+  const articles = items.filter((i) => i.type === 'guide')
 
   return (
     <html>
@@ -156,7 +156,7 @@ function ItemRow({ item, siteUrl }: { item: DigestItem; siteUrl: string }) {
               </p>
             )}
             <p style={{ color: ORANGE, fontSize: '12px', fontWeight: 600, margin: '8px 0 0 0' }}>
-              Read {item.type === 'review' ? 'review' : 'article'} →
+              Read {item.type === 'review' ? 'review' : 'guide'} →
             </p>
           </a>
         </td>

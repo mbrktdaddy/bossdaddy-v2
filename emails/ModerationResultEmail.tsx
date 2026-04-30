@@ -1,7 +1,7 @@
 import * as React from 'react'
 
 type Action = 'approve' | 'reject' | 'request_edits'
-type ContentType = 'review' | 'article'
+type ContentType = 'review' | 'guide'
 
 interface Props {
   action: Action

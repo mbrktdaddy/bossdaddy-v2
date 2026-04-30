@@ -239,7 +239,7 @@ export function GuideWorkspace({ guide: article }: Props) {
           title={title}
           category={category}
           content={content}
-          contentType="article"
+          contentType="guide"
           externalInstruction={refineInstruction}
           onExternalInstructionUsed={() => setRefineInstruction('')}
           onRefined={(draft) => {
@@ -283,7 +283,7 @@ export function GuideWorkspace({ guide: article }: Props) {
               <HeroImagePanel
                 imageUrl={imageUrl}
                 onChange={setImageUrl}
-                contentType="article"
+                contentType="guide"
                 title={title}
                 category={category}
                 excerpt={excerpt}
@@ -320,7 +320,7 @@ export function GuideWorkspace({ guide: article }: Props) {
               fallbackTitle={title}
               fallbackDescription={excerpt}
               slug={article.slug}
-              contentType="article"
+              contentType="guide"
               onChangeTitle={setMetaTitle}
               onChangeDescription={setMetaDesc}
             />
@@ -332,11 +332,11 @@ export function GuideWorkspace({ guide: article }: Props) {
               excerpt={excerpt}
               category={category}
               currentId={article.id}
-              contentType="article"
+              contentType="guide"
               content={content}
               onChangeContent={setContent}
             />
-            <SocialPostsPanel contentType="article" contentId={article.id} />
+            <SocialPostsPanel contentType="guide" contentId={article.id} />
           </div>
         </div>
 
@@ -344,7 +344,7 @@ export function GuideWorkspace({ guide: article }: Props) {
         <div className="pt-6 border-t border-gray-800/60">
           <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Admin</p>
           <div className="space-y-6">
-            <VersionHistoryPanel contentType="article" contentId={article.id} />
+            <VersionHistoryPanel contentType="guide" contentId={article.id} />
             <ModerationInfo
               score={article.moderation_score}
               flags={article.moderation_flags ?? []}
