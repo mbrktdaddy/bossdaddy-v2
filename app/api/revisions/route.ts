@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
   if (!revision) return NextResponse.json({ error: 'Revision not found' }, { status: 404 })
 
-  const table = content_type === 'article' ? 'articles' : 'reviews'
+  const table = content_type === 'article' ? 'guides' : 'reviews'
 
   // Snapshot current state FIRST so revert itself creates a restore point
   const { data: currentState } = await admin.from(table).select('*').eq('id', content_id).single()

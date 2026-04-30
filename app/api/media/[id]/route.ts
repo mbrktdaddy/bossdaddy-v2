@@ -111,7 +111,7 @@ export async function DELETE(
     // Fast hero-ref check (exact match only — body refs can't be auto-fixed so don't block)
     const [productRefs, articleRefs, reviewRefs] = await Promise.all([
       admin.from('products').select('id, name, slug', { count: 'exact' }).eq('image_url', asset.url),
-      admin.from('articles').select('id, title, slug, status', { count: 'exact' }).eq('image_url', asset.url),
+      admin.from('guides').select('id, title, slug, status', { count: 'exact' }).eq('image_url', asset.url),
       admin.from('reviews').select('id, title, slug, status', { count: 'exact' }).eq('image_url', asset.url),
     ])
     const totalHeroRefs =
@@ -120,7 +120,7 @@ export async function DELETE(
     if (totalHeroRefs > 0) {
       // Fetch body refs too so the UI can display a full picture
       const [articleBodyRefs, reviewBodyRefs] = await Promise.all([
-        admin.from('articles').select('id, title, slug, status')
+        admin.from('guides').select('id, title, slug, status')
           .neq('image_url', asset.url).ilike('content', `%${asset.url}%`),
         admin.from('reviews').select('id, title, slug, status')
           .neq('image_url', asset.url).ilike('content', `%${asset.url}%`),
@@ -141,7 +141,7 @@ export async function DELETE(
   // Cascade-null all hero references before deleting
   if (confirm) {
     await Promise.all([
-      admin.from('articles').update({ image_url: null }).eq('image_url', asset.url),
+      admin.from('guides').update({ image_url: null }).eq('image_url', asset.url),
       admin.from('reviews').update({ image_url: null }).eq('image_url', asset.url),
       // products.image_url handled below via primary-promotion logic
     ])

@@ -27,7 +27,7 @@ type SortKey = 'updated' | 'created' | 'az'
 
 interface Props {
   items: BulkListItem[]
-  contentType: 'articles' | 'reviews'
+  contentType: 'guides' | 'reviews'
   emptyMessage: string
 }
 
@@ -39,7 +39,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
   const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('updated')
 
-  const publicRoute = contentType === 'articles' ? '/articles' : '/reviews'
+  const publicRoute = contentType === 'guides' ? '/guides' : '/reviews'
 
   const filteredItems = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -188,7 +188,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
                     <div className="w-full h-full flex items-center justify-center text-lg">
                       {contentType === 'reviews' && item.rating !== undefined && item.rating !== null
                         ? <span className="text-sm font-bold text-yellow-400">{item.rating}</span>
-                        : (category?.icon ?? (contentType === 'articles' ? '📝' : '⭐'))}
+                        : (category?.icon ?? (contentType === 'guides' ? '📝' : '⭐'))}
                     </div>
                   )}
                 </div>

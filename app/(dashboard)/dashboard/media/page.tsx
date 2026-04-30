@@ -490,7 +490,7 @@ export default function MediaLibraryPage() {
             {usageData.articles_hero.length > 0 && (
               <UsageSection
                 label="Guide hero"
-                items={usageData.articles_hero.map((a) => ({ id: a.id, label: a.title ?? a.slug, href: `/dashboard/articles/${a.id}`, status: a.status }))}
+                items={usageData.articles_hero.map((a) => ({ id: a.id, label: a.title ?? a.slug, href: `/dashboard/guides/${a.id}`, status: a.status }))}
                 note="hero image will be cleared"
               />
             )}

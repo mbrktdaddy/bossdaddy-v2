@@ -19,17 +19,27 @@ function rewritePublicLegacy(pathname: string): string | null {
 
 // Legacy routes that now redirect to the unified workspace.
 function rewriteLegacyRoute(pathname: string): string | null {
-  // /dashboard/articles/[id]/edit → /dashboard/articles/[id]
-  const articleEdit = pathname.match(/^\/dashboard\/articles\/([^/]+)\/edit\/?$/)
-  if (articleEdit) return `/dashboard/articles/${articleEdit[1]}`
+  // Public /articles/* → /guides/* (SEO 301 redirects)
+  if (pathname === '/articles') return '/guides'
+  const articleSlug = pathname.match(/^\/articles\/([^/]+)\/?$/)
+  if (articleSlug) return `/guides/${articleSlug[1]}`
+
+  // /dashboard/articles/* → /dashboard/guides/*
+  if (pathname === '/dashboard/articles') return '/dashboard/guides'
+  const dashArticle = pathname.match(/^\/dashboard\/articles\/(.+)$/)
+  if (dashArticle) return `/dashboard/guides/${dashArticle[1]}`
+
+  // /dashboard/guides/[id]/edit → /dashboard/guides/[id]
+  const guideEdit = pathname.match(/^\/dashboard\/guides\/([^/]+)\/edit\/?$/)
+  if (guideEdit) return `/dashboard/guides/${guideEdit[1]}`
 
   // /dashboard/reviews/[id]/edit → /dashboard/reviews/[id]
   const reviewEdit = pathname.match(/^\/dashboard\/reviews\/([^/]+)\/edit\/?$/)
   if (reviewEdit) return `/dashboard/reviews/${reviewEdit[1]}`
 
   // /dashboard/moderation/* → unified workspace
-  const modArticle = pathname.match(/^\/dashboard\/moderation\/articles\/([^/]+)\/?$/)
-  if (modArticle) return `/dashboard/articles/${modArticle[1]}`
+  const modGuide = pathname.match(/^\/dashboard\/moderation\/articles\/([^/]+)\/?$/)
+  if (modGuide) return `/dashboard/guides/${modGuide[1]}`
   const modReview = pathname.match(/^\/dashboard\/moderation\/([^/]+)\/?$/)
   if (modReview) return `/dashboard/reviews/${modReview[1]}`
   if (pathname === '/dashboard/moderation' || pathname.startsWith('/dashboard/moderation/')) {
@@ -96,14 +106,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Handle legacy route redirects (before role checks)
-  if (user) {
-    const rewrite = rewriteLegacyRoute(pathname)
-    if (rewrite) {
-      const url = request.nextUrl.clone()
-      url.pathname = rewrite
-      return NextResponse.redirect(url, { status: 308 })
-    }
+  // Handle legacy route redirects — public /articles redirects apply to all users;
+  // dashboard redirects only apply to authenticated users (unauthenticated will be
+  // bounced to /login by the guard above before reaching dashboard paths).
+  const rewrite = rewriteLegacyRoute(pathname)
+  if (rewrite && (user || !pathname.startsWith('/dashboard'))) {
+    const url = request.nextUrl.clone()
+    url.pathname = rewrite
+    return NextResponse.redirect(url, { status: 301 })
   }
 
   // Admin-only dashboard (except profile which is self-serve for any authed user)

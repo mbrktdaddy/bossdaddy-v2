@@ -16,7 +16,7 @@ export async function generateStaticParams() {
  const admin = createAdminClient()
  const [{ data: reviews }, { data: articles }] = await Promise.all([
  admin.from('reviews').select('author_id').eq('status', 'approved').eq('is_visible', true),
- admin.from('articles').select('author_id').eq('status', 'approved').eq('is_visible', true),
+ admin.from('guides').select('author_id').eq('status', 'approved').eq('is_visible', true),
  ])
  const ids = new Set<string>()
  for (const r of reviews ?? []) if (r.author_id) ids.add(r.author_id)
@@ -59,7 +59,7 @@ export default async function AuthorPage({ params }: Props) {
  .order('published_at', { ascending: false })
  .limit(100),
  supabase
- .from('articles')
+ .from('guides')
  .select('id, slug, title, category, excerpt, published_at, reading_time_minutes')
  .eq('author_id', profile.id)
  .eq('status', 'approved')
@@ -157,7 +157,7 @@ export default async function AuthorPage({ params }: Props) {
  return (
  <Link
  key={a.id}
- href={`/articles/${a.slug}`}
+ href={`/guides/${a.slug}`}
  className="flex items-center justify-between p-4 bg-gray-900 rounded-2xl transition-colors group"
  >
  <div className="min-w-0">

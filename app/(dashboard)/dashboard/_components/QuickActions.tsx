@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 const ACTIONS = [
   {
-    href: '/dashboard/articles/new',
+    href: '/dashboard/guides/new',
     label: 'New Guide',
     description: 'AI-first creation wizard',
     icon: (

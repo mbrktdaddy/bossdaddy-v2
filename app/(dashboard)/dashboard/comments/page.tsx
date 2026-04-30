@@ -41,7 +41,7 @@ export default async function CommentsPage({ searchParams }: Props) {
 
   const [{ data: reviewTitles }, { data: articleTitles }] = await Promise.all([
     reviewIds.length  ? admin.from('reviews').select('id, title, slug').in('id', reviewIds)    : Promise.resolve({ data: [] as { id: string; title: string; slug: string }[] }),
-    articleIds.length ? admin.from('articles').select('id, title, slug').in('id', articleIds) : Promise.resolve({ data: [] as { id: string; title: string; slug: string }[] }),
+    articleIds.length ? admin.from('guides').select('id, title, slug').in('id', articleIds) : Promise.resolve({ data: [] as { id: string; title: string; slug: string }[] }),
   ])
 
   const contentMap = new Map<string, { title: string; slug: string; type: string }>([

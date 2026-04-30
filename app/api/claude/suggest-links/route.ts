@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
   // Same-category pool first — that's where topical matches live
   const [{ data: sameCategoryArticles }, { data: sameCategoryReviews }] = await Promise.all([
     admin
-      .from('articles')
+      .from('guides')
       .select('id, title, slug, excerpt, category')
       .eq('status', 'approved')
       .eq('is_visible', true)
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 
   const sameCategoryPool = [
     ...(sameCategoryArticles ?? []).map((a) => ({
-      type: 'article' as const, id: a.id, title: a.title, slug: a.slug, excerpt: a.excerpt ?? '', url: `/articles/${a.slug}`,
+      type: 'article' as const, id: a.id, title: a.title, slug: a.slug, excerpt: a.excerpt ?? '', url: `/guides/${a.slug}`,
     })),
     ...(sameCategoryReviews ?? []).map((r) => ({
       type: 'review' as const, id: r.id, title: r.title, slug: r.slug, excerpt: r.excerpt ?? '', url: `/reviews/${r.slug}`,
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
   if (sameCategoryPool.length < 5) {
     const [{ data: crossArticles }, { data: crossReviews }] = await Promise.all([
       admin
-        .from('articles')
+        .from('guides')
         .select('id, title, slug, excerpt')
         .eq('status', 'approved')
         .eq('is_visible', true)
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     candidates = [
       ...sameCategoryPool,
       ...(crossArticles ?? []).map((a) => ({
-        type: 'article' as const, id: a.id, title: a.title, slug: a.slug, excerpt: a.excerpt ?? '', url: `/articles/${a.slug}`,
+        type: 'article' as const, id: a.id, title: a.title, slug: a.slug, excerpt: a.excerpt ?? '', url: `/guides/${a.slug}`,
       })),
       ...(crossReviews ?? []).map((r) => ({
         type: 'review' as const, id: r.id, title: r.title, slug: r.slug, excerpt: r.excerpt ?? '', url: `/reviews/${r.slug}`,

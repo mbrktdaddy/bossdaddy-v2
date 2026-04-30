@@ -13,7 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .eq('is_visible', true)
       .order('published_at', { ascending: false }),
     supabase
-      .from('articles')
+      .from('guides')
       .select('slug, published_at, updated_at')
       .eq('status', 'approved')
       .eq('is_visible', true)
@@ -28,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }))
 
   const articleUrls: MetadataRoute.Sitemap = (articles ?? []).map((a) => ({
-    url: `${base}/articles/${a.slug}`,
+    url: `${base}/guides/${a.slug}`,
     lastModified: a.updated_at ?? a.published_at,
     changeFrequency: 'monthly',
     priority: 0.7,
@@ -37,7 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: base, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },
     { url: `${base}/reviews`,  lastModified: new Date(), changeFrequency: 'daily',   priority: 0.9 },
-    { url: `${base}/articles`, lastModified: new Date(), changeFrequency: 'daily',   priority: 0.9 },
+    { url: `${base}/guides`, lastModified: new Date(), changeFrequency: 'daily',   priority: 0.9 },
     { url: `${base}/gear`,     lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${base}/shop`,     lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.6 },
     { url: `${base}/about`,    lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },

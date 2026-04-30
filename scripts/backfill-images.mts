@@ -107,7 +107,7 @@ function injectSectionImages(html: string, imageUrls: string[]): string {
 
 async function backfillArticles() {
   const { data: articles, error } = await supabase
-    .from('articles')
+    .from('guides')
     .select('id, title, category, excerpt, content, image_url')
     .eq('status', 'approved')
 
@@ -165,7 +165,7 @@ async function backfillArticles() {
       }
 
       if (Object.keys(updates).length > 0) {
-        await supabase.from('articles').update(updates).eq('id', article.id)
+        await supabase.from('guides').update(updates).eq('id', article.id)
       }
 
     } catch (err) {

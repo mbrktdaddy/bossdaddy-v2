@@ -46,7 +46,7 @@ export function TopPerformers({ items }: { items: TopItem[] }) {
         {visible.map((item, i) => {
           const category = getCategoryBySlug(item.category)
           const percent = Math.round(((item.view_count ?? 0) / max) * 100)
-          const href = item.type === 'article' ? `/dashboard/articles/${item.id}` : `/dashboard/reviews/${item.id}`
+          const href = item.type === 'article' ? `/dashboard/guides/${item.id}` : `/dashboard/reviews/${item.id}`
           return (
             <Link key={`${item.type}-${item.id}`} href={href} className="block px-5 py-3 hover:bg-gray-950/40 transition-colors">
               <div className="flex items-center gap-3">

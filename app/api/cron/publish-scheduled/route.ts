@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
   // Find items whose scheduled time has arrived and are not yet live
   const [{ data: dueArticles }, { data: dueReviews }] = await Promise.all([
     admin
-      .from('articles')
+      .from('guides')
       .select('id, slug')
       .not('scheduled_publish_at', 'is', null)
       .lte('scheduled_publish_at', now)
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
 
   if (articleIds.length) {
     const { error, count } = await admin
-      .from('articles')
+      .from('guides')
       .update({
         status:               'approved',
         published_at:         now,
@@ -78,8 +78,8 @@ export async function GET(request: NextRequest) {
   // Revalidate public pages that might have changed
   if (articlesPublished > 0) {
     revalidatePath('/')
-    revalidatePath('/articles')
-    ;(dueArticles ?? []).forEach((a) => a.slug && revalidatePath(`/articles/${a.slug}`))
+    revalidatePath('/guides')
+    ;(dueArticles ?? []).forEach((a) => a.slug && revalidatePath(`/guides/${a.slug}`))
   }
   if (reviewsPublished > 0) {
     revalidatePath('/')

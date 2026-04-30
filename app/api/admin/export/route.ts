@@ -16,7 +16,7 @@ export async function GET(_request: NextRequest) {
   const admin = createAdminClient()
 
   const [{ data: articles }, { data: reviews }, { data: media }, { data: comments }] = await Promise.all([
-    admin.from('articles').select('*').order('created_at', { ascending: true }),
+    admin.from('guides').select('*').order('created_at', { ascending: true }),
     admin.from('reviews').select('*').order('created_at', { ascending: true }),
     admin.from('media_assets').select('*').order('created_at', { ascending: true }),
     admin.from('comments').select('*').order('created_at', { ascending: true }),

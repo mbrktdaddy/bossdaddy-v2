@@ -37,7 +37,7 @@ export default async function ProfilePage() {
   ] = await Promise.all([
     supabase.from('reviews').select('id', { count: 'exact', head: true })
       .eq('author_id', user.id).eq('status', 'approved'),
-    supabase.from('articles').select('id', { count: 'exact', head: true })
+    supabase.from('guides').select('id', { count: 'exact', head: true })
       .eq('author_id', user.id).eq('status', 'approved'),
     supabase.from('comments').select('id', { count: 'exact', head: true })
       .eq('author_id', user.id),
@@ -48,7 +48,7 @@ export default async function ProfilePage() {
     supabase.from('likes').select('id', { count: 'exact', head: true })
       .eq('user_id', user.id),
     supabase.from('reviews').select('id').eq('author_id', user.id),
-    supabase.from('articles').select('id').eq('author_id', user.id),
+    supabase.from('guides').select('id').eq('author_id', user.id),
     supabase.from('comments').select('id').eq('author_id', user.id),
     // Most recently liked reviews (ID list, ordered by like date)
     supabase.from('likes').select('content_id, created_at')
@@ -91,7 +91,7 @@ export default async function ProfilePage() {
           .in('id', likedReviewIds).eq('status', 'approved').eq('is_visible', true)
       : Promise.resolve({ data: [] }),
     likedArticleIds.length
-      ? supabase.from('articles').select('id, slug, title')
+      ? supabase.from('guides').select('id, slug, title')
           .in('id', likedArticleIds).eq('status', 'approved').eq('is_visible', true)
       : Promise.resolve({ data: [] }),
   ])
@@ -280,7 +280,7 @@ export default async function ProfilePage() {
             {orderedLikedArticles.map((a) => a && (
               <Link
                 key={a.id}
-                href={`/articles/${a.slug}`}
+                href={`/guides/${a.slug}`}
                 className="flex items-center gap-3 p-3 bg-gray-950 border border-gray-800 hover:border-orange-700/50 rounded-xl transition-colors group"
               >
                 <span className="text-xs px-2 py-0.5 rounded-full bg-blue-950/60 text-blue-400 border border-blue-900/60 shrink-0">
@@ -327,7 +327,7 @@ export default async function ProfilePage() {
               </svg>
             </Link>
             <Link
-              href="/dashboard/articles"
+              href="/dashboard/guides"
               className="flex items-center justify-between p-3 bg-gray-950 border border-gray-800 hover:border-gray-700 rounded-xl transition-colors group"
             >
               <span className="text-sm text-gray-300 group-hover:text-white transition-colors">Manage articles</span>

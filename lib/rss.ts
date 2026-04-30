@@ -56,7 +56,7 @@ export async function fetchFeedItems(opts: FeedOptions = {}): Promise<FeedItem[]
     .limit(limit)
 
   const articlesQuery = supabase
-    .from('articles')
+    .from('guides')
     .select('slug, title, excerpt, content, category, image_url, published_at, profiles(username)')
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -133,7 +133,7 @@ export function buildRssXml(meta: FeedMeta, items: FeedItem[], opts: FeedOptions
 
   const rssItems = items
     .map((item) => {
-      const path = item.type === 'review' ? `/reviews/${item.slug}` : `/articles/${item.slug}`
+      const path = item.type === 'review' ? `/reviews/${item.slug}` : `/guides/${item.slug}`
       const url = `${SITE_URL}${path}`
       const cat = getCategoryLabel(item.category)
       const titleSuffix = item.type === 'review' && item.rating != null ? ` — ${item.rating}/10` : ''
