@@ -11,7 +11,7 @@ export default function NewArticlePage() {
         All articles
       </Link>
       <div className="mb-6">
-        <h1 className="text-2xl font-black">New Article</h1>
+        <h1 className="text-2xl font-black">New Guide</h1>
         <p className="text-gray-500 text-sm mt-1">Describe your idea, generate the full draft, then edit in the workspace.</p>
       </div>
       <ArticleCreateWizard />

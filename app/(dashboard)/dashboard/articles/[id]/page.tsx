@@ -25,7 +25,7 @@ export default async function ArticleWorkspacePage({
           </svg>
           All articles
         </Link>
-        <p className="text-red-400">Article not found. It may have been deleted.</p>
+        <p className="text-red-400">Guide not found. It may have been deleted.</p>
       </div>
     )
   }

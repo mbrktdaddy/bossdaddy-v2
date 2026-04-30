@@ -55,7 +55,7 @@ export default function ReviewCard({ review: r, priority = false }: { review: Re
               ? new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
               : ''}
           </span>
-          <span className="text-xs text-orange-500 font-medium">Read review →</span>
+          <span className="text-xs text-orange-500 font-medium">Read review</span>
         </div>
       </div>
     </Link>

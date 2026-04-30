@@ -71,7 +71,7 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
                       ? 'bg-blue-950/40 text-blue-400 border-blue-900/40'
                       : 'bg-orange-950/40 text-orange-400 border-orange-900/40'
                   }`}>
-                    {item.type === 'article' ? 'Article' : 'Review'}
+                    {item.type === 'article' ? 'Guide' : 'Review'}
                   </span>
                   {category && <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>}
                   <span className="text-xs text-gray-600">{timeAgo(item.created_at)}</span>

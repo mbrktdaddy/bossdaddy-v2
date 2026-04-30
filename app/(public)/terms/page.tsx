@@ -132,13 +132,13 @@ export default function TermsPage() {
 
  <h2>7. Our Content</h2>
  <p>
- Original content on this Site — reviews, articles, images, graphics, the Boss
+ Original content on this Site — reviews, guides, images, graphics, the Boss
  Daddy Life name and brand — belongs to or is licensed to Boss Daddy LLC and is
  protected by U.S. copyright, trademark, and other intellectual property laws.
  </p>
  <p>
  Linking to our content and quoting short excerpts with attribution is permitted.
- Republishing full reviews or articles without written permission is not. Nothing
+ Republishing full reviews or guides without written permission is not. Nothing
  in these Terms grants you any right to use our trademarks, service marks, or
  trade names without prior written consent.
  </p>

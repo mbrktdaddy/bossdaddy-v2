@@ -227,7 +227,7 @@ export function ArticleCreateWizard() {
   }
 
   if (step === 'generating' || step === 'saving') {
-    const label = step === 'generating' ? '✍️ Writing full article with Claude…' : '💾 Saving draft…'
+    const label = step === 'generating' ? '✍️ Writing full guide with Claude…' : '💾 Saving draft…'
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <div className="w-8 h-8 border-4 border-gray-800 border-t-orange-500 rounded-full animate-spin" />
@@ -350,7 +350,7 @@ export function ArticleCreateWizard() {
             type="text"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            placeholder="What's this article about?"
+            placeholder="What's this guide about?"
             className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
         </div>
@@ -452,7 +452,7 @@ export function ArticleCreateWizard() {
               <p className="text-xs text-gray-600">
                 {selectedSlugs.length === 0
                   ? 'Leave empty to skip affiliate links. Each selection embeds one [[BUY:slug]] into the draft.'
-                  : `${selectedSlugs.length} selected — Claude will embed one affiliate link per product, spaced across the article.`}
+                  : `${selectedSlugs.length} selected — Claude will embed one affiliate link per product, spaced across the guide.`}
               </p>
             </div>
           )}

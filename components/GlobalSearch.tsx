@@ -118,7 +118,7 @@ export default function GlobalSearch() {
             <>
               {results.articles.length > 0 && (
                 <div className="px-2 pt-3">
-                  <p className="px-2 text-xs text-gray-600 uppercase tracking-wider font-semibold mb-1">Articles</p>
+                  <p className="px-2 text-xs text-gray-600 uppercase tracking-wider font-semibold mb-1">Guides</p>
                   {results.articles.map((a, i) => {
                     const flatIdx = i
                     return (

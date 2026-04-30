@@ -103,7 +103,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
                     href={`/reviews?category=${cat.slug}`}
                     className="self-end shrink-0 text-xs text-gray-500 hover:text-orange-400 transition-colors uppercase tracking-widest font-semibold"
                   >
-                    View all {total} →
+                    View all {total}
                   </Link>
                 )}
               </div>

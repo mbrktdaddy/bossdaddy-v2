@@ -15,7 +15,7 @@ export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'Boss Daddy Life — Dad Like a Boss',
-  description: 'Honest gear reviews, real dad skills, and a brotherhood for men who show up every day. Zero sponsors. Zero fluff. Real dads + smart tech.',
+  description: 'Honest gear reviews, real-dad guides, and smart-tech advice for men who show up every day. Zero sponsors. Zero fluff. Real dads + smart tech.',
   alternates: { canonical: '/' },
 }
 
@@ -69,24 +69,23 @@ export default async function HomePage() {
           }}
         />
         <div className="relative max-w-4xl mx-auto px-6 py-24 md:py-32 text-center">
-          <div className="inline-flex items-center gap-2 bg-orange-950/50 border border-orange-800/50 rounded-full px-4 py-1.5 text-xs text-orange-400 font-medium mb-8">
-            <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-            Zero Sponsors. Zero Fluff. 100% Real.
-          </div>
           <h1 className="text-6xl md:text-[7.5rem] leading-[0.92] tracking-tight mb-6 text-white">
             Dad Like
             <br />
             <span className="text-orange-500">a Boss.</span>
           </h1>
-          <p className="text-gray-400 text-base md:text-lg leading-relaxed mb-10 max-w-xl mx-auto">
-            Honest gear reviews and real-dad skills — for men who actually show up.
+          <p className="text-[11px] md:text-xs uppercase tracking-[0.25em] font-bold text-orange-500 mb-5">
+            Real Dads <span className="text-orange-800 mx-2">·</span> Real Reviews <span className="text-orange-800 mx-2">·</span> Smart Tech
+          </p>
+          <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-10 max-w-2xl mx-auto">
+            Gear, reviews, and guides for the Boss Dads who show up every single day.
           </p>
           <div className="flex items-center justify-center gap-3">
             <Link href="/reviews" className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-2xl transition-colors">
               Browse Reviews
             </Link>
             <Link href="/articles" className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white font-semibold rounded-2xl transition-colors">
-              Read the Blog →
+              Browse Guides
             </Link>
           </div>
         </div>
@@ -108,7 +107,7 @@ export default async function HomePage() {
               </div>
             </div>
             <Link href="/reviews" className="hidden sm:inline-flex items-center self-end text-xs text-gray-500 hover:text-orange-400 transition-colors uppercase tracking-widest font-semibold">
-              All Reviews →
+              All Reviews
             </Link>
           </div>
           <Link
@@ -154,7 +153,7 @@ export default async function HomePage() {
                 <span className="text-sm text-gray-500">
                   {reviews[0].published_at ? new Date(reviews[0].published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
                 </span>
-                <span className="text-sm text-orange-500 font-semibold">Read review →</span>
+                <span className="text-sm text-orange-500 font-semibold">Read review</span>
               </div>
             </div>
           </Link>
@@ -172,7 +171,7 @@ export default async function HomePage() {
                 <span className="text-xs font-black uppercase tracking-widest text-orange-500">On Deck</span>
               </div>
               <Link href="/wishlist" className="text-xs text-gray-500 hover:text-orange-400 transition-colors font-medium">
-                Vote on what&apos;s next →
+                Vote on what&apos;s next
               </Link>
             </div>
             <div className="flex gap-4 overflow-x-auto scrollbar-hide sm:overflow-visible sm:grid sm:grid-cols-3">
@@ -256,7 +255,7 @@ export default async function HomePage() {
             <p className="text-gray-500 text-sm mt-1">Bought, tested, and Boss Daddy Approved</p>
           </div>
           <Link href="/reviews" className="text-sm text-orange-400 hover:text-orange-300 transition-colors">
-            View all →
+            View all
           </Link>
         </div>
 
@@ -310,7 +309,7 @@ export default async function HomePage() {
                         <span className="text-xs text-gray-600">
                           {r.published_at ? new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
                         </span>
-                        <span className="text-xs text-orange-500 font-medium">Read review →</span>
+                        <span className="text-xs text-orange-500 font-medium">Read review</span>
                       </div>
                     </div>
                   </Link>
@@ -357,7 +356,7 @@ export default async function HomePage() {
               href="/reviews"
               className="shrink-0 px-8 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-2xl transition-colors"
             >
-              Shop the List →
+              Shop the List
             </Link>
           </div>
 

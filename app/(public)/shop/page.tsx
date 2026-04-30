@@ -150,7 +150,7 @@ export default async function ShopPage({ searchParams }: Props) {
                       {p.price_cents != null ? formatPrice(p.price_cents) : '—'}
                     </span>
                     <span className="text-xs text-gray-500">
-                      {isAvailable ? 'Buy →' : 'Notify me →'}
+                      {isAvailable ? 'Buy' : 'Notify me'}
                     </span>
                   </div>
                 </div>
@@ -182,7 +182,7 @@ export default async function ShopPage({ searchParams }: Props) {
         </div>
       )}
 
-      {/* In the meantime → /gear callout */}
+      {/* In the meantime /gear callout */}
       <div className="mt-16 bg-gray-900 rounded-2xl p-6 sm:p-8 text-center shadow-xl shadow-black/40">
         <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">In the meantime</p>
         <h3 className="text-xl font-black mb-2">See what Boss Daddy actually uses</h3>
@@ -193,7 +193,7 @@ export default async function ShopPage({ searchParams }: Props) {
           href="/gear"
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold rounded-2xl transition-colors"
         >
-          Browse the gear list →
+          Browse the gear list
         </Link>
       </div>
 

@@ -52,7 +52,7 @@ export default function ArticleCard({ article: a, priority = false }: { article:
             {a.reading_time_minutes && (
               <span className="text-xs text-gray-500">{a.reading_time_minutes} min read</span>
             )}
-            <span className="text-xs text-orange-500 font-medium">Read →</span>
+            <span className="text-xs text-orange-500 font-medium">Read guide</span>
           </div>
         </div>
       </div>

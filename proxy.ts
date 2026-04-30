@@ -9,6 +9,14 @@ function isAdminRoute(pathname: string) {
   return pathname.startsWith('/dashboard') && !pathname.startsWith('/dashboard/profile')
 }
 
+// Public legacy redirects (work for unauthenticated users too).
+function rewritePublicLegacy(pathname: string): string | null {
+  // /shop and /shop/* → /gear (Shop unified into the Gear page)
+  if (pathname === '/shop' || pathname === '/shop/') return '/gear'
+  if (pathname.startsWith('/shop/')) return '/gear'
+  return null
+}
+
 // Legacy routes that now redirect to the unified workspace.
 function rewriteLegacyRoute(pathname: string): string | null {
   // /dashboard/articles/[id]/edit → /dashboard/articles/[id]
@@ -71,6 +79,14 @@ export async function proxy(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl
+
+  // Public legacy redirects (run before any auth checks — works for guests)
+  const publicRewrite = rewritePublicLegacy(pathname)
+  if (publicRewrite) {
+    const url = request.nextUrl.clone()
+    url.pathname = publicRewrite
+    return NextResponse.redirect(url, { status: 301 })
+  }
 
   // Redirect unauthenticated users away from protected routes
   if (pathname.startsWith('/dashboard') && !user) {

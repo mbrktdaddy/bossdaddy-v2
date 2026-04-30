@@ -21,7 +21,7 @@ export default async function AboutPage() {
 
  const STATS = [
  { value: String(reviewCount ?? 0), label: 'Products reviewed' },
- { value: String(articleCount ?? 0), label: 'Articles written' },
+ { value: String(articleCount ?? 0), label: 'Guides written' },
  { value: '100%', label: 'Firsthand tested' },
  { value: '$0', label: 'Paid placements' },
  ]
@@ -100,7 +100,7 @@ export default async function AboutPage() {
  </p>
  <p>
  I got tired of the fluff, the fake reviews, and the brand-sponsored noise. So I built
- Boss Daddy as the place where real dads can go for reviews, articles, and gear from a
+ Boss Daddy as the place where real dads can go for reviews, guides, and gear from a
  real dad in the trenches — no fluff, no paid placements, no compromises.
  </p>
  <p>
@@ -117,10 +117,10 @@ export default async function AboutPage() {
  the most comprehensive, up-to-date, and useful information possible, we also put AI to
  work for you. We use advanced AI analysis, research models, and tools to dig through
  specs, compare data, and surface the latest testing results — to create the most
- comprehensive reviews, articles, and guides on the internet.
+ comprehensive reviews and guides on the internet.
  </p>
  <p>
- Every article, every review, and every recommendation still gets personally approved by
+ Every guide, every review, and every recommendation still gets personally approved by
  the Boss Daddy team. Whether you&apos;re shopping for a new grill, hunting for kid gear,
  buying a new tool, or just looking for guidance on a home improvement project — Boss
  Daddy uses every tool available to make sure you get straight answers from guys who
@@ -217,7 +217,7 @@ export default async function AboutPage() {
  Browse Reviews
  </Link>
  <Link href="/articles" className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-2xl transition-colors text-sm">
- Read Articles
+ Browse Guides
  </Link>
  </div>
  </div>

@@ -150,7 +150,7 @@ export default async function AuthorPage({ params }: Props) {
  {/* Articles */}
  {totalArticles > 0 && (
  <div>
- <h2 className="text-lg font-black mb-5">Articles</h2>
+ <h2 className="text-lg font-black mb-5">Guides</h2>
  <div className="space-y-2">
  {articles!.map((a) => {
  const cat = getCategoryBySlug(a.category)

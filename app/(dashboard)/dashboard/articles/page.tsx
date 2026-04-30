@@ -43,7 +43,7 @@ export default async function MyArticlesPage({ searchParams }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between mb-6 sm:mb-8">
         <div>
-          <h1 className="text-2xl font-black">My Articles</h1>
+          <h1 className="text-2xl font-black">My Guides</h1>
           <p className="text-gray-500 text-sm mt-1">Guides, how-tos, and dad wisdom</p>
         </div>
         <Link

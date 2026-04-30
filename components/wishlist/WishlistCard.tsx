@@ -58,7 +58,7 @@ export function WishlistCard({ item }: Props) {
               href={`/wishlist/${item.slug}`}
               className="text-xs font-semibold text-orange-400 hover:text-orange-300 transition-colors"
             >
-              Read review →
+              Read review
             </Link>
           ) : item.affiliate_url && item.store ? (
             <a
@@ -67,11 +67,11 @@ export function WishlistCard({ item }: Props) {
               rel="sponsored nofollow noopener"
               className="text-xs font-semibold text-orange-400 hover:text-orange-300 transition-colors"
             >
-              {getBuyLabel(item.store, item.custom_store_name)} →
+              {getBuyLabel(item.store, item.custom_store_name)}
             </a>
           ) : (
             <Link href={`/wishlist/${item.slug}`} className="text-xs font-semibold text-zinc-500 hover:text-zinc-300 transition-colors">
-              Vote →
+              Vote
             </Link>
           )}
         </div>

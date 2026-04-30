@@ -3,7 +3,7 @@ import Link from 'next/link'
 const ACTIONS = [
   {
     href: '/dashboard/articles/new',
-    label: 'New Article',
+    label: 'New Guide',
     description: 'AI-first creation wizard',
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -8,10 +8,9 @@ import { createClient } from '@/lib/supabase/client'
 const NAV_LINKS = [
   { href: '/',         label: 'Home' },
   { href: '/reviews',  label: 'Reviews' },
-  { href: '/articles', label: 'Articles' },
+  { href: '/articles', label: 'Guides' },
   { href: '/wishlist', label: 'Wishlist' },
   { href: '/gear',     label: 'Gear' },
-  { href: '/shop',     label: 'Shop' },
   { href: '/about',    label: 'About' },
 ]
 
@@ -152,7 +151,7 @@ export default function Header() {
                 <input
                   name="q"
                   type="search"
-                  placeholder="Search reviews and articles..."
+                  placeholder="Search reviews and guides..."
                   className="w-full pl-8 pr-3 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 transition-colors"
                 />
                 <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

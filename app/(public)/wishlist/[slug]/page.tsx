@@ -143,7 +143,7 @@ export default async function WishlistDetailPage({ params }: Props) {
                 href={linkedReviewSlug ? `/reviews/${linkedReviewSlug}` : '/reviews'}
                 className="inline-flex items-center gap-2 px-5 py-3 bg-orange-600 hover:bg-orange-500 text-white text-sm font-bold rounded-2xl transition-colors"
               >
-                Read the full review →
+                Read the full review
               </Link>
             </div>
           ) : (

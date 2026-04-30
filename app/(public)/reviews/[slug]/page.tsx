@@ -351,7 +351,7 @@ export default async function ReviewPage({ params }: Props) {
                 className="mt-4 pt-4 flex items-center gap-2 text-xs text-gray-400 hover:text-orange-400 transition-colors"
               >
                 <span>{category.icon}</span>
-                <span>More {category.label} reviews →</span>
+                <span>More {category.label} reviews</span>
               </Link>
             )}
           </div>

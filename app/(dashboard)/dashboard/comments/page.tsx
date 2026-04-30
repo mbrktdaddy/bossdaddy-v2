@@ -105,7 +105,7 @@ export default async function CommentsPage({ searchParams }: Props) {
                       ? 'bg-orange-950/40 text-orange-400 border-orange-900/30'
                       : 'bg-blue-950/40 text-blue-400 border-blue-900/30'
                   }`}>
-                    {c.content_type === 'review' ? 'Review' : 'Article'}
+                    {c.content_type === 'review' ? 'Review' : 'Guide'}
                   </span>
                   <span className="text-xs text-gray-500">by @{author}</span>
                   <span className="text-xs text-gray-700">

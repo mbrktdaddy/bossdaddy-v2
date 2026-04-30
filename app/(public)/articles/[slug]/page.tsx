@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const data = await getArticle(slug)
 
-  if (!data) return { title: 'Article Not Found' }
+  if (!data) return { title: 'Guide Not Found' }
 
   const pageTitle       = data.meta_title?.trim()       || data.title
   const pageDescription = data.meta_description?.trim() || data.excerpt || undefined
@@ -103,7 +103,7 @@ export default async function ArticlePage({ params }: Props) {
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-3 text-sm text-gray-400 mb-8 flex-wrap">
-          <Link href="/articles" className="py-2 inline-block hover:text-white transition-colors">← Articles</Link>
+          <Link href="/articles" className="py-2 inline-block hover:text-white transition-colors">← Guides</Link>
           {category && (
             <>
               <span className="text-gray-700">/</span>
@@ -178,7 +178,7 @@ export default async function ArticlePage({ params }: Props) {
         {/* Bottom CTA — email signup */}
         <div className="mt-12 pt-8">
           <div className="bg-gradient-to-br from-gray-900 to-gray-950 rounded-2xl p-6 sm:p-8 text-center shadow-xl shadow-black/40">
-            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Liked this article?</p>
+            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Liked this guide?</p>
             <h3 className="text-xl font-black mb-2">Get the next one in your inbox</h3>
             <p className="text-sm text-gray-400 mb-5 max-w-md mx-auto">
               One email when there&apos;s actually something worth saying. Plus dad-tested gear picks before they go up.
@@ -196,7 +196,7 @@ export default async function ArticlePage({ params }: Props) {
               href="/reviews"
               className="inline-block mt-5 text-sm text-orange-500 hover:text-orange-400 font-medium transition-colors"
             >
-              Or browse the review catalog →
+              Or browse the review catalog
             </Link>
           </div>
         </div>
@@ -222,7 +222,7 @@ export default async function ArticlePage({ params }: Props) {
         {/* Related articles */}
         {related && related.length > 0 && (
           <div className="mt-12">
-            <h2 className="text-lg font-black mb-4">More Articles</h2>
+            <h2 className="text-lg font-black mb-4">More Guides</h2>
             <div className="space-y-2">
               {related.map((a) => (
                 <Link

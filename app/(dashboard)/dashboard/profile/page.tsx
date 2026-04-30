@@ -193,7 +193,7 @@ export default async function ProfilePage() {
               </div>
               <div className="text-center">
                 <p className="text-2xl font-black text-white">{articleCount ?? 0}</p>
-                <p className="text-xs text-gray-500 mt-1">Published Articles</p>
+                <p className="text-xs text-gray-500 mt-1">Published Guides</p>
               </div>
             </>
           )}

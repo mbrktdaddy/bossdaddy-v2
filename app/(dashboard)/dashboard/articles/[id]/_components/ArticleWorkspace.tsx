@@ -138,7 +138,7 @@ export function ArticleWorkspace({ article }: Props) {
   }
 
   async function handleDelete() {
-    if (!confirm('Delete this article permanently? This cannot be undone.')) return
+    if (!confirm('Delete this guide permanently? This cannot be undone.')) return
     setDeleting(true); setErr(null)
     const res = await fetch(`/api/articles/${article.id}`, { method: 'DELETE' })
     if (!res.ok) {
@@ -177,7 +177,7 @@ export function ArticleWorkspace({ article }: Props) {
 
       <WorkspaceHeader
         backHref="/dashboard/articles"
-        backLabel="All articles"
+        backLabel="All guides"
         title={title || 'Untitled'}
         subtitle={`Created ${createdAt}${article.reading_time_minutes ? ` · ${article.reading_time_minutes} min read` : ''}`}
         rightSlot={

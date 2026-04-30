@@ -50,7 +50,7 @@ export default function AffiliateDisclosurePage() {
  <li>Direct brand affiliate programs</li>
  </ul>
  <p>
- Affiliate links appear in reviews, articles, and buying guides. Where they appear,
+ Affiliate links appear in reviews and guides. Where they appear,
  you&apos;ll see a disclosure at the top of that page.
  </p>
 

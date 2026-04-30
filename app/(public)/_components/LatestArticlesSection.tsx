@@ -18,11 +18,11 @@ export async function LatestArticlesSection() {
     <section className="max-w-6xl mx-auto px-6 py-16">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-2xl font-black text-white">From the Blog</h2>
-          <p className="text-gray-500 text-sm mt-1">Guides, skills, and dad wisdom</p>
+          <h2 className="text-2xl font-black text-white">Latest Guides</h2>
+          <p className="text-gray-500 text-sm mt-1">Skills, builds, and dad wisdom</p>
         </div>
         <Link href="/articles" className="text-sm text-orange-400 hover:text-orange-300 transition-colors">
-          View all →
+          View all
         </Link>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -66,7 +66,7 @@ export async function LatestArticlesSection() {
                   {a.reading_time_minutes && (
                     <span className="text-xs text-gray-600">{a.reading_time_minutes} min read</span>
                   )}
-                  <span className="text-xs text-orange-500 font-medium">Read →</span>
+                  <span className="text-xs text-orange-500 font-medium">Read</span>
                 </div>
               </div>
             </div>

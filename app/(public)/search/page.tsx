@@ -120,7 +120,7 @@ export default async function SearchPage({ searchParams }: Props) {
  {/* Article results */}
  {(articles?.length ?? 0) > 0 && (
  <div>
- <p className="text-xs text-orange-500 font-semibold uppercase tracking-widest mb-3">Articles</p>
+ <p className="text-xs text-orange-500 font-semibold uppercase tracking-widest mb-3">Guides</p>
  <div className="space-y-2">
  {articles!.map((a) => {
  const cat = getCategoryBySlug(a.category)
@@ -140,7 +140,7 @@ export default async function SearchPage({ searchParams }: Props) {
  <p className="font-semibold text-sm group-hover:text-orange-400 transition-colors">{a.title}</p>
  {a.excerpt && <p className="text-gray-500 text-xs mt-1 line-clamp-1">{a.excerpt}</p>}
  </div>
- <span className="text-xs text-orange-500 font-medium ml-4 shrink-0">Read →</span>
+ <span className="text-xs text-orange-500 font-medium ml-4 shrink-0">Read</span>
  </Link>
  )
  })}

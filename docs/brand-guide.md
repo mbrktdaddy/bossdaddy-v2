@@ -1,7 +1,25 @@
 # Boss Daddy — Brand Guide
 
 > Single source of truth for the Boss Daddy v2 design system. Update this file when design decisions change.
-> Last revised: 2026-04-29
+> Last revised: 2026-04-30
+
+## 0. Naming & Vocabulary
+
+User-facing content types are referred to consistently as:
+
+| User-facing term | What it covers | Code/internal term |
+|---|---|---|
+| **Reviews** | Product reviews | `reviews` table, `Review*` types |
+| **Guides** | All long-form editorial — how-tos, skills, advice, articles | `articles` table, `Article*` types (kept for now) |
+| **Wishlist** | Pipeline of products being considered/tested | `wishlist_items` table |
+| **Shop** | Boss Daddy branded merch | `shop_products` table |
+| **Gear** | Curated gear list (the items I personally use) | `/gear` route |
+
+**Important rules:**
+- The user-facing term is **always "Guides"** in nav, headings, buttons, metadata, search results, dashboard labels, and any visible UI string.
+- The internal table/type/variable names remain `article` / `articles` / `Article*` — renaming the DB schema is a separate, deliberate refactor.
+- Never use the word "Blog" in user-facing copy. The site doesn't have a blog; it has Guides.
+- When introducing new copy, prefer "guide" / "guides" (lowercase in body, title-case in headings/labels).
 
 ---
 
@@ -282,10 +300,17 @@ No dashed borders. Soft panel that reads as "this is intentional" not "this is b
 - Centered hero with hybrid radial+linear orange gradient.
 - Story-led narrative: Hero → Featured Review → Stats (inline-removed) → On Deck → Articles → Categories → More Reviews → Shop → Newsletter → Closing.
 
-### Listing pages (`/reviews`, `/articles`, `/shop`, `/wishlist`, `/gear`)
+### Listing pages (`/reviews`, `/articles`, `/wishlist`, `/gear`)
 - Page header pattern: eyebrow + h1 + count line. No hero gradient.
 - Filter pills below header (where applicable).
 - Section openers use the vertical orange rule pattern.
+
+### `/gear` — unified Gear + Merch page
+- "Shop" is **not** a separate top-level concept. The unified `/gear` page hosts both:
+  1. **Boss Daddy Approved Gear** — the curated top-rated picks from reviews (rating ≥ 8.0). The substance.
+  2. **Made by Boss Daddy** — featured panel for branded merch, sits between the category filter and the gear grid. Renders a tight coming-soon callout when no merch is live; renders a 3-up product grid when products are available.
+- Hero copy: *"Boss Daddy Approved Gear"* H1 + *"Field-tested by a real dad. And, soon, made by one."* tagline.
+- `/shop` 301-redirects to `/gear` for SEO + bookmark continuity.
 
 ### Detail pages (`/reviews/[slug]`, `/articles/[slug]`)
 - Article header with rating + meta (no border-b under it — spacing carries).
