@@ -38,8 +38,8 @@ interface GuideData {
   slug: string | null
   moderation_score: number | null
   moderation_flags: string[] | null
-  created_at: string
-  updated_at: string
+  created_at: string | null
+  updated_at: string | null
   reading_time_minutes: number | null
   rejection_reason: string | null
   meta_title: string | null
@@ -170,7 +170,7 @@ export function GuideWorkspace({ guide: article }: Props) {
   })
 
   const previewUrl = isPublished && article.slug ? `/guides/${article.slug}` : null
-  const createdAt  = new Date(article.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  const createdAt  = new Date(article.created_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 
   return (
     <div className="p-4 sm:p-8 max-w-4xl">

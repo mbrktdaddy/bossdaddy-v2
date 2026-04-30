@@ -57,7 +57,7 @@ export default async function DashboardHome() {
     .sort((a, b) => {
       const scoreDiff = (b.moderation_score ?? 0) - (a.moderation_score ?? 0)
       if (scoreDiff !== 0) return scoreDiff
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      return new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime()
     })
     .slice(0, 10)
 

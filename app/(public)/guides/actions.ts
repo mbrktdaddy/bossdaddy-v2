@@ -1,5 +1,6 @@
 'use server'
 import { createClient } from '@/lib/supabase/server'
+import type { CategorySlug } from '@/lib/categories'
 
 export type GuideRow = {
   id: string
@@ -23,7 +24,8 @@ export async function loadMoreGuides(category: string, page: number): Promise<Gu
     .select('id, slug, title, category, excerpt, image_url, published_at, reading_time_minutes')
     .eq('status', 'approved')
     .eq('is_visible', true)
-    .eq('category', category)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .eq('category', category as any)
     .order('published_at', { ascending: false })
     .range(from, to)
   return (data ?? []) as GuideRow[]

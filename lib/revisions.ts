@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import type { Json } from '@/lib/supabase/database.types'
 
 type ContentType = 'guide' | 'review'
 
@@ -35,7 +36,7 @@ export async function snapshotRevision(
       content_type:   contentType,
       content_id:     contentId,
       version_number: nextVersion,
-      snapshot,
+      snapshot:       snapshot as unknown as Json,
       created_by:     createdBy,
     })
 

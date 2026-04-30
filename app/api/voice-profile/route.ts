@@ -84,5 +84,5 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: `Save failed: ${error.message}` }, { status: 500 })
   }
 
-  return NextResponse.json({ profile: data as VoiceProfile })
+  return NextResponse.json({ profile: data as unknown as VoiceProfile })
 }

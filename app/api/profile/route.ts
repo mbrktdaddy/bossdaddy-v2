@@ -40,7 +40,7 @@ export async function PUT(request: NextRequest) {
 
   const { error } = await supabase
     .from('profiles')
-    .update(updates)
+    .update(updates as never) // Zod-validated — safe to cast
     .eq('id', user.id)
 
   if (error) {

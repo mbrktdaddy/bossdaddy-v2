@@ -127,7 +127,7 @@ export default async function HomePage() {
                 <span className="absolute top-4 left-4 bg-orange-600 text-white px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-black/40">
                   Featured
                 </span>
-                {reviews[0].rating >= 8 && (
+                {(reviews[0].rating ?? 0) >= 8 && (
                   <div className="absolute top-4 right-4">
                     <BossApprovedBadge size="sm" variant="card" />
                   </div>
@@ -139,7 +139,7 @@ export default async function HomePage() {
                 <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
                   {reviews[0].product_name}
                 </span>
-                <RatingScore rating={reviews[0].rating} />
+                <RatingScore rating={reviews[0].rating ?? 0} />
               </div>
               <h3 className="text-2xl md:text-3xl font-black leading-tight mb-3 text-white group-hover:text-orange-400 transition-colors">
                 {reviews[0].title}
@@ -285,7 +285,7 @@ export default async function HomePage() {
                         <span className="absolute top-3 left-3 px-2 py-0.5 bg-black/60 backdrop-blur-sm text-orange-400 text-[10px] font-bold tracking-[0.2em] tabular-nums">
                           {String(i + 1).padStart(2, '0')}
                         </span>
-                        {r.rating >= 8 && (
+                        {(r.rating ?? 0) >= 8 && (
                           <div className="absolute top-3 right-3">
                             <BossApprovedBadge size="sm" variant="card" />
                           </div>
@@ -297,7 +297,7 @@ export default async function HomePage() {
                         <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
                           {r.product_name}
                         </span>
-                        <RatingScore rating={r.rating} />
+                        <RatingScore rating={r.rating ?? 0} />
                       </div>
                       <h3 className="text-base font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
                         {r.title}
@@ -328,7 +328,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mb-8">
             {reviews
               ?.filter((r) => r.image_url)
-              .sort((a, b) => b.rating - a.rating)
+              .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
               .slice(0, 6)
               .map((r) => (
                 <div key={r.id} className="relative w-full aspect-square rounded-2xl overflow-hidden bg-gray-800">

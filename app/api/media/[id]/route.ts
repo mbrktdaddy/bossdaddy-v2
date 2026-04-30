@@ -57,14 +57,16 @@ export async function PATCH(
       .eq('is_primary', true)
 
     const updates: Record<string, unknown> = { is_primary: true, ...pickDefined(rest) }
-    await admin.from('media_assets').update(updates).eq('id', id)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await admin.from('media_assets').update(updates as any).eq('id', id)
 
     // Sync products.image_url
     await admin.from('products').update({ image_url: asset.url }).eq('id', productId)
   } else {
     const updates = pickDefined({ ...rest, ...(is_primary === false ? { is_primary: false } : {}) })
     if (Object.keys(updates).length > 0) {
-      await admin.from('media_assets').update(updates).eq('id', id)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await admin.from('media_assets').update(updates as any).eq('id', id)
     }
   }
 

@@ -90,7 +90,8 @@ export async function POST(request: NextRequest) {
     if (k in snap) updates[k] = snap[k]
   }
 
-  const { error } = await admin.from(table).update(updates).eq('id', content_id)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await admin.from(table).update(updates as any).eq('id', content_id)
   if (error) return NextResponse.json({ error: `Revert failed: ${error.message}` }, { status: 500 })
 
   return NextResponse.json({ success: true })

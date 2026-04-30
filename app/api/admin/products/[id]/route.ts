@@ -63,7 +63,8 @@ export async function PATCH(
   }
 
   const admin = createAdminClient()
-  const { data, error } = await admin.from('products').update(updates).eq('id', id).select().single()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await admin.from('products').update(updates as any).eq('id', id).select().single()
   if (error) {
     if (error.code === '23505') return NextResponse.json({ error: 'Slug already in use' }, { status: 409 })
     return NextResponse.json({ error: `Update failed: ${error.message}` }, { status: 500 })

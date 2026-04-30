@@ -53,7 +53,7 @@ export default async function WishlistDetailPage({ params }: Props) {
   const admin = createAdminClient()
 
   const wishlistItem = {
-    ...(item as WishlistItem),
+    ...(item as unknown as WishlistItem),
     vote_count: (item.vote_count as { count: number }[])?.[0]?.count ?? 0,
   }
 

@@ -109,7 +109,7 @@ export default async function SearchPage({ searchParams }: Props) {
  <p className="font-semibold text-sm group-hover:text-orange-400 transition-colors">{r.title}</p>
  {r.excerpt && <p className="text-gray-500 text-xs mt-1 line-clamp-1">{r.excerpt}</p>}
  </div>
- <RatingScore rating={r.rating} />
+ <RatingScore rating={r.rating ?? 0} />
  </Link>
  )
  })}

@@ -109,7 +109,7 @@ export default async function CommentsPage({ searchParams }: Props) {
                   </span>
                   <span className="text-xs text-gray-500">by @{author}</span>
                   <span className="text-xs text-gray-700">
-                    {new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {new Date(c.created_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
                   {score !== null && (
                     <span className={`text-xs font-mono ${

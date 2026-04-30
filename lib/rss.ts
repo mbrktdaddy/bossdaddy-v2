@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { getCategoryLabel } from '@/lib/categories'
+import { getCategoryLabel, type CategorySlug } from '@/lib/categories'
 
 export interface FeedItem {
   type: 'review' | 'guide'
@@ -64,8 +64,10 @@ export async function fetchFeedItems(opts: FeedOptions = {}): Promise<FeedItem[]
     .limit(limit)
 
   if (opts.category) {
-    reviewsQuery.eq('category', opts.category)
-    articlesQuery.eq('category', opts.category)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    reviewsQuery.eq('category', opts.category as any)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    articlesQuery.eq('category', opts.category as any)
   }
 
   type ReviewRow = {

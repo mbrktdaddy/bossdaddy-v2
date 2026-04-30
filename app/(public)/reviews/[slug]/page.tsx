@@ -158,8 +158,8 @@ export default async function ReviewPage({ params }: Props) {
 
           {/* Rating + meta */}
           <div className="flex flex-wrap items-center gap-5 pb-6">
-            <RatingScore rating={review.rating} size="lg" />
-            {review.rating >= 8 && <BossApprovedBadge size="lg" />}
+            <RatingScore rating={review.rating ?? 0} size="lg" />
+            {(review.rating ?? 0) >= 8 && <BossApprovedBadge size="lg" />}
             <div className="flex items-center gap-4 text-sm text-gray-400">
               <span>by <Link href={`/author/${author}`} className="text-gray-300 hover:text-orange-400 transition-colors">@{author}</Link></span>
               {review.published_at && (
@@ -225,7 +225,7 @@ export default async function ReviewPage({ params }: Props) {
 
         {/* Primary product CTA — after pros/cons, before the article body */}
         {product && (
-          <ProductCtaCard product={product} rating={review.rating} variant="prominent" />
+          <ProductCtaCard product={product} rating={review.rating ?? undefined} variant="prominent" />
         )}
 
         {/* Review body */}
@@ -246,7 +246,7 @@ export default async function ReviewPage({ params }: Props) {
 
         {/* Final product CTA — last chance to convert, before the newsletter box */}
         {product && (
-          <ProductCtaCard product={product} rating={review.rating} variant="final" />
+          <ProductCtaCard product={product} rating={review.rating ?? undefined} variant="final" />
         )}
 
         {/* Bottom CTA — email signup */}
@@ -297,7 +297,7 @@ export default async function ReviewPage({ params }: Props) {
                   className="flex items-center justify-between p-4 bg-gray-900 rounded-2xl shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/40 transition-all group"
                 >
                   <p className="text-sm font-semibold group-hover:text-orange-400 transition-colors truncate min-w-0 mr-4">{r.title}</p>
-                  <RatingScore rating={r.rating} size="sm" />
+                  <RatingScore rating={r.rating ?? 0} size="sm" />
                 </Link>
               ))}
             </div>
@@ -313,8 +313,8 @@ export default async function ReviewPage({ params }: Props) {
           <div className="bg-gray-900 rounded-2xl p-5 shadow-lg shadow-black/40">
             <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Quick Verdict</p>
             <p className="font-black text-base mb-3">{review.product_name}</p>
-            <RatingScore rating={review.rating} size="sm" />
-            {review.rating >= 8 && (
+            <RatingScore rating={review.rating ?? 0} size="sm" />
+            {(review.rating ?? 0) >= 8 && (
               <div className="mt-3">
                 <BossApprovedBadge size="sm" />
               </div>
@@ -368,7 +368,7 @@ export default async function ReviewPage({ params }: Props) {
                     className="block group"
                   >
                     <p className="text-sm font-semibold group-hover:text-orange-400 transition-colors leading-snug">{r.title}</p>
-                    <RatingScore rating={r.rating} />
+                    <RatingScore rating={r.rating ?? 0} />
                   </Link>
                 ))}
               </div>

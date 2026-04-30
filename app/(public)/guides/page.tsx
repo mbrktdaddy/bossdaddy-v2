@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { CATEGORIES, getCategoryBySlug } from '@/lib/categories'
+import { CATEGORIES, getCategoryBySlug, type CategorySlug } from '@/lib/categories'
 import GuideCard from './_components/GuideCard'
 import GuidesGrid from './_components/GuidesGrid'
 const PER_PAGE = 12
@@ -121,7 +121,8 @@ export default async function GuidesPage({ searchParams }: Props) {
     .select('id, slug, title, category, excerpt, image_url, published_at, reading_time_minutes', { count: 'exact' })
     .eq('status', 'approved')
     .eq('is_visible', true)
-    .eq('category', category)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .eq('category', category as any)
     .order('published_at', { ascending: false })
     .range(0, PER_PAGE - 1)
 

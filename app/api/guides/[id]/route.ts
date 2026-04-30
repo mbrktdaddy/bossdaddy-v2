@@ -107,7 +107,8 @@ export async function PUT(
       updateData.rejection_reason = modParsed.data.rejection_reason ?? ''
     }
 
-    const { data, error } = await admin.from('guides').update(updateData).eq('id', id).select('*').single()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await admin.from('guides').update(updateData as any).eq('id', id).select('*').single()
     if (error) {
       console.error('Guide moderation update failed:', error)
       return NextResponse.json({ error: `Moderation action failed: ${error.message}` }, { status: 500 })
@@ -192,7 +193,8 @@ export async function PUT(
   // When an admin edits a live guide, revalidate the public pages too
   const wasApproved = current.status === 'approved'
 
-  const { data, error } = await admin.from('guides').update(updates).eq('id', id).select().single()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await admin.from('guides').update(updates as any).eq('id', id).select().single()
   if (error) {
     console.error('Guide author/admin update failed:', error)
     return NextResponse.json({ error: `Update failed: ${error.message}` }, { status: 500 })

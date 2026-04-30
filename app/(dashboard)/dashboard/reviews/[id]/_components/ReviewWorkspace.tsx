@@ -38,17 +38,17 @@ interface ReviewData {
   excerpt: string | null
   content: string
   image_url: string | null
-  rating: number
+  rating: number | null
   pros: string[] | null
   cons: string[] | null
-  has_affiliate_links: boolean
-  disclosure_acknowledged: boolean
+  has_affiliate_links: boolean | null
+  disclosure_acknowledged: boolean | null
   status: string
   slug: string | null
   moderation_score: number | null
   moderation_flags: string[] | null
-  created_at: string
-  updated_at: string
+  created_at: string | null
+  updated_at: string | null
   reading_time_minutes: number | null
   rejection_reason: string | null
   meta_title: string | null
@@ -214,7 +214,7 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   })
 
   const previewUrl = isPublished && review.slug ? `/reviews/${review.slug}` : null
-  const createdAt  = new Date(review.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  const createdAt  = new Date(review.created_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 
   return (
     <div className="p-4 sm:p-8 max-w-4xl">

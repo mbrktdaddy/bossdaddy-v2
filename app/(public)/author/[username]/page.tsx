@@ -139,7 +139,7 @@ export default async function AuthorPage({ params }: Props) {
  </p>
  )}
  </div>
- <RatingScore rating={r.rating} />
+ <RatingScore rating={r.rating ?? 0} />
  </Link>
  )
  })}

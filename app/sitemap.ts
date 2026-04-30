@@ -22,14 +22,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const reviewUrls: MetadataRoute.Sitemap = (reviews ?? []).map((r) => ({
     url: `${base}/reviews/${r.slug}`,
-    lastModified: r.updated_at ?? r.published_at,
+    lastModified: r.updated_at ?? r.published_at ?? undefined,
     changeFrequency: 'monthly',
     priority: 0.8,
   }))
 
   const articleUrls: MetadataRoute.Sitemap = (articles ?? []).map((a) => ({
     url: `${base}/guides/${a.slug}`,
-    lastModified: a.updated_at ?? a.published_at,
+    lastModified: a.updated_at ?? a.published_at ?? undefined,
     changeFrequency: 'monthly',
     priority: 0.7,
   }))

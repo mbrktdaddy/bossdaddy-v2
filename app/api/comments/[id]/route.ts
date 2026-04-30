@@ -38,7 +38,7 @@ export async function PUT(
   // Revalidate the parent content page so the approved comment appears immediately
   if (parsed.data.action === 'approve' && data) {
     const { content_type, content_id } = data as { content_type: string; content_id: string }
-    const table = content_type === 'review' ? 'reviews' : 'articles'
+    const table = content_type === 'review' ? 'reviews' : 'guides'
     const { data: content } = await admin.from(table).select('slug').eq('id', content_id).single()
     if (content?.slug) revalidatePath(`/${content_type}s/${content.slug}`)
   }

@@ -37,7 +37,8 @@ export async function updateProfile(input: z.input<typeof UpdateSchema>): Promis
     return { ok: false, error: 'No fields to update' }
   }
 
-  const { error } = await supabase.from('profiles').update(updates).eq('id', user.id)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await supabase.from('profiles').update(updates as any).eq('id', user.id)
   if (error) {
     const msg = error.message.includes('unique')
       ? 'That username is already taken.'

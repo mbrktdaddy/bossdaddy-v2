@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
         author_id: user.id,
         slug,
         title,
-        category,
+        category: category as never, // validated by Zod against CATEGORY_SLUGS
         excerpt: excerpt ?? null,
         content: sanitizedContent,
         image_url: image_url ?? null,

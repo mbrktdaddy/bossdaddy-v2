@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
   // Fetch the source content
   const admin = createAdminClient()
-  const table = content_type === 'review' ? 'reviews' : 'articles'
+  const table = content_type === 'review' ? 'reviews' : 'guides'
   const fields = content_type === 'review'
     ? 'title, product_name, category, excerpt, content, rating, slug'
     : 'title, category, excerpt, content, slug'

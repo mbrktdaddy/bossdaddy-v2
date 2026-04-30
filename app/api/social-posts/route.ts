@@ -76,7 +76,7 @@ export async function PATCH(request: NextRequest) {
   const admin = createAdminClient()
   const { data, error } = await admin
     .from('social_posts')
-    .update(update)
+    .update(update as never) // Zod-validated — safe to cast
     .eq('content_type', content_type)
     .eq('content_id', content_id)
     .eq('platform', platform)

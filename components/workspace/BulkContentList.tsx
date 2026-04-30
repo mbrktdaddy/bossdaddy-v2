@@ -13,8 +13,8 @@ export interface BulkListItem {
   category: string
   status: string
   slug: string | null
-  created_at: string
-  updated_at: string
+  created_at: string | null
+  updated_at: string | null
   reading_time_minutes: number | null
   rejection_reason: string | null
   image_url?: string | null
@@ -46,8 +46,8 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
     const filtered = q ? items.filter((i) => i.title.toLowerCase().includes(q)) : items
     return [...filtered].sort((a, b) => {
       if (sortKey === 'az') return a.title.localeCompare(b.title)
-      if (sortKey === 'created') return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+      if (sortKey === 'created') return new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime()
+      return new Date(b.updated_at ?? '').getTime() - new Date(a.updated_at ?? '').getTime()
     })
   }, [items, search, sortKey])
 
@@ -203,7 +203,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
                     {category && <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>}
                     {item.reading_time_minutes && <span className="text-xs text-gray-600">{item.reading_time_minutes} min</span>}
                     <span className="text-xs text-gray-700">
-                      {new Date(item.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      {new Date(item.updated_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </span>
                   </div>
                   {item.rejection_reason && ['draft', 'rejected'].includes(item.status) && (

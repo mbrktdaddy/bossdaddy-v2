@@ -70,7 +70,7 @@ export default async function UsersPage() {
               <div className="min-w-0">
                 <p className="text-sm font-semibold truncate">@{u.username}</p>
                 <p className="text-xs text-gray-600">
-                  Joined {new Date(u.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  Joined {new Date(u.created_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </p>
               </div>
             </div>

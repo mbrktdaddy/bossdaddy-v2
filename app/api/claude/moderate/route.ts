@@ -38,21 +38,22 @@ export async function POST(request: NextRequest) {
     : (parsed.data as { reviewId: string }).reviewId
   const table = isGuide ? 'guides' : 'reviews'
 
-  const { data: content, error } = await supabase
-    .from(table)
-    .select('id, title, content, has_affiliate_links, disclosure_acknowledged')
-    .eq('id', contentId)
-    .single()
+  const { data: content, error } = isGuide
+    ? await supabase.from('guides').select('id, title, content').eq('id', contentId).single()
+    : await supabase.from('reviews').select('id, title, content, has_affiliate_links, disclosure_acknowledged').eq('id', contentId).single()
 
   if (error || !content) {
     return NextResponse.json({ error: 'Content not found' }, { status: 404 })
   }
 
+  const hasAffiliateLinks = 'has_affiliate_links' in content ? content.has_affiliate_links : false
+  const disclosureAcknowledged = 'disclosure_acknowledged' in content ? content.disclosure_acknowledged : false
+
   const prompt = `Review the following content submission:
 
 Title: ${content.title}
-Has affiliate links: ${content.has_affiliate_links ?? false}
-Disclosure acknowledged: ${content.disclosure_acknowledged ?? false}
+Has affiliate links: ${hasAffiliateLinks ?? false}
+Disclosure acknowledged: ${disclosureAcknowledged ?? false}
 
 Content:
 ${content.content.slice(0, 4000)}

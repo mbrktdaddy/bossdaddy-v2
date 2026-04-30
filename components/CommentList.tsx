@@ -48,7 +48,7 @@ export default async function CommentList({ contentType, contentId }: Props) {
               </div>
               <span className="text-sm font-medium text-gray-300">@{author}</span>
               <span className="text-xs text-gray-600">
-                {new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                {new Date(c.created_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
               </span>
             </div>
             <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">{c.body}</p>

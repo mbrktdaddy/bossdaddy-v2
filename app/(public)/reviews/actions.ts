@@ -1,5 +1,6 @@
 'use server'
 import { createClient } from '@/lib/supabase/server'
+import type { CategorySlug } from '@/lib/categories'
 
 export type ReviewRow = {
   id: string
@@ -24,7 +25,8 @@ export async function loadMoreReviews(category: string, page: number): Promise<R
     .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
     .eq('status', 'approved')
     .eq('is_visible', true)
-    .eq('category', category)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .eq('category', category as any)
     .order('published_at', { ascending: false })
     .range(from, to)
   return (data ?? []) as ReviewRow[]

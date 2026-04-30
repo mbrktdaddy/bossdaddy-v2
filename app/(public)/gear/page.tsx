@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
-import { CATEGORIES, getCategoryBySlug } from '@/lib/categories'
+import { CATEGORIES, getCategoryBySlug, type CategorySlug } from '@/lib/categories'
 import RatingScore from '@/components/RatingScore'
 import { MerchPanel } from './_components/MerchPanel'
 import type { Metadata } from 'next'
@@ -42,7 +42,8 @@ export default async function GearPage({ searchParams }: Props) {
     .limit(120)
 
   if (category) {
-    query = query.eq('category', category)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    query = query.eq('category', category as any)
   }
 
   const { data: reviews } = await query
@@ -142,7 +143,7 @@ export default async function GearPage({ searchParams }: Props) {
                     <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
                       {r.product_name}
                     </span>
-                    <RatingScore rating={r.rating} />
+                    <RatingScore rating={r.rating ?? 0} />
                   </div>
                   <h3 className="text-base font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
                     {r.title}

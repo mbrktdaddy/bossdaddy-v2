@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { CATEGORIES, getCategoryLabel, getCategoryBySlug } from '@/lib/categories'
+import { CATEGORIES, getCategoryLabel, getCategoryBySlug, type CategorySlug } from '@/lib/categories'
 import ReviewCard from './_components/ReviewCard'
 import ReviewsGrid from './_components/ReviewsGrid'
 const PER_PAGE = 12
@@ -124,7 +124,8 @@ export default async function ReviewsPage({ searchParams }: Props) {
     .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at', { count: 'exact' })
     .eq('status', 'approved')
     .eq('is_visible', true)
-    .eq('category', category)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .eq('category', category as any)
     .order('published_at', { ascending: false })
     .range(0, PER_PAGE - 1)
 

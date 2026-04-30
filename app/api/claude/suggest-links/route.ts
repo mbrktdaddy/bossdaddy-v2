@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getClaudeClient, MODEL } from '@/lib/claude/client'
+import type { CategorySlug } from '@/lib/categories'
 import { z } from 'zod'
 
 export const maxDuration = 30
@@ -40,7 +41,8 @@ export async function POST(request: NextRequest) {
       .select('id, title, slug, excerpt, category')
       .eq('status', 'approved')
       .eq('is_visible', true)
-      .eq('category', category)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .eq('category', category as any)
       .neq('id', excludeId)
       .limit(15),
     admin
@@ -48,7 +50,8 @@ export async function POST(request: NextRequest) {
       .select('id, title, slug, excerpt, product_name, category')
       .eq('status', 'approved')
       .eq('is_visible', true)
-      .eq('category', category)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .eq('category', category as any)
       .neq('id', excludeId)
       .limit(15),
   ])
@@ -72,7 +75,8 @@ export async function POST(request: NextRequest) {
         .select('id, title, slug, excerpt')
         .eq('status', 'approved')
         .eq('is_visible', true)
-        .neq('category', category)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .neq('category', category as any)
         .neq('id', excludeId)
         .limit(10),
       admin
@@ -80,7 +84,8 @@ export async function POST(request: NextRequest) {
         .select('id, title, slug, excerpt')
         .eq('status', 'approved')
         .eq('is_visible', true)
-        .neq('category', category)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .neq('category', category as any)
         .neq('id', excludeId)
         .limit(10),
     ])
