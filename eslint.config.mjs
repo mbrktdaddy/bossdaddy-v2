@@ -13,6 +13,20 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    // Prevent regressions: raw auth.getUser() throws on stale tokens.
+    // Use getUserSafe() from @/lib/supabase/server instead.
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "MemberExpression[object.property.name='auth'][property.name='getUser']",
+          message: "Use getUserSafe(supabase) from @/lib/supabase/server instead of supabase.auth.getUser() — raw getUser throws on stale tokens.",
+        },
+      ],
+    },
+    ignores: ['lib/supabase/server.ts'],
+  },
 ]);
 
 export default eslintConfig;

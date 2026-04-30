@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
   const { type: content_type, id: content_id } = parsed.data
 
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { user } = await getUserSafe(supabase)
 
   const { count } = await supabase
     .from('likes')
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
   if (!success) return NextResponse.json({ error: 'Too many requests.' }, { status: 429 })
 
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { user } = await getUserSafe(supabase)
   if (!user) return NextResponse.json({ error: 'Sign in to like.' }, { status: 401 })
 
   const body = await request.json().catch(() => null)

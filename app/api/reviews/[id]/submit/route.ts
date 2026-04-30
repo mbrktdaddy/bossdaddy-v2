@@ -1,8 +1,9 @@
-import { NextResponse, type NextRequest, after } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { safeAfter } from '@/lib/server/safeAfter'
 
 // POST /api/reviews/[id]/submit — transition draft → pending, trigger moderation
 export async function POST(
@@ -11,9 +12,7 @@ export async function POST(
 ) {
   const { id } = await params
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { user } = await getUserSafe(supabase)
 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -52,7 +51,7 @@ export async function POST(
   const secret = process.env.INTERNAL_API_SECRET
   if (!secret) console.error('INTERNAL_API_SECRET not set — moderation will not run')
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
-  after(async () => {
+  safeAfter('review-moderation', async () => {
     await fetch(`${baseUrl}/api/claude/moderate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-internal-secret': secret ?? '' },

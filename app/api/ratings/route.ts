@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getUserSafe } from '@/lib/supabase/server'
 
 const postSchema = z.object({
   review_id: z.string().uuid(),
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
   if (!reviewId) return NextResponse.json({ error: 'review_id required' }, { status: 400 })
 
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { user } = await getUserSafe(supabase)
 
   const summary = await buildSummary(supabase, reviewId, !!user)
   if (!summary) return NextResponse.json({ error: 'Failed to load ratings' }, { status: 500 })
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { user } = await getUserSafe(supabase)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()

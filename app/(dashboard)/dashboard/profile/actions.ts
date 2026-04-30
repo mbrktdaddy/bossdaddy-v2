@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getUserSafe } from '@/lib/supabase/server'
 
 const UpdateSchema = z.object({
   username: z
@@ -21,7 +21,7 @@ export type UpdateProfileResult = { ok: true } | { ok: false; error: string }
 
 export async function updateProfile(input: z.input<typeof UpdateSchema>): Promise<UpdateProfileResult> {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { user } = await getUserSafe(supabase)
   if (!user) return { ok: false, error: 'Unauthorized' }
 
   const parsed = UpdateSchema.safeParse(input)

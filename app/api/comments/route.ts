@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { getClaudeClient, MODEL, COMMENT_MODERATOR_SYSTEM } from '@/lib/claude/client'
 import { checkRateLimit } from '@/lib/rate-limit'
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
   if (!success) return NextResponse.json({ error: 'Too many comments. Try again later.' }, { status: 429 })
 
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { user } = await getUserSafe(supabase)
   if (!user) return NextResponse.json({ error: 'Sign in to leave a comment.' }, { status: 401 })
 
   const body = await request.json().catch(() => null)

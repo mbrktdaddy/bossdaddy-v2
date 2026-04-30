@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getUserSafe } from '@/lib/supabase/server'
 import type { WishlistItem } from '@/lib/wishlist'
 import { getBuyLabel, getStatusLabel } from '@/lib/wishlist'
 import { StatusBadge } from '@/components/wishlist/StatusBadge'
@@ -70,7 +70,7 @@ export default async function WishlistDetailPage({ params }: Props) {
 
   // Get user state (server-side for SSR)
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { user } = await getUserSafe(supabase)
 
   let userHasVoted = false
   let userSubscribed = false
