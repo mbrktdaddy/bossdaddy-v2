@@ -42,17 +42,14 @@ export async function POST(
   const bytes = await file.arrayBuffer()
 
   const admin = createAdminClient()
-  // TODO(bucket-rename): 'article-images' → 'guide-images'. Deferred — see
-  // docs/brand-guide.md §0 for runbook + risk assessment. Don't rename the
-  // string here without doing the Supabase Storage API migration first.
   const { error: uploadError } = await admin.storage
-    .from('article-images')
+    .from('guide-images')
     .upload(filename, bytes, { contentType: file.type, upsert: true })
 
   if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 })
 
   const { data: { publicUrl } } = admin.storage
-    .from('article-images')
+    .from('guide-images')
     .getPublicUrl(filename)
 
   // Update guide record

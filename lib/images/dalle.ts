@@ -1,9 +1,7 @@
 import OpenAI from 'openai'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-// TODO(bucket-rename): 'article-images' → 'guide-images'. Deferred — see
-// docs/brand-guide.md §0 for runbook + risk assessment.
-type Bucket = 'article-images' | 'review-images' | 'media'
+type Bucket = 'guide-images' | 'review-images' | 'media'
 type ImageSize = '1024x1024' | '1792x1024' | '1024x1792'
 
 const SAFE_FALLBACK_PROMPT =

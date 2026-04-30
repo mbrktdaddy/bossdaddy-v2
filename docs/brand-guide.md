@@ -25,30 +25,7 @@ User-facing content types are referred to consistently as:
 - **`shop_launch` email-interest tag** — stored on subscriber records. Renaming would orphan existing subscriber segmentation. New signups still use this tag.
 - **`openGraph: { type: 'article' }` in page metadata** — W3C OpenGraph protocol value. `'guide'` is not a valid OG type; must stay `'article'` (or `'website'`) for social cards/SEO to render.
 
-**Deferred TODO — `article-images` Supabase storage bucket → `guide-images`:**
-
-Storage bucket naming is currently inconsistent: `review-images` matches the `reviews` table, but `article-images` doesn't match the renamed `guides` table. Target name on rename: `guide-images` (singular, matching the `review-images` pattern).
-
-*Why deferred:* renaming a Supabase storage bucket isn't a SQL operation — it requires:
-1. Create a new `guide-images` bucket
-2. Use Supabase Storage API (or admin script) to copy every file from `article-images` → `guide-images`
-3. `UPDATE guides SET image_url = REPLACE(image_url, '/storage/v1/object/public/article-images/', '/storage/v1/object/public/guide-images/')`
-4. Update the 4 code references (`app/api/guides/[id]/image/route.ts`, `app/api/images/hero/route.ts`, `lib/images/dalle.ts`)
-5. Verify image rendering on every guide page
-6. Eventually delete old bucket (or keep as backup for ~90 days)
-
-*Risks of leaving it unrenamed:*
-- **Onboarding confusion** (real, but minor): new devs grepping for "article" hit the bucket name and wonder if the rename is incomplete.
-- **Stale references in new code** (real): future PRs touching image upload may type `article-images` from muscle memory and the linter won't catch it.
-- **Accidental cleanup risk** (real but unlikely): a future "remove dead code" sweep could mis-classify the bucket as orphaned.
-- **Documentation drag** (cosmetic): this section of the brand guide has to maintain a "see exception" note forever.
-
-*Risks of doing it now (or whenever we tackle it):*
-- **Image breakage if step 3 fails** (high impact, low probability with care): bad UPDATE means broken images sitewide. Mitigate with a backup query and staged rollout.
-- **Time cost** (~30-60 min focused work).
-- **Coordination with operator** (need Supabase dashboard access for bucket-level operations).
-
-*Recommendation:* tackle this when there's a quiet maintenance stretch — not during feature work, not while live traffic is heavy. If we do another infrastructure-touching session (e.g., adding a new bucket, reorganizing storage, or a major migration), bundle it then. **Sooner is better than later** — the longer we wait, the more files exist to migrate and the more `article-images` strings accumulate in muscle memory. The work doesn't get easier with time. Don't let it sit longer than 6 months.
+**Storage buckets:** `guide-images` (guides hero images), `review-images` (review hero images), `media` (product/media assets). All public read. Uploads use the service-role admin client.
 
 **Rename gotchas — watch out next time we do a sweep like article→guide:**
 
