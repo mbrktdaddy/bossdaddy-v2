@@ -50,6 +50,19 @@ Storage bucket naming is currently inconsistent: `review-images` matches the `re
 
 *Recommendation:* tackle this when there's a quiet maintenance stretch — not during feature work, not while live traffic is heavy. If we do another infrastructure-touching session (e.g., adding a new bucket, reorganizing storage, or a major migration), bundle it then. **Sooner is better than later** — the longer we wait, the more files exist to migrate and the more `article-images` strings accumulate in muscle memory. The work doesn't get easier with time. Don't let it sit longer than 6 months.
 
+**Rename gotchas — watch out next time we do a sweep like article→guide:**
+
+These are non-obvious places that earlier regex sweeps missed during the article→guide rename. If we ever do another sitewide content-type rename, these are where to look first:
+
+1. **JSX attribute values use double quotes** (`contentType="article"`) — different from JS/TS string literals (`'article'`). A regex targeting `'article'` (single-quoted) misses every JSX prop. Always run a second pass with `"article"` patterns and grep `="article"` and `={"article"}`.
+2. **Email templates** (`emails/` directory) have their own `ContentType` union types. Easy to forget when listing files for a rename script — `emails/` lives outside `app/` and `components/` typical scope.
+3. **DB CHECK constraints fire on UPDATE** — drop the old constraint *before* updating row values, then add the new constraint after. If you UPDATE first, the old constraint rejects the new value (error 23514). Migration 034 hit this; the fix is in its history if you need a template.
+4. **`LIKE '_'` wildcard pitfall in PL/pgSQL renames** — underscore is a single-char wildcard in `LIKE`/`ILIKE`. Pattern `'shop_products%'` matches `'shop products'` (with space). Always use `ESCAPE '\'` when matching identifier names with underscores. Migration 033 hit this; bug fix is in its history.
+5. **RPC function bodies referencing renamed tables** — Postgres updates SQL function dependencies on table rename in most cases, but PL/pgSQL functions and `LANGUAGE sql` functions can drift. Always include a `DROP FUNCTION IF EXISTS old; CREATE OR REPLACE new` block in the migration to be explicit.
+6. **`openGraph: { type: 'article' }` is W3C protocol, not internal** — TypeScript types validate this. Don't rename. The string `'article'` here is a fixed external standard.
+7. **Storage bucket names** are tied to every stored `image_url` column — see the deferred TODO above.
+8. **API route folders + redirect ordering** — when renaming `/articles` → `/guides`, add the 301 redirect in `proxy.ts` *before* the rest of the page-level work so dev/preview environments don't 404 mid-refactor.
+
 ---
 
 ## 1. Brand Identity
