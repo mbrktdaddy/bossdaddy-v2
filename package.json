@@ -37,5 +37,8 @@
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5"
+  },
+  "optionalDependencies": {
+    "require-in-the-middle": "^8.0.1"
   }
 }
