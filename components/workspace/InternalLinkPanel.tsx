@@ -113,10 +113,10 @@ export function InternalLinkPanel({
 
       <div className="px-4 pb-4 space-y-4">
 
-        {/* ── Currently in this article ───────────────────────────────── */}
+        {/* ── Currently in this guide ───────────────────────────────── */}
         {existing.length > 0 && (
           <section className="space-y-2">
-            <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold">Currently in this article</p>
+            <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold">Currently in this guide</p>
             {existing.map((link) => (
               <ExistingLinkCard
                 key={`${link.position}-${link.href}`}

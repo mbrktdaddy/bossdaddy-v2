@@ -59,7 +59,7 @@ export default function BioForm({
           placeholder="Boss Daddy"
           className="w-full px-3 py-2.5 bg-gray-950 border border-gray-700 focus:border-orange-500 rounded-xl text-white text-sm placeholder-gray-600 focus:outline-none transition-colors"
         />
-        <p className="mt-1 text-xs text-gray-600">How your name appears on articles + reviews.</p>
+        <p className="mt-1 text-xs text-gray-600">How your name appears on guides + reviews.</p>
       </div>
 
       <div>
@@ -85,7 +85,7 @@ export default function BioForm({
           placeholder="A few sentences about who you are, what you test, and why your perspective matters."
           className="w-full px-3 py-2.5 bg-gray-950 border border-gray-700 focus:border-orange-500 rounded-xl text-white text-sm placeholder-gray-600 focus:outline-none transition-colors resize-none"
         />
-        <p className="mt-1 text-xs text-gray-600">Shown at the bottom of every article + review you publish. {bio.length}/800</p>
+        <p className="mt-1 text-xs text-gray-600">Shown at the bottom of every guide + review you publish. {bio.length}/800</p>
       </div>
 
       <div>

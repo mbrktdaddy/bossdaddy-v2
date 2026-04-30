@@ -40,7 +40,7 @@ export default function PrivacyPolicyPage() {
  <h3>What You Give Us Directly</h3>
  <ul>
  <li><strong>Account info:</strong> Email and password when you sign up.</li>
- <li><strong>Comments:</strong> Anything you post in the comments on a review or article.</li>
+ <li><strong>Comments:</strong> Anything you post in the comments on a review or guide.</li>
  <li><strong>Contact:</strong> Your name and email if you write to us.</li>
  <li><strong>Newsletter:</strong> Your email if you subscribe to the list.</li>
  </ul>

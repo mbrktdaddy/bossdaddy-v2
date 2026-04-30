@@ -94,7 +94,7 @@ export default async function MyGuidesPage({ searchParams }: Props) {
       {/* Articles list with bulk actions */}
       {!displayed?.length && !filter && (
         <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
-          <p className="text-gray-500 text-lg mb-2">No articles yet, Boss.</p>
+          <p className="text-gray-500 text-lg mb-2">No guides yet, Boss.</p>
           <Link href="/dashboard/guides/new" className="text-orange-400 hover:text-orange-300 text-sm">
             Write your first one →
           </Link>

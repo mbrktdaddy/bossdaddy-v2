@@ -69,7 +69,7 @@ export default async function AuthorPage({ params }: Props) {
  ])
 
  const totalReviews = reviews?.length ?? 0
- const totalArticles = articles?.length ?? 0
+ const totalGuides = articles?.length ?? 0
 
  return (
  <div className="max-w-4xl mx-auto px-6 py-12">
@@ -103,7 +103,7 @@ export default async function AuthorPage({ params }: Props) {
  )}
  <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
  <span><span className="text-white font-semibold">{totalReviews}</span> {totalReviews === 1 ? 'review' : 'reviews'}</span>
- <span><span className="text-white font-semibold">{totalArticles}</span> {totalArticles === 1 ? 'guide' : 'articles'}</span>
+ <span><span className="text-white font-semibold">{totalGuides}</span> {totalGuides === 1 ? 'guide' : 'guides'}</span>
  </div>
  </div>
  </div>
@@ -148,7 +148,7 @@ export default async function AuthorPage({ params }: Props) {
  )}
 
  {/* Articles */}
- {totalArticles > 0 && (
+ {totalGuides > 0 && (
  <div>
  <h2 className="text-lg font-black mb-5">Guides</h2>
  <div className="space-y-2">
@@ -181,7 +181,7 @@ export default async function AuthorPage({ params }: Props) {
  </div>
  )}
 
- {totalReviews === 0 && totalArticles === 0 && (
+ {totalReviews === 0 && totalGuides === 0 && (
  <div className="text-center py-24 bg-gray-900/40 rounded-2xl">
  <p className="text-gray-600">No published content yet.</p>
  </div>

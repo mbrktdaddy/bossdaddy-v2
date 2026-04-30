@@ -24,7 +24,7 @@ export default async function ProfilePage() {
   // ── Stats + liked content IDs — all in parallel ──────────────────────────
   const [
     { count: reviewCount },
-    { count: articleCount },
+    { count: guideCount },
     { count: commentCount },
     { count: draftCount },
     { count: awaitingCount },
@@ -192,7 +192,7 @@ export default async function ProfilePage() {
                 <p className="text-xs text-gray-500 mt-1">Published Reviews</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-black text-white">{articleCount ?? 0}</p>
+                <p className="text-2xl font-black text-white">{guideCount ?? 0}</p>
                 <p className="text-xs text-gray-500 mt-1">Published Guides</p>
               </div>
             </>
@@ -330,7 +330,7 @@ export default async function ProfilePage() {
               href="/dashboard/guides"
               className="flex items-center justify-between p-3 bg-gray-950 border border-gray-800 hover:border-gray-700 rounded-xl transition-colors group"
             >
-              <span className="text-sm text-gray-300 group-hover:text-white transition-colors">Manage articles</span>
+              <span className="text-sm text-gray-300 group-hover:text-white transition-colors">Manage guides</span>
               <svg className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>

@@ -65,7 +65,7 @@ export default function EditorialStandardsPage() {
  have you wonder. Here&apos;s exactly how it works:
  </p>
  <ul>
- <li><strong>AI drafts. Humans decide.</strong> Every article, review, and buying guide is reviewed and approved by a human on the Boss Daddy team before it goes live.</li>
+ <li><strong>AI drafts. Humans decide.</strong> Every guide and review is reviewed and approved by a human on the Boss Daddy team before it goes live.</li>
  <li><strong>AI never substitutes for lived experience.</strong> Firsthand observations, real-world testing notes, and verdicts come from humans who have actually used the product.</li>
  <li><strong>Ratings are always human-verified.</strong> No rating, score, or final recommendation is published without a person signing off on it.</li>
  <li><strong>AI helps with research and structure.</strong> Specs, comparisons, pros-and-cons framing, plain-English explanations — AI is a good tool for that. It is not a good tool for telling you whether something is worth your money. That&apos;s a human call.</li>

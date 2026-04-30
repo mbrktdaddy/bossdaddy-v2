@@ -84,7 +84,7 @@ export default function TableOfContents({ target = '.bd-content', minHeadings = 
 
   return (
     <nav aria-label="Table of contents" className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-      <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">In this article</p>
+      <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">In this guide</p>
       <ul className="space-y-1.5 text-sm">
         {items.map((item) => {
           const isActive = activeId === item.id

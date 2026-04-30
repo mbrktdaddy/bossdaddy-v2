@@ -152,7 +152,7 @@ export default async function SearchPage({ searchParams }: Props) {
 
  {query.length < 2 && !query && (
  <div className="text-center py-24 bg-gray-900/40 rounded-2xl">
- <p className="text-gray-600">Type something above to search reviews and articles.</p>
+ <p className="text-gray-600">Type something above to search reviews and guides.</p>
  </div>
  )}
  </div>
