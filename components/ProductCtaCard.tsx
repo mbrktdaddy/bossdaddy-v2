@@ -22,7 +22,7 @@ export default function ProductCtaCard({ product, rating, variant = 'prominent' 
 
   return (
     <aside
-      className="my-8 bg-gradient-to-br from-orange-950/60 to-gray-900 border border-orange-900/50 rounded-2xl p-5 sm:p-6"
+      className="my-8 bg-gradient-to-br from-orange-950/60 to-gray-900 rounded-2xl p-5 sm:p-6 shadow-xl shadow-black/40"
       aria-label="Product offer"
     >
       <p className="text-xs text-orange-400 uppercase tracking-widest font-semibold mb-3">
@@ -31,7 +31,7 @@ export default function ProductCtaCard({ product, rating, variant = 'prominent' 
 
       <div className="flex flex-col sm:flex-row gap-5 sm:items-center">
         {product.image_url && (
-          <div className="relative w-full sm:w-32 h-32 shrink-0 rounded-xl overflow-hidden bg-gray-950 border border-gray-800">
+          <div className="relative w-full sm:w-32 h-32 shrink-0 rounded-2xl overflow-hidden bg-gray-950">
             <Image
               src={product.image_url}
               alt={product.name}
@@ -56,7 +56,7 @@ export default function ProductCtaCard({ product, rating, variant = 'prominent' 
             target="_blank"
             rel={rel}
             data-product-slug={product.slug}
-            className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl transition-colors min-h-[44px] w-full sm:w-auto"
+            className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-2xl transition-colors min-h-[44px] w-full sm:w-auto"
           >
             {buttonLabel}
             <span aria-hidden="true">→</span>

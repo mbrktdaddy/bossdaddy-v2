@@ -33,11 +33,11 @@ export default async function AuthorBio({ username }: Props) {
     .toUpperCase()
 
   return (
-    <div className="mt-12 pt-8 border-t border-gray-800">
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 sm:p-7">
+    <div className="mt-12 pt-8">
+      <div className="bg-gray-900 rounded-2xl p-6 sm:p-7 shadow-lg shadow-black/40">
         <div className="flex items-start gap-4">
           {avatarUrl ? (
-            <div className="w-14 h-14 shrink-0 rounded-full overflow-hidden border border-gray-700 bg-gray-950 relative">
+            <div className="w-14 h-14 shrink-0 rounded-full overflow-hidden bg-gray-950 relative">
               <Image src={avatarUrl} alt={displayName} fill sizes="56px" className="object-cover" />
             </div>
           ) : (

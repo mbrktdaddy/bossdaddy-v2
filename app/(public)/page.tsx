@@ -6,10 +6,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { CATEGORIES } from '@/lib/categories'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import RatingScore from '@/components/RatingScore'
-import HeroCarousel from '@/components/HeroCarousel'
 import CodeRedirect from './_components/CodeRedirect'
 import { LatestArticlesSection } from './_components/LatestArticlesSection'
-import type { WishlistItem } from '@/lib/wishlist'
+import { getStatusColor, getStatusLabel, type WishlistItem } from '@/lib/wishlist'
 import type { Metadata } from 'next'
 
 export const revalidate = 3600
@@ -21,47 +20,37 @@ export const metadata: Metadata = {
 }
 
 
-const STATIC_STATS = [
-  { value: '100%', label: 'Self-Purchased' },
-  { value: '0', label: 'Sponsored Posts' },
-]
-
 export default async function HomePage() {
   const supabase = await createClient()
   const adminClient = createAdminClient()
 
   const [
-    { data: reviews, count: reviewCount, error: reviewsError },
-    { count: articleCount },
+    { data: reviews, error: reviewsError },
     { data: testingNow },
   ] = await Promise.all([
     supabase
       .from('reviews')
-      .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at', { count: 'exact' })
+      .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
       .eq('status', 'approved')
       .eq('is_visible', true)
       .order('published_at', { ascending: false })
       .limit(12),
-    supabase
-      .from('articles')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'approved')
-      .eq('is_visible', true),
     adminClient
       .from('wishlist_items')
       .select('id, slug, title, image_url, status')
-      .eq('status', 'testing')
+      .in('status', ['testing', 'queued', 'considering'])
       .order('priority', { ascending: false })
-      .limit(3),
+      .limit(20),
   ])
 
   if (reviewsError) console.error('Reviews query error:', reviewsError)
 
-  const STATS = [
-    { value: String(reviewCount ?? 0), label: 'Products Tested' },
-    { value: String(articleCount ?? 0), label: 'Articles Written' },
-    ...STATIC_STATS,
-  ]
+  // Order pipeline items: testing first, then queued, then considering. Take top 3.
+  const STATUS_RANK: Record<string, number> = { testing: 0, queued: 1, considering: 2 }
+  const onDeck = (testingNow ?? [])
+    .slice()
+    .sort((a, b) => (STATUS_RANK[a.status] ?? 99) - (STATUS_RANK[b.status] ?? 99))
+    .slice(0, 3)
 
   return (
     <>
@@ -70,84 +59,130 @@ export default async function HomePage() {
       </Suspense>
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden border-b border-gray-800/60">
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-950/30 via-transparent to-transparent pointer-events-none" />
-        <div className="relative max-w-6xl mx-auto px-6 py-20 md:py-28">
-          <div className="flex flex-col md:flex-row items-center gap-12 lg:gap-20">
+      <section className="relative overflow-hidden">
+        {/* Hybrid hero: spotlight from top + linear top-down */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'radial-gradient(ellipse 70% 60% at 50% -10%, rgba(204,85,0,0.18), transparent 70%), linear-gradient(180deg, rgba(204,85,0,0.10), transparent 70%)',
+          }}
+        />
+        <div className="relative max-w-4xl mx-auto px-6 py-24 md:py-32 text-center">
+          <div className="inline-flex items-center gap-2 bg-orange-950/50 border border-orange-800/50 rounded-full px-4 py-1.5 text-xs text-orange-400 font-medium mb-8">
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+            Zero Sponsors. Zero Fluff. 100% Real.
+          </div>
+          <h1 className="text-6xl md:text-[7.5rem] leading-[0.92] tracking-tight mb-6 text-white">
+            Dad Like
+            <br />
+            <span className="text-orange-500">a Boss.</span>
+          </h1>
+          <p className="text-gray-400 text-base md:text-lg leading-relaxed mb-10 max-w-xl mx-auto">
+            Honest gear reviews and real-dad skills — for men who actually show up.
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <Link href="/reviews" className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-2xl transition-colors">
+              Browse Reviews
+            </Link>
+            <Link href="/articles" className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white font-semibold rounded-2xl transition-colors">
+              Read the Blog →
+            </Link>
+          </div>
+        </div>
+      </section>
 
-            {/* Left: hero copy */}
-            <div className="flex-1">
-              <div className="inline-flex items-center gap-2 bg-orange-950/50 border border-orange-800/50 rounded-full px-4 py-1.5 text-xs text-orange-400 font-medium mb-6">
-                <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-                Zero Sponsors. Zero Fluff. 100% Real.
-              </div>
-              <h1 className="text-5xl md:text-7xl leading-[1.0] tracking-tight mb-4 text-white">
-                Dad Like
-                <br />
-                <span className="text-orange-500">a Boss.</span>
-              </h1>
-              <p className="text-gray-400 text-base md:text-lg leading-relaxed mb-3 max-w-xl">
-                Honest gear reviews, real skills, and a brotherhood for dads who show up every single day —
-                strong, present, and proud.
-              </p>
-              <p className="text-orange-400/80 text-sm font-semibold tracking-wide mb-8">
-                Show Up. Get Better. Never Settle.
-              </p>
-              <div className="flex items-center gap-3">
-                <Link href="/reviews" className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors">
-                  Browse Reviews
-                </Link>
-                <Link href="/articles" className="px-6 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white font-semibold rounded-xl transition-colors">
-                  Read the Blog →
-                </Link>
+      {/* ── Featured Review ─────────────────────────────────────────────── */}
+      {reviews && reviews.length > 0 && (
+        <section className="relative">
+         {/* Architectural top-rule — fades at edges, branded */}
+         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-600/50 to-transparent" />
+         <div className="max-w-6xl mx-auto px-6 py-20">
+          <div className="flex items-stretch justify-between gap-4 mb-8">
+            <div className="flex items-stretch gap-4">
+              {/* Vertical accent rule next to header */}
+              <div className="w-[3px] bg-orange-600 rounded-full" />
+              <div>
+                <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-2">Just In</p>
+                <h2 className="text-2xl font-black text-white leading-tight">Most Recent Test</h2>
               </div>
             </div>
-
-            {/* Right: top picks carousel */}
-            {reviews && reviews.length > 0 && (
-              <HeroCarousel reviews={reviews.slice(0, 5)} />
-            )}
-
+            <Link href="/reviews" className="hidden sm:inline-flex items-center self-end text-xs text-gray-500 hover:text-orange-400 transition-colors uppercase tracking-widest font-semibold">
+              All Reviews →
+            </Link>
           </div>
-        </div>
-      </section>
-
-      {/* ── Stats Bar ─────────────────────────────────────────────────────── */}
-      <section className="border-b border-gray-800/60 bg-gray-900/40">
-        <div className="max-w-6xl mx-auto px-6 py-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {STATS.map((s) => (
-              <div key={s.label} className="text-center">
-                <p className="text-3xl font-black text-orange-500">{s.value}</p>
-                <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">{s.label}</p>
+          <Link
+            href={`/reviews/${reviews[0].slug}`}
+            className="group flex flex-col md:flex-row bg-gray-900 rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200"
+          >
+            {reviews[0].image_url && (
+              <div className="relative w-full md:w-1/2 h-72 md:h-auto md:min-h-[380px] bg-gray-800 shrink-0">
+                <Image
+                  src={reviews[0].image_url}
+                  alt={reviews[0].product_name}
+                  fill
+                  priority
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+                <span className="absolute top-4 left-4 bg-orange-600 text-white px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-black/40">
+                  Featured
+                </span>
+                {reviews[0].rating >= 8 && (
+                  <div className="absolute top-4 right-4">
+                    <BossApprovedBadge size="sm" variant="card" />
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            )}
+            <div className="p-8 md:p-10 flex flex-col flex-1 justify-center">
+              <div className="flex items-center justify-between mb-4 gap-3">
+                <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
+                  {reviews[0].product_name}
+                </span>
+                <RatingScore rating={reviews[0].rating} />
+              </div>
+              <h3 className="text-2xl md:text-3xl font-black leading-tight mb-3 text-white group-hover:text-orange-400 transition-colors">
+                {reviews[0].title}
+              </h3>
+              {reviews[0].excerpt && (
+                <p className="text-gray-400 text-base leading-relaxed line-clamp-3">
+                  {reviews[0].excerpt}
+                </p>
+              )}
+              <div className="flex items-center justify-between mt-6 pt-4">
+                <span className="text-sm text-gray-500">
+                  {reviews[0].published_at ? new Date(reviews[0].published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
+                </span>
+                <span className="text-sm text-orange-500 font-semibold">Read review →</span>
+              </div>
+            </div>
+          </Link>
+         </div>
+        </section>
+      )}
 
-
-      {/* ── What I'm Testing Now ──────────────────────────────────────────── */}
-      {testingNow && testingNow.length > 0 && (
-        <section className="border-b border-gray-800/60 bg-gray-900/20">
+      {/* ── On Deck — pipeline (testing / queued / considering) ───────────── */}
+      {onDeck.length > 0 && (
+        <section>
           <div className="max-w-6xl mx-auto px-6 py-6">
             <div className="flex items-center justify-between gap-4 mb-4">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                <span className="text-xs font-black uppercase tracking-widest text-green-400">Testing Now</span>
+                <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                <span className="text-xs font-black uppercase tracking-widest text-orange-500">On Deck</span>
               </div>
               <Link href="/wishlist" className="text-xs text-gray-500 hover:text-orange-400 transition-colors font-medium">
                 Vote on what&apos;s next →
               </Link>
             </div>
             <div className="flex gap-4 overflow-x-auto scrollbar-hide sm:overflow-visible sm:grid sm:grid-cols-3">
-              {(testingNow as WishlistItem[]).map((item) => (
+              {(onDeck as WishlistItem[]).map((item) => (
                 <Link
                   key={item.id}
                   href={`/wishlist/${item.slug}`}
-                  className="shrink-0 w-48 sm:w-auto flex items-center gap-3 p-3 bg-gray-900 hover:bg-gray-800 border border-gray-800 hover:border-orange-800/50 rounded-xl transition-colors"
+                  className="shrink-0 w-48 sm:w-auto flex items-center gap-3 p-3 bg-gray-900 hover:bg-gray-800 rounded-2xl shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/40 transition-all"
                 >
-                  <div className="relative w-10 h-10 shrink-0 rounded-lg overflow-hidden bg-gray-950 border border-gray-800">
+                  <div className="relative w-10 h-10 shrink-0 rounded-2xl overflow-hidden bg-gray-950">
                     {item.image_url ? (
                       <Image src={item.image_url} alt={item.title} fill className="object-contain p-1" sizes="40px" />
                     ) : (
@@ -158,7 +193,12 @@ export default async function HomePage() {
                       </div>
                     )}
                   </div>
-                  <p className="text-xs font-semibold text-gray-300 line-clamp-2 leading-snug">{item.title}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${getStatusColor(item.status)}`}>
+                      {getStatusLabel(item.status)}
+                    </p>
+                    <p className="text-xs font-semibold text-gray-300 line-clamp-2 leading-snug">{item.title}</p>
+                  </div>
                 </Link>
               ))}
             </div>
@@ -166,10 +206,15 @@ export default async function HomePage() {
         </section>
       )}
 
+      {/* ── Latest Articles ───────────────────────────────────────────────── */}
+      <Suspense fallback={<LatestArticlesSkeleton />}>
+        <LatestArticlesSection />
+      </Suspense>
+
       {/* ── Categories ────────────────────────────────────────────────────── */}
-      <section className="py-16 border-b border-gray-800/60 overflow-hidden">
+      <section className="py-16 overflow-hidden">
         <div className="max-w-6xl mx-auto px-6 mb-6">
-          <h2 className="text-3xl font-black text-white mb-1">Browse by Category</h2>
+          <h2 className="text-2xl font-black text-white mb-1">Browse by Category</h2>
           <p className="text-gray-500 text-sm">Backyard tested. Boss approved.</p>
         </div>
         {/* Mobile: full-width scroll strip */}
@@ -179,7 +224,7 @@ export default async function HomePage() {
               <Link
                 key={cat.slug}
                 href={`/reviews?category=${cat.slug}`}
-                className={`group shrink-0 w-28 flex flex-col items-center justify-center rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.color} hover:scale-[1.03] transition-transform duration-200 py-6 px-2`}
+                className={`group shrink-0 w-28 flex flex-col items-center justify-center rounded-2xl bg-gradient-to-br ${cat.color} shadow-md shadow-black/30 hover:scale-[1.03] transition-transform duration-200 py-6 px-2`}
               >
                 <div className="text-4xl mb-3">{cat.icon}</div>
                 <p className={`text-xs font-bold text-center leading-snug ${cat.accent}`}>{cat.label}</p>
@@ -193,7 +238,7 @@ export default async function HomePage() {
             <Link
               key={cat.slug}
               href={`/reviews?category=${cat.slug}`}
-              className={`group flex flex-col items-center justify-center rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.color} hover:scale-[1.03] transition-transform duration-200 py-6 px-2`}
+              className={`group flex flex-col items-center justify-center rounded-2xl bg-gradient-to-br ${cat.color} shadow-md shadow-black/30 hover:scale-[1.03] transition-transform duration-200 py-6 px-2`}
             >
               <div className="text-4xl mb-3">{cat.icon}</div>
               <p className={`text-xs font-bold text-center leading-snug ${cat.accent}`}>{cat.label}</p>
@@ -202,11 +247,12 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Latest Reviews ────────────────────────────────────────────────── */}
-      <section className="max-w-6xl mx-auto px-6 py-16 border-b border-gray-800/60">
+      {/* ── More Reviews (grid) ──────────────────────────────────────────── */}
+      <section>
+       <div className="max-w-6xl mx-auto px-6 py-16">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-3xl font-black text-white">Latest Reviews</h2>
+            <h2 className="text-2xl font-black text-white">More Reviews</h2>
             <p className="text-gray-500 text-sm mt-1">Bought, tested, and Boss Daddy Approved</p>
           </div>
           <Link href="/reviews" className="text-sm text-orange-400 hover:text-orange-300 transition-colors">
@@ -214,69 +260,70 @@ export default async function HomePage() {
           </Link>
         </div>
 
-        {!reviews?.length ? (
-          <div className="text-center py-20 border border-dashed border-gray-800 rounded-2xl">
-            <p className="text-gray-600">Reviews dropping soon.</p>
+        {!reviews?.length || reviews.length < 2 ? (
+          <div className="text-center py-20 rounded-2xl">
+            <p className="text-gray-600">More reviews dropping soon.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {reviews.slice(0, 6).map((r, i) => (
-              <Link
-                key={r.id}
-                href={`/reviews/${r.slug}`}
-                className="group flex flex-col bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-orange-700/60 transition-all duration-200"
-              >
-                {r.image_url && (
-                  <div className="relative w-full h-44 bg-gray-800 shrink-0">
-                    <Image
-                      src={r.image_url}
-                      alt={r.product_name}
-                      fill
-                      priority={i < 3}
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
-                    {r.rating >= 8 && (
-                      <div className="absolute top-3 right-3">
-                        <BossApprovedBadge size="sm" variant="card" />
+                {reviews.slice(1, 7).map((r, i) => (
+                  <Link
+                    key={r.id}
+                    href={`/reviews/${r.slug}`}
+                    className="group flex flex-col bg-gray-900 rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200"
+                  >
+                    {r.image_url && (
+                      <div className="relative w-full h-44 bg-gray-800 shrink-0">
+                        <Image
+                          src={r.image_url}
+                          alt={r.product_name}
+                          fill
+                          priority={i < 2}
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        />
+                        {/* Magazine-TOC index number */}
+                        <span className="absolute top-3 left-3 px-2 py-0.5 bg-black/60 backdrop-blur-sm text-orange-400 text-[10px] font-bold tracking-[0.2em] tabular-nums">
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
+                        {r.rating >= 8 && (
+                          <div className="absolute top-3 right-3">
+                            <BossApprovedBadge size="sm" variant="card" />
+                          </div>
+                        )}
                       </div>
                     )}
-                  </div>
-                )}
-                <div className="p-5 flex flex-col flex-1">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
-                      {r.product_name}
-                    </span>
-                    <RatingScore rating={r.rating} />
-                  </div>
-                  <h3 className="text-base font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
-                    {r.title}
-                  </h3>
-                  {r.excerpt && (
-                    <p className="text-gray-500 text-sm mt-2 line-clamp-2">{r.excerpt}</p>
-                  )}
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-800">
-                    <span className="text-xs text-gray-600">
-                      {r.published_at ? new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
-                    </span>
-                    <span className="text-xs text-orange-500 font-medium">Read review →</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                    <div className="p-5 flex flex-col flex-1">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
+                          {r.product_name}
+                        </span>
+                        <RatingScore rating={r.rating} />
+                      </div>
+                      <h3 className="text-base font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
+                        {r.title}
+                      </h3>
+                      {r.excerpt && (
+                        <p className="text-gray-500 text-sm mt-2 line-clamp-2">{r.excerpt}</p>
+                      )}
+                      <div className="flex items-center justify-between mt-4 pt-4">
+                        <span className="text-xs text-gray-600">
+                          {r.published_at ? new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
+                        </span>
+                        <span className="text-xs text-orange-500 font-medium">Read review →</span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
           </div>
         )}
+       </div>
       </section>
 
-      {/* ── Latest Articles ───────────────────────────────────────────────── */}
-      <Suspense fallback={<LatestArticlesSkeleton />}>
-        <LatestArticlesSection />
-      </Suspense>
-
       {/* ── Shop Teaser ───────────────────────────────────────────────────── */}
-      <section className="max-w-6xl mx-auto px-6 py-16 border-b border-gray-800/60">
-        <div className="bg-gray-900 border border-gray-800 rounded-3xl overflow-hidden px-8 py-10">
+      <section>
+       <div className="max-w-6xl mx-auto px-6 py-16">
+        <div className="bg-gray-900 rounded-2xl overflow-hidden shadow-xl shadow-black/40 px-8 py-10">
 
           {/* Product image strip — horizontal, centered */}
           <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mb-8">
@@ -285,7 +332,7 @@ export default async function HomePage() {
               .sort((a, b) => b.rating - a.rating)
               .slice(0, 6)
               .map((r) => (
-                <div key={r.id} className="relative w-full aspect-square rounded-xl overflow-hidden bg-gray-800">
+                <div key={r.id} className="relative w-full aspect-square rounded-2xl overflow-hidden bg-gray-800">
                   <Image
                     src={r.image_url!}
                     alt={r.product_name}
@@ -308,22 +355,23 @@ export default async function HomePage() {
             </div>
             <Link
               href="/reviews"
-              className="shrink-0 px-8 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors"
+              className="shrink-0 px-8 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-2xl transition-colors"
             >
               Shop the List →
             </Link>
           </div>
 
         </div>
+       </div>
       </section>
 
       {/* ── Join the Crew / Newsletter ────────────────────────────────────── */}
-      <section id="crew" className="max-w-6xl mx-auto px-6 py-16 border-b border-gray-800/60">
-        <div className="bg-gradient-to-br from-orange-950/40 to-gray-900 border border-orange-800/30 rounded-3xl px-8 py-12 text-center max-w-2xl mx-auto">
+      <section id="crew" className="max-w-6xl mx-auto px-6 py-16">
+        <div className="bg-gradient-to-br from-orange-950/40 to-gray-900 rounded-2xl shadow-xl shadow-black/40 px-8 py-12 text-center max-w-2xl mx-auto">
           <p className="text-orange-400 text-xs font-semibold uppercase tracking-widest mb-3">
             Join the Boss Daddy Crew
           </p>
-          <h2 className="text-3xl font-black text-white mb-3">
+          <h2 className="text-2xl font-black text-white mb-3">
             Real Talk. Honest Reviews.<br />No BS Ever.
           </h2>
           <p className="text-gray-400 mb-8">
@@ -336,11 +384,11 @@ export default async function HomePage() {
               name="email"
               required
               placeholder="your@email.com"
-              className="flex-1 px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+              className="flex-1 px-4 py-3 bg-gray-900 border border-gray-700 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
             />
             <button
               type="submit"
-              className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors text-sm whitespace-nowrap"
+              className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-2xl transition-colors text-sm whitespace-nowrap"
             >
               Join Free
             </button>
@@ -350,11 +398,16 @@ export default async function HomePage() {
       </section>
 
       {/* ── Closing Tagline ───────────────────────────────────────────────── */}
-      <section className="max-w-6xl mx-auto px-6 py-10 text-center">
-        <p className="text-4xl md:text-5xl font-black text-white">
-          Now let&apos;s dad like a boss —{' '}
-          <span className="text-orange-500">together.</span>
-        </p>
+      <section className="relative py-24 md:py-32">
+        {/* Hairline rule above */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-px bg-orange-600/40" />
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-6">— The Bottom Line</p>
+          <p className="text-3xl md:text-5xl font-black text-white leading-[1.1]">
+            Now let&apos;s dad like a boss —{' '}
+            <span className="text-orange-500">together.</span>
+          </p>
+        </div>
       </section>
 
     </>
@@ -363,7 +416,7 @@ export default async function HomePage() {
 
 function LatestArticlesSkeleton() {
   return (
-    <section className="max-w-6xl mx-auto px-6 py-16 border-b border-gray-800/60">
+    <section className="max-w-6xl mx-auto px-6 py-16">
       <div className="h-8 w-48 bg-gray-900 rounded mb-8 animate-pulse" />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {Array.from({ length: 3 }).map((_, i) => (

@@ -10,7 +10,7 @@ interface Props {
 
 export function WishlistCard({ item }: Props) {
   return (
-    <div className="bg-[var(--bd-surface)] border border-[var(--bd-border)] rounded-2xl overflow-hidden flex flex-col">
+    <div className="bg-[var(--bd-surface)] rounded-2xl overflow-hidden flex flex-col shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200">
       {/* Image */}
       <Link href={`/wishlist/${item.slug}`} className="block relative aspect-[4/3] bg-zinc-900">
         {item.image_url ? (

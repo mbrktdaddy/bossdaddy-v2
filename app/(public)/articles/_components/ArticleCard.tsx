@@ -8,7 +8,7 @@ export default function ArticleCard({ article: a, priority = false }: { article:
   return (
     <Link
       href={`/articles/${a.slug}`}
-      className="group flex flex-col bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-orange-700/60 transition-all duration-200"
+      className="group flex flex-col bg-gray-900 rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200"
     >
       {a.image_url ? (
         <div className="relative w-full h-44 bg-gray-800 shrink-0 overflow-hidden">
@@ -42,7 +42,7 @@ export default function ArticleCard({ article: a, priority = false }: { article:
         {a.excerpt && (
           <p className="text-gray-400 text-sm mt-2 line-clamp-2">{a.excerpt}</p>
         )}
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-800">
+        <div className="flex items-center justify-between mt-4 pt-4">
           <span className="text-xs text-gray-500">
             {a.published_at
               ? new Date(a.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })

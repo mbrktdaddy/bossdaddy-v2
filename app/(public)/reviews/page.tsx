@@ -53,24 +53,27 @@ export default async function ReviewsPage({ searchParams }: Props) {
       .filter(s => s.items.length > 0)
 
     return (
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        <div className="mb-10">
-          <h1 className="text-3xl font-black mb-2">All Reviews</h1>
-          <p className="text-gray-500">
+      <div className="max-w-6xl mx-auto px-6 py-16">
+        {/* Page header — eyebrow + h1 + count */}
+        <div className="mb-12">
+          <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— The Gear</p>
+          <h1 className="text-4xl md:text-5xl font-black mb-3 text-white tracking-tight">All Reviews</h1>
+          <p className="text-gray-500 text-sm tabular-nums">
             {reviews.length} dad-tested {reviews.length === 1 ? 'review' : 'reviews'} across {sections.length} {sections.length === 1 ? 'category' : 'categories'}
           </p>
         </div>
 
-        <div className="-mx-6 overflow-x-auto scrollbar-hide mb-12">
+        {/* Filter pills */}
+        <div className="-mx-6 overflow-x-auto scrollbar-hide mb-14">
           <div className="flex items-center gap-2 px-6 pb-1">
-            <span className="shrink-0 whitespace-nowrap px-4 py-3 rounded-full text-sm font-medium bg-orange-600 text-white">
+            <span className="shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-semibold bg-orange-600 text-white shadow-md shadow-black/30">
               All
             </span>
             {CATEGORIES.map((c) => (
               <Link
                 key={c.slug}
                 href={`/reviews?category=${c.slug}`}
-                className="shrink-0 whitespace-nowrap px-4 py-3 rounded-full text-sm font-medium bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white transition-colors"
+                className="shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40 transition-all"
               >
                 {c.icon} {c.label}
               </Link>
@@ -79,29 +82,32 @@ export default async function ReviewsPage({ searchParams }: Props) {
         </div>
 
         {sections.length === 0 ? (
-          <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
-            <p className="text-gray-600 text-lg">No reviews here yet.</p>
-            <p className="text-gray-700 text-sm mt-2">Check back soon, Boss.</p>
+          <div className="text-center py-24 bg-gray-900/40 rounded-2xl">
+            <p className="text-gray-500 text-lg font-semibold">No reviews here yet.</p>
+            <p className="text-gray-600 text-sm mt-2">Check back soon, Boss.</p>
           </div>
         ) : (
           sections.map(({ cat, items, total }, i) => (
-            <section key={cat.slug}>
-              {i > 0 && <div className="border-t border-gray-800 mb-12" />}
-              <div className="flex items-start justify-between mb-6">
-                <div className="border-l-2 border-orange-600 pl-4">
-                  <h2 className="text-xl font-black">{cat.icon} {cat.label}</h2>
-                  <p className="text-sm text-gray-500 mt-0.5">{cat.description}</p>
+            <section key={cat.slug} className={i > 0 ? 'mt-16' : ''}>
+              <div className="flex items-stretch justify-between mb-6 gap-4">
+                <div className="flex items-stretch gap-4">
+                  <div className="w-[3px] bg-orange-600 rounded-full" />
+                  <div>
+                    <p className="text-[11px] text-orange-500 uppercase tracking-[0.18em] font-bold mb-1">{cat.icon} {cat.label}</p>
+                    <h2 className="text-xl md:text-2xl font-black text-white">{cat.label}</h2>
+                    {cat.description && <p className="text-sm text-gray-500 mt-1">{cat.description}</p>}
+                  </div>
                 </div>
                 {total > items.length && (
                   <Link
                     href={`/reviews?category=${cat.slug}`}
-                    className="text-sm text-orange-400 hover:text-orange-300 font-medium shrink-0 ml-6 py-2 transition-colors"
+                    className="self-end shrink-0 text-xs text-gray-500 hover:text-orange-400 transition-colors uppercase tracking-widest font-semibold"
                   >
                     View all {total} →
                   </Link>
                 )}
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {items.map((r, i) => <ReviewCard key={r.id} review={r} priority={i < 3} />)}
               </div>
             </section>
@@ -125,24 +131,27 @@ export default async function ReviewsPage({ searchParams }: Props) {
   const reviews = (data ?? []) as ReviewRow[]
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12">
-      <div className="mb-10">
-        <h1 className="text-3xl font-black mb-2">
+    <div className="max-w-6xl mx-auto px-6 py-16">
+      {/* Page header — eyebrow + h1 + count */}
+      <div className="mb-12">
+        <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— Reviews / {getCategoryLabel(category).toUpperCase()}</p>
+        <h1 className="text-4xl md:text-5xl font-black mb-3 text-white tracking-tight">
           {cat?.icon} {getCategoryLabel(category)}
         </h1>
         {cat?.description && (
-          <p className="text-gray-400 mb-1">{cat.description}</p>
+          <p className="text-gray-400 mb-2 max-w-2xl">{cat.description}</p>
         )}
-        <p className="text-gray-600 text-sm">
+        <p className="text-gray-500 text-sm tabular-nums">
           {count ?? 0} dad-tested {(count ?? 0) === 1 ? 'review' : 'reviews'}
         </p>
       </div>
 
-      <div className="-mx-6 overflow-x-auto scrollbar-hide mb-10">
+      {/* Filter pills */}
+      <div className="-mx-6 overflow-x-auto scrollbar-hide mb-14">
         <div className="flex items-center gap-2 px-6 pb-1">
           <Link
             href="/reviews"
-            className="shrink-0 whitespace-nowrap px-4 py-3 rounded-full text-sm font-medium bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white transition-colors"
+            className="shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40 transition-all"
           >
             All
           </Link>
@@ -150,10 +159,10 @@ export default async function ReviewsPage({ searchParams }: Props) {
             <Link
               key={c.slug}
               href={`/reviews?category=${c.slug}`}
-              className={`shrink-0 whitespace-nowrap px-4 py-3 rounded-full text-sm font-medium transition-colors ${
+              className={`shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
                 category === c.slug
-                  ? 'bg-orange-600 text-white'
-                  : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'
+                  ? 'bg-orange-600 text-white shadow-md shadow-black/30'
+                  : 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40'
               }`}
             >
               {c.icon} {c.label}
@@ -163,9 +172,9 @@ export default async function ReviewsPage({ searchParams }: Props) {
       </div>
 
       {!reviews.length ? (
-        <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
-          <p className="text-gray-600 text-lg">No reviews here yet.</p>
-          <p className="text-gray-700 text-sm mt-2">Check back soon, Boss.</p>
+        <div className="text-center py-24 bg-gray-900/40 rounded-2xl">
+          <p className="text-gray-500 text-lg font-semibold">No reviews here yet.</p>
+          <p className="text-gray-600 text-sm mt-2">Check back soon, Boss.</p>
         </div>
       ) : (
         <ReviewsGrid initialItems={reviews} total={count ?? 0} category={category} />

@@ -61,7 +61,7 @@ export default async function ShopPage({ searchParams }: Props) {
 
       {/* Email capture (top, prominent when nothing's live yet) */}
       {allComingSoon && (
-        <div className="mb-12 max-w-xl mx-auto bg-gradient-to-br from-gray-900 to-gray-950 border border-orange-900/30 rounded-2xl p-6">
+        <div className="mb-12 max-w-xl mx-auto bg-gradient-to-br from-gray-900 to-gray-950 rounded-2xl p-6 shadow-xl shadow-black/40">
           <EmailSignup
             heading="Get first dibs"
             description="We'll let you know the second the first drop goes live. No spam — just a single launch email and you're in."
@@ -78,10 +78,10 @@ export default async function ShopPage({ searchParams }: Props) {
           <div className="flex items-center gap-2 px-6 pb-1 justify-center">
             <Link
               href="/shop"
-              className={`shrink-0 whitespace-nowrap px-4 py-3 rounded-full text-sm font-medium transition-colors ${
+              className={`shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
                 !category
-                  ? 'bg-orange-600 text-white'
-                  : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'
+                  ? 'bg-orange-600 text-white shadow-md shadow-black/30'
+                  : 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40'
               }`}
             >
               All
@@ -90,10 +90,10 @@ export default async function ShopPage({ searchParams }: Props) {
               <Link
                 key={c.slug}
                 href={`/shop?category=${c.slug}`}
-                className={`shrink-0 whitespace-nowrap px-4 py-3 rounded-full text-sm font-medium transition-colors ${
+                className={`shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
                   category === c.slug
-                    ? 'bg-orange-600 text-white'
-                    : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'
+                    ? 'bg-orange-600 text-white shadow-md shadow-black/30'
+                    : 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40'
                 }`}
               >
                 {c.icon} {c.label}
@@ -105,9 +105,9 @@ export default async function ShopPage({ searchParams }: Props) {
 
       {/* Product grid */}
       {products.length === 0 ? (
-        <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
-          <p className="text-gray-600 text-lg">Nothing here yet.</p>
-          <p className="text-gray-700 text-sm mt-2">Check back soon — first drop is being put together.</p>
+        <div className="text-center py-24 bg-gray-900/40 rounded-2xl">
+          <p className="text-gray-500 text-lg font-semibold">Nothing here yet.</p>
+          <p className="text-gray-600 text-sm mt-2">Check back soon — first drop is being put together.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -133,7 +133,7 @@ export default async function ShopPage({ searchParams }: Props) {
                     </div>
                   )}
                   {isComingSoon && (
-                    <div className="absolute top-3 left-3 bg-orange-950/90 border border-orange-800/60 backdrop-blur-sm px-2.5 py-1 rounded-full">
+                    <div className="absolute top-3 left-3 bg-orange-950/90 backdrop-blur-sm px-2.5 py-1 rounded-full shadow-md shadow-black/40">
                       <p className="text-[10px] font-bold text-orange-400 uppercase tracking-widest">Coming soon</p>
                     </div>
                   )}
@@ -145,7 +145,7 @@ export default async function ShopPage({ searchParams }: Props) {
                   {p.description && (
                     <p className="text-gray-500 text-sm line-clamp-2 mb-3 flex-1">{p.description}</p>
                   )}
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-800">
+                  <div className="flex items-center justify-between pt-3">
                     <span className="text-orange-500 font-bold text-sm">
                       {p.price_cents != null ? formatPrice(p.price_cents) : '—'}
                     </span>
@@ -157,7 +157,7 @@ export default async function ShopPage({ searchParams }: Props) {
               </>
             )
 
-            const className = 'group flex flex-col bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-orange-700/60 transition-all duration-200'
+            const className = 'group flex flex-col bg-gray-900 rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200'
 
             if (isAvailable && p.external_url) {
               return (
@@ -183,7 +183,7 @@ export default async function ShopPage({ searchParams }: Props) {
       )}
 
       {/* In the meantime → /gear callout */}
-      <div className="mt-16 bg-gray-900 border border-gray-800 rounded-2xl p-6 sm:p-8 text-center">
+      <div className="mt-16 bg-gray-900 rounded-2xl p-6 sm:p-8 text-center shadow-xl shadow-black/40">
         <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">In the meantime</p>
         <h3 className="text-xl font-black mb-2">See what Boss Daddy actually uses</h3>
         <p className="text-gray-400 text-sm mb-5 max-w-md mx-auto">
@@ -191,7 +191,7 @@ export default async function ShopPage({ searchParams }: Props) {
         </p>
         <Link
           href="/gear"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold rounded-xl transition-colors"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold rounded-2xl transition-colors"
         >
           Browse the gear list →
         </Link>

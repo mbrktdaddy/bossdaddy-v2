@@ -117,7 +117,7 @@ export default async function ArticlePage({ params }: Props) {
         {/* FTC Disclosure — rendered whenever the article contains affiliate links */}
         {article.has_affiliate_links && (
           <div
-            className="mb-8 text-xs text-gray-500 bg-gray-900 border border-gray-800 rounded-xl px-4 py-3"
+            className="mb-8 text-xs text-gray-500 bg-gray-900 rounded-2xl px-4 py-3 shadow-md shadow-black/30"
             dangerouslySetInnerHTML={{ __html: FTC_DISCLOSURE_HTML }}
           />
         )}
@@ -125,7 +125,7 @@ export default async function ArticlePage({ params }: Props) {
         {/* Header */}
         <div className="mb-10">
           <h1 className="text-3xl md:text-4xl font-black leading-tight mb-6">{article.title}</h1>
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400 pb-6 border-b border-gray-800">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400 pb-6">
             <span>by <Link href={`/author/${author}`} className="text-gray-300 hover:text-orange-400 transition-colors">@{author}</Link></span>
             {article.published_at && (
               <span>
@@ -176,8 +176,8 @@ export default async function ArticlePage({ params }: Props) {
         </div>
 
         {/* Bottom CTA — email signup */}
-        <div className="mt-12 pt-8 border-t border-gray-800">
-          <div className="bg-gradient-to-br from-gray-900 to-gray-950 border border-orange-900/30 rounded-2xl p-6 sm:p-8 text-center">
+        <div className="mt-12 pt-8">
+          <div className="bg-gradient-to-br from-gray-900 to-gray-950 rounded-2xl p-6 sm:p-8 text-center shadow-xl shadow-black/40">
             <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Liked this article?</p>
             <h3 className="text-xl font-black mb-2">Get the next one in your inbox</h3>
             <p className="text-sm text-gray-400 mb-5 max-w-md mx-auto">
@@ -202,7 +202,7 @@ export default async function ArticlePage({ params }: Props) {
         </div>
 
         {/* Like + Share */}
-        <div className="mt-8 pt-6 border-t border-gray-800 flex items-center justify-between flex-wrap gap-4">
+        <div className="mt-8 pt-6 flex items-center justify-between flex-wrap gap-4">
           <LikeButton contentType="article" contentId={article.id} />
           <ShareButtons title={article.title} />
         </div>
@@ -228,7 +228,7 @@ export default async function ArticlePage({ params }: Props) {
                 <Link
                   key={a.id}
                   href={`/articles/${a.slug}`}
-                  className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800 hover:border-orange-700/50 rounded-2xl transition-colors group"
+                  className="flex items-center justify-between p-4 bg-gray-900 rounded-2xl shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/40 transition-all group"
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-semibold group-hover:text-orange-400 transition-colors truncate">{a.title}</p>

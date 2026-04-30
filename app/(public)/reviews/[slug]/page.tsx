@@ -133,7 +133,7 @@ export default async function ReviewPage({ params }: Props) {
         {/* FTC Disclosure */}
         {review.has_affiliate_links && (
           <div
-            className="mb-8 text-xs text-gray-500 bg-gray-900 border border-gray-800 rounded-xl px-4 py-3"
+            className="mb-8 text-xs text-gray-500 bg-gray-900 rounded-2xl px-4 py-3 shadow-md shadow-black/30"
             dangerouslySetInnerHTML={{ __html: FTC_DISCLOSURE_HTML }}
           />
         )}
@@ -147,7 +147,7 @@ export default async function ReviewPage({ params }: Props) {
             {category && (
               <Link
                 href={`/reviews?category=${category.slug}`}
-                className={`text-xs font-medium px-3 py-1 rounded-full bg-gray-900 border border-gray-800 ${category.accent} hover:border-gray-600 transition-colors`}
+                className={`text-xs font-medium px-3 py-1 rounded-full bg-gray-900 ${category.accent} hover:bg-gray-800 shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40 transition-all`}
               >
                 {category.icon} {category.label}
               </Link>
@@ -157,7 +157,7 @@ export default async function ReviewPage({ params }: Props) {
           <h1 className="text-3xl md:text-4xl font-black leading-tight mb-6">{review.title}</h1>
 
           {/* Rating + meta */}
-          <div className="flex flex-wrap items-center gap-5 pb-6 border-b border-gray-800">
+          <div className="flex flex-wrap items-center gap-5 pb-6">
             <RatingScore rating={review.rating} size="lg" />
             {review.rating >= 8 && <BossApprovedBadge size="lg" />}
             <div className="flex items-center gap-4 text-sm text-gray-400">
@@ -191,7 +191,7 @@ export default async function ReviewPage({ params }: Props) {
         {(pros.length > 0 || cons.length > 0) && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
             {pros.length > 0 && (
-              <div className="bg-green-950/30 border border-green-800/40 rounded-2xl p-5">
+              <div className="bg-green-950/30 rounded-2xl p-5 shadow-md shadow-black/30">
                 <p className="text-green-400 font-bold text-sm uppercase tracking-wide mb-3">
                   ✓ The Good
                 </p>
@@ -206,7 +206,7 @@ export default async function ReviewPage({ params }: Props) {
               </div>
             )}
             {cons.length > 0 && (
-              <div className="bg-red-950/30 border border-red-800/40 rounded-2xl p-5">
+              <div className="bg-red-950/30 rounded-2xl p-5 shadow-md shadow-black/30">
                 <p className="text-red-400 font-bold text-sm uppercase tracking-wide mb-3">
                   ✗ The Bad
                 </p>
@@ -250,8 +250,8 @@ export default async function ReviewPage({ params }: Props) {
         )}
 
         {/* Bottom CTA — email signup */}
-        <div className="mt-12 pt-8 border-t border-gray-800">
-          <div className="bg-gradient-to-br from-gray-900 to-gray-950 border border-orange-900/30 rounded-2xl p-6 sm:p-8 text-center">
+        <div className="mt-12 pt-8">
+          <div className="bg-gradient-to-br from-gray-900 to-gray-950 rounded-2xl p-6 sm:p-8 text-center shadow-xl shadow-black/40">
             <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Liked this review?</p>
             <h3 className="text-xl font-black mb-4">Get the next one in your inbox</h3>
             <div className="max-w-md mx-auto">
@@ -267,7 +267,7 @@ export default async function ReviewPage({ params }: Props) {
         </div>
 
         {/* Like + Share */}
-        <div className="mt-8 pt-6 border-t border-gray-800 flex items-center justify-between flex-wrap gap-4">
+        <div className="mt-8 pt-6 flex items-center justify-between flex-wrap gap-4">
           <LikeButton contentType="review" contentId={review.id} />
           <ShareButtons title={review.title} />
         </div>
@@ -294,7 +294,7 @@ export default async function ReviewPage({ params }: Props) {
                 <Link
                   key={r.id}
                   href={`/reviews/${r.slug}`}
-                  className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800 hover:border-orange-700/50 rounded-2xl transition-colors group"
+                  className="flex items-center justify-between p-4 bg-gray-900 rounded-2xl shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/40 transition-all group"
                 >
                   <p className="text-sm font-semibold group-hover:text-orange-400 transition-colors truncate min-w-0 mr-4">{r.title}</p>
                   <RatingScore rating={r.rating} size="sm" />
@@ -310,7 +310,7 @@ export default async function ReviewPage({ params }: Props) {
         <aside className="hidden xl:flex flex-col gap-4 w-72 shrink-0 sticky top-6 self-start">
 
           {/* Quick Verdict */}
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+          <div className="bg-gray-900 rounded-2xl p-5 shadow-lg shadow-black/40">
             <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Quick Verdict</p>
             <p className="font-black text-base mb-3">{review.product_name}</p>
             <RatingScore rating={review.rating} size="sm" />
@@ -320,7 +320,7 @@ export default async function ReviewPage({ params }: Props) {
               </div>
             )}
             {pros.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-gray-800">
+              <div className="mt-4 pt-4">
                 <p className="text-xs text-gray-400 uppercase tracking-wide mb-2">The Good</p>
                 <ul className="space-y-1.5">
                   {pros.slice(0, 3).map((pro, i) => (
@@ -333,7 +333,7 @@ export default async function ReviewPage({ params }: Props) {
               </div>
             )}
             {cons.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-gray-800">
+              <div className="mt-4 pt-4">
                 <p className="text-xs text-gray-400 uppercase tracking-wide mb-2">The Bad</p>
                 <ul className="space-y-1.5">
                   {cons.slice(0, 2).map((con, i) => (
@@ -348,7 +348,7 @@ export default async function ReviewPage({ params }: Props) {
             {category && (
               <Link
                 href={`/reviews?category=${category.slug}`}
-                className="mt-4 pt-4 border-t border-gray-800 flex items-center gap-2 text-xs text-gray-400 hover:text-orange-400 transition-colors"
+                className="mt-4 pt-4 flex items-center gap-2 text-xs text-gray-400 hover:text-orange-400 transition-colors"
               >
                 <span>{category.icon}</span>
                 <span>More {category.label} reviews →</span>
@@ -358,7 +358,7 @@ export default async function ReviewPage({ params }: Props) {
 
           {/* Related Reviews */}
           {related && related.length > 0 && (
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+            <div className="bg-gray-900 rounded-2xl p-5 shadow-lg shadow-black/40">
               <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">More Reviews</p>
               <div className="space-y-4">
                 {related.map((r) => (

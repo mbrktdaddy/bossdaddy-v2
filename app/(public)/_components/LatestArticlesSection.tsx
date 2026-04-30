@@ -15,10 +15,10 @@ export async function LatestArticlesSection() {
   if (!articles || articles.length === 0) return null
 
   return (
-    <section className="max-w-6xl mx-auto px-6 py-16 border-b border-gray-800/60">
+    <section className="max-w-6xl mx-auto px-6 py-16">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-3xl font-black text-white">From the Blog</h2>
+          <h2 className="text-2xl font-black text-white">From the Blog</h2>
           <p className="text-gray-500 text-sm mt-1">Guides, skills, and dad wisdom</p>
         </div>
         <Link href="/articles" className="text-sm text-orange-400 hover:text-orange-300 transition-colors">
@@ -30,7 +30,7 @@ export async function LatestArticlesSection() {
           <Link
             key={a.id}
             href={`/articles/${a.slug}`}
-            className="group flex flex-col bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-orange-700/60 transition-all duration-200"
+            className="group flex flex-col bg-gray-900 rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200"
           >
             {a.image_url ? (
               <div className="relative w-full h-44 bg-gray-800 shrink-0 overflow-hidden">
@@ -58,7 +58,7 @@ export async function LatestArticlesSection() {
               {a.excerpt && (
                 <p className="text-gray-500 text-sm mt-2 line-clamp-2">{a.excerpt}</p>
               )}
-              <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-800">
+              <div className="flex items-center justify-between mt-4 pt-4">
                 <span className="text-xs text-gray-600">
                   {a.published_at ? new Date(a.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
                 </span>

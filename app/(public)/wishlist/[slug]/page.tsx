@@ -100,7 +100,7 @@ export default async function WishlistDetailPage({ params }: Props) {
       <div className="flex flex-col sm:flex-row gap-8">
         {/* Image */}
         {wishlistItem.image_url && (
-          <div className="relative w-full sm:w-48 h-48 shrink-0 rounded-2xl overflow-hidden bg-zinc-900 border border-[var(--bd-border)]">
+          <div className="relative w-full sm:w-48 h-48 shrink-0 rounded-2xl overflow-hidden bg-zinc-900 shadow-md shadow-black/30">
             <Image
               src={wishlistItem.image_url}
               alt={wishlistItem.title}
@@ -123,7 +123,7 @@ export default async function WishlistDetailPage({ params }: Props) {
 
           {/* Skipped reason */}
           {isSkipped && wishlistItem.skip_reason && (
-            <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl mb-4">
+            <div className="p-4 bg-zinc-900 rounded-2xl mb-4 shadow-md shadow-black/30">
               <p className="text-xs font-black uppercase tracking-widest text-zinc-500 mb-1">Why I&apos;m not testing this</p>
               <p className="text-sm text-zinc-400">{wishlistItem.skip_reason}</p>
             </div>
@@ -141,7 +141,7 @@ export default async function WishlistDetailPage({ params }: Props) {
             <div className="mt-4">
               <Link
                 href={linkedReviewSlug ? `/reviews/${linkedReviewSlug}` : '/reviews'}
-                className="inline-flex items-center gap-2 px-5 py-3 bg-orange-600 hover:bg-orange-500 text-white text-sm font-bold rounded-xl transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-3 bg-orange-600 hover:bg-orange-500 text-white text-sm font-bold rounded-2xl transition-colors"
               >
                 Read the full review →
               </Link>
@@ -165,7 +165,7 @@ export default async function WishlistDetailPage({ params }: Props) {
                     href={`/go/${wishlistItem.slug}`}
                     target="_blank"
                     rel="sponsored nofollow noopener"
-                    className="flex items-center gap-2 px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold rounded-xl transition-colors"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold rounded-2xl transition-colors"
                   >
                     {getBuyLabel(wishlistItem.store, wishlistItem.custom_store_name)}
                   </a>
@@ -178,7 +178,7 @@ export default async function WishlistDetailPage({ params }: Props) {
 
       {/* Vote count context */}
       {!isReviewed && !isSkipped && (
-        <div className="mt-8 p-4 bg-orange-950/20 border border-orange-900/30 rounded-2xl">
+        <div className="mt-8 p-4 bg-orange-950/20 rounded-2xl shadow-md shadow-black/30">
           <p className="text-sm text-orange-300/80">
             <strong className="text-orange-400">{wishlistItem.vote_count as number} {wishlistItem.vote_count === 1 ? 'person has' : 'people have'} voted</strong> for this review.
             The more votes, the sooner it gets done.
@@ -187,7 +187,7 @@ export default async function WishlistDetailPage({ params }: Props) {
         </div>
       )}
 
-      <div className="mt-8 pt-6 border-t border-[var(--bd-border)]">
+      <div className="mt-8 pt-6">
         <Link href="/wishlist" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
           ← Back to wishlist
         </Link>

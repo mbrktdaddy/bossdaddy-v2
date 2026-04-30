@@ -35,7 +35,7 @@ export default function ReviewsGrid({ initialItems, total, category }: Props) {
           <button
             onClick={handleLoadMore}
             disabled={isPending}
-            className="px-8 py-3 bg-gray-900 border border-gray-700 rounded-xl text-sm font-semibold text-gray-300 hover:border-orange-600 hover:text-white transition-all disabled:opacity-50"
+            className="px-8 py-3 bg-gray-900 rounded-2xl shadow-lg shadow-black/30 text-sm font-semibold text-gray-300 hover:shadow-xl hover:shadow-black/50 hover:text-white transition-all disabled:opacity-50"
           >
             {isPending ? 'Loading...' : `Load more (${total - items.length} remaining)`}
           </button>

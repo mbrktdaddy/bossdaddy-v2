@@ -9,16 +9,16 @@
   --bd-orange: #CC5500;
   --bd-orange-light: #d96200;
 
-  /* Surfaces (dark-first, warm-shifted) */
-  --bd-bg: #100c07;
-  --bd-surface: #1e180c;
-  --bd-surface-raised: #282112;
-  --bd-border: #342c1c;
+  /* Surfaces — Forge Base (neutral warm-black) */
+  --bd-bg: #0b0b0d;
+  --bd-surface: #141418;
+  --bd-surface-raised: #1c1c22;
+  --bd-border: #28282e;
 
-  /* Text */
-  --bd-text: #f0f0f0;
-  --bd-text-muted: #a1a1a1;
-  --bd-text-faint: #6b6b6b;
+  /* Text — Forge Base */
+  --bd-text: #f5f5f5;
+  --bd-text-muted: #a8a8b0;
+  --bd-text-faint: #6a6a72;
 
   /* Cream — second voice for editorial moments */
   --bd-paper: #EDE6D3;
@@ -42,17 +42,17 @@
   --color-orange-900: #5c2600;
   --color-orange-950: #3d1a00;
 
-  /* Warm dark gray scale — brown-shifted surfaces and borders */
-  --color-gray-950: #100c07;
-  --color-gray-900: #1e180c;
-  --color-gray-800: #282112;
-  --color-gray-700: #342c1c;
+  /* Forge Base gray scale — neutral warm-black */
+  --color-gray-950: #0b0b0d;
+  --color-gray-900: #141418;
+  --color-gray-800: #1c1c22;
+  --color-gray-700: #28282e;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #100c07;
-    --foreground: #ededed;
+    --background: #0b0b0d;
+    --foreground: #f5f5f5;
   }
 }
 

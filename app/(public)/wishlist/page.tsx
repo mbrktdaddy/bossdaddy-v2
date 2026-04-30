@@ -56,8 +56,8 @@ export default async function WishlistPage() {
       </div>
 
       {!hasContent ? (
-        <div className="bg-[var(--bd-surface)] border border-[var(--bd-border)] rounded-2xl p-12 text-center">
-          <p className="text-[var(--bd-text-muted)]">The wishlist is being built out. Check back soon.</p>
+        <div className="bg-gray-900/40 rounded-2xl p-12 text-center">
+          <p className="text-gray-500 font-semibold">The wishlist is being built out. Check back soon.</p>
         </div>
       ) : (
         <div className="space-y-12">
@@ -78,7 +78,7 @@ export default async function WishlistPage() {
                   </summary>
                   <div className="space-y-3">
                     {sectionItems.map((item) => (
-                      <div key={item.id} className="p-4 bg-[var(--bd-surface)] border border-[var(--bd-border)] rounded-2xl">
+                      <div key={item.id} className="p-4 bg-[var(--bd-surface)] rounded-2xl shadow-md shadow-black/30">
                         <p className="text-sm font-semibold text-zinc-400">{item.title}</p>
                         {item.skip_reason && (
                           <p className="text-xs text-zinc-600 mt-1">{item.skip_reason}</p>
