@@ -4,6 +4,8 @@
 > This is the active Boss Daddy rebuild. All new feature work, design, and content happens here.
 > The legacy WordPress site is at `~/boss-daddy/` — maintenance-only archive.
 
+> **Brand & Design System**: see [`docs/brand-guide.md`](docs/brand-guide.md) — authoritative source for colors, typography, components, layout, and design decisions. Update that file when design changes; this file covers engineering rules.
+
 ## Stack
 - **Framework**: Next.js 16 App Router, TypeScript strict
 - **Auth + DB**: Supabase (`@supabase/ssr`) with Row-Level Security
