@@ -22,6 +22,7 @@ export function SchedulePanel({ scheduledAt, onChange, disabled }: Props) {
   const localValue = scheduledAt ? toDateTimeLocal(scheduledAt) : ''
   const isScheduled = !!scheduledAt
   const scheduledDate = scheduledAt ? new Date(scheduledAt) : null
+  // eslint-disable-next-line react-hooks/purity
   const isPast = scheduledDate ? scheduledDate.getTime() < Date.now() : false
 
   return (

@@ -250,6 +250,7 @@ export default function MediaLibraryPage() {
     setLoading(false)
   }, [])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchAssets(page, filterProductId) }, [fetchAssets, page, filterProductId])
 
   function handleFilterChange(productId: string) {

@@ -56,6 +56,7 @@ export function InternalLinkPanel({
   }
 
   async function load() {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true); setError(null)
     try {
       const res = await fetch('/api/claude/suggest-links', {
@@ -233,6 +234,7 @@ interface ExistingLinkCardProps {
 
 function ExistingLinkCard({ link, total, onMove, onRemove, onTextCommit }: ExistingLinkCardProps) {
   const [text, setText] = useState(link.text)
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setText(link.text) }, [link.text])
 
   function commitText() {

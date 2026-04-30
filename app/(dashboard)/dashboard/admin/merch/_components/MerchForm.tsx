@@ -207,7 +207,7 @@ export function MerchForm({ item }: Props) {
           className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
         />
         <p className="mt-1 text-xs text-gray-600">
-          Where the "Buy" button sends the customer when status is <code className="text-orange-400">available</code>. Leave blank for coming-soon items.
+          Where the &quot;Buy&quot; button sends the customer when status is <code className="text-orange-400">available</code>. Leave blank for coming-soon items.
         </p>
       </div>
 

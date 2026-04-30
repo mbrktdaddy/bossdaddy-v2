@@ -10,6 +10,7 @@ export default function WelcomeToast() {
     const stored = sessionStorage.getItem('just_signed_in')
     if (stored) {
       sessionStorage.removeItem('just_signed_in')
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUsername(stored)
       setVisible(true)
       const timer = setTimeout(() => setVisible(false), 5000)

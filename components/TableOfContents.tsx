@@ -55,6 +55,7 @@ export default function TableOfContents({ target = '.bd-content', minHeadings = 
       collected.push({ id, text, level: h.tagName === 'H3' ? 3 : 2 })
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setItems(collected)
   }, [target])
 

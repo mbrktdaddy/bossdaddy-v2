@@ -58,7 +58,7 @@ export function LoginPromptModal({ onClose, returnPath }: Props) {
 
           <h3 id="login-modal-title" className="text-lg font-black mb-1">Join to vote</h3>
           <p className="text-sm text-gray-400 mb-6">
-            Create a free account to vote on what Boss Daddy reviews next and get notified when it's live.
+            Create a free account to vote on what Boss Daddy reviews next and get notified when it&apos;s live.
           </p>
 
           <div className="space-y-3">

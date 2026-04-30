@@ -27,6 +27,7 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
 
   useEffect(() => {
     let cancelled = false
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true); setError(null)
     fetch('/api/products')
       .then((r) => r.json().then((j) => ({ ok: r.ok, json: j })))

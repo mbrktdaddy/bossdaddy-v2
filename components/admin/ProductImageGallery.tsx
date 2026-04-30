@@ -55,6 +55,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
     setLoading(false)
   }
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load() }, [productId])
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -173,7 +174,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
       </div>
 
       <p className="text-xs text-gray-600">
-        Upload new images or pick existing ones from the media library. Click "Set primary" to use as the product card image.
+        Upload new images or pick existing ones from the media library. Click &quot;Set primary&quot; to use as the product card image.
       </p>
 
       {showPicker && (

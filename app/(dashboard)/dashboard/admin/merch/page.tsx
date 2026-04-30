@@ -42,7 +42,7 @@ export default async function AdminMerchListPage() {
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center">
           <p className="text-gray-400 mb-2">No merch items yet.</p>
           <p className="text-xs text-gray-600">
-            Add your first item — set status to <code className="text-orange-400">coming_soon</code> to show it on /gear with a "Notify me" CTA.
+            Add your first item — set status to <code className="text-orange-400">coming_soon</code> to show it on /gear with a &quot;Notify me&quot; CTA.
           </p>
         </div>
       ) : (

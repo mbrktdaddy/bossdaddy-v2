@@ -80,7 +80,7 @@ export default function EditEmailForm({ current }: { current: string }) {
         <p className="text-green-400 text-sm font-semibold mb-1">Confirmation sent</p>
         <p className="text-gray-400 text-sm">
           Check <span className="text-white">{email.trim()}</span> for a confirmation link.
-          Your email won't change until you click it.
+          Your email won&apos;t change until you click it.
         </p>
         <button onClick={reset} className="text-xs text-gray-500 hover:text-gray-300 mt-3 transition-colors">
           Done
@@ -139,7 +139,7 @@ export default function EditEmailForm({ current }: { current: string }) {
           className="w-full px-3 py-2.5 bg-gray-950 border border-gray-700 focus:border-orange-500 rounded-xl text-white text-sm focus:outline-none transition-colors placeholder-gray-600"
         />
         <p className="text-xs text-gray-600">
-          We'll send a verification code to your current email to confirm it's you.
+          We&apos;ll send a verification code to your current email to confirm it&apos;s you.
         </p>
         {error && <p className="text-red-400 text-xs">{error}</p>}
         <div className="flex items-center gap-3">

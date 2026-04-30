@@ -157,7 +157,7 @@ export function ProductForm({ product }: Props) {
             className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
           <p className="mt-1 text-xs text-gray-600">
-            Used in the CTA button: "Check Price at [store name]".
+            Used in the CTA button: &quot;Check Price at [store name]&quot;.
           </p>
         </div>
       )}

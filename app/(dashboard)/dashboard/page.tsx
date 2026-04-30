@@ -87,7 +87,7 @@ export default async function DashboardHome() {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black">Welcome back, Boss.</h1>
-          <p className="text-gray-500 text-sm mt-1">Here's what's happening with your site.</p>
+          <p className="text-gray-500 text-sm mt-1">Here&apos;s what&apos;s happening with your site.</p>
         </div>
         <ExportButton />
       </div>

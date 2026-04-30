@@ -245,6 +245,7 @@ function PostCard({ post, busy, copied, onCopy, onBodyCommit, onHashtagsCommit, 
   const [body, setBody]       = useState(post.body)
   const [tagInput, setTagInput] = useState('')
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setBody(post.body) }, [post.body])
 
   const total = body.length + (post.hashtags.length > 0

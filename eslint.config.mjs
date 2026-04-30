@@ -14,8 +14,12 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
   ]),
   {
-    // Prevent regressions: raw auth.getUser() throws on stale tokens.
-    // Use getUserSafe() from @/lib/supabase/server instead.
+    // Prevent regressions in server-side code: raw auth.getUser() throws on
+    // stale tokens. Use getUserSafe() from @/lib/supabase/server instead.
+    // Scoped to API routes and server libs only — client components use the
+    // browser Supabase client where getUser() is safe and getUserSafe() doesn't apply.
+    files: ['app/api/**/*.ts', 'lib/**/*.ts'],
+    ignores: ['lib/supabase/server.ts'],
     rules: {
       'no-restricted-syntax': [
         'error',
@@ -25,7 +29,6 @@ const eslintConfig = defineConfig([
         },
       ],
     },
-    ignores: ['lib/supabase/server.ts'],
   },
 ]);
 

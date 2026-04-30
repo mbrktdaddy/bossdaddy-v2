@@ -56,6 +56,7 @@ export default function GlobalSearch() {
     return () => clearTimeout(t)
   }, [query, runSearch])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setCursor(0) }, [results])
 
   function navigate(href: string) {
