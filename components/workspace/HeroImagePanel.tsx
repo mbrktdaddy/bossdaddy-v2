@@ -9,7 +9,7 @@ interface Props {
   imageUrl: string | null
   onChange: (url: string | null) => void
   label?: string
-  contentType: 'article' | 'review'
+  contentType: 'guide' | 'review'
   title?: string
   category?: string
   excerpt?: string

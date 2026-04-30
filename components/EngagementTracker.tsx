@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 
 interface Props {
-  contentType: 'article' | 'review'
+  contentType: 'guide' | 'review'
   contentId: string
   /** CSS selector of the article body to track scroll within. Defaults to .bd-content */
   scrollTarget?: string

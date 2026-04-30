@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface Props {
-  contentType: 'review' | 'article' | 'comment'
+  contentType: 'review' | 'guide' | 'comment'
   contentId: string
   size?: 'sm' | 'md'
 }

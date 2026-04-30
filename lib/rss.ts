@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getCategoryLabel } from '@/lib/categories'
 
 export interface FeedItem {
-  type: 'review' | 'article'
+  type: 'review' | 'guide'
   slug: string
   title: string
   excerpt: string | null
@@ -20,7 +20,7 @@ interface FeedOptions {
   /** Limit how many items to include in the feed. */
   limit?: number
   /** Filter to only this content type, or undefined for both. */
-  type?: 'review' | 'article'
+  type?: 'review' | 'guide'
   /** Include the full article body as content:encoded. Defaults to true. */
   fullContent?: boolean
 }
@@ -87,7 +87,7 @@ export async function fetchFeedItems(opts: FeedOptions = {}): Promise<FeedItem[]
   }
 
   const [{ data: reviews }, { data: articles }] = await Promise.all([
-    opts.type === 'article' ? Promise.resolve({ data: [] as ReviewRow[] })  : reviewsQuery,
+    opts.type === 'guide' ? Promise.resolve({ data: [] as ReviewRow[] })  : reviewsQuery,
     opts.type === 'review'  ? Promise.resolve({ data: [] as ArticleRow[] }) : articlesQuery,
   ])
 
@@ -105,7 +105,7 @@ export async function fetchFeedItems(opts: FeedOptions = {}): Promise<FeedItem[]
       author: authorOf(r),
     })),
     ...((articles as ArticleRow[]) ?? []).map((a) => ({
-      type: 'article' as const,
+      type: 'guide' as const,
       slug: a.slug,
       title: a.title,
       excerpt: a.excerpt,

@@ -139,7 +139,7 @@ export async function PUT(
                 : action === 'reject' ? 'Update on your Boss Daddy submission'
                 : 'Edits requested on your Boss Daddy submission',
               react: React.createElement(ModerationResultEmail, {
-                action, contentType: 'article', title: articleTitle,
+                action, contentType: 'guide', title: articleTitle,
                 reason: rejectionReason, siteUrl,
               }),
             })
@@ -199,7 +199,7 @@ export async function PUT(
   }
 
   // Snapshot the PREVIOUS state for version history (fire-and-forget; don't block response)
-  snapshotRevision('article', id, current as Record<string, unknown>, user.id).catch((err) =>
+  snapshotRevision('guide', id, current as Record<string, unknown>, user.id).catch((err) =>
     console.error('Guide revision snapshot failed:', err)
   )
 

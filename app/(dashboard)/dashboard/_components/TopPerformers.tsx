@@ -14,7 +14,7 @@ interface TopItem {
   category: string
   view_count: number | null
   image_url: string | null
-  type: 'article' | 'review'
+  type: 'guide' | 'review'
   published_at: string | null
 }
 
@@ -46,7 +46,7 @@ export function TopPerformers({ items }: { items: TopItem[] }) {
         {visible.map((item, i) => {
           const category = getCategoryBySlug(item.category)
           const percent = Math.round(((item.view_count ?? 0) / max) * 100)
-          const href = item.type === 'article' ? `/dashboard/guides/${item.id}` : `/dashboard/reviews/${item.id}`
+          const href = item.type === 'guide' ? `/dashboard/guides/${item.id}` : `/dashboard/reviews/${item.id}`
           return (
             <Link key={`${item.type}-${item.id}`} href={href} className="block px-5 py-3 hover:bg-gray-950/40 transition-colors">
               <div className="flex items-center gap-3">
@@ -68,7 +68,7 @@ export function TopPerformers({ items }: { items: TopItem[] }) {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className={`text-xs px-1.5 py-0.5 rounded border ${
-                      item.type === 'article'
+                      item.type === 'guide'
                         ? 'bg-blue-950/40 text-blue-400 border-blue-900/40'
                         : 'bg-orange-950/40 text-orange-400 border-orange-900/40'
                     }`}>

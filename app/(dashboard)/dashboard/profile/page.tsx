@@ -56,7 +56,7 @@ export default async function ProfilePage() {
       .order('created_at', { ascending: false }).limit(10),
     // Most recently liked articles (ID list, ordered by like date)
     supabase.from('likes').select('content_id, created_at')
-      .eq('user_id', user.id).eq('content_type', 'article')
+      .eq('user_id', user.id).eq('content_type', 'guide')
       .order('created_at', { ascending: false }).limit(10),
   ])
 
@@ -76,7 +76,7 @@ export default async function ProfilePage() {
   ] = await Promise.all([
     allContentIds.length
       ? supabase.from('likes').select('id', { count: 'exact', head: true })
-          .in('content_type', ['review', 'article']).in('content_id', allContentIds)
+          .in('content_type', ['review', 'guide']).in('content_id', allContentIds)
       : Promise.resolve({ count: 0 }),
     myCommentIdList.length
       ? supabase.from('likes').select('id', { count: 'exact', head: true })

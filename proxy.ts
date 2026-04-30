@@ -14,6 +14,8 @@ function rewritePublicLegacy(pathname: string): string | null {
   // /shop and /shop/* → /gear (Shop unified into the Gear page)
   if (pathname === '/shop' || pathname === '/shop/') return '/gear'
   if (pathname.startsWith('/shop/')) return '/gear'
+  // /feed/articles.xml → /feed/guides.xml (RSS feed renamed)
+  if (pathname === '/feed/articles.xml') return '/feed/guides.xml'
   return null
 }
 

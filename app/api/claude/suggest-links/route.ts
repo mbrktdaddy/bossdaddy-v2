@@ -11,7 +11,7 @@ const SuggestSchema = z.object({
   excerpt:      z.string().max(400).optional().nullable(),
   category:     z.string().min(1).max(80),
   current_id:   z.string().uuid().optional().nullable(),
-  content_type: z.enum(['article', 'review']).optional(),
+  content_type: z.enum(['guide', 'review']).optional(),
 })
 
 // POST /api/claude/suggest-links — find published articles/reviews relevant to the current content
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 
   const sameCategoryPool = [
     ...(sameCategoryArticles ?? []).map((a) => ({
-      type: 'article' as const, id: a.id, title: a.title, slug: a.slug, excerpt: a.excerpt ?? '', url: `/guides/${a.slug}`,
+      type: 'guide' as const, id: a.id, title: a.title, slug: a.slug, excerpt: a.excerpt ?? '', url: `/guides/${a.slug}`,
     })),
     ...(sameCategoryReviews ?? []).map((r) => ({
       type: 'review' as const, id: r.id, title: r.title, slug: r.slug, excerpt: r.excerpt ?? '', url: `/reviews/${r.slug}`,
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     candidates = [
       ...sameCategoryPool,
       ...(crossArticles ?? []).map((a) => ({
-        type: 'article' as const, id: a.id, title: a.title, slug: a.slug, excerpt: a.excerpt ?? '', url: `/guides/${a.slug}`,
+        type: 'guide' as const, id: a.id, title: a.title, slug: a.slug, excerpt: a.excerpt ?? '', url: `/guides/${a.slug}`,
       })),
       ...(crossReviews ?? []).map((r) => ({
         type: 'review' as const, id: r.id, title: r.title, slug: r.slug, excerpt: r.excerpt ?? '', url: `/reviews/${r.slug}`,
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
   // reviews for comparison.
   const steer = content_type === 'review'
     ? 'The piece being edited is a REVIEW. Favor linking to ARTICLES that provide how-to or buying-guide context, and to a small number of peer REVIEWS readers are likely to cross-shop.'
-    : content_type === 'article'
+    : content_type === 'guide'
     ? 'The piece being edited is an ARTICLE (often a guide or roundup). Favor linking to REVIEWS for any product you name, and to a couple of peer ARTICLES that go deeper on related topics.'
     : 'Prefer cross-type links (reviews from a guide, guides from a review) over same-type.'
 

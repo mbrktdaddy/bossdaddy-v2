@@ -11,7 +11,7 @@ interface Revision {
 }
 
 interface Props {
-  contentType: 'article' | 'review'
+  contentType: 'guide' | 'review'
   contentId: string
 }
 

@@ -88,7 +88,7 @@ export function GuideCreateWizard() {
       const res = await fetch('/api/claude/suggest-prompt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description, type: 'article' }),
+        body: JSON.stringify({ description, type: 'guide' }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Suggest failed')

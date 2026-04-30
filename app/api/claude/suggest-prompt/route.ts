@@ -7,7 +7,7 @@ export const maxDuration = 30
 
 const Input = z.object({
   description: z.string().min(2).max(300),
-  type: z.enum(['article', 'review']),
+  type: z.enum(['guide', 'review']),
 })
 
 const SUGGEST_SYSTEM = `You help Boss Daddy content creators turn rough ideas into structured generation prompts.

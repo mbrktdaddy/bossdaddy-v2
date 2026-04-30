@@ -50,7 +50,7 @@ export const metadata: Metadata = {
       'application/rss+xml': [
         { url: '/feed.xml',           title: 'Boss Daddy Life — All' },
         { url: '/feed/reviews.xml',   title: 'Boss Daddy Life — Reviews' },
-        { url: '/feed/articles.xml',  title: 'Boss Daddy Life — Articles' },
+        { url: '/feed/guides.xml',    title: 'Boss Daddy Life — Guides' },
       ],
     },
   },

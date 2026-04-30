@@ -3,12 +3,12 @@ import { fetchFeedItems, buildRssXml, rssResponse } from '@/lib/rss'
 export const revalidate = 3600
 
 export async function GET() {
-  const items = await fetchFeedItems({ type: 'article', limit: 30 })
+  const items = await fetchFeedItems({ type: 'guide', limit: 30 })
   const xml = buildRssXml(
     {
-      title: 'Boss Daddy Life — Articles',
+      title: 'Boss Daddy Life — Guides',
       description: 'Honest takes on dad life, family, and the gear that supports it.',
-      selfPath: '/feed/articles.xml',
+      selfPath: '/feed/guides.xml',
     },
     items,
   )

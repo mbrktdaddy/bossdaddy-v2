@@ -103,7 +103,7 @@ export default async function AuthorPage({ params }: Props) {
  )}
  <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
  <span><span className="text-white font-semibold">{totalReviews}</span> {totalReviews === 1 ? 'review' : 'reviews'}</span>
- <span><span className="text-white font-semibold">{totalArticles}</span> {totalArticles === 1 ? 'article' : 'articles'}</span>
+ <span><span className="text-white font-semibold">{totalArticles}</span> {totalArticles === 1 ? 'guide' : 'articles'}</span>
  </div>
  </div>
  </div>

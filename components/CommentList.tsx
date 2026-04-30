@@ -3,7 +3,7 @@ import CommentShareButton from './CommentShareButton'
 import LikeButton from './LikeButton'
 
 interface Props {
-  contentType: 'review' | 'article'
+  contentType: 'review' | 'guide'
   contentId: string
 }
 

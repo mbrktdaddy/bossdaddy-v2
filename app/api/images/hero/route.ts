@@ -9,7 +9,7 @@ const HeroInput = z.object({
   title:         z.string().min(1).max(150),
   category:      z.string().min(1).max(80),
   excerpt:       z.string().max(200).optional().nullable(),
-  content_type:  z.enum(['article', 'review']),
+  content_type:  z.enum(['guide', 'review']),
   product_name:  z.string().max(120).optional().nullable(),
   custom_prompt: z.string().max(600).optional().nullable(),
 })

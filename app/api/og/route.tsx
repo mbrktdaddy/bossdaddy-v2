@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get('type') ?? 'review'
   const category = searchParams.get('category') ?? ''
 
-  const typeLabel = type === 'article' ? 'ARTICLE' : 'REVIEW'
+  const typeLabel = type === 'guide' ? 'ARTICLE' : 'REVIEW'
   const categoryLabel = category
     ? category.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
     : ''

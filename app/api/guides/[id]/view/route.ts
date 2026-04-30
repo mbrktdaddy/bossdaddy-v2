@@ -14,6 +14,6 @@ export async function POST(
   if (!success) return NextResponse.json({ ok: true }) // silent — no error exposed
 
   const supabase = await createClient()
-  await supabase.rpc('increment_article_views', { row_id: id })
+  await supabase.rpc('increment_guide_views', { row_id: id })
   return NextResponse.json({ ok: true })
 }

@@ -5,12 +5,12 @@ import { snapshotRevision } from '@/lib/revisions'
 import { z } from 'zod'
 
 const ListSchema = z.object({
-  content_type: z.enum(['article', 'review']),
+  content_type: z.enum(['guide', 'review']),
   content_id:   z.string().uuid(),
 })
 
 const RevertSchema = z.object({
-  content_type: z.enum(['article', 'review']),
+  content_type: z.enum(['guide', 'review']),
   content_id:   z.string().uuid(),
   revision_id:  z.string().uuid(),
 })
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
   if (!revision) return NextResponse.json({ error: 'Revision not found' }, { status: 404 })
 
-  const table = content_type === 'article' ? 'guides' : 'reviews'
+  const table = content_type === 'guide' ? 'guides' : 'reviews'
 
   // Snapshot current state FIRST so revert itself creates a restore point
   const { data: currentState } = await admin.from(table).select('*').eq('id', content_id).single()
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
 
   // Build update payload from snapshot — only fields the user would edit
   const snap = revision.snapshot as Record<string, unknown>
-  const editableFields = content_type === 'article'
+  const editableFields = content_type === 'guide'
     ? ['title', 'category', 'excerpt', 'content', 'image_url', 'meta_title', 'meta_description']
     : ['title', 'product_name', 'category', 'excerpt', 'content', 'image_url', 'rating', 'pros', 'cons',
        'disclosure_acknowledged', 'meta_title', 'meta_description']

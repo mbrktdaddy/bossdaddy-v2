@@ -7,7 +7,7 @@ import * as React from 'react'
 export const maxDuration = 60
 
 interface DigestItem {
-  type: 'review' | 'article'
+  type: 'review' | 'guide'
   title: string
   slug: string
   excerpt: string | null
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
       rating: r.rating,
     })),
     ...(articles ?? []).map((a) => ({
-      type: 'article' as const,
+      type: 'guide' as const,
       title: a.title,
       slug: a.slug ?? '',
       excerpt: a.excerpt ?? null,

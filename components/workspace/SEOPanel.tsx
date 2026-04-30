@@ -6,7 +6,7 @@ interface Props {
   fallbackTitle: string
   fallbackDescription: string
   slug: string | null
-  contentType: 'article' | 'review'
+  contentType: 'guide' | 'review'
   onChangeTitle: (v: string) => void
   onChangeDescription: (v: string) => void
   defaultOpen?: boolean

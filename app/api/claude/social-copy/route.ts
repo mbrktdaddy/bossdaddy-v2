@@ -7,7 +7,7 @@ import { z } from 'zod'
 export const maxDuration = 45
 
 const Schema = z.object({
-  content_type: z.enum(['article', 'review']),
+  content_type: z.enum(['guide', 'review']),
   content_id:   z.string().uuid(),
   // Platforms to generate for
   platforms:    z.array(z.enum(['twitter', 'instagram', 'facebook', 'linkedin', 'threads'])).min(1).max(5),

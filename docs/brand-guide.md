@@ -17,9 +17,14 @@ User-facing content types are referred to consistently as:
 
 **Important rules:**
 - The user-facing term is **always "Guides"** in nav, headings, buttons, metadata, search results, dashboard labels, and any visible UI string.
-- The internal table/type/variable names remain `article` / `articles` / `Article*` — renaming the DB schema is a separate, deliberate refactor.
+- Internal code, types, file/folder names, DB tables, and variable names also use `guide` / `guides` (post-cleanup as of migrations 032 + 034).
 - Never use the word "Blog" in user-facing copy. The site doesn't have a blog; it has Guides.
 - When introducing new copy, prefer "guide" / "guides" (lowercase in body, title-case in headings/labels).
+
+**Intentionally kept legacy names (do not rename):**
+- **`article-images` Supabase storage bucket** — bucket names are user-invisible and renaming requires moving every file + UPDATE'ing every `image_url` column in `guides` and `reviews`. High operational risk for cosmetic gain. Bucket stays as-is, the `guides` table just stores image URLs that point at this bucket.
+- **`shop_launch` email-interest tag** — stored on subscriber records. Renaming would orphan existing subscriber segmentation. New signups still use this tag.
+- **`openGraph: { type: 'article' }` in page metadata** — W3C OpenGraph protocol value. `'guide'` is not a valid OG type; must stay `'article'` (or `'website'`) for social cards/SEO to render.
 
 ---
 

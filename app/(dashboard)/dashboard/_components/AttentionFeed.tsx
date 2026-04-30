@@ -8,7 +8,7 @@ type PendingItem = {
   moderation_score: number | null
   moderation_flags: string[] | null
   created_at: string
-  type: 'article' | 'review'
+  type: 'guide' | 'review'
 }
 
 type PendingComment = {
@@ -53,7 +53,7 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
         const score = item.moderation_score
         const category = getCategoryBySlug(item.category)
         const isHighRisk = score !== null && score >= 0.7
-        const href = item.type === 'article'
+        const href = item.type === 'guide'
           ? `/dashboard/guides/${item.id}`
           : `/dashboard/reviews/${item.id}`
 
@@ -67,11 +67,11 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <span className={`text-xs px-2 py-0.5 rounded-full border ${
-                    item.type === 'article'
+                    item.type === 'guide'
                       ? 'bg-blue-950/40 text-blue-400 border-blue-900/40'
                       : 'bg-orange-950/40 text-orange-400 border-orange-900/40'
                   }`}>
-                    {item.type === 'article' ? 'Guide' : 'Review'}
+                    {item.type === 'guide' ? 'Guide' : 'Review'}
                   </span>
                   {category && <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>}
                   <span className="text-xs text-gray-600">{timeAgo(item.created_at)}</span>

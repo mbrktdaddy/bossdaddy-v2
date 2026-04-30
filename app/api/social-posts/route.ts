@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { z } from 'zod'
 
 const Platform = z.enum(['twitter', 'instagram', 'facebook', 'linkedin', 'threads'])
-const ContentType = z.enum(['article', 'review'])
+const ContentType = z.enum(['guide', 'review'])
 
 async function gateRole(): Promise<{ user: { id: string } } | NextResponse> {
   const supabase = await createClient()
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
   if (!contentType || !contentId) {
     return NextResponse.json({ error: 'Missing content_type or content_id' }, { status: 400 })
   }
-  if (!['article', 'review'].includes(contentType)) {
+  if (!['guide', 'review'].includes(contentType)) {
     return NextResponse.json({ error: 'Invalid content_type' }, { status: 400 })
   }
 

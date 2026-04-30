@@ -24,7 +24,7 @@ export interface InternalLink {
   start: number
   end: number
   raw: string
-  type: 'article' | 'review' | 'other'
+  type: 'guide' | 'review' | 'other'
 }
 
 // Anchors whose href starts with /articles/ or /reviews/ — relative URLs
@@ -43,7 +43,7 @@ function hrefToPath(href: string): string {
 
 function classifyHref(href: string): InternalLink['type'] {
   const pathname = hrefToPath(href)
-  if (pathname.startsWith('/articles/')) return 'article'
+  if (pathname.startsWith('/articles/')) return 'guide'
   if (pathname.startsWith('/reviews/'))  return 'review'
   return 'other'
 }

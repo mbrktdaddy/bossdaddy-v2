@@ -13,7 +13,7 @@ import {
 } from '@/lib/internalLinks'
 
 interface Suggestion {
-  type: 'article' | 'review'
+  type: 'guide' | 'review'
   id: string
   title: string
   slug: string
@@ -26,7 +26,7 @@ interface Props {
   excerpt: string
   category: string
   currentId: string
-  contentType: 'article' | 'review'
+  contentType: 'guide' | 'review'
   content: string
   onChangeContent: (next: string) => void
 }
@@ -181,7 +181,7 @@ export function InternalLinkPanel({
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-0.5">
                           <span className={`text-xs px-2 py-0.5 rounded-full border ${
-                            s.type === 'article'
+                            s.type === 'guide'
                               ? 'bg-blue-950/40 text-blue-400 border-blue-900/40'
                               : 'bg-orange-950/40 text-orange-400 border-orange-900/40'
                           }`}>
@@ -245,7 +245,7 @@ function ExistingLinkCard({ link, total, onMove, onRemove, onTextCommit }: Exist
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
           <span className={`text-xs px-2 py-0.5 rounded-full border ${
-            link.type === 'article'
+            link.type === 'guide'
               ? 'bg-blue-950/40 text-blue-400 border-blue-900/40'
               : 'bg-orange-950/40 text-orange-400 border-orange-900/40'
           }`}>{link.type}</span>

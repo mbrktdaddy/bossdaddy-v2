@@ -129,7 +129,7 @@ export async function DELETE(
         error: 'Asset is referenced elsewhere. Re-send with ?confirm=true to cascade-clear and delete.',
         usage: {
           products:       productRefs.data    ?? [],
-          articles_hero:  articleRefs.data    ?? [],
+          guides_hero:  articleRefs.data    ?? [],
           reviews_hero:   reviewRefs.data     ?? [],
           articles_body:  articleBodyRefs.data ?? [],
           reviews_body:   reviewBodyRefs.data  ?? [],

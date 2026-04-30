@@ -49,7 +49,7 @@ export default async function DashboardHome() {
   // Build the "needs attention" feed — pending items sorted by risk score desc then newest first
   const pendingArticles = articlesTyped
     .filter((a) => a.status === 'pending')
-    .map((a) => ({ ...a, type: 'article' as const, moderation_flags: (a.moderation_flags ?? []) as string[] }))
+    .map((a) => ({ ...a, type: 'guide' as const, moderation_flags: (a.moderation_flags ?? []) as string[] }))
   const pendingReviews = reviewsTyped
     .filter((r) => r.status === 'pending')
     .map((r) => ({ ...r, type: 'review' as const, moderation_flags: (r.moderation_flags ?? []) as string[] }))
@@ -67,7 +67,7 @@ export default async function DashboardHome() {
       id: a.id, title: a.title, slug: (a as unknown as { slug: string }).slug, category: a.category,
       view_count: (a as unknown as { view_count: number | null }).view_count,
       image_url: (a as unknown as { image_url: string | null }).image_url,
-      type: 'article' as const,
+      type: 'guide' as const,
       published_at: (a as unknown as { published_at: string | null }).published_at,
     })),
     ...reviewsTyped.filter((r) => r.status === 'approved').map((r) => ({

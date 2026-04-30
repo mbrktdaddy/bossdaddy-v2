@@ -4,12 +4,12 @@ import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 const LikeSchema = z.object({
-  content_type: z.enum(['review', 'article', 'comment']),
+  content_type: z.enum(['review', 'guide', 'comment']),
   content_id:   z.string().uuid(),
 })
 
 const GetSchema = z.object({
-  type: z.enum(['review', 'article', 'comment']),
+  type: z.enum(['review', 'guide', 'comment']),
   id:   z.string().uuid(),
 })
 

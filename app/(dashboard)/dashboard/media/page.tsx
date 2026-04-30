@@ -26,7 +26,7 @@ interface Product {
 interface UsageItem { id: string; title?: string; name?: string; slug: string; status?: string }
 interface UsageData {
   products:      { id: string; name: string; slug: string }[]
-  articles_hero: UsageItem[]
+  guides_hero: UsageItem[]
   reviews_hero:  UsageItem[]
   articles_body: UsageItem[]
   reviews_body:  UsageItem[]
@@ -487,10 +487,10 @@ export default function MediaLibraryPage() {
                 note="image_url will be cleared"
               />
             )}
-            {usageData.articles_hero.length > 0 && (
+            {usageData.guides_hero.length > 0 && (
               <UsageSection
                 label="Guide hero"
-                items={usageData.articles_hero.map((a) => ({ id: a.id, label: a.title ?? a.slug, href: `/dashboard/guides/${a.id}`, status: a.status }))}
+                items={usageData.guides_hero.map((a) => ({ id: a.id, label: a.title ?? a.slug, href: `/dashboard/guides/${a.id}`, status: a.status }))}
                 note="hero image will be cleared"
               />
             )}

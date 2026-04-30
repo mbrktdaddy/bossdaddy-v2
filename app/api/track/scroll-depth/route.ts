@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { z } from 'zod'
 
 const Schema = z.object({
-  content_type: z.enum(['article', 'review']),
+  content_type: z.enum(['guide', 'review']),
   content_id:   z.string().uuid(),
   milestone:    z.union([z.literal(25), z.literal(50), z.literal(75), z.literal(100)]),
 })

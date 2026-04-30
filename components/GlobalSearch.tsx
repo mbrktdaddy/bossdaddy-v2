@@ -20,7 +20,7 @@ export default function GlobalSearch() {
 
   // Flat list of navigable results for keyboard
   const flat = [
-    ...results.articles.map((a) => ({ kind: 'article' as const, id: a.id, title: a.title, href: `/dashboard/guides/${a.id}`, meta: a.category })),
+    ...results.articles.map((a) => ({ kind: 'guide' as const, id: a.id, title: a.title, href: `/dashboard/guides/${a.id}`, meta: a.category })),
     ...results.reviews.map((r)  => ({ kind: 'review'  as const, id: r.id, title: r.title, href: `/dashboard/reviews/${r.id}`,  meta: r.product_name })),
     ...results.media.map((m)    => ({ kind: 'media'   as const, id: m.id, title: m.alt_text ?? m.filename, href: `/dashboard/media`, meta: m.filename })),
   ]

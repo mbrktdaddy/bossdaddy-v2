@@ -37,7 +37,7 @@ export default async function CommentsPage({ searchParams }: Props) {
 
   // Lookup article/review titles for the comments in view
   const reviewIds  = Array.from(new Set((comments ?? []).filter(c => c.content_type === 'review').map(c => c.content_id)))
-  const articleIds = Array.from(new Set((comments ?? []).filter(c => c.content_type === 'article').map(c => c.content_id)))
+  const articleIds = Array.from(new Set((comments ?? []).filter(c => c.content_type === 'guide').map(c => c.content_id)))
 
   const [{ data: reviewTitles }, { data: articleTitles }] = await Promise.all([
     reviewIds.length  ? admin.from('reviews').select('id, title, slug').in('id', reviewIds)    : Promise.resolve({ data: [] as { id: string; title: string; slug: string }[] }),
@@ -46,7 +46,7 @@ export default async function CommentsPage({ searchParams }: Props) {
 
   const contentMap = new Map<string, { title: string; slug: string; type: string }>([
     ...(reviewTitles  ?? []).map(r => [r.id, { title: r.title, slug: r.slug, type: 'review' }]  as [string, { title: string; slug: string; type: string }]),
-    ...(articleTitles ?? []).map(a => [a.id, { title: a.title, slug: a.slug, type: 'article' }] as [string, { title: string; slug: string; type: string }]),
+    ...(articleTitles ?? []).map(a => [a.id, { title: a.title, slug: a.slug, type: 'guide' }] as [string, { title: string; slug: string; type: string }]),
   ])
 
   return (

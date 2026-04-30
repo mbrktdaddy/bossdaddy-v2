@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 
 interface Props {
   id: string
-  type: 'review' | 'article'
+  type: 'review' | 'guide'
 }
 
 export default function ViewTracker({ id, type }: Props) {

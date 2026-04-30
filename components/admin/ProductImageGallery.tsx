@@ -9,7 +9,7 @@ const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ss
 interface UsageItem { id: string; title?: string; name?: string; slug: string; status?: string }
 interface UsageData {
   products:      { id: string; name: string; slug: string }[]
-  articles_hero: UsageItem[]
+  guides_hero: UsageItem[]
   reviews_hero:  UsageItem[]
   articles_body: UsageItem[]
   reviews_body:  UsageItem[]
@@ -272,7 +272,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
 
             {[
               ...usageModal.usage.products.map((p) => `Product: ${p.name}`),
-              ...usageModal.usage.articles_hero.map((a) => `Article hero: ${a.title ?? a.slug}`),
+              ...usageModal.usage.guides_hero.map((a) => `Guide hero: ${a.title ?? a.slug}`),
               ...usageModal.usage.reviews_hero.map((r) => `Review hero: ${r.title ?? r.slug}`),
             ].map((label, i) => (
               <p key={i} className="text-sm text-gray-300 bg-gray-900 border border-gray-800 rounded-lg px-3 py-2">

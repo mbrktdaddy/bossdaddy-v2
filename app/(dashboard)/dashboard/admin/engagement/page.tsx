@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 
 interface ContentRow {
   id: string
-  type: 'article' | 'review'
+  type: 'guide' | 'review'
   title: string
   slug: string
   category: string
@@ -61,7 +61,7 @@ export default async function EngagementPage() {
   const rows: ContentRow[] = [
     ...((articles ?? []) as Omit<ContentRow, 'type' | 'click_count'>[]).map((a) => ({
       ...a,
-      type: 'article' as const,
+      type: 'guide' as const,
       click_count: clicksByContent.get(`article:${a.id}`) ?? 0,
     })),
     ...((reviews ?? []) as Omit<ContentRow, 'type' | 'click_count'>[]).map((r) => ({
@@ -133,7 +133,7 @@ export default async function EngagementPage() {
                     <tr key={`${r.type}-${r.id}`} className="hover:bg-gray-950/40">
                       <td className="px-5 py-2.5 max-w-md">
                         <Link
-                          href={r.type === 'article' ? `/guides/${r.slug}` : `/reviews/${r.slug}`}
+                          href={r.type === 'guide' ? `/guides/${r.slug}` : `/reviews/${r.slug}`}
                           className="text-gray-200 hover:text-orange-400 truncate block"
                         >
                           {r.title}
