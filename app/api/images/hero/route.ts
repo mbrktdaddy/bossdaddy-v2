@@ -37,6 +37,8 @@ export async function POST(request: NextRequest) {
       `Real-world setting with natural or warm indoor lighting, clean composition, sharp focus, ` +
       `no people, no text, no watermarks. Style: professional lifestyle photography as seen on major content sites.`
 
+  // TODO(bucket-rename): 'article-images' → 'guide-images'. Deferred — see
+  // docs/brand-guide.md §0 for runbook + risk assessment.
   const bucket = content_type === 'review' ? 'review-images' : 'article-images'
 
   try {
