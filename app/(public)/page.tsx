@@ -74,8 +74,12 @@ export default async function HomePage() {
             <br />
             <span className="text-orange-500">a Boss.</span>
           </h1>
-          <p className="text-[11px] md:text-xs uppercase tracking-[0.25em] font-bold text-orange-500 mb-5">
-            Real Dads <span className="text-orange-800 mx-2">·</span> Real Reviews <span className="text-orange-800 mx-2">·</span> Smart Tech
+          <p className="text-[11px] md:text-xs uppercase tracking-[0.2em] font-bold text-orange-500 mb-5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+            <span>Real Dads</span>
+            <span className="text-orange-800">·</span>
+            <span>Real Reviews</span>
+            <span className="text-orange-800">·</span>
+            <span>Smart Tech</span>
           </p>
           <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-10 max-w-2xl mx-auto">
             Reviews, guides, and really good stuff for the Boss Dads who show up every single day.
