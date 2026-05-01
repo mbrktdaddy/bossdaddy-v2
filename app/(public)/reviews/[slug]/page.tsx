@@ -17,6 +17,7 @@ import CommentForm from '@/components/CommentForm'
 import CommentList from '@/components/CommentList'
 import RatingWidget from '@/components/RatingWidget'
 import ImageLightbox from '@/components/ImageLightbox'
+import { LightboxImage } from '@/components/LightboxImage'
 import ProductCtaCard from '@/components/ProductCtaCard'
 import { EmailSignup } from '@/components/EmailSignup'
 import AuthorBio from '@/components/AuthorBio'
@@ -175,16 +176,18 @@ export default async function ReviewPage({ params }: Props) {
 
         {/* Hero image */}
         {review.image_url && (
-          <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden mb-10 bg-gray-900">
-            <Image
-              src={review.image_url}
-              alt={review.product_name}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 768px"
-              priority
-            />
-          </div>
+          <LightboxImage src={review.image_url} alt={review.product_name}>
+            <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden mb-10 bg-gray-900">
+              <Image
+                src={review.image_url}
+                alt={review.product_name}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 768px"
+                priority
+              />
+            </div>
+          </LightboxImage>
         )}
 
         {/* Pros / Cons */}

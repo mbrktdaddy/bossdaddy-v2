@@ -11,6 +11,7 @@ import { VoteButton } from '@/components/wishlist/VoteButton'
 import { SubscribeButton } from '@/components/wishlist/SubscribeButton'
 import CommentForm from '@/components/CommentForm'
 import CommentList from '@/components/CommentList'
+import { LightboxImage } from '@/components/LightboxImage'
 import type { Metadata } from 'next'
 
 export const revalidate = 300
@@ -98,16 +99,18 @@ export default async function BenchDetailPage({ params }: Props) {
       </div>
 
       {wishlistItem.image_url && (
-        <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-zinc-900 shadow-md shadow-black/30 mb-8">
-          <Image
-            src={wishlistItem.image_url}
-            alt={wishlistItem.title}
-            fill
-            className="object-contain p-6"
-            sizes="(max-width: 768px) 100vw, 768px"
-            priority
-          />
-        </div>
+        <LightboxImage src={wishlistItem.image_url} alt={wishlistItem.title}>
+          <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-zinc-900 shadow-md shadow-black/30 mb-8">
+            <Image
+              src={wishlistItem.image_url}
+              alt={wishlistItem.title}
+              fill
+              className="object-contain p-6"
+              sizes="(max-width: 768px) 100vw, 768px"
+              priority
+            />
+          </div>
+        </LightboxImage>
       )}
 
       <div className="flex flex-col gap-4">

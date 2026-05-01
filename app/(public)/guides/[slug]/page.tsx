@@ -14,6 +14,7 @@ import LikeButton from '@/components/LikeButton'
 import CommentForm from '@/components/CommentForm'
 import CommentList from '@/components/CommentList'
 import ImageLightbox from '@/components/ImageLightbox'
+import { LightboxImage } from '@/components/LightboxImage'
 import { EmailSignup } from '@/components/EmailSignup'
 import AuthorBio from '@/components/AuthorBio'
 
@@ -142,16 +143,18 @@ export default async function GuidePage({ params }: Props) {
 
         {/* Hero image */}
         {guide.image_url && (
-          <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden mb-10 bg-gray-900">
-            <Image
-              src={guide.image_url}
-              alt={guide.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 768px"
-              priority
-            />
-          </div>
+          <LightboxImage src={guide.image_url} alt={guide.title}>
+            <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden mb-10 bg-gray-900">
+              <Image
+                src={guide.image_url}
+                alt={guide.title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 768px"
+                priority
+              />
+            </div>
+          </LightboxImage>
         )}
 
         {/* Table of contents — only renders if the guide has 3+ H2/H3 headings */}
