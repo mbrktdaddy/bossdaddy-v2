@@ -152,7 +152,7 @@ export default async function AboutPage() {
  <h2 className="text-2xl font-black mb-2">What We Cover</h2>
  <p className="text-gray-500 text-sm mb-6">Real-world testing across everything modern dads actually love.</p>
  <div className="-mx-6 overflow-x-auto scrollbar-hide">
- <div className="flex items-center gap-2 px-6 pb-1 sm:flex-wrap">
+ <div className="flex items-center gap-2 px-6 pb-1">
  {CATEGORIES.map((cat) => (
  <Link
  key={cat.slug}

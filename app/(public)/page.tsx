@@ -219,8 +219,8 @@ export default async function HomePage() {
         <div className="max-w-6xl mx-auto px-6 mb-4">
           <h2 className="text-sm font-black text-white uppercase tracking-widest">Browse by Category</h2>
         </div>
-        <div className="-mx-0 overflow-x-auto scrollbar-hide">
-          <div className="flex items-center gap-2 px-6 pb-1 sm:justify-center">
+        <div className="-mx-6 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center gap-2 px-6 pb-1">
             {CATEGORIES.map((cat) => (
               <Link
                 key={cat.slug}

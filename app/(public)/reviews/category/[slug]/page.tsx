@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { getCategoryBySlug, CATEGORIES } from '@/lib/categories'
 import RatingScore from '@/components/RatingScore'
@@ -52,26 +53,42 @@ export default async function CategoryPage({ params }: Props) {
     ],
   }
 
+  const pillBase = 'shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium transition-all'
+  const pillActive = 'bg-orange-600 text-white shadow-md shadow-black/30'
+  const pillInactive = 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40'
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+
       <div className="w-full max-w-6xl mx-auto px-6 py-12">
 
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-xs text-gray-500 mb-8">
-          <Link href="/reviews" className="hover:text-orange-400 transition-colors">Reviews</Link>
-          <span>/</span>
-          <span className="text-gray-300">{cat.icon} {cat.label}</span>
-        </nav>
+        {/* Category filter pills — matches reviews/page.tsx exactly */}
+        <div className="-mx-6 overflow-x-auto scrollbar-hide mb-10">
+          <div className="flex items-center gap-2 px-6 pb-1">
+            <Link href="/reviews" className={`${pillBase} ${pillInactive}`}>All</Link>
+            {CATEGORIES.map((c) => (
+              <Link
+                key={c.slug}
+                href={`/reviews/category/${c.slug}`}
+                className={`${pillBase} ${c.slug === slug ? pillActive : pillInactive}`}
+              >
+                {c.icon} {c.label}
+              </Link>
+            ))}
+          </div>
+        </div>
 
-        {/* Header */}
+        {/* Category header */}
         <div className="mb-10">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">{cat.icon} Category</p>
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">
+            {cat.icon} Reviews
+          </p>
           <h1 className="text-3xl md:text-4xl font-black mb-4">{cat.label}</h1>
           <p className="text-gray-400 max-w-2xl leading-relaxed">{cat.description}</p>
         </div>
 
-        {/* Grid */}
+        {/* Review grid */}
         {reviews && reviews.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {reviews.map((r) => (
@@ -81,46 +98,42 @@ export default async function CategoryPage({ params }: Props) {
                 className="group bg-gray-900 rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all"
               >
                 {r.image_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={r.image_url} alt={r.product_name} className="w-full h-44 object-cover" />
+                  <div className="relative w-full h-48">
+                    <Image
+                      src={r.image_url}
+                      alt={r.product_name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
+                  </div>
                 ) : (
-                  <div className="w-full h-44 bg-gray-800 flex items-center justify-center text-4xl">{cat.icon}</div>
+                  <div className="w-full h-48 bg-gray-800 flex items-center justify-center text-4xl">
+                    {cat.icon}
+                  </div>
                 )}
-                <div className="p-4 space-y-2">
-                  <p className="text-xs text-orange-400 font-medium">{r.product_name}</p>
-                  <h2 className="font-black text-sm leading-snug group-hover:text-orange-400 transition-colors line-clamp-2">{r.title}</h2>
-                  {r.excerpt && <p className="text-xs text-gray-500 line-clamp-2">{r.excerpt}</p>}
+                <div className="p-5 space-y-2">
+                  <span className="text-xs font-medium text-orange-500 uppercase tracking-widest bg-orange-950/40 px-2.5 py-0.5 rounded-full">
+                    {r.product_name}
+                  </span>
+                  <h2 className="font-black text-base leading-snug group-hover:text-orange-400 transition-colors line-clamp-2">
+                    {r.title}
+                  </h2>
+                  {r.excerpt && (
+                    <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">{r.excerpt}</p>
+                  )}
                   <RatingScore rating={r.rating ?? 0} size="sm" />
                 </div>
               </Link>
             ))}
           </div>
         ) : (
-          <div className="text-center py-20">
-            <p className="text-gray-500 text-lg mb-2">{cat.icon} No reviews yet in {cat.label}.</p>
+          <div className="text-center py-24 bg-gray-900/40 rounded-2xl">
+            <p className="text-5xl mb-4">{cat.icon}</p>
+            <p className="text-gray-400 text-lg font-semibold mb-2">No {cat.label} reviews yet.</p>
             <p className="text-gray-600 text-sm">Check back soon — the first one is in progress.</p>
           </div>
         )}
-
-        {/* All categories */}
-        <div className="mt-16 pt-10 border-t border-gray-800/60">
-          <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold mb-4">Browse all categories</p>
-          <div className="flex flex-wrap gap-2">
-            {CATEGORIES.map((c) => (
-              <Link
-                key={c.slug}
-                href={`/reviews/category/${c.slug}`}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  c.slug === slug
-                    ? 'bg-orange-600 text-white'
-                    : 'bg-gray-900 text-gray-400 hover:text-white hover:bg-gray-800'
-                }`}
-              >
-                {c.icon} {c.label}
-              </Link>
-            ))}
-          </div>
-        </div>
 
       </div>
     </>

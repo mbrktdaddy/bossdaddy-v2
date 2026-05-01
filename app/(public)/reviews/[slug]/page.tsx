@@ -160,13 +160,15 @@ export default async function ReviewPage({ params }: Props) {
         {/* Article header */}
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-4 flex-wrap">
+            {/* Product name — primary context, orange chip */}
             <span className="text-xs font-medium text-orange-500 uppercase tracking-widest bg-orange-950/40 px-3 py-1 rounded-full">
               {review.product_name}
             </span>
+            {/* Category — secondary context, gray chip with icon */}
             {category && (
               <Link
                 href={`/reviews/category/${category.slug}`}
-                className={`text-xs font-medium px-3 py-1 rounded-full bg-gray-900 ${category.accent} hover:bg-gray-800 shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40 transition-all`}
+                className="text-xs font-medium px-3 py-1 rounded-full bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
               >
                 {category.icon} {category.label}
               </Link>

@@ -93,9 +93,12 @@ export default async function GuidesPage({ searchParams }: Props) {
 
         <div className="-mx-6 overflow-x-auto scrollbar-hide mb-14">
           <div className="flex items-center gap-2 px-6 pb-1">
-            <span className="shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-semibold bg-orange-600 text-white shadow-md shadow-black/30">
+            <Link
+              href="/guides"
+              className="shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-semibold bg-orange-600 text-white shadow-md shadow-black/30"
+            >
               All
-            </span>
+            </Link>
             {CATEGORIES.map((c) => (
               <Link
                 key={c.slug}

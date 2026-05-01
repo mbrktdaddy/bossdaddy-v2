@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
 import RatingScore from '@/components/RatingScore'
 
@@ -82,23 +83,33 @@ export default async function TagPage({ params }: Props) {
               <Link key={r.id} href={`/reviews/${r.slug}`}
                 className="group bg-gray-900 rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all">
                 {r.image_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={r.image_url} alt={r.product_name} className="w-full h-44 object-cover" />
+                  <div className="relative w-full h-48">
+                    <Image
+                      src={r.image_url}
+                      alt={r.product_name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
+                  </div>
                 ) : (
-                  <div className="w-full h-44 bg-gray-800" />
+                  <div className="w-full h-48 bg-gray-800" />
                 )}
-                <div className="p-4 space-y-2">
-                  <p className="text-xs text-orange-400 font-medium">{r.product_name}</p>
-                  <h2 className="font-black text-sm leading-snug group-hover:text-orange-400 transition-colors line-clamp-2">{r.title}</h2>
-                  {r.excerpt && <p className="text-xs text-gray-500 line-clamp-2">{r.excerpt}</p>}
+                <div className="p-5 space-y-2">
+                  <span className="text-xs font-medium text-orange-500 uppercase tracking-widest bg-orange-950/40 px-2.5 py-0.5 rounded-full">
+                    {r.product_name}
+                  </span>
+                  <h2 className="font-black text-base leading-snug group-hover:text-orange-400 transition-colors line-clamp-2">{r.title}</h2>
+                  {r.excerpt && <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">{r.excerpt}</p>}
                   <RatingScore rating={r.rating ?? 0} size="sm" />
                 </div>
               </Link>
             ))}
           </div>
         ) : (
-          <div className="text-center py-20">
-            <p className="text-gray-500">No reviews with this tag yet.</p>
+          <div className="text-center py-24 bg-gray-900/40 rounded-2xl">
+            <p className="text-gray-400 text-lg font-semibold mb-2">No reviews tagged &ldquo;{tag.label}&rdquo; yet.</p>
+            <p className="text-gray-600 text-sm">Check back soon — more reviews are on the way.</p>
           </div>
         )}
 
