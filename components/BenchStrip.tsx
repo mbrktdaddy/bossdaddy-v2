@@ -40,16 +40,16 @@ export default async function BenchStrip({
           {ctaText} →
         </Link>
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex gap-3 overflow-x-auto scrollbar-hide sm:overflow-visible sm:grid sm:grid-cols-3">
         {items.map((item) => (
           <Link
             key={item.id}
             href={`/bench/${item.slug}`}
-            className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-800/60 transition-colors group"
+            className="shrink-0 w-48 sm:w-auto flex items-center gap-3 p-3 bg-gray-900/80 hover:bg-gray-800 rounded-xl shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40 transition-all group"
           >
-            <div className="relative w-9 h-9 shrink-0 rounded-xl overflow-hidden bg-gray-950">
+            <div className="relative w-10 h-10 shrink-0 rounded-xl overflow-hidden bg-gray-950">
               {item.image_url ? (
-                <Image src={item.image_url} alt={item.title} fill className="object-contain p-1" sizes="36px" />
+                <Image src={item.image_url} alt={item.title} fill className="object-contain p-1" sizes="40px" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   <svg className="w-4 h-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -62,7 +62,7 @@ export default async function BenchStrip({
               <p className={`text-[9px] font-bold uppercase tracking-widest mb-0.5 ${getStatusColor(item.status as WishlistStatus)}`}>
                 {getStatusLabel(item.status as WishlistStatus)}
               </p>
-              <p className="text-xs font-semibold text-gray-300 group-hover:text-white line-clamp-1 leading-snug transition-colors">
+              <p className="text-xs font-semibold text-gray-300 group-hover:text-white line-clamp-2 leading-snug transition-colors">
                 {item.title}
               </p>
             </div>
