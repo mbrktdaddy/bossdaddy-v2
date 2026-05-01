@@ -168,9 +168,9 @@ export default async function HomePage() {
             <div className="flex items-center justify-between gap-4 mb-4">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-                <span className="text-xs font-black uppercase tracking-widest text-orange-500">On Deck</span>
+                <span className="text-xs font-black uppercase tracking-widest text-orange-500">On the Bench</span>
               </div>
-              <Link href="/wishlist" className="text-xs text-gray-500 hover:text-orange-400 transition-colors font-medium">
+              <Link href="/bench" className="text-xs text-gray-500 hover:text-orange-400 transition-colors font-medium">
                 Vote on what&apos;s next
               </Link>
             </div>
@@ -178,7 +178,7 @@ export default async function HomePage() {
               {(onDeck as WishlistItem[]).map((item) => (
                 <Link
                   key={item.id}
-                  href={`/wishlist/${item.slug}`}
+                  href={`/bench/${item.slug}`}
                   className="shrink-0 w-48 sm:w-auto flex items-center gap-3 p-3 bg-gray-900 hover:bg-gray-800 rounded-2xl shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/40 transition-all"
                 >
                   <div className="relative w-10 h-10 shrink-0 rounded-2xl overflow-hidden bg-gray-950">

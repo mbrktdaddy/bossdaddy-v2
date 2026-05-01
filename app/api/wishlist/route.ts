@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  revalidatePath('/wishlist')
+  revalidatePath('/bench')
   revalidatePath('/')
 
   return NextResponse.json({ item: data }, { status: 201 })

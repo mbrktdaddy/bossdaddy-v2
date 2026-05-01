@@ -92,7 +92,7 @@ export async function PATCH(
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  revalidatePath('/wishlist')
+  revalidatePath('/bench')
   revalidatePath('/')
 
   return NextResponse.json({ item: data })
@@ -115,7 +115,7 @@ export async function DELETE(
   const { error } = await admin.from('wishlist_items').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  revalidatePath('/wishlist')
+  revalidatePath('/bench')
   revalidatePath('/')
 
   return NextResponse.json({ success: true })

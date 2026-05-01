@@ -7,12 +7,12 @@ import type { Metadata } from 'next'
 export const revalidate = 300
 
 export const metadata: Metadata = {
-  title: "Boss Daddy's Wishlist — Vote on What I Test Next",
-  description: "See what Boss Daddy is currently testing, what's coming next, and vote on what you want reviewed. Members get notified when it goes live.",
-  alternates: { canonical: '/wishlist' },
+  title: "On the Bench — Vote on What Boss Daddy Tests Next",
+  description: "See what Boss Daddy is currently testing, what's coming next, and vote on what you want reviewed. Get notified when it goes live.",
+  alternates: { canonical: '/bench' },
 }
 
-export default async function WishlistPage() {
+export default async function BenchPage() {
   const admin = createAdminClient()
   const { data } = await admin
     .from('wishlist_items')
@@ -29,11 +29,11 @@ export default async function WishlistPage() {
   const groups = groupByStatus(items)
 
   const sections: { key: keyof typeof groups; heading: string; sub: string }[] = [
-    { key: 'testing',     heading: '🧪 Testing Now',    sub: "Currently putting it through the paces." },
-    { key: 'queued',      heading: '🔜 Coming Soon',     sub: "Confirmed in the pipeline." },
+    { key: 'testing',     heading: '🧪 Testing Now',        sub: "Currently putting it through the paces." },
+    { key: 'queued',      heading: '🔜 Coming Soon',         sub: "Confirmed in the pipeline." },
     { key: 'considering', heading: '🤔 Under Consideration', sub: "Vote to move your pick up the queue." },
-    { key: 'reviewed',    heading: '✅ Already Reviewed', sub: "Verdict is in — read the full review." },
-    { key: 'skipped',     heading: 'Not Testing',        sub: "Decided against these — here's why." },
+    { key: 'reviewed',    heading: '✅ Already Reviewed',    sub: "Verdict is in — read the full review." },
+    { key: 'skipped',     heading: 'Not Testing',            sub: "Decided against these — here's why." },
   ]
 
   const hasContent = items.length > 0
@@ -47,17 +47,17 @@ export default async function WishlistPage() {
           Live Testing Pipeline
         </div>
         <h1 className="text-3xl sm:text-4xl font-black mb-3">
-          The Boss Daddy Wishlist
+          On the Bench
         </h1>
         <p className="text-[var(--bd-text-muted)] max-w-xl">
           Everything I&apos;m currently testing, planning to review, or decided to skip — with the reasons.
-          Members can vote on what gets reviewed next.
+          Vote on what gets reviewed next.
         </p>
       </div>
 
       {!hasContent ? (
         <div className="bg-gray-900/40 rounded-2xl p-12 text-center">
-          <p className="text-gray-500 font-semibold">The wishlist is being built out. Check back soon.</p>
+          <p className="text-gray-500 font-semibold">Loading up the bench. Check back soon.</p>
         </div>
       ) : (
         <div className="space-y-12">
@@ -65,7 +65,6 @@ export default async function WishlistPage() {
             const sectionItems = groups[key]
             if (sectionItems.length === 0) return null
 
-            // Skipped section is a collapsible accordion
             if (key === 'skipped') {
               return (
                 <details key={key} className="group">

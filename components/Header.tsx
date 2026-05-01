@@ -6,12 +6,11 @@ import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 const NAV_LINKS = [
-  { href: '/',         label: 'Home' },
-  { href: '/reviews',  label: 'Reviews' },
-  { href: '/guides',   label: 'Guides' },
-  { href: '/wishlist', label: 'Wishlist' },
-  { href: '/gear',     label: 'Gear' },
-  { href: '/about',    label: 'About' },
+  { href: '/',        label: 'Home' },
+  { href: '/reviews', label: 'Reviews' },
+  { href: '/guides',  label: 'Guides' },
+  { href: '/gear',    label: 'Gear' },
+  { href: '/about',   label: 'About' },
 ]
 
 function isActive(pathname: string, href: string) {

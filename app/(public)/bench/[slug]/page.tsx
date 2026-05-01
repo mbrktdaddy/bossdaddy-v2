@@ -38,13 +38,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const data = await getWishlistItem(slug)
   if (!data) return {}
   return {
-    title: `${data.title} — Boss Daddy Wishlist`,
+    title: `${data.title} — On the Bench`,
     description: data.description ?? `Boss Daddy is considering reviewing ${data.title}. Vote to move it up the queue.`,
-    alternates: { canonical: `/wishlist/${slug}` },
+    alternates: { canonical: `/bench/${slug}` },
   }
 }
 
-export default async function WishlistDetailPage({ params }: Props) {
+export default async function BenchDetailPage({ params }: Props) {
   const { slug } = await params
   const item = await getWishlistItem(slug)
 
@@ -57,7 +57,6 @@ export default async function WishlistDetailPage({ params }: Props) {
     vote_count: (item.vote_count as { count: number }[])?.[0]?.count ?? 0,
   }
 
-  // Fetch linked review slug for "Read the full review" CTA
   let linkedReviewSlug: string | null = null
   if (wishlistItem.review_id) {
     const { data: linkedReview } = await admin
@@ -68,7 +67,6 @@ export default async function WishlistDetailPage({ params }: Props) {
     linkedReviewSlug = linkedReview?.slug ?? null
   }
 
-  // Get user state (server-side for SSR)
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
 
@@ -92,13 +90,12 @@ export default async function WishlistDetailPage({ params }: Props) {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
       {/* Breadcrumb */}
       <div className="mb-8 text-xs text-zinc-600">
-        <Link href="/wishlist" className="hover:text-zinc-400 transition-colors">Wishlist</Link>
+        <Link href="/bench" className="hover:text-zinc-400 transition-colors">On the Bench</Link>
         <span className="mx-2">→</span>
         <span className="text-zinc-400">{wishlistItem.title}</span>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-8">
-        {/* Image */}
         {wishlistItem.image_url && (
           <div className="relative w-full sm:w-48 h-48 shrink-0 rounded-2xl overflow-hidden bg-zinc-900 shadow-md shadow-black/30">
             <Image
@@ -112,7 +109,6 @@ export default async function WishlistDetailPage({ params }: Props) {
           </div>
         )}
 
-        {/* Info */}
         <div className="flex-1 min-w-0">
           <StatusBadge status={wishlistItem.status} className="mb-3" />
           <h1 className="text-2xl sm:text-3xl font-black leading-tight mb-3">{wishlistItem.title}</h1>
@@ -121,7 +117,6 @@ export default async function WishlistDetailPage({ params }: Props) {
             <p className="text-[var(--bd-text-muted)] text-sm leading-relaxed mb-4">{wishlistItem.description}</p>
           )}
 
-          {/* Skipped reason */}
           {isSkipped && wishlistItem.skip_reason && (
             <div className="p-4 bg-zinc-900 rounded-2xl mb-4 shadow-md shadow-black/30">
               <p className="text-xs font-black uppercase tracking-widest text-zinc-500 mb-1">Why I&apos;m not testing this</p>
@@ -129,14 +124,12 @@ export default async function WishlistDetailPage({ params }: Props) {
             </div>
           )}
 
-          {/* Estimated date */}
           {wishlistItem.estimated_review_date && ['queued','testing'].includes(wishlistItem.status) && (
             <p className="text-xs text-zinc-500 mb-4">
               Estimated review: {new Date(wishlistItem.estimated_review_date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
             </p>
           )}
 
-          {/* Action bar */}
           {isReviewed ? (
             <div className="mt-4">
               <Link
@@ -176,7 +169,6 @@ export default async function WishlistDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Vote count context */}
       {!isReviewed && !isSkipped && (
         <div className="mt-8 p-4 bg-orange-950/20 rounded-2xl shadow-md shadow-black/30">
           <p className="text-sm text-orange-300/80">
@@ -188,8 +180,8 @@ export default async function WishlistDetailPage({ params }: Props) {
       )}
 
       <div className="mt-8 pt-6">
-        <Link href="/wishlist" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
-          ← Back to wishlist
+        <Link href="/bench" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+          ← Back to the bench
         </Link>
       </div>
     </div>

@@ -30,7 +30,7 @@ export async function POST(
       .from('wishlist_votes')
       .select('*', { count: 'exact', head: true })
       .eq('wishlist_item_id', id)
-    revalidatePath('/wishlist')
+    revalidatePath('/bench')
     return NextResponse.json({ voted: false, vote_count: count ?? 0 })
   } else {
     // Add vote — verify item exists first
@@ -46,7 +46,7 @@ export async function POST(
       .from('wishlist_votes')
       .select('*', { count: 'exact', head: true })
       .eq('wishlist_item_id', id)
-    revalidatePath('/wishlist')
+    revalidatePath('/bench')
     return NextResponse.json({ voted: true, vote_count: count ?? 0 })
   }
 }

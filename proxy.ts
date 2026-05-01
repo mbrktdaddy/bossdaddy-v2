@@ -16,6 +16,10 @@ function rewritePublicLegacy(pathname: string): string | null {
   if (pathname.startsWith('/shop/')) return '/gear'
   // /feed/articles.xml → /feed/guides.xml (RSS feed renamed)
   if (pathname === '/feed/articles.xml') return '/feed/guides.xml'
+  // /wishlist and /wishlist/* → /bench (renamed to "On the Bench")
+  if (pathname === '/wishlist' || pathname === '/wishlist/') return '/bench'
+  const wishlistSlug = pathname.match(/^\/wishlist\/([^/]+)\/?$/)
+  if (wishlistSlug) return `/bench/${wishlistSlug[1]}`
   return null
 }
 
