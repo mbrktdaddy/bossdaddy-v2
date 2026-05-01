@@ -211,38 +211,22 @@ export default async function HomePage() {
       </Suspense>
 
       {/* ── Categories ────────────────────────────────────────────────────── */}
-      <section className="py-16 overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6 mb-6">
-          <h2 className="text-2xl font-black text-white mb-1">Browse by Category</h2>
-          <p className="text-gray-500 text-sm">Backyard tested. Boss approved.</p>
+      <section className="py-10">
+        <div className="max-w-6xl mx-auto px-6 mb-4">
+          <h2 className="text-sm font-black text-white uppercase tracking-widest">Browse by Category</h2>
         </div>
-        {/* Mobile: full-width scroll strip */}
-        <div className="overflow-x-auto scrollbar-hide sm:hidden">
-          <div className="flex gap-3 px-6 pb-2">
+        <div className="-mx-0 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center gap-2 px-6 pb-1">
             {CATEGORIES.map((cat) => (
               <Link
                 key={cat.slug}
                 href={`/reviews?category=${cat.slug}`}
-                className={`group shrink-0 w-28 flex flex-col items-center justify-center rounded-2xl bg-gradient-to-br ${cat.color} shadow-md shadow-black/30 hover:scale-[1.03] transition-transform duration-200 py-6 px-2`}
+                className="shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40 transition-all"
               >
-                <div className="text-4xl mb-3">{cat.icon}</div>
-                <p className={`text-xs font-bold text-center leading-snug ${cat.accent}`}>{cat.label}</p>
+                {cat.icon} {cat.label}
               </Link>
             ))}
           </div>
-        </div>
-        {/* Desktop: full-width grid */}
-        <div className="hidden sm:grid sm:grid-cols-7 gap-3 max-w-6xl mx-auto px-6">
-          {CATEGORIES.map((cat) => (
-            <Link
-              key={cat.slug}
-              href={`/reviews?category=${cat.slug}`}
-              className={`group flex flex-col items-center justify-center rounded-2xl bg-gradient-to-br ${cat.color} shadow-md shadow-black/30 hover:scale-[1.03] transition-transform duration-200 py-6 px-2`}
-            >
-              <div className="text-4xl mb-3">{cat.icon}</div>
-              <p className={`text-xs font-bold text-center leading-snug ${cat.accent}`}>{cat.label}</p>
-            </Link>
-          ))}
         </div>
       </section>
 
