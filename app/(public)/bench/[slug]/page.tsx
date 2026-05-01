@@ -184,11 +184,7 @@ export default async function BenchDetailPage({ params }: Props) {
       {/* Discussion */}
       {!isSkipped && (
         <div className="mt-12 pt-8 border-t border-gray-800/60">
-          <h2 className="text-lg font-black mb-1">What should I test?</h2>
-          <p className="text-sm text-gray-500 mb-6">
-            Tell me what matters most to you — specific use cases, durability concerns, comparisons to what you already own.
-            This goes straight into my research before I buy it.
-          </p>
+          <h2 className="text-lg font-black mb-6">What should I test?</h2>
           <div className="mb-8">
             <CommentForm
               contentType="wishlist_item"
