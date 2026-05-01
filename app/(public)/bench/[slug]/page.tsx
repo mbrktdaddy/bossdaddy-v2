@@ -97,20 +97,20 @@ export default async function BenchDetailPage({ params }: Props) {
         <span className="text-zinc-400">{wishlistItem.title}</span>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-8">
-        {wishlistItem.image_url && (
-          <div className="relative w-full sm:w-48 h-48 shrink-0 rounded-2xl overflow-hidden bg-zinc-900 shadow-md shadow-black/30">
-            <Image
-              src={wishlistItem.image_url}
-              alt={wishlistItem.title}
-              fill
-              className="object-contain p-4"
-              sizes="192px"
-              priority
-            />
-          </div>
-        )}
+      {wishlistItem.image_url && (
+        <div className="relative w-full aspect-[16/7] rounded-2xl overflow-hidden bg-zinc-900 shadow-md shadow-black/30 mb-8">
+          <Image
+            src={wishlistItem.image_url}
+            alt={wishlistItem.title}
+            fill
+            className="object-contain p-6"
+            sizes="(max-width: 768px) 100vw, 768px"
+            priority
+          />
+        </div>
+      )}
 
+      <div className="flex flex-col gap-4">
         <div className="flex-1 min-w-0">
           <StatusBadge status={wishlistItem.status} className="mb-3" />
           <h1 className="text-2xl sm:text-3xl font-black leading-tight mb-3">{wishlistItem.title}</h1>
