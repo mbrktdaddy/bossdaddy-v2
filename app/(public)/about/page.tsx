@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CATEGORIES } from '@/lib/categories'
 import { createClient } from '@/lib/supabase/server'
+import { EmailSignup } from '@/components/EmailSignup'
 
 export const revalidate = 3600
 
@@ -31,10 +32,7 @@ export default async function AboutPage() {
 
  {/* Hero */}
  <div className="mb-16">
- <div className="inline-flex items-center gap-2 bg-orange-950/50 border border-orange-800/50 rounded-full px-4 py-1.5 text-xs text-orange-400 font-medium mb-6">
- <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
- The real story behind Boss Daddy
- </div>
+ <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— The Real Story Behind Boss Daddy</p>
  <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6">
  The Dad Who Thought
  <br />
@@ -71,8 +69,15 @@ export default async function AboutPage() {
  <p>
  One day the thought of being a dad was nonexistent — and the next, I was holding a tiny
  human who looked up at me like I was the whole damn world. In that moment, everything
- shifted. I went from &quot;probably never&quot; to &quot;this is everything&quot; in a single heartbeat.
+ shifted.
  </p>
+
+ <blockquote className="not-prose my-10 border-l-2 border-orange-500 pl-6 sm:pl-8">
+ <p className="text-xl sm:text-2xl font-black leading-snug text-white">
+ I went from &ldquo;probably never&rdquo; to &ldquo;this is everything&rdquo; in a single heartbeat.
+ </p>
+ </blockquote>
+
  <p>
  Every single day since, I&apos;ve made a non-negotiable commitment: show up, get better, and
  never settle. I pray. I grind. I work on being the best husband and father my family
@@ -146,33 +151,18 @@ export default async function AboutPage() {
  <div className="mb-16">
  <h2 className="text-2xl font-black mb-2">What We Cover</h2>
  <p className="text-gray-500 text-sm mb-6">Real-world testing across everything modern dads actually love.</p>
- {/* Mobile: break out of parent padding, full-width scroll */}
- <div className="-mx-6 overflow-x-auto scrollbar-hide sm:hidden">
- <div className="flex gap-3 px-6 pb-2">
+ <div className="-mx-6 overflow-x-auto scrollbar-hide">
+ <div className="flex items-center gap-2 px-6 pb-1 sm:flex-wrap">
  {CATEGORIES.map((cat) => (
  <Link
  key={cat.slug}
  href={`/reviews?category=${cat.slug}`}
- className={`group shrink-0 w-28 flex flex-col items-center justify-center rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.color} hover:scale-[1.03] transition-transform duration-200 py-6 px-2`}
+ className="shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40 transition-all"
  >
- <div className="text-4xl mb-3">{cat.icon}</div>
- <p className={`text-xs font-bold text-center leading-snug ${cat.accent}`}>{cat.label}</p>
+ {cat.icon} {cat.label}
  </Link>
  ))}
  </div>
- </div>
- {/* Desktop: full grid */}
- <div className="hidden sm:grid sm:grid-cols-7 gap-3">
- {CATEGORIES.map((cat) => (
- <Link
- key={cat.slug}
- href={`/reviews?category=${cat.slug}`}
- className={`group flex flex-col items-center justify-center rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.color} hover:scale-[1.03] transition-transform duration-200 py-6 px-2`}
- >
- <div className="text-4xl mb-3">{cat.icon}</div>
- <p className={`text-xs font-bold text-center leading-snug ${cat.accent}`}>{cat.label}</p>
- </Link>
- ))}
  </div>
  </div>
 
@@ -189,26 +179,18 @@ export default async function AboutPage() {
  </p>
 
  {/* Newsletter signup */}
- <div className="mb-8">
+ <div className="mb-8 max-w-md mx-auto">
  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Join the Crew</p>
  <p className="text-gray-400 text-sm mb-4">
  Weekly reviews, the good stuff, and dad-life wins. No spam. No sponsors. Just the crew.
  </p>
- <form action="/api/newsletter/subscribe" method="POST" className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
- <input
- type="email"
- name="email"
- required
- placeholder="your@email.com"
- className="flex-1 px-4 py-3 bg-gray-900 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+ <EmailSignup
+ heading={null}
+ description={null}
+ buttonLabel="Join Free"
+ successMessage="You're in. Welcome to the crew."
+ interests={['newsletter']}
  />
- <button
- type="submit"
- className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-2xl transition-colors text-sm whitespace-nowrap"
- >
- Join Free
- </button>
- </form>
  <p className="text-xs text-gray-600 mt-3">Unsubscribe anytime. We mean it.</p>
  </div>
 
