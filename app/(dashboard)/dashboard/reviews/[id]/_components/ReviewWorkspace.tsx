@@ -29,6 +29,8 @@ import { AutoSaveIndicator } from '@/components/workspace/AutoSaveIndicator'
 import { ListEditor } from '@/components/workspace/ListEditor'
 import { useAutoSave } from '@/components/workspace/useAutoSave'
 import { useKeyboardShortcuts } from '@/components/workspace/useKeyboardShortcuts'
+import { ReviewDraftPreview } from '@/components/workspace/ReviewDraftPreview'
+import { RefinePreviewModal } from '@/components/workspace/RefinePreviewModal'
 
 interface FAQ { question: string; answer: string }
 
@@ -104,6 +106,16 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   const [faqs, setFaqs]                   = useState<FAQ[]>(review.faqs ?? [])
 
   const [heroPromptSuggestion, setHeroPromptSuggestion] = useState('')
+  const [previewOpen, setPreviewOpen] = useState(false)
+
+  // Pending refine — holds proposed content before user accepts or discards
+  const [pendingRefine, setPendingRefine] = useState<{
+    content: string
+    title?: string; excerpt?: string; rating?: number
+    pros?: string[]; cons?: string[]
+    tldr?: string; keyTakeaways?: string[]; bestFor?: string[]; notFor?: string[]
+    faqs?: FAQ[]
+  } | null>(null)
 
   useEffect(() => {
     const key = `bd:hero-prompt:${review.id}`
@@ -171,6 +183,24 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
     } catch (err) {
       setErr(err instanceof Error ? err.message : 'Save failed')
     }
+  }
+
+  function applyPendingRefine() {
+    if (!pendingRefine) return
+    setContent(pendingRefine.content)
+    if (pendingRefine.title) setTitle(pendingRefine.title)
+    if (pendingRefine.excerpt) setExcerpt(pendingRefine.excerpt)
+    if (pendingRefine.rating) setRating(pendingRefine.rating)
+    if (pendingRefine.pros) setPros(pendingRefine.pros)
+    if (pendingRefine.cons) setCons(pendingRefine.cons)
+    if (pendingRefine.tldr) setTldr(pendingRefine.tldr)
+    if (pendingRefine.keyTakeaways) setKeyTakeaways(pendingRefine.keyTakeaways)
+    if (pendingRefine.bestFor) setBestFor(pendingRefine.bestFor)
+    if (pendingRefine.notFor) setNotFor(pendingRefine.notFor)
+    if (pendingRefine.faqs) setFaqs(pendingRefine.faqs)
+    setPendingRefine(null)
+    setMsg('Changes applied')
+    setTimeout(() => setMsg(null), 3000)
   }
 
   const canPublish = !hasAffiliate || disclosureAck
@@ -274,10 +304,14 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
         </div>
       )}
 
-      <div className="space-y-6">
+      {/* Preview + edit two-column layout on xl screens */}
+      <div className={previewOpen ? 'xl:flex xl:gap-6 xl:items-start' : ''}>
 
-        {/* ── CORE ─────────────────────────────────────────────────────── */}
-        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold">Core</p>
+      {/* ── Editor column ─────────────────────────────────────────────── */}
+      <div className={`space-y-6 ${previewOpen ? 'xl:flex-1 xl:min-w-0' : ''}`}>
+
+        {/* ── STORY ────────────────────────────────────────────────────── */}
+        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold">Story</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -344,11 +378,7 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
           externalInstruction={refineInstruction}
           onExternalInstructionUsed={() => setRefineInstruction('')}
           onRefined={(draft) => {
-            if (draft.title) setTitle(draft.title)
-            if (draft.excerpt) setExcerpt(draft.excerpt)
-            if (draft.rating) setRating(Math.round(draft.rating))
-            if (draft.pros?.length) setPros(draft.pros)
-            if (draft.cons?.length) setCons(draft.cons)
+            const d = draft as Record<string, unknown>
             const refinedContent = [
               draft.introduction,
               ...(draft.sections ?? []).map((s) => {
@@ -357,21 +387,21 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
               }),
               draft.verdict ? `<h2>The Verdict</h2>\n<p>${draft.verdict}</p>` : '',
             ].filter(Boolean).join('\n\n')
-            const { content: merged, preservedCount, appendedCount } = preserveImagesAcrossRefine(content, refinedContent)
-            setContent(merged)
-            if (preservedCount > 0) {
-              const note = appendedCount > 0
-                ? `Refined • Preserved ${preservedCount} inline image${preservedCount === 1 ? '' : 's'} (${appendedCount} appended at end — re-position from the panel)`
-                : `Refined • Preserved ${preservedCount} inline image${preservedCount === 1 ? '' : 's'}`
-              setMsg(note)
-              setTimeout(() => setMsg(null), 5000)
-            }
-            // Update content blocks if refine touched them
-            if ((draft as Record<string, unknown>).tldr) setTldr((draft as Record<string, unknown>).tldr as string)
-            if ((draft as Record<string, unknown>).keyTakeaways) setKeyTakeaways((draft as Record<string, unknown>).keyTakeaways as string[])
-            if ((draft as Record<string, unknown>).bestFor) setBestFor((draft as Record<string, unknown>).bestFor as string[])
-            if ((draft as Record<string, unknown>).notFor) setNotFor((draft as Record<string, unknown>).notFor as string[])
-            if ((draft as Record<string, unknown>).faqs) setFaqs((draft as Record<string, unknown>).faqs as FAQ[])
+            const { content: merged } = preserveImagesAcrossRefine(content, refinedContent)
+            // Stage for review — don't apply until user accepts
+            setPendingRefine({
+              content: merged,
+              title:   draft.title,
+              excerpt: draft.excerpt,
+              rating:  draft.rating ? Math.round(draft.rating) : undefined,
+              pros:    draft.pros?.length ? draft.pros : undefined,
+              cons:    draft.cons?.length ? draft.cons : undefined,
+              tldr:          d.tldr as string | undefined,
+              keyTakeaways:  d.keyTakeaways as string[] | undefined,
+              bestFor:       d.bestFor as string[] | undefined,
+              notFor:        d.notFor as string[] | undefined,
+              faqs:          d.faqs as FAQ[] | undefined,
+            })
           }}
         />
 
@@ -518,9 +548,9 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
           </div>
         </div>
 
-        {/* ── PRODUCT & MONETIZATION ───────────────────────────────────── */}
+        {/* ── COMMERCE ─────────────────────────────────────────────────── */}
         <div className="pt-6 border-t border-gray-800/60">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Product &amp; Monetization</p>
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Commerce</p>
           <div className="space-y-6">
             <PrimaryProductPanel value={productSlug} onChange={setProductSlug} />
             <ProductLinkPanel
@@ -549,7 +579,7 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
 
         {/* ── DISTRIBUTION ─────────────────────────────────────────────── */}
         <div className="pt-6 border-t border-gray-800/60">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Distribution</p>
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Publish &amp; Distribute</p>
           <div className="space-y-6">
             <SEOPanel
               metaTitle={metaTitle}
@@ -609,7 +639,32 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
           ⌨ <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘S</kbd> save · <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘↵</kbd> publish · <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘Z</kbd> undo · <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘⇧Z</kbd> redo
         </p>
 
-      </div>
+      </div>{/* end editor column */}
+
+      {/* ── Live preview column (xl only) ─────────────────────────────── */}
+      {previewOpen && (
+        <div className="hidden xl:block w-[420px] shrink-0 sticky top-6 self-start">
+          <ReviewDraftPreview
+            title={title}
+            productName={productName}
+            rating={rating}
+            category={category}
+            excerpt={excerpt}
+            content={content}
+            imageUrl={imageUrl}
+            pros={pros.filter(p => p.trim())}
+            cons={cons.filter(c => c.trim())}
+            tldr={tldr}
+            keyTakeaways={keyTakeaways}
+            bestFor={bestFor}
+            notFor={notFor}
+            faqs={faqs}
+            author="Boss Daddy"
+          />
+        </div>
+      )}
+
+      </div>{/* end preview+edit flex wrapper */}
 
       <WorkspaceToolbar
         isSaving={autoSave.state === 'saving' || busy}
@@ -625,7 +680,19 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
         canPublish={canPublish}
         publishBlockedReason={publishBlockedReason}
         readinessChecks={readinessChecks}
+        previewOpen={previewOpen}
+        onTogglePreview={() => setPreviewOpen(p => !p)}
       />
+
+      {/* Refine diff modal — shows before/after before applying changes */}
+      {pendingRefine && (
+        <RefinePreviewModal
+          before={content}
+          after={pendingRefine.content}
+          onAccept={applyPendingRefine}
+          onDiscard={() => setPendingRefine(null)}
+        />
+      )}
     </div>
   )
 }

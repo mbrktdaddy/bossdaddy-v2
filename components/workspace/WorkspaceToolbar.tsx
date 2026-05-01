@@ -21,12 +21,15 @@ interface Props {
   canPublish?: boolean
   publishBlockedReason?: string | null
   readinessChecks?: ReadinessCheck[]
+  previewOpen?: boolean
+  onTogglePreview?: () => void
 }
 
 export function WorkspaceToolbar({
   isSaving, isPublishing, isDeleting, isPublished,
   onSave, onPublish, onUnpublish, onDelete, onDuplicate,
   previewUrl, canPublish = true, publishBlockedReason, readinessChecks,
+  previewOpen, onTogglePreview,
 }: Props) {
   const incomplete = readinessChecks?.filter((c) => !c.done) ?? []
   const allReady   = incomplete.length === 0
@@ -50,6 +53,20 @@ export function WorkspaceToolbar({
             title="Create a new draft with this content"
           >
             📋 Duplicate
+          </button>
+        )}
+        {onTogglePreview && (
+          <button
+            type="button"
+            onClick={onTogglePreview}
+            className={`hidden xl:flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg transition-colors ${
+              previewOpen
+                ? 'bg-orange-950/60 text-orange-400 border border-orange-900/40'
+                : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+            }`}
+            title="Toggle live preview panel"
+          >
+            👁 Preview
           </button>
         )}
         {previewUrl && (
