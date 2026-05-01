@@ -4,14 +4,18 @@
 
 BEGIN;
 
--- Step 1: Convert enum columns to TEXT (required before DROP TYPE)
+-- Step 1: Drop DEFAULT first — defaults reference the enum type and block DROP TYPE
+ALTER TABLE reviews ALTER COLUMN category DROP DEFAULT;
+ALTER TABLE guides  ALTER COLUMN category DROP DEFAULT;
+
+-- Step 2: Convert enum columns to TEXT
 ALTER TABLE reviews ALTER COLUMN category TYPE TEXT;
 ALTER TABLE guides  ALTER COLUMN category TYPE TEXT;
 
--- Step 2: Drop the old enum type
+-- Step 3: Now safe to drop the enum (no remaining dependents)
 DROP TYPE IF EXISTS review_category;
 
--- Step 3: Migrate old slugs to new taxonomy
+-- Step 4: Migrate old slugs to new taxonomy
 UPDATE reviews SET category = 'grilling-cooking'   WHERE category = 'bbq-grilling';
 UPDATE reviews SET category = 'tools-diy'          WHERE category = 'diy-tools';
 UPDATE reviews SET category = 'health-wellness'    WHERE category = 'health-fitness';
@@ -22,7 +26,7 @@ UPDATE guides  SET category = 'tools-diy'          WHERE category = 'diy-tools';
 UPDATE guides  SET category = 'health-wellness'    WHERE category = 'health-fitness';
 UPDATE guides  SET category = 'home-lifestyle'     WHERE category IN ('dad-life', 'family-lifestyle', 'other');
 
--- Step 4: Enforce the new category set via CHECK
+-- Step 5: Enforce the new category set via CHECK
 ALTER TABLE reviews
   ADD CONSTRAINT reviews_category_check CHECK (
     category IN (
@@ -39,10 +43,6 @@ ALTER TABLE guides
     )
   );
 
--- Step 5: Drop the old DEFAULT 'other' (default was tied to enum)
-ALTER TABLE reviews ALTER COLUMN category DROP DEFAULT;
-ALTER TABLE guides  ALTER COLUMN category DROP DEFAULT;
-
 -- Step 6: Sync media_assets CHECK constraint
 ALTER TABLE media_assets DROP CONSTRAINT IF EXISTS media_assets_category_check;
 ALTER TABLE media_assets ADD CONSTRAINT media_assets_category_check
@@ -51,7 +51,11 @@ ALTER TABLE media_assets ADD CONSTRAINT media_assets_category_check
     'tech-edc', 'vehicles-garage', 'health-wellness', 'home-lifestyle'
   ));
 
--- Step 7: Recreate performance indexes (underlying column type changed)
+-- Step 7: Set NOT NULL explicitly (was already NOT NULL, just reinforcing)
+ALTER TABLE reviews ALTER COLUMN category SET NOT NULL;
+ALTER TABLE guides  ALTER COLUMN category SET NOT NULL;
+
+-- Step 8: Recreate performance indexes (underlying column type changed)
 DROP INDEX IF EXISTS idx_reviews_status_visible_category_published;
 CREATE INDEX idx_reviews_status_visible_category_published
   ON reviews (status, is_visible, category, published_at DESC);
