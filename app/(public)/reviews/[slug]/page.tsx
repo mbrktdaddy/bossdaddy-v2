@@ -22,6 +22,7 @@ import ProductCtaCard from '@/components/ProductCtaCard'
 import { EmailSignup } from '@/components/EmailSignup'
 import AuthorBio from '@/components/AuthorBio'
 import { getProductBySlug } from '@/lib/products'
+import BenchStrip from '@/components/BenchStrip'
 
 const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
 
@@ -277,6 +278,12 @@ export default async function ReviewPage({ params }: Props) {
 
         {/* Author bio */}
         <AuthorBio username={author} />
+
+        {/* On the Bench */}
+        <div className="mt-12">
+          <p className="text-xs text-gray-500 mb-3">Liked this review? Here&apos;s what I&apos;m testing next — vote to move it up.</p>
+          <BenchStrip ctaText="See all on the bench" />
+        </div>
 
         {/* Comments */}
         <div className="mt-12">

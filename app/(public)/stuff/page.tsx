@@ -5,6 +5,7 @@ import { CATEGORIES, getCategoryBySlug, type CategorySlug } from '@/lib/categori
 import RatingScore from '@/components/RatingScore'
 import { MerchPanel } from '@/app/(public)/gear/_components/MerchPanel'
 import FeaturedReviewCard from '@/components/FeaturedReviewCard'
+import BenchStrip from '@/components/BenchStrip'
 import type { Metadata } from 'next'
 
 export const revalidate = 3600
@@ -137,6 +138,12 @@ export default async function StuffPage({ searchParams }: Props) {
       {topPick && (
         <FeaturedReviewCard review={{ ...topPick, rating: topPick.rating ?? 0 }} label="Boss's #1 Pick" />
       )}
+
+      {/* More coming — bench strip */}
+      <div className="mb-14">
+        <p className="text-xs text-gray-500 mb-3">More stuff is on the way. Vote on what gets tested next.</p>
+        <BenchStrip ctaText="See everything on the bench" />
+      </div>
 
       {/* Content */}
       {!topPicks.length ? (
