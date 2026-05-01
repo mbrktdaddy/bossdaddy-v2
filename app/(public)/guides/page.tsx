@@ -73,7 +73,7 @@ export default async function GuidesPage({ searchParams }: Props) {
 
         {/* Stats bar */}
         {guides.length > 0 && (
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-12 pb-6 border-b border-gray-800/60 text-sm text-gray-500">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 pb-4 border-b border-gray-800/40 text-sm text-gray-500">
             <span><span className="text-white font-bold tabular-nums">{guides.length}</span> {guides.length === 1 ? 'guide' : 'guides'}</span>
             <span className="text-gray-700 hidden sm:block">·</span>
             <span><span className="text-white font-bold tabular-nums">{categoryCount}</span> {categoryCount === 1 ? 'category' : 'categories'}</span>

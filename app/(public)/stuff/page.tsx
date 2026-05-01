@@ -87,7 +87,7 @@ export default async function StuffPage({ searchParams }: Props) {
 
       {/* Stats bar */}
       {topPicks.length > 0 && (
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-12 pb-6 border-b border-gray-800/60 text-sm text-gray-500">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 pb-4 border-b border-gray-800/40 text-sm text-gray-500">
           <span><span className="text-white font-bold tabular-nums">{topPicks.length}</span> {topPicks.length === 1 ? 'pick' : 'picks'} rated 8+</span>
           <span className="text-gray-700 hidden sm:block">·</span>
           <span><span className="text-white font-bold tabular-nums">{categoryCount}</span> {categoryCount === 1 ? 'category' : 'categories'}</span>
@@ -156,21 +156,26 @@ export default async function StuffPage({ searchParams }: Props) {
           {topPicks.map((r) => <StuffCard key={r.id} review={r} />)}
         </div>
       ) : (
-        <div className="space-y-16">
-          {tiers.map(({ label, sub, items }) => (
-            <section key={label}>
-              <div className="flex items-stretch gap-4 mb-6">
-                <div className="w-[3px] bg-orange-600 rounded-full" />
-                <div>
-                  <h2 className="text-xl font-black text-white">{label}</h2>
-                  <p className="text-xs text-gray-500 mt-0.5">{sub}</p>
+        <div>
+          {tiers.map(({ label, sub, items }, i) => {
+            const isLast = i === tiers.length - 1
+            const isPerfect = label.includes('Perfect Score')
+            const bottomMargin = isLast ? '' : isPerfect ? 'mb-24' : 'mb-16'
+            return (
+              <section key={label} className={bottomMargin}>
+                <div className="flex items-stretch gap-4 mb-6">
+                  <div className="w-[3px] bg-orange-600 rounded-full" />
+                  <div>
+                    <h2 className="text-xl font-black text-white">{label}</h2>
+                    <p className="text-xs text-gray-500 mt-0.5">{sub}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {items.map((r) => <StuffCard key={r.id} review={r} />)}
-              </div>
-            </section>
-          ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {items.map((r) => <StuffCard key={r.id} review={r} />)}
+                </div>
+              </section>
+            )
+          })}
         </div>
       )}
     </div>

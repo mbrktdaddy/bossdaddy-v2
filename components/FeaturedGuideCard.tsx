@@ -9,7 +9,7 @@ export default function FeaturedGuideCard({ guide: g }: { guide: GuideRow }) {
   return (
     <Link
       href={`/guides/${g.slug}`}
-      className="group relative flex flex-col sm:flex-row overflow-hidden rounded-2xl bg-gray-900 shadow-xl shadow-black/50 hover:shadow-2xl hover:shadow-black/60 transition-all duration-300 mb-14"
+      className="group relative flex flex-col sm:flex-row overflow-hidden rounded-2xl bg-gray-900 shadow-xl shadow-black/50 hover:shadow-2xl hover:shadow-black/60 transition-all duration-300 mt-2 mb-20"
     >
       {/* Image */}
       <div className="relative w-full sm:w-[55%] h-56 sm:h-auto shrink-0 bg-gray-800">
