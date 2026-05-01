@@ -167,7 +167,7 @@ export default async function ReviewPage({ params }: Props) {
             {/* Category — secondary context, gray chip with icon */}
             {category && (
               <Link
-                href={`/reviews/category/${category.slug}`}
+                href={`/category/${category.slug}`}
                 className="text-xs font-medium px-3 py-1 rounded-full bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
               >
                 {category.icon} {category.label}
@@ -445,11 +445,11 @@ export default async function ReviewPage({ params }: Props) {
             )}
             {category && (
               <Link
-                href={`/reviews/category/${category.slug}`}
+                href={`/category/${category.slug}`}
                 className="mt-4 pt-4 flex items-center gap-2 text-xs text-gray-400 hover:text-orange-400 transition-colors"
               >
                 <span>{category.icon}</span>
-                <span>More {category.label} reviews</span>
+                <span>Browse all {category.label} →</span>
               </Link>
             )}
           </div>

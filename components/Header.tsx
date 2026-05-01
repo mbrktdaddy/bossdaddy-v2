@@ -126,7 +126,7 @@ export default function Header() {
                   {CATEGORIES.map((cat) => (
                     <Link
                       key={cat.slug}
-                      href={`/reviews/category/${cat.slug}`}
+                      href={`/category/${cat.slug}`}
                       onClick={() => setCatOpen(false)}
                       className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-900 transition-colors group"
                     >
@@ -293,10 +293,10 @@ export default function Header() {
                 {CATEGORIES.map((cat) => (
                   <Link
                     key={cat.slug}
-                    href={`/reviews/category/${cat.slug}`}
+                    href={`/category/${cat.slug}`}
                     onClick={() => setMobileOpen(false)}
                     className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                      pathname === `/reviews/category/${cat.slug}`
+                      pathname === `/category/${cat.slug}`
                         ? 'bg-orange-950/60 text-orange-400 border border-orange-900/40'
                         : 'bg-gray-900 text-gray-300 hover:text-white hover:bg-gray-800'
                     }`}

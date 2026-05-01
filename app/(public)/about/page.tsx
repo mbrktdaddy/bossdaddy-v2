@@ -155,7 +155,7 @@ export default async function AboutPage() {
  {CATEGORIES.map((cat) => (
  <Link
  key={cat.slug}
- href={`/reviews/category/${cat.slug}`}
+ href={`/category/${cat.slug}`}
  className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 transition-colors"
  >
  <span className="shrink-0">{cat.icon}</span>
