@@ -72,7 +72,7 @@ STRUCTURE REQUIREMENTS:
 - Introduction: 2–3 sentences that open with a real testing scenario (first-person dad)
 - Sections: 3–5 sections, each 150–250 words covering different aspects (performance, design, value, family use, etc.)
 - Separate paragraphs within each section with \\n\\n
-- Verdict: 1–2 paragraphs with a clear buy/skip recommendation
+- Verdict: 1–2 paragraphs with a clear buy/skip recommendation; if a product slug was provided, end the verdict with the third [[BUY:slug]] token
 - Pros: 3–6 short, specific items (not vague — "12V battery lasted 4 hours" not "long battery")
 - Cons: 2–4 honest, specific items — never skip the cons
 - Rating: honest 1–10 score; reserve 9+ for truly exceptional products

@@ -38,7 +38,11 @@ CONTENT PILLARS — hit at least 2:
 
 PRODUCT LINKS:
 - Look for a "Product slug:" line (single) or a "Product slugs:" line (comma-separated list) in the user message.
-- Single slug ("Product slug: x"): embed exactly one [[BUY:x]] token at the strongest purchase-intent moment, usually inside the verdict or a clear recommendation sentence.
+- Single slug ("Product slug: x"): embed exactly three [[BUY:x]] tokens — never more, never fewer. Place them at:
+  1. EARLY — at the end of the first section's strongest benefit statement (not the intro)
+  2. MID — immediately after the single most credible proof point in a middle section (a real test result, expert validation, or concrete data point)
+  3. VERDICT — at the end of the verdict, after the closing buy recommendation
+  Never place two tokens in the same section. Always distribute: first section, a middle section, verdict.
 - Multiple slugs ("Product slugs: a, b, c"): embed exactly one [[BUY:slug]] per listed slug, each appearing once — no more, no less. Space them out across relevant sections; don't cluster, don't repeat, don't skip.
 - Never write raw product URLs (no amazon.com, no geni.us, no shortened links).
 - If neither line is present, write no product links at all.

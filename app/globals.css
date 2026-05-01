@@ -146,3 +146,8 @@ h1, h2, h3, h4 {
 .bd-content figure:not(.bd-image-placeholder) img {
   cursor: zoom-in;
 }
+
+/* ── Code blocks in review/article body — scroll wide blocks, not the page ── */
+.bd-editorial pre {
+  overflow-x: auto;
+}

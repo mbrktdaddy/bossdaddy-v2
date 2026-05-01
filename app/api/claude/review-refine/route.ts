@@ -27,6 +27,11 @@ export async function POST(request: NextRequest) {
 
   const { title, product_name, category, content, instruction } = parsed.data
 
+  // Extract product slug from any resolved affiliate anchor so token placement
+  // rules survive a refine cycle (resolved <a data-product-slug> → [[BUY:slug]])
+  const slugMatch = content.match(/data-product-slug="([^"]+)"/)
+  const productSlug = slugMatch?.[1] ?? null
+
   const plainText = content
     .replace(/<figure[\s\S]*?<\/figure>/gi, '')
     .replace(/<[^>]+>/g, ' ')
@@ -37,7 +42,7 @@ export async function POST(request: NextRequest) {
 
 Title: ${title}
 Product: ${product_name}
-Category: ${category}
+Category: ${category}${productSlug ? `\nProduct slug: ${productSlug}` : ''}
 
 Current review text:
 ${plainText}
