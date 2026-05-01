@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useEditor, EditorContent, ReactNodeViewRenderer, NodeViewWrapper } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import CharacterCount from '@tiptap/extension-character-count'
 import { Node, mergeAttributes } from '@tiptap/core'
@@ -87,13 +86,65 @@ const FigureNode = Node.create({
 
   renderHTML({ HTMLAttributes }) {
     const { src, alt, caption, ...figureAttrs } = HTMLAttributes
-    const children: (string | Record<string, unknown>)[][] = [['img', { src, alt }]]
+    const children: (string | Record<string, unknown>)[][] = []
+    if (src) children.push(['img', { src, alt }])
     if (caption) children.push(['figcaption', {}, caption as string])
     return ['figure', mergeAttributes(figureAttrs), ...children]
   },
 
   addNodeView() {
     return ReactNodeViewRenderer(FigureView)
+  },
+})
+
+// ── Image gallery wrapper ───────────────────────────────────────────────────
+// Preserves <div class="bd-image-grid"> wrappers around galleries — without
+// this, Tiptap drops the wrapper and figures float to top level on first edit.
+
+const ImageGridNode = Node.create({
+  name: 'imageGrid',
+  group: 'block',
+  content: 'figure+',
+
+  addAttributes() {
+    return {
+      'data-slot-id': { default: null },
+    }
+  },
+
+  parseHTML() {
+    return [{ tag: 'div.bd-image-grid' }]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes, { class: 'bd-image-grid' }), 0]
+  },
+})
+
+// ── Link with affiliate attribute preservation ──────────────────────────────
+// Default Link strips data-product-slug and overrides rel. Affiliate anchors
+// resolved from [[BUY:slug]] tokens carry rel="sponsored nofollow noopener"
+// + data-product-slug — both must survive editor round-trips.
+
+import LinkExtension from '@tiptap/extension-link'
+
+const Link = LinkExtension.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      rel: {
+        default: 'noopener noreferrer',
+        parseHTML: (el) => el.getAttribute('rel'),
+        renderHTML: (attrs) => attrs.rel ? { rel: attrs.rel } : {},
+      },
+      'data-product-slug': {
+        default: null,
+        parseHTML: (el) => el.getAttribute('data-product-slug'),
+        renderHTML: (attrs) => attrs['data-product-slug']
+          ? { 'data-product-slug': attrs['data-product-slug'] }
+          : {},
+      },
+    }
   },
 })
 
@@ -184,6 +235,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords }: Prop
       Placeholder.configure({ placeholder: placeholder ?? 'Write your review here…' }),
       CharacterCount,
       FigureNode,
+      ImageGridNode,
     ],
     content: value,
     editorProps: {

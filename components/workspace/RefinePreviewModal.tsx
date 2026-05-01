@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect } from 'react'
+
 interface Props {
   before: string   // current content HTML
   after: string    // proposed content HTML
@@ -17,6 +19,14 @@ const proseClasses = `
 `.trim()
 
 export function RefinePreviewModal({ before, after, onAccept, onDiscard }: Props) {
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onDiscard()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onDiscard])
+
   return (
     <div className="fixed inset-0 z-50 flex items-stretch bg-black/80 backdrop-blur-sm">
       <div className="flex flex-col w-full max-w-6xl mx-auto my-4 mx-4 bg-gray-950 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl">
