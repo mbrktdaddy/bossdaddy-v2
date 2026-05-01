@@ -5,7 +5,7 @@ import RatingScore from '@/components/RatingScore'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import type { ReviewRow } from '@/app/(public)/reviews/actions'
 
-export default function FeaturedReviewCard({ review: r }: { review: ReviewRow }) {
+export default function FeaturedReviewCard({ review: r, label = 'Featured Review' }: { review: ReviewRow; label?: string }) {
   const cat = getCategoryBySlug(r.category)
 
   return (
@@ -38,7 +38,7 @@ export default function FeaturedReviewCard({ review: r }: { review: ReviewRow })
         <div>
           <div className="flex items-center gap-2 mb-4">
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500 bg-orange-950/60 px-2.5 py-1 rounded-full">
-              Featured Review
+              {label}
             </span>
             {cat && (
               <span className="text-[10px] text-gray-500 uppercase tracking-widest">{cat.icon} {cat.label}</span>
