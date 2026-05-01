@@ -2,6 +2,11 @@
 
 import Link from 'next/link'
 
+export interface ReadinessCheck {
+  label: string
+  done: boolean
+}
+
 interface Props {
   isSaving: boolean
   isPublishing?: boolean
@@ -15,13 +20,17 @@ interface Props {
   previewUrl?: string | null
   canPublish?: boolean
   publishBlockedReason?: string | null
+  readinessChecks?: ReadinessCheck[]
 }
 
 export function WorkspaceToolbar({
   isSaving, isPublishing, isDeleting, isPublished,
   onSave, onPublish, onUnpublish, onDelete, onDuplicate,
-  previewUrl, canPublish = true, publishBlockedReason,
+  previewUrl, canPublish = true, publishBlockedReason, readinessChecks,
 }: Props) {
+  const incomplete = readinessChecks?.filter((c) => !c.done) ?? []
+  const allReady   = incomplete.length === 0
+
   return (
     <div className="sticky bottom-0 left-0 right-0 -mx-4 sm:-mx-8 px-4 sm:px-8 py-3 bg-gray-950/95 backdrop-blur border-t border-gray-800 flex items-center gap-2 flex-wrap z-10">
       <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
@@ -65,6 +74,24 @@ export function WorkspaceToolbar({
       </div>
 
       <div className="flex items-center gap-2 flex-wrap">
+        {/* Readiness checklist — shown when not yet published */}
+        {!isPublished && readinessChecks && readinessChecks.length > 0 && (
+          <div className="flex items-center gap-1.5 flex-wrap mr-2">
+            {readinessChecks.map((check) => (
+              <span
+                key={check.label}
+                title={check.label}
+                className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                  check.done
+                    ? 'bg-green-950/60 text-green-500 border border-green-900/40'
+                    : 'bg-red-950/60 text-red-400 border border-red-900/40'
+                }`}
+              >
+                {check.done ? '✓' : '✗'} {check.label}
+              </span>
+            ))}
+          </div>
+        )}
         {isPublished && onUnpublish && (
           <button
             type="button"

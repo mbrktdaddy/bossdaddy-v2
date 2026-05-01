@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+
 interface Props {
   metaTitle: string
   metaDescription: string
@@ -7,6 +9,10 @@ interface Props {
   fallbackDescription: string
   slug: string | null
   contentType: 'guide' | 'review'
+  productName?: string
+  category?: string
+  excerpt?: string
+  content?: string
   onChangeTitle: (v: string) => void
   onChangeDescription: (v: string) => void
   defaultOpen?: boolean
@@ -32,8 +38,34 @@ function countLabel(value: string, recommended: number) {
 
 export function SEOPanel({
   metaTitle, metaDescription, fallbackTitle, fallbackDescription, slug, contentType,
+  productName, category, excerpt, content,
   onChangeTitle, onChangeDescription, defaultOpen = true,
 }: Props) {
+  const [generating, setGenerating] = useState(false)
+  const [genError, setGenError]     = useState<string | null>(null)
+
+  async function handleGenerate() {
+    setGenerating(true)
+    setGenError(null)
+    try {
+      const res = await fetch('/api/claude/seo-meta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: fallbackTitle, product_name: productName,
+          category, excerpt, content, content_type: contentType,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Failed')
+      if (json.metaTitle) onChangeTitle(json.metaTitle)
+      if (json.metaDescription) onChangeDescription(json.metaDescription)
+    } catch (err) {
+      setGenError(err instanceof Error ? err.message : 'Generation failed')
+    }
+    setGenerating(false)
+  }
+
   const displayTitle       = metaTitle.trim()       || fallbackTitle       || 'Untitled'
   const displayDescription = metaDescription.trim() || fallbackDescription || ''
   const previewUrl = `bossdaddylife.com/${contentType}s/${slug ?? 'slug-goes-here'}`
@@ -54,6 +86,19 @@ export function SEOPanel({
       </summary>
 
       <div className="px-4 pb-4 space-y-4">
+
+        {/* AI generate */}
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={handleGenerate}
+            disabled={generating}
+            className="text-xs px-3 py-1.5 bg-orange-950/50 hover:bg-orange-900/50 disabled:opacity-50 text-orange-400 border border-orange-900/40 rounded-lg transition-colors font-medium"
+          >
+            {generating ? 'Generating…' : '✨ Generate with AI'}
+          </button>
+          {genError && <span className="text-xs text-red-400">{genError}</span>}
+        </div>
 
         {/* Meta title */}
         <div>

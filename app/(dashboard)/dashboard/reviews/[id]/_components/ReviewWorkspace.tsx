@@ -107,8 +107,12 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   const status = review.status
   const isPublished = status === 'approved'
 
-  // Detect affiliate links whenever content changes
-  useEffect(() => { setHasAff(detectAffiliateLinks(content)) }, [content])
+  // Detect affiliate links whenever content changes; clear ack if links are removed
+  useEffect(() => {
+    const hasLinks = detectAffiliateLinks(content)
+    setHasAff(hasLinks)
+    if (!hasLinks) setDiscAck(false)
+  }, [content])
 
   const payload = useMemo(() => ({
     title,
@@ -155,6 +159,18 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   const publishBlockedReason = !canPublish
     ? 'Acknowledge the affiliate disclosure before publishing (see section below).'
     : null
+
+  const readinessChecks = [
+    { label: 'Title',      done: title.trim().length >= 10 },
+    { label: 'Hero image', done: !!imageUrl },
+    { label: 'Excerpt',    done: excerpt.trim().length > 0 },
+    { label: 'Pros',       done: pros.filter(p => p.trim()).length >= 3 },
+    { label: 'Cons',       done: cons.filter(c => c.trim()).length >= 2 },
+    { label: 'Rating',     done: rating >= 1 },
+    { label: 'Content',    done: content.replace(/<[^>]+>/g, '').trim().length >= 100 },
+    { label: 'No placeholders', done: !content.includes('bd-image-placeholder') },
+    ...(hasAffiliate ? [{ label: 'Disclosure', done: disclosureAck }] : []),
+  ]
 
   async function publishOrUnpublish(action: 'approve' | 'unpublish') {
     if (action === 'approve' && !canPublish) {
@@ -422,6 +438,10 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
               fallbackDescription={excerpt}
               slug={review.slug}
               contentType="review"
+              productName={productName}
+              category={category}
+              excerpt={excerpt}
+              content={content}
               onChangeTitle={setMetaTitle}
               onChangeDescription={setMetaDesc}
             />
@@ -484,6 +504,7 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
         previewUrl={previewUrl}
         canPublish={canPublish}
         publishBlockedReason={publishBlockedReason}
+        readinessChecks={readinessChecks}
       />
     </div>
   )

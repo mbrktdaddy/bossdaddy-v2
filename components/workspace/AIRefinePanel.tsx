@@ -7,6 +7,7 @@ interface Props {
   category: string
   content: string
   productName?: string
+  productSlug?: string
   contentType: 'guide' | 'review'
   onRefined: (draft: RefinedDraft) => void
   externalInstruction?: string
@@ -45,7 +46,7 @@ export function AIRefinePanel({ title, category, content, productName, contentTy
     setLoading(true)
     setError(null)
     try {
-      const endpoint = contentType === 'guide' ? '/api/claude/article-refine' : '/api/claude/review-refine'
+      const endpoint = contentType === 'guide' ? '/api/claude/guide-refine' : '/api/claude/review-refine'
       const body = contentType === 'guide'
         ? { title, category, content, instruction }
         : { title, product_name: productName, category, content, instruction }

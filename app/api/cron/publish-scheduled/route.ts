@@ -1,6 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getResend, FROM_EMAIL } from '@/lib/resend'
+import { ModerationResultEmail } from '@/emails/ModerationResultEmail'
+import * as React from 'react'
 
 export const maxDuration = 30
 
@@ -31,13 +34,13 @@ export async function GET(request: NextRequest) {
   const [{ data: dueArticles }, { data: dueReviews }] = await Promise.all([
     admin
       .from('guides')
-      .select('id, slug')
+      .select('id, slug, title, author_id')
       .not('scheduled_publish_at', 'is', null)
       .lte('scheduled_publish_at', now)
       .in('status', ['draft', 'pending', 'rejected']),
     admin
       .from('reviews')
-      .select('id, slug')
+      .select('id, slug, title, author_id')
       .not('scheduled_publish_at', 'is', null)
       .lte('scheduled_publish_at', now)
       .in('status', ['draft', 'pending', 'rejected']),
@@ -84,7 +87,73 @@ export async function GET(request: NextRequest) {
   if (reviewsPublished > 0) {
     revalidatePath('/')
     revalidatePath('/reviews')
+    revalidatePath('/about')
     ;(dueReviews ?? []).forEach((r) => r.slug && revalidatePath(`/reviews/${r.slug}`))
+  }
+
+  // Send author notifications + wishlist alerts (fire-and-forget, don't block response)
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+  if (process.env.RESEND_API_KEY) {
+    const resend = getResend()
+
+    const notifyAuthor = async (authorId: string, title: string, contentType: 'review' | 'guide') => {
+      try {
+        const { data: authUser } = await admin.auth.admin.getUserById(authorId)
+        const email = authUser?.user?.email
+        if (!email) return
+        await resend.emails.send({
+          from: FROM_EMAIL,
+          to: email,
+          subject: '🎉 Your content is live on Boss Daddy Life',
+          react: React.createElement(ModerationResultEmail, {
+            action: 'approve', contentType, title, siteUrl,
+          }),
+        })
+      } catch (err) { console.error('Scheduled publish author notify failed:', err) }
+    }
+
+    const notifyWishlist = async (reviewId: string, reviewTitle: string, reviewSlug: string) => {
+      try {
+        const { data: wishlistItem } = await admin
+          .from('wishlist_items').select('id').eq('review_id', reviewId).maybeSingle()
+        if (!wishlistItem) return
+        const { data: subs } = await admin
+          .from('wishlist_subscriptions').select('id, user_id')
+          .eq('wishlist_item_id', wishlistItem.id).eq('notified', false)
+        if (!subs?.length) return
+        for (const sub of subs) {
+          try {
+            const { data: authUser } = await admin.auth.admin.getUserById(sub.user_id as string)
+            const email = authUser?.user?.email
+            if (email) {
+              await resend.emails.send({
+                from: FROM_EMAIL,
+                to: email,
+                subject: `Boss Daddy reviewed ${reviewTitle} — read it now`,
+                html: `<p>Hey! You asked to be notified when Boss Daddy reviewed <strong>${reviewTitle}</strong>.</p>
+<p><a href="${siteUrl}/reviews/${reviewSlug}" style="background:#CC5500;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:bold;">Read the review</a></p>
+<p style="color:#888;font-size:12px;">You're receiving this because you subscribed to this item on the Boss Daddy wishlist.</p>`,
+              })
+              await admin.from('wishlist_subscriptions')
+                .update({ notified: true, notified_at: new Date().toISOString() })
+                .eq('id', sub.id)
+            }
+          } catch (err) { console.error('Wishlist notify failed for', sub.user_id, err) }
+        }
+      } catch (err) { console.error('Wishlist batch notify failed for review', reviewId, err) }
+    }
+
+    await Promise.allSettled([
+      ...(dueArticles ?? []).filter(a => a.author_id).map(a =>
+        notifyAuthor(a.author_id as string, a.title as string, 'guide')
+      ),
+      ...(dueReviews ?? []).filter(r => r.author_id).map(r =>
+        notifyAuthor(r.author_id as string, r.title as string, 'review')
+      ),
+      ...(dueReviews ?? []).filter(r => r.slug).map(r =>
+        notifyWishlist(r.id, r.title as string, r.slug as string)
+      ),
+    ])
   }
 
   return NextResponse.json({
