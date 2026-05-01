@@ -76,12 +76,12 @@ export default async function StuffPage({ searchParams }: Props) {
 
       {/* Page header */}
       <div className="mb-8">
-        <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— Yeah, I Know We Shouldn&apos;t Pray For Stuff</p>
+        <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— Dad-Tested Only</p>
         <h1 className="text-4xl md:text-5xl font-black mb-3 text-white tracking-tight">
-          {cat ? `${cat.icon} ${cat.label} Stuff` : "Boss Daddy's Stuff"}
+          {cat ? `${cat.icon} ${cat.label} Stuff` : "Boss Daddy's Favorite Stuff"}
         </h1>
         <p className="text-gray-400 text-base md:text-lg leading-relaxed max-w-2xl">
-          Field-tested by a real dad. <span className="text-gray-500">And, soon, made by one.</span>
+          I know we shouldn&apos;t pray for stuff, but here&apos;s a list of some really cool stuff.
         </p>
       </div>
 
