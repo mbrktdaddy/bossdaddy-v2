@@ -57,6 +57,11 @@ Return JSON with this exact shape:
 {
   "title": "string — updated title if instructions require it, otherwise keep original",
   "excerpt": "string — updated excerpt if needed, max 160 chars",
+  "tldr": "string — 2–3 sentence skimmer summary; update if instructions touch the overall verdict",
+  "keyTakeaways": ["string — 3–5 specific bullets; update if instructions change key insights"],
+  "bestFor": ["string — 3–4 buyer profiles; update if instructions change the recommendation"],
+  "notFor": ["string — 2–3 skip scenarios; update if instructions change the recommendation"],
+  "faqs": [{ "question": "string", "answer": "string" }],
   "introduction": "string",
   "sections": [
     { "heading": "string", "body": "string" }

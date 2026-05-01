@@ -12,7 +12,7 @@ export default async function ReviewWorkspacePage({
 
   const { data: review } = await admin
     .from('reviews')
-    .select('id, title, product_name, category, excerpt, content, image_url, rating, pros, cons, has_affiliate_links, disclosure_acknowledged, status, slug, moderation_score, moderation_flags, created_at, updated_at, reading_time_minutes, rejection_reason, meta_title, meta_description, scheduled_publish_at, product_slug')
+    .select('id, title, product_name, category, excerpt, content, image_url, rating, pros, cons, has_affiliate_links, disclosure_acknowledged, status, slug, moderation_score, moderation_flags, created_at, updated_at, reading_time_minutes, rejection_reason, meta_title, meta_description, scheduled_publish_at, product_slug, tldr, key_takeaways, best_for, not_for, faqs')
     .eq('id', id)
     .single()
 
@@ -48,6 +48,10 @@ export default async function ReviewWorkspacePage({
         moderation_flags: (review.moderation_flags ?? []) as string[],
         pros: (review.pros ?? []) as string[],
         cons: (review.cons ?? []) as string[],
+        key_takeaways: (review.key_takeaways ?? []) as string[],
+        best_for: (review.best_for ?? []) as string[],
+        not_for: (review.not_for ?? []) as string[],
+        faqs: (review.faqs ?? []) as { question: string; answer: string }[],
         product_id: productId,
       }}
     />

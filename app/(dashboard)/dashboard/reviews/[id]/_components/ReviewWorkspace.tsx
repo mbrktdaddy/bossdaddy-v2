@@ -30,6 +30,8 @@ import { ListEditor } from '@/components/workspace/ListEditor'
 import { useAutoSave } from '@/components/workspace/useAutoSave'
 import { useKeyboardShortcuts } from '@/components/workspace/useKeyboardShortcuts'
 
+interface FAQ { question: string; answer: string }
+
 interface ReviewData {
   id: string
   title: string
@@ -56,6 +58,11 @@ interface ReviewData {
   scheduled_publish_at: string | null
   product_slug: string | null
   product_id: string | null
+  tldr: string | null
+  key_takeaways: string[] | null
+  best_for: string[] | null
+  not_for: string[] | null
+  faqs: FAQ[] | null
 }
 
 const RATING_OPTIONS = [
@@ -89,6 +96,12 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   const [metaDesc, setMetaDesc]       = useState(review.meta_description ?? '')
   const [scheduledAt, setScheduled]   = useState<string | null>(review.scheduled_publish_at)
   const [productSlug, setProductSlug] = useState<string | null>(review.product_slug)
+
+  const [tldr, setTldr]                   = useState(review.tldr ?? '')
+  const [keyTakeaways, setKeyTakeaways]   = useState<string[]>(review.key_takeaways ?? [])
+  const [bestFor, setBestFor]             = useState<string[]>(review.best_for ?? [])
+  const [notFor, setNotFor]               = useState<string[]>(review.not_for ?? [])
+  const [faqs, setFaqs]                   = useState<FAQ[]>(review.faqs ?? [])
 
   const [heroPromptSuggestion, setHeroPromptSuggestion] = useState('')
 
@@ -129,7 +142,12 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
     meta_description:     metaDesc  || null,
     scheduled_publish_at: scheduledAt,
     product_slug:         productSlug,
-  }), [title, productName, category, excerpt, content, imageUrl, rating, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, productSlug])
+    tldr:                 tldr || null,
+    key_takeaways:        keyTakeaways,
+    best_for:             bestFor,
+    not_for:              notFor,
+    faqs,
+  }), [title, productName, category, excerpt, content, imageUrl, rating, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, productSlug, tldr, keyTakeaways, bestFor, notFor, faqs])
 
   const save = async (p: typeof payload) => {
     const res = await fetch(`/api/reviews/${review.id}`, {
@@ -348,6 +366,12 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
               setMsg(note)
               setTimeout(() => setMsg(null), 5000)
             }
+            // Update content blocks if refine touched them
+            if ((draft as Record<string, unknown>).tldr) setTldr((draft as Record<string, unknown>).tldr as string)
+            if ((draft as Record<string, unknown>).keyTakeaways) setKeyTakeaways((draft as Record<string, unknown>).keyTakeaways as string[])
+            if ((draft as Record<string, unknown>).bestFor) setBestFor((draft as Record<string, unknown>).bestFor as string[])
+            if ((draft as Record<string, unknown>).notFor) setNotFor((draft as Record<string, unknown>).notFor as string[])
+            if ((draft as Record<string, unknown>).faqs) setFaqs((draft as Record<string, unknown>).faqs as FAQ[])
           }}
         />
 
@@ -366,6 +390,102 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
           <p className="mt-1.5 text-xs text-gray-600">
             Primary CTA is set via the Product &amp; Monetization section below. Use <code className="text-orange-400">[[BUY:product-slug]]</code> inline only for natural mid-article mentions.
           </p>
+        </div>
+
+        {/* ── CONTENT BLOCKS ───────────────────────────────────────────── */}
+        <div className="pt-6 border-t border-gray-800/60">
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Content Blocks</p>
+          <p className="text-xs text-gray-600 mb-4">These render as structured UI elements on the public page — not prose. Generated automatically by AI drafts; edit freely.</p>
+          <div className="space-y-6">
+
+            {/* TL;DR */}
+            <div>
+              <label className="block text-sm text-gray-300 mb-1.5">TL;DR <span className="text-gray-600 font-normal">— 2–3 sentence skimmer summary</span></label>
+              <textarea
+                value={tldr}
+                onChange={(e) => setTldr(e.target.value)}
+                rows={3}
+                placeholder="e.g. The Enfamil Enspire Ready-to-Feed is the easiest formula I've ever used at 4 AM. The nutritional profile is the closest thing to breast milk on the market, and our daughter took to it immediately after rejecting two other brands. The price is steep, but for tired dads doing solo feedings, it's worth it."
+                className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-y text-sm"
+              />
+            </div>
+
+            {/* Key Takeaways + Best/Not For */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <ListEditor
+                label="Key Takeaways"
+                items={keyTakeaways}
+                onChange={setKeyTakeaways}
+                placeholder="e.g. Zero prep at 4 AM — crack and pour"
+                accent="text-orange-400"
+              />
+              <ListEditor
+                label="Best For"
+                items={bestFor}
+                onChange={setBestFor}
+                placeholder="e.g. Dads doing solo overnight feedings"
+                accent="text-green-400"
+              />
+              <ListEditor
+                label="Not For"
+                items={notFor}
+                onChange={setNotFor}
+                placeholder="e.g. Families on a tight formula budget"
+                accent="text-red-400"
+              />
+            </div>
+
+            {/* FAQs */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm text-gray-300">FAQs</label>
+                <button
+                  type="button"
+                  onClick={() => setFaqs([...faqs, { question: '', answer: '' }])}
+                  className="text-xs text-orange-400 hover:text-orange-300 transition-colors"
+                >
+                  + Add question
+                </button>
+              </div>
+              <div className="space-y-3">
+                {faqs.map((faq, i) => (
+                  <div key={i} className="bg-gray-900 border border-gray-800 rounded-xl p-3 space-y-2">
+                    <div className="flex items-start gap-2">
+                      <span className="text-xs text-gray-600 mt-2 shrink-0">Q</span>
+                      <input
+                        type="text"
+                        value={faq.question}
+                        onChange={(e) => setFaqs(faqs.map((f, j) => j === i ? { ...f, question: e.target.value } : f))}
+                        placeholder="e.g. Is Enfamil Enspire Ready-to-Feed worth the price?"
+                        className="flex-1 px-3 py-1.5 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setFaqs(faqs.filter((_, j) => j !== i))}
+                        className="text-gray-600 hover:text-red-400 transition-colors text-xs mt-2"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-xs text-gray-600 mt-2 shrink-0">A</span>
+                      <textarea
+                        value={faq.answer}
+                        onChange={(e) => setFaqs(faqs.map((f, j) => j === i ? { ...f, answer: e.target.value } : f))}
+                        placeholder="2–3 sentences. Direct, specific, first-person."
+                        rows={2}
+                        className="flex-1 px-3 py-1.5 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 resize-none"
+                      />
+                    </div>
+                  </div>
+                ))}
+                {faqs.length === 0 && (
+                  <p className="text-xs text-gray-600 italic">No FAQs yet. Add questions readers commonly search for — great for SEO.</p>
+                )}
+              </div>
+            </div>
+
+          </div>
         </div>
 
         {/* ── MEDIA ────────────────────────────────────────────────────── */}

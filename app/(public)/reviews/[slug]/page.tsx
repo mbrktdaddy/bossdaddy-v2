@@ -46,7 +46,7 @@ const getReview = cache(async (slug: string) => {
   const supabase = await createClient()
   const { data } = await supabase
     .from('reviews')
-    .select('id, title, product_name, category, content, rating, pros, cons, excerpt, image_url, has_affiliate_links, product_slug, published_at, meta_title, meta_description, profiles(username)')
+    .select('id, title, product_name, category, content, rating, pros, cons, excerpt, image_url, has_affiliate_links, product_slug, published_at, meta_title, meta_description, tldr, key_takeaways, best_for, not_for, faqs, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -109,6 +109,12 @@ export default async function ReviewPage({ params }: Props) {
   const pros = (review.pros as string[]) ?? []
   const cons = (review.cons as string[]) ?? []
 
+  const tldr          = review.tldr as string | null
+  const keyTakeaways  = (review.key_takeaways as string[] | null) ?? []
+  const bestFor       = (review.best_for as string[] | null) ?? []
+  const notFor        = (review.not_for as string[] | null) ?? []
+  const faqs          = (review.faqs as { question: string; answer: string }[] | null) ?? []
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Review',
@@ -120,9 +126,20 @@ export default async function ReviewPage({ params }: Props) {
     datePublished: review.published_at,
   }
 
+  const faqJsonLd = faqs.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.question,
+      acceptedAnswer: { '@type': 'Answer', text: f.answer },
+    })),
+  } : null
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      {faqJsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />}
       <ViewTracker id={review.id} type="review" />
       <EngagementTracker contentType="review" contentId={review.id} />
 
@@ -174,6 +191,28 @@ export default async function ReviewPage({ params }: Props) {
             </div>
           </div>
         </div>
+
+        {/* TL;DR + Key Takeaways — above the fold for skimmers */}
+        {(tldr || keyTakeaways.length > 0) && (
+          <div className="mb-8 bg-orange-950/30 border border-orange-900/40 rounded-2xl p-5 shadow-md shadow-black/30">
+            {tldr && (
+              <p className="text-gray-200 leading-relaxed text-sm sm:text-base mb-4">{tldr}</p>
+            )}
+            {keyTakeaways.length > 0 && (
+              <>
+                <p className="text-xs text-orange-400 uppercase tracking-widest font-semibold mb-2">Key Takeaways</p>
+                <ul className="space-y-1.5">
+                  {keyTakeaways.map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
+                      <span className="text-orange-500 mt-0.5 shrink-0">→</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
+        )}
 
         {/* Hero image */}
         {review.image_url && (
@@ -227,6 +266,38 @@ export default async function ReviewPage({ params }: Props) {
           </div>
         )}
 
+        {/* Best For / Not For — purchase decision block */}
+        {(bestFor.length > 0 || notFor.length > 0) && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+            {bestFor.length > 0 && (
+              <div className="bg-gray-900 rounded-2xl p-5 shadow-md shadow-black/30">
+                <p className="text-xs text-green-400 uppercase tracking-widest font-semibold mb-3">✓ Best For</p>
+                <ul className="space-y-2">
+                  {bestFor.map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
+                      <span className="text-green-500 mt-0.5 shrink-0">+</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {notFor.length > 0 && (
+              <div className="bg-gray-900 rounded-2xl p-5 shadow-md shadow-black/30">
+                <p className="text-xs text-red-400 uppercase tracking-widest font-semibold mb-3">✗ Not For</p>
+                <ul className="space-y-2">
+                  {notFor.map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
+                      <span className="text-red-500 mt-0.5 shrink-0">−</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Primary product CTA — after pros/cons, before the article body */}
         {product && (
           <ProductCtaCard product={product} rating={review.rating ?? undefined} variant="prominent" />
@@ -251,6 +322,21 @@ export default async function ReviewPage({ params }: Props) {
         {/* Final product CTA — last chance to convert, before the newsletter box */}
         {product && (
           <ProductCtaCard product={product} rating={review.rating ?? undefined} variant="final" />
+        )}
+
+        {/* FAQs — SEO + reader utility */}
+        {faqs.length > 0 && (
+          <div className="mt-12 pt-8 border-t border-gray-800/60">
+            <h2 className="text-xl font-black mb-6">Frequently Asked Questions</h2>
+            <div className="space-y-4">
+              {faqs.map((faq, i) => (
+                <div key={i} className="bg-gray-900 rounded-2xl p-5 shadow-md shadow-black/30">
+                  <p className="font-bold text-sm text-white mb-2">{faq.question}</p>
+                  <p className="text-sm text-gray-300 leading-relaxed">{faq.answer}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
 
         {/* Bottom CTA — email signup */}

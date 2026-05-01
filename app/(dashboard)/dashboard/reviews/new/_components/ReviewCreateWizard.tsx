@@ -58,6 +58,8 @@ export function ReviewCreateWizard() {
   const [previewDraft, setPreviewDraft] = useState<{
     title: string; excerpt: string; content: string
     rating: number; pros: string[]; cons: string[]; imagePrompt: string
+    tldr: string; keyTakeaways: string[]; bestFor: string[]; notFor: string[]
+    faqs: { question: string; answer: string }[]
   } | null>(null)
 
   const [products, setProducts]         = useState<ProductOption[]>([])
@@ -167,6 +169,11 @@ export function ReviewCreateWizard() {
         rating: Math.round(draft.rating ?? 7),
         pros: draft.pros ?? [], cons: draft.cons ?? [],
         imagePrompt: genJson.imagePrompt ?? '',
+        tldr: (draft as Record<string, unknown>).tldr as string ?? '',
+        keyTakeaways: (draft as Record<string, unknown>).keyTakeaways as string[] ?? [],
+        bestFor: (draft as Record<string, unknown>).bestFor as string[] ?? [],
+        notFor: (draft as Record<string, unknown>).notFor as string[] ?? [],
+        faqs: (draft as Record<string, unknown>).faqs as { question: string; answer: string }[] ?? [],
       })
       setStep('preview')
     } catch (err) {
@@ -194,6 +201,11 @@ export function ReviewCreateWizard() {
           cons: previewDraft.cons,
           product_slug: productSlug.trim() || null,
           disclosure_acknowledged: false,
+          tldr: previewDraft.tldr,
+          key_takeaways: previewDraft.keyTakeaways,
+          best_for: previewDraft.bestFor,
+          not_for: previewDraft.notFor,
+          faqs: previewDraft.faqs,
         }),
       })
       const saveJson = await saveRes.json()

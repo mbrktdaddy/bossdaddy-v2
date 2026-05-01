@@ -15,6 +15,8 @@ import { z } from 'zod'
 
 const CategorySchema = z.enum(CATEGORY_SLUGS as [string, ...string[]])
 
+const FAQItemSchema = z.object({ question: z.string(), answer: z.string() })
+
 const UpdateSchema = z.object({
   title:                    z.string().min(10).max(120).optional(),
   product_name:             z.string().min(2).max(120).optional(),
@@ -30,6 +32,11 @@ const UpdateSchema = z.object({
   meta_description:         z.string().max(200).optional().nullable(),
   scheduled_publish_at:     z.string().datetime().optional().nullable(),
   product_slug:             z.string().regex(/^[a-z0-9-]+$/).max(120).optional().nullable(),
+  tldr:                     z.string().max(600).optional().nullable(),
+  key_takeaways:            z.array(z.string()).optional(),
+  best_for:                 z.array(z.string()).optional(),
+  not_for:                  z.array(z.string()).optional(),
+  faqs:                     z.array(FAQItemSchema).optional(),
 })
 
 const ModerateSchema = z.object({
@@ -231,6 +238,11 @@ export async function PUT(
   if (parsed.data.meta_description !== undefined) updates.meta_description = parsed.data.meta_description
   if (parsed.data.scheduled_publish_at !== undefined) updates.scheduled_publish_at = parsed.data.scheduled_publish_at
   if (parsed.data.product_slug !== undefined) updates.product_slug = parsed.data.product_slug
+  if (parsed.data.tldr !== undefined) updates.tldr = parsed.data.tldr
+  if (parsed.data.key_takeaways !== undefined) updates.key_takeaways = parsed.data.key_takeaways
+  if (parsed.data.best_for !== undefined) updates.best_for = parsed.data.best_for
+  if (parsed.data.not_for !== undefined) updates.not_for = parsed.data.not_for
+  if (parsed.data.faqs !== undefined) updates.faqs = parsed.data.faqs
   if (parsed.data.content) {
     const resolved = await resolveProductTokens(parsed.data.content, supabase)
     const sanitized = sanitizeHtml(resolved)

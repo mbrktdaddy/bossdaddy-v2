@@ -77,6 +77,13 @@ STRUCTURE REQUIREMENTS:
 - Cons: 2–4 honest, specific items — never skip the cons
 - Rating: honest 1–10 score; reserve 9+ for truly exceptional products
 
+CONTENT BLOCKS (required — these render as structured UI elements, not prose):
+- tldr: 2–3 sentence plain-English summary for skimmers. No jargon. Lead with the verdict.
+- keyTakeaways: 3–5 specific, useful bullet points. Not a rehash of pros — highlight the most surprising or decision-relevant insights.
+- bestFor: 3–4 specific buyer profiles who will love this (e.g. "Dads doing solo overnight feedings", "Budget-conscious families who need reliability")
+- notFor: 2–3 specific situations or buyer types who should skip (be honest — vague "not for everyone" is not acceptable)
+- faqs: 3–5 Q&A pairs covering the most common purchase questions. Answers 2–3 sentences each. Write questions the way a real dad searching Google would phrase them.
+
 SEO: Include the product name naturally in the intro and at least one section heading.
 
 ${inlineImagesInstruction(imageSlots)}
@@ -85,6 +92,11 @@ Return JSON with this exact shape:
 {
   "title": "string (SEO title including product name, max 70 chars — e.g. 'DeWalt 20V Drill Review: Built for Real Dad Projects')",
   "excerpt": "string (one punchy sentence for the card — max 160 chars)",
+  "tldr": "string (2–3 sentences, skimmer-friendly verdict summary)",
+  "keyTakeaways": ["string (3–5 items, specific and useful)"],
+  "bestFor": ["string (3–4 specific buyer profiles)"],
+  "notFor": ["string (2–3 specific skip scenarios)"],
+  "faqs": [{ "question": "string", "answer": "string (2–3 sentences)" }],
   "introduction": "string (2–3 sentences, first-person dad opening with a real use case)",
   "sections": [
     { "heading": "string (clear heading)", "body": "string (150–250 words, paragraphs separated by \\n\\n)" }
@@ -102,7 +114,7 @@ Return JSON with this exact shape:
   const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
   const claudeResult = await getClaudeClient().messages.create({
     model: MODEL,
-    max_tokens: 2500,
+    max_tokens: 3800,
     system: systemBlocks,
     messages: [{ role: 'user', content: prompt }],
   }).catch((err: unknown) => {

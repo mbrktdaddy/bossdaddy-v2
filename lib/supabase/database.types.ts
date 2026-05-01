@@ -187,6 +187,9 @@ export type Database = {
       guides: {
         Row: {
           author_id: string
+          faqs: Json
+          key_takeaways: Json
+          tldr: string | null
           category: Database["public"]["Enums"]["review_category"]
           content: string
           created_at: string | null
@@ -220,10 +223,12 @@ export type Database = {
           content: string
           created_at?: string | null
           excerpt?: string | null
+          faqs?: Json
           has_affiliate_links?: boolean
           id?: string
           image_url?: string | null
           is_visible?: boolean
+          key_takeaways?: Json
           meta_description?: string | null
           meta_title?: string | null
           moderation_flags?: Json | null
@@ -240,6 +245,7 @@ export type Database = {
           slug: string
           status?: string
           title: string
+          tldr?: string | null
           updated_at?: string | null
           view_count?: number
         }
@@ -249,10 +255,12 @@ export type Database = {
           content?: string
           created_at?: string | null
           excerpt?: string | null
+          faqs?: Json
           has_affiliate_links?: boolean
           id?: string
           image_url?: string | null
           is_visible?: boolean
+          key_takeaways?: Json
           meta_description?: string | null
           meta_title?: string | null
           moderation_flags?: Json | null
@@ -269,6 +277,7 @@ export type Database = {
           slug?: string
           status?: string
           title?: string
+          tldr?: string | null
           updated_at?: string | null
           view_count?: number
         }
@@ -533,20 +542,24 @@ export type Database = {
       reviews: {
         Row: {
           author_id: string
+          best_for: Json
           category: Database["public"]["Enums"]["review_category"]
           cons: Json | null
           content: string
           created_at: string | null
           disclosure_acknowledged: boolean | null
           excerpt: string | null
+          faqs: Json
           has_affiliate_links: boolean | null
           id: string
           image_url: string | null
           is_visible: boolean
+          key_takeaways: Json
           meta_description: string | null
           meta_title: string | null
           moderation_flags: Json | null
           moderation_score: number | null
+          not_for: Json
           product_name: string
           product_slug: string | null
           pros: Json | null
@@ -563,25 +576,30 @@ export type Database = {
           slug: string
           status: string
           title: string
+          tldr: string | null
           updated_at: string | null
           view_count: number
         }
         Insert: {
           author_id: string
+          best_for?: Json
           category?: Database["public"]["Enums"]["review_category"]
           cons?: Json | null
           content: string
           created_at?: string | null
           disclosure_acknowledged?: boolean | null
           excerpt?: string | null
+          faqs?: Json
           has_affiliate_links?: boolean | null
           id?: string
           image_url?: string | null
           is_visible?: boolean
+          key_takeaways?: Json
           meta_description?: string | null
           meta_title?: string | null
           moderation_flags?: Json | null
           moderation_score?: number | null
+          not_for?: Json
           product_name: string
           product_slug?: string | null
           pros?: Json | null
@@ -598,25 +616,30 @@ export type Database = {
           slug: string
           status?: string
           title: string
+          tldr?: string | null
           updated_at?: string | null
           view_count?: number
         }
         Update: {
           author_id?: string
+          best_for?: Json
           category?: Database["public"]["Enums"]["review_category"]
           cons?: Json | null
           content?: string
           created_at?: string | null
           disclosure_acknowledged?: boolean | null
           excerpt?: string | null
+          faqs?: Json
           has_affiliate_links?: boolean | null
           id?: string
           image_url?: string | null
           is_visible?: boolean
+          key_takeaways?: Json
           meta_description?: string | null
           meta_title?: string | null
           moderation_flags?: Json | null
           moderation_score?: number | null
+          not_for?: Json
           product_name?: string
           product_slug?: string | null
           pros?: Json | null
@@ -633,6 +656,7 @@ export type Database = {
           slug?: string
           status?: string
           title?: string
+          tldr?: string | null
           updated_at?: string | null
           view_count?: number
         }

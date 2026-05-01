@@ -8,6 +8,8 @@ import { z } from 'zod'
 
 const CategorySchema = z.enum(CATEGORY_SLUGS as [string, ...string[]])
 
+const FAQSchema = z.object({ question: z.string(), answer: z.string() })
+
 const CreateReviewSchema = z.object({
   title: z.string().min(10).max(120),
   product_name: z.string().min(2).max(120),
@@ -20,6 +22,11 @@ const CreateReviewSchema = z.object({
   disclosure_acknowledged: z.boolean(),
   image_url: z.string().url().optional().nullable(),
   product_slug: z.string().max(80).optional().nullable(),
+  tldr: z.string().max(600).optional().nullable(),
+  key_takeaways: z.array(z.string()).default([]),
+  best_for: z.array(z.string()).default([]),
+  not_for: z.array(z.string()).default([]),
+  faqs: z.array(FAQSchema).default([]),
 })
 
 export async function POST(request: NextRequest) {
@@ -39,7 +46,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { title, product_name, category, excerpt, content, rating, pros, cons, disclosure_acknowledged, image_url, product_slug } = parsed.data
+    const { title, product_name, category, excerpt, content, rating, pros, cons, disclosure_acknowledged, image_url, product_slug, tldr, key_takeaways, best_for, not_for, faqs } = parsed.data
 
     let sanitizedContent: string
     try {
@@ -81,6 +88,11 @@ export async function POST(request: NextRequest) {
         rating,
         pros,
         cons,
+        tldr: tldr ?? null,
+        key_takeaways,
+        best_for,
+        not_for,
+        faqs,
         has_affiliate_links: hasAffiliateLinks,
         disclosure_acknowledged,
         reading_time_minutes: computeReadingTime(sanitizedContent),
