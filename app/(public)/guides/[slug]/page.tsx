@@ -184,7 +184,7 @@ export default async function GuidePage({ params }: Props) {
             <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Liked this guide?</p>
             <h3 className="text-xl font-black mb-2">Get the next one in your inbox</h3>
             <p className="text-sm text-gray-400 mb-5 max-w-md mx-auto">
-              One email when there&apos;s actually something worth saying. Plus dad-tested gear picks before they go up.
+              One email when there&apos;s actually something worth saying. Plus dad-tested stuff before they go up.
             </p>
             <div className="max-w-md mx-auto">
               <EmailSignup

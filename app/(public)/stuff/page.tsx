@@ -75,7 +75,7 @@ export default async function StuffPage({ searchParams }: Props) {
 
       {/* Page header */}
       <div className="mb-8">
-        <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— Dad-Tested Only</p>
+        <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— Yeah, I Know We Shouldn&apos;t Pray For Stuff</p>
         <h1 className="text-4xl md:text-5xl font-black mb-3 text-white tracking-tight">
           {cat ? `${cat.icon} ${cat.label} Stuff` : "Boss Daddy's Stuff"}
         </h1>

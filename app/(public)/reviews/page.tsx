@@ -12,7 +12,7 @@ export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'Dad-Tested Product Reviews',
-  description: 'Every product on Boss Daddy Life is bought with our own money, used in real life, and rated honestly. Browse gear reviews across tools, grills, outdoor, tech, and more.',
+  description: 'Every product on Boss Daddy Life is bought with our own money, used in real life, and rated honestly. Browse our reviews across tools, grills, outdoor, tech, and more.',
   openGraph: {
     title: 'Dad-Tested Product Reviews — Boss Daddy Life',
     description: 'Every product bought with our own money, used in real life, and rated honestly. No sponsored posts. No fluff.',
@@ -71,7 +71,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
       <div className="max-w-6xl mx-auto px-6 py-16">
         {/* Page header */}
         <div className="mb-8">
-          <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— The Gear</p>
+          <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— The Stuff</p>
           <h1 className="text-4xl md:text-5xl font-black mb-3 text-white tracking-tight">All Reviews</h1>
         </div>
 

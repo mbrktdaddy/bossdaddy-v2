@@ -12,7 +12,7 @@ export const CATEGORIES = [
   {
     slug: 'diy-tools',
     label: 'DIY & Tools',
-    description: 'Power tools, hand tools, and gear that actually gets the job done.',
+    description: 'Power tools, hand tools, and stuff that actually gets the job done.',
     icon: '🔧',
     color: 'from-gray-800/50 to-gray-900/40',
     border: 'border-gray-700/40',
@@ -22,7 +22,7 @@ export const CATEGORIES = [
   {
     slug: 'kids-family',
     label: 'Kids & Family',
-    description: 'Toys, gear, and gadgets tested by real kids with zero mercy.',
+    description: 'Toys, stuff, and gadgets tested by real kids with zero mercy.',
     icon: '👨‍👧‍👦',
     color: 'from-gray-800/50 to-gray-900/40',
     border: 'border-gray-700/40',
@@ -32,7 +32,7 @@ export const CATEGORIES = [
   {
     slug: 'health-fitness',
     label: 'Health & Fitness',
-    description: 'Gear that keeps the boss in fighting shape — no gym bro nonsense.',
+    description: 'Stuff that keeps the boss in fighting shape — no gym bro nonsense.',
     icon: '💪',
     color: 'from-gray-800/50 to-gray-900/40',
     border: 'border-gray-700/40',
@@ -42,7 +42,7 @@ export const CATEGORIES = [
   {
     slug: 'outdoors-adventure',
     label: 'Outdoors & Adventure',
-    description: 'Family camping, hiking, and gear that gets you off the couch and into the wild.',
+    description: 'Family camping, hiking, and stuff that gets you off the couch and into the wild.',
     icon: '🏕️',
     color: 'from-gray-800/50 to-gray-900/40',
     border: 'border-gray-700/40',

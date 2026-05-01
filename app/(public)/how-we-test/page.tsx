@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
  title: 'How We Test — Boss Daddy Life',
- description: 'Real products, real testing, real dads. Here\'s exactly how Boss Daddy Life reviews gear and earns the Boss Daddy Approved designation.',
+ description: 'Real products, real testing, real dads. Here\'s exactly how Boss Daddy Life reviews stuff and earns the Boss Daddy Approved designation.',
  alternates: { canonical: '/how-we-test' },
 }
 
@@ -30,19 +30,19 @@ const PILLAR_TESTING = [
  icon: '💪',
  title: 'Health & Fitness',
  description:
- 'Supplements and gear get weeks, not days. A pre-workout gets a full training cycle. A protein powder gets mixed in every drink style a real guy uses — shaker, blender, oatmeal, coffee. Equipment gets used in home-gym reality: concrete floors, limited space, interruptions. Outcomes are reported honestly, including the ones that didn\'t move the needle.',
+ 'Supplements and stuff get weeks, not days. A pre-workout gets a full training cycle. A protein powder gets mixed in every drink style a real guy uses — shaker, blender, oatmeal, coffee. Equipment gets used in home-gym reality: concrete floors, limited space, interruptions. Outcomes are reported honestly, including the ones that didn\'t move the needle.',
  },
  {
  icon: '👶',
  title: 'Kid Gear & Baby Gear',
  description:
- 'Used by an actual kid, in the actual chaos. Strollers go over curbs, gravel, and airport tile. Car seats get installed and re-installed. Monitors run overnight, every night. Toys survive — or don\'t survive — a real toddler. If it can\'t take a blowout, a tantrum, and a dropped bottle, that\'s in the review. Safety-critical gear is checked against current standards before it ever gets written up.',
+ 'Used by an actual kid, in the actual chaos. Strollers go over curbs, gravel, and airport tile. Car seats get installed and re-installed. Monitors run overnight, every night. Toys survive — or don\'t survive — a real toddler. If it can\'t take a blowout, a tantrum, and a dropped bottle, that\'s in the review. Safety-critical stuff is checked against current standards before it ever gets written up.',
  },
  {
  icon: '🧔',
  title: 'Dad Life & Fatherhood Culture',
  description:
- 'Books, gear, wallets, watches, EDC, gifts — things dads actually carry and use. We live with them. A wallet rides in the back pocket for a month. A watch goes in the shower, the gym, the job site. A book gets read cover-to-cover before we write a word about it. No skim-and-summarize.',
+ 'Books, stuff, wallets, watches, EDC, gifts — things dads actually carry and use. We live with them. A wallet rides in the back pocket for a month. A watch goes in the shower, the gym, the job site. A book gets read cover-to-cover before we write a word about it. No skim-and-summarize.',
  },
  {
  icon: '🏡',
@@ -141,7 +141,7 @@ export default function HowWeTestPage() {
  <h2>The Rating System</h2>
  <p>
  We rate on a <strong>1 to 10 scale</strong>, in half-point increments. Simple on
- purpose. A 10 is rare — reserved for gear that genuinely earned it across every
+ purpose. A 10 is rare — reserved for stuff that genuinely earned it across every
  dimension. An 8 or above earns the Boss Daddy Approved designation. A 5 is honest:
  it works, it&apos;s fine, it might not be the one we&apos;d buy again. Anything below a 5
  is a product we&apos;re telling you to think twice about.

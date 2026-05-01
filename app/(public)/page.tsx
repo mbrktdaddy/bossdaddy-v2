@@ -15,7 +15,7 @@ export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'Boss Daddy Life — Dad Like a Boss',
-  description: 'Honest gear reviews, real-dad guides, and smart-tech advice for men who show up every day. Zero sponsors. Zero fluff. Real dads + smart tech.',
+  description: 'Honest product reviews, real-dad guides, and smart-tech advice for men who show up every day. Zero sponsors. Zero fluff. Real dads + smart tech.',
   alternates: { canonical: '/' },
 }
 
@@ -78,7 +78,7 @@ export default async function HomePage() {
             Real Dads <span className="text-orange-800 mx-2">·</span> Real Reviews <span className="text-orange-800 mx-2">·</span> Smart Tech
           </p>
           <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-10 max-w-2xl mx-auto">
-            Gear, reviews, and guides for the Boss Dads who show up every single day.
+            Reviews, guides, and really good stuff for the Boss Dads who show up every single day.
           </p>
           <div className="flex items-center justify-center gap-3">
             <Link href="/reviews" className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-2xl transition-colors">
@@ -347,7 +347,7 @@ export default async function HomePage() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
               <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Boss Daddy Shop</p>
-              <h2 className="text-2xl font-black text-white mb-2">The Boss Daddy Gear List</h2>
+              <h2 className="text-2xl font-black text-white mb-2">The Good Stuff</h2>
               <p className="text-gray-400 text-sm max-w-sm">
                 Every product we&apos;ve tested and actually stand behind — all in one place.
               </p>
@@ -374,7 +374,7 @@ export default async function HomePage() {
             Real Talk. Honest Reviews.<br />No BS Ever.
           </h2>
           <p className="text-gray-400 mb-8">
-            Weekly reviews, gear picks, and dad-life wins from a real dad in the trenches.
+            Weekly reviews, the good stuff, and dad-life wins from a real dad in the trenches.
             No spam. No sponsors. Just the crew.
           </p>
           <form action="/api/newsletter/subscribe" method="POST" className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">

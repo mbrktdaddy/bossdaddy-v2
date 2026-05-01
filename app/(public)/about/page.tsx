@@ -100,7 +100,7 @@ export default async function AboutPage() {
  </p>
  <p>
  I got tired of the fluff, the fake reviews, and the brand-sponsored noise. So I built
- Boss Daddy as the place where real dads can go for reviews, guides, and gear from a
+ Boss Daddy as the place where real dads can go for reviews, guides, and really good stuff from a
  real dad in the trenches — no fluff, no paid placements, no compromises.
  </p>
  <p>
@@ -112,7 +112,7 @@ export default async function AboutPage() {
 
  <h2>Real Dad. Smart Tools.</h2>
  <p>
- We are still a founder-led operation — buying the gear, testing it in our own backyards,
+ We are still a founder-led operation — buying the stuff, testing it in our own backyards,
  sweating through the projects, and living the dad life every single day. But to deliver
  the most comprehensive, up-to-date, and useful information possible, we also put AI to
  work for you. We use advanced AI analysis, research models, and tools to dig through
@@ -121,7 +121,7 @@ export default async function AboutPage() {
  </p>
  <p>
  Every guide, every review, and every recommendation still gets personally approved by
- the Boss Daddy team. Whether you&apos;re shopping for a new grill, hunting for kid gear,
+ the Boss Daddy team. Whether you&apos;re shopping for a new grill, hunting for kid stuff,
  buying a new tool, or just looking for guidance on a home improvement project — Boss
  Daddy uses every tool available to make sure you get straight answers from guys who
  actually show up. That&apos;s the Boss Daddy way: real dads + smart tech = better decisions
@@ -130,8 +130,8 @@ export default async function AboutPage() {
 
  <h2>More Than Just Reviews</h2>
  <p>
- Boss Daddy started as a review and gear site, but quickly became something much bigger —
- an AI-assisted gear and product review powerhouse, a place for honest advice, practical
+ Boss Daddy started as a review site, but quickly became something much bigger —
+ an AI-assisted product review powerhouse, a place for honest advice, practical
  skills, and epic family adventures, and a family-oriented brand that stands for
  brotherhood, strength, honesty, and faith.
  </p>
@@ -192,7 +192,7 @@ export default async function AboutPage() {
  <div className="mb-8">
  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Join the Crew</p>
  <p className="text-gray-400 text-sm mb-4">
- Weekly gear picks, honest reviews, and dad-life wins. No spam. No sponsors. Just the crew.
+ Weekly reviews, the good stuff, and dad-life wins. No spam. No sponsors. Just the crew.
  </p>
  <form action="/api/newsletter/subscribe" method="POST" className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
  <input

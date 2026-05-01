@@ -7,7 +7,7 @@ export async function GET() {
   const xml = buildRssXml(
     {
       title: 'Boss Daddy Life — Guides',
-      description: 'Honest takes on dad life, family, and the gear that supports it.',
+      description: 'Honest takes on dad life, family, and the good stuff that supports it.',
       selfPath: '/feed/guides.xml',
     },
     items,

@@ -75,7 +75,7 @@ export default function Footer() {
       {/* Newsletter band */}
       <div className="max-w-2xl mx-auto px-6 pt-12 pb-8 text-center">
         <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">Welcome to the crew.</p>
-        <h3 className="text-2xl font-black mb-2">Get dad-tested gear in your inbox</h3>
+        <h3 className="text-2xl font-black mb-2">Get the good stuff in your inbox</h3>
         <p className="text-gray-400 text-sm mb-6">
           One email when there&apos;s actually something worth saying. No daily spam, no fluff.
         </p>

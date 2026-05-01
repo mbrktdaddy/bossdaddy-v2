@@ -12,10 +12,10 @@ export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'Dad Guides — Skills, How-Tos & Advice',
-  description: 'Real guides for real dads — gear how-tos, backyard projects, grilling tips, and practical advice from a dad who actually tested it. No fluff, just what works.',
+  description: 'Real guides for real dads — stuff how-tos, backyard projects, grilling tips, and practical advice from a dad who actually tested it. No fluff, just what works.',
   openGraph: {
     title: 'Dad Guides — Boss Daddy Life',
-    description: 'Real guides for real dads. Gear how-tos, backyard projects, grilling tips, and practical advice. No fluff.',
+    description: 'Real guides for real dads. Stuff how-tos, backyard projects, grilling tips, and practical advice. No fluff.',
     images: [{ url: '/api/og?title=Dad+Guides+%26+Advice&type=guide', width: 1200, height: 630 }],
   },
   twitter: {

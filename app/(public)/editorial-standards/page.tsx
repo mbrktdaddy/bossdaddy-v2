@@ -26,7 +26,7 @@ export default function EditorialStandardsPage() {
  prose-strong:text-white">
 
  <p>
- Boss Daddy Life exists because dads deserve straight talk about the gear, tools, and
+ Boss Daddy Life exists because dads deserve straight talk about the stuff, tools, and
  products they spend real money on. This page lays out the rules we write by. If
  something you read here ever falls short of these standards, we want to hear about it.
  </p>
