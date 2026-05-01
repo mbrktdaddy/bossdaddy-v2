@@ -9,6 +9,8 @@ import { getBuyLabel } from '@/lib/wishlist'
 import { StatusBadge } from '@/components/wishlist/StatusBadge'
 import { VoteButton } from '@/components/wishlist/VoteButton'
 import { SubscribeButton } from '@/components/wishlist/SubscribeButton'
+import CommentForm from '@/components/CommentForm'
+import CommentList from '@/components/CommentList'
 import type { Metadata } from 'next'
 
 export const revalidate = 300
@@ -176,6 +178,25 @@ export default async function BenchDetailPage({ params }: Props) {
             The more votes, the sooner it gets done.
             {!user && ' Create a free account to cast your vote.'}
           </p>
+        </div>
+      )}
+
+      {/* Discussion */}
+      {!isSkipped && (
+        <div className="mt-12 pt-8 border-t border-gray-800/60">
+          <h2 className="text-lg font-black mb-1">What should I test?</h2>
+          <p className="text-sm text-gray-500 mb-6">
+            Tell me what matters most to you — specific use cases, durability concerns, comparisons to what you already own.
+            This goes straight into my research before I buy it.
+          </p>
+          <div className="mb-8">
+            <CommentForm
+              contentType="wishlist_item"
+              contentId={wishlistItem.id}
+              prompt="What do you want me to find out about this product?"
+            />
+          </div>
+          <CommentList contentType="wishlist_item" contentId={wishlistItem.id} />
         </div>
       )}
 

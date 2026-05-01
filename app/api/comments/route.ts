@@ -6,7 +6,7 @@ import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 const CreateCommentSchema = z.object({
-  content_type: z.enum(['review', 'guide']),
+  content_type: z.enum(['review', 'guide', 'wishlist_item']),
   content_id:   z.string().uuid(),
   body:         z.string().min(5).max(2000),
 })

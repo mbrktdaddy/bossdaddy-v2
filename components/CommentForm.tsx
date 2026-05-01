@@ -6,11 +6,12 @@ import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 interface Props {
-  contentType: 'review' | 'guide'
+  contentType: 'review' | 'guide' | 'wishlist_item'
   contentId: string
+  prompt?: string
 }
 
-export default function CommentForm({ contentType, contentId }: Props) {
+export default function CommentForm({ contentType, contentId, prompt }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const [body, setBody]             = useState('')
@@ -107,10 +108,13 @@ export default function CommentForm({ contentType, contentId }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
+      {prompt && (
+        <p className="text-sm text-gray-400 italic">{prompt}</p>
+      )}
       <textarea
         value={body}
         onChange={e => setBody(e.target.value)}
-        placeholder="Share your thoughts... (sign in required)"
+        placeholder={prompt ? 'Your answer...' : 'Share your thoughts... (sign in required)'}
         rows={4}
         maxLength={2000}
         className="w-full px-4 py-3 bg-gray-900 border border-gray-700 focus:border-orange-500 rounded-xl text-white placeholder-gray-500 focus:outline-none resize-none text-sm transition-colors"
