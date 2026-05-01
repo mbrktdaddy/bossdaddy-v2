@@ -36,7 +36,7 @@ export async function MerchPanel() {
           <div className="w-[3px] bg-orange-600 rounded-full" />
           <div>
             <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-1">— Made by Boss Daddy</p>
-            <h2 className="text-2xl font-black text-white leading-tight">Boss Daddy Goods</h2>
+            <h2 className="text-2xl font-black text-white leading-tight">Boss Daddy Merch</h2>
           </div>
         </div>
 
