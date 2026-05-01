@@ -165,6 +165,31 @@ export default async function HomePage() {
         </section>
       )}
 
+      {/* ── Browse by Category ───────────────────────────────────────────── */}
+      <section className="py-12">
+        <div className="max-w-6xl mx-auto px-6">
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Browse by Category</p>
+          <h2 className="text-2xl font-black mb-8">What kind of dad stuff are you into?</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {CATEGORIES.map((cat) => (
+              <Link
+                key={cat.slug}
+                href={`/reviews/category/${cat.slug}`}
+                className="group flex flex-col items-center text-center gap-2 p-4 bg-gray-900 rounded-2xl border border-gray-800 hover:border-orange-900/60 hover:bg-gray-800 shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/40 transition-all"
+              >
+                <span className="text-3xl">{cat.icon}</span>
+                <span className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors leading-tight">
+                  {cat.label}
+                </span>
+                <span className="text-xs text-gray-500 line-clamp-2 leading-relaxed hidden sm:block">
+                  {cat.description}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── On Deck — pipeline (testing / queued / considering) ───────────── */}
       {onDeck.length > 0 && (
         <section>
@@ -213,31 +238,6 @@ export default async function HomePage() {
       <Suspense fallback={<LatestArticlesSkeleton />}>
         <LatestGuidesSection />
       </Suspense>
-
-      {/* ── Browse by Category ───────────────────────────────────────────── */}
-      <section className="py-12">
-        <div className="max-w-6xl mx-auto px-6">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Browse by Category</p>
-          <h2 className="text-2xl font-black mb-8">What kind of dad stuff are you into?</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {CATEGORIES.map((cat) => (
-              <Link
-                key={cat.slug}
-                href={`/reviews/category/${cat.slug}`}
-                className="group flex flex-col items-center text-center gap-2 p-4 bg-gray-900 rounded-2xl border border-gray-800 hover:border-orange-900/60 hover:bg-gray-800 shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/40 transition-all"
-              >
-                <span className="text-3xl">{cat.icon}</span>
-                <span className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors leading-tight">
-                  {cat.label}
-                </span>
-                <span className="text-xs text-gray-500 line-clamp-2 leading-relaxed hidden sm:block">
-                  {cat.description}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── More Reviews (grid) ──────────────────────────────────────────── */}
       <section>

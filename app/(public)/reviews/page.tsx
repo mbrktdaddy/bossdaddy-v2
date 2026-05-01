@@ -92,9 +92,6 @@ export default async function ReviewsPage({ searchParams }: Props) {
           </div>
         )}
 
-        {/* Featured review */}
-        {featured && <FeaturedReviewCard review={featured} />}
-
         {/* Category grid — 2 columns mobile, 4 desktop, all visible */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-12">
           <Link
@@ -114,6 +111,9 @@ export default async function ReviewsPage({ searchParams }: Props) {
             </Link>
           ))}
         </div>
+
+        {/* Featured review — after the filter so categories are seen first */}
+        {featured && <FeaturedReviewCard review={featured} />}
 
         {sections.length === 0 ? (
           <div className="text-center py-24 bg-gray-900/40 rounded-2xl">

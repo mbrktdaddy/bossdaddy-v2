@@ -88,9 +88,6 @@ export default async function GuidesPage({ searchParams }: Props) {
           </div>
         )}
 
-        {/* Featured guide */}
-        {featured && <FeaturedGuideCard guide={featured} />}
-
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-12">
           <Link href="/guides"
             className="col-span-2 sm:col-span-4 flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-semibold bg-orange-600 text-white shadow-md shadow-black/30 hover:bg-orange-500 transition-colors">
@@ -104,6 +101,9 @@ export default async function GuidesPage({ searchParams }: Props) {
             </Link>
           ))}
         </div>
+
+        {/* Featured guide — after the filter so categories are seen first */}
+        {featured && <FeaturedGuideCard guide={featured} />}
 
         {sections.length === 0 ? (
           <div className="text-center py-24 bg-gray-900/40 rounded-2xl">
