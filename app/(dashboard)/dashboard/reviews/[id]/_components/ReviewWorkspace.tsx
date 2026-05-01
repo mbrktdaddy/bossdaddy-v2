@@ -7,7 +7,7 @@ import { CATEGORIES } from '@/lib/categories'
 import { detectAffiliateLinks } from '@/lib/affiliate'
 import { preserveImagesAcrossRefine } from '@/lib/inlineImages'
 import { StatusBadge } from '@/components/workspace/StatusBadge'
-import { ContentEditor } from '@/components/workspace/ContentEditor'
+import { TiptapEditor } from '@/components/workspace/TiptapEditor'
 import { HeroImagePanel } from '@/components/workspace/HeroImagePanel'
 import { AIRefinePanel } from '@/components/workspace/AIRefinePanel'
 import { ModerationInfo } from '@/components/workspace/ModerationInfo'
@@ -381,14 +381,14 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Content <span className="text-gray-600">(HTML)</span></label>
-          <ContentEditor
+          <label className="block text-sm text-gray-300 mb-1.5">Content</label>
+          <TiptapEditor
             value={content}
             onChange={setContent}
             targetWords={CATEGORIES.find(c => c.slug === category)?.targetWords}
           />
           <p className="mt-1.5 text-xs text-gray-600">
-            Primary CTA is set via the Product &amp; Monetization section below. Use <code className="text-orange-400">[[BUY:product-slug]]</code> inline only for natural mid-article mentions.
+            Primary CTA is set via Product &amp; Monetization below. Use <code className="text-orange-400">[[BUY:product-slug]]</code> inline for mid-article mentions — resolves to a link on save.
           </p>
         </div>
 
@@ -606,7 +606,7 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
         )}
 
         <p className="text-xs text-gray-600">
-          ⌨ <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘S</kbd> save · <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘↵</kbd> publish · <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘⇧P</kbd> toggle preview
+          ⌨ <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘S</kbd> save · <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘↵</kbd> publish · <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘Z</kbd> undo · <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘⇧Z</kbd> redo
         </p>
 
       </div>
