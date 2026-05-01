@@ -82,7 +82,7 @@ export default async function HomePage() {
             <span>Smart Tech</span>
           </p>
           <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-10 max-w-2xl mx-auto">
-            Reviews, guides, and really cool stuff for the Boss Dads who show up every single day.
+            Reviews, guides, and really cool stuff for Dads who show up every single day.
           </p>
           <div className="flex items-center justify-center gap-3">
             <Link href="/reviews" className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-2xl transition-colors">
