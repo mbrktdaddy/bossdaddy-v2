@@ -5,7 +5,7 @@ import { EmailSignup } from '@/components/EmailSignup'
 const FOOTER_LINKS = [
   { href: '/reviews',              label: 'Reviews' },
   { href: '/guides',               label: 'Guides' },
-  { href: '/gear',                 label: 'Gear' },
+  { href: '/stuff',                label: 'Stuff' },
   { href: '/bench',                label: 'On the Bench' },
   { href: '/about',                label: 'About' },
   { href: '/how-we-test',          label: 'How We Test' },

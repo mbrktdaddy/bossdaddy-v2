@@ -11,9 +11,12 @@ function isAdminRoute(pathname: string) {
 
 // Public legacy redirects (work for unauthenticated users too).
 function rewritePublicLegacy(pathname: string): string | null {
-  // /shop and /shop/* → /gear (Shop unified into the Gear page)
-  if (pathname === '/shop' || pathname === '/shop/') return '/gear'
-  if (pathname.startsWith('/shop/')) return '/gear'
+  // /shop and /shop/* → /stuff (Shop unified into the Stuff page)
+  if (pathname === '/shop' || pathname === '/shop/') return '/stuff'
+  if (pathname.startsWith('/shop/')) return '/stuff'
+  // /gear and /gear/* → /stuff (renamed)
+  if (pathname === '/gear' || pathname === '/gear/') return '/stuff'
+  if (pathname.startsWith('/gear')) return '/stuff' + pathname.slice(5)
   // /feed/articles.xml → /feed/guides.xml (RSS feed renamed)
   if (pathname === '/feed/articles.xml') return '/feed/guides.xml'
   // /wishlist and /wishlist/* → /bench (renamed to "On the Bench")
