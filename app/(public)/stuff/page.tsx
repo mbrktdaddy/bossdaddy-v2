@@ -102,33 +102,32 @@ export default async function StuffPage({ searchParams }: Props) {
         </div>
       )}
 
-      {/* Category filter pills */}
-      <div className="-mx-6 overflow-x-auto scrollbar-hide mb-10">
-        <div className="flex items-center gap-2 px-6 pb-1">
+      {/* Category grid — 2 columns mobile, 4 desktop, all visible */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-12">
+        <Link
+          href="/stuff"
+          className={`col-span-2 sm:col-span-4 flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+            !category
+              ? 'bg-orange-600 text-white shadow-md shadow-black/30 hover:bg-orange-500'
+              : 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20'
+          }`}
+        >
+          All Stuff
+        </Link>
+        {CATEGORIES.map((c) => (
           <Link
-            href="/stuff"
-            className={`shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
-              !category
+            key={c.slug}
+            href={`/stuff?category=${c.slug}`}
+            className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+              category === c.slug
                 ? 'bg-orange-600 text-white shadow-md shadow-black/30'
-                : 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40'
+                : 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20'
             }`}
           >
-            All Stuff
+            <span className="shrink-0">{c.icon}</span>
+            <span className="truncate">{c.label}</span>
           </Link>
-          {CATEGORIES.map((c) => (
-            <Link
-              key={c.slug}
-              href={`/stuff?category=${c.slug}`}
-              className={`shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
-                category === c.slug
-                  ? 'bg-orange-600 text-white shadow-md shadow-black/30'
-                  : 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40'
-              }`}
-            >
-              {c.icon} {c.shortLabel}
-            </Link>
-          ))}
-        </div>
+        ))}
       </div>
 
       {/* Boss Daddy Merch panel */}
