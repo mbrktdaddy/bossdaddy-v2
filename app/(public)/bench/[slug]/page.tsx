@@ -193,7 +193,7 @@ export default async function BenchDetailPage({ params }: Props) {
             <CommentForm
               contentType="wishlist_item"
               contentId={wishlistItem.id}
-              prompt="What do you want me to find out about this product?"
+              prompt="Everyone seems to love this item. What should I know first?"
             />
           </div>
           <CommentList contentType="wishlist_item" contentId={wishlistItem.id} />
