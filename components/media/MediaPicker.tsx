@@ -294,6 +294,11 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
           />
         </div>
 
+        {tab === 'library' && !uploadError && (
+          <p className="text-gray-500 text-xs border-b border-gray-800/60 px-5 py-2 shrink-0">
+            📐 For best results upload <span className="text-gray-400 font-medium">landscape images (16:9)</span> — recommended for hero slots on bench items, reviews, and guides.
+          </p>
+        )}
         {uploadError && tab === 'library' && (
           <p className="text-red-400 text-xs bg-red-950/50 border-b border-red-900/40 px-5 py-2.5 shrink-0">{uploadError}</p>
         )}
