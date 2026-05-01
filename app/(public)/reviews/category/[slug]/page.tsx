@@ -53,9 +53,8 @@ export default async function CategoryPage({ params }: Props) {
     ],
   }
 
-  const pillBase = 'shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium transition-all'
   const pillActive = 'bg-orange-600 text-white shadow-md shadow-black/30'
-  const pillInactive = 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40'
+  const pillInactive = 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20'
 
   return (
     <>
@@ -63,20 +62,24 @@ export default async function CategoryPage({ params }: Props) {
 
       <div className="w-full max-w-6xl mx-auto px-6 py-12">
 
-        {/* Category filter pills — matches reviews/page.tsx exactly */}
-        <div className="-mx-6 overflow-x-auto scrollbar-hide mb-10">
-          <div className="flex items-center gap-2 px-6 pb-1">
-            <Link href="/reviews" className={`${pillBase} ${pillInactive}`}>All</Link>
-            {CATEGORIES.map((c) => (
-              <Link
-                key={c.slug}
-                href={`/reviews/category/${c.slug}`}
-                className={`${pillBase} ${c.slug === slug ? pillActive : pillInactive}`}
-              >
-                {c.icon} {c.shortLabel}
-              </Link>
-            ))}
-          </div>
+        {/* Category grid — matches reviews/page.tsx */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-10">
+          <Link href="/reviews"
+            className="col-span-2 sm:col-span-4 flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 transition-colors">
+            All Reviews
+          </Link>
+          {CATEGORIES.map((c) => (
+            <Link
+              key={c.slug}
+              href={`/reviews/category/${c.slug}`}
+              className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                c.slug === slug ? pillActive : pillInactive
+              }`}
+            >
+              <span className="shrink-0">{c.icon}</span>
+              <span className="truncate">{c.label}</span>
+            </Link>
+          ))}
         </div>
 
         {/* Category header */}

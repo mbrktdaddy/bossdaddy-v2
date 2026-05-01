@@ -151,18 +151,17 @@ export default async function AboutPage() {
  <div className="mb-16">
  <h2 className="text-2xl font-black mb-2">What We Cover</h2>
  <p className="text-gray-500 text-sm mb-6">Real-world testing across everything modern dads actually love.</p>
- <div className="-mx-6 overflow-x-auto scrollbar-hide">
- <div className="flex items-center gap-2 px-6 pb-1">
+ <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
  {CATEGORIES.map((cat) => (
  <Link
  key={cat.slug}
  href={`/reviews/category/${cat.slug}`}
- className="shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40 transition-all"
+ className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 transition-colors"
  >
- {cat.icon} {cat.shortLabel}
+ <span className="shrink-0">{cat.icon}</span>
+ <span className="truncate">{cat.label}</span>
  </Link>
  ))}
- </div>
  </div>
  </div>
 

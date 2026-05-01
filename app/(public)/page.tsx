@@ -214,35 +214,28 @@ export default async function HomePage() {
         <LatestGuidesSection />
       </Suspense>
 
-      {/* ── Categories ────────────────────────────────────────────────────── */}
-      <section className="py-10">
-        <div className="max-w-6xl mx-auto px-6 mb-4">
-          <h2 className="text-sm font-black text-white uppercase tracking-widest">Browse by Category</h2>
-        </div>
-        {/* Mobile: horizontal scroll strip. Desktop: centered wrap grid. */}
-        <div className="md:hidden -mx-6 overflow-x-auto scrollbar-hide">
-          <div className="flex items-center gap-2 px-6 pb-1">
+      {/* ── Browse by Category ───────────────────────────────────────────── */}
+      <section className="py-12">
+        <div className="max-w-6xl mx-auto px-6">
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Browse by Category</p>
+          <h2 className="text-2xl font-black mb-8">What kind of dad stuff are you into?</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {CATEGORIES.map((cat) => (
               <Link
                 key={cat.slug}
                 href={`/reviews/category/${cat.slug}`}
-                className="shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40 transition-all"
+                className="group flex flex-col items-center text-center gap-2 p-4 bg-gray-900 rounded-2xl border border-gray-800 hover:border-orange-900/60 hover:bg-gray-800 shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/40 transition-all"
               >
-                {cat.icon} {cat.shortLabel}
+                <span className="text-3xl">{cat.icon}</span>
+                <span className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors leading-tight">
+                  {cat.label}
+                </span>
+                <span className="text-xs text-gray-500 line-clamp-2 leading-relaxed hidden sm:block">
+                  {cat.description}
+                </span>
               </Link>
             ))}
           </div>
-        </div>
-        <div className="hidden md:flex flex-wrap justify-center gap-2">
-          {CATEGORIES.map((cat) => (
-            <Link
-              key={cat.slug}
-              href={`/reviews/category/${cat.slug}`}
-              className="shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40 transition-all"
-            >
-              {cat.icon} {cat.label}
-            </Link>
-          ))}
         </div>
       </section>
 

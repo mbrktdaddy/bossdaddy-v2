@@ -101,33 +101,31 @@ export default async function GearPage({ searchParams }: Props) {
         </div>
       )}
 
-      {/* Category filter pills */}
-      <div className="-mx-6 overflow-x-auto scrollbar-hide mb-10">
-        <div className="flex items-center gap-2 px-6 pb-1">
-          <Link
-            href="/gear"
-            className={`shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
-              !category
-                ? 'bg-orange-600 text-white shadow-md shadow-black/30'
-                : 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40'
-            }`}
+      {/* Category filter — select on mobile/desktop (gear uses query-param filtering) */}
+      <div className="flex items-center gap-3 mb-10">
+        <div className="flex-1 relative">
+          <select
+            defaultValue={category ?? ''}
+            onChange={(e) => {
+              const val = (e.target as HTMLSelectElement).value
+              window.location.href = val ? `/gear?category=${val}` : '/gear'
+            }}
+            className="w-full appearance-none pl-4 pr-10 py-2.5 bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-orange-500 transition-colors cursor-pointer"
           >
-            All Gear
-          </Link>
-          {CATEGORIES.map((c) => (
-            <Link
-              key={c.slug}
-              href={`/gear?category=${c.slug}`}
-              className={`shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
-                category === c.slug
-                  ? 'bg-orange-600 text-white shadow-md shadow-black/30'
-                  : 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40'
-              }`}
-            >
-              {c.icon} {c.shortLabel}
-            </Link>
-          ))}
+            <option value="">All Gear</option>
+            {CATEGORIES.map((c) => (
+              <option key={c.slug} value={c.slug}>{c.icon} {c.label}</option>
+            ))}
+          </select>
+          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
         </div>
+        {category && (
+          <a href="/gear" className="text-sm text-gray-500 hover:text-orange-400 transition-colors whitespace-nowrap">
+            Clear filter
+          </a>
+        )}
       </div>
 
       {/* ── Featured: Made by Boss Daddy (merch panel) ─────────────────── */}
