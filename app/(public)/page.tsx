@@ -121,29 +121,42 @@ export default async function HomePage() {
 
       {/* ── Trust signals strip ──────────────────────────────────────────── */}
       <section className="border-t border-b border-gray-800/60">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-center gap-6 flex-wrap">
-          <Link
-            href="/how-we-test"
-            className="text-xs text-gray-500 hover:text-orange-400 transition-colors font-medium uppercase tracking-widest"
-          >
-            How We Test
-          </Link>
-          <span className="text-gray-700 text-xs">·</span>
-          <Link
-            href="/editorial-standards"
-            className="text-xs text-gray-500 hover:text-orange-400 transition-colors font-medium uppercase tracking-widest"
-          >
-            Editorial Standards
-          </Link>
-          <span className="text-gray-700 text-xs">·</span>
-          <Link
-            href="/affiliate-disclosure"
-            className="text-xs text-gray-500 hover:text-orange-400 transition-colors font-medium uppercase tracking-widest"
-          >
-            Affiliate Disclosure
-          </Link>
-          <span className="text-gray-700 text-xs">·</span>
-          <span className="text-xs text-gray-600 font-medium uppercase tracking-widest">Zero Paid Placements</span>
+        <div className="max-w-6xl mx-auto px-6 py-4">
+          {/* Mobile: 2×2 grid — no orphaned separators */}
+          <div className="grid grid-cols-2 gap-x-4 gap-y-3 sm:hidden">
+            {[
+              { label: 'How We Test', href: '/how-we-test' },
+              { label: 'Editorial Standards', href: '/editorial-standards' },
+              { label: 'Affiliate Disclosure', href: '/affiliate-disclosure' },
+            ].map(({ label, href }) => (
+              <Link
+                key={href}
+                href={href}
+                className="text-[11px] text-gray-500 hover:text-orange-400 transition-colors font-medium uppercase tracking-widest text-center"
+              >
+                {label}
+              </Link>
+            ))}
+            <span className="text-[11px] text-gray-600 font-medium uppercase tracking-widest text-center">
+              Zero Paid Placements
+            </span>
+          </div>
+          {/* Desktop: single row with dot separators */}
+          <div className="hidden sm:flex items-center justify-center gap-6">
+            <Link href="/how-we-test" className="text-xs text-gray-500 hover:text-orange-400 transition-colors font-medium uppercase tracking-widest">
+              How We Test
+            </Link>
+            <span className="text-gray-700 text-xs">·</span>
+            <Link href="/editorial-standards" className="text-xs text-gray-500 hover:text-orange-400 transition-colors font-medium uppercase tracking-widest">
+              Editorial Standards
+            </Link>
+            <span className="text-gray-700 text-xs">·</span>
+            <Link href="/affiliate-disclosure" className="text-xs text-gray-500 hover:text-orange-400 transition-colors font-medium uppercase tracking-widest">
+              Affiliate Disclosure
+            </Link>
+            <span className="text-gray-700 text-xs">·</span>
+            <span className="text-xs text-gray-600 font-medium uppercase tracking-widest">Zero Paid Placements</span>
+          </div>
         </div>
       </section>
 
