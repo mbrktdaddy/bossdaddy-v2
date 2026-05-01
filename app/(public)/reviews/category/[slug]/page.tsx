@@ -73,7 +73,7 @@ export default async function CategoryPage({ params }: Props) {
                 href={`/reviews/category/${c.slug}`}
                 className={`${pillBase} ${c.slug === slug ? pillActive : pillInactive}`}
               >
-                {c.icon} {c.label}
+                {c.icon} {c.shortLabel}
               </Link>
             ))}
           </div>

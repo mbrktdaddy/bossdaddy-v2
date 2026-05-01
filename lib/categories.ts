@@ -2,6 +2,7 @@ export const CATEGORIES = [
   {
     slug: 'kids-family',
     label: 'Kids & Family',
+    shortLabel: 'Kids',
     description: 'Baby gear, toddler stuff, parenting tools, and everything tested by real kids with zero mercy.',
     icon: '👨‍👧‍👦',
     color: 'from-gray-800/50 to-gray-900/40',
@@ -12,6 +13,7 @@ export const CATEGORIES = [
   {
     slug: 'tools-diy',
     label: 'Tools & DIY',
+    shortLabel: 'Tools',
     description: 'Power tools, hand tools, home repair, yard maintenance, and projects that actually get done.',
     icon: '🔧',
     color: 'from-gray-800/50 to-gray-900/40',
@@ -22,6 +24,7 @@ export const CATEGORIES = [
   {
     slug: 'grilling-cooking',
     label: 'Grilling & Cooking',
+    shortLabel: 'Cooking',
     description: 'Grills, smokers, knives, cookware, and everything that makes a meal worth eating.',
     icon: '🔥',
     color: 'from-gray-800/50 to-gray-900/40',
@@ -32,6 +35,7 @@ export const CATEGORIES = [
   {
     slug: 'outdoors-adventure',
     label: 'Outdoors & Adventure',
+    shortLabel: 'Outdoors',
     description: 'Camping, hiking, fishing, and gear that gets the family off the couch and into the wild.',
     icon: '🏕️',
     color: 'from-gray-800/50 to-gray-900/40',
@@ -42,6 +46,7 @@ export const CATEGORIES = [
   {
     slug: 'tech-edc',
     label: 'Tech & EDC',
+    shortLabel: 'Tech',
     description: 'Gadgets, everyday carry, and the gear that keeps a dad productive and prepared.',
     icon: '📱',
     color: 'from-gray-800/50 to-gray-900/40',
@@ -52,6 +57,7 @@ export const CATEGORIES = [
   {
     slug: 'vehicles-garage',
     label: 'Vehicles & Garage',
+    shortLabel: 'Vehicles',
     description: 'Cars, trucks, motorcycles, and the tools that keep them running right.',
     icon: '🚗',
     color: 'from-gray-800/50 to-gray-900/40',
@@ -62,6 +68,7 @@ export const CATEGORIES = [
   {
     slug: 'health-wellness',
     label: 'Health & Wellness',
+    shortLabel: 'Wellness',
     description: 'Physical and mental wellness — supplements, fitness gear, sleep, mindfulness, and personal growth.',
     icon: '💪',
     color: 'from-gray-800/50 to-gray-900/40',
@@ -72,6 +79,7 @@ export const CATEGORIES = [
   {
     slug: 'home-lifestyle',
     label: 'Home & Lifestyle',
+    shortLabel: 'Home',
     description: 'Furniture, organization, comfort, and the stuff that makes a house feel like home.',
     icon: '🏡',
     color: 'from-gray-800/50 to-gray-900/40',

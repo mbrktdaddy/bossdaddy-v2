@@ -110,7 +110,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
                 href={`/reviews/category/${c.slug}`}
                 className="shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40 transition-all"
               >
-                {c.icon} {c.label}
+                {c.icon} {c.shortLabel}
               </Link>
             ))}
           </div>
@@ -201,7 +201,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
                   : 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40'
               }`}
             >
-              {c.icon} {c.label}
+              {c.icon} {c.shortLabel}
             </Link>
           ))}
         </div>

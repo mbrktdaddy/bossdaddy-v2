@@ -125,7 +125,7 @@ export default async function StuffPage({ searchParams }: Props) {
                   : 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40'
               }`}
             >
-              {c.icon} {c.label}
+              {c.icon} {c.shortLabel}
             </Link>
           ))}
         </div>
