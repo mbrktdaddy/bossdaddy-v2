@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { CATEGORIES, getCategoryBySlug, type CategorySlug } from '@/lib/categories'
 import GuideCard from './_components/GuideCard'
 import GuidesGrid from './_components/GuidesGrid'
+import FeaturedGuideCard from '@/components/FeaturedGuideCard'
 const PER_PAGE = 12
 import type { GuideRow } from './actions'
 import type { Metadata } from 'next'
@@ -51,15 +52,44 @@ export default async function GuidesPage({ searchParams }: Props) {
       }))
       .filter(s => s.items.length > 0)
 
+    // Featured: most recent guide with an image
+    const featured = guides.find(g => g.image_url) ?? null
+
+    // Stats
+    const categoryCount = new Set(guides.map(g => g.category)).size
+    const avgReadTime = guides.filter(g => g.reading_time_minutes).length > 0
+      ? Math.round(guides.reduce((sum, g) => sum + (g.reading_time_minutes ?? 0), 0) / guides.filter(g => g.reading_time_minutes).length)
+      : null
+    const lastAdded = guides[0]?.published_at
+      ? new Date(guides[0].published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      : null
+
     return (
       <div className="max-w-6xl mx-auto px-6 py-16">
-        <div className="mb-12">
+        <div className="mb-8">
           <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— The Field Notes</p>
           <h1 className="text-4xl md:text-5xl font-black mb-3 text-white tracking-tight">Guides</h1>
-          <p className="text-gray-500 text-sm tabular-nums">
-            {guides.length} {guides.length === 1 ? 'guide' : 'guides'} — skills, builds, and dad wisdom
-          </p>
         </div>
+
+        {/* Stats bar */}
+        {guides.length > 0 && (
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-12 pb-6 border-b border-gray-800/60 text-sm text-gray-500">
+            <span><span className="text-white font-bold tabular-nums">{guides.length}</span> {guides.length === 1 ? 'guide' : 'guides'}</span>
+            <span className="text-gray-700 hidden sm:block">·</span>
+            <span><span className="text-white font-bold tabular-nums">{categoryCount}</span> {categoryCount === 1 ? 'category' : 'categories'}</span>
+            {avgReadTime && <>
+              <span className="text-gray-700 hidden sm:block">·</span>
+              <span>Avg <span className="text-white font-bold tabular-nums">{avgReadTime} min</span> read</span>
+            </>}
+            {lastAdded && <>
+              <span className="text-gray-700 hidden sm:block">·</span>
+              <span>Last added <span className="text-white font-medium">{lastAdded}</span></span>
+            </>}
+          </div>
+        )}
+
+        {/* Featured guide */}
+        {featured && <FeaturedGuideCard guide={featured} />}
 
         <div className="-mx-6 overflow-x-auto scrollbar-hide mb-14">
           <div className="flex items-center gap-2 px-6 pb-1">

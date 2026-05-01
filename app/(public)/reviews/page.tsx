@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { CATEGORIES, getCategoryLabel, getCategoryBySlug, type CategorySlug } from '@/lib/categories'
 import ReviewCard from './_components/ReviewCard'
 import ReviewsGrid from './_components/ReviewsGrid'
+import FeaturedReviewCard from '@/components/FeaturedReviewCard'
 const PER_PAGE = 12
 import type { ReviewRow } from './actions'
 import type { Metadata } from 'next'
@@ -52,16 +53,47 @@ export default async function ReviewsPage({ searchParams }: Props) {
       }))
       .filter(s => s.items.length > 0)
 
+    // Featured: highest-rated review with an image
+    const featured = reviews
+      .filter(r => r.image_url)
+      .sort((a, b) => b.rating - a.rating)[0] ?? null
+
+    // Stats
+    const categoryCount = new Set(reviews.map(r => r.category)).size
+    const avgRating = reviews.length > 0
+      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+      : null
+    const lastAdded = reviews[0]?.published_at
+      ? new Date(reviews[0].published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      : null
+
     return (
       <div className="max-w-6xl mx-auto px-6 py-16">
-        {/* Page header — eyebrow + h1 + count */}
-        <div className="mb-12">
+        {/* Page header */}
+        <div className="mb-8">
           <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— The Gear</p>
           <h1 className="text-4xl md:text-5xl font-black mb-3 text-white tracking-tight">All Reviews</h1>
-          <p className="text-gray-500 text-sm tabular-nums">
-            {reviews.length} dad-tested {reviews.length === 1 ? 'review' : 'reviews'} across {sections.length} {sections.length === 1 ? 'category' : 'categories'}
-          </p>
         </div>
+
+        {/* Stats bar */}
+        {reviews.length > 0 && (
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-12 pb-6 border-b border-gray-800/60 text-sm text-gray-500">
+            <span><span className="text-white font-bold tabular-nums">{reviews.length}</span> dad-tested {reviews.length === 1 ? 'review' : 'reviews'}</span>
+            <span className="text-gray-700 hidden sm:block">·</span>
+            <span><span className="text-white font-bold tabular-nums">{categoryCount}</span> {categoryCount === 1 ? 'category' : 'categories'}</span>
+            {avgRating && <>
+              <span className="text-gray-700 hidden sm:block">·</span>
+              <span>Avg rating <span className="text-orange-400 font-bold tabular-nums">{avgRating}/10</span></span>
+            </>}
+            {lastAdded && <>
+              <span className="text-gray-700 hidden sm:block">·</span>
+              <span>Last added <span className="text-white font-medium">{lastAdded}</span></span>
+            </>}
+          </div>
+        )}
+
+        {/* Featured review */}
+        {featured && <FeaturedReviewCard review={featured} />}
 
         {/* Filter pills */}
         <div className="-mx-6 overflow-x-auto scrollbar-hide mb-14">
