@@ -104,7 +104,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
             {CATEGORIES.map((c) => (
               <Link
                 key={c.slug}
-                href={`/reviews?category=${c.slug}`}
+                href={`/reviews/category/${c.slug}`}
                 className="shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40 transition-all"
               >
                 {c.icon} {c.label}
@@ -132,7 +132,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
                 </div>
                 {total > items.length && (
                   <Link
-                    href={`/reviews?category=${cat.slug}`}
+                    href={`/reviews/category/${cat.slug}`}
                     className="self-end shrink-0 text-xs text-gray-500 hover:text-orange-400 transition-colors uppercase tracking-widest font-semibold"
                   >
                     View all {total}
@@ -191,7 +191,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
           {CATEGORIES.map((c) => (
             <Link
               key={c.slug}
-              href={`/reviews?category=${c.slug}`}
+              href={`/reviews/category/${c.slug}`}
               className={`shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
                 category === c.slug
                   ? 'bg-orange-600 text-white shadow-md shadow-black/30'

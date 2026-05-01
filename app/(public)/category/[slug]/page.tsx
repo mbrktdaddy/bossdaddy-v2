@@ -6,5 +6,5 @@ interface Props {
 
 export default async function CategoryPage({ params }: Props) {
  const { slug } = await params
- redirect(`/reviews?category=${slug}`)
+ redirect(`/reviews/category/${slug}`)
 }

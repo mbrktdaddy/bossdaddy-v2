@@ -156,7 +156,7 @@ export default async function AboutPage() {
  {CATEGORIES.map((cat) => (
  <Link
  key={cat.slug}
- href={`/reviews?category=${cat.slug}`}
+ href={`/reviews/category/${cat.slug}`}
  className="shrink-0 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40 transition-all"
  >
  {cat.icon} {cat.label}

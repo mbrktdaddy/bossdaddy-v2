@@ -108,7 +108,7 @@ export default async function GuidePage({ params }: Props) {
           {category && (
             <>
               <span className="text-gray-700">/</span>
-              <Link href={`/guides?category=${category.slug}`} className={`py-2 inline-block hover:text-white transition-colors ${category.accent}`}>
+              <Link href={`/guides/category/${category.slug}`} className={`py-2 inline-block hover:text-white transition-colors ${category.accent}`}>
                 {category.icon} {category.label}
               </Link>
             </>

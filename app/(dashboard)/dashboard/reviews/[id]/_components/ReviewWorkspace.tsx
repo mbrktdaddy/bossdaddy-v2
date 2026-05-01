@@ -27,6 +27,7 @@ import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader'
 import { WorkspaceToolbar } from '@/components/workspace/WorkspaceToolbar'
 import { AutoSaveIndicator } from '@/components/workspace/AutoSaveIndicator'
 import { ListEditor } from '@/components/workspace/ListEditor'
+import { TagPicker } from '@/components/workspace/TagPicker'
 import { useAutoSave } from '@/components/workspace/useAutoSave'
 import { useKeyboardShortcuts } from '@/components/workspace/useKeyboardShortcuts'
 import { ReviewDraftPreview } from '@/components/workspace/ReviewDraftPreview'
@@ -65,6 +66,7 @@ interface ReviewData {
   best_for: string[] | null
   not_for: string[] | null
   faqs: FAQ[] | null
+  tags?: string[]
 }
 
 const RATING_OPTIONS = [
@@ -99,6 +101,7 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   const [scheduledAt, setScheduled]   = useState<string | null>(review.scheduled_publish_at)
   const [productSlug, setProductSlug] = useState<string | null>(review.product_slug)
 
+  const [tags, setTags]                   = useState<string[]>(review.tags ?? [])
   const [tldr, setTldr]                   = useState(review.tldr ?? '')
   const [keyTakeaways, setKeyTakeaways]   = useState<string[]>(review.key_takeaways ?? [])
   const [bestFor, setBestFor]             = useState<string[]>(review.best_for ?? [])
@@ -162,15 +165,23 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   }), [title, productName, category, excerpt, content, imageUrl, rating, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, productSlug, tldr, keyTakeaways, bestFor, notFor, faqs])
 
   const save = async (p: typeof payload) => {
-    const res = await fetch(`/api/reviews/${review.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(p),
-    })
-    if (!res.ok) {
-      const json = await res.json().catch(() => ({}))
+    const [contentRes, tagsRes] = await Promise.all([
+      fetch(`/api/reviews/${review.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(p),
+      }),
+      fetch(`/api/reviews/${review.id}/tags`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tags }),
+      }),
+    ])
+    if (!contentRes.ok) {
+      const json = await contentRes.json().catch(() => ({}))
       throw new Error(json.error ?? 'Save failed')
     }
+    if (!tagsRes.ok) console.warn('Tag save failed — will retry on next save')
   }
   const autoSave = useAutoSave({ data: payload, saveFn: save, delay: 20000 })
 
@@ -367,6 +378,12 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
               className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
             />
           </div>
+        </div>
+
+        {/* Tags */}
+        <div className="pt-4 border-t border-gray-800/60">
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">Tags</p>
+          <TagPicker selected={tags} onChange={setTags} />
         </div>
 
         <AIRefinePanel

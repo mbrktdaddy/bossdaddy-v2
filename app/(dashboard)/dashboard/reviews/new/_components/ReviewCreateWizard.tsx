@@ -27,7 +27,7 @@ export function ReviewCreateWizard() {
   const [productName, setProductName]   = useState('')
   const [productSlug, setProductSlug]   = useState('')
   const [keyFeatures, setKeyFeatures]   = useState('')
-  const [category, setCategory]         = useState('other')
+  const [category, setCategory]         = useState('')
   const [imageSlots, setImageSlots]     = useState<number | 'auto'>('auto')
   const [suggesting, setSuggesting]     = useState(false)
   const [suggestions, setSuggestions]   = useState<{ productName: string; angle: string; keyFeatures: string[] }[]>([])
@@ -113,6 +113,7 @@ export function ReviewCreateWizard() {
 
   async function handleGenerate() {
     if (!productName.trim()) { setError('Enter a product name first'); return }
+    if (!category) { setError('Select a category before generating'); return }
     setStep('generating'); setError(null)
 
     try {
@@ -441,8 +442,10 @@ export function ReviewCreateWizard() {
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
+            required
             className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
+            <option value="" disabled>Select a category…</option>
             {CATEGORIES.map(c => <option key={c.slug} value={c.slug}>{c.icon} {c.label}</option>)}
           </select>
         </div>

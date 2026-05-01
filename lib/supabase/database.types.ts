@@ -190,7 +190,7 @@ export type Database = {
           faqs: Json
           key_takeaways: Json
           tldr: string | null
-          category: Database["public"]["Enums"]["review_category"]
+          category: string
           content: string
           created_at: string | null
           excerpt: string | null
@@ -219,7 +219,7 @@ export type Database = {
         }
         Insert: {
           author_id: string
-          category?: Database["public"]["Enums"]["review_category"]
+          category?: string
           content: string
           created_at?: string | null
           excerpt?: string | null
@@ -251,7 +251,7 @@ export type Database = {
         }
         Update: {
           author_id?: string
-          category?: Database["public"]["Enums"]["review_category"]
+          category?: string
           content?: string
           created_at?: string | null
           excerpt?: string | null
@@ -543,7 +543,7 @@ export type Database = {
         Row: {
           author_id: string
           best_for: Json
-          category: Database["public"]["Enums"]["review_category"]
+          category: string
           cons: Json | null
           content: string
           created_at: string | null
@@ -583,7 +583,7 @@ export type Database = {
         Insert: {
           author_id: string
           best_for?: Json
-          category?: Database["public"]["Enums"]["review_category"]
+          category?: string
           cons?: Json | null
           content: string
           created_at?: string | null
@@ -623,7 +623,7 @@ export type Database = {
         Update: {
           author_id?: string
           best_for?: Json
-          category?: Database["public"]["Enums"]["review_category"]
+          category?: string
           cons?: Json | null
           content?: string
           created_at?: string | null
@@ -752,6 +752,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tags: {
+        Row: {
+          slug: string
+          label: string
+          tag_group: string
+          display_order: number
+          created_at: string
+        }
+        Insert: {
+          slug: string
+          label: string
+          tag_group: string
+          display_order?: number
+          created_at?: string
+        }
+        Update: {
+          slug?: string
+          label?: string
+          tag_group?: string
+          display_order?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
+      review_tags: {
+        Row: { review_id: string; tag_slug: string }
+        Insert: { review_id: string; tag_slug: string }
+        Update: { review_id?: string; tag_slug?: string }
+        Relationships: []
+      }
+      guide_tags: {
+        Row: { guide_id: string; tag_slug: string }
+        Insert: { guide_id: string; tag_slug: string }
+        Update: { guide_id?: string; tag_slug?: string }
+        Relationships: []
       }
       voice_profiles: {
         Row: {
@@ -978,12 +1014,7 @@ export type Database = {
       is_author_or_admin: { Args: never; Returns: boolean }
     }
     Enums: {
-      review_category:
-        | "bbq-grilling"
-        | "diy-tools"
-        | "kids-family"
-        | "health-fitness"
-        | "other"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1110,14 +1141,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      review_category: [
-        "bbq-grilling",
-        "diy-tools",
-        "kids-family",
-        "health-fitness",
-        "other",
-      ],
-    },
+    Enums: {},
   },
 } as const

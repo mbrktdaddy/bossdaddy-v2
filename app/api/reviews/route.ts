@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
         slug,
         title,
         product_name,
-        category: category as never, // validated by Zod against CATEGORY_SLUGS
+        category,
         excerpt: excerpt ?? null,
         content: sanitizedContent,
         image_url: image_url ?? null,

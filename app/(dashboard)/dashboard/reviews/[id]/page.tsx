@@ -16,6 +16,11 @@ export default async function ReviewWorkspacePage({
     .eq('id', id)
     .single()
 
+  // Fetch tags for this review
+  const { data: tagRows } = await admin
+    .from('review_tags').select('tag_slug').eq('review_id', id)
+  const reviewTags = (tagRows ?? []).map((r) => r.tag_slug)
+
   // Look up product_id from slug so the workspace can pre-filter the media picker
   let productId: string | null = null
   if (review?.product_slug) {
@@ -52,6 +57,7 @@ export default async function ReviewWorkspacePage({
         best_for: (review.best_for ?? []) as string[],
         not_for: (review.not_for ?? []) as string[],
         faqs: (review.faqs ?? []) as { question: string; answer: string }[],
+        tags: reviewTags,
         product_id: productId,
       }}
     />
