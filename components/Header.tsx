@@ -1,17 +1,15 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { CATEGORIES } from '@/lib/categories'
 
 const NAV_LINKS = [
-  { href: '/',        label: 'Home' },
   { href: '/reviews', label: 'Reviews' },
   { href: '/guides',  label: 'Guides' },
   { href: '/stuff',   label: 'Stuff' },
-  { href: '/about',   label: 'About' },
 ]
 
 function isActive(pathname: string, href: string) {
@@ -22,11 +20,18 @@ function isActive(pathname: string, href: string) {
 export default function Header() {
   const [mobileOpen, setMobileOpen]   = useState(false)
   const [catOpen, setCatOpen]         = useState(false)
+  const [searchOpen, setSearchOpen]   = useState(false)
   const [username, setUsername]       = useState<string | null>(null)
   const [mobileCatOpen, setMobileCat] = useState(false)
-  const pathname = usePathname()
-  const router   = useRouter()
-  const browseRef = useRef<HTMLDivElement>(null)
+  const pathname   = usePathname()
+  const router     = useRouter()
+  const browseRef  = useRef<HTMLDivElement>(null)
+  const searchRef  = useRef<HTMLInputElement>(null)
+
+  const openSearch = useCallback(() => {
+    setSearchOpen(true)
+    setTimeout(() => searchRef.current?.focus(), 50)
+  }, [])
 
   // Close mega-menu on outside click or Escape
   useEffect(() => {
@@ -42,7 +47,7 @@ export default function Header() {
 
   // Close menus on route change
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { setMobileOpen(false); setCatOpen(false) }, [pathname])
+  useEffect(() => { setMobileOpen(false); setCatOpen(false); setSearchOpen(false) }, [pathname])
 
   useEffect(() => {
     const supabase = createClient()
@@ -158,20 +163,41 @@ export default function Header() {
 
         {/* Right side */}
         <div className="flex items-center gap-3">
-          {/* Search */}
-          <form action="/search" className="hidden md:flex items-center">
-            <div className="relative">
-              <input
-                name="q"
-                type="search"
-                placeholder="Search..."
-                className="w-36 lg:w-48 pl-8 pr-3 py-1.5 bg-gray-900 border border-gray-800 hover:border-gray-700 focus:border-orange-500 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none transition-colors"
-              />
-              <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-          </form>
+          {/* Search — icon by default, expands on click */}
+          <div className="hidden md:flex items-center">
+            {searchOpen ? (
+              <form
+                action="/search"
+                onBlur={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget as Node)) setSearchOpen(false)
+                }}
+              >
+                <div className="relative">
+                  <input
+                    ref={searchRef}
+                    name="q"
+                    type="search"
+                    placeholder="Search..."
+                    onKeyDown={(e) => { if (e.key === 'Escape') setSearchOpen(false) }}
+                    className="w-44 lg:w-56 pl-8 pr-3 py-1.5 bg-gray-900 border border-gray-700 focus:border-orange-500 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none transition-colors"
+                  />
+                  <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+              </form>
+            ) : (
+              <button
+                onClick={openSearch}
+                aria-label="Search"
+                className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-900 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+            )}
+          </div>
 
           {username ? (
             <div className="hidden md:flex items-center gap-2">
