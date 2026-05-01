@@ -105,7 +105,7 @@ export default async function AboutPage() {
  </p>
  <p>
  I got tired of the fluff, the fake reviews, and the brand-sponsored noise. So I built
- Boss Daddy as the place where real dads can go for reviews, guides, and really good stuff from a
+ Boss Daddy as the place where real dads can go for reviews, guides, and really cool stuff from a
  real dad in the trenches — no fluff, no paid placements, no compromises.
  </p>
  <p>
