@@ -43,13 +43,16 @@ ALTER TABLE guides
     )
   );
 
--- Step 6: Migrate media_assets category values, then sync CHECK constraint
+-- Step 6: Drop the OLD media_assets CHECK first (it allows old slugs only and
+-- would reject UPDATEs that introduce new slugs), then migrate values, then
+-- enforce the new CHECK.
+ALTER TABLE media_assets DROP CONSTRAINT IF EXISTS media_assets_category_check;
+
 UPDATE media_assets SET category = 'grilling-cooking'   WHERE category = 'bbq-grilling';
 UPDATE media_assets SET category = 'tools-diy'          WHERE category = 'diy-tools';
 UPDATE media_assets SET category = 'health-wellness'    WHERE category = 'health-fitness';
 UPDATE media_assets SET category = 'home-lifestyle'     WHERE category IN ('dad-life', 'family-lifestyle', 'other');
 
-ALTER TABLE media_assets DROP CONSTRAINT IF EXISTS media_assets_category_check;
 ALTER TABLE media_assets ADD CONSTRAINT media_assets_category_check
   CHECK (category IS NULL OR category IN (
     'kids-family', 'tools-diy', 'grilling-cooking', 'outdoors-adventure',
