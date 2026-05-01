@@ -385,18 +385,23 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 <label className="block text-sm text-gray-300 mb-2">Aspect ratio</label>
                 <div className="flex gap-2">
                   {[
-                    { value: '1792x1024', label: 'Landscape', ratio: '16:9' },
-                    { value: '1024x1024', label: 'Square',    ratio: '1:1' },
-                    { value: '1024x1792', label: 'Portrait',  ratio: '9:16' },
+                    { value: '1792x1024', label: 'Landscape', ratio: '16:9', recommended: true },
+                    { value: '1024x1024', label: 'Square',    ratio: '1:1',  recommended: false },
+                    { value: '1024x1792', label: 'Portrait',  ratio: '9:16', recommended: false },
                   ].map((opt) => (
                     <button
                       key={opt.value}
                       type="button"
                       onClick={() => setGenSize(opt.value as typeof genSize)}
-                      className={`flex-1 flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg transition-colors ${
+                      className={`relative flex-1 flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg transition-colors ${
                         genSize === opt.value ? 'bg-orange-600 text-white' : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600'
                       }`}
                     >
+                      {opt.recommended && (
+                        <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full leading-none">
+                          Best
+                        </span>
+                      )}
                       <span className="text-xs font-semibold">{opt.label}</span>
                       <span className="text-xs opacity-70 font-mono">{opt.ratio}</span>
                     </button>

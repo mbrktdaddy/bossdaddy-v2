@@ -98,7 +98,7 @@ export default async function BenchDetailPage({ params }: Props) {
       </div>
 
       {wishlistItem.image_url && (
-        <div className="relative w-full aspect-[16/7] rounded-2xl overflow-hidden bg-zinc-900 shadow-md shadow-black/30 mb-8">
+        <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-zinc-900 shadow-md shadow-black/30 mb-8">
           <Image
             src={wishlistItem.image_url}
             alt={wishlistItem.title}
