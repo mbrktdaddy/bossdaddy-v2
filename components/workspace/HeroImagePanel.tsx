@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
@@ -30,7 +30,28 @@ export function HeroImagePanel({
     if (initialPrompt && !imagePrompt) setImagePrompt(initialPrompt)
   }, [initialPrompt]) // eslint-disable-line react-hooks/exhaustive-deps
   const [generating, setGenerating] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
+
+  async function handleCameraCapture(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setError(null)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/media', { method: 'POST', body: fd })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Upload failed')
+      onChange(json.asset?.url ?? null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed')
+    }
+    setUploading(false)
+    e.target.value = ''
+  }
 
   async function handleGenerate() {
     if (!title && !productName) { setError('Need a title first to generate an image.'); return }
@@ -60,16 +81,34 @@ export function HeroImagePanel({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <label className="text-sm text-gray-300 font-medium">{label}</label>
-        <button
-          type="button"
-          onClick={() => setShowPicker(true)}
-          className="text-xs px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded-lg transition-colors"
-        >
-          📁 Library
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => cameraInputRef.current?.click()}
+            disabled={uploading}
+            className="text-xs px-3 py-1.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white rounded-lg transition-colors min-h-[36px]"
+          >
+            {uploading ? 'Uploading…' : '📷 Take Photo'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowPicker(true)}
+            className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded-lg transition-colors min-h-[36px]"
+          >
+            📁 Library
+          </button>
+        </div>
       </div>
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={handleCameraCapture}
+        className="hidden"
+      />
 
       {imageUrl ? (
         <div className="relative group">
