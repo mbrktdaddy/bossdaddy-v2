@@ -4,6 +4,7 @@ import { CATEGORIES, getCategoryLabel, getCategoryBySlug, type CategorySlug } fr
 import ReviewCard from './_components/ReviewCard'
 import ReviewsGrid from './_components/ReviewsGrid'
 import FeaturedReviewCard from '@/components/FeaturedReviewCard'
+import BenchStrip from '@/components/BenchStrip'
 const PER_PAGE = 12
 import type { ReviewRow } from './actions'
 import type { Metadata } from 'next'
@@ -147,6 +148,11 @@ export default async function ReviewsPage({ searchParams }: Props) {
             </section>
           ))
         )}
+
+        {/* On the Bench — what's coming next */}
+        <div className="mt-16">
+          <BenchStrip ctaText="See all on the bench" />
+        </div>
       </div>
     )
   }
@@ -213,6 +219,11 @@ export default async function ReviewsPage({ searchParams }: Props) {
       ) : (
         <ReviewsGrid initialItems={reviews} total={count ?? 0} category={category} />
       )}
+
+      {/* On the Bench — what's coming next */}
+      <div className="mt-16">
+        <BenchStrip ctaText="See all on the bench" />
+      </div>
     </div>
   )
 }
