@@ -62,22 +62,22 @@ export default async function CategoryPage({ params }: Props) {
 
       <div className="w-full max-w-6xl mx-auto px-6 py-12">
 
-        {/* Category grid — matches reviews/page.tsx */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-10">
+        {/* Category filter — horizontal scroll strip */}
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-10 pb-1">
           <Link href="/reviews"
-            className="col-span-2 sm:col-span-4 flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 transition-colors">
+            className="shrink-0 flex items-center px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 transition-colors">
             All Reviews
           </Link>
           {CATEGORIES.map((c) => (
             <Link
               key={c.slug}
               href={`/reviews/category/${c.slug}`}
-              className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+              className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
                 c.slug === slug ? pillActive : pillInactive
               }`}
             >
-              <span className="shrink-0">{c.icon}</span>
-              <span className="truncate">{c.label}</span>
+              <span>{c.icon}</span>
+              <span>{c.label}</span>
             </Link>
           ))}
         </div>
