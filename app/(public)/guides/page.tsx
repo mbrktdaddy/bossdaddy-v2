@@ -88,16 +88,17 @@ export default async function GuidesPage({ searchParams }: Props) {
           </div>
         )}
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-12">
+        {/* Category filter — horizontal scroll strip */}
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
           <Link href="/guides"
-            className="col-span-2 sm:col-span-4 flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-semibold bg-orange-600 text-white shadow-md shadow-black/30 hover:bg-orange-500 transition-colors">
+            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-orange-600 text-white shadow-md shadow-black/30 hover:bg-orange-500 transition-colors">
             All Guides
           </Link>
           {CATEGORIES.map((c) => (
-            <Link key={c.slug} href={`/guides/category/${c.slug}`}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 transition-colors">
-              <span className="shrink-0">{c.icon}</span>
-              <span className="truncate">{c.label}</span>
+            <Link key={c.slug} href={`/guides?category=${c.slug}`}
+              className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 transition-colors">
+              <span>{c.icon}</span>
+              <span>{c.label}</span>
             </Link>
           ))}
         </div>
@@ -124,7 +125,7 @@ export default async function GuidesPage({ searchParams }: Props) {
                 </div>
                 {total > items.length && (
                   <Link
-                    href={`/guides/category/${cat.slug}`}
+                    href={`/guides?category=${cat.slug}`}
                     className="self-end shrink-0 text-xs text-gray-500 hover:text-orange-400 transition-colors uppercase tracking-widest font-semibold"
                   >
                     View all {total}
@@ -170,20 +171,21 @@ export default async function GuidesPage({ searchParams }: Props) {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-12">
+      {/* Category filter — horizontal scroll strip */}
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
         <Link href="/guides"
-          className="col-span-2 sm:col-span-4 flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 transition-colors">
+          className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 transition-colors">
           All Guides
         </Link>
         {CATEGORIES.map((c) => (
-          <Link key={c.slug} href={`/guides/category/${c.slug}`}
-            className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+          <Link key={c.slug} href={`/guides?category=${c.slug}`}
+            className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
               category === c.slug
                 ? 'bg-orange-600 text-white shadow-md shadow-black/30'
                 : 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20'
             }`}>
-            <span className="shrink-0">{c.icon}</span>
-            <span className="truncate">{c.label}</span>
+            <span>{c.icon}</span>
+            <span>{c.label}</span>
           </Link>
         ))}
       </div>
