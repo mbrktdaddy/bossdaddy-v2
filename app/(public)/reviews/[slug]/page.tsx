@@ -88,20 +88,21 @@ export default async function ReviewPage({ params }: Props) {
 
   const supabase = await createClient()
 
-  // Related reviews — same category, exclude current
-  const { data: related } = await supabase
-    .from('reviews')
-    .select('id, slug, title, product_name, rating, excerpt')
-    .eq('status', 'approved')
-    .eq('is_visible', true)
-    .eq('category', review.category)
-    .neq('slug', slug)
-    .order('published_at', { ascending: false })
-    .limit(3)
-
-  const product = review.product_slug
-    ? await getProductBySlug(supabase, review.product_slug)
-    : null
+  // Related reviews + product fetched in parallel — they don't depend on each other
+  const [{ data: related }, product] = await Promise.all([
+    supabase
+      .from('reviews')
+      .select('id, slug, title, product_name, rating, excerpt')
+      .eq('status', 'approved')
+      .eq('is_visible', true)
+      .eq('category', review.category)
+      .neq('slug', slug)
+      .order('published_at', { ascending: false })
+      .limit(3),
+    review.product_slug
+      ? getProductBySlug(supabase, review.product_slug)
+      : Promise.resolve(null),
+  ])
 
   const profileData = Array.isArray(review.profiles)
     ? review.profiles[0]
