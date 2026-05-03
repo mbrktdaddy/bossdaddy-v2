@@ -75,7 +75,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-gray-950/95 backdrop-blur-sm border-b border-gray-800/60">
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 
         {/* Logo */}
         <Link href="/" className="font-black text-xl tracking-tight shrink-0">
@@ -236,26 +236,26 @@ export default function Header() {
         </div>
       </div>
 
+      {/* Mobile search bar — always visible, no hamburger needed */}
+      <div className="md:hidden px-4 pb-3">
+        <form action="/search">
+          <div className="relative">
+            <input
+              name="q"
+              type="search"
+              placeholder="Search reviews and guides..."
+              className="w-full pl-9 pr-3 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors"
+            />
+            <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </form>
+      </div>
+
       {/* Mobile drawer */}
       {mobileOpen && (
         <div className="md:hidden border-t border-gray-800 bg-gray-950 overflow-y-auto max-h-[calc(100dvh-4rem)]">
-          {/* Search */}
-          <div className="px-4 pt-4">
-            <form action="/search">
-              <div className="relative">
-                <input
-                  name="q"
-                  type="search"
-                  placeholder="Search reviews and guides..."
-                  className="w-full pl-8 pr-3 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 transition-colors"
-                />
-                <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-            </form>
-          </div>
-
           {/* Main nav links */}
           <nav className="flex flex-col px-4 pt-3 gap-1">
             {NAV_LINKS.map(({ href, label }) => (
