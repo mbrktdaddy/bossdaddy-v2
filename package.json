@@ -4,10 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "predev": "node scripts/check-middleware-convention.mjs",
     "build": "next build",
+    "prebuild": "node scripts/check-middleware-convention.mjs",
     "start": "next start",
     "lint": "eslint",
     "check": "tsc --noEmit && eslint",
+    "check:middleware": "node scripts/check-middleware-convention.mjs",
     "db:types": "supabase gen types typescript --project-id fsxbertkzcigvkdyqgep > lib/supabase/database.types.ts",
     "db:push": "supabase db push",
     "smoke": "node --env-file=.env.local scripts/smoke-test.mjs"
