@@ -59,7 +59,14 @@ export function ProductForm({ product }: Props) {
       )
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Save failed')
-      router.push('/dashboard/admin/products')
+      // On create, redirect to the edit page so the user lands on the
+      // multi-upload gallery (which auto-tags every upload to this product).
+      // On edit, return to the list as before.
+      if (isNew && json.product?.id) {
+        router.push(`/dashboard/admin/products/${json.product.id}`)
+      } else {
+        router.push('/dashboard/admin/products')
+      }
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')
@@ -290,7 +297,7 @@ export function ProductForm({ product }: Props) {
           </details>
 
           <p className="text-xs text-gray-600">
-            After saving, you can add a full multi-image gallery on the edit page.
+            After saving, you&apos;ll land on the multi-image gallery for this product — every image you upload there auto-tags to it.
           </p>
 
           {showPicker && (

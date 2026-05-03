@@ -59,23 +59,39 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
   useEffect(() => { load() }, [productId])
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const files = Array.from(e.target.files ?? [])
+    if (!files.length) return
     setUploading(true); setError(null)
 
-    const fd = new FormData()
-    fd.append('file', file)
-    fd.append('product_id', productId)
-    // Auto-primary when it's the first image
-    if (images.length === 0) fd.append('is_primary', 'true')
+    // Auto-primary on the first uploaded file IF the gallery was empty
+    const startedEmpty = images.length === 0
 
-    const res = await fetch('/api/media', { method: 'POST', body: fd })
-    const json = await res.json()
-    if (!res.ok) { setError(json.error ?? 'Upload failed'); setUploading(false); return }
+    const results = await Promise.allSettled(
+      files.map(async (file, i) => {
+        const fd = new FormData()
+        fd.append('file', file)
+        fd.append('product_id', productId)
+        if (startedEmpty && i === 0) fd.append('is_primary', 'true')
+        const res = await fetch('/api/media', { method: 'POST', body: fd })
+        const json = await res.json()
+        if (!res.ok) throw new Error(json.error ?? 'Upload failed')
+        return json.asset as ProductImage
+      }),
+    )
 
-    const newImg: ProductImage = json.asset
-    setImages((prev) => [...prev, newImg])
-    if (newImg.is_primary) onPrimaryChange(newImg.url)
+    const succeeded = results
+      .filter((r): r is PromiseFulfilledResult<ProductImage> => r.status === 'fulfilled')
+      .map((r) => r.value)
+    const failed = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[]
+
+    if (succeeded.length) {
+      setImages((prev) => [...prev, ...succeeded])
+      const primary = succeeded.find((img) => img.is_primary)
+      if (primary) onPrimaryChange(primary.url)
+    }
+    if (failed.length) {
+      setError(`${failed.length} of ${files.length} uploads failed: ${failed[0].reason?.message ?? 'unknown error'}`)
+    }
     setUploading(false)
     if (fileRef.current) fileRef.current.value = ''
   }
@@ -168,13 +184,14 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
           ref={fileRef}
           type="file"
           accept="image/jpeg,image/png,image/webp"
+          multiple
           className="hidden"
           onChange={handleUpload}
         />
       </div>
 
       <p className="text-xs text-gray-600">
-        Upload new images or pick existing ones from the media library. Click &quot;Set primary&quot; to use as the product card image.
+        Upload one or many at once — every image is auto-tagged to this product. Click &quot;Set primary&quot; to choose the product card image.
       </p>
 
       {showPicker && (
