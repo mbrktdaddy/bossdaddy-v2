@@ -330,16 +330,33 @@ export default async function ReviewPage({ params }: Props) {
           <ProductCtaCard product={product} rating={review.rating ?? undefined} variant="final" />
         )}
 
-        {/* FAQs — SEO + reader utility */}
+        {/* FAQs — collapsible, SEO + reader utility */}
         {faqs.length > 0 && (
           <div className="mt-12 pt-8 border-t border-gray-800/60">
             <h2 className="text-xl font-black mb-6">Frequently Asked Questions</h2>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {faqs.map((faq, i) => (
-                <div key={i} className="bg-gray-900 rounded-2xl p-5 shadow-md shadow-black/30">
-                  <p className="font-bold text-sm text-white mb-2">{faq.question}</p>
-                  <p className="text-sm text-gray-300 leading-relaxed">{faq.answer}</p>
-                </div>
+                <details
+                  key={i}
+                  className="group bg-gray-900 rounded-2xl shadow-md shadow-black/30 overflow-hidden"
+                >
+                  <summary className="flex items-center justify-between gap-4 cursor-pointer list-none px-5 py-4 hover:bg-gray-800/60 transition-colors min-h-[44px]">
+                    <p className="font-bold text-sm text-white leading-snug">{faq.question}</p>
+                    <svg
+                      className="w-4 h-4 text-orange-500 shrink-0 transition-transform duration-200 group-open:rotate-180"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                      aria-hidden="true"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div className="px-5 pb-5">
+                    <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">{faq.answer}</p>
+                  </div>
+                </details>
               ))}
             </div>
           </div>
