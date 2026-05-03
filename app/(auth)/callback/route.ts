@@ -5,7 +5,15 @@ import { NextResponse, type NextRequest } from 'next/server'
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/'
+
+  // Validate the `next` redirect target. Only same-origin relative paths
+  // are allowed. `//evil.com` is rejected — browsers resolve it to a full
+  // URL even though startsWith('/') passes (open-redirect / phishing vector).
+  const rawNext = searchParams.get('next')
+  const next =
+    rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//')
+      ? rawNext
+      : '/'
 
   if (code) {
     const cookieStore = await cookies()

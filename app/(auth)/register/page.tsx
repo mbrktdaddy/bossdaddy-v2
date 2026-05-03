@@ -17,8 +17,13 @@ function RegisterForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const nextParam = searchParams.get('next')
-  // Only allow relative paths to prevent open-redirect
-  const redirectTo = nextParam && nextParam.startsWith('/') ? nextParam : '/'
+  // Only allow relative paths to prevent open-redirect.
+  // Reject protocol-relative URLs like //evil.com which browsers resolve
+  // to https://evil.com — phishing vector even though startsWith('/') passes.
+  const redirectTo =
+    nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')
+      ? nextParam
+      : '/'
 
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
