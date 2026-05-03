@@ -140,7 +140,7 @@ export function HeroImagePanel({
           type="text"
           value={imagePrompt}
           onChange={(e) => setImagePrompt(e.target.value)}
-          placeholder="Custom prompt (optional — leave blank to auto-generate from title/category)"
+          placeholder="Custom prompt for editorial scene (optional). Use 📷 for the actual product."
           className="flex-1 px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-xs text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500"
         />
         <button

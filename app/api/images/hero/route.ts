@@ -25,17 +25,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { title, category, excerpt, content_type, product_name, custom_prompt } = parsed.data
+  const { title, category, excerpt, content_type, custom_prompt } = parsed.data
+
+  // Always avoid replicating specific products / brand packaging — AI hero
+  // images are for editorial context only. Owned photography (📷 Take Photo
+  // in the workspace) is the right asset for the actual product hero.
+  const SAFETY_RULES =
+    'Strict rules: NO specific product replicas, NO brand names, NO logos, ' +
+    'NO product packaging or labels visible, NO text, NO watermarks, NO trademarks, ' +
+    'NO recognizable real-world products. Generate a generic editorial scene only.'
 
   const prompt = custom_prompt?.trim()
-    ? custom_prompt.trim()
+    ? `${custom_prompt.trim()}\n\n${SAFETY_RULES}`
     : content_type === 'review'
-    ? `Editorial stock photo of the ${product_name ?? title}. ${excerpt ?? ''} Category: ${category}. ` +
-      `Product in a realistic real-world setting, natural lighting, clean composition, ` +
-      `no people, no text. Style: professional product photography as seen on major review sites.`
-    : `Editorial stock photo: ${title}. ${excerpt ?? ''} Category: ${category}. ` +
-      `Real-world setting with natural or warm indoor lighting, clean composition, sharp focus, ` +
-      `no people, no text, no watermarks. Style: professional lifestyle photography as seen on major content sites.`
+    ? `Editorial lifestyle scene representing the ${category} category. ` +
+      `${excerpt ? `Context: ${excerpt}. ` : ''}` +
+      `Generic real-world setting suggesting use of items in this category — ` +
+      `wooden surface or natural environment, warm natural lighting, soft focus on background props, ` +
+      `clean editorial composition, no people. Style: documentary lifestyle photography. ${SAFETY_RULES}`
+    : `Editorial scene representing the topic "${title}". ${excerpt ? `Context: ${excerpt}. ` : ''}` +
+      `Category: ${category}. Real-world setting with warm natural lighting, clean composition, ` +
+      `sharp focus, no people. Style: professional editorial lifestyle photography. ${SAFETY_RULES}`
 
   const bucket = content_type === 'review' ? 'review-images' : 'guide-images'
 
