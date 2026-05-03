@@ -19,6 +19,8 @@ import RatingWidget from '@/components/RatingWidget'
 import ImageLightbox from '@/components/ImageLightbox'
 import { LightboxImage } from '@/components/LightboxImage'
 import ProductCtaCard from '@/components/ProductCtaCard'
+import StickyMobileCta from '@/components/StickyMobileCta'
+import ReadingProgressBar from '@/components/ReadingProgressBar'
 import { EmailSignup } from '@/components/EmailSignup'
 import AuthorBio from '@/components/AuthorBio'
 import { getProductBySlug } from '@/lib/products'
@@ -140,8 +142,10 @@ export default async function ReviewPage({ params }: Props) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {faqJsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />}
+      <ReadingProgressBar />
       <ViewTracker id={review.id} type="review" />
       <EngagementTracker contentType="review" contentId={review.id} />
+      {product && <StickyMobileCta product={product} />}
 
       <div className="w-full max-w-6xl mx-auto px-6 py-12 overflow-x-clip">
         <div className="flex flex-col xl:flex-row gap-12 xl:items-start">
@@ -175,7 +179,7 @@ export default async function ReviewPage({ params }: Props) {
             )}
           </div>
 
-          <h1 className="text-3xl md:text-4xl font-black leading-tight mb-6">{review.title}</h1>
+          <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6 tracking-tight">{review.title}</h1>
 
           {/* Rating + meta */}
           <div className="flex flex-wrap items-center gap-5 pb-6">

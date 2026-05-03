@@ -22,6 +22,7 @@ export default function ProductCtaCard({ product, rating, variant = 'prominent' 
 
   return (
     <aside
+      data-product-cta
       className="my-8 bg-gradient-to-br from-orange-950/60 to-gray-900 rounded-2xl p-5 sm:p-6 shadow-xl shadow-black/40"
       aria-label="Product offer"
     >

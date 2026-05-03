@@ -65,6 +65,7 @@ export default function ImageLightbox({ children, className }: Props) {
               src={current.src}
               alt={current.alt}
               className="max-w-full max-h-[85vh] object-contain rounded-lg"
+              style={{ touchAction: 'pinch-zoom' }}
             />
             {current.caption && (
               <p className="text-sm text-gray-300 italic text-center max-w-2xl">

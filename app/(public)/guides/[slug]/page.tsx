@@ -10,6 +10,7 @@ import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import ProductCtaCard from '@/components/ProductCtaCard'
+import ReadingProgressBar from '@/components/ReadingProgressBar'
 import RatingScore from '@/components/RatingScore'
 import ShareButtons from '@/components/ShareButtons'
 import ViewTracker from '@/components/ViewTracker'
@@ -122,6 +123,7 @@ export default async function GuidePage({ params }: Props) {
 
   return (
     <>
+      <ReadingProgressBar />
       <ViewTracker id={guide.id} type="guide" />
       <EngagementTracker contentType="guide" contentId={guide.id} />
       <div className="max-w-[1100px] mx-auto px-6 py-12">
@@ -149,7 +151,7 @@ export default async function GuidePage({ params }: Props) {
 
         {/* Header */}
         <div className="mb-10">
-          <h1 className="text-3xl md:text-4xl font-black leading-tight mb-6">{guide.title}</h1>
+          <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6 tracking-tight">{guide.title}</h1>
           <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400 pb-6">
             <span>by <Link href={`/author/${author}`} className="text-gray-300 hover:text-orange-400 transition-colors">@{author}</Link></span>
             {guide.published_at && (
