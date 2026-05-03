@@ -1,5 +1,5 @@
 import { cache } from 'react'
-import dynamic from 'next/dynamic'
+import nextDynamic from 'next/dynamic'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -21,10 +21,15 @@ import { LightboxImage } from '@/components/LightboxImage'
 import { EmailSignup } from '@/components/EmailSignup'
 import AuthorBio from '@/components/AuthorBio'
 
-const TableOfContents = dynamic(() => import('@/components/TableOfContents'))
-const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
+const TableOfContents = nextDynamic(() => import('@/components/TableOfContents'))
+const EngagementTracker = nextDynamic(() => import('@/components/EngagementTracker'))
 
-export const revalidate = 60
+// Dynamic rendering — every request renders fresh on the server.
+// We deliberately bypass ISR caching here because edge-cache inconsistency
+// caused mobile devices to receive stale HTML on the same URL. Tradeoff:
+// ~50–150ms slower first paint per request, but guaranteed correctness on
+// every device. See app/(public)/reviews/[slug]/page.tsx for full context.
+export const dynamic = 'force-dynamic'
 
 interface Props {
   params: Promise<{ slug: string }>
