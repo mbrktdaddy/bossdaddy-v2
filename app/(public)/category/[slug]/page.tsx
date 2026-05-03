@@ -252,15 +252,15 @@ export default async function CategoryHubPage({ params }: Props) {
         {/* ── Other categories ──────────────────────────────────────────── */}
         <section className="mt-12 pt-12 border-t border-gray-800/60">
           <p className="text-xs text-gray-600 uppercase tracking-widest font-semibold mb-5">More Categories</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 pb-1">
             {CATEGORIES.filter((c) => c.slug !== slug).map((c) => (
               <Link
                 key={c.slug}
                 href={`/category/${c.slug}`}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 transition-colors"
+                className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 transition-colors"
               >
-                <span className="shrink-0">{c.icon}</span>
-                <span className="truncate">{c.label}</span>
+                <span>{c.icon}</span>
+                <span>{c.label}</span>
               </Link>
             ))}
           </div>
