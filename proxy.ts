@@ -1,3 +1,7 @@
+// THIS FILE MUST BE NAMED proxy.ts — Next.js 16 uses proxy.ts as the
+// middleware entry point (renamed from middleware.ts in earlier versions).
+// Do NOT rename to middleware.ts and do NOT create a middleware.ts alongside
+// this file — either will break the build or silently disable auth protection.
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 

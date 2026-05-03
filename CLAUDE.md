@@ -117,14 +117,16 @@ Logo and placeholder images live in `public/images/`:
 
 ---
 
-## Middleware — NEVER Rename These Files
+## Middleware — NEVER Rename proxy.ts
 
 **This has broken the site 4 times. Do not repeat it.**
 
-- `middleware.ts` — **must exist at the project root with this exact name**. Next.js requires this filename regardless of version. If this file is missing or renamed, all middleware silently stops running: `/dashboard` becomes publicly accessible, Supabase sessions stop refreshing, and legacy redirects stop working. No build errors are thrown — it just silently breaks.
-- `proxy.ts` — contains the actual middleware logic. `middleware.ts` re-exports from it. The function inside is named `proxy` because it acts as a request proxy, but the **file** must be `middleware.ts`.
+Next.js 16 changed the middleware filename convention from `middleware.ts` to **`proxy.ts`**. This project uses `proxy.ts` at the project root — that is the correct and required filename for Next.js 16. If both `middleware.ts` and `proxy.ts` exist, the build fails with an explicit error. If only `middleware.ts` exists, the build fails the same way.
 
-**Never rename `middleware.ts` to `proxy.ts`**, regardless of what the function inside is named. The filename is a Next.js framework requirement, not a style choice.
+- `proxy.ts` — **must exist at the project root with this exact name**. Contains auth protection, Supabase session refresh, and legacy URL redirects. If renamed to `middleware.ts`, the build breaks.
+- The function inside is named `proxy` and must be exported as `proxy` — do not rename it to `middleware`.
+
+**Never rename `proxy.ts` to `middleware.ts`.** Never create a `middleware.ts` file alongside it.
 
 ---
 
@@ -135,4 +137,4 @@ Logo and placeholder images live in `public/images/`:
 - Do not skip the affiliate disclosure gate — it's a legal compliance requirement.
 - Do not hardcode product slugs or IDs — always derive from DB.
 - Do not commit `.env.local` — use `.env.local.example` as the reference.
-- Do not rename `middleware.ts` — see the Middleware section above.
+- Do not rename `proxy.ts` or create `middleware.ts` — see the Middleware section above.

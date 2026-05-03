@@ -60,6 +60,5 @@ export default sentryEnabled
       tunnelRoute: '/monitoring',
 
       silent: !process.env.CI,
-      disableLogger: true,
     })
   : nextConfig
