@@ -117,6 +117,17 @@ Logo and placeholder images live in `public/images/`:
 
 ---
 
+## Middleware — NEVER Rename These Files
+
+**This has broken the site 4 times. Do not repeat it.**
+
+- `middleware.ts` — **must exist at the project root with this exact name**. Next.js requires this filename regardless of version. If this file is missing or renamed, all middleware silently stops running: `/dashboard` becomes publicly accessible, Supabase sessions stop refreshing, and legacy redirects stop working. No build errors are thrown — it just silently breaks.
+- `proxy.ts` — contains the actual middleware logic. `middleware.ts` re-exports from it. The function inside is named `proxy` because it acts as a request proxy, but the **file** must be `middleware.ts`.
+
+**Never rename `middleware.ts` to `proxy.ts`**, regardless of what the function inside is named. The filename is a Next.js framework requirement, not a style choice.
+
+---
+
 ## What NOT to Do
 
 - Do not add `'use client'` to Server Components — keep data fetching on the server.
@@ -124,3 +135,4 @@ Logo and placeholder images live in `public/images/`:
 - Do not skip the affiliate disclosure gate — it's a legal compliance requirement.
 - Do not hardcode product slugs or IDs — always derive from DB.
 - Do not commit `.env.local` — use `.env.local.example` as the reference.
+- Do not rename `middleware.ts` — see the Middleware section above.
