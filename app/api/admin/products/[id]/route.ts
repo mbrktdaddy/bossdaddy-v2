@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { z } from 'zod'
@@ -69,6 +70,19 @@ export async function PATCH(
     if (error.code === '23505') return NextResponse.json({ error: 'Slug already in use' }, { status: 409 })
     return NextResponse.json({ error: `Update failed: ${error.message}` }, { status: 500 })
   }
+
+  // Flush every review that references this product so updated
+  // URLs / images / names appear without waiting for the ISR window
+  const productSlug = (data as { slug?: string })?.slug
+  if (productSlug) {
+    const { data: reviews } = await admin
+      .from('reviews')
+      .select('slug')
+      .eq('product_slug', productSlug)
+      .eq('status', 'approved')
+    for (const r of reviews ?? []) revalidatePath(`/reviews/${r.slug}`)
+  }
+
   return NextResponse.json({ product: data })
 }
 

@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { getClaudeClient, MODEL, COMMENT_MODERATOR_SYSTEM } from '@/lib/claude/client'
 import { checkRateLimit } from '@/lib/rate-limit'
@@ -182,6 +184,16 @@ export async function POST(request: NextRequest) {
   // Check trust promotion after any approved insert
   if (status === 'approved' && !isTrusted) {
     checkTrustPromotion(supabase, user.id).catch(() => {})
+  }
+
+  // Flush the public page cache so router.refresh() returns the new comment
+  if (status === 'approved') {
+    const ct = parsed.data.content_type
+    const tableMap   = { review: 'reviews', guide: 'guides', wishlist_item: 'wishlist_items' } as const
+    const prefixMap  = { review: '/reviews', guide: '/guides', wishlist_item: '/bench' } as const
+    const admin = createAdminClient()
+    const { data: content } = await admin.from(tableMap[ct]).select('slug').eq('id', parsed.data.content_id).single()
+    if (content?.slug) revalidatePath(`${prefixMap[ct]}/${content.slug}`)
   }
 
   return NextResponse.json({ comment: data }, { status: 201 })

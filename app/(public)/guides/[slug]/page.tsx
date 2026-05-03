@@ -24,7 +24,7 @@ import AuthorBio from '@/components/AuthorBio'
 const TableOfContents = dynamic(() => import('@/components/TableOfContents'))
 const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
 
-export const revalidate = 3600
+export const revalidate = 60
 
 interface Props {
   params: Promise<{ slug: string }>

@@ -14,11 +14,12 @@ interface Props {
 export default function CommentForm({ contentType, contentId, prompt }: Props) {
   const router = useRouter()
   const pathname = usePathname()
-  const [body, setBody]             = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [submitted, setSubmitted]   = useState<'approved' | 'pending' | false>(false)
-  const [needsAuth, setNeedsAuth]   = useState(false)
-  const [error, setError]           = useState<string | null>(null)
+  const [body, setBody]                   = useState('')
+  const [submitting, setSubmitting]       = useState(false)
+  const [submitted, setSubmitted]         = useState<'approved' | 'pending' | false>(false)
+  const [submittedBody, setSubmittedBody] = useState('')
+  const [needsAuth, setNeedsAuth]         = useState(false)
+  const [error, setError]                 = useState<string | null>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -53,6 +54,7 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
       if (!res.ok) { setError(json.error ?? 'Something went wrong.'); setSubmitting(false); return }
 
       setSubmitting(false)
+      setSubmittedBody(body.trim())
       setSubmitted(json.comment?.status === 'approved' ? 'approved' : 'pending')
       setBody('')
       router.refresh()
@@ -62,19 +64,36 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
     }
   }
 
-  if (submitted) {
+  if (submitted === 'approved') {
     return (
-      <div className={`border rounded-2xl p-5 ${submitted === 'approved' ? 'bg-green-950/30 border-green-900/40' : 'bg-gray-900 border-gray-800'}`}>
-        <p className={`font-semibold text-sm mb-1 ${submitted === 'approved' ? 'text-green-400' : 'text-gray-300'}`}>
-          {submitted === 'approved' ? 'Comment posted!' : 'Comment submitted'}
-        </p>
-        <p className="text-gray-400 text-sm">
-          {submitted === 'approved'
-            ? 'Your comment is now live. Refresh the page to see it.'
-            : 'Your comment is pending approval and will appear once reviewed.'}
-        </p>
+      <div className="space-y-3">
+        <div className="bg-gray-900 border border-green-900/40 rounded-2xl p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-7 h-7 rounded-full bg-orange-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
+              ✓
+            </div>
+            <span className="text-sm font-medium text-green-400">Just posted</span>
+            <span className="text-xs text-gray-600">moments ago</span>
+          </div>
+          <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">{submittedBody}</p>
+        </div>
         <button
-          onClick={() => setSubmitted(false)}
+          onClick={() => { setSubmitted(false); setSubmittedBody('') }}
+          className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+        >
+          Leave another comment
+        </button>
+      </div>
+    )
+  }
+
+  if (submitted === 'pending') {
+    return (
+      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+        <p className="font-semibold text-sm mb-1 text-gray-300">Comment submitted</p>
+        <p className="text-gray-400 text-sm">Your comment is pending approval and will appear once reviewed.</p>
+        <button
+          onClick={() => { setSubmitted(false); setSubmittedBody('') }}
           className="text-xs text-gray-500 hover:text-gray-300 mt-3 transition-colors"
         >
           Leave another comment
