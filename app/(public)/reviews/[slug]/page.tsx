@@ -1,5 +1,5 @@
 import { cache } from 'react'
-import nextDynamic from 'next/dynamic'
+import dynamic from 'next/dynamic'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -24,15 +24,9 @@ import AuthorBio from '@/components/AuthorBio'
 import { getProductBySlug } from '@/lib/products'
 import BenchStrip from '@/components/BenchStrip'
 
-const EngagementTracker = nextDynamic(() => import('@/components/EngagementTracker'))
+const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
 
-// Dynamic rendering — every request renders fresh on the server.
-// We deliberately bypass ISR caching here because edge-cache inconsistency
-// caused mobile devices to receive stale HTML (no CTA card) while desktop
-// got fresh HTML on the same URL. Tradeoff: ~50–150ms slower first paint
-// per request, but guaranteed correctness on every device. Reads still
-// flow through Supabase's connection pool — no scaling concern at our size.
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 interface Props {
   params: Promise<{ slug: string }>
