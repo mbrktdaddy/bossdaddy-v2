@@ -236,8 +236,8 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile search bar — always visible, no hamburger needed */}
-      <div className="md:hidden px-4 pb-3">
+      {/* Mobile search bar — always visible except on /search (which has its own) */}
+      <div className={`md:hidden px-4 pb-3 ${pathname === '/search' ? 'hidden' : ''}`}>
         <form action="/search">
           <div className="relative">
             <input
