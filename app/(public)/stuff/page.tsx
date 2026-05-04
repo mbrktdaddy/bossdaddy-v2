@@ -61,7 +61,6 @@ export default async function StuffPage({ searchParams }: Props) {
 
   // Stats
   const categoryCount = new Set((allApproved ?? []).map(r => r.category)).size
-  const highestRating = topPicks[0]?.rating ?? null
   const bossPicks = topPicks.filter(r => (r.rating ?? 0) >= 9).length
 
   // #1 Pick hero — highest rated with an image
