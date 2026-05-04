@@ -184,20 +184,49 @@ export type Database = {
           },
         ]
       }
+      guide_tags: {
+        Row: {
+          guide_id: string
+          tag_slug: string
+        }
+        Insert: {
+          guide_id: string
+          tag_slug: string
+        }
+        Update: {
+          guide_id?: string
+          tag_slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guide_tags_guide_id_fkey"
+            columns: ["guide_id"]
+            isOneToOne: false
+            referencedRelation: "guides"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guide_tags_tag_slug_fkey"
+            columns: ["tag_slug"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       guides: {
         Row: {
           author_id: string
-          faqs: Json
-          key_takeaways: Json
-          tldr: string | null
           category: string
           content: string
           created_at: string | null
           excerpt: string | null
+          faqs: Json
           has_affiliate_links: boolean
           id: string
           image_url: string | null
           is_visible: boolean
+          key_takeaways: Json
           meta_description: string | null
           meta_title: string | null
           moderation_flags: Json | null
@@ -214,12 +243,13 @@ export type Database = {
           slug: string
           status: string
           title: string
+          tldr: string | null
           updated_at: string | null
           view_count: number
         }
         Insert: {
           author_id: string
-          category?: string
+          category: string
           content: string
           created_at?: string | null
           excerpt?: string | null
@@ -461,6 +491,87 @@ export type Database = {
         }
         Relationships: []
       }
+      pick_list_items: {
+        Row: {
+          blurb: string | null
+          created_at: string
+          id: string
+          pick_list_id: string
+          position: number
+          review_id: string
+        }
+        Insert: {
+          blurb?: string | null
+          created_at?: string
+          id?: string
+          pick_list_id: string
+          position?: number
+          review_id: string
+        }
+        Update: {
+          blurb?: string | null
+          created_at?: string
+          id?: string
+          pick_list_id?: string
+          position?: number
+          review_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pick_list_items_pick_list_id_fkey"
+            columns: ["pick_list_id"]
+            isOneToOne: false
+            referencedRelation: "pick_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pick_list_items_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pick_lists: {
+        Row: {
+          created_at: string
+          description: string | null
+          hero_image_url: string | null
+          id: string
+          intro_html: string | null
+          is_visible: boolean
+          published_at: string | null
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          hero_image_url?: string | null
+          id?: string
+          intro_html?: string | null
+          is_visible?: boolean
+          published_at?: string | null
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          hero_image_url?: string | null
+          id?: string
+          intro_html?: string | null
+          is_visible?: boolean
+          published_at?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           affiliate_url: string | null
@@ -539,6 +650,36 @@ export type Database = {
         }
         Relationships: []
       }
+      review_tags: {
+        Row: {
+          review_id: string
+          tag_slug: string
+        }
+        Insert: {
+          review_id: string
+          tag_slug: string
+        }
+        Update: {
+          review_id?: string
+          tag_slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_tags_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_tags_tag_slug_fkey"
+            columns: ["tag_slug"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           author_id: string
@@ -583,7 +724,7 @@ export type Database = {
         Insert: {
           author_id: string
           best_for?: Json
-          category?: string
+          category: string
           cons?: Json | null
           content: string
           created_at?: string | null
@@ -711,6 +852,30 @@ export type Database = {
           },
         ]
       }
+      tags: {
+        Row: {
+          created_at: string | null
+          display_order: number
+          label: string
+          slug: string
+          tag_group: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number
+          label: string
+          slug: string
+          tag_group: string
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number
+          label?: string
+          slug?: string
+          tag_group?: string
+        }
+        Relationships: []
+      }
       user_ratings: {
         Row: {
           created_at: string
@@ -752,42 +917,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      tags: {
-        Row: {
-          slug: string
-          label: string
-          tag_group: string
-          display_order: number
-          created_at: string
-        }
-        Insert: {
-          slug: string
-          label: string
-          tag_group: string
-          display_order?: number
-          created_at?: string
-        }
-        Update: {
-          slug?: string
-          label?: string
-          tag_group?: string
-          display_order?: number
-          created_at?: string
-        }
-        Relationships: []
-      }
-      review_tags: {
-        Row: { review_id: string; tag_slug: string }
-        Insert: { review_id: string; tag_slug: string }
-        Update: { review_id?: string; tag_slug?: string }
-        Relationships: []
-      }
-      guide_tags: {
-        Row: { guide_id: string; tag_slug: string }
-        Insert: { guide_id: string; tag_slug: string }
-        Update: { guide_id?: string; tag_slug?: string }
-        Relationships: []
       }
       voice_profiles: {
         Row: {

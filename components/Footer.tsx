@@ -6,6 +6,7 @@ const FOOTER_LINKS = [
   { href: '/reviews',              label: 'Reviews' },
   { href: '/guides',               label: 'Guides' },
   { href: '/stuff',                label: 'Stuff' },
+  { href: '/picks',                label: 'Picks' },
   { href: '/bench',                label: 'On the Bench' },
   { href: '/about',                label: 'About' },
   { href: '/how-we-test',          label: 'How We Test' },

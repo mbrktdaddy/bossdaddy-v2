@@ -44,13 +44,14 @@ export async function POST(
     .slice(0, 60)
   const reviewSlug = `${baseSlug}-${crypto.randomUUID().replace(/-/g, '').slice(0, 8)}`
 
-  // Create review draft
+  // Create review draft — category defaults to 'other' (admin can update in workspace)
   const { data: review, error: reviewError } = await admin
     .from('reviews')
     .insert({
       slug:                    reviewSlug,
       title:                   `${item.title} — Review`,
       product_name:            item.title,
+      category:                'other',
       status:                  'draft',
       author_id:               user.id,
       image_url:               item.image_url ?? null,

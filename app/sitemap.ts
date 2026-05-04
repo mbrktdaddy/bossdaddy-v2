@@ -8,7 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient()
   const admin = createAdminClient()
 
-  const [{ data: reviews }, { data: articles }, { data: tags }] = await Promise.all([
+  const [{ data: reviews }, { data: articles }, { data: tags }, { data: picks }] = await Promise.all([
     supabase
       .from('reviews')
       .select('slug, published_at, updated_at')
@@ -22,6 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .eq('is_visible', true)
       .order('published_at', { ascending: false }),
     admin.from('tags').select('slug'),
+    admin.from('pick_lists').select('slug, updated_at').eq('is_visible', true),
   ])
 
   const reviewUrls: MetadataRoute.Sitemap = (reviews ?? []).map((r) => ({
@@ -52,10 +53,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
+  const pickUrls: MetadataRoute.Sitemap = (picks ?? []).map((p) => ({
+    url: `${base}/picks/${p.slug}`,
+    lastModified: p.updated_at ?? undefined,
+    changeFrequency: 'weekly',
+    priority: 0.8,
+  }))
+
   return [
     { url: base,              lastModified: new Date(), changeFrequency: 'daily',   priority: 1.0 },
     { url: `${base}/reviews`, lastModified: new Date(), changeFrequency: 'daily',   priority: 0.9 },
     { url: `${base}/guides`,  lastModified: new Date(), changeFrequency: 'daily',   priority: 0.9 },
+    { url: `${base}/picks`,   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${base}/stuff`,   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${base}/bench`,   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${base}/about`,   lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
@@ -63,5 +72,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...tagUrls,
     ...reviewUrls,
     ...articleUrls,
+    ...pickUrls,
   ]
 }
