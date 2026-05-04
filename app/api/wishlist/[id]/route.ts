@@ -93,6 +93,8 @@ export async function PATCH(
   }
 
   revalidatePath('/bench')
+  revalidatePath('/reviews')
+  revalidatePath('/stuff')
   revalidatePath('/')
 
   return NextResponse.json({ item: data })
@@ -116,6 +118,8 @@ export async function DELETE(
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   revalidatePath('/bench')
+  revalidatePath('/reviews')
+  revalidatePath('/stuff')
   revalidatePath('/')
 
   return NextResponse.json({ success: true })

@@ -73,6 +73,8 @@ export async function POST(
     .eq('id', id)
 
   revalidatePath('/bench')
+  revalidatePath('/reviews')
+  revalidatePath('/stuff')
   revalidatePath('/')
 
   return NextResponse.json({ review_id: review.id, review_slug: review.slug }, { status: 201 })

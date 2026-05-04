@@ -131,7 +131,9 @@ export async function PUT(
     revalidatePath('/reviews')
     revalidatePath('/stuff')
     revalidatePath('/about')
-    if (data?.slug) revalidatePath(`/reviews/${data.slug}`)
+    if (data?.slug)     revalidatePath(`/reviews/${data.slug}`)
+    if (data?.category) revalidatePath(`/reviews/category/${data.category}`)
+    if (data?.category) revalidatePath(`/category/${data.category}`)
 
     // Send email notification — scheduled via after() so it doesn't block the response
     const notifyActions = ['approve', 'reject', 'request_edits'] as const
@@ -287,6 +289,8 @@ export async function PUT(
     revalidatePath('/reviews')
     revalidatePath('/stuff')
     revalidatePath(`/reviews/${data.slug}`)
+    if (data?.category) revalidatePath(`/reviews/category/${data.category}`)
+    if (data?.category) revalidatePath(`/category/${data.category}`)
   }
 
   return NextResponse.json({ review: data })
