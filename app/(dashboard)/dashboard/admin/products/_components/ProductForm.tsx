@@ -193,6 +193,8 @@ export function ProductForm({ product }: Props) {
           {store === 'best-buy'  && 'Get your link from Best Buy\'s affiliate portal (Impact.com). Your publisher ID is embedded.'}
           {store === 'rei'       && 'Get your link from REI\'s affiliate portal (Impact.com or Rakuten). Your publisher ID is embedded.'}
           {store === 'dicks'     && "Get your link from Dick's affiliate portal (Impact.com). Your publisher ID is embedded."}
+          {store === 'bass-pro'  && 'Get your link from Bass Pro Shops affiliate portal (Impact.com). Your publisher ID is embedded.'}
+          {store === 'buckle'    && 'Get your link from Buckle\'s affiliate portal (Rakuten). Your publisher ID is embedded.'}
           {store === 'kohls'     && "Get your link from Kohl's affiliate portal (Rakuten). Your publisher ID is embedded."}
           {store === 'menards'   && 'Menards has limited affiliate availability. If you have a link paste it here — otherwise use Non-affiliate URL.'}
           {store === 'costco'    && '⚠️ Costco has no affiliate program. Use the Non-affiliate URL field below for the direct product link.'}

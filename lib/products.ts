@@ -3,7 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 export type ProductStore =
   | 'amazon' | 'walmart' | 'target' | 'costco' | 'sams-club'
   | 'home-depot' | 'lowes' | 'menards' | 'best-buy'
-  | 'rei' | 'dicks' | 'kohls' | 'other'
+  | 'rei' | 'dicks' | 'bass-pro' | 'buckle' | 'kohls' | 'other'
 
 export const STORE_OPTIONS: { value: ProductStore; label: string }[] = [
   // Major online / general retail
@@ -19,8 +19,11 @@ export const STORE_OPTIONS: { value: ProductStore; label: string }[] = [
   { value: 'lowes',      label: "Lowe's" },
   { value: 'menards',    label: 'Menards' },
   // Outdoor / sporting
-  { value: 'rei',   label: 'REI' },
-  { value: 'dicks', label: "Dick's Sporting Goods" },
+  { value: 'rei',       label: 'REI' },
+  { value: 'dicks',     label: "Dick's Sporting Goods" },
+  { value: 'bass-pro',  label: 'Bass Pro Shops' },
+  // Apparel
+  { value: 'buckle', label: 'Buckle' },
   // Fallback
   { value: 'other', label: 'Other / Unlisted' },
 ]
