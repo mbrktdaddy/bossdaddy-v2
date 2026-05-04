@@ -129,6 +129,7 @@ export async function PUT(
 
     revalidatePath('/')
     revalidatePath('/reviews')
+    revalidatePath('/stuff')
     revalidatePath('/about')
     if (data?.slug) revalidatePath(`/reviews/${data.slug}`)
 
@@ -284,6 +285,7 @@ export async function PUT(
   if (wasApproved && data?.slug) {
     revalidatePath('/')
     revalidatePath('/reviews')
+    revalidatePath('/stuff')
     revalidatePath(`/reviews/${data.slug}`)
   }
 
@@ -317,6 +319,7 @@ export async function DELETE(
   if (error) return NextResponse.json({ error: 'Delete failed' }, { status: 500 })
 
   revalidatePath('/reviews')
+  revalidatePath('/stuff')
   revalidatePath('/')
   return NextResponse.json({ success: true })
 }

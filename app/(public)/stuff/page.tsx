@@ -8,7 +8,7 @@ import FeaturedReviewCard from '@/components/FeaturedReviewCard'
 import BenchStrip from '@/components/BenchStrip'
 import type { Metadata } from 'next'
 
-export const revalidate = 3600
+export const revalidate = 60
 
 export const metadata: Metadata = {
   title: "Boss Daddy's Stuff — Field-Tested Picks",
