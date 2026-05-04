@@ -110,11 +110,11 @@ export default async function StuffPage({ searchParams }: Props) {
               <span className="text-orange-400 font-bold tabular-nums">{bossPicks}</span> Boss {bossPicks === 1 ? 'Pick' : 'Picks'} (9+)
             </a>
           </>}
-          {highestRating && topPick && <>
+          {highestRating && <>
             <span className="text-gray-700 hidden sm:block">·</span>
-            <Link href={`/reviews/${topPick.slug}`} className="hover:text-gray-300 transition-colors">
+            <a href="#perfect-score" className="hover:text-gray-300 transition-colors">
               Top rated <span className="text-white font-bold tabular-nums">{highestRating}/10</span>
-            </Link>
+            </a>
           </>}
         </div>
       )}
@@ -178,7 +178,11 @@ export default async function StuffPage({ searchParams }: Props) {
             const isPerfect = label.includes('Perfect Score')
             const bottomMargin = isLast ? '' : isPerfect ? 'mb-24' : 'mb-16'
             return (
-              <section key={label} id={label.includes('Boss Picks') ? 'boss-picks' : undefined} className={bottomMargin}>
+              <section
+                key={label}
+                id={label.includes('Perfect Score') ? 'perfect-score' : label.includes('Boss Picks') ? 'boss-picks' : undefined}
+                className={bottomMargin}
+              >
                 <div className="flex items-stretch gap-4 mb-6">
                   <div className="w-[3px] bg-orange-600 rounded-full" />
                   <div>
