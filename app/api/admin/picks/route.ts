@@ -59,5 +59,6 @@ export async function POST(request: NextRequest) {
   }
 
   revalidatePath('/picks')
+  revalidatePath('/')
   return NextResponse.json({ pick: data }, { status: 201 })
 }

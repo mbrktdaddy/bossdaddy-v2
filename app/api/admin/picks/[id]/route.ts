@@ -81,6 +81,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   const { data: pick } = await admin.from('pick_lists').select('*').eq('id', id).single()
   revalidatePath('/picks')
+  revalidatePath('/')
   if (pick?.slug) revalidatePath(`/picks/${pick.slug}`)
   return NextResponse.json({ pick })
 }
@@ -97,6 +98,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   revalidatePath('/picks')
+  revalidatePath('/')
   if (pick?.slug) revalidatePath(`/picks/${pick.slug}`)
   return NextResponse.json({ success: true })
 }

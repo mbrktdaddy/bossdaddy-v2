@@ -72,7 +72,7 @@ export default async function PickDetailPage({ params }: Props) {
   }))
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
-  const jsonLd = {
+  const articleLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: pick.title,
@@ -83,9 +83,38 @@ export default async function PickDetailPage({ params }: Props) {
     mainEntityOfPage: `${siteUrl}/picks/${slug}`,
   }
 
+  const itemListLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: pick.title,
+    description: pick.description,
+    numberOfItems: items.length,
+    itemListElement: items.map((entry, idx) => {
+      const r = entry.review!
+      return {
+        '@type': 'ListItem',
+        position: idx + 1,
+        url: `${siteUrl}/reviews/${r.slug}`,
+        name: r.product_name,
+        item: {
+          '@type': 'Product',
+          name: r.product_name,
+          aggregateRating: r.rating ? {
+            '@type': 'AggregateRating',
+            ratingValue: r.rating,
+            bestRating: 10,
+            worstRating: 1,
+            ratingCount: 1,
+          } : undefined,
+        },
+      }
+    }),
+  }
+
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
 
       <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Breadcrumb */}

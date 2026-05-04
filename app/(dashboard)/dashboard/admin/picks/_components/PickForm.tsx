@@ -268,18 +268,19 @@ export function PickForm({ pick, initialItems }: Props) {
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <button type="button" onClick={() => moveItem(idx, -1)} disabled={idx === 0}
-                        className="p-1.5 text-gray-500 hover:text-white disabled:opacity-30 transition-colors" title="Move up">↑</button>
+                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-base text-gray-500 hover:text-white disabled:opacity-30 transition-colors rounded-lg hover:bg-gray-800" title="Move up" aria-label="Move up">↑</button>
                       <button type="button" onClick={() => moveItem(idx, 1)} disabled={idx === items.length - 1}
-                        className="p-1.5 text-gray-500 hover:text-white disabled:opacity-30 transition-colors" title="Move down">↓</button>
+                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-base text-gray-500 hover:text-white disabled:opacity-30 transition-colors rounded-lg hover:bg-gray-800" title="Move down" aria-label="Move down">↓</button>
                       <button type="button" onClick={() => removeItem(item.review_id)}
-                        className="p-1.5 text-gray-600 hover:text-red-400 transition-colors" title="Remove">×</button>
+                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-lg text-gray-600 hover:text-red-400 hover:bg-red-950/30 transition-colors rounded-lg" title="Remove" aria-label="Remove">×</button>
                     </div>
                   </div>
-                  <input
-                    type="text" value={item.blurb ?? ''}
+                  <textarea
+                    value={item.blurb ?? ''}
                     onChange={(e) => updateBlurb(item.review_id, e.target.value)}
-                    placeholder="Optional editorial blurb for this pick..."
-                    className="mt-2 w-full px-3 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-base"
+                    placeholder="Optional editorial blurb for this pick (2-3 sentences)..."
+                    rows={2}
+                    className="mt-2 w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 resize-none text-base sm:text-sm"
                   />
                 </div>
               )
