@@ -148,9 +148,9 @@ export async function POST(request: NextRequest) {
       moderationScore = result.score
       moderationFlags = result.flags ?? []
 
-      if (result.score <= 0.15 || result.recommendation === 'approve') {
+      if (result.score <= 0.30 || result.recommendation === 'approve') {
         status = 'approved'
-      } else if (result.score >= 0.85 || result.recommendation === 'reject') {
+      } else if (result.score >= 0.75 || result.recommendation === 'reject') {
         // Silent reject — spammer sees a generic "submitted" message, never knows
         return NextResponse.json(
           { comment: { status: 'pending' } },
