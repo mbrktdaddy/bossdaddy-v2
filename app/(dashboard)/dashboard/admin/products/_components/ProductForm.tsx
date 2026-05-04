@@ -175,14 +175,29 @@ export function ProductForm({ product }: Props) {
           type="url"
           value={affiliateUrl}
           onChange={(e) => setAffiliateUrl(e.target.value)}
-          placeholder="https://www.amazon.com/dp/... or affiliate link from any retailer"
-          className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          placeholder={
+            store === 'amazon'    ? 'https://www.amazon.com/dp/...' :
+            store === 'costco'    ? 'No affiliate program — use Non-affiliate URL below' :
+            store === 'sams-club' ? 'No affiliate program — use Non-affiliate URL below' :
+            'Paste your affiliate link from this retailer\'s program'
+          }
+          disabled={store === 'costco' || store === 'sams-club'}
+          className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-40 disabled:cursor-not-allowed"
         />
         <p className="mt-1 text-xs text-gray-600">
-          {store === 'amazon'
-            ? 'Paste the SiteStripe "Text Only" URL — your associate tag should already be baked in.'
-            : 'Your affiliate link from this retailer\'s program. Anchor gets rel="sponsored nofollow noopener" automatically.'
-          }
+          {store === 'amazon'    && 'Use the SiteStripe "Text Only" button on Amazon — your associate tag is embedded automatically.'}
+          {store === 'walmart'   && 'Get your link from the Walmart Creator portal (Impact.com). Your publisher ID is embedded in the URL.'}
+          {store === 'target'    && 'Get your link from Target\'s affiliate portal (Impact.com). Your publisher ID is embedded in the URL.'}
+          {store === 'home-depot' && 'Get your link from Home Depot\'s affiliate portal (Impact.com). Your publisher ID is embedded.'}
+          {store === 'lowes'     && "Get your link from Lowe's affiliate portal (CJ Affiliate / cj.com). Your publisher ID is embedded."}
+          {store === 'best-buy'  && 'Get your link from Best Buy\'s affiliate portal (Impact.com). Your publisher ID is embedded.'}
+          {store === 'rei'       && 'Get your link from REI\'s affiliate portal (Impact.com or Rakuten). Your publisher ID is embedded.'}
+          {store === 'dicks'     && "Get your link from Dick's affiliate portal (Impact.com). Your publisher ID is embedded."}
+          {store === 'kohls'     && "Get your link from Kohl's affiliate portal (Rakuten). Your publisher ID is embedded."}
+          {store === 'menards'   && 'Menards has limited affiliate availability. If you have a link paste it here — otherwise use Non-affiliate URL.'}
+          {store === 'costco'    && '⚠️ Costco has no affiliate program. Use the Non-affiliate URL field below for the direct product link.'}
+          {store === 'sams-club' && "⚠️ Sam's Club has no affiliate program. Use the Non-affiliate URL field below for the direct product link."}
+          {store === 'other'     && 'Paste your affiliate link from this retailer\'s program. Rendered with rel="sponsored nofollow noopener".'}
         </p>
       </div>
 
@@ -196,21 +211,29 @@ export function ProductForm({ product }: Props) {
             placeholder="B07XYZ1234"
             className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
-          <p className="mt-1 text-xs text-gray-600">Amazon product ID — reference only, not used in the rendered link.</p>
+          <p className="mt-1 text-xs text-gray-600">Amazon product ID — stored for future PA-API image fetching once access is approved.</p>
         </div>
       )}
 
       <div>
-        <label className="block text-sm text-gray-300 mb-1.5">Non-affiliate URL</label>
+        <label className="block text-sm text-gray-300 mb-1.5">
+          Non-affiliate URL
+          {(store === 'costco' || store === 'sams-club') && (
+            <span className="ml-2 text-orange-400 text-xs font-semibold">← use this for {store === 'costco' ? 'Costco' : "Sam's Club"}</span>
+          )}
+        </label>
         <input
           type="url"
           value={nonAffiliateUrl}
           onChange={(e) => setNonAffUrl(e.target.value)}
-          placeholder="https://manufacturer.com/product"
+          placeholder="https://www.costco.com/product.html"
           className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
         />
         <p className="mt-1 text-xs text-gray-600">
-          Fallback used only when no affiliate URL is set. Rendered without <code>sponsored</code>/<code>nofollow</code>.
+          {(store === 'costco' || store === 'sams-club')
+            ? 'Paste the direct product page URL. Shown as "View [product name]" — no sponsored/nofollow since there\'s no affiliate relationship.'
+            : 'Fallback used only when no affiliate URL is set. Rendered without sponsored/nofollow attributes.'
+          }
         </p>
       </div>
 
