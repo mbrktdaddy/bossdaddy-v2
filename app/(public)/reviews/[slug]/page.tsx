@@ -125,7 +125,17 @@ export default async function ReviewPage({ params }: Props) {
     reviewBody: review.content.replace(/<[^>]+>/g, '').slice(0, 500),
     reviewRating: { '@type': 'Rating', ratingValue: review.rating, bestRating: 10, worstRating: 1 },
     author: { '@type': 'Person', name: author },
-    itemReviewed: { '@type': 'Product', name: review.product_name },
+    itemReviewed: {
+      '@type': 'Product',
+      name: review.product_name,
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: review.rating,
+        bestRating: 10,
+        worstRating: 1,
+        ratingCount: 1,
+      },
+    },
     datePublished: review.published_at,
   }
 
