@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { compressImage } from '@/lib/compress-image'
 
 interface MediaAsset {
   id: string
@@ -121,7 +122,8 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
     setUploading(true); setUploadError(null)
 
     const results = await Promise.allSettled(
-      list.map(async (file) => {
+      list.map(async (raw) => {
+        const file = await compressImage(raw)
         const fd = new FormData()
         fd.append('file', file)
         const res = await fetch('/api/media', { method: 'POST', body: fd })

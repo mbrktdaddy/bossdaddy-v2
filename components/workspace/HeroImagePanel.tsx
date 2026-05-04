@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
+import { compressImage } from '@/lib/compress-image'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
@@ -35,11 +36,12 @@ export function HeroImagePanel({
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
   async function handleCameraCapture(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const raw = e.target.files?.[0]
+    if (!raw) return
     setUploading(true)
     setError(null)
     try {
+      const file = await compressImage(raw)
       const fd = new FormData()
       fd.append('file', file)
       const res = await fetch('/api/media', { method: 'POST', body: fd })

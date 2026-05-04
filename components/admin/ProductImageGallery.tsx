@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { compressImage } from '@/lib/compress-image'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
 
@@ -67,7 +68,8 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
     const startedEmpty = images.length === 0
 
     const results = await Promise.allSettled(
-      files.map(async (file, i) => {
+      files.map(async (raw, i) => {
+        const file = await compressImage(raw)
         const fd = new FormData()
         fd.append('file', file)
         fd.append('product_id', productId)
