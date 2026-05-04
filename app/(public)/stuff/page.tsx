@@ -48,12 +48,19 @@ export default async function StuffPage({ searchParams }: Props) {
     query = query.eq('category', category as any)
   }
 
+  // Separate query for total category count (all approved reviews, not just 8+)
+  const { data: allApproved } = await supabase
+    .from('reviews')
+    .select('category')
+    .eq('status', 'approved')
+    .eq('is_visible', true)
+
   const { data: reviews } = await query
   const topPicks = reviews ?? []
   const cat = category ? getCategoryBySlug(category) : null
 
   // Stats
-  const categoryCount = new Set(topPicks.map(r => r.category)).size
+  const categoryCount = new Set((allApproved ?? []).map(r => r.category)).size
   const highestRating = topPicks[0]?.rating ?? null
   const bossPicks = topPicks.filter(r => (r.rating ?? 0) >= 9).length
 
@@ -88,16 +95,26 @@ export default async function StuffPage({ searchParams }: Props) {
       {/* Stats bar */}
       {topPicks.length > 0 && (
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 pb-4 border-b border-gray-800/40 text-sm text-gray-500">
-          <span><span className="text-white font-bold tabular-nums">{topPicks.length}</span> {topPicks.length === 1 ? 'pick' : 'picks'} rated 8+</span>
-          <span className="text-gray-700 hidden sm:block">·</span>
-          <span><span className="text-white font-bold tabular-nums">{categoryCount}</span> {categoryCount === 1 ? 'category' : 'categories'}</span>
+          <Link href="/reviews" className="hover:text-gray-300 transition-colors">
+            <span className="text-white font-bold tabular-nums">{topPicks.length}</span> {topPicks.length === 1 ? 'pick' : 'picks'} rated 8+
+          </Link>
+          {!category && <>
+            <span className="text-gray-700 hidden sm:block">·</span>
+            <Link href="/reviews" className="hover:text-gray-300 transition-colors">
+              <span className="text-white font-bold tabular-nums">{categoryCount}</span> {categoryCount === 1 ? 'category' : 'categories'}
+            </Link>
+          </>}
           {bossPicks > 0 && <>
             <span className="text-gray-700 hidden sm:block">·</span>
-            <span><span className="text-orange-400 font-bold tabular-nums">{bossPicks}</span> Boss {bossPicks === 1 ? 'Pick' : 'Picks'} (9+)</span>
+            <a href="#boss-picks" className="hover:text-gray-300 transition-colors">
+              <span className="text-orange-400 font-bold tabular-nums">{bossPicks}</span> Boss {bossPicks === 1 ? 'Pick' : 'Picks'} (9+)
+            </a>
           </>}
-          {highestRating && <>
+          {highestRating && topPick && <>
             <span className="text-gray-700 hidden sm:block">·</span>
-            <span>Top rated <span className="text-white font-bold tabular-nums">{highestRating}/10</span></span>
+            <Link href={`/reviews/${topPick.slug}`} className="hover:text-gray-300 transition-colors">
+              Top rated <span className="text-white font-bold tabular-nums">{highestRating}/10</span>
+            </Link>
           </>}
         </div>
       )}
@@ -161,7 +178,7 @@ export default async function StuffPage({ searchParams }: Props) {
             const isPerfect = label.includes('Perfect Score')
             const bottomMargin = isLast ? '' : isPerfect ? 'mb-24' : 'mb-16'
             return (
-              <section key={label} className={bottomMargin}>
+              <section key={label} id={label.includes('Boss Picks') ? 'boss-picks' : undefined} className={bottomMargin}>
                 <div className="flex items-stretch gap-4 mb-6">
                   <div className="w-[3px] bg-orange-600 rounded-full" />
                   <div>
