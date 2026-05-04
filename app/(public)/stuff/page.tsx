@@ -110,10 +110,10 @@ export default async function StuffPage({ searchParams }: Props) {
               <span className="text-orange-400 font-bold tabular-nums">{bossPicks}</span> Boss {bossPicks === 1 ? 'Pick' : 'Picks'} (9+)
             </a>
           </>}
-          {highestRating && <>
+          {tens.length > 0 && <>
             <span className="text-gray-700 hidden sm:block">·</span>
             <a href="#perfect-score" className="hover:text-gray-300 transition-colors">
-              Top rated <span className="text-white font-bold tabular-nums">{highestRating}/10</span>
+              <span className="text-white font-bold tabular-nums">{tens.length}</span> perfect {tens.length === 1 ? 'score' : 'scores'} (10/10)
             </a>
           </>}
         </div>
