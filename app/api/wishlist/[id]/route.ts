@@ -1,7 +1,8 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest, after } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { notifyWishlistSubscribers } from '@/lib/wishlist-emails'
 import { z } from 'zod'
 
 const UpdateSchema = z.object({
@@ -80,6 +81,15 @@ export async function PATCH(
   }
 
   const admin = createAdminClient()
+
+  // Capture old status before the update so we can detect transitions
+  const { data: existing } = await admin
+    .from('wishlist_items')
+    .select('status')
+    .eq('id', id)
+    .single()
+  const oldStatus = existing?.status as string | undefined
+
   const { data, error } = await admin
     .from('wishlist_items')
     .update(parsed.data)
@@ -96,6 +106,21 @@ export async function PATCH(
   revalidatePath('/reviews')
   revalidatePath('/stuff')
   revalidatePath('/')
+
+  // Notify subscribers on forward status transitions to 'queued' or 'testing'.
+  // The 'reviewed' transition is handled separately when a review is approved
+  // (in app/api/reviews/[id]/route.ts) since that path also has the review slug.
+  const newStatus = (data?.status as string | undefined)
+  const transitioned = oldStatus && newStatus && oldStatus !== newStatus
+  if (transitioned && (newStatus === 'queued' || newStatus === 'testing')) {
+    after(async () => {
+      try {
+        await notifyWishlistSubscribers({ itemId: id, status: newStatus })
+      } catch (err) {
+        console.error('Wishlist status notification failed:', err)
+      }
+    })
+  }
 
   return NextResponse.json({ item: data })
 }
