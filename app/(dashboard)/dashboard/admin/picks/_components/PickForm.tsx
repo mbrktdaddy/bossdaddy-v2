@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { OCCASIONS, OCCASION_GROUPS } from '@/lib/gift-occasions'
 
 interface ReviewSummary {
   id: string
@@ -30,6 +31,8 @@ interface PickList {
   hero_image_url: string | null
   is_visible: boolean
   published_at: string | null
+  pick_type?: string | null
+  occasion?: string | null
 }
 
 interface Props {
@@ -47,6 +50,8 @@ export function PickForm({ pick, initialItems }: Props) {
   const [introHtml, setIntro]   = useState(pick?.intro_html ?? '')
   const [heroUrl, setHeroUrl]   = useState(pick?.hero_image_url ?? '')
   const [visible, setVisible]   = useState(pick?.is_visible ?? false)
+  const [pickType, setPickType] = useState<string>(pick?.pick_type ?? 'general')
+  const [occasion, setOccasion] = useState<string>(pick?.occasion ?? '')
   const [items, setItems]       = useState<PickItem[]>(
     initialItems.map((i, idx) => ({ ...i, position: i.position ?? idx }))
   )
@@ -113,6 +118,8 @@ export function PickForm({ pick, initialItems }: Props) {
       intro_html: introHtml.trim() || null,
       hero_image_url: heroUrl.trim() || null,
       is_visible: visible,
+      pick_type: pickType,
+      occasion: pickType === 'gift_guide' ? (occasion || null) : null,
       items: items.map((i) => ({ review_id: i.review_id, position: i.position, blurb: i.blurb })),
     }
 
@@ -198,6 +205,40 @@ export function PickForm({ pick, initialItems }: Props) {
             className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-base"
           />
         </div>
+
+        <div>
+          <label className="block text-sm text-gray-300 mb-1.5">List type</label>
+          <select
+            value={pickType} onChange={(e) => setPickType(e.target.value)}
+            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500 text-base"
+          >
+            <option value="general">General Pick List (shows on /picks)</option>
+            <option value="gift_guide">Gift Guide (shows on /gifts)</option>
+            <option value="best_of">Best Of (curated category list)</option>
+          </select>
+        </div>
+
+        {pickType === 'gift_guide' && (
+          <div>
+            <label className="block text-sm text-gray-300 mb-1.5">Occasion <span className="text-red-400">*</span></label>
+            <select
+              value={occasion} onChange={(e) => setOccasion(e.target.value)}
+              className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500 text-base"
+            >
+              <option value="">Select an occasion…</option>
+              {OCCASION_GROUPS.map((group) => (
+                <optgroup key={group.id} label={group.label}>
+                  {OCCASIONS.filter((o) => o.group === group.id).map((o) => (
+                    <option key={o.value} value={o.value}>{o.emoji} {o.label}</option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-gray-600">
+              This list will replace any previous gift guide for this occasion at <code className="text-orange-400">/gifts/{OCCASIONS.find((o) => o.value === occasion)?.slug ?? '[occasion]'}</code>
+            </p>
+          </div>
+        )}
 
         <label className="flex items-center gap-3 cursor-pointer py-1">
           <input

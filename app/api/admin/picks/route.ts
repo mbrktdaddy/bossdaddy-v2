@@ -12,6 +12,8 @@ const PickListSchema = z.object({
   hero_image_url:z.string().url().max(2048).optional().nullable(),
   is_visible:    z.boolean().optional().default(false),
   published_at:  z.string().optional().nullable(),
+  pick_type:     z.enum(['general', 'gift_guide', 'best_of']).optional().default('general'),
+  occasion:      z.string().max(40).optional().nullable(),
 })
 
 async function requireAdmin(supabase: Awaited<ReturnType<typeof createClient>>) {
@@ -47,11 +49,9 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
 
   const admin = createAdminClient()
-  const { data, error } = await admin
-    .from('pick_lists')
-    .insert({ ...parsed.data, published_at: parsed.data.is_visible ? (parsed.data.published_at ?? new Date().toISOString()) : null })
-    .select()
-    .single()
+  const insertPayload = { ...parsed.data, published_at: parsed.data.is_visible ? (parsed.data.published_at ?? new Date().toISOString()) : null }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await admin.from('pick_lists').insert(insertPayload as any).select().single()
 
   if (error) {
     if (error.code === '23505') return NextResponse.json({ error: 'Slug already in use' }, { status: 409 })
@@ -59,6 +59,12 @@ export async function POST(request: NextRequest) {
   }
 
   revalidatePath('/picks')
+  revalidatePath('/gifts')
   revalidatePath('/')
+  if (parsed.data.occasion) {
+    const { OCCASIONS } = await import('@/lib/gift-occasions')
+    const occasionConfig = OCCASIONS.find((o) => o.value === parsed.data.occasion)
+    if (occasionConfig) revalidatePath(`/gifts/${occasionConfig.slug}`)
+  }
   return NextResponse.json({ pick: data }, { status: 201 })
 }

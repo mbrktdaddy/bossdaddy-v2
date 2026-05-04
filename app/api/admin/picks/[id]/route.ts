@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { OCCASIONS } from '@/lib/gift-occasions'
 import { z } from 'zod'
 
 const UpdateSchema = z.object({
@@ -12,6 +13,8 @@ const UpdateSchema = z.object({
   hero_image_url:z.string().url().max(2048).optional().nullable(),
   is_visible:    z.boolean().optional(),
   published_at:  z.string().optional().nullable(),
+  pick_type:     z.enum(['general', 'gift_guide', 'best_of']).optional(),
+  occasion:      z.string().max(40).optional().nullable(),
   items: z.array(z.object({
     review_id: z.string().uuid(),
     position:  z.number().int(),
@@ -79,10 +82,16 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
   }
 
-  const { data: pick } = await admin.from('pick_lists').select('*').eq('id', id).single()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: pick } = await (admin as any).from('pick_lists').select('*').eq('id', id).single()
   revalidatePath('/picks')
+  revalidatePath('/gifts')
   revalidatePath('/')
   if (pick?.slug) revalidatePath(`/picks/${pick.slug}`)
+  if (pick?.occasion) {
+    const occ = OCCASIONS.find((o) => o.value === pick.occasion)
+    if (occ) revalidatePath(`/gifts/${occ.slug}`)
+  }
   return NextResponse.json({ pick })
 }
 
@@ -93,12 +102,18 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   if ('error' in gate) return gate.error
 
   const admin = createAdminClient()
-  const { data: pick } = await admin.from('pick_lists').select('slug').eq('id', id).single()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: pick } = await (admin as any).from('pick_lists').select('slug, occasion').eq('id', id).single()
   const { error } = await admin.from('pick_lists').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   revalidatePath('/picks')
+  revalidatePath('/gifts')
   revalidatePath('/')
   if (pick?.slug) revalidatePath(`/picks/${pick.slug}`)
+  if (pick?.occasion) {
+    const occ = OCCASIONS.find((o) => o.value === pick.occasion)
+    if (occ) revalidatePath(`/gifts/${occ.slug}`)
+  }
   return NextResponse.json({ success: true })
 }

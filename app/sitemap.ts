@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { CATEGORY_SLUGS } from '@/lib/categories'
+import { OCCASIONS } from '@/lib/gift-occasions'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = 'https://www.bossdaddylife.com'
@@ -60,10 +61,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
+  // Every defined occasion — stable URLs that compound SEO whether content exists or not
+  const giftUrls: MetadataRoute.Sitemap = OCCASIONS.map((occ) => ({
+    url: `${base}/gifts/${occ.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly',
+    priority: 0.85,
+  }))
+
   return [
     { url: base,              lastModified: new Date(), changeFrequency: 'daily',   priority: 1.0 },
     { url: `${base}/reviews`, lastModified: new Date(), changeFrequency: 'daily',   priority: 0.9 },
     { url: `${base}/guides`,  lastModified: new Date(), changeFrequency: 'daily',   priority: 0.9 },
+    { url: `${base}/gifts`,   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.9 },
     { url: `${base}/picks`,   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${base}/stuff`,   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${base}/bench`,   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.7 },
@@ -73,5 +83,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...reviewUrls,
     ...articleUrls,
     ...pickUrls,
+    ...giftUrls,
   ]
 }

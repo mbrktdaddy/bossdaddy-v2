@@ -13,10 +13,12 @@ export const metadata: Metadata = {
 
 export default async function PicksIndexPage() {
   const supabase = await createClient()
-  const { data: picks } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: picks } = await (supabase as any)
     .from('pick_lists')
-    .select('id, slug, title, description, hero_image_url, published_at')
+    .select('id, slug, title, description, hero_image_url, published_at, pick_type')
     .eq('is_visible', true)
+    .neq('pick_type', 'gift_guide')
     .order('published_at', { ascending: false })
 
   return (
@@ -37,7 +39,7 @@ export default async function PicksIndexPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {(picks ?? []).map((pick) => (
+          {((picks ?? []) as Array<{ id: string; slug: string; title: string; description: string | null; hero_image_url: string | null }>).map((pick) => (
             <Link
               key={pick.id}
               href={`/picks/${pick.slug}`}
