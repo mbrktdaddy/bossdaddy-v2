@@ -1,18 +1,28 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 export type ProductStore =
-  | 'amazon' | 'walmart' | 'target' | 'kohls'
-  | 'home-depot' | 'lowes' | 'menards' | 'other'
+  | 'amazon' | 'walmart' | 'target' | 'costco' | 'sams-club'
+  | 'home-depot' | 'lowes' | 'menards' | 'best-buy'
+  | 'rei' | 'dicks' | 'kohls' | 'other'
 
 export const STORE_OPTIONS: { value: ProductStore; label: string }[] = [
-  { value: 'amazon',     label: 'Amazon' },
-  { value: 'walmart',    label: 'Walmart' },
-  { value: 'target',     label: 'Target' },
-  { value: 'kohls',      label: "Kohl's" },
+  // Major online / general retail
+  { value: 'amazon',    label: 'Amazon' },
+  { value: 'walmart',   label: 'Walmart' },
+  { value: 'target',    label: 'Target' },
+  { value: 'costco',    label: 'Costco' },
+  { value: 'sams-club', label: "Sam's Club" },
+  { value: 'best-buy',  label: 'Best Buy' },
+  { value: 'kohls',     label: "Kohl's" },
+  // Home improvement
   { value: 'home-depot', label: 'Home Depot' },
   { value: 'lowes',      label: "Lowe's" },
   { value: 'menards',    label: 'Menards' },
-  { value: 'other',      label: 'Other / Unlisted' },
+  // Outdoor / sporting
+  { value: 'rei',   label: 'REI' },
+  { value: 'dicks', label: "Dick's Sporting Goods" },
+  // Fallback
+  { value: 'other', label: 'Other / Unlisted' },
 ]
 
 export function getStoreLabel(store: string, customName?: string | null): string {
