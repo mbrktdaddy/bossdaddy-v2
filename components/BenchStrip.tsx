@@ -57,7 +57,7 @@ export default async function BenchStrip({
                   src={item.image_url}
                   alt={item.title}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="object-contain p-3"
                   sizes="(max-width: 640px) 176px, 33vw"
                 />
               ) : (
