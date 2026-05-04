@@ -82,8 +82,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: pick } = await (admin as any).from('pick_lists').select('*').eq('id', id).single()
+  const { data: pick } = await admin.from('pick_lists').select('*').eq('id', id).single()
   revalidatePath('/picks')
   revalidatePath('/gifts')
   revalidatePath('/')
@@ -102,8 +101,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   if ('error' in gate) return gate.error
 
   const admin = createAdminClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: pick } = await (admin as any).from('pick_lists').select('slug, occasion').eq('id', id).single()
+  const { data: pick } = await admin.from('pick_lists').select('slug, occasion').eq('id', id).single()
   const { error } = await admin.from('pick_lists').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 

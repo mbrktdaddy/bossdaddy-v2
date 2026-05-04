@@ -13,8 +13,7 @@ export const metadata: Metadata = {
 
 export default async function PicksIndexPage() {
   const supabase = await createClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: picks } = await (supabase as any)
+  const { data: picks } = await supabase
     .from('pick_lists')
     .select('id, slug, title, description, hero_image_url, published_at, pick_type')
     .eq('is_visible', true)
@@ -39,7 +38,7 @@ export default async function PicksIndexPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {((picks ?? []) as Array<{ id: string; slug: string; title: string; description: string | null; hero_image_url: string | null }>).map((pick) => (
+          {(picks ?? []).map((pick) => (
             <Link
               key={pick.id}
               href={`/picks/${pick.slug}`}

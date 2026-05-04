@@ -541,6 +541,8 @@ export type Database = {
           id: string
           intro_html: string | null
           is_visible: boolean
+          occasion: string | null
+          pick_type: string
           published_at: string | null
           slug: string
           title: string
@@ -553,6 +555,8 @@ export type Database = {
           id?: string
           intro_html?: string | null
           is_visible?: boolean
+          occasion?: string | null
+          pick_type?: string
           published_at?: string | null
           slug: string
           title: string
@@ -565,6 +569,8 @@ export type Database = {
           id?: string
           intro_html?: string | null
           is_visible?: boolean
+          occasion?: string | null
+          pick_type?: string
           published_at?: string | null
           slug?: string
           title?: string

@@ -49,9 +49,11 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
 
   const admin = createAdminClient()
-  const insertPayload = { ...parsed.data, published_at: parsed.data.is_visible ? (parsed.data.published_at ?? new Date().toISOString()) : null }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await admin.from('pick_lists').insert(insertPayload as any).select().single()
+  const { data, error } = await admin
+    .from('pick_lists')
+    .insert({ ...parsed.data, published_at: parsed.data.is_visible ? (parsed.data.published_at ?? new Date().toISOString()) : null })
+    .select()
+    .single()
 
   if (error) {
     if (error.code === '23505') return NextResponse.json({ error: 'Slug already in use' }, { status: 409 })

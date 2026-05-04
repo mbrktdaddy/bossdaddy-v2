@@ -45,8 +45,7 @@ export default async function GiftOccasionPage({ params }: Props) {
   const supabase = await createClient()
 
   // Find the most recent published gift guide for this occasion
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: pick } = await (supabase as any)
+  const { data: pick } = await supabase
     .from('pick_lists')
     .select('id, slug, title, description, intro_html, hero_image_url, published_at')
     .eq('pick_type', 'gift_guide')

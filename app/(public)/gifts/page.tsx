@@ -2,7 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
-import { OCCASIONS, OCCASION_GROUPS, getOccasionByValue } from '@/lib/gift-occasions'
+import { OCCASIONS, OCCASION_GROUPS } from '@/lib/gift-occasions'
 
 export const revalidate = 60
 
@@ -20,17 +20,15 @@ export default async function GiftsIndexPage() {
   const supabase = await createClient()
 
   // Find which occasions have published gift guides so we can show "live" indicators
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: liveGifts } = await (supabase as any)
+  const { data: liveGifts } = await supabase
     .from('pick_lists')
     .select('occasion, slug, title, hero_image_url, published_at')
     .eq('pick_type', 'gift_guide')
     .eq('is_visible', true)
     .order('published_at', { ascending: false })
 
-  type LiveGift = { occasion: string | null; slug: string; title: string; hero_image_url: string | null }
   const liveByOccasion = new Map<string, { slug: string; title: string; hero_image_url: string | null }>()
-  for (const g of ((liveGifts ?? []) as LiveGift[])) {
+  for (const g of (liveGifts ?? [])) {
     if (g.occasion && !liveByOccasion.has(g.occasion)) {
       liveByOccasion.set(g.occasion, {
         slug: g.slug,
