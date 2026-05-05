@@ -33,6 +33,25 @@ export function getStoreLabel(store: string, customName?: string | null): string
   return STORE_OPTIONS.find((s) => s.value === store)?.label ?? store
 }
 
+export type ProductStatus = 'wishlist' | 'testing' | 'reviewed' | 'passed' | 'archived'
+
+export const PRODUCT_STATUS_OPTIONS: { value: ProductStatus; label: string }[] = [
+  { value: 'wishlist',  label: 'Wishlist' },
+  { value: 'testing',  label: 'Testing' },
+  { value: 'reviewed', label: 'Reviewed' },
+  { value: 'passed',   label: 'Passed' },
+  { value: 'archived', label: 'Archived' },
+]
+
+export type TestingDuration = '<1wk' | '1-4wks' | '1-3mo' | '3+mo'
+
+export const TESTING_DURATION_OPTIONS: { value: TestingDuration; label: string }[] = [
+  { value: '<1wk',   label: 'Less than 1 week' },
+  { value: '1-4wks', label: '1–4 weeks' },
+  { value: '1-3mo',  label: '1–3 months' },
+  { value: '3+mo',   label: '3+ months' },
+]
+
 export interface Product {
   id: string
   slug: string
@@ -43,6 +62,10 @@ export interface Product {
   store: string
   custom_store_name: string | null
   image_url: string | null
+  description: string | null
+  category: string | null
+  price_cents: number | null
+  status: ProductStatus
   created_at: string
   updated_at: string
 }

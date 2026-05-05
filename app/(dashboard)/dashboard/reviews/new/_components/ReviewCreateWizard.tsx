@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { CATEGORIES } from '@/lib/categories'
+import { TESTING_DURATION_OPTIONS } from '@/lib/products'
 
 const STORAGE_KEY = 'bd:review-wizard-draft'
 
@@ -16,6 +17,7 @@ interface ProductOption {
   store: string
   affiliate_url: string | null
   non_affiliate_url: string | null
+  price_cents: number | null
 }
 
 export function ReviewCreateWizard() {
@@ -32,6 +34,13 @@ export function ReviewCreateWizard() {
   const [suggesting, setSuggesting]     = useState(false)
   const [suggestions, setSuggestions]   = useState<{ productName: string; angle: string; keyFeatures: string[] }[]>([])
 
+  // Your Experience fields — drive Claude's tone and persist to the review row
+  const [inputRating, setInputRating]       = useState<number | null>(null)
+  const [testingDuration, setTestingDuration] = useState('')
+  const [howYouUsedIt, setHowYouUsedIt]     = useState('')
+  const [standoutMoment, setStandoutMoment] = useState('')
+  const [pricePaid, setPricePaid]           = useState('')
+
   const restoredRef = useRef(false)
   useEffect(() => {
     if (restoredRef.current) return
@@ -40,20 +49,25 @@ export function ReviewCreateWizard() {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (!raw) return
       const saved = JSON.parse(raw)
-      if (saved.description)  setDescription(saved.description)
-      if (saved.productName)  setProductName(saved.productName)
-      if (saved.productSlug)  setProductSlug(saved.productSlug)
-      if (saved.keyFeatures)  setKeyFeatures(saved.keyFeatures)
-      if (saved.category)     setCategory(saved.category)
+      if (saved.description)            setDescription(saved.description)
+      if (saved.productName)            setProductName(saved.productName)
+      if (saved.productSlug)            setProductSlug(saved.productSlug)
+      if (saved.keyFeatures)            setKeyFeatures(saved.keyFeatures)
+      if (saved.category)               setCategory(saved.category)
       if (saved.imageSlots !== undefined) setImageSlots(saved.imageSlots)
+      if (saved.inputRating != null)    setInputRating(saved.inputRating)
+      if (saved.testingDuration)        setTestingDuration(saved.testingDuration)
+      if (saved.howYouUsedIt)           setHowYouUsedIt(saved.howYouUsedIt)
+      if (saved.standoutMoment)         setStandoutMoment(saved.standoutMoment)
+      if (saved.pricePaid)              setPricePaid(saved.pricePaid)
     } catch { /* ignore */ }
   }, [])
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, productName, productSlug, keyFeatures, category, imageSlots }))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, productName, productSlug, keyFeatures, category, imageSlots, inputRating, testingDuration, howYouUsedIt, standoutMoment, pricePaid }))
     } catch { /* ignore */ }
-  }, [description, productName, productSlug, keyFeatures, category, imageSlots])
+  }, [description, productName, productSlug, keyFeatures, category, imageSlots, inputRating, testingDuration, howYouUsedIt, standoutMoment, pricePaid])
 
   const [previewDraft, setPreviewDraft] = useState<{
     title: string; excerpt: string; content: string
@@ -79,7 +93,13 @@ export function ReviewCreateWizard() {
     setProductSlug(slug)
     if (!slug) return
     const match = products.find((p) => p.slug === slug)
-    if (match) setProductName(match.name)
+    if (match) {
+      setProductName(match.name)
+      // Auto-fill price only if the field is still empty (don't clobber typed values)
+      if (!pricePaid.trim() && match.price_cents != null) {
+        setPricePaid(String(match.price_cents))
+      }
+    }
   }
 
   async function handleSuggest() {
@@ -114,7 +134,10 @@ export function ReviewCreateWizard() {
   async function handleGenerate() {
     if (!productName.trim()) { setError('Enter a product name first'); return }
     if (!category) { setError('Select a category before generating'); return }
+    if (inputRating === null) { setError('Rate the product before generating — this drives the draft tone'); return }
     setStep('generating'); setError(null)
+
+    const parsedPricePaid = pricePaid.trim() ? parseInt(pricePaid.trim(), 10) : null
 
     try {
       const genRes = await fetch('/api/claude/draft', {
@@ -125,7 +148,12 @@ export function ReviewCreateWizard() {
           category,
           keyFeatures: keyFeatures.split('\n').map(f => f.trim()).filter(Boolean),
           imageSlots,
+          rating: inputRating,
           ...(productSlug.trim() ? { productSlug: productSlug.trim() } : {}),
+          ...(testingDuration ? { testingDuration } : {}),
+          ...(howYouUsedIt.trim() ? { howYouUsedIt: howYouUsedIt.trim() } : {}),
+          ...(standoutMoment.trim() ? { standoutMoment: standoutMoment.trim() } : {}),
+          ...(!isNaN(parsedPricePaid!) && parsedPricePaid !== null ? { pricePaid: parsedPricePaid } : {}),
         }),
       })
       const genJson = await genRes.json()
@@ -167,7 +195,7 @@ export function ReviewCreateWizard() {
 
       setPreviewDraft({
         title: draft.title, excerpt: draft.excerpt, content,
-        rating: Math.round(draft.rating ?? 7),
+        rating: inputRating!,  // use our input — Claude's rating is ignored
         pros: draft.pros ?? [], cons: draft.cons ?? [],
         imagePrompt: genJson.imagePrompt ?? '',
         tldr: (draft as Record<string, unknown>).tldr as string ?? '',
@@ -197,7 +225,7 @@ export function ReviewCreateWizard() {
           excerpt: previewDraft.excerpt,
           content: previewDraft.content,
           image_url: null,
-          rating: previewDraft.rating,
+          rating: inputRating!,
           pros: previewDraft.pros,
           cons: previewDraft.cons,
           product_slug: productSlug.trim() || null,
@@ -207,6 +235,10 @@ export function ReviewCreateWizard() {
           best_for: previewDraft.bestFor,
           not_for: previewDraft.notFor,
           faqs: previewDraft.faqs,
+          testing_duration: testingDuration || null,
+          how_you_used_it: howYouUsedIt.trim() || null,
+          standout_moment: standoutMoment.trim() || null,
+          price_paid_cents: pricePaid.trim() && !isNaN(parseInt(pricePaid, 10)) ? parseInt(pricePaid, 10) : null,
         }),
       })
       const saveJson = await saveRes.json()
@@ -224,6 +256,7 @@ export function ReviewCreateWizard() {
 
   async function handleSkipToBlank() {
     if (!productName.trim()) { setError('Enter a product name first'); return }
+    if (inputRating === null) { setError('Rate the product before continuing'); return }
     setStep('saving'); setError(null)
     try {
       const res = await fetch('/api/reviews', {
@@ -236,11 +269,15 @@ export function ReviewCreateWizard() {
           excerpt: '',
           content: '<p>Start writing here…</p>',
           image_url: null,
-          rating: 7,
+          rating: inputRating,
           pros: [],
           cons: [],
           product_slug: productSlug.trim() || null,
           disclosure_acknowledged: false,
+          testing_duration: testingDuration || null,
+          how_you_used_it: howYouUsedIt.trim() || null,
+          standout_moment: standoutMoment.trim() || null,
+          price_paid_cents: pricePaid.trim() && !isNaN(parseInt(pricePaid, 10)) ? parseInt(pricePaid, 10) : null,
         }),
       })
       const json = await res.json()
@@ -449,6 +486,99 @@ export function ReviewCreateWizard() {
             {CATEGORIES.map(c => <option key={c.slug} value={c.slug}>{c.icon} {c.label}</option>)}
           </select>
         </div>
+
+      {/* ── Your Experience ─────────────────────────────────────────────── */}
+      <div className="bg-gray-900 border border-orange-900/30 rounded-xl p-5 space-y-4">
+        <div>
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-0.5">Your Experience</p>
+          <p className="text-xs text-gray-600">Drives the draft tone — your rating overrides Claude&apos;s guess.</p>
+        </div>
+
+        {/* Rating picker */}
+        <div>
+          <label className="block text-sm text-gray-300 mb-2">
+            Your rating <span className="text-red-400">*</span>
+          </label>
+          <div className="grid grid-cols-5 gap-1.5">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => setInputRating(n)}
+                className={`min-h-[44px] py-3 text-sm font-bold rounded-lg transition-colors ${
+                  inputRating === n
+                    ? 'bg-orange-600 text-white'
+                    : 'bg-gray-950 border border-gray-800 text-gray-400 hover:border-orange-700/60 hover:text-white'
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+          {inputRating !== null && (
+            <p className="mt-1 text-xs text-orange-400">
+              {inputRating <= 3 ? 'Rough — not recommended' : inputRating <= 5 ? 'Below average' : inputRating <= 7 ? 'Solid pick' : inputRating <= 9 ? 'Really good' : 'Best in class'}
+            </p>
+          )}
+        </div>
+
+        {/* Testing duration + Price in a 2-col grid on sm+ */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm text-gray-300 mb-1.5">How long tested</label>
+            <select
+              value={testingDuration}
+              onChange={(e) => setTestingDuration(e.target.value)}
+              className="w-full px-4 py-2.5 bg-gray-950 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+              <option value="">— select —</option>
+              {TESTING_DURATION_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-300 mb-1.5">Price paid (cents)</label>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={pricePaid}
+              onChange={(e) => setPricePaid(e.target.value.replace(/\D/g, ''))}
+              placeholder="e.g. 2999 = $29.99"
+              className="w-full px-4 py-2.5 bg-gray-950 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+            {pricePaid && !isNaN(parseInt(pricePaid, 10)) && (
+              <p className="mt-1 text-xs text-orange-400">${(parseInt(pricePaid, 10) / 100).toFixed(2)}</p>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-300 mb-1.5">How did you use it? <span className="text-gray-600">(optional)</span></label>
+          <textarea
+            value={howYouUsedIt}
+            onChange={(e) => setHowYouUsedIt(e.target.value)}
+            maxLength={300}
+            rows={2}
+            placeholder="e.g. Built a backyard deck over 3 weekends. Used it for pilot holes, driving screws, mixing grout."
+            className="w-full px-4 py-2.5 bg-gray-950 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-300 mb-1.5">Standout moment <span className="text-gray-600">(optional)</span></label>
+          <textarea
+            value={standoutMoment}
+            onChange={(e) => setStandoutMoment(e.target.value)}
+            maxLength={300}
+            rows={2}
+            placeholder="e.g. Battery lasted the entire weekend — never had to stop and charge."
+            className="w-full px-4 py-2.5 bg-gray-950 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+          />
+        </div>
+      </div>
 
         <div>
           <label className="block text-sm text-gray-300 mb-1.5">

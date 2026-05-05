@@ -8,13 +8,19 @@ import { z } from 'zod'
 export const maxDuration = 90
 
 const DraftInput = z.object({
-  productName: z.string().min(2).max(120),
-  category: z.string().min(2).max(80),
-  keyFeatures: z.array(z.string()).max(15).default([]),
-  targetAudience: z.string().max(200).optional(),
-  productSlug: z.string().regex(/^[a-z0-9-]+$/).max(80).optional(),
+  productName:     z.string().min(2).max(120),
+  category:        z.string().min(2).max(80),
+  keyFeatures:     z.array(z.string()).max(15).default([]),
+  targetAudience:  z.string().max(200).optional(),
+  productSlug:     z.string().regex(/^[a-z0-9-]+$/).max(80).optional(),
   // 'auto' lets Claude pick (2–3 images); a number forces exactly that many.
-  imageSlots: z.union([z.literal('auto'), z.number().int().min(0).max(6)]).default('auto'),
+  imageSlots:      z.union([z.literal('auto'), z.number().int().min(0).max(6)]).default('auto'),
+  // Experience fields — author-provided; drive tone/verdict alignment.
+  rating:          z.number().int().min(1).max(10),
+  testingDuration: z.enum(['<1wk', '1-4wks', '1-3mo', '3+mo']).optional(),
+  howYouUsedIt:    z.string().max(300).optional(),
+  standoutMoment:  z.string().max(300).optional(),
+  pricePaid:       z.number().int().min(0).optional(),
 })
 
 function inlineImagesInstruction(slots: number | 'auto'): string {
@@ -61,12 +67,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { productName, category, keyFeatures, targetAudience, productSlug, imageSlots } = parsed.data
+  const { productName, category, keyFeatures, targetAudience, productSlug, imageSlots, rating, testingDuration, howYouUsedIt, standoutMoment, pricePaid } = parsed.data
+
+  const durationLabel: Record<string, string> = {
+    '<1wk': 'less than 1 week', '1-4wks': '1–4 weeks', '1-3mo': '1–3 months', '3+mo': '3+ months',
+  }
+
+  const experienceLines = [
+    `Author rating: ${rating}/10 — IMPORTANT: the entire draft (tone, verdict, pros/cons balance, recommendation) must reflect this exact score. Do not adjust it.`,
+    testingDuration ? `Testing duration: ${durationLabel[testingDuration] ?? testingDuration}` : null,
+    howYouUsedIt ? `How I used it: ${howYouUsedIt}` : null,
+    standoutMoment ? `Standout moment: ${standoutMoment}` : null,
+    pricePaid != null ? `Price paid: $${(pricePaid / 100).toFixed(2)}` : null,
+  ].filter(Boolean).join('\n')
 
   const prompt = `Write a product review:
 
 Product: ${productName}
 Category: ${category}${keyFeatures.length ? `\nKey Features: ${keyFeatures.join(', ')}` : ''}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}${productSlug ? `\nProduct slug: ${productSlug}` : ''}
+
+AUTHOR EXPERIENCE (ground truth — write the review as if you lived this):
+${experienceLines}
 
 STRUCTURE REQUIREMENTS:
 - Introduction: 2–3 sentences that open with a real testing scenario (first-person dad)
@@ -75,7 +96,7 @@ STRUCTURE REQUIREMENTS:
 - Verdict: 1–2 paragraphs with a clear buy/skip recommendation; if a product slug was provided, end the verdict with the third [[BUY:slug]] token
 - Pros: 3–6 short, specific items (not vague — "12V battery lasted 4 hours" not "long battery")
 - Cons: 2–4 honest, specific items — never skip the cons
-- Rating: honest 1–10 score; reserve 9+ for truly exceptional products
+- Rating: output the author-provided rating (${rating}) exactly — do not adjust it
 
 CONTENT BLOCKS (required — these render as structured UI elements, not prose):
 - tldr: 2–3 sentence plain-English summary for skimmers. No jargon. Lead with the verdict.
@@ -153,7 +174,10 @@ Return JSON with this exact shape:
   const imagePrompt: string = (draft.imagePrompt as string)
     ?? `Photorealistic product photo of the ${productName} on a clean surface, natural lighting, no people`
 
-  const { imagePrompt: _omit, ...cleanDraft } = draft
+  // Strip imagePrompt from the draft payload and override rating with the
+  // author-provided value — Claude's rating is ignored per design.
+  const { imagePrompt: _omit, rating: _claudeRating, ...draftWithoutRating } = draft
+  const cleanDraft = { ...draftWithoutRating, rating }
 
   return NextResponse.json({ draft: cleanDraft, imagePrompt, remaining })
 }

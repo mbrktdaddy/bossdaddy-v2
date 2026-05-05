@@ -4,7 +4,8 @@ import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import type { Product } from '@/lib/products'
-import { STORE_OPTIONS } from '@/lib/products'
+import { STORE_OPTIONS, PRODUCT_STATUS_OPTIONS } from '@/lib/products'
+import { CATEGORIES } from '@/lib/categories'
 import { ProductImageGallery } from '@/components/admin/ProductImageGallery'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
@@ -26,6 +27,11 @@ export function ProductForm({ product }: Props) {
   const [nonAffiliateUrl, setNonAffUrl]         = useState(product?.non_affiliate_url ?? '')
   const [imageUrl, setImageUrl]                 = useState(product?.image_url ?? '')
 
+  const [description, setDescription] = useState(product?.description ?? '')
+  const [category, setCategory]       = useState(product?.category ?? '')
+  const [priceCents, setPriceCents]   = useState(product?.price_cents != null ? String(product.price_cents) : '')
+  const [status, setStatus]           = useState<string>(product?.status ?? 'wishlist')
+
   const [busy, setBusy]             = useState(false)
   const [error, setError]           = useState<string | null>(null)
   const [deleting, setDeleting]     = useState(false)
@@ -37,6 +43,8 @@ export function ProductForm({ product }: Props) {
     e.preventDefault()
     setBusy(true); setError(null)
 
+    const parsedPrice = priceCents.trim() ? parseInt(priceCents.trim(), 10) : null
+
     const payload = {
       slug:              slug.trim().toLowerCase(),
       name:              name.trim(),
@@ -46,6 +54,10 @@ export function ProductForm({ product }: Props) {
       affiliate_url:     affiliateUrl.trim() || null,
       non_affiliate_url: nonAffiliateUrl.trim() || null,
       image_url:         imageUrl.trim() || null,
+      description:       description.trim() || null,
+      category:          category || null,
+      price_cents:       !isNaN(parsedPrice!) && parsedPrice !== null ? parsedPrice : null,
+      status,
     }
 
     try {
@@ -333,6 +345,66 @@ export function ProductForm({ product }: Props) {
           )}
         </div>
       )}
+
+      {/* ── Editorial metadata ─────────────────────────────────────────── */}
+      <div>
+        <label className="block text-sm text-gray-300 mb-1.5">Short description</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          maxLength={400}
+          rows={3}
+          placeholder="1–2 sentences: what this product is and why it matters. Used as fallback card copy in picks, gift guides, and /stuff."
+          className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+        />
+        <p className="mt-1 text-xs text-gray-600">{description.length}/400 characters</p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm text-gray-300 mb-1.5">Category</label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+          >
+            <option value="">— none —</option>
+            {CATEGORIES.map((c) => (
+              <option key={c.slug} value={c.slug}>{c.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-300 mb-1.5">Price (cents)</label>
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={priceCents}
+            onChange={(e) => setPriceCents(e.target.value.replace(/\D/g, ''))}
+            placeholder="e.g. 2999 = $29.99"
+            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          {priceCents && !isNaN(parseInt(priceCents, 10)) && (
+            <p className="mt-1 text-xs text-orange-400">${(parseInt(priceCents, 10) / 100).toFixed(2)}</p>
+          )}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm text-gray-300 mb-1.5">Status</label>
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+        >
+          {PRODUCT_STATUS_OPTIONS.map((s) => (
+            <option key={s.value} value={s.value}>{s.label}</option>
+          ))}
+        </select>
+        <p className="mt-1 text-xs text-gray-600">Auto-flips to &quot;Reviewed&quot; when a linked review is approved.</p>
+      </div>
 
       {error && (
         <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">{error}</p>

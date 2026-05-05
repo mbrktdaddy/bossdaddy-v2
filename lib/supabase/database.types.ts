@@ -582,39 +582,51 @@ export type Database = {
         Row: {
           affiliate_url: string | null
           asin: string | null
+          category: string | null
           created_at: string
           custom_store_name: string | null
+          description: string | null
           id: string
           image_url: string | null
           name: string
           non_affiliate_url: string | null
+          price_cents: number | null
           slug: string
+          status: string
           store: string
           updated_at: string
         }
         Insert: {
           affiliate_url?: string | null
           asin?: string | null
+          category?: string | null
           created_at?: string
           custom_store_name?: string | null
+          description?: string | null
           id?: string
           image_url?: string | null
           name: string
           non_affiliate_url?: string | null
+          price_cents?: number | null
           slug: string
+          status?: string
           store?: string
           updated_at?: string
         }
         Update: {
           affiliate_url?: string | null
           asin?: string | null
+          category?: string | null
           created_at?: string
           custom_store_name?: string | null
+          description?: string | null
           id?: string
           image_url?: string | null
           name?: string
           non_affiliate_url?: string | null
+          price_cents?: number | null
           slug?: string
+          status?: string
           store?: string
           updated_at?: string
         }
@@ -698,6 +710,7 @@ export type Database = {
           excerpt: string | null
           faqs: Json
           has_affiliate_links: boolean | null
+          how_you_used_it: string | null
           id: string
           image_url: string | null
           is_visible: boolean
@@ -707,6 +720,7 @@ export type Database = {
           moderation_flags: Json | null
           moderation_score: number | null
           not_for: Json
+          price_paid_cents: number | null
           product_name: string
           product_slug: string | null
           pros: Json | null
@@ -721,7 +735,9 @@ export type Database = {
           scroll_75_count: number
           search_vector: unknown
           slug: string
+          standout_moment: string | null
           status: string
+          testing_duration: string | null
           title: string
           tldr: string | null
           updated_at: string | null
@@ -738,6 +754,7 @@ export type Database = {
           excerpt?: string | null
           faqs?: Json
           has_affiliate_links?: boolean | null
+          how_you_used_it?: string | null
           id?: string
           image_url?: string | null
           is_visible?: boolean
@@ -747,6 +764,7 @@ export type Database = {
           moderation_flags?: Json | null
           moderation_score?: number | null
           not_for?: Json
+          price_paid_cents?: number | null
           product_name: string
           product_slug?: string | null
           pros?: Json | null
@@ -761,7 +779,9 @@ export type Database = {
           scroll_75_count?: number
           search_vector?: unknown
           slug: string
+          standout_moment?: string | null
           status?: string
+          testing_duration?: string | null
           title: string
           tldr?: string | null
           updated_at?: string | null
@@ -778,6 +798,7 @@ export type Database = {
           excerpt?: string | null
           faqs?: Json
           has_affiliate_links?: boolean | null
+          how_you_used_it?: string | null
           id?: string
           image_url?: string | null
           is_visible?: boolean
@@ -787,6 +808,7 @@ export type Database = {
           moderation_flags?: Json | null
           moderation_score?: number | null
           not_for?: Json
+          price_paid_cents?: number | null
           product_name?: string
           product_slug?: string | null
           pros?: Json | null
@@ -801,7 +823,9 @@ export type Database = {
           scroll_75_count?: number
           search_vector?: unknown
           slug?: string
+          standout_moment?: string | null
           status?: string
+          testing_duration?: string | null
           title?: string
           tldr?: string | null
           updated_at?: string | null

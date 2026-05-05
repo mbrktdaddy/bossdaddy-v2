@@ -27,6 +27,10 @@ const CreateReviewSchema = z.object({
   best_for: z.array(z.string()).default([]),
   not_for: z.array(z.string()).default([]),
   faqs: z.array(FAQSchema).default([]),
+  testing_duration: z.enum(['<1wk', '1-4wks', '1-3mo', '3+mo']).optional().nullable(),
+  how_you_used_it: z.string().max(300).optional().nullable(),
+  standout_moment: z.string().max(300).optional().nullable(),
+  price_paid_cents: z.number().int().min(0).optional().nullable(),
 })
 
 export async function POST(request: NextRequest) {
@@ -46,7 +50,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { title, product_name, category, excerpt, content, rating, pros, cons, disclosure_acknowledged, image_url, product_slug, tldr, key_takeaways, best_for, not_for, faqs } = parsed.data
+    const { title, product_name, category, excerpt, content, rating, pros, cons, disclosure_acknowledged, image_url, product_slug, tldr, key_takeaways, best_for, not_for, faqs, testing_duration, how_you_used_it, standout_moment, price_paid_cents } = parsed.data
 
     let sanitizedContent: string
     try {
@@ -96,6 +100,10 @@ export async function POST(request: NextRequest) {
         has_affiliate_links: hasAffiliateLinks,
         disclosure_acknowledged,
         reading_time_minutes: computeReadingTime(sanitizedContent),
+        testing_duration: testing_duration ?? null,
+        how_you_used_it: how_you_used_it ?? null,
+        standout_moment: standout_moment ?? null,
+        price_paid_cents: price_paid_cents ?? null,
         status: 'draft',
       })
       .select()

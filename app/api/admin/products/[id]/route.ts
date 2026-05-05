@@ -13,6 +13,10 @@ const UpdateSchema = z.object({
   affiliate_url:     z.string().url().max(2048).optional().nullable(),
   non_affiliate_url: z.string().url().max(2048).optional().nullable(),
   image_url:         z.string().url().max(2048).optional().nullable(),
+  description:       z.string().max(400).optional().nullable(),
+  category:          z.string().max(80).optional().nullable(),
+  price_cents:       z.number().int().min(0).optional().nullable(),
+  status:            z.enum(['wishlist', 'testing', 'reviewed', 'passed', 'archived']).optional(),
 })
 
 async function requireAdmin(supabase: Awaited<ReturnType<typeof createClient>>) {

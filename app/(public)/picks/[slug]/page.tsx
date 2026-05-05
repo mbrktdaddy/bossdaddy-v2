@@ -65,7 +65,7 @@ export default async function PickDetailPage({ params }: Props) {
   }).filter((i) => i.review != null)
 
   const productSlugs = [...new Set(items.map((i) => i.review?.product_slug).filter(Boolean) as string[])]
-  const productMap = new Map<string, { slug: string; affiliate_url: string | null; non_affiliate_url: string | null; store: string; custom_store_name: string | null }>()
+  const productMap = new Map<string, { slug: string; affiliate_url: string | null; non_affiliate_url: string | null; store: string; custom_store_name: string | null; description: string | null }>()
   await Promise.all(productSlugs.map(async (ps) => {
     const product = await getProductBySlug(supabase, ps)
     if (product) productMap.set(ps, product)
@@ -207,7 +207,7 @@ export default async function PickDetailPage({ params }: Props) {
                   </div>
 
                   <p className="text-sm text-gray-400 leading-relaxed flex-1">
-                    {blurb ?? review.excerpt ?? ''}
+                    {blurb ?? review.excerpt ?? product?.description ?? ''}
                   </p>
 
                   <div className="flex flex-wrap items-center gap-3 mt-4">

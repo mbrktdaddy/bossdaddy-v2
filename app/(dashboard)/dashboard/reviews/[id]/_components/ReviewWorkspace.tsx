@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { CATEGORIES } from '@/lib/categories'
+import { TESTING_DURATION_OPTIONS } from '@/lib/products'
 import { detectAffiliateLinks } from '@/lib/affiliate'
 import { preserveImagesAcrossRefine } from '@/lib/inlineImages'
 import { StatusBadge } from '@/components/workspace/StatusBadge'
@@ -67,6 +68,10 @@ interface ReviewData {
   not_for: string[] | null
   faqs: FAQ[] | null
   tags?: string[]
+  testing_duration: string | null
+  how_you_used_it: string | null
+  standout_moment: string | null
+  price_paid_cents: number | null
 }
 
 const RATING_OPTIONS = [
@@ -100,6 +105,13 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   const [metaDesc, setMetaDesc]       = useState(review.meta_description ?? '')
   const [scheduledAt, setScheduled]   = useState<string | null>(review.scheduled_publish_at)
   const [productSlug, setProductSlug] = useState<string | null>(review.product_slug)
+
+  const [testingDuration, setTestingDuration] = useState(review.testing_duration ?? '')
+  const [howYouUsedIt, setHowYouUsedIt]       = useState(review.how_you_used_it ?? '')
+  const [standoutMoment, setStandoutMoment]   = useState(review.standout_moment ?? '')
+  const [pricePaidCents, setPricePaidCents]   = useState(
+    review.price_paid_cents != null ? String(review.price_paid_cents) : ''
+  )
 
   const [tags, setTags]                   = useState<string[]>(review.tags ?? [])
   const [tldr, setTldr]                   = useState(review.tldr ?? '')
@@ -162,7 +174,12 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
     best_for:             bestFor,
     not_for:              notFor,
     faqs,
-  }), [title, productName, category, excerpt, content, imageUrl, rating, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, productSlug, tldr, keyTakeaways, bestFor, notFor, faqs])
+    testing_duration:     testingDuration || null,
+    how_you_used_it:      howYouUsedIt.trim() || null,
+    standout_moment:      standoutMoment.trim() || null,
+    price_paid_cents:     pricePaidCents.trim() && !isNaN(parseInt(pricePaidCents, 10))
+                            ? parseInt(pricePaidCents, 10) : null,
+  }), [title, productName, category, excerpt, content, imageUrl, rating, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, productSlug, tldr, keyTakeaways, bestFor, notFor, faqs, testingDuration, howYouUsedIt, standoutMoment, pricePaidCents])
 
   const save = async (p: typeof payload) => {
     const [contentRes, tagsRes] = await Promise.all([
@@ -377,6 +394,66 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
               rows={2}
               className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
             />
+          </div>
+        </div>
+
+        {/* ── Your Experience ───────────────────────────────────────────── */}
+        <div className="pt-4 border-t border-gray-800/60">
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Your Experience</p>
+          <p className="text-xs text-gray-600 mb-3">Backfill testing context — used to drive future AI refines and stored on the review.</p>
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm text-gray-300 mb-1.5">How long tested</label>
+                <select
+                  value={testingDuration}
+                  onChange={(e) => setTestingDuration(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
+                  <option value="">— not set —</option>
+                  {TESTING_DURATION_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1.5">Price paid (cents)</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={pricePaidCents}
+                  onChange={(e) => setPricePaidCents(e.target.value.replace(/\D/g, ''))}
+                  placeholder="e.g. 2999 = $29.99"
+                  className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+                {pricePaidCents && !isNaN(parseInt(pricePaidCents, 10)) && (
+                  <p className="mt-1 text-xs text-orange-400">${(parseInt(pricePaidCents, 10) / 100).toFixed(2)}</p>
+                )}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm text-gray-300 mb-1.5">How did you use it?</label>
+              <textarea
+                value={howYouUsedIt}
+                onChange={(e) => setHowYouUsedIt(e.target.value)}
+                maxLength={300}
+                rows={2}
+                placeholder="e.g. Built a backyard deck over 3 weekends — pilot holes, screws, mixing grout."
+                className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-300 mb-1.5">Standout moment</label>
+              <textarea
+                value={standoutMoment}
+                onChange={(e) => setStandoutMoment(e.target.value)}
+                maxLength={300}
+                rows={2}
+                placeholder="e.g. Battery lasted the entire weekend — never had to stop and charge."
+                className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+              />
+            </div>
           </div>
         </div>
 

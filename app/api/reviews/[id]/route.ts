@@ -38,6 +38,10 @@ const UpdateSchema = z.object({
   best_for:                 z.array(z.string()).optional(),
   not_for:                  z.array(z.string()).optional(),
   faqs:                     z.array(FAQItemSchema).optional(),
+  testing_duration:         z.enum(['<1wk', '1-4wks', '1-3mo', '3+mo']).optional().nullable(),
+  how_you_used_it:          z.string().max(300).optional().nullable(),
+  standout_moment:          z.string().max(300).optional().nullable(),
+  price_paid_cents:         z.number().int().min(0).optional().nullable(),
 })
 
 const ModerateSchema = z.object({
@@ -166,6 +170,20 @@ export async function PUT(
       } catch (err) { console.error('after() registration failed (review):', err) }
     }
 
+    // Flip linked product status to 'reviewed' when a review is approved
+    if (modParsed.data.action === 'approve' && data?.product_slug) {
+      const productSlugToFlip = data.product_slug as string
+      after(async () => {
+        try {
+          await admin
+            .from('products')
+            .update({ status: 'reviewed' })
+            .eq('slug', productSlugToFlip)
+            .in('status', ['wishlist', 'testing'])  // advance but don't clobber 'passed'/'archived'
+        } catch (err) { console.error('Product status flip failed:', err) }
+      })
+    }
+
     // Notify wishlist subscribers when a linked review goes live
     if (modParsed.data.action === 'approve' && data && process.env.RESEND_API_KEY) {
       const reviewId = id
@@ -220,6 +238,10 @@ export async function PUT(
   if (parsed.data.best_for !== undefined) updates.best_for = parsed.data.best_for
   if (parsed.data.not_for !== undefined) updates.not_for = parsed.data.not_for
   if (parsed.data.faqs !== undefined) updates.faqs = parsed.data.faqs
+  if (parsed.data.testing_duration !== undefined) updates.testing_duration = parsed.data.testing_duration
+  if (parsed.data.how_you_used_it !== undefined) updates.how_you_used_it = parsed.data.how_you_used_it
+  if (parsed.data.standout_moment !== undefined) updates.standout_moment = parsed.data.standout_moment
+  if (parsed.data.price_paid_cents !== undefined) updates.price_paid_cents = parsed.data.price_paid_cents
   if (parsed.data.content) {
     const resolved = await resolveProductTokens(parsed.data.content, supabase)
     const sanitized = sanitizeHtml(resolved)

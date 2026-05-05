@@ -12,6 +12,10 @@ const ProductSchema = z.object({
   affiliate_url:     z.string().url().max(2048).optional().nullable(),
   non_affiliate_url: z.string().url().max(2048).optional().nullable(),
   image_url:         z.string().url().max(2048).optional().nullable(),
+  description:       z.string().max(400).optional().nullable(),
+  category:          z.string().max(80).optional().nullable(),
+  price_cents:       z.number().int().min(0).optional().nullable(),
+  status:            z.enum(['wishlist', 'testing', 'reviewed', 'passed', 'archived']).optional().default('wishlist'),
 })
 
 // GET /api/admin/products — list all products (admin only)
@@ -60,6 +64,10 @@ export async function POST(request: NextRequest) {
       affiliate_url:     parsed.data.affiliate_url ?? null,
       non_affiliate_url: parsed.data.non_affiliate_url ?? null,
       image_url:         parsed.data.image_url ?? null,
+      description:       parsed.data.description ?? null,
+      category:          parsed.data.category ?? null,
+      price_cents:       parsed.data.price_cents ?? null,
+      status:            parsed.data.status ?? 'wishlist',
     })
     .select()
     .single()
