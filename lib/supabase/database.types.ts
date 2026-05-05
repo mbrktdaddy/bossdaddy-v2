@@ -578,6 +578,78 @@ export type Database = {
         }
         Relationships: []
       }
+      press_outreach: {
+        Row: {
+          body: string
+          brand_name: string
+          contact_email: string | null
+          contact_method: string
+          contact_name: string | null
+          contact_url: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          product_id: string | null
+          product_name: string
+          responded_at: string | null
+          sent_at: string | null
+          status: string
+          subject: string | null
+        }
+        Insert: {
+          body: string
+          brand_name: string
+          contact_email?: string | null
+          contact_method?: string
+          contact_name?: string | null
+          contact_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          product_name: string
+          responded_at?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+        }
+        Update: {
+          body?: string
+          brand_name?: string
+          contact_email?: string | null
+          contact_method?: string
+          contact_name?: string | null
+          contact_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          product_name?: string
+          responded_at?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "press_outreach_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "press_outreach_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           affiliate_url: string | null
