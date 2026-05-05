@@ -60,7 +60,7 @@ export default async function CategoryHubPage({ params }: Props) {
   ])
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
-  const jsonLd = {
+  const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
@@ -69,12 +69,26 @@ export default async function CategoryHubPage({ params }: Props) {
     ],
   }
 
+  type FAQ = { question: string; answer: string }
+  const catFaqs = (cat.faqs ?? []) as unknown as FAQ[]
+
+  const faqLd = catFaqs.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: catFaqs.map((f) => ({
+      '@type': 'Question',
+      name: f.question,
+      acceptedAnswer: { '@type': 'Answer', text: f.answer },
+    })),
+  } : null
+
   const hasReviews = topReviews && topReviews.length > 0
   const hasGuides = latestGuides && latestGuides.length > 0
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
       <div className="w-full max-w-6xl mx-auto px-6 py-12">
 
@@ -85,6 +99,11 @@ export default async function CategoryHubPage({ params }: Props) {
           </p>
           <h1 className="text-4xl md:text-5xl font-black mb-5 leading-tight">{cat.label}</h1>
           <p className="text-gray-400 max-w-2xl leading-relaxed text-lg">{cat.description}</p>
+          {cat.pov && (
+            <p className="mt-5 text-gray-300 max-w-2xl leading-relaxed italic border-l-2 border-orange-600/50 pl-4">
+              {cat.pov as string}
+            </p>
+          )}
           <Link
             href={`/reviews/category/${slug}`}
             className="inline-block mt-5 text-sm text-gray-500 hover:text-orange-400 transition-colors font-medium"
@@ -247,6 +266,34 @@ export default async function CategoryHubPage({ params }: Props) {
               See what&apos;s coming →
             </Link>
           </div>
+        )}
+
+        {/* ── FAQ accordion ────────────────────────────────────────────── */}
+        {catFaqs.length > 0 && (
+          <section className="mb-16">
+            <div className="flex items-stretch gap-4 mb-6">
+              <div className="w-[3px] bg-orange-600 rounded-full" />
+              <div>
+                <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-1">Common Questions</p>
+                <h2 className="text-2xl font-black text-white leading-tight">{cat.label} FAQ</h2>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {catFaqs.map((faq, i) => (
+                <details key={i} className="group bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+                  <summary className="flex items-center justify-between gap-3 px-4 py-3.5 cursor-pointer list-none min-h-[44px]">
+                    <span className="text-sm font-semibold text-white leading-snug">{faq.question}</span>
+                    <svg className="w-4 h-4 shrink-0 text-orange-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div className="px-4 pb-4 pt-1 text-sm text-gray-400 leading-relaxed border-t border-gray-800">
+                    {faq.answer}
+                  </div>
+                </details>
+              ))}
+            </div>
+          </section>
         )}
 
         {/* ── Other categories ──────────────────────────────────────────── */}
