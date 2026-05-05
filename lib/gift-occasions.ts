@@ -241,6 +241,34 @@ export const OCCASIONS: OccasionConfig[] = [
   },
 ]
 
+/**
+ * Returns 6 occasion configs ordered by seasonal relevance.
+ * Pass a date for deterministic testing; defaults to today.
+ */
+export function getSeasonalOccasions(date: Date = new Date()): OccasionConfig[] {
+  const month = date.getMonth() + 1 // 1-12
+
+  // Ordered slugs per season — first = most relevant
+  let values: Occasion[]
+  if (month === 12 || month <= 2) {
+    // Winter: Dec–Feb
+    values = ['christmas', 'new_year', 'valentines_day', 'super_bowl', 'anniversary', 'birthday']
+  } else if (month <= 5) {
+    // Spring: Mar–May
+    values = ['mothers_day', 'fathers_day', 'graduation', 'easter', 'baby_shower', 'anniversary']
+  } else if (month <= 8) {
+    // Summer: Jun–Aug
+    values = ['fathers_day', 'fourth_of_july', 'grilling_season', 'camping_season', 'summer_kickoff', 'birthday']
+  } else {
+    // Fall: Sep–Nov
+    values = ['back_to_school', 'halloween', 'thanksgiving', 'christmas', 'birthday', 'anniversary']
+  }
+
+  return values
+    .map((v) => OCCASIONS.find((o) => o.value === v))
+    .filter((o): o is OccasionConfig => o !== undefined)
+}
+
 export const OCCASION_GROUPS: { id: OccasionGroup; label: string }[] = [
   { id: 'holiday',   label: 'Holidays' },
   { id: 'milestone', label: 'Life Milestones' },
