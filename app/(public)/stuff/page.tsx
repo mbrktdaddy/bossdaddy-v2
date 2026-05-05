@@ -35,27 +35,27 @@ export default async function StuffPage({ searchParams }: Props) {
   const seasonalOccasions = getSeasonalOccasions()
   const seasonalValues = seasonalOccasions.map((o) => o.value)
 
+  // Apply category filter at DB level (before limit) — JS post-filter would
+  // miss in-category reviews ranked below position 120 globally.
+  let reviewsQuery = supabase
+    .from('reviews')
+    .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
+    .eq('status', 'approved')
+    .eq('is_visible', true)
+    .gte('rating', 8)
+    .order('rating', { ascending: false })
+    .order('published_at', { ascending: false })
+    .limit(120)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (category) reviewsQuery = reviewsQuery.eq('category', category as any)
+
   const [
     { data: reviews },
     { data: allApproved },
     { data: giftPickLists },
     { data: featuredPickRows },
   ] = await Promise.all([
-    supabase
-      .from('reviews')
-      .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
-      .eq('status', 'approved')
-      .eq('is_visible', true)
-      .gte('rating', 8)
-      .order('rating', { ascending: false })
-      .order('published_at', { ascending: false })
-      .limit(120)
-      .then((r) => {
-        if (category) {
-          return { ...r, data: (r.data ?? []).filter((row) => row.category === category) }
-        }
-        return r
-      }),
+    reviewsQuery,
     supabase
       .from('reviews')
       .select('category')
@@ -155,7 +155,7 @@ export default async function StuffPage({ searchParams }: Props) {
               </Link>
             </>
           )}
-          {bossPicks > 0 && (
+          {!category && bossPicks > 0 && (
             <>
               <span className="text-gray-700 hidden sm:block">·</span>
               <a href="#boss-picks" className="hover:text-gray-300 transition-colors">
@@ -163,7 +163,7 @@ export default async function StuffPage({ searchParams }: Props) {
               </a>
             </>
           )}
-          {tens.length > 0 && (
+          {!category && tens.length > 0 && (
             <>
               <span className="text-gray-700 hidden sm:block">·</span>
               <a href="#perfect-score" className="hover:text-gray-300 transition-colors">
@@ -310,7 +310,7 @@ export default async function StuffPage({ searchParams }: Props) {
               <Link href={`/picks/${featuredPick.slug}`} className="group block bg-gray-900 rounded-2xl overflow-hidden shadow-xl shadow-black/50 hover:shadow-black/70 transition-all">
                 <div className="flex flex-col sm:flex-row">
                   {/* Hero image */}
-                  <div className="relative w-full sm:w-72 h-48 sm:h-auto shrink-0 bg-gray-800">
+                  <div className="relative w-full sm:w-72 h-48 sm:h-auto sm:min-h-[220px] shrink-0 bg-gray-800">
                     {featuredPick.hero_image_url ? (
                       <Image
                         src={featuredPick.hero_image_url}
@@ -387,15 +387,15 @@ export default async function StuffPage({ searchParams }: Props) {
                   <Link
                     key={c.slug}
                     href={`/category/${c.slug}`}
-                    className="group flex flex-col items-center text-center gap-2 bg-gray-900 hover:bg-gray-800 rounded-2xl p-4 shadow-md shadow-black/30 transition-all"
+                    className="group flex flex-col items-center justify-center text-center gap-2 bg-gray-900 hover:bg-gray-800 rounded-2xl p-4 min-h-[120px] shadow-md shadow-black/30 transition-all"
                   >
                     <span className="text-3xl">{c.icon}</span>
                     <span className="text-sm font-bold text-white leading-tight group-hover:text-orange-400 transition-colors">
                       {c.shortLabel}
                     </span>
-                    {count > 0 && (
-                      <span className="text-xs text-gray-600">{count} pick{count !== 1 ? 's' : ''}</span>
-                    )}
+                    <span className="text-xs text-gray-600">
+                      {count > 0 ? `${count} pick${count !== 1 ? 's' : ''}` : 'Coming soon'}
+                    </span>
                   </Link>
                 )
               })}
