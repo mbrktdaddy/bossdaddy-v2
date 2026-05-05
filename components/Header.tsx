@@ -10,8 +10,6 @@ const NAV_LINKS = [
   { href: '/',        label: 'Home' },
   { href: '/reviews', label: 'Reviews' },
   { href: '/guides',  label: 'Guides' },
-  { href: '/gifts',   label: 'Gifts' },
-  { href: '/picks',   label: 'Picks' },
   { href: '/stuff',   label: 'Stuff' },
 ]
 
@@ -88,7 +86,7 @@ export default function Header() {
     router.refresh()
   }
 
-  const isCategoryActive = pathname.startsWith('/reviews/category') || pathname.startsWith('/guides/category')
+  const isCategoryActive = pathname.startsWith('/reviews/category') || pathname.startsWith('/guides/category') || pathname.startsWith('/category/')
 
   return (
     <header className="sticky top-0 z-50 bg-gray-950/95 backdrop-blur-sm border-b border-gray-800/60">
@@ -157,7 +155,7 @@ export default function Header() {
                     </Link>
                   ))}
                 </div>
-                <div className="mt-4 pt-4 border-t border-gray-800 flex items-center justify-between">
+                <div className="mt-4 pt-4 border-t border-gray-800 flex items-center justify-between flex-wrap gap-y-2">
                   <Link
                     href="/reviews"
                     onClick={() => setCatOpen(false)}
@@ -171,6 +169,20 @@ export default function Header() {
                     className="text-xs text-gray-500 hover:text-gray-300 font-semibold transition-colors"
                   >
                     All guides →
+                  </Link>
+                  <Link
+                    href="/gifts"
+                    onClick={() => setCatOpen(false)}
+                    className="text-xs text-gray-500 hover:text-gray-300 font-semibold transition-colors"
+                  >
+                    Gift guides →
+                  </Link>
+                  <Link
+                    href="/picks"
+                    onClick={() => setCatOpen(false)}
+                    className="text-xs text-gray-500 hover:text-gray-300 font-semibold transition-colors"
+                  >
+                    Collections →
                   </Link>
                 </div>
               </div>
@@ -377,6 +389,25 @@ export default function Header() {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Secondary links — gift guides + collections */}
+          <div className="px-4 pb-4 flex items-center gap-4 border-t border-gray-800/40 pt-3">
+            <Link
+              href="/gifts"
+              onClick={() => setMobileOpen(false)}
+              className="text-sm text-gray-500 hover:text-orange-400 font-semibold transition-colors py-1"
+            >
+              🎁 Gift Guides
+            </Link>
+            <span className="text-gray-800">·</span>
+            <Link
+              href="/picks"
+              onClick={() => setMobileOpen(false)}
+              className="text-sm text-gray-500 hover:text-orange-400 font-semibold transition-colors py-1"
+            >
+              ⭐ Collections
+            </Link>
           </div>
 
           {/* Auth / account */}
