@@ -5,13 +5,18 @@ import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
-export const maxDuration = 60
+export const maxDuration = 90
+
+const FAQSchema = z.object({ question: z.string(), answer: z.string() })
 
 const RefineInput = z.object({
-  title:       z.string().min(1).max(120),
-  category:    z.string().min(1).max(80),
-  content:     z.string().min(10),
-  instruction: z.string().min(4).max(1000),
+  title:         z.string().min(1).max(120),
+  category:      z.string().min(1).max(80),
+  content:       z.string().min(10),
+  instruction:   z.string().min(4).max(1000),
+  tldr:          z.string().max(600).optional(),
+  keyTakeaways:  z.array(z.string()).optional(),
+  faqs:          z.array(FAQSchema).optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -28,7 +33,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { title, category, content, instruction } = parsed.data
+  const { title, category, content, instruction, tldr, keyTakeaways, faqs } = parsed.data
 
   // Strip HTML tags so Claude receives clean readable text — avoids nested-quote JSON breakage
   const plainText = content
@@ -37,6 +42,12 @@ export async function POST(request: NextRequest) {
     .replace(/\s+/g, ' ')
     .trim()
 
+  const contentBlocksContext = [
+    tldr ? `Current TL;DR: ${tldr}` : null,
+    keyTakeaways?.length ? `Current Key Takeaways:\n${keyTakeaways.map((t, i) => `${i + 1}. ${t}`).join('\n')}` : null,
+    faqs?.length ? `Current FAQs:\n${faqs.map((f) => `Q: ${f.question}\nA: ${f.answer}`).join('\n\n')}` : null,
+  ].filter(Boolean).join('\n\n')
+
   const prompt = `You are editing an existing Boss Daddy guide. Apply ONLY the requested changes — preserve everything else.
 
 Title: ${title}
@@ -44,13 +55,16 @@ Category: ${category}
 
 Current article text:
 ${plainText}
-
+${contentBlocksContext ? `\n${contentBlocksContext}\n` : ''}
 Refinement instructions: ${instruction}
 
-Return JSON with this exact shape (same as a new draft):
+Return JSON with this exact shape:
 {
   "title": "string — updated title if the instructions require it, otherwise keep the original",
   "excerpt": "string — updated excerpt if needed, otherwise keep original (max 160 chars)",
+  "tldr": "string — updated TL;DR if the instructions require it, otherwise keep the original",
+  "keyTakeaways": ["string — updated key takeaways if the instructions require it, otherwise keep the originals"],
+  "faqs": [{ "question": "string", "answer": "string" }],
   "introduction": "string — the opening paragraph(s)",
   "sections": [
     { "heading": "string", "body": "string" }
@@ -65,7 +79,7 @@ Important: Only change what the instructions specify. Keep the first-person dad 
     const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
     const message = await claude.messages.create({
       model: MODEL,
-      max_tokens: 3000,
+      max_tokens: 3800,
       system: systemBlocks,
       messages: [{ role: 'user', content: prompt }],
     })

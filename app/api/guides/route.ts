@@ -8,12 +8,17 @@ import { z } from 'zod'
 
 const CategorySchema = z.enum(CATEGORY_SLUGS as [string, ...string[]])
 
+const FAQSchema = z.object({ question: z.string(), answer: z.string() })
+
 const CreateGuideSchema = z.object({
-  title: z.string().min(10).max(120),
-  category: CategorySchema,
-  excerpt: z.string().max(200).optional(),
-  content: z.string().min(100),
-  image_url: z.string().url().optional().nullable(),
+  title:         z.string().min(10).max(120),
+  category:      CategorySchema,
+  excerpt:       z.string().max(200).optional(),
+  content:       z.string().min(100),
+  image_url:     z.string().url().optional().nullable(),
+  tldr:          z.string().max(600).optional().nullable(),
+  key_takeaways: z.array(z.string()).default([]),
+  faqs:          z.array(FAQSchema).default([]),
 })
 
 export async function POST(request: NextRequest) {
@@ -34,7 +39,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { title, category, excerpt, content, image_url } = parsed.data
+    const { title, category, excerpt, content, image_url, tldr, key_takeaways, faqs } = parsed.data
 
     let sanitizedContent: string
     try {
@@ -59,12 +64,15 @@ export async function POST(request: NextRequest) {
         slug,
         title,
         category,
-        excerpt: excerpt ?? null,
-        content: sanitizedContent,
-        image_url: image_url ?? null,
+        excerpt:              excerpt ?? null,
+        content:              sanitizedContent,
+        image_url:            image_url ?? null,
+        tldr:                 tldr ?? null,
+        key_takeaways:        key_takeaways,
+        faqs:                 faqs,
         reading_time_minutes: computeReadingTime(sanitizedContent),
-        has_affiliate_links: detectAffiliateLinks(sanitizedContent),
-        status: 'draft',
+        has_affiliate_links:  detectAffiliateLinks(sanitizedContent),
+        status:               'draft',
       })
       .select()
       .single()

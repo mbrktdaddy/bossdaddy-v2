@@ -12,9 +12,13 @@ export default async function GuideWorkspacePage({
 
   const { data: guide } = await admin
     .from('guides')
-    .select('id, title, category, excerpt, content, image_url, status, slug, moderation_score, moderation_flags, created_at, updated_at, reading_time_minutes, rejection_reason, meta_title, meta_description, scheduled_publish_at')
+    .select('id, title, category, excerpt, content, image_url, status, slug, moderation_score, moderation_flags, created_at, updated_at, reading_time_minutes, rejection_reason, meta_title, meta_description, scheduled_publish_at, tldr, key_takeaways, faqs')
     .eq('id', id)
     .single()
+
+  const { data: tagRows } = await admin
+    .from('guide_tags').select('tag_slug').eq('guide_id', id)
+  const guideTags = (tagRows ?? []).map((r) => r.tag_slug)
 
   if (!guide) {
     return (
@@ -35,6 +39,9 @@ export default async function GuideWorkspacePage({
       guide={{
         ...guide,
         moderation_flags: (guide.moderation_flags ?? []) as string[],
+        key_takeaways:    (guide.key_takeaways ?? []) as string[],
+        faqs:             (guide.faqs ?? []) as { question: string; answer: string }[],
+        tags:             guideTags,
       }}
     />
   )

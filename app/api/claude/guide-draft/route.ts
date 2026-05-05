@@ -69,6 +69,11 @@ STRUCTURE REQUIREMENTS:
 - Conclusion: 1–2 paragraphs with a specific next step or recommendation
 - Separate paragraphs within each section with \\n\\n
 
+CONTENT BLOCKS (required — these render as structured UI elements, not prose):
+- tldr: 2–3 sentence plain-English summary for skimmers. Lead with the main takeaway.
+- keyTakeaways: 3–5 specific, actionable bullet points. Not a rehash of the intro — highlight the most useful or surprising insights.
+- faqs: 3–5 Q&A pairs covering the most common questions on this topic. Write questions the way a real dad searching Google would phrase them. Answers 2–3 sentences each.
+
 SEO: Include the main topic phrase naturally in the intro and at least one section heading.
 
 ${inlineImagesInstruction(imageSlots)}
@@ -77,6 +82,9 @@ Return JSON with this exact shape:
 {
   "title": "string (specific, useful title — max 80 chars, include the topic keyword)",
   "excerpt": "string (one punchy sentence for the article card — max 160 chars)",
+  "tldr": "string (2–3 sentences, plain-English summary for skimmers)",
+  "keyTakeaways": ["string (3–5 specific, actionable items)"],
+  "faqs": [{ "question": "string", "answer": "string (2–3 sentences)" }],
   "introduction": "string (2–3 sentences, first-person dad opening a real situation)",
   "sections": [
     { "heading": "string (clear, action-oriented heading)", "body": "string (150–250 words, paragraphs separated by \\n\\n)" }
@@ -91,7 +99,7 @@ Return JSON with this exact shape:
   const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
   const claudeResult = await getClaudeClient().messages.create({
     model: MODEL,
-    max_tokens: 3000,
+    max_tokens: 3800,
     system: systemBlocks,
     messages: [{ role: 'user', content: prompt }],
   }).catch((err: unknown) => {

@@ -20,6 +20,8 @@ const ModerateSchema = z.object({
   rejection_reason: z.string().optional(),
 })
 
+const FAQItemSchema = z.object({ question: z.string(), answer: z.string() })
+
 const UpdateSchema = z.object({
   title:                z.string().min(10).max(120).optional(),
   category:             CategorySchema.optional(),
@@ -29,6 +31,9 @@ const UpdateSchema = z.object({
   meta_title:           z.string().max(70).optional().nullable(),
   meta_description:     z.string().max(200).optional().nullable(),
   scheduled_publish_at: z.string().datetime().optional().nullable(),
+  tldr:                 z.string().max(600).optional().nullable(),
+  key_takeaways:        z.array(z.string()).optional(),
+  faqs:                 z.array(FAQItemSchema).optional(),
 })
 
 // GET /api/guides/[id]
@@ -166,6 +171,9 @@ export async function PUT(
   if (parsed.data.meta_title !== undefined) updates.meta_title = parsed.data.meta_title
   if (parsed.data.meta_description !== undefined) updates.meta_description = parsed.data.meta_description
   if (parsed.data.scheduled_publish_at !== undefined) updates.scheduled_publish_at = parsed.data.scheduled_publish_at
+  if (parsed.data.tldr !== undefined) updates.tldr = parsed.data.tldr
+  if (parsed.data.key_takeaways !== undefined) updates.key_takeaways = parsed.data.key_takeaways
+  if (parsed.data.faqs !== undefined) updates.faqs = parsed.data.faqs
   if (parsed.data.content) {
     const resolved = await resolveProductTokens(parsed.data.content, supabase)
     const sanitized = sanitizeHtml(resolved)

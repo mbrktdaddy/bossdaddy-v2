@@ -45,7 +45,7 @@ const getGuide = cache(async (slug: string) => {
   const supabase = await createClient()
   const { data } = await supabase
     .from('guides')
-    .select('id, title, slug, category, content, excerpt, image_url, has_affiliate_links, published_at, reading_time_minutes, meta_title, meta_description, profiles(username)')
+    .select('id, title, slug, category, content, excerpt, image_url, has_affiliate_links, published_at, reading_time_minutes, meta_title, meta_description, tldr, key_takeaways, faqs, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -115,17 +115,37 @@ export default async function GuidePage({ params }: Props) {
       : Promise.resolve({ data: [] as { slug: string; name: string; affiliate_url: string | null; non_affiliate_url: string | null; store: string; custom_store_name: string | null; image_url: string | null }[], error: null }),
   ])
 
+  type FAQ = { question: string; answer: string }
+  const guideFaqs = (guide.faqs ?? []) as FAQ[]
+  const guideKeyTakeaways = (guide.key_takeaways ?? []) as string[]
+
   const profileData = Array.isArray(guide.profiles)
     ? guide.profiles[0]
     : (guide.profiles as unknown as { username: string } | null)
   const author = profileData?.username ?? 'Boss Daddy'
   const category = getCategoryBySlug(guide.category ?? '')
 
+  const faqJsonLd = guideFaqs.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: guideFaqs.map((f) => ({
+      '@type': 'Question',
+      name: f.question,
+      acceptedAnswer: { '@type': 'Answer', text: f.answer },
+    })),
+  } : null
+
   return (
     <>
       <ReadingProgressBar />
       <ViewTracker id={guide.id} type="guide" />
       <EngagementTracker contentType="guide" contentId={guide.id} />
+      {faqJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+      )}
       <div className="max-w-[1100px] mx-auto px-6 py-12">
 
         {/* Breadcrumb */}
@@ -183,6 +203,26 @@ export default async function GuidePage({ params }: Props) {
           </LightboxImage>
         )}
 
+        {/* TL;DR box */}
+        {(guide.tldr || guideKeyTakeaways.length > 0) && (
+          <div className="mb-10 bg-orange-950/30 border border-orange-900/40 rounded-2xl p-5 sm:p-6">
+            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">TL;DR</p>
+            {guide.tldr && (
+              <p className="text-gray-200 leading-relaxed text-sm sm:text-base mb-4">{guide.tldr}</p>
+            )}
+            {guideKeyTakeaways.length > 0 && (
+              <ul className="space-y-2">
+                {guideKeyTakeaways.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-gray-300">
+                    <span className="text-orange-500 mt-0.5 shrink-0">→</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
         {/* ── Two-column layout ─────────────────────────────────────────── */}
         <div className="lg:grid lg:grid-cols-[1fr_280px] lg:gap-10 lg:items-start">
 
@@ -224,6 +264,28 @@ export default async function GuidePage({ params }: Props) {
                 })}
               </ImageLightbox>
             </div>
+
+            {/* FAQ accordion */}
+            {guideFaqs.length > 0 && (
+              <div className="mt-12 pt-8 border-t border-gray-800/60">
+                <h2 className="text-xl font-black mb-5">Frequently Asked Questions</h2>
+                <div className="space-y-2">
+                  {guideFaqs.map((faq, i) => (
+                    <details key={i} className="group bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+                      <summary className="flex items-center justify-between gap-3 px-4 py-3.5 cursor-pointer list-none min-h-[44px]">
+                        <span className="text-sm font-semibold text-white leading-snug">{faq.question}</span>
+                        <svg className="w-4 h-4 shrink-0 text-orange-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </summary>
+                      <div className="px-4 pb-4 pt-1 text-sm text-gray-400 leading-relaxed border-t border-gray-800">
+                        {faq.answer}
+                      </div>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Email signup CTA */}
             <div className="mt-12 pt-8">
