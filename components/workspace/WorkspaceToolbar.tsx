@@ -31,8 +31,6 @@ export function WorkspaceToolbar({
   previewUrl, canPublish = true, publishBlockedReason, readinessChecks,
   previewOpen, onTogglePreview,
 }: Props) {
-  const incomplete = readinessChecks?.filter((c) => !c.done) ?? []
-
   return (
     <div className="sticky bottom-0 left-0 right-0 -mx-4 sm:-mx-8 px-4 sm:px-8 py-3 bg-gray-950/95 backdrop-blur border-t border-gray-800 flex items-center gap-2 flex-wrap z-10">
       <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
