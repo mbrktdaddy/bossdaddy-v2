@@ -1,6 +1,5 @@
 'use server'
 import { createClient } from '@/lib/supabase/server'
-import type { CategorySlug } from '@/lib/categories'
 
 export type GuideRow = {
   id: string

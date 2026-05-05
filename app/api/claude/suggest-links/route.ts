@@ -2,7 +2,6 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getClaudeClient, MODEL } from '@/lib/claude/client'
-import type { CategorySlug } from '@/lib/categories'
 import { z } from 'zod'
 
 export const maxDuration = 30

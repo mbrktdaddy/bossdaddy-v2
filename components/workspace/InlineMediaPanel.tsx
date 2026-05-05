@@ -14,7 +14,6 @@ import {
   detachFromGallery,
   extractH2Headings,
   extractItems,
-  extractSlots,
   fillSlot,
   insertAtPosition,
   moveChildInGallery,

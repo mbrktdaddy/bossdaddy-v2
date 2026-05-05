@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { CATEGORIES, getCategoryBySlug, type CategorySlug } from '@/lib/categories'
+import { CATEGORIES, getCategoryBySlug } from '@/lib/categories'
 import GuideCard from './_components/GuideCard'
 import GuidesGrid from './_components/GuidesGrid'
 import FeaturedGuideCard from '@/components/FeaturedGuideCard'

@@ -1,11 +1,11 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export const maxDuration = 60
 
 // GET /api/admin/export — admin-only full content backup as JSON
-export async function GET(_request: NextRequest) {
+export async function GET() {
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

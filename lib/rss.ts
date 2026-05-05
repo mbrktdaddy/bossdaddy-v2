@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { getCategoryLabel, type CategorySlug } from '@/lib/categories'
+import { getCategoryLabel } from '@/lib/categories'
 
 export interface FeedItem {
   type: 'review' | 'guide'

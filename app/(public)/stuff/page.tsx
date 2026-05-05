@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
-import { CATEGORIES, getCategoryBySlug, type CategorySlug } from '@/lib/categories'
+import { CATEGORIES, getCategoryBySlug } from '@/lib/categories'
 import RatingScore from '@/components/RatingScore'
 import { MerchPanel } from '@/app/(public)/gear/_components/MerchPanel'
 import FeaturedReviewCard from '@/components/FeaturedReviewCard'
