@@ -47,8 +47,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
+  const guideCategoryUrls: MetadataRoute.Sitemap = CATEGORY_SLUGS.map((slug) => ({
+    url: `${base}/guides/category/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.8,
+  }))
+
   const tagUrls: MetadataRoute.Sitemap = (tags ?? []).map((t) => ({
     url: `${base}/reviews/tag/${t.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.6,
+  }))
+
+  const guideTagUrls: MetadataRoute.Sitemap = (tags ?? []).map((t) => ({
+    url: `${base}/guides/tag/${t.slug}`,
     lastModified: new Date(),
     changeFrequency: 'weekly',
     priority: 0.6,
@@ -79,7 +93,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/bench`,   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${base}/about`,   lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
     ...categoryUrls,
+    ...guideCategoryUrls,
     ...tagUrls,
+    ...guideTagUrls,
     ...reviewUrls,
     ...articleUrls,
     ...pickUrls,

@@ -109,6 +109,13 @@ SEO: Include the product name naturally in the intro and at least one section he
 
 ${inlineImagesInstruction(imageSlots)}
 
+TAGS: Pick 3–6 slugs from this controlled vocabulary that best describe this review. Be selective — only tag what genuinely applies.
+Editorial (pick at most 1): top-pick, best-value, splurge, hidden-gem, boss-approved, mixed-verdict, buyer-beware, better-options, overhyped
+Life Stage (pick relevant ones): pregnancy, newborn, infant, toddler, preschool, school-age, teen
+Price: under-25, under-50, under-100, under-250, premium
+Use Case: travel, daily, occasional, gift-idea, gear-haul
+Topic: home-improvement, workshop, automotive, yard-work, kitchen-tools, outdoor-cooking, mental-health, mindfulness, self-help, faith, formula-feeding, baby-sleep, strollers, car-seats, baby-carriers, diapering, nursery-gear, power-tools, hand-tools, storage-org, camping, hiking, fishing, hunting, water-sports, smart-home, wearables, audio-gear, edc-carry, truck-gear, detailing, cast-iron, meal-prep, fitness, home-gym, cleaning, organization
+
 Return JSON with this exact shape:
 {
   "title": "string (SEO title including product name, max 70 chars — e.g. 'DeWalt 20V Drill Review: Built for Real Dad Projects')",
@@ -129,7 +136,8 @@ Return JSON with this exact shape:
   "imagePrompt": "string (DALL-E 3 prompt: the product in a realistic setting, natural or warm lighting, clean composition, no people, no text, under 180 chars, style: editorial product photography)",
   "inlineImages": [
     { "afterHeading": "string (must match one of the section headings above)", "prompt": "string", "altText": "string", "caption": "string" }
-  ]
+  ],
+  "suggestedTags": ["string (3–6 slugs from the controlled vocabulary above)"]
 }`
 
   const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
@@ -174,10 +182,11 @@ Return JSON with this exact shape:
   const imagePrompt: string = (draft.imagePrompt as string)
     ?? `Photorealistic product photo of the ${productName} on a clean surface, natural lighting, no people`
 
-  // Strip imagePrompt from the draft payload and override rating with the
-  // author-provided value — Claude's rating is ignored per design.
-  const { imagePrompt: _omit, rating: _claudeRating, ...draftWithoutRating } = draft
-  const cleanDraft = { ...draftWithoutRating, rating }
+  const suggestedTags = Array.isArray(draft.suggestedTags) ? draft.suggestedTags as string[] : []
 
-  return NextResponse.json({ draft: cleanDraft, imagePrompt, remaining })
+  // Strip imagePrompt and suggestedTags from draft payload; override rating with author value.
+  const { imagePrompt: _omit, rating: _claudeRating, suggestedTags: _tags, ...draftWithoutExtras } = draft
+  const cleanDraft = { ...draftWithoutExtras, rating }
+
+  return NextResponse.json({ draft: cleanDraft, imagePrompt, suggestedTags, remaining })
 }

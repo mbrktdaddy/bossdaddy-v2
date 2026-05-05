@@ -19,6 +19,7 @@ const CreateGuideSchema = z.object({
   tldr:          z.string().max(600).optional().nullable(),
   key_takeaways: z.array(z.string()).default([]),
   faqs:          z.array(FAQSchema).default([]),
+  suggested_tags: z.array(z.string().max(80)).max(10).default([]),
 })
 
 export async function POST(request: NextRequest) {
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { title, category, excerpt, content, image_url, tldr, key_takeaways, faqs } = parsed.data
+    const { title, category, excerpt, content, image_url, tldr, key_takeaways, faqs, suggested_tags } = parsed.data
 
     let sanitizedContent: string
     try {
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Article insert failed:', error)
+      console.error('Guide insert failed:', error)
       if (error.code === '23505') return NextResponse.json({ error: 'A guide with this title already exists. Try a slightly different title.' }, { status: 409 })
       return NextResponse.json({
         error: `Failed to create guide: ${error.message}`,
@@ -87,6 +88,14 @@ export async function POST(request: NextRequest) {
         hint: error.hint,
       }, { status: 500 })
     }
+    // Auto-apply AI-suggested tags — fire-and-forget, don't block response
+    if (data && suggested_tags.length > 0) {
+      const tagRows = suggested_tags.map((slug) => ({ guide_id: data.id, tag_slug: slug }))
+      supabase.from('guide_tags').insert(tagRows).then(({ error: tagErr }) => {
+        if (tagErr) console.error('Auto-tag insert failed:', tagErr)
+      })
+    }
+
     return NextResponse.json({ article: data }, { status: 201 })
   } catch (err) {
     console.error('Uncaught in POST /api/guides:', err)

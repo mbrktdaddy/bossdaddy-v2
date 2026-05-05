@@ -78,6 +78,12 @@ SEO: Include the main topic phrase naturally in the intro and at least one secti
 
 ${inlineImagesInstruction(imageSlots)}
 
+TAGS: Pick 3–6 slugs from this controlled vocabulary that best describe this guide. Be selective — only tag what genuinely applies.
+Editorial (pick at most 1): top-pick, best-value, hidden-gem
+Life Stage: pregnancy, newborn, infant, toddler, preschool, school-age, teen
+Use Case: travel, daily, occasional, gift-idea, gear-haul
+Topic: home-improvement, workshop, automotive, yard-work, kitchen-tools, outdoor-cooking, mental-health, mindfulness, self-help, faith, formula-feeding, baby-sleep, strollers, car-seats, baby-carriers, diapering, nursery-gear, power-tools, hand-tools, storage-org, camping, hiking, fishing, hunting, water-sports, smart-home, wearables, audio-gear, edc-carry, truck-gear, detailing, cast-iron, meal-prep, fitness, home-gym, cleaning, organization
+
 Return JSON with this exact shape:
 {
   "title": "string (specific, useful title — max 80 chars, include the topic keyword)",
@@ -93,7 +99,8 @@ Return JSON with this exact shape:
   "heroImagePrompt": "string (DALL-E 3 prompt for the hero image: specific real-world objects, natural daylight or warm indoor light, no people, no text, under 180 chars, style: editorial photography)",
   "inlineImages": [
     { "afterHeading": "string (must match one of the section headings above)", "prompt": "string", "altText": "string", "caption": "string" }
-  ]
+  ],
+  "suggestedTags": ["string (3–6 slugs from the controlled vocabulary above)"]
 }`
 
   const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
@@ -139,7 +146,9 @@ Return JSON with this exact shape:
     ?? (draft.imagePrompts as Record<string, string> | undefined)?.hero
     ?? `Photorealistic lifestyle photo for a dad-focused article about ${topic}, no people, objects and setting only`
 
-  const { heroImagePrompt: _heroOmit, imagePrompts: _legacyOmit, ...cleanDraft } = draft
+  const suggestedTags = Array.isArray(draft.suggestedTags) ? draft.suggestedTags as string[] : []
 
-  return NextResponse.json({ draft: cleanDraft, imagePrompt, remaining })
+  const { heroImagePrompt: _heroOmit, imagePrompts: _legacyOmit, suggestedTags: _tags, ...cleanDraft } = draft
+
+  return NextResponse.json({ draft: cleanDraft, imagePrompt, suggestedTags, remaining })
 }

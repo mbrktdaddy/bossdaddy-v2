@@ -74,6 +74,7 @@ export function ReviewCreateWizard() {
     rating: number; pros: string[]; cons: string[]; imagePrompt: string
     tldr: string; keyTakeaways: string[]; bestFor: string[]; notFor: string[]
     faqs: { question: string; answer: string }[]
+    suggestedTags: string[]
   } | null>(null)
 
   const [products, setProducts]         = useState<ProductOption[]>([])
@@ -203,6 +204,7 @@ export function ReviewCreateWizard() {
         bestFor: (draft as Record<string, unknown>).bestFor as string[] ?? [],
         notFor: (draft as Record<string, unknown>).notFor as string[] ?? [],
         faqs: (draft as Record<string, unknown>).faqs as { question: string; answer: string }[] ?? [],
+        suggestedTags: Array.isArray(genJson.suggestedTags) ? genJson.suggestedTags : [],
       })
       setStep('preview')
     } catch (err) {
@@ -239,6 +241,7 @@ export function ReviewCreateWizard() {
           how_you_used_it: howYouUsedIt.trim() || null,
           standout_moment: standoutMoment.trim() || null,
           price_paid_cents: pricePaid.trim() && !isNaN(parseInt(pricePaid, 10)) ? parseInt(pricePaid, 10) : null,
+          suggested_tags: previewDraft.suggestedTags,
         }),
       })
       const saveJson = await saveRes.json()

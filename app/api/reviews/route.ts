@@ -31,6 +31,7 @@ const CreateReviewSchema = z.object({
   how_you_used_it: z.string().max(300).optional().nullable(),
   standout_moment: z.string().max(300).optional().nullable(),
   price_paid_cents: z.number().int().min(0).optional().nullable(),
+  suggested_tags: z.array(z.string().max(80)).max(10).default([]),
 })
 
 export async function POST(request: NextRequest) {
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { title, product_name, category, excerpt, content, rating, pros, cons, disclosure_acknowledged, image_url, product_slug, tldr, key_takeaways, best_for, not_for, faqs, testing_duration, how_you_used_it, standout_moment, price_paid_cents } = parsed.data
+    const { title, product_name, category, excerpt, content, rating, pros, cons, disclosure_acknowledged, image_url, product_slug, tldr, key_takeaways, best_for, not_for, faqs, testing_duration, how_you_used_it, standout_moment, price_paid_cents, suggested_tags } = parsed.data
 
     let sanitizedContent: string
     try {
@@ -119,6 +120,15 @@ export async function POST(request: NextRequest) {
         hint: error.hint,
       }, { status: 500 })
     }
+
+    // Auto-apply AI-suggested tags — fire-and-forget, don't block response
+    if (data && suggested_tags.length > 0) {
+      const tagRows = suggested_tags.map((slug) => ({ review_id: data.id, tag_slug: slug }))
+      supabase.from('review_tags').insert(tagRows).then(({ error: tagErr }) => {
+        if (tagErr) console.error('Auto-tag insert failed:', tagErr)
+      })
+    }
+
     return NextResponse.json({ review: data }, { status: 201 })
   } catch (err) {
     console.error('Uncaught in POST /api/reviews:', err)
