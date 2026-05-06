@@ -19,7 +19,7 @@ export async function LatestGuidesSection() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-2xl font-black text-white">Latest Guides</h2>
-          <p className="text-gray-500 text-sm mt-1">Skills, builds, and dad wisdom</p>
+          <p className="text-gray-500 text-sm mt-1">Skills, builds, and hard-won dad wisdom.</p>
         </div>
         <Link href="/guides" className="text-sm text-orange-400 hover:text-orange-300 transition-colors">
           View all

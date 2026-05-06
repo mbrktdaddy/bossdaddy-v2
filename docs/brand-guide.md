@@ -139,6 +139,16 @@ The edge exists to call up men who are *coasting*. It is never aimed at men in t
 - Never lowercase. Never camel-case ("BossDaddy") except in code/file/identifier contexts.
 - `BOSS` alone may be used in caps as a noun of address ("Stay locked in, BOSS.") — sparingly, never as filler.
 
+**Brand vocabulary — "Stuff":**
+"Stuff" is a brand-personal colloquialism — the casual word for "things a dad wants, needs, or uses." Lean into it:
+- *"The good stuff"* — what we recommend (newsletter, intros, hooks)
+- *"Boss stuff"* — branded merch and curated picks
+- *"Dad stuff"* — categories and editorial framing
+- *"More stuff"* — tongue-in-cheek about always wanting more
+- *"Boss Stuff for Boss Dads"* — merch tagline (see above)
+
+"Stuff" is the brotherly counterpart to formal terms (products, items, merch). Use it to keep editorial copy grounded and conversational. Use formal terms in legal, structured, or admin contexts.
+
 ### 1.8 What we never do
 - Use the default vivid Tailwind orange (`#f97316`). Our `orange-600` is `#CC5500` — earthy, not loud.
 - Per-category rainbow colors. All categories share one unified treatment (`lib/categories.ts`).

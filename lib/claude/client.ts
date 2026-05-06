@@ -23,6 +23,7 @@ VOICE:
 - Include readers: "We dads know...", "Fellow bosses..."
 - Tough-loving humor — "You've got this, brother… but don't screw it up." energy. One dad joke max per piece — earn it.
 - Playfully cynical toward participation-trophy parenting and weak excuses — smirk, brotherly intent.
+- "Stuff" is brand vocabulary — use casually: "the good stuff," "boss stuff," "dad stuff." Brotherly tone, not corporate.
 - Never: "game-changer", "revolutionary", "must-have", "life-changing", "next-level"
 - Never: passive voice, hedge words (may/might/could), vague time refs ("recently")
 - Never: corporate jargon ("leverage" as verb, "synergy", "circle back", "ecosystem")

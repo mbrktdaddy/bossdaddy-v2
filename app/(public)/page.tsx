@@ -65,7 +65,7 @@ export default async function HomePage() {
           <h1 className="text-6xl md:text-[7.5rem] leading-[0.92] tracking-tight mb-6 text-white">
             Dad Like
             <br />
-            <span className="text-orange-500">a Boss.</span>
+            <span className="text-orange-500">a BOSS.</span>
           </h1>
           <p className="text-[11px] md:text-xs uppercase tracking-[0.2em] font-bold text-orange-500 mb-5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
             <span>Real Dads</span>
@@ -154,7 +154,7 @@ export default async function HomePage() {
               <div className="flex items-stretch gap-4">
                 <div className="w-[3px] bg-orange-600 rounded-full" />
                 <div>
-                  <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-2">Start Here</p>
+                  <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-2">— Start Here</p>
                   <h2 className="text-2xl font-black text-white leading-tight">Boss Daddy&apos;s Pick</h2>
                 </div>
               </div>
@@ -225,7 +225,7 @@ export default async function HomePage() {
       {/* ── Browse by Category ──────────────────────────────────────────── */}
       <section className="py-12">
         <div className="max-w-6xl mx-auto px-6">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Browse by Category</p>
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">— Browse by Category</p>
           <h2 className="text-2xl font-black mb-8">What kind of dad stuff are you into?</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {CATEGORIES.map((cat) => (
@@ -335,13 +335,13 @@ export default async function HomePage() {
       <section id="crew" className="max-w-6xl mx-auto px-6 py-16">
         <div className="bg-gradient-to-br from-orange-950/40 to-gray-900 rounded-2xl shadow-xl shadow-black/40 px-8 py-12 text-center max-w-2xl mx-auto">
           <p className="text-orange-400 text-xs font-semibold uppercase tracking-widest mb-3">
-            Join the Boss Daddy Crew
+            — Join the Boss Daddy Crew
           </p>
           <h2 className="text-2xl font-black text-white mb-3">
             Real Talk. Honest Reviews.<br />No BS Ever.
           </h2>
           <p className="text-gray-400 mb-8">
-            Monthly recap, the good stuff, and dad-life wins from a real dad in the trenches.
+            The good stuff, straight from the trenches — reviews, wins, and real talk from a dad who shows up.
             No spam. No sponsors. Just the crew.
           </p>
           <form action="/api/newsletter/subscribe" method="POST" className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
@@ -369,7 +369,7 @@ export default async function HomePage() {
         <div className="max-w-4xl mx-auto px-6 text-center">
           <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-6">— The Bottom Line</p>
           <p className="text-3xl md:text-5xl font-black text-white leading-[1.1]">
-            Now let&apos;s dad like a boss —{' '}
+            Now let&apos;s dad like a BOSS —{' '}
             <span className="text-orange-500">together.</span>
           </p>
         </div>
