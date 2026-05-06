@@ -13,7 +13,7 @@ import type { Metadata } from 'next'
 export const revalidate = 3600
 
 export const metadata: Metadata = {
-  title: 'Boss Daddy Life — Dad Like a Boss',
+  title: 'Boss Daddy Life — Dad like a BOSS',
   description: 'Honest product reviews, real-dad guides, and smart-tech advice for men who show up every day. Zero sponsors. Zero fluff. Real dads + smart tech.',
   alternates: { canonical: '/' },
 }

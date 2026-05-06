@@ -27,11 +27,11 @@ const sourceSerif4 = Source_Serif_4({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Boss Daddy — Dad-Tested Product Reviews',
+    default: 'Boss Daddy — Dad like a BOSS',
     template: '%s | Boss Daddy',
   },
   description:
-    'Honest, dad-tested product reviews and recommendations. No corporate fluff — just real results from a real dad who buys, tests, and tells it straight.',
+    'The gold standard for men who Dad like a BOSS. Honest reviews, practical guides, and real-dad wisdom — zero sponsors, zero fluff.',
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   ),
