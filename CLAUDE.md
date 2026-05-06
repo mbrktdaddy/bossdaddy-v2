@@ -99,10 +99,14 @@ CSS vars also available: `--bd-orange`, `--bd-surface`, `--bd-border`, `--bd-tex
 
 ## Brand Voice
 
-All Claude draft generation uses the Boss Daddy system prompt defined in `lib/claude/client.ts`. Key rules:
-- First-person dad voice
-- Confident, direct, no corporate speak
-- Always reference real testing ("I used this for 3 weekends...")
+All Claude draft generation uses the Boss Daddy system prompt defined in `lib/claude/client.ts`. Source of truth for voice: `docs/brand-guide.md` §1.
+
+Archetype: **Wise Warrior / Protector King** — older, wiser brother voice. Tough-loving humor, playfully cynical toward mediocrity, warm and present with struggling dads. Grounded in faith without preaching.
+
+Key rules:
+- First-person dad voice with real-testing specifics ("I used this for 3 weekends...")
+- Confident, direct — no corporate speak, no hype phrases
+- Edge OFF for safety, struggle, loss, and vulnerability topics — see brand guide §1.6
 - FTC disclosure auto-injected for all reviews with affiliate links
 
 ---

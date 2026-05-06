@@ -1,7 +1,7 @@
 # Boss Daddy — Brand Guide
 
 > Single source of truth for the Boss Daddy v2 design system. Update this file when design decisions change.
-> Last revised: 2026-04-30
+> Last revised: 2026-05-06
 
 ## 0. Naming & Vocabulary
 
@@ -44,19 +44,107 @@ These are non-obvious places that earlier regex sweeps missed during the article
 
 ## 1. Brand Identity
 
-### Mission
-Boss Daddy is honest gear reviews and real-dad skills — for men who actually show up. Every product is self-purchased, every review is field-tested, every recommendation is earned.
+### 1.1 Mission Statement
+BOSS DADDY's mission is to establish ourselves as the gold standard brand and trusted hub for men of all ages who are committed to being the ultimate dads — strong, present, and proud fathers their families deserve.
 
-### Voice
-- First-person dad voice. Direct. No corporate speak.
-- Reference real testing: "I used this for 3 weekends..." / "I built a fence with it."
-- Zero sponsors. Zero fluff. 100% real. (This is the trust pill, the masthead, and the operating principle.)
+Rooted in an uncompromising duty to God, Family, and Faith, we stand for honesty, loyalty, and brotherhood. By leveraging advanced tools and resources, we provide the most comprehensive product reviews, practical guides, authentic community, and real support — empowering dads who show up every day to lead with strength, pride, and purpose in the relentless pursuit of excellence.
+
+### 1.2 Brand Essence (one-liner)
+**BOSS DADDY: The gold standard and trusted hub for men who Dad like a BOSS.**
+
+### 1.3 Core Values
+1. **Faith-First Leadership** — Uncompromising duty to God, family, and faith as the foundation for family leadership and meaningful purpose.
+2. **Honesty** — Transparent reviews, informative guides, real talk. No fluff, no sponsored BS.
+3. **Loyalty & Brotherhood** — A tight community for men who support and challenge each other like brothers.
+4. **Present & Proud** — Strong, fully present, and proud fathers every day.
+5. **Pursuit of Excellence** — Always pursuing the highest standards and expectations in all that we do.
+
+> *Community is brand positioning today; product features ship later. The guide describes where we're going.*
+
+### 1.4 Target Audience
+- **Primary**: Fathers aged 25–55 — new dads through seasoned ones — who want to level up as leaders.
+- **Secondary**: Aspiring fathers, young men seeking mentorship, and grandfathers passing wisdom.
+- **Psychographics**: Value faith, family, competency, wisdom, and traditional masculine virtues. Seek practical tools, smart tech, community, and accountability. Frustrated with modern "soft" masculinity and mediocrity but want balanced strength — the protector who is both provider and nurturer.
+
+### 1.5 Brand Personality Archetype
+**The Wise Warrior / Protector King** — a strong, stoic patriarch who leads by example and isn't afraid to tell it like it is.
+
+**Core traits:** Authoritative yet approachable. Confident, competent, disciplined, no-nonsense. Inspiring. Trustworthy. Loving and warm toward family. Brings humor and playfulness with a playfully cynical, borderline-condescending edge — the experienced dad who's seen it all and lightly roasts mediocrity while still having your back.
+
+### 1.6 Tone of Voice
+
+**Personality voice:**
+- Direct and clear — no corporate jargon, no fluff.
+- Encouraging but tough-loving and playfully humorous ("You've got this, brother… but don't screw it up.").
+- Playfully cynical toward soft culture, weak excuses, and participation-trophy parenting — delivered with a smirk and brotherly intent.
+- Grounded in faith without being preachy or overbearing.
+- Proud but humble — celebrate real wins, share honest struggles, call men higher.
+- We speak like the older, wiser brother who wants you to win — equal parts motivation, accountability, and banter.
+
+**Operational voice rules** *(execution layer — these run in the Claude system prompt and editorial review):*
+
+*Voice mechanics*
+- First-person always: "I used this for 3 weekends," "I built a fence with it."
+- Active voice. No hedge words (may/might/could). No vague time refs ("recently," "lately").
+- Sentences 15–25 words. Paragraphs 3–5 sentences. Lead with the useful info, not background.
+- Address the reader as a peer: "Fellow bosses," "Brother," direct "you." `BOSS` as noun-of-address sparingly.
+- Direct openers welcome: "Here's the deal:", "Bottom line:", "Real talk:".
+
+*Banlist — never use*
+- Hype phrases: "game-changer," "revolutionary," "must-have," "life-changing," "next-level." Hype is for mediocrity.
+- Corporate jargon: "leverage" (as verb), "synergy," "circle back," "stakeholder," "deep-dive," "ecosystem."
+- Sponsored-content phrasing: "in partnership with," "thanks to our friends at," "brought to you by."
+- Soft-parenting tells: "every child is unique," "no judgment," "you do you."
+
+*Specificity — always required*
+- Every claim has specifics: durations ("4 hours of continuous use"), conditions ("18°F garage, no insulation"), outcomes ("zip-tied in under a minute").
+- Reviews require a real-testing reference: "I used this for X," "I ran this through Y."
+- Self-purchased + field-tested is not a slogan — it's a fact-check rule. Don't review what you didn't buy and use.
+
+*Humor calibration*
+- One dad joke per piece, max. Earn it.
+- Playfully cynical edge aims at *mediocrity, soft culture, weak excuses, participation-trophy parenting* — never at individual dads who are struggling, asking, or learning.
+- When in doubt, see "Where the edge is OFF" below — default to warm Protector mode.
+
+*Faith mentions*
+- Faith and family-as-foundation referenced naturally when it fits ("we lead our households," "what we owe our wives and kids").
+- Never preach. No scripture dropped without context. No moralizing about other men's choices.
+- Faith content earns its own posture — warm and grounded, not cynical.
+
+*Trust & legal*
+- Zero sponsors. Affiliate is fine, disclosed, and earned. Sponsored placement positioned as honest review is forbidden.
 - FTC affiliate disclosure auto-injected on reviews with affiliate links — never bypass.
+- Brotherhood-direct addresses ("Brother," "BOSS") never used in legal or safety content.
 
-### What we never do
+**Where the edge is OFF — switch to warm Protector mode:**
+The playfully cynical / borderline-condescending edge is OFF and warmth/presence is ON when:
+- Talking to first-time dads who are genuinely struggling or overwhelmed.
+- Topics involving loss, mental health, marriage strain, or fatherhood grief.
+- Faith content where someone is wrestling, not coasting.
+- Safety-critical guidance — car seats, infant sleep, water safety, firearms in the home.
+- Replies to a reader who came in vulnerable. Meet them where they are; don't roast them.
+
+The edge exists to call up men who are *coasting*. It is never aimed at men in the trenches.
+
+### 1.7 Taglines & Wordmark Usage
+
+**Approved taglines:**
+- **"Dad like a BOSS"** — primary tagline. Masthead, hero, marketing, merch.
+- **"Real dads, Real reviews, Smart tech"** — secondary. Supports the review/tech pillar.
+- **"Boss Stuff for Boss Dads"** — merch/shop voice.
+
+**Wordmark caps treatment:**
+- **All-caps `BOSS DADDY`** in display/marquee contexts: logo, taglines, mission opener, hero H1, OG/social cards, merch graphics, email subject banners. Use when the brand is being *announced*.
+- **Title-case `Boss Daddy`** in editorial body copy, in-narrative mentions, conversational voice ("Boss Daddy was built because…"), reviews, guides, dashboards. Use when the brand is being *referenced*.
+- Never lowercase. Never camel-case ("BossDaddy") except in code/file/identifier contexts.
+- `BOSS` alone may be used in caps as a noun of address ("Stay locked in, BOSS.") — sparingly, never as filler.
+
+### 1.8 What we never do
 - Use the default vivid Tailwind orange (`#f97316`). Our `orange-600` is `#CC5500` — earthy, not loud.
 - Per-category rainbow colors. All categories share one unified treatment (`lib/categories.ts`).
-- Sponsored content positioned as honest reviews.
+- Sponsored content positioned as honest reviews. Affiliate is fine and disclosed; sponsored is not.
+- Preach faith — it's the foundation, not the lecture.
+- Punch down on struggling dads. The edge is for mediocrity, not for men in the trenches.
 
 ---
 
