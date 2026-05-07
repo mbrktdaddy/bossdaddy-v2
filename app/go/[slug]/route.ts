@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getProductBySlug } from '@/lib/products'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { appendAmazonTag } from '@/lib/amazon-tag'
 
 const SLUG_RE = /^[a-z0-9-]+$/
 
@@ -31,10 +32,12 @@ export async function GET(
   const supabase = await createClient()
   const product = await getProductBySlug(supabase, slug)
 
+  const tag = process.env.AMAZON_ASSOCIATE_TAG ?? ''
+
   if (product) {
-    const destination = product.affiliate_url ?? product.non_affiliate_url
-    if (!destination) notFound()
-    redirect(destination)
+    const raw = product.affiliate_url ?? product.non_affiliate_url
+    if (!raw) notFound()
+    redirect(appendAmazonTag(raw, tag))
   }
 
   // Fall through to wishlist items
@@ -47,5 +50,5 @@ export async function GET(
 
   if (!wishlistItem?.affiliate_url) notFound()
 
-  redirect(wishlistItem.affiliate_url)
+  redirect(appendAmazonTag(wishlistItem.affiliate_url, tag))
 }
