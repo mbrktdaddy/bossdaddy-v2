@@ -32,12 +32,14 @@ export function ProductForm({ product }: Props) {
   const [priceCents, setPriceCents]   = useState(product?.price_cents != null ? String(product.price_cents) : '')
   const [status, setStatus]           = useState<string>(product?.status ?? 'wishlist')
 
-  const [busy, setBusy]             = useState(false)
-  const [error, setError]           = useState<string | null>(null)
-  const [deleting, setDeleting]     = useState(false)
-  const [showPicker, setShowPicker] = useState(false)
-  const [uploading, setUploading]   = useState(false)
-  const newImageFileRef             = useRef<HTMLInputElement>(null)
+  const [busy, setBusy]                   = useState(false)
+  const [error, setError]                 = useState<string | null>(null)
+  const [deleting, setDeleting]           = useState(false)
+  const [showPicker, setShowPicker]       = useState(false)
+  const [uploading, setUploading]         = useState(false)
+  const [importing, setImporting]         = useState(false)
+  const [importResult, setImportResult]   = useState<string | null>(null)
+  const newImageFileRef                   = useRef<HTMLInputElement>(null)
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
@@ -115,6 +117,29 @@ export function ProductForm({ product }: Props) {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Delete failed')
       setDeleting(false)
+    }
+  }
+
+  async function handleImportImages() {
+    if (!product) return
+    setImporting(true); setImportResult(null); setError(null)
+    try {
+      const res  = await fetch(`/api/admin/products/${product.id}/import-amazon-images`, { method: 'POST' })
+      const json = await res.json()
+      if (!res.ok) {
+        if (json.error === 'PA_API_NOT_CONFIGURED') {
+          setImportResult('PA-API not configured yet — available after 3 qualifying Amazon sales.')
+        } else {
+          throw new Error(json.error ?? 'Import failed')
+        }
+      } else {
+        setImportResult(`Imported ${json.imported} image${json.imported === 1 ? '' : 's'} from Amazon.`)
+        router.refresh()
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Import failed')
+    } finally {
+      setImporting(false)
     }
   }
 
@@ -225,7 +250,22 @@ export function ProductForm({ product }: Props) {
             placeholder="B07XYZ1234"
             className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
-          <p className="mt-1 text-xs text-gray-600">Amazon product ID — stored for future PA-API image fetching once access is approved.</p>
+          <div className="mt-2 flex items-center gap-3 flex-wrap">
+            <p className="text-xs text-gray-600 flex-1">10-character Amazon product ID — find it in the product URL after <code className="text-orange-400">/dp/</code></p>
+            {!isNew && asin.trim() && (
+              <button
+                type="button"
+                onClick={handleImportImages}
+                disabled={importing}
+                className="text-xs px-3 py-1.5 bg-amber-700/60 hover:bg-amber-600/60 disabled:opacity-40 text-amber-300 font-semibold rounded-lg transition-colors shrink-0"
+              >
+                {importing ? 'Importing…' : 'Import images from Amazon'}
+              </button>
+            )}
+          </div>
+          {importResult && (
+            <p className="mt-1.5 text-xs text-green-400">{importResult}</p>
+          )}
         </div>
       )}
 
