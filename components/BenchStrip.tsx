@@ -58,7 +58,7 @@ export default async function BenchStrip({
                   alt={item.title}
                   fill
                   className="object-contain p-3"
-                  sizes="(max-width: 640px) 176px, 33vw"
+                  sizes="(max-width: 640px) 176px, (max-width: 1024px) 33vw, 200px"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
