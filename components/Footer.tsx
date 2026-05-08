@@ -108,6 +108,7 @@ export default function Footer() {
             ) : (
               <span
                 key={key}
+                role="img"
                 aria-label={`${label} — coming soon`}
                 title={`${label} — coming soon`}
                 className="text-gray-700 cursor-not-allowed"
