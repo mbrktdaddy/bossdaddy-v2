@@ -116,6 +116,42 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url, { status: 301 })
   }
 
+  // Slug-cleanup Phase 2 (2026-05-08): redirect old hash-suffixed review/guide
+  // slugs to clean ones via legacy_slugs[]. Only fires when the slug ends in
+  // -{8 hex} so live URLs aren't taxed. Server Component permanentRedirect()
+  // gets swallowed by Sentry instrumentation, so we do it here instead.
+  const HASH_SUFFIX = /-[0-9a-f]{8}$/
+  const reviewLegacy = pathname.match(/^\/reviews\/([^/]+)\/?$/)
+  if (reviewLegacy && HASH_SUFFIX.test(reviewLegacy[1])) {
+    const { data } = await supabase
+      .from('reviews')
+      .select('slug')
+      .contains('legacy_slugs', [reviewLegacy[1]])
+      .eq('status', 'approved')
+      .eq('is_visible', true)
+      .maybeSingle()
+    if (data?.slug && data.slug !== reviewLegacy[1]) {
+      const url = request.nextUrl.clone()
+      url.pathname = `/reviews/${data.slug}`
+      return NextResponse.redirect(url, { status: 301 })
+    }
+  }
+  const guideLegacy = pathname.match(/^\/guides\/([^/]+)\/?$/)
+  if (guideLegacy && HASH_SUFFIX.test(guideLegacy[1])) {
+    const { data } = await supabase
+      .from('guides')
+      .select('slug')
+      .contains('legacy_slugs', [guideLegacy[1]])
+      .eq('status', 'approved')
+      .eq('is_visible', true)
+      .maybeSingle()
+    if (data?.slug && data.slug !== guideLegacy[1]) {
+      const url = request.nextUrl.clone()
+      url.pathname = `/guides/${data.slug}`
+      return NextResponse.redirect(url, { status: 301 })
+    }
+  }
+
   // Redirect unauthenticated users away from protected routes
   if (pathname.startsWith('/dashboard') && !user) {
     const url = request.nextUrl.clone()
