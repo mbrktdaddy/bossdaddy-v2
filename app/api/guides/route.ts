@@ -54,9 +54,8 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
-    const slug =
-      title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) +
-      '-' + crypto.randomUUID().replace(/-/g, '').slice(0, 8)
+    const { generateUniqueSlug } = await import('@/lib/slug')
+    const slug = await generateUniqueSlug(supabase, 'guides', title)
 
     const { data, error } = await supabase
       .from('guides')

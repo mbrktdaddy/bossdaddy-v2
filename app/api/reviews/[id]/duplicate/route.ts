@@ -27,8 +27,8 @@ export async function POST(
   if (!source) return NextResponse.json({ error: 'Source review not found' }, { status: 404 })
 
   const baseTitle = `${source.title} (copy)`.slice(0, 120)
-  const slug = baseTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60)
-    + '-' + crypto.randomUUID().replace(/-/g, '').slice(0, 8)
+  const { generateUniqueSlug } = await import('@/lib/slug')
+  const slug = await generateUniqueSlug(admin, 'reviews', baseTitle)
 
   const { data: newReview, error } = await admin
     .from('reviews')

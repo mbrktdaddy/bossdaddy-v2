@@ -36,13 +36,8 @@ export async function POST(
     if (product) product_slug = product.slug
   }
 
-  // Generate slug for the review draft
-  const baseSlug = `${item.title} Review`
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 60)
-  const reviewSlug = `${baseSlug}-${crypto.randomUUID().replace(/-/g, '').slice(0, 8)}`
+  const { generateUniqueSlug } = await import('@/lib/slug')
+  const reviewSlug = await generateUniqueSlug(admin, 'reviews', `${item.title} Review`)
 
   // Create review draft — category defaults to 'other' (admin can update in workspace)
   const { data: review, error: reviewError } = await admin
