@@ -19,10 +19,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { data: tag } = await admin.from('tags').select('slug, label').eq('slug', slug).single()
   if (!tag) return { title: 'Not Found' }
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+
+  const { count } = await admin
+    .from('guide_tags')
+    .select('guide_id', { count: 'exact', head: true })
+    .eq('tag_slug', slug)
+
   return {
     title: `${tag.label} Guides — Dad-Written | Boss Daddy`,
     description: `Dad-written guides tagged "${tag.label}" — practical, first-person advice from a real dad.`,
     alternates: { canonical: `${siteUrl}/guides/tag/${slug}` },
+    robots: (count ?? 0) === 0 ? { index: false, follow: true } : undefined,
   }
 }
 

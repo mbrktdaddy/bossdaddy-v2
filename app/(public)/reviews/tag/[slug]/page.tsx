@@ -19,10 +19,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { data: tag } = await admin.from('tags').select('slug, label').eq('slug', slug).single()
   if (!tag) return { title: 'Not Found' }
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+
+  // Empty tag pages get noindex — Google flags them as thin content otherwise
+  const { count } = await admin
+    .from('review_tags')
+    .select('review_id', { count: 'exact', head: true })
+    .eq('tag_slug', slug)
+
   return {
     title: `${tag.label} Reviews — Dad-Tested | Boss Daddy`,
     description: `Dad-tested reviews tagged "${tag.label}" — hands-on, no-BS gear reviews from a real dad.`,
     alternates: { canonical: `${siteUrl}/reviews/tag/${slug}` },
+    robots: (count ?? 0) === 0 ? { index: false, follow: true } : undefined,
   }
 }
 

@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getCategoryBySlug, CATEGORIES } from '@/lib/categories'
 import RatingScore from '@/components/RatingScore'
 
@@ -17,6 +18,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cat = getCategoryBySlug(slug)
   if (!cat) return { title: 'Not Found' }
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+
+  const admin = createAdminClient()
+  const { count } = await admin
+    .from('reviews')
+    .select('id', { count: 'exact', head: true })
+    .eq('category', slug)
+    .eq('status', 'approved')
+    .eq('is_visible', true)
+
   return {
     title: `${cat.label} Reviews — Dad-Tested | Boss Daddy`,
     description: cat.description,
@@ -26,6 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: cat.description,
       url: `${siteUrl}/reviews/category/${slug}`,
     },
+    robots: (count ?? 0) === 0 ? { index: false, follow: true } : undefined,
   }
 }
 

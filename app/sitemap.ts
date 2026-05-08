@@ -9,22 +9,37 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient()
   const admin = createAdminClient()
 
-  const [{ data: reviews }, { data: articles }, { data: tags }, { data: picks }] = await Promise.all([
+  const [
+    { data: reviews },
+    { data: articles },
+    { data: reviewTagRows },
+    { data: guideTagRows },
+    { data: picks },
+  ] = await Promise.all([
     supabase
       .from('reviews')
-      .select('slug, published_at, updated_at')
+      .select('slug, category, published_at, updated_at')
       .eq('status', 'approved')
       .eq('is_visible', true)
       .order('published_at', { ascending: false }),
     supabase
       .from('guides')
-      .select('slug, published_at, updated_at')
+      .select('slug, category, published_at, updated_at')
       .eq('status', 'approved')
       .eq('is_visible', true)
       .order('published_at', { ascending: false }),
-    admin.from('tags').select('slug'),
+    // Only tags actually attached to a published, visible review/guide
+    admin.from('review_tags').select('tag_slug, reviews!inner(status, is_visible)')
+      .eq('reviews.status', 'approved')
+      .eq('reviews.is_visible', true),
+    admin.from('guide_tags').select('tag_slug, guides!inner(status, is_visible)')
+      .eq('guides.status', 'approved')
+      .eq('guides.is_visible', true),
     admin.from('pick_lists').select('slug, updated_at').eq('is_visible', true),
   ])
+
+  const reviewTagSlugs = Array.from(new Set((reviewTagRows ?? []).map((r) => r.tag_slug)))
+  const guideTagSlugs  = Array.from(new Set((guideTagRows  ?? []).map((g) => g.tag_slug)))
 
   const reviewUrls: MetadataRoute.Sitemap = (reviews ?? []).map((r) => ({
     url: `${base}/reviews/${r.slug}`,
@@ -40,29 +55,37 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  const categoryUrls: MetadataRoute.Sitemap = CATEGORY_SLUGS.map((slug) => ({
-    url: `${base}/reviews/category/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.8,
-  }))
+  // Only include category pages that have published, visible content
+  const reviewCategoriesWithContent = new Set((reviews ?? []).map((r) => r.category).filter(Boolean) as string[])
+  const guideCategoriesWithContent  = new Set((articles ?? []).map((a) => a.category).filter(Boolean) as string[])
 
-  const guideCategoryUrls: MetadataRoute.Sitemap = CATEGORY_SLUGS.map((slug) => ({
-    url: `${base}/guides/category/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.8,
-  }))
+  const categoryUrls: MetadataRoute.Sitemap = CATEGORY_SLUGS
+    .filter((slug) => reviewCategoriesWithContent.has(slug))
+    .map((slug) => ({
+      url: `${base}/reviews/category/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    }))
 
-  const tagUrls: MetadataRoute.Sitemap = (tags ?? []).map((t) => ({
-    url: `${base}/reviews/tag/${t.slug}`,
+  const guideCategoryUrls: MetadataRoute.Sitemap = CATEGORY_SLUGS
+    .filter((slug) => guideCategoriesWithContent.has(slug))
+    .map((slug) => ({
+      url: `${base}/guides/category/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    }))
+
+  const tagUrls: MetadataRoute.Sitemap = reviewTagSlugs.map((slug) => ({
+    url: `${base}/reviews/tag/${slug}`,
     lastModified: new Date(),
     changeFrequency: 'weekly',
     priority: 0.6,
   }))
 
-  const guideTagUrls: MetadataRoute.Sitemap = (tags ?? []).map((t) => ({
-    url: `${base}/guides/tag/${t.slug}`,
+  const guideTagUrls: MetadataRoute.Sitemap = guideTagSlugs.map((slug) => ({
+    url: `${base}/guides/tag/${slug}`,
     lastModified: new Date(),
     changeFrequency: 'weekly',
     priority: 0.6,

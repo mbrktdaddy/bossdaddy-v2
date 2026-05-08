@@ -39,11 +39,12 @@ const getWishlistItem = cache(async (slug: string) => {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const data = await getWishlistItem(slug)
-  if (!data) return {}
+  if (!data) return { robots: { index: false, follow: true } }
   return {
     title: `${data.title} — On the Bench`,
     description: data.description ?? `Boss Daddy is considering reviewing ${data.title}. Vote to move it up the queue.`,
     alternates: { canonical: `/bench/${slug}` },
+    robots: { index: false, follow: true },
   }
 }
 
