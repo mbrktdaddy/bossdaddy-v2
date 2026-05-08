@@ -88,13 +88,14 @@ export default async function ReviewPage({ params }: Props) {
     // Cold path: requested slug isn't a live review. Check if it's a legacy
     // slug from the slug cleanup (migration 049 + Phase 2 backfill) and 301.
     const fallbackClient = await createClient()
-    const { data: legacy } = await fallbackClient
+    const { data: legacy, error: legacyErr } = await fallbackClient
       .from('reviews')
       .select('slug')
       .contains('legacy_slugs', [slug])
       .eq('status', 'approved')
       .eq('is_visible', true)
       .maybeSingle()
+    console.error('[legacy-slug-lookup]', { requestedSlug: slug, legacy, legacyErr })
     if (legacy) permanentRedirect(`/reviews/${legacy.slug}`)
     notFound()
   }
