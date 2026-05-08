@@ -87,8 +87,9 @@ export default async function ReviewPage({ params }: Props) {
   if (!review) {
     // Cold path: requested slug isn't a live review. Check if it's a legacy
     // slug from the slug cleanup (migration 049 + Phase 2 backfill) and 301.
-    const fallbackClient = await createClient()
-    const { data: legacy, error: legacyErr } = await fallbackClient
+    // Use admin client to sidestep any RLS interaction with array containment.
+    const admin = createAdminClient()
+    const { data: legacy, error: legacyErr } = await admin
       .from('reviews')
       .select('slug')
       .contains('legacy_slugs', [slug])
@@ -96,7 +97,7 @@ export default async function ReviewPage({ params }: Props) {
       .eq('is_visible', true)
       .maybeSingle()
     console.error('[legacy-slug-lookup]', { requestedSlug: slug, legacy, legacyErr })
-    if (legacy) permanentRedirect(`/reviews/${legacy.slug}`)
+    if (legacy?.slug) permanentRedirect(`/reviews/${legacy.slug}`)
     notFound()
   }
 

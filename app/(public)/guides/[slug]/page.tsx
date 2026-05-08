@@ -81,16 +81,16 @@ export default async function GuidePage({ params }: Props) {
 
   if (!guide) {
     // Cold path: requested slug isn't a live guide. Check legacy_slugs (Phase 2
-    // slug cleanup) and 301 to the current slug.
-    const fallbackClient = await createClient()
-    const { data: legacy } = await fallbackClient
+    // slug cleanup) and 301 to the current slug. Admin client sidesteps RLS.
+    const admin = createAdminClient()
+    const { data: legacy } = await admin
       .from('guides')
       .select('slug')
       .contains('legacy_slugs', [slug])
       .eq('status', 'approved')
       .eq('is_visible', true)
       .maybeSingle()
-    if (legacy) permanentRedirect(`/guides/${legacy.slug}`)
+    if (legacy?.slug) permanentRedirect(`/guides/${legacy.slug}`)
     notFound()
   }
 
