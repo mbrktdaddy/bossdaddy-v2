@@ -116,13 +116,16 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url, { status: 301 })
   }
 
-  // Slug-cleanup Phase 2 (2026-05-08): redirect old hash-suffixed review/guide
-  // slugs to clean ones via legacy_slugs[]. Only fires when the slug ends in
-  // -{8 hex} so live URLs aren't taxed. Server Component permanentRedirect()
-  // gets swallowed by Sentry instrumentation, so we do it here instead.
-  const HASH_SUFFIX = /-[0-9a-f]{8}$/
+  // Slug-cleanup Phase 2 (2026-05-08): redirect old slugs to clean ones via
+  // legacy_slugs[]. Server Component permanentRedirect() gets swallowed by
+  // Sentry instrumentation, so we do it here in proxy instead.
+  //
+  // The lookup uses a GIN index on legacy_slugs[]; cost is ~5-15ms per
+  // /reviews/* and /guides/* hit. We can't easily gate by suffix pattern
+  // because legacy slugs vary (8 hex, 4 alphanumeric, or no suffix at all
+  // when only the title was edited).
   const reviewLegacy = pathname.match(/^\/reviews\/([^/]+)\/?$/)
-  if (reviewLegacy && HASH_SUFFIX.test(reviewLegacy[1])) {
+  if (reviewLegacy) {
     const { data } = await supabase
       .from('reviews')
       .select('slug')
@@ -137,7 +140,7 @@ export async function proxy(request: NextRequest) {
     }
   }
   const guideLegacy = pathname.match(/^\/guides\/([^/]+)\/?$/)
-  if (guideLegacy && HASH_SUFFIX.test(guideLegacy[1])) {
+  if (guideLegacy) {
     const { data } = await supabase
       .from('guides')
       .select('slug')
