@@ -2,14 +2,28 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from './supabase/database.types'
 
 /**
- * Slugify a title: lowercase, ASCII-only, hyphen-separated, capped at 60 chars.
+ * Slugify a title: lowercase, ASCII-only, hyphen-separated, capped at 75 chars
+ * with word-boundary truncation. Diacritics are normalized (ü→u) and
+ * apostrophes are dropped (don't → dont) so they don't create awkward dashes.
  */
+const SLUG_MAX = 75
+
 export function slugifyTitle(title: string): string {
-  return title
+  let slug = title
     .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')   // strip diacritics (ü, ñ, é → u, n, e)
+    .replace(/['’]/g, '')         // strip straight + curly apostrophes
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
-    .slice(0, 60)
+
+  if (slug.length > SLUG_MAX) {
+    const truncated = slug.slice(0, SLUG_MAX)
+    const lastDash = truncated.lastIndexOf('-')
+    slug = lastDash > 40 ? truncated.slice(0, lastDash) : truncated
+  }
+
+  return slug
 }
 
 /**

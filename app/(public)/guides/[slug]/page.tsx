@@ -1,6 +1,6 @@
 import { cache } from 'react'
 import dynamic from 'next/dynamic'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
@@ -79,7 +79,20 @@ export default async function GuidePage({ params }: Props) {
   const { slug } = await params
   const guide = await getGuide(slug)
 
-  if (!guide) notFound()
+  if (!guide) {
+    // Cold path: requested slug isn't a live guide. Check legacy_slugs (Phase 2
+    // slug cleanup) and 301 to the current slug.
+    const fallbackClient = await createClient()
+    const { data: legacy } = await fallbackClient
+      .from('guides')
+      .select('slug')
+      .contains('legacy_slugs', [slug])
+      .eq('status', 'approved')
+      .eq('is_visible', true)
+      .maybeSingle()
+    if (legacy) permanentRedirect(`/guides/${legacy.slug}`)
+    notFound()
+  }
 
   const supabase = await createClient()
 

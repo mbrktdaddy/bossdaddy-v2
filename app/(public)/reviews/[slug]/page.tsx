@@ -1,6 +1,6 @@
 import { cache } from 'react'
 import dynamic from 'next/dynamic'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
@@ -84,7 +84,20 @@ export default async function ReviewPage({ params }: Props) {
   const { slug } = await params
   const review = await getReview(slug)
 
-  if (!review) notFound()
+  if (!review) {
+    // Cold path: requested slug isn't a live review. Check if it's a legacy
+    // slug from the slug cleanup (migration 049 + Phase 2 backfill) and 301.
+    const fallbackClient = await createClient()
+    const { data: legacy } = await fallbackClient
+      .from('reviews')
+      .select('slug')
+      .contains('legacy_slugs', [slug])
+      .eq('status', 'approved')
+      .eq('is_visible', true)
+      .maybeSingle()
+    if (legacy) permanentRedirect(`/reviews/${legacy.slug}`)
+    notFound()
+  }
 
   const supabase = await createClient()
 
