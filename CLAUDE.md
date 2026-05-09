@@ -87,9 +87,25 @@ draft → pending → approved
 
 ## DB Migration Workflow
 
-- All schema changes go in `supabase/migrations/` with sequential filenames.
+- All schema changes go in `supabase/migrations/` with sequential filenames (`NNN_description.sql`).
 - Never run raw `ALTER TABLE` or `CREATE TABLE` directly in application code.
 - Apply via `supabase db push` or paste into the Supabase SQL editor.
+- **Start every new migration from `supabase/migrations/_TEMPLATE.sql`** — it encodes the RLS doctrine below. The underscore prefix excludes it from the runner.
+- After applying, regenerate types: `npm run db:types`.
+
+### RLS doctrine (read this before authoring a migration)
+
+Forgetting the right read role on a public table silently breaks logged-out visitors but works fine for admins — that's how migrations 042 (products) and 043 (profiles) shipped broken. Avoid the same trap:
+
+| Table type | Read role | Write gate |
+|---|---|---|
+| Public content (reviews, guides, products, pick_lists, etc.) | `to anon, authenticated` | `is_admin()` |
+| User-owned data (wishlists, drafts, comments) | `to authenticated` + `using (user_id = auth.uid() or is_admin())` | same |
+| Admin-only (moderation, audit logs) | `to authenticated` + `using (is_admin())` | `is_admin()` |
+
+- **Always** use the `is_admin()` helper (migration 002) — never inline the `EXISTS (SELECT 1 FROM profiles ...)` check.
+- **Always** `enable row level security` on new tables.
+- `UNIQUE` constraints already index — don't add a redundant B-tree on the same column.
 
 ---
 
