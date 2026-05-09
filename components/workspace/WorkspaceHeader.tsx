@@ -23,8 +23,8 @@ export function WorkspaceHeader({ backHref, backLabel = 'Back', title, subtitle,
       </Link>
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="min-w-0 flex-1">
-          <h1 className="text-xl sm:text-2xl font-black leading-tight">{title}</h1>
-          {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
+          <h1 className="text-xl sm:text-2xl font-black leading-tight line-clamp-2 sm:line-clamp-none">{title}</h1>
+          {subtitle && <p className="text-sm text-gray-500 mt-1 line-clamp-1 sm:line-clamp-none">{subtitle}</p>}
         </div>
         {rightSlot && <div className="shrink-0">{rightSlot}</div>}
       </div>

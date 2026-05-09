@@ -71,8 +71,8 @@ export default async function WishlistAdminPage() {
                 <p className="text-xs text-gray-600 mt-0.5">{item.slug}</p>
               </div>
 
-              <div className="shrink-0 flex items-center gap-3 text-xs">
-                <span className="text-gray-500">{item.vote_count as unknown as number} votes</span>
+              <div className="shrink-0 flex items-center gap-2 sm:gap-3 text-xs flex-wrap justify-end">
+                <span className="hidden sm:inline text-gray-500">{item.vote_count as unknown as number} votes</span>
                 <span className={`px-2 py-1 rounded-md bg-gray-800 border border-gray-700 font-medium ${getStatusColor(item.status)}`}>
                   {getStatusLabel(item.status)}
                 </span>

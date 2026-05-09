@@ -180,7 +180,7 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
         </Link>
         <button
           onClick={() => setOpen(!open)}
-          className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+          className="p-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
           aria-label="Toggle menu"
         >
           {open ? (

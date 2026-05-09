@@ -59,7 +59,7 @@ export default async function CommentsPage({ searchParams }: Props) {
       </div>
 
       {/* Status tabs */}
-      <div className="mb-6 flex gap-1 bg-gray-900 border border-gray-800 rounded-xl p-1 w-fit">
+      <div className="mb-6 flex gap-1 bg-gray-900 border border-gray-800 rounded-xl p-1 w-fit max-w-full overflow-x-auto scrollbar-hide">
         {STATUS_TABS.map((t) => {
           const active = status === t.key
           const count = counts[t.key as keyof typeof counts]

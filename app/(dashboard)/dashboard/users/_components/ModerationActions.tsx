@@ -110,7 +110,7 @@ export default function ModerationActions({ userId, username, status, suspendedU
 
       <button
         onClick={() => setOpen((v) => !v)}
-        className="px-2 py-1 rounded-md text-xs text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+        className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md text-base text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
         aria-label={`Moderation actions for @${username}`}
       >
         ⋯

@@ -83,7 +83,7 @@ export default async function EngagementPage() {
     .slice(0, 10)
 
   return (
-    <div className="p-8 max-w-6xl">
+    <div className="p-4 sm:p-8 max-w-6xl">
 
       <div className="mb-8">
         <h1 className="text-2xl font-black">Engagement</h1>

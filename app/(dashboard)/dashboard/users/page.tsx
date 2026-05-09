@@ -22,7 +22,7 @@ export default async function UsersPage() {
   }
 
   return (
-    <div className="p-8 max-w-4xl">
+    <div className="p-4 sm:p-8 max-w-4xl">
 
       {/* Header */}
       <div className="mb-8">
@@ -31,7 +31,7 @@ export default async function UsersPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
         {[
           { label: 'Total',   value: counts.total,  color: 'text-white' },
           { label: 'Admins',  value: counts.admin,  color: 'text-red-400' },

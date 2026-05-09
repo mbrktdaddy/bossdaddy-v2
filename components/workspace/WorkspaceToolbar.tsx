@@ -31,6 +31,11 @@ export function WorkspaceToolbar({
   previewUrl, canPublish = true, publishBlockedReason, readinessChecks,
   previewOpen, onTogglePreview,
 }: Props) {
+  const readyCount  = readinessChecks?.filter((c) => c.done).length ?? 0
+  const readyTotal  = readinessChecks?.length ?? 0
+  const firstMissing = readinessChecks?.find((c) => !c.done)?.label
+  const readyTooltip = readinessChecks?.map((c) => `${c.done ? '✓' : '✗'} ${c.label}`).join('\n')
+
   return (
     <div className="sticky bottom-0 left-0 right-0 -mx-4 sm:-mx-8 px-4 sm:px-8 py-3 bg-gray-950/95 backdrop-blur border-t border-gray-800 flex items-center gap-2 flex-wrap z-10">
       <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
@@ -38,7 +43,7 @@ export function WorkspaceToolbar({
           type="button"
           onClick={onSave}
           disabled={isSaving}
-          className="px-4 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+          className="px-4 py-3 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
         >
           {isSaving ? 'Saving…' : 'Save'}
         </button>
@@ -46,7 +51,7 @@ export function WorkspaceToolbar({
           <button
             type="button"
             onClick={onDuplicate}
-            className="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
+            className="px-3 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
             title="Create a new draft with this content"
           >
             📋 Duplicate
@@ -56,7 +61,7 @@ export function WorkspaceToolbar({
           <button
             type="button"
             onClick={onTogglePreview}
-            className={`hidden xl:flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg transition-colors ${
+            className={`hidden xl:flex items-center gap-1.5 px-3 py-3 text-sm rounded-lg transition-colors ${
               previewOpen
                 ? 'bg-orange-950/60 text-orange-400 border border-orange-900/40'
                 : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
@@ -70,7 +75,7 @@ export function WorkspaceToolbar({
           <Link
             href={previewUrl}
             target="_blank"
-            className="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
+            className="px-3 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
           >
             🔗 Preview
           </Link>
@@ -80,7 +85,7 @@ export function WorkspaceToolbar({
             type="button"
             onClick={onDelete}
             disabled={isDeleting}
-            className="px-3 py-2 text-red-400 hover:bg-red-950/40 disabled:opacity-50 text-sm rounded-lg transition-colors"
+            className="px-3 py-3 text-red-400 hover:bg-red-950/40 disabled:opacity-50 text-sm rounded-lg transition-colors"
           >
             {isDeleting ? 'Deleting…' : '🗑 Delete'}
           </button>
@@ -88,30 +93,44 @@ export function WorkspaceToolbar({
       </div>
 
       <div className="flex items-center gap-2 flex-wrap">
-        {/* Readiness checklist — shown when not yet published */}
+        {/* Readiness checklist — full badge strip ≥sm; compact summary <sm */}
         {!isPublished && readinessChecks && readinessChecks.length > 0 && (
-          <div className="flex items-center gap-1.5 flex-wrap mr-2">
-            {readinessChecks.map((check) => (
-              <span
-                key={check.label}
-                title={check.label}
-                className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                  check.done
-                    ? 'bg-green-950/60 text-green-500 border border-green-900/40'
-                    : 'bg-red-950/60 text-red-400 border border-red-900/40'
-                }`}
-              >
-                {check.done ? '✓' : '✗'} {check.label}
-              </span>
-            ))}
-          </div>
+          <>
+            <span
+              title={readyTooltip}
+              className={`sm:hidden text-xs px-2.5 py-1 rounded-full font-medium border ${
+                readyCount === readyTotal
+                  ? 'bg-green-950/60 text-green-500 border-green-900/40'
+                  : 'bg-yellow-950/60 text-yellow-400 border-yellow-900/40'
+              }`}
+            >
+              {readyCount === readyTotal
+                ? `✓ Ready (${readyCount}/${readyTotal})`
+                : `${readyCount}/${readyTotal} · ${firstMissing} missing`}
+            </span>
+            <div className="hidden sm:flex items-center gap-1.5 flex-wrap mr-2">
+              {readinessChecks.map((check) => (
+                <span
+                  key={check.label}
+                  title={check.label}
+                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                    check.done
+                      ? 'bg-green-950/60 text-green-500 border border-green-900/40'
+                      : 'bg-red-950/60 text-red-400 border border-red-900/40'
+                  }`}
+                >
+                  {check.done ? '✓' : '✗'} {check.label}
+                </span>
+              ))}
+            </div>
+          </>
         )}
         {isPublished && onUnpublish && (
           <button
             type="button"
             onClick={onUnpublish}
             disabled={isPublishing}
-            className="px-4 py-2 bg-yellow-900/60 hover:bg-yellow-900 disabled:opacity-50 text-yellow-300 text-sm font-semibold rounded-lg transition-colors border border-yellow-900/40"
+            className="px-4 py-3 bg-yellow-900/60 hover:bg-yellow-900 disabled:opacity-50 text-yellow-300 text-sm font-semibold rounded-lg transition-colors border border-yellow-900/40"
           >
             {isPublishing ? '…' : 'Unpublish'}
           </button>
@@ -122,7 +141,7 @@ export function WorkspaceToolbar({
             onClick={onPublish}
             disabled={isPublishing || !canPublish}
             title={!canPublish ? (publishBlockedReason ?? undefined) : undefined}
-            className="px-5 py-2 bg-green-700 hover:bg-green-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors"
+            className="px-5 py-3 bg-green-700 hover:bg-green-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors"
           >
             {isPublishing ? 'Publishing…' : '✓ Publish Live'}
           </button>

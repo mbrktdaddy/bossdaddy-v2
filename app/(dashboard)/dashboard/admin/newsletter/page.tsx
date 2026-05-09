@@ -36,7 +36,7 @@ export default async function AdminNewsletterPage() {
   const interestRows = Object.entries(interestCounts).sort((a, b) => b[1] - a[1])
 
   return (
-    <div className="p-8 max-w-5xl">
+    <div className="p-4 sm:p-8 max-w-5xl">
 
       <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
         <div>
