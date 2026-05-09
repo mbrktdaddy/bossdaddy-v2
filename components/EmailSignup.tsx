@@ -69,6 +69,8 @@ export function EmailSignup({
       <form onSubmit={handleSubmit} className={`flex gap-2 ${compact ? '' : 'flex-col sm:flex-row mt-3'}`}>
         <input
           type="email"
+          name="email"
+          autoComplete="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}

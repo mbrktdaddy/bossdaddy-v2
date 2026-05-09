@@ -189,6 +189,7 @@ export default function Header({ username }: HeaderProps) {
                     ref={searchRef}
                     name="q"
                     type="search"
+                    autoComplete="off"
                     placeholder="Search..."
                     onKeyDown={(e) => { if (e.key === 'Escape') setSearchOpen(false) }}
                     className="w-44 lg:w-56 pl-8 pr-3 py-1.5 bg-gray-900 border border-gray-700 focus:border-orange-500 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none transition-colors"
@@ -310,6 +311,7 @@ export default function Header({ username }: HeaderProps) {
             <input
               name="q"
               type="search"
+              autoComplete="off"
               placeholder="Search reviews and guides..."
               className="w-full pl-9 pr-3 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-base text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors"
             />
