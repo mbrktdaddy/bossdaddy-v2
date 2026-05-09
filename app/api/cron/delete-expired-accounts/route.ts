@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { sendAccountStatusEmailDirect } from '@/lib/account-emails'
 
 export const maxDuration = 60
 
@@ -56,12 +57,27 @@ export async function GET(request: NextRequest) {
       reason: 'Hard delete after 30-day pending_deletion cooldown',
     })
 
+    // Capture email BEFORE deleteUser — auth.users row is gone after, can't look up.
+    const { data: authUser } = await admin.auth.admin.getUserById(target.id)
+    const email = authUser.user?.email ?? null
+
     const { error: deleteErr } = await admin.auth.admin.deleteUser(target.id)
     if (deleteErr) {
       console.error(`cron: failed to delete user ${target.username} (${target.id}):`, deleteErr)
       results.push({ id: target.id, username: target.username, ok: false, error: deleteErr.message })
-    } else {
-      results.push({ id: target.id, username: target.username, ok: true })
+      continue
+    }
+
+    results.push({ id: target.id, username: target.username, ok: true })
+
+    // Final "your account is gone" email — last touch, GDPR-friendly. Fire and
+    // forget; if this fails we've still hard-deleted, can't roll back.
+    if (email) {
+      sendAccountStatusEmailDirect({
+        to: email,
+        username: target.username,
+        event: 'hard_deleted',
+      }).catch((err) => console.error('cron: hard_deleted email failed for', target.username, err))
     }
   }
 

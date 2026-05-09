@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { sendAccountStatusEmail } from '@/lib/account-emails'
+import type { AccountStatusEvent } from '@/emails/AccountStatusEmail'
 import type { Database } from '@/lib/supabase/database.types'
 import { z } from 'zod'
 
@@ -103,6 +105,28 @@ export async function POST(request: NextRequest) {
     payload:     durationDays ? { durationDays } : null,
   })
   if (auditErr) console.error('moderation audit insert failed:', auditErr)
+
+  // User-facing email — fire and forget. Keeps user informed of every state
+  // change. unsuspend/unban/restore all collapse into the single "restored"
+  // template; the user just needs to know they can sign in again.
+  const emailEvent: AccountStatusEvent | null =
+    action === 'suspend' ? 'suspended'
+    : action === 'ban'   ? 'banned'
+    : action === 'delete' ? 'admin_delete_scheduled'
+    : (action === 'unsuspend' || action === 'unban' || action === 'restore') ? 'restored'
+    : null
+
+  if (emailEvent) {
+    sendAccountStatusEmail({
+      userId,
+      event: emailEvent,
+      reason: reason ?? null,
+      suspendedUntilIso: action === 'suspend' ? (updates.suspended_until as string | undefined) ?? null : null,
+      deletionDateIso: action === 'delete'
+        ? new Date(Date.now() + 30 * 86_400_000).toISOString()
+        : null,
+    }).catch((err) => console.error('moderation email send failed:', err))
+  }
 
   return NextResponse.json({ success: true })
 }

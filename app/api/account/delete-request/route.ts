@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { sendAccountStatusEmail } from '@/lib/account-emails'
 import { z } from 'zod'
 
 const Schema = z.object({
@@ -63,6 +64,14 @@ export async function POST(request: NextRequest) {
     action_type: 'request_deletion',
     reason,
   })
+
+  // Confirmation email with cancel CTA — fire and forget
+  sendAccountStatusEmail({
+    userId: user.id,
+    event: 'self_delete_scheduled',
+    reason,
+    deletionDateIso: new Date(Date.now() + 30 * 86_400_000).toISOString(),
+  }).catch((err) => console.error('delete-request email send failed:', err))
 
   return NextResponse.json({ success: true })
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { sendAccountStatusEmail } from '@/lib/account-emails'
 
 // POST /api/account/cancel-deletion
 //
@@ -44,6 +45,12 @@ export async function POST() {
     target_id: user.id,
     action_type: 'cancel_deletion',
   })
+
+  // "Welcome back" confirmation — fire and forget
+  sendAccountStatusEmail({
+    userId: user.id,
+    event: 'restored',
+  }).catch((err) => console.error('cancel-deletion email send failed:', err))
 
   return NextResponse.json({ success: true })
 }
