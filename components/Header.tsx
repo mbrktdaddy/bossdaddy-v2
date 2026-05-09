@@ -263,7 +263,6 @@ export default function Header({ username }: HeaderProps) {
                     <form action="/api/auth/signout" method="POST">
                       <button
                         type="submit"
-                        onClick={() => setUserMenuOpen(false)}
                         className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-400 hover:bg-red-950/40 hover:text-red-400 transition-colors text-left"
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -432,7 +431,6 @@ export default function Header({ username }: HeaderProps) {
                 <form action="/api/auth/signout" method="POST" className="mt-1">
                   <button
                     type="submit"
-                    onClick={() => setMobileOpen(false)}
                     className="w-full flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:bg-red-950/40 hover:text-red-400 transition-colors text-left border-t border-gray-800/60 pt-3"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
