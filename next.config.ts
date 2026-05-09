@@ -1,5 +1,10 @@
 import type { NextConfig } from 'next'
 import { withSentryConfig } from '@sentry/nextjs'
+import bundleAnalyzer from '@next/bundle-analyzer'
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+})
 
 const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
@@ -49,7 +54,7 @@ const nextConfig: NextConfig = {
 // for source map uploads), this is a no-op.
 const sentryEnabled = !!process.env.NEXT_PUBLIC_SENTRY_DSN
 
-export default sentryEnabled
+const wrapped = sentryEnabled
   ? withSentryConfig(nextConfig, {
       org: process.env.SENTRY_ORG,
       project: process.env.SENTRY_PROJECT,
@@ -62,3 +67,5 @@ export default sentryEnabled
       silent: !process.env.CI,
     })
   : nextConfig
+
+export default withBundleAnalyzer(wrapped)

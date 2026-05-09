@@ -2,9 +2,15 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { usePathname } from 'next/navigation'
 import { CATEGORIES } from '@/lib/categories'
+
+interface HeaderProps {
+  /** The current user's username, or null if not signed in. Resolved server-side
+   *  in the (public) layout so the Header doesn't need the Supabase client and
+   *  the auth/postgrest libs stay out of the public bundle. */
+  username: string | null
+}
 
 const NAV_LINKS = [
   { href: '/',        label: 'Home' },
@@ -18,15 +24,13 @@ function isActive(pathname: string, href: string) {
   return pathname.startsWith(href)
 }
 
-export default function Header() {
+export default function Header({ username }: HeaderProps) {
   const [mobileOpen, setMobileOpen]   = useState(false)
   const [catOpen, setCatOpen]         = useState(false)
   const [searchOpen, setSearchOpen]   = useState(false)
-  const [username, setUsername]       = useState<string | null>(null)
   const [mobileCatOpen, setMobileCat] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const pathname    = usePathname()
-  const router      = useRouter()
   const browseRef   = useRef<HTMLDivElement>(null)
   const searchRef   = useRef<HTMLInputElement>(null)
   const userMenuRef = useRef<HTMLDivElement>(null)
@@ -63,28 +67,6 @@ export default function Header() {
   // Close menus on route change
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMobileOpen(false); setCatOpen(false); setSearchOpen(false); setUserMenuOpen(false) }, [pathname])
-
-  useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) { setUsername(null); return }
-      supabase.from('profiles').select('username').eq('id', user.id).single()
-        .then(({ data }) => setUsername(data?.username ?? user.email?.split('@')[0] ?? 'Account'))
-    })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      if (!session) { setUsername(null); return }
-      supabase.from('profiles').select('username').eq('id', session.user.id).single()
-        .then(({ data }) => setUsername(data?.username ?? session.user.email?.split('@')[0] ?? 'Account'))
-    })
-    return () => subscription.unsubscribe()
-  }, [])
-
-  async function handleSignOut() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/')
-    router.refresh()
-  }
 
   const isCategoryActive = pathname.startsWith('/reviews/category') || pathname.startsWith('/guides/category') || pathname.startsWith('/category/')
 
@@ -277,15 +259,18 @@ export default function Header() {
                     Dashboard
                   </Link>
                   <div className="border-t border-gray-800/60 mt-1 pt-1">
-                    <button
-                      onClick={() => { setUserMenuOpen(false); handleSignOut() }}
-                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-400 hover:bg-red-950/40 hover:text-red-400 transition-colors text-left"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                      </svg>
-                      Sign Out
-                    </button>
+                    <form action="/api/auth/signout" method="POST">
+                      <button
+                        type="submit"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-400 hover:bg-red-950/40 hover:text-red-400 transition-colors text-left"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Sign Out
+                      </button>
+                    </form>
                   </div>
                 </div>
               )}
@@ -443,15 +428,18 @@ export default function Header() {
                   </svg>
                   Dashboard
                 </Link>
-                <button
-                  onClick={() => { setMobileOpen(false); handleSignOut() }}
-                  className="mt-1 flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:bg-red-950/40 hover:text-red-400 transition-colors text-left border-t border-gray-800/60 pt-3"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  Sign Out
-                </button>
+                <form action="/api/auth/signout" method="POST" className="mt-1">
+                  <button
+                    type="submit"
+                    onClick={() => setMobileOpen(false)}
+                    className="w-full flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 hover:bg-red-950/40 hover:text-red-400 transition-colors text-left border-t border-gray-800/60 pt-3"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Sign Out
+                  </button>
+                </form>
               </div>
             ) : (
               <Link href={`/login?next=${encodeURIComponent(pathname)}`} onClick={() => setMobileOpen(false)}
