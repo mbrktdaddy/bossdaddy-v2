@@ -70,14 +70,19 @@ export async function GET(request: NextRequest) {
 
     results.push({ id: target.id, username: target.username, ok: true })
 
-    // Final "your account is gone" email — last touch, GDPR-friendly. Fire and
-    // forget; if this fails we've still hard-deleted, can't roll back.
+    // Final "your account is gone" email — last touch, GDPR-friendly. Awaited
+    // because fire-and-forget gets dropped on serverless shutdown; if it fails
+    // we still log and continue (the user is already hard-deleted, can't roll back).
     if (email) {
-      sendAccountStatusEmailDirect({
-        to: email,
-        username: target.username,
-        event: 'hard_deleted',
-      }).catch((err) => console.error('cron: hard_deleted email failed for', target.username, err))
+      try {
+        await sendAccountStatusEmailDirect({
+          to: email,
+          username: target.username,
+          event: 'hard_deleted',
+        })
+      } catch (err) {
+        console.error('cron: hard_deleted email failed for', target.username, err)
+      }
     }
   }
 

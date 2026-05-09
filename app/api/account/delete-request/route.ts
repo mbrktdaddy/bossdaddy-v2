@@ -65,13 +65,18 @@ export async function POST(request: NextRequest) {
     reason,
   })
 
-  // Confirmation email with cancel CTA — fire and forget
-  sendAccountStatusEmail({
-    userId: user.id,
-    event: 'self_delete_scheduled',
-    reason,
-    deletionDateIso: new Date(Date.now() + 30 * 86_400_000).toISOString(),
-  }).catch((err) => console.error('delete-request email send failed:', err))
+  // Confirmation email with cancel CTA. Awaited so the Resend send completes
+  // before this serverless function shuts down and the email gets dropped.
+  try {
+    await sendAccountStatusEmail({
+      userId: user.id,
+      event: 'self_delete_scheduled',
+      reason,
+      deletionDateIso: new Date(Date.now() + 30 * 86_400_000).toISOString(),
+    })
+  } catch (err) {
+    console.error('delete-request email send failed:', err)
+  }
 
   return NextResponse.json({ success: true })
 }

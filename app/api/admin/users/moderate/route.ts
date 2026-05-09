@@ -117,15 +117,21 @@ export async function POST(request: NextRequest) {
     : null
 
   if (emailEvent) {
-    sendAccountStatusEmail({
-      userId,
-      event: emailEvent,
-      reason: reason ?? null,
-      suspendedUntilIso: action === 'suspend' ? (updates.suspended_until as string | undefined) ?? null : null,
-      deletionDateIso: action === 'delete'
-        ? new Date(Date.now() + 30 * 86_400_000).toISOString()
-        : null,
-    }).catch((err) => console.error('moderation email send failed:', err))
+    // Awaited so the Resend send completes before the function returns —
+    // fire-and-forget gets killed by serverless shutdown and the email is lost.
+    try {
+      await sendAccountStatusEmail({
+        userId,
+        event: emailEvent,
+        reason: reason ?? null,
+        suspendedUntilIso: action === 'suspend' ? (updates.suspended_until as string | undefined) ?? null : null,
+        deletionDateIso: action === 'delete'
+          ? new Date(Date.now() + 30 * 86_400_000).toISOString()
+          : null,
+      })
+    } catch (err) {
+      console.error('moderation email send failed:', err)
+    }
   }
 
   return NextResponse.json({ success: true })

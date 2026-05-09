@@ -46,11 +46,16 @@ export async function POST() {
     action_type: 'cancel_deletion',
   })
 
-  // "Welcome back" confirmation — fire and forget
-  sendAccountStatusEmail({
-    userId: user.id,
-    event: 'restored',
-  }).catch((err) => console.error('cancel-deletion email send failed:', err))
+  // "Welcome back" confirmation. Awaited so the Resend send completes before
+  // this serverless function shuts down and the email gets dropped.
+  try {
+    await sendAccountStatusEmail({
+      userId: user.id,
+      event: 'restored',
+    })
+  } catch (err) {
+    console.error('cancel-deletion email send failed:', err)
+  }
 
   return NextResponse.json({ success: true })
 }
