@@ -19,7 +19,10 @@ const eslintConfig = defineConfig([
     // Scoped to API routes and server libs only — client components use the
     // browser Supabase client where getUser() is safe and getUserSafe() doesn't apply.
     files: ['app/api/**/*.ts', 'lib/**/*.ts'],
-    ignores: ['lib/supabase/server.ts'],
+    // server.ts defines getUserSafe itself; proxy/session.ts wraps the same
+    // try/catch but also clears stale sb-* cookies on throw — extra cleanup
+    // getUserSafe doesn't do.
+    ignores: ['lib/supabase/server.ts', 'lib/proxy/session.ts'],
     rules: {
       'no-restricted-syntax': [
         'error',
