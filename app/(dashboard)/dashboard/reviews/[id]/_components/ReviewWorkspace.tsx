@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { CATEGORIES } from '@/lib/categories'
 import { TESTING_DURATION_OPTIONS } from '@/lib/products'
@@ -29,8 +28,7 @@ import { WorkspaceToolbar } from '@/components/workspace/WorkspaceToolbar'
 import { AutoSaveIndicator } from '@/components/workspace/AutoSaveIndicator'
 import { ListEditor } from '@/components/workspace/ListEditor'
 import { TagPicker } from '@/components/workspace/TagPicker'
-import { useAutoSave } from '@/components/workspace/useAutoSave'
-import { useKeyboardShortcuts } from '@/components/workspace/useKeyboardShortcuts'
+import { useContentWorkspace } from '@/components/workspace/useContentWorkspace'
 import { ReviewDraftPreview } from '@/components/workspace/ReviewDraftPreview'
 import { RefinePreviewModal } from '@/components/workspace/RefinePreviewModal'
 
@@ -88,8 +86,6 @@ const RATING_OPTIONS = [
 ]
 
 export function ReviewWorkspace({ review }: { review: ReviewData }) {
-  const router = useRouter()
-
   const [title, setTitle]             = useState(review.title)
   const [productName, setProductName] = useState(review.product_name)
   const [category, setCategory]       = useState(review.category)
@@ -135,14 +131,11 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   useEffect(() => {
     const key = `bd:hero-prompt:${review.id}`
     const val = sessionStorage.getItem(key)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (val) { setHeroPromptSuggestion(val); sessionStorage.removeItem(key) }
   }, [review.id])
 
   const [refineInstruction, setRefineInstruction] = useState('')
-  const [busy, setBusy]   = useState(false)
-  const [actionErr, setErr] = useState<string | null>(null)
-  const [actionMsg, setMsg] = useState<string | null>(null)
-  const [deleting, setDeleting] = useState(false)
 
   const status = review.status
   const isPublished = status === 'approved'
@@ -150,7 +143,9 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   // Detect affiliate links whenever content changes; clear ack if links are removed
   useEffect(() => {
     const hasLinks = detectAffiliateLinks(content)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setHasAff(hasLinks)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!hasLinks) setDiscAck(false)
   }, [content])
 
@@ -181,37 +176,13 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
                             ? parseInt(pricePaidCents, 10) : null,
   }), [title, productName, category, excerpt, content, imageUrl, rating, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, productSlug, tldr, keyTakeaways, bestFor, notFor, faqs, testingDuration, howYouUsedIt, standoutMoment, pricePaidCents])
 
-  const save = async (p: typeof payload) => {
-    const [contentRes, tagsRes] = await Promise.all([
-      fetch(`/api/reviews/${review.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(p),
-      }),
-      fetch(`/api/reviews/${review.id}/tags`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tags }),
-      }),
-    ])
-    if (!contentRes.ok) {
-      const json = await contentRes.json().catch(() => ({}))
-      throw new Error(json.error ?? 'Save failed')
-    }
-    if (!tagsRes.ok) console.warn('Tag save failed — will retry on next save')
-  }
-  const autoSave = useAutoSave({ data: payload, saveFn: save, delay: 20000 })
+  const canPublish = !hasAffiliate || disclosureAck
+  const publishBlockedReason = !canPublish
+    ? 'Acknowledge the affiliate disclosure before publishing (see section below).'
+    : null
 
-  async function manualSave() {
-    setErr(null); setMsg(null)
-    try {
-      await autoSave.triggerSave()
-      setMsg('Saved')
-      setTimeout(() => setMsg(null), 2000)
-    } catch (err) {
-      setErr(err instanceof Error ? err.message : 'Save failed')
-    }
-  }
+  const { busy, actionErr, actionMsg, setMsg, deleting, autoSave, manualSave, publishOrUnpublish, handleDelete, handleDuplicate } =
+    useContentWorkspace({ id: review.id, contentType: 'review', payload, tags, isPublished, canPublish, publishBlockedReason })
 
   function applyPendingRefine() {
     if (!pendingRefine) return
@@ -231,11 +202,6 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
     setTimeout(() => setMsg(null), 3000)
   }
 
-  const canPublish = !hasAffiliate || disclosureAck
-  const publishBlockedReason = !canPublish
-    ? 'Acknowledge the affiliate disclosure before publishing (see section below).'
-    : null
-
   const readinessChecks = [
     { label: 'Title',      done: title.trim().length >= 10 },
     { label: 'Hero image', done: !!imageUrl },
@@ -247,63 +213,6 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
     { label: 'No placeholders', done: !content.includes('bd-image-placeholder') },
     ...(hasAffiliate ? [{ label: 'Disclosure', done: disclosureAck }] : []),
   ]
-
-  async function publishOrUnpublish(action: 'approve' | 'unpublish') {
-    if (action === 'approve' && !canPublish) {
-      setErr(publishBlockedReason ?? 'Cannot publish yet.')
-      return
-    }
-    setBusy(true); setErr(null); setMsg(null)
-    try {
-      await save(payload)
-      const res = await fetch(`/api/reviews/${review.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action }),
-      })
-      if (!res.ok) {
-        const json = await res.json().catch(() => ({}))
-        throw new Error(json.error ?? 'Action failed')
-      }
-      setMsg(action === 'approve' ? '✓ Published' : 'Unpublished')
-      setTimeout(() => router.refresh(), 600)
-    } catch (err) {
-      setErr(err instanceof Error ? err.message : 'Action failed')
-    }
-    setBusy(false)
-  }
-
-  async function handleDelete() {
-    if (!confirm('Delete this review permanently? This cannot be undone.')) return
-    setDeleting(true); setErr(null)
-    const res = await fetch(`/api/reviews/${review.id}`, { method: 'DELETE' })
-    if (!res.ok) {
-      const json = await res.json().catch(() => ({}))
-      setErr(json.error ?? 'Delete failed')
-      setDeleting(false)
-      return
-    }
-    router.push('/dashboard/reviews')
-    router.refresh()
-  }
-
-  async function handleDuplicate() {
-    setBusy(true); setErr(null)
-    const res = await fetch(`/api/reviews/${review.id}/duplicate`, { method: 'POST' })
-    const json = await res.json()
-    if (!res.ok) {
-      setErr(json.error ?? 'Duplicate failed')
-      setBusy(false)
-      return
-    }
-    router.push(`/dashboard/reviews/${json.review.id}`)
-    router.refresh()
-  }
-
-  useKeyboardShortcuts({
-    'mod+s':     () => manualSave(),
-    'mod+enter': () => { if (!isPublished) publishOrUnpublish('approve') },
-  })
 
   const previewUrl = isPublished && review.slug ? `/reviews/${review.slug}` : null
   const createdAt  = new Date(review.created_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })

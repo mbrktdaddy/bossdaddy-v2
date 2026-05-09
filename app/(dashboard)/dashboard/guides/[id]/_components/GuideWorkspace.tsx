@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { CATEGORIES } from '@/lib/categories'
 import { preserveImagesAcrossRefine } from '@/lib/inlineImages'
@@ -22,8 +21,7 @@ import { AutoSaveIndicator } from '@/components/workspace/AutoSaveIndicator'
 import { ListEditor } from '@/components/workspace/ListEditor'
 import { TagPicker } from '@/components/workspace/TagPicker'
 import { RefinePreviewModal } from '@/components/workspace/RefinePreviewModal'
-import { useAutoSave } from '@/components/workspace/useAutoSave'
-import { useKeyboardShortcuts } from '@/components/workspace/useKeyboardShortcuts'
+import { useContentWorkspace } from '@/components/workspace/useContentWorkspace'
 
 const InlineMediaPanel = dynamic(
   () => import('@/components/workspace/InlineMediaPanel').then((m) => ({ default: m.InlineMediaPanel })),
@@ -61,8 +59,6 @@ interface Props {
 }
 
 export function GuideWorkspace({ guide: article }: Props) {
-  const router = useRouter()
-
   const [title, setTitle]           = useState(article.title)
   const [category, setCategory]     = useState(article.category)
   const [excerpt, setExcerpt]       = useState(article.excerpt ?? '')
@@ -82,6 +78,7 @@ export function GuideWorkspace({ guide: article }: Props) {
   useEffect(() => {
     const key = `bd:hero-prompt:${article.id}`
     const val = sessionStorage.getItem(key)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (val) { setHeroPromptSuggestion(val); sessionStorage.removeItem(key) }
   }, [article.id])
 
@@ -92,10 +89,6 @@ export function GuideWorkspace({ guide: article }: Props) {
   } | null>(null)
 
   const [refineInstruction, setRefineInstruction] = useState('')
-  const [busy, setBusy]       = useState(false)
-  const [actionErr, setErr]   = useState<string | null>(null)
-  const [actionMsg, setMsg]   = useState<string | null>(null)
-  const [deleting, setDeleting] = useState(false)
 
   const status = article.status
   const isPublished = status === 'approved'
@@ -114,37 +107,8 @@ export function GuideWorkspace({ guide: article }: Props) {
     faqs,
   }), [title, category, excerpt, content, imageUrl, metaTitle, metaDesc, scheduledAt, tldr, keyTakeaways, faqs])
 
-  const save = async (p: typeof payload) => {
-    const [contentRes, tagsRes] = await Promise.all([
-      fetch(`/api/guides/${article.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(p),
-      }),
-      fetch(`/api/guides/${article.id}/tags`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tags }),
-      }),
-    ])
-    if (!contentRes.ok) {
-      const json = await contentRes.json().catch(() => ({}))
-      throw new Error(json.error ?? 'Save failed')
-    }
-    if (!tagsRes.ok) console.warn('Tag save failed — will retry on next save')
-  }
-  const autoSave = useAutoSave({ data: payload, saveFn: save, delay: 20000 })
-
-  async function manualSave() {
-    setErr(null); setMsg(null)
-    try {
-      await autoSave.triggerSave()
-      setMsg('Saved')
-      setTimeout(() => setMsg(null), 2000)
-    } catch (err) {
-      setErr(err instanceof Error ? err.message : 'Save failed')
-    }
-  }
+  const { busy, actionErr, actionMsg, setMsg, deleting, autoSave, manualSave, publishOrUnpublish, handleDelete, handleDuplicate } =
+    useContentWorkspace({ id: article.id, contentType: 'guide', payload, tags, isPublished })
 
   function applyPendingRefine() {
     if (!pendingRefine) return
@@ -158,59 +122,6 @@ export function GuideWorkspace({ guide: article }: Props) {
     setMsg('Changes applied')
     setTimeout(() => setMsg(null), 3000)
   }
-
-  async function publishOrUnpublish(action: 'approve' | 'unpublish') {
-    setBusy(true); setErr(null); setMsg(null)
-    try {
-      await save(payload)
-      const res = await fetch(`/api/guides/${article.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action }),
-      })
-      if (!res.ok) {
-        const json = await res.json().catch(() => ({}))
-        throw new Error(json.error ?? 'Action failed')
-      }
-      setMsg(action === 'approve' ? '✓ Published' : 'Unpublished')
-      setTimeout(() => router.refresh(), 600)
-    } catch (err) {
-      setErr(err instanceof Error ? err.message : 'Action failed')
-    }
-    setBusy(false)
-  }
-
-  async function handleDelete() {
-    if (!confirm('Delete this guide permanently? This cannot be undone.')) return
-    setDeleting(true); setErr(null)
-    const res = await fetch(`/api/guides/${article.id}`, { method: 'DELETE' })
-    if (!res.ok) {
-      const json = await res.json().catch(() => ({}))
-      setErr(json.error ?? 'Delete failed')
-      setDeleting(false)
-      return
-    }
-    router.push('/dashboard/guides')
-    router.refresh()
-  }
-
-  async function handleDuplicate() {
-    setBusy(true); setErr(null)
-    const res = await fetch(`/api/guides/${article.id}/duplicate`, { method: 'POST' })
-    const json = await res.json()
-    if (!res.ok) {
-      setErr(json.error ?? 'Duplicate failed')
-      setBusy(false)
-      return
-    }
-    router.push(`/dashboard/guides/${json.article.id}`)
-    router.refresh()
-  }
-
-  useKeyboardShortcuts({
-    'mod+s':     () => manualSave(),
-    'mod+enter': () => { if (!isPublished) publishOrUnpublish('approve') },
-  })
 
   const readinessChecks = [
     { label: 'Title',      done: title.trim().length >= 10 },
