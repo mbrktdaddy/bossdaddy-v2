@@ -11,7 +11,13 @@
 -- auth.users which is NOT exposed by this policy. Sensitive write operations
 -- (changing role, marking trusted_commenter) remain locked to admin-only and
 -- self-only via the existing profiles_admin_* and profiles_self_* policies.
+--
+-- 2026-05-08: added `drop policy if exists` so this migration is idempotent
+-- and replays cleanly in CI / fresh environments. Migration 027 already
+-- created a `profiles_public_read` policy; this one was a defensive duplicate
+-- that never actually ran in production (027's drop+create won the race).
 
+drop policy if exists "profiles_public_read" on profiles;
 create policy "profiles_public_read"
   on profiles for select
   to anon, authenticated
