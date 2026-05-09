@@ -2,6 +2,13 @@
 -- Listing pages filter by status='approved' AND is_visible=true and order by
 -- published_at DESC. Author + gear pages add author_id / rating filters.
 -- Composite indexes match those access patterns to avoid sequential scans.
+--
+-- Renumbered from 031 → 052 on 2026-05-08. The original 031 referenced the
+-- `guides` table, which is created by migration 032 (rename articles → guides).
+-- Production applied this migration *after* 032 was already in place, but new
+-- environments replay migrations in filename order — 031 ran before guides
+-- existed and failed. Each statement uses `create index if not exists`, so
+-- the next `supabase db push` against production is a safe no-op.
 
 -- /reviews and /guides all-views
 create index if not exists idx_reviews_status_visible_published
