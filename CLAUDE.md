@@ -17,6 +17,28 @@
 
 ---
 
+## Naming Doctrine — Internal Names ≠ Display Labels
+
+Internal names (DB tables, route segments, status enum values, variable names) stay **stable forever**. Display labels can change freely via `lib/labels.ts`.
+
+| Layer | Stability | Example |
+|---|---|---|
+| DB table / column | Never rename | `wishlist_items.status = 'wishlist'` |
+| Route URL | Rename only with `legacy_slugs[]` + `proxy.ts` 301 | `/bench` (was `/wishlist`) |
+| Display label | Free to change in `lib/labels.ts` | `LABELS.bench.short` → "Bench" |
+
+**Rules:**
+- Adding a top-level domain concept? Define its display labels in `lib/labels.ts`.
+- Tempted to rename a DB table? Don't. Add a label override and move on.
+- Tempted to rename a route URL? Only if the user-facing URL is wrong. Add to `legacy_slugs[]` and 301 in `proxy.ts`.
+- Page H1s, nav links, footer links, email templates → **always** use `LABELS.*`.
+- Body copy, article content, one-off page strings → free text is fine.
+- Brand name "Boss Daddy" is stable — do **not** centralize it.
+
+If a rename leaks (someone hardcoded "Wishlist" instead of using `LABELS.bench.short`), fix the leak by routing through `lib/labels.ts`. Never rename the underlying internal name to match the display.
+
+---
+
 ## Supabase Client Rules
 
 | Context | Import from |

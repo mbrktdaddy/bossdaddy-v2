@@ -33,10 +33,11 @@ export function getStoreLabel(store: string, customName?: string | null): string
   return STORE_OPTIONS.find((s) => s.value === store)?.label ?? store
 }
 
+// Status values are stable (DB column products.status); display labels via lib/labels.
 export type ProductStatus = 'wishlist' | 'testing' | 'reviewed' | 'passed' | 'archived'
 
 export const PRODUCT_STATUS_OPTIONS: { value: ProductStatus; label: string }[] = [
-  { value: 'wishlist',  label: 'Wishlist' },
+  { value: 'wishlist', label: 'Bench' },
   { value: 'testing',  label: 'Testing' },
   { value: 'reviewed', label: 'Reviewed' },
   { value: 'passed',   label: 'Passed' },

@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { LABELS } from '@/lib/labels'
 
 interface DigestItem {
   type: 'review' | 'guide'
@@ -26,8 +27,8 @@ const MUTED  = '#9ca3af'
 const FAINT  = '#6b7280'
 
 export function WeeklyDigestEmail({ email, items, weekLabel, siteUrl = 'https://www.bossdaddylife.com' }: Props) {
-  const reviews  = items.filter((i) => i.type === 'review')
-  const articles = items.filter((i) => i.type === 'guide')
+  const reviews = items.filter((i) => i.type === 'review')
+  const guides  = items.filter((i) => i.type === 'guide')
 
   return (
     <html>
@@ -71,7 +72,7 @@ export function WeeklyDigestEmail({ email, items, weekLabel, siteUrl = 'https://
                   <tr>
                     <td style={{ padding: '16px 40px 0 40px' }}>
                       <p style={{ color: ORANGE, fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', margin: '24px 0 12px 0' }}>
-                        ★ New Reviews
+                        ★ New {LABELS.reviews.plural}
                       </p>
                       {reviews.map((r) => (
                         <ItemRow key={r.slug} item={r} siteUrl={siteUrl} />
@@ -80,14 +81,14 @@ export function WeeklyDigestEmail({ email, items, weekLabel, siteUrl = 'https://
                   </tr>
                 )}
 
-                {/* Article section */}
-                {articles.length > 0 && (
+                {/* Guides section */}
+                {guides.length > 0 && (
                   <tr>
                     <td style={{ padding: '16px 40px 0 40px' }}>
                       <p style={{ color: ORANGE, fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', margin: '24px 0 12px 0' }}>
-                        Articles
+                        {LABELS.guides.plural}
                       </p>
-                      {articles.map((a) => (
+                      {guides.map((a) => (
                         <ItemRow key={a.slug} item={a} siteUrl={siteUrl} />
                       ))}
                     </td>

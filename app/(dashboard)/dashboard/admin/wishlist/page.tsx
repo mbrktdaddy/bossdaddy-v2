@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
 import type { WishlistItem } from '@/lib/wishlist'
 import { getStatusLabel, getStatusColor } from '@/lib/wishlist'
+import { LABELS } from '@/lib/labels'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +27,7 @@ export default async function WishlistAdminPage() {
     <div className="p-4 sm:p-8 max-w-4xl">
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black">Wishlist</h1>
+          <h1 className="text-2xl font-black">{LABELS.bench.short}</h1>
           <p className="text-gray-500 text-sm mt-1">
             Products you plan to test. Members vote on what to review next.
           </p>
@@ -41,7 +42,7 @@ export default async function WishlistAdminPage() {
 
       {items.length === 0 ? (
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center">
-          <p className="text-gray-400 mb-2">No wishlist items yet.</p>
+          <p className="text-gray-400 mb-2">No {LABELS.bench.short.toLowerCase()} items yet.</p>
           <p className="text-xs text-gray-600">Add products you&apos;re considering or currently testing.</p>
         </div>
       ) : (

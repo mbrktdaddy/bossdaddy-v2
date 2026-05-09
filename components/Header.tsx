@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { CATEGORIES } from '@/lib/categories'
+import { LABELS } from '@/lib/labels'
 
 interface HeaderProps {
   /** The current user's username, or null if not signed in. Resolved server-side
@@ -14,9 +15,9 @@ interface HeaderProps {
 
 const NAV_LINKS = [
   { href: '/',        label: 'Home' },
-  { href: '/reviews', label: 'Reviews' },
-  { href: '/guides',  label: 'Guides' },
-  { href: '/stuff',   label: 'Stuff' },
+  { href: '/reviews', label: LABELS.reviews.plural },
+  { href: '/guides',  label: LABELS.guides.plural },
+  { href: '/stuff',   label: LABELS.stuff.short },
 ]
 
 function isActive(pathname: string, href: string) {
@@ -143,14 +144,14 @@ export default function Header({ username }: HeaderProps) {
                     onClick={() => setCatOpen(false)}
                     className="text-xs text-orange-500 hover:text-orange-400 font-semibold transition-colors"
                   >
-                    All reviews →
+                    All {LABELS.reviews.plural.toLowerCase()} →
                   </Link>
                   <Link
                     href="/guides"
                     onClick={() => setCatOpen(false)}
                     className="text-xs text-gray-500 hover:text-gray-300 font-semibold transition-colors"
                   >
-                    All guides →
+                    All {LABELS.guides.plural.toLowerCase()} →
                   </Link>
                   <Link
                     href="/gifts"

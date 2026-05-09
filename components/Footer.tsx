@@ -1,14 +1,15 @@
 import Link from 'next/link'
 import { SOCIAL } from '@/lib/social'
 import { EmailSignup } from '@/components/EmailSignup'
+import { LABELS } from '@/lib/labels'
 
 const FOOTER_LINKS = [
-  { href: '/reviews',              label: 'Reviews' },
-  { href: '/guides',               label: 'Guides' },
-  { href: '/stuff',                label: 'Stuff' },
-  { href: '/gifts',                label: 'Gifts' },
-  { href: '/picks',                label: 'Picks' },
-  { href: '/bench',                label: 'On the Bench' },
+  { href: '/reviews',              label: LABELS.reviews.plural },
+  { href: '/guides',               label: LABELS.guides.plural },
+  { href: '/stuff',                label: LABELS.stuff.short },
+  { href: '/gifts',                label: LABELS.gifts.short },
+  { href: '/picks',                label: LABELS.picks.short },
+  { href: '/bench',                label: LABELS.bench.full },
   { href: '/about',                label: 'About' },
   { href: '/how-we-test',          label: 'How We Test' },
   { href: '/affiliate-disclosure', label: 'Disclosure' },
