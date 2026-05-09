@@ -1,6 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/auth-cache'
 import RoleSelector from './_components/RoleSelector'
+import ModerationActions from './_components/ModerationActions'
+
+type AccountStatus = 'active' | 'suspended' | 'banned' | 'pending_deletion'
 
 export default async function UsersPage() {
   const me = await requireAdmin()
@@ -8,7 +11,7 @@ export default async function UsersPage() {
 
   const { data: users } = await supabase
     .from('profiles')
-    .select('id, username, role, created_at')
+    .select('id, username, role, created_at, account_status, suspended_until, moderation_reason')
     .order('created_at', { ascending: false })
 
   const counts = {
@@ -74,7 +77,17 @@ export default async function UsersPage() {
                 </p>
               </div>
             </div>
-            <RoleSelector userId={u.id} currentRole={u.role} isSelf={u.id === me.id} />
+            <div className="flex items-center gap-3">
+              <ModerationActions
+                userId={u.id}
+                username={u.username}
+                status={(u.account_status ?? 'active') as AccountStatus}
+                suspendedUntil={u.suspended_until ?? null}
+                reason={u.moderation_reason ?? null}
+                isSelf={u.id === me.id}
+              />
+              <RoleSelector userId={u.id} currentRole={u.role} isSelf={u.id === me.id} />
+            </div>
           </div>
         ))}
       </div>

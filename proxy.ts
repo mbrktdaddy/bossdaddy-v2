@@ -108,6 +108,43 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
+  // Account moderation: signed-in users with non-active status get signed out
+  // and bounced to /account/blocked. The blocked page itself is allowlisted.
+  if (user && !pathname.startsWith('/account/blocked') && !pathname.startsWith('/api/auth/signout')) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('account_status, suspended_until')
+      .eq('id', user.id)
+      .single()
+
+    if (profile && profile.account_status !== 'active') {
+      // Auto-clear suspensions whose end date has passed
+      const stillSuspended = profile.account_status === 'suspended'
+        && (!profile.suspended_until || new Date(profile.suspended_until) > new Date())
+
+      const blocked =
+        profile.account_status === 'banned' ||
+        profile.account_status === 'pending_deletion' ||
+        stillSuspended
+
+      if (blocked) {
+        await supabase.auth.signOut()
+        const url = request.nextUrl.clone()
+        url.pathname = '/account/blocked'
+        url.search = ''
+        return NextResponse.redirect(url, { status: 303 })
+      }
+
+      // Suspension elapsed — restore active status, fall through to normal flow
+      if (profile.account_status === 'suspended' && !stillSuspended) {
+        await supabase
+          .from('profiles')
+          .update({ account_status: 'active', suspended_until: null })
+          .eq('id', user.id)
+      }
+    }
+  }
+
   // Public legacy redirects (run before any auth checks — works for guests)
   const publicRewrite = rewritePublicLegacy(pathname)
   if (publicRewrite) {

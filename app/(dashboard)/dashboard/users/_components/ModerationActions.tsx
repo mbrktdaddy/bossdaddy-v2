@@ -1,0 +1,191 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+
+type Status = 'active' | 'suspended' | 'banned' | 'pending_deletion'
+
+interface Props {
+  userId: string
+  username: string
+  status: Status
+  suspendedUntil: string | null
+  reason: string | null
+  isSelf: boolean
+}
+
+const STATUS_BADGE: Record<Status, { label: string; classes: string }> = {
+  active:            { label: 'Active',     classes: 'bg-green-950/40 text-green-400 border-green-900/40' },
+  suspended:         { label: 'Suspended',  classes: 'bg-yellow-950/40 text-yellow-400 border-yellow-900/40' },
+  banned:            { label: 'Banned',     classes: 'bg-red-950/40 text-red-400 border-red-900/40' },
+  pending_deletion:  { label: 'Pending delete', classes: 'bg-zinc-950/60 text-zinc-400 border-zinc-800' },
+}
+
+const ACTIONS_BY_STATUS: Record<Status, Array<{ key: string; label: string; tone: 'safe' | 'warn' | 'danger' }>> = {
+  active: [
+    { key: 'suspend', label: 'Suspend (timed)', tone: 'warn' },
+    { key: 'ban',     label: 'Ban (permanent)', tone: 'danger' },
+    { key: 'delete',  label: 'Delete account',  tone: 'danger' },
+  ],
+  suspended: [
+    { key: 'unsuspend', label: 'Lift suspension', tone: 'safe' },
+    { key: 'ban',       label: 'Ban (permanent)', tone: 'danger' },
+    { key: 'delete',    label: 'Delete account',  tone: 'danger' },
+  ],
+  banned: [
+    { key: 'unban',  label: 'Unban (restore active)', tone: 'safe' },
+    { key: 'delete', label: 'Delete account',         tone: 'danger' },
+  ],
+  pending_deletion: [
+    { key: 'restore', label: 'Cancel deletion',    tone: 'safe' },
+    { key: 'ban',     label: 'Ban instead',        tone: 'danger' },
+  ],
+}
+
+export default function ModerationActions({ userId, username, status, suspendedUntil, reason, isSelf }: Props) {
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const [pendingAction, setPendingAction] = useState<string | null>(null)
+  const [durationDays, setDurationDays] = useState(7)
+  const [actionReason, setActionReason] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const badge = STATUS_BADGE[status]
+
+  async function submit(action: string) {
+    setLoading(true); setError(null)
+    const res = await fetch('/api/admin/users/moderate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        action,
+        ...(action === 'suspend' ? { durationDays } : {}),
+        ...(actionReason ? { reason: actionReason } : {}),
+      }),
+    })
+    const json = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      setError(json.error ?? 'Action failed')
+      setLoading(false)
+      return
+    }
+    setLoading(false); setOpen(false); setPendingAction(null); setActionReason('')
+    router.refresh()
+  }
+
+  if (isSelf) {
+    return (
+      <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md border ${badge.classes}`}>
+        {badge.label}
+      </span>
+    )
+  }
+
+  const actions = ACTIONS_BY_STATUS[status]
+
+  return (
+    <div className="flex items-center gap-2 relative">
+      <span
+        className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md border ${badge.classes}`}
+        title={
+          [
+            reason ? `Reason: ${reason}` : null,
+            suspendedUntil ? `Until: ${new Date(suspendedUntil).toLocaleString()}` : null,
+          ].filter(Boolean).join('\n') || undefined
+        }
+      >
+        {badge.label}
+      </span>
+
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="px-2 py-1 rounded-md text-xs text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+        aria-label={`Moderation actions for @${username}`}
+      >
+        ⋯
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-1 w-64 bg-gray-950 border border-gray-800 rounded-xl shadow-2xl z-50 p-1.5">
+          {pendingAction == null ? (
+            <>
+              <p className="text-[10px] uppercase tracking-widest text-gray-600 px-3 pt-2 pb-1">
+                Moderate @{username}
+              </p>
+              {actions.map(({ key, label, tone }) => (
+                <button
+                  key={key}
+                  onClick={() => setPendingAction(key)}
+                  className={`block w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                    tone === 'danger' ? 'text-red-400 hover:bg-red-950/40'
+                    : tone === 'warn' ? 'text-yellow-400 hover:bg-yellow-950/30'
+                    : 'text-gray-300 hover:bg-gray-900 hover:text-white'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </>
+          ) : (
+            <div className="p-2 space-y-3">
+              <p className="text-xs font-bold text-white">
+                {pendingAction === 'suspend' && `Suspend @${username}`}
+                {pendingAction === 'ban' && `Ban @${username}?`}
+                {pendingAction === 'delete' && `Delete @${username}?`}
+                {pendingAction === 'unsuspend' && `Lift suspension on @${username}?`}
+                {pendingAction === 'unban' && `Unban @${username}?`}
+                {pendingAction === 'restore' && `Cancel deletion of @${username}?`}
+              </p>
+
+              {pendingAction === 'suspend' && (
+                <label className="block text-xs text-gray-400">
+                  Duration (days)
+                  <input
+                    type="number" min={1} max={365}
+                    value={durationDays}
+                    onChange={(e) => setDurationDays(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="w-full mt-1 px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs focus:outline-none focus:border-orange-500"
+                  />
+                </label>
+              )}
+
+              {(pendingAction === 'suspend' || pendingAction === 'ban' || pendingAction === 'delete') && (
+                <label className="block text-xs text-gray-400">
+                  Reason (visible to user)
+                  <input
+                    type="text" maxLength={200}
+                    value={actionReason}
+                    onChange={(e) => setActionReason(e.target.value)}
+                    placeholder="e.g. spam, harassment, violation of standards"
+                    className="w-full mt-1 px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs focus:outline-none focus:border-orange-500"
+                  />
+                </label>
+              )}
+
+              {error && <p className="text-xs text-red-400">{error}</p>}
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => submit(pendingAction)}
+                  disabled={loading}
+                  className="flex-1 px-3 py-1.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white text-xs font-semibold rounded transition-colors"
+                >
+                  {loading ? 'Working…' : 'Confirm'}
+                </button>
+                <button
+                  onClick={() => { setPendingAction(null); setActionReason('') }}
+                  disabled={loading}
+                  className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold rounded transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}

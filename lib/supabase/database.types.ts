@@ -706,39 +706,105 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: string
           avatar_url: string | null
           bio: string | null
           created_at: string | null
+          deletion_requested_at: string | null
           display_name: string | null
           id: string
+          moderation_action_at: string | null
+          moderation_action_by: string | null
+          moderation_note: string | null
+          moderation_reason: string | null
           role: string
+          suspended_until: string | null
           tagline: string | null
           trusted_commenter: boolean
           username: string
         }
         Insert: {
+          account_status?: string
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
+          deletion_requested_at?: string | null
           display_name?: string | null
           id: string
+          moderation_action_at?: string | null
+          moderation_action_by?: string | null
+          moderation_note?: string | null
+          moderation_reason?: string | null
           role?: string
+          suspended_until?: string | null
           tagline?: string | null
           trusted_commenter?: boolean
           username: string
         }
         Update: {
+          account_status?: string
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
+          deletion_requested_at?: string | null
           display_name?: string | null
           id?: string
+          moderation_action_at?: string | null
+          moderation_action_by?: string | null
+          moderation_note?: string | null
+          moderation_reason?: string | null
           role?: string
+          suspended_until?: string | null
           tagline?: string | null
           trusted_commenter?: boolean
           username?: string
         }
         Relationships: []
+      }
+      moderation_actions: {
+        Row: {
+          action_type: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          payload: Json | null
+          reason: string | null
+          target_id: string
+        }
+        Insert: {
+          action_type: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          payload?: Json | null
+          reason?: string | null
+          target_id: string
+        }
+        Update: {
+          action_type?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          payload?: Json | null
+          reason?: string | null
+          target_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_actions_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_actions_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       review_tags: {
         Row: {
