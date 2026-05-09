@@ -20,10 +20,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!tag) return { title: 'Not Found' }
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
 
+  // Empty tag pages get noindex — Google flags them as thin content otherwise.
+  // Join with guides and filter by approved+visible to match sitemap.ts logic;
+  // counting raw guide_tags rows would mark tags-of-only-drafts as indexable.
   const { count } = await admin
     .from('guide_tags')
-    .select('guide_id', { count: 'exact', head: true })
+    .select('guide_id, guides!inner(status, is_visible)', { count: 'exact', head: true })
     .eq('tag_slug', slug)
+    .eq('guides.status', 'approved')
+    .eq('guides.is_visible', true)
 
   return {
     title: `${tag.label} Guides — Dad-Written | Boss Daddy`,

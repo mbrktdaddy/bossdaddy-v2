@@ -20,11 +20,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!tag) return { title: 'Not Found' }
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
 
-  // Empty tag pages get noindex — Google flags them as thin content otherwise
+  // Empty tag pages get noindex — Google flags them as thin content otherwise.
+  // Join with reviews and filter by approved+visible to match sitemap.ts logic;
+  // counting raw review_tags rows would mark tags-of-only-drafts as indexable.
   const { count } = await admin
     .from('review_tags')
-    .select('review_id', { count: 'exact', head: true })
+    .select('review_id, reviews!inner(status, is_visible)', { count: 'exact', head: true })
     .eq('tag_slug', slug)
+    .eq('reviews.status', 'approved')
+    .eq('reviews.is_visible', true)
 
   return {
     title: `${tag.label} Reviews — Dad-Tested | Boss Daddy`,
