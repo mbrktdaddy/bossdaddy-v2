@@ -86,7 +86,7 @@ export default function Header({ username }: HeaderProps) {
             priority
             className="h-9 w-9 object-contain"
           />
-          <span className="hidden sm:inline">
+          <span>
             <span className="text-orange-500">BOSS</span>
             <span className="text-white"> DADDY</span>
           </span>
