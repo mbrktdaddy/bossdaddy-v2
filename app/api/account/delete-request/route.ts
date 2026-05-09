@@ -1,6 +1,11 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { z } from 'zod'
+
+const Schema = z.object({
+  reason: z.string().max(200).optional(),
+}).optional()
 
 // POST /api/account/delete-request
 //
@@ -9,13 +14,18 @@ import { createAdminClient } from '@/lib/supabase/admin'
 // hard-deletes anyone in this state for ≥30 days. The user can cancel any
 // time within the window via /api/account/cancel-deletion.
 //
-// Authors with published reviews or guides are blocked here — content
-// transfer is a manual admin task. For Boss Daddy this affects ~0% of
-// users (only the site owner is an author).
-export async function POST() {
+// Optional `reason` is stored on the moderation_actions audit row — useful
+// product feedback. Authors with published reviews or guides are blocked
+// here; content transfer is a manual admin task. For Boss Daddy this
+// affects ~0% of users (only the site owner is an author).
+export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const body = await request.json().catch(() => ({}))
+  const parsed = Schema.safeParse(body)
+  const reason = parsed.success ? parsed.data?.reason ?? null : null
 
   // Block authors with content — they'd lose their reviews/guides on hard delete.
   const [{ count: reviewCount }, { count: guideCount }] = await Promise.all([
@@ -46,11 +56,12 @@ export async function POST() {
     return NextResponse.json({ error: 'Could not request deletion.' }, { status: 500 })
   }
 
-  // Audit row — self-initiated
+  // Audit row — self-initiated, with the optional reason for product feedback
   await admin.from('moderation_actions').insert({
     actor_id: user.id,
     target_id: user.id,
     action_type: 'request_deletion',
+    reason,
   })
 
   return NextResponse.json({ success: true })

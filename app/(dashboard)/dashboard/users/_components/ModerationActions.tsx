@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { ADMIN_MODERATION_REASONS, OTHER_REASON } from '@/lib/moderation-reasons'
 
 type Status = 'active' | 'suspended' | 'banned' | 'pending_deletion'
 
@@ -47,11 +48,18 @@ export default function ModerationActions({ userId, username, status, suspendedU
   const [open, setOpen] = useState(false)
   const [pendingAction, setPendingAction] = useState<string | null>(null)
   const [durationDays, setDurationDays] = useState(7)
-  const [actionReason, setActionReason] = useState('')
+  const [reasonChoice, setReasonChoice] = useState<string>('')
+  const [customReason, setCustomReason] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const badge = STATUS_BADGE[status]
+  const isOther = reasonChoice === OTHER_REASON
+  // Effective reason sent to the API: custom text if "Other" was picked,
+  // otherwise the dropdown label, or undefined if nothing was chosen.
+  const effectiveReason = isOther
+    ? (customReason.trim() || undefined)
+    : (reasonChoice || undefined)
 
   async function submit(action: string) {
     setLoading(true); setError(null)
@@ -62,7 +70,7 @@ export default function ModerationActions({ userId, username, status, suspendedU
         userId,
         action,
         ...(action === 'suspend' ? { durationDays } : {}),
-        ...(actionReason ? { reason: actionReason } : {}),
+        ...(effectiveReason ? { reason: effectiveReason } : {}),
       }),
     })
     const json = await res.json().catch(() => ({}))
@@ -71,7 +79,8 @@ export default function ModerationActions({ userId, username, status, suspendedU
       setLoading(false)
       return
     }
-    setLoading(false); setOpen(false); setPendingAction(null); setActionReason('')
+    setLoading(false); setOpen(false); setPendingAction(null)
+    setReasonChoice(''); setCustomReason('')
     router.refresh()
   }
 
@@ -152,16 +161,33 @@ export default function ModerationActions({ userId, username, status, suspendedU
               )}
 
               {(pendingAction === 'suspend' || pendingAction === 'ban' || pendingAction === 'delete') && (
-                <label className="block text-xs text-gray-400">
-                  Reason (visible to user)
-                  <input
-                    type="text" maxLength={200}
-                    value={actionReason}
-                    onChange={(e) => setActionReason(e.target.value)}
-                    placeholder="e.g. spam, harassment, violation of standards"
-                    className="w-full mt-1 px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs focus:outline-none focus:border-orange-500"
-                  />
-                </label>
+                <div className="space-y-2">
+                  <label className="block text-xs text-gray-400">
+                    Reason
+                    <select
+                      value={reasonChoice}
+                      onChange={(e) => setReasonChoice(e.target.value)}
+                      className="w-full mt-1 px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs focus:outline-none focus:border-orange-500"
+                    >
+                      <option value="">— Select a reason —</option>
+                      {ADMIN_MODERATION_REASONS.map((r) => (
+                        <option key={r} value={r}>{r}</option>
+                      ))}
+                    </select>
+                  </label>
+                  {isOther && (
+                    <label className="block text-xs text-gray-400">
+                      Specify
+                      <input
+                        type="text" maxLength={200}
+                        value={customReason}
+                        onChange={(e) => setCustomReason(e.target.value)}
+                        placeholder="Describe the violation"
+                        className="w-full mt-1 px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs focus:outline-none focus:border-orange-500"
+                      />
+                    </label>
+                  )}
+                </div>
               )}
 
               {error && <p className="text-xs text-red-400">{error}</p>}
@@ -175,7 +201,7 @@ export default function ModerationActions({ userId, username, status, suspendedU
                   {loading ? 'Working…' : 'Confirm'}
                 </button>
                 <button
-                  onClick={() => { setPendingAction(null); setActionReason('') }}
+                  onClick={() => { setPendingAction(null); setReasonChoice(''); setCustomReason('') }}
                   disabled={loading}
                   className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold rounded transition-colors"
                 >

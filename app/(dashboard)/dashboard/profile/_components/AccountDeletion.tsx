@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { SELF_DELETION_REASONS, OTHER_REASON } from '@/lib/moderation-reasons'
 
 interface Props {
   /** 'active' | 'suspended' | 'banned' | 'pending_deletion' */
@@ -15,6 +16,12 @@ interface Props {
 const COOLDOWN_DAYS = 30
 
 export default function AccountDeletion({ accountStatus, deletionDate, hasPublishedContent }: Props) {
+  const [reasonChoice, setReasonChoice] = useState<string>('')
+  const [customReason, setCustomReason] = useState('')
+  const isOther = reasonChoice === OTHER_REASON
+  const effectiveReason = isOther
+    ? (customReason.trim() || undefined)
+    : (reasonChoice || undefined)
   const router = useRouter()
   const [confirming, setConfirming] = useState(false)
   const [confirmText, setConfirmText] = useState('')
@@ -67,7 +74,11 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
   // -------- active state — danger zone with delete option --------
   async function requestDelete() {
     setLoading(true); setError(null)
-    const res = await fetch('/api/account/delete-request', { method: 'POST' })
+    const res = await fetch('/api/account/delete-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(effectiveReason ? { reason: effectiveReason } : {}),
+    })
     const json = await res.json().catch(() => ({}))
     if (!res.ok) {
       setError(json.error ?? 'Could not request deletion.')
@@ -106,6 +117,33 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
             You can cancel any time before then by signing back in. After {COOLDOWN_DAYS} days,
             comments, votes, and subscriptions are wiped and the account can&apos;t be recovered.
           </p>
+
+          <label className="block text-xs text-gray-400">
+            Reason for leaving (optional, helps us improve)
+            <select
+              value={reasonChoice}
+              onChange={(e) => setReasonChoice(e.target.value)}
+              className="w-full mt-1 px-3 py-2 bg-gray-900 border border-gray-700 rounded text-white text-sm focus:outline-none focus:border-orange-500"
+            >
+              <option value="">— Prefer not to say —</option>
+              {SELF_DELETION_REASONS.map((r) => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
+          </label>
+          {isOther && (
+            <label className="block text-xs text-gray-400">
+              Tell us more
+              <input
+                type="text" maxLength={200}
+                value={customReason}
+                onChange={(e) => setCustomReason(e.target.value)}
+                placeholder="What's the reason?"
+                className="w-full mt-1 px-3 py-2 bg-gray-900 border border-gray-700 rounded text-white text-sm focus:outline-none focus:border-orange-500"
+              />
+            </label>
+          )}
+
           <label className="block text-xs text-gray-400">
             Type <code className="text-red-400">DELETE</code> to confirm:
             <input
