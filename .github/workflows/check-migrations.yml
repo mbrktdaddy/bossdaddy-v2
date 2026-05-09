@@ -1,0 +1,66 @@
+name: Check migrations replay
+
+# Replays every migration in supabase/migrations/ against a fresh Postgres
+# instance to catch regressions before they hit production. Migration 040
+# took 3 fix commits to apply cleanly; this workflow exists so the next
+# 040-style failure surfaces in CI instead of mid-`supabase db push`.
+#
+# Triggers on PR + push when migrations or shadow setup change. Manual
+# dispatch is also enabled for ad-hoc validation.
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/**'
+      - 'scripts/shadow-setup.sql'
+      - '.github/workflows/check-migrations.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'supabase/migrations/**'
+      - 'scripts/shadow-setup.sql'
+  workflow_dispatch:
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: bossdaddy_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      PGURL: postgresql://postgres:postgres@localhost:5432/bossdaddy_test
+      PGOPTIONS: --client-min-messages=warning
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install psql client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+
+      - name: Apply shadow Supabase stubs (auth + storage)
+        run: psql "$PGURL" -v ON_ERROR_STOP=1 -f scripts/shadow-setup.sql
+
+      - name: Replay all migrations in order
+        run: |
+          set -euo pipefail
+          for f in $(ls supabase/migrations/[0-9]*.sql | sort -V); do
+            echo "→ Applying $f"
+            psql "$PGURL" -v ON_ERROR_STOP=1 -f "$f"
+          done
+          echo "✓ All migrations replayed successfully."

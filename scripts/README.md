@@ -7,6 +7,7 @@ Operational tooling for Boss Daddy v2. One-off data migrations live in `_archive
 | Script | Triggered by | Purpose |
 |---|---|---|
 | `check-middleware-convention.mjs` | `npm predev`, `npm prebuild` | Fails the build if `middleware.ts` is created or `proxy.ts` is renamed. Next.js 16 requires `proxy.ts` — see CLAUDE.md "Middleware" section. |
+| `shadow-setup.sql` | CI (`.github/workflows/check-migrations.yml`) | Minimal Supabase auth/storage stubs so all `supabase/migrations/*.sql` can be replayed against a vanilla Postgres in CI. Catches structural regressions before `supabase db push`. |
 | `smoke-test.mjs` | `npm run smoke` | Hits a curated list of public + protected endpoints and asserts status codes. Run before / after deploys. |
 | `extract-bundle-stats.mjs` | manual | Reads the `.next/` build output and dumps the parsed/gzipped sizes of public-route chunks. Used to verify Supabase / SDK weight isn't leaking into the public bundle. |
 | `list-bench-items.mjs` | manual | Diagnostic dump of `wishlist_items` rows (id, slug, status, votes). Useful for debugging the bench/admin-bench data. |
