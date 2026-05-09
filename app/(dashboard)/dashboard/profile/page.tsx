@@ -4,6 +4,7 @@ import { requireUser, getCurrentProfile } from '@/lib/auth-cache'
 import EditUsernameForm from './_components/EditUsernameForm'
 import EditEmailForm from './_components/EditEmailForm'
 import BioForm from './_components/BioForm'
+import AccountDeletion from './_components/AccountDeletion'
 
 const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
   admin:  { label: 'Admin',  className: 'bg-orange-950/60 text-orange-400 border border-orange-900/60' },
@@ -107,6 +108,18 @@ export default async function ProfilePage() {
     ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
     : null
 
+  const accountStatus = profile?.account_status ?? 'active'
+  const deletionRequestedAt = profile?.deletion_requested_at ?? null
+  const hasPublishedContent = (reviewCount ?? 0) > 0 || (guideCount ?? 0) > 0
+
+  // Hard-delete date is deterministic from request_date + 30 days (matches the
+  // cron sweep cutoff). Pre-format here so the client component stays pure.
+  const COOLDOWN_DAYS = 30
+  const deletionDate = deletionRequestedAt
+    ? new Date(new Date(deletionRequestedAt).getTime() + COOLDOWN_DAYS * 86_400_000)
+        .toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    : null
+
   return (
     <div className="p-8 max-w-2xl">
 
@@ -115,6 +128,15 @@ export default async function ProfilePage() {
         <h1 className="text-2xl font-black">My Profile</h1>
         <p className="text-gray-500 text-sm mt-1">Manage your account and view your activity</p>
       </div>
+
+      {/* Pending-deletion banner — sits at top so it can't be missed */}
+      {accountStatus === 'pending_deletion' && (
+        <AccountDeletion
+          accountStatus={accountStatus}
+          deletionDate={deletionDate}
+          hasPublishedContent={hasPublishedContent}
+        />
+      )}
 
       {/* Identity card */}
       <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6">
@@ -337,6 +359,15 @@ export default async function ProfilePage() {
             </Link>
           </div>
         </div>
+      )}
+
+      {/* Danger zone — only when account is currently active */}
+      {accountStatus === 'active' && (
+        <AccountDeletion
+          accountStatus={accountStatus}
+          deletionDate={deletionDate}
+          hasPublishedContent={hasPublishedContent}
+        />
       )}
 
       {/* Admin quick links */}

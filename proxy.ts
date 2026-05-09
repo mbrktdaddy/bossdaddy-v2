@@ -108,8 +108,12 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  // Account moderation: signed-in users with non-active status get signed out
-  // and bounced to /account/blocked. The blocked page itself is allowlisted.
+  // Account moderation: banned and active-suspension accounts get signed out
+  // and bounced to /account/blocked. pending_deletion is *not* blocked here
+  // — those users need to keep signing in to cancel the deletion within the
+  // 30-day cooldown. The cron at /api/cron/delete-expired-accounts hard-
+  // deletes them after the cooldown elapses; once that runs, their auth
+  // session is gone and they can't sign in at all.
   if (user && !pathname.startsWith('/account/blocked') && !pathname.startsWith('/api/auth/signout')) {
     const { data: profile } = await supabase
       .from('profiles')
@@ -117,15 +121,11 @@ export async function proxy(request: NextRequest) {
       .eq('id', user.id)
       .single()
 
-    if (profile && profile.account_status !== 'active') {
-      // Auto-clear suspensions whose end date has passed
+    if (profile && profile.account_status !== 'active' && profile.account_status !== 'pending_deletion') {
       const stillSuspended = profile.account_status === 'suspended'
         && (!profile.suspended_until || new Date(profile.suspended_until) > new Date())
 
-      const blocked =
-        profile.account_status === 'banned' ||
-        profile.account_status === 'pending_deletion' ||
-        stillSuspended
+      const blocked = profile.account_status === 'banned' || stillSuspended
 
       if (blocked) {
         await supabase.auth.signOut()
