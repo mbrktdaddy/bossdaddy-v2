@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
 import RatingScore from '@/components/RatingScore'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -119,10 +120,10 @@ export default async function TagPage({ params }: Props) {
             ))}
           </div>
         ) : (
-          <div className="text-center py-24 bg-gray-900/40 rounded-2xl">
-            <p className="text-gray-400 text-lg font-semibold mb-2">No reviews tagged &ldquo;{tag.label}&rdquo; yet.</p>
-            <p className="text-gray-600 text-sm">Check back soon — more reviews are on the way.</p>
-          </div>
+          <EmptyState
+            title={`No reviews tagged "${tag.label}" yet.`}
+            body="Check back soon — more reviews are on the way."
+          />
         )}
 
       </div>

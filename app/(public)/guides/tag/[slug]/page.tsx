@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCategoryBySlug } from '@/lib/categories'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -131,10 +132,10 @@ export default async function GuideTagPage({ params }: Props) {
             })}
           </div>
         ) : (
-          <div className="text-center py-24 bg-gray-900/40 rounded-2xl">
-            <p className="text-gray-400 text-lg font-semibold mb-2">No guides tagged &ldquo;{tag.label}&rdquo; yet.</p>
-            <p className="text-gray-600 text-sm">Check back soon — more guides are on the way.</p>
-          </div>
+          <EmptyState
+            title={`No guides tagged "${tag.label}" yet.`}
+            body="Check back soon — more guides are on the way."
+          />
         )}
 
       </div>

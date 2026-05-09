@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCategoryBySlug, CATEGORIES } from '@/lib/categories'
 import RatingScore from '@/components/RatingScore'
+import { PillFilterStrip, PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -64,9 +65,6 @@ export default async function CategoryPage({ params }: Props) {
     ],
   }
 
-  const pillActive = 'bg-orange-600 text-white shadow-md shadow-black/30'
-  const pillInactive = 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20'
-
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
@@ -74,24 +72,21 @@ export default async function CategoryPage({ params }: Props) {
       <div className="w-full max-w-6xl mx-auto px-6 py-12">
 
         {/* Category filter — horizontal scroll strip */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-10 pb-1">
-          <Link href="/reviews"
-            className="shrink-0 flex items-center px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 transition-colors">
+        <PillFilterStrip className="mb-10">
+          <Link href="/reviews" className={`${PILL_BASE} ${PILL_INACTIVE}`}>
             All Reviews
           </Link>
           {CATEGORIES.map((c) => (
             <Link
               key={c.slug}
               href={`/reviews/category/${c.slug}`}
-              className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
-                c.slug === slug ? pillActive : pillInactive
-              }`}
+              className={`${PILL_BASE} ${c.slug === slug ? PILL_ACTIVE : PILL_INACTIVE}`}
             >
               <span>{c.icon}</span>
               <span>{c.label}</span>
             </Link>
           ))}
-        </div>
+        </PillFilterStrip>
 
         {/* Category header */}
         <div className="mb-10">
