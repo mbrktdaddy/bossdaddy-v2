@@ -227,6 +227,10 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords }: Prop
         heading:          { levels: [2, 3, 4] },
         horizontalRule:   false,
         strike:           false,
+        // StarterKit ships a Link extension by default; we use our custom Link
+        // (with affiliate attribute preservation) defined below, so disable
+        // the built-in to avoid the "Duplicate extension names: ['link']" warning.
+        link:             false,
       }),
       Link.configure({
         openOnClick: false,
