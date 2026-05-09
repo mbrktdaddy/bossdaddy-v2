@@ -1,8 +1,19 @@
+import Image from 'next/image'
 import Link from 'next/link'
 
 export default function NotFound() {
   return (
     <main className="min-h-screen bg-gray-950 flex flex-col items-center justify-center px-6 text-center">
+      <Link href="/" aria-label="Boss Daddy — Home" className="mb-6">
+        <Image
+          src="/images/bd-logo-badge.png"
+          alt=""
+          width={64}
+          height={64}
+          priority
+          className="h-16 w-16 object-contain"
+        />
+      </Link>
       <p className="text-orange-500 text-xs uppercase tracking-widest font-semibold mb-4">404</p>
       <h1 className="text-4xl font-black text-white mb-3">Page not found</h1>
       <p className="text-gray-400 text-sm mb-8 max-w-sm">

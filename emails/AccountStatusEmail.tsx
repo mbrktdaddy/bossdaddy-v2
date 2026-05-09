@@ -98,10 +98,26 @@ export function AccountStatusEmail({ event, username, siteUrl, reason, suspensio
               <table width='560' cellPadding={0} cellSpacing={0} style={{ backgroundColor: '#111111', borderRadius: '12px', overflow: 'hidden', maxWidth: '560px', width: '100%' }}>
 
                 <tr>
-                  <td style={{ backgroundColor: '#1a0800', padding: '32px 40px', borderBottom: '1px solid #2a1000' }}>
-                    <p style={{ margin: 0, color: '#CC5500', fontWeight: 900, fontSize: '20px', letterSpacing: '-0.5px' }}>
-                      BOSS DADDY LIFE
-                    </p>
+                  <td style={{ backgroundColor: '#1a0800', padding: '24px 40px', borderBottom: '1px solid #2a1000' }}>
+                    <table cellPadding={0} cellSpacing={0}>
+                      <tr>
+                        <td style={{ paddingRight: '12px', verticalAlign: 'middle' }}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={`${siteUrl}/images/bd-logo-badge.png`}
+                            alt="Boss Daddy"
+                            width={36}
+                            height={36}
+                            style={{ display: 'block' }}
+                          />
+                        </td>
+                        <td style={{ verticalAlign: 'middle' }}>
+                          <p style={{ margin: 0, color: '#CC5500', fontWeight: 900, fontSize: '20px', letterSpacing: '-0.5px' }}>
+                            BOSS DADDY LIFE
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
 

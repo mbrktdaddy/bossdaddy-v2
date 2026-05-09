@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { SOCIAL } from '@/lib/social'
 import { EmailSignup } from '@/components/EmailSignup'
@@ -122,7 +123,14 @@ export default function Footer() {
       </div>
       <div className="max-w-6xl mx-auto px-6 py-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-          <Link href="/" className="font-black text-gray-400 tracking-tight hover:text-gray-200 transition-colors py-2 inline-block">
+          <Link href="/" className="flex items-center gap-2 font-black text-gray-400 tracking-tight hover:text-gray-200 transition-colors py-2">
+            <Image
+              src="/images/bd-logo-badge.png"
+              alt=""
+              width={28}
+              height={28}
+              className="h-7 w-7 object-contain"
+            />
             BOSS DADDY LIFE
           </Link>
           <div className="flex items-center gap-4 flex-wrap justify-center">

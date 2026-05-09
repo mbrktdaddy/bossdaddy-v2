@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { CATEGORIES } from '@/lib/categories'
@@ -76,9 +77,19 @@ export default function Header({ username }: HeaderProps) {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 
         {/* Logo */}
-        <Link href="/" className="font-black text-xl tracking-tight shrink-0">
-          <span className="text-orange-500">BOSS</span>
-          <span className="text-white"> DADDY</span>
+        <Link href="/" className="flex items-center gap-2 font-black text-xl tracking-tight shrink-0">
+          <Image
+            src="/images/bd-logo-badge.png"
+            alt="Boss Daddy"
+            width={36}
+            height={36}
+            priority
+            className="h-9 w-9 object-contain"
+          />
+          <span className="hidden sm:inline">
+            <span className="text-orange-500">BOSS</span>
+            <span className="text-white"> DADDY</span>
+          </span>
         </Link>
 
         {/* Desktop nav */}
