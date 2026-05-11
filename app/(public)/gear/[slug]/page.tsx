@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation'
-import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { formatPrice, getMerchDisplayImage } from '@/lib/merch'
 import AddToCartForm from './_components/AddToCartForm'
+import { MerchImageGallery } from '@/components/MerchImageGallery'
 import type { Metadata } from 'next'
 
 interface Props {
@@ -29,7 +29,7 @@ export default async function MerchDetailPage({ params }: Props) {
 
   const { data: merch } = await supabase
     .from('merch')
-    .select('id, slug, name, description, image_url, default_image_url, status, currency')
+    .select('id, slug, name, description, image_url, default_image_url, images, status, currency')
     .eq('slug', slug)
     .in('status', ['available', 'coming_soon'])
     .is('archived_at', null)
@@ -45,7 +45,11 @@ export default async function MerchDetailPage({ params }: Props) {
 
   const variants = variantsData ?? []
   const isAvailable = merch.status === 'available'
-  const imageUrl = getMerchDisplayImage(merch as Parameters<typeof getMerchDisplayImage>[0])
+  const fallbackImage = getMerchDisplayImage(merch as Parameters<typeof getMerchDisplayImage>[0])
+  // Prefer synced images array; fall back to single thumbnail if empty
+  const galleryImages: string[] = (merch as { images?: string[] }).images?.length
+    ? (merch as { images: string[] }).images
+    : fallbackImage ? [fallbackImage] : []
 
   const prices = [...new Set(variants.map(v => v.retail_price_cents))]
   const priceDisplay = prices.length === 0
@@ -67,26 +71,12 @@ export default async function MerchDetailPage({ params }: Props) {
       </Link>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        {/* Image */}
-        <div className="relative aspect-square bg-gray-900 rounded-2xl overflow-hidden">
-          {imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt={merch.name}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
-              priority
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-7xl opacity-20">👕</div>
-          )}
-          {!isAvailable && (
-            <div className="absolute top-4 left-4 bg-orange-950/90 backdrop-blur-sm px-3 py-1.5 rounded-full">
-              <p className="text-xs font-bold text-orange-400 uppercase tracking-widest">Coming soon</p>
-            </div>
-          )}
-        </div>
+        {/* Image gallery */}
+        <MerchImageGallery
+          images={galleryImages}
+          alt={merch.name}
+          comingSoon={!isAvailable}
+        />
 
         {/* Details */}
         <div className="flex flex-col">

@@ -45,7 +45,7 @@ function parseColor(variantName) {
   return parts.find((p) => p.length > 0 && !sizePattern.test(p)) ?? null
 }
 
-async function syncMerch(sp) {
+async function syncMerch(sp, images = []) {
   // Check if row already exists by Printful product ID
   const { data: existing } = await supabase
     .from('merch')
@@ -58,6 +58,7 @@ async function syncMerch(sp) {
     name: sp.name,
     printful_sync_product_id: sp.id,
     default_image_url: sp.thumbnail_url,
+    images,
     status: 'available',
     currency: 'USD',
     archived_at: null,
@@ -138,7 +139,16 @@ async function run() {
       const sp = detail.sync_product
       const variants = detail.sync_variants.filter((v) => v.synced && !v.is_ignored)
 
-      const merchRow = await syncMerch(sp)
+      // Collect all unique preview URLs from every variant's files
+      const images = [...new Set(
+        variants.flatMap((v) =>
+          (v.files ?? [])
+            .filter((f) => f.preview_url && f.type !== 'default')
+            .map((f) => f.preview_url)
+        )
+      )]
+
+      const merchRow = await syncMerch(sp, images)
 
       for (const v of variants) {
         await syncVariant(v, merchRow.id)
