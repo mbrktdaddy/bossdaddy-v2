@@ -28,6 +28,7 @@ export function MerchForm({ item }: Props) {
   const [status, setStatus]           = useState<MerchStatus>(item?.status ?? 'coming_soon')
   const [externalUrl, setExternalUrl] = useState(item?.external_url ?? '')
   const [position, setPosition]       = useState<number>(item?.position ?? 0)
+  const [featured, setFeatured]       = useState(item?.featured ?? false)
 
   const [busy, setBusy]               = useState(false)
   const [deleting, setDeleting]       = useState(false)
@@ -58,6 +59,7 @@ export function MerchForm({ item }: Props) {
       status,
       external_url: externalUrl.trim() || null,
       position:     Number.isFinite(position) ? position : 0,
+      featured,
     }
 
     try {
@@ -222,6 +224,25 @@ export function MerchForm({ item }: Props) {
           className="w-32 px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
         />
         <p className="mt-1 text-xs text-gray-600">Lower numbers display first.</p>
+      </div>
+
+      <div>
+        <label className="flex items-center gap-3 cursor-pointer select-none">
+          <div className="relative">
+            <input
+              type="checkbox"
+              checked={featured}
+              onChange={(e) => setFeatured(e.target.checked)}
+              className="sr-only"
+            />
+            <div className={`w-10 h-6 rounded-full transition-colors ${featured ? 'bg-orange-600' : 'bg-gray-700'}`} />
+            <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${featured ? 'translate-x-4' : 'translate-x-0'}`} />
+          </div>
+          <div>
+            <p className="text-sm text-gray-300 font-medium">Featured</p>
+            <p className="text-xs text-gray-600">Show on homepage strip and end-of-article callouts.</p>
+          </div>
+        </label>
       </div>
 
       {/* Image */}

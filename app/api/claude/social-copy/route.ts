@@ -162,18 +162,19 @@ Return ONLY the JSON. No markdown, no preamble.`
     return NextResponse.json({ error: 'No posts returned' }, { status: 502 })
   }
 
-  // Upsert each post
+  // platform check uses 'x' internally; route accepts 'twitter' for backwards compat
+  const PLATFORM_MAP: Record<string, string> = { twitter: 'x' }
+  const DB_PLATFORMS = ['x', 'instagram', 'threads', 'facebook']
+
   const rows = drafts
     .filter((d) => d.platform && d.body && platforms.includes(d.platform as typeof platforms[number]))
-    .map((d) => ({
-      content_type,
-      content_id,
-      platform: d.platform,
-      body: d.body,
-      hashtags: Array.isArray(d.hashtags) ? d.hashtags.slice(0, 30).map(String) : [],
-      generated_by: user.id,
-      generated_at: new Date().toISOString(),
-    }))
+    .map((d) => {
+      const platform = PLATFORM_MAP[d.platform] ?? d.platform
+      const tags: string[] = Array.isArray(d.hashtags) ? d.hashtags.slice(0, 30).map(String) : []
+      const content = tags.length > 0 ? `${d.body}\n\n${tags.join(' ')}` : d.body
+      return { platform, content, source_type: content_type, source_id: content_id, user_id: user.id, status: 'draft' as const }
+    })
+    .filter((r) => DB_PLATFORMS.includes(r.platform))
 
   if (rows.length === 0) {
     return NextResponse.json({ error: 'No valid posts returned' }, { status: 502 })
@@ -181,12 +182,12 @@ Return ONLY the JSON. No markdown, no preamble.`
 
   const { data: saved, error: dbError } = await admin
     .from('social_posts')
-    .upsert(rows, { onConflict: 'content_type,content_id,platform' })
-    .select('platform, body, hashtags, generated_at')
+    .insert(rows)
+    .select('platform, content, status')
 
   if (dbError) {
     console.error('social-copy save error:', dbError)
-    return NextResponse.json({ error: 'Saved drafts to memory but DB upsert failed', drafts }, { status: 500 })
+    return NextResponse.json({ error: 'Saved drafts to memory but DB insert failed', drafts }, { status: 500 })
   }
 
   return NextResponse.json({ posts: saved ?? rows })

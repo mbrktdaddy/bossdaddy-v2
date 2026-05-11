@@ -1,4 +1,4 @@
-import { cache } from 'react'
+import { cache, Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -18,6 +18,7 @@ import LikeButton from '@/components/LikeButton'
 import CommentForm from '@/components/CommentForm'
 import CommentList from '@/components/CommentList'
 import ImageLightbox from '@/components/ImageLightbox'
+import { MerchCallout } from '@/components/MerchCallout'
 import { LightboxImage } from '@/components/LightboxImage'
 import { EmailSignup } from '@/components/EmailSignup'
 import AuthorBio from '@/components/AuthorBio'
@@ -431,6 +432,11 @@ export default async function GuidePage({ params }: Props) {
                 <CommentForm contentType="guide" contentId={guide.id} />
               </div>
             </div>
+
+            {/* Merch callout */}
+            <Suspense fallback={null}>
+              <MerchCallout />
+            </Suspense>
 
           </div>{/* end main column */}
 

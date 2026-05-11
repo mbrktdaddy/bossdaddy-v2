@@ -13,6 +13,7 @@ const MerchSchema = z.object({
   status:       z.enum(['concept', 'coming_soon', 'available', 'sold_out', 'discontinued']).default('coming_soon'),
   external_url: z.string().url().max(2048).optional().nullable(),
   position:     z.number().int().nonnegative().optional(),
+  featured:     z.boolean().optional(),
 })
 
 async function requireAdmin() {
@@ -62,6 +63,7 @@ export async function POST(request: NextRequest) {
       status:       parsed.data.status,
       external_url: parsed.data.external_url ?? null,
       position:     parsed.data.position ?? 0,
+      featured:     parsed.data.featured ?? false,
     })
     .select()
     .single()

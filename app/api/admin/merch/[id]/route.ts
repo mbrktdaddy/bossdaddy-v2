@@ -13,6 +13,7 @@ const MerchPatchSchema = z.object({
   status:       z.enum(['concept', 'coming_soon', 'available', 'sold_out', 'discontinued']).optional(),
   external_url: z.string().url().max(2048).optional().nullable(),
   position:     z.number().int().nonnegative().optional(),
+  featured:     z.boolean().optional(),
 })
 
 async function requireAdmin() {

@@ -400,6 +400,33 @@ export type Database = {
           },
         ]
       }
+      hashtag_presets: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          platform: string
+          tags: string[]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          platform?: string
+          tags?: string[]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          platform?: string
+          tags?: string[]
+          user_id?: string
+        }
+        Relationships: []
+      }
       likes: {
         Row: {
           content_id: string
@@ -510,6 +537,7 @@ export type Database = {
           default_image_url: string | null
           description: string | null
           external_url: string | null
+          featured: boolean
           id: string
           image_url: string | null
           name: string
@@ -528,6 +556,7 @@ export type Database = {
           default_image_url?: string | null
           description?: string | null
           external_url?: string | null
+          featured?: boolean
           id?: string
           image_url?: string | null
           name: string
@@ -546,6 +575,7 @@ export type Database = {
           default_image_url?: string | null
           description?: string | null
           external_url?: string | null
+          featured?: boolean
           id?: string
           image_url?: string | null
           name?: string
@@ -1260,44 +1290,54 @@ export type Database = {
       }
       social_posts: {
         Row: {
-          body: string
-          content_id: string
-          content_type: string
-          generated_at: string
-          generated_by: string | null
-          hashtags: string[]
+          content: string
+          created_at: string
           id: string
+          image_url: string | null
+          link_url: string | null
+          notes: string | null
           platform: string
+          posted_at: string | null
+          source_id: string | null
+          source_title: string | null
+          source_type: string | null
+          status: string
+          updated_at: string
+          user_id: string
         }
         Insert: {
-          body: string
-          content_id: string
-          content_type: string
-          generated_at?: string
-          generated_by?: string | null
-          hashtags?: string[]
+          content: string
+          created_at?: string
           id?: string
-          platform: string
+          image_url?: string | null
+          link_url?: string | null
+          notes?: string | null
+          platform?: string
+          posted_at?: string | null
+          source_id?: string | null
+          source_title?: string | null
+          source_type?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
         }
         Update: {
-          body?: string
-          content_id?: string
-          content_type?: string
-          generated_at?: string
-          generated_by?: string | null
-          hashtags?: string[]
+          content?: string
+          created_at?: string
           id?: string
+          image_url?: string | null
+          link_url?: string | null
+          notes?: string | null
           platform?: string
+          posted_at?: string | null
+          source_id?: string | null
+          source_title?: string | null
+          source_type?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "social_posts_generated_by_fkey"
-            columns: ["generated_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       tags: {
         Row: {

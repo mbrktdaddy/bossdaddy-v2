@@ -8,6 +8,7 @@ import RatingScore from '@/components/RatingScore'
 import CodeRedirect from './_components/CodeRedirect'
 import { LatestGuidesSection } from './_components/LatestGuidesSection'
 import BenchStrip from '@/components/BenchStrip'
+import { HomepageMerchStrip } from '@/components/HomepageMerchStrip'
 import type { Metadata } from 'next'
 
 export const revalidate = 3600
@@ -144,6 +145,11 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── Merch Strip ─────────────────────────────────────────────────── */}
+      <Suspense fallback={null}>
+        <HomepageMerchStrip />
+      </Suspense>
 
       {/* ── Boss Daddy's Pick ────────────────────────────────────────────── */}
       {featuredReview && (

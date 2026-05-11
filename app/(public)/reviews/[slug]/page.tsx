@@ -1,4 +1,4 @@
-import { cache } from 'react'
+import { cache, Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -18,6 +18,7 @@ import CommentList from '@/components/CommentList'
 import RatingWidget from '@/components/RatingWidget'
 import ImageLightbox from '@/components/ImageLightbox'
 import { LightboxImage } from '@/components/LightboxImage'
+import { MerchCallout } from '@/components/MerchCallout'
 import ProductCtaCard from '@/components/ProductCtaCard'
 import StickyMobileCta from '@/components/StickyMobileCta'
 import ReadingProgressBar from '@/components/ReadingProgressBar'
@@ -414,6 +415,11 @@ export default async function ReviewPage({ params }: Props) {
             <CommentForm contentType="review" contentId={review.id} />
           </div>
         </div>
+
+        {/* Merch callout */}
+        <Suspense fallback={null}>
+          <MerchCallout />
+        </Suspense>
 
         {/* Related reviews — mobile only */}
         {related && related.length > 0 && (

@@ -31,6 +31,7 @@ export interface Merch {
   default_image_url: string | null
   category: MerchCategory | null
   status: MerchStatus
+  featured: boolean
   external_url: string | null
   printful_sync_product_id: number | null
   currency: string
