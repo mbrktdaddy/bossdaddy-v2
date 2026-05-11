@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query = (admin as any)
     .from('social_posts')
-    .select('id, platform, content, status, source_type, source_title, notes, created_at, updated_at')
+    .select('id, platform, content, status, source_type, source_title, link_url, image_url, notes, posted_at, created_at, updated_at')
     .eq('user_id', user!.id)
     .order('created_at', { ascending: false })
 
@@ -39,10 +39,12 @@ export async function GET(request: NextRequest) {
 const CreateSchema = z.object({
   platform:     z.enum(PLATFORM_IDS as [string, ...string[]]),
   content:      z.string().min(1).max(5000),
-  status:       z.enum(['draft', 'ready']).optional().default('draft'),
+  status:       z.enum(['draft', 'ready', 'posted']).optional().default('draft'),
   source_type:  z.enum(['review', 'guide', 'original']).optional(),
   source_id:    z.string().uuid().optional(),
   source_title: z.string().max(300).optional(),
+  link_url:     z.string().url().optional().nullable(),
+  image_url:    z.string().url().optional().nullable(),
   notes:        z.string().max(500).optional(),
 })
 
@@ -60,7 +62,7 @@ export async function POST(request: NextRequest) {
   const { data, error: dbErr } = await (admin as any)
     .from('social_posts')
     .insert({ ...parsed.data, user_id: user!.id })
-    .select('id, platform, content, status, source_type, source_title, notes, created_at, updated_at')
+    .select('id, platform, content, status, source_type, source_title, link_url, image_url, notes, posted_at, created_at, updated_at')
     .single()
 
   if (dbErr) return NextResponse.json({ error: dbErr.message }, { status: 500 })

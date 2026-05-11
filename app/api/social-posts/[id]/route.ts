@@ -11,9 +11,11 @@ async function requireAuth() {
 }
 
 const PatchSchema = z.object({
-  content: z.string().min(1).max(5000).optional(),
-  status:  z.enum(['draft', 'ready']).optional(),
-  notes:   z.string().max(500).optional().nullable(),
+  content:   z.string().min(1).max(5000).optional(),
+  status:    z.enum(['draft', 'ready', 'posted']).optional(),
+  notes:     z.string().max(500).optional().nullable(),
+  link_url:  z.string().url().optional().nullable(),
+  image_url: z.string().url().optional().nullable(),
 })
 
 // PATCH /api/social-posts/[id]
@@ -26,14 +28,17 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const parsed = PatchSchema.safeParse(body)
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
+  const update: Record<string, unknown> = { ...parsed.data, updated_at: new Date().toISOString() }
+  if (parsed.data.status === 'posted') update.posted_at = new Date().toISOString()
+
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error: dbErr } = await (admin as any)
     .from('social_posts')
-    .update({ ...parsed.data, updated_at: new Date().toISOString() })
+    .update(update)
     .eq('id', id)
     .eq('user_id', user!.id)
-    .select('id, platform, content, status, source_type, source_title, notes, created_at, updated_at')
+    .select('id, platform, content, status, source_type, source_title, link_url, image_url, notes, posted_at, created_at, updated_at')
     .single()
 
   if (dbErr) return NextResponse.json({ error: dbErr.message }, { status: 500 })

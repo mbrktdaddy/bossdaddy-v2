@@ -18,24 +18,40 @@ export default async function SocialPage({ searchParams }: Props) {
 
   const { platform = 'x', status = 'all' } = await searchParams
 
-  // Load posts for this user
   const admin = createAdminClient()
+
+  // Posts
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query = (admin as any)
+  let postsQuery = (admin as any)
     .from('social_posts')
-    .select('id, platform, content, status, source_type, source_title, notes, created_at, updated_at')
+    .select('id, platform, content, status, source_type, source_title, link_url, image_url, notes, posted_at, created_at, updated_at')
     .eq('user_id', user.id)
     .eq('platform', platform)
     .order('created_at', { ascending: false })
+  if (status !== 'all') postsQuery = postsQuery.eq('status', status)
+  const { data: posts } = await postsQuery
 
-  if (status !== 'all') query = query.eq('status', status)
-  const { data: posts } = await query
+  // Hashtag presets for this platform
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: presets } = await (admin as any)
+    .from('hashtag_presets')
+    .select('id, name, platform, tags, created_at')
+    .eq('user_id', user.id)
+    .eq('platform', platform)
+    .order('created_at', { ascending: true })
 
-  // Load reviews + guides for source picker in generate form
-  const [{ data: reviews }, { data: guides }] = await Promise.all([
-    supabase.from('reviews').select('id, title').eq('author_id', user.id).order('title'),
-    supabase.from('guides').select('id, title').eq('author_id', user.id).order('title'),
+  // Source links for link picker and generate drawer (reviews + guides = user's own; merch = all)
+  const [{ data: reviews }, { data: guides }, { data: merch }] = await Promise.all([
+    supabase.from('reviews').select('id, title, slug').eq('author_id', user.id).order('title'),
+    supabase.from('guides').select('id, title, slug').eq('author_id', user.id).order('title'),
+    supabase.from('merch').select('id, name, slug').neq('status', 'archived').order('name'),
   ])
+
+  const sourceLinks = {
+    reviews: reviews ?? [],
+    guides:  guides  ?? [],
+    merch:   (merch ?? []).map((m) => ({ id: m.id, title: m.name, slug: m.slug })),
+  }
 
   const currentPlatform = PLATFORMS.find((p) => p.id === platform) ?? PLATFORMS[0]
 
@@ -48,8 +64,8 @@ export default async function SocialPage({ searchParams }: Props) {
           <p className="text-sm text-gray-400 mt-0.5">Generate, edit, and copy posts to your accounts.</p>
         </div>
         <GenerateDrawer
-          reviews={reviews ?? []}
-          guides={guides ?? []}
+          reviews={sourceLinks.reviews}
+          guides={sourceLinks.guides}
           currentPlatform={platform}
         />
       </div>
@@ -66,15 +82,16 @@ export default async function SocialPage({ searchParams }: Props) {
                 : 'text-gray-400 hover:bg-gray-800 hover:text-white'
             }`}
           >
-            {p.label}
-            {p.id === 'x' ? '' : <span className="ml-1.5 text-xs opacity-60">coming soon</span>}
+            {p.id === 'x' ? 'X (Twitter)' : (
+              <span>{p.label} <span className="text-xs opacity-50">soon</span></span>
+            )}
           </a>
         ))}
       </div>
 
       {/* Status filter */}
       <div className="flex gap-2 mb-6">
-        {['all', 'draft', 'ready'].map((s) => (
+        {['all', 'draft', 'ready', 'posted'].map((s) => (
           <a
             key={s}
             href={`/dashboard/social?platform=${platform}&status=${s}`}
@@ -89,10 +106,13 @@ export default async function SocialPage({ searchParams }: Props) {
         ))}
       </div>
 
-      {/* Posts list */}
+      {/* Posts list + presets panel */}
       <SocialPostList
         posts={posts ?? []}
         charLimit={currentPlatform.charLimit}
+        sourceLinks={sourceLinks}
+        initialPresets={presets ?? []}
+        platform={platform}
       />
     </div>
   )
