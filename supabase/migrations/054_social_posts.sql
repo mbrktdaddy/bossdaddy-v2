@@ -2,8 +2,11 @@
 -- Platform stored as text (not enum) so adding new platforms needs no migration.
 -- Status: draft (working) → ready (polished, copy-paste when you want).
 -- Source: optional link to the review/guide that inspired the post.
+--
+-- Replaces the older social_posts table from migration 028 (different schema).
+drop table if exists social_posts cascade;
 
-create table if not exists social_posts (
+create table social_posts (
   id          uuid        primary key default gen_random_uuid(),
   user_id     uuid        not null references auth.users on delete cascade,
   platform    text        not null default 'x'
