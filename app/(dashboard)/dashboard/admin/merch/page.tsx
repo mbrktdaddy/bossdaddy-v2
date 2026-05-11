@@ -2,7 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
-import { MERCH_CATEGORIES, MERCH_STATUSES, formatPrice, type Merch } from '@/lib/merch'
+import { MERCH_CATEGORIES, MERCH_STATUSES, formatPrice, getMerchDisplayImage, type Merch } from '@/lib/merch'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,8 +58,8 @@ export default async function AdminMerchListPage() {
               >
                 {/* Thumbnail */}
                 <div className="relative w-14 h-14 shrink-0 rounded-lg overflow-hidden bg-gray-950 border border-gray-800">
-                  {p.image_url ? (
-                    <Image src={p.image_url} alt={p.name} fill className="object-cover" sizes="56px" />
+                  {getMerchDisplayImage(p) ? (
+                    <Image src={getMerchDisplayImage(p)!} alt={p.name} fill className="object-cover" sizes="56px" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-2xl opacity-50">
                       {cat?.icon ?? '📦'}

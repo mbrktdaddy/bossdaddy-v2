@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { MERCH_CATEGORIES, MERCH_STATUSES, type Merch, type MerchCategory, type MerchStatus } from '@/lib/merch'
+import { MERCH_CATEGORIES, MERCH_STATUSES, getMerchDisplayImage, type Merch, type MerchCategory, type MerchStatus } from '@/lib/merch'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
@@ -227,22 +227,43 @@ export function MerchForm({ item }: Props) {
       {/* Image */}
       <div className="space-y-3">
         <p className="text-sm font-semibold text-white">Product Image</p>
-        {imageUrl && (
-          <div className="relative w-32 h-32 rounded-xl overflow-hidden border border-gray-800 bg-gray-950">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
-            <button
-              type="button"
-              onClick={() => setImageUrl('')}
-              className="absolute top-1 right-1 p-1 bg-gray-900/80 hover:bg-red-900/80 text-gray-400 hover:text-red-400 rounded transition-colors"
-              title="Clear image"
-            >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        )}
+
+        {/* Show effective image — manual override takes priority over Printful default */}
+        {(() => {
+          const displayImg = imageUrl || (item ? getMerchDisplayImage(item) : null)
+          const isPrintfulDefault = !imageUrl && !!item?.default_image_url
+          return displayImg ? (
+            <div className="space-y-1.5">
+              <div className="relative w-32 h-32 rounded-xl overflow-hidden border border-gray-800 bg-gray-950">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={displayImg} alt={name} className="w-full h-full object-cover" />
+                {imageUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setImageUrl('')}
+                    className="absolute top-1 right-1 p-1 bg-gray-900/80 hover:bg-red-900/80 text-gray-400 hover:text-red-400 rounded transition-colors"
+                    title="Clear override image"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              {isPrintfulDefault && (
+                <p className="text-xs text-gray-500">
+                  Printful default — upload or pick from library to override.
+                </p>
+              )}
+              {imageUrl && (
+                <p className="text-xs text-orange-400">
+                  Manual override active. Clear it to revert to Printful image.
+                </p>
+              )}
+            </div>
+          ) : null
+        })()}
+
         <div className="flex items-center gap-2 flex-wrap">
           <button
             type="button"
