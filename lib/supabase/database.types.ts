@@ -536,6 +536,7 @@ export type Database = {
           currency: string
           default_image_url: string | null
           description: string | null
+          enabled_images: string[]
           external_url: string | null
           featured: boolean
           id: string
@@ -556,6 +557,7 @@ export type Database = {
           currency?: string
           default_image_url?: string | null
           description?: string | null
+          enabled_images?: string[]
           external_url?: string | null
           featured?: boolean
           id?: string
@@ -576,6 +578,7 @@ export type Database = {
           currency?: string
           default_image_url?: string | null
           description?: string | null
+          enabled_images?: string[]
           external_url?: string | null
           featured?: boolean
           id?: string

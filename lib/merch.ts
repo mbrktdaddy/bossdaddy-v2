@@ -33,6 +33,7 @@ export interface Merch {
   status: MerchStatus
   featured: boolean
   images: string[]
+  enabled_images: string[]
   external_url: string | null
   printful_sync_product_id: number | null
   currency: string

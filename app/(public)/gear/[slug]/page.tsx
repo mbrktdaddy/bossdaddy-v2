@@ -29,7 +29,7 @@ export default async function MerchDetailPage({ params }: Props) {
 
   const { data: merch } = await supabase
     .from('merch')
-    .select('id, slug, name, description, image_url, default_image_url, images, status, currency')
+    .select('id, slug, name, description, image_url, default_image_url, images, enabled_images, status, currency')
     .eq('slug', slug)
     .in('status', ['available', 'coming_soon'])
     .is('archived_at', null)
@@ -46,10 +46,12 @@ export default async function MerchDetailPage({ params }: Props) {
   const variants = variantsData ?? []
   const isAvailable = merch.status === 'available'
   const fallbackImage = getMerchDisplayImage(merch as Parameters<typeof getMerchDisplayImage>[0])
-  // Prefer synced images array; fall back to single thumbnail if empty
-  const galleryImages: string[] = (merch as { images?: string[] }).images?.length
-    ? (merch as { images: string[] }).images
-    : fallbackImage ? [fallbackImage] : []
+  const m = merch as { images?: string[]; enabled_images?: string[] }
+  // enabled_images = admin-curated subset; images = full synced set; fallback = thumbnail
+  const galleryImages: string[] =
+    (m.enabled_images?.length ? m.enabled_images : null) ??
+    (m.images?.length ? m.images : null) ??
+    (fallbackImage ? [fallbackImage] : [])
 
   const prices = [...new Set(variants.map(v => v.retail_price_cents))]
   const priceDisplay = prices.length === 0
