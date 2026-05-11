@@ -3,6 +3,7 @@ import type Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createOrder } from '@/lib/printful'
+import { sendOrderConfirmationEmail } from '@/lib/order-emails'
 
 export async function POST(request: Request) {
   const body = await request.text()
@@ -144,6 +145,29 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     } catch (err) {
       // Log and continue — order is in DB, Printful can be retried from admin panel
       console.error('[stripe webhook] Printful order failed:', err)
+    }
+  }
+
+  // Send order confirmation email
+  const customerEmail = session.customer_details?.email
+  if (customerEmail) {
+    try {
+      await sendOrderConfirmationEmail({
+        to: customerEmail,
+        orderNumber: order.order_number,
+        items: orderItemRows.map((r) => ({
+          name: r.name_snapshot,
+          qty: r.qty,
+          unit_price_cents: r.unit_price_cents,
+          image_snapshot_url: r.image_snapshot_url,
+        })),
+        subtotalCents,
+        taxCents: session.total_details?.amount_tax ?? 0,
+        totalCents: session.amount_total ?? subtotalCents,
+        shippingAddress,
+      })
+    } catch (err) {
+      console.error('[stripe webhook] order confirmation email failed:', err)
     }
   }
 

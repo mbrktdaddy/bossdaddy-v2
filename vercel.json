@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/delete-expired-accounts",
       "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/cleanup-carts",
+      "schedule": "0 4 * * *"
     }
   ]
 }
