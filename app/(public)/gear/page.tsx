@@ -401,6 +401,9 @@ export default async function GearPage({ searchParams }: Props) {
               })}
             </div>
           </section>
+
+          {/* ── Boss Daddy Merch ──────────────────────────────────────────── */}
+          <MerchPanel />
         </>
       )}
 
@@ -441,9 +444,6 @@ export default async function GearPage({ searchParams }: Props) {
           })}
         </div>
       )}
-
-      {/* ── Merch panel (unfiltered only) ───────────────────────────────────── */}
-      {!category && <div className="mt-16"><MerchPanel /></div>}
 
       {/* ── Bench strip ─────────────────────────────────────────────────────── */}
       <div className="mt-16">

@@ -70,6 +70,9 @@ export default async function AdminMerchListPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-sm font-semibold truncate">{p.name}</p>
+                    {p.featured && (
+                      <span className="text-xs text-orange-400 font-bold">★ Featured</span>
+                    )}
                     {cat && (
                       <span className="text-xs text-gray-500">
                         {cat.icon} {cat.label}

@@ -21,7 +21,6 @@ export async function MerchPanel() {
     .in('status', ['coming_soon', 'available'])
     .is('archived_at', null)
     .order('position', { ascending: true })
-    .limit(3)
 
   const products = (data ?? []) as Merch[]
   const isEmpty = products.length === 0
