@@ -90,12 +90,6 @@ async function syncVariant(v, merchId) {
     v.files[0]?.preview_url ??
     null
 
-  const { data: existing } = await supabase
-    .from('merch_variants')
-    .select('id')
-    .eq('printful_sync_variant_id', v.id)
-    .maybeSingle()
-
   const payload = {
     merch_id: merchId,
     printful_variant_id: v.variant_id,
@@ -105,6 +99,15 @@ async function syncVariant(v, merchId) {
     image_url: previewUrl,
     in_stock: v.synced,
   }
+
+  // limit(1) handles edge case where duplicate rows exist (maybeSingle errors silently on >1 rows)
+  const { data: rows } = await supabase
+    .from('merch_variants')
+    .select('id')
+    .eq('printful_sync_variant_id', v.id)
+    .limit(1)
+
+  const existing = rows?.[0] ?? null
 
   if (existing) {
     const { error } = await supabase
