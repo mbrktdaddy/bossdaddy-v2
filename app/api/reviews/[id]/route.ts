@@ -134,7 +134,7 @@ export async function PUT(
 
     revalidatePath('/')
     revalidatePath('/reviews')
-    revalidatePath('/stuff')
+    revalidatePath('/gear')
     revalidatePath('/about')
     if (data?.slug)     revalidatePath(`/reviews/${data.slug}`)
     if (data?.category) revalidatePath(`/reviews/category/${data.category}`)
@@ -283,7 +283,7 @@ export async function PUT(
   if (wasApproved && data?.slug) {
     revalidatePath('/')
     revalidatePath('/reviews')
-    revalidatePath('/stuff')
+    revalidatePath('/gear')
     revalidatePath(`/reviews/${data.slug}`)
     if (data?.category) revalidatePath(`/reviews/category/${data.category}`)
     if (data?.category) revalidatePath(`/category/${data.category}`)
@@ -319,7 +319,7 @@ export async function DELETE(
   if (error) return NextResponse.json({ error: 'Delete failed' }, { status: 500 })
 
   revalidatePath('/reviews')
-  revalidatePath('/stuff')
+  revalidatePath('/gear')
   revalidatePath('/')
   return NextResponse.json({ success: true })
 }

@@ -13,7 +13,8 @@
     "check:middleware": "node scripts/check-middleware-convention.mjs",
     "db:types": "supabase gen types typescript --project-id fsxbertkzcigvkdyqgep > lib/supabase/database.types.ts",
     "db:push": "supabase db push",
-    "smoke": "node --env-file=.env.local scripts/smoke-test.mjs"
+    "smoke": "node --env-file=.env.local scripts/smoke-test.mjs",
+    "merch:sync": "node --env-file=.env.local scripts/sync-printful.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.89.0",
@@ -39,6 +40,7 @@
     "require-in-the-middle": "^8.0.1",
     "resend": "^6.12.0",
     "sanitize-html": "^2.14.0",
+    "stripe": "^17.7.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

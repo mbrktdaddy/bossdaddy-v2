@@ -104,7 +104,7 @@ export async function PATCH(
 
   revalidatePath('/bench')
   revalidatePath('/reviews')
-  revalidatePath('/stuff')
+  revalidatePath('/gear')
   revalidatePath('/')
 
   // Notify subscribers on forward status transitions to 'queued' or 'testing'.
@@ -144,7 +144,7 @@ export async function DELETE(
 
   revalidatePath('/bench')
   revalidatePath('/reviews')
-  revalidatePath('/stuff')
+  revalidatePath('/gear')
   revalidatePath('/')
 
   return NextResponse.json({ success: true })

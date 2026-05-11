@@ -32,7 +32,7 @@ export async function POST(
       .eq('wishlist_item_id', id)
     revalidatePath('/bench')
     revalidatePath('/reviews')
-    revalidatePath('/stuff')
+    revalidatePath('/gear')
     return NextResponse.json({ voted: false, vote_count: count ?? 0 })
   } else {
     // Add vote — verify item exists first
@@ -50,7 +50,7 @@ export async function POST(
       .eq('wishlist_item_id', id)
     revalidatePath('/bench')
     revalidatePath('/reviews')
-    revalidatePath('/stuff')
+    revalidatePath('/gear')
     return NextResponse.json({ voted: true, vote_count: count ?? 0 })
   }
 }

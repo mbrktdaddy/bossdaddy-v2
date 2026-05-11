@@ -3,13 +3,13 @@ import { NextResponse, type NextRequest } from 'next/server'
 // Public legacy URL redirects — work for unauthenticated users too.
 // Keep these in sync with sitemap.xml exclusions and any external links.
 export function rewritePublicLegacy(pathname: string): string | null {
-  // /shop and /shop/* → /stuff (shop unified into the stuff page)
-  if (pathname === '/shop' || pathname === '/shop/') return '/stuff'
-  if (pathname.startsWith('/shop/')) return '/stuff'
+  // /shop and /shop/* → /gear (shop unified into the gear page)
+  if (pathname === '/shop' || pathname === '/shop/') return '/gear'
+  if (pathname.startsWith('/shop/')) return '/gear'
 
-  // /gear and /gear/* → /stuff (renamed)
-  if (pathname === '/gear' || pathname === '/gear/') return '/stuff'
-  if (pathname.startsWith('/gear')) return '/stuff' + pathname.slice(5)
+  // /stuff and /stuff/* → /gear (/gear is now canonical)
+  if (pathname === '/stuff' || pathname === '/stuff/') return '/gear'
+  if (pathname.startsWith('/stuff')) return '/gear' + pathname.slice(6)
 
   // /feed/articles.xml → /feed/guides.xml (RSS feed renamed)
   if (pathname === '/feed/articles.xml') return '/feed/guides.xml'

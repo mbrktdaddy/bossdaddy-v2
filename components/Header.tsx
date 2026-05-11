@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { CATEGORIES } from '@/lib/categories'
 import { LABELS } from '@/lib/labels'
+import CartIcon from '@/components/CartIcon'
 
 interface HeaderProps {
   /** The current user's username, or null if not signed in. Resolved server-side
@@ -18,7 +19,7 @@ const NAV_LINKS = [
   { href: '/',        label: 'Home' },
   { href: '/reviews', label: LABELS.reviews.plural },
   { href: '/guides',  label: LABELS.guides.plural },
-  { href: '/stuff',   label: LABELS.stuff.short },
+  { href: '/gear',    label: LABELS.stuff.short },
 ]
 
 function isActive(pathname: string, href: string) {
@@ -185,7 +186,7 @@ export default function Header({ username }: HeaderProps) {
         </nav>
 
         {/* Right side */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1">
           {/* Search — icon by default, expands on click */}
           <div className="hidden md:flex items-center">
             {searchOpen ? (
@@ -222,6 +223,8 @@ export default function Header({ username }: HeaderProps) {
               </button>
             )}
           </div>
+
+          <CartIcon />
 
           {username ? (
             <div ref={userMenuRef} className="hidden md:block relative">

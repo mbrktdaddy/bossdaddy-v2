@@ -21,9 +21,9 @@ export const LABELS = {
     addCta: 'Add to Bench',
   },
 
-  // products table → /stuff public route
+  // products table → /gear public route
   stuff: {
-    short: 'Stuff',
+    short: 'Gear',
     full: 'Boss Daddy Approved Gear',
   },
 

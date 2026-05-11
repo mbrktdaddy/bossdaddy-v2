@@ -1,7 +1,8 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { EmailSignup } from '@/components/EmailSignup'
-import { MERCH_CATEGORIES, formatPrice, type Merch } from '@/lib/merch'
+import { MERCH_CATEGORIES, formatPrice, getMerchDisplayImage, type Merch } from '@/lib/merch'
 
 /**
  * MerchPanel — featured "Made by Boss Daddy" section on the unified /gear page.
@@ -16,8 +17,9 @@ export async function MerchPanel() {
 
   const { data } = await supabase
     .from('merch')
-    .select('id, name, slug, description, image_url, price_cents, status, category, position, external_url')
+    .select('id, name, slug, description, image_url, default_image_url, price_cents, status, category, position, external_url, printful_sync_product_id')
     .in('status', ['coming_soon', 'available'])
+    .is('archived_at', null)
     .order('position', { ascending: true })
     .limit(3)
 
@@ -65,12 +67,14 @@ export async function MerchPanel() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {products.map((p) => {
               const isAvailable = p.status === 'available'
+              const isPrintful = p.printful_sync_product_id != null
+              const displayImage = getMerchDisplayImage(p as Parameters<typeof getMerchDisplayImage>[0]) ?? p.image_url
               const inner = (
                 <>
                   <div className="relative w-full aspect-square bg-gray-800/40">
-                    {p.image_url ? (
+                    {displayImage ? (
                       <Image
-                        src={p.image_url}
+                        src={displayImage}
                         alt={p.name}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -110,6 +114,15 @@ export async function MerchPanel() {
 
               const className = 'group flex flex-col bg-gray-900 rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200'
 
+              // Printful products → internal detail page
+              if (isPrintful) {
+                return (
+                  <Link key={p.id} href={`/gear/${p.slug}`} className={className}>
+                    {inner}
+                  </Link>
+                )
+              }
+              // Manual products with external link
               if (isAvailable && p.external_url) {
                 return (
                   <a key={p.id} href={p.external_url} target="_blank" rel="noopener" className={className}>

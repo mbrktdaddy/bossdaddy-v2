@@ -73,6 +73,82 @@ export type Database = {
           },
         ]
       }
+      cart_items: {
+        Row: {
+          cart_id: string
+          created_at: string
+          id: string
+          merch_id: string
+          qty: number
+          updated_at: string
+          variant_id: string
+        }
+        Insert: {
+          cart_id: string
+          created_at?: string
+          id?: string
+          merch_id: string
+          qty?: number
+          updated_at?: string
+          variant_id: string
+        }
+        Update: {
+          cart_id?: string
+          created_at?: string
+          id?: string
+          merch_id?: string
+          qty?: number
+          updated_at?: string
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cart_items_cart_id_fkey"
+            columns: ["cart_id"]
+            isOneToOne: false
+            referencedRelation: "carts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cart_items_merch_id_fkey"
+            columns: ["merch_id"]
+            isOneToOne: false
+            referencedRelation: "merch"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cart_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "merch_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      carts: {
+        Row: {
+          anon_session_id: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          anon_session_id?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          anon_session_id?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       comment_shares: {
         Row: {
           comment_id: string
@@ -227,6 +303,7 @@ export type Database = {
           image_url: string | null
           is_visible: boolean
           key_takeaways: Json
+          legacy_slugs: string[]
           meta_description: string | null
           meta_title: string | null
           moderation_flags: Json | null
@@ -259,6 +336,7 @@ export type Database = {
           image_url?: string | null
           is_visible?: boolean
           key_takeaways?: Json
+          legacy_slugs?: string[]
           meta_description?: string | null
           meta_title?: string | null
           moderation_flags?: Json | null
@@ -291,6 +369,7 @@ export type Database = {
           image_url?: string | null
           is_visible?: boolean
           key_takeaways?: Json
+          legacy_slugs?: string[]
           meta_description?: string | null
           meta_title?: string | null
           moderation_flags?: Json | null
@@ -424,8 +503,11 @@ export type Database = {
       }
       merch: {
         Row: {
+          archived_at: string | null
           category: string | null
           created_at: string
+          currency: string
+          default_image_url: string | null
           description: string | null
           external_url: string | null
           id: string
@@ -433,13 +515,17 @@ export type Database = {
           name: string
           position: number
           price_cents: number | null
+          printful_sync_product_id: number | null
           slug: string
           status: string
           updated_at: string
         }
         Insert: {
+          archived_at?: string | null
           category?: string | null
           created_at?: string
+          currency?: string
+          default_image_url?: string | null
           description?: string | null
           external_url?: string | null
           id?: string
@@ -447,13 +533,17 @@ export type Database = {
           name: string
           position?: number
           price_cents?: number | null
+          printful_sync_product_id?: number | null
           slug: string
           status?: string
           updated_at?: string
         }
         Update: {
+          archived_at?: string | null
           category?: string | null
           created_at?: string
+          currency?: string
+          default_image_url?: string | null
           description?: string | null
           external_url?: string | null
           id?: string
@@ -461,11 +551,113 @@ export type Database = {
           name?: string
           position?: number
           price_cents?: number | null
+          printful_sync_product_id?: number | null
           slug?: string
           status?: string
           updated_at?: string
         }
         Relationships: []
+      }
+      merch_variants: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          in_stock: boolean
+          merch_id: string
+          position: number
+          printful_sync_variant_id: number | null
+          printful_variant_id: number | null
+          retail_price_cents: number
+          size: string | null
+          updated_at: string
+          weight_g: number | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          in_stock?: boolean
+          merch_id: string
+          position?: number
+          printful_sync_variant_id?: number | null
+          printful_variant_id?: number | null
+          retail_price_cents: number
+          size?: string | null
+          updated_at?: string
+          weight_g?: number | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          in_stock?: boolean
+          merch_id?: string
+          position?: number
+          printful_sync_variant_id?: number | null
+          printful_variant_id?: number | null
+          retail_price_cents?: number
+          size?: string | null
+          updated_at?: string
+          weight_g?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merch_variants_merch_id_fkey"
+            columns: ["merch_id"]
+            isOneToOne: false
+            referencedRelation: "merch"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      moderation_actions: {
+        Row: {
+          action_type: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          payload: Json | null
+          reason: string | null
+          target_id: string
+        }
+        Insert: {
+          action_type: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          payload?: Json | null
+          reason?: string | null
+          target_id: string
+        }
+        Update: {
+          action_type?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          payload?: Json | null
+          reason?: string | null
+          target_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_actions_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_actions_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       newsletter_subscribers: {
         Row: {
@@ -488,6 +680,127 @@ export type Database = {
           email?: string
           id?: string
           interests?: string[]
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          image_snapshot_url: string | null
+          merch_id: string
+          name_snapshot: string
+          order_id: string
+          qty: number
+          unit_price_cents: number
+          variant_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_snapshot_url?: string | null
+          merch_id: string
+          name_snapshot: string
+          order_id: string
+          qty: number
+          unit_price_cents: number
+          variant_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_snapshot_url?: string | null
+          merch_id?: string
+          name_snapshot?: string
+          order_id?: string
+          qty?: number
+          unit_price_cents?: number
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_merch_id_fkey"
+            columns: ["merch_id"]
+            isOneToOne: false
+            referencedRelation: "merch"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "merch_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string
+          currency: string
+          email: string
+          id: string
+          order_number: string
+          printful_order_id: number | null
+          shipping_address: Json
+          shipping_cents: number
+          status: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+          subtotal_cents: number
+          tax_cents: number
+          total_cents: number
+          tracking_number: string | null
+          tracking_url: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          email: string
+          id?: string
+          order_number: string
+          printful_order_id?: number | null
+          shipping_address?: Json
+          shipping_cents?: number
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          subtotal_cents?: number
+          tax_cents?: number
+          total_cents?: number
+          tracking_number?: string | null
+          tracking_url?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          email?: string
+          id?: string
+          order_number?: string
+          printful_order_id?: number | null
+          shipping_address?: Json
+          shipping_cents?: number
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          subtotal_cents?: number
+          tax_cents?: number
+          total_cents?: number
+          tracking_number?: string | null
+          tracking_url?: string | null
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -759,47 +1072,10 @@ export type Database = {
           trusted_commenter?: boolean
           username?: string
         }
-        Relationships: []
-      }
-      moderation_actions: {
-        Row: {
-          action_type: string
-          actor_id: string | null
-          created_at: string
-          id: string
-          payload: Json | null
-          reason: string | null
-          target_id: string
-        }
-        Insert: {
-          action_type: string
-          actor_id?: string | null
-          created_at?: string
-          id?: string
-          payload?: Json | null
-          reason?: string | null
-          target_id: string
-        }
-        Update: {
-          action_type?: string
-          actor_id?: string | null
-          created_at?: string
-          id?: string
-          payload?: Json | null
-          reason?: string | null
-          target_id?: string
-        }
         Relationships: [
           {
-            foreignKeyName: "moderation_actions_actor_id_fkey"
-            columns: ["actor_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "moderation_actions_target_id_fkey"
-            columns: ["target_id"]
+            foreignKeyName: "profiles_moderation_action_by_fkey"
+            columns: ["moderation_action_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -853,6 +1129,7 @@ export type Database = {
           image_url: string | null
           is_visible: boolean
           key_takeaways: Json
+          legacy_slugs: string[]
           meta_description: string | null
           meta_title: string | null
           moderation_flags: Json | null
@@ -897,6 +1174,7 @@ export type Database = {
           image_url?: string | null
           is_visible?: boolean
           key_takeaways?: Json
+          legacy_slugs?: string[]
           meta_description?: string | null
           meta_title?: string | null
           moderation_flags?: Json | null
@@ -941,6 +1219,7 @@ export type Database = {
           image_url?: string | null
           is_visible?: boolean
           key_takeaways?: Json
+          legacy_slugs?: string[]
           meta_description?: string | null
           meta_title?: string | null
           moderation_flags?: Json | null

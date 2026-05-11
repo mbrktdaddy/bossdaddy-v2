@@ -19,6 +19,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'm.media-amazon.com' },
       { protocol: 'https', hostname: supabaseHostname },
+      { protocol: 'https', hostname: 'files.cdn.printful.com' },
     ],
   },
 
@@ -37,7 +38,7 @@ const nextConfig: NextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // unsafe-* required by Next.js
               "style-src 'self' 'unsafe-inline'",
-              `img-src 'self' data: blob: https://images.unsplash.com https://m.media-amazon.com https://${supabaseHostname}`,
+              `img-src 'self' data: blob: https://images.unsplash.com https://m.media-amazon.com https://${supabaseHostname} https://files.cdn.printful.com`,
               "font-src 'self' data:",
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://*.sentry.io https://*.ingest.sentry.io",
               "frame-ancestors 'none'",

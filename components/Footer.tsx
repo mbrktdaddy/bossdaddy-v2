@@ -7,7 +7,7 @@ import { LABELS } from '@/lib/labels'
 const FOOTER_LINKS = [
   { href: '/reviews',              label: LABELS.reviews.plural },
   { href: '/guides',               label: LABELS.guides.plural },
-  { href: '/stuff',                label: LABELS.stuff.short },
+  { href: '/gear',                 label: LABELS.stuff.short },
   { href: '/gifts',                label: LABELS.gifts.short },
   { href: '/picks',                label: LABELS.picks.short },
   { href: '/bench',                label: LABELS.bench.full },
