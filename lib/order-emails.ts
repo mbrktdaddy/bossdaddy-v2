@@ -1,6 +1,6 @@
 // Server-only. Never import from client components.
 import * as React from 'react'
-import { getResend, FROM_EMAIL } from '@/lib/resend'
+import { sendEmail, type EmailResult } from '@/lib/email'
 import { OrderConfirmationEmail } from '@/emails/OrderConfirmationEmail'
 
 interface OrderItem {
@@ -27,27 +27,20 @@ export async function sendOrderConfirmationEmail(args: {
   taxCents: number
   totalCents: number
   shippingAddress: ShippingAddress | null
-}) {
+}): Promise<EmailResult> {
   const { to, orderNumber, items, subtotalCents, taxCents, totalCents, shippingAddress } = args
-  const resend = getResend()
-
-  try {
-    const { error } = await resend.emails.send({
-      from: FROM_EMAIL,
-      to,
-      subject: `Order confirmed — ${orderNumber}`,
-      react: React.createElement(OrderConfirmationEmail, {
-        orderNumber,
-        email: to,
-        items,
-        subtotalCents,
-        taxCents,
-        totalCents,
-        shippingAddress,
-      }),
-    })
-    if (error) console.error('order-emails: resend error', orderNumber, error)
-  } catch (err) {
-    console.error('order-emails: send threw', orderNumber, err)
-  }
+  return sendEmail({
+    to,
+    subject: `Order confirmed — ${orderNumber}`,
+    tag: 'order_confirmation',
+    react: React.createElement(OrderConfirmationEmail, {
+      orderNumber,
+      email: to,
+      items,
+      subtotalCents,
+      taxCents,
+      totalCents,
+      shippingAddress,
+    }),
+  })
 }

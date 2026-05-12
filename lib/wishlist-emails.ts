@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getResend, FROM_EMAIL } from '@/lib/resend'
+import { sendEmail } from '@/lib/email'
 import { WishlistStatusEmail, getWishlistStatusSubject } from '@/emails/WishlistStatusEmail'
 
 type NotifiableStatus = 'queued' | 'testing' | 'reviewed'
@@ -53,34 +53,30 @@ export async function notifyWishlistSubscribers({ itemId, status, reviewSlug }: 
   const subject = getWishlistStatusSubject(status, item.title as string)
 
   for (const sub of subs) {
-    try {
-      const { data: authUser } = await admin.auth.admin.getUserById(sub.user_id as string)
-      const email = authUser?.user?.email
-      if (!email) continue
+    const { data: authUser } = await admin.auth.admin.getUserById(sub.user_id as string)
+    const email = authUser?.user?.email
+    if (!email) continue
 
-      await getResend().emails.send({
-        from: FROM_EMAIL,
-        to: email,
-        subject,
-        react: React.createElement(WishlistStatusEmail, {
-          status,
-          itemTitle: item.title as string,
-          itemSlug: item.slug as string,
-          itemImageUrl: item.image_url as string | null,
-          reviewSlug: reviewSlug ?? null,
-          siteUrl,
-        }),
-      })
+    const result = await sendEmail({
+      to: email,
+      subject,
+      tag: `wishlist_${status}`,
+      react: React.createElement(WishlistStatusEmail, {
+        status,
+        itemTitle: item.title as string,
+        itemSlug: item.slug as string,
+        itemImageUrl: item.image_url as string | null,
+        reviewSlug: reviewSlug ?? null,
+        siteUrl,
+      }),
+    })
 
-      // For final 'reviewed' status, mark notified so the cron path doesn't double-send
-      if (status === 'reviewed') {
-        await admin
-          .from('wishlist_subscriptions')
-          .update({ notified: true, notified_at: new Date().toISOString() })
-          .eq('id', sub.id)
-      }
-    } catch (err) {
-      console.error(`Wishlist notify failed for sub ${sub.id} (status=${status}):`, err)
+    // Only mark notified on success so failed sends get retried next time
+    if (result.ok && status === 'reviewed') {
+      await admin
+        .from('wishlist_subscriptions')
+        .update({ notified: true, notified_at: new Date().toISOString() })
+        .eq('id', sub.id)
     }
   }
 }

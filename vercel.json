@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/cleanup-carts",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/retry-order-emails",
+      "schedule": "0 6 * * *"
     }
   ]
 }

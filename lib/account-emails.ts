@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getResend, FROM_EMAIL } from '@/lib/resend'
+import { sendEmail } from '@/lib/email'
 import { AccountStatusEmail, type AccountStatusEvent } from '@/emails/AccountStatusEmail'
 import * as React from 'react'
 
@@ -67,27 +67,21 @@ interface DirectArgs {
 
 export async function sendAccountStatusEmailDirect(args: DirectArgs): Promise<void> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
-  const resend = getResend()
 
   const fmt = (iso: string | null | undefined) =>
     iso ? new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : null
 
-  try {
-    const { error } = await resend.emails.send({
-      from:    FROM_EMAIL,
-      to:      args.to,
-      subject: SUBJECTS[args.event],
-      react: React.createElement(AccountStatusEmail, {
-        event:            args.event,
-        username:         args.username,
-        siteUrl,
-        reason:           args.reason ?? null,
-        suspensionEndsOn: fmt(args.suspendedUntilIso),
-        deletionDate:     fmt(args.deletionDateIso),
-      }),
-    })
-    if (error) console.error('account-emails: resend error', args.event, error)
-  } catch (err) {
-    console.error('account-emails: send threw', args.event, err)
-  }
+  await sendEmail({
+    to:      args.to,
+    subject: SUBJECTS[args.event],
+    tag:     `account_${args.event}`,
+    react: React.createElement(AccountStatusEmail, {
+      event:            args.event,
+      username:         args.username,
+      siteUrl,
+      reason:           args.reason ?? null,
+      suspensionEndsOn: fmt(args.suspendedUntilIso),
+      deletionDate:     fmt(args.deletionDateIso),
+    }),
+  })
 }

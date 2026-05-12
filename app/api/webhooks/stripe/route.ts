@@ -37,6 +37,22 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   const cartId = session.metadata?.cart_id
   if (!cartId) throw new Error('No cart_id in session metadata')
 
+  // Idempotency guard: Stripe retries webhook deliveries (e.g., if a previous
+  // call returned non-2xx, or for at-least-once delivery semantics). Without
+  // this check, every retry would attempt to insert a duplicate order, hit the
+  // unique(stripe_session_id) constraint, return 500, and trigger more retries.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: existingOrder } = await (admin as any)
+    .from('orders')
+    .select('id')
+    .eq('stripe_session_id', session.id)
+    .maybeSingle()
+
+  if (existingOrder) {
+    console.log(`[stripe webhook] duplicate delivery for ${session.id} — order ${existingOrder.id} already exists`)
+    return
+  }
+
   // Fetch cart items with variant details needed for Printful
   const { data: cartItems } = await admin
     .from('cart_items')
@@ -148,27 +164,31 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     }
   }
 
-  // Send order confirmation email
+  // Send order confirmation email + persist the outcome so failures are visible
+  // in admin and retryable by the nightly cron.
   const customerEmail = session.customer_details?.email
   if (customerEmail) {
-    try {
-      await sendOrderConfirmationEmail({
-        to: customerEmail,
-        orderNumber: order.order_number,
-        items: orderItemRows.map((r) => ({
-          name: r.name_snapshot,
-          qty: r.qty,
-          unit_price_cents: r.unit_price_cents,
-          image_snapshot_url: r.image_snapshot_url,
-        })),
-        subtotalCents,
-        taxCents: session.total_details?.amount_tax ?? 0,
-        totalCents: session.amount_total ?? subtotalCents,
-        shippingAddress,
-      })
-    } catch (err) {
-      console.error('[stripe webhook] order confirmation email failed:', err)
-    }
+    const result = await sendOrderConfirmationEmail({
+      to: customerEmail,
+      orderNumber: order.order_number,
+      items: orderItemRows.map((r) => ({
+        name: r.name_snapshot,
+        qty: r.qty,
+        unit_price_cents: r.unit_price_cents,
+        image_snapshot_url: r.image_snapshot_url,
+      })),
+      subtotalCents,
+      taxCents: session.total_details?.amount_tax ?? 0,
+      totalCents: session.amount_total ?? subtotalCents,
+      shippingAddress,
+    })
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (admin as any).from('orders').update({
+      confirmation_email_sent_at: result.ok ? new Date().toISOString() : null,
+      confirmation_email_error:   result.ok ? null : result.error,
+      confirmation_email_attempts: 1,
+    }).eq('id', order.id)
   }
 
   // Clear cart so it doesn't persist after purchase

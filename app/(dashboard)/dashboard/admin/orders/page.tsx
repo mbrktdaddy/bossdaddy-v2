@@ -25,7 +25,7 @@ export default async function AdminOrdersPage() {
   const admin = createAdminClient() as any
   const { data, error } = await admin
     .from('orders')
-    .select('id, order_number, status, email, total_cents, printful_order_id, stripe_session_id, created_at')
+    .select('id, order_number, status, email, total_cents, printful_order_id, stripe_session_id, created_at, confirmation_email_sent_at, confirmation_email_error, confirmation_email_attempts')
     .order('created_at', { ascending: false })
     .limit(200)
 
@@ -46,6 +46,9 @@ export default async function AdminOrdersPage() {
     printful_order_id: number | null
     stripe_session_id: string
     created_at: string
+    confirmation_email_sent_at: string | null
+    confirmation_email_error: string | null
+    confirmation_email_attempts: number
   }>
 
   return (
@@ -86,7 +89,17 @@ export default async function AdminOrdersPage() {
                 className="grid grid-cols-[1fr_1fr_auto_auto_auto] gap-4 px-5 py-4 border-b border-gray-800/60 last:border-0 items-center hover:bg-gray-800/30 transition-colors"
               >
                 <div>
-                  <p className="text-white font-bold text-sm">{order.order_number}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-white font-bold text-sm">{order.order_number}</p>
+                    {!order.confirmation_email_sent_at && order.confirmation_email_attempts > 0 && (
+                      <span
+                        title={order.confirmation_email_error ?? 'No confirmation email sent'}
+                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-950/60 text-red-400"
+                      >
+                        ✉ failed ({order.confirmation_email_attempts})
+                      </span>
+                    )}
+                  </div>
                   <p className="text-gray-600 text-xs mt-0.5">{date}</p>
                 </div>
                 <p className="text-gray-400 text-sm truncate">{order.email}</p>
