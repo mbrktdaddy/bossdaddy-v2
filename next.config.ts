@@ -11,6 +11,10 @@ const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL
   : 'fsxbertkzcigvkdyqgep.supabase.co'
 
 const nextConfig: NextConfig = {
+  // Allow LAN device origins (phone on local network) to use the dev server's
+  // HMR endpoint. Dev-only — production builds ignore this.
+  allowedDevOrigins: ['192.168.1.104'],
+
   images: {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 86400,
