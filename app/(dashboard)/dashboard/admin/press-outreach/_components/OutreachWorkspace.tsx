@@ -72,7 +72,9 @@ boss@bossdaddylife.com`
 }
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  // timeZone: 'UTC' prevents React 19 hydration mismatches between
+  // server (UTC) and client (user's local TZ).
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 }
 
 function MethodBadge({ method }: { method: ContactMethod }) {

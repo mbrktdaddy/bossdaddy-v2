@@ -52,7 +52,7 @@
     "@types/sanitize-html": "^2.13.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
-    "supabase": "^2.98.0",
+    "supabase": "^2.98.2",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5"

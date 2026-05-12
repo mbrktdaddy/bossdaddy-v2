@@ -143,12 +143,12 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
           <div className="flex items-center gap-2 shrink-0">
             {post.posted_at && (
               <span className="text-xs text-gray-600">
-                Posted {new Date(post.posted_at).toLocaleDateString()}
+                Posted {new Date(post.posted_at).toLocaleDateString('en-US', { timeZone: 'UTC' })}
               </span>
             )}
             {!post.posted_at && (
               <span className="text-xs text-gray-600">
-                {new Date(post.created_at).toLocaleDateString()}
+                {new Date(post.created_at).toLocaleDateString('en-US', { timeZone: 'UTC' })}
               </span>
             )}
           </div>

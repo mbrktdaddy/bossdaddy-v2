@@ -133,7 +133,9 @@ export function GuideWorkspace({ guide: article }: Props) {
   ]
 
   const previewUrl = isPublished && article.slug ? `/guides/${article.slug}` : null
-  const createdAt  = new Date(article.created_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  // timeZone: 'UTC' prevents the React 19 hydration mismatch — server (UTC)
+  // and client (local TZ) must produce identical strings.
+  const createdAt  = new Date(article.created_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 
   return (
     <div className="p-4 sm:p-8 max-w-4xl">

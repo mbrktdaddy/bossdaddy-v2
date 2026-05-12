@@ -779,6 +779,9 @@ export type Database = {
       }
       orders: {
         Row: {
+          confirmation_email_attempts: number
+          confirmation_email_error: string | null
+          confirmation_email_sent_at: string | null
           created_at: string
           currency: string
           email: string
@@ -799,6 +802,9 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          confirmation_email_attempts?: number
+          confirmation_email_error?: string | null
+          confirmation_email_sent_at?: string | null
           created_at?: string
           currency?: string
           email: string
@@ -819,6 +825,9 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          confirmation_email_attempts?: number
+          confirmation_email_error?: string | null
+          confirmation_email_sent_at?: string | null
           created_at?: string
           currency?: string
           email?: string
@@ -1159,6 +1168,7 @@ export type Database = {
           disclosure_acknowledged: boolean | null
           excerpt: string | null
           faqs: Json
+          featured: boolean
           has_affiliate_links: boolean | null
           how_you_used_it: string | null
           id: string
@@ -1204,6 +1214,7 @@ export type Database = {
           disclosure_acknowledged?: boolean | null
           excerpt?: string | null
           faqs?: Json
+          featured?: boolean
           has_affiliate_links?: boolean | null
           how_you_used_it?: string | null
           id?: string
@@ -1249,6 +1260,7 @@ export type Database = {
           disclosure_acknowledged?: boolean | null
           excerpt?: string | null
           faqs?: Json
+          featured?: boolean
           has_affiliate_links?: boolean | null
           how_you_used_it?: string | null
           id?: string

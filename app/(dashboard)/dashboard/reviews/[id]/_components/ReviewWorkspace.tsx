@@ -215,7 +215,11 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   ]
 
   const previewUrl = isPublished && review.slug ? `/reviews/${review.slug}` : null
-  const createdAt  = new Date(review.created_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  // Force UTC so the server's render (UTC machine) matches the browser's
+  // render (user's local TZ). Without this, a review created near midnight
+  // UTC renders different dates on each side and React 19 fatals on the
+  // resulting hydration mismatch.
+  const createdAt  = new Date(review.created_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 
   return (
     <div className="p-4 sm:p-8 max-w-4xl">
