@@ -56,9 +56,10 @@ interface GuideData {
 
 interface Props {
   guide: GuideData
+  createdAtFormatted: string
 }
 
-export function GuideWorkspace({ guide: article }: Props) {
+export function GuideWorkspace({ guide: article, createdAtFormatted }: Props) {
   const [title, setTitle]           = useState(article.title)
   const [category, setCategory]     = useState(article.category)
   const [excerpt, setExcerpt]       = useState(article.excerpt ?? '')
@@ -133,9 +134,7 @@ export function GuideWorkspace({ guide: article }: Props) {
   ]
 
   const previewUrl = isPublished && article.slug ? `/guides/${article.slug}` : null
-  // timeZone: 'UTC' prevents the React 19 hydration mismatch — server (UTC)
-  // and client (local TZ) must produce identical strings.
-  const createdAt  = new Date(article.created_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
+  const createdAt = createdAtFormatted
 
   return (
     <div className="p-4 sm:p-8 max-w-4xl">

@@ -85,7 +85,7 @@ const RATING_OPTIONS = [
   { value: 1,  label: 'Avoid' },
 ]
 
-export function ReviewWorkspace({ review }: { review: ReviewData }) {
+export function ReviewWorkspace({ review, createdAtFormatted }: { review: ReviewData; createdAtFormatted: string }) {
   const [title, setTitle]             = useState(review.title)
   const [productName, setProductName] = useState(review.product_name)
   const [category, setCategory]       = useState(review.category)
@@ -215,11 +215,9 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   ]
 
   const previewUrl = isPublished && review.slug ? `/reviews/${review.slug}` : null
-  // Force UTC so the server's render (UTC machine) matches the browser's
-  // render (user's local TZ). Without this, a review created near midnight
-  // UTC renders different dates on each side and React 19 fatals on the
-  // resulting hydration mismatch.
-  const createdAt  = new Date(review.created_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
+  // Date is pre-formatted in the server component (page.tsx). Doing it here
+  // in a Client Component caused hydration mismatches even with timeZone: 'UTC'.
+  const createdAt = createdAtFormatted
 
   return (
     <div className="p-4 sm:p-8 max-w-4xl">
