@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getCurrentProfile } from '@/lib/auth-cache'
 import { ReviewWorkspace } from './_components/ReviewWorkspace'
 
 export default async function ReviewWorkspacePage({
@@ -10,9 +11,13 @@ export default async function ReviewWorkspacePage({
   const { id } = await params
   const admin = createAdminClient()
 
-  const { data: review } = await admin
+  const me = await getCurrentProfile()
+  const isAdmin = me?.role === 'admin'
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: review } = await (admin as any)
     .from('reviews')
-    .select('id, title, product_name, category, excerpt, content, image_url, rating, pros, cons, has_affiliate_links, disclosure_acknowledged, status, slug, moderation_score, moderation_flags, created_at, updated_at, reading_time_minutes, rejection_reason, meta_title, meta_description, scheduled_publish_at, product_slug, tldr, key_takeaways, best_for, not_for, faqs, testing_duration, how_you_used_it, standout_moment, price_paid_cents')
+    .select('id, title, product_name, category, excerpt, content, image_url, rating, pros, cons, has_affiliate_links, disclosure_acknowledged, status, slug, moderation_score, moderation_flags, created_at, updated_at, reading_time_minutes, rejection_reason, meta_title, meta_description, scheduled_publish_at, product_slug, tldr, key_takeaways, best_for, not_for, faqs, testing_duration, how_you_used_it, standout_moment, price_paid_cents, featured')
     .eq('id', id)
     .single()
 
@@ -48,6 +53,7 @@ export default async function ReviewWorkspacePage({
 
   return (
     <ReviewWorkspace
+      isAdmin={isAdmin}
       review={{
         ...review,
         moderation_flags: (review.moderation_flags ?? []) as string[],
@@ -59,6 +65,7 @@ export default async function ReviewWorkspacePage({
         faqs: (review.faqs ?? []) as { question: string; answer: string }[],
         tags: reviewTags,
         product_id: productId,
+        featured: review.featured ?? false,
       }}
     />
   )

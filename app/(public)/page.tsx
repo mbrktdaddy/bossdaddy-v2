@@ -26,12 +26,14 @@ export default async function HomePage() {
     { data: featuredReviews },
     { data: latestReviews },
   ] = await Promise.all([
-    // Top-rated review — anchors the hero
+    // Hero review — prefers an admin-flagged `featured` review, falls back
+    // to the highest-rated approved review (newest tiebreaker)
     supabase
       .from('reviews')
       .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
       .eq('status', 'approved')
       .eq('is_visible', true)
+      .order('featured', { ascending: false })
       .order('rating', { ascending: false })
       .order('published_at', { ascending: false })
       .limit(1),

@@ -7,6 +7,7 @@ import { TESTING_DURATION_OPTIONS } from '@/lib/products'
 import { detectAffiliateLinks } from '@/lib/affiliate'
 import { preserveImagesAcrossRefine } from '@/lib/inlineImages'
 import { StatusBadge } from '@/components/workspace/StatusBadge'
+import FeatureToggle from './FeatureToggle'
 import { TiptapEditor } from '@/components/workspace/TiptapEditor'
 import { HeroImagePanel } from '@/components/workspace/HeroImagePanel'
 import { AIRefinePanel } from '@/components/workspace/AIRefinePanel'
@@ -70,6 +71,7 @@ interface ReviewData {
   how_you_used_it: string | null
   standout_moment: string | null
   price_paid_cents: number | null
+  featured: boolean
 }
 
 const RATING_OPTIONS = [
@@ -85,7 +87,7 @@ const RATING_OPTIONS = [
   { value: 1,  label: 'Avoid' },
 ]
 
-export function ReviewWorkspace({ review }: { review: ReviewData }) {
+export function ReviewWorkspace({ review, isAdmin }: { review: ReviewData; isAdmin: boolean }) {
   const [title, setTitle]             = useState(review.title)
   const [productName, setProductName] = useState(review.product_name)
   const [category, setCategory]       = useState(review.category)
@@ -229,6 +231,9 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
           <div className="flex items-center gap-3 flex-wrap justify-end">
             <AutoSaveIndicator state={autoSave.state} error={autoSave.error} />
             <StatusBadge status={status} />
+            {isAdmin && isPublished && (
+              <FeatureToggle reviewId={review.id} initialFeatured={review.featured} />
+            )}
           </div>
         }
       />
