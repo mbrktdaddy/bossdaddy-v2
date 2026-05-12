@@ -23,8 +23,15 @@ export async function POST(request: Request) {
       await handleCheckoutComplete(event.data.object as Stripe.Checkout.Session)
     } catch (err) {
       console.error('[stripe webhook] checkout.session.completed error:', err)
-      // Return 500 so Stripe retries delivery
-      return NextResponse.json({ error: 'Order creation failed' }, { status: 500 })
+      // Return the actual error message so it's visible in Stripe's webhook
+      // delivery log. Stripe still retries on any non-2xx, so this doesn't
+      // change behavior — it just makes debugging possible.
+      const message = err instanceof Error ? err.message : String(err)
+      const stack   = err instanceof Error ? err.stack : undefined
+      return NextResponse.json(
+        { error: 'Order creation failed', message, stack },
+        { status: 500 },
+      )
     }
   }
 
