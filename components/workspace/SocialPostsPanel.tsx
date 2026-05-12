@@ -118,9 +118,10 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
   }
 
   async function handleCopy(post: SocialPost) {
-    const text = post.hashtags.length > 0
-      ? `${post.body}\n\n${post.hashtags.map((t) => `#${t}`).join(' ')}`
-      : post.body
+    const hashtags = post.hashtags ?? []
+    const text = hashtags.length > 0
+      ? `${post.body ?? ''}\n\n${hashtags.map((t) => `#${t}`).join(' ')}`
+      : (post.body ?? '')
     try {
       await navigator.clipboard.writeText(text)
       setCopied(post.platform)
@@ -242,29 +243,32 @@ interface PostCardProps {
 
 function PostCard({ post, busy, copied, onCopy, onBodyCommit, onHashtagsCommit, onRegenerate, onDelete }: PostCardProps) {
   const m = PLATFORM_META[post.platform]
-  const [body, setBody]       = useState(post.body)
+  // Defend against post.body / hashtags being null/undefined — caused a
+  // workspace-wide hydration crash on review/guide pages until 2026-05-12.
+  const [body, setBody]       = useState(post.body ?? '')
   const [tagInput, setTagInput] = useState('')
+  const hashtags = post.hashtags ?? []
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { setBody(post.body) }, [post.body])
+  useEffect(() => { setBody(post.body ?? '') }, [post.body])
 
-  const total = body.length + (post.hashtags.length > 0
-    ? post.hashtags.join(' ').length + post.hashtags.length + 2  // " #" prefixes + leading "\n\n"
+  const total = body.length + (hashtags.length > 0
+    ? hashtags.join(' ').length + hashtags.length + 2  // " #" prefixes + leading "\n\n"
     : 0)
   const overLimit = m.charLimit != null && total > m.charLimit
 
   function commitBody() {
     if (body.trim() && body !== post.body) onBodyCommit(body)
-    else if (!body.trim()) setBody(post.body)
+    else if (!body.trim()) setBody(post.body ?? '')
   }
   function addTag() {
     const t = tagInput.trim().replace(/^#/, '')
-    if (!t || post.hashtags.includes(t)) { setTagInput(''); return }
-    onHashtagsCommit([...post.hashtags, t])
+    if (!t || hashtags.includes(t)) { setTagInput(''); return }
+    onHashtagsCommit([...hashtags, t])
     setTagInput('')
   }
   function removeTag(t: string) {
-    onHashtagsCommit(post.hashtags.filter((x) => x !== t))
+    onHashtagsCommit(hashtags.filter((x) => x !== t))
   }
 
   return (
@@ -316,7 +320,7 @@ function PostCard({ post, busy, copied, onCopy, onBodyCommit, onHashtagsCommit, 
       <div>
         <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Hashtags</p>
         <div className="flex flex-wrap items-center gap-1.5">
-          {post.hashtags.map((t) => (
+          {hashtags.map((t) => (
             <span
               key={t}
               className="inline-flex items-center gap-1 px-2 py-1 bg-orange-950/40 border border-orange-900/40 text-orange-400 text-xs rounded-full"
