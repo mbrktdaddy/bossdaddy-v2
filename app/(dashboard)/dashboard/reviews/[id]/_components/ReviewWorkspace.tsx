@@ -7,7 +7,6 @@ import { TESTING_DURATION_OPTIONS } from '@/lib/products'
 import { detectAffiliateLinks } from '@/lib/affiliate'
 import { preserveImagesAcrossRefine } from '@/lib/inlineImages'
 import { StatusBadge } from '@/components/workspace/StatusBadge'
-import FeatureToggle from './FeatureToggle'
 import { TiptapEditor } from '@/components/workspace/TiptapEditor'
 import { HeroImagePanel } from '@/components/workspace/HeroImagePanel'
 import { AIRefinePanel } from '@/components/workspace/AIRefinePanel'
@@ -71,7 +70,6 @@ interface ReviewData {
   how_you_used_it: string | null
   standout_moment: string | null
   price_paid_cents: number | null
-  featured: boolean
 }
 
 const RATING_OPTIONS = [
@@ -87,7 +85,7 @@ const RATING_OPTIONS = [
   { value: 1,  label: 'Avoid' },
 ]
 
-export function ReviewWorkspace({ review, isAdmin }: { review: ReviewData; isAdmin: boolean }) {
+export function ReviewWorkspace({ review }: { review: ReviewData }) {
   const [title, setTitle]             = useState(review.title)
   const [productName, setProductName] = useState(review.product_name)
   const [category, setCategory]       = useState(review.category)
@@ -234,18 +232,6 @@ export function ReviewWorkspace({ review, isAdmin }: { review: ReviewData; isAdm
           </div>
         }
       />
-
-      {/* Admin: homepage hero feature toggle — own panel to avoid the
-          WorkspaceHeader rightSlot hydration mismatch we saw on 2026-05-12. */}
-      {isAdmin && isPublished && (
-        <div className="mb-4 px-4 py-3 rounded-xl bg-gray-900/60 border border-gray-800/60 flex items-center justify-between gap-3 flex-wrap">
-          <div className="min-w-0">
-            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold">Homepage Hero</p>
-            <p className="text-xs text-gray-500 mt-0.5">Make this the featured review in the homepage hero.</p>
-          </div>
-          <FeatureToggle reviewId={review.id} initialFeatured={review.featured ?? false} />
-        </div>
-      )}
 
       {review.rejection_reason && ['draft', 'rejected'].includes(status) && (
         <div className="mb-4 px-4 py-3 rounded-xl bg-yellow-950/40 border border-yellow-900/40">
