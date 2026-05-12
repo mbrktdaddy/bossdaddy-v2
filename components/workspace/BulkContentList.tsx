@@ -203,7 +203,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
                     {category && <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>}
                     {item.reading_time_minutes && <span className="text-xs text-gray-600">{item.reading_time_minutes} min</span>}
                     <span className="text-xs text-gray-700">
-                      {new Date(item.updated_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      {new Date(item.updated_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })}
                     </span>
                   </div>
                   {item.rejection_reason && ['draft', 'rejected'].includes(item.status) && (

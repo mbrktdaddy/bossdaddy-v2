@@ -101,7 +101,7 @@ export default function ModerationActions({ userId, username, status, suspendedU
         title={
           [
             reason ? `Reason: ${reason}` : null,
-            suspendedUntil ? `Until: ${new Date(suspendedUntil).toLocaleString()}` : null,
+            suspendedUntil ? `Until: ${new Date(suspendedUntil).toLocaleString('en-US', { timeZone: 'UTC' })} UTC` : null,
           ].filter(Boolean).join('\n') || undefined
         }
       >

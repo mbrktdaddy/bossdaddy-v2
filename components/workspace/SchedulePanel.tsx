@@ -33,7 +33,7 @@ export function SchedulePanel({ scheduledAt, onChange, disabled }: Props) {
         </span>
         {isScheduled ? (
           <span className={`text-xs font-mono ${isPast ? 'text-yellow-500' : 'text-purple-400'}`}>
-            {isPast ? 'overdue' : scheduledDate!.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+            {isPast ? 'overdue' : scheduledDate!.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'UTC' })}
           </span>
         ) : (
           <span className="text-xs text-gray-600">Publish at a specific time</span>
