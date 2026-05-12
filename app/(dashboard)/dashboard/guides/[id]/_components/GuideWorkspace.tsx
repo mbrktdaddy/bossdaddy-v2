@@ -56,10 +56,9 @@ interface GuideData {
 
 interface Props {
   guide: GuideData
-  createdAtFormatted: string
 }
 
-export function GuideWorkspace({ guide: article, createdAtFormatted }: Props) {
+export function GuideWorkspace({ guide: article }: Props) {
   const [title, setTitle]           = useState(article.title)
   const [category, setCategory]     = useState(article.category)
   const [excerpt, setExcerpt]       = useState(article.excerpt ?? '')
@@ -134,7 +133,7 @@ export function GuideWorkspace({ guide: article, createdAtFormatted }: Props) {
   ]
 
   const previewUrl = isPublished && article.slug ? `/guides/${article.slug}` : null
-  const createdAt = createdAtFormatted
+  const createdAt  = new Date(article.created_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 
   return (
     <div className="p-4 sm:p-8 max-w-4xl">

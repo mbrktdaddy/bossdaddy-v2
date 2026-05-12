@@ -46,17 +46,8 @@ export default async function ReviewWorkspacePage({
     )
   }
 
-  // Format the created date server-side as a final string. The workspace is
-  // a Client Component that runs through SSR + hydration; formatting dates
-  // in client code triggered React 19 hydration mismatches even with
-  // timeZone: 'UTC'. Pre-formatted prop = zero hydration risk.
-  const createdAtFormatted = new Date(review.created_at ?? '').toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
-  })
-
   return (
     <ReviewWorkspace
-      createdAtFormatted={createdAtFormatted}
       review={{
         ...review,
         moderation_flags: (review.moderation_flags ?? []) as string[],

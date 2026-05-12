@@ -34,15 +34,8 @@ export default async function GuideWorkspacePage({
     )
   }
 
-  // Format the created date server-side so the Client Component never has
-  // to re-compute it and risk a hydration mismatch.
-  const createdAtFormatted = new Date(guide.created_at ?? '').toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
-  })
-
   return (
     <GuideWorkspace
-      createdAtFormatted={createdAtFormatted}
       guide={{
         ...guide,
         moderation_flags: (guide.moderation_flags ?? []) as string[],

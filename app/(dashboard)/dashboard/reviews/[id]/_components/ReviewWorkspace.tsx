@@ -85,7 +85,7 @@ const RATING_OPTIONS = [
   { value: 1,  label: 'Avoid' },
 ]
 
-export function ReviewWorkspace({ review, createdAtFormatted }: { review: ReviewData; createdAtFormatted: string }) {
+export function ReviewWorkspace({ review }: { review: ReviewData }) {
   const [title, setTitle]             = useState(review.title)
   const [productName, setProductName] = useState(review.product_name)
   const [category, setCategory]       = useState(review.category)
@@ -215,9 +215,7 @@ export function ReviewWorkspace({ review, createdAtFormatted }: { review: Review
   ]
 
   const previewUrl = isPublished && review.slug ? `/reviews/${review.slug}` : null
-  // Date is pre-formatted in the server component (page.tsx). Doing it here
-  // in a Client Component caused hydration mismatches even with timeZone: 'UTC'.
-  const createdAt = createdAtFormatted
+  const createdAt  = new Date(review.created_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 
   return (
     <div className="p-4 sm:p-8 max-w-4xl">
