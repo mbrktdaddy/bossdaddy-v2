@@ -80,17 +80,37 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   const { data: cartRow } = await admin
     .from('carts').select('user_id').eq('id', cartId).maybeSingle()
 
-  // Build shipping address from Stripe session
-  const sd = session.shipping_details
+  // Build shipping address from Stripe session.
+  // Stripe API 2026-04-22.dahlia moved shipping_details from session root to
+  // session.collected_information.shipping_details. Check the new path first,
+  // fall back to the legacy path for any older sessions still in retry queues.
+  type ShippingDetailsLike = {
+    name?: string | null
+    address?: {
+      line1?: string | null
+      line2?: string | null
+      city?: string | null
+      state?: string | null
+      postal_code?: string | null
+      country?: string | null
+    } | null
+  }
+  const sessionExt = session as unknown as {
+    collected_information?: { shipping_details?: ShippingDetailsLike | null } | null
+    shipping_details?: ShippingDetailsLike | null
+  }
+  const sd: ShippingDetailsLike | null | undefined =
+    sessionExt.collected_information?.shipping_details ?? sessionExt.shipping_details
+
   const shippingAddress = sd ? {
-    name: sd.name,
-    line1: sd.address?.line1,
+    name: sd.name ?? null,
+    line1: sd.address?.line1 ?? null,
     line2: sd.address?.line2 ?? null,
-    city: sd.address?.city,
-    state: sd.address?.state,
-    postal_code: sd.address?.postal_code,
-    country: sd.address?.country,
-  } : null
+    city: sd.address?.city ?? null,
+    state: sd.address?.state ?? null,
+    postal_code: sd.address?.postal_code ?? null,
+    country: sd.address?.country ?? null,
+  } : {}
 
   const subtotalCents = cartItems.reduce(
     (s, i) => s + i.qty * (i.variant as { retail_price_cents: number }).retail_price_cents,
@@ -141,19 +161,19 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     .map((i) => ({ i, v: i.variant as { retail_price_cents: number; printful_sync_variant_id: number | null } }))
     .filter(({ v }) => v.printful_sync_variant_id != null)
 
-  if (printfulItems.length > 0 && shippingAddress && session.customer_details?.email) {
+  if (printfulItems.length > 0 && sd?.address?.line1 && session.customer_details?.email) {
     try {
       const printfulOrder = await createOrder(
         {
           external_id: session.id,
           shipping: 'STANDARD',
           recipient: {
-            name: shippingAddress.name ?? '',
-            address1: shippingAddress.line1 ?? '',
-            city: shippingAddress.city ?? '',
-            state_code: shippingAddress.state ?? '',
-            country_code: shippingAddress.country ?? 'US',
-            zip: shippingAddress.postal_code ?? '',
+            name: sd.name ?? '',
+            address1: sd.address.line1,
+            city: sd.address?.city ?? '',
+            state_code: sd.address?.state ?? '',
+            country_code: sd.address?.country ?? 'US',
+            zip: sd.address?.postal_code ?? '',
             email: session.customer_details.email,
           },
           items: printfulItems.map(({ i, v }) => ({
