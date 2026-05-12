@@ -50,6 +50,10 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 
   if (existingOrder) {
     console.log(`[stripe webhook] duplicate delivery for ${session.id} — order ${existingOrder.id} already exists`)
+    // Defensive cart cleanup: if a prior webhook invocation errored mid-flow
+    // before reaching the cart delete, the cart still contains the purchased
+    // items. Always sweep on duplicate delivery so retries finish the job.
+    await admin.from('carts').delete().eq('id', cartId)
     return
   }
 

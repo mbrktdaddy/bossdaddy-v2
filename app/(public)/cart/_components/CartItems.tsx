@@ -64,6 +64,21 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
     }
   }
 
+  async function emptyCart() {
+    if (!confirm('Remove all items from your cart?')) return
+    setBusy('__all__')
+    try {
+      const res = await fetch('/api/cart/clear', { method: 'DELETE' })
+      if (res.ok) {
+        recalc([])
+        dispatchCartUpdated()
+        router.refresh()
+      }
+    } finally {
+      setBusy(null)
+    }
+  }
+
   async function removeItem(itemId: string) {
     setBusy(itemId)
     try {
@@ -189,9 +204,19 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
         <p className="text-center text-xs text-gray-600">Secure checkout via Stripe · Free US shipping</p>
       </div>
 
-      <Link href="/gear" className="text-center text-sm text-gray-500 hover:text-orange-400 transition-colors">
-        ← Continue Shopping
-      </Link>
+      <div className="flex items-center justify-between text-sm">
+        <Link href="/gear" className="text-gray-500 hover:text-orange-400 transition-colors">
+          ← Continue Shopping
+        </Link>
+        <button
+          type="button"
+          onClick={emptyCart}
+          disabled={busy === '__all__'}
+          className="text-gray-600 hover:text-red-400 disabled:opacity-50 transition-colors text-xs"
+        >
+          {busy === '__all__' ? 'Emptying…' : 'Empty cart'}
+        </button>
+      </div>
     </div>
   )
 }
