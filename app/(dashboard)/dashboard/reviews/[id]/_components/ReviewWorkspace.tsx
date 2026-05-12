@@ -231,12 +231,21 @@ export function ReviewWorkspace({ review, isAdmin }: { review: ReviewData; isAdm
           <div className="flex items-center gap-3 flex-wrap justify-end">
             <AutoSaveIndicator state={autoSave.state} error={autoSave.error} />
             <StatusBadge status={status} />
-            {isAdmin && isPublished && (
-              <FeatureToggle reviewId={review.id} initialFeatured={review.featured} />
-            )}
           </div>
         }
       />
+
+      {/* Admin: homepage hero feature toggle — own panel to avoid the
+          WorkspaceHeader rightSlot hydration mismatch we saw on 2026-05-12. */}
+      {isAdmin && isPublished && (
+        <div className="mb-4 px-4 py-3 rounded-xl bg-gray-900/60 border border-gray-800/60 flex items-center justify-between gap-3 flex-wrap">
+          <div className="min-w-0">
+            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold">Homepage Hero</p>
+            <p className="text-xs text-gray-500 mt-0.5">Make this the featured review in the homepage hero.</p>
+          </div>
+          <FeatureToggle reviewId={review.id} initialFeatured={review.featured ?? false} />
+        </div>
+      )}
 
       {review.rejection_reason && ['draft', 'rejected'].includes(status) && (
         <div className="mb-4 px-4 py-3 rounded-xl bg-yellow-950/40 border border-yellow-900/40">
