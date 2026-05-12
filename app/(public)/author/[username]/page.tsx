@@ -85,7 +85,7 @@ export default async function AuthorPage({ params }: Props) {
  className="w-16 h-16 rounded-2xl object-cover shrink-0"
  />
  ) : (
- <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-600 to-orange-800 flex items-center justify-center text-2xl font-black text-white shrink-0">
+ <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-700 to-orange-950 flex items-center justify-center text-2xl font-black text-white shrink-0">
  {(profile.display_name ?? username)[0].toUpperCase()}
  </div>
  )}

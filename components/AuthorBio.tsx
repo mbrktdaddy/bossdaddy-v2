@@ -41,7 +41,7 @@ export default async function AuthorBio({ username }: Props) {
               <Image src={avatarUrl} alt={displayName} fill sizes="56px" className="object-cover" />
             </div>
           ) : (
-            <div className="w-14 h-14 shrink-0 rounded-full bg-gradient-to-br from-orange-600 to-orange-800 flex items-center justify-center text-white font-black text-lg border border-orange-700/40">
+            <div className="w-14 h-14 shrink-0 rounded-full bg-gradient-to-br from-orange-700 to-orange-950 flex items-center justify-center text-white font-black text-lg border border-orange-700/40">
               {initials || 'BD'}
             </div>
           )}
