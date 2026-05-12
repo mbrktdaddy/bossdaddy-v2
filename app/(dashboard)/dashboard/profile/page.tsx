@@ -5,6 +5,7 @@ import EditUsernameForm from './_components/EditUsernameForm'
 import EditEmailForm from './_components/EditEmailForm'
 import BioForm from './_components/BioForm'
 import AccountDeletion from './_components/AccountDeletion'
+import AvatarUploader from './_components/AvatarUploader'
 
 const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
   admin:  { label: 'Admin',  className: 'bg-orange-950/60 text-orange-400 border border-orange-900/60' },
@@ -138,27 +139,28 @@ export default async function ProfilePage() {
         />
       )}
 
-      {/* Identity card */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-orange-600 flex items-center justify-center text-2xl font-black text-white shrink-0">
-            {profile?.username?.[0]?.toUpperCase() ?? '?'}
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <p className="font-black text-lg">@{profile?.username}</p>
-              <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${roleCfg.className}`}>
-                {roleCfg.label}
-              </span>
-            </div>
-            {memberSince && (
-              <p className="text-sm text-gray-500 mt-0.5">Member since {memberSince}</p>
-            )}
-          </div>
+      {/* Identity hero — avatar + name + role pill + joined date */}
+      <div className="bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 rounded-2xl p-6 mb-6">
+        <AvatarUploader
+          initialAvatarUrl={(profile as { avatar_url?: string | null } | null)?.avatar_url ?? null}
+          initial={profile?.username?.[0]?.toUpperCase() ?? '?'}
+        />
+
+        <div className="mt-6 flex items-center gap-2 flex-wrap">
+          <p className="font-black text-xl text-white">@{profile?.username}</p>
+          <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${roleCfg.className}`}>
+            {roleCfg.label}
+          </span>
         </div>
+        {memberSince && (
+          <p className="text-sm text-gray-500 mt-1">Member since {memberSince}</p>
+        )}
+      </div>
 
+      {/* Account — username + email */}
+      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6">
+        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Account</p>
         <EditUsernameForm current={profile?.username ?? ''} />
-
         <div className="mt-5 pt-5 border-t border-gray-800">
           <label className="block text-xs text-gray-500 uppercase tracking-widest mb-2">Email</label>
           <EditEmailForm current={user.email ?? ''} />
@@ -198,7 +200,6 @@ export default async function ProfilePage() {
             initialDisplayName={(profile as { display_name?: string | null } | null)?.display_name ?? null}
             initialTagline={(profile as { tagline?: string | null } | null)?.tagline ?? null}
             initialBio={(profile as { bio?: string | null } | null)?.bio ?? null}
-            initialAvatarUrl={(profile as { avatar_url?: string | null } | null)?.avatar_url ?? null}
           />
         </div>
       )}

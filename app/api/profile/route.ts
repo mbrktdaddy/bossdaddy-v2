@@ -12,7 +12,9 @@ const UpdateSchema = z.object({
   display_name: z.string().min(1).max(60).optional().nullable(),
   tagline:      z.string().max(120).optional().nullable(),
   bio:          z.string().max(800).optional().nullable(),
-  avatar_url:   z.string().url().max(2048).optional().nullable(),
+  // avatar_url is intentionally NOT writable here — it goes through
+  // /api/profile/avatar which enforces upload-to-our-bucket. This removes
+  // the "paste any URL" SSRF/phishing vector flagged in the security audit.
 })
 
 export async function PUT(request: NextRequest) {

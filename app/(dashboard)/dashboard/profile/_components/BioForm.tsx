@@ -8,20 +8,17 @@ interface Props {
   initialDisplayName: string | null
   initialTagline:     string | null
   initialBio:         string | null
-  initialAvatarUrl:   string | null
 }
 
 export default function BioForm({
   initialDisplayName,
   initialTagline,
   initialBio,
-  initialAvatarUrl,
 }: Props) {
   const router = useRouter()
   const [displayName, setDisplayName] = useState(initialDisplayName ?? '')
   const [tagline,     setTagline]     = useState(initialTagline ?? '')
   const [bio,         setBio]         = useState(initialBio ?? '')
-  const [avatarUrl,   setAvatarUrl]   = useState(initialAvatarUrl ?? '')
   const [pending,     startTransition] = useTransition()
   const [success,     setSuccess]     = useState(false)
   const [error,       setError]       = useState<string | null>(null)
@@ -34,7 +31,6 @@ export default function BioForm({
         display_name: displayName.trim() || null,
         tagline:      tagline.trim()     || null,
         bio:          bio.trim()         || null,
-        avatar_url:   avatarUrl.trim()   || null,
       })
       if (!result.ok) {
         setError(result.error)
@@ -86,19 +82,6 @@ export default function BioForm({
           className="w-full px-3 py-2.5 bg-gray-950 border border-gray-700 focus:border-orange-500 rounded-xl text-white text-sm placeholder-gray-600 focus:outline-none transition-colors resize-none"
         />
         <p className="mt-1 text-xs text-gray-600">Shown at the bottom of every guide + review you publish. {bio.length}/800</p>
-      </div>
-
-      <div>
-        <label className="block text-xs text-gray-500 uppercase tracking-widest mb-2">Avatar URL</label>
-        <input
-          type="url"
-          value={avatarUrl}
-          maxLength={2048}
-          onChange={(e) => { setAvatarUrl(e.target.value); setSuccess(false); setError(null) }}
-          placeholder="https://..."
-          className="w-full px-3 py-2.5 bg-gray-950 border border-gray-700 focus:border-orange-500 rounded-xl text-white text-sm placeholder-gray-600 focus:outline-none transition-colors"
-        />
-        <p className="mt-1 text-xs text-gray-600">Optional. Leave blank to use the colored initials block.</p>
       </div>
 
       <div className="flex items-center justify-between gap-3 pt-2">
