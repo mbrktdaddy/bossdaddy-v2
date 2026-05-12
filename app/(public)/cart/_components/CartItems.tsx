@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { formatPrice, getMerchDisplayImage } from '@/lib/merch'
 import type { CartItemWithDetails } from '@/lib/merch'
+import { dispatchCartUpdated } from '@/lib/cart-events'
 
 interface Props {
   initialItems: CartItemWithDetails[]
@@ -37,6 +38,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
         recalc(qty === 0
           ? items.filter(i => i.id !== itemId)
           : items.map(i => i.id === itemId ? { ...i, qty } : i))
+        dispatchCartUpdated()
         router.refresh()
       }
     } finally {
@@ -72,6 +74,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
       })
       if (res.ok) {
         recalc(items.filter(i => i.id !== itemId))
+        dispatchCartUpdated()
         router.refresh()
       }
     } finally {

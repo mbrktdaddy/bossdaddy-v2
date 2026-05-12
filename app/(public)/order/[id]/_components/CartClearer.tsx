@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect } from 'react'
+import { dispatchCartUpdated } from '@/lib/cart-events'
 
-// Fires 'cart-updated' so CartIcon re-fetches after a successful order.
+// Fires after the order detail renders so CartIcon re-fetches its badge count.
 export default function CartClearer() {
   useEffect(() => {
-    window.dispatchEvent(new CustomEvent('cart-updated'))
+    dispatchCartUpdated()
   }, [])
   return null
 }

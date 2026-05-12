@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { formatPrice } from '@/lib/merch'
+import { dispatchCartUpdated } from '@/lib/cart-events'
 
 interface Variant {
   id: string
@@ -41,6 +42,7 @@ export default function AddToCartForm({ variants }: { variants: Variant[] }) {
         return
       }
       setAdded(true)
+      dispatchCartUpdated()
       router.refresh()
       setTimeout(() => setAdded(false), 3000)
     } catch {

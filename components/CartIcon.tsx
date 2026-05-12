@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { CART_UPDATED_EVENT } from '@/lib/cart-events'
 
 export default function CartIcon() {
   const [count, setCount] = useState(0)
@@ -20,8 +21,8 @@ export default function CartIcon() {
   }, [pathname, fetchCount])
 
   useEffect(() => {
-    window.addEventListener('cart-updated', fetchCount)
-    return () => window.removeEventListener('cart-updated', fetchCount)
+    window.addEventListener(CART_UPDATED_EVENT, fetchCount)
+    return () => window.removeEventListener(CART_UPDATED_EVENT, fetchCount)
   }, [fetchCount])
 
   return (
