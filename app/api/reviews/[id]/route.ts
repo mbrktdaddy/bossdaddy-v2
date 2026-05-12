@@ -42,6 +42,11 @@ const UpdateSchema = z.object({
   how_you_used_it:          z.string().max(300).optional().nullable(),
   standout_moment:          z.string().max(300).optional().nullable(),
   price_paid_cents:         z.number().int().min(0).optional().nullable(),
+  score_quality:            z.number().int().min(1).max(10).optional().nullable(),
+  score_value:              z.number().int().min(1).max(10).optional().nullable(),
+  score_ease:               z.number().int().min(1).max(10).optional().nullable(),
+  score_daily_use:          z.number().int().min(1).max(10).optional().nullable(),
+  would_rebuy:              z.boolean().optional().nullable(),
 })
 
 const ModerateSchema = z.object({
@@ -242,6 +247,11 @@ export async function PUT(
   if (parsed.data.how_you_used_it !== undefined) updates.how_you_used_it = parsed.data.how_you_used_it
   if (parsed.data.standout_moment !== undefined) updates.standout_moment = parsed.data.standout_moment
   if (parsed.data.price_paid_cents !== undefined) updates.price_paid_cents = parsed.data.price_paid_cents
+  if (parsed.data.score_quality !== undefined) updates.score_quality = parsed.data.score_quality
+  if (parsed.data.score_value !== undefined) updates.score_value = parsed.data.score_value
+  if (parsed.data.score_ease !== undefined) updates.score_ease = parsed.data.score_ease
+  if (parsed.data.score_daily_use !== undefined) updates.score_daily_use = parsed.data.score_daily_use
+  if (parsed.data.would_rebuy !== undefined) updates.would_rebuy = parsed.data.would_rebuy
   if (parsed.data.content) {
     const resolved = await resolveProductTokens(parsed.data.content, supabase)
     const sanitized = sanitizeHtml(resolved)

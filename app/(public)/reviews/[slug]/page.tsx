@@ -9,8 +9,11 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
 import ShareButtons from '@/components/ShareButtons'
-import BossApprovedBadge from '@/components/BossApprovedBadge'
 import RatingScore from '@/components/RatingScore'
+import VerdictCard from '@/components/reviews/VerdictCard'
+import TakeawaysCard from '@/components/reviews/TakeawaysCard'
+import TrustReceipt from '@/components/reviews/TrustReceipt'
+import BossApprovedBadge from '@/components/BossApprovedBadge'
 import ViewTracker from '@/components/ViewTracker'
 import LikeButton from '@/components/LikeButton'
 import CommentForm from '@/components/CommentForm'
@@ -49,7 +52,7 @@ const getReview = cache(async (slug: string) => {
   const supabase = await createClient()
   const { data } = await supabase
     .from('reviews')
-    .select('id, title, product_name, category, content, rating, pros, cons, excerpt, image_url, has_affiliate_links, product_slug, published_at, meta_title, meta_description, tldr, key_takeaways, best_for, not_for, faqs, profiles(username)')
+    .select('id, title, product_name, category, content, rating, pros, cons, excerpt, image_url, has_affiliate_links, product_slug, published_at, meta_title, meta_description, tldr, key_takeaways, best_for, not_for, faqs, testing_duration, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -118,6 +121,13 @@ export default async function ReviewPage({ params }: Props) {
   const bestFor       = (review.best_for as string[] | null) ?? []
   const notFor        = (review.not_for as string[] | null) ?? []
   const faqs          = (review.faqs as { question: string; answer: string }[] | null) ?? []
+
+  const subScores = {
+    quality:  review.score_quality   ?? null,
+    value:    review.score_value     ?? null,
+    ease:     review.score_ease      ?? null,
+    dailyUse: review.score_daily_use ?? null,
+  }
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -191,62 +201,67 @@ export default async function ReviewPage({ params }: Props) {
             )}
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6 tracking-tight">{review.title}</h1>
+          <h1 className="text-4xl md:text-5xl font-black leading-tight mb-4 tracking-tight">{review.title}</h1>
 
-          {/* Rating + meta */}
-          <div className="flex flex-wrap items-center gap-5 pb-6">
-            <RatingScore rating={review.rating ?? 0} size="lg" />
-            {(review.rating ?? 0) >= 8 && <BossApprovedBadge size="lg" />}
-            <div className="flex items-center gap-4 text-sm text-gray-400">
-              <span>by <Link href={`/author/${author}`} className="text-gray-300 hover:text-orange-400 transition-colors">@{author}</Link></span>
-              {review.published_at && (
-                <span>
-                  {new Date(review.published_at).toLocaleDateString('en-US', {
-                    month: 'long', day: 'numeric', year: 'numeric',
-                  })}
-                </span>
-              )}
-            </div>
+          {/* Author + date meta */}
+          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
+            <span>by <Link href={`/author/${author}`} className="text-gray-300 hover:text-orange-400 transition-colors">@{author}</Link></span>
+            {review.published_at && (
+              <span>
+                {new Date(review.published_at).toLocaleDateString('en-US', {
+                  month: 'long', day: 'numeric', year: 'numeric',
+                })}
+              </span>
+            )}
           </div>
+
+          {/* Trust receipt — what I paid + how long I tested. Sits right under the
+              byline so the reader has trust context before the verdict lands. */}
+          <TrustReceipt
+            pricePaidCents={review.price_paid_cents}
+            testingDuration={review.testing_duration}
+            className="mt-2 pb-6"
+          />
         </div>
 
-        {/* TL;DR + Key Takeaways — above the fold for skimmers */}
-        {(tldr || keyTakeaways.length > 0) && (
-          <div className="mb-8 bg-orange-950/30 border border-orange-900/40 rounded-2xl p-5 shadow-md shadow-black/30">
-            {tldr && (
-              <p className="text-gray-200 leading-relaxed text-sm sm:text-base mb-4">{tldr}</p>
-            )}
-            {keyTakeaways.length > 0 && (
-              <>
-                <p className="text-xs text-orange-400 uppercase tracking-widest font-semibold mb-2">Key Takeaways</p>
-                <ul className="space-y-1.5">
-                  {keyTakeaways.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
-                      <span className="text-orange-500 mt-0.5 shrink-0">→</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </>
+        {/* Hero image — moved above the verdict so readers see the product first.
+            Boss Approved stamp lives in the top-right corner (matches the pattern
+            used on every other surface: HeroCarousel, FeaturedReviewCard, etc.) */}
+        {review.image_url && (
+          <div className="relative mb-8">
+            <LightboxImage src={review.image_url} alt={review.product_name}>
+              <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden bg-gray-900">
+                <Image
+                  src={review.image_url}
+                  alt={review.product_name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 768px"
+                  priority
+                />
+              </div>
+            </LightboxImage>
+            {(review.rating ?? 0) >= 8 && (
+              <div className="absolute top-3 right-3 pointer-events-none">
+                <BossApprovedBadge size="sm" variant="card" />
+              </div>
             )}
           </div>
         )}
 
-        {/* Hero image */}
-        {review.image_url && (
-          <LightboxImage src={review.image_url} alt={review.product_name}>
-            <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden mb-10 bg-gray-900">
-              <Image
-                src={review.image_url}
-                alt={review.product_name}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 768px"
-                priority
-              />
-            </div>
-          </LightboxImage>
-        )}
+        {/* Verdict Card — score arc (with approved check) + re-buy chip + bars + CTA */}
+        <VerdictCard
+          variant="inbody"
+          productName={review.product_name}
+          rating={review.rating ?? 0}
+          tldr={tldr}
+          product={product}
+          wouldRebuy={review.would_rebuy}
+          subScores={subScores}
+        />
+
+        {/* Key Takeaways — separate block, visually quieter than the verdict */}
+        <TakeawaysCard items={keyTakeaways} />
 
         {/* Pros / Cons */}
         {(pros.length > 0 || cons.length > 0) && (
@@ -316,12 +331,7 @@ export default async function ReviewPage({ params }: Props) {
           </div>
         )}
 
-        {/* Primary product CTA — after pros/cons, before the article body */}
-        {product && (
-          <ProductCtaCard product={product} rating={review.rating ?? undefined} variant="prominent" />
-        )}
-
-        {/* Review body */}
+        {/* Review body — primary CTA lives in the VerdictCard above; final CTA below */}
         <div className="min-w-0 w-full">
           <ImageLightbox className="bd-content">
             <div
@@ -445,52 +455,26 @@ export default async function ReviewPage({ params }: Props) {
         {/* ── Sidebar ───────────────────────────────────────────────────── */}
         <aside className="hidden xl:flex flex-col gap-4 w-72 shrink-0 sticky top-6 self-start">
 
-          {/* Quick Verdict */}
-          <div className="bg-gray-900 rounded-2xl p-5 shadow-lg shadow-black/40">
-            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Quick Verdict</p>
-            <p className="font-black text-base mb-3">{review.product_name}</p>
-            <RatingScore rating={review.rating ?? 0} size="sm" />
-            {(review.rating ?? 0) >= 8 && (
-              <div className="mt-3">
-                <BossApprovedBadge size="sm" />
-              </div>
-            )}
-            {pros.length > 0 && (
-              <div className="mt-4 pt-4">
-                <p className="text-xs text-gray-400 uppercase tracking-wide mb-2">The Good</p>
-                <ul className="space-y-1.5">
-                  {pros.slice(0, 3).map((pro, i) => (
-                    <li key={i} className="flex items-start gap-1.5 text-xs text-gray-300">
-                      <span className="text-green-500 shrink-0 mt-0.5">+</span>
-                      {pro}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {cons.length > 0 && (
-              <div className="mt-4 pt-4">
-                <p className="text-xs text-gray-400 uppercase tracking-wide mb-2">The Bad</p>
-                <ul className="space-y-1.5">
-                  {cons.slice(0, 2).map((con, i) => (
-                    <li key={i} className="flex items-start gap-1.5 text-xs text-gray-300">
-                      <span className="text-red-500 shrink-0 mt-0.5">−</span>
-                      {con}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {category && (
-              <Link
-                href={`/category/${category.slug}`}
-                className="mt-4 pt-4 flex items-center gap-2 text-xs text-gray-400 hover:text-orange-400 transition-colors"
-              >
-                <span>{category.icon}</span>
-                <span>Browse all {category.label} →</span>
-              </Link>
-            )}
-          </div>
+          {/* Quick Verdict — same VerdictCard component, sidebar variant */}
+          <VerdictCard
+            variant="sidebar"
+            productName={review.product_name}
+            rating={review.rating ?? 0}
+            tldr={tldr}
+            product={product}
+            wouldRebuy={review.would_rebuy}
+            subScores={subScores}
+          />
+
+          {category && (
+            <Link
+              href={`/category/${category.slug}`}
+              className="flex items-center gap-2 px-1 text-xs text-gray-400 hover:text-orange-400 transition-colors"
+            >
+              <span>{category.icon}</span>
+              <span>Browse all {category.label} →</span>
+            </Link>
+          )}
 
           {/* Related Reviews */}
           {related && related.length > 0 && (

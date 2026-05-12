@@ -31,6 +31,11 @@ const CreateReviewSchema = z.object({
   how_you_used_it: z.string().max(300).optional().nullable(),
   standout_moment: z.string().max(300).optional().nullable(),
   price_paid_cents: z.number().int().min(0).optional().nullable(),
+  score_quality:    z.number().int().min(1).max(10).optional().nullable(),
+  score_value:      z.number().int().min(1).max(10).optional().nullable(),
+  score_ease:       z.number().int().min(1).max(10).optional().nullable(),
+  score_daily_use:  z.number().int().min(1).max(10).optional().nullable(),
+  would_rebuy:      z.boolean().optional().nullable(),
   suggested_tags: z.array(z.string().max(80)).max(10).default([]),
 })
 
@@ -51,7 +56,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { title, product_name, category, excerpt, content, rating, pros, cons, disclosure_acknowledged, image_url, product_slug, tldr, key_takeaways, best_for, not_for, faqs, testing_duration, how_you_used_it, standout_moment, price_paid_cents, suggested_tags } = parsed.data
+    const { title, product_name, category, excerpt, content, rating, pros, cons, disclosure_acknowledged, image_url, product_slug, tldr, key_takeaways, best_for, not_for, faqs, testing_duration, how_you_used_it, standout_moment, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, suggested_tags } = parsed.data
 
     let sanitizedContent: string
     try {
@@ -104,6 +109,11 @@ export async function POST(request: NextRequest) {
         how_you_used_it: how_you_used_it ?? null,
         standout_moment: standout_moment ?? null,
         price_paid_cents: price_paid_cents ?? null,
+        score_quality:    score_quality   ?? null,
+        score_value:      score_value     ?? null,
+        score_ease:       score_ease      ?? null,
+        score_daily_use:  score_daily_use ?? null,
+        would_rebuy:      would_rebuy     ?? null,
         status: 'draft',
       })
       .select()

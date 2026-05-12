@@ -1,6 +1,10 @@
 'use client'
 
 import { getCategoryBySlug } from '@/lib/categories'
+import VerdictCard from '@/components/reviews/VerdictCard'
+import TakeawaysCard from '@/components/reviews/TakeawaysCard'
+import TrustReceipt from '@/components/reviews/TrustReceipt'
+import BossApprovedBadge from '@/components/BossApprovedBadge'
 
 interface FAQ { question: string; answer: string }
 
@@ -20,20 +24,29 @@ interface Props {
   notFor: string[]
   faqs: FAQ[]
   author: string
-}
-
-function RatingDot({ rating }: { rating: number }) {
-  const color = rating >= 8 ? 'text-green-400' : rating >= 6 ? 'text-yellow-400' : 'text-red-400'
-  return (
-    <span className={`font-black text-2xl ${color}`}>{rating.toFixed(1)}<span className="text-sm text-gray-500 font-normal">/10</span></span>
-  )
+  pricePaidCents?: number | null
+  testingDuration?: string | null
+  scoreQuality?: number | null
+  scoreValue?: number | null
+  scoreEase?: number | null
+  scoreDailyUse?: number | null
+  wouldRebuy?: boolean | null
 }
 
 export function ReviewDraftPreview({
   title, productName, rating, category, excerpt, content,
   imageUrl, pros, cons, tldr, keyTakeaways, bestFor, notFor, faqs, author,
+  pricePaidCents = null, testingDuration = null,
+  scoreQuality = null, scoreValue = null, scoreEase = null, scoreDailyUse = null,
+  wouldRebuy = null,
 }: Props) {
   const cat = getCategoryBySlug(category)
+  const subScores = {
+    quality: scoreQuality,
+    value: scoreValue,
+    ease: scoreEase,
+    dailyUse: scoreDailyUse,
+  }
 
   return (
     <div className="bg-gray-950 border border-gray-800 rounded-2xl overflow-hidden text-sm">
@@ -62,15 +75,14 @@ export function ReviewDraftPreview({
           {title || <span className="text-gray-600 italic">Untitled review</span>}
         </h1>
 
-        {/* Rating + meta */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <RatingDot rating={rating} />
-          {rating >= 8 && (
-            <span className="text-xs font-bold text-orange-500 bg-orange-950/50 border border-orange-900/50 px-2 py-0.5 rounded-full">
-              ✓ Boss Approved
-            </span>
-          )}
-          <span className="text-xs text-gray-500">by @{author}</span>
+        {/* Author meta + trust receipt — mirrors the public page layout */}
+        <div>
+          <p className="text-xs text-gray-500">by @{author}</p>
+          <TrustReceipt
+            pricePaidCents={pricePaidCents}
+            testingDuration={testingDuration}
+            className="mt-1 text-[11px]"
+          />
         </div>
 
         {/* Excerpt */}
@@ -78,27 +90,32 @@ export function ReviewDraftPreview({
           <p className="text-gray-400 text-xs leading-relaxed italic border-l-2 border-gray-800 pl-3">{excerpt}</p>
         )}
 
-        {/* TL;DR + Key Takeaways */}
-        {(tldr || keyTakeaways.length > 0) && (
-          <div className="bg-orange-950/30 border border-orange-900/40 rounded-xl p-4 space-y-3">
-            {tldr && <p className="text-gray-200 text-xs leading-relaxed">{tldr}</p>}
-            {keyTakeaways.length > 0 && (
-              <ul className="space-y-1">
-                {keyTakeaways.map((item, i) => (
-                  <li key={i} className="flex items-start gap-1.5 text-xs text-gray-300">
-                    <span className="text-orange-500 shrink-0">→</span>{item}
-                  </li>
-                ))}
-              </ul>
+        {/* Hero image — moved above verdict to mirror the public page.
+            Boss Approved sits as a corner stamp on the image (rating ≥ 8). */}
+        {imageUrl && (
+          <div className="relative">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={imageUrl} alt={productName} className="w-full h-40 object-cover rounded-xl" />
+            {rating >= 8 && (
+              <div className="absolute top-2 right-2 pointer-events-none">
+                <BossApprovedBadge size="sm" variant="card" />
+              </div>
             )}
           </div>
         )}
 
-        {/* Hero image */}
-        {imageUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={imageUrl} alt={productName} className="w-full h-40 object-cover rounded-xl" />
-        )}
+        {/* Verdict — same component readers see, preview variant */}
+        <VerdictCard
+          variant="preview"
+          productName={productName}
+          rating={rating}
+          tldr={tldr}
+          wouldRebuy={wouldRebuy}
+          subScores={subScores}
+        />
+
+        {/* Key Takeaways — preview variant */}
+        <TakeawaysCard items={keyTakeaways} variant="preview" />
 
         {/* Pros / Cons */}
         {(pros.length > 0 || cons.length > 0) && (

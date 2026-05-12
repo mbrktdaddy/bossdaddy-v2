@@ -75,6 +75,8 @@ export function ReviewCreateWizard() {
     tldr: string; keyTakeaways: string[]; bestFor: string[]; notFor: string[]
     faqs: { question: string; answer: string }[]
     suggestedTags: string[]
+    subScores: { quality: number | null; value: number | null; ease: number | null; dailyUse: number | null }
+    wouldRebuy: boolean | null
   } | null>(null)
 
   const [products, setProducts]         = useState<ProductOption[]>([])
@@ -194,17 +196,29 @@ export function ReviewCreateWizard() {
         draft.verdict ? `<h2>The Verdict</h2>\n<p>${draft.verdict}</p>` : '',
       ].filter(Boolean).join('\n\n')
 
+      const d = draft as Record<string, unknown>
+      const sub = (d.subScores ?? {}) as Record<string, unknown>
+      const subScores = {
+        quality:  typeof sub.quality  === 'number' ? sub.quality  : null,
+        value:    typeof sub.value    === 'number' ? sub.value    : null,
+        ease:     typeof sub.ease     === 'number' ? sub.ease     : null,
+        dailyUse: typeof sub.dailyUse === 'number' ? sub.dailyUse : null,
+      }
+      const wouldRebuy = typeof d.wouldRebuy === 'boolean' ? d.wouldRebuy : null
+
       setPreviewDraft({
         title: draft.title, excerpt: draft.excerpt, content,
         rating: inputRating!,  // use our input — Claude's rating is ignored
         pros: draft.pros ?? [], cons: draft.cons ?? [],
         imagePrompt: genJson.imagePrompt ?? '',
-        tldr: (draft as Record<string, unknown>).tldr as string ?? '',
-        keyTakeaways: (draft as Record<string, unknown>).keyTakeaways as string[] ?? [],
-        bestFor: (draft as Record<string, unknown>).bestFor as string[] ?? [],
-        notFor: (draft as Record<string, unknown>).notFor as string[] ?? [],
-        faqs: (draft as Record<string, unknown>).faqs as { question: string; answer: string }[] ?? [],
+        tldr: d.tldr as string ?? '',
+        keyTakeaways: d.keyTakeaways as string[] ?? [],
+        bestFor: d.bestFor as string[] ?? [],
+        notFor: d.notFor as string[] ?? [],
+        faqs: d.faqs as { question: string; answer: string }[] ?? [],
         suggestedTags: Array.isArray(genJson.suggestedTags) ? genJson.suggestedTags : [],
+        subScores,
+        wouldRebuy,
       })
       setStep('preview')
     } catch (err) {
@@ -241,6 +255,11 @@ export function ReviewCreateWizard() {
           how_you_used_it: howYouUsedIt.trim() || null,
           standout_moment: standoutMoment.trim() || null,
           price_paid_cents: pricePaid.trim() && !isNaN(parseInt(pricePaid, 10)) ? parseInt(pricePaid, 10) : null,
+          score_quality:   previewDraft.subScores.quality,
+          score_value:     previewDraft.subScores.value,
+          score_ease:      previewDraft.subScores.ease,
+          score_daily_use: previewDraft.subScores.dailyUse,
+          would_rebuy:     previewDraft.wouldRebuy,
           suggested_tags: previewDraft.suggestedTags,
         }),
       })
@@ -334,6 +353,24 @@ export function ReviewCreateWizard() {
                 </ul>
               </div>
             </div>
+          )}
+          {/* Sub-scores + re-buy — surface what Claude proposed so authors can review before saving */}
+          {(previewDraft.subScores.quality != null || previewDraft.wouldRebuy != null) && (
+            <p className="pt-2 text-[11px] text-gray-500 border-t border-gray-800/60">
+              <span className="text-orange-400 font-semibold">Sub-scores:</span>{' '}
+              Q{previewDraft.subScores.quality ?? '—'} ·
+              V{previewDraft.subScores.value ?? '—'} ·
+              E{previewDraft.subScores.ease ?? '—'} ·
+              D{previewDraft.subScores.dailyUse ?? '—'}
+              {previewDraft.wouldRebuy != null && (
+                <>
+                  <span className="mx-2 text-gray-700">|</span>
+                  <span className="text-orange-400 font-semibold">Re-buy:</span>{' '}
+                  {previewDraft.wouldRebuy ? 'Yes' : 'No'}
+                </>
+              )}
+              <span className="block mt-1 text-gray-600">All editable in the workspace after save.</span>
+            </p>
           )}
         </div>
         {error && (

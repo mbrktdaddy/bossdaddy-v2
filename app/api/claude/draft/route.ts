@@ -99,11 +99,17 @@ STRUCTURE REQUIREMENTS:
 - Rating: output the author-provided rating (${rating}) exactly — do not adjust it
 
 CONTENT BLOCKS (required — these render as structured UI elements, not prose):
-- tldr: 2–3 sentence plain-English summary for skimmers. No jargon. Lead with the verdict.
+- tldr: 1–2 sentence verdict for skimmers. No jargon. Lead with the gut answer ("Solid mid-tier carrier at a fair price." / "Skip this — better options at the same price.").
 - keyTakeaways: 3–5 specific, useful bullet points. Not a rehash of pros — highlight the most surprising or decision-relevant insights.
 - bestFor: 3–4 specific buyer profiles who will love this (e.g. "Dads doing solo overnight feedings", "Budget-conscious families who need reliability")
 - notFor: 2–3 specific situations or buyer types who should skip (be honest — vague "not for everyone" is not acceptable)
 - faqs: 3–5 Q&A pairs covering the most common purchase questions. Answers 2–3 sentences each. Write questions the way a real dad searching Google would phrase them.
+- subScores: four 1–10 integers that DEFEND the overall rating of ${rating}. They must average roughly to the overall (no 10s on a 6 review). One can be a clear weak spot. Fields:
+  • quality   — build / formulation / materials
+  • value     — worth the price paid
+  • ease      — ease of use, setup, daily friction
+  • dailyUse  — fits real life, holds up under normal dad-life conditions
+- wouldRebuy: boolean. True only if a thoughtful dad would honestly buy this product again knowing what he knows now. Default to true for ratings ≥ 8; for 5–7 think carefully; for ≤ 4 default to false.
 
 SEO: Include the product name naturally in the intro and at least one section heading.
 
@@ -120,11 +126,13 @@ Return JSON with this exact shape:
 {
   "title": "string (SEO title including product name, max 70 chars — e.g. 'DeWalt 20V Drill Review: Built for Real Dad Projects')",
   "excerpt": "string (one punchy sentence for the card — max 160 chars)",
-  "tldr": "string (2–3 sentences, skimmer-friendly verdict summary)",
+  "tldr": "string (1–2 sentences, skimmer-friendly verdict)",
   "keyTakeaways": ["string (3–5 items, specific and useful)"],
   "bestFor": ["string (3–4 specific buyer profiles)"],
   "notFor": ["string (2–3 specific skip scenarios)"],
   "faqs": [{ "question": "string", "answer": "string (2–3 sentences)" }],
+  "subScores": { "quality": number (1-10), "value": number (1-10), "ease": number (1-10), "dailyUse": number (1-10) },
+  "wouldRebuy": boolean,
   "introduction": "string (2–3 sentences, first-person dad opening with a real use case)",
   "sections": [
     { "heading": "string (clear heading)", "body": "string (150–250 words, paragraphs separated by \\n\\n)" }

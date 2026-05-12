@@ -1190,6 +1190,10 @@ export type Database = {
           reading_time_minutes: number | null
           rejection_reason: string | null
           scheduled_publish_at: string | null
+          score_daily_use: number | null
+          score_ease: number | null
+          score_quality: number | null
+          score_value: number | null
           scroll_100_count: number
           scroll_25_count: number
           scroll_50_count: number
@@ -1203,6 +1207,7 @@ export type Database = {
           tldr: string | null
           updated_at: string | null
           view_count: number
+          would_rebuy: boolean | null
         }
         Insert: {
           author_id: string
@@ -1236,6 +1241,10 @@ export type Database = {
           reading_time_minutes?: number | null
           rejection_reason?: string | null
           scheduled_publish_at?: string | null
+          score_daily_use?: number | null
+          score_ease?: number | null
+          score_quality?: number | null
+          score_value?: number | null
           scroll_100_count?: number
           scroll_25_count?: number
           scroll_50_count?: number
@@ -1249,6 +1258,7 @@ export type Database = {
           tldr?: string | null
           updated_at?: string | null
           view_count?: number
+          would_rebuy?: boolean | null
         }
         Update: {
           author_id?: string
@@ -1282,6 +1292,10 @@ export type Database = {
           reading_time_minutes?: number | null
           rejection_reason?: string | null
           scheduled_publish_at?: string | null
+          score_daily_use?: number | null
+          score_ease?: number | null
+          score_quality?: number | null
+          score_value?: number | null
           scroll_100_count?: number
           scroll_25_count?: number
           scroll_50_count?: number
@@ -1295,6 +1309,7 @@ export type Database = {
           tldr?: string | null
           updated_at?: string | null
           view_count?: number
+          would_rebuy?: boolean | null
         }
         Relationships: [
           {

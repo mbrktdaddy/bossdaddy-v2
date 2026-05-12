@@ -70,6 +70,11 @@ interface ReviewData {
   how_you_used_it: string | null
   standout_moment: string | null
   price_paid_cents: number | null
+  score_quality: number | null
+  score_value: number | null
+  score_ease: number | null
+  score_daily_use: number | null
+  would_rebuy: boolean | null
 }
 
 const RATING_OPTIONS = [
@@ -108,6 +113,12 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   const [pricePaidCents, setPricePaidCents]   = useState(
     review.price_paid_cents != null ? String(review.price_paid_cents) : ''
   )
+
+  const [scoreQuality, setScoreQuality]   = useState<number | null>(review.score_quality ?? null)
+  const [scoreValue, setScoreValue]       = useState<number | null>(review.score_value ?? null)
+  const [scoreEase, setScoreEase]         = useState<number | null>(review.score_ease ?? null)
+  const [scoreDailyUse, setScoreDailyUse] = useState<number | null>(review.score_daily_use ?? null)
+  const [wouldRebuy, setWouldRebuy]       = useState<boolean | null>(review.would_rebuy ?? null)
 
   const [tags, setTags]                   = useState<string[]>(review.tags ?? [])
   const [tldr, setTldr]                   = useState(review.tldr ?? '')
@@ -174,7 +185,12 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
     standout_moment:      standoutMoment.trim() || null,
     price_paid_cents:     pricePaidCents.trim() && !isNaN(parseInt(pricePaidCents, 10))
                             ? parseInt(pricePaidCents, 10) : null,
-  }), [title, productName, category, excerpt, content, imageUrl, rating, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, productSlug, tldr, keyTakeaways, bestFor, notFor, faqs, testingDuration, howYouUsedIt, standoutMoment, pricePaidCents])
+    score_quality:        scoreQuality,
+    score_value:          scoreValue,
+    score_ease:           scoreEase,
+    score_daily_use:      scoreDailyUse,
+    would_rebuy:          wouldRebuy,
+  }), [title, productName, category, excerpt, content, imageUrl, rating, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, productSlug, tldr, keyTakeaways, bestFor, notFor, faqs, testingDuration, howYouUsedIt, standoutMoment, pricePaidCents, scoreQuality, scoreValue, scoreEase, scoreDailyUse, wouldRebuy])
 
   const canPublish = !hasAffiliate || disclosureAck
   const publishBlockedReason = !canPublish
@@ -362,6 +378,62 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
                 placeholder="e.g. Battery lasted the entire weekend — never had to stop and charge."
                 className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
               />
+            </div>
+          </div>
+        </div>
+
+        {/* ── Verdict Breakdown ────────────────────────────────────────── */}
+        <div className="pt-4 border-t border-gray-800/60">
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Verdict Breakdown</p>
+          <p className="text-xs text-gray-600 mb-3">Four 1–10 sub-scores that defend the overall rating, plus the honest re-buy signal. All render on the public Verdict Card.</p>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {([
+              ['Quality',     scoreQuality,  setScoreQuality]  as const,
+              ['Value',       scoreValue,    setScoreValue]    as const,
+              ['Ease of Use', scoreEase,     setScoreEase]     as const,
+              ['Daily Use',   scoreDailyUse, setScoreDailyUse] as const,
+            ]).map(([label, value, setter]) => (
+              <div key={label}>
+                <label className="block text-xs text-gray-300 mb-1.5">{label}</label>
+                <select
+                  value={value ?? ''}
+                  onChange={(e) => setter(e.target.value === '' ? null : Number(e.target.value))}
+                  className="w-full px-3 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                >
+                  <option value="">—</option>
+                  {[1,2,3,4,5,6,7,8,9,10].map((n) => (
+                    <option key={n} value={n}>{n}/10</option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4">
+            <p className="block text-sm text-gray-300 mb-1.5">Would you buy it again?</p>
+            <div className="flex gap-2 flex-wrap">
+              {([
+                ['Yes', true],
+                ['No', false],
+                ['Not set', null],
+              ] as const).map(([label, val]) => {
+                const active = wouldRebuy === val
+                return (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => setWouldRebuy(val)}
+                    className={`px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-semibold border transition-colors ${
+                      active
+                        ? 'bg-orange-600 border-orange-500 text-white'
+                        : 'bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                )
+              })}
             </div>
           </div>
         </div>
@@ -663,6 +735,13 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
             notFor={notFor}
             faqs={faqs}
             author="Boss Daddy"
+            pricePaidCents={pricePaidCents.trim() && !isNaN(parseInt(pricePaidCents, 10)) ? parseInt(pricePaidCents, 10) : null}
+            testingDuration={testingDuration || null}
+            scoreQuality={scoreQuality}
+            scoreValue={scoreValue}
+            scoreEase={scoreEase}
+            scoreDailyUse={scoreDailyUse}
+            wouldRebuy={wouldRebuy}
           />
         </div>
       )}
