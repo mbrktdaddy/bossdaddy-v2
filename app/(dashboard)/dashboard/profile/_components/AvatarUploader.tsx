@@ -69,7 +69,7 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
           const file = e.dataTransfer.files?.[0]
           if (file) handleFile(file)
         }}
-        className="group relative w-24 h-24 rounded-full overflow-hidden bg-orange-600 flex items-center justify-center text-4xl font-black text-white shrink-0 ring-2 ring-gray-800 hover:ring-orange-700 transition-all disabled:opacity-50 disabled:cursor-wait"
+        className="group relative w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-orange-700 to-orange-950 flex items-center justify-center text-4xl font-black text-white shrink-0 ring-2 ring-gray-800 hover:ring-orange-700 transition-all disabled:opacity-50 disabled:cursor-wait"
         aria-label={avatarUrl ? 'Change avatar' : 'Upload avatar'}
       >
         {avatarUrl ? (

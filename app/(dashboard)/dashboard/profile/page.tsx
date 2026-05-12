@@ -140,7 +140,7 @@ export default async function ProfilePage() {
       )}
 
       {/* Identity hero — avatar + name + role pill + joined date */}
-      <div className="bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 rounded-2xl p-6 mb-6">
+      <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-orange-950/40 border border-gray-800 rounded-2xl p-6 mb-6">
         <AvatarUploader
           initialAvatarUrl={(profile as { avatar_url?: string | null } | null)?.avatar_url ?? null}
           initial={profile?.username?.[0]?.toUpperCase() ?? '?'}
