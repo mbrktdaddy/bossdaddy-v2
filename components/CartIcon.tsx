@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -8,12 +8,21 @@ export default function CartIcon() {
   const [count, setCount] = useState(0)
   const pathname = usePathname()
 
-  useEffect(() => {
+  const fetchCount = useCallback(() => {
     fetch('/api/cart')
       .then(r => r.json())
       .then(d => setCount(d.count ?? 0))
       .catch(() => {})
-  }, [pathname])
+  }, [])
+
+  useEffect(() => {
+    fetchCount()
+  }, [pathname, fetchCount])
+
+  useEffect(() => {
+    window.addEventListener('cart-updated', fetchCount)
+    return () => window.removeEventListener('cart-updated', fetchCount)
+  }, [fetchCount])
 
   return (
     <Link

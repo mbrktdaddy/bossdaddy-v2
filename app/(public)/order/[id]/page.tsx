@@ -5,6 +5,7 @@ import { stripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatPrice } from '@/lib/merch'
 import OrderPoller from './_components/OrderPoller'
+import CartClearer from './_components/CartClearer'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -64,6 +65,7 @@ export default async function OrderPage({ params }: Props) {
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-16">
+      <CartClearer />
 
       {/* Header */}
       <div className="mb-10 text-center">
