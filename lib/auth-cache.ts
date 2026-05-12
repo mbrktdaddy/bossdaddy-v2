@@ -39,3 +39,9 @@ export async function requireAdmin() {
   if (!profile || profile.role !== 'admin') redirect('/')
   return profile
 }
+
+export async function requireAuthor() {
+  const profile = await getCurrentProfile()
+  if (!profile || (profile.role !== 'author' && profile.role !== 'admin')) redirect('/dashboard')
+  return profile
+}

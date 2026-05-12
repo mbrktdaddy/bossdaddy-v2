@@ -35,10 +35,25 @@ const UpsertSchema = z.object({
   facts:        z.array(FactSchema).max(100).default([]),
 })
 
+// Voice profiles only exist to inform Claude when an author drafts content.
+// Members have no drafting permissions, so the role gate here matches the UI
+// gate in /dashboard/profile (the link is hidden for members anyway).
+async function requireAuthorRole(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const { user } = await getUserSafe(supabase)
+  if (!user) return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }), user: null }
+
+  const { data: profile } = await supabase
+    .from('profiles').select('role').eq('id', user.id).single()
+  if (profile?.role !== 'author' && profile?.role !== 'admin') {
+    return { error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }), user: null }
+  }
+  return { error: null, user }
+}
+
 export async function GET() {
   const supabase = await createClient()
-  const { user } = await getUserSafe(supabase)
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { error: authErr, user } = await requireAuthorRole(supabase)
+  if (authErr) return authErr
 
   const { data, error } = await supabase
     .from('voice_profiles')
@@ -58,8 +73,8 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   const supabase = await createClient()
-  const { user } = await getUserSafe(supabase)
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { error: authErr, user } = await requireAuthorRole(supabase)
+  if (authErr) return authErr
 
   const body = await request.json().catch(() => null)
   const parsed = UpsertSchema.safeParse(body)
