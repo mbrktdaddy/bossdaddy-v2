@@ -208,6 +208,10 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
         ) : (
           <div className="space-y-3">
             {posts
+              // Skip posts whose platform isn't in PLATFORM_META (legacy/unsupported
+              // values). PostCard depends on PLATFORM_META[post.platform] and crashes
+              // if it's undefined.
+              .filter((p) => PLATFORM_META[p.platform] != null)
               .sort((a, b) => Object.keys(PLATFORM_META).indexOf(a.platform) - Object.keys(PLATFORM_META).indexOf(b.platform))
               .map((post) => (
                 <PostCard
