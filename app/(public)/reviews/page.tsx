@@ -1,8 +1,9 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { CATEGORIES, getCategoryLabel, getCategoryBySlug } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
-import ReviewCard from './_components/ReviewCard'
+import RatingScore from '@/components/RatingScore'
 import ReviewsGrid from './_components/ReviewsGrid'
 import FeaturedReviewCard from '@/components/FeaturedReviewCard'
 import BenchStrip from '@/components/BenchStrip'
@@ -35,7 +36,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
   const { category } = await searchParams
   const supabase = await createClient()
 
-  // ── All view — category sections ──────────────────────────────────────
+  // ── All view — featured card + per-category editorial row sections ──
   if (!category) {
     const { data } = await supabase
       .from('reviews')
@@ -55,12 +56,10 @@ export default async function ReviewsPage({ searchParams }: Props) {
       }))
       .filter(s => s.items.length > 0)
 
-    // Featured: highest-rated review with an image
     const featured = reviews
       .filter(r => r.image_url)
       .sort((a, b) => b.rating - a.rating)[0] ?? null
 
-    // Stats
     const categoryCount = new Set(reviews.map(r => r.category)).size
     const avgRating = reviews.length > 0
       ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
@@ -71,9 +70,10 @@ export default async function ReviewsPage({ searchParams }: Props) {
 
     return (
       <div className="max-w-6xl mx-auto px-6 py-16">
-        {/* Page header */}
+        {/* Page header — tick-line eyebrow pattern */}
         <div className="mb-8">
-          <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— The Stuff</p>
+          <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">The Stuff</p>
           <h1 className="text-4xl md:text-5xl font-black mb-3 text-white tracking-tight">All Reviews</h1>
         </div>
 
@@ -114,25 +114,35 @@ export default async function ReviewsPage({ searchParams }: Props) {
           ))}
         </div>
 
-        {/* Featured review — after the filter so categories are seen first */}
-        {featured && <FeaturedReviewCard review={featured} />}
+        {/* Featured review — visual hero of the directory page */}
+        {featured && (
+          <div className="mb-16">
+            <FeaturedReviewCard review={featured} />
+          </div>
+        )}
 
+        {/* Per-category sections — editorial rows (newspaper directory style)
+            replaces the prior 8 identical 3-col card grids with a tighter,
+            scannable list per category. Featured card above does the visual
+            heavy-lifting; these are quick browse-and-tap entries. */}
         {sections.length === 0 ? (
-          <div className="text-center py-24 bg-gray-900/40 rounded-2xl">
+          <div className="text-center py-24 bg-gray-900/40 rounded-2xl border border-gray-800/60 ring-1 ring-inset ring-white/[0.02]">
             <p className="text-gray-500 text-lg font-semibold">No reviews here yet.</p>
             <p className="text-gray-600 text-sm mt-2">Check back soon, Boss.</p>
           </div>
         ) : (
           sections.map(({ cat, items, total }, i) => (
-            <section key={cat.slug} className={i > 0 ? 'mt-16' : ''}>
-              <div className="flex items-stretch justify-between mb-6 gap-4">
-                <div className="flex items-stretch gap-4">
-                  <div className="w-[3px] bg-orange-600 rounded-full" />
-                  <div>
-                    <p className="flex items-center gap-1.5 text-[11px] text-orange-500 uppercase tracking-[0.18em] font-bold mb-1"><CategoryIcon slug={cat.slug} className="w-4 h-4 text-orange-500" /> {cat.label}</p>
-                    <h2 className="text-xl md:text-2xl font-black text-white">{cat.label}</h2>
-                    {cat.description && <p className="text-sm text-gray-500 mt-1">{cat.description}</p>}
-                  </div>
+            <section key={cat.slug} className={i > 0 ? 'mt-12' : ''}>
+              <div className="flex items-end justify-between mb-5 gap-4">
+                <div className="min-w-0">
+                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+                  <h2 className="text-xl md:text-2xl font-black text-white flex items-center gap-2.5 leading-tight">
+                    <CategoryIcon slug={cat.slug} className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500 shrink-0" />
+                    <span className="truncate">{cat.label}</span>
+                  </h2>
+                  {cat.description && (
+                    <p className="text-sm text-gray-500 mt-1.5 line-clamp-1">{cat.description}</p>
+                  )}
                 </div>
                 {total > items.length && (
                   <Link
@@ -143,8 +153,8 @@ export default async function ReviewsPage({ searchParams }: Props) {
                   </Link>
                 )}
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {items.map((r, i) => <ReviewCard key={r.id} review={r} priority={i < 3} />)}
+              <div className="divide-y divide-gray-800/60">
+                {items.map((r) => <ReviewRow key={r.id} review={r} />)}
               </div>
             </section>
           ))
@@ -158,7 +168,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
     )
   }
 
-  // ── Filtered view — flat grid + load more ─────────────────────────────
+  // ── Filtered view — flat card grid (deep browse surface) ──────────────
   const cat = getCategoryBySlug(category)
   const { data, count } = await supabase
     .from('reviews')
@@ -174,11 +184,15 @@ export default async function ReviewsPage({ searchParams }: Props) {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-16">
-      {/* Page header — eyebrow + h1 + count */}
+      {/* Page header — tick-line eyebrow + breadcrumb */}
       <div className="mb-12">
-        <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— Reviews / {getCategoryLabel(category).toUpperCase()}</p>
+        <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">
+          Reviews / {getCategoryLabel(category).toUpperCase()}
+        </p>
         <h1 className="text-4xl md:text-5xl font-black mb-3 text-white tracking-tight flex items-center gap-3">
-          {cat && <CategoryIcon slug={cat.slug} className="w-10 h-10 text-orange-500" />}{getCategoryLabel(category)}
+          {cat && <CategoryIcon slug={cat.slug} className="w-10 h-10 text-orange-500" />}
+          <span>{getCategoryLabel(category)}</span>
         </h1>
         {cat?.description && (
           <p className="text-gray-400 mb-2 max-w-2xl">{cat.description}</p>
@@ -188,7 +202,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
         </p>
       </div>
 
-      {/* Category filter — horizontal scroll strip */}
+      {/* Category filter pills */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
         <Link
           href="/reviews"
@@ -213,7 +227,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
       </div>
 
       {!reviews.length ? (
-        <div className="text-center py-24 bg-gray-900/40 rounded-2xl">
+        <div className="text-center py-24 bg-gray-900/40 rounded-2xl border border-gray-800/60 ring-1 ring-inset ring-white/[0.02]">
           <p className="text-gray-500 text-lg font-semibold">No reviews here yet.</p>
           <p className="text-gray-600 text-sm mt-2">Check back soon, Boss.</p>
         </div>
@@ -221,10 +235,47 @@ export default async function ReviewsPage({ searchParams }: Props) {
         <ReviewsGrid initialItems={reviews} total={count ?? 0} category={category} />
       )}
 
-      {/* On the Bench — what's coming next */}
+      {/* On the Bench */}
       <div className="mt-16">
         <BenchStrip ctaText="See all on the bench" />
       </div>
     </div>
+  )
+}
+
+// Editorial row — image left, title + product name right, rating far right.
+// Same geometry as the /gear Solid Gear rows. Used for the per-category
+// directory lists on the unfiltered /reviews surface.
+function ReviewRow({ review: r }: { review: ReviewRow }) {
+  return (
+    <Link
+      href={`/reviews/${r.slug}`}
+      className="group flex items-center gap-5 py-5 -mx-4 px-4 rounded-2xl hover:bg-gray-900/40 transition-colors"
+    >
+      <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-gray-800 shrink-0">
+        {r.image_url ? (
+          <Image
+            src={r.image_url}
+            alt={r.product_name}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            sizes="(max-width: 640px) 80px, 96px"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-gray-800/50 to-gray-900/40 flex items-center justify-center">
+            <CategoryIcon slug={r.category} className="w-6 h-6 text-orange-500/40" />
+          </div>
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <h3 className="text-base md:text-lg font-bold text-white group-hover:text-orange-400 transition-colors leading-snug">
+          {r.title}
+        </h3>
+        <p className="text-xs text-gray-500 mt-1 truncate">{r.product_name}</p>
+      </div>
+      <div className="shrink-0">
+        <RatingScore rating={r.rating ?? 0} />
+      </div>
+    </Link>
   )
 }
