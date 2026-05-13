@@ -180,12 +180,12 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Trust strip — warm-tint surface variant ────────────────────── */}
-      <section className="relative bg-gradient-to-b from-gray-950 to-gray-900/30 border-y border-gray-800/60">
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none bg-gradient-to-b from-orange-950/[0.08] to-transparent"
-        />
+      {/* ═══ MOVEMENT 1 — The Open (warm wash) ═══════════════════════════ */}
+      <div className="relative bg-gradient-to-b from-orange-950/[0.12] to-orange-950/[0.04]">
+        <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-orange-600/40" />
+
+      {/* ── Trust strip ─────────────────────────────────────────────────── */}
+      <section className="relative border-b border-gray-800/60">
         <div className="relative max-w-6xl mx-auto px-6 py-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-4">
             <TrustBadge
@@ -332,7 +332,13 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ── The Rules — drop cap on #01 for typographic flourish ───────── */}
+      </div>{/* ═══ End Movement 1 ═════════════════════════════════════════ */}
+
+      {/* ═══ MOVEMENT 2 — Voice & Browse (plain dark) ════════════════════ */}
+      <div className="relative bg-gray-950">
+        <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gray-800/60" />
+
+      {/* ── The Rules ───────────────────────────────────────────────────── */}
       <section className="relative border-b border-gray-800/40">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-px bg-orange-600/40" />
         <div className="max-w-5xl mx-auto px-6 py-20 md:py-24">
@@ -360,19 +366,13 @@ export default async function HomePage() {
                 title: "I'll tell you the truth.",
                 body: "If I wouldn't buy it again, I say so. If it changed my life, I say so. The score on the page is the score I'd give a friend.",
               },
-            ].map((rule, idx) => (
+            ].map((rule) => (
               <div key={rule.n}>
                 <p className="text-5xl md:text-6xl font-black text-orange-500/30 mb-4 leading-none tabular-nums">
                   {rule.n}
                 </p>
                 <p className="text-xl font-black text-white mb-3">{rule.title}</p>
-                <p
-                  className={
-                    idx === 0
-                      ? 'text-gray-400 leading-relaxed text-sm first-letter:float-left first-letter:text-5xl md:first-letter:text-6xl first-letter:font-black first-letter:text-orange-500 first-letter:leading-none first-letter:pr-2 first-letter:pt-1 first-letter:mr-1'
-                      : 'text-gray-400 leading-relaxed text-sm'
-                  }
-                >
+                <p className="text-gray-400 leading-relaxed text-sm">
                   {rule.body}
                 </p>
               </div>
@@ -386,10 +386,6 @@ export default async function HomePage() {
           grid. Treats category navigation as the editorial-ribbon utility it
           actually is, not feature content. */}
       <section className="relative">
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-orange-950/[0.05] to-transparent"
-        />
         <div className="relative max-w-6xl mx-auto px-6 py-10">
           <div className="mb-6">
             <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
@@ -416,6 +412,12 @@ export default async function HomePage() {
         </div>
       </section>
 
+      </div>{/* ═══ End Movement 2 ═════════════════════════════════════════ */}
+
+      {/* ═══ MOVEMENT 3 — Editorial Queue (sunken) ═══════════════════════ */}
+      <div className="relative bg-black/40">
+        <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gray-900" />
+
       {/* ── Latest Guides ──────────────────────────────────────────────── */}
       <Suspense fallback={<LatestGuidesSkeleton />}>
         <LatestGuidesSection />
@@ -435,17 +437,19 @@ export default async function HomePage() {
         </div>
       </section>
 
+      </div>{/* ═══ End Movement 3 ═════════════════════════════════════════ */}
+
+      {/* ═══ MOVEMENT 4 — Action (warm wash ↗) ═══════════════════════════ */}
+      <div className="relative bg-gradient-to-b from-orange-950/[0.04] to-orange-950/[0.14]">
+        <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-orange-600/40" />
+
       {/* ── Merch strip ────────────────────────────────────────────────── */}
       <Suspense fallback={null}>
         <HomepageMerchStrip />
       </Suspense>
 
-      {/* ── Newsletter — warm tint surface ─────────────────────────────── */}
+      {/* ── Newsletter ──────────────────────────────────────────────────── */}
       <section id="crew" className="relative">
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none bg-gradient-to-b from-orange-950/[0.06] to-transparent"
-        />
         <div className="relative max-w-6xl mx-auto px-6 py-16">
           <div className="bg-gradient-to-br from-orange-950/40 to-gray-900 rounded-2xl shadow-xl shadow-black/40 px-8 py-12 text-center max-w-2xl mx-auto">
             <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3 mx-auto" />
@@ -491,6 +495,8 @@ export default async function HomePage() {
           <p className="text-sm text-gray-500 italic">— Boss Daddy</p>
         </div>
       </section>
+
+      </div>{/* ═══ End Movement 4 ═════════════════════════════════════════ */}
     </>
   )
 }

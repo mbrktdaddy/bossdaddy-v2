@@ -11,7 +11,7 @@ interface Props {
 const STATUS_RANK: Record<string, number> = { testing: 0, queued: 1, considering: 2 }
 
 export default async function BenchStrip({
-  heading = "On the Bench",
+  heading = 'On the Bench',
   ctaText = "Vote on what's next",
 }: Props) {
   const admin = createAdminClient()
@@ -32,7 +32,7 @@ export default async function BenchStrip({
   return (
     <div className="rounded-2xl bg-gray-900/60 border border-gray-800/60 p-5 sm:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 mb-5">
+      <div className="flex items-center justify-between gap-4 mb-4">
         <div className="flex items-center gap-2.5">
           <span className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_rgba(204,85,0,0.8)]" />
           <span className="text-xs font-black uppercase tracking-widest text-orange-500">{heading}</span>
@@ -42,48 +42,53 @@ export default async function BenchStrip({
         </Link>
       </div>
 
-      {/* Cards — horizontal scroll on mobile, 3-col grid on desktop */}
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-5 px-5 sm:mx-0 sm:px-0 sm:overflow-visible sm:grid sm:grid-cols-3 sm:gap-4">
+      {/* Queue rows */}
+      <ul className="divide-y divide-gray-800/60">
         {items.map((item) => (
-          <Link
-            key={item.id}
-            href={`/bench/${item.slug}`}
-            className="shrink-0 w-44 sm:w-auto flex flex-col bg-gray-900 hover:bg-gray-800/90 rounded-xl overflow-hidden shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/50 transition-all group"
-          >
-            {/* Image (aspect-video, prominent) */}
-            <div className="relative w-full aspect-video bg-gray-950">
-              {item.image_url ? (
-                <Image
-                  src={item.image_url}
-                  alt={item.title}
-                  fill
-                  className="object-contain p-3"
-                  sizes="(max-width: 640px) 176px, (max-width: 1024px) 33vw, 200px"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <svg className="w-8 h-8 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-              )}
-              {/* Status pill overlay */}
-              <div className="absolute top-2 left-2">
-                <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-sm ${getStatusColor(item.status as WishlistStatus)}`}>
-                  {getStatusLabel(item.status as WishlistStatus)}
-                </span>
+          <li key={item.id}>
+            <Link
+              href={`/bench/${item.slug}`}
+              className="group flex items-center gap-3 sm:gap-4 py-3 -mx-2 px-2 rounded-lg hover:bg-gray-800/40 transition-colors min-h-[64px]"
+            >
+              {/* Thumbnail — square, fills */}
+              <div className="relative shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-gray-950 border border-gray-800/60">
+                {item.image_url ? (
+                  <Image
+                    src={item.image_url}
+                    alt={item.title}
+                    fill
+                    className="object-cover"
+                    sizes="64px"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                )}
               </div>
-            </div>
 
-            {/* Title */}
-            <div className="p-3">
-              <p className="text-sm font-bold text-gray-200 group-hover:text-orange-400 line-clamp-2 leading-snug transition-colors">
+              {/* Status pill — fixed-width column so titles align */}
+              <span
+                className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-gray-950/80 shrink-0 text-center sm:min-w-[88px] ${getStatusColor(item.status as WishlistStatus)}`}
+              >
+                {getStatusLabel(item.status as WishlistStatus)}
+              </span>
+
+              {/* Title */}
+              <p className="text-sm font-bold text-gray-300 group-hover:text-orange-400 transition-colors line-clamp-1 flex-1">
                 {item.title}
               </p>
-            </div>
-          </Link>
+
+              {/* Arrow */}
+              <span aria-hidden className="text-gray-600 group-hover:text-orange-400 transition-colors text-lg shrink-0">
+                →
+              </span>
+            </Link>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   )
 }
