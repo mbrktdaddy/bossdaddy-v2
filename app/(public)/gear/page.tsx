@@ -32,7 +32,6 @@ export default async function GearPage({ searchParams }: Props) {
   const { category } = await searchParams
   const supabase = await createClient()
 
-  // ── Queries (all parallelized) ──────────────────────────────────────────────
   const seasonalOccasions = getSeasonalOccasions()
   const seasonalValues = seasonalOccasions.map((o) => o.value)
 
@@ -62,7 +61,6 @@ export default async function GearPage({ searchParams }: Props) {
       .select('category')
       .eq('status', 'approved')
       .eq('is_visible', true),
-    // Gift guide pick lists for seasonal occasions
     supabase
       .from('pick_lists')
       .select('id, slug, title, hero_image_url, occasion')
@@ -70,7 +68,6 @@ export default async function GearPage({ searchParams }: Props) {
       .eq('is_visible', true)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .in('occasion', seasonalValues as any),
-    // Featured collection (most recently published general/best_of)
     supabase
       .from('pick_lists')
       .select('id, slug, title, description, hero_image_url')
@@ -85,7 +82,6 @@ export default async function GearPage({ searchParams }: Props) {
   const cat = category ? getCategoryBySlug(category) : null
   const featuredPick = featuredPickRows?.[0] ?? null
 
-  // Fetch featured pick items (sequential — depends on featuredPick)
   let featuredItems: {
     position: number
     blurb: string | null
@@ -102,40 +98,33 @@ export default async function GearPage({ searchParams }: Props) {
     featuredItems = (data ?? []) as any
   }
 
-  // Build gift guide map for fast lookup: occasion value → pick_list
   const giftPickMap = new Map(
     (giftPickLists ?? []).map((p) => [p.occasion, p])
   )
 
-  // Stats
-  const categoryCount  = new Set((allApproved ?? []).map((r) => r.category)).size
-  const bossPicks      = topPicks.filter((r) => (r.rating ?? 0) >= 9).length
-  const topPick        = !category ? (topPicks.find((r) => r.image_url) ?? null) : null
+  const categoryCount = new Set((allApproved ?? []).map((r) => r.category)).size
+  const bossPicks     = topPicks.filter((r) => (r.rating ?? 0) >= 9).length
+  const topPick       = !category ? (topPicks.find((r) => r.image_url) ?? null) : null
 
-  // Per-category counts for the Shop by Category section (from full topPicks)
   const countByCategory = new Map<string, number>()
   for (const r of topPicks) {
     countByCategory.set(r.category, (countByCategory.get(r.category) ?? 0) + 1)
   }
 
-  // Tier groups
   const tens   = topPicks.filter((r) => (r.rating ?? 0) === 10)
   const nines  = topPicks.filter((r) => (r.rating ?? 0) >= 9 && (r.rating ?? 0) < 10)
   const eights = topPicks.filter((r) => (r.rating ?? 0) >= 8 && (r.rating ?? 0) < 9)
-  const tiers  = [
-    { label: '🏆 Perfect Score', sub: 'Flawless. Nothing I tested came close.',                        items: tens },
-    { label: '⭐ Boss Picks',     sub: 'Earned it. These are the ones I recommend without hesitation.', items: nines },
-    { label: '👍 Solid Gear',    sub: 'Good enough that I kept them. Not perfect, but worth it.',       items: eights },
-  ].filter((t) => t.items.length > 0)
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-16">
 
-      {/* ── Header ──────────────────────────────────────────────────────────── */}
+      {/* ── Header — tick-line eyebrow pattern (matches homepage) ─────────── */}
       <div className="mb-8">
-        <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— Daddy Tested, Boss Approved</p>
+        <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Daddy Tested, Boss Approved</p>
         <h1 className="text-4xl md:text-5xl font-black mb-3 text-white tracking-tight flex items-center gap-3">
-          {cat && <CategoryIcon slug={cat.slug} className="w-10 h-10 text-orange-500" />}{cat ? `${cat.label} Gear` : "Boss Daddy's Gear"}
+          {cat && <CategoryIcon slug={cat.slug} className="w-10 h-10 text-orange-500" />}
+          <span>{cat ? `${cat.label} Gear` : "Boss Daddy's Gear"}</span>
         </h1>
         <p className="text-gray-400 text-base md:text-lg leading-relaxed max-w-2xl">
           I know we shouldn&apos;t pray for stuff, but here&apos;s a list of some really cool stuff.
@@ -175,7 +164,7 @@ export default async function GearPage({ searchParams }: Props) {
         </div>
       )}
 
-      {/* ── Category filter ─────────────────────────────────────────────────── */}
+      {/* ── Category filter pills ──────────────────────────────────────────── */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
         <Link
           href="/gear"
@@ -213,25 +202,23 @@ export default async function GearPage({ searchParams }: Props) {
       {/* ── Unfiltered-only discovery sections ──────────────────────────────── */}
       {!category && (
         <>
-          {/* ── Shop by Occasion ──────────────────────────────────────────── */}
+          {/* ── Shop by Occasion — tick-line header + tactile cards ────────── */}
           <section className="mb-16">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-stretch gap-4">
-                <div className="w-[3px] bg-orange-600 rounded-full" />
-                <div>
-                  <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-1">Gift Guides</p>
-                  <h2 className="text-2xl font-black text-white leading-tight">Shop by Occasion</h2>
-                </div>
+            <div className="flex items-end justify-between mb-6">
+              <div>
+                <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Gift Guides</p>
+                <h2 className="text-2xl font-black text-white leading-tight">Shop by Occasion</h2>
               </div>
               <Link
                 href="/gifts"
-                className="hidden sm:inline-flex text-xs text-gray-500 hover:text-orange-400 transition-colors uppercase tracking-widest font-semibold"
+                className="hidden sm:inline-flex text-xs text-gray-500 hover:text-orange-400 transition-colors uppercase tracking-widest font-semibold shrink-0"
               >
                 All gift guides →
               </Link>
             </div>
 
-            {/* Mobile: horizontal scroll / Desktop: 3-col grid */}
+            {/* Mobile: horizontal scroll */}
             <div className="sm:hidden flex gap-3 overflow-x-auto scrollbar-hide -mx-6 px-6 pb-1">
               {seasonalOccasions.map((occ) => {
                 const pick = giftPickMap.get(occ.value)
@@ -239,7 +226,7 @@ export default async function GearPage({ searchParams }: Props) {
                   <Link
                     key={occ.slug}
                     href={`/gifts/${occ.slug}`}
-                    className="shrink-0 w-40 rounded-2xl overflow-hidden bg-gray-900 shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all"
+                    className="shrink-0 w-40 rounded-2xl overflow-hidden bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-orange-900/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all"
                   >
                     <div className="relative w-full h-24 bg-gray-800">
                       {pick?.hero_image_url ? (
@@ -256,6 +243,7 @@ export default async function GearPage({ searchParams }: Props) {
               })}
             </div>
 
+            {/* Desktop: 3-col grid */}
             <div className="hidden sm:grid grid-cols-3 gap-4">
               {seasonalOccasions.map((occ) => {
                 const pick = giftPickMap.get(occ.value)
@@ -263,7 +251,7 @@ export default async function GearPage({ searchParams }: Props) {
                   <Link
                     key={occ.slug}
                     href={`/gifts/${occ.slug}`}
-                    className="group relative rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all"
+                    className="group relative rounded-2xl overflow-hidden border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-orange-900/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all"
                   >
                     <div className="relative w-full h-36 bg-gray-800">
                       {pick?.hero_image_url ? (
@@ -289,28 +277,28 @@ export default async function GearPage({ searchParams }: Props) {
             </div>
           </section>
 
-          {/* ── Featured Collection ────────────────────────────────────────── */}
+          {/* ── Featured Collection — tick-line header + tactile card ──────── */}
           {featuredPick && (
             <section className="mb-16">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-stretch gap-4">
-                  <div className="w-[3px] bg-orange-600 rounded-full" />
-                  <div>
-                    <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-1">Curated Pick</p>
-                    <h2 className="text-2xl font-black text-white leading-tight">Featured Collection</h2>
-                  </div>
+              <div className="flex items-end justify-between mb-6">
+                <div>
+                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Curated Pick</p>
+                  <h2 className="text-2xl font-black text-white leading-tight">Featured Collection</h2>
                 </div>
                 <Link
                   href="/picks"
-                  className="hidden sm:inline-flex text-xs text-gray-500 hover:text-orange-400 transition-colors uppercase tracking-widest font-semibold"
+                  className="hidden sm:inline-flex text-xs text-gray-500 hover:text-orange-400 transition-colors uppercase tracking-widest font-semibold shrink-0"
                 >
                   All collections →
                 </Link>
               </div>
 
-              <Link href={`/picks/${featuredPick.slug}`} className="group block bg-gray-900 rounded-2xl overflow-hidden shadow-xl shadow-black/50 hover:shadow-black/70 transition-all">
+              <Link
+                href={`/picks/${featuredPick.slug}`}
+                className="group block bg-gray-900 rounded-2xl overflow-hidden border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-xl shadow-black/50 hover:border-orange-900/40 hover:shadow-black/70 hover:-translate-y-0.5 transition-all"
+              >
                 <div className="flex flex-col sm:flex-row">
-                  {/* Hero image */}
                   <div className="relative w-full sm:w-72 h-48 sm:h-auto sm:min-h-[220px] shrink-0 bg-gray-800">
                     {featuredPick.hero_image_url ? (
                       <Image
@@ -324,7 +312,6 @@ export default async function GearPage({ searchParams }: Props) {
                       <div className="w-full h-full flex items-center justify-center text-5xl opacity-30">⭐</div>
                     )}
                   </div>
-                  {/* Content */}
                   <div className="flex-1 p-5 sm:p-6 flex flex-col justify-between">
                     <div>
                       <h3 className="text-lg font-black text-white leading-snug mb-2 group-hover:text-orange-400 transition-colors">
@@ -335,7 +322,6 @@ export default async function GearPage({ searchParams }: Props) {
                           {featuredPick.description}
                         </p>
                       )}
-                      {/* 3 preview items */}
                       {featuredItems.length > 0 && (
                         <div className="flex gap-2 flex-wrap">
                           {featuredItems.map((item, i) => {
@@ -372,34 +358,38 @@ export default async function GearPage({ searchParams }: Props) {
             </section>
           )}
 
-          {/* ── Shop by Category ──────────────────────────────────────────── */}
-          <section className="mb-16">
-            <div className="flex items-stretch gap-4 mb-6">
-              <div className="w-[3px] bg-orange-600 rounded-full" />
-              <div>
-                <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-1">Browse</p>
+          {/* ── Shop by Category — warm-tint surface + unified opener ──────── */}
+          <section className="relative mb-16">
+            <div
+              aria-hidden
+              className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-orange-950/[0.05] to-transparent"
+            />
+            <div className="relative">
+              <div className="mb-6">
+                <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Browse</p>
                 <h2 className="text-2xl font-black text-white leading-tight">Shop by Category</h2>
               </div>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {CATEGORIES.map((c) => {
-                const count = countByCategory.get(c.slug) ?? 0
-                return (
-                  <Link
-                    key={c.slug}
-                    href={`/category/${c.slug}`}
-                    className="group flex flex-col items-center justify-center text-center gap-2 bg-gray-900 hover:bg-gray-800 rounded-2xl p-4 min-h-[120px] shadow-md shadow-black/30 transition-all"
-                  >
-                    <CategoryIcon slug={c.slug} className="w-7 h-7 text-orange-500" />
-                    <span className="text-sm font-bold text-white leading-tight group-hover:text-orange-400 transition-colors">
-                      {c.shortLabel}
-                    </span>
-                    <span className="text-xs text-gray-600">
-                      {count > 0 ? `${count} pick${count !== 1 ? 's' : ''}` : 'Coming soon'}
-                    </span>
-                  </Link>
-                )
-              })}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {CATEGORIES.map((c) => {
+                  const count = countByCategory.get(c.slug) ?? 0
+                  return (
+                    <Link
+                      key={c.slug}
+                      href={`/category/${c.slug}`}
+                      className="group flex flex-col items-center justify-center text-center gap-2 bg-gray-900 hover:bg-gray-800 rounded-2xl p-4 min-h-[120px] border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-md shadow-black/30 hover:border-orange-900/40 hover:shadow-lg hover:shadow-black/40 hover:-translate-y-0.5 transition-all"
+                    >
+                      <CategoryIcon slug={c.slug} className="w-7 h-7 text-orange-500" />
+                      <span className="text-sm font-bold text-white leading-tight group-hover:text-orange-400 transition-colors">
+                        {c.shortLabel}
+                      </span>
+                      <span className="text-xs text-gray-600">
+                        {count > 0 ? `${count} pick${count !== 1 ? 's' : ''}` : 'Coming soon'}
+                      </span>
+                    </Link>
+                  )
+                })}
+              </div>
             </div>
           </section>
 
@@ -408,41 +398,91 @@ export default async function GearPage({ searchParams }: Props) {
         </>
       )}
 
-      {/* ── Tiers / filtered grid ────────────────────────────────────────────── */}
+      {/* ── Tiers / filtered grid ────────────────────────────────────────────
+          Three distinct geometries for the three rating tiers — a visual
+          hierarchy that mirrors the rating hierarchy:
+            10:  asymmetric magazine 1+2 (most editorial, top of pyramid)
+            9+:  standard 3-col card grid (workhorse middle)
+            8+:  compact editorial rows (browse-and-scan base) */}
       {!topPicks.length ? (
-        <div className="text-center py-24 bg-gray-900/40 rounded-2xl">
+        <div className="text-center py-24 bg-gray-900/40 rounded-2xl border border-gray-800/60 ring-1 ring-inset ring-white/[0.02]">
           <p className="text-gray-500 text-lg font-semibold">Nothing here yet.</p>
           <p className="text-gray-600 text-sm mt-2">Reviews are being added.</p>
         </div>
       ) : category ? (
+        // Filtered view: simple 3-col grid (no tier separation when filtered)
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {topPicks.map((r) => <GearCard key={r.id} review={r} />)}
         </div>
       ) : (
         <div>
-          {tiers.map(({ label, sub, items }, i) => {
-            const isLast = i === tiers.length - 1
-            const isPerfect = label.includes('Perfect Score')
-            const bottomMargin = isLast ? '' : isPerfect ? 'mb-24' : 'mb-16'
-            return (
-              <section
-                key={label}
-                id={isPerfect ? 'perfect-score' : label.includes('Boss Picks') ? 'boss-picks' : undefined}
-                className={bottomMargin}
-              >
-                <div className="flex items-stretch gap-4 mb-6">
-                  <div className="w-[3px] bg-orange-600 rounded-full" />
-                  <div>
-                    <h2 className="text-xl font-black text-white">{label}</h2>
-                    <p className="text-xs text-gray-500 mt-0.5">{sub}</p>
+          {/* ── Perfect Score — asymmetric magazine grid + radial glow ──── */}
+          {tens.length > 0 && (
+            <section id="perfect-score" className="relative mb-24">
+              <div
+                aria-hidden
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background:
+                    'radial-gradient(ellipse 60% 50% at 50% 0%, rgba(204,85,0,0.10), transparent 60%)',
+                }}
+              />
+              <div className="relative">
+                <div className="mb-6">
+                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Top Tier</p>
+                  <h2 className="text-xl font-black text-white">Perfect Score</h2>
+                  <p className="text-xs text-gray-500 mt-0.5">Flawless. Nothing I tested came close.</p>
+                </div>
+                {tens.length === 1 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {tens.map((r) => <GearCard key={r.id} review={r} />)}
                   </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {items.map((r) => <GearCard key={r.id} review={r} />)}
-                </div>
-              </section>
-            )
-          })}
+                ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-2 gap-5">
+                    {tens.slice(0, 3).map((r, i) => (
+                      <GearCard key={r.id} review={r} isHero={i === 0} />
+                    ))}
+                  </div>
+                )}
+                {tens.length > 3 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-5">
+                    {tens.slice(3).map((r) => <GearCard key={r.id} review={r} />)}
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* ── Boss Picks — standard 3-col card grid ──────────────────── */}
+          {nines.length > 0 && (
+            <section id="boss-picks" className="mb-16">
+              <div className="mb-6">
+                <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Boss Approved</p>
+                <h2 className="text-xl font-black text-white">Boss Picks</h2>
+                <p className="text-xs text-gray-500 mt-0.5">Earned it. These are the ones I recommend without hesitation.</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {nines.map((r) => <GearCard key={r.id} review={r} />)}
+              </div>
+            </section>
+          )}
+
+          {/* ── Solid Gear — compact editorial rows ────────────────────── */}
+          {eights.length > 0 && (
+            <section className="mb-16">
+              <div className="mb-6">
+                <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Worth It</p>
+                <h2 className="text-xl font-black text-white">Solid Gear</h2>
+                <p className="text-xs text-gray-500 mt-0.5">Good enough that I kept them. Not perfect, but worth it.</p>
+              </div>
+              <div className="divide-y divide-gray-800/60">
+                {eights.map((r) => <GearRow key={r.id} review={r} />)}
+              </div>
+            </section>
+          )}
         </div>
       )}
 
@@ -466,44 +506,116 @@ export default async function GearPage({ searchParams }: Props) {
   )
 }
 
-function GearCard({ review: r }: { review: { id: string; slug: string; title: string; product_name: string; category: string; rating: number | null; excerpt: string | null; image_url: string | null; published_at: string | null } }) {
+type GearReview = {
+  id: string
+  slug: string
+  title: string
+  product_name: string
+  category: string
+  rating: number | null
+  excerpt: string | null
+  image_url: string | null
+  published_at: string | null
+}
+
+function GearCard({ review: r, isHero = false }: { review: GearReview; isHero?: boolean }) {
   const cat = getCategoryBySlug(r.category)
   return (
     <Link
       href={`/reviews/${r.slug}`}
-      className="group flex flex-col bg-gray-900 rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200"
+      className={`group flex flex-col bg-gray-900 rounded-2xl overflow-hidden border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-orange-900/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200 ${
+        isHero ? 'lg:col-span-2 lg:row-span-2' : ''
+      }`}
     >
       {r.image_url ? (
-        <div className="relative w-full h-44 bg-gray-800 shrink-0">
+        <div className={`relative w-full bg-gray-800 shrink-0 ${
+          isHero ? 'h-64 sm:h-80 lg:h-[420px]' : 'h-44'
+        }`}>
           <Image
             src={r.image_url}
             alt={r.product_name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            sizes={
+              isHero
+                ? '(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 680px'
+                : '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
+            }
           />
         </div>
       ) : (
-        <div className="w-full h-44 bg-gray-800/50 flex items-center justify-center shrink-0">
-          {cat ? <CategoryIcon slug={cat.slug} className="w-8 h-8 text-orange-500" /> : <span className="text-4xl">📦</span>}
+        <div className={`w-full bg-gradient-to-br from-gray-800/40 to-gray-900/40 flex items-center justify-center shrink-0 ${
+          isHero ? 'h-64 sm:h-80 lg:h-[420px]' : 'h-44'
+        }`}>
+          {cat && <CategoryIcon slug={cat.slug} className={isHero ? 'w-12 h-12 text-orange-500/40' : 'w-8 h-8 text-orange-500/40'} />}
         </div>
       )}
-      <div className="p-5 flex flex-col flex-1">
+      <div className={`flex flex-col flex-1 ${isHero ? 'p-6 lg:p-7' : 'p-5'}`}>
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
             {r.product_name}
           </span>
           <RatingScore rating={r.rating ?? 0} />
         </div>
-        <h3 className="text-base font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
+        <h3 className={`leading-snug group-hover:text-orange-400 transition-colors flex-1 ${
+          isHero ? 'text-xl md:text-2xl font-black text-white' : 'text-base font-semibold'
+        }`}>
           {r.title}
         </h3>
         {r.excerpt && (
-          <p className="text-gray-500 text-sm mt-2 line-clamp-2">{r.excerpt}</p>
+          <p className={`text-gray-500 mt-2 ${
+            isHero ? 'text-sm sm:text-base line-clamp-3' : 'text-sm line-clamp-2'
+          }`}>
+            {r.excerpt}
+          </p>
         )}
         <div className="mt-4 pt-4">
           <span className="text-xs text-orange-500 font-medium">Read full review</span>
         </div>
+      </div>
+    </Link>
+  )
+}
+
+// Compact editorial row treatment for the lowest tier — mirrors the
+// homepage Latest Guides geometry but flipped (image left, title right)
+// so the two surfaces don't read as identical.
+function GearRow({ review: r }: { review: GearReview }) {
+  const cat = getCategoryBySlug(r.category)
+  return (
+    <Link
+      href={`/reviews/${r.slug}`}
+      className="group flex items-center gap-5 py-5 -mx-4 px-4 rounded-2xl hover:bg-gray-900/40 transition-colors"
+    >
+      <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-gray-800 shrink-0">
+        {r.image_url ? (
+          <Image
+            src={r.image_url}
+            alt={r.product_name}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            sizes="(max-width: 640px) 80px, 96px"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-gray-800/50 to-gray-900/40 flex items-center justify-center">
+            {cat && <CategoryIcon slug={cat.slug} className="w-6 h-6 text-orange-500/40" />}
+          </div>
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          {cat && <CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-orange-500" />}
+          <span className="text-[10px] sm:text-xs text-orange-500 uppercase tracking-widest font-semibold">
+            {cat?.shortLabel ?? r.category}
+          </span>
+        </div>
+        <h3 className="text-base md:text-lg font-bold text-white group-hover:text-orange-400 transition-colors leading-snug">
+          {r.title}
+        </h3>
+        <p className="text-xs text-gray-500 mt-1 truncate">{r.product_name}</p>
+      </div>
+      <div className="shrink-0">
+        <RatingScore rating={r.rating ?? 0} />
       </div>
     </Link>
   )
