@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { generateAndUploadImage } from '@/lib/images/dalle'
+import { generateAndUploadImage } from '@/lib/images/openai'
 import { z } from 'zod'
 
 export const maxDuration = 60
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
   const bucket = content_type === 'review' ? 'review-images' : 'guide-images'
 
   try {
-    const imageUrl = await generateAndUploadImage(prompt, bucket, '1792x1024')
+    const imageUrl = await generateAndUploadImage(prompt, bucket, '1536x1024')
     return NextResponse.json({ imageUrl })
   } catch (err) {
     console.error('Hero image generation error:', err)

@@ -61,7 +61,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
 
   // Generate state
   const [genPrompt, setGenPrompt] = useState('')
-  const [genSize, setGenSize] = useState<'1024x1024' | '1792x1024' | '1024x1792'>('1792x1024')
+  const [genSize, setGenSize] = useState<'1024x1024' | '1536x1024' | '1024x1536'>('1536x1024')
   const [genLoading, setGenLoading] = useState(false)
   const [genError, setGenError] = useState<string | null>(null)
 
@@ -392,9 +392,9 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 <label className="block text-sm text-gray-300 mb-2">Aspect ratio</label>
                 <div className="flex gap-2">
                   {[
-                    { value: '1792x1024', label: 'Landscape', ratio: '16:9', recommended: true },
-                    { value: '1024x1024', label: 'Square',    ratio: '1:1',  recommended: false },
-                    { value: '1024x1792', label: 'Portrait',  ratio: '9:16', recommended: false },
+                    { value: '1536x1024', label: 'Landscape', ratio: '3:2', recommended: true },
+                    { value: '1024x1024', label: 'Square',    ratio: '1:1', recommended: false },
+                    { value: '1024x1536', label: 'Portrait',  ratio: '2:3', recommended: false },
                   ].map((opt) => (
                     <button
                       key={opt.value}

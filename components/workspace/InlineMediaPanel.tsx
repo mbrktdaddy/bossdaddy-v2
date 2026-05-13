@@ -145,7 +145,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             prompt: slot.prompt,
-            size: '1792x1024',
+            size: '1536x1024',
             alt_text: slot.alt || slot.caption || slot.prompt.slice(0, 120),
           }),
         })
@@ -176,7 +176,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt,
-          size: '1792x1024',
+          size: '1536x1024',
           alt_text: slot.alt || slot.caption || prompt.slice(0, 120),
         }),
       })
@@ -278,7 +278,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: addPrompt.trim(),
-          size: '1792x1024',
+          size: '1536x1024',
           alt_text: addAlt || addCaption || addPrompt.slice(0, 120),
         }),
       })

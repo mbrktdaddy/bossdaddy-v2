@@ -1,14 +1,14 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { generateAndUploadImage } from '@/lib/images/dalle'
+import { generateAndUploadImage } from '@/lib/images/openai'
 import { z } from 'zod'
 
 export const maxDuration = 60
 
 const GenerateSchema = z.object({
   prompt:   z.string().min(4).max(600),
-  size:     z.enum(['1024x1024', '1792x1024', '1024x1792']).default('1024x1024'),
+  size:     z.enum(['1024x1024', '1536x1024', '1024x1536']).default('1024x1024'),
   alt_text: z.string().max(200).optional().nullable(),
 })
 
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       alt_text:    alt_text?.trim() || prompt.slice(0, 120),
       uploaded_by: user.id,
       file_size:   null,
-      mime_type:   'image/png',
+      mime_type:   'image/webp',
     })
     .select('id, url, filename, alt_text, file_size, mime_type, created_at')
     .single()

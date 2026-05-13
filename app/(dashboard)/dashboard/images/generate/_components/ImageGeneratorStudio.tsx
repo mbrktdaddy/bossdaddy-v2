@@ -11,7 +11,7 @@ interface SessionImage {
 
 export function ImageGeneratorStudio() {
   const [prompt, setPrompt] = useState('')
-  const [size, setSize] = useState<'1024x1024' | '1792x1024' | '1024x1792'>('1792x1024')
+  const [size, setSize] = useState<'1024x1024' | '1536x1024' | '1024x1536'>('1536x1024')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [session, setSession] = useState<SessionImage[]>([])
@@ -67,9 +67,9 @@ Tips:
           <label className="block text-sm text-gray-300 mb-2">Aspect ratio</label>
           <div className="flex gap-2">
             {[
-              { value: '1792x1024', label: 'Landscape', ratio: '16:9' },
-              { value: '1024x1024', label: 'Square',    ratio: '1:1'  },
-              { value: '1024x1792', label: 'Portrait',  ratio: '9:16' },
+              { value: '1536x1024', label: 'Landscape', ratio: '3:2' },
+              { value: '1024x1024', label: 'Square',    ratio: '1:1' },
+              { value: '1024x1536', label: 'Portrait',  ratio: '2:3' },
             ].map((opt) => (
               <button
                 key={opt.value}

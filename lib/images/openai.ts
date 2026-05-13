@@ -1,8 +1,18 @@
 import OpenAI from 'openai'
+import sharp from 'sharp'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 type Bucket = 'guide-images' | 'review-images' | 'media'
-type ImageSize = '1024x1024' | '1792x1024' | '1024x1792'
+type ImageSize = '1024x1024' | '1536x1024' | '1024x1536'
+
+// Pinned snapshot so OpenAI silently rolling the model forward can't drift our
+// hero-image aesthetic. Upgrade deliberately, not by surprise.
+const IMAGE_MODEL = 'gpt-image-2-2026-04-21'
+
+// WebP quality 90 is visually indistinguishable from the source PNG on
+// photo-style content, while reducing file size roughly 10x. Lower values
+// start to show artifacts on the smooth gradients in warm-natural-light scenes.
+const WEBP_QUALITY = 90
 
 const SAFE_FALLBACK_PROMPT =
   'Photorealistic lifestyle photography, tools and outdoor gear on a wooden surface, warm natural lighting, clean composition, high quality, no people'
@@ -25,22 +35,20 @@ function isContentPolicyError(err: unknown): boolean {
   )
 }
 
-async function callDallE(
+async function callImageModel(
   prompt: string,
   size: ImageSize,
   client: OpenAI
 ): Promise<string> {
   const response = await client.images.generate({
-    model: 'dall-e-3',
+    model: IMAGE_MODEL,
     prompt,
     n: 1,
     size,
-    quality: 'standard',
-    style: 'natural',
-    response_format: 'b64_json',
+    quality: 'high',
   })
   const b64 = response.data?.[0]?.b64_json
-  if (!b64) throw new Error('No image data returned from DALL-E')
+  if (!b64) throw new Error('No image data returned from image model')
   return b64
 }
 
@@ -53,23 +61,27 @@ export async function generateAndUploadImage(
 
   let b64: string
   try {
-    b64 = await callDallE(prompt, size, client)
+    b64 = await callImageModel(prompt, size, client)
   } catch (err) {
     if (isContentPolicyError(err)) {
       // Retry with a safe generic prompt rather than failing the whole draft
-      b64 = await callDallE(SAFE_FALLBACK_PROMPT, size, client)
+      b64 = await callImageModel(SAFE_FALLBACK_PROMPT, size, client)
     } else {
       throw err
     }
   }
 
-  const buffer = Buffer.from(b64, 'base64')
-  const filename = `ai-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`
+  const pngBuffer = Buffer.from(b64, 'base64')
+  const webpBuffer = await sharp(pngBuffer)
+    .webp({ quality: WEBP_QUALITY })
+    .toBuffer()
+
+  const filename = `ai-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`
 
   const admin = createAdminClient()
   const { error } = await admin.storage
     .from(bucket)
-    .upload(filename, buffer, { contentType: 'image/png', upsert: false })
+    .upload(filename, webpBuffer, { contentType: 'image/webp', upsert: false })
 
   if (error) throw new Error(`Storage upload failed: ${error.message}`)
 
