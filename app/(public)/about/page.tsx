@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CATEGORIES } from '@/lib/categories'
+import CategoryIcon from '@/components/CategoryIcon'
 import { createClient } from '@/lib/supabase/server'
 import { EmailSignup } from '@/components/EmailSignup'
 
@@ -158,7 +159,7 @@ export default async function AboutPage() {
  href={`/category/${cat.slug}`}
  className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 transition-colors"
  >
- <span className="shrink-0">{cat.icon}</span>
+ <CategoryIcon slug={cat.slug} className="w-4 h-4 text-orange-500 shrink-0" />
  <span className="truncate">{cat.label}</span>
  </Link>
  ))}

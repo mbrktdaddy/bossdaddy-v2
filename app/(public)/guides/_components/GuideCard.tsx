@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { getCategoryBySlug } from '@/lib/categories'
+import CategoryIcon from '@/components/CategoryIcon'
 import type { GuideRow } from '../actions'
 
 export default function GuideCard({ guide: a, priority = false }: { guide: GuideRow; priority?: boolean }) {
@@ -25,15 +26,13 @@ export default function GuideCard({ guide: a, priority = false }: { guide: Guide
         <div className={`w-full h-44 shrink-0 bg-gradient-to-br ${
           getCategoryBySlug(a.category)?.color ?? 'from-gray-800 to-gray-900'
         } flex items-center justify-center`}>
-          <span className="text-4xl opacity-40">
-            {getCategoryBySlug(a.category)?.icon ?? '📄'}
-          </span>
+          {cat ? <CategoryIcon slug={cat.slug} className="w-8 h-8 text-orange-500 opacity-40" /> : <span className="text-4xl opacity-40">📄</span>}
         </div>
       )}
       <div className="p-5 flex flex-col flex-1">
         {cat && (
-          <span className="text-xs font-medium text-orange-500 uppercase tracking-widest mb-3">
-            {cat.icon} {cat.label}
+          <span className="flex items-center gap-1 text-xs font-medium text-orange-500 uppercase tracking-widest mb-3">
+            <CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-orange-500" /> {cat.label}
           </span>
         )}
         <h2 className="text-base font-bold leading-snug text-white group-hover:text-orange-400 transition-colors flex-1">

@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { getCategoryBySlug, CATEGORIES } from '@/lib/categories'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
+import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
 
 interface Props { params: Promise<{ slug: string }> }
@@ -94,8 +95,8 @@ export default async function CategoryHubPage({ params }: Props) {
 
         {/* ── Category hero ─────────────────────────────────────────────── */}
         <div className="mb-16">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">
-            {cat.icon} Boss Daddy
+          <p className="flex items-center gap-1.5 text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">
+            <CategoryIcon slug={cat.slug} className="w-4 h-4 text-orange-500" /> Boss Daddy
           </p>
           <h1 className="text-4xl md:text-5xl font-black mb-5 leading-tight">{cat.label}</h1>
           <p className="text-gray-400 max-w-2xl leading-relaxed text-lg">{cat.description}</p>
@@ -155,8 +156,8 @@ export default async function CategoryHubPage({ params }: Props) {
                       )}
                     </div>
                   ) : (
-                    <div className="w-full h-48 bg-gray-800 flex items-center justify-center text-4xl shrink-0">
-                      {cat.icon}
+                    <div className="w-full h-48 bg-gray-800 flex items-center justify-center shrink-0">
+                      <CategoryIcon slug={cat.slug} className="w-8 h-8 text-orange-500" />
                     </div>
                   )}
                   <div className="p-5 flex flex-col flex-1">
@@ -219,7 +220,7 @@ export default async function CategoryHubPage({ params }: Props) {
                     </div>
                   ) : (
                     <div className="w-full h-44 bg-gradient-to-br from-gray-800/50 to-gray-900/40 flex items-center justify-center shrink-0">
-                      <span className="text-4xl opacity-40">{cat.icon}</span>
+                      <CategoryIcon slug={cat.slug} className="w-8 h-8 text-orange-500 opacity-40" />
                     </div>
                   )}
                   <div className="p-5 flex flex-col flex-1">
@@ -256,7 +257,7 @@ export default async function CategoryHubPage({ params }: Props) {
         {/* ── Empty state ───────────────────────────────────────────────── */}
         {!hasReviews && !hasGuides && (
           <div className="text-center py-24 bg-gray-900/40 rounded-2xl">
-            <p className="text-5xl mb-4">{cat.icon}</p>
+            <CategoryIcon slug={cat.slug} className="w-10 h-10 text-orange-500 mb-4 mx-auto" />
             <p className="text-gray-400 text-lg font-semibold mb-2">No {cat.label} content yet.</p>
             <p className="text-gray-600 text-sm">Check back soon — it&apos;s on the bench.</p>
             <Link
@@ -306,7 +307,7 @@ export default async function CategoryHubPage({ params }: Props) {
                 href={`/category/${c.slug}`}
                 className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 transition-colors"
               >
-                <span>{c.icon}</span>
+                <CategoryIcon slug={c.slug} className="w-4 h-4 text-orange-500" />
                 <span>{c.label}</span>
               </Link>
             ))}

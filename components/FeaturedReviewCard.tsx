@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { getCategoryBySlug } from '@/lib/categories'
+import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import type { ReviewRow } from '@/app/(public)/reviews/actions'
@@ -26,7 +27,7 @@ export default function FeaturedReviewCard({ review: r, label = 'Featured Review
           />
         ) : (
           <div className={`w-full h-full bg-gradient-to-br ${cat?.color ?? 'from-gray-800 to-gray-900'} flex items-center justify-center`}>
-            <span className="text-6xl opacity-30">{cat?.icon ?? '📦'}</span>
+            {cat ? <CategoryIcon slug={cat.slug} className="w-10 h-10 text-orange-500 opacity-30" /> : <span className="text-6xl opacity-30">📦</span>}
           </div>
         )}
         {/* Gradient overlay on mobile bottom edge */}
@@ -41,7 +42,7 @@ export default function FeaturedReviewCard({ review: r, label = 'Featured Review
               {label}
             </span>
             {cat && (
-              <span className="text-[10px] text-gray-500 uppercase tracking-widest">{cat.icon} {cat.label}</span>
+              <span className="flex items-center gap-1 text-[10px] text-gray-500 uppercase tracking-widest"><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-gray-500" /> {cat.label}</span>
             )}
           </div>
 

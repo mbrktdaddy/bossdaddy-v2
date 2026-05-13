@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getCategoryBySlug } from '@/lib/categories'
+import CategoryIcon from '@/components/CategoryIcon'
 
 type PendingItem = {
   id: string
@@ -74,7 +75,7 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
                   }`}>
                     {item.type === 'guide' ? 'Guide' : 'Review'}
                   </span>
-                  {category && <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>}
+                  {category && <span className={`flex items-center gap-1 text-xs ${category.accent}`}><CategoryIcon slug={category.slug} className="w-3.5 h-3.5 text-orange-500" /> {category.label}</span>}
                   <span className="text-xs text-gray-600">{timeAgo(item.created_at)}</span>
                 </div>
                 <p className="text-sm font-semibold truncate">{item.title}</p>

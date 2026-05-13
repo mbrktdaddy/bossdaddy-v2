@@ -29,6 +29,7 @@ import { EmailSignup } from '@/components/EmailSignup'
 import AuthorBio from '@/components/AuthorBio'
 import { getProductBySlug } from '@/lib/products'
 import BenchStrip from '@/components/BenchStrip'
+import CategoryIcon from '@/components/CategoryIcon'
 
 const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
 
@@ -190,9 +191,9 @@ export default async function ReviewPage({ params }: Props) {
             {category && (
               <Link
                 href={`/category/${category.slug}`}
-                className="text-xs font-medium px-3 py-1 rounded-full bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
+                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
               >
-                {category.icon} {category.label}
+                <CategoryIcon slug={category.slug} className="w-4 h-4 text-orange-500" /> {category.label}
               </Link>
             )}
           </div>
@@ -399,7 +400,7 @@ export default async function ReviewPage({ params }: Props) {
               href={`/category/${category.slug}`}
               className="flex items-center gap-2 px-1 text-xs text-gray-400 hover:text-orange-400 transition-colors"
             >
-              <span>{category.icon}</span>
+              <CategoryIcon slug={category.slug} className="w-4 h-4 text-gray-400" />
               <span>Browse all {category.label} →</span>
             </Link>
           )}

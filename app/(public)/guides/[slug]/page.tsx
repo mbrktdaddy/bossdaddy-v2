@@ -22,6 +22,7 @@ import { MerchCallout } from '@/components/MerchCallout'
 import { LightboxImage } from '@/components/LightboxImage'
 import { EmailSignup } from '@/components/EmailSignup'
 import AuthorBio from '@/components/AuthorBio'
+import CategoryIcon from '@/components/CategoryIcon'
 
 const TableOfContents = dynamic(() => import('@/components/TableOfContents'))
 const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
@@ -155,8 +156,8 @@ export default async function GuidePage({ params }: Props) {
           {category && (
             <>
               <span className="text-gray-700">/</span>
-              <Link href={`/category/${category.slug}`} className={`py-2 inline-block hover:text-white transition-colors ${category.accent}`}>
-                {category.icon} {category.label}
+              <Link href={`/category/${category.slug}`} className={`flex items-center gap-1.5 py-2 inline-block hover:text-white transition-colors ${category.accent}`}>
+                <CategoryIcon slug={category.slug} className="w-4 h-4 text-orange-500" /> {category.label}
               </Link>
             </>
           )}
@@ -346,7 +347,7 @@ export default async function GuidePage({ params }: Props) {
                         </div>
                       ) : (
                         <div className="w-full h-36 bg-gray-800 flex items-center justify-center shrink-0">
-                          {category && <span className="text-3xl opacity-30">{category.icon}</span>}
+                          {category && <CategoryIcon slug={category.slug} className="w-7 h-7 text-orange-500 opacity-30" />}
                         </div>
                       )}
                       <div className="p-4 flex flex-col flex-1">
@@ -390,7 +391,7 @@ export default async function GuidePage({ params }: Props) {
                         </div>
                       ) : (
                         <div className="w-full h-36 bg-gradient-to-br from-gray-800/50 to-gray-900/40 flex items-center justify-center shrink-0">
-                          {category && <span className="text-3xl opacity-30">{category.icon}</span>}
+                          {category && <CategoryIcon slug={category.slug} className="w-7 h-7 text-orange-500 opacity-30" />}
                         </div>
                       )}
                       <div className="p-4 flex flex-col flex-1">

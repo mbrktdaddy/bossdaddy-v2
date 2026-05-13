@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
 import { getCategoryBySlug } from '@/lib/categories'
+import CategoryIcon from '@/components/CategoryIcon'
 
 export const dynamic = 'force-dynamic'
 
@@ -142,7 +143,7 @@ export default async function EngagementPage() {
                           <span className="text-[10px] text-orange-500/80 uppercase tracking-widest">
                             {r.type}
                           </span>
-                          {cat && <span className="text-[10px] text-gray-600">{cat.icon} {cat.label}</span>}
+                          {cat && <span className="flex items-center gap-1 text-[10px] text-gray-600"><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-gray-600" /> {cat.label}</span>}
                         </div>
                       </td>
                       <td className="text-right px-3 py-2.5 text-gray-300 font-mono">{(r.view_count ?? 0).toLocaleString()}</td>

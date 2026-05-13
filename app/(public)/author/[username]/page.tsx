@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCategoryBySlug } from '@/lib/categories'
+import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
 import type { Metadata } from 'next'
 
@@ -130,7 +131,7 @@ export default async function AuthorPage({ params }: Props) {
  <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2 py-0.5 rounded-full">
  {r.product_name}
  </span>
- {cat && <span className={`text-xs ${cat.accent}`}>{cat.icon} {cat.label}</span>}
+ {cat && <span className={`flex items-center gap-1 text-xs ${cat.accent}`}><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-orange-500" /> {cat.label}</span>}
  </div>
  <p className="text-sm font-semibold group-hover:text-orange-400 transition-colors truncate">{r.title}</p>
  {r.published_at && (
@@ -162,7 +163,7 @@ export default async function AuthorPage({ params }: Props) {
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1">
- {cat && <span className={`text-xs ${cat.accent}`}>{cat.icon} {cat.label}</span>}
+ {cat && <span className={`flex items-center gap-1 text-xs ${cat.accent}`}><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-orange-500" /> {cat.label}</span>}
  </div>
  <p className="text-sm font-semibold group-hover:text-orange-400 transition-colors truncate">{a.title}</p>
  {a.published_at && (

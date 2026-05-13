@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { CATEGORIES, getCategoryLabel, getCategoryBySlug } from '@/lib/categories'
+import CategoryIcon from '@/components/CategoryIcon'
 import ReviewCard from './_components/ReviewCard'
 import ReviewsGrid from './_components/ReviewsGrid'
 import FeaturedReviewCard from '@/components/FeaturedReviewCard'
@@ -107,7 +108,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
               href={`/reviews/category/${c.slug}`}
               className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 transition-colors"
             >
-              <span>{c.icon}</span>
+              <CategoryIcon slug={c.slug} className="w-4 h-4 text-orange-500" />
               <span>{c.label}</span>
             </Link>
           ))}
@@ -128,7 +129,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
                 <div className="flex items-stretch gap-4">
                   <div className="w-[3px] bg-orange-600 rounded-full" />
                   <div>
-                    <p className="text-[11px] text-orange-500 uppercase tracking-[0.18em] font-bold mb-1">{cat.icon} {cat.label}</p>
+                    <p className="flex items-center gap-1.5 text-[11px] text-orange-500 uppercase tracking-[0.18em] font-bold mb-1"><CategoryIcon slug={cat.slug} className="w-4 h-4 text-orange-500" /> {cat.label}</p>
                     <h2 className="text-xl md:text-2xl font-black text-white">{cat.label}</h2>
                     {cat.description && <p className="text-sm text-gray-500 mt-1">{cat.description}</p>}
                   </div>
@@ -176,8 +177,8 @@ export default async function ReviewsPage({ searchParams }: Props) {
       {/* Page header — eyebrow + h1 + count */}
       <div className="mb-12">
         <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— Reviews / {getCategoryLabel(category).toUpperCase()}</p>
-        <h1 className="text-4xl md:text-5xl font-black mb-3 text-white tracking-tight">
-          {cat?.icon} {getCategoryLabel(category)}
+        <h1 className="text-4xl md:text-5xl font-black mb-3 text-white tracking-tight flex items-center gap-3">
+          {cat && <CategoryIcon slug={cat.slug} className="w-10 h-10 text-orange-500" />}{getCategoryLabel(category)}
         </h1>
         {cat?.description && (
           <p className="text-gray-400 mb-2 max-w-2xl">{cat.description}</p>
@@ -205,7 +206,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
                 : 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20'
             }`}
           >
-            <span>{c.icon}</span>
+            <CategoryIcon slug={c.slug} className="w-4 h-4 text-orange-500" />
             <span>{c.label}</span>
           </Link>
         ))}

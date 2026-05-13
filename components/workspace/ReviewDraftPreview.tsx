@@ -5,6 +5,7 @@ import VerdictCard from '@/components/reviews/VerdictCard'
 import TakeawaysCard from '@/components/reviews/TakeawaysCard'
 import TrustReceipt from '@/components/reviews/TrustReceipt'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
+import CategoryIcon from '@/components/CategoryIcon'
 
 interface FAQ { question: string; answer: string }
 
@@ -64,8 +65,8 @@ export function ReviewDraftPreview({
             {productName || 'Product Name'}
           </span>
           {cat && (
-            <span className="text-xs font-medium text-gray-400 bg-gray-900 px-2.5 py-0.5 rounded-full">
-              {cat.icon} {cat.label}
+            <span className="flex items-center gap-1 text-xs font-medium text-gray-400 bg-gray-900 px-2.5 py-0.5 rounded-full">
+              <CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-gray-400" /> {cat.label}
             </span>
           )}
         </div>

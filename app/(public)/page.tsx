@@ -4,6 +4,7 @@ import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { CATEGORIES } from '@/lib/categories'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
+import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
 import CodeRedirect from './_components/CodeRedirect'
 import { LatestGuidesSection } from './_components/LatestGuidesSection'
@@ -380,31 +381,36 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Browse by Category — warm tint surface ──────────────────────── */}
+      {/* ── Categories — pill rail (utility nav, not a feature grid) ────
+          Reclaims ~500px of vertical scroll on mobile vs the prior 2×4 tile
+          grid. Treats category navigation as the editorial-ribbon utility it
+          actually is, not feature content. */}
       <section className="relative">
         <div
           aria-hidden
           className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-orange-950/[0.05] to-transparent"
         />
-        <div className="relative max-w-6xl mx-auto px-6 py-16">
-          <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Browse by Category</p>
-          <h2 className="text-2xl font-black mb-8">What kind of dad stuff are you into?</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="relative max-w-6xl mx-auto px-6 py-10">
+          <div className="mb-6">
+            <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Browse</p>
+            <h2 className="text-2xl font-black">Pick your lane.</h2>
+          </div>
+
+          {/* Mobile: horizontal scroll strip — break out of the padded container
+              per CLAUDE.md horizontal-scroll rule, restore padding inside */}
+          <div className="sm:hidden -mx-6">
+            <div className="flex gap-2.5 overflow-x-auto px-6 pb-2 scrollbar-hide">
+              {CATEGORIES.map((cat) => (
+                <CategoryPill key={cat.slug} slug={cat.slug} label={cat.shortLabel} />
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop: wrap to fit, all 8 visible at once */}
+          <div className="hidden sm:flex flex-wrap gap-2.5">
             {CATEGORIES.map((cat) => (
-              <Link
-                key={cat.slug}
-                href={`/category/${cat.slug}`}
-                className="group flex flex-col items-center text-center gap-2 p-4 bg-gray-900 rounded-2xl border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-md shadow-black/30 hover:border-orange-900/60 hover:bg-gray-800 hover:shadow-lg hover:shadow-black/40 hover:-translate-y-0.5 transition-all"
-              >
-                <span className="text-3xl">{cat.icon}</span>
-                <span className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors leading-tight">
-                  {cat.label}
-                </span>
-                <span className="text-xs text-gray-500 line-clamp-2 leading-relaxed hidden sm:block">
-                  {cat.description}
-                </span>
-              </Link>
+              <CategoryPill key={cat.slug} slug={cat.slug} label={cat.shortLabel} />
             ))}
           </div>
         </div>
@@ -486,6 +492,18 @@ export default async function HomePage() {
         </div>
       </section>
     </>
+  )
+}
+
+function CategoryPill({ slug, label }: { slug: string; label: string }) {
+  return (
+    <Link
+      href={`/category/${slug}`}
+      className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] px-4 py-2.5 text-sm font-semibold text-gray-200 min-h-[44px] whitespace-nowrap hover:border-orange-900/60 hover:bg-gray-800 hover:text-orange-400 transition-colors"
+    >
+      <CategoryIcon slug={slug} className="w-4 h-4 text-orange-500 shrink-0" />
+      <span>{label}</span>
+    </Link>
   )
 }
 

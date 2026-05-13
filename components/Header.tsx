@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation'
 import { CATEGORIES } from '@/lib/categories'
 import { LABELS } from '@/lib/labels'
 import CartIcon from '@/components/CartIcon'
+import CategoryIcon from '@/components/CategoryIcon'
 
 interface HeaderProps {
   /** The current user's username, or null if not signed in. Resolved server-side
@@ -140,7 +141,7 @@ export default function Header({ username }: HeaderProps) {
                       onClick={() => setCatOpen(false)}
                       className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-900 transition-colors group"
                     >
-                      <span className="text-2xl leading-none mt-0.5">{cat.icon}</span>
+                      <CategoryIcon slug={cat.slug} className="w-6 h-6 text-orange-500 mt-0.5 shrink-0" />
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors leading-tight">
                           {cat.label}
@@ -384,7 +385,7 @@ export default function Header({ username }: HeaderProps) {
                         : 'bg-gray-900 text-gray-300 hover:text-white hover:bg-gray-800'
                     }`}
                   >
-                    <span>{cat.icon}</span>
+                    <CategoryIcon slug={cat.slug} className="w-4 h-4 text-orange-500" />
                     <span className="truncate">{cat.label}</span>
                   </Link>
                 ))}

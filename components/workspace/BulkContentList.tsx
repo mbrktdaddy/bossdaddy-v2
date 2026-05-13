@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { getCategoryBySlug } from '@/lib/categories'
+import CategoryIcon from '@/components/CategoryIcon'
 import { StatusBadge } from './StatusBadge'
 
 export interface BulkListItem {
@@ -185,10 +186,10 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
                   {item.image_url ? (
                     <Image src={item.image_url} alt={item.title} fill className="object-cover" sizes="48px" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-lg">
+                    <div className="w-full h-full flex items-center justify-center">
                       {contentType === 'reviews' && item.rating !== undefined && item.rating !== null
                         ? <span className="text-sm font-bold text-yellow-400">{item.rating}</span>
-                        : (category?.icon ?? (contentType === 'guides' ? '📝' : '⭐'))}
+                        : (category ? <CategoryIcon slug={category.slug} className="w-5 h-5 text-orange-500" /> : <span className="text-lg">{contentType === 'guides' ? '📝' : '⭐'}</span>)}
                     </div>
                   )}
                 </div>
@@ -200,7 +201,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     {item.product_name && <span className="text-xs text-gray-500">{item.product_name}</span>}
-                    {category && <span className={`text-xs ${category.accent}`}>{category.icon} {category.label}</span>}
+                    {category && <span className={`flex items-center gap-1 text-xs ${category.accent}`}><CategoryIcon slug={category.slug} className="w-3.5 h-3.5 text-orange-500" /> {category.label}</span>}
                     {item.reading_time_minutes && <span className="text-xs text-gray-600">{item.reading_time_minutes} min</span>}
                     <span className="text-xs text-gray-700">
                       {new Date(item.updated_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })}

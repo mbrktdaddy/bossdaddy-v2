@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCategoryBySlug, CATEGORIES } from '@/lib/categories'
+import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
 import { PillFilterStrip, PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 
@@ -82,7 +83,7 @@ export default async function CategoryPage({ params }: Props) {
               href={`/reviews/category/${c.slug}`}
               className={`${PILL_BASE} ${c.slug === slug ? PILL_ACTIVE : PILL_INACTIVE}`}
             >
-              <span>{c.icon}</span>
+              <CategoryIcon slug={c.slug} className="w-4 h-4 text-orange-500" />
               <span>{c.label}</span>
             </Link>
           ))}
@@ -90,8 +91,8 @@ export default async function CategoryPage({ params }: Props) {
 
         {/* Category header */}
         <div className="mb-10">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">
-            {cat.icon} Reviews
+          <p className="flex items-center gap-1.5 text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">
+            <CategoryIcon slug={cat.slug} className="w-4 h-4 text-orange-500" /> Reviews
           </p>
           <h1 className="text-3xl md:text-4xl font-black mb-4">{cat.label}</h1>
           <p className="text-gray-400 max-w-2xl leading-relaxed">{cat.description}</p>
@@ -117,8 +118,8 @@ export default async function CategoryPage({ params }: Props) {
                     />
                   </div>
                 ) : (
-                  <div className="w-full h-48 bg-gray-800 flex items-center justify-center text-4xl">
-                    {cat.icon}
+                  <div className="w-full h-48 bg-gray-800 flex items-center justify-center">
+                    <CategoryIcon slug={cat.slug} className="w-8 h-8 text-orange-500" />
                   </div>
                 )}
                 <div className="p-5 space-y-2">
@@ -138,7 +139,7 @@ export default async function CategoryPage({ params }: Props) {
           </div>
         ) : (
           <div className="text-center py-24 bg-gray-900/40 rounded-2xl">
-            <p className="text-5xl mb-4">{cat.icon}</p>
+            <CategoryIcon slug={cat.slug} className="w-10 h-10 text-orange-500 mb-4 mx-auto" />
             <p className="text-gray-400 text-lg font-semibold mb-2">No {cat.label} reviews yet.</p>
             <p className="text-gray-600 text-sm">Check back soon — the first one is in progress.</p>
           </div>

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { CATEGORIES, getCategoryBySlug } from '@/lib/categories'
+import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
 import { MerchPanel } from './_components/MerchPanel'
 import FeaturedReviewCard from '@/components/FeaturedReviewCard'
@@ -133,8 +134,8 @@ export default async function GearPage({ searchParams }: Props) {
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <div className="mb-8">
         <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— Daddy Tested, Boss Approved</p>
-        <h1 className="text-4xl md:text-5xl font-black mb-3 text-white tracking-tight">
-          {cat ? `${cat.icon} ${cat.label} Gear` : "Boss Daddy's Gear"}
+        <h1 className="text-4xl md:text-5xl font-black mb-3 text-white tracking-tight flex items-center gap-3">
+          {cat && <CategoryIcon slug={cat.slug} className="w-10 h-10 text-orange-500" />}{cat ? `${cat.label} Gear` : "Boss Daddy's Gear"}
         </h1>
         <p className="text-gray-400 text-base md:text-lg leading-relaxed max-w-2xl">
           I know we shouldn&apos;t pray for stuff, but here&apos;s a list of some really cool stuff.
@@ -196,7 +197,7 @@ export default async function GearPage({ searchParams }: Props) {
                 : 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20'
             }`}
           >
-            <span>{c.icon}</span>
+            <CategoryIcon slug={c.slug} className="w-4 h-4 text-orange-500" />
             <span>{c.label}</span>
           </Link>
         ))}
@@ -389,7 +390,7 @@ export default async function GearPage({ searchParams }: Props) {
                     href={`/category/${c.slug}`}
                     className="group flex flex-col items-center justify-center text-center gap-2 bg-gray-900 hover:bg-gray-800 rounded-2xl p-4 min-h-[120px] shadow-md shadow-black/30 transition-all"
                   >
-                    <span className="text-3xl">{c.icon}</span>
+                    <CategoryIcon slug={c.slug} className="w-7 h-7 text-orange-500" />
                     <span className="text-sm font-bold text-white leading-tight group-hover:text-orange-400 transition-colors">
                       {c.shortLabel}
                     </span>
@@ -484,7 +485,7 @@ function GearCard({ review: r }: { review: { id: string; slug: string; title: st
         </div>
       ) : (
         <div className="w-full h-44 bg-gray-800/50 flex items-center justify-center shrink-0">
-          <span className="text-4xl">{cat?.icon ?? '📦'}</span>
+          {cat ? <CategoryIcon slug={cat.slug} className="w-8 h-8 text-orange-500" /> : <span className="text-4xl">📦</span>}
         </div>
       )}
       <div className="p-5 flex flex-col flex-1">

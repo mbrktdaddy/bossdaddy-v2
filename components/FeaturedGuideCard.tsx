@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { getCategoryBySlug } from '@/lib/categories'
+import CategoryIcon from '@/components/CategoryIcon'
 import type { GuideRow } from '@/app/(public)/guides/actions'
 
 export default function FeaturedGuideCard({ guide: g }: { guide: GuideRow }) {
@@ -24,7 +25,7 @@ export default function FeaturedGuideCard({ guide: g }: { guide: GuideRow }) {
           />
         ) : (
           <div className={`w-full h-full bg-gradient-to-br ${cat?.color ?? 'from-gray-800 to-gray-900'} flex items-center justify-center`}>
-            <span className="text-6xl opacity-30">{cat?.icon ?? '📖'}</span>
+            {cat ? <CategoryIcon slug={cat.slug} className="w-10 h-10 text-orange-500 opacity-30" /> : <span className="text-6xl opacity-30">📖</span>}
           </div>
         )}
         <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-gray-900 to-transparent sm:hidden" />
@@ -38,7 +39,7 @@ export default function FeaturedGuideCard({ guide: g }: { guide: GuideRow }) {
               Featured Guide
             </span>
             {cat && (
-              <span className="text-[10px] text-gray-500 uppercase tracking-widest">{cat.icon} {cat.label}</span>
+              <span className="flex items-center gap-1 text-[10px] text-gray-500 uppercase tracking-widest"><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-gray-500" /> {cat.label}</span>
             )}
           </div>
 

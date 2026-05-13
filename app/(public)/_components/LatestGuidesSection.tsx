@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { getCategoryBySlug } from '@/lib/categories'
+import CategoryIcon from '@/components/CategoryIcon'
 
 // Editorial row-list — keeps the dense, magazine-style hierarchy (eyebrow →
 // headline → meta → thumb) but drops the 01/02/03 numerals. The category
@@ -44,7 +45,7 @@ export async function LatestGuidesSection() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   {cat && (
-                    <span aria-hidden className="text-base leading-none">{cat.icon}</span>
+                    <CategoryIcon slug={cat.slug} className="w-4 h-4 text-orange-500" />
                   )}
                   <span className="text-[10px] md:text-xs text-orange-500 uppercase tracking-widest font-semibold">
                     {cat?.label ?? a.category}
