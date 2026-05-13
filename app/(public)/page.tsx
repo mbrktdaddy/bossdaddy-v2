@@ -24,7 +24,7 @@ export default async function HomePage() {
 
   const [
     { data: featuredReviews },
-    { data: latestReviews },
+    { data: latestReviewsRaw },
   ] = await Promise.all([
     // Top-rated review — anchors the hero
     supabase
@@ -35,17 +35,21 @@ export default async function HomePage() {
       .order('rating', { ascending: false })
       .order('published_at', { ascending: false })
       .limit(1),
-    // Latest reviews for the card grid further down
+    // Fetch 4 latest; we filter out whichever ends up as the hero feature so the
+    // Recent Reviews grid never duplicates the hero card.
     supabase
       .from('reviews')
       .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
       .eq('status', 'approved')
       .eq('is_visible', true)
       .order('published_at', { ascending: false })
-      .limit(3),
+      .limit(4),
   ])
 
   const featuredReview = featuredReviews?.[0] ?? null
+  const latestReviews = (latestReviewsRaw ?? [])
+    .filter((r) => r.id !== featuredReview?.id)
+    .slice(0, 3)
 
   return (
     <>
@@ -53,10 +57,7 @@ export default async function HomePage() {
         <CodeRedirect />
       </Suspense>
 
-      {/* ── Hero ─────────────────────────────────────────────────────────────
-          Split layout: copy + CTAs on the left, top-rated review card on the
-          right serving as the visual anchor (replaces text-only-on-gradient).
-          Falls back to single-column centered text when no reviews exist yet. */}
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
@@ -88,10 +89,10 @@ export default async function HomePage() {
                     See This Month&apos;s Top Picks →
                   </Link>
                   <Link
-                    href="#crew"
+                    href="/guides"
                     className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white font-semibold rounded-2xl transition-colors"
                   >
-                    Join the Crew
+                    Browse Guides
                   </Link>
                 </div>
                 <Link
@@ -102,10 +103,10 @@ export default async function HomePage() {
                 </Link>
               </div>
 
-              {/* Featured review card — visual anchor */}
+              {/* Featured review card — visual anchor with tactile depth */}
               <Link
                 href={`/reviews/${featuredReview.slug}`}
-                className="group block bg-gray-900 rounded-2xl overflow-hidden shadow-xl shadow-black/40 hover:shadow-2xl hover:shadow-black/60 transition-all duration-200"
+                className="group block bg-gray-900 rounded-2xl overflow-hidden border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-xl shadow-black/40 hover:border-orange-900/40 hover:shadow-2xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200"
               >
                 {featuredReview.image_url && (
                   <div className="relative w-full aspect-[5/4] bg-gray-800">
@@ -178,12 +179,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Trust strip ─────────────────────────────────────────────────────
-          Elevated treatment: icon badges + uppercase labels in a four-up grid
-          on desktop, two-up on mobile. This is the strongest trust signal on
-          the page and now has visual weight to match. */}
-      <section className="bg-gradient-to-b from-gray-950 to-gray-900/30 border-y border-gray-800/60">
-        <div className="max-w-6xl mx-auto px-6 py-6">
+      {/* ── Trust strip — warm-tint surface variant ────────────────────── */}
+      <section className="relative bg-gradient-to-b from-gray-950 to-gray-900/30 border-y border-gray-800/60">
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none bg-gradient-to-b from-orange-950/[0.08] to-transparent"
+        />
+        <div className="relative max-w-6xl mx-auto px-6 py-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-4">
             <TrustBadge
               href="/how-we-test"
@@ -225,10 +227,111 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── The Rules ───────────────────────────────────────────────────────
-          Typography-led rhythm break. No images, no cards — just a numbered
-          three-rule manifesto in brand voice. Sits between the trust strip
-          and the discovery sections so trust is built before exploration. */}
+      {/* ── Recent Reviews — asymmetric magazine grid (1 hero + 2 stacked) ─ */}
+      {latestReviews && latestReviews.length > 0 && (
+        <section className="relative">
+          <div
+            aria-hidden
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                'radial-gradient(ellipse 60% 50% at 50% 0%, rgba(204,85,0,0.10), transparent 60%)',
+            }}
+          />
+          <div className="relative max-w-6xl mx-auto px-6 py-16">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Recent Reviews</p>
+                <h2 className="text-2xl font-black text-white">Bought, tested, and Boss Daddy Approved</h2>
+              </div>
+              <Link href="/reviews" className="text-sm text-orange-400 hover:text-orange-300 transition-colors">
+                View all
+              </Link>
+            </div>
+
+            {/* Magazine "1 + 2" layout: hero spans 2x2 on lg, smalls stack 1x1 each on the right */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-2 gap-5">
+              {latestReviews.map((r, i) => {
+                const isHero = i === 0
+                return (
+                  <Link
+                    key={r.id}
+                    href={`/reviews/${r.slug}`}
+                    className={`group flex flex-col bg-gray-900 rounded-2xl overflow-hidden border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-orange-900/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200 ${
+                      isHero ? 'lg:col-span-2 lg:row-span-2' : ''
+                    }`}
+                  >
+                    {r.image_url && (
+                      <div
+                        className={`relative w-full bg-gray-800 shrink-0 ${
+                          isHero ? 'h-64 sm:h-80 lg:h-[420px]' : 'h-44'
+                        }`}
+                      >
+                        <Image
+                          src={r.image_url}
+                          alt={r.product_name}
+                          fill
+                          priority={i === 0}
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          sizes={
+                            isHero
+                              ? '(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 680px'
+                              : '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
+                          }
+                        />
+                        {(r.rating ?? 0) >= 8 && (
+                          <div className="absolute top-3 right-3">
+                            <BossApprovedBadge size="sm" variant="card" />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <div className={`flex flex-col flex-1 ${isHero ? 'p-6 lg:p-7' : 'p-5'}`}>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
+                          {r.product_name}
+                        </span>
+                        <RatingScore rating={r.rating ?? 0} />
+                      </div>
+                      <h3
+                        className={`leading-snug group-hover:text-orange-400 transition-colors flex-1 ${
+                          isHero ? 'text-xl md:text-2xl font-black text-white' : 'text-base font-semibold'
+                        }`}
+                      >
+                        {r.title}
+                      </h3>
+                      {r.excerpt && (
+                        <p
+                          className={`text-gray-500 mt-2 ${
+                            isHero ? 'text-sm sm:text-base line-clamp-3' : 'text-sm line-clamp-2'
+                          }`}
+                        >
+                          {r.excerpt}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between mt-4 pt-4">
+                        <span className="text-xs text-gray-600">
+                          {r.published_at
+                            ? new Date(r.published_at).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })
+                            : ''}
+                        </span>
+                        <span className="text-xs text-orange-500 font-medium">Read review</span>
+                      </div>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── The Rules — drop cap on #01 for typographic flourish ───────── */}
       <section className="relative border-b border-gray-800/40">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-px bg-orange-600/40" />
         <div className="max-w-5xl mx-auto px-6 py-20 md:py-24">
@@ -256,30 +359,43 @@ export default async function HomePage() {
                 title: "I'll tell you the truth.",
                 body: "If I wouldn't buy it again, I say so. If it changed my life, I say so. The score on the page is the score I'd give a friend.",
               },
-            ].map((rule) => (
+            ].map((rule, idx) => (
               <div key={rule.n}>
                 <p className="text-5xl md:text-6xl font-black text-orange-500/30 mb-4 leading-none tabular-nums">
                   {rule.n}
                 </p>
                 <p className="text-xl font-black text-white mb-3">{rule.title}</p>
-                <p className="text-gray-400 leading-relaxed text-sm">{rule.body}</p>
+                <p
+                  className={
+                    idx === 0
+                      ? 'text-gray-400 leading-relaxed text-sm first-letter:float-left first-letter:text-5xl md:first-letter:text-6xl first-letter:font-black first-letter:text-orange-500 first-letter:leading-none first-letter:pr-2 first-letter:pt-1 first-letter:mr-1'
+                      : 'text-gray-400 leading-relaxed text-sm'
+                  }
+                >
+                  {rule.body}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Browse by Category ──────────────────────────────────────────── */}
-      <section className="py-16">
-        <div className="max-w-6xl mx-auto px-6">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">— Browse by Category</p>
+      {/* ── Browse by Category — warm tint surface ──────────────────────── */}
+      <section className="relative">
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-orange-950/[0.05] to-transparent"
+        />
+        <div className="relative max-w-6xl mx-auto px-6 py-16">
+          <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Browse by Category</p>
           <h2 className="text-2xl font-black mb-8">What kind of dad stuff are you into?</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {CATEGORIES.map((cat) => (
               <Link
                 key={cat.slug}
                 href={`/category/${cat.slug}`}
-                className="group flex flex-col items-center text-center gap-2 p-4 bg-gray-900 rounded-2xl border border-gray-800 hover:border-orange-900/60 hover:bg-gray-800 shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/40 transition-all"
+                className="group flex flex-col items-center text-center gap-2 p-4 bg-gray-900 rounded-2xl border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-md shadow-black/30 hover:border-orange-900/60 hover:bg-gray-800 hover:shadow-lg hover:shadow-black/40 hover:-translate-y-0.5 transition-all"
               >
                 <span className="text-3xl">{cat.icon}</span>
                 <span className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors leading-tight">
@@ -294,11 +410,17 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── On the Bench ────────────────────────────────────────────────── */}
+      {/* ── Latest Guides ──────────────────────────────────────────────── */}
+      <Suspense fallback={<LatestGuidesSkeleton />}>
+        <LatestGuidesSection />
+      </Suspense>
+
+      {/* ── On the Bench ───────────────────────────────────────────────── */}
       <section>
         <div className="max-w-6xl mx-auto px-6 py-6">
           <div className="mb-4">
-            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">— On the Bench</p>
+            <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">On the Bench</p>
             <p className="text-sm text-gray-500">Products on my wishlist to test next.</p>
           </div>
           <Suspense fallback={null}>
@@ -307,120 +429,51 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Latest Guides (editorial list — rhythm break vs Recent Reviews) ─ */}
-      <Suspense fallback={<LatestGuidesSkeleton />}>
-        <LatestGuidesSection />
-      </Suspense>
-
-      {/* ── Recent Reviews (card grid) ──────────────────────────────────── */}
-      {latestReviews && latestReviews.length > 0 && (
-        <section>
-          <div className="max-w-6xl mx-auto px-6 py-16">
-            <div className="flex items-end justify-between mb-8">
-              <div>
-                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">— Recent Reviews</p>
-                <h2 className="text-2xl font-black text-white">Bought, tested, and Boss Daddy Approved</h2>
-              </div>
-              <Link href="/reviews" className="text-sm text-orange-400 hover:text-orange-300 transition-colors">
-                View all
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-              {latestReviews.map((r, i) => (
-                <Link
-                  key={r.id}
-                  href={`/reviews/${r.slug}`}
-                  className="group flex flex-col bg-gray-900 rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200"
-                >
-                  {r.image_url && (
-                    <div className="relative w-full h-44 bg-gray-800 shrink-0">
-                      <Image
-                        src={r.image_url}
-                        alt={r.product_name}
-                        fill
-                        priority={i === 0}
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      />
-                      {(r.rating ?? 0) >= 8 && (
-                        <div className="absolute top-3 right-3">
-                          <BossApprovedBadge size="sm" variant="card" />
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  <div className="p-5 flex flex-col flex-1">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
-                        {r.product_name}
-                      </span>
-                      <RatingScore rating={r.rating ?? 0} />
-                    </div>
-                    <h3 className="text-base font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
-                      {r.title}
-                    </h3>
-                    {r.excerpt && (
-                      <p className="text-gray-500 text-sm mt-2 line-clamp-2">{r.excerpt}</p>
-                    )}
-                    <div className="flex items-center justify-between mt-4 pt-4">
-                      <span className="text-xs text-gray-600">
-                        {r.published_at
-                          ? new Date(r.published_at).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric',
-                            })
-                          : ''}
-                      </span>
-                      <span className="text-xs text-orange-500 font-medium">Read review</span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── Merch strip — moved below content so editorial credibility is
-          established before the store pitch ─────────────────────────────── */}
+      {/* ── Merch strip ────────────────────────────────────────────────── */}
       <Suspense fallback={null}>
         <HomepageMerchStrip />
       </Suspense>
 
-      {/* ── Newsletter ──────────────────────────────────────────────────── */}
-      <section id="crew" className="max-w-6xl mx-auto px-6 py-16">
-        <div className="bg-gradient-to-br from-orange-950/40 to-gray-900 rounded-2xl shadow-xl shadow-black/40 px-8 py-12 text-center max-w-2xl mx-auto">
-          <p className="text-orange-400 text-xs font-semibold uppercase tracking-widest mb-3">
-            — Join the Boss Daddy Crew
-          </p>
-          <h2 className="text-2xl font-black text-white mb-3">
-            Real Talk. Honest Reviews.<br />No BS Ever.
-          </h2>
-          <p className="text-gray-400 mb-8">
-            The good stuff, straight from the trenches — reviews, wins, and real talk from a dad who shows up.
-            No spam. No sponsors. Just the crew.
-          </p>
-          <form action="/api/newsletter/subscribe" method="POST" className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-            <input
-              type="email"
-              name="email"
-              required
-              placeholder="your@email.com"
-              className="flex-1 px-4 py-3 bg-gray-900 border border-gray-700 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
-            />
-            <button
-              type="submit"
-              className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-2xl transition-colors text-sm whitespace-nowrap"
-            >
-              Join Free
-            </button>
-          </form>
-          <p className="text-xs text-gray-600 mt-4">Unsubscribe anytime. We mean it.</p>
+      {/* ── Newsletter — warm tint surface ─────────────────────────────── */}
+      <section id="crew" className="relative">
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none bg-gradient-to-b from-orange-950/[0.06] to-transparent"
+        />
+        <div className="relative max-w-6xl mx-auto px-6 py-16">
+          <div className="bg-gradient-to-br from-orange-950/40 to-gray-900 rounded-2xl shadow-xl shadow-black/40 px-8 py-12 text-center max-w-2xl mx-auto">
+            <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3 mx-auto" />
+            <p className="text-orange-400 text-xs font-semibold uppercase tracking-widest mb-3">
+              Join the Boss Daddy Crew
+            </p>
+            <h2 className="text-2xl font-black text-white mb-3">
+              Real Talk. Honest Reviews.<br />No BS Ever.
+            </h2>
+            <p className="text-gray-400 mb-8">
+              The good stuff, straight from the trenches — reviews, wins, and real talk from a dad who shows up.
+              No spam. No sponsors. Just the crew.
+            </p>
+            <form action="/api/newsletter/subscribe" method="POST" className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <input
+                type="email"
+                name="email"
+                required
+                placeholder="your@email.com"
+                className="flex-1 px-4 py-3 bg-gray-900 border border-gray-700 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+              />
+              <button
+                type="submit"
+                className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-2xl transition-colors text-sm whitespace-nowrap"
+              >
+                Join Free
+              </button>
+            </form>
+            <p className="text-xs text-gray-600 mt-4">Unsubscribe anytime. We mean it.</p>
+          </div>
         </div>
       </section>
 
-      {/* ── Closing tagline + CTA ──────────────────────────────────────── */}
+      {/* ── Closing tagline — magazine-style signoff, no CTA button ────── */}
       <section className="relative py-24 md:py-32">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-px bg-orange-600/40" />
         <div className="max-w-4xl mx-auto px-6 text-center">
@@ -429,12 +482,7 @@ export default async function HomePage() {
             Now let&apos;s dad like a BOSS —{' '}
             <span className="text-orange-500">together.</span>
           </p>
-          <Link
-            href="/reviews"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-2xl transition-colors"
-          >
-            See the latest reviews →
-          </Link>
+          <p className="text-sm text-gray-500 italic">— Boss Daddy</p>
         </div>
       </section>
     </>
@@ -464,19 +512,18 @@ function TrustBadge({
 }
 
 function LatestGuidesSkeleton() {
-  // Mirrors the new editorial list treatment — three rows, not a card grid.
   return (
     <section className="max-w-5xl mx-auto px-6 py-16">
       <div className="mb-8">
+        <div className="h-px w-6 bg-gray-800 mb-3" />
         <div className="h-3 w-32 bg-gray-900 rounded mb-3 animate-pulse" />
         <div className="h-7 w-72 bg-gray-900 rounded animate-pulse" />
       </div>
       <div className="divide-y divide-gray-800/60">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="flex items-center gap-5 py-6">
-            <div className="w-12 h-10 bg-gray-900 rounded animate-pulse shrink-0" />
             <div className="flex-1 space-y-2">
-              <div className="h-3 w-20 bg-gray-800 rounded animate-pulse" />
+              <div className="h-3 w-24 bg-gray-800 rounded animate-pulse" />
               <div className="h-5 w-full bg-gray-800 rounded animate-pulse" />
               <div className="h-3 w-3/4 bg-gray-800 rounded animate-pulse" />
             </div>
