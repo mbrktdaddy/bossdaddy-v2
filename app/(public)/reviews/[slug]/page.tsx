@@ -52,7 +52,7 @@ const getReview = cache(async (slug: string) => {
   const supabase = await createClient()
   const { data } = await supabase
     .from('reviews')
-    .select('id, title, product_name, category, content, rating, pros, cons, excerpt, image_url, has_affiliate_links, product_slug, published_at, meta_title, meta_description, tldr, key_takeaways, best_for, not_for, faqs, testing_duration, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, profiles(username)')
+    .select('id, title, product_name, category, content, rating, excerpt, image_url, has_affiliate_links, product_slug, published_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -113,13 +113,9 @@ export default async function ReviewPage({ params }: Props) {
     : (review.profiles as unknown as { username: string } | null)
   const author = profileData?.username ?? 'Boss Daddy'
   const category = getCategoryBySlug(review.category ?? '')
-  const pros = (review.pros as string[]) ?? []
-  const cons = (review.cons as string[]) ?? []
 
   const tldr          = review.tldr as string | null
   const keyTakeaways  = (review.key_takeaways as string[] | null) ?? []
-  const bestFor       = (review.best_for as string[] | null) ?? []
-  const notFor        = (review.not_for as string[] | null) ?? []
   const faqs          = (review.faqs as { question: string; answer: string }[] | null) ?? []
 
   const subScores = {
@@ -262,74 +258,6 @@ export default async function ReviewPage({ params }: Props) {
 
         {/* Key Takeaways — separate block, visually quieter than the verdict */}
         <TakeawaysCard items={keyTakeaways} />
-
-        {/* Pros / Cons */}
-        {(pros.length > 0 || cons.length > 0) && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
-            {pros.length > 0 && (
-              <div className="bg-green-950/30 rounded-2xl p-5 shadow-md shadow-black/30">
-                <p className="text-green-400 font-bold text-sm uppercase tracking-wide mb-3">
-                  ✓ The Good
-                </p>
-                <ul className="space-y-2">
-                  {pros.map((pro, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
-                      <span className="text-green-500 mt-0.5 shrink-0">+</span>
-                      {pro}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {cons.length > 0 && (
-              <div className="bg-red-950/30 rounded-2xl p-5 shadow-md shadow-black/30">
-                <p className="text-red-400 font-bold text-sm uppercase tracking-wide mb-3">
-                  ✗ The Bad
-                </p>
-                <ul className="space-y-2">
-                  {cons.map((con, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
-                      <span className="text-red-500 mt-0.5 shrink-0">−</span>
-                      {con}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Best For / Not For — purchase decision block */}
-        {(bestFor.length > 0 || notFor.length > 0) && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-            {bestFor.length > 0 && (
-              <div className="bg-gray-900 rounded-2xl p-5 shadow-md shadow-black/30">
-                <p className="text-xs text-green-400 uppercase tracking-widest font-semibold mb-3">✓ Best For</p>
-                <ul className="space-y-2">
-                  {bestFor.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
-                      <span className="text-green-500 mt-0.5 shrink-0">+</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {notFor.length > 0 && (
-              <div className="bg-gray-900 rounded-2xl p-5 shadow-md shadow-black/30">
-                <p className="text-xs text-red-400 uppercase tracking-widest font-semibold mb-3">✗ Not For</p>
-                <ul className="space-y-2">
-                  {notFor.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
-                      <span className="text-red-500 mt-0.5 shrink-0">−</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Review body — primary CTA lives in the VerdictCard above; final CTA below */}
         <div className="min-w-0 w-full">
