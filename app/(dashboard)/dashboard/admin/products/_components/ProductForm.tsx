@@ -7,14 +7,16 @@ import type { Product } from '@/lib/products'
 import { STORE_OPTIONS, PRODUCT_STATUS_OPTIONS } from '@/lib/products'
 import { CATEGORIES } from '@/lib/categories'
 import { ProductImageGallery } from '@/components/admin/ProductImageGallery'
+import { buildAmazonAffiliateUrl, extractAsin, isValidAsin } from '@/lib/amazon-tag'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
 interface Props {
   product: Product | null
+  amazonAssociateTag: string
 }
 
-export function ProductForm({ product }: Props) {
+export function ProductForm({ product, amazonAssociateTag }: Props) {
   const router = useRouter()
   const isNew = !product
 
@@ -211,9 +213,18 @@ export function ProductForm({ product }: Props) {
         <input
           type="url"
           value={affiliateUrl}
-          onChange={(e) => setAffiliateUrl(e.target.value)}
+          onChange={(e) => {
+            const next = e.target.value
+            setAffiliateUrl(next)
+            // Auto-extract ASIN when an Amazon URL is pasted — only fill if
+            // the ASIN field is empty so we don't clobber a manually-typed one.
+            if (store === 'amazon' && !asin.trim()) {
+              const found = extractAsin(next)
+              if (found) setAsin(found)
+            }
+          }}
           placeholder={
-            store === 'amazon'    ? 'https://www.amazon.com/dp/...' :
+            store === 'amazon'    ? 'https://www.amazon.com/dp/... — or fill the ASIN below and click Build' :
             store === 'costco'    ? 'No affiliate program — use Non-affiliate URL below' :
             store === 'sams-club' ? 'No affiliate program — use Non-affiliate URL below' :
             'Paste your affiliate link from this retailer\'s program'
@@ -252,6 +263,16 @@ export function ProductForm({ product }: Props) {
           />
           <div className="mt-2 flex items-center gap-3 flex-wrap">
             <p className="text-xs text-gray-600 flex-1">10-character Amazon product ID — find it in the product URL after <code className="text-orange-400">/dp/</code></p>
+            {isValidAsin(asin) && amazonAssociateTag && (
+              <button
+                type="button"
+                onClick={() => setAffiliateUrl(buildAmazonAffiliateUrl(asin, amazonAssociateTag))}
+                className="text-xs px-3 py-1.5 bg-orange-700/60 hover:bg-orange-600/60 text-orange-200 font-semibold rounded-lg transition-colors shrink-0"
+                title={`https://www.amazon.com/dp/${asin.trim().toUpperCase()}?tag=${amazonAssociateTag}`}
+              >
+                {affiliateUrl.trim() ? '↻ Rebuild URL from ASIN' : 'Build affiliate URL'}
+              </button>
+            )}
             {!isNew && asin.trim() && (
               <button
                 type="button"

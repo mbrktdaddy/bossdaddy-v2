@@ -41,7 +41,10 @@ export default async function ProductEditPage({
           : 'Editing this product updates every future review token — existing resolved links in already-saved reviews are unaffected.'}
       </p>
 
-      <ProductForm product={product} />
+      <ProductForm
+        product={product}
+        amazonAssociateTag={process.env.AMAZON_ASSOCIATE_TAG ?? ''}
+      />
     </div>
   )
 }
