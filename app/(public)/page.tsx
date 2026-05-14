@@ -367,12 +367,12 @@ export default async function HomePage() {
                 body: "If I wouldn't buy it again, I say so. If it changed my life, I say so. The score on the page is the score I'd give a friend.",
               },
             ].map((rule) => (
-              <div key={rule.n}>
+              <div key={rule.n} className="text-center md:text-left">
                 <p className="text-5xl md:text-6xl font-black text-orange-500/30 mb-4 leading-none tabular-nums">
                   {rule.n}
                 </p>
                 <p className="text-xl font-black text-white mb-3">{rule.title}</p>
-                <p className="text-gray-400 leading-relaxed text-sm">
+                <p className="text-gray-400 leading-relaxed text-sm max-w-sm mx-auto md:max-w-none md:mx-0">
                   {rule.body}
                 </p>
               </div>
