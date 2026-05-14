@@ -16,7 +16,6 @@ const CreateReviewSchema = z.object({
   category: CategorySchema,
   excerpt: z.string().max(200).optional(),
   content: z.string().min(100),
-  rating: z.number().min(1).max(10),
   pros: z.array(z.string()).default([]),
   cons: z.array(z.string()).default([]),
   disclosure_acknowledged: z.boolean(),
@@ -56,7 +55,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { title, product_name, category, excerpt, content, rating, pros, cons, disclosure_acknowledged, image_url, product_slug, tldr, key_takeaways, best_for, not_for, faqs, testing_duration, how_you_used_it, standout_moment, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, suggested_tags } = parsed.data
+    const { title, product_name, category, excerpt, content, pros, cons, disclosure_acknowledged, image_url, product_slug, tldr, key_takeaways, best_for, not_for, faqs, testing_duration, how_you_used_it, standout_moment, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, suggested_tags } = parsed.data
 
     let sanitizedContent: string
     try {
@@ -94,7 +93,6 @@ export async function POST(request: NextRequest) {
         content: sanitizedContent,
         image_url: image_url ?? null,
         product_slug: product_slug ?? null,
-        rating,
         pros,
         cons,
         tldr: tldr ?? null,

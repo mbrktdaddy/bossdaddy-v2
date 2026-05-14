@@ -20,7 +20,7 @@ export async function POST(
   const admin = createAdminClient()
   const { data: source } = await admin
     .from('reviews')
-    .select('title, product_name, category, excerpt, content, image_url, rating, pros, cons, has_affiliate_links, disclosure_acknowledged, reading_time_minutes')
+    .select('title, product_name, category, excerpt, content, image_url, pros, cons, has_affiliate_links, disclosure_acknowledged, reading_time_minutes, score_quality, score_value, score_ease, score_daily_use, would_rebuy')
     .eq('id', id)
     .single()
 
@@ -41,7 +41,11 @@ export async function POST(
       excerpt:                  source.excerpt,
       content:                  source.content,
       image_url:                source.image_url,
-      rating:                   source.rating,
+      score_quality:            source.score_quality,
+      score_value:              source.score_value,
+      score_ease:               source.score_ease,
+      score_daily_use:          source.score_daily_use,
+      would_rebuy:              source.would_rebuy,
       pros:                     source.pros,
       cons:                     source.cons,
       has_affiliate_links:      source.has_affiliate_links,

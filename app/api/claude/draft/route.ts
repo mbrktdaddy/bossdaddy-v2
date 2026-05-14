@@ -16,7 +16,10 @@ const DraftInput = z.object({
   // 'auto' lets Claude pick (2–3 images); a number forces exactly that many.
   imageSlots:      z.union([z.literal('auto'), z.number().int().min(0).max(6)]).default('auto'),
   // Experience fields — author-provided; drive tone/verdict alignment.
-  rating:          z.number().int().min(1).max(10),
+  // ratingHint is the author's gut-feel target for the overall (1-10). Claude
+  // uses it to shape the four sub-scores so they average near this target.
+  // The hint is NOT persisted — the saved rating is generated from the sub-scores.
+  ratingHint:      z.number().int().min(1).max(10),
   testingDuration: z.enum(['<1wk', '1-4wks', '1-3mo', '3+mo']).optional(),
   howYouUsedIt:    z.string().max(300).optional(),
   standoutMoment:  z.string().max(300).optional(),
@@ -67,14 +70,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { productName, category, keyFeatures, targetAudience, productSlug, imageSlots, rating, testingDuration, howYouUsedIt, standoutMoment, pricePaid } = parsed.data
+  const { productName, category, keyFeatures, targetAudience, productSlug, imageSlots, ratingHint, testingDuration, howYouUsedIt, standoutMoment, pricePaid } = parsed.data
 
   const durationLabel: Record<string, string> = {
     '<1wk': 'less than 1 week', '1-4wks': '1–4 weeks', '1-3mo': '1–3 months', '3+mo': '3+ months',
   }
 
   const experienceLines = [
-    `Author rating: ${rating}/10 — IMPORTANT: the entire draft (tone, verdict, pros/cons balance, recommendation) must reflect this exact score. Do not adjust it.`,
+    `Author target rating: ${ratingHint}/10 — the four sub-scores you produce must average to roughly this value. Tone, verdict, pros/cons balance must all reflect this target.`,
     testingDuration ? `Testing duration: ${durationLabel[testingDuration] ?? testingDuration}` : null,
     howYouUsedIt ? `How I used it: ${howYouUsedIt}` : null,
     standoutMoment ? `Standout moment: ${standoutMoment}` : null,
@@ -96,7 +99,6 @@ STRUCTURE REQUIREMENTS:
 - Verdict: 1–2 paragraphs with a clear buy/skip recommendation; if a product slug was provided, end the verdict with the third [[BUY:slug]] token
 - Pros: 3–6 short, specific items (not vague — "12V battery lasted 4 hours" not "long battery")
 - Cons: 2–4 honest, specific items — never skip the cons
-- Rating: output the author-provided rating (${rating}) exactly — do not adjust it
 
 CONTENT BLOCKS (required — these render as structured UI elements, not prose):
 - tldr: 1–2 sentence verdict for skimmers. No jargon. Lead with the gut answer ("Solid mid-tier carrier at a fair price." / "Skip this — better options at the same price.").
@@ -104,12 +106,12 @@ CONTENT BLOCKS (required — these render as structured UI elements, not prose):
 - bestFor: 3–4 specific buyer profiles who will love this (e.g. "Dads doing solo overnight feedings", "Budget-conscious families who need reliability")
 - notFor: 2–3 specific situations or buyer types who should skip (be honest — vague "not for everyone" is not acceptable)
 - faqs: 3–5 Q&A pairs covering the most common purchase questions. Answers 2–3 sentences each. Write questions the way a real dad searching Google would phrase them.
-- subScores: four 1–10 integers that DEFEND the overall rating of ${rating}. They must average roughly to the overall (no 10s on a 6 review). One can be a clear weak spot. Fields:
+- subScores: four 1–10 integers that DEFEND a target overall of ${ratingHint}/10. They must average to ~${ratingHint}.0 (no 10s on a 6 review). One can be a clear weak spot. These four are the SINGLE SOURCE OF TRUTH for the overall rating — the displayed rating is computed as their average, so make them honest and consistent with the verdict tone. Fields:
   • quality   — build / formulation / materials
   • value     — worth the price paid
   • ease      — ease of use, setup, daily friction
   • dailyUse  — fits real life, holds up under normal dad-life conditions
-- wouldRebuy: boolean. True only if a thoughtful dad would honestly buy this product again knowing what he knows now. Default to true for ratings ≥ 8; for 5–7 think carefully; for ≤ 4 default to false.
+- wouldRebuy: boolean. True only if a thoughtful dad would honestly buy this product again knowing what he knows now. Default to true for target ≥ 8; for 5–7 think carefully; for ≤ 4 default to false.
 
 SEO: Include the product name naturally in the intro and at least one section heading.
 
@@ -138,7 +140,6 @@ Return JSON with this exact shape:
     { "heading": "string (clear heading)", "body": "string (150–250 words, paragraphs separated by \\n\\n)" }
   ],
   "verdict": "string (1–2 paragraphs, clear recommendation, separated by \\n\\n if 2 paragraphs)",
-  "rating": number (1–10, decimals ok),
   "pros": ["string"],
   "cons": ["string"],
   "imagePrompt": "string (DALL-E 3 prompt: the product in a realistic setting, natural or warm lighting, clean composition, no people, no text, under 180 chars, style: editorial product photography)",
@@ -192,9 +193,10 @@ Return JSON with this exact shape:
 
   const suggestedTags = Array.isArray(draft.suggestedTags) ? draft.suggestedTags as string[] : []
 
-  // Strip imagePrompt and suggestedTags from draft payload; override rating with author value.
-  const { imagePrompt: _omit, rating: _claudeRating, suggestedTags: _tags, ...draftWithoutExtras } = draft
-  const cleanDraft = { ...draftWithoutExtras, rating }
+  // Strip imagePrompt and suggestedTags from the draft payload — they're returned
+  // alongside, not inside. The rating field is no longer accepted from the AI; the
+  // overall is computed from the four sub-scores at the DB level.
+  const { imagePrompt: _omit, rating: _claudeRating, suggestedTags: _tags, ...cleanDraft } = draft
 
   return NextResponse.json({ draft: cleanDraft, imagePrompt, suggestedTags, remaining })
 }

@@ -151,7 +151,7 @@ export function ReviewCreateWizard() {
           category,
           keyFeatures: keyFeatures.split('\n').map(f => f.trim()).filter(Boolean),
           imageSlots,
-          rating: inputRating,
+          ratingHint: inputRating,
           ...(productSlug.trim() ? { productSlug: productSlug.trim() } : {}),
           ...(testingDuration ? { testingDuration } : {}),
           ...(howYouUsedIt.trim() ? { howYouUsedIt: howYouUsedIt.trim() } : {}),
@@ -172,7 +172,7 @@ export function ReviewCreateWizard() {
       const draft = genJson.draft as {
         title: string; excerpt: string; introduction: string
         sections: { heading: string; body: string }[]
-        verdict: string; rating: number; pros: string[]; cons: string[]
+        verdict: string; pros: string[]; cons: string[]
         inlineImages?: { afterHeading: string; prompt: string; altText: string; caption: string }[]
       }
 
@@ -241,7 +241,6 @@ export function ReviewCreateWizard() {
           excerpt: previewDraft.excerpt,
           content: previewDraft.content,
           image_url: null,
-          rating: inputRating!,
           pros: previewDraft.pros,
           cons: previewDraft.cons,
           product_slug: productSlug.trim() || null,
@@ -291,7 +290,10 @@ export function ReviewCreateWizard() {
           excerpt: '',
           content: '<p>Start writing here…</p>',
           image_url: null,
-          rating: inputRating,
+          score_quality:   inputRating,
+          score_value:     inputRating,
+          score_ease:      inputRating,
+          score_daily_use: inputRating,
           pros: [],
           cons: [],
           product_slug: productSlug.trim() || null,
@@ -531,13 +533,13 @@ export function ReviewCreateWizard() {
       <div className="bg-gray-900 border border-orange-900/30 rounded-xl p-5 space-y-4">
         <div>
           <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-0.5">Your Experience</p>
-          <p className="text-xs text-gray-600">Drives the draft tone — your rating overrides Claude&apos;s guess.</p>
+          <p className="text-xs text-gray-600">Your gut-feel rating shapes the AI&apos;s four sub-scores. The saved overall is computed from those sub-scores — edit them later in the workspace.</p>
         </div>
 
-        {/* Rating picker */}
+        {/* Rating picker — hint only, not persisted */}
         <div>
           <label className="block text-sm text-gray-300 mb-2">
-            Your rating <span className="text-red-400">*</span>
+            Your gut-feel rating <span className="text-red-400">*</span>
           </label>
           <div className="grid grid-cols-5 gap-1.5">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (

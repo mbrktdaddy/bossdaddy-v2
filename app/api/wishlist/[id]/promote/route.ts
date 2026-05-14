@@ -53,7 +53,6 @@ export async function POST(
       product_slug:            product_slug,
       disclosure_acknowledged: false,
       content:                 '',
-      rating:                  5,
       pros:                    [],
       cons:                    [],
     })

@@ -77,19 +77,6 @@ interface ReviewData {
   would_rebuy: boolean | null
 }
 
-const RATING_OPTIONS = [
-  { value: 10, label: 'Flawless' },
-  { value: 9,  label: 'Outstanding' },
-  { value: 8,  label: 'Great' },
-  { value: 7,  label: 'Good' },
-  { value: 6,  label: 'Solid' },
-  { value: 5,  label: 'Average' },
-  { value: 4,  label: 'Below average' },
-  { value: 3,  label: 'Poor' },
-  { value: 2,  label: 'Bad' },
-  { value: 1,  label: 'Avoid' },
-]
-
 export function ReviewWorkspace({ review }: { review: ReviewData }) {
   const [title, setTitle]             = useState(review.title)
   const [productName, setProductName] = useState(review.product_name)
@@ -97,7 +84,6 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   const [excerpt, setExcerpt]         = useState(review.excerpt ?? '')
   const [content, setContent]         = useState(review.content)
   const [imageUrl, setImageUrl]       = useState<string | null>(review.image_url)
-  const [rating, setRating]           = useState<number>(review.rating ?? 7)
   const [pros, setPros]               = useState<string[]>(review.pros ?? [])
   const [cons, setCons]               = useState<string[]>(review.cons ?? [])
   const [disclosureAck, setDiscAck]   = useState<boolean>(review.disclosure_acknowledged ?? false)
@@ -120,6 +106,13 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   const [scoreDailyUse, setScoreDailyUse] = useState<number | null>(review.score_daily_use ?? null)
   const [wouldRebuy, setWouldRebuy]       = useState<boolean | null>(review.would_rebuy ?? null)
 
+  // Computed overall — average of the four sub-scores. Null until all four are
+  // populated. This is the source of truth; the DB stores the same generated value.
+  const computedRating = useMemo<number | null>(() => {
+    if (scoreQuality == null || scoreValue == null || scoreEase == null || scoreDailyUse == null) return null
+    return (scoreQuality + scoreValue + scoreEase + scoreDailyUse) / 4
+  }, [scoreQuality, scoreValue, scoreEase, scoreDailyUse])
+
   const [tags, setTags]                   = useState<string[]>(review.tags ?? [])
   const [tldr, setTldr]                   = useState(review.tldr ?? '')
   const [keyTakeaways, setKeyTakeaways]   = useState<string[]>(review.key_takeaways ?? [])
@@ -133,7 +126,8 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   // Pending refine — holds proposed content before user accepts or discards
   const [pendingRefine, setPendingRefine] = useState<{
     content: string
-    title?: string; excerpt?: string; rating?: number
+    title?: string; excerpt?: string
+    subScores?: { quality?: number; value?: number; ease?: number; dailyUse?: number }
     pros?: string[]; cons?: string[]
     tldr?: string; keyTakeaways?: string[]; bestFor?: string[]; notFor?: string[]
     faqs?: FAQ[]
@@ -167,7 +161,6 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
     excerpt: excerpt || undefined,
     content,
     image_url: imageUrl,
-    rating,
     pros: pros.filter(p => p.trim()),
     cons: cons.filter(c => c.trim()),
     disclosure_acknowledged: disclosureAck,
@@ -190,7 +183,7 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
     score_ease:           scoreEase,
     score_daily_use:      scoreDailyUse,
     would_rebuy:          wouldRebuy,
-  }), [title, productName, category, excerpt, content, imageUrl, rating, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, productSlug, tldr, keyTakeaways, bestFor, notFor, faqs, testingDuration, howYouUsedIt, standoutMoment, pricePaidCents, scoreQuality, scoreValue, scoreEase, scoreDailyUse, wouldRebuy])
+  }), [title, productName, category, excerpt, content, imageUrl, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, productSlug, tldr, keyTakeaways, bestFor, notFor, faqs, testingDuration, howYouUsedIt, standoutMoment, pricePaidCents, scoreQuality, scoreValue, scoreEase, scoreDailyUse, wouldRebuy])
 
   const canPublish = !hasAffiliate || disclosureAck
   const publishBlockedReason = !canPublish
@@ -205,7 +198,12 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
     setContent(pendingRefine.content)
     if (pendingRefine.title) setTitle(pendingRefine.title)
     if (pendingRefine.excerpt) setExcerpt(pendingRefine.excerpt)
-    if (pendingRefine.rating) setRating(pendingRefine.rating)
+    if (pendingRefine.subScores) {
+      if (typeof pendingRefine.subScores.quality  === 'number') setScoreQuality(pendingRefine.subScores.quality)
+      if (typeof pendingRefine.subScores.value    === 'number') setScoreValue(pendingRefine.subScores.value)
+      if (typeof pendingRefine.subScores.ease     === 'number') setScoreEase(pendingRefine.subScores.ease)
+      if (typeof pendingRefine.subScores.dailyUse === 'number') setScoreDailyUse(pendingRefine.subScores.dailyUse)
+    }
     if (pendingRefine.pros) setPros(pendingRefine.pros)
     if (pendingRefine.cons) setCons(pendingRefine.cons)
     if (pendingRefine.tldr) setTldr(pendingRefine.tldr)
@@ -224,7 +222,7 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
     { label: 'Excerpt',    done: excerpt.trim().length > 0 },
     { label: 'Pros',       done: pros.filter(p => p.trim()).length >= 3 },
     { label: 'Cons',       done: cons.filter(c => c.trim()).length >= 2 },
-    { label: 'Rating',     done: rating >= 1 },
+    { label: 'Sub-scores', done: computedRating != null },
     { label: 'Content',    done: content.replace(/<[^>]+>/g, '').trim().length >= 100 },
     { label: 'No placeholders', done: !content.includes('bd-image-placeholder') },
     ...(hasAffiliate ? [{ label: 'Disclosure', done: disclosureAck }] : []),
@@ -240,7 +238,7 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
         backHref="/dashboard/reviews"
         backLabel="All reviews"
         title={title || 'Untitled'}
-        subtitle={`${productName || '—'} · ${rating}/10 · Created ${createdAt}${review.reading_time_minutes ? ` · ${review.reading_time_minutes} min read` : ''}`}
+        subtitle={`${productName || '—'} · ${computedRating != null ? `${computedRating.toFixed(1)}/10` : '—/10'} · Created ${createdAt}${review.reading_time_minutes ? ` · ${review.reading_time_minutes} min read` : ''}`}
         rightSlot={
           <div className="flex items-center gap-3 flex-wrap justify-end">
             <AutoSaveIndicator state={autoSave.state} error={autoSave.error} />
@@ -300,16 +298,18 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm text-gray-300 mb-1.5">Rating</label>
-            <select
-              value={rating}
-              onChange={(e) => setRating(Number(e.target.value))}
-              className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-              {RATING_OPTIONS.map(r => (
-                <option key={r.value} value={r.value}>{r.value}/10 · {r.label}</option>
-              ))}
-            </select>
+            <label className="block text-sm text-gray-300 mb-1.5">Overall Rating</label>
+            <div className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg flex items-baseline gap-1.5 min-h-[42px]">
+              {computedRating != null ? (
+                <>
+                  <span className="text-xl font-black text-orange-400 tabular-nums">{computedRating.toFixed(2)}</span>
+                  <span className="text-sm font-semibold text-gray-500">/10</span>
+                </>
+              ) : (
+                <span className="text-xs text-gray-500 italic">Set all 4 sub-scores below</span>
+              )}
+            </div>
+            <p className="mt-1 text-xs text-gray-600">Computed from the 4 sub-scores. Adjust those to change.</p>
           </div>
           <div className="sm:col-span-2">
             <label className="block text-sm text-gray-300 mb-1.5">Excerpt</label>
@@ -468,7 +468,7 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
               content: merged,
               title:   draft.title,
               excerpt: draft.excerpt,
-              rating:  draft.rating ? Math.round(draft.rating) : undefined,
+              subScores: d.subScores as { quality?: number; value?: number; ease?: number; dailyUse?: number } | undefined,
               pros:    draft.pros?.length ? draft.pros : undefined,
               cons:    draft.cons?.length ? draft.cons : undefined,
               tldr:          d.tldr as string | undefined,
@@ -722,7 +722,7 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
           <ReviewDraftPreview
             title={title}
             productName={productName}
-            rating={rating}
+            rating={computedRating ?? 0}
             category={category}
             excerpt={excerpt}
             content={content}
