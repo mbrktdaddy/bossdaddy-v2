@@ -33,7 +33,8 @@ export default async function AboutPage() {
 
  {/* Hero */}
  <div className="mb-16">
- <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— The Real Story Behind Boss Daddy</p>
+ <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+ <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">The Real Story Behind Boss Daddy</p>
  <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6">
  The Dad Who Thought
  <br />
@@ -50,7 +51,7 @@ export default async function AboutPage() {
  {/* Stats */}
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
  {STATS.map((s) => (
- <div key={s.label} className="bg-gray-900 rounded-2xl p-5 text-center">
+ <div key={s.label} className="bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl p-5 text-center">
  <p className="text-3xl font-black text-orange-500 mb-1">{s.value}</p>
  <p className="text-xs text-gray-500 uppercase tracking-wide">{s.label}</p>
  </div>
@@ -150,6 +151,8 @@ export default async function AboutPage() {
 
  {/* Pillars */}
  <div className="mb-16">
+ <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+ <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Categories</p>
  <h2 className="text-2xl font-black mb-2">What We Cover</h2>
  <p className="text-gray-500 text-sm mb-6">Real-world testing across everything modern dads actually love.</p>
  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -157,7 +160,7 @@ export default async function AboutPage() {
  <Link
  key={cat.slug}
  href={`/category/${cat.slug}`}
- className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 transition-colors"
+ className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] text-gray-400 hover:bg-gray-800 hover:text-white hover:border-orange-900/40 shadow-sm shadow-black/20 transition-colors"
  >
  <CategoryIcon slug={cat.slug} className="w-4 h-4 text-orange-500 shrink-0" />
  <span className="truncate">{cat.label}</span>
@@ -180,6 +183,7 @@ export default async function AboutPage() {
 
  {/* Newsletter signup */}
  <div className="mb-8 max-w-md mx-auto">
+ <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3 mx-auto" />
  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Join the Crew</p>
  <p className="text-gray-400 text-sm mb-4">
  Weekly reviews, the good stuff, and dad-life wins. No spam. No sponsors. Just the crew.

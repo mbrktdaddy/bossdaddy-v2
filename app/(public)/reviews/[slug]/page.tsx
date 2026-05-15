@@ -284,12 +284,16 @@ export default async function ReviewPage({ params }: Props) {
         {/* FAQs — collapsible, SEO + reader utility */}
         {faqs.length > 0 && (
           <div className="mt-12 pt-8 border-t border-gray-800/60">
-            <h2 className="text-xl font-black mb-6">Frequently Asked Questions</h2>
+            <div className="mb-6">
+              <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+              <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Common Questions</p>
+              <h2 className="text-xl font-black">Frequently Asked Questions</h2>
+            </div>
             <div className="space-y-3">
               {faqs.map((faq, i) => (
                 <details
                   key={i}
-                  className="group bg-gray-900 rounded-2xl shadow-md shadow-black/30 overflow-hidden"
+                  className="group bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 rounded-2xl shadow-md shadow-black/30 overflow-hidden transition-colors"
                 >
                   <summary className="flex items-center justify-between gap-4 cursor-pointer list-none px-5 py-4 hover:bg-gray-800/60 transition-colors min-h-[44px]">
                     <p className="font-bold text-sm text-white leading-snug">{faq.question}</p>
@@ -315,7 +319,8 @@ export default async function ReviewPage({ params }: Props) {
 
         {/* Bottom CTA — email signup */}
         <div className="mt-12 pt-8">
-          <div className="bg-gradient-to-br from-gray-900 to-gray-950 rounded-2xl p-6 sm:p-8 text-center shadow-xl shadow-black/40">
+          <div className="bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl p-6 sm:p-8 text-center shadow-xl shadow-black/40">
+            <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3 mx-auto" />
             <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Liked this review?</p>
             <h3 className="text-xl font-black mb-4">Get the next one in your inbox</h3>
             <div className="max-w-md mx-auto">
@@ -363,13 +368,17 @@ export default async function ReviewPage({ params }: Props) {
         {/* Related reviews — mobile only */}
         {related && related.length > 0 && (
           <div className="mt-12 xl:hidden">
-            <h2 className="text-lg font-black mb-4">More Reviews</h2>
+            <div className="mb-4">
+              <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+              <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">More Reviews</p>
+              <h2 className="text-lg font-black">Keep reading</h2>
+            </div>
             <div className="space-y-2">
               {related.map((r) => (
                 <Link
                   key={r.id}
                   href={`/reviews/${r.slug}`}
-                  className="flex items-center justify-between p-4 bg-gray-900 rounded-2xl shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/40 transition-all group"
+                  className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/40 hover:border-orange-900/40 hover:-translate-y-0.5 transition-all group"
                 >
                   <p className="text-sm font-semibold group-hover:text-orange-400 transition-colors truncate min-w-0 mr-4">{r.title}</p>
                   <RatingScore rating={r.rating ?? 0} size="sm" />
@@ -407,7 +416,8 @@ export default async function ReviewPage({ params }: Props) {
 
           {/* Related Reviews */}
           {related && related.length > 0 && (
-            <div className="bg-gray-900 rounded-2xl p-5 shadow-lg shadow-black/40">
+            <div className="bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl p-5 shadow-lg shadow-black/40">
+              <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
               <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">More Reviews</p>
               <div className="space-y-4">
                 {related.map((r) => (
