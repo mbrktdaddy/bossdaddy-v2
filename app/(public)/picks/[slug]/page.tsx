@@ -28,11 +28,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .eq('is_visible', true)
     .single()
   if (!data) return { title: 'Not Found' }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const c = data as any
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
-  const metaTitle       = c.meta_title       ?? `${c.title} — Boss Daddy Picks`
-  const metaDescription = c.meta_description ?? c.description ?? 'Dad-tested picks curated by Boss Daddy.'
+  const metaTitle       = data.meta_title       ?? `${data.title} — Boss Daddy Picks`
+  const metaDescription = data.meta_description ?? data.description ?? 'Dad-tested picks curated by Boss Daddy.'
   return {
     title:       metaTitle,
     description: metaDescription,
