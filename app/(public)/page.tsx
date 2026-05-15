@@ -259,7 +259,7 @@ export default async function HomePage() {
                   <Link
                     key={r.id}
                     href={`/reviews/${r.slug}`}
-                    className={`group flex flex-col bg-gray-900 rounded-2xl overflow-hidden border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-orange-900/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200 ${
+                    className={`group flex flex-col bg-gradient-to-br from-gray-900 to-gray-900/60 rounded-2xl overflow-hidden border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-orange-900/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200 ${
                       isHero ? 'lg:col-span-2 lg:row-span-2' : ''
                     }`}
                   >
