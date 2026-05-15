@@ -22,6 +22,7 @@ import RatingWidget from '@/components/RatingWidget'
 import ImageLightbox from '@/components/ImageLightbox'
 import { LightboxImage } from '@/components/LightboxImage'
 import { MerchCallout } from '@/components/MerchCallout'
+import CollectionsForReview from '@/components/CollectionsForReview'
 import ProductCtaCard from '@/components/ProductCtaCard'
 import StickyMobileCta from '@/components/StickyMobileCta'
 import ReadingProgressBar from '@/components/ReadingProgressBar'
@@ -340,6 +341,9 @@ export default async function ReviewPage({ params }: Props) {
           <LikeButton contentType="review" contentId={review.id} />
           <ShareButtons title={review.title} />
         </div>
+
+        {/* Featured in collections — cross-link strip */}
+        <CollectionsForReview reviewId={review.id} />
 
         {/* Author bio */}
         <AuthorBio username={author} />

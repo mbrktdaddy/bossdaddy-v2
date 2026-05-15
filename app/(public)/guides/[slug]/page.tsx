@@ -10,6 +10,7 @@ import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import ProductCtaCard from '@/components/ProductCtaCard'
+import CollectionEmbed from '@/components/CollectionEmbed'
 import ReadingProgressBar from '@/components/ReadingProgressBar'
 import RatingScore from '@/components/RatingScore'
 import ShareButtons from '@/components/ShareButtons'
@@ -249,6 +250,9 @@ export default async function GuidePage({ params }: Props) {
                         variant="prominent"
                       />
                     )
+                  }
+                  if (segment.type === 'collection') {
+                    return <CollectionEmbed key={`embed-${i}`} slug={segment.slug} />
                   }
                   return segment.content ? (
                     <div
@@ -540,25 +544,38 @@ type InlineProduct = {
 type ContentSegment =
   | { type: 'html'; content: string }
   | { type: 'product'; product: InlineProduct }
+  | { type: 'collection'; slug: string }
 
 function splitContentForInlineCards(html: string, products: InlineProduct[]): ContentSegment[] {
-  // Matches <p> tags whose only content is a resolved [[BUY:slug]] anchor
-  const standaloneRe = /<p>\s*<a\s[^>]*data-product-slug="([^"]+)"[^>]*>[^<]*<\/a>\s*<\/p>/g
+  // Standalone [[BUY:slug]] anchor (post-resolve form)
+  const productRe = /<p>\s*<a\s[^>]*data-product-slug="([^"]+)"[^>]*>[^<]*<\/a>\s*<\/p>/g
+  // Standalone [[COLLECTION:slug]] embed marker (post-resolve form)
+  const collectionRe = /<div\s+class="bd-collection-embed"\s+data-collection-slug="([a-z0-9-]+)"[^>]*>\s*<\/div>/g
+
+  // Gather both kinds of inline-replaceable matches, sort by position, then
+  // weave them into segments so the prose between them stays intact.
+  type RawMatch = { index: number; length: number; segment: ContentSegment }
+  const matches: RawMatch[] = []
+  let m: RegExpExecArray | null
+  while ((m = productRe.exec(html)) !== null) {
+    const product = products.find((p) => p.slug === m![1])
+    if (!product) continue
+    matches.push({ index: m.index, length: m[0].length, segment: { type: 'product', product } })
+  }
+  while ((m = collectionRe.exec(html)) !== null) {
+    matches.push({ index: m.index, length: m[0].length, segment: { type: 'collection', slug: m[1] } })
+  }
+  matches.sort((a, b) => a.index - b.index)
+
   const segments: ContentSegment[] = []
   let lastIndex = 0
-  let match
-
-  while ((match = standaloneRe.exec(html)) !== null) {
-    const product = products.find((p) => p.slug === match![1])
-    if (!product) continue // no DB record — leave the anchor in HTML as-is
-
+  for (const match of matches) {
     if (match.index > lastIndex) {
       segments.push({ type: 'html', content: html.slice(lastIndex, match.index) })
     }
-    segments.push({ type: 'product', product })
-    lastIndex = match.index + match[0].length
+    segments.push(match.segment)
+    lastIndex = match.index + match.length
   }
-
   if (lastIndex < html.length) {
     segments.push({ type: 'html', content: html.slice(lastIndex) })
   }

@@ -3,6 +3,7 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { computeReadingTime } from '@/lib/reading-time'
 import { detectAffiliateLinks } from '@/lib/affiliate'
 import { resolveProductTokens } from '@/lib/products'
+import { resolveCollectionTokens } from '@/lib/collection-tokens'
 import { CATEGORY_SLUGS } from '@/lib/categories'
 import { z } from 'zod'
 
@@ -45,7 +46,8 @@ export async function POST(request: NextRequest) {
     let sanitizedContent: string
     try {
       const { sanitizeHtml } = await import('@/lib/sanitize')
-      const resolvedContent = await resolveProductTokens(content, supabase)
+      let resolvedContent = await resolveProductTokens(content, supabase)
+      resolvedContent = await resolveCollectionTokens(resolvedContent, supabase)
       sanitizedContent = sanitizeHtml(resolvedContent)
     } catch (err) {
       console.error('sanitize import/call threw:', err)

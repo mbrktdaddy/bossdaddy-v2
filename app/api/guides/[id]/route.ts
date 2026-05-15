@@ -6,6 +6,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { detectAffiliateLinks } from '@/lib/affiliate'
 import { resolveProductTokens } from '@/lib/products'
+import { resolveCollectionTokens } from '@/lib/collection-tokens'
 import { computeReadingTime } from '@/lib/reading-time'
 import { getResend, FROM_EMAIL } from '@/lib/resend'
 import { ModerationResultEmail } from '@/emails/ModerationResultEmail'
@@ -175,7 +176,8 @@ export async function PUT(
   if (parsed.data.key_takeaways !== undefined) updates.key_takeaways = parsed.data.key_takeaways
   if (parsed.data.faqs !== undefined) updates.faqs = parsed.data.faqs
   if (parsed.data.content) {
-    const resolved = await resolveProductTokens(parsed.data.content, supabase)
+    let resolved = await resolveProductTokens(parsed.data.content, supabase)
+    resolved = await resolveCollectionTokens(resolved, supabase)
     const sanitized = sanitizeHtml(resolved)
     updates.content = sanitized
     updates.reading_time_minutes = computeReadingTime(sanitized)

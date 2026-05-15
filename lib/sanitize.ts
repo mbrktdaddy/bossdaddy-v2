@@ -16,14 +16,15 @@ const ALLOWED_ATTRIBUTES: Record<string, string[]> = {
   // that Claude attaches to inline-image placeholder stubs in generated drafts,
   // and that the InlineMediaPanel uses to manage every inline image.
   figure: ['class', 'id', 'data-slot-id', 'data-prompt', 'data-alt', 'data-caption'],
-  div:    ['class', 'id', 'data-slot-id'],
+  div:    ['class', 'id', 'data-slot-id', 'data-collection-slug'],
   '*':    ['class', 'id'],
 }
 
-// `div` is allowed only when it carries one of our gallery classes — keeps
-// user-pasted layout junk out. Other tags (figure, etc.) are left unrestricted.
+// `div` is allowed only when it carries one of our known content-component
+// classes — keeps user-pasted layout junk out. Other tags (figure, etc.) are
+// left unrestricted.
 const ALLOWED_CLASSES: Record<string, string[]> = {
-  div: ['bd-image-grid'],
+  div: ['bd-image-grid', 'bd-collection-embed'],
 }
 
 /**
