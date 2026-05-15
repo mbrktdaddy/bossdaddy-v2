@@ -90,6 +90,7 @@ export default async function GuideCategoryPage({ params }: Props) {
 
         {/* Category header */}
         <div className="mb-10">
+          <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
           <p className="flex items-center gap-1.5 text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">
             <CategoryIcon slug={cat.slug} className="w-4 h-4 text-orange-500" /> Guides
           </p>
@@ -104,7 +105,7 @@ export default async function GuideCategoryPage({ params }: Props) {
               <Link
                 key={g.id}
                 href={`/guides/${g.slug}`}
-                className="group bg-gray-900 rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all"
+                className="group bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 hover:border-orange-900/40 hover:-translate-y-0.5 transition-all"
               >
                 {g.image_url ? (
                   <div className="relative w-full h-48">

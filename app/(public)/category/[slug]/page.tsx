@@ -95,6 +95,7 @@ export default async function CategoryHubPage({ params }: Props) {
 
         {/* ── Category hero ─────────────────────────────────────────────── */}
         <div className="mb-16">
+          <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
           <p className="flex items-center gap-1.5 text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">
             <CategoryIcon slug={cat.slug} className="w-4 h-4 text-orange-500" /> Boss Daddy
           </p>
@@ -116,19 +117,17 @@ export default async function CategoryHubPage({ params }: Props) {
         {/* ── Best reviews ──────────────────────────────────────────────── */}
         {hasReviews && (
           <section className="mb-20">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-stretch gap-4">
-                <div className="w-[3px] bg-orange-600 rounded-full" />
-                <div>
-                  <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-1">Top Rated</p>
-                  <h2 className="text-2xl font-black text-white leading-tight">Best {cat.label}</h2>
-                </div>
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Top Rated</p>
+                <h2 className="text-2xl font-black text-white leading-tight">Best {cat.label}</h2>
               </div>
               <Link
                 href={`/reviews/category/${slug}`}
                 className="hidden sm:inline-flex text-xs text-gray-500 hover:text-orange-400 transition-colors uppercase tracking-widest font-semibold"
               >
-                All Reviews
+                All Reviews →
               </Link>
             </div>
 
@@ -137,7 +136,7 @@ export default async function CategoryHubPage({ params }: Props) {
                 <Link
                   key={r.id}
                   href={`/reviews/${r.slug}`}
-                  className="group flex flex-col bg-gray-900 rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200"
+                  className="group flex flex-col bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 hover:border-orange-900/40 hover:-translate-y-0.5 transition-all duration-200"
                 >
                   {r.image_url ? (
                     <div className="relative w-full h-48 bg-gray-800 shrink-0">
@@ -181,76 +180,80 @@ export default async function CategoryHubPage({ params }: Props) {
           </section>
         )}
 
-        {/* ── Guides ────────────────────────────────────────────────────── */}
+        {/* ── Guides — editorial rows (geometry variation vs Best Reviews grid above) */}
         {hasGuides && (
           <section className="mb-20">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-stretch gap-4">
-                <div className="w-[3px] bg-orange-600 rounded-full" />
-                <div>
-                  <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-1">Know-How</p>
-                  <h2 className="text-2xl font-black text-white leading-tight">{cat.label} Guides</h2>
-                </div>
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Know-How</p>
+                <h2 className="text-2xl font-black text-white leading-tight">{cat.label} Guides</h2>
               </div>
               <Link
-                href="/guides"
+                href={`/guides/category/${slug}`}
                 className="hidden sm:inline-flex text-xs text-gray-500 hover:text-orange-400 transition-colors uppercase tracking-widest font-semibold"
               >
-                All Guides
+                All Guides →
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-              {latestGuides.map((g, i) => (
-                <Link
-                  key={g.id}
-                  href={`/guides/${g.slug}`}
-                  className="group flex flex-col bg-gray-900 rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200"
-                >
-                  {g.image_url ? (
-                    <div className="relative w-full h-44 bg-gray-800 shrink-0 overflow-hidden">
-                      <Image
-                        src={g.image_url}
-                        alt={g.title}
-                        fill
-                        priority={i === 0}
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      />
+            <ul className="divide-y divide-gray-800/60">
+              {latestGuides.map((g) => (
+                <li key={g.id}>
+                  <Link
+                    href={`/guides/${g.slug}`}
+                    className="group flex items-center gap-4 sm:gap-5 py-5 -mx-2 px-2 rounded-xl hover:bg-gray-900/50 transition-colors"
+                  >
+                    {/* Thumbnail — fixed square, fills */}
+                    <div className="relative shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-gray-900 border border-gray-800/60">
+                      {g.image_url ? (
+                        <Image
+                          src={g.image_url}
+                          alt={g.title}
+                          fill
+                          className="object-cover"
+                          sizes="96px"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <CategoryIcon slug={cat.slug} className="w-7 h-7 text-orange-500/40" />
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <div className="w-full h-44 bg-gradient-to-br from-gray-800/50 to-gray-900/40 flex items-center justify-center shrink-0">
-                      <CategoryIcon slug={cat.slug} className="w-8 h-8 text-orange-500 opacity-40" />
-                    </div>
-                  )}
-                  <div className="p-5 flex flex-col flex-1">
-                    <h3 className="text-base font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
-                      {g.title}
-                    </h3>
-                    {g.excerpt && (
-                      <p className="text-gray-500 text-sm mt-2 line-clamp-2">{g.excerpt}</p>
-                    )}
-                    <div className="flex items-center justify-between mt-4">
-                      <span className="text-xs text-gray-600">
-                        {g.published_at
-                          ? new Date(g.published_at).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric',
-                            })
-                          : ''}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        {g.reading_time_minutes && (
-                          <span className="text-xs text-gray-600">{g.reading_time_minutes} min</span>
+
+                    {/* Title + meta */}
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-base sm:text-lg font-black text-gray-100 group-hover:text-orange-400 transition-colors line-clamp-2 leading-snug">
+                        {g.title}
+                      </h3>
+                      {g.excerpt && (
+                        <p className="hidden sm:block text-sm text-gray-500 mt-1.5 line-clamp-1">{g.excerpt}</p>
+                      )}
+                      <div className="flex items-center gap-3 mt-2 text-xs text-gray-600">
+                        {g.published_at && (
+                          <span>
+                            {new Date(g.published_at).toLocaleDateString('en-US', {
+                              month: 'short', day: 'numeric', year: 'numeric',
+                            })}
+                          </span>
                         )}
-                        <span className="text-xs text-orange-500 font-medium">Read →</span>
+                        {g.reading_time_minutes && (
+                          <span aria-hidden>·</span>
+                        )}
+                        {g.reading_time_minutes && (
+                          <span>{g.reading_time_minutes} min read</span>
+                        )}
                       </div>
                     </div>
-                  </div>
-                </Link>
+
+                    {/* Chevron */}
+                    <span aria-hidden className="text-gray-600 group-hover:text-orange-400 transition-colors text-2xl shrink-0">
+                      →
+                    </span>
+                  </Link>
+                </li>
               ))}
-            </div>
+            </ul>
           </section>
         )}
 
@@ -272,16 +275,14 @@ export default async function CategoryHubPage({ params }: Props) {
         {/* ── FAQ accordion ────────────────────────────────────────────── */}
         {catFaqs.length > 0 && (
           <section className="mb-16">
-            <div className="flex items-stretch gap-4 mb-6">
-              <div className="w-[3px] bg-orange-600 rounded-full" />
-              <div>
-                <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-1">Common Questions</p>
-                <h2 className="text-2xl font-black text-white leading-tight">{cat.label} FAQ</h2>
-              </div>
+            <div className="mb-6">
+              <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+              <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Common Questions</p>
+              <h2 className="text-2xl font-black text-white leading-tight">{cat.label} FAQ</h2>
             </div>
             <div className="space-y-2">
               {catFaqs.map((faq, i) => (
-                <details key={i} className="group bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+                <details key={i} className="group bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 transition-colors rounded-xl overflow-hidden">
                   <summary className="flex items-center justify-between gap-3 px-4 py-3.5 cursor-pointer list-none min-h-[44px]">
                     <span className="text-sm font-semibold text-white leading-snug">{faq.question}</span>
                     <svg className="w-4 h-4 shrink-0 text-orange-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -299,6 +300,7 @@ export default async function CategoryHubPage({ params }: Props) {
 
         {/* ── Other categories ──────────────────────────────────────────── */}
         <section className="mt-12 pt-12 border-t border-gray-800/60">
+          <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
           <p className="text-xs text-gray-600 uppercase tracking-widest font-semibold mb-5">More Categories</p>
           <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 pb-1">
             {CATEGORIES.filter((c) => c.slug !== slug).map((c) => (
