@@ -149,6 +149,105 @@ export type Database = {
         }
         Relationships: []
       }
+      collection_items: {
+        Row: {
+          blurb: string | null
+          collection_id: string
+          created_at: string
+          id: string
+          position: number
+          review_id: string
+          role_label: string | null
+          wins_category: string | null
+        }
+        Insert: {
+          blurb?: string | null
+          collection_id: string
+          created_at?: string
+          id?: string
+          position?: number
+          review_id: string
+          role_label?: string | null
+          wins_category?: string | null
+        }
+        Update: {
+          blurb?: string | null
+          collection_id?: string
+          created_at?: string
+          id?: string
+          position?: number
+          review_id?: string
+          role_label?: string | null
+          wins_category?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pick_list_items_pick_list_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pick_list_items_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections: {
+        Row: {
+          bundle_total_cents: number | null
+          collection_type: string
+          created_at: string
+          description: string | null
+          hero_image_url: string | null
+          id: string
+          intro_html: string | null
+          is_visible: boolean
+          occasion: string | null
+          published_at: string | null
+          slug: string
+          title: string
+          updated_at: string
+          winner_summary: string | null
+        }
+        Insert: {
+          bundle_total_cents?: number | null
+          collection_type?: string
+          created_at?: string
+          description?: string | null
+          hero_image_url?: string | null
+          id?: string
+          intro_html?: string | null
+          is_visible?: boolean
+          occasion?: string | null
+          published_at?: string | null
+          slug: string
+          title: string
+          updated_at?: string
+          winner_summary?: string | null
+        }
+        Update: {
+          bundle_total_cents?: number | null
+          collection_type?: string
+          created_at?: string
+          description?: string | null
+          hero_image_url?: string | null
+          id?: string
+          intro_html?: string | null
+          is_visible?: boolean
+          occasion?: string | null
+          published_at?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string
+          winner_summary?: string | null
+        }
+        Relationships: []
+      }
       comment_shares: {
         Row: {
           comment_id: string
@@ -846,93 +945,6 @@ export type Database = {
           tracking_url?: string | null
           updated_at?: string
           user_id?: string | null
-        }
-        Relationships: []
-      }
-      collection_items: {
-        Row: {
-          blurb: string | null
-          created_at: string
-          id: string
-          collection_id: string
-          position: number
-          review_id: string
-        }
-        Insert: {
-          blurb?: string | null
-          created_at?: string
-          id?: string
-          collection_id: string
-          position?: number
-          review_id: string
-        }
-        Update: {
-          blurb?: string | null
-          created_at?: string
-          id?: string
-          collection_id?: string
-          position?: number
-          review_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "collection_items_collection_id_fkey"
-            columns: ["collection_id"]
-            isOneToOne: false
-            referencedRelation: "collections"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "collection_items_review_id_fkey"
-            columns: ["review_id"]
-            isOneToOne: false
-            referencedRelation: "reviews"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      collections: {
-        Row: {
-          created_at: string
-          description: string | null
-          hero_image_url: string | null
-          id: string
-          intro_html: string | null
-          is_visible: boolean
-          occasion: string | null
-          collection_type: string
-          published_at: string | null
-          slug: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          hero_image_url?: string | null
-          id?: string
-          intro_html?: string | null
-          is_visible?: boolean
-          occasion?: string | null
-          collection_type?: string
-          published_at?: string | null
-          slug: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          hero_image_url?: string | null
-          id?: string
-          intro_html?: string | null
-          is_visible?: boolean
-          occasion?: string | null
-          collection_type?: string
-          published_at?: string | null
-          slug?: string
-          title?: string
-          updated_at?: string
         }
         Relationships: []
       }
