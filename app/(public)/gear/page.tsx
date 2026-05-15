@@ -226,7 +226,7 @@ export default async function GearPage({ searchParams }: Props) {
                   <Link
                     key={occ.slug}
                     href={`/gifts/${occ.slug}`}
-                    className="shrink-0 w-40 rounded-2xl overflow-hidden bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-orange-900/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all"
+                    className="shrink-0 w-40 rounded-2xl overflow-hidden bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-orange-900/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all"
                   >
                     <div className="relative w-full h-24 bg-gray-800">
                       {pick?.hero_image_url ? (
@@ -296,7 +296,7 @@ export default async function GearPage({ searchParams }: Props) {
 
               <Link
                 href={`/picks/${featuredPick.slug}`}
-                className="group block bg-gray-900 rounded-2xl overflow-hidden border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-xl shadow-black/50 hover:border-orange-900/40 hover:shadow-black/70 hover:-translate-y-0.5 transition-all"
+                className="group block bg-gradient-to-br from-gray-900 to-gray-900/60 rounded-2xl overflow-hidden border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-xl shadow-black/50 hover:border-orange-900/40 hover:shadow-black/70 hover:-translate-y-0.5 transition-all"
               >
                 <div className="flex flex-col sm:flex-row">
                   <div className="relative w-full sm:w-72 h-48 sm:h-auto sm:min-h-[220px] shrink-0 bg-gray-800">
@@ -377,7 +377,7 @@ export default async function GearPage({ searchParams }: Props) {
                     <Link
                       key={c.slug}
                       href={`/category/${c.slug}`}
-                      className="group flex flex-col items-center justify-center text-center gap-2 bg-gray-900 hover:bg-gray-800 rounded-2xl p-4 min-h-[120px] border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-md shadow-black/30 hover:border-orange-900/40 hover:shadow-lg hover:shadow-black/40 hover:-translate-y-0.5 transition-all"
+                      className="group flex flex-col items-center justify-center text-center gap-2 bg-gradient-to-br from-gray-900 to-gray-900/60 hover:bg-gray-800 rounded-2xl p-4 min-h-[120px] border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-md shadow-black/30 hover:border-orange-900/40 hover:shadow-lg hover:shadow-black/40 hover:-translate-y-0.5 transition-all"
                     >
                       <CategoryIcon slug={c.slug} className="w-7 h-7 text-orange-500" />
                       <span className="text-sm font-bold text-white leading-tight group-hover:text-orange-400 transition-colors">
@@ -523,7 +523,7 @@ function GearCard({ review: r, isHero = false }: { review: GearReview; isHero?: 
   return (
     <Link
       href={`/reviews/${r.slug}`}
-      className={`group flex flex-col bg-gray-900 rounded-2xl overflow-hidden border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-orange-900/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200 ${
+      className={`group flex flex-col bg-gradient-to-br from-gray-900 to-gray-900/60 rounded-2xl overflow-hidden border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-orange-900/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200 ${
         isHero ? 'lg:col-span-2 lg:row-span-2' : ''
       }`}
     >

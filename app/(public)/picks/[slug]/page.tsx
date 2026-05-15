@@ -169,7 +169,7 @@ export default async function PickDetailPage({ params }: Props) {
             const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
 
             return (
-              <div key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 rounded-2xl p-5 shadow-lg shadow-black/40 transition-colors">
+              <div key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 rounded-2xl p-5 shadow-lg shadow-black/40 transition-colors">
                 {/* Rank */}
                 <div className="flex sm:flex-col items-center gap-3 sm:gap-0 shrink-0">
                   <span className="w-10 h-10 rounded-full bg-orange-950/60 border border-orange-900/40 flex items-center justify-center text-orange-400 font-black text-sm tabular-nums">

@@ -107,7 +107,7 @@ export default async function HomePage() {
               {/* Featured review card — visual anchor with tactile depth */}
               <Link
                 href={`/reviews/${featuredReview.slug}`}
-                className="group block bg-gray-900 rounded-2xl overflow-hidden border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-xl shadow-black/40 hover:border-orange-900/40 hover:shadow-2xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200"
+                className="group block bg-gradient-to-br from-gray-900 to-gray-900/60 rounded-2xl overflow-hidden border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-xl shadow-black/40 hover:border-orange-900/40 hover:shadow-2xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200"
               >
                 {featuredReview.image_url && (
                   <div className="relative w-full aspect-[5/4] bg-gray-800">
@@ -505,7 +505,7 @@ function CategoryPill({ slug, label }: { slug: string; label: string }) {
   return (
     <Link
       href={`/category/${slug}`}
-      className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] px-4 py-2.5 text-sm font-semibold text-gray-200 min-h-[44px] whitespace-nowrap hover:border-orange-900/60 hover:bg-gray-800 hover:text-orange-400 transition-colors"
+      className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] px-4 py-2.5 text-sm font-semibold text-gray-200 min-h-[44px] whitespace-nowrap hover:border-orange-900/60 hover:bg-gray-800 hover:text-orange-400 transition-colors"
     >
       <CategoryIcon slug={slug} className="w-4 h-4 text-orange-500 shrink-0" />
       <span>{label}</span>

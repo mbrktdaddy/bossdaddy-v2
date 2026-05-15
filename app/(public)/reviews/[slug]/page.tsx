@@ -293,7 +293,7 @@ export default async function ReviewPage({ params }: Props) {
               {faqs.map((faq, i) => (
                 <details
                   key={i}
-                  className="group bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 rounded-2xl shadow-md shadow-black/30 overflow-hidden transition-colors"
+                  className="group bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 rounded-2xl shadow-md shadow-black/30 overflow-hidden transition-colors"
                 >
                   <summary className="flex items-center justify-between gap-4 cursor-pointer list-none px-5 py-4 hover:bg-gray-800/60 transition-colors min-h-[44px]">
                     <p className="font-bold text-sm text-white leading-snug">{faq.question}</p>
@@ -378,7 +378,7 @@ export default async function ReviewPage({ params }: Props) {
                 <Link
                   key={r.id}
                   href={`/reviews/${r.slug}`}
-                  className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/40 hover:border-orange-900/40 hover:-translate-y-0.5 transition-all group"
+                  className="flex items-center justify-between p-4 bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/40 hover:border-orange-900/40 hover:-translate-y-0.5 transition-all group"
                 >
                   <p className="text-sm font-semibold group-hover:text-orange-400 transition-colors truncate min-w-0 mr-4">{r.title}</p>
                   <RatingScore rating={r.rating ?? 0} size="sm" />
@@ -416,7 +416,7 @@ export default async function ReviewPage({ params }: Props) {
 
           {/* Related Reviews */}
           {related && related.length > 0 && (
-            <div className="bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl p-5 shadow-lg shadow-black/40">
+            <div className="bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl p-5 shadow-lg shadow-black/40">
               <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
               <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">More Reviews</p>
               <div className="space-y-4">

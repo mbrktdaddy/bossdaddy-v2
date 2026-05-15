@@ -51,7 +51,7 @@ export default async function AboutPage() {
  {/* Stats */}
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
  {STATS.map((s) => (
- <div key={s.label} className="bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl p-5 text-center">
+ <div key={s.label} className="bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl p-5 text-center">
  <p className="text-3xl font-black text-orange-500 mb-1">{s.value}</p>
  <p className="text-xs text-gray-500 uppercase tracking-wide">{s.label}</p>
  </div>
@@ -160,7 +160,7 @@ export default async function AboutPage() {
  <Link
  key={cat.slug}
  href={`/category/${cat.slug}`}
- className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] text-gray-400 hover:bg-gray-800 hover:text-white hover:border-orange-900/40 shadow-sm shadow-black/20 transition-colors"
+ className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] text-gray-400 hover:bg-gray-800 hover:text-white hover:border-orange-900/40 shadow-sm shadow-black/20 transition-colors"
  >
  <CategoryIcon slug={cat.slug} className="w-4 h-4 text-orange-500 shrink-0" />
  <span className="truncate">{cat.label}</span>
