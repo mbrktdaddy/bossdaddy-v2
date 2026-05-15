@@ -116,7 +116,10 @@ export default async function AuthorPage({ params }: Props) {
  {/* Reviews */}
  {totalReviews > 0 && (
  <div className="mb-12">
- <h2 className="text-lg font-black mb-5">Reviews</h2>
+ <div className="mb-5">
+ <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+ <h2 className="text-lg font-black">Reviews</h2>
+ </div>
  <div className="space-y-2">
  {reviews!.map((r) => {
  const cat = getCategoryBySlug(r.category)
@@ -124,7 +127,7 @@ export default async function AuthorPage({ params }: Props) {
  <Link
  key={r.id}
  href={`/reviews/${r.slug}`}
- className="flex items-center justify-between p-4 bg-gray-900 rounded-2xl transition-colors group"
+ className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 rounded-2xl transition-colors group"
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -151,7 +154,10 @@ export default async function AuthorPage({ params }: Props) {
  {/* Articles */}
  {totalGuides > 0 && (
  <div>
- <h2 className="text-lg font-black mb-5">Guides</h2>
+ <div className="mb-5">
+ <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+ <h2 className="text-lg font-black">Guides</h2>
+ </div>
  <div className="space-y-2">
  {articles!.map((a) => {
  const cat = getCategoryBySlug(a.category)
@@ -159,7 +165,7 @@ export default async function AuthorPage({ params }: Props) {
  <Link
  key={a.id}
  href={`/guides/${a.slug}`}
- className="flex items-center justify-between p-4 bg-gray-900 rounded-2xl transition-colors group"
+ className="flex items-center justify-between p-4 bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 rounded-2xl transition-colors group"
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1">

@@ -140,7 +140,8 @@ export default async function PickDetailPage({ params }: Props) {
 
         {/* Header */}
         <div className="mb-10">
-          <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— Boss Daddy Picks</p>
+          <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">Boss Daddy Picks</p>
           <h1 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tight leading-tight">{pick.title}</h1>
           {pick.description && (
             <p className="text-lg text-gray-400 leading-relaxed max-w-2xl">{pick.description}</p>
@@ -168,7 +169,7 @@ export default async function PickDetailPage({ params }: Props) {
             const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
 
             return (
-              <div key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gray-900 rounded-2xl p-5 shadow-lg shadow-black/40">
+              <div key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 rounded-2xl p-5 shadow-lg shadow-black/40 transition-colors">
                 {/* Rank */}
                 <div className="flex sm:flex-col items-center gap-3 sm:gap-0 shrink-0">
                   <span className="w-10 h-10 rounded-full bg-orange-950/60 border border-orange-900/40 flex items-center justify-center text-orange-400 font-black text-sm tabular-nums">

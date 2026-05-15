@@ -42,7 +42,8 @@ export default async function GiftsIndexPage() {
     <div className="max-w-6xl mx-auto px-6 py-16">
       {/* Header */}
       <div className="mb-12">
-        <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— The Gift Vault</p>
+        <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">The Gift Vault</p>
         <h1 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tight">Gift Guides</h1>
         <p className="text-gray-400 max-w-2xl leading-relaxed text-base md:text-lg">
           Real-tested gift guides for every holiday, milestone, and occasion. Each list curated from a dad who actually buys, tests, and lives with this stuff. No corporate gift-list filler.
@@ -52,12 +53,10 @@ export default async function GiftsIndexPage() {
       {/* Grouped occasion grid */}
       {OCCASION_GROUPS.map((group) => (
         <section key={group.id} className="mb-14">
-          <div className="flex items-stretch gap-4 mb-6">
-            <div className="w-[3px] bg-orange-600 rounded-full" />
-            <div>
-              <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-1">— {group.label}</p>
-              <h2 className="text-2xl font-black text-white">{group.label}</h2>
-            </div>
+          <div className="mb-6">
+            <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">{group.label}</p>
+            <h2 className="text-2xl font-black text-white">{group.label}</h2>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -67,7 +66,7 @@ export default async function GiftsIndexPage() {
                 <Link
                   key={occ.value}
                   href={`/gifts/${occ.slug}`}
-                  className="group flex flex-col bg-gray-900 hover:bg-gray-800/90 rounded-2xl overflow-hidden shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/50 transition-all border border-gray-800"
+                  className="group flex flex-col bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:bg-gray-800/90 hover:border-orange-900/40 hover:-translate-y-0.5 rounded-2xl overflow-hidden shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/50 transition-all"
                 >
                   <div className="relative aspect-video bg-gray-950 flex items-center justify-center">
                     {live?.hero_image_url ? (
@@ -106,6 +105,7 @@ export default async function GiftsIndexPage() {
 
       {/* Newsletter pitch */}
       <div className="mt-16 pt-10 border-t border-gray-800/60 text-center max-w-2xl mx-auto">
+        <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3 mx-auto" />
         <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Stay in the loop</p>
         <h3 className="text-xl font-black text-white mb-2">New gift guides drop with the seasons</h3>
         <p className="text-sm text-gray-400 mb-4">

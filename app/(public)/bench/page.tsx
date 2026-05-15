@@ -92,6 +92,7 @@ export default async function BenchPage() {
             return (
               <section key={key}>
                 <div className="mb-5">
+                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
                   <h2 className="text-lg font-black">{heading}</h2>
                   <p className="text-xs text-[var(--bd-text-muted)] mt-0.5">{sub}</p>
                 </div>

@@ -158,7 +158,8 @@ export default async function GiftOccasionPage({ params }: Props) {
 
         {/* Header */}
         <div className="mb-10">
-          <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— Gift Guide</p>
+          <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">Gift Guide</p>
           <h1 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tight leading-tight">
             {pick?.title ?? occ.label}
           </h1>
@@ -188,7 +189,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                 const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
 
                 return (
-                  <div key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gray-900 rounded-2xl p-5 shadow-lg shadow-black/40">
+                  <div key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 rounded-2xl p-5 shadow-lg shadow-black/40 transition-colors">
                     <div className="flex sm:flex-col items-center gap-3 sm:gap-0 shrink-0">
                       <span className="w-10 h-10 rounded-full bg-orange-950/60 border border-orange-900/40 flex items-center justify-center text-orange-400 font-black text-sm tabular-nums">
                         {idx + 1}
@@ -247,6 +248,7 @@ export default async function GiftOccasionPage({ params }: Props) {
         ) : (
           /* Empty state — proper SEO landing page even with no content */
           <div className="bg-gradient-to-br from-orange-950/30 to-gray-900 rounded-2xl p-8 md:p-10 border border-orange-900/30 mb-10">
+            <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
             <p className="text-xs text-orange-500 uppercase tracking-widest font-bold mb-3">Coming Soon</p>
             <h2 className="text-2xl md:text-3xl font-black text-white mb-3">
               The {occ.label} list is being built
@@ -269,13 +271,14 @@ export default async function GiftOccasionPage({ params }: Props) {
         {/* Related occasions strip */}
         {related.length > 0 && (
           <section className="mt-14 pt-10 border-t border-gray-800/60">
+            <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
             <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-5">More Gift Guides</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {related.map((r) => (
                 <Link
                   key={r.value}
                   href={`/gifts/${r.slug}`}
-                  className="flex items-center gap-3 px-4 py-3 bg-gray-900 hover:bg-gray-800 rounded-xl transition-colors min-h-[44px]"
+                  className="flex items-center gap-3 px-4 py-3 bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:bg-gray-800 hover:border-orange-900/40 rounded-xl transition-colors min-h-[44px]"
                 >
                   <span className="text-2xl shrink-0">{r.emoji}</span>
                   <span className="text-sm font-semibold text-gray-300 hover:text-white transition-colors truncate">{r.label}</span>

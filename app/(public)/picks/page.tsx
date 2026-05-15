@@ -24,7 +24,8 @@ export default async function PicksIndexPage() {
     <div className="max-w-6xl mx-auto px-6 py-16">
       {/* Header */}
       <div className="mb-12">
-        <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-3">— The Picks</p>
+        <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">The Picks</p>
         <h1 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tight">Boss Daddy Picks</h1>
         <p className="text-gray-400 max-w-2xl leading-relaxed">
           Curated gear lists from a dad who actually buys, tests, and lives with this stuff. Gift guides, best-of roundups, and category deep-dives.
@@ -42,7 +43,7 @@ export default async function PicksIndexPage() {
             <Link
               key={pick.id}
               href={`/picks/${pick.slug}`}
-              className="group flex flex-col bg-gray-900 rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200"
+              className="group flex flex-col bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 hover:border-orange-900/40 hover:-translate-y-0.5 transition-all duration-200"
             >
               <div className="relative w-full aspect-video bg-gray-800 shrink-0">
                 {pick.hero_image_url ? (

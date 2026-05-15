@@ -90,6 +90,7 @@ export default async function SearchPage({ searchParams }: Props) {
  {/* Review results */}
  {(reviews?.length ?? 0) > 0 && (
  <div className="mb-10">
+ <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
  <p className="text-xs text-orange-500 font-semibold uppercase tracking-widest mb-3">Reviews</p>
  <div className="space-y-2">
  {reviews!.map((r) => {
@@ -98,7 +99,7 @@ export default async function SearchPage({ searchParams }: Props) {
  <Link
  key={r.id}
  href={`/reviews/${r.slug}`}
- className="flex items-start justify-between p-4 bg-gray-900 rounded-2xl transition-colors group"
+ className="flex items-start justify-between p-4 bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 rounded-2xl transition-colors group"
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -121,6 +122,7 @@ export default async function SearchPage({ searchParams }: Props) {
  {/* Article results */}
  {(articles?.length ?? 0) > 0 && (
  <div>
+ <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
  <p className="text-xs text-orange-500 font-semibold uppercase tracking-widest mb-3">Guides</p>
  <div className="space-y-2">
  {articles!.map((a) => {
@@ -129,7 +131,7 @@ export default async function SearchPage({ searchParams }: Props) {
  <Link
  key={a.id}
  href={`/guides/${a.slug}`}
- className="flex items-start justify-between p-4 bg-gray-900 rounded-2xl transition-colors group"
+ className="flex items-start justify-between p-4 bg-gray-900 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 rounded-2xl transition-colors group"
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1 flex-wrap">
