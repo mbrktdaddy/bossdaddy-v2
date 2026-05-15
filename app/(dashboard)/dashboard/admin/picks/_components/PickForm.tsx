@@ -19,6 +19,8 @@ interface PickItem {
   review_id: string
   position: number
   blurb: string | null
+  wins_category?: string | null
+  role_label?: string | null
   reviews?: ReviewSummary | ReviewSummary[] | null
 }
 
@@ -33,6 +35,8 @@ interface PickList {
   published_at: string | null
   collection_type?: string | null
   occasion?: string | null
+  winner_summary?: string | null
+  bundle_total_cents?: number | null
 }
 
 interface Props {
@@ -50,8 +54,10 @@ export function PickForm({ pick, initialItems }: Props) {
   const [introHtml, setIntro]   = useState(pick?.intro_html ?? '')
   const [heroUrl, setHeroUrl]   = useState(pick?.hero_image_url ?? '')
   const [visible, setVisible]   = useState(pick?.is_visible ?? false)
-  const [pickType, setPickType] = useState<string>(pick?.collection_type ?? 'general')
-  const [occasion, setOccasion] = useState<string>(pick?.occasion ?? '')
+  const [pickType, setPickType]           = useState<string>(pick?.collection_type ?? 'general')
+  const [occasion, setOccasion]           = useState<string>(pick?.occasion ?? '')
+  const [winnerSummary, setWinnerSummary] = useState<string>(pick?.winner_summary ?? '')
+  const [bundleTotalCents, setBundleTotal] = useState<string>(pick?.bundle_total_cents != null ? String(pick.bundle_total_cents) : '')
   const [items, setItems]       = useState<PickItem[]>(
     initialItems.map((i, idx) => ({ ...i, position: i.position ?? idx }))
   )
@@ -107,9 +113,19 @@ export function PickForm({ pick, initialItems }: Props) {
     setItems((prev) => prev.map((i) => i.review_id === review_id ? { ...i, blurb: blurb || null } : i))
   }
 
+  function updateWinsCategory(review_id: string, wins_category: string) {
+    setItems((prev) => prev.map((i) => i.review_id === review_id ? { ...i, wins_category: wins_category || null } : i))
+  }
+
+  function updateRoleLabel(review_id: string, role_label: string) {
+    setItems((prev) => prev.map((i) => i.review_id === review_id ? { ...i, role_label: role_label || null } : i))
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
     setBusy(true); setError(null)
+
+    const parsedBundleTotal = bundleTotalCents.trim() ? parseInt(bundleTotalCents.trim(), 10) : null
 
     const payload = {
       slug: slug.trim().toLowerCase(),
@@ -120,7 +136,15 @@ export function PickForm({ pick, initialItems }: Props) {
       is_visible: visible,
       collection_type: pickType,
       occasion: pickType === 'gift_guide' ? (occasion || null) : null,
-      items: items.map((i) => ({ review_id: i.review_id, position: i.position, blurb: i.blurb })),
+      winner_summary: pickType === 'comparison' ? (winnerSummary.trim() || null) : null,
+      bundle_total_cents: pickType === 'stack' && parsedBundleTotal !== null && !isNaN(parsedBundleTotal) ? parsedBundleTotal : null,
+      items: items.map((i) => ({
+        review_id:     i.review_id,
+        position:      i.position,
+        blurb:         i.blurb,
+        wins_category: pickType === 'comparison' ? (i.wins_category ?? null) : null,
+        role_label:    pickType === 'stack' ? (i.role_label ?? null) : null,
+      })),
     }
 
     try {
@@ -167,7 +191,15 @@ export function PickForm({ pick, initialItems }: Props) {
             pattern="[a-z0-9-]+" placeholder="fathers-day-gift-guide"
             className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-base"
           />
-          <p className="mt-1 text-xs text-gray-600">Public URL: /picks/{slug || 'your-slug'}</p>
+          <p className="mt-1 text-xs text-gray-600">
+            Public URL: {pickType === 'comparison'
+              ? `/comparisons/${slug || 'your-slug'}`
+              : pickType === 'stack'
+              ? `/stacks/${slug || 'your-slug'}`
+              : pickType === 'gift_guide'
+              ? `/gifts/${slug || 'your-slug'}`
+              : `/picks/${slug || 'your-slug'}`}
+          </p>
         </div>
 
         <div>
@@ -207,16 +239,55 @@ export function PickForm({ pick, initialItems }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">List type</label>
+          <label className="block text-sm text-gray-300 mb-1.5">Collection type</label>
           <select
             value={pickType} onChange={(e) => setPickType(e.target.value)}
             className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500 text-base"
           >
-            <option value="general">General Pick List (shows on /picks)</option>
-            <option value="gift_guide">Gift Guide (shows on /gifts)</option>
-            <option value="best_of">Best Of (curated category list)</option>
+            <option value="general">Pick (general curated list, /picks)</option>
+            <option value="best_of">Best Of (ranked category list, /picks)</option>
+            <option value="gift_guide">Gift Guide (by occasion, /gifts)</option>
+            <option value="comparison">Comparison (head-to-head, /comparisons)</option>
+            <option value="stack">Stack (kit for a goal, /stacks)</option>
           </select>
         </div>
+
+        {pickType === 'comparison' && (
+          <div>
+            <label className="block text-sm text-gray-300 mb-1.5">
+              Bottom line <span className="text-gray-600">(one-line verdict shown above the scorecard)</span>
+            </label>
+            <textarea
+              value={winnerSummary}
+              onChange={(e) => setWinnerSummary(e.target.value)}
+              maxLength={500}
+              rows={2}
+              placeholder="Buy the Yeti for everyday use, the RTIC if you need it bigger, and skip the Igloo unless you're on a budget."
+              className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none text-base"
+            />
+            <p className="mt-1 text-xs text-gray-600">{winnerSummary.length}/500</p>
+          </div>
+        )}
+
+        {pickType === 'stack' && (
+          <div>
+            <label className="block text-sm text-gray-300 mb-1.5">
+              Bundle total <span className="text-gray-600">(cents — optional; otherwise computed from items)</span>
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={bundleTotalCents}
+              onChange={(e) => setBundleTotal(e.target.value.replace(/\D/g, ''))}
+              placeholder="e.g. 49999 = $499.99"
+              className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-base"
+            />
+            {bundleTotalCents && !isNaN(parseInt(bundleTotalCents, 10)) && (
+              <p className="mt-1 text-xs text-orange-400">${(parseInt(bundleTotalCents, 10) / 100).toFixed(2)}</p>
+            )}
+          </div>
+        )}
 
         {pickType === 'gift_guide' && (
           <div>
@@ -323,6 +394,26 @@ export function PickForm({ pick, initialItems }: Props) {
                     rows={2}
                     className="mt-2 w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 resize-none text-base sm:text-sm"
                   />
+                  {pickType === 'comparison' && (
+                    <input
+                      type="text"
+                      value={item.wins_category ?? ''}
+                      onChange={(e) => updateWinsCategory(item.review_id, e.target.value)}
+                      placeholder="Winner badge (e.g. 'Best Overall', 'Best Budget', 'Best for Solo Use')"
+                      maxLength={80}
+                      className="mt-2 w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-base sm:text-sm"
+                    />
+                  )}
+                  {pickType === 'stack' && (
+                    <input
+                      type="text"
+                      value={item.role_label ?? ''}
+                      onChange={(e) => updateRoleLabel(item.review_id, e.target.value)}
+                      placeholder="Role in the stack (e.g. 'The Anchor', 'The Daily Driver', 'The Backup')"
+                      maxLength={80}
+                      className="mt-2 w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-base sm:text-sm"
+                    />
+                  )}
                 </div>
               )
             })}

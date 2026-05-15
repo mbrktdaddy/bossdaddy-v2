@@ -35,7 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     admin.from('guide_tags').select('tag_slug, guides!inner(status, is_visible)')
       .eq('guides.status', 'approved')
       .eq('guides.is_visible', true),
-    admin.from('collections').select('slug, updated_at').eq('is_visible', true),
+    admin.from('collections').select('slug, updated_at, collection_type').eq('is_visible', true),
   ])
 
   const reviewTagSlugs = Array.from(new Set((reviewTagRows ?? []).map((r) => r.tag_slug)))
@@ -91,12 +91,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
-  const pickUrls: MetadataRoute.Sitemap = (picks ?? []).map((p) => ({
-    url: `${base}/picks/${p.slug}`,
-    lastModified: p.updated_at ?? undefined,
-    changeFrequency: 'weekly',
-    priority: 0.8,
-  }))
+  // Route each collection to its type-specific URL. Gift guides live at
+  // /gifts/[occasion-slug] (already covered by giftUrls below) so skip those.
+  const collectionUrls: MetadataRoute.Sitemap = (picks ?? [])
+    .filter((p) => p.collection_type !== 'gift_guide')
+    .map((p) => {
+      const path = p.collection_type === 'comparison'
+        ? `/comparisons/${p.slug}`
+        : p.collection_type === 'stack'
+        ? `/stacks/${p.slug}`
+        : `/picks/${p.slug}`
+      return {
+        url: `${base}${path}`,
+        lastModified: p.updated_at ?? undefined,
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+      }
+    })
 
   // Every defined occasion — stable URLs that compound SEO whether content exists or not
   const giftUrls: MetadataRoute.Sitemap = OCCASIONS.map((occ) => ({
@@ -111,8 +122,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/reviews`, lastModified: new Date(), changeFrequency: 'daily',   priority: 0.9 },
     { url: `${base}/guides`,  lastModified: new Date(), changeFrequency: 'daily',   priority: 0.9 },
     { url: `${base}/gifts`,   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.9 },
-    { url: `${base}/picks`,   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
-    { url: `${base}/gear`,    lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
+    { url: `${base}/picks`,        lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
+    { url: `${base}/comparisons`,  lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
+    { url: `${base}/stacks`,       lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
+    { url: `${base}/gear`,         lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${base}/bench`,   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${base}/about`,   lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
     ...categoryUrls,
@@ -121,7 +134,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...guideTagUrls,
     ...reviewUrls,
     ...articleUrls,
-    ...pickUrls,
+    ...collectionUrls,
     ...giftUrls,
   ]
 }

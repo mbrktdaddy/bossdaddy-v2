@@ -5,15 +5,17 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { z } from 'zod'
 
 const PickListSchema = z.object({
-  slug:          z.string().min(2).max(80).regex(/^[a-z0-9-]+$/),
-  title:         z.string().min(2).max(160),
-  description:   z.string().max(500).optional().nullable(),
-  intro_html:    z.string().max(10000).optional().nullable(),
-  hero_image_url:z.string().url().max(2048).optional().nullable(),
-  is_visible:    z.boolean().optional().default(false),
-  published_at:  z.string().optional().nullable(),
-  collection_type:     z.enum(['general', 'gift_guide', 'best_of']).optional().default('general'),
-  occasion:      z.string().max(40).optional().nullable(),
+  slug:                 z.string().min(2).max(80).regex(/^[a-z0-9-]+$/),
+  title:                z.string().min(2).max(160),
+  description:          z.string().max(500).optional().nullable(),
+  intro_html:           z.string().max(10000).optional().nullable(),
+  hero_image_url:       z.string().url().max(2048).optional().nullable(),
+  is_visible:           z.boolean().optional().default(false),
+  published_at:         z.string().optional().nullable(),
+  collection_type:      z.enum(['general', 'gift_guide', 'best_of', 'comparison', 'stack']).optional().default('general'),
+  occasion:             z.string().max(40).optional().nullable(),
+  winner_summary:       z.string().max(500).optional().nullable(),
+  bundle_total_cents:   z.number().int().min(0).optional().nullable(),
 })
 
 async function requireAdmin(supabase: Awaited<ReturnType<typeof createClient>>) {
