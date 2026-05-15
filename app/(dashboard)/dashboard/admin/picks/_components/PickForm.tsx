@@ -39,6 +39,8 @@ interface PickList {
   occasion?: string | null
   winner_summary?: string | null
   bundle_total_cents?: number | null
+  meta_title?: string | null
+  meta_description?: string | null
 }
 
 interface Props {
@@ -60,6 +62,8 @@ export function PickForm({ pick, initialItems }: Props) {
   const [occasion, setOccasion]           = useState<string>(pick?.occasion ?? '')
   const [winnerSummary, setWinnerSummary] = useState<string>(pick?.winner_summary ?? '')
   const [bundleTotalCents, setBundleTotal] = useState<string>(pick?.bundle_total_cents != null ? String(pick.bundle_total_cents) : '')
+  const [metaTitle, setMetaTitle]         = useState<string>(pick?.meta_title ?? '')
+  const [metaDescription, setMetaDesc]    = useState<string>(pick?.meta_description ?? '')
   const [items, setItems]       = useState<PickItem[]>(
     initialItems.map((i, idx) => ({ ...i, position: i.position ?? idx }))
   )
@@ -70,6 +74,37 @@ export function PickForm({ pick, initialItems }: Props) {
   const [busy, setBusy]     = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [error, setError]   = useState<string | null>(null)
+
+  // ── AI intro generation + refine ──────────────────────────────────────────
+  const [aiBusy, setAiBusy] = useState(false)
+  const [aiError, setAiError] = useState<string | null>(null)
+  const [refineInstruction, setRefineInstruction] = useState('')
+
+  async function callIntroAI(refine: boolean) {
+    if (items.length < 2) { setAiError('Add at least 2 reviews before generating'); return }
+    setAiBusy(true); setAiError(null)
+    try {
+      const res = await fetch('/api/claude/collection-intro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          collectionType: pickType,
+          title:          title || 'Untitled collection',
+          description:    description || null,
+          itemReviewIds:  items.map((i) => i.review_id),
+          currentHtml:    refine ? introHtml : undefined,
+          instruction:    refine ? refineInstruction.trim() : undefined,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Generation failed')
+      setIntro(json.html ?? '')
+      if (refine) setRefineInstruction('')
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : 'Generation failed')
+    }
+    setAiBusy(false)
+  }
 
   function getReview(item: PickItem): ReviewSummary | null {
     if (!item.reviews) return null
@@ -143,6 +178,8 @@ export function PickForm({ pick, initialItems }: Props) {
       occasion: pickType === 'gift_guide' ? (occasion || null) : null,
       winner_summary: pickType === 'comparison' ? (winnerSummary.trim() || null) : null,
       bundle_total_cents: pickType === 'stack' && parsedBundleTotal !== null && !isNaN(parsedBundleTotal) ? parsedBundleTotal : null,
+      meta_title:       metaTitle.trim() || null,
+      meta_description: metaDescription.trim() || null,
       items: items.map((i) => ({
         review_id:     i.review_id,
         position:      i.position,
@@ -226,14 +263,50 @@ export function PickForm({ pick, initialItems }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">
-            Editorial intro <span className="text-gray-600">(shows above the body of the detail page)</span>
-          </label>
+          <div className="flex items-end justify-between mb-1.5 gap-2 flex-wrap">
+            <label className="block text-sm text-gray-300">
+              Editorial intro <span className="text-gray-600">(shows above the body of the detail page)</span>
+            </label>
+            <button
+              type="button"
+              onClick={() => callIntroAI(false)}
+              disabled={aiBusy || items.length < 2}
+              className="text-xs px-3 py-1.5 bg-orange-700/60 hover:bg-orange-600/60 disabled:opacity-40 text-orange-200 font-semibold rounded-lg transition-colors min-h-[32px]"
+              title={items.length < 2 ? 'Add at least 2 reviews first' : 'Generate intro with AI'}
+            >
+              {aiBusy && !refineInstruction ? '✨ Generating…' : introHtml.trim() ? '↻ Regenerate with AI' : '✨ Generate with AI'}
+            </button>
+          </div>
           <TiptapEditor
             value={introHtml}
             onChange={setIntro}
             placeholder="Tell the reader why this collection exists. A few sentences of context that frame the picks below…"
           />
+
+          {/* Inline AI refine — short instruction reshapes the current intro */}
+          {introHtml.trim() && (
+            <div className="mt-3 flex flex-col sm:flex-row gap-2">
+              <input
+                type="text"
+                value={refineInstruction}
+                onChange={(e) => setRefineInstruction(e.target.value)}
+                placeholder="Refine instruction — e.g. 'tighter', 'more dad voice', 'lead with the testing scenario'…"
+                className="flex-1 px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => callIntroAI(true)}
+                disabled={aiBusy || !refineInstruction.trim() || items.length < 2}
+                className="shrink-0 text-xs px-3 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-gray-200 font-semibold rounded-lg transition-colors min-h-[36px]"
+              >
+                {aiBusy && refineInstruction ? 'Refining…' : 'Refine →'}
+              </button>
+            </div>
+          )}
+
+          {aiError && (
+            <p className="mt-2 text-xs text-red-400 bg-red-950/40 border border-red-900/40 rounded-lg px-3 py-2">{aiError}</p>
+          )}
         </div>
 
         <HeroImagePanel
@@ -321,6 +394,49 @@ export function PickForm({ pick, initialItems }: Props) {
             </p>
           </div>
         )}
+
+        {/* SEO overrides — collapsible since they're optional */}
+        <details className="group rounded-xl bg-gray-950/60 border border-gray-800/60">
+          <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between gap-3 min-h-[44px]">
+            <div>
+              <p className="text-sm font-semibold text-gray-200">SEO overrides</p>
+              <p className="text-xs text-gray-600">Optional. Fall back to title + description if left empty.</p>
+            </div>
+            <svg className="w-4 h-4 text-gray-500 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div className="px-4 pb-4 pt-1 space-y-3 border-t border-gray-800/60">
+            <div>
+              <label className="block text-xs text-gray-400 mb-1.5">
+                Meta title <span className="text-gray-600">(HTML &lt;title&gt; tag; ~70 char limit)</span>
+              </label>
+              <input
+                type="text"
+                value={metaTitle}
+                onChange={(e) => setMetaTitle(e.target.value)}
+                maxLength={120}
+                placeholder={title ? `${title.slice(0, 60)}${title.length > 60 ? '…' : ''}` : 'Defaults to title'}
+                className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-sm"
+              />
+              <p className="mt-1 text-xs text-gray-600 tabular-nums">{metaTitle.length}/120</p>
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1.5">
+                Meta description <span className="text-gray-600">(search snippet; ~155 char limit)</span>
+              </label>
+              <textarea
+                value={metaDescription}
+                onChange={(e) => setMetaDesc(e.target.value)}
+                maxLength={300}
+                rows={3}
+                placeholder={description || 'Defaults to short description'}
+                className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-sm resize-none"
+              />
+              <p className="mt-1 text-xs text-gray-600 tabular-nums">{metaDescription.length}/300</p>
+            </div>
+          </div>
+        </details>
 
         <label className="flex items-center gap-3 cursor-pointer py-1">
           <input

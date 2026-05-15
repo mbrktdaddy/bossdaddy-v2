@@ -27,18 +27,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = await createClient()
   const { data } = await supabase
     .from('collections')
-    .select('title, description')
+    .select('title, description, meta_title, meta_description')
     .eq('slug', slug)
     .eq('collection_type', 'comparison')
     .eq('is_visible', true)
     .single()
   if (!data) return { title: 'Not Found' }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const c = data as any
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+  const metaTitle       = c.meta_title       ?? `${c.title} — Comparison`
+  const metaDescription = c.meta_description ?? c.description ?? 'Head-to-head comparison from Boss Daddy.'
   return {
-    title: `${data.title} — Comparison`,
-    description: data.description ?? 'Head-to-head comparison from Boss Daddy.',
-    alternates: { canonical: `${siteUrl}/comparisons/${slug}` },
-    openGraph: { title: data.title, description: data.description ?? undefined, url: `${siteUrl}/comparisons/${slug}` },
+    title:       metaTitle,
+    description: metaDescription,
+    alternates:  { canonical: `${siteUrl}/comparisons/${slug}` },
+    openGraph:   { title: metaTitle, description: metaDescription, url: `${siteUrl}/comparisons/${slug}` },
   }
 }
 

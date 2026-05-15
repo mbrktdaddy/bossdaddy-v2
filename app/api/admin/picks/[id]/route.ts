@@ -17,6 +17,8 @@ const UpdateSchema = z.object({
   occasion:             z.string().max(40).optional().nullable(),
   winner_summary:       z.string().max(500).optional().nullable(),
   bundle_total_cents:   z.number().int().min(0).optional().nullable(),
+  meta_title:           z.string().max(120).optional().nullable(),
+  meta_description:     z.string().max(300).optional().nullable(),
   items: z.array(z.object({
     review_id:     z.string().uuid(),
     position:      z.number().int(),

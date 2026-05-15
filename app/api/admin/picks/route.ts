@@ -16,6 +16,8 @@ const PickListSchema = z.object({
   occasion:             z.string().max(40).optional().nullable(),
   winner_summary:       z.string().max(500).optional().nullable(),
   bundle_total_cents:   z.number().int().min(0).optional().nullable(),
+  meta_title:           z.string().max(120).optional().nullable(),
+  meta_description:     z.string().max(300).optional().nullable(),
 })
 
 async function requireAdmin(supabase: Awaited<ReturnType<typeof createClient>>) {
@@ -51,9 +53,11 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
 
   const admin = createAdminClient()
+  const insertPayload = { ...parsed.data, published_at: parsed.data.is_visible ? (parsed.data.published_at ?? new Date().toISOString()) : null }
   const { data, error } = await admin
     .from('collections')
-    .insert({ ...parsed.data, published_at: parsed.data.is_visible ? (parsed.data.published_at ?? new Date().toISOString()) : null })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .insert(insertPayload as any)
     .select()
     .single()
 
