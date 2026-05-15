@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { OCCASIONS, OCCASION_GROUPS } from '@/lib/gift-occasions'
+import { HeroImagePanel } from '@/components/workspace/HeroImagePanel'
+import { TiptapEditor } from '@/components/workspace/TiptapEditor'
 
 interface ReviewSummary {
   id: string
@@ -80,7 +82,10 @@ export function PickForm({ pick, initialItems }: Props) {
     const res = await fetch(`/api/admin/search?q=${encodeURIComponent(q)}&type=review&limit=8`)
     if (res.ok) {
       const json = await res.json()
-      setSearchResults(json.results ?? [])
+      // API returns { articles, reviews, media }; only show approved reviews so
+      // drafts/pending/rejected entries can't be added to public collections.
+      const reviews = (json.reviews ?? []) as Array<ReviewSummary & { status?: string }>
+      setSearchResults(reviews.filter((r) => r.status === 'approved'))
     }
     setSearching(false)
   }
@@ -221,22 +226,28 @@ export function PickForm({ pick, initialItems }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Editorial intro <span className="text-gray-600">(HTML, shows at top of detail page)</span></label>
-          <textarea
-            value={introHtml} onChange={(e) => setIntro(e.target.value)}
-            rows={4} placeholder="<p>Every year I get asked the same question...</p>"
-            className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none text-base"
+          <label className="block text-sm text-gray-300 mb-1.5">
+            Editorial intro <span className="text-gray-600">(shows above the body of the detail page)</span>
+          </label>
+          <TiptapEditor
+            value={introHtml}
+            onChange={setIntro}
+            placeholder="Tell the reader why this collection exists. A few sentences of context that frame the picks below…"
           />
         </div>
 
-        <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Hero image URL</label>
-          <input
-            type="url" value={heroUrl} onChange={(e) => setHeroUrl(e.target.value)}
-            placeholder="https://..."
-            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-base"
-          />
-        </div>
+        <HeroImagePanel
+          imageUrl={heroUrl || null}
+          onChange={(url) => setHeroUrl(url ?? '')}
+          label="Hero image"
+          contentType="guide"
+          title={title}
+          category="other"
+          excerpt={description}
+        />
+        <p className="-mt-3 text-xs text-gray-600">
+          📷 Take a real photo, 📁 pick from the media library, or generate an editorial scene with AI.
+        </p>
 
         <div>
           <label className="block text-sm text-gray-300 mb-1.5">Collection type</label>

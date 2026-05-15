@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       .limit(8),
     admin
       .from('reviews')
-      .select('id, title, slug, status, category, product_name')
+      .select('id, title, slug, status, category, product_name, rating, image_url')
       .or(`title.ilike.${like},product_name.ilike.${like},excerpt.ilike.${like}`)
       .order('updated_at', { ascending: false })
       .limit(8),
