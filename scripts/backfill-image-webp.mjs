@@ -135,6 +135,30 @@ async function deleteOriginal(bucket, name) {
   if (error) throw new Error(`delete ${bucket}/${name}: ${error.message}`)
 }
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+
+// Retry a network-dependent operation with backoff. First pass died because
+// the Supabase Storage CDN started returning `fetch failed` / `terminated`
+// errors after a few large PNG downloads — likely connection pool saturation.
+// 3 attempts with 1s / 3s / 8s backoff handles transient failures without
+// stalling the whole batch.
+async function withRetry(fn, label, attempts = 3) {
+  const delays = [1000, 3000, 8000]
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn()
+    } catch (err) {
+      const isLast = i === attempts - 1
+      const msg = err instanceof Error ? err.message : String(err)
+      if (isLast) throw err
+      const delay = delays[i] ?? 5000
+      log(`  ${label}: ${msg} — retry ${i + 1}/${attempts - 1} in ${delay}ms`)
+      await sleep(delay)
+    }
+  }
+  throw new Error('unreachable')
+}
+
 async function main() {
   // Phase A — inventory
   log('Phase A: inventory')
@@ -178,9 +202,9 @@ async function main() {
       if (await siblingWebpExists(f.bucket, f.name)) {
         log(`${prefix} → sibling .webp exists, skipping encode`)
       } else {
-        const png   = await downloadPng(f.bucket, f.name)
+        const png   = await withRetry(() => downloadPng(f.bucket, f.name), `${prefix} download`)
         const webp  = await sharp(png).webp({ quality: WEBP_QUALITY }).toBuffer()
-        await uploadWebp(f.bucket, webpName, webp)
+        await withRetry(() => uploadWebp(f.bucket, webpName, webp), `${prefix} upload`)
         stats.sumBefore += png.length
         stats.sumAfter  += webp.length
         log(`${prefix} → ${(png.length/1024).toFixed(0)} KB → ${(webp.length/1024).toFixed(0)} KB`)
@@ -192,13 +216,17 @@ async function main() {
       stats.rowsTouched.inline      += touched.inline
 
       if (!KEEP_ORIGINALS) {
-        await deleteOriginal(f.bucket, f.name)
+        await withRetry(() => deleteOriginal(f.bucket, f.name), `${prefix} delete`)
       }
       stats.converted++
     } catch (err) {
       stats.failed++
       log(`${prefix} → FAILED: ${err.message}`)
     }
+
+    // Gentle pacing between iterations to keep the CDN connection pool happy.
+    // Total added wall time: ~93 * 250ms ≈ 23s spread over the run.
+    await sleep(250)
   }
 
   log('\nSummary')
