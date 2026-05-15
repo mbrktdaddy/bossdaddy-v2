@@ -21,9 +21,9 @@ export default async function GiftsIndexPage() {
 
   // Find which occasions have published gift guides so we can show "live" indicators
   const { data: liveGifts } = await supabase
-    .from('pick_lists')
+    .from('collections')
     .select('occasion, slug, title, hero_image_url, published_at')
-    .eq('pick_type', 'gift_guide')
+    .eq('collection_type', 'gift_guide')
     .eq('is_visible', true)
     .order('published_at', { ascending: false })
 

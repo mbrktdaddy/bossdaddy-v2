@@ -99,7 +99,7 @@ Forgetting the right read role on a public table silently breaks logged-out visi
 
 | Table type | Read role | Write gate |
 |---|---|---|
-| Public content (reviews, guides, products, pick_lists, etc.) | `to anon, authenticated` | `is_admin()` |
+| Public content (reviews, guides, products, collections, etc.) | `to anon, authenticated` | `is_admin()` |
 | User-owned data (wishlists, drafts, comments) | `to authenticated` + `using (user_id = auth.uid() or is_admin())` | same |
 | Admin-only (moderation, audit logs) | `to authenticated` + `using (is_admin())` | `is_admin()` |
 

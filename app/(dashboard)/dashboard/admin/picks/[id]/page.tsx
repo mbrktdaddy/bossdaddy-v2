@@ -12,10 +12,10 @@ export default async function EditPickPage({ params }: { params: Promise<{ id: s
 
   const admin = createAdminClient()
   const [{ data: pick }, { data: items }] = await Promise.all([
-    admin.from('pick_lists').select('*').eq('id', id).single(),
-    admin.from('pick_list_items')
+    admin.from('collections').select('*').eq('id', id).single(),
+    admin.from('collection_items')
       .select('id, review_id, position, blurb, reviews(id, slug, title, product_name, rating, image_url)')
-      .eq('pick_list_id', id)
+      .eq('collection_id', id)
       .order('position'),
   ])
 

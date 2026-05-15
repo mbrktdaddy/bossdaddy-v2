@@ -62,17 +62,17 @@ export default async function GearPage({ searchParams }: Props) {
       .eq('status', 'approved')
       .eq('is_visible', true),
     supabase
-      .from('pick_lists')
+      .from('collections')
       .select('id, slug, title, hero_image_url, occasion')
-      .eq('pick_type', 'gift_guide')
+      .eq('collection_type', 'gift_guide')
       .eq('is_visible', true)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .in('occasion', seasonalValues as any),
     supabase
-      .from('pick_lists')
+      .from('collections')
       .select('id, slug, title, description, hero_image_url')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .in('pick_type', ['general', 'best_of'] as any)
+      .in('collection_type', ['general', 'best_of'] as any)
       .eq('is_visible', true)
       .order('published_at', { ascending: false })
       .limit(1),
@@ -89,9 +89,9 @@ export default async function GearPage({ searchParams }: Props) {
   }[] = []
   if (featuredPick) {
     const { data } = await supabase
-      .from('pick_list_items')
+      .from('collection_items')
       .select('position, blurb, reviews(slug, title, product_name, rating, image_url)')
-      .eq('pick_list_id', featuredPick.id)
+      .eq('collection_id', featuredPick.id)
       .order('position')
       .limit(3)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

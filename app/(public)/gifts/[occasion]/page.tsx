@@ -46,9 +46,9 @@ export default async function GiftOccasionPage({ params }: Props) {
 
   // Find the most recent published gift guide for this occasion
   const { data: pick } = await supabase
-    .from('pick_lists')
+    .from('collections')
     .select('id, slug, title, description, intro_html, hero_image_url, published_at')
-    .eq('pick_type', 'gift_guide')
+    .eq('collection_type', 'gift_guide')
     .eq('occasion', occ.value)
     .eq('is_visible', true)
     .order('published_at', { ascending: false })
@@ -62,9 +62,9 @@ export default async function GiftOccasionPage({ params }: Props) {
 
   if (pick) {
     const { data: pickItems } = await admin
-      .from('pick_list_items')
+      .from('collection_items')
       .select('position, blurb, reviews(id, slug, title, product_name, rating, excerpt, image_url, product_slug, has_affiliate_links)')
-      .eq('pick_list_id', pick.id)
+      .eq('collection_id', pick.id)
       .order('position')
 
     items = (pickItems ?? []).map((pi) => {

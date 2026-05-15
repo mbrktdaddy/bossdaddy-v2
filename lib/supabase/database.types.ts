@@ -849,12 +849,12 @@ export type Database = {
         }
         Relationships: []
       }
-      pick_list_items: {
+      collection_items: {
         Row: {
           blurb: string | null
           created_at: string
           id: string
-          pick_list_id: string
+          collection_id: string
           position: number
           review_id: string
         }
@@ -862,7 +862,7 @@ export type Database = {
           blurb?: string | null
           created_at?: string
           id?: string
-          pick_list_id: string
+          collection_id: string
           position?: number
           review_id: string
         }
@@ -870,20 +870,20 @@ export type Database = {
           blurb?: string | null
           created_at?: string
           id?: string
-          pick_list_id?: string
+          collection_id?: string
           position?: number
           review_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "pick_list_items_pick_list_id_fkey"
-            columns: ["pick_list_id"]
+            foreignKeyName: "collection_items_collection_id_fkey"
+            columns: ["collection_id"]
             isOneToOne: false
-            referencedRelation: "pick_lists"
+            referencedRelation: "collections"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "pick_list_items_review_id_fkey"
+            foreignKeyName: "collection_items_review_id_fkey"
             columns: ["review_id"]
             isOneToOne: false
             referencedRelation: "reviews"
@@ -891,7 +891,7 @@ export type Database = {
           },
         ]
       }
-      pick_lists: {
+      collections: {
         Row: {
           created_at: string
           description: string | null
@@ -900,7 +900,7 @@ export type Database = {
           intro_html: string | null
           is_visible: boolean
           occasion: string | null
-          pick_type: string
+          collection_type: string
           published_at: string | null
           slug: string
           title: string
@@ -914,7 +914,7 @@ export type Database = {
           intro_html?: string | null
           is_visible?: boolean
           occasion?: string | null
-          pick_type?: string
+          collection_type?: string
           published_at?: string | null
           slug: string
           title: string
@@ -928,7 +928,7 @@ export type Database = {
           intro_html?: string | null
           is_visible?: boolean
           occasion?: string | null
-          pick_type?: string
+          collection_type?: string
           published_at?: string | null
           slug?: string
           title?: string

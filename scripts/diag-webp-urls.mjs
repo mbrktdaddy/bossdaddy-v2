@@ -30,7 +30,7 @@ for (const fname of FILES) {
     { table: 'media_assets', cols: ['url', 'filename'] },
     { table: 'guides',       cols: ['image_url', 'content'] },
     { table: 'reviews',      cols: ['image_url', 'content'] },
-    { table: 'pick_lists',   cols: ['hero_image_url'] },
+    { table: 'collections',   cols: ['hero_image_url'] },
   ]
 
   let foundAnywhere = false

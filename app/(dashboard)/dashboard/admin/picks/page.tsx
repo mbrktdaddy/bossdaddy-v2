@@ -9,7 +9,7 @@ export default async function PicksListPage() {
 
   const admin = createAdminClient()
   const { data: picks } = await admin
-    .from('pick_lists')
+    .from('collections')
     .select('id, slug, title, description, is_visible, published_at')
     .order('created_at', { ascending: false })
 

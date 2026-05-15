@@ -12,7 +12,7 @@ const PickListSchema = z.object({
   hero_image_url:z.string().url().max(2048).optional().nullable(),
   is_visible:    z.boolean().optional().default(false),
   published_at:  z.string().optional().nullable(),
-  pick_type:     z.enum(['general', 'gift_guide', 'best_of']).optional().default('general'),
+  collection_type:     z.enum(['general', 'gift_guide', 'best_of']).optional().default('general'),
   occasion:      z.string().max(40).optional().nullable(),
 })
 
@@ -31,7 +31,7 @@ export async function GET() {
 
   const admin = createAdminClient()
   const { data, error } = await admin
-    .from('pick_lists')
+    .from('collections')
     .select('id, slug, title, description, hero_image_url, is_visible, published_at, created_at')
     .order('created_at', { ascending: false })
 
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 
   const admin = createAdminClient()
   const { data, error } = await admin
-    .from('pick_lists')
+    .from('collections')
     .insert({ ...parsed.data, published_at: parsed.data.is_visible ? (parsed.data.published_at ?? new Date().toISOString()) : null })
     .select()
     .single()

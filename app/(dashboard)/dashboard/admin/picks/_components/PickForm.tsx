@@ -31,7 +31,7 @@ interface PickList {
   hero_image_url: string | null
   is_visible: boolean
   published_at: string | null
-  pick_type?: string | null
+  collection_type?: string | null
   occasion?: string | null
 }
 
@@ -50,7 +50,7 @@ export function PickForm({ pick, initialItems }: Props) {
   const [introHtml, setIntro]   = useState(pick?.intro_html ?? '')
   const [heroUrl, setHeroUrl]   = useState(pick?.hero_image_url ?? '')
   const [visible, setVisible]   = useState(pick?.is_visible ?? false)
-  const [pickType, setPickType] = useState<string>(pick?.pick_type ?? 'general')
+  const [pickType, setPickType] = useState<string>(pick?.collection_type ?? 'general')
   const [occasion, setOccasion] = useState<string>(pick?.occasion ?? '')
   const [items, setItems]       = useState<PickItem[]>(
     initialItems.map((i, idx) => ({ ...i, position: i.position ?? idx }))
@@ -118,7 +118,7 @@ export function PickForm({ pick, initialItems }: Props) {
       intro_html: introHtml.trim() || null,
       hero_image_url: heroUrl.trim() || null,
       is_visible: visible,
-      pick_type: pickType,
+      collection_type: pickType,
       occasion: pickType === 'gift_guide' ? (occasion || null) : null,
       items: items.map((i) => ({ review_id: i.review_id, position: i.position, blurb: i.blurb })),
     }

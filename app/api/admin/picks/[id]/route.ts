@@ -13,7 +13,7 @@ const UpdateSchema = z.object({
   hero_image_url:z.string().url().max(2048).optional().nullable(),
   is_visible:    z.boolean().optional(),
   published_at:  z.string().optional().nullable(),
-  pick_type:     z.enum(['general', 'gift_guide', 'best_of']).optional(),
+  collection_type:     z.enum(['general', 'gift_guide', 'best_of']).optional(),
   occasion:      z.string().max(40).optional().nullable(),
   items: z.array(z.object({
     review_id: z.string().uuid(),
@@ -38,10 +38,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
   const admin = createAdminClient()
   const [{ data: pick }, { data: items }] = await Promise.all([
-    admin.from('pick_lists').select('*').eq('id', id).single(),
-    admin.from('pick_list_items')
+    admin.from('collections').select('*').eq('id', id).single(),
+    admin.from('collection_items')
       .select('id, review_id, position, blurb, reviews(id, slug, title, product_name, rating, image_url)')
-      .eq('pick_list_id', id)
+      .eq('collection_id', id)
       .order('position'),
   ])
 
@@ -65,24 +65,24 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (Object.keys(meta).length > 0) {
     const payload: Record<string, unknown> = { ...meta }
     if (meta.is_visible && !meta.published_at) {
-      const { data: existing } = await admin.from('pick_lists').select('published_at').eq('id', id).single()
+      const { data: existing } = await admin.from('collections').select('published_at').eq('id', id).single()
       if (!existing?.published_at) payload.published_at = new Date().toISOString()
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await admin.from('pick_lists').update(payload as any).eq('id', id)
+    const { error } = await admin.from('collections').update(payload as any).eq('id', id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
   if (items !== undefined) {
-    await admin.from('pick_list_items').delete().eq('pick_list_id', id)
+    await admin.from('collection_items').delete().eq('collection_id', id)
     if (items.length > 0) {
-      const rows = items.map((item) => ({ pick_list_id: id, ...item }))
-      const { error } = await admin.from('pick_list_items').insert(rows)
+      const rows = items.map((item) => ({ collection_id: id, ...item }))
+      const { error } = await admin.from('collection_items').insert(rows)
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     }
   }
 
-  const { data: pick } = await admin.from('pick_lists').select('*').eq('id', id).single()
+  const { data: pick } = await admin.from('collections').select('*').eq('id', id).single()
   revalidatePath('/picks')
   revalidatePath('/gifts')
   revalidatePath('/')
@@ -101,8 +101,8 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   if ('error' in gate) return gate.error
 
   const admin = createAdminClient()
-  const { data: pick } = await admin.from('pick_lists').select('slug, occasion').eq('id', id).single()
-  const { error } = await admin.from('pick_lists').delete().eq('id', id)
+  const { data: pick } = await admin.from('collections').select('slug, occasion').eq('id', id).single()
+  const { error } = await admin.from('collections').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   revalidatePath('/picks')

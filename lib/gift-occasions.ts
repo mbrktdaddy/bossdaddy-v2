@@ -3,7 +3,7 @@
  * /gifts/[slug] that compounds SEO across years — content gets refreshed
  * annually but the URL never changes.
  *
- * `value` matches the occasion column in pick_lists (with underscores).
+ * `value` matches the occasion column in collections (with underscores).
  * `slug`  is the URL-safe form (with hyphens).
  */
 

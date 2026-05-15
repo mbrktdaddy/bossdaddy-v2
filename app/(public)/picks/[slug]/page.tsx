@@ -14,7 +14,7 @@ interface Props { params: Promise<{ slug: string }> }
 
 export async function generateStaticParams() {
   const admin = createAdminClient()
-  const { data } = await admin.from('pick_lists').select('slug').eq('is_visible', true)
+  const { data } = await admin.from('collections').select('slug').eq('is_visible', true)
   return (data ?? []).map(({ slug }) => ({ slug }))
 }
 
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const supabase = await createClient()
   const { data } = await supabase
-    .from('pick_lists')
+    .from('collections')
     .select('title, description')
     .eq('slug', slug)
     .eq('is_visible', true)
@@ -42,7 +42,7 @@ export default async function PickDetailPage({ params }: Props) {
   const supabase = await createClient()
 
   const { data: pick } = await supabase
-    .from('pick_lists')
+    .from('collections')
     .select('id, slug, title, description, intro_html, hero_image_url, published_at')
     .eq('slug', slug)
     .eq('is_visible', true)
@@ -52,9 +52,9 @@ export default async function PickDetailPage({ params }: Props) {
 
   const admin = createAdminClient()
   const { data: pickItems } = await admin
-    .from('pick_list_items')
+    .from('collection_items')
     .select('position, blurb, reviews(id, slug, title, product_name, category, rating, excerpt, image_url, product_slug, has_affiliate_links)')
-    .eq('pick_list_id', pick.id)
+    .eq('collection_id', pick.id)
     .order('position')
 
   type ReviewRow = { id: string; slug: string; title: string; product_name: string; rating: number; excerpt: string | null; image_url: string | null; product_slug: string | null; has_affiliate_links: boolean }

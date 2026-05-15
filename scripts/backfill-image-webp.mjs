@@ -89,11 +89,11 @@ async function rewriteDb(oldUrl, newUrl, oldName, newName) {
     .eq('url', oldUrl)
   if (maErr) throw new Error(`media_assets update: ${maErr.message}`)
 
-  // 2. guides.image_url + reviews.image_url + pick_lists.hero_image_url
+  // 2. guides.image_url + reviews.image_url + collections.hero_image_url
   const heroTables = [
     { table: 'guides',     col: 'image_url' },
     { table: 'reviews',    col: 'image_url' },
-    { table: 'pick_lists', col: 'hero_image_url' },
+    { table: 'collections', col: 'hero_image_url' },
   ]
   let heroCount = 0
   for (const { table, col } of heroTables) {

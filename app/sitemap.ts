@@ -35,7 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     admin.from('guide_tags').select('tag_slug, guides!inner(status, is_visible)')
       .eq('guides.status', 'approved')
       .eq('guides.is_visible', true),
-    admin.from('pick_lists').select('slug, updated_at').eq('is_visible', true),
+    admin.from('collections').select('slug, updated_at').eq('is_visible', true),
   ])
 
   const reviewTagSlugs = Array.from(new Set((reviewTagRows ?? []).map((r) => r.tag_slug)))

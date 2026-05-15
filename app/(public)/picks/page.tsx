@@ -14,10 +14,10 @@ export const metadata: Metadata = {
 export default async function PicksIndexPage() {
   const supabase = await createClient()
   const { data: picks } = await supabase
-    .from('pick_lists')
-    .select('id, slug, title, description, hero_image_url, published_at, pick_type')
+    .from('collections')
+    .select('id, slug, title, description, hero_image_url, published_at, collection_type')
     .eq('is_visible', true)
-    .neq('pick_type', 'gift_guide')
+    .neq('collection_type', 'gift_guide')
     .order('published_at', { ascending: false })
 
   return (

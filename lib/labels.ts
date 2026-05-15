@@ -27,7 +27,7 @@ export const LABELS = {
     full: 'Boss Daddy Approved Gear',
   },
 
-  // pick_lists table → /picks public route
+  // collections table → /picks public route
   picks: {
     short: 'Picks',
     full: 'Boss Daddy Picks',
