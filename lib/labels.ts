@@ -50,4 +50,25 @@ export const LABELS = {
     short: 'Gifts',
     full: 'Gift Guides',
   },
+
+  // comparison-type collections → /comparisons
+  comparisons: {
+    short: 'Comparisons',
+    full: 'Head-to-Head Comparisons',
+    singular: 'Comparison',
+  },
+
+  // stack-type collections → /stacks
+  stacks: {
+    short: 'Stacks',
+    full: 'Boss Daddy Stacks',
+    singular: 'Stack',
+  },
+
+  // Umbrella for all collection types — the brand surface that unifies
+  // /picks, /comparisons, /stacks, /gifts under one discoverable home.
+  vault: {
+    short: 'Vault',
+    full: 'The Vault',
+  },
 } as const
