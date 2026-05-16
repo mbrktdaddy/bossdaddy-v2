@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { OCCASIONS, OCCASION_GROUPS } from '@/lib/gift-occasions'
 import { HeroImagePanel } from '@/components/workspace/HeroImagePanel'
 import { TiptapEditor } from '@/components/workspace/TiptapEditor'
+import { SchedulePanel } from '@/components/workspace/SchedulePanel'
 
 interface ReviewSummary {
   id: string
@@ -42,6 +43,7 @@ interface PickList {
   bundle_total_cents?: number | null
   meta_title?: string | null
   meta_description?: string | null
+  scheduled_publish_at?: string | null
 }
 
 interface Props {
@@ -65,6 +67,7 @@ export function PickForm({ pick, initialItems }: Props) {
   const [bundleTotalCents, setBundleTotal] = useState<string>(pick?.bundle_total_cents != null ? String(pick.bundle_total_cents) : '')
   const [metaTitle, setMetaTitle]         = useState<string>(pick?.meta_title ?? '')
   const [metaDescription, setMetaDesc]    = useState<string>(pick?.meta_description ?? '')
+  const [scheduledAt, setScheduledAt]     = useState<string | null>(pick?.scheduled_publish_at ?? null)
   const [items, setItems]       = useState<PickItem[]>(
     initialItems.map((i, idx) => ({ ...i, position: i.position ?? idx }))
   )
@@ -221,8 +224,9 @@ export function PickForm({ pick, initialItems }: Props) {
       occasion: pickType === 'gift_guide' ? (occasion || null) : null,
       winner_summary: pickType === 'comparison' ? (winnerSummary.trim() || null) : null,
       bundle_total_cents: pickType === 'stack' && parsedBundleTotal !== null && !isNaN(parsedBundleTotal) ? parsedBundleTotal : null,
-      meta_title:       metaTitle.trim() || null,
-      meta_description: metaDescription.trim() || null,
+      meta_title:           metaTitle.trim() || null,
+      meta_description:     metaDescription.trim() || null,
+      scheduled_publish_at: scheduledAt,
       items: items.map((i) => ({
         review_id:     i.review_id,
         position:      i.position,
@@ -441,6 +445,18 @@ export function PickForm({ pick, initialItems }: Props) {
               This list will replace any previous gift guide for this occasion at <code className="text-orange-400">/gifts/{OCCASIONS.find((o) => o.value === occasion)?.slug ?? '[occasion]'}</code>
             </p>
           </div>
+        )}
+
+        {/* Schedule publish — flip is_visible automatically at a future time */}
+        <SchedulePanel
+          scheduledAt={scheduledAt}
+          onChange={setScheduledAt}
+          disabled={visible}
+        />
+        {visible && scheduledAt && (
+          <p className="-mt-3 text-xs text-amber-400">
+            ⚠ This collection is already live. Clear the schedule, or unpublish first to schedule a future drop.
+          </p>
         )}
 
         {/* SEO overrides — collapsible since they're optional */}

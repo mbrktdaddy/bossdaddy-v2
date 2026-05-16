@@ -30,8 +30,10 @@ export async function GET(request: NextRequest) {
   const admin = createAdminClient()
   const now = new Date().toISOString()
 
-  // Find items whose scheduled time has arrived and are not yet live
-  const [{ data: dueArticles }, { data: dueReviews }] = await Promise.all([
+  // Find items whose scheduled time has arrived and are not yet live.
+  // Reviews + guides use status='approved' as their "live" state; collections
+  // use is_visible=true.
+  const [{ data: dueArticles }, { data: dueReviews }, { data: dueCollections }] = await Promise.all([
     admin
       .from('guides')
       .select('id, slug, title, author_id')
@@ -44,13 +46,21 @@ export async function GET(request: NextRequest) {
       .not('scheduled_publish_at', 'is', null)
       .lte('scheduled_publish_at', now)
       .in('status', ['draft', 'pending', 'rejected']),
+    admin
+      .from('collections')
+      .select('id, slug, title, collection_type, occasion')
+      .not('scheduled_publish_at', 'is', null)
+      .lte('scheduled_publish_at', now)
+      .eq('is_visible', false),
   ])
 
-  const articleIds = (dueArticles ?? []).map((a) => a.id)
-  const reviewIds  = (dueReviews ?? []).map((r) => r.id)
+  const articleIds    = (dueArticles    ?? []).map((a) => a.id)
+  const reviewIds     = (dueReviews     ?? []).map((r) => r.id)
+  const collectionIds = (dueCollections ?? []).map((c) => c.id)
 
-  let articlesPublished = 0
-  let reviewsPublished  = 0
+  let articlesPublished    = 0
+  let reviewsPublished     = 0
+  let collectionsPublished = 0
 
   if (articleIds.length) {
     const { error, count } = await admin
@@ -78,6 +88,22 @@ export async function GET(request: NextRequest) {
     reviewsPublished = count ?? 0
   }
 
+  if (collectionIds.length) {
+    // Collections use is_visible + published_at; no status column. Set both.
+    const collectionUpdate = {
+      is_visible:           true,
+      published_at:         now,
+      scheduled_publish_at: null,
+    }
+    const { error, count } = await admin
+      .from('collections')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .update(collectionUpdate as any, { count: 'exact' })
+      .in('id', collectionIds)
+    if (error) console.error('Scheduled collection publish failed:', error)
+    collectionsPublished = count ?? 0
+  }
+
   // Revalidate public pages that might have changed
   if (articlesPublished > 0) {
     revalidatePath('/')
@@ -89,6 +115,25 @@ export async function GET(request: NextRequest) {
     revalidatePath('/reviews')
     revalidatePath('/about')
     ;(dueReviews ?? []).forEach((r) => r.slug && revalidatePath(`/reviews/${r.slug}`))
+  }
+  if (collectionsPublished > 0) {
+    revalidatePath('/')
+    revalidatePath('/picks')
+    revalidatePath('/comparisons')
+    revalidatePath('/stacks')
+    revalidatePath('/gifts')
+    // Route each newly-live collection to its type-specific detail URL.
+    const { OCCASIONS } = await import('@/lib/gift-occasions')
+    for (const c of (dueCollections ?? [])) {
+      if (!c.slug) continue
+      if (c.collection_type === 'comparison') revalidatePath(`/comparisons/${c.slug}`)
+      else if (c.collection_type === 'stack')  revalidatePath(`/stacks/${c.slug}`)
+      else if (c.collection_type === 'gift_guide') {
+        const occ = OCCASIONS.find((o) => o.value === c.occasion)
+        if (occ) revalidatePath(`/gifts/${occ.slug}`)
+      }
+      else revalidatePath(`/picks/${c.slug}`)
+    }
   }
 
   // Send author notifications + wishlist alerts (fire-and-forget, don't block response)
@@ -160,6 +205,7 @@ export async function GET(request: NextRequest) {
     success: true,
     articlesPublished,
     reviewsPublished,
+    collectionsPublished,
     checkedAt: now,
   })
 }

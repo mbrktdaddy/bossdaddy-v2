@@ -19,6 +19,7 @@ const UpdateSchema = z.object({
   bundle_total_cents:   z.number().int().min(0).optional().nullable(),
   meta_title:           z.string().max(120).optional().nullable(),
   meta_description:     z.string().max(300).optional().nullable(),
+  scheduled_publish_at: z.string().datetime().optional().nullable(),
   items: z.array(z.object({
     review_id:     z.string().uuid(),
     position:      z.number().int(),

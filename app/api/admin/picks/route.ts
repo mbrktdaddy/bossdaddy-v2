@@ -18,6 +18,7 @@ const PickListSchema = z.object({
   bundle_total_cents:   z.number().int().min(0).optional().nullable(),
   meta_title:           z.string().max(120).optional().nullable(),
   meta_description:     z.string().max(300).optional().nullable(),
+  scheduled_publish_at: z.string().datetime().optional().nullable(),
 })
 
 async function requireAdmin(supabase: Awaited<ReturnType<typeof createClient>>) {
@@ -56,7 +57,8 @@ export async function POST(request: NextRequest) {
   const insertPayload = { ...parsed.data, published_at: parsed.data.is_visible ? (parsed.data.published_at ?? new Date().toISOString()) : null }
   const { data, error } = await admin
     .from('collections')
-    .insert(insertPayload)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .insert(insertPayload as any)
     .select()
     .single()
 
