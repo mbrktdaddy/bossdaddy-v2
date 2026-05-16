@@ -89,13 +89,6 @@ export default async function ComparisonDetailPage({ params }: Props) {
     .eq('slug', slug)
     .eq('collection_type', 'comparison')
     .eq('is_visible', true)
-    .returns<{
-      id: string; slug: string; title: string; description: string | null;
-      intro_html: string | null; hero_image_url: string | null;
-      winner_summary: string | null;
-      methodology_html: string | null; faqs: { question: string; answer: string }[] | null;
-      published_at: string | null; updated_at: string | null;
-    }[]>()
     .single()
 
   if (!comparison) notFound()
@@ -106,13 +99,6 @@ export default async function ComparisonDetailPage({ params }: Props) {
     .select('position, blurb, wins_category, best_for, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, pros, cons, key_takeaways, best_for, not_for, score_quality, score_value, score_ease, score_daily_use)')
     .eq('collection_id', comparison.id)
     .order('position')
-    .returns<Array<{
-      position:      number
-      blurb:         string | null
-      wins_category: string | null
-      best_for:      string | null
-      reviews:       ReviewRow | ReviewRow[] | null
-    }>>()
 
   const items = (rawItems ?? []).map((it) => {
     const r = it.reviews

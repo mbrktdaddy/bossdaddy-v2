@@ -79,12 +79,6 @@ export default async function PickDetailPage({ params }: Props) {
     .eq('slug', slug)
     .eq('is_visible', true)
     .in('collection_type', PICK_TYPES)
-    .returns<{
-      id: string; slug: string; title: string; description: string | null;
-      intro_html: string | null; hero_image_url: string | null;
-      methodology_html: string | null; faqs: { question: string; answer: string }[] | null;
-      published_at: string | null; updated_at: string | null;
-    }[]>()
     .single()
 
   if (!pick) notFound()
@@ -95,12 +89,6 @@ export default async function PickDetailPage({ params }: Props) {
     .select('position, blurb, best_for, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, pros, cons, best_for, has_affiliate_links)')
     .eq('collection_id', pick.id)
     .order('position')
-    .returns<Array<{
-      position: number
-      blurb:    string | null
-      best_for: string | null
-      reviews:  ReviewRow | ReviewRow[] | null
-    }>>()
 
   const items = (pickItems ?? []).map((pi) => {
     const r = pi.reviews
@@ -180,7 +168,9 @@ export default async function PickDetailPage({ params }: Props) {
     mainEntityOfPage: `${siteUrl}/picks/${slug}`,
   }
 
-  const itemListLd = {
+  // Skip ItemList when empty — schema.org rejects numberOfItems: 0 and
+  // Google flags it as malformed structured data.
+  const itemListLd = items.length > 0 ? {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: pick.title,
@@ -207,14 +197,14 @@ export default async function PickDetailPage({ params }: Props) {
         },
       }
     }),
-  }
+  } : null
 
   const faqLd = faqPageLd(faqs)
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
+      {itemListLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />}
       {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
       <div className="max-w-7xl mx-auto px-6 py-12">

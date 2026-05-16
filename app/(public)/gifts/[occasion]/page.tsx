@@ -72,12 +72,6 @@ export default async function GiftOccasionPage({ params }: Props) {
     .eq('is_visible', true)
     .order('published_at', { ascending: false })
     .limit(1)
-    .returns<{
-      id: string; slug: string; title: string; description: string | null;
-      intro_html: string | null; hero_image_url: string | null;
-      methodology_html: string | null; faqs: { question: string; answer: string }[] | null;
-      published_at: string | null; updated_at: string | null;
-    }[]>()
     .maybeSingle()
 
   const admin = createAdminClient()
@@ -89,12 +83,6 @@ export default async function GiftOccasionPage({ params }: Props) {
       .select('position, blurb, best_for, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, best_for, has_affiliate_links)')
       .eq('collection_id', pick.id)
       .order('position')
-      .returns<Array<{
-        position: number
-        blurb:    string | null
-        best_for: string | null
-        reviews:  ReviewRow | ReviewRow[] | null
-      }>>()
 
     items = (pickItems ?? []).map((pi) => {
       const reviews = pi.reviews

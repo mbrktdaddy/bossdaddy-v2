@@ -81,13 +81,6 @@ export default async function StackDetailPage({ params }: Props) {
     .eq('slug', slug)
     .eq('collection_type', 'stack')
     .eq('is_visible', true)
-    .returns<{
-      id: string; slug: string; title: string; description: string | null;
-      intro_html: string | null; hero_image_url: string | null;
-      bundle_total_cents: number | null;
-      methodology_html: string | null; faqs: { question: string; answer: string }[] | null;
-      published_at: string | null; updated_at: string | null;
-    }[]>()
     .single()
 
   if (!stack) notFound()

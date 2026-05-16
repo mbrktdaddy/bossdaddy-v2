@@ -56,7 +56,10 @@ export default function MethodologyCallout({
               dangerouslySetInnerHTML={{ __html: html }}
             />
           ) : (
-            <p className="text-sm sm:text-base text-gray-300 leading-relaxed">{text}</p>
+            // whitespace-pre-line preserves paragraph breaks editors type into
+            // the workspace textarea — without it, multi-paragraph methodology
+            // collapses into one wall of text.
+            <p className="text-sm sm:text-base text-gray-300 leading-relaxed whitespace-pre-line">{text}</p>
           )}
         </div>
       </div>
