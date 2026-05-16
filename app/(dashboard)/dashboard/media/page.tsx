@@ -42,7 +42,6 @@ function formatBytes(bytes: number | null) {
 function AssetCard({
   asset,
   productName,
-  onDelete,
   onConfirmDelete,
   onAltSave,
   copiedId,
@@ -50,7 +49,6 @@ function AssetCard({
 }: {
   asset: MediaAsset
   productName: string | null
-  onDelete: (id: string) => void
   onConfirmDelete: (id: string) => Promise<void>
   onAltSave: (id: string, alt: string) => void
   copiedId: string | null
@@ -431,7 +429,6 @@ export default function MediaLibraryPage() {
                 key={asset.id}
                 asset={asset}
                 productName={asset.product_id ? (productMap[asset.product_id] ?? null) : null}
-                onDelete={handleDelete}
                 onConfirmDelete={handleConfirmDelete}
                 onAltSave={handleAltSave}
                 copiedId={copiedId}

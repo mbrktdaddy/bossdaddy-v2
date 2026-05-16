@@ -56,7 +56,10 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
     setLoading(false)
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // load() is stable for the component's lifetime — re-running it whenever
+  // productId changes is the intent. Adding it to deps would require a
+  // useCallback wrap that buys nothing here.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load() }, [productId])
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {

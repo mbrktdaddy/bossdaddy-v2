@@ -145,12 +145,14 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   const status = review.status
   const isPublished = status === 'approved'
 
-  // Detect affiliate links whenever content changes; clear ack if links are removed
+  // Detect affiliate links whenever content changes; clear ack if links are removed.
+  // setHasAff is unavoidable here — the derived state needs to drive both UI and
+  // the readiness checklist downstream of useMemo. setDiscAck is conditional so
+  // it doesn't trigger set-state-in-effect.
   useEffect(() => {
     const hasLinks = detectAffiliateLinks(content)
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setHasAff(hasLinks)
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!hasLinks) setDiscAck(false)
   }, [content])
 

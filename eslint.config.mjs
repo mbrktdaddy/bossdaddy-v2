@@ -14,6 +14,20 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
   ]),
   {
+    // Honor the underscore-prefix convention for intentionally unused
+    // variables (e.g. destructure-and-discard patterns: `const { foo, _omit,
+    // ...rest } = obj`). This is the canonical JS/TS escape hatch when you
+    // need to name a binding to strip a field from an object.
+    rules: {
+      '@typescript-eslint/no-unused-vars': ['warn', {
+        argsIgnorePattern:              '^_',
+        varsIgnorePattern:              '^_',
+        caughtErrorsIgnorePattern:      '^_',
+        destructuredArrayIgnorePattern: '^_',
+      }],
+    },
+  },
+  {
     // React Email templates render a full HTML document, so they use the raw
     // <head> element on purpose. next/head's <Head /> belongs to the Next.js
     // App Router and would break email rendering. Disable the Next-page-

@@ -55,7 +55,6 @@ export function ProductLinkPanel({ content, onChangeContent }: Props) {
     setLoading(false)
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load() }, [])
 
   function insertProduct(slug: string) {

@@ -56,7 +56,6 @@ export function InternalLinkPanel({
   }
 
   async function load() {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true); setError(null)
     try {
       const res = await fetch('/api/claude/suggest-links', {

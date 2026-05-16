@@ -30,7 +30,6 @@ interface MediaPickerProps {
   onSelect: (url: string, altText: string, assetId?: string) => void
   onClose: () => void
   defaultProductId?: string
-  defaultCategory?: string
   /** Enable multi-select mode — confirm fires onMultiSelect instead of onSelect */
   multi?: boolean
   onMultiSelect?: (items: MultiSelectItem[]) => void
@@ -38,7 +37,7 @@ interface MediaPickerProps {
 
 type Tab = 'library' | 'generate'
 
-export default function MediaPicker({ onSelect, onClose, defaultProductId, defaultCategory, multi, onMultiSelect }: MediaPickerProps) {
+export default function MediaPicker({ onSelect, onClose, defaultProductId, multi, onMultiSelect }: MediaPickerProps) {
   const [tab, setTab] = useState<Tab>('library')
 
   // Library state
