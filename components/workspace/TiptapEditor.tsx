@@ -196,6 +196,113 @@ function LinkDialog({ initial, onConfirm, onCancel }: {
   )
 }
 
+// ── Collection embed dialog ─────────────────────────────────────────────────
+// Searches visible collections and inserts a [[COLLECTION:slug]] token at the
+// cursor. Resolved at save time by lib/collection-tokens.ts into a marker div
+// that the guide render layer swaps for a <CollectionEmbed> preview.
+
+interface CollectionHit {
+  id: string
+  slug: string
+  title: string
+  collection_type: string | null
+}
+
+const COLLECTION_TYPE_LABEL: Record<string, string> = {
+  general:    'Pick',
+  best_of:    'Best Of',
+  gift_guide: 'Gift Guide',
+  comparison: 'Comparison',
+  stack:      'Stack',
+}
+
+function CollectionDialog({ onConfirm, onCancel }: {
+  onConfirm: (slug: string) => void
+  onCancel: () => void
+}) {
+  const [q, setQ] = useState('')
+  const [results, setResults] = useState<CollectionHit[]>([])
+  const [searching, setSearching] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    const handle = setTimeout(async () => {
+      setSearching(true)
+      try {
+        const res = await fetch(`/api/admin/collections/search?q=${encodeURIComponent(q)}`)
+        if (!res.ok) return
+        const json = await res.json()
+        if (!cancelled) setResults((json.collections ?? []) as CollectionHit[])
+      } catch { /* ignore */ }
+      if (!cancelled) setSearching(false)
+    }, q ? 300 : 0)
+    return () => { cancelled = true; clearTimeout(handle) }
+  }, [q])
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 bg-black/60" onClick={onCancel}>
+      <div
+        className="bg-gray-900 border border-gray-700 rounded-xl w-full max-w-lg mx-4 shadow-2xl overflow-hidden flex flex-col max-h-[70vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="px-5 pt-5 pb-3 border-b border-gray-800">
+          <p className="text-sm font-semibold text-white mb-3">Insert collection</p>
+          <input
+            type="text"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Escape') onCancel() }}
+            placeholder="Search picks, stacks, comparisons by title or slug…"
+            autoFocus
+            className="w-full px-3 py-2 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500"
+          />
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-2 py-2">
+          {searching && results.length === 0 ? (
+            <p className="text-xs text-gray-500 px-3 py-4">Searching…</p>
+          ) : results.length === 0 ? (
+            <p className="text-xs text-gray-500 px-3 py-4">No collections match. Try a shorter or different term.</p>
+          ) : (
+            <ul className="space-y-1">
+              {results.map((c) => {
+                const label = COLLECTION_TYPE_LABEL[c.collection_type ?? 'general'] ?? 'Collection'
+                return (
+                  <li key={c.id}>
+                    <button
+                      type="button"
+                      onClick={() => onConfirm(c.slug)}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800/80 text-left transition-colors"
+                    >
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400 bg-orange-950/40 border border-orange-900/40 px-2 py-0.5 rounded-full shrink-0">
+                        {label}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-white truncate">{c.title}</p>
+                        <p className="text-xs text-gray-500 truncate">/{c.slug}</p>
+                      </div>
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </div>
+
+        <div className="px-5 py-3 border-t border-gray-800 flex justify-end">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main component ──────────────────────────────────────────────────────────
 
 interface Props {
@@ -204,6 +311,7 @@ interface Props {
   placeholder?: string
   rows?: number       // kept for API compat — not used directly in Tiptap
   targetWords?: number
+  enableCollectionEmbed?: boolean
 }
 
 interface SelectionState {
@@ -212,10 +320,11 @@ interface SelectionState {
   text: string
 }
 
-export function TiptapEditor({ value, onChange, placeholder, targetWords }: Props) {
+export function TiptapEditor({ value, onChange, placeholder, targetWords, enableCollectionEmbed = false }: Props) {
   const lastEmitted     = useRef(value)
   const [linkOpen, setLinkOpen]     = useState(false)
   const [linkCurrent, setLinkCurrent] = useState('')
+  const [collectionOpen, setCollectionOpen] = useState(false)
   const [selection, setSelection]   = useState<SelectionState | null>(null)
   const [aiInstruction, setAiInstruction] = useState('')
   const [aiRefining, setAiRefining] = useState(false)
@@ -389,6 +498,17 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords }: Prop
             className="px-2 py-1 rounded-lg text-xs font-semibold text-red-400 hover:bg-gray-700 transition-colors">✕ link</button>
         )}
 
+        {enableCollectionEmbed && (
+          <button
+            type="button"
+            onMouseDown={(e) => { e.preventDefault(); setCollectionOpen(true) }}
+            className="px-2 py-1 rounded-lg text-xs font-semibold text-gray-300 hover:bg-gray-700 transition-colors"
+            title="Insert a Boss Daddy collection (pick / stack / comparison) inline"
+          >
+            + Collection
+          </button>
+        )}
+
         <div className="flex-1" />
 
         <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().undo().run() }}
@@ -441,6 +561,22 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords }: Prop
           initial={linkCurrent}
           onConfirm={applyLink}
           onCancel={() => setLinkOpen(false)}
+        />
+      )}
+
+      {collectionOpen && (
+        <CollectionDialog
+          onConfirm={(slug) => {
+            setCollectionOpen(false)
+            if (!editor) return
+            // Insert the token on its own line. resolveCollectionTokens() at
+            // save time will swap it for the bd-collection-embed marker div.
+            editor.chain().focus().insertContent({
+              type: 'paragraph',
+              content: [{ type: 'text', text: `[[COLLECTION:${slug}]]` }],
+            }).run()
+          }}
+          onCancel={() => setCollectionOpen(false)}
         />
       )}
     </div>
