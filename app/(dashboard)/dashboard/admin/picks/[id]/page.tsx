@@ -40,7 +40,11 @@ export default async function EditPickPage({ params }: { params: Promise<{ id: s
           )}
         </div>
       </div>
-      <PickForm pick={pick} initialItems={items ?? []} />
+      {/* Cast: collections.faqs is generated as `Json` (any-shape jsonb) but
+          PickForm uses the structured CollectionFAQ[] shape we enforce at the
+          API/zod layer. The cast is safe because every write path validates
+          against FaqSchema before insert. */}
+      <PickForm pick={pick as unknown as Parameters<typeof PickForm>[0]['pick']} initialItems={items ?? []} />
     </div>
   )
 }

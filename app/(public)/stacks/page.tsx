@@ -2,6 +2,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
+import { getCollectionsWithCategory } from '@/lib/collection-listings'
+import CategoryFilterPills from '@/components/collections/CategoryFilterPills'
 
 export const revalidate = 60
 
@@ -11,19 +13,24 @@ export const metadata: Metadata = {
   alternates: { canonical: '/stacks' },
 }
 
-export default async function StacksIndexPage() {
+interface Props { searchParams: Promise<{ cat?: string }> }
+
+export default async function StacksIndexPage({ searchParams }: Props) {
+  const { cat: catParam } = await searchParams
   const supabase = await createClient()
-  const { data: stacks } = await supabase
-    .from('collections')
-    .select('id, slug, title, description, hero_image_url, published_at')
-    .eq('is_visible', true)
-    .eq('collection_type', 'stack')
-    .order('published_at', { ascending: false })
+  const all = await getCollectionsWithCategory(supabase, ['stack'])
+
+  const counts = new Map<string, number>()
+  for (const c of all) {
+    if (c.dominant_category) counts.set(c.dominant_category, (counts.get(c.dominant_category) ?? 0) + 1)
+  }
+
+  const filtered = catParam ? all.filter((c) => c.dominant_category === catParam) : all
+  const active = catParam ?? null
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-16">
-      {/* Header */}
-      <div className="mb-12">
+      <div className="mb-10">
         <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
         <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">Stacks</p>
         <h1 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tight">The Kit For The Job</h1>
@@ -32,14 +39,20 @@ export default async function StacksIndexPage() {
         </p>
       </div>
 
-      {!stacks?.length ? (
+      <CategoryFilterPills basePath="/stacks" active={active} counts={counts} total={all.length} />
+
+      {filtered.length === 0 ? (
         <div className="text-center py-24 bg-gray-900/40 rounded-2xl">
-          <p className="text-gray-500 text-lg font-semibold">First stack dropping soon.</p>
-          <p className="text-gray-600 text-sm mt-2">Check back soon, Boss.</p>
+          <p className="text-gray-500 text-lg font-semibold">
+            {active ? 'No stacks in this category yet.' : 'First stack dropping soon.'}
+          </p>
+          <p className="text-gray-600 text-sm mt-2">
+            {active ? <Link href="/stacks" className="text-orange-400 hover:text-orange-300">See all stacks →</Link> : 'Check back soon, Boss.'}
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {(stacks ?? []).map((s) => (
+          {filtered.map((s) => (
             <Link
               key={s.id}
               href={`/stacks/${s.slug}`}

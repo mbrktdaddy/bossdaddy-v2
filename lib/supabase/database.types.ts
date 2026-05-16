@@ -151,6 +151,7 @@ export type Database = {
       }
       collection_items: {
         Row: {
+          best_for: string | null
           blurb: string | null
           collection_id: string
           created_at: string
@@ -161,6 +162,7 @@ export type Database = {
           wins_category: string | null
         }
         Insert: {
+          best_for?: string | null
           blurb?: string | null
           collection_id: string
           created_at?: string
@@ -171,6 +173,7 @@ export type Database = {
           wins_category?: string | null
         }
         Update: {
+          best_for?: string | null
           blurb?: string | null
           collection_id?: string
           created_at?: string
@@ -203,12 +206,14 @@ export type Database = {
           collection_type: string
           created_at: string
           description: string | null
+          faqs: Json | null
           hero_image_url: string | null
           id: string
           intro_html: string | null
           is_visible: boolean
           meta_description: string | null
           meta_title: string | null
+          methodology_html: string | null
           occasion: string | null
           published_at: string | null
           scheduled_publish_at: string | null
@@ -222,12 +227,14 @@ export type Database = {
           collection_type?: string
           created_at?: string
           description?: string | null
+          faqs?: Json | null
           hero_image_url?: string | null
           id?: string
           intro_html?: string | null
           is_visible?: boolean
           meta_description?: string | null
           meta_title?: string | null
+          methodology_html?: string | null
           occasion?: string | null
           published_at?: string | null
           scheduled_publish_at?: string | null
@@ -241,12 +248,14 @@ export type Database = {
           collection_type?: string
           created_at?: string
           description?: string | null
+          faqs?: Json | null
           hero_image_url?: string | null
           id?: string
           intro_html?: string | null
           is_visible?: boolean
           meta_description?: string | null
           meta_title?: string | null
+          methodology_html?: string | null
           occasion?: string | null
           published_at?: string | null
           scheduled_publish_at?: string | null

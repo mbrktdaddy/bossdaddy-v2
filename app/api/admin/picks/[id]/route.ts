@@ -121,10 +121,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     await admin.from('collection_items').delete().eq('collection_id', id)
     if (items.length > 0) {
       const rows = items.map((item) => ({ collection_id: id, ...item }))
-      // Cast until migration 068 lands + `npm run db:types` regenerates the
-      // shape with `best_for` on collection_items. Strip the cast after that runs.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await admin.from('collection_items').insert(rows as any)
+      const { error } = await admin.from('collection_items').insert(rows)
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     }
   }
