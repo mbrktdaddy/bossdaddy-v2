@@ -249,9 +249,26 @@ export function PickForm({ pick, initialItems }: Props) {
     setItems((prev) => prev.map((i) => i.review_id === review_id ? { ...i, role_label: role_label || null } : i))
   }
 
-  async function handleSave(e: React.FormEvent) {
-    e.preventDefault()
+  // Where this collection lives on the public site once visible. Falls back
+  // to null when the slug is empty (new draft) or when a gift guide has no
+  // occasion picked yet — without that piece the URL doesn't resolve.
+  function getPublicPath(): string | null {
+    const s = slug.trim().toLowerCase()
+    if (!s) return null
+    if (pickType === 'gift_guide') {
+      const occ = OCCASIONS.find((o) => o.value === occasion)
+      return occ ? `/gifts/${occ.slug}` : null
+    }
+    if (pickType === 'comparison') return `/comparisons/${s}`
+    if (pickType === 'stack')      return `/stacks/${s}`
+    return `/picks/${s}` // general, best_of
+  }
+  const publicPath = getPublicPath()
+
+  async function handleSave(e: React.FormEvent | null, opts?: { visible?: boolean }) {
+    if (e) e.preventDefault()
     setBusy(true); setError(null); setSavedAt(null)
+    const visibleValue = opts?.visible ?? visible
 
     const parsedBundleTotal = bundleTotalCents.trim() ? parseInt(bundleTotalCents.trim(), 10) : null
 
@@ -261,7 +278,7 @@ export function PickForm({ pick, initialItems }: Props) {
       description: description.trim() || null,
       intro_html: introHtml.trim() || null,
       hero_image_url: heroUrl.trim() || null,
-      is_visible: visible,
+      is_visible: visibleValue,
       collection_type: pickType,
       occasion: pickType === 'gift_guide' ? (occasion || null) : null,
       winner_summary: pickType === 'comparison' ? (winnerSummary.trim() || null) : null,
@@ -290,6 +307,7 @@ export function PickForm({ pick, initialItems }: Props) {
         router.push(`/dashboard/admin/picks/${json.pick.id}`)
         // Stay busy through the navigation — the destination remounts the form.
       } else {
+        if (opts?.visible !== undefined) setVisible(opts.visible)
         router.refresh()
         setSavedAt(new Date().toLocaleTimeString())
         setBusy(false)
@@ -588,13 +606,15 @@ export function PickForm({ pick, initialItems }: Props) {
           </ul>
         </div>
 
-        <label className="flex items-center gap-3 cursor-pointer py-1">
-          <input
-            type="checkbox" checked={visible} onChange={(e) => setVisible(e.target.checked)}
-            className="w-4 h-4 rounded accent-orange-500"
-          />
-          <span className="text-sm text-gray-300">Publish (make visible on site)</span>
-        </label>
+        {isNew && (
+          <label className="flex items-center gap-3 cursor-pointer py-1">
+            <input
+              type="checkbox" checked={visible} onChange={(e) => setVisible(e.target.checked)}
+              className="w-4 h-4 rounded accent-orange-500"
+            />
+            <span className="text-sm text-gray-300">Publish (make visible on site)</span>
+          </label>
+        )}
       </div>
 
       {/* Items */}
@@ -705,14 +725,40 @@ export function PickForm({ pick, initialItems }: Props) {
           className="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors min-h-[44px]">
           {busy ? 'Saving…' : isNew ? 'Create List' : 'Save Changes'}
         </button>
+
+        {!isNew && (
+          <button type="button"
+            onClick={() => handleSave(null, { visible: !visible })}
+            disabled={busy || !slug.trim() || !title.trim()}
+            className={visible
+              ? 'px-5 py-2.5 bg-yellow-900/40 hover:bg-yellow-900/60 border border-yellow-900/50 text-yellow-300 text-sm font-semibold rounded-xl transition-colors min-h-[44px] disabled:opacity-40'
+              : 'px-5 py-2.5 bg-green-700 hover:bg-green-600 text-white text-sm font-semibold rounded-xl transition-colors min-h-[44px] disabled:opacity-40'}>
+            {busy ? '…' : visible ? 'Unpublish' : 'Publish Live'}
+          </button>
+        )}
+
+        {!isNew && visible && publicPath && (
+          <a href={publicPath} target="_blank" rel="noopener noreferrer"
+             className="px-5 py-2.5 bg-orange-950/40 hover:bg-orange-900/40 border border-orange-900/40 text-orange-400 hover:text-orange-300 text-sm font-semibold rounded-xl transition-colors min-h-[44px] inline-flex items-center gap-1.5">
+            View Live →
+          </a>
+        )}
+
+        {!isNew && !visible && publicPath && (
+          <span className="text-xs text-gray-500">
+            Hidden — will live at <code className="text-orange-400/70">{publicPath}</code>
+          </span>
+        )}
+
         {!isNew && (
           <button type="button" onClick={handleDelete} disabled={deleting}
-            className="px-5 py-2.5 text-red-400 hover:text-red-300 text-sm transition-colors disabled:opacity-40 min-h-[44px]">
+            className="ml-auto px-5 py-2.5 text-red-400 hover:text-red-300 text-sm transition-colors disabled:opacity-40 min-h-[44px]">
             {deleting ? 'Deleting…' : 'Delete'}
           </button>
         )}
+
         {!busy && !error && savedAt && (
-          <span className="text-sm text-green-400 font-semibold">
+          <span className="text-sm text-green-400 font-semibold w-full sm:w-auto">
             Saved at {savedAt}
           </span>
         )}
