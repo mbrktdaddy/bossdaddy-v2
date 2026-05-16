@@ -103,11 +103,20 @@ export default async function StackDetailPage({ params }: Props) {
   }))
 
   // Compute total: prefer stored bundle_total_cents, else sum item prices.
-  const computedTotal = items.reduce((sum, { review }) => {
-    const product = review?.product_slug ? productMap.get(review.product_slug) : null
-    return sum + (product?.price_cents ?? 0)
-  }, 0)
+  // Skip items with no price_cents — treating missing prices as $0 would
+  // silently understate the total and mislead the reader.
+  const { computedTotal, pricedCount } = items.reduce<{ computedTotal: number; pricedCount: number }>(
+    (acc, { review }) => {
+      const product = review?.product_slug ? productMap.get(review.product_slug) : null
+      if (product?.price_cents != null) {
+        return { computedTotal: acc.computedTotal + product.price_cents, pricedCount: acc.pricedCount + 1 }
+      }
+      return acc
+    },
+    { computedTotal: 0, pricedCount: 0 },
+  )
   const total = stack.bundle_total_cents ?? (computedTotal > 0 ? computedTotal : null)
+  const partialPricing = stack.bundle_total_cents == null && pricedCount < items.length
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   const articleLd = {
@@ -243,7 +252,11 @@ export default async function StackDetailPage({ params }: Props) {
           <section className="mb-12 rounded-2xl border border-orange-900/40 bg-gradient-to-br from-orange-950/30 to-gray-900/60 ring-1 ring-inset ring-white/[0.02] p-5 sm:p-6 text-center">
             <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Build the Stack</p>
             <p className="text-3xl sm:text-4xl font-black text-white tabular-nums mb-1">${(total / 100).toFixed(2)}</p>
-            <p className="text-xs text-gray-500">Estimated total · {items.length} {items.length === 1 ? 'piece' : 'pieces'}</p>
+            <p className="text-xs text-gray-500">
+              {partialPricing
+                ? `Partial total · ${pricedCount} of ${items.length} pieces have a listed price`
+                : `Estimated total · ${items.length} ${items.length === 1 ? 'piece' : 'pieces'}`}
+            </p>
           </section>
         )}
       </div>

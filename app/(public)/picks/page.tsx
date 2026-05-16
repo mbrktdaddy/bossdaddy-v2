@@ -56,8 +56,10 @@ export default async function PicksIndexPage() {
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-4xl">🏆</span>
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800/40 to-gray-900/60">
+                    <svg className="w-10 h-10 text-orange-500/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18M3 12h18M3 18h12" />
+                    </svg>
                   </div>
                 )}
                 <div className="absolute top-3 left-3">

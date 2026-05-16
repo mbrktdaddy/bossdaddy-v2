@@ -319,8 +319,9 @@ export default async function ComparisonDetailPage({ params }: Props) {
                       </div>
                       <RatingScore rating={review.rating ?? 0} size="sm" />
                     </div>
-                    {blurb && (
-                      <p className="text-sm text-gray-400 leading-relaxed flex-1">{blurb}</p>
+                    {/* Editor's comparison-specific blurb, with the linked review's excerpt as fallback. */}
+                    {(blurb || review.excerpt) && (
+                      <p className="text-sm text-gray-400 leading-relaxed flex-1">{blurb || review.excerpt}</p>
                     )}
                     <div className="flex flex-wrap items-center gap-3 mt-4">
                       <Link href={`/reviews/${review.slug}`} className="text-xs text-gray-400 hover:text-orange-400 transition-colors font-semibold uppercase tracking-widest">
