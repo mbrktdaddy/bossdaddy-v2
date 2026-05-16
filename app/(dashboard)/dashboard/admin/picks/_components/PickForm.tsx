@@ -12,6 +12,7 @@ interface ReviewSummary {
   slug: string
   title: string
   product_name: string
+  category?: string | null
   rating: number | null
   image_url: string | null
 }
@@ -75,6 +76,27 @@ export function PickForm({ pick, initialItems }: Props) {
   const [deleting, setDeleting] = useState(false)
   const [error, setError]   = useState<string | null>(null)
   const [slugTaken, setSlugTaken] = useState<{ type: string } | null>(null)
+
+  // ── Derived hero-image category ───────────────────────────────────────────
+  // Collections don't have their own category column. Derive one from the most
+  // common category across linked review items so the AI image generator gets
+  // a thematic prompt (e.g. "baby-gear" → editorial nursery scene) instead of
+  // the generic "other" fallback.
+  function deriveCategory(): string {
+    const counts: Record<string, number> = {}
+    for (const item of items) {
+      const review = getReview(item)
+      const cat = review?.category
+      if (cat) counts[cat] = (counts[cat] ?? 0) + 1
+    }
+    let best: string | null = null
+    let bestCount = 0
+    for (const [cat, n] of Object.entries(counts)) {
+      if (n > bestCount) { best = cat; bestCount = n }
+    }
+    return best ?? 'other'
+  }
+  const heroCategory = deriveCategory()
 
   // ── Slug uniqueness pre-check (debounced) ─────────────────────────────────
   // Friendly warning before the editor saves and hits a 409. Skips its own id
@@ -341,7 +363,7 @@ export function PickForm({ pick, initialItems }: Props) {
           label="Hero image"
           contentType="guide"
           title={title}
-          category="other"
+          category={heroCategory}
           excerpt={description}
         />
         <p className="-mt-3 text-xs text-gray-600">

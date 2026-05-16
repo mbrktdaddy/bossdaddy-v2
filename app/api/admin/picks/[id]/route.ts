@@ -46,7 +46,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const [{ data: pick }, { data: items }] = await Promise.all([
     admin.from('collections').select('*').eq('id', id).single(),
     admin.from('collection_items')
-      .select('id, review_id, position, blurb, wins_category, role_label, reviews(id, slug, title, product_name, rating, image_url)')
+      .select('id, review_id, position, blurb, wins_category, role_label, reviews(id, slug, title, product_name, category, rating, image_url)')
       .eq('collection_id', id)
       .order('position'),
   ])
