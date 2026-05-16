@@ -77,10 +77,17 @@ export default async function StackDetailPage({ params }: Props) {
 
   const { data: stack } = await supabase
     .from('collections')
-    .select('id, slug, title, description, intro_html, hero_image_url, bundle_total_cents, published_at, updated_at')
+    .select('id, slug, title, description, intro_html, hero_image_url, bundle_total_cents, methodology_html, faqs, published_at, updated_at')
     .eq('slug', slug)
     .eq('collection_type', 'stack')
     .eq('is_visible', true)
+    .returns<{
+      id: string; slug: string; title: string; description: string | null;
+      intro_html: string | null; hero_image_url: string | null;
+      bundle_total_cents: number | null;
+      methodology_html: string | null; faqs: { question: string; answer: string }[] | null;
+      published_at: string | null; updated_at: string | null;
+    }[]>()
     .single()
 
   if (!stack) notFound()
@@ -149,7 +156,11 @@ export default async function StackDetailPage({ params }: Props) {
     ...((somePicks        ?? []) as RelatedItem[]),
   ]
 
-  const faqs = (categoryDef?.faqs ?? []).slice(0, 4)
+  const collectionFaqs = (stack as { faqs?: { question: string; answer: string }[] | null }).faqs
+  const faqs = (collectionFaqs && collectionFaqs.length > 0
+    ? collectionFaqs
+    : (categoryDef?.faqs ?? [])).slice(0, 6)
+  const methodologyOverride = (stack as { methodology_html?: string | null }).methodology_html ?? null
 
   const tocItems = [
     ...(total != null      ? [{ id: 'cost',         label: 'Build Cost' }] : []),
@@ -258,9 +269,13 @@ export default async function StackDetailPage({ params }: Props) {
               </div>
             )}
 
-            {/* Methodology */}
-            {categoryDef && (
-              <MethodologyCallout categorySlug={dominantCategory} id="how-i-tested" />
+            {/* Methodology — override takes precedence over category default */}
+            {(categoryDef || methodologyOverride) && (
+              <MethodologyCallout
+                categorySlug={dominantCategory}
+                overrideText={methodologyOverride}
+                id="how-i-tested"
+              />
             )}
 
             {/* Lineup */}

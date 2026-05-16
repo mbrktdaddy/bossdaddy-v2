@@ -32,7 +32,13 @@ interface PickItem {
   blurb: string | null
   wins_category?: string | null
   role_label?: string | null
+  best_for?: string | null
   reviews?: ReviewSummary | ReviewSummary[] | null
+}
+
+export interface CollectionFAQ {
+  question: string
+  answer:   string
 }
 
 interface PickList {
@@ -51,6 +57,10 @@ interface PickList {
   meta_title?: string | null
   meta_description?: string | null
   scheduled_publish_at?: string | null
+  // Editorial overrides — migration 068. Null falls back to category defaults
+  // on public pages (lib/categories.ts pov + faqs).
+  methodology_html?: string | null
+  faqs?: CollectionFAQ[] | null
 }
 
 interface Props {
@@ -78,6 +88,11 @@ export function PickForm({ pick, initialItems }: Props) {
   const [items, setItems]       = useState<PickItem[]>(
     initialItems.map((i, idx) => ({ ...i, position: i.position ?? idx }))
   )
+
+  // Editorial overrides (migration 068). When blank, public pages pull the
+  // dominant category's pov + faqs from lib/categories.ts as fallback.
+  const [methodologyHtml, setMethodologyHtml] = useState<string>(pick?.methodology_html ?? '')
+  const [faqs, setFaqs]                       = useState<CollectionFAQ[]>(pick?.faqs ?? [])
 
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<ReviewSummary[]>([])
@@ -249,6 +264,10 @@ export function PickForm({ pick, initialItems }: Props) {
     setItems((prev) => prev.map((i) => i.review_id === review_id ? { ...i, role_label: role_label || null } : i))
   }
 
+  function updateBestFor(review_id: string, best_for: string) {
+    setItems((prev) => prev.map((i) => i.review_id === review_id ? { ...i, best_for: best_for || null } : i))
+  }
+
   // Where this collection lives on the public site once visible. Falls back
   // to null when the slug is empty (new draft) or when a gift guide has no
   // occasion picked yet — without that piece the URL doesn't resolve.
@@ -286,12 +305,21 @@ export function PickForm({ pick, initialItems }: Props) {
       meta_title:           metaTitle.trim() || null,
       meta_description:     metaDescription.trim() || null,
       scheduled_publish_at: scheduledAt,
+      // Editorial overrides (migration 068)
+      methodology_html:     methodologyHtml.trim() || null,
+      faqs:                 faqs.length > 0 ? faqs : null,
       items: items.map((i) => ({
         review_id:     i.review_id,
         position:      i.position,
         blurb:         i.blurb,
         wins_category: pickType === 'comparison' ? (i.wins_category ?? null) : null,
         role_label:    pickType === 'stack' ? (i.role_label ?? null) : null,
+        // best_for is shown for comparison + best_of/general only; gift guides
+        // and stacks have their own slots (occasion / role_label). Persist null
+        // for the off-types so accidental data on a flavor switch doesn't leak.
+        best_for:      (pickType === 'comparison' || pickType === 'best_of' || pickType === 'general')
+                          ? ((i.best_for ?? '').trim() || null)
+                          : null,
       })),
     }
 
@@ -575,6 +603,108 @@ export function PickForm({ pick, initialItems }: Props) {
           </div>
         </details>
 
+        {/* Methodology override — collapsible. Falls back to the dominant
+            item-category's pov from lib/categories.ts on public pages when
+            left empty (the normal case). Use this to write a per-collection
+            "How I Tested" when the standard category voice doesn't fit. */}
+        <details className="group rounded-xl bg-gray-950/60 border border-gray-800/60">
+          <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between gap-3 min-h-[44px]">
+            <div>
+              <p className="text-sm font-semibold text-gray-200">Methodology override</p>
+              <p className="text-xs text-gray-600">
+                Optional. Public pages fall back to the category&apos;s &quot;how I test&quot; voice when empty.
+              </p>
+            </div>
+            <svg className="w-4 h-4 text-gray-500 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div className="px-4 pb-4 pt-1 space-y-2 border-t border-gray-800/60">
+            <label className="block text-xs text-gray-400 mb-1.5">
+              How I Tested <span className="text-gray-600">(plain text — line breaks preserved)</span>
+            </label>
+            <textarea
+              value={methodologyHtml}
+              onChange={(e) => setMethodologyHtml(e.target.value)}
+              maxLength={10000}
+              rows={6}
+              placeholder="Tell the reader how the testing was done for this specific collection. Skipped categories, time windows, real-life conditions, etc."
+              className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-sm resize-y"
+            />
+            <p className="text-xs text-gray-600 tabular-nums">{methodologyHtml.length}/10000</p>
+          </div>
+        </details>
+
+        {/* FAQ override — collapsible. Falls back to the dominant
+            item-category's faqs from lib/categories.ts on public pages when
+            empty. Up to 12 rows; each is question + answer text. */}
+        <details className="group rounded-xl bg-gray-950/60 border border-gray-800/60">
+          <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between gap-3 min-h-[44px]">
+            <div>
+              <p className="text-sm font-semibold text-gray-200">FAQ override</p>
+              <p className="text-xs text-gray-600">
+                Optional. {faqs.length > 0 ? `${faqs.length} of 12 entries.` : 'Public pages fall back to the category FAQs when empty.'}
+              </p>
+            </div>
+            <svg className="w-4 h-4 text-gray-500 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div className="px-4 pb-4 pt-2 border-t border-gray-800/60 space-y-3">
+            {faqs.length === 0 && (
+              <p className="text-xs text-gray-600 italic">
+                No custom FAQs yet — readers will see the category&apos;s default Q&amp;A.
+              </p>
+            )}
+            {faqs.map((faq, idx) => (
+              <div key={idx} className="rounded-lg bg-gray-900 border border-gray-800 p-3 space-y-2 relative">
+                <div className="flex items-start justify-between gap-3">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500">Q&amp;A {idx + 1}</span>
+                  <button
+                    type="button"
+                    onClick={() => setFaqs((f) => f.filter((_, i) => i !== idx))}
+                    className="text-xs text-gray-500 hover:text-red-400 transition-colors"
+                    title="Remove this Q&A"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  value={faq.question}
+                  onChange={(e) => {
+                    const v = e.target.value
+                    setFaqs((f) => f.map((q, i) => i === idx ? { ...q, question: v } : q))
+                  }}
+                  maxLength={200}
+                  placeholder="Question (e.g. How long did you test these?)"
+                  className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-sm"
+                />
+                <textarea
+                  value={faq.answer}
+                  onChange={(e) => {
+                    const v = e.target.value
+                    setFaqs((f) => f.map((q, i) => i === idx ? { ...q, answer: v } : q))
+                  }}
+                  maxLength={1000}
+                  rows={3}
+                  placeholder="Answer — concise and direct."
+                  className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-sm resize-y"
+                />
+              </div>
+            ))}
+            {faqs.length < 12 && (
+              <button
+                type="button"
+                onClick={() => setFaqs((f) => [...f, { question: '', answer: '' }])}
+                className="w-full px-3 py-2 bg-gray-900 hover:bg-gray-800 border border-dashed border-gray-700 hover:border-orange-700 text-xs text-gray-400 hover:text-orange-300 rounded-lg transition-colors min-h-[44px]"
+              >
+                + Add Q&amp;A
+              </button>
+            )}
+          </div>
+        </details>
+
         {/* Readiness — quick visual checklist of what's set vs missing */}
         <div className="bg-gray-950/60 border border-gray-800/60 rounded-xl p-4">
           <div className="flex items-baseline justify-between mb-3">
@@ -708,6 +838,20 @@ export function PickForm({ pick, initialItems }: Props) {
                       onChange={(e) => updateRoleLabel(item.review_id, e.target.value)}
                       placeholder="Role in the stack (e.g. 'The Anchor', 'The Daily Driver', 'The Backup')"
                       maxLength={80}
+                      className="mt-2 w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-base sm:text-sm"
+                    />
+                  )}
+                  {/* "Best for" tagline — shown on comparison + best-of/general
+                      where it appears as a small Best for line on the public
+                      detail page. Stacks use role_label and gifts have no
+                      analogous slot, so it's hidden for those flavors. */}
+                  {(pickType === 'comparison' || pickType === 'best_of' || pickType === 'general') && (
+                    <input
+                      type="text"
+                      value={item.best_for ?? ''}
+                      onChange={(e) => updateBestFor(item.review_id, e.target.value)}
+                      placeholder="Best for… (short tagline — e.g. 'the grill master', 'weekend warriors')"
+                      maxLength={120}
                       className="mt-2 w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-base sm:text-sm"
                     />
                   )}

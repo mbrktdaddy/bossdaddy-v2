@@ -66,28 +66,45 @@ export default async function GiftOccasionPage({ params }: Props) {
 
   const { data: pick } = await supabase
     .from('collections')
-    .select('id, slug, title, description, intro_html, hero_image_url, published_at, updated_at')
+    .select('id, slug, title, description, intro_html, hero_image_url, methodology_html, faqs, published_at, updated_at')
     .eq('collection_type', 'gift_guide')
     .eq('occasion', occ.value)
     .eq('is_visible', true)
     .order('published_at', { ascending: false })
     .limit(1)
+    .returns<{
+      id: string; slug: string; title: string; description: string | null;
+      intro_html: string | null; hero_image_url: string | null;
+      methodology_html: string | null; faqs: { question: string; answer: string }[] | null;
+      published_at: string | null; updated_at: string | null;
+    }[]>()
     .maybeSingle()
 
   const admin = createAdminClient()
-  let items: Array<{ position: number; blurb: string | null; review: ReviewRow }> = []
+  let items: Array<{ position: number; blurb: string | null; best_for: string | null; review: ReviewRow }> = []
 
   if (pick) {
     const { data: pickItems } = await admin
       .from('collection_items')
-      .select('position, blurb, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, best_for, has_affiliate_links)')
+      .select('position, blurb, best_for, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, best_for, has_affiliate_links)')
       .eq('collection_id', pick.id)
       .order('position')
+      .returns<Array<{
+        position: number
+        blurb:    string | null
+        best_for: string | null
+        reviews:  ReviewRow | ReviewRow[] | null
+      }>>()
 
     items = (pickItems ?? []).map((pi) => {
       const reviews = pi.reviews
       const review = Array.isArray(reviews) ? reviews[0] : reviews
-      return { position: pi.position, blurb: pi.blurb, review: review as ReviewRow }
+      return {
+        position: pi.position,
+        blurb:    pi.blurb,
+        best_for: (pi as { best_for?: string | null }).best_for ?? null,
+        review:   review as ReviewRow,
+      }
     }).filter((i) => i.review != null)
   }
 
@@ -133,7 +150,11 @@ export default async function GiftOccasionPage({ params }: Props) {
     ]
   }
 
-  const faqs = (categoryDef?.faqs ?? []).slice(0, 4)
+  const collectionFaqs = (pick as { faqs?: { question: string; answer: string }[] | null } | null)?.faqs
+  const faqs = (collectionFaqs && collectionFaqs.length > 0
+    ? collectionFaqs
+    : (categoryDef?.faqs ?? [])).slice(0, 6)
+  const methodologyOverride = (pick as { methodology_html?: string | null } | null)?.methodology_html ?? null
 
   const tocItems = pick ? [
     ...(categoryDef        ? [{ id: 'how-i-tested', label: 'How I Pick Gifts' }] : []),
@@ -239,10 +260,12 @@ export default async function GiftOccasionPage({ params }: Props) {
 
             {pick && <ArticleTOC items={tocItems} variant="mobile" />}
 
-            {/* Methodology — only when we have content (and a category to anchor it) */}
-            {pick && categoryDef && (
+            {/* Methodology — only when we have content. Override takes precedence
+                over the category default. */}
+            {pick && (categoryDef || methodologyOverride) && (
               <MethodologyCallout
                 categorySlug={dominantCategory}
+                overrideText={methodologyOverride}
                 id="how-i-tested"
               />
             )}
@@ -259,7 +282,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                 </div>
 
                 <div className="space-y-5">
-                  {items.map(({ review, blurb }, idx) => {
+                  {items.map(({ review, blurb, best_for: itemBestFor }, idx) => {
                     const product = review.product_slug ? productMap.get(review.product_slug) : null
                     const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                     return (
@@ -290,13 +313,18 @@ export default async function GiftOccasionPage({ params }: Props) {
                             {review.rating != null && <RatingScore rating={review.rating} size="sm" />}
                           </div>
 
+                          {/* Editor's per-collection "best for" tagline takes the prominent slot */}
+                          {itemBestFor && (
+                            <p className="text-sm italic text-orange-300/90 mb-2">Best for {itemBestFor}</p>
+                          )}
+
                           <p className="text-sm text-gray-300 leading-relaxed mb-3">
                             {blurb ?? review.tldr ?? review.excerpt ?? ''}
                           </p>
 
                           {(review.best_for?.length ?? 0) > 0 && (
                             <p className="text-xs text-gray-500 mb-3">
-                              <span className="text-orange-400 font-bold uppercase tracking-widest">For:</span> {review.best_for!.slice(0, 3).join(' · ')}
+                              <span className="text-orange-400 font-bold uppercase tracking-widest">Also good for:</span> {review.best_for!.slice(0, 3).join(' · ')}
                             </p>
                           )}
 

@@ -4,6 +4,13 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { z } from 'zod'
 
+const FaqSchema = z.array(
+  z.object({
+    question: z.string().min(3).max(200),
+    answer:   z.string().min(3).max(1000),
+  }),
+).max(12)
+
 const PickListSchema = z.object({
   slug:                 z.string().min(2).max(80).regex(/^[a-z0-9-]+$/),
   title:                z.string().min(2).max(160),
@@ -19,6 +26,10 @@ const PickListSchema = z.object({
   meta_title:           z.string().max(120).optional().nullable(),
   meta_description:     z.string().max(300).optional().nullable(),
   scheduled_publish_at: z.string().datetime().optional().nullable(),
+  // Editorial overrides — migration 068. Null/empty falls back to the
+  // dominant category's pov/faqs from lib/categories.ts on public pages.
+  methodology_html:     z.string().max(10000).optional().nullable(),
+  faqs:                 FaqSchema.optional().nullable(),
 })
 
 async function requireAdmin(supabase: Awaited<ReturnType<typeof createClient>>) {
@@ -55,9 +66,12 @@ export async function POST(request: NextRequest) {
 
   const admin = createAdminClient()
   const insertPayload = { ...parsed.data, published_at: parsed.data.is_visible ? (parsed.data.published_at ?? new Date().toISOString()) : null }
+  // Cast until migration 068 lands and `npm run db:types` regenerates the
+  // shape with `methodology_html` + `faqs`. Strip the cast after that runs.
   const { data, error } = await admin
     .from('collections')
-    .insert(insertPayload)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .insert(insertPayload as any)
     .select()
     .single()
 

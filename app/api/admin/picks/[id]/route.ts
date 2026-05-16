@@ -5,6 +5,13 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { OCCASIONS } from '@/lib/gift-occasions'
 import { z } from 'zod'
 
+const FaqSchema = z.array(
+  z.object({
+    question: z.string().min(3).max(200),
+    answer:   z.string().min(3).max(1000),
+  }),
+).max(12)
+
 const UpdateSchema = z.object({
   slug:                 z.string().min(2).max(80).regex(/^[a-z0-9-]+$/).optional(),
   title:                z.string().min(2).max(160).optional(),
@@ -20,12 +27,16 @@ const UpdateSchema = z.object({
   meta_title:           z.string().max(120).optional().nullable(),
   meta_description:     z.string().max(300).optional().nullable(),
   scheduled_publish_at: z.string().datetime().optional().nullable(),
+  // Editorial overrides (migration 068).
+  methodology_html:     z.string().max(10000).optional().nullable(),
+  faqs:                 FaqSchema.optional().nullable(),
   items: z.array(z.object({
     review_id:     z.string().uuid(),
     position:      z.number().int(),
     blurb:         z.string().max(500).optional().nullable(),
     wins_category: z.string().max(80).optional().nullable(),
     role_label:    z.string().max(80).optional().nullable(),
+    best_for:      z.string().max(120).optional().nullable(),  // migration 068
   })).optional(),
 })
 
@@ -47,7 +58,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const [{ data: pick }, { data: items }] = await Promise.all([
     admin.from('collections').select('*').eq('id', id).single(),
     admin.from('collection_items')
-      .select('id, review_id, position, blurb, wins_category, role_label, reviews(id, slug, title, product_name, category, rating, image_url)')
+      .select('id, review_id, position, blurb, wins_category, role_label, best_for, reviews(id, slug, title, product_name, category, rating, image_url)')
       .eq('collection_id', id)
       .order('position'),
   ])
@@ -110,7 +121,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     await admin.from('collection_items').delete().eq('collection_id', id)
     if (items.length > 0) {
       const rows = items.map((item) => ({ collection_id: id, ...item }))
-      const { error } = await admin.from('collection_items').insert(rows)
+      // Cast until migration 068 lands + `npm run db:types` regenerates the
+      // shape with `best_for` on collection_items. Strip the cast after that runs.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await admin.from('collection_items').insert(rows as any)
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     }
   }

@@ -85,10 +85,17 @@ export default async function ComparisonDetailPage({ params }: Props) {
 
   const { data: comparison } = await supabase
     .from('collections')
-    .select('id, slug, title, description, intro_html, hero_image_url, winner_summary, published_at, updated_at')
+    .select('id, slug, title, description, intro_html, hero_image_url, winner_summary, methodology_html, faqs, published_at, updated_at')
     .eq('slug', slug)
     .eq('collection_type', 'comparison')
     .eq('is_visible', true)
+    .returns<{
+      id: string; slug: string; title: string; description: string | null;
+      intro_html: string | null; hero_image_url: string | null;
+      winner_summary: string | null;
+      methodology_html: string | null; faqs: { question: string; answer: string }[] | null;
+      published_at: string | null; updated_at: string | null;
+    }[]>()
     .single()
 
   if (!comparison) notFound()
@@ -96,9 +103,16 @@ export default async function ComparisonDetailPage({ params }: Props) {
   const admin = createAdminClient()
   const { data: rawItems } = await admin
     .from('collection_items')
-    .select('position, blurb, wins_category, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, pros, cons, key_takeaways, best_for, not_for, score_quality, score_value, score_ease, score_daily_use)')
+    .select('position, blurb, wins_category, best_for, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, pros, cons, key_takeaways, best_for, not_for, score_quality, score_value, score_ease, score_daily_use)')
     .eq('collection_id', comparison.id)
     .order('position')
+    .returns<Array<{
+      position:      number
+      blurb:         string | null
+      wins_category: string | null
+      best_for:      string | null
+      reviews:       ReviewRow | ReviewRow[] | null
+    }>>()
 
   const items = (rawItems ?? []).map((it) => {
     const r = it.reviews
@@ -107,6 +121,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
       position: it.position,
       blurb: it.blurb,
       wins_category: it.wins_category,
+      best_for: (it as { best_for?: string | null }).best_for ?? null,
       review: review as ReviewRow | null,
     }
   }).filter((i) => i.review != null)
@@ -183,7 +198,13 @@ export default async function ComparisonDetailPage({ params }: Props) {
   const wordCount = wordsource.split(/\s+/).filter(Boolean).length
   const readingMinutes = Math.max(1, Math.round(wordCount / 235))
 
-  const faqs = (categoryDef?.faqs ?? []).slice(0, 4)
+  // Per-collection FAQ override wins over the category default when present.
+  // Mirrors the methodology_html / pov fallback pattern.
+  const collectionFaqs = (comparison as { faqs?: { question: string; answer: string }[] | null }).faqs
+  const faqs = (collectionFaqs && collectionFaqs.length > 0
+    ? collectionFaqs
+    : (categoryDef?.faqs ?? [])).slice(0, 6)
+  const methodologyOverride = (comparison as { methodology_html?: string | null }).methodology_html ?? null
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
 
   // ── JSON-LD: Article + ItemList + Review per product + FAQPage ────────────
@@ -330,9 +351,13 @@ export default async function ComparisonDetailPage({ params }: Props) {
               </div>
             </section>
 
-            {/* Methodology */}
-            {categoryDef && (
-              <MethodologyCallout categorySlug={dominantCategory} id="how-i-tested" />
+            {/* Methodology — override takes precedence over category default */}
+            {(categoryDef || methodologyOverride) && (
+              <MethodologyCallout
+                categorySlug={dominantCategory}
+                overrideText={methodologyOverride}
+                id="how-i-tested"
+              />
             )}
 
             {/* Scorecard with image headers */}
@@ -442,7 +467,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
               </div>
 
               <div className="space-y-10">
-                {items.map(({ review, blurb, wins_category }, idx) => {
+                {items.map(({ review, blurb, wins_category, best_for: itemBestFor }, idx) => {
                   if (!review) return null
                   const product = review.product_slug ? productMap.get(review.product_slug) : null
                   const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
@@ -470,6 +495,9 @@ export default async function ComparisonDetailPage({ params }: Props) {
                             <div className="min-w-0 flex-1">
                               {wins_category && (
                                 <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-orange-300 bg-orange-950/60 border border-orange-900/40 px-2.5 py-1 rounded-full mb-2">{wins_category}</span>
+                              )}
+                              {itemBestFor && (
+                                <p className="text-sm italic text-orange-300/90 mb-2">Best for {itemBestFor}</p>
                               )}
                               <p className="text-xs font-medium text-orange-500/80 uppercase tracking-widest mb-1">{review.product_name}</p>
                               <Link href={`/reviews/${review.slug}`} className="text-xl font-black text-white hover:text-orange-400 transition-colors leading-tight block">
