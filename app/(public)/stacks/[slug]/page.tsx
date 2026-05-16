@@ -7,6 +7,12 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import RatingScore from '@/components/RatingScore'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import { getProductBySlug } from '@/lib/products'
+import { getCategoryBySlug } from '@/lib/categories'
+import ArticleTOC from '@/components/collections/ArticleTOC'
+import EditorialMeta from '@/components/collections/EditorialMeta'
+import MethodologyCallout from '@/components/collections/MethodologyCallout'
+import FAQAccordion, { faqPageLd } from '@/components/collections/FAQAccordion'
+import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 
 export const revalidate = 60
 
@@ -49,10 +55,13 @@ type ReviewRow = {
   slug: string
   title: string
   product_name: string
+  category: string | null
   rating: number | null
   excerpt: string | null
+  tldr: string | null
   image_url: string | null
   product_slug: string | null
+  best_for: string[] | null
 }
 
 type ProductRow = {
@@ -68,7 +77,7 @@ export default async function StackDetailPage({ params }: Props) {
 
   const { data: stack } = await supabase
     .from('collections')
-    .select('id, slug, title, description, intro_html, hero_image_url, bundle_total_cents, published_at')
+    .select('id, slug, title, description, intro_html, hero_image_url, bundle_total_cents, published_at, updated_at')
     .eq('slug', slug)
     .eq('collection_type', 'stack')
     .eq('is_visible', true)
@@ -79,7 +88,7 @@ export default async function StackDetailPage({ params }: Props) {
   const admin = createAdminClient()
   const { data: rawItems } = await admin
     .from('collection_items')
-    .select('position, blurb, role_label, reviews(id, slug, title, product_name, rating, excerpt, image_url, product_slug)')
+    .select('position, blurb, role_label, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, best_for)')
     .eq('collection_id', stack.id)
     .order('position')
 
@@ -94,7 +103,6 @@ export default async function StackDetailPage({ params }: Props) {
     }
   }).filter((i) => i.review != null)
 
-  // Hydrate products for affiliate CTAs + price computation
   const productSlugs = [...new Set(items.map((i) => i.review?.product_slug).filter(Boolean) as string[])]
   const productMap = new Map<string, ProductRow>()
   await Promise.all(productSlugs.map(async (ps) => {
@@ -102,9 +110,7 @@ export default async function StackDetailPage({ params }: Props) {
     if (product) productMap.set(ps, product as ProductRow)
   }))
 
-  // Compute total: prefer stored bundle_total_cents, else sum item prices.
-  // Skip items with no price_cents — treating missing prices as $0 would
-  // silently understate the total and mislead the reader.
+  // Build-cost computation — prefer stored total, else sum known prices.
   const { computedTotal, pricedCount } = items.reduce<{ computedTotal: number; pricedCount: number }>(
     (acc, { review }) => {
       const product = review?.product_slug ? productMap.get(review.product_slug) : null
@@ -118,147 +124,267 @@ export default async function StackDetailPage({ params }: Props) {
   const total = stack.bundle_total_cents ?? (computedTotal > 0 ? computedTotal : null)
   const partialPricing = stack.bundle_total_cents == null && pricedCount < items.length
 
+  // Dominant category
+  const categoryCounts = new Map<string, number>()
+  for (const it of items) {
+    const c = it.review?.category
+    if (c) categoryCounts.set(c, (categoryCounts.get(c) ?? 0) + 1)
+  }
+  const dominantCategory = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
+  const categoryDef = dominantCategory ? getCategoryBySlug(dominantCategory) : null
+
+  // Related — 2 sibling stacks + 1 comparison + 1 pick
+  const [
+    { data: otherStacks },
+    { data: someComparisons },
+    { data: somePicks },
+  ] = await Promise.all([
+    admin.from('collections').select('slug, title, description, hero_image_url, collection_type').eq('collection_type', 'stack').eq('is_visible', true).neq('id', stack.id).order('published_at', { ascending: false }).limit(2),
+    admin.from('collections').select('slug, title, description, hero_image_url, collection_type').eq('collection_type', 'comparison').eq('is_visible', true).order('published_at', { ascending: false }).limit(1),
+    admin.from('collections').select('slug, title, description, hero_image_url, collection_type').in('collection_type', ['best_of', 'general']).eq('is_visible', true).order('published_at', { ascending: false }).limit(1),
+  ])
+  const related: RelatedItem[] = [
+    ...((otherStacks      ?? []) as RelatedItem[]),
+    ...((someComparisons  ?? []) as RelatedItem[]),
+    ...((somePicks        ?? []) as RelatedItem[]),
+  ]
+
+  const faqs = (categoryDef?.faqs ?? []).slice(0, 4)
+
+  const tocItems = [
+    ...(total != null      ? [{ id: 'cost',         label: 'Build Cost' }] : []),
+    ...(categoryDef        ? [{ id: 'how-i-tested', label: 'How I Tested' }] : []),
+    { id: 'lineup', label: 'The Lineup' },
+    ...(stack.intro_html   ? [{ id: 'overview', label: 'Overview' }] : []),
+    ...(faqs.length > 0    ? [{ id: 'faq',     label: 'FAQ' }] : []),
+    ...(related.length > 0 ? [{ id: 'related', label: 'Related' }] : []),
+  ]
+
+  const wordsource = [
+    stack.intro_html ?? '',
+    stack.description ?? '',
+    ...items.map((i) => i.blurb ?? i.review?.excerpt ?? ''),
+  ].join(' ').replace(/<[^>]*>/g, ' ')
+  const readingMinutes = Math.max(1, Math.round(wordsource.split(/\s+/).filter(Boolean).length / 235))
+
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+
   const articleLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: stack.title,
     description: stack.description,
     datePublished: stack.published_at,
+    dateModified:  stack.updated_at ?? stack.published_at,
     author: { '@type': 'Person', name: 'Boss Daddy' },
     publisher: { '@type': 'Organization', name: 'Boss Daddy Life', url: siteUrl },
     mainEntityOfPage: `${siteUrl}/stacks/${slug}`,
   }
 
+  const itemListLd = items.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type':    'ItemList',
+    name:        stack.title,
+    description: stack.description ?? undefined,
+    numberOfItems: items.length,
+    itemListElement: items.map((entry, idx) => ({
+      '@type':  'ListItem',
+      position: idx + 1,
+      url:      `${siteUrl}/reviews/${entry.review!.slug}`,
+      name:     entry.review!.product_name,
+      item: {
+        '@type': 'Product',
+        name:    entry.review!.product_name,
+        image:   entry.review!.image_url ?? undefined,
+        aggregateRating: entry.review!.rating != null ? {
+          '@type':       'AggregateRating',
+          ratingValue:   entry.review!.rating,
+          bestRating:    10,
+          worstRating:   1,
+          ratingCount:   1,
+        } : undefined,
+      },
+    })),
+  } : null
+
+  const faqLd = faqPageLd(faqs)
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      {itemListLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />}
+      {faqLd      && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
-      <div className="max-w-4xl mx-auto px-6 py-12">
-        {/* Breadcrumb */}
+      <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="flex items-center gap-2 text-xs text-gray-500 mb-8">
           <Link href="/stacks" className="hover:text-orange-400 transition-colors">Stacks</Link>
           <span>/</span>
           <span className="text-gray-400">{stack.title}</span>
         </div>
 
-        {/* Hero image */}
-        {stack.hero_image_url && (
-          <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-10 bg-gray-900">
-            <Image
-              src={stack.hero_image_url}
-              alt={stack.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 896px"
-              priority
-            />
-          </div>
-        )}
-
-        {/* Header */}
-        <div className="mb-10">
-          <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">The Stack</p>
-          <h1 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tight leading-tight">{stack.title}</h1>
-          {stack.description && (
-            <p className="text-lg text-gray-400 leading-relaxed max-w-2xl">{stack.description}</p>
-          )}
-          {stack.intro_html && (
-            <div
-              className="mt-6 prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: stack.intro_html }}
-            />
-          )}
-        </div>
-
-        {/* Lineup */}
-        <section className="mb-12" aria-label="Stack lineup">
-          <div className="mb-6 flex items-end justify-between">
-            <div>
+        <div className="lg:flex lg:gap-10 lg:items-start">
+          <main className="lg:flex-1 lg:max-w-3xl min-w-0">
+            <header className="mb-8">
               <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-              <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">The Lineup</p>
-              <h2 className="text-2xl font-black text-white leading-tight">
-                {items.length} {items.length === 1 ? 'piece' : 'pieces'} in this kit
-              </h2>
-            </div>
-          </div>
-
-          <div className="space-y-5">
-            {items.map(({ review, blurb, role_label }) => {
-              if (!review) return null
-              const product = review.product_slug ? productMap.get(review.product_slug) : null
-              const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
-              const priceCents = product?.price_cents ?? null
-              return (
-                <article
-                  key={review.id}
-                  className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 rounded-2xl p-5 shadow-lg shadow-black/40 transition-colors"
+              <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">The Stack</p>
+              <h1 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tight leading-tight">{stack.title}</h1>
+              {stack.description && (
+                <p className="text-lg text-gray-400 leading-relaxed mb-6">{stack.description}</p>
+              )}
+              <EditorialMeta
+                publishedAt={stack.published_at}
+                updatedAt={stack.updated_at}
+                readingMinutes={readingMinutes}
+              />
+              {/* Build-cost pill in the header — quick-jumps to the breakdown */}
+              {total != null && total > 0 && (
+                <a
+                  href="#cost"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-orange-950/40 border border-orange-900/40 hover:border-orange-700/60 rounded-full text-xs font-bold text-orange-300 hover:text-orange-200 transition-colors min-h-[36px]"
                 >
-                  {review.image_url && (
-                    <div className="relative w-full sm:w-44 h-44 sm:h-36 shrink-0 rounded-xl overflow-hidden bg-gray-800">
-                      <Image src={review.image_url} alt={review.product_name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 176px" />
-                      {(review.rating ?? 0) >= 8 && (
-                        <div className="absolute top-2 right-2"><BossApprovedBadge size="sm" variant="card" /></div>
-                      )}
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0 flex flex-col">
-                    {role_label && (
-                      <span className="self-start text-[10px] font-black uppercase tracking-[0.2em] text-orange-300 bg-orange-950/60 border border-orange-900/40 px-3 py-1 rounded-full mb-2">
-                        {role_label}
-                      </span>
-                    )}
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <div>
-                        <p className="text-xs font-medium text-orange-500/80 uppercase tracking-widest mb-1">{review.product_name}</p>
-                        <Link href={`/reviews/${review.slug}`} className="text-lg font-bold text-white hover:text-orange-400 transition-colors leading-snug">
-                          {review.title}
-                        </Link>
-                      </div>
-                      <RatingScore rating={review.rating ?? 0} size="sm" />
-                    </div>
-                    {blurb && (
-                      <p className="text-sm text-gray-400 leading-relaxed flex-1">{blurb}</p>
-                    )}
-                    <div className="flex flex-wrap items-center gap-3 mt-4">
-                      {priceCents != null && (
-                        <span className="text-base font-black text-white tabular-nums">${(priceCents / 100).toFixed(2)}</span>
-                      )}
-                      <Link href={`/reviews/${review.slug}`} className="text-xs text-gray-400 hover:text-orange-400 transition-colors font-semibold uppercase tracking-widest">
-                        Read review →
-                      </Link>
-                      {href && (
-                        <a
-                          href={href}
-                          target="_blank"
-                          rel={product?.affiliate_url ? 'sponsored nofollow noopener' : 'noopener'}
-                          data-product-slug={review.product_slug ?? undefined}
-                          className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center ml-auto"
-                        >
-                          Check Price
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </article>
-              )
-            })}
-          </div>
-        </section>
+                  <span className="text-orange-500/80 uppercase tracking-widest text-[10px]">Build cost</span>
+                  <span className="tabular-nums">${(total / 100).toFixed(0)}</span>
+                  <span className="text-orange-500/60">·</span>
+                  <span className="text-orange-500/80 text-[10px] uppercase tracking-widest">{items.length} pieces</span>
+                </a>
+              )}
+            </header>
 
-        {/* Total */}
-        {total != null && total > 0 && (
-          <section className="mb-12 rounded-2xl border border-orange-900/40 bg-gradient-to-br from-orange-950/30 to-gray-900/60 ring-1 ring-inset ring-white/[0.02] p-5 sm:p-6 text-center">
-            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Build the Stack</p>
-            <p className="text-3xl sm:text-4xl font-black text-white tabular-nums mb-1">${(total / 100).toFixed(2)}</p>
-            <p className="text-xs text-gray-500">
-              {partialPricing
-                ? `Partial total · ${pricedCount} of ${items.length} pieces have a listed price`
-                : `Estimated total · ${items.length} ${items.length === 1 ? 'piece' : 'pieces'}`}
-            </p>
-          </section>
-        )}
+            <ArticleTOC items={tocItems} variant="mobile" />
+
+            {stack.hero_image_url && (
+              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-10 bg-gray-900">
+                <Image src={stack.hero_image_url} alt={stack.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 768px" priority />
+              </div>
+            )}
+
+            {/* Methodology */}
+            {categoryDef && (
+              <MethodologyCallout categorySlug={dominantCategory} id="how-i-tested" />
+            )}
+
+            {/* Lineup */}
+            <section id="lineup" className="mb-12" aria-label="Stack lineup">
+              <div className="mb-5">
+                <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">The Lineup</p>
+                <h2 className="text-2xl font-black text-white leading-tight">
+                  {items.length} {items.length === 1 ? 'piece' : 'pieces'} in this kit
+                </h2>
+              </div>
+
+              <div className="space-y-5">
+                {items.map(({ review, blurb, role_label }, idx) => {
+                  if (!review) return null
+                  const product = review.product_slug ? productMap.get(review.product_slug) : null
+                  const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
+                  const priceCents = product?.price_cents ?? null
+                  return (
+                    <article
+                      key={review.id}
+                      className="relative flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 rounded-2xl p-5 shadow-lg shadow-black/40 transition-colors"
+                    >
+                      {/* Position number — subtle ordering signal */}
+                      <span aria-hidden className="absolute top-3 left-3 text-[10px] font-black text-orange-500/30 tabular-nums tracking-widest">
+                        {String(idx + 1).padStart(2, '0')}
+                      </span>
+
+                      {review.image_url && (
+                        <div className="relative w-full sm:w-44 h-44 sm:h-36 shrink-0 rounded-xl overflow-hidden bg-gray-800">
+                          <Image src={review.image_url} alt={review.product_name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 176px" />
+                          {(review.rating ?? 0) >= 8 && (
+                            <div className="absolute top-2 right-2"><BossApprovedBadge size="sm" variant="card" /></div>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="flex-1 min-w-0 flex flex-col">
+                        {role_label && (
+                          <span className="self-start text-[10px] font-black uppercase tracking-[0.2em] text-orange-300 bg-orange-950/60 border border-orange-900/40 px-3 py-1 rounded-full mb-2">
+                            {role_label}
+                          </span>
+                        )}
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <div>
+                            <p className="text-xs font-medium text-orange-500/80 uppercase tracking-widest mb-1">{review.product_name}</p>
+                            <Link href={`/reviews/${review.slug}`} className="text-lg font-bold text-white hover:text-orange-400 transition-colors leading-snug block">
+                              {review.title}
+                            </Link>
+                          </div>
+                          <RatingScore rating={review.rating ?? 0} size="sm" />
+                        </div>
+                        {(blurb || review.tldr) && (
+                          <p className="text-sm text-gray-300 leading-relaxed flex-1 mb-3">{blurb ?? review.tldr}</p>
+                        )}
+                        {(review.best_for?.length ?? 0) > 0 && (
+                          <p className="text-xs text-gray-500 mb-3">
+                            <span className="text-orange-400 font-bold uppercase tracking-widest">Best for:</span> {review.best_for!.slice(0, 3).join(' · ')}
+                          </p>
+                        )}
+                        <div className="flex flex-wrap items-center gap-3 mt-auto pt-1">
+                          {priceCents != null && (
+                            <span className="text-base font-black text-white tabular-nums">${(priceCents / 100).toFixed(0)}</span>
+                          )}
+                          <Link href={`/reviews/${review.slug}`} className="text-xs text-gray-400 hover:text-orange-400 transition-colors font-semibold uppercase tracking-widest">
+                            Read review →
+                          </Link>
+                          {href && (
+                            <a
+                              href={href}
+                              target="_blank"
+                              rel={product?.affiliate_url ? 'sponsored nofollow noopener' : 'noopener'}
+                              data-product-slug={review.product_slug ?? undefined}
+                              className="ml-auto px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
+                            >
+                              Check Price
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </article>
+                  )
+                })}
+              </div>
+            </section>
+
+            {stack.intro_html && (
+              <section id="overview" className="mb-12">
+                <div className="mb-5">
+                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">The Overview</p>
+                  <h2 className="text-2xl font-black text-white leading-tight">Why this kit works together</h2>
+                </div>
+                <div
+                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-orange-400 hover:prose-a:text-orange-300 prose-a:no-underline"
+                  dangerouslySetInnerHTML={{ __html: stack.intro_html }}
+                />
+              </section>
+            )}
+
+            {/* Total — prominent build-cost callout */}
+            {total != null && total > 0 && (
+              <section
+                id="cost"
+                aria-label="Build cost"
+                className="mb-12 rounded-2xl border border-orange-900/40 bg-gradient-to-br from-orange-950/30 to-gray-900/60 ring-1 ring-inset ring-white/[0.02] p-6 sm:p-8 shadow-lg shadow-black/40 text-center"
+              >
+                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">Build the Stack</p>
+                <p className="text-4xl sm:text-5xl font-black text-white tabular-nums mb-2">${(total / 100).toFixed(2)}</p>
+                <p className="text-xs text-gray-500">
+                  {partialPricing
+                    ? `Partial total · ${pricedCount} of ${items.length} pieces have a listed price`
+                    : `Estimated total · ${items.length} ${items.length === 1 ? 'piece' : 'pieces'}`}
+                </p>
+              </section>
+            )}
+
+            {faqs.length > 0 && <FAQAccordion faqs={faqs} id="faq" />}
+
+            <RelatedRail items={related} id="related" />
+          </main>
+
+          <ArticleTOC items={tocItems} variant="desktop" />
+        </div>
       </div>
     </>
   )
