@@ -11,7 +11,19 @@ import { LatestGuidesSection } from './_components/LatestGuidesSection'
 import BenchStrip from '@/components/BenchStrip'
 import InMotionTicker from '@/components/InMotionTicker'
 import { HomepageMerchStrip } from '@/components/HomepageMerchStrip'
+import { OCCASIONS } from '@/lib/gift-occasions'
 import type { Metadata } from 'next'
+
+// Used by the From-The-Vault strip; small inline shape rather than reaching
+// for the full DB row type since we only consume a few fields here.
+interface VaultStripCard {
+  slug:            string
+  title:           string
+  description:     string | null
+  hero_image_url:  string | null
+  collection_type: string
+  occasion:        string | null
+}
 
 export const revalidate = 3600
 
@@ -27,6 +39,7 @@ export default async function HomePage() {
   const [
     { data: featuredReviews },
     { data: latestReviewsRaw },
+    { data: vaultPicksRaw },
   ] = await Promise.all([
     // Top-rated review — anchors the hero
     supabase
@@ -46,12 +59,32 @@ export default async function HomePage() {
       .eq('is_visible', true)
       .order('published_at', { ascending: false })
       .limit(4),
+    // Up to 6 recent Vault collections — we pick a diverse trio downstream
+    // (one comparison + one pick/best-of + one stack/gift_guide) so the
+    // homepage strip signals the breadth of editorial content beyond reviews.
+    supabase
+      .from('collections')
+      .select('slug, title, description, hero_image_url, collection_type, occasion, published_at')
+      .eq('is_visible', true)
+      .order('published_at', { ascending: false, nullsFirst: false })
+      .limit(12),
   ])
 
   const featuredReview = featuredReviews?.[0] ?? null
   const latestReviews = (latestReviewsRaw ?? [])
     .filter((r) => r.id !== featuredReview?.id)
     .slice(0, 3)
+
+  // Pick a diverse Vault trio — one of each flavor when possible, falling
+  // back to whatever's most recent. Order on the homepage strip: Comparison →
+  // Pick → Stack → Gift Guide (drops as needed when we hit 3).
+  const vaultPool = (vaultPicksRaw ?? []) as VaultStripCard[]
+  const vaultTrio: VaultStripCard[] = []
+  for (const t of ['comparison', 'best_of', 'general', 'stack', 'gift_guide']) {
+    const first = vaultPool.find((v) => v.collection_type === t && !vaultTrio.includes(v))
+    if (first) vaultTrio.push(first)
+    if (vaultTrio.length >= 3) break
+  }
 
   return (
     <>
@@ -339,6 +372,56 @@ export default async function HomePage() {
         </section>
       )}
 
+      {/* ── From The Vault — diverse trio of collections ───────────────── */}
+      {vaultTrio.length > 0 && (
+        <section className="relative">
+          <div className="relative max-w-6xl mx-auto px-6 py-16">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">From The Vault</p>
+                <h2 className="text-2xl font-black text-white">Comparisons, kits, and curated picks</h2>
+              </div>
+              <Link href="/vault" className="text-sm text-orange-400 hover:text-orange-300 transition-colors">
+                Open the Vault →
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {vaultTrio.map((card) => {
+                const meta = vaultTypeMeta(card.collection_type)
+                const href = vaultHrefFor(card)
+                return (
+                  <Link
+                    key={`${card.collection_type}:${card.slug}`}
+                    href={href}
+                    className="group flex flex-col bg-gradient-to-br from-gray-900 to-gray-900/60 rounded-2xl overflow-hidden border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-orange-900/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200"
+                  >
+                    <div className="relative aspect-video bg-gray-950">
+                      {card.hero_image_url ? (
+                        <Image src={card.hero_image_url} alt={card.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center text-orange-500/30">{meta.icon}</div>
+                      )}
+                      <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-gray-950/85 backdrop-blur border border-gray-800 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-orange-400">
+                        {meta.label}
+                      </span>
+                    </div>
+                    <div className="p-5 flex flex-col flex-1">
+                      <p className="text-base font-bold text-white group-hover:text-orange-400 transition-colors leading-snug mb-2 line-clamp-2">{card.title}</p>
+                      {card.description && (
+                        <p className="text-sm text-gray-500 leading-relaxed line-clamp-2 flex-1">{card.description}</p>
+                      )}
+                      <p className="mt-4 text-xs text-orange-500 font-semibold">Read →</p>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
       </div>{/* ═══ End Movement 1 ═════════════════════════════════════════ */}
 
       {/* ═══ MOVEMENT 2 — Voice & Browse (plain dark) ════════════════════ */}
@@ -540,6 +623,43 @@ function TrustBadge({
     </span>
   )
   return href ? <Link href={href}>{inner}</Link> : <span className="cursor-default">{inner}</span>
+}
+
+function vaultHrefFor(card: VaultStripCard): string {
+  if (card.collection_type === 'gift_guide') {
+    if (!card.occasion) return '/gifts'
+    const occ = OCCASIONS.find((o) => o.value === card.occasion)
+    return occ ? `/gifts/${occ.slug}` : '/gifts'
+  }
+  if (card.collection_type === 'comparison') return `/comparisons/${card.slug}`
+  if (card.collection_type === 'stack')      return `/stacks/${card.slug}`
+  return `/picks/${card.slug}`
+}
+
+function vaultTypeMeta(type: string): { label: string; icon: React.ReactNode } {
+  const cls = 'w-10 h-10'
+  if (type === 'comparison') {
+    return {
+      label: 'Comparison',
+      icon: <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z" /></svg>,
+    }
+  }
+  if (type === 'stack') {
+    return {
+      label: 'Stack',
+      icon: <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>,
+    }
+  }
+  if (type === 'gift_guide') {
+    return {
+      label: 'Gift Guide',
+      icon: <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>,
+    }
+  }
+  return {
+    label: type === 'best_of' ? 'Best Of' : 'Pick List',
+    icon: <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>,
+  }
 }
 
 function LatestGuidesSkeleton() {

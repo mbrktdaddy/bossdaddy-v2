@@ -20,7 +20,53 @@ const NAV_LINKS = [
   { href: '/',        label: 'Home' },
   { href: '/reviews', label: LABELS.reviews.plural },
   { href: '/guides',  label: LABELS.guides.plural },
+  { href: '/vault',   label: LABELS.vault.full },
   { href: '/gear',    label: LABELS.stuff.short },
+]
+
+// Sub-links surfaced in the "Browse" mega-menu footer + mobile drawer.
+// Source of truth for which collection types are user-visible in nav.
+const VAULT_LINKS = [
+  {
+    href: '/comparisons',
+    label: 'Comparisons',
+    blurb: 'Head-to-head scorecards',
+    icon: (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z" />
+      </svg>
+    ),
+  },
+  {
+    href: '/picks',
+    label: 'Best Of',
+    blurb: 'Curated picks',
+    icon: (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+      </svg>
+    ),
+  },
+  {
+    href: '/stacks',
+    label: 'Stacks',
+    blurb: 'Kits built for purpose',
+    icon: (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+      </svg>
+    ),
+  },
+  {
+    href: '/gifts',
+    label: 'Gift Guides',
+    blurb: 'Real-tested ideas',
+    icon: (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+      </svg>
+    ),
+  },
 ]
 
 function isActive(pathname: string, href: string) {
@@ -151,35 +197,57 @@ export default function Header({ username }: HeaderProps) {
                     </Link>
                   ))}
                 </div>
-                <div className="mt-4 pt-4 border-t border-gray-800 flex items-center justify-between flex-wrap gap-y-2">
-                  <Link
-                    href="/reviews"
-                    onClick={() => setCatOpen(false)}
-                    className="text-xs text-orange-500 hover:text-orange-400 font-semibold transition-colors"
-                  >
-                    All {LABELS.reviews.plural.toLowerCase()} →
-                  </Link>
-                  <Link
-                    href="/guides"
-                    onClick={() => setCatOpen(false)}
-                    className="text-xs text-gray-500 hover:text-gray-300 font-semibold transition-colors"
-                  >
-                    All {LABELS.guides.plural.toLowerCase()} →
-                  </Link>
-                  <Link
-                    href="/gifts"
-                    onClick={() => setCatOpen(false)}
-                    className="text-xs text-gray-500 hover:text-gray-300 font-semibold transition-colors"
-                  >
-                    Gift guides →
-                  </Link>
-                  <Link
-                    href="/picks"
-                    onClick={() => setCatOpen(false)}
-                    className="text-xs text-gray-500 hover:text-gray-300 font-semibold transition-colors"
-                  >
-                    Collections →
-                  </Link>
+                {/* The Vault — sibling discovery section for collection types */}
+                <div className="mt-5 pt-4 border-t border-gray-800">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold">From {LABELS.vault.full}</p>
+                    <Link
+                      href="/vault"
+                      onClick={() => setCatOpen(false)}
+                      className="text-xs text-gray-500 hover:text-orange-400 font-semibold transition-colors"
+                    >
+                      See all →
+                    </Link>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1">
+                    {VAULT_LINKS.map((v) => (
+                      <Link
+                        key={v.href}
+                        href={v.href}
+                        onClick={() => setCatOpen(false)}
+                        className="flex items-start gap-2.5 p-2.5 rounded-xl hover:bg-gray-900 transition-colors group"
+                      >
+                        <span className="text-orange-500 mt-0.5 shrink-0">{v.icon}</span>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-white group-hover:text-orange-400 transition-colors leading-tight">{v.label}</p>
+                          <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-1">{v.blurb}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-gray-800/60 flex items-center justify-between flex-wrap gap-y-2">
+                    <Link
+                      href="/reviews"
+                      onClick={() => setCatOpen(false)}
+                      className="text-xs text-gray-500 hover:text-gray-300 font-semibold transition-colors"
+                    >
+                      All {LABELS.reviews.plural.toLowerCase()} →
+                    </Link>
+                    <Link
+                      href="/guides"
+                      onClick={() => setCatOpen(false)}
+                      className="text-xs text-gray-500 hover:text-gray-300 font-semibold transition-colors"
+                    >
+                      All {LABELS.guides.plural.toLowerCase()} →
+                    </Link>
+                    <Link
+                      href="/gear"
+                      onClick={() => setCatOpen(false)}
+                      className="text-xs text-gray-500 hover:text-gray-300 font-semibold transition-colors"
+                    >
+                      All {LABELS.stuff.short.toLowerCase()} →
+                    </Link>
+                  </div>
                 </div>
               </div>
             )}
@@ -393,29 +461,31 @@ export default function Header({ username }: HeaderProps) {
             )}
           </div>
 
-          {/* Secondary links — gift guides + collections */}
-          <div className="px-4 pb-4 flex items-center gap-4 border-t border-gray-800/40 pt-3">
-            <Link
-              href="/gifts"
-              onClick={() => setMobileOpen(false)}
-              className="text-sm text-gray-500 hover:text-orange-400 font-semibold transition-colors py-1 inline-flex items-center gap-1.5"
-            >
-              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-              </svg>
-              Gift Guides
-            </Link>
-            <span className="text-gray-800">·</span>
-            <Link
-              href="/picks"
-              onClick={() => setMobileOpen(false)}
-              className="text-sm text-gray-500 hover:text-orange-400 font-semibold transition-colors py-1 inline-flex items-center gap-1.5"
-            >
-              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-              </svg>
-              Collections
-            </Link>
+          {/* From The Vault — collection types as a 2x2 grid */}
+          <div className="px-4 pb-4 border-t border-gray-800/40 pt-3">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] font-bold text-orange-500 uppercase tracking-widest">From {LABELS.vault.full}</p>
+              <Link
+                href="/vault"
+                onClick={() => setMobileOpen(false)}
+                className="text-xs text-gray-500 hover:text-orange-400 font-semibold transition-colors"
+              >
+                See all →
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {VAULT_LINKS.map((v) => (
+                <Link
+                  key={v.href}
+                  href={v.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-900 hover:bg-gray-800 transition-colors min-h-[44px]"
+                >
+                  <span className="text-orange-500 shrink-0">{v.icon}</span>
+                  <span className="text-xs font-semibold text-gray-300 truncate">{v.label}</span>
+                </Link>
+              ))}
+            </div>
           </div>
 
           {/* Auth / account */}
