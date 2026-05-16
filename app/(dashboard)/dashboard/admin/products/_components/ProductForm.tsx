@@ -266,7 +266,23 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
             {isValidAsin(asin) && amazonAssociateTag && (
               <button
                 type="button"
-                onClick={() => setAffiliateUrl(buildAmazonAffiliateUrl(asin, amazonAssociateTag))}
+                onClick={() => {
+                  // Detect SiteStripe long-form URLs by their tracking params.
+                  // Rebuilding from ASIN produces a bare /dp/<ASIN>?tag=<tag>
+                  // and drops linkCode/linkId/ref_ — confirm before clobbering.
+                  if (/[?&](linkCode|linkId|ref_)=/.test(affiliateUrl)) {
+                    const ok = window.confirm(
+                      'This URL looks like a SiteStripe long-form link ' +
+                      '(linkCode / linkId / ref_ tracking params present).\n\n' +
+                      'Rebuilding will replace it with a bare ' +
+                      `https://www.amazon.com/dp/${asin.trim().toUpperCase()}?tag=${amazonAssociateTag} ` +
+                      'and you will lose the SiteStripe tracking params.\n\n' +
+                      'Continue?'
+                    )
+                    if (!ok) return
+                  }
+                  setAffiliateUrl(buildAmazonAffiliateUrl(asin, amazonAssociateTag))
+                }}
                 className="text-xs px-3 py-1.5 bg-orange-700/60 hover:bg-orange-600/60 text-orange-200 font-semibold rounded-lg transition-colors shrink-0"
                 title={`https://www.amazon.com/dp/${asin.trim().toUpperCase()}?tag=${amazonAssociateTag}`}
               >
