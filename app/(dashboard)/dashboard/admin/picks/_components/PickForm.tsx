@@ -83,6 +83,7 @@ export function PickForm({ pick, initialItems }: Props) {
   const [searchResults, setSearchResults] = useState<ReviewSummary[]>([])
   const [searching, setSearching] = useState(false)
   const [busy, setBusy]     = useState(false)
+  const [savedAt, setSavedAt] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [error, setError]   = useState<string | null>(null)
   const [slugTaken, setSlugTaken] = useState<{ type: string } | null>(null)
@@ -250,7 +251,7 @@ export function PickForm({ pick, initialItems }: Props) {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
-    setBusy(true); setError(null)
+    setBusy(true); setError(null); setSavedAt(null)
 
     const parsedBundleTotal = bundleTotalCents.trim() ? parseInt(bundleTotalCents.trim(), 10) : null
 
@@ -287,8 +288,11 @@ export function PickForm({ pick, initialItems }: Props) {
 
       if (isNew) {
         router.push(`/dashboard/admin/picks/${json.pick.id}`)
+        // Stay busy through the navigation — the destination remounts the form.
       } else {
         router.refresh()
+        setSavedAt(new Date().toLocaleTimeString())
+        setBusy(false)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')
@@ -696,7 +700,7 @@ export function PickForm({ pick, initialItems }: Props) {
 
       {error && <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">{error}</p>}
 
-      <div className="flex items-center gap-3 pt-2">
+      <div className="flex items-center gap-3 pt-2 flex-wrap">
         <button type="submit" disabled={busy || !slug.trim() || !title.trim()}
           className="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors min-h-[44px]">
           {busy ? 'Saving…' : isNew ? 'Create List' : 'Save Changes'}
@@ -706,6 +710,11 @@ export function PickForm({ pick, initialItems }: Props) {
             className="px-5 py-2.5 text-red-400 hover:text-red-300 text-sm transition-colors disabled:opacity-40 min-h-[44px]">
             {deleting ? 'Deleting…' : 'Delete'}
           </button>
+        )}
+        {!busy && !error && savedAt && (
+          <span className="text-sm text-green-400 font-semibold">
+            Saved at {savedAt}
+          </span>
         )}
       </div>
     </form>
