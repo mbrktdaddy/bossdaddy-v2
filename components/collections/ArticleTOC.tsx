@@ -8,26 +8,31 @@ export interface TOCItem {
 }
 
 interface Props {
-  items: TOCItem[]
+  items:    TOCItem[]
+  /**
+   * `mobile` renders sticky pill strip at viewport top; place INSIDE the
+   * article column near the top so source order stays linear.
+   * `desktop` renders the right rail; place as a sibling of <main> in a
+   * lg:flex parent so it occupies its own column.
+   */
+  variant:  'mobile' | 'desktop'
 }
 
 /**
- * Reading-rail nav for long collection pages. Desktop: sticky right rail
- * with active-section highlighting via IntersectionObserver. Mobile:
- * horizontal pill scroll that fits inside the editorial column.
+ * Reading-rail nav for long collection pages. Split into two variants the
+ * parent composes so mobile pills can sit inside the article flow at the
+ * top while the desktop rail occupies its own right column.
  *
  * The parent page is responsible for matching each item.id to a section
  * with that id on the page. Items render in order — keep the parent's
  * source array authoritative.
  */
-export default function ArticleTOC({ items }: Props) {
+export default function ArticleTOC({ items, variant }: Props) {
   const [activeId, setActiveId] = useState<string | null>(items[0]?.id ?? null)
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        // Pick the entry closest to the top of the viewport that's at least
-        // partially visible. Avoids flicker when multiple sections overlap.
         const visible = entries.filter((e) => e.isIntersecting)
         if (visible.length === 0) return
         visible.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
@@ -35,7 +40,6 @@ export default function ArticleTOC({ items }: Props) {
       },
       { rootMargin: '-20% 0px -65% 0px', threshold: [0, 0.1, 0.5, 1] },
     )
-
     for (const item of items) {
       const el = document.getElementById(item.id)
       if (el) observer.observe(el)
@@ -45,9 +49,8 @@ export default function ArticleTOC({ items }: Props) {
 
   if (items.length === 0) return null
 
-  return (
-    <>
-      {/* Mobile: horizontal scroll strip — appears in the editorial column flow */}
+  if (variant === 'mobile') {
+    return (
       <nav
         aria-label="On this page"
         className="lg:hidden -mx-6 mb-8 px-6 sticky top-0 z-10 bg-gray-950/95 backdrop-blur py-3 border-y border-gray-800/60"
@@ -71,32 +74,31 @@ export default function ArticleTOC({ items }: Props) {
           ))}
         </div>
       </nav>
+    )
+  }
 
-      {/* Desktop: sticky right rail. Positioned absolutely-ish so the editorial
-          column doesn't have to know about it — the page wraps content in a
-          relative parent and we float right at top. */}
-      <aside
-        aria-label="On this page"
-        className="hidden lg:block sticky top-24 self-start ml-6 w-56 shrink-0"
-      >
-        <p className="text-[10px] font-bold text-orange-500 uppercase tracking-widest mb-3">On this page</p>
-        <ul className="space-y-1 border-l border-gray-800/60 pl-3">
-          {items.map((item) => (
-            <li key={item.id}>
-              <a
-                href={`#${item.id}`}
-                className={`block py-1.5 text-xs font-medium border-l-2 -ml-3 pl-3 transition-colors ${
-                  activeId === item.id
-                    ? 'text-orange-400 border-orange-500 font-bold'
-                    : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-700'
-                }`}
-              >
-                {item.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </aside>
-    </>
+  return (
+    <aside
+      aria-label="On this page"
+      className="hidden lg:block sticky top-24 self-start w-56 shrink-0"
+    >
+      <p className="text-[10px] font-bold text-orange-500 uppercase tracking-widest mb-3">On this page</p>
+      <ul className="space-y-1 border-l border-gray-800/60 pl-3">
+        {items.map((item) => (
+          <li key={item.id}>
+            <a
+              href={`#${item.id}`}
+              className={`block py-1.5 text-xs font-medium border-l-2 -ml-3 pl-3 transition-colors ${
+                activeId === item.id
+                  ? 'text-orange-400 border-orange-500 font-bold'
+                  : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-700'
+              }`}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </aside>
   )
 }
