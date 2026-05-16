@@ -36,12 +36,22 @@ export async function resolveCollectionTokens(
 
   const known = new Set<string>(((data ?? []) as { slug: string }[]).map((row) => row.slug))
 
-  return html.replace(TOKEN_REGEX, (_, slug: string) => {
+  const replaced = html.replace(TOKEN_REGEX, (_, slug: string) => {
     if (!known.has(slug)) {
       return `<span class="bd-link-missing" data-slug="${escapeHtml(slug)}">[collection missing: ${escapeHtml(slug)}]</span>`
     }
     return `<div class="bd-collection-embed" data-collection-slug="${escapeHtml(slug)}"></div>`
   })
+
+  // TiptapEditor wraps editor text in <p> tags. When [[COLLECTION:slug]] is
+  // typed as the sole content of a paragraph, the resolved <div> would end up
+  // as `<p><div class="bd-collection-embed"></div></p>` — invalid HTML
+  // (block-in-inline) that the browser auto-fixes by inserting an extra empty
+  // <p>. Strip the wrapping <p> in that exact case so the marker stands alone.
+  return replaced.replace(
+    /<p>\s*(<div class="bd-collection-embed" data-collection-slug="[a-z0-9-]+"><\/div>)\s*<\/p>/g,
+    '$1'
+  )
 }
 
 /** Find all collection-embed markers in already-resolved HTML. */

@@ -12,9 +12,18 @@ export const revalidate = 60
 
 interface Props { params: Promise<{ slug: string }> }
 
+// PICK_TYPES are the only flavors that live at /picks/[slug]. Comparisons,
+// stacks, and gift guides each get their own route — without this filter, a
+// comparison slug requested via /picks/<slug> would render under this layout.
+const PICK_TYPES = ['general', 'best_of'] as const
+
 export async function generateStaticParams() {
   const admin = createAdminClient()
-  const { data } = await admin.from('collections').select('slug').eq('is_visible', true)
+  const { data } = await admin
+    .from('collections')
+    .select('slug')
+    .eq('is_visible', true)
+    .in('collection_type', PICK_TYPES)
   return (data ?? []).map(({ slug }) => ({ slug }))
 }
 
@@ -26,6 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .select('title, description, meta_title, meta_description')
     .eq('slug', slug)
     .eq('is_visible', true)
+    .in('collection_type', PICK_TYPES)
     .single()
   if (!data) return { title: 'Not Found' }
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
@@ -48,6 +58,7 @@ export default async function PickDetailPage({ params }: Props) {
     .select('id, slug, title, description, intro_html, hero_image_url, published_at')
     .eq('slug', slug)
     .eq('is_visible', true)
+    .in('collection_type', PICK_TYPES)
     .single()
 
   if (!pick) notFound()

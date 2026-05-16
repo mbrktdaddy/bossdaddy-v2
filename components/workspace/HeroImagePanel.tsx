@@ -28,12 +28,28 @@ export function HeroImagePanel({
   // When the workspace reads its sessionStorage suggestion and passes it in,
   // pre-fill the prompt field (only if the user hasn't typed anything yet).
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (initialPrompt && !imagePrompt) setImagePrompt(initialPrompt)
   }, [initialPrompt]) // eslint-disable-line react-hooks/exhaustive-deps
   const [generating, setGenerating] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
+
+  // Defensive response reader. When an API route throws an uncaught error or
+  // Vercel hits the serverless maxDuration, the body comes back as plain
+  // HTML/text — `res.json()` then throws `Unexpected token 'A'...`. Read text
+  // first, try-parse, fall back to a readable error string.
+  async function readJsonResponse<T extends Record<string, unknown>>(res: Response, fallback: string): Promise<T> {
+    const text = await res.text()
+    let parsed: T = {} as T
+    try { parsed = text ? JSON.parse(text) as T : ({} as T) } catch { /* non-JSON error body */ }
+    if (!res.ok) {
+      const msg = (parsed as { error?: string }).error ?? (text ? text.slice(0, 200) : '') ?? ''
+      throw new Error(msg || fallback || `HTTP ${res.status}`)
+    }
+    return parsed
+  }
 
   async function handleCameraCapture(e: React.ChangeEvent<HTMLInputElement>) {
     const raw = e.target.files?.[0]
@@ -45,8 +61,7 @@ export function HeroImagePanel({
       const fd = new FormData()
       fd.append('file', file)
       const res = await fetch('/api/media', { method: 'POST', body: fd })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Upload failed')
+      const json = await readJsonResponse<{ asset?: { url?: string } }>(res, 'Upload failed')
       onChange(json.asset?.url ?? null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed')
@@ -72,9 +87,8 @@ export function HeroImagePanel({
           custom_prompt: imagePrompt.trim() || null,
         }),
       })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Image generation failed')
-      onChange(json.imageUrl)
+      const json = await readJsonResponse<{ imageUrl?: string }>(res, 'Image generation failed')
+      if (json.imageUrl) onChange(json.imageUrl)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Image generation failed')
     }

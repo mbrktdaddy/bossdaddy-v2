@@ -103,6 +103,24 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const occ = OCCASIONS.find((o) => o.value === pick.occasion)
     if (occ) revalidatePath(`/gifts/${occ.slug}`)
   }
+
+  // Revalidate any review page whose ID is currently in this collection so the
+  // <CollectionsForReview> cross-link strip refreshes immediately.
+  const { data: linkedReviewIds } = await admin
+    .from('collection_items')
+    .select('review_id')
+    .eq('collection_id', id)
+  const reviewIds = (linkedReviewIds ?? []).map((r) => r.review_id)
+  if (reviewIds.length > 0) {
+    const { data: reviewRows } = await admin
+      .from('reviews')
+      .select('slug')
+      .in('id', reviewIds)
+    for (const r of (reviewRows ?? [])) {
+      if (r.slug) revalidatePath(`/reviews/${r.slug}`)
+    }
+  }
+
   return NextResponse.json({ pick })
 }
 
