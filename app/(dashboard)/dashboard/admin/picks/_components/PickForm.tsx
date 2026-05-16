@@ -720,47 +720,56 @@ export function PickForm({ pick, initialItems }: Props) {
 
       {error && <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">{error}</p>}
 
-      <div className="flex items-center gap-3 pt-2 flex-wrap">
-        <button type="submit" disabled={busy || !slug.trim() || !title.trim()}
-          className="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors min-h-[44px]">
-          {busy ? 'Saving…' : isNew ? 'Create List' : 'Save Changes'}
-        </button>
-
-        {!isNew && (
-          <button type="button"
-            onClick={() => handleSave(null, { visible: !visible })}
-            disabled={busy || !slug.trim() || !title.trim()}
-            className={visible
-              ? 'px-5 py-2.5 bg-yellow-900/40 hover:bg-yellow-900/60 border border-yellow-900/50 text-yellow-300 text-sm font-semibold rounded-xl transition-colors min-h-[44px] disabled:opacity-40'
-              : 'px-5 py-2.5 bg-green-700 hover:bg-green-600 text-white text-sm font-semibold rounded-xl transition-colors min-h-[44px] disabled:opacity-40'}>
-            {busy ? '…' : visible ? 'Unpublish' : 'Publish Live'}
+      {/* Sticky action bar — pins to the bottom of the viewport so Save /
+          Publish / View Live / Delete are reachable from anywhere in this
+          long form, especially on mobile. Matches the VoiceProfileForm
+          pattern. */}
+      <div className="sticky bottom-2 sm:bottom-4 z-20 mt-4 -mx-3 sm:mx-0 px-3 sm:px-4 py-3 bg-gray-950/85 backdrop-blur border border-gray-800 rounded-2xl shadow-lg shadow-black/40">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <button type="submit" disabled={busy || !slug.trim() || !title.trim()}
+            className="px-4 sm:px-5 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors min-h-[44px]">
+            {busy ? 'Saving…' : isNew ? 'Create List' : 'Save Changes'}
           </button>
-        )}
 
-        {!isNew && visible && publicPath && (
-          <a href={publicPath} target="_blank" rel="noopener noreferrer"
-             className="px-5 py-2.5 bg-orange-950/40 hover:bg-orange-900/40 border border-orange-900/40 text-orange-400 hover:text-orange-300 text-sm font-semibold rounded-xl transition-colors min-h-[44px] inline-flex items-center gap-1.5">
-            View Live →
-          </a>
-        )}
+          {!isNew && (
+            <button type="button"
+              onClick={() => handleSave(null, { visible: !visible })}
+              disabled={busy || !slug.trim() || !title.trim()}
+              className={visible
+                ? 'px-4 sm:px-5 py-2.5 bg-yellow-900/40 hover:bg-yellow-900/60 border border-yellow-900/50 text-yellow-300 text-sm font-semibold rounded-xl transition-colors min-h-[44px] disabled:opacity-40'
+                : 'px-4 sm:px-5 py-2.5 bg-green-700 hover:bg-green-600 text-white text-sm font-semibold rounded-xl transition-colors min-h-[44px] disabled:opacity-40'}>
+              {busy ? '…' : visible ? 'Unpublish' : 'Publish Live'}
+            </button>
+          )}
 
-        {!isNew && !visible && publicPath && (
-          <span className="text-xs text-gray-500">
-            Hidden — will live at <code className="text-orange-400/70">{publicPath}</code>
-          </span>
-        )}
+          {!isNew && visible && publicPath && (
+            <a href={publicPath} target="_blank" rel="noopener noreferrer"
+               className="px-4 sm:px-5 py-2.5 bg-orange-950/40 hover:bg-orange-900/40 border border-orange-900/40 text-orange-400 hover:text-orange-300 text-sm font-semibold rounded-xl transition-colors min-h-[44px] inline-flex items-center gap-1.5">
+              View Live →
+            </a>
+          )}
 
-        {!isNew && (
-          <button type="button" onClick={handleDelete} disabled={deleting}
-            className="ml-auto px-5 py-2.5 text-red-400 hover:text-red-300 text-sm transition-colors disabled:opacity-40 min-h-[44px]">
-            {deleting ? 'Deleting…' : 'Delete'}
-          </button>
-        )}
+          {!isNew && (
+            <button type="button" onClick={handleDelete} disabled={deleting}
+              className="ml-auto px-4 sm:px-5 py-2.5 text-red-400 hover:text-red-300 text-sm transition-colors disabled:opacity-40 min-h-[44px]">
+              {deleting ? 'Deleting…' : 'Delete'}
+            </button>
+          )}
+        </div>
 
-        {!busy && !error && savedAt && (
-          <span className="text-sm text-green-400 font-semibold w-full sm:w-auto">
-            Saved at {savedAt}
-          </span>
+        {/* Status line under the buttons — keeps the bar compact on mobile
+            and avoids the long URL pushing buttons off the row. */}
+        {(savedAt || (!isNew && !visible && publicPath)) && !busy && !error && (
+          <div className="mt-2 text-xs flex flex-wrap items-center gap-x-3 gap-y-1">
+            {savedAt && (
+              <span className="text-green-400 font-semibold">Saved at {savedAt}</span>
+            )}
+            {!isNew && !visible && publicPath && (
+              <span className="text-gray-500">
+                Hidden — will live at <code className="text-orange-400/70">{publicPath}</code>
+              </span>
+            )}
+          </div>
         )}
       </div>
     </form>
