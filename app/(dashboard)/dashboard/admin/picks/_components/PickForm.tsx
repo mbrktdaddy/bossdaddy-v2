@@ -487,7 +487,7 @@ export function PickForm({ pick, initialItems }: Props) {
               {OCCASION_GROUPS.map((group) => (
                 <optgroup key={group.id} label={group.label}>
                   {OCCASIONS.filter((o) => o.group === group.id).map((o) => (
-                    <option key={o.value} value={o.value}>{o.emoji} {o.label}</option>
+                    <option key={o.value} value={o.value}>{o.label}</option>
                   ))}
                 </optgroup>
               ))}

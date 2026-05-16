@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getProductBySlug } from '@/lib/products'
 import { OCCASIONS, getOccasion } from '@/lib/gift-occasions'
+import OccasionIcon from '@/components/OccasionIcon'
 import RatingScore from '@/components/RatingScore'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import { EmailSignup } from '@/components/EmailSignup'
@@ -152,7 +153,7 @@ export default async function GiftOccasionPage({ params }: Props) {
           </div>
         ) : (
           <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-8 bg-gradient-to-br from-orange-950/40 to-gray-900 flex items-center justify-center border border-orange-900/20">
-            <span className="text-7xl md:text-8xl">{occ.emoji}</span>
+            <OccasionIcon value={occ.value} className="w-20 h-20 md:w-24 md:h-24 text-orange-500/70" />
           </div>
         )}
 
@@ -280,7 +281,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                   href={`/gifts/${r.slug}`}
                   className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:bg-gray-800 hover:border-orange-900/40 rounded-xl transition-colors min-h-[44px]"
                 >
-                  <span className="text-2xl shrink-0">{r.emoji}</span>
+                  <OccasionIcon value={r.value} className="w-6 h-6 shrink-0 text-orange-400" />
                   <span className="text-sm font-semibold text-gray-300 hover:text-white transition-colors truncate">{r.label}</span>
                 </Link>
               ))}

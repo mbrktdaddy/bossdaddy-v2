@@ -3,6 +3,7 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { OCCASIONS, OCCASION_GROUPS } from '@/lib/gift-occasions'
+import OccasionIcon from '@/components/OccasionIcon'
 
 export const revalidate = 60
 
@@ -78,7 +79,7 @@ export default async function GiftsIndexPage() {
                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       />
                     ) : (
-                      <span className="text-5xl">{occ.emoji}</span>
+                      <OccasionIcon value={occ.value} className="w-12 h-12 text-orange-500/70" />
                     )}
                     {live && (
                       <div className="absolute top-2 right-2">

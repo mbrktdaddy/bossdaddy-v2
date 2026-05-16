@@ -404,11 +404,11 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
             {/* Mode tabs */}
             <div className="flex flex-wrap gap-1.5">
               {([
-                { v: 'generate',    l: '✨ AI generate' },
-                { v: 'library',     l: '📁 Library' },
-                { v: 'upload',      l: '⬆ Upload' },
-                { v: 'placeholder', l: '🎯 Empty slot' },
-                { v: 'gallery',     l: '🖼 Gallery' },
+                { v: 'generate',    l: 'AI generate' },
+                { v: 'library',     l: 'Library' },
+                { v: 'upload',      l: 'Upload' },
+                { v: 'placeholder', l: 'Empty slot' },
+                { v: 'gallery',     l: 'Gallery' },
               ] as Array<{ v: AddMode; l: string }>).map(opt => (
                 <button
                   key={opt.v}
@@ -493,11 +493,11 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
             >
               {addBusy
                 ? 'Working…'
-                : addMode === 'generate'    ? '✨ Generate & insert'
-                : addMode === 'library'     ? '📁 Pick from library'
-                : addMode === 'upload'      ? '⬆ Choose file & insert'
-                : addMode === 'gallery'     ? '🖼 Pick images for gallery'
-                                            : '🎯 Insert empty slot'}
+                : addMode === 'generate'    ? 'Generate & insert'
+                : addMode === 'library'     ? 'Pick from library'
+                : addMode === 'upload'      ? 'Choose file & insert'
+                : addMode === 'gallery'     ? 'Pick images for gallery'
+                                            : 'Insert empty slot'}
             </button>
           </div>
         )}
@@ -674,7 +674,7 @@ function GalleryCard(p: GalleryCardProps) {
             onClick={p.onRemoveGallery}
             className="px-2.5 py-1.5 bg-transparent hover:bg-red-950/40 text-gray-500 hover:text-red-400 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
             title="Remove entire gallery"
-          >🗑</button>
+          ><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg></button>
         </div>
       </div>
 
@@ -686,7 +686,7 @@ function GalleryCard(p: GalleryCardProps) {
               {/* Child header */}
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <span className={`text-xs font-semibold ${child.filled ? 'text-green-400' : 'text-orange-400'}`}>
-                  {child.filled ? '✓ Image' : '🎯 Slot'} {childIdx + 1}/{item.children.length}
+                  {child.filled ? 'Image' : 'Slot'} {childIdx + 1}/{item.children.length}
                 </span>
                 <div className="flex items-center gap-1">
                   <button
@@ -716,7 +716,7 @@ function GalleryCard(p: GalleryCardProps) {
                     disabled={busySlotId === child.slotId}
                     className="px-2 py-1 bg-transparent hover:bg-red-950/40 text-gray-500 hover:text-red-400 text-xs rounded-lg min-h-[32px] min-w-[32px] transition-colors"
                     title="Remove image"
-                  >🗑</button>
+                  ><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg></button>
                 </div>
               </div>
 
@@ -837,7 +837,7 @@ function SlotCard(p: SlotCardProps) {
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
           <span className={`text-xs font-semibold ${filled ? 'text-green-400' : 'text-orange-400'}`}>
-            {filled ? '✓ Image' : '🎯 Slot'}
+            {filled ? 'Image' : 'Slot'}
           </span>
           <select
             value={position}
@@ -873,7 +873,7 @@ function SlotCard(p: SlotCardProps) {
           <button type="button" onClick={() => p.onMove(position + 1)} disabled={busy || position === total}
             className="px-2.5 py-1.5 bg-gray-800 hover:bg-gray-700 disabled:opacity-30 text-gray-300 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors" title="Move down">↓</button>
           <button type="button" onClick={p.onRemove} disabled={busy}
-            className="px-2.5 py-1.5 bg-transparent hover:bg-red-950/40 text-gray-500 hover:text-red-400 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors" title="Remove image">🗑</button>
+            className="px-2.5 py-1.5 bg-transparent hover:bg-red-950/40 text-gray-500 hover:text-red-400 text-xs rounded-lg min-h-[36px] min-w-[36px] inline-flex items-center justify-center transition-colors" title="Remove image"><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg></button>
         </div>
       </div>
 
