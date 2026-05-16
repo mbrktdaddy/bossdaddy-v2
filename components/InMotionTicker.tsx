@@ -1,10 +1,39 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-const STATUS_META: Record<string, { label: string; icon: string }> = {
-  testing:     { label: 'Testing',     icon: '🧪' },
-  queued:      { label: 'Up next',     icon: '🔜' },
-  considering: { label: 'Considering', icon: '🤔' },
+// Brand doctrine: no emoji on web surfaces — inline SVGs match the rest of
+// the site (CategoryIcon set, ticker dot in BenchStrip, etc.). Outlined
+// stroke 1.5 currentColor at w-3.5 h-3.5 sizing.
+function StatusIcon({ kind, className }: { kind: 'testing' | 'queued' | 'considering'; className?: string }) {
+  const cls = className ?? 'w-3.5 h-3.5 shrink-0'
+  if (kind === 'testing') {
+    // Beaker — active testing, the most committed signal
+    return (
+      <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+      </svg>
+    )
+  }
+  if (kind === 'queued') {
+    // Clock — coming up, time-shifted into the future
+    return (
+      <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    )
+  }
+  // considering — question / decision pending
+  return (
+    <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+    </svg>
+  )
+}
+
+const STATUS_META: Record<string, { label: string; kind: 'testing' | 'queued' | 'considering' }> = {
+  testing:     { label: 'Testing',     kind: 'testing' },
+  queued:      { label: 'Up next',     kind: 'queued' },
+  considering: { label: 'Considering', kind: 'considering' },
 }
 
 // Internal status rank so the ticker leads with "testing now" (most active
@@ -49,7 +78,7 @@ export default async function InMotionTicker() {
                   href={`/bench/${item.slug}`}
                   className="inline-flex items-center gap-1.5 text-gray-300 hover:text-orange-300 transition-colors"
                 >
-                  <span aria-hidden className="text-[13px] leading-none">{meta.icon}</span>
+                  <StatusIcon kind={meta.kind} className="w-3.5 h-3.5 shrink-0 text-orange-400" />
                   <span className="text-orange-400/80 font-semibold tracking-wide">{meta.label}:</span>
                   <span className="font-medium">{item.title}</span>
                 </Link>
