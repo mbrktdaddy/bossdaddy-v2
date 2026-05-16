@@ -9,6 +9,7 @@ import RatingScore from '@/components/RatingScore'
 import CodeRedirect from './_components/CodeRedirect'
 import { LatestGuidesSection } from './_components/LatestGuidesSection'
 import BenchStrip from '@/components/BenchStrip'
+import InMotionTicker from '@/components/InMotionTicker'
 import { HomepageMerchStrip } from '@/components/HomepageMerchStrip'
 import type { Metadata } from 'next'
 
@@ -56,6 +57,12 @@ export default async function HomePage() {
     <>
       <Suspense fallback={null}>
         <CodeRedirect />
+      </Suspense>
+
+      {/* ── In Motion ticker — auto-fed from Bench testing/queued items.
+            Renders nothing when nothing's in motion. ────────────────────── */}
+      <Suspense fallback={null}>
+        <InMotionTicker />
       </Suspense>
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}

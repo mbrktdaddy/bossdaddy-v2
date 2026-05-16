@@ -57,8 +57,7 @@ export async function POST(request: NextRequest) {
   const insertPayload = { ...parsed.data, published_at: parsed.data.is_visible ? (parsed.data.published_at ?? new Date().toISOString()) : null }
   const { data, error } = await admin
     .from('collections')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .insert(insertPayload as any)
+    .insert(insertPayload)
     .select()
     .single()
 

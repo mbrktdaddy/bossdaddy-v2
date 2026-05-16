@@ -90,15 +90,13 @@ export async function GET(request: NextRequest) {
 
   if (collectionIds.length) {
     // Collections use is_visible + published_at; no status column. Set both.
-    const collectionUpdate = {
-      is_visible:           true,
-      published_at:         now,
-      scheduled_publish_at: null,
-    }
     const { error, count } = await admin
       .from('collections')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .update(collectionUpdate as any, { count: 'exact' })
+      .update({
+        is_visible:           true,
+        published_at:         now,
+        scheduled_publish_at: null,
+      }, { count: 'exact' })
       .in('id', collectionIds)
     if (error) console.error('Scheduled collection publish failed:', error)
     collectionsPublished = count ?? 0

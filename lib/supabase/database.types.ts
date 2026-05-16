@@ -211,6 +211,7 @@ export type Database = {
           meta_title: string | null
           occasion: string | null
           published_at: string | null
+          scheduled_publish_at: string | null
           slug: string
           title: string
           updated_at: string
@@ -229,6 +230,7 @@ export type Database = {
           meta_title?: string | null
           occasion?: string | null
           published_at?: string | null
+          scheduled_publish_at?: string | null
           slug: string
           title: string
           updated_at?: string
@@ -247,6 +249,7 @@ export type Database = {
           meta_title?: string | null
           occasion?: string | null
           published_at?: string | null
+          scheduled_publish_at?: string | null
           slug?: string
           title?: string
           updated_at?: string
