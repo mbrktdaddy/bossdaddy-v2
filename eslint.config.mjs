@@ -14,6 +14,16 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
   ]),
   {
+    // React Email templates render a full HTML document, so they use the raw
+    // <head> element on purpose. next/head's <Head /> belongs to the Next.js
+    // App Router and would break email rendering. Disable the Next-page-
+    // specific rule for the emails/ folder.
+    files: ['emails/**/*.{ts,tsx}'],
+    rules: {
+      '@next/next/no-head-element': 'off',
+    },
+  },
+  {
     // Prevent regressions in server-side code: raw auth.getUser() throws on
     // stale tokens. Use getUserSafe() from @/lib/supabase/server instead.
     // Scoped to API routes and server libs only — client components use the
