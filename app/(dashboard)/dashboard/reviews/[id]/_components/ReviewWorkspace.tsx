@@ -87,7 +87,6 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   const [pros, setPros]               = useState<string[]>(review.pros ?? [])
   const [cons, setCons]               = useState<string[]>(review.cons ?? [])
   const [disclosureAck, setDiscAck]   = useState<boolean>(review.disclosure_acknowledged ?? false)
-  const [hasAffiliate, setHasAff]     = useState<boolean>(review.has_affiliate_links ?? false)
   const [metaTitle, setMetaTitle]     = useState(review.meta_title ?? '')
   const [metaDesc, setMetaDesc]       = useState(review.meta_description ?? '')
   const [scheduledAt, setScheduled]   = useState<string | null>(review.scheduled_publish_at)
@@ -145,16 +144,17 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   const status = review.status
   const isPublished = status === 'approved'
 
-  // Detect affiliate links whenever content changes; clear ack if links are removed.
-  // setHasAff is unavoidable here — the derived state needs to drive both UI and
-  // the readiness checklist downstream of useMemo. setDiscAck is conditional so
-  // it doesn't trigger set-state-in-effect.
-  useEffect(() => {
-    const hasLinks = detectAffiliateLinks(content)
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setHasAff(hasLinks)
-    if (!hasLinks) setDiscAck(false)
-  }, [content])
+  // hasAffiliate is pure derived state — content fully determines it. Avoids
+  // the cascading render → effect → setState pattern the React 19 lint flagged.
+  //
+  // We intentionally do NOT auto-clear disclosureAck when hasAffiliate flips
+  // false: the publish gate (`!hasAffiliate || disclosureAck`) and the
+  // readiness checklist both already condition on hasAffiliate, and the
+  // checkbox UI is hidden when hasAffiliate=false. Preserving the user's
+  // explicit acknowledgment across link-toggle cycles is the cleaner UX
+  // anyway — they don't have to re-check if they remove a link and add
+  // another one back.
+  const hasAffiliate = useMemo(() => detectAffiliateLinks(content), [content])
 
   const payload = useMemo(() => ({
     title,

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { compressImage } from '@/lib/compress-image'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
@@ -40,7 +40,10 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
   const [cascadeDeleting, setCascadeDeleting] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  async function load() {
+  // useCallback so `load` is referentially stable across renders for a given
+  // productId — lets us put it in the useEffect deps array cleanly without
+  // re-firing the effect on unrelated renders.
+  const load = useCallback(async () => {
     setLoading(true)
     const res = await fetch(`/api/media?product_id=${productId}&limit=40&page=1`)
     const json = await res.json()
@@ -54,13 +57,16 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
       setError(json.error ?? 'Failed to load images')
     }
     setLoading(false)
-  }
+  }, [productId])
 
-  // load() is stable for the component's lifetime — re-running it whenever
-  // productId changes is the intent. Adding it to deps would require a
-  // useCallback wrap that buys nothing here.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { load() }, [productId])
+  // React 19's set-state-in-effect rule traces through the load() callback
+  // and flags the synchronous setLoading(true) inside it. The rule guards
+  // against cascading-render bugs, but that concern doesn't apply here:
+  // load's deps are stable (productId only) and none of the state load sets
+  // is in its own deps — there is no cascade. Documented disable instead of
+  // contorting the spinner UX.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { load() }, [load])
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])

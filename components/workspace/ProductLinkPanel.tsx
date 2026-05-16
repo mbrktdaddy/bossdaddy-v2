@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { extractH2Headings, insertAtPosition } from '@/lib/inlineImages'
 import {
@@ -41,7 +41,9 @@ export function ProductLinkPanel({ content, onChangeContent }: Props) {
     return { kind: 'afterHeading' as const, index: Number(posKey.replace('h-', '')) }
   }
 
-  async function load() {
+  // useCallback so `load` is referentially stable across renders — lets the
+  // mount-effect declare it as a dep cleanly without re-firing on every render.
+  const load = useCallback(async () => {
     setLoading(true); setError(null)
     try {
       const res = await fetch('/api/products')
@@ -53,9 +55,9 @@ export function ProductLinkPanel({ content, onChangeContent }: Props) {
       setError(err instanceof Error ? err.message : 'Failed')
     }
     setLoading(false)
-  }
+  }, [])
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load() }, [load])
 
   function insertProduct(slug: string) {
     onChangeContent(insertAtPosition(content, `<p>[[BUY:${slug}]]</p>`, resolvePosition()))
