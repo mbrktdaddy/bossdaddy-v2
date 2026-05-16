@@ -6,8 +6,11 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const MAX_SIZE_BYTES = 8 * 1024 * 1024 // 8 MB
 
 // GET /api/media — paginated list for library/picker
-// ?product_id=<uuid>  filter to a specific product's images
-// ?page=<n>           pagination
+// ?product_id=<uuid>   filter to a specific product's images
+//   '__none__'        — unassigned only
+// ?category=<slug>    filter by editorial category (e.g. 'grilling')
+//   '__none__'        — uncategorized only
+// ?page=<n>            pagination
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
@@ -26,6 +29,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const page = Math.max(1, parseInt(searchParams.get('page') ?? '1'))
   const productId = searchParams.get('product_id') ?? null
+  const category  = searchParams.get('category')   ?? null
   const limit = 40
   const offset = (page - 1) * limit
 
@@ -34,7 +38,7 @@ export async function GET(request: NextRequest) {
   let query = admin
     .from('media_assets')
     .select(
-      'id, url, filename, alt_text, uploaded_by, file_size, mime_type, created_at, product_id, label, is_primary, position, profiles(username)',
+      'id, url, filename, alt_text, uploaded_by, file_size, mime_type, created_at, product_id, label, is_primary, position, category, tags, profiles(username)',
       { count: 'exact' },
     )
     .order('created_at', { ascending: false })
@@ -44,6 +48,12 @@ export async function GET(request: NextRequest) {
     query = query.is('product_id', null)
   } else if (productId) {
     query = query.eq('product_id', productId)
+  }
+
+  if (category === '__none__') {
+    query = query.is('category', null)
+  } else if (category) {
+    query = query.eq('category', category)
   }
 
   const { data, error, count } = await query

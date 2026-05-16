@@ -179,6 +179,7 @@ export function HeroImagePanel({
         <MediaPicker
           onSelect={(url) => { onChange(url); setShowPicker(false) }}
           onClose={() => setShowPicker(false)}
+          defaultCategory={category}
         />
       )}
     </div>

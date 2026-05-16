@@ -562,6 +562,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
           onSelect={handlePickerSelect}
           onClose={() => setPickerSlot(null)}
           defaultProductId={productId}
+          defaultCategory={category}
         />
       )}
       {pickerForNew && (
@@ -569,6 +570,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
           onSelect={handlePickerSelect}
           onClose={() => { setPickerForNew(false); setAddBusy(false) }}
           defaultProductId={productId}
+          defaultCategory={category}
         />
       )}
       {pickerForGallery && (
@@ -578,6 +580,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
           onMultiSelect={handleMultiSelect}
           onClose={() => { setPickerForGallery(false); setAddBusy(false) }}
           defaultProductId={productId}
+          defaultCategory={category}
         />
       )}
       {addToGalleryId && (
@@ -585,6 +588,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
           onSelect={handlePickerSelect}
           onClose={() => setAddToGalleryId(null)}
           defaultProductId={productId}
+          defaultCategory={category}
         />
       )}
     </details>

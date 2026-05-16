@@ -418,6 +418,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
             <MediaPicker
               onSelect={(url) => { setImageUrl(url); setShowPicker(false) }}
               onClose={() => setShowPicker(false)}
+              defaultCategory={category}
             />
           )}
         </div>

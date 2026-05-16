@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { compressImage } from '@/lib/compress-image'
+import { CATEGORIES } from '@/lib/categories'
 
 interface MediaAsset {
   id: string
@@ -30,6 +31,13 @@ interface MediaPickerProps {
   onSelect: (url: string, altText: string, assetId?: string) => void
   onClose: () => void
   defaultProductId?: string
+  /**
+   * Editorial category slug from the calling context (article, product, etc.).
+   * Pre-seeds the library filter AND is sent on uploads from the picker so
+   * new assets are tagged with the article's category for future reuse.
+   * Source of truth: `lib/categories.ts`. Pass the category SLUG, not the label.
+   */
+  defaultCategory?: string
   /** Enable multi-select mode — confirm fires onMultiSelect instead of onSelect */
   multi?: boolean
   onMultiSelect?: (items: MultiSelectItem[]) => void
@@ -37,7 +45,7 @@ interface MediaPickerProps {
 
 type Tab = 'library' | 'generate'
 
-export default function MediaPicker({ onSelect, onClose, defaultProductId, multi, onMultiSelect }: MediaPickerProps) {
+export default function MediaPicker({ onSelect, onClose, defaultProductId, defaultCategory, multi, onMultiSelect }: MediaPickerProps) {
   const [tab, setTab] = useState<Tab>('library')
 
   // Library state
@@ -54,9 +62,12 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, multi
   // Search
   const [searchQuery, setSearchQuery] = useState('')
 
-  // Product filter — pre-seeded from caller context
+  // Product + category filters — pre-seeded from caller context.
+  // Both are orthogonal — they AND together server-side so an editor can drill
+  // down "category=grilling AND product=traeger-xl" or keep either alone.
   const [products, setProducts] = useState<Product[]>([])
   const [filterProductId, setFilterProductId] = useState<string>(defaultProductId ?? '')
+  const [filterCategory,  setFilterCategory]  = useState<string>(defaultCategory  ?? '')
 
   // Generate state
   const [genPrompt, setGenPrompt] = useState('')
@@ -86,10 +97,11 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, multi
       .catch(() => {})
   }, [])
 
-  const fetchAssets = useCallback(async (p: number, productId: string) => {
+  const fetchAssets = useCallback(async (p: number, productId: string, category: string) => {
     setLoading(true)
     const qs = new URLSearchParams({ page: String(p) })
     if (productId) qs.set('product_id', productId)
+    if (category)  qs.set('category',   category)
     const res = await fetch(`/api/media?${qs}`)
     if (res.ok) {
       const json = await res.json()
@@ -99,7 +111,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, multi
     setLoading(false)
   }, [])
 
-  useEffect(() => { fetchAssets(page, filterProductId) }, [fetchAssets, page, filterProductId])
+  useEffect(() => { fetchAssets(page, filterProductId, filterCategory) }, [fetchAssets, page, filterProductId, filterCategory])
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose() }
@@ -107,9 +119,16 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, multi
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  // Reset to page 1 when filter changes
-  function handleFilterChange(productId: string) {
+  // Reset to page 1 when either filter changes — keeps the user from being
+  // stranded on page 5 of "no results" after narrowing the filter set.
+  function handleProductFilterChange(productId: string) {
     setFilterProductId(productId)
+    setPage(1)
+    setSelected(null)
+    setSearchQuery('')
+  }
+  function handleCategoryFilterChange(category: string) {
+    setFilterCategory(category)
     setPage(1)
     setSelected(null)
     setSearchQuery('')
@@ -125,6 +144,11 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, multi
         const file = await compressImage(raw)
         const fd = new FormData()
         fd.append('file', file)
+        // Tag new uploads with the active filter context so they're findable
+        // by the same filters next time. Skips __none__ since that's a
+        // negative filter, not a value.
+        if (filterCategory  && filterCategory  !== '__none__') fd.append('category',   filterCategory)
+        if (filterProductId && filterProductId !== '__none__') fd.append('product_id', filterProductId)
         const res = await fetch('/api/media', { method: 'POST', body: fd })
         const json = await res.json()
         if (!res.ok) throw new Error(json.error ?? 'Upload failed')
@@ -248,14 +272,31 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, multi
                 className="w-28 sm:w-36 px-2 py-1.5 bg-gray-800 border border-gray-700 text-xs text-gray-300 placeholder-gray-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
               />
             )}
-            {/* Product filter */}
+            {/* Category filter — editorial axis. Independent of the product
+                filter; both AND together server-side. */}
+            {tab === 'library' && (
+              <select
+                value={filterCategory}
+                onChange={(e) => handleCategoryFilterChange(e.target.value)}
+                title="Filter library by editorial category"
+                className="px-2 py-1.5 bg-gray-800 border border-gray-700 text-xs text-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
+              >
+                <option value="">All categories</option>
+                <option value="__none__">Uncategorized only</option>
+                {CATEGORIES.map((c) => (
+                  <option key={c.slug} value={c.slug}>{c.shortLabel}</option>
+                ))}
+              </select>
+            )}
+            {/* Product filter — physical-asset axis (specific product). */}
             {tab === 'library' && products.length > 0 && (
               <select
                 value={filterProductId}
-                onChange={(e) => handleFilterChange(e.target.value)}
+                onChange={(e) => handleProductFilterChange(e.target.value)}
+                title="Filter library by attached product"
                 className="px-2 py-1.5 bg-gray-800 border border-gray-700 text-xs text-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
               >
-                <option value="">All images</option>
+                <option value="">All products</option>
                 <option value="__none__">Unassigned only</option>
                 {products.map((p) => (
                   <option key={p.id} value={p.id}>{p.name}</option>
@@ -321,7 +362,13 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, multi
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <p className="text-sm">
-                  {searchQuery ? `No images match "${searchQuery}"` : filterProductId ? 'No images for this product yet' : 'No images yet — click to generate one'}
+                  {searchQuery
+                    ? `No images match "${searchQuery}"`
+                    : filterProductId
+                      ? 'No images for this product yet'
+                      : filterCategory
+                        ? 'No images in this category yet'
+                        : 'No images yet — click to generate one'}
                 </p>
               </div>
             ) : (
