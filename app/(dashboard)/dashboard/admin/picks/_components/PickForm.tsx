@@ -3,10 +3,17 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import { OCCASIONS, OCCASION_GROUPS } from '@/lib/gift-occasions'
 import { HeroImagePanel } from '@/components/workspace/HeroImagePanel'
 import { TiptapEditor } from '@/components/workspace/TiptapEditor'
 import { SchedulePanel } from '@/components/workspace/SchedulePanel'
+
+// InlineMediaPanel is heavy + drags in image upload UI — load lazy.
+const InlineMediaPanel = dynamic(
+  () => import('@/components/workspace/InlineMediaPanel').then((m) => ({ default: m.InlineMediaPanel })),
+  { ssr: false },
+)
 
 interface ReviewSummary {
   id: string
@@ -79,6 +86,40 @@ export function PickForm({ pick, initialItems }: Props) {
   const [deleting, setDeleting] = useState(false)
   const [error, setError]   = useState<string | null>(null)
   const [slugTaken, setSlugTaken] = useState<{ type: string } | null>(null)
+
+  // ── Readiness checklist ───────────────────────────────────────────────────
+  // Mirrors the pattern in ReviewWorkspace/GuideWorkspace. The list of checks
+  // depends on collection_type because each flavor needs different ingredients
+  // to render well.
+  function buildReadiness(): { label: string; done: boolean; required: boolean }[] {
+    const checks: { label: string; done: boolean; required: boolean }[] = [
+      { label: 'Title',  done: title.trim().length >= 2, required: true },
+      { label: 'Slug',   done: /^[a-z0-9-]{2,}$/.test(slug.trim()), required: true },
+      { label: 'Description', done: description.trim().length > 0, required: false },
+      { label: 'Hero image',  done: !!heroUrl.trim(), required: false },
+    ]
+
+    if (pickType === 'comparison') {
+      checks.push({ label: '≥ 2 contenders', done: items.length >= 2, required: true })
+      checks.push({ label: 'Bottom-line summary',  done: winnerSummary.trim().length > 0, required: false })
+      const taggedCount = items.filter((i) => (i.wins_category ?? '').trim().length > 0).length
+      checks.push({ label: `Winner badges (${taggedCount}/${items.length})`, done: items.length > 0 && taggedCount === items.length, required: false })
+    } else if (pickType === 'stack') {
+      checks.push({ label: '≥ 1 item', done: items.length >= 1, required: true })
+      const taggedCount = items.filter((i) => (i.role_label ?? '').trim().length > 0).length
+      checks.push({ label: `Role labels (${taggedCount}/${items.length})`, done: items.length > 0 && taggedCount === items.length, required: false })
+    } else if (pickType === 'gift_guide') {
+      checks.push({ label: 'Occasion selected', done: occasion.trim().length > 0, required: true })
+      checks.push({ label: '≥ 1 item', done: items.length >= 1, required: true })
+    } else {
+      // general / best_of
+      checks.push({ label: '≥ 1 item', done: items.length >= 1, required: true })
+    }
+
+    return checks
+  }
+  const readiness = buildReadiness()
+  const requiredMissing = readiness.filter((c) => c.required && !c.done).length
 
   // ── Derived hero-image category ───────────────────────────────────────────
   // Collections don't have their own category column. Derive one from the most
@@ -359,6 +400,16 @@ export function PickForm({ pick, initialItems }: Props) {
           {aiError && (
             <p className="mt-2 text-xs text-red-400 bg-red-950/40 border border-red-900/40 rounded-lg px-3 py-2">{aiError}</p>
           )}
+
+          {/* Inline images — manages bd-image-placeholder figures inside the intro */}
+          <div className="mt-3 bg-gray-950/60 border border-gray-800/60 rounded-xl p-4">
+            <p className="text-xs text-gray-500 font-medium uppercase tracking-widest mb-3">Inline images</p>
+            <InlineMediaPanel
+              content={introHtml}
+              onChangeContent={setIntro}
+              category={heroCategory}
+            />
+          </div>
         </div>
 
         <HeroImagePanel
@@ -501,6 +552,37 @@ export function PickForm({ pick, initialItems }: Props) {
             </div>
           </div>
         </details>
+
+        {/* Readiness — quick visual checklist of what's set vs missing */}
+        <div className="bg-gray-950/60 border border-gray-800/60 rounded-xl p-4">
+          <div className="flex items-baseline justify-between mb-3">
+            <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest">Ready to publish?</p>
+            <p className={`text-xs font-bold tabular-nums ${requiredMissing > 0 ? 'text-amber-400' : 'text-green-400'}`}>
+              {requiredMissing > 0 ? `${requiredMissing} required missing` : 'All required ✓'}
+            </p>
+          </div>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+            {readiness.map((c) => (
+              <li key={c.label} className="flex items-center gap-2 text-xs">
+                <span
+                  aria-hidden
+                  className={`w-3.5 h-3.5 rounded-full shrink-0 flex items-center justify-center text-[10px] font-black ${
+                    c.done
+                      ? 'bg-green-500/20 text-green-400'
+                      : c.required
+                      ? 'bg-amber-500/20 text-amber-400'
+                      : 'bg-gray-800 text-gray-600'
+                  }`}
+                >
+                  {c.done ? '✓' : c.required ? '!' : '·'}
+                </span>
+                <span className={c.done ? 'text-gray-300' : c.required ? 'text-amber-300' : 'text-gray-500'}>
+                  {c.label}{c.required && !c.done ? ' (required)' : ''}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <label className="flex items-center gap-3 cursor-pointer py-1">
           <input
