@@ -14,14 +14,17 @@ function getLimiter(type: string): Ratelimit | null {
 
   const redis = Redis.fromEnv()
   const configs: Record<string, Ratelimit> = {
-    draft:      new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10,  '1 h'),  prefix: 'bd_draft' }),
-    submit:     new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5,   '1 h'),  prefix: 'bd_submit' }),
-    refine:     new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20,  '1 h'),  prefix: 'bd_refine' }),
-    newsletter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(3,   '1 h'),  prefix: 'bd_newsletter' }),
-    view:       new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(120, '1 m'),  prefix: 'bd_view' }),
+    draft:             new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10,  '1 h'),  prefix: 'bd_draft' }),
+    submit:            new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5,   '1 h'),  prefix: 'bd_submit' }),
+    refine:            new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20,  '1 h'),  prefix: 'bd_refine' }),
+    newsletter:        new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(3,   '1 h'),  prefix: 'bd_newsletter' }),
+    view:              new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(120, '1 m'),  prefix: 'bd_view' }),
     // Affiliate click redirect — protects associate account from bot click patterns.
     // Real humans rarely click 30 affiliate links per minute; bots routinely do.
-    click:      new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30,  '1 m'),  prefix: 'bd_click' }),
+    click:             new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30,  '1 m'),  prefix: 'bd_click' }),
+    // Collection intro generation + refine — short prompts, smaller token spend
+    // than full review/guide drafts, so a higher cap than `draft` is fine.
+    'collection-intro': new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, '1 h'), prefix: 'bd_collection_intro' }),
   }
 
   limiters[type] = configs[type] ?? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1 h'), prefix: `bd_${type}` })
@@ -30,7 +33,7 @@ function getLimiter(type: string): Ratelimit | null {
 
 export async function checkRateLimit(
   identifier: string,
-  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' = 'draft'
+  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' = 'draft'
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
   const limiter = getLimiter(type)
   if (!limiter) return { success: true, remaining: 999, reset: 0 }

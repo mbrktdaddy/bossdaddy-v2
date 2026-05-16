@@ -35,9 +35,9 @@ export async function POST(request: NextRequest) {
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { success, remaining } = await checkRateLimit(`collection-intro:${user.id}`)
+  const { success, remaining } = await checkRateLimit(`collection-intro:${user.id}`, 'collection-intro')
   if (!success) {
-    return NextResponse.json({ error: 'Rate limit exceeded. 10 generations per hour.' }, { status: 429 })
+    return NextResponse.json({ error: 'Rate limit exceeded. 20 generations per hour.' }, { status: 429 })
   }
 
   const body = await request.json().catch(() => null)

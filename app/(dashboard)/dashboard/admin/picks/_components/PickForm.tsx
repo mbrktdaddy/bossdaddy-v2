@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { OCCASIONS, OCCASION_GROUPS } from '@/lib/gift-occasions'
@@ -74,6 +74,27 @@ export function PickForm({ pick, initialItems }: Props) {
   const [busy, setBusy]     = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [error, setError]   = useState<string | null>(null)
+  const [slugTaken, setSlugTaken] = useState<{ type: string } | null>(null)
+
+  // ── Slug uniqueness pre-check (debounced) ─────────────────────────────────
+  // Friendly warning before the editor saves and hits a 409. Skips its own id
+  // when editing so the editor's existing slug doesn't flag itself.
+  useEffect(() => {
+    const s = slug.trim().toLowerCase()
+    if (s.length < 2) { setSlugTaken(null); return }
+    // Editing an existing collection with its original slug? No need to check.
+    if (pick && pick.slug === s) { setSlugTaken(null); return }
+    const handle = setTimeout(async () => {
+      try {
+        const url = `/api/admin/picks/slug-check?slug=${encodeURIComponent(s)}${pick ? `&exclude=${pick.id}` : ''}`
+        const res = await fetch(url)
+        if (!res.ok) return
+        const json = await res.json()
+        setSlugTaken(json.exists ? { type: json.type ?? 'general' } : null)
+      } catch { /* network blip — silently skip */ }
+    }, 350)
+    return () => clearTimeout(handle)
+  }, [slug, pick])
 
   // ── AI intro generation + refine ──────────────────────────────────────────
   const [aiBusy, setAiBusy] = useState(false)
@@ -242,6 +263,11 @@ export function PickForm({ pick, initialItems }: Props) {
               ? `/gifts/${slug || 'your-slug'}`
               : `/picks/${slug || 'your-slug'}`}
           </p>
+          {slugTaken && (
+            <p className="mt-1 text-xs text-amber-400">
+              ⚠ Slug already in use by an existing <strong className="font-semibold">{slugTaken.type === 'gift_guide' ? 'gift guide' : slugTaken.type === 'best_of' ? 'best-of list' : slugTaken.type}</strong>. Saving will fail until you pick a different one.
+            </p>
+          )}
         </div>
 
         <div>

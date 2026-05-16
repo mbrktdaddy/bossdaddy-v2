@@ -68,6 +68,32 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const { items, ...meta } = parsed.data
   const admin = createAdminClient()
 
+  // Publish gate: prevent setting is_visible=true on a collection that doesn't
+  // have enough items for its type to render meaningfully. Comparisons need a
+  // head-to-head (≥ 2 contenders), stacks need at least one piece of kit.
+  if (meta.is_visible === true) {
+    const { data: existing } = await admin
+      .from('collections')
+      .select('collection_type')
+      .eq('id', id)
+      .single()
+    const type = existing?.collection_type ?? 'general'
+    const minItems = type === 'comparison' ? 2 : type === 'stack' ? 1 : 0
+    if (minItems > 0) {
+      // Use the items in the body if provided (they're about to replace what's
+      // in the DB); otherwise count what's already saved.
+      const itemCount = items !== undefined
+        ? items.length
+        : (await admin.from('collection_items').select('id', { count: 'exact', head: true }).eq('collection_id', id)).count ?? 0
+      if (itemCount < minItems) {
+        return NextResponse.json(
+          { error: `A ${type} needs at least ${minItems} item${minItems === 1 ? '' : 's'} before it can be published.` },
+          { status: 422 }
+        )
+      }
+    }
+  }
+
   if (Object.keys(meta).length > 0) {
     const payload: Record<string, unknown> = { ...meta }
     if (meta.is_visible && !meta.published_at) {
