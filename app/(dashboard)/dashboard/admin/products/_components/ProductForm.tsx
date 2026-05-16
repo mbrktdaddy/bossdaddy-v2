@@ -1,15 +1,13 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import dynamic from 'next/dynamic'
 import type { Product } from '@/lib/products'
 import { STORE_OPTIONS, PRODUCT_STATUS_OPTIONS } from '@/lib/products'
 import { CATEGORIES } from '@/lib/categories'
 import { ProductImageGallery } from '@/components/admin/ProductImageGallery'
+import { PendingImageGallery, flushPendingImages, type PendingImage } from '@/components/admin/PendingImageGallery'
 import { buildAmazonAffiliateUrl, extractAsin, isValidAsin } from '@/lib/amazon-tag'
-
-const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
 interface Props {
   product: Product | null
@@ -37,15 +35,31 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
   const [busy, setBusy]                   = useState(false)
   const [error, setError]                 = useState<string | null>(null)
   const [deleting, setDeleting]           = useState(false)
-  const [showPicker, setShowPicker]       = useState(false)
-  const [uploading, setUploading]         = useState(false)
   const [importing, setImporting]         = useState(false)
   const [importResult, setImportResult]   = useState<string | null>(null)
-  const newImageFileRef                   = useRef<HTMLInputElement>(null)
+
+  // New-product mode: stage images client-side until the product row exists
+  // (media_assets.product_id is a UUID FK, can't write rows for a product
+  // that hasn't been created yet). Flushed via flushPendingImages on save.
+  const [pendingImages, setPendingImages] = useState<PendingImage[]>([])
+  // After a successful product POST, if some uploads failed, we stop the
+  // navigation flow and let the user choose when to continue to the edit
+  // page. createdProductId carries that signal forward.
+  const [createdProductId, setCreatedProductId] = useState<string | null>(null)
+  const [uploadStatus,     setUploadStatus]     = useState<string | null>(null)
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
-    setBusy(true); setError(null)
+
+    // Special branch: product was already created in a prior submit attempt
+    // but some uploads failed — the form is now a "continue to edit page"
+    // shim. Clicking save here just navigates.
+    if (createdProductId) {
+      router.push(`/dashboard/admin/products/${createdProductId}`)
+      return
+    }
+
+    setBusy(true); setError(null); setUploadStatus(null)
 
     const parsedPrice = priceCents.trim() ? parseInt(priceCents.trim(), 10) : null
 
@@ -75,33 +89,48 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
       )
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Save failed')
-      // On create, redirect to the edit page so the user lands on the
-      // multi-upload gallery (which auto-tags every upload to this product).
-      // On edit, return to the list as before.
-      if (isNew && json.product?.id) {
-        router.push(`/dashboard/admin/products/${json.product.id}`)
-      } else {
+
+      // Edit mode: simple redirect, no images to flush.
+      if (!isNew) {
         router.push('/dashboard/admin/products')
+        return
       }
-      router.refresh()
+
+      // New mode: flush any staged images. If a paste-URL was set, it lands
+      // on the product as image_url AT CREATE TIME; the first uploaded image
+      // (if any) is_primary=true and the POST /api/media handler auto-syncs
+      // products.image_url server-side, so the gallery primary wins.
+      const newId: string | undefined = json.product?.id
+      if (!newId) {
+        router.push('/dashboard/admin/products')
+        return
+      }
+
+      if (pendingImages.length === 0) {
+        router.push(`/dashboard/admin/products/${newId}`)
+        return
+      }
+
+      setUploadStatus(`Uploading ${pendingImages.length} image${pendingImages.length === 1 ? '' : 's'}…`)
+      const result = await flushPendingImages(pendingImages, newId, category || null)
+
+      if (result.failed === 0) {
+        // Clean success — go to edit page.
+        router.push(`/dashboard/admin/products/${newId}`)
+        return
+      }
+
+      // Partial failure: product exists, but some images didn't upload. Stop
+      // here so the user sees the result and decides when to continue. We
+      // park `createdProductId` so re-clicking Save navigates manually.
+      setCreatedProductId(newId)
+      setUploadStatus(`Uploaded ${result.uploaded} of ${pendingImages.length}. ${result.failed} failed — retry on the edit page.`)
+      setError(result.firstError ?? null)
+      setBusy(false)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')
       setBusy(false)
     }
-  }
-
-  async function handleNewImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setUploading(true); setError(null)
-    const fd = new FormData()
-    fd.append('file', file)
-    const res = await fetch('/api/media', { method: 'POST', body: fd })
-    const json = await res.json()
-    if (!res.ok) { setError(json.error ?? 'Upload failed'); setUploading(false); return }
-    setImageUrl(json.asset.url)
-    setUploading(false)
-    if (newImageFileRef.current) newImageFileRef.current.value = ''
   }
 
   async function handleDelete() {
@@ -354,73 +383,30 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
         </div>
       ) : (
         <div className="space-y-3">
-          <p className="text-sm font-semibold text-white">Product Image</p>
-
-          {/* Preview */}
-          {imageUrl && (
-            <div className="relative w-24 h-24 rounded-xl overflow-hidden border border-gray-800 bg-gray-950">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={imageUrl} alt="Product" className="w-full h-full object-contain p-2" />
-              <button
-                type="button"
-                onClick={() => setImageUrl('')}
-                className="absolute top-1 right-1 p-1 bg-gray-900/80 hover:bg-red-900/80 text-gray-400 hover:text-red-400 rounded transition-colors"
-                title="Clear image"
-              >
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          )}
-
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={() => setShowPicker(true)}
-              className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-lg transition-colors"
-            >
-              Pick from library
-            </button>
-            <button
-              type="button"
-              onClick={() => newImageFileRef.current?.click()}
-              disabled={uploading}
-              className="text-xs px-3 py-1.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white font-semibold rounded-lg transition-colors"
-            >
-              {uploading ? 'Uploading…' : '+ Upload'}
-            </button>
-          </div>
-          <input
-            ref={newImageFileRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="hidden"
-            onChange={handleNewImageUpload}
+          <PendingImageGallery
+            images={pendingImages}
+            onChange={setPendingImages}
+            category={category || undefined}
+            disabled={busy}
           />
 
           <details className="text-xs text-gray-600">
-            <summary className="cursor-pointer hover:text-gray-400 transition-colors">Paste URL directly</summary>
-            <input
-              type="url"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="https://..."
-              className="mt-2 w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
+            <summary className="cursor-pointer hover:text-gray-400 transition-colors">Manual URL override (skip the gallery)</summary>
+            <div className="mt-2 space-y-1">
+              <input
+                type="url"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="https://... paste a URL directly"
+                className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+              <p className="text-gray-600">
+                Sets the product&apos;s hero directly. If you also stage gallery images above,
+                the one marked Primary will overwrite this on save.
+                {store === 'amazon' && ' On the Amazon product page, right-click the main image → Copy image address.'}
+              </p>
+            </div>
           </details>
-
-          <p className="text-xs text-gray-600">
-            After saving, you&apos;ll land on the multi-image gallery for this product — every image you upload there auto-tags to it.
-          </p>
-
-          {showPicker && (
-            <MediaPicker
-              onSelect={(url) => { setImageUrl(url); setShowPicker(false) }}
-              onClose={() => setShowPicker(false)}
-              defaultCategory={category}
-            />
-          )}
         </div>
       )}
 
@@ -488,13 +474,29 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
         <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">{error}</p>
       )}
 
-      <div className="flex items-center gap-3 pt-2">
+      {uploadStatus && (
+        <p className={`text-sm rounded-lg px-4 py-3 ${
+          createdProductId
+            ? 'text-amber-300 bg-amber-950/40 border border-amber-900/40'
+            : 'text-gray-300 bg-gray-900 border border-gray-800'
+        }`}>
+          {uploadStatus}
+        </p>
+      )}
+
+      <div className="flex items-center gap-3 pt-2 flex-wrap">
         <button
           type="submit"
           disabled={busy || !slug.trim() || !name.trim()}
           className="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
         >
-          {busy ? 'Saving…' : isNew ? 'Create product' : 'Save changes'}
+          {busy
+            ? 'Saving…'
+            : createdProductId
+              ? 'Continue to product →'
+              : isNew
+                ? 'Create product'
+                : 'Save changes'}
         </button>
         {!isNew && (
           <button
