@@ -66,7 +66,7 @@ export default async function BenchStrip({
                 {item.image_url ? (
                   <Image
                     src={item.image_url}
-                    alt={item.title}
+                    alt=""
                     fill
                     className="object-cover"
                     sizes="64px"

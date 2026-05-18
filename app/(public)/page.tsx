@@ -528,14 +528,10 @@ export default async function HomePage() {
         <LatestGuidesSection />
       </Suspense>
 
-      {/* ── On the Bench ───────────────────────────────────────────────── */}
+      {/* ── On the Bench — BenchStrip ships its own complete header
+            (pulsing dot eyebrow + tagline + CTA), so no outer section header here. */}
       <section>
         <div className="max-w-6xl mx-auto px-6 py-6">
-          <div className="mb-4">
-            <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">On the Bench</p>
-            <p className="text-sm text-gray-500">Products on my wishlist to test next.</p>
-          </div>
           <Suspense fallback={null}>
             <BenchStrip />
           </Suspense>
