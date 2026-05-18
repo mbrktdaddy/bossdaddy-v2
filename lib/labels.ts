@@ -15,10 +15,18 @@
 
 export const LABELS = {
   // wishlist_items table → /bench public route
+  //
+  // Reader-clarification copy: every surface that names the Bench out of
+  // context (footer, ticker, BenchStrip, hover titles) should use one of
+  // these taglines so the metaphor teaches itself.
   bench: {
-    short: 'Bench',
-    full: 'On the Bench',
-    addCta: 'Add to Bench',
+    short:        'Bench',
+    full:         'On the Bench',
+    addCta:       'Add to Bench',
+    // Long form — for /bench dek and hover tooltips. One sentence.
+    tagline:      'Products lined up for testing — vote on what gets reviewed next.',
+    // Invitation-style — for BenchStrip subhead on /reviews + /gear.
+    shortTagline: 'Check out the upcoming items on our bench list',
   },
 
   // products table → /gear public route

@@ -4,7 +4,10 @@ import { SOCIAL } from '@/lib/social'
 import { EmailSignup } from '@/components/EmailSignup'
 import { LABELS } from '@/lib/labels'
 
-const FOOTER_LINKS = [
+// The optional `hint` surfaces in the `title` attribute — hover tooltips
+// for sighted readers, full text for screen-reader users. Used today for
+// the Bench so a cold encounter ("what's the bench?") teaches itself.
+const FOOTER_LINKS: Array<{ href: string; label: string; hint?: string }> = [
   { href: '/reviews',              label: LABELS.reviews.plural },
   { href: '/guides',               label: LABELS.guides.plural },
   { href: '/gear',                 label: LABELS.stuff.short },
@@ -13,7 +16,7 @@ const FOOTER_LINKS = [
   { href: '/picks',                label: LABELS.picks.short },
   { href: '/stacks',               label: LABELS.stacks.short },
   { href: '/gifts',                label: LABELS.gifts.short },
-  { href: '/bench',                label: LABELS.bench.full },
+  { href: '/bench',                label: LABELS.bench.full,    hint: LABELS.bench.tagline },
   { href: '/about',                label: 'About' },
   { href: '/how-we-test',          label: 'How We Test' },
   { href: '/affiliate-disclosure', label: 'Disclosure' },
@@ -137,8 +140,13 @@ export default function Footer() {
             BOSS DADDY LIFE
           </Link>
           <div className="flex items-center gap-4 flex-wrap justify-center">
-            {FOOTER_LINKS.map(({ href, label }) => (
-              <Link key={href} href={href} className="py-2 inline-block hover:text-gray-300 transition-colors">
+            {FOOTER_LINKS.map(({ href, label, hint }) => (
+              <Link
+                key={href}
+                href={href}
+                title={hint}
+                className="py-2 inline-block hover:text-gray-300 transition-colors"
+              >
                 {label}
               </Link>
             ))}

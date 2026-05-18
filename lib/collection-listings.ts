@@ -82,3 +82,71 @@ export async function getCollectionsWithCategory(
     dominant_category: pickDominant(c.id),
   }))
 }
+
+/** One badge surfaced on a product card — "this product appears in collection X". */
+export interface ProductBadge {
+  slug:            string
+  title:           string
+  /** 'comparison' | 'best_of' | 'general' | 'stack' — gift_guide intentionally excluded (routed by occasion). */
+  collection_type: string
+}
+
+/**
+ * Batch-fetch the collections each product appears in. Returns a Map keyed by
+ * product_slug so listing pages can render badges per card without N+1 queries.
+ *
+ * Skipped collection types: 'gift_guide' (its public URL is keyed by occasion
+ * slug, not by collection slug — would need OCCASIONS lookup to render an
+ * href, and gift guides have their own discovery surface via /gifts).
+ *
+ * Limit per product is enforced in JS post-group so the underlying query can
+ * cover many products in one round-trip; cap is the `max` argument.
+ */
+export async function getBadgesByProductSlug(
+  supabase:     SupabaseClient,
+  productSlugs: string[],
+  max:          number = 3,
+): Promise<Map<string, ProductBadge[]>> {
+  const out = new Map<string, ProductBadge[]>()
+  const slugs = [...new Set(productSlugs.filter(Boolean))]
+  if (slugs.length === 0) return out
+
+  // Single query: collection_items → collections (filtered to non-gift visible)
+  // joined to reviews (filtered to the requested product slugs). Postgres does
+  // the work; we group + cap in JS.
+  const { data } = await supabase
+    .from('collection_items')
+    .select(`
+      reviews!inner(product_slug),
+      collections!inner(slug, title, collection_type, is_visible, published_at)
+    `)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .in('reviews.product_slug', slugs as any)
+    .eq('collections.is_visible', true)
+    .neq('collections.collection_type', 'gift_guide')
+    .order('published_at', { ascending: false, referencedTable: 'collections' })
+
+  type Row = {
+    reviews: { product_slug: string | null } | { product_slug: string | null }[] | null
+    collections: {
+      slug: string
+      title: string
+      collection_type: string
+      is_visible: boolean
+      published_at: string | null
+    } | { slug: string; title: string; collection_type: string; is_visible: boolean; published_at: string | null }[] | null
+  }
+  const rows = (data ?? []) as Row[]
+
+  for (const row of rows) {
+    const review = Array.isArray(row.reviews) ? row.reviews[0] : row.reviews
+    const coll   = Array.isArray(row.collections) ? row.collections[0] : row.collections
+    if (!review?.product_slug || !coll) continue
+    const list = out.get(review.product_slug) ?? []
+    if (list.length >= max) continue
+    list.push({ slug: coll.slug, title: coll.title, collection_type: coll.collection_type })
+    out.set(review.product_slug, list)
+  }
+
+  return out
+}

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { LABELS } from '@/lib/labels'
 
 // Brand doctrine: no emoji on web surfaces — inline SVGs match the rest of
 // the site (CategoryIcon set, ticker dot in BenchStrip, etc.). Outlined
@@ -91,9 +92,10 @@ export default async function InMotionTicker() {
           <span aria-hidden className="shrink-0 text-orange-900/60">·</span>
           <Link
             href="/bench"
+            title={LABELS.bench.tagline}
             className="shrink-0 inline-flex items-center gap-1 text-orange-400 hover:text-orange-300 transition-colors font-semibold uppercase tracking-widest"
           >
-            See the bench →
+            See the Bench — what&apos;s next →
           </Link>
         </div>
       </div>

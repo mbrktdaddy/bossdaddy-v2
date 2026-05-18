@@ -2,8 +2,10 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { CATEGORIES, getCategoryBySlug } from '@/lib/categories'
+import { getBadgesByProductSlug, type ProductBadge } from '@/lib/collection-listings'
 import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
+import BadgesForProduct from '@/components/collections/BadgesForProduct'
 import { MerchPanel } from './_components/MerchPanel'
 import FeaturedReviewCard from '@/components/FeaturedReviewCard'
 import BenchStrip from '@/components/BenchStrip'
@@ -40,7 +42,7 @@ export default async function GearPage({ searchParams }: Props) {
   // miss in-category reviews ranked below position 120 globally.
   let reviewsQuery = supabase
     .from('reviews')
-    .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
+    .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at, product_slug')
     .eq('status', 'approved')
     .eq('is_visible', true)
     .gte('rating', 8)
@@ -79,7 +81,15 @@ export default async function GearPage({ searchParams }: Props) {
       .limit(1),
   ])
 
-  const topPicks = reviews ?? []
+  const rawTopPicks = (reviews ?? []) as GearReview[]
+  // Batch-fetch collection badges for every visible product in one query so
+  // GearCard can render chips per card without N+1 round-trips.
+  const slugsForBadges = rawTopPicks.map((r) => r.product_slug).filter((s): s is string => Boolean(s))
+  const badgeMap = await getBadgesByProductSlug(supabase, slugsForBadges)
+  const topPicks: GearReview[] = rawTopPicks.map((r) => ({
+    ...r,
+    badges: r.product_slug ? badgeMap.get(r.product_slug) ?? [] : [],
+  }))
   const cat = category ? getCategoryBySlug(category) : null
   const featuredPick = featuredPickRows?.[0] ?? null
 
@@ -521,6 +531,9 @@ type GearReview = {
   excerpt: string | null
   image_url: string | null
   published_at: string | null
+  product_slug: string | null
+  // Pre-resolved collection badges. Batch-fetched once at the page level.
+  badges?: ProductBadge[]
 }
 
 function GearCard({ review: r, isHero = false }: { review: GearReview; isHero?: boolean }) {
@@ -573,6 +586,9 @@ function GearCard({ review: r, isHero = false }: { review: GearReview; isHero?: 
           }`}>
             {r.excerpt}
           </p>
+        )}
+        {r.badges && r.badges.length > 0 && (
+          <BadgesForProduct badges={r.badges} max={isHero ? 3 : 2} compact={!isHero} />
         )}
         <div className="mt-4 pt-4">
           <span className="text-xs text-orange-500 font-medium">Read full review</span>

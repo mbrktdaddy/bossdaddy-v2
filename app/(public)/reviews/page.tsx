@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { CATEGORIES, getCategoryLabel, getCategoryBySlug } from '@/lib/categories'
+import { getBadgesByProductSlug } from '@/lib/collection-listings'
 import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
 import ReviewsGrid from './_components/ReviewsGrid'
@@ -40,13 +41,21 @@ export default async function ReviewsPage({ searchParams }: Props) {
   if (!category) {
     const { data } = await supabase
       .from('reviews')
-      .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
+      .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at, product_slug')
       .eq('status', 'approved')
       .eq('is_visible', true)
       .order('published_at', { ascending: false })
       .limit(200)
 
-    const reviews = (data ?? []) as ReviewRow[]
+    const rawReviews = (data ?? []) as ReviewRow[]
+    // Batch-fetch collection badges for every visible product in one query so
+    // ReviewCard can render chips per row without N+1.
+    const slugsForBadges = rawReviews.map((r) => r.product_slug).filter((s): s is string => Boolean(s))
+    const badgeMap = await getBadgesByProductSlug(supabase, slugsForBadges)
+    const reviews: ReviewRow[] = rawReviews.map((r) => ({
+      ...r,
+      badges: r.product_slug ? badgeMap.get(r.product_slug) ?? [] : [],
+    }))
 
     const sections = CATEGORIES
       .map(cat => ({
@@ -172,7 +181,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
   const cat = getCategoryBySlug(category)
   const { data, count } = await supabase
     .from('reviews')
-    .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at', { count: 'exact' })
+    .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at, product_slug', { count: 'exact' })
     .eq('status', 'approved')
     .eq('is_visible', true)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -180,7 +189,13 @@ export default async function ReviewsPage({ searchParams }: Props) {
     .order('published_at', { ascending: false })
     .range(0, PER_PAGE - 1)
 
-  const reviews = (data ?? []) as ReviewRow[]
+  const rawReviews = (data ?? []) as ReviewRow[]
+  const slugsForBadges = rawReviews.map((r) => r.product_slug).filter((s): s is string => Boolean(s))
+  const badgeMap = await getBadgesByProductSlug(supabase, slugsForBadges)
+  const reviews: ReviewRow[] = rawReviews.map((r) => ({
+    ...r,
+    badges: r.product_slug ? badgeMap.get(r.product_slug) ?? [] : [],
+  }))
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-16">

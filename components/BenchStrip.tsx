@@ -2,10 +2,14 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getStatusColor, getStatusLabel, type WishlistStatus } from '@/lib/wishlist'
+import { LABELS } from '@/lib/labels'
 
 interface Props {
   heading?: string
   ctaText?: string
+  /** Subhead under the eyebrow — defaults to the canonical bench tagline.
+   *  Pass null to hide; pass a string to override. */
+  subhead?: string | null
 }
 
 const STATUS_RANK: Record<string, number> = { testing: 0, queued: 1, considering: 2 }
@@ -13,6 +17,7 @@ const STATUS_RANK: Record<string, number> = { testing: 0, queued: 1, considering
 export default async function BenchStrip({
   heading = 'On the Bench',
   ctaText = "Vote on what's next",
+  subhead = LABELS.bench.shortTagline,
 }: Props) {
   const admin = createAdminClient()
   const { data } = await admin
@@ -31,13 +36,19 @@ export default async function BenchStrip({
 
   return (
     <div className="rounded-2xl bg-gray-900/60 border border-gray-800/60 p-5 sm:p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-4 mb-4">
-        <div className="flex items-center gap-2.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_rgba(204,85,0,0.8)]" />
-          <span className="text-xs font-black uppercase tracking-widest text-orange-500">{heading}</span>
+      {/* Header — eyebrow + invitation tagline + CTA. Tagline teaches the
+          metaphor wherever this strip lands (currently /reviews + /gear). */}
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_rgba(204,85,0,0.8)]" />
+            <span className="text-xs font-black uppercase tracking-widest text-orange-500">{heading}</span>
+          </div>
+          {subhead && (
+            <p className="mt-1 text-xs text-gray-500 leading-snug">{subhead}</p>
+          )}
         </div>
-        <Link href="/bench" className="text-xs text-gray-500 hover:text-orange-400 transition-colors font-semibold">
+        <Link href="/bench" className="shrink-0 text-xs text-gray-500 hover:text-orange-400 transition-colors font-semibold whitespace-nowrap">
           {ctaText} →
         </Link>
       </div>

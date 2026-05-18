@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { getCategoryBySlug } from '@/lib/categories'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import RatingScore from '@/components/RatingScore'
+import BadgesForProduct from '@/components/collections/BadgesForProduct'
 import type { ReviewRow } from '../actions'
 
 export default function ReviewCard({ review: r, priority = false }: { review: ReviewRow; priority?: boolean }) {
@@ -48,6 +49,9 @@ export default function ReviewCard({ review: r, priority = false }: { review: Re
         </h2>
         {r.excerpt && (
           <p className="text-gray-400 text-sm mt-2 line-clamp-2">{r.excerpt}</p>
+        )}
+        {r.badges && r.badges.length > 0 && (
+          <BadgesForProduct badges={r.badges} max={2} compact />
         )}
         <div className="flex items-center justify-between mt-4 pt-4">
           <span className="text-xs text-gray-500">
