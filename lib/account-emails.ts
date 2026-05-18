@@ -10,6 +10,8 @@ const SUBJECTS: Record<AccountStatusEvent, string> = {
   self_delete_scheduled:   "We've received your account deletion request",
   restored:                'Welcome back to Boss Daddy',
   hard_deleted:            'Your Boss Daddy account has been deleted',
+  promoted_to_author:      "You're a Boss Daddy author now",
+  demoted_to_member:       'Your Boss Daddy author privileges have been removed',
 }
 
 interface SendArgs {

@@ -7,6 +7,8 @@ export type AccountStatusEvent =
   | 'self_delete_scheduled'
   | 'restored'
   | 'hard_deleted'
+  | 'promoted_to_author'
+  | 'demoted_to_member'
 
 interface Props {
   event: AccountStatusEvent
@@ -75,6 +77,22 @@ const CONFIG: Record<AccountStatusEvent, {
     color: '#9ca3af',
     bgColor: '#1a1a1a',
     cta: null,
+  },
+  promoted_to_author: {
+    subject: "You're a Boss Daddy author now",
+    headline: "You're an author now, Boss",
+    subtext: 'Boss Daddy promoted you to author. The workspace is open — start drafting reviews, guides, and collections that ship under your byline.',
+    color: '#4ade80',
+    bgColor: '#052e16',
+    cta: { label: 'Open the workspace →', path: '/dashboard' },
+  },
+  demoted_to_member: {
+    subject: 'Your Boss Daddy author privileges have been removed',
+    headline: 'Author privileges removed',
+    subtext: 'Your author access has been removed. Your account stays active — you can still read, comment, and use every member feature. The workspace is no longer available.',
+    color: '#fbbf24',
+    bgColor: '#1c1100',
+    cta: { label: 'Contact Boss Daddy →', path: 'mailto:boss@bossdaddylife.com?subject=Author%20privileges%20question' },
   },
 }
 
