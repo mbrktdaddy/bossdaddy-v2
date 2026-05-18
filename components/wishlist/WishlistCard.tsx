@@ -9,10 +9,16 @@ interface Props {
 }
 
 export function WishlistCard({ item }: Props) {
+  const voteCount = item.vote_count ?? 0
+  // Bench routes are canonical; the prior /wishlist links 301-hopped through
+  // proxy. Linking direct saves the redirect and unifies with the rest of
+  // the site (footer, In Motion ticker, BenchStrip all already use /bench).
+  const detailHref = `/bench/${item.slug}`
+
   return (
     <div className="bg-[var(--bd-surface)] rounded-2xl overflow-hidden flex flex-col shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200">
       {/* Image */}
-      <Link href={`/wishlist/${item.slug}`} className="block relative aspect-[4/3] bg-zinc-900">
+      <Link href={detailHref} className="block relative aspect-[4/3] bg-zinc-900">
         {item.image_url ? (
           <Image
             src={item.image_url}
@@ -33,7 +39,7 @@ export function WishlistCard({ item }: Props) {
       {/* Body */}
       <div className="p-4 flex flex-col flex-1 gap-3">
         <div className="flex items-start justify-between gap-2">
-          <Link href={`/wishlist/${item.slug}`} className="text-sm font-bold leading-snug hover:text-orange-400 transition-colors line-clamp-2">
+          <Link href={detailHref} className="text-sm font-bold leading-snug hover:text-orange-400 transition-colors line-clamp-2">
             {item.title}
           </Link>
           <StatusBadge status={item.status} className="shrink-0" />
@@ -44,21 +50,33 @@ export function WishlistCard({ item }: Props) {
         )}
 
         <div className="mt-auto flex items-center justify-between gap-2 pt-1">
-          {/* Vote count */}
-          <span className="text-xs text-zinc-500 flex items-center gap-1">
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          {/* Vote count — promoted visually so the engagement signal
+              (popularity) is the first thing a scanner notices. Tabular nums
+              keep the digit width stable as counts grow. */}
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold tabular-nums ${
+              voteCount > 0
+                ? 'bg-orange-950/40 border border-orange-900/40 text-orange-300'
+                : 'bg-gray-900/60 border border-gray-800/60 text-gray-500'
+            }`}
+            title={voteCount > 0 ? `${voteCount} ${voteCount === 1 ? 'reader has' : 'readers have'} voted for this` : 'No votes yet — be the first'}
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
             </svg>
-            {item.vote_count ?? 0} {(item.vote_count ?? 0) === 1 ? 'vote' : 'votes'}
+            {voteCount}
+            <span className="font-medium text-[10px] uppercase tracking-wider">{voteCount === 1 ? 'vote' : 'votes'}</span>
           </span>
 
-          {/* CTA */}
+          {/* CTA — Vote feels inviting (orange) rather than buried (gray) so
+              the engagement loop is the more obvious call. Affiliate buy
+              link is the deflection path when the item isn't yet under test. */}
           {item.status === 'reviewed' && item.review_id ? (
             <Link
-              href={`/wishlist/${item.slug}`}
+              href={detailHref}
               className="text-xs font-semibold text-orange-400 hover:text-orange-300 transition-colors"
             >
-              Read review
+              Read review →
             </Link>
           ) : item.affiliate_url && item.store ? (
             <a
@@ -70,8 +88,11 @@ export function WishlistCard({ item }: Props) {
               {getBuyLabel(item.store, item.custom_store_name)}
             </a>
           ) : (
-            <Link href={`/wishlist/${item.slug}`} className="text-xs font-semibold text-zinc-500 hover:text-zinc-300 transition-colors">
-              Vote
+            <Link
+              href={detailHref}
+              className="text-xs font-bold text-orange-400 hover:text-orange-300 transition-colors uppercase tracking-widest"
+            >
+              Vote →
             </Link>
           )}
         </div>
