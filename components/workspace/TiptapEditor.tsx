@@ -380,12 +380,23 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
     immediatelyRender: false,
   })
 
-  // Sync external content updates (InlineMediaPanel writes back to `value`)
+  // Sync external content updates (InlineMediaPanel writes back to `value`,
+  // AI generators replace it wholesale). TipTap's setContent calls flushSync
+  // internally; running it inside the effect's render phase trips React 19's
+  // "flushSync from a lifecycle method" warning. queueMicrotask defers the
+  // commit until after the current render commits, which is what TipTap's
+  // own React adapter does. The cancel flag protects against the editor
+  // unmounting (or `value` changing again) before the microtask runs.
   useEffect(() => {
     if (!editor) return
     if (value === lastEmitted.current) return
     lastEmitted.current = value
-    editor.commands.setContent(value, { emitUpdate: false })
+    let cancelled = false
+    queueMicrotask(() => {
+      if (cancelled || editor.isDestroyed) return
+      editor.commands.setContent(value, { emitUpdate: false })
+    })
+    return () => { cancelled = true }
   }, [value, editor])
 
   const wordCount = editor?.storage.characterCount?.words() ?? 0

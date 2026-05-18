@@ -14,7 +14,8 @@ import OccasionIcon from '@/components/OccasionIcon'
 import ArticleTOC from '@/components/collections/ArticleTOC'
 import EditorialMeta from '@/components/collections/EditorialMeta'
 import MethodologyCallout from '@/components/collections/MethodologyCallout'
-import FAQAccordion, { faqPageLd } from '@/components/collections/FAQAccordion'
+import FAQAccordion from '@/components/collections/FAQAccordion'
+import { faqPageLd } from '@/lib/seo/faq-ld'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 
 export const revalidate = 60
@@ -75,12 +76,12 @@ export default async function GiftOccasionPage({ params }: Props) {
     .maybeSingle()
 
   const admin = createAdminClient()
-  let items: Array<{ position: number; blurb: string | null; best_for: string | null; review: ReviewRow }> = []
+  let items: Array<{ position: number; blurb: string | null; best_for: string | null; role_label: string | null; review: ReviewRow }> = []
 
   if (pick) {
     const { data: pickItems } = await admin
       .from('collection_items')
-      .select('position, blurb, best_for, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, best_for, has_affiliate_links)')
+      .select('position, blurb, best_for, role_label, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, best_for, has_affiliate_links)')
       .eq('collection_id', pick.id)
       .order('position')
 
@@ -88,10 +89,11 @@ export default async function GiftOccasionPage({ params }: Props) {
       const reviews = pi.reviews
       const review = Array.isArray(reviews) ? reviews[0] : reviews
       return {
-        position: pi.position,
-        blurb:    pi.blurb,
-        best_for: (pi as { best_for?: string | null }).best_for ?? null,
-        review:   review as ReviewRow,
+        position:   pi.position,
+        blurb:      pi.blurb,
+        best_for:   (pi as { best_for?: string | null }).best_for ?? null,
+        role_label: (pi as { role_label?: string | null }).role_label ?? null,
+        review:     review as ReviewRow,
       }
     }).filter((i) => i.review != null)
   }
@@ -108,6 +110,20 @@ export default async function GiftOccasionPage({ params }: Props) {
     const product = await getProductBySlug(supabase, ps)
     if (product) productMap.set(ps, { slug: product.slug, affiliate_url: product.affiliate_url, non_affiliate_url: product.non_affiliate_url, price_cents: product.price_cents })
   }))
+
+  // Price range pill for the gift-guide header — readers want the budget at a
+  // glance before deciding whether to scroll. Skipped when nothing is priced.
+  const priceCents = items
+    .map((i) => (i.review?.product_slug ? productMap.get(i.review.product_slug)?.price_cents ?? null : null))
+    .filter((c): c is number => typeof c === 'number' && c > 0)
+  const priceRange = priceCents.length > 0
+    ? { min: Math.min(...priceCents), max: Math.max(...priceCents) }
+    : null
+  const priceRangeLabel = priceRange
+    ? (priceRange.min === priceRange.max
+        ? `$${(priceRange.min / 100).toFixed(0)}`
+        : `$${(priceRange.min / 100).toFixed(0)} – $${(priceRange.max / 100).toFixed(0)}`)
+    : null
 
   // Dominant category from items — drives methodology + FAQ when there's content.
   const categoryCounts = new Map<string, number>()
@@ -138,16 +154,21 @@ export default async function GiftOccasionPage({ params }: Props) {
     ]
   }
 
+  // FAQs are collection-specific only — no fallback to the dominant category's
+  // generic Q&As. Editors fill the FAQ override panel (manually or via the AI
+  // fill button) or the section doesn't render. Avoids the "why is this here"
+  // feeling when the fallback was a category-wide list unrelated to the gifts.
   const collectionFaqs = (pick as { faqs?: { question: string; answer: string }[] | null } | null)?.faqs
-  const faqs = (collectionFaqs && collectionFaqs.length > 0
-    ? collectionFaqs
-    : (categoryDef?.faqs ?? [])).slice(0, 6)
+  const faqs = (collectionFaqs ?? []).slice(0, 6)
   const methodologyOverride = (pick as { methodology_html?: string | null } | null)?.methodology_html ?? null
 
+  // TOC order mirrors the section order on the page: lead with the hook
+  // (Why These), then methodology, then the picks, then FAQ + related. This
+  // matches how readers actually consume a gift guide.
   const tocItems = pick ? [
+    ...(pick.intro_html    ? [{ id: 'overview', label: 'Why These' }] : []),
     ...(categoryDef        ? [{ id: 'how-i-tested', label: 'How I Pick Gifts' }] : []),
     { id: 'picks', label: 'The Gifts' },
-    ...(pick.intro_html    ? [{ id: 'overview', label: 'Why These' }] : []),
     ...(faqs.length > 0    ? [{ id: 'faq',     label: 'FAQ' }] : []),
     ...(related.length > 0 ? [{ id: 'related', label: 'Also From The Vault' }] : []),
   ] : []
@@ -238,39 +259,66 @@ export default async function GiftOccasionPage({ params }: Props) {
                 {pick?.description ?? occ.longBlurb}
               </p>
               {pick && (
-                <EditorialMeta
-                  publishedAt={pick.published_at}
-                  updatedAt={pick.updated_at}
-                  readingMinutes={readingMinutes}
-                />
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <EditorialMeta
+                    publishedAt={pick.published_at}
+                    updatedAt={pick.updated_at}
+                    readingMinutes={readingMinutes}
+                  />
+                  {priceRangeLabel && (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-950/40 border border-orange-900/40 text-xs font-bold text-orange-300 tabular-nums">
+                      <span className="text-orange-500/70 uppercase tracking-widest text-[10px]">Range</span>
+                      {priceRangeLabel}
+                    </span>
+                  )}
+                </div>
               )}
             </header>
 
             {pick && <ArticleTOC items={tocItems} variant="mobile" />}
 
+            {/* Why These — the hook leads. Moved above methodology + picks so
+                readers get context (the "why this list exists" beat) before
+                scanning items, the way every major gift-guide reads. */}
+            {pick?.intro_html && (
+              <section id="overview" className="mb-10">
+                <div className="mb-5">
+                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Why These</p>
+                  <h2 className="text-2xl font-black text-white leading-tight">Behind the picks</h2>
+                </div>
+                <div
+                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-orange-400 hover:prose-a:text-orange-300 prose-a:no-underline"
+                  dangerouslySetInnerHTML={{ __html: pick.intro_html }}
+                />
+              </section>
+            )}
+
             {/* Methodology — only when we have content. Override takes precedence
-                over the category default. */}
+                over the category default. Eyebrow says "How I Pick Gifts" so
+                the on-page heading matches the TOC entry one-for-one. */}
             {pick && (categoryDef || methodologyOverride) && (
               <MethodologyCallout
                 categorySlug={dominantCategory}
                 overrideText={methodologyOverride}
                 id="how-i-tested"
+                eyebrowLabel="How I Pick Gifts"
               />
             )}
 
-            {/* The Picks */}
+            {/* The Gifts — eyebrow matches the TOC entry one-for-one. */}
             {items.length > 0 ? (
               <section id="picks" className="mb-12">
                 <div className="mb-5">
                   <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">
-                    {items.length} dad-tested {items.length === 1 ? 'pick' : 'picks'}
-                  </p>
-                  <h2 className="text-2xl font-black text-white leading-tight">All personally bought and used</h2>
+                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">The Gifts</p>
+                  <h2 className="text-2xl font-black text-white leading-tight">
+                    {items.length} dad-tested {items.length === 1 ? 'gift' : 'gifts'}, all personally bought
+                  </h2>
                 </div>
 
                 <div className="space-y-5">
-                  {items.map(({ review, blurb, best_for: itemBestFor }, idx) => {
+                  {items.map(({ review, blurb, best_for: itemBestFor, role_label: itemRoleLabel }, idx) => {
                     const product = review.product_slug ? productMap.get(review.product_slug) : null
                     const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                     return (
@@ -292,7 +340,16 @@ export default async function GiftOccasionPage({ params }: Props) {
 
                         <div className="flex-1 min-w-0 flex flex-col">
                           <div className="flex items-start justify-between gap-3 mb-2">
-                            <div>
+                            <div className="min-w-0">
+                              {/* Role chip — the editorial "Best Overall", "For
+                                  the New Dad", "Splurge Pick" tag. Sits above
+                                  the product name eyebrow so it lands as the
+                                  first thing the eye catches. */}
+                              {itemRoleLabel && (
+                                <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-orange-600/15 border border-orange-700/40 text-[10px] font-black uppercase tracking-widest text-orange-300">
+                                  {itemRoleLabel}
+                                </span>
+                              )}
                               <p className="text-xs font-medium text-orange-500/80 uppercase tracking-widest mb-1">{review.product_name}</p>
                               <Link href={`/reviews/${review.slug}`} className="text-base font-bold text-white hover:text-orange-400 transition-colors leading-snug block">
                                 {review.title}
@@ -364,23 +421,9 @@ export default async function GiftOccasionPage({ params }: Props) {
               </div>
             )}
 
-            {pick?.intro_html && (
-              <section id="overview" className="mb-12">
-                <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Why These</p>
-                  <h2 className="text-2xl font-black text-white leading-tight">Behind the picks</h2>
-                </div>
-                <div
-                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-orange-400 hover:prose-a:text-orange-300 prose-a:no-underline"
-                  dangerouslySetInnerHTML={{ __html: pick.intro_html }}
-                />
-              </section>
-            )}
-
             {pick && faqs.length > 0 && <FAQAccordion faqs={faqs} id="faq" />}
 
-            {pick && <RelatedRail items={related} id="related" heading="Also from The Vault" eyebrow="Beyond gifts" />}
+            {pick && <RelatedRail items={related} id="related" eyebrow="Also From The Vault" heading="Keep going beyond gifts" />}
 
             {/* Related occasions strip — siblings in the same occasion group */}
             {relatedOccasions.length > 0 && (

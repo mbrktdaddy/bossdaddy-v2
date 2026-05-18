@@ -23,6 +23,7 @@ interface ReviewSummary {
   category?: string | null
   rating: number | null
   image_url: string | null
+  product_slug?: string | null
 }
 
 interface PickItem {
@@ -33,6 +34,9 @@ interface PickItem {
   wins_category?: string | null
   role_label?: string | null
   best_for?: string | null
+  // Resolved server-side from products.price_cents via the review's product_slug.
+  // Only used in the workspace for the price-range readout — not persisted.
+  price_cents?: number | null
   reviews?: ReviewSummary | ReviewSummary[] | null
 }
 
@@ -66,6 +70,65 @@ interface PickList {
 interface Props {
   pick: PickList | null
   initialItems: PickItem[]
+}
+
+// Per-flavor copy for the role_label field. Comparison uses wins_category
+// instead — semantically distinct (winner-per-criterion vs. editorial tag).
+const ROLE_LABEL_CONFIG: Record<string, { label: string; placeholder: string; help: string } | null> = {
+  gift_guide: {
+    label:       'Gift tag',
+    placeholder: "e.g. 'For the New Dad', 'Splurge Pick', 'Under $25'",
+    help:        'Shows as the chip above the product name on the gift card.',
+  },
+  best_of: {
+    label:       'Best-of role',
+    placeholder: "e.g. 'Best Overall', 'Best Budget', 'Best for Beginners'",
+    help:        'One "Best Overall" — make sure the top pick claims it.',
+  },
+  general: {
+    label:       'Editorial tag',
+    placeholder: "e.g. 'Top Pick', 'Runner-up', 'Hidden Gem'",
+    help:        'Shows as the chip above the product name.',
+  },
+  stack: {
+    label:       'Role in the stack',
+    placeholder: "e.g. 'The Anchor', 'Daily Driver', 'Recovery Backbone'",
+    help:        "Tie to the piece's function inside the kit, not generic strengths.",
+  },
+  comparison: null,
+}
+
+// Soft title-case lint — flags titles that are all-lowercase, that contain
+// "fathers day" / "mothers day" style apostrophe drops, or that lead with a
+// lowercase character. Non-blocking; renders a small amber hint.
+function titleLint(t: string): string | null {
+  const v = t.trim()
+  if (v.length === 0) return null
+  if (/^[a-z]/.test(v)) return 'Title starts with a lowercase letter.'
+  if (/^[a-z0-9\s-]+$/.test(v)) return 'Title is all lowercase — consider Title Case.'
+  if (/\bfathers day\b/i.test(v))   return "“Fathers Day” usually wants an apostrophe — “Father's Day”."
+  if (/\bmothers day\b/i.test(v))   return "“Mothers Day” usually wants an apostrophe — “Mother's Day”."
+  if (/\bvalentines day\b/i.test(v))return "“Valentines Day” usually wants an apostrophe — “Valentine's Day”."
+  if (/\bnew years\b/i.test(v) && !/new year['’]s/i.test(v)) return "“New Years” usually wants an apostrophe — “New Year's”."
+  return null
+}
+
+// Build the "$17 – $350" readout for the workspace. Returns null when no item
+// has a resolved price — the workspace then shows a "missing prices" warning
+// instead of an empty pill.
+function priceRangeSummary(items: PickItem[]): {
+  min: number; max: number; priced: number; total: number
+} | null {
+  const cents = items
+    .map((i) => i.price_cents)
+    .filter((c): c is number => typeof c === 'number' && c > 0)
+  if (cents.length === 0) return null
+  return {
+    min:    Math.min(...cents),
+    max:    Math.max(...cents),
+    priced: cents.length,
+    total:  items.length,
+  }
 }
 
 export function PickForm({ pick, initialItems }: Props) {
@@ -209,6 +272,66 @@ export function PickForm({ pick, initialItems }: Props) {
     setAiBusy(false)
   }
 
+  // ── AI: fill per-pick blurbs + role labels + flavor-aware FAQs ───────────
+  // Single shot. Updates the items state and (when no FAQs are already
+  // customized) the FAQ override panel. We never clobber edits the user has
+  // already typed — existing blurb/role_label values stay untouched.
+  const [fillBusy, setFillBusy]   = useState(false)
+  const [fillError, setFillError] = useState<string | null>(null)
+  const [fillNote, setFillNote]   = useState<string | null>(null)
+
+  async function callFillAI() {
+    if (items.length < 1) { setFillError('Add at least one pick first'); return }
+    setFillBusy(true); setFillError(null); setFillNote(null)
+    try {
+      const res = await fetch('/api/claude/collection-fill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          collectionType: pickType,
+          title:          title || 'Untitled collection',
+          description:    description || null,
+          itemReviewIds:  items.map((i) => i.review_id),
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Generation failed')
+
+      const blurbsById = new Map<string, string>()
+      for (const b of (json.blurbs ?? []) as Array<{ id: string; blurb: string }>) blurbsById.set(b.id, b.blurb)
+      const rolesById = new Map<string, string>()
+      for (const r of (json.roleLabels ?? []) as Array<{ id: string; label: string }>) rolesById.set(r.id, r.label)
+
+      let blurbsFilled = 0
+      let rolesFilled  = 0
+      setItems((prev) => prev.map((i) => {
+        let next = i
+        const aiBlurb = blurbsById.get(i.review_id)
+        if (aiBlurb && !(i.blurb ?? '').trim()) { next = { ...next, blurb: aiBlurb }; blurbsFilled++ }
+        const aiRole = rolesById.get(i.review_id)
+        if (aiRole && pickType !== 'comparison' && !(i.role_label ?? '').trim()) {
+          next = { ...next, role_label: aiRole }; rolesFilled++
+        }
+        return next
+      }))
+
+      let faqsFilled = 0
+      if (faqs.length === 0 && Array.isArray(json.faqs) && json.faqs.length > 0) {
+        setFaqs(json.faqs.slice(0, 12))
+        faqsFilled = json.faqs.length
+      }
+
+      const noteParts: string[] = []
+      if (blurbsFilled > 0) noteParts.push(`${blurbsFilled} blurb${blurbsFilled === 1 ? '' : 's'}`)
+      if (rolesFilled  > 0) noteParts.push(`${rolesFilled} role label${rolesFilled === 1 ? '' : 's'}`)
+      if (faqsFilled   > 0) noteParts.push(`${faqsFilled} FAQ${faqsFilled === 1 ? '' : 's'}`)
+      setFillNote(noteParts.length > 0 ? `Filled ${noteParts.join(', ')}. Existing edits were preserved.` : 'Nothing to fill — every slot already has content.')
+    } catch (err) {
+      setFillError(err instanceof Error ? err.message : 'Generation failed')
+    }
+    setFillBusy(false)
+  }
+
   function getReview(item: PickItem): ReviewSummary | null {
     if (!item.reviews) return null
     return Array.isArray(item.reviews) ? item.reviews[0] ?? null : item.reviews
@@ -312,14 +435,15 @@ export function PickForm({ pick, initialItems }: Props) {
         review_id:     i.review_id,
         position:      i.position,
         blurb:         i.blurb,
+        // Comparison alone uses wins_category (winner-per-criterion). Every
+        // other flavor uses role_label as the per-item chip — gift-guides
+        // ("Splurge Pick"), best-of ("Best Overall"), picks ("Top Pick"),
+        // stacks ("The Anchor").
         wins_category: pickType === 'comparison' ? (i.wins_category ?? null) : null,
-        role_label:    pickType === 'stack' ? (i.role_label ?? null) : null,
-        // best_for is shown for comparison + best_of/general only; gift guides
-        // and stacks have their own slots (occasion / role_label). Persist null
-        // for the off-types so accidental data on a flavor switch doesn't leak.
-        best_for:      (pickType === 'comparison' || pickType === 'best_of' || pickType === 'general')
-                          ? ((i.best_for ?? '').trim() || null)
-                          : null,
+        role_label:    pickType === 'comparison' ? null : ((i.role_label ?? '').trim() || null),
+        // best_for is an optional secondary "best for X" line. Allow on every
+        // flavor — gift-guide cards benefit from it too.
+        best_for:      ((i.best_for ?? '').trim() || null),
       })),
     }
 
@@ -394,6 +518,9 @@ export function PickForm({ pick, initialItems }: Props) {
             placeholder="Father's Day Gift Guide 2026"
             className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-base"
           />
+          {titleLint(title) && (
+            <p className="mt-1 text-xs text-amber-400">⚠ {titleLint(title)}</p>
+          )}
         </div>
 
         <div>
@@ -749,9 +876,47 @@ export function PickForm({ pick, initialItems }: Props) {
 
       {/* Items */}
       <div>
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-sm font-semibold text-white">Picks <span className="text-gray-500 font-normal">({items.length})</span></p>
+        <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
+          <div>
+            <p className="text-sm font-semibold text-white">
+              Picks <span className="text-gray-500 font-normal">({items.length})</span>
+            </p>
+            {(() => {
+              const range = priceRangeSummary(items)
+              if (items.length === 0) return null
+              if (range) {
+                const fmt = (c: number) => `$${(c / 100).toFixed(0)}`
+                const label = range.min === range.max ? fmt(range.min) : `${fmt(range.min)} – ${fmt(range.max)}`
+                return (
+                  <p className="text-xs text-gray-500 mt-0.5 tabular-nums">
+                    Price range: <span className="text-orange-400 font-semibold">{label}</span>
+                    {range.priced < range.total && (
+                      <span className="text-amber-400/80 ml-2">({range.total - range.priced} unpriced)</span>
+                    )}
+                  </p>
+                )
+              }
+              return <p className="text-xs text-amber-400/80 mt-0.5">No items have a product price — readers won&apos;t see a price.</p>
+            })()}
+          </div>
+          {items.length > 0 && (
+            <button
+              type="button"
+              onClick={callFillAI}
+              disabled={fillBusy}
+              className="text-xs px-3 py-2 bg-orange-700/60 hover:bg-orange-600/60 disabled:opacity-40 text-orange-200 font-semibold rounded-lg transition-colors min-h-[36px]"
+              title="Generate per-pick blurbs, role labels, and flavor-specific FAQs in one shot"
+            >
+              {fillBusy ? '✨ Filling…' : '✨ Fill blurbs, roles & FAQs'}
+            </button>
+          )}
         </div>
+        {fillError && (
+          <p className="mb-3 text-xs text-red-400 bg-red-950/40 border border-red-900/40 rounded-lg px-3 py-2">{fillError}</p>
+        )}
+        {fillNote && !fillError && (
+          <p className="mb-3 text-xs text-green-400 bg-green-950/30 border border-green-900/40 rounded-lg px-3 py-2">{fillNote}</p>
+        )}
 
         {/* Search to add */}
         <div className="relative mb-4">
@@ -831,26 +996,38 @@ export function PickForm({ pick, initialItems }: Props) {
                       className="mt-2 w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-base sm:text-sm"
                     />
                   )}
-                  {pickType === 'stack' && (
-                    <input
-                      type="text"
-                      value={item.role_label ?? ''}
-                      onChange={(e) => updateRoleLabel(item.review_id, e.target.value)}
-                      placeholder="Role in the stack (e.g. 'The Anchor', 'The Daily Driver', 'The Backup')"
-                      maxLength={80}
-                      className="mt-2 w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-base sm:text-sm"
-                    />
-                  )}
-                  {/* "Best for" tagline — shown on comparison + best-of/general
-                      where it appears as a small Best for line on the public
-                      detail page. Stacks use role_label and gifts have no
-                      analogous slot, so it's hidden for those flavors. */}
-                  {(pickType === 'comparison' || pickType === 'best_of' || pickType === 'general') && (
+                  {/* Role label — every non-comparison flavor renders this as
+                      the chip above the product name on public pages. Comparison
+                      uses wins_category instead (winner-per-criterion). */}
+                  {(() => {
+                    const cfg = ROLE_LABEL_CONFIG[pickType]
+                    if (!cfg) return null
+                    return (
+                      <div className="mt-2">
+                        <input
+                          type="text"
+                          value={item.role_label ?? ''}
+                          onChange={(e) => updateRoleLabel(item.review_id, e.target.value)}
+                          placeholder={cfg.placeholder}
+                          maxLength={80}
+                          aria-label={cfg.label}
+                          className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-base sm:text-sm"
+                        />
+                      </div>
+                    )
+                  })()}
+                  {/* "Best for" tagline — optional italic line shown beneath the
+                      title on every flavor. Comparison + best-of/general lean
+                      on it the most, but it can sharpen a gift-guide pick
+                      ("Best for the dad on shift work") so we surface it
+                      everywhere except stack (where role_label already plays
+                      this part). */}
+                  {pickType !== 'stack' && (
                     <input
                       type="text"
                       value={item.best_for ?? ''}
                       onChange={(e) => updateBestFor(item.review_id, e.target.value)}
-                      placeholder="Best for… (short tagline — e.g. 'the grill master', 'weekend warriors')"
+                      placeholder="Best for… (e.g. 'the grill master', 'weekend warriors')"
                       maxLength={120}
                       className="mt-2 w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-base sm:text-sm"
                     />

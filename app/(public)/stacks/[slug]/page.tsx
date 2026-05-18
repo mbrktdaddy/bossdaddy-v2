@@ -11,7 +11,8 @@ import { getCategoryBySlug } from '@/lib/categories'
 import ArticleTOC from '@/components/collections/ArticleTOC'
 import EditorialMeta from '@/components/collections/EditorialMeta'
 import MethodologyCallout from '@/components/collections/MethodologyCallout'
-import FAQAccordion, { faqPageLd } from '@/components/collections/FAQAccordion'
+import FAQAccordion from '@/components/collections/FAQAccordion'
+import { faqPageLd } from '@/lib/seo/faq-ld'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 
 export const revalidate = 60
@@ -149,19 +150,22 @@ export default async function StackDetailPage({ params }: Props) {
     ...((somePicks        ?? []) as RelatedItem[]),
   ]
 
+  // FAQs are collection-specific only — no fallback to the dominant category's
+  // generic Q&As. Editors fill the panel (manually or via AI fill) or the
+  // section doesn't render.
   const collectionFaqs = (stack as { faqs?: { question: string; answer: string }[] | null }).faqs
-  const faqs = (collectionFaqs && collectionFaqs.length > 0
-    ? collectionFaqs
-    : (categoryDef?.faqs ?? [])).slice(0, 6)
+  const faqs = (collectionFaqs ?? []).slice(0, 6)
   const methodologyOverride = (stack as { methodology_html?: string | null }).methodology_html ?? null
 
+  // TOC mirrors the new section order. Labels match the visible eyebrow on
+  // each section one-for-one.
   const tocItems = [
-    ...(total != null      ? [{ id: 'cost',         label: 'Build Cost' }] : []),
+    ...(stack.intro_html   ? [{ id: 'overview', label: 'Why These' }] : []),
     ...(categoryDef        ? [{ id: 'how-i-tested', label: 'How I Tested' }] : []),
     { id: 'lineup', label: 'The Lineup' },
-    ...(stack.intro_html   ? [{ id: 'overview', label: 'Overview' }] : []),
+    ...(total != null      ? [{ id: 'cost',         label: 'Build Cost' }] : []),
     ...(faqs.length > 0    ? [{ id: 'faq',     label: 'FAQ' }] : []),
-    ...(related.length > 0 ? [{ id: 'related', label: 'Related' }] : []),
+    ...(related.length > 0 ? [{ id: 'related', label: 'Also From The Vault' }] : []),
   ]
 
   const wordsource = [
@@ -262,6 +266,21 @@ export default async function StackDetailPage({ params }: Props) {
               </div>
             )}
 
+            {/* Why These — the editorial framing leads, before methodology + lineup. */}
+            {stack.intro_html && (
+              <section id="overview" className="mb-10">
+                <div className="mb-5">
+                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Why These</p>
+                  <h2 className="text-2xl font-black text-white leading-tight">Why this kit works together</h2>
+                </div>
+                <div
+                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-orange-400 hover:prose-a:text-orange-300 prose-a:no-underline"
+                  dangerouslySetInnerHTML={{ __html: stack.intro_html }}
+                />
+              </section>
+            )}
+
             {/* Methodology — override takes precedence over category default */}
             {(categoryDef || methodologyOverride) && (
               <MethodologyCallout
@@ -355,20 +374,6 @@ export default async function StackDetailPage({ params }: Props) {
               </div>
             </section>
 
-            {stack.intro_html && (
-              <section id="overview" className="mb-12">
-                <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">The Overview</p>
-                  <h2 className="text-2xl font-black text-white leading-tight">Why this kit works together</h2>
-                </div>
-                <div
-                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-orange-400 hover:prose-a:text-orange-300 prose-a:no-underline"
-                  dangerouslySetInnerHTML={{ __html: stack.intro_html }}
-                />
-              </section>
-            )}
-
             {/* Total — prominent build-cost callout */}
             {total != null && total > 0 && (
               <section
@@ -376,7 +381,7 @@ export default async function StackDetailPage({ params }: Props) {
                 aria-label="Build cost"
                 className="mb-12 rounded-2xl border border-orange-900/40 bg-gradient-to-br from-orange-950/30 to-gray-900/60 ring-1 ring-inset ring-white/[0.02] p-6 sm:p-8 shadow-lg shadow-black/40 text-center"
               >
-                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">Build the Stack</p>
+                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">Build Cost</p>
                 <p className="text-4xl sm:text-5xl font-black text-white tabular-nums mb-2">${(total / 100).toFixed(2)}</p>
                 <p className="text-xs text-gray-500">
                   {partialPricing
@@ -388,7 +393,15 @@ export default async function StackDetailPage({ params }: Props) {
 
             {faqs.length > 0 && <FAQAccordion faqs={faqs} id="faq" />}
 
-            <RelatedRail items={related} id="related" />
+            <RelatedRail items={related} id="related" eyebrow="Also From The Vault" heading="Keep going" />
+
+            {/* Same-flavor browse link — quiet footer affordance, mirrors the
+                "See all gift guides" link gift pages already have. */}
+            <div className="mt-8 text-center">
+              <Link href="/stacks" className="text-sm text-gray-500 hover:text-orange-400 transition-colors">
+                Browse all Stacks →
+              </Link>
+            </div>
           </main>
 
           <ArticleTOC items={tocItems} variant="desktop" />

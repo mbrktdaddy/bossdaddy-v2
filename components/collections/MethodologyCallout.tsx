@@ -9,6 +9,8 @@ interface Props {
   overrideText?: string | null
   /** Section anchor id — referenced by ArticleTOC. */
   id?: string
+  /** Eyebrow text. Defaults to "How I Tested"; gift guides pass "How I Pick Gifts". */
+  eyebrowLabel?: string
 }
 
 /**
@@ -27,6 +29,7 @@ export default function MethodologyCallout({
   overrideHtml,
   overrideText,
   id = 'how-i-tested',
+  eyebrowLabel = 'How I Tested',
 }: Props) {
   const html = overrideHtml?.trim() || null
   const text = overrideText?.trim() || (categorySlug ? getCategoryBySlug(categorySlug)?.pov ?? null : null)
@@ -36,7 +39,7 @@ export default function MethodologyCallout({
   return (
     <section
       id={id}
-      aria-label="How I tested"
+      aria-label={eyebrowLabel}
       className="mb-12 rounded-2xl border border-orange-900/30 bg-gradient-to-br from-orange-950/20 to-gray-900/60 ring-1 ring-inset ring-white/[0.02] shadow-md shadow-black/30"
     >
       <div className="flex items-start gap-4 p-5 sm:p-6">
@@ -49,7 +52,7 @@ export default function MethodologyCallout({
 
         <div className="flex-1 min-w-0">
           <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-2" />
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-bold mb-2">How I Tested</p>
+          <p className="text-xs text-orange-500 uppercase tracking-widest font-bold mb-2">{eyebrowLabel}</p>
           {html ? (
             <div
               className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-p:text-sm sm:prose-p:text-base prose-p:my-0 prose-p:mb-3 last:prose-p:mb-0"

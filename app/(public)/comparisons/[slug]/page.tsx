@@ -11,7 +11,8 @@ import { getCategoryBySlug } from '@/lib/categories'
 import ArticleTOC from '@/components/collections/ArticleTOC'
 import EditorialMeta from '@/components/collections/EditorialMeta'
 import MethodologyCallout from '@/components/collections/MethodologyCallout'
-import FAQAccordion, { faqPageLd } from '@/components/collections/FAQAccordion'
+import FAQAccordion from '@/components/collections/FAQAccordion'
+import { faqPageLd } from '@/lib/seo/faq-ld'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 
 export const revalidate = 60
@@ -159,19 +160,29 @@ export default async function ComparisonDetailPage({ params }: Props) {
     ...((someStacks      ?? []) as RelatedItem[]),
   ]
 
-  // TOC items in render order — must match the section ids below.
+  // FAQs are collection-specific only — no fallback to the dominant category's
+  // generic Q&As. Editors fill the panel (manually or via AI fill) or the
+  // section doesn't render. Computed before tocItems so the FAQ TOC entry
+  // only appears when there's actually a section to scroll to.
+  const collectionFaqs = (comparison as { faqs?: { question: string; answer: string }[] | null }).faqs
+  const faqs = (collectionFaqs ?? []).slice(0, 6)
+
+  // TOC items in render order — must match the section ids and eyebrows
+  // below one-for-one. Order: Bottom Line (the hook) → Contenders strip →
+  // The Take (editorial overview) → Methodology → Scorecard → per-product
+  // dives → FAQ → related.
   const tocItems = [
-    ...(comparison.winner_summary ? [{ id: 'bottom-line',  label: 'Bottom Line' }] : []),
-    { id: 'contenders',  label: 'Contenders' },
+    ...(comparison.winner_summary ? [{ id: 'bottom-line',  label: 'The Bottom Line' }] : []),
+    { id: 'contenders',  label: 'The Contenders' },
+    ...(comparison.intro_html ? [{ id: 'overview', label: 'The Take' }] : []),
     ...(categoryDef       ? [{ id: 'how-i-tested', label: 'How I Tested' }] : []),
-    ...(items.length >= 2 ? [{ id: 'scorecard',    label: 'Scorecard' }] : []),
-    ...(comparison.intro_html ? [{ id: 'overview', label: 'Overview' }] : []),
+    ...(items.length >= 2 ? [{ id: 'scorecard',    label: 'The Scorecard' }] : []),
     ...items.map((it) => ({
       id:    `dive-${it.review!.slug}`,
       label: it.review!.product_name,
     })),
-    ...(categoryDef?.faqs?.length ? [{ id: 'faq',     label: 'FAQ' }] : []),
-    ...(related.length > 0        ? [{ id: 'related', label: 'Related' }] : []),
+    ...(faqs.length > 0    ? [{ id: 'faq',     label: 'FAQ' }] : []),
+    ...(related.length > 0 ? [{ id: 'related', label: 'Also From The Vault' }] : []),
   ]
 
   // Reading time approximation — 235 wpm over intro + blurbs + winner.
@@ -183,13 +194,6 @@ export default async function ComparisonDetailPage({ params }: Props) {
   ].join(' ').replace(/<[^>]*>/g, ' ')
   const wordCount = wordsource.split(/\s+/).filter(Boolean).length
   const readingMinutes = Math.max(1, Math.round(wordCount / 235))
-
-  // Per-collection FAQ override wins over the category default when present.
-  // Mirrors the methodology_html / pov fallback pattern.
-  const collectionFaqs = (comparison as { faqs?: { question: string; answer: string }[] | null }).faqs
-  const faqs = (collectionFaqs && collectionFaqs.length > 0
-    ? collectionFaqs
-    : (categoryDef?.faqs ?? [])).slice(0, 6)
   const methodologyOverride = (comparison as { methodology_html?: string | null }).methodology_html ?? null
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
 
@@ -337,6 +341,23 @@ export default async function ComparisonDetailPage({ params }: Props) {
               </div>
             </section>
 
+            {/* The Take — editorial overview between the contender strip and
+                the scorecard so readers form a narrative mental model before
+                they stare at numbers. Eyebrow matches the TOC entry. */}
+            {comparison.intro_html && (
+              <section id="overview" className="mb-12">
+                <div className="mb-5">
+                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">The Take</p>
+                  <h2 className="text-2xl font-black text-white leading-tight">What sets these apart</h2>
+                </div>
+                <div
+                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-orange-400 hover:prose-a:text-orange-300 prose-a:no-underline"
+                  dangerouslySetInnerHTML={{ __html: comparison.intro_html }}
+                />
+              </section>
+            )}
+
             {/* Methodology — override takes precedence over category default */}
             {(categoryDef || methodologyOverride) && (
               <MethodologyCallout
@@ -346,13 +367,13 @@ export default async function ComparisonDetailPage({ params }: Props) {
               />
             )}
 
-            {/* Scorecard with image headers */}
+            {/* Scorecard with image headers — eyebrow matches the TOC entry. */}
             {items.length >= 2 && (
               <section id="scorecard" className="mb-12" aria-label="Scorecard">
                 <div className="mb-5">
                   <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Head-to-head</p>
-                  <h2 className="text-2xl font-black text-white leading-tight">The Scorecard</h2>
+                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">The Scorecard</p>
+                  <h2 className="text-2xl font-black text-white leading-tight">Head-to-head</h2>
                 </div>
 
                 <div className="overflow-x-auto -mx-6 px-6">
@@ -426,21 +447,6 @@ export default async function ComparisonDetailPage({ params }: Props) {
                     </tbody>
                   </table>
                 </div>
-              </section>
-            )}
-
-            {/* Editorial Overview */}
-            {comparison.intro_html && (
-              <section id="overview" className="mb-12">
-                <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">The Overview</p>
-                  <h2 className="text-2xl font-black text-white leading-tight">What sets these apart</h2>
-                </div>
-                <div
-                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-orange-400 hover:prose-a:text-orange-300 prose-a:no-underline"
-                  dangerouslySetInnerHTML={{ __html: comparison.intro_html }}
-                />
               </section>
             )}
 
@@ -577,7 +583,15 @@ export default async function ComparisonDetailPage({ params }: Props) {
             )}
 
             {/* Related */}
-            <RelatedRail items={related} id="related" />
+            <RelatedRail items={related} id="related" eyebrow="Also From The Vault" heading="Keep going" />
+
+            {/* Same-flavor browse link — quiet footer affordance for readers
+                who finished one head-to-head and want another. */}
+            <div className="mt-8 text-center">
+              <Link href="/comparisons" className="text-sm text-gray-500 hover:text-orange-400 transition-colors">
+                Browse all Comparisons →
+              </Link>
+            </div>
           </main>
 
           {/* Desktop right rail */}

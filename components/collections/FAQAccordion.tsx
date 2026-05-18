@@ -1,11 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import type { FAQ } from '@/lib/seo/faq-ld'
 
-export interface FAQ {
-  question: string
-  answer:   string
-}
+export type { FAQ }
 
 interface Props {
   faqs: FAQ[]
@@ -16,11 +14,8 @@ interface Props {
 }
 
 /**
- * Accordion-style FAQ with native <details>/<summary> for accessibility
- * and graceful no-JS behavior. Designed to sit at the bottom of long
- * collection / review / guide pages. Parent should emit FAQPage JSON-LD
- * separately (see `faqPageLd` helper below) so the schema can be
- * generated server-side from the same data.
+ * Accordion-style FAQ. Parent server component should emit FAQPage JSON-LD
+ * separately via `faqPageLd` from `@/lib/seo/faq-ld`.
  */
 export default function FAQAccordion({ faqs, id = 'faq', heading = 'Frequently Asked Questions' }: Props) {
   const [openIdx, setOpenIdx] = useState<number | null>(0)
@@ -79,20 +74,3 @@ export default function FAQAccordion({ faqs, id = 'faq', heading = 'Frequently A
   )
 }
 
-/**
- * Build the FAQPage JSON-LD payload from the same array. Call this in the
- * parent server component and emit alongside the page's other schema so
- * the FAQs become rich-result eligible.
- */
-export function faqPageLd(faqs: FAQ[]) {
-  if (!faqs || faqs.length === 0) return null
-  return {
-    '@context': 'https://schema.org',
-    '@type':    'FAQPage',
-    mainEntity: faqs.map((f) => ({
-      '@type':          'Question',
-      name:             f.question,
-      acceptedAnswer:   { '@type': 'Answer', text: f.answer },
-    })),
-  }
-}

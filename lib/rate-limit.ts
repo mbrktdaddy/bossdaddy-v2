@@ -25,6 +25,10 @@ function getLimiter(type: string): Ratelimit | null {
     // Collection intro generation + refine — short prompts, smaller token spend
     // than full review/guide drafts, so a higher cap than `draft` is fine.
     'collection-intro': new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, '1 h'), prefix: 'bd_collection_intro' }),
+    // One-shot fill of per-pick blurbs, role labels, and flavor-specific FAQs.
+    // Higher token spend than intro because it returns multiple structured pieces,
+    // but still a tight prompt so 15/hr is plenty for editing flow.
+    'collection-fill':  new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(15, '1 h'), prefix: 'bd_collection_fill' }),
   }
 
   limiters[type] = configs[type] ?? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1 h'), prefix: `bd_${type}` })
@@ -33,7 +37,7 @@ function getLimiter(type: string): Ratelimit | null {
 
 export async function checkRateLimit(
   identifier: string,
-  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' = 'draft'
+  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' = 'draft'
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
   const limiter = getLimiter(type)
   if (!limiter) return { success: true, remaining: 999, reset: 0 }

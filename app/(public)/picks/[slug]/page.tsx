@@ -11,7 +11,8 @@ import { getCategoryBySlug } from '@/lib/categories'
 import ArticleTOC from '@/components/collections/ArticleTOC'
 import EditorialMeta from '@/components/collections/EditorialMeta'
 import MethodologyCallout from '@/components/collections/MethodologyCallout'
-import FAQAccordion, { faqPageLd } from '@/components/collections/FAQAccordion'
+import FAQAccordion from '@/components/collections/FAQAccordion'
+import { faqPageLd } from '@/lib/seo/faq-ld'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 
 export const revalidate = 60
@@ -86,7 +87,7 @@ export default async function PickDetailPage({ params }: Props) {
   const admin = createAdminClient()
   const { data: pickItems } = await admin
     .from('collection_items')
-    .select('position, blurb, best_for, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, pros, cons, best_for, has_affiliate_links)')
+    .select('position, blurb, best_for, role_label, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, pros, cons, best_for, has_affiliate_links)')
     .eq('collection_id', pick.id)
     .order('position')
 
@@ -94,10 +95,11 @@ export default async function PickDetailPage({ params }: Props) {
     const r = pi.reviews
     const review = Array.isArray(r) ? r[0] : r
     return {
-      position: pi.position,
-      blurb: pi.blurb,
-      best_for: (pi as { best_for?: string | null }).best_for ?? null,
-      review: review as ReviewRow | null,
+      position:   pi.position,
+      blurb:      pi.blurb,
+      best_for:   (pi as { best_for?: string | null }).best_for ?? null,
+      role_label: (pi as { role_label?: string | null }).role_label ?? null,
+      review:     review as ReviewRow | null,
     }
   }).filter((i) => i.review != null)
 
@@ -133,18 +135,23 @@ export default async function PickDetailPage({ params }: Props) {
     ...((someStacks      ?? []) as RelatedItem[]),
   ]
 
+  // FAQs are collection-specific only — no fallback to the dominant category's
+  // generic Q&As. Editors fill the panel (manually or via AI fill) or the
+  // section doesn't render.
   const collectionFaqs = (pick as { faqs?: { question: string; answer: string }[] | null }).faqs
-  const faqs = (collectionFaqs && collectionFaqs.length > 0
-    ? collectionFaqs
-    : (categoryDef?.faqs ?? [])).slice(0, 6)
+  const faqs = (collectionFaqs ?? []).slice(0, 6)
   const methodologyOverride = (pick as { methodology_html?: string | null }).methodology_html ?? null
 
+  // TOC mirrors the new section order — intro leads, then methodology, then
+  // picks, then FAQ + related. Labels match the visible eyebrow on each
+  // section one-for-one so jumping to an anchor lands on a heading that
+  // says the same words.
   const tocItems = [
+    ...(pick.intro_html    ? [{ id: 'overview', label: 'Why These' }] : []),
     ...(categoryDef        ? [{ id: 'how-i-tested', label: 'How I Tested' }] : []),
     { id: 'picks',     label: items.length === 1 ? 'The Pick' : 'The Picks' },
-    ...(pick.intro_html ? [{ id: 'overview', label: 'Overview' }] : []),
     ...(faqs.length > 0    ? [{ id: 'faq',     label: 'FAQ' }] : []),
-    ...(related.length > 0 ? [{ id: 'related', label: 'Related' }] : []),
+    ...(related.length > 0 ? [{ id: 'related', label: 'Also From The Vault' }] : []),
   ]
 
   const wordsource = [
@@ -238,6 +245,21 @@ export default async function PickDetailPage({ params }: Props) {
               </div>
             )}
 
+            {/* Why These — the editorial hook leads, before methodology + picks. */}
+            {pick.intro_html && (
+              <section id="overview" className="mb-10">
+                <div className="mb-5">
+                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Why These</p>
+                  <h2 className="text-2xl font-black text-white leading-tight">Behind the picks</h2>
+                </div>
+                <div
+                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-orange-400 hover:prose-a:text-orange-300 prose-a:no-underline"
+                  dangerouslySetInnerHTML={{ __html: pick.intro_html }}
+                />
+              </section>
+            )}
+
             {/* Methodology — override takes precedence over category default */}
             {(categoryDef || methodologyOverride) && (
               <MethodologyCallout
@@ -247,18 +269,20 @@ export default async function PickDetailPage({ params }: Props) {
               />
             )}
 
-            {/* The Picks — ranked list with medal icons for top 3 */}
+            {/* The Picks — eyebrow matches the TOC entry. */}
             <section id="picks" className="mb-12" aria-label="The picks">
               <div className="mb-5">
                 <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
                 <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">
-                  {items.length} dad-tested {items.length === 1 ? 'pick' : 'picks'}
+                  {items.length === 1 ? 'The Pick' : 'The Picks'}
                 </p>
-                <h2 className="text-2xl font-black text-white leading-tight">All personally bought and tested</h2>
+                <h2 className="text-2xl font-black text-white leading-tight">
+                  {items.length} dad-tested {items.length === 1 ? 'pick' : 'picks'}, all personally tested
+                </h2>
               </div>
 
               <div className="space-y-5">
-                {items.map(({ review, blurb, best_for: itemBestFor }, idx) => {
+                {items.map(({ review, blurb, best_for: itemBestFor, role_label: itemRoleLabel }, idx) => {
                   if (!review) return null
                   const product = review.product_slug ? productMap.get(review.product_slug) : null
                   const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
@@ -281,7 +305,13 @@ export default async function PickDetailPage({ params }: Props) {
 
                       <div className="flex-1 min-w-0 flex flex-col">
                         <div className="flex items-start justify-between gap-3 mb-2">
-                          <div>
+                          <div className="min-w-0">
+                            {/* Role chip — editorial tag from the workspace. */}
+                            {itemRoleLabel && (
+                              <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-orange-600/15 border border-orange-700/40 text-[10px] font-black uppercase tracking-widest text-orange-300">
+                                {itemRoleLabel}
+                              </span>
+                            )}
                             <p className="text-xs font-medium text-orange-500/80 uppercase tracking-widest mb-1">{review.product_name}</p>
                             <Link href={`/reviews/${review.slug}`} className="text-lg font-bold text-white hover:text-orange-400 transition-colors leading-snug block">
                               {review.title}
@@ -332,23 +362,19 @@ export default async function PickDetailPage({ params }: Props) {
               </div>
             </section>
 
-            {pick.intro_html && (
-              <section id="overview" className="mb-12">
-                <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">The Overview</p>
-                  <h2 className="text-2xl font-black text-white leading-tight">Behind the picks</h2>
-                </div>
-                <div
-                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-orange-400 hover:prose-a:text-orange-300 prose-a:no-underline"
-                  dangerouslySetInnerHTML={{ __html: pick.intro_html }}
-                />
-              </section>
-            )}
-
             {faqs.length > 0 && <FAQAccordion faqs={faqs} id="faq" />}
 
-            <RelatedRail items={related} id="related" />
+            <RelatedRail items={related} id="related" eyebrow="Also From The Vault" heading="Keep going" />
+
+            {/* Same-flavor browse link — a quiet footer affordance for readers
+                who finished one list and want more of the same kind. The
+                RelatedRail above handles cross-flavor discovery; this is
+                the "I want another list like this" path. */}
+            <div className="mt-8 text-center">
+              <Link href="/picks" className="text-sm text-gray-500 hover:text-orange-400 transition-colors">
+                Browse all Boss Daddy Picks →
+              </Link>
+            </div>
           </main>
 
           <ArticleTOC items={tocItems} variant="desktop" />
