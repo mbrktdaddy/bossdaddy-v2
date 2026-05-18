@@ -5,7 +5,9 @@ import { LABELS } from '@/lib/labels'
 // Brand doctrine: no emoji on web surfaces — inline SVGs match the rest of
 // the site (CategoryIcon set, ticker dot in BenchStrip, etc.). Outlined
 // stroke 1.5 currentColor at w-3.5 h-3.5 sizing.
-function StatusIcon({ kind, className }: { kind: 'testing' | 'queued' | 'considering'; className?: string }) {
+type IconKind = 'testing' | 'queued' | 'considering' | 'reviewed'
+
+function StatusIcon({ kind, className }: { kind: IconKind; className?: string }) {
   const cls = className ?? 'w-3.5 h-3.5 shrink-0'
   if (kind === 'testing') {
     // Beaker — active testing, the most committed signal
@@ -23,18 +25,27 @@ function StatusIcon({ kind, className }: { kind: 'testing' | 'queued' | 'conside
       </svg>
     )
   }
-  // considering — question / decision pending
+  if (kind === 'considering') {
+    // Question — decision pending
+    return (
+      <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+      </svg>
+    )
+  }
+  // reviewed — check-in-circle, the lifecycle close signal
   return (
     <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
   )
 }
 
-const STATUS_META: Record<string, { label: string; kind: 'testing' | 'queued' | 'considering' }> = {
-  testing:     { label: 'Testing',     kind: 'testing' },
-  queued:      { label: 'Up next',     kind: 'queued' },
-  considering: { label: 'Considering', kind: 'considering' },
+const STATUS_META: Record<string, { label: string; kind: IconKind }> = {
+  testing:     { label: 'Testing',       kind: 'testing' },
+  queued:      { label: 'Up next',       kind: 'queued' },
+  considering: { label: 'Considering',   kind: 'considering' },
+  reviewed:    { label: 'Just reviewed', kind: 'reviewed' },
 }
 
 // Internal status rank so the ticker leads with "testing now" (most active
@@ -47,18 +58,51 @@ const STATUS_RANK: Record<string, number> = { testing: 0, queued: 1, considering
  * Bench data so there's nothing to maintain. Renders nothing when no items
  * are in motion — no empty stripe.
  */
+// Ticker items are a discriminated union — bench items link to /bench/[slug]
+// and review items link to /reviews/[slug]. The 'reviewed' kind closes the
+// lifecycle loop visually: "what's being tested · what just landed."
+type TickerItem =
+  | { kind: 'wishlist'; id: string; slug: string; title: string; status: string }
+  | { kind: 'review';   id: string; slug: string; title: string; status: 'reviewed' }
+
 export default async function InMotionTicker() {
   const admin = createAdminClient()
-  const { data } = await admin
-    .from('wishlist_items')
-    .select('id, slug, title, status')
-    .in('status', ['testing', 'queued'])
-    .order('priority', { ascending: false })
-    .limit(8)
+  // Fetch the in-progress (wishlist) + just-landed (reviews) buckets in
+  // parallel. "Just reviewed" is the lifecycle close — last 14 days, top 2.
+  // Date.now is intentional here: this is an async Server Component that
+  // re-runs per request, so a fresh "14 days ago" window is what we want.
+  // The react-hooks/purity rule fires on Date.now in any component body,
+  // but the rule is meant for client renders where re-renders should be
+  // stable — not relevant in a per-request server render.
+  // eslint-disable-next-line react-hooks/purity
+  const sinceIso = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()
+  const [{ data: benchData }, { data: reviewData }] = await Promise.all([
+    admin
+      .from('wishlist_items')
+      .select('id, slug, title, status')
+      .in('status', ['testing', 'queued'])
+      .order('priority', { ascending: false })
+      .limit(8),
+    admin
+      .from('reviews')
+      .select('id, slug, title')
+      .eq('status', 'approved')
+      .eq('is_visible', true)
+      .gte('published_at', sinceIso)
+      .order('published_at', { ascending: false })
+      .limit(2),
+  ])
 
-  const items = (data ?? [])
+  const benchItems: TickerItem[] = (benchData ?? [])
     .slice()
     .sort((a, b) => (STATUS_RANK[a.status] ?? 99) - (STATUS_RANK[b.status] ?? 99))
+    .map((b) => ({ kind: 'wishlist', id: b.id, slug: b.slug, title: b.title, status: b.status }))
+  const reviewItems: TickerItem[] = (reviewData ?? []).map((r) => ({
+    kind: 'review', id: r.id, slug: r.slug, title: r.title, status: 'reviewed',
+  }))
+  // Recent reviews land at the end of the band — intent (testing/queued) reads
+  // first, output (just reviewed) reads last, mirroring time-flow.
+  const items = [...benchItems, ...reviewItems]
 
   if (items.length === 0) return null
 
@@ -73,10 +117,11 @@ export default async function InMotionTicker() {
           <span aria-hidden className="shrink-0 text-orange-900/60">·</span>
           {items.map((item, i) => {
             const meta = STATUS_META[item.status] ?? STATUS_META.testing
+            const href = item.kind === 'review' ? `/reviews/${item.slug}` : `/bench/${item.slug}`
             return (
-              <span key={item.id} className="shrink-0 inline-flex items-center gap-2">
+              <span key={`${item.kind}:${item.id}`} className="shrink-0 inline-flex items-center gap-2">
                 <Link
-                  href={`/bench/${item.slug}`}
+                  href={href}
                   className="inline-flex items-center gap-1.5 text-gray-300 hover:text-orange-300 transition-colors"
                 >
                   <StatusIcon kind={meta.kind} className="w-3.5 h-3.5 shrink-0 text-orange-400" />

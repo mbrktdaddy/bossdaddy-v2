@@ -94,8 +94,11 @@ export default async function ReviewPage({ params }: Props) {
 
   const supabase = await createClient()
 
-  // Related reviews + product fetched in parallel — they don't depend on each other
-  const [{ data: related }, product] = await Promise.all([
+  // Related reviews + product + bench back-link fetched in parallel — they
+  // don't depend on each other. Bench back-link closes the lifecycle loop:
+  // when this review was promoted from a wishlist item, we surface a
+  // "From the Bench →" chip in the header pointing back to the source.
+  const [{ data: related }, product, { data: benchItem }] = await Promise.all([
     supabase
       .from('reviews')
       .select('id, slug, title, product_name, rating, excerpt')
@@ -108,6 +111,11 @@ export default async function ReviewPage({ params }: Props) {
     review.product_slug
       ? getProductBySlug(supabase, review.product_slug)
       : Promise.resolve(null),
+    supabase
+      .from('wishlist_items')
+      .select('slug, title')
+      .eq('review_id', review.id)
+      .maybeSingle(),
   ])
 
   const profileData = Array.isArray(review.profiles)
@@ -195,6 +203,22 @@ export default async function ReviewPage({ params }: Props) {
                 className="flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
               >
                 <CategoryIcon slug={category.slug} className="w-4 h-4 text-orange-500" /> {category.label}
+              </Link>
+            )}
+            {/* "From the Bench" — closes the lifecycle loop when this review
+                was promoted from a wishlist item. Trust signal: shows the
+                product went through the testing pipeline, not the listicle
+                pipeline. Hover tooltip carries the bench tagline. */}
+            {benchItem && (
+              <Link
+                href={`/bench/${benchItem.slug}`}
+                title="Products lined up for testing — vote on what gets reviewed next."
+                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-orange-950/40 border border-orange-900/40 text-orange-300 hover:border-orange-700/60 hover:bg-orange-900/40 hover:text-orange-200 transition-colors"
+              >
+                <svg className="w-3.5 h-3.5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                From the Bench
               </Link>
             )}
           </div>
