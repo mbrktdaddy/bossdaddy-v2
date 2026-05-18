@@ -85,8 +85,12 @@ export async function POST(request: NextRequest) {
       break
   }
 
-  const admin = createAdminClient()
-  const { error: updateErr } = await admin
+  // Use the user-scoped client for the profile update so auth.uid() == admin.
+  // The prevent_account_status_self_change trigger calls is_admin() and would
+  // raise "Only admins can change suspended_until" if auth.uid() is NULL
+  // (which is what createAdminClient / service_role produces). The audit insert
+  // below can stay on the admin client — that table has no role-gated trigger.
+  const { error: updateErr } = await supabase
     .from('profiles')
     .update(updates)
     .eq('id', userId)
@@ -95,6 +99,8 @@ export async function POST(request: NextRequest) {
     console.error('moderation profile update failed:', updateErr)
     return NextResponse.json({ error: `Update failed: ${updateErr.message}` }, { status: 500 })
   }
+
+  const admin = createAdminClient()
 
   // Audit row — fire and let it succeed or fail; the profile is what governs access.
   const { error: auditErr } = await admin.from('moderation_actions').insert({

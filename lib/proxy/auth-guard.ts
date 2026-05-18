@@ -2,12 +2,35 @@ import { NextResponse, type NextRequest } from 'next/server'
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 import { rewriteLegacyRoute } from './rewrites'
 
-// Non-admins who hit /dashboard get bounced to this page (a safe public page).
+// Members hitting an off-limits dashboard route get bounced here (safe public page).
 const NON_ADMIN_HOME = '/'
 
-// Routes available only to admins (everything in /dashboard except /profile).
-function isAdminRoute(pathname: string) {
-  return pathname.startsWith('/dashboard') && !pathname.startsWith('/dashboard/profile')
+// Admin-only dashboard surfaces. Authors AND members are blocked from these.
+// Three pages live outside /dashboard/admin/ for historical reasons — list them
+// explicitly so the gate stays correct when new admin pages are added.
+const ADMIN_ONLY_PATHS = [
+  '/dashboard/admin/',   // canonical admin namespace
+  '/dashboard/users',    // user/role management
+  '/dashboard/comments', // comment moderation
+  '/dashboard/social',   // social posts
+] as const
+
+function isAdminOnlyRoute(pathname: string) {
+  return ADMIN_ONLY_PATHS.some(p => {
+    const base = p.replace(/\/$/, '')
+    // Exact match (e.g. /dashboard/users) OR a subpath (e.g. /dashboard/users/123),
+    // but NOT a sibling that happens to share a prefix (e.g. /dashboard/users-export).
+    return pathname === base || pathname.startsWith(base + '/')
+  })
+}
+
+// Author-or-admin routes: everything else in /dashboard except /dashboard/profile.
+function needsAuthorOrAdmin(pathname: string) {
+  return (
+    pathname.startsWith('/dashboard') &&
+    !pathname.startsWith('/dashboard/profile') &&
+    !isAdminOnlyRoute(pathname)
+  )
 }
 
 // Combined auth/route gates: dashboard auth requirement, legacy route 301s,
@@ -40,15 +63,24 @@ export async function checkAuthGuard(args: {
     return NextResponse.redirect(url, { status: 301 })
   }
 
-  // 3. Admin-only dashboard routes (except /dashboard/profile)
-  if (isAdminRoute(pathname) && user) {
+  // 3. Role-tier dashboard gates (skip /dashboard/profile — any authed user OK).
+  //
+  //   /dashboard/admin/* + users/comments/social  → admin only
+  //   /dashboard/* (everything else)              → author or admin
+  //   /dashboard/profile                          → any authenticated user (no role check)
+  if (user && pathname.startsWith('/dashboard') && !pathname.startsWith('/dashboard/profile')) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single()
 
-    if (profile?.role !== 'admin') {
+    const role = profile?.role
+    const blocked =
+      (isAdminOnlyRoute(pathname) && role !== 'admin') ||
+      (needsAuthorOrAdmin(pathname) && role !== 'admin' && role !== 'author')
+
+    if (blocked) {
       const url = request.nextUrl.clone()
       url.pathname = NON_ADMIN_HOME
       return NextResponse.redirect(url)

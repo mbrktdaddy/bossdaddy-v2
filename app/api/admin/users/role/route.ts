@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { z } from 'zod'
 
 const Schema = z.object({
@@ -26,8 +25,12 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'You cannot change your own role.' }, { status: 400 })
   }
 
-  const admin = createAdminClient()
-  const { error } = await admin
+  // Use the user-scoped client so auth.uid() == admin. This satisfies both the
+  // profiles_admin_write RLS policy and the prevent_role_escalation trigger,
+  // which calls is_admin() and requires a non-NULL auth.uid(). The service_role
+  // admin client would bypass RLS but leave auth.uid() NULL, causing the
+  // trigger to raise "Only admins can change user roles".
+  const { error } = await supabase
     .from('profiles')
     .update({ role: parsed.data.role })
     .eq('id', parsed.data.userId)

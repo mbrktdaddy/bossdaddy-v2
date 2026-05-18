@@ -12,7 +12,14 @@ interface Props {
   role: string
 }
 
-const NAV_SECTIONS: { label: string; items: { href: string; label: string; icon: React.ReactNode }[] }[] = [
+interface NavItem {
+  href: string
+  label: string
+  icon: React.ReactNode
+  adminOnly?: boolean
+}
+
+const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
     label: 'Dashboard',
     items: [
@@ -27,13 +34,19 @@ const NAV_SECTIONS: { label: string; items: { href: string; label: string; icon:
       { href: '/dashboard/guides', label: LABELS.guides.plural,
         icon: <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" /></svg>
       },
+      { href: '/dashboard/guides/new', label: `New ${LABELS.guides.singular}`,
+        icon: <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" /></svg>
+      },
       { href: '/dashboard/reviews', label: LABELS.reviews.plural,
         icon: <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
       },
-      { href: '/dashboard/comments', label: 'Comments',
+      { href: '/dashboard/reviews/new', label: `New ${LABELS.reviews.singular}`,
+        icon: <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" /></svg>
+      },
+      { href: '/dashboard/comments', label: 'Comments', adminOnly: true,
         icon: <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
       },
-      { href: '/dashboard/social', label: 'Social Posts',
+      { href: '/dashboard/social', label: 'Social Posts', adminOnly: true,
         icon: <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>
       },
     ],
@@ -92,29 +105,35 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
   function NavLinks({ onNav }: { onNav?: () => void }) {
     return (
       <>
-        {NAV_SECTIONS.map((section) => (
-          <div key={section.label} className="mb-4">
-            <p className="text-xs text-gray-600 font-medium uppercase tracking-widest px-3 mb-2">{section.label}</p>
-            {section.items.map((item) => {
-              // Hide Admin section if user isn't admin
-              if (section.label === 'Admin' && !isAdmin) return null
-              const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={onNav}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
-                    active ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
-                  }`}
-                >
-                  {item.icon}
-                  {item.label}
-                </Link>
-              )
-            })}
-          </div>
-        ))}
+        {NAV_SECTIONS.map((section) => {
+          const visibleItems = section.items.filter(item =>
+            !item.adminOnly || isAdmin
+          )
+          // Hide the entire Admin section (and its heading) for non-admins
+          if (section.label === 'Admin' && !isAdmin) return null
+          if (visibleItems.length === 0) return null
+          return (
+            <div key={section.label} className="mb-4">
+              <p className="text-xs text-gray-600 font-medium uppercase tracking-widest px-3 mb-2">{section.label}</p>
+              {visibleItems.map((item) => {
+                const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={onNav}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
+                      active ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                    }`}
+                  >
+                    {item.icon}
+                    {item.label}
+                  </Link>
+                )
+              })}
+            </div>
+          )
+        })}
       </>
     )
   }
