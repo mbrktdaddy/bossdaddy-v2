@@ -75,8 +75,11 @@ export const LABELS = {
 
   // Umbrella for all collection types — the brand surface that unifies
   // /picks, /comparisons, /stacks, /gifts under one discoverable home.
+  // Same pattern as the Bench: a canonical tagline that teaches the
+  // metaphor wherever the noun "Vault" lands cold (homepage strip, nav).
   vault: {
-    short: 'Vault',
-    full: 'The Vault',
+    short:   'Vault',
+    full:    'The Vault',
+    tagline: 'Curated picks, comparisons, and stacks — beyond a single review.',
   },
 } as const

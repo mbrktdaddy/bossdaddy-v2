@@ -11,7 +11,7 @@ const FOOTER_LINKS: Array<{ href: string; label: string; hint?: string }> = [
   { href: '/reviews',              label: LABELS.reviews.plural },
   { href: '/guides',               label: LABELS.guides.plural },
   { href: '/gear',                 label: LABELS.stuff.short },
-  { href: '/vault',                label: LABELS.vault.full },
+  { href: '/vault',                label: LABELS.vault.full,    hint: LABELS.vault.tagline },
   { href: '/comparisons',          label: LABELS.comparisons.short },
   { href: '/picks',                label: LABELS.picks.short },
   { href: '/stacks',               label: LABELS.stacks.short },

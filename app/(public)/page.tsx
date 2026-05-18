@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { CATEGORIES } from '@/lib/categories'
+import { LABELS } from '@/lib/labels'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
@@ -11,6 +12,7 @@ import { LatestGuidesSection } from './_components/LatestGuidesSection'
 import BenchStrip from '@/components/BenchStrip'
 import InMotionTicker from '@/components/InMotionTicker'
 import { HomepageMerchStrip } from '@/components/HomepageMerchStrip'
+import { EmailSignup } from '@/components/EmailSignup'
 import { OCCASIONS } from '@/lib/gift-occasions'
 import type { Metadata } from 'next'
 
@@ -268,6 +270,52 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── The Rules — moved up from Movement 2 so the strongest authority
+            assertion is right under the hero, not 4 sections deep where
+            most mobile readers never reached it. This is the trust *proof*
+            that backs the hero's "my own money, no sponsors" *promise*. */}
+      <section className="relative border-b border-gray-800/40">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-px bg-orange-600/40" />
+        <div className="max-w-5xl mx-auto px-6 py-16 md:py-20">
+          <p className="text-[11px] md:text-xs text-orange-500 uppercase tracking-[0.3em] font-bold mb-4 text-center">— The Rules</p>
+          <h2 className="text-3xl md:text-4xl font-black text-center text-white mb-4 leading-tight">
+            Three rules. That&apos;s the whole standard.
+          </h2>
+          <p className="text-gray-400 text-center mb-12 max-w-xl mx-auto text-sm md:text-base">
+            Why you can trust what you read here — and why I can tell you the truth without hedging.
+          </p>
+          <div className="grid md:grid-cols-3 gap-10 md:gap-12">
+            {[
+              {
+                n: '01',
+                title: 'I bought it.',
+                body: 'My money. No PR samples, no free units, no sponsor influence. Every product on this site is purchased the same way you would buy it.',
+              },
+              {
+                n: '02',
+                title: 'I used it.',
+                body: 'Weeks, not minutes. My kid, my grill, my garage, my weekends. If a product needs real testing to expose its flaws, it gets real testing.',
+              },
+              {
+                n: '03',
+                title: "I'll tell you the truth.",
+                body: "If I wouldn't buy it again, I say so. If it changed my life, I say so. The score on the page is the score I'd give a friend.",
+              },
+            ].map((rule) => (
+              <div key={rule.n} className="text-center md:text-left">
+                <p className="text-5xl md:text-6xl font-black text-orange-500/30 mb-4 leading-none tabular-nums">
+                  {rule.n}
+                </p>
+                <p className="text-xl font-black text-white mb-3">{rule.title}</p>
+                <p className="text-gray-400 leading-relaxed text-sm max-w-sm mx-auto md:max-w-none md:mx-0">
+                  {rule.body}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── Recent Reviews — asymmetric magazine grid (1 hero + 2 stacked) ─ */}
       {latestReviews && latestReviews.length > 0 && (
         <section className="relative">
@@ -376,13 +424,18 @@ export default async function HomePage() {
       {vaultTrio.length > 0 && (
         <section className="relative">
           <div className="relative max-w-6xl mx-auto px-6 py-16">
-            <div className="flex items-end justify-between mb-8">
-              <div>
+            <div className="flex items-end justify-between mb-8 gap-4">
+              <div className="min-w-0">
                 <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
                 <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">From The Vault</p>
                 <h2 className="text-2xl font-black text-white">Comparisons, kits, and curated picks</h2>
+                <p className="mt-2 text-sm text-gray-500">{LABELS.vault.tagline}</p>
               </div>
-              <Link href="/vault" className="text-sm text-orange-400 hover:text-orange-300 transition-colors">
+              <Link
+                href="/vault"
+                title={LABELS.vault.tagline}
+                className="shrink-0 text-sm text-orange-400 hover:text-orange-300 transition-colors whitespace-nowrap"
+              >
                 Open the Vault →
               </Link>
             </div>
@@ -428,48 +481,10 @@ export default async function HomePage() {
       <div className="relative bg-gray-950">
         <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gray-800/60" />
 
-      {/* ── The Rules ───────────────────────────────────────────────────── */}
-      <section className="relative border-b border-gray-800/40">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-px bg-orange-600/40" />
-        <div className="max-w-5xl mx-auto px-6 py-20 md:py-24">
-          <p className="text-[11px] md:text-xs text-orange-500 uppercase tracking-[0.3em] font-bold mb-4 text-center">— The Rules</p>
-          <h2 className="text-3xl md:text-4xl font-black text-center text-white mb-4 leading-tight">
-            Three rules. That&apos;s the whole standard.
-          </h2>
-          <p className="text-gray-400 text-center mb-14 max-w-xl mx-auto text-sm md:text-base">
-            Why you can trust what you read here — and why I can tell you the truth without hedging.
-          </p>
-          <div className="grid md:grid-cols-3 gap-10 md:gap-12">
-            {[
-              {
-                n: '01',
-                title: 'I bought it.',
-                body: 'My money. No PR samples, no free units, no sponsor influence. Every product on this site is purchased the same way you would buy it.',
-              },
-              {
-                n: '02',
-                title: 'I used it.',
-                body: 'Weeks, not minutes. My kid, my grill, my garage, my weekends. If a product needs real testing to expose its flaws, it gets real testing.',
-              },
-              {
-                n: '03',
-                title: "I'll tell you the truth.",
-                body: "If I wouldn't buy it again, I say so. If it changed my life, I say so. The score on the page is the score I'd give a friend.",
-              },
-            ].map((rule) => (
-              <div key={rule.n} className="text-center md:text-left">
-                <p className="text-5xl md:text-6xl font-black text-orange-500/30 mb-4 leading-none tabular-nums">
-                  {rule.n}
-                </p>
-                <p className="text-xl font-black text-white mb-3">{rule.title}</p>
-                <p className="text-gray-400 leading-relaxed text-sm max-w-sm mx-auto md:max-w-none md:mx-0">
-                  {rule.body}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* The Rules previously lived here in Movement 2 — moved up into
+          Movement 1 right after the hero so the strongest authority
+          statement is above the fold for the trust-questioning reader.
+          Categories now opens Movement 2. */}
 
       {/* ── Categories — pill rail (utility nav, not a feature grid) ────
           Reclaims ~500px of vertical scroll on mobile vs the prior 2×4 tile
@@ -553,22 +568,20 @@ export default async function HomePage() {
               The good stuff, straight from the trenches — reviews, wins, and real talk from a dad who shows up.
               No spam. No sponsors. Just the crew.
             </p>
-            <form action="/api/newsletter/subscribe" method="POST" className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <input
-                type="email"
-                name="email"
-                required
-                placeholder="your@email.com"
-                className="flex-1 px-4 py-3 bg-gray-900 border border-gray-700 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+            {/* Routed through EmailSignup (server action) so the duplicate-
+                signup welcome-email gate fires and returning subscribers see
+                the "you're already on the list" toast instead of a cold
+                redirect that triggers another welcome email. */}
+            <div className="max-w-md mx-auto text-left">
+              <EmailSignup
+                heading={null}
+                description={null}
+                buttonLabel="Join Free"
+                successMessage="You're in, Boss. Welcome to the crew."
+                interests={['newsletter']}
               />
-              <button
-                type="submit"
-                className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-2xl transition-colors text-sm whitespace-nowrap"
-              >
-                Join Free
-              </button>
-            </form>
-            <p className="text-xs text-gray-600 mt-4">Unsubscribe anytime. We mean it.</p>
+            </div>
+            <p className="text-xs text-gray-600 mt-4 text-center">Unsubscribe anytime. We mean it.</p>
           </div>
         </div>
       </section>
