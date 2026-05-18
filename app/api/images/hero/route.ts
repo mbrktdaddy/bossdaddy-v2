@@ -12,6 +12,7 @@ const HeroInput = z.object({
   content_type:  z.enum(['guide', 'review']),
   product_name:  z.string().max(120).optional().nullable(),
   custom_prompt: z.string().max(600).optional().nullable(),
+  premium:       z.boolean().optional().default(false),
 })
 
 export async function POST(request: NextRequest) {
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { title, category, excerpt, content_type, custom_prompt } = parsed.data
+  const { title, category, excerpt, content_type, custom_prompt, premium } = parsed.data
 
   // Always avoid replicating specific products / brand packaging — AI hero
   // images are for editorial context only. Owned photography (📷 Take Photo
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
   const bucket = content_type === 'review' ? 'review-images' : 'guide-images'
 
   try {
-    const imageUrl = await generateAndUploadImage(prompt, bucket, '1536x1024')
+    const imageUrl = await generateAndUploadImage(prompt, bucket, '1536x1024', premium)
     return NextResponse.json({ imageUrl })
   } catch (err) {
     console.error('Hero image generation error:', err)

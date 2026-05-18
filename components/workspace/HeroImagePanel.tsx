@@ -33,6 +33,7 @@ export function HeroImagePanel({
   }, [initialPrompt]) // eslint-disable-line react-hooks/exhaustive-deps
   const [generating, setGenerating] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [premium, setPremium] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
@@ -85,6 +86,7 @@ export function HeroImagePanel({
           content_type: contentType,
           product_name: productName ?? null,
           custom_prompt: imagePrompt.trim() || null,
+          premium,
         }),
       })
       const json = await readJsonResponse<{ imageUrl?: string }>(res, 'Image generation failed')
@@ -167,6 +169,31 @@ export function HeroImagePanel({
         >
           {generating ? 'Generating…' : imageUrl ? '↺ Regenerate' : 'Generate'}
         </button>
+      </div>
+
+      <div className="flex items-center gap-1 text-[11px]">
+        <span className="text-gray-500 mr-1">Model</span>
+        <button
+          type="button"
+          onClick={() => setPremium(false)}
+          className={`px-2.5 py-1 rounded-md transition-colors ${
+            !premium ? 'bg-orange-600 text-white' : 'bg-gray-900 border border-gray-800 text-gray-400 hover:text-white'
+          }`}
+        >
+          Standard
+        </button>
+        <button
+          type="button"
+          onClick={() => setPremium(true)}
+          className={`px-2.5 py-1 rounded-md transition-colors ${
+            premium ? 'bg-orange-600 text-white' : 'bg-gray-900 border border-gray-800 text-gray-400 hover:text-white'
+          }`}
+        >
+          Premium
+        </button>
+        <span className="text-gray-600 ml-2">
+          {premium ? 'gpt-image-1.5 · high quality' : 'gpt-image-1 · medium quality'}
+        </span>
       </div>
 
       {error && (

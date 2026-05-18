@@ -10,6 +10,7 @@ const GenerateSchema = z.object({
   prompt:   z.string().min(4).max(600),
   size:     z.enum(['1024x1024', '1536x1024', '1024x1536']).default('1024x1024'),
   alt_text: z.string().max(200).optional().nullable(),
+  premium:  z.boolean().optional().default(false),
 })
 
 // POST /api/images/generate — generate an image and store it in the media library
@@ -29,11 +30,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { prompt, size, alt_text } = parsed.data
+  const { prompt, size, alt_text, premium } = parsed.data
 
   let publicUrl: string
   try {
-    publicUrl = await generateAndUploadImage(prompt, 'media', size)
+    publicUrl = await generateAndUploadImage(prompt, 'media', size, premium)
   } catch (err) {
     console.error('Image generate failed:', err)
     const msg = err instanceof Error ? err.message : String(err)

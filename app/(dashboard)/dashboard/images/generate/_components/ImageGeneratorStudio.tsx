@@ -12,6 +12,7 @@ interface SessionImage {
 export function ImageGeneratorStudio() {
   const [prompt, setPrompt] = useState('')
   const [size, setSize] = useState<'1024x1024' | '1536x1024' | '1024x1536'>('1536x1024')
+  const [premium, setPremium] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [session, setSession] = useState<SessionImage[]>([])
@@ -24,7 +25,7 @@ export function ImageGeneratorStudio() {
       const res = await fetch('/api/images/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: prompt.trim(), size }),
+        body: JSON.stringify({ prompt: prompt.trim(), size, premium }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Generation failed')
@@ -83,6 +84,30 @@ Tips:
               >
                 <span className="text-xs font-semibold">{opt.label}</span>
                 <span className="text-xs opacity-70 font-mono">{opt.ratio}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-300 mb-2">Model tier</label>
+          <div className="flex gap-2">
+            {[
+              { value: false, label: 'Standard', tag: 'gpt-image-1 · medium' },
+              { value: true,  label: 'Premium',  tag: 'gpt-image-1.5 · high' },
+            ].map((opt) => (
+              <button
+                key={String(opt.value)}
+                type="button"
+                onClick={() => setPremium(opt.value)}
+                className={`flex-1 flex flex-col items-center gap-1 px-3 py-3 rounded-xl transition-colors ${
+                  premium === opt.value
+                    ? 'bg-orange-600 text-white'
+                    : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600'
+                }`}
+              >
+                <span className="text-xs font-semibold">{opt.label}</span>
+                <span className="text-xs opacity-70 font-mono">{opt.tag}</span>
               </button>
             ))}
           </div>

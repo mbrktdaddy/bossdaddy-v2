@@ -74,6 +74,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
   const [uploadingForNew, setUploadingForNew] = useState(false)
   const [busySlotId, setBusySlotId]           = useState<string | null>(null)
   const [bulkBusy, setBulkBusy]               = useState<{ done: number; total: number } | null>(null)
+  const [premium, setPremium]                 = useState(false)
   const [error, setError]                     = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -147,6 +148,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
             prompt: slot.prompt,
             size: '1536x1024',
             alt_text: slot.alt || slot.caption || slot.prompt.slice(0, 120),
+            premium,
           }),
         })
         const json = await res.json()
@@ -178,6 +180,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
           prompt,
           size: '1536x1024',
           alt_text: slot.alt || slot.caption || prompt.slice(0, 120),
+          premium,
         }),
       })
       const json = await res.json()
@@ -280,6 +283,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
           prompt: addPrompt.trim(),
           size: '1536x1024',
           alt_text: addAlt || addCaption || addPrompt.slice(0, 120),
+          premium,
         }),
       })
       const json = await res.json()
@@ -369,6 +373,32 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
       </summary>
 
       <div className="px-4 pb-4 space-y-3">
+
+        {/* ── Model tier toggle (applies to all generation actions) ───── */}
+        <div className="flex items-center gap-1 text-[11px]">
+          <span className="text-gray-500 mr-1">Model</span>
+          <button
+            type="button"
+            onClick={() => setPremium(false)}
+            className={`px-2.5 py-1 rounded-md transition-colors ${
+              !premium ? 'bg-orange-600 text-white' : 'bg-gray-900 border border-gray-800 text-gray-400 hover:text-white'
+            }`}
+          >
+            Standard
+          </button>
+          <button
+            type="button"
+            onClick={() => setPremium(true)}
+            className={`px-2.5 py-1 rounded-md transition-colors ${
+              premium ? 'bg-orange-600 text-white' : 'bg-gray-900 border border-gray-800 text-gray-400 hover:text-white'
+            }`}
+          >
+            Premium
+          </button>
+          <span className="text-gray-600 ml-2">
+            {premium ? 'gpt-image-1.5 · high' : 'gpt-image-1 · medium'}
+          </span>
+        </div>
 
         {/* ── Bulk fill ───────────────────────────────────────────────── */}
         {!showAdd && fillableSlots.length > 0 && (
