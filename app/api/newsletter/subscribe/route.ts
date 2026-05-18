@@ -51,13 +51,16 @@ export async function POST(request: NextRequest) {
 
   // Upsert subscriber. Interests are merged with the existing array
   // server-side (via a Postgres array union) so re-signing up doesn't
-  // overwrite previous opt-ins.
+  // overwrite previous opt-ins. We also fetch `confirmed` so we know
+  // whether to suppress the welcome email on repeat signups.
   const newInterests = parsed.data.interests ?? []
   const { data: existing } = await supabase
     .from('newsletter_subscribers')
-    .select('interests')
+    .select('interests, confirmed')
     .eq('email', parsed.data.email)
     .maybeSingle()
+
+  const alreadySubscribed = existing?.confirmed === true
 
   const mergedInterests = Array.from(
     new Set([...(existing?.interests ?? []), ...newInterests]),
@@ -74,22 +77,26 @@ export async function POST(request: NextRequest) {
     console.error('Newsletter DB error:', dbError)
   }
 
-  // Send welcome email via Resend
-  try {
-    const resend = getResend()
-    await resend.emails.send({
-      from: FROM_EMAIL,
-      to: parsed.data.email,
-      subject: "You're in, Boss. Welcome to the crew. 🔥",
-      react: React.createElement(WelcomeEmail, { email: parsed.data.email, siteUrl }),
-    })
-  } catch (err) {
-    // Don't fail the signup if email sending fails — subscriber is already saved
-    console.error('Resend error:', err)
+  // Skip welcome email on repeat signups — see app/actions/newsletter.ts
+  // for the same gate and the "why" comment.
+  if (!alreadySubscribed) {
+    try {
+      const resend = getResend()
+      await resend.emails.send({
+        from: FROM_EMAIL,
+        to: parsed.data.email,
+        subject: "You're in, Boss. Welcome to the crew. 🔥",
+        react: React.createElement(WelcomeEmail, { email: parsed.data.email, siteUrl }),
+      })
+    } catch (err) {
+      // Don't fail the signup if email sending fails — subscriber is already saved
+      console.error('Resend error:', err)
+    }
   }
 
   const isForm = !contentType.includes('application/json')
+  const successQuery = alreadySubscribed ? 'already-subscribed' : 'success'
   return isForm
-    ? NextResponse.redirect(new URL('/?newsletter=success', siteUrl))
-    : NextResponse.json({ success: true })
+    ? NextResponse.redirect(new URL(`/?newsletter=${successQuery}`, siteUrl))
+    : NextResponse.json({ success: true, alreadySubscribed })
 }

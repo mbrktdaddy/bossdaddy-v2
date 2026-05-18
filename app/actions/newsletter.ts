@@ -13,7 +13,9 @@ const Schema = z.object({
   interests: z.array(z.string().max(40)).max(10).optional(),
 })
 
-export type SubscribeResult = { ok: true } | { ok: false; error: string }
+export type SubscribeResult =
+  | { ok: true; alreadySubscribed: boolean }
+  | { ok: false; error: string }
 
 export async function subscribeToNewsletter(input: { email: string; interests?: string[] }): Promise<SubscribeResult> {
   const h = await headers()
@@ -26,11 +28,16 @@ export async function subscribeToNewsletter(input: { email: string; interests?: 
   if (!parsed.success) return { ok: false, error: 'Invalid email' }
 
   const supabase = createAdminClient()
+  // Fetch `confirmed` too so we can suppress the welcome email on repeat
+  // signups. The DB upsert below stays idempotent (interests merge), but the
+  // welcome email shouldn't fire twice — that's the spammy pattern.
   const { data: existing } = await supabase
     .from('newsletter_subscribers')
-    .select('interests')
+    .select('interests, confirmed')
     .eq('email', parsed.data.email)
     .maybeSingle()
+
+  const alreadySubscribed = existing?.confirmed === true
 
   const mergedInterests = Array.from(
     new Set([...(existing?.interests ?? []), ...(parsed.data.interests ?? [])]),
@@ -47,18 +54,23 @@ export async function subscribeToNewsletter(input: { email: string; interests?: 
     console.error('Newsletter DB error:', dbError)
   }
 
-  try {
-    const resend = getResend()
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
-    await resend.emails.send({
-      from: FROM_EMAIL,
-      to: parsed.data.email,
-      subject: "You're in, Boss. Welcome to the crew. 🔥",
-      react: React.createElement(WelcomeEmail, { email: parsed.data.email, siteUrl }),
-    })
-  } catch (err) {
-    console.error('Resend error:', err)
+  // Skip the welcome email for returning subscribers — they already received
+  // it. Also blocks the abuse vector where someone repeatedly submits another
+  // person's address to spam their inbox with welcome mail.
+  if (!alreadySubscribed) {
+    try {
+      const resend = getResend()
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+      await resend.emails.send({
+        from: FROM_EMAIL,
+        to: parsed.data.email,
+        subject: "You're in, Boss. Welcome to the crew. 🔥",
+        react: React.createElement(WelcomeEmail, { email: parsed.data.email, siteUrl }),
+      })
+    } catch (err) {
+      console.error('Resend error:', err)
+    }
   }
 
-  return { ok: true }
+  return { ok: true, alreadySubscribed }
 }

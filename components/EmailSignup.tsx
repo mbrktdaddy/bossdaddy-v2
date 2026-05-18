@@ -12,6 +12,8 @@ interface Props {
   buttonLabel?: string
   /** Message shown after a successful signup. */
   successMessage?: string
+  /** Message shown when the email was already a confirmed subscriber. */
+  alreadySubscribedMessage?: string
   /** Tags recorded against this signup (e.g. ['shop_launch', 'merch_apparel']) */
   interests?: string[]
   /** Compact variant — smaller padding, single line. */
@@ -23,11 +25,12 @@ export function EmailSignup({
   description = null,
   buttonLabel = 'Notify me',
   successMessage = "You're on the list. We'll be in touch.",
+  alreadySubscribedMessage = "You're already on the list — we'll keep the good stuff coming.",
   interests = [],
   compact = false,
 }: Props) {
   const [email, setEmail] = useState('')
-  const [state, setState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
+  const [state, setState] = useState<'idle' | 'submitting' | 'success' | 'already' | 'error'>('idle')
   const [error, setError] = useState<string | null>(null)
   const [, startTransition] = useTransition()
 
@@ -42,17 +45,18 @@ export function EmailSignup({
         setError(result.error)
         return
       }
-      setState('success')
+      setState(result.alreadySubscribed ? 'already' : 'success')
       setEmail('')
     })
   }
 
-  if (state === 'success') {
+  if (state === 'success' || state === 'already') {
+    const isAlready = state === 'already'
     return (
-      <div className={`bg-green-950/30 border border-green-800/40 rounded-2xl ${compact ? 'p-3' : 'p-5'}`}>
-        <p className={`text-green-400 ${compact ? 'text-sm' : 'text-base'} font-semibold flex items-center gap-2`}>
-          <span>✓</span>
-          {successMessage}
+      <div className={`${isAlready ? 'bg-orange-950/30 border-orange-800/40' : 'bg-green-950/30 border-green-800/40'} border rounded-2xl ${compact ? 'p-3' : 'p-5'}`}>
+        <p className={`${isAlready ? 'text-orange-300' : 'text-green-400'} ${compact ? 'text-sm' : 'text-base'} font-semibold flex items-center gap-2`}>
+          <span>{isAlready ? '✓' : '✓'}</span>
+          {isAlready ? alreadySubscribedMessage : successMessage}
         </p>
       </div>
     )
