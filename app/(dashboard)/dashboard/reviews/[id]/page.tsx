@@ -12,9 +12,39 @@ export default async function ReviewWorkspacePage({
 
   const { data: review } = await admin
     .from('reviews')
-    .select('id, title, product_name, category, excerpt, content, image_url, rating, pros, cons, has_affiliate_links, disclosure_acknowledged, status, slug, moderation_score, moderation_flags, created_at, updated_at, reading_time_minutes, rejection_reason, meta_title, meta_description, scheduled_publish_at, product_slug, tldr, key_takeaways, best_for, not_for, faqs, testing_duration, how_you_used_it, standout_moment, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy')
+    .select('id, title, product_name, category, excerpt, content, image_url, rating, pros, cons, has_affiliate_links, disclosure_acknowledged, status, slug, moderation_score, moderation_flags, created_at, updated_at, reading_time_minutes, rejection_reason, meta_title, meta_description, scheduled_publish_at, product_slug, tldr, key_takeaways, best_for, not_for, faqs, testing_duration, how_you_used_it, standout_moment, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, is_visible, published_at, parent_review_id, milestone_label, milestone_days, previous_rating, verdict_change')
     .eq('id', id)
     .single()
+
+  // If this review IS a follow-up, fetch the parent for editor context.
+  let parent: { id: string; title: string; slug: string | null; rating: number | null; published_at: string | null } | null = null
+  if (review?.parent_review_id) {
+    const { data: parentRow } = await admin
+      .from('reviews')
+      .select('id, title, slug, rating, published_at')
+      .eq('id', review.parent_review_id)
+      .single()
+    parent = parentRow ?? null
+  }
+
+  // Count existing follow-ups when this IS a top-level review — surfaces "2 follow-ups already scheduled" in the workspace.
+  let followupCount = 0
+  if (review && review.parent_review_id === null) {
+    const { count } = await admin
+      .from('reviews')
+      .select('id', { count: 'exact', head: true })
+      .eq('parent_review_id', review.id)
+    followupCount = count ?? 0
+  }
+
+  // Compute parent age on the server. This is an async Server Component that
+  // re-runs per request, so intentional per-request variance from Date.now()
+  // is fine. The API route re-validates the 30-day gate on submit.
+  // eslint-disable-next-line react-hooks/purity
+  const now = Date.now()
+  const parentAgeDays = review?.published_at
+    ? Math.floor((now - new Date(review.published_at).getTime()) / (1000 * 60 * 60 * 24))
+    : null
 
   // Fetch tags for this review
   const { data: tagRows } = await admin
@@ -60,6 +90,9 @@ export default async function ReviewWorkspacePage({
         tags: reviewTags,
         product_id: productId,
       }}
+      parent={parent}
+      followupCount={followupCount}
+      parentAgeDays={parentAgeDays}
     />
   )
 }

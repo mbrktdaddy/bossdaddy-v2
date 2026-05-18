@@ -31,6 +31,10 @@ import { TagPicker } from '@/components/workspace/TagPicker'
 import { useContentWorkspace } from '@/components/workspace/useContentWorkspace'
 import { ReviewDraftPreview } from '@/components/workspace/ReviewDraftPreview'
 import { RefinePreviewModal } from '@/components/workspace/RefinePreviewModal'
+import { ScheduleFollowupModal } from '@/components/workspace/ScheduleFollowupModal'
+
+type VerdictChange = 'improved' | 'unchanged' | 'declined' | 'complete_reversal'
+const MIN_PARENT_AGE_DAYS = 30
 
 interface FAQ { question: string; answer: string }
 
@@ -75,9 +79,33 @@ interface ReviewData {
   score_ease: number | null
   score_daily_use: number | null
   would_rebuy: boolean | null
+  is_visible: boolean | null
+  published_at: string | null
+  parent_review_id: string | null
+  milestone_label: string | null
+  milestone_days: number | null
+  previous_rating: number | null
+  verdict_change: string | null
 }
 
-export function ReviewWorkspace({ review }: { review: ReviewData }) {
+interface ParentSummary {
+  id: string
+  title: string
+  slug: string | null
+  rating: number | null
+  published_at: string | null
+}
+
+interface WorkspaceProps {
+  review: ReviewData
+  parent?: ParentSummary | null
+  followupCount?: number
+  // Computed server-side: days between parent.published_at and now. Stale by
+  // the time the page hydrates, but the API revalidates on POST.
+  parentAgeDays?: number | null
+}
+
+export function ReviewWorkspace({ review, parent = null, followupCount = 0, parentAgeDays = null }: WorkspaceProps) {
   const [title, setTitle]             = useState(review.title)
   const [productName, setProductName] = useState(review.product_name)
   const [category, setCategory]       = useState(review.category)
@@ -104,6 +132,19 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
   const [scoreEase, setScoreEase]         = useState<number | null>(review.score_ease ?? null)
   const [scoreDailyUse, setScoreDailyUse] = useState<number | null>(review.score_daily_use ?? null)
   const [wouldRebuy, setWouldRebuy]       = useState<boolean | null>(review.would_rebuy ?? null)
+  const [verdictChange, setVerdictChange] = useState<VerdictChange | null>(
+    (review.verdict_change as VerdictChange | null) ?? null
+  )
+
+  // Follow-up scheduling — modal opens from the Distribution section button.
+  const [scheduleOpen, setScheduleOpen] = useState(false)
+  const isFollowup = review.parent_review_id !== null
+  const canScheduleFollowup =
+    !isFollowup &&
+    review.status === 'approved' &&
+    review.is_visible === true &&
+    parentAgeDays !== null &&
+    parentAgeDays >= MIN_PARENT_AGE_DAYS
 
   // Computed overall — average of the four sub-scores. Null until all four are
   // populated. This is the source of truth; the DB stores the same generated value.
@@ -185,7 +226,8 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
     score_ease:           scoreEase,
     score_daily_use:      scoreDailyUse,
     would_rebuy:          wouldRebuy,
-  }), [title, productName, category, excerpt, content, imageUrl, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, productSlug, tldr, keyTakeaways, bestFor, notFor, faqs, testingDuration, howYouUsedIt, standoutMoment, pricePaidCents, scoreQuality, scoreValue, scoreEase, scoreDailyUse, wouldRebuy])
+    verdict_change:       isFollowup ? verdictChange : undefined,
+  }), [title, productName, category, excerpt, content, imageUrl, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, productSlug, tldr, keyTakeaways, bestFor, notFor, faqs, testingDuration, howYouUsedIt, standoutMoment, pricePaidCents, scoreQuality, scoreValue, scoreEase, scoreDailyUse, wouldRebuy, verdictChange, isFollowup])
 
   const canPublish = !hasAffiliate || disclosureAck
   const publishBlockedReason = !canPublish
@@ -262,6 +304,87 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
 
       {/* ── Editor column ─────────────────────────────────────────────── */}
       <div className={`space-y-6 ${previewOpen ? 'xl:flex-1 xl:min-w-0' : ''}`}>
+
+        {/* ── FOLLOW-UP CONTEXT (only when this review is itself a follow-up) ── */}
+        {isFollowup && (
+          <div className="bg-orange-950/30 border border-orange-900/40 rounded-2xl p-4 sm:p-5">
+            <p className="text-xs text-orange-400 uppercase tracking-widest font-semibold mb-2">
+              Follow-up Review
+            </p>
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-3 text-sm">
+              <span className="text-white font-semibold">
+                {review.milestone_label ?? 'Update'}
+              </span>
+              {review.milestone_days != null && (
+                <span className="text-gray-400">{review.milestone_days} days after the original</span>
+              )}
+              {review.previous_rating != null && (
+                <span className="text-gray-400">
+                  · Original verdict {Number(review.previous_rating).toFixed(1)}/10
+                </span>
+              )}
+            </div>
+
+            {parent ? (
+              <p className="text-xs text-gray-400 mb-4">
+                Updating:{' '}
+                {parent.slug ? (
+                  <a
+                    href={`/reviews/${parent.slug}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-orange-400 hover:text-orange-300 underline underline-offset-2"
+                  >
+                    {parent.title}
+                  </a>
+                ) : (
+                  <span className="text-gray-300">{parent.title}</span>
+                )}
+                <a
+                  href={`/dashboard/reviews/${parent.id}`}
+                  className="ml-2 text-gray-500 hover:text-gray-300"
+                >
+                  (open original workspace →)
+                </a>
+              </p>
+            ) : (
+              <p className="text-xs text-gray-500 italic mb-4">
+                Original review unavailable — it may have been deleted.
+              </p>
+            )}
+
+            <div>
+              <p className="block text-sm text-gray-300 mb-2">Verdict change vs. original</p>
+              <div className="flex gap-2 flex-wrap">
+                {([
+                  ['Improved',          'improved',           '↑'],
+                  ['Unchanged',         'unchanged',          '→'],
+                  ['Declined',          'declined',           '↓'],
+                  ['Complete reversal', 'complete_reversal',  '⚡'],
+                ] as const).map(([label, val, icon]) => {
+                  const active = verdictChange === val
+                  return (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => setVerdictChange(active ? null : val)}
+                      className={`px-3 py-2.5 min-h-[44px] rounded-lg text-sm font-semibold border transition-colors ${
+                        active
+                          ? 'bg-orange-600 border-orange-500 text-white'
+                          : 'bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800'
+                      }`}
+                    >
+                      <span className="mr-1.5">{icon}</span>{label}
+                    </button>
+                  )
+                })}
+              </div>
+              <p className="mt-2 text-xs text-gray-600">
+                Editorial judgment — drives the badge color on the public timeline. Tap again to clear.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* ── STORY ────────────────────────────────────────────────────── */}
         <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold">Story</p>
@@ -675,6 +798,38 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
             {!isPublished && (
               <SchedulePanel scheduledAt={scheduledAt} onChange={setScheduled} />
             )}
+
+            {/* Schedule follow-up — top-level published reviews only */}
+            {!isFollowup && isPublished && review.is_visible && (
+              <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4">
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-widest mb-2">
+                  Follow-up Reviews
+                </p>
+                <p className="text-sm text-gray-300 mb-1">
+                  {followupCount === 0
+                    ? 'No follow-ups scheduled yet.'
+                    : `${followupCount} follow-up${followupCount === 1 ? '' : 's'} already in the timeline.`}
+                </p>
+                <p className="text-xs text-gray-500 mb-3">
+                  A follow-up is a longform update — what changed, what you got wrong, would you buy it again.
+                </p>
+                {canScheduleFollowup ? (
+                  <button
+                    type="button"
+                    onClick={() => setScheduleOpen(true)}
+                    className="px-4 py-2.5 min-h-[44px] rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold transition-colors"
+                  >
+                    + Schedule follow-up
+                  </button>
+                ) : (
+                  <p className="text-xs text-gray-600 italic">
+                    {parentAgeDays === null
+                      ? 'Available once this review is published.'
+                      : `Available in ${MIN_PARENT_AGE_DAYS - parentAgeDays} more day${MIN_PARENT_AGE_DAYS - parentAgeDays === 1 ? '' : 's'} (parent must be at least ${MIN_PARENT_AGE_DAYS} days old).`}
+                  </p>
+                )}
+              </div>
+            )}
             <InternalLinkPanel
               title={title}
               excerpt={excerpt}
@@ -775,6 +930,14 @@ export function ReviewWorkspace({ review }: { review: ReviewData }) {
           after={pendingRefine.content}
           onAccept={applyPendingRefine}
           onDiscard={() => setPendingRefine(null)}
+        />
+      )}
+
+      {/* Schedule follow-up modal — opens from the Distribution section button */}
+      {scheduleOpen && (
+        <ScheduleFollowupModal
+          reviewId={review.id}
+          onClose={() => setScheduleOpen(false)}
         />
       )}
     </div>

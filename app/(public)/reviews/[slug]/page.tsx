@@ -31,6 +31,9 @@ import AuthorBio from '@/components/AuthorBio'
 import { getProductBySlug } from '@/lib/products'
 import BenchStrip from '@/components/BenchStrip'
 import CategoryIcon from '@/components/CategoryIcon'
+import { ReviewTimelineStrip } from '@/components/reviews/ReviewTimelineStrip'
+import { VerdictChangeBadge } from '@/components/reviews/VerdictChangeBadge'
+import { getReviewTimeline, transformFollowupContent, type VerdictChange } from '@/lib/reviews'
 
 const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
 
@@ -54,7 +57,7 @@ const getReview = cache(async (slug: string) => {
   const supabase = await createClient()
   const { data } = await supabase
     .from('reviews')
-    .select('id, title, product_name, category, content, rating, excerpt, image_url, has_affiliate_links, product_slug, published_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, profiles(username)')
+    .select('id, title, product_name, category, content, rating, excerpt, image_url, has_affiliate_links, product_slug, published_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, parent_review_id, milestone_label, milestone_days, previous_rating, verdict_change, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -94,11 +97,11 @@ export default async function ReviewPage({ params }: Props) {
 
   const supabase = await createClient()
 
-  // Related reviews + product + bench back-link fetched in parallel — they
-  // don't depend on each other. Bench back-link closes the lifecycle loop:
-  // when this review was promoted from a wishlist item, we surface a
-  // "From the Bench →" chip in the header pointing back to the source.
-  const [{ data: related }, product, { data: benchItem }] = await Promise.all([
+  // Related reviews + product + bench back-link + lifecycle timeline fetched
+  // in parallel — they don't depend on each other. Bench back-link closes the
+  // first lifecycle loop (wishlist → review); timeline closes the second
+  // (review → follow-up → re-verdict).
+  const [{ data: related }, product, { data: benchItem }, timeline] = await Promise.all([
     supabase
       .from('reviews')
       .select('id, slug, title, product_name, rating, excerpt')
@@ -116,7 +119,19 @@ export default async function ReviewPage({ params }: Props) {
       .select('slug, title')
       .eq('review_id', review.id)
       .maybeSingle(),
+    getReviewTimeline(supabase, review.id, review.parent_review_id),
   ])
+
+  const isFollowup = review.parent_review_id !== null
+  const parentNode = timeline.find((n) => n.is_parent) ?? null
+  const verdictChange = review.verdict_change as VerdictChange | null
+
+  // On follow-up pages, transform the body so the 4 required headings render
+  // as <details open> blocks (skim-readers can collapse; SEO still sees the h2).
+  // Top-level reviews keep the existing plain-prose treatment.
+  const bodyTransform = isFollowup ? transformFollowupContent(review.content) : null
+  const renderedBodyHtml = bodyTransform ? bodyTransform.html : review.content
+  const followupToc = bodyTransform?.toc ?? []
 
   const profileData = Array.isArray(review.profiles)
     ? review.profiles[0]
@@ -135,7 +150,9 @@ export default async function ReviewPage({ params }: Props) {
     dailyUse: review.score_daily_use ?? null,
   }
 
-  const jsonLd = {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+
+  const jsonLd: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Review',
     name: review.title,
@@ -154,6 +171,17 @@ export default async function ReviewPage({ params }: Props) {
       },
     },
     datePublished: review.published_at,
+  }
+
+  // Link follow-up reviews back to the parent for SEO clustering. Each follow-up
+  // remains its own canonical page (own slug, own meta), but `isPartOf` tells
+  // crawlers these belong to the same review lineage.
+  if (isFollowup && parentNode?.slug) {
+    jsonLd.isPartOf = {
+      '@type': 'Review',
+      '@id': `${siteUrl}/reviews/${parentNode.slug}`,
+      name: parentNode.title,
+    }
   }
 
   const faqJsonLd = faqs.length > 0 ? {
@@ -180,6 +208,23 @@ export default async function ReviewPage({ params }: Props) {
 
         {/* ── Main content ──────────────────────────────────────────────── */}
         <main className="flex-1 min-w-0">
+
+        {/* Back to original — only on follow-up pages */}
+        {isFollowup && parentNode?.slug && (
+          <Link
+            href={`/reviews/${parentNode.slug}`}
+            className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-orange-400 transition-colors mb-4"
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to the original review
+          </Link>
+        )}
+
+        {/* Lifecycle timeline strip — parent + every follow-up, chronological.
+            Renders nothing when there are no follow-ups (timeline length === 1). */}
+        <ReviewTimelineStrip nodes={timeline} activeId={review.id} />
 
         {/* FTC Disclosure */}
         {review.has_affiliate_links && (
@@ -222,6 +267,18 @@ export default async function ReviewPage({ params }: Props) {
               </Link>
             )}
           </div>
+
+          {/* Verdict change badge — only on follow-ups with an editor-set verdict change */}
+          {isFollowup && verdictChange && (
+            <div className="mb-4">
+              <VerdictChangeBadge
+                verdictChange={verdictChange}
+                previousRating={review.previous_rating ?? null}
+                currentRating={review.rating}
+                milestoneLabel={review.milestone_label ?? 'Update'}
+              />
+            </div>
+          )}
 
           <h1 className="text-4xl md:text-5xl font-black leading-tight mb-4 tracking-tight">{review.title}</h1>
 
@@ -285,6 +342,29 @@ export default async function ReviewPage({ params }: Props) {
         {/* Key Takeaways — separate block, visually quieter than the verdict */}
         <TakeawaysCard items={keyTakeaways} />
 
+        {/* Follow-up TOC — auto-generated from the required headings the body contains */}
+        {isFollowup && followupToc.length >= 2 && (
+          <nav
+            aria-label="Follow-up sections"
+            className="mt-8 mb-4 px-4 py-3 rounded-xl bg-gray-900/60 border border-gray-800/60"
+          >
+            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">In this update</p>
+            <ol className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
+              {followupToc.map((entry) => (
+                <li key={entry.anchor}>
+                  <a
+                    href={`#${entry.anchor}`}
+                    className="inline-flex items-center gap-2 text-sm text-gray-300 hover:text-orange-400 transition-colors min-h-[36px]"
+                  >
+                    <span aria-hidden className="text-gray-600">›</span>
+                    <span className="capitalize">{entry.label}</span>
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )}
+
         {/* Review body — primary CTA lives in the VerdictCard above; final CTA below */}
         <div className="min-w-0 w-full">
           <ImageLightbox className="bd-content">
@@ -296,7 +376,7 @@ export default async function ReviewPage({ params }: Props) {
                 prose-a:text-orange-400 prose-a:no-underline hover:prose-a:text-orange-300
                 prose-strong:text-white
                 prose-li:text-gray-300 prose-li:leading-[1.75]"
-              dangerouslySetInnerHTML={{ __html: review.content }}
+              dangerouslySetInnerHTML={{ __html: renderedBodyHtml }}
             />
           </ImageLightbox>
         </div>

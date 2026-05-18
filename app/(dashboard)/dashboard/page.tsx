@@ -4,6 +4,7 @@ import { QuickActions } from './_components/QuickActions'
 import { AttentionFeed } from './_components/AttentionFeed'
 import { ExportButton } from './_components/ExportButton'
 import { TopPerformers } from './_components/TopPerformers'
+import { FollowupsDueCard } from '@/components/dashboard/FollowupsDueCard'
 
 export default async function DashboardHome() {
   const admin = createAdminClient()
@@ -119,6 +120,12 @@ export default async function DashboardHome() {
       <section className="space-y-3">
         <p className="text-xs text-gray-600 font-medium uppercase tracking-widest">Quick Actions</p>
         <QuickActions />
+      </section>
+
+      {/* Follow-ups due — top-level reviews that haven't been updated in 5+ months.
+          Renders nothing when the list is empty. */}
+      <section className="space-y-3">
+        <FollowupsDueCard />
       </section>
 
       {/* Top performers */}

@@ -1208,9 +1208,13 @@ export type Database = {
           legacy_slugs: string[]
           meta_description: string | null
           meta_title: string | null
+          milestone_days: number | null
+          milestone_label: string | null
           moderation_flags: Json | null
           moderation_score: number | null
           not_for: Json
+          parent_review_id: string | null
+          previous_rating: number | null
           price_paid_cents: number | null
           product_name: string
           product_slug: string | null
@@ -1236,6 +1240,7 @@ export type Database = {
           title: string
           tldr: string | null
           updated_at: string | null
+          verdict_change: string | null
           view_count: number
           would_rebuy: boolean | null
         }
@@ -1259,9 +1264,13 @@ export type Database = {
           legacy_slugs?: string[]
           meta_description?: string | null
           meta_title?: string | null
+          milestone_days?: number | null
+          milestone_label?: string | null
           moderation_flags?: Json | null
           moderation_score?: number | null
           not_for?: Json
+          parent_review_id?: string | null
+          previous_rating?: number | null
           price_paid_cents?: number | null
           product_name: string
           product_slug?: string | null
@@ -1287,6 +1296,7 @@ export type Database = {
           title: string
           tldr?: string | null
           updated_at?: string | null
+          verdict_change?: string | null
           view_count?: number
           would_rebuy?: boolean | null
         }
@@ -1310,9 +1320,13 @@ export type Database = {
           legacy_slugs?: string[]
           meta_description?: string | null
           meta_title?: string | null
+          milestone_days?: number | null
+          milestone_label?: string | null
           moderation_flags?: Json | null
           moderation_score?: number | null
           not_for?: Json
+          parent_review_id?: string | null
+          previous_rating?: number | null
           price_paid_cents?: number | null
           product_name?: string
           product_slug?: string | null
@@ -1338,6 +1352,7 @@ export type Database = {
           title?: string
           tldr?: string | null
           updated_at?: string | null
+          verdict_change?: string | null
           view_count?: number
           would_rebuy?: boolean | null
         }
@@ -1347,6 +1362,13 @@ export type Database = {
             columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_parent_review_id_fkey"
+            columns: ["parent_review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
             referencedColumns: ["id"]
           },
         ]

@@ -46,6 +46,7 @@ const UpdateSchema = z.object({
   score_ease:               z.number().int().min(1).max(10).optional().nullable(),
   score_daily_use:          z.number().int().min(1).max(10).optional().nullable(),
   would_rebuy:              z.boolean().optional().nullable(),
+  verdict_change:           z.enum(['improved', 'unchanged', 'declined', 'complete_reversal']).optional().nullable(),
 })
 
 const ModerateSchema = z.object({
@@ -250,6 +251,7 @@ export async function PUT(
   if (parsed.data.score_ease !== undefined) updates.score_ease = parsed.data.score_ease
   if (parsed.data.score_daily_use !== undefined) updates.score_daily_use = parsed.data.score_daily_use
   if (parsed.data.would_rebuy !== undefined) updates.would_rebuy = parsed.data.would_rebuy
+  if (parsed.data.verdict_change !== undefined) updates.verdict_change = parsed.data.verdict_change
   if (parsed.data.content) {
     const resolved = await resolveProductTokens(parsed.data.content, supabase)
     const sanitized = sanitizeHtml(resolved)
