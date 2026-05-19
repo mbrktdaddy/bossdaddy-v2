@@ -13,6 +13,7 @@ export type ReviewRow = {
   image_url: string | null
   published_at: string | null
   product_slug: string | null
+  featured?: boolean
   // Pre-resolved collection badges — batch-fetched once per call so cards
   // don't trigger N+1 queries during render.
   badges?: ProductBadge[]

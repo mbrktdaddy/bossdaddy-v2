@@ -38,20 +38,52 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   const supabase = await createClient()
 
+  // Resolve homepage hero: site_settings pointer → reviews.featured → algorithmic.
+  // A guide can take the hero slot when the admin pins one; otherwise it's a review.
+  const { data: settings } = await supabase
+    .from('site_settings')
+    .select('homepage_hero_type, homepage_hero_id')
+    .eq('id', 1)
+    .single()
+
   const [
-    { data: featuredReviews },
+    { data: heroReviewByOverride },
+    { data: heroReviewByFeatured },
+    { data: heroGuide },
     { data: latestReviewsRaw },
     { data: vaultPicksRaw },
   ] = await Promise.all([
-    // Top-rated review — anchors the hero
+    // If admin pinned a specific review as hero, fetch it.
+    settings?.homepage_hero_type === 'review' && settings.homepage_hero_id
+      ? supabase
+          .from('reviews')
+          .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
+          .eq('id', settings.homepage_hero_id)
+          .eq('status', 'approved')
+          .eq('is_visible', true)
+          .limit(1)
+      : Promise.resolve({ data: null }),
+    // Featured review fallback (also used by /reviews top card; we read it
+    // here so the same hero shows on / when no explicit override is set).
     supabase
       .from('reviews')
       .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
       .eq('status', 'approved')
       .eq('is_visible', true)
+      .order('featured', { ascending: false })
       .order('rating', { ascending: false })
       .order('published_at', { ascending: false })
       .limit(1),
+    // If admin pinned a guide as hero, fetch it.
+    settings?.homepage_hero_type === 'guide' && settings.homepage_hero_id
+      ? supabase
+          .from('guides')
+          .select('id, slug, title, category, excerpt, image_url, published_at, reading_time_minutes')
+          .eq('id', settings.homepage_hero_id)
+          .eq('status', 'approved')
+          .eq('is_visible', true)
+          .limit(1)
+      : Promise.resolve({ data: null }),
     // Fetch 4 latest; we filter out whichever ends up as the hero feature so the
     // Recent Reviews grid never duplicates the hero card.
     supabase
@@ -72,7 +104,20 @@ export default async function HomePage() {
       .limit(12),
   ])
 
-  const featuredReview = featuredReviews?.[0] ?? null
+  // Hero resolution: explicit guide override > explicit review override >
+  // featured/top-rated review fallback. The first that resolves wins.
+  const overrideGuide  = heroGuide?.[0] ?? null
+  const overrideReview = heroReviewByOverride?.[0] ?? null
+  const fallbackReview = heroReviewByFeatured?.[0] ?? null
+
+  const featuredHero = overrideGuide
+    ? { kind: 'guide' as const, data: overrideGuide }
+    : (overrideReview ?? fallbackReview)
+      ? { kind: 'review' as const, data: overrideReview ?? fallbackReview! }
+      : null
+
+  // Back-compat alias for the JSX below (which references featuredReview).
+  const featuredReview = featuredHero?.kind === 'review' ? featuredHero.data : null
   const latestReviews = (latestReviewsRaw ?? [])
     .filter((r) => r.id !== featuredReview?.id)
     .slice(0, 3)
@@ -110,7 +155,7 @@ export default async function HomePage() {
           }}
         />
         <div className="relative max-w-6xl mx-auto px-6 py-16 md:py-24">
-          {featuredReview ? (
+          {featuredHero ? (
             <div className="grid lg:grid-cols-[1fr_1.05fr] gap-10 lg:gap-14 items-center">
               {/* Copy column */}
               <div>
@@ -146,51 +191,101 @@ export default async function HomePage() {
                 </Link>
               </div>
 
-              {/* Featured review card — visual anchor with tactile depth */}
-              <Link
-                href={`/reviews/${featuredReview.slug}`}
-                className="group block bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-white/[0.02] shadow-xl shadow-black/40 hover:border-accent-border/40 hover:shadow-2xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200"
-              >
-                {featuredReview.image_url && (
-                  <div className="relative w-full aspect-[5/4] bg-surface-raised">
-                    <Image
-                      src={featuredReview.image_url}
-                      alt={featuredReview.product_name}
-                      fill
-                      priority
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      sizes="(max-width: 1024px) 100vw, 520px"
-                    />
-                  </div>
-                )}
-                <div className="p-6">
-                  <div className="flex items-center justify-between gap-3 mb-3">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      {(() => {
-                        const cat = getCategoryBySlug(featuredReview.category)
-                        return cat ? (
-                          <>
-                            <CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text shrink-0" />
-                            <span className="text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-semibold truncate">
-                              {cat.label}
-                            </span>
-                          </>
-                        ) : null
-                      })()}
+              {featuredHero.kind === 'review' ? (
+                <Link
+                  href={`/reviews/${featuredHero.data.slug}`}
+                  className="group block bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-white/[0.02] shadow-xl shadow-black/40 hover:border-accent-border/40 hover:shadow-2xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200"
+                >
+                  {featuredHero.data.image_url && (
+                    <div className="relative w-full aspect-[5/4] bg-surface-raised">
+                      <Image
+                        src={featuredHero.data.image_url}
+                        alt={featuredHero.data.product_name}
+                        fill
+                        priority
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 1024px) 100vw, 520px"
+                      />
                     </div>
-                    <RatingScore rating={featuredReview.rating ?? 0} />
-                  </div>
-                  <h2 className="text-xl md:text-2xl font-black leading-tight text-white group-hover:text-accent-text-soft transition-colors mb-3">
-                    {featuredReview.title}
-                  </h2>
-                  {featuredReview.excerpt && (
-                    <p className="text-prose-muted text-sm leading-relaxed line-clamp-2">
-                      {featuredReview.excerpt}
-                    </p>
                   )}
-                  <p className="text-sm text-accent-text font-semibold mt-4">Read review →</p>
-                </div>
-              </Link>
+                  <div className="p-6">
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        {(() => {
+                          const cat = getCategoryBySlug(featuredHero.data.category)
+                          return cat ? (
+                            <>
+                              <CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text shrink-0" />
+                              <span className="text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-semibold truncate">
+                                {cat.label}
+                              </span>
+                            </>
+                          ) : null
+                        })()}
+                      </div>
+                      <RatingScore rating={featuredHero.data.rating ?? 0} />
+                    </div>
+                    <h2 className="text-xl md:text-2xl font-black leading-tight text-white group-hover:text-accent-text-soft transition-colors mb-3">
+                      {featuredHero.data.title}
+                    </h2>
+                    {featuredHero.data.excerpt && (
+                      <p className="text-prose-muted text-sm leading-relaxed line-clamp-2">
+                        {featuredHero.data.excerpt}
+                      </p>
+                    )}
+                    <p className="text-sm text-accent-text font-semibold mt-4">Read review →</p>
+                  </div>
+                </Link>
+              ) : (
+                <Link
+                  href={`/guides/${featuredHero.data.slug}`}
+                  className="group block bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-white/[0.02] shadow-xl shadow-black/40 hover:border-accent-border/40 hover:shadow-2xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200"
+                >
+                  {featuredHero.data.image_url && (
+                    <div className="relative w-full aspect-[5/4] bg-surface-raised">
+                      <Image
+                        src={featuredHero.data.image_url}
+                        alt={featuredHero.data.title}
+                        fill
+                        priority
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 1024px) 100vw, 520px"
+                      />
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        {(() => {
+                          const cat = getCategoryBySlug(featuredHero.data.category ?? '')
+                          return cat ? (
+                            <>
+                              <CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text shrink-0" />
+                              <span className="text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-semibold truncate">
+                                {cat.label}
+                              </span>
+                            </>
+                          ) : null
+                        })()}
+                      </div>
+                      {featuredHero.data.reading_time_minutes && (
+                        <span className="text-xs text-prose-faint tabular-nums shrink-0">
+                          {featuredHero.data.reading_time_minutes} min read
+                        </span>
+                      )}
+                    </div>
+                    <h2 className="text-xl md:text-2xl font-black leading-tight text-white group-hover:text-accent-text-soft transition-colors mb-3">
+                      {featuredHero.data.title}
+                    </h2>
+                    {featuredHero.data.excerpt && (
+                      <p className="text-prose-muted text-sm leading-relaxed line-clamp-2">
+                        {featuredHero.data.excerpt}
+                      </p>
+                    )}
+                    <p className="text-sm text-accent-text font-semibold mt-4">Read guide →</p>
+                  </div>
+                </Link>
+              )}
             </div>
           ) : (
             // Fallback: centered text-only when no reviews exist yet

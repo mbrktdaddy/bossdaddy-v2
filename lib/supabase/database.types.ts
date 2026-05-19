@@ -415,6 +415,7 @@ export type Database = {
           created_at: string | null
           excerpt: string | null
           faqs: Json
+          featured: boolean
           has_affiliate_links: boolean
           id: string
           image_url: string | null
@@ -448,6 +449,7 @@ export type Database = {
           created_at?: string | null
           excerpt?: string | null
           faqs?: Json
+          featured?: boolean
           has_affiliate_links?: boolean
           id?: string
           image_url?: string | null
@@ -481,6 +483,7 @@ export type Database = {
           created_at?: string | null
           excerpt?: string | null
           faqs?: Json
+          featured?: boolean
           has_affiliate_links?: boolean
           id?: string
           image_url?: string | null
@@ -1200,6 +1203,7 @@ export type Database = {
           faqs: Json
           featured: boolean
           has_affiliate_links: boolean | null
+          is_top_pick: boolean
           how_you_used_it: string | null
           id: string
           image_url: string | null
@@ -1256,6 +1260,7 @@ export type Database = {
           faqs?: Json
           featured?: boolean
           has_affiliate_links?: boolean | null
+          is_top_pick?: boolean
           how_you_used_it?: string | null
           id?: string
           image_url?: string | null
@@ -1312,6 +1317,7 @@ export type Database = {
           faqs?: Json
           featured?: boolean
           has_affiliate_links?: boolean | null
+          is_top_pick?: boolean
           how_you_used_it?: string | null
           id?: string
           image_url?: string | null
@@ -1372,6 +1378,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      site_settings: {
+        Row: {
+          id: number
+          homepage_hero_type: string | null
+          homepage_hero_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          homepage_hero_type?: string | null
+          homepage_hero_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          homepage_hero_type?: string | null
+          homepage_hero_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       social_posts: {
         Row: {

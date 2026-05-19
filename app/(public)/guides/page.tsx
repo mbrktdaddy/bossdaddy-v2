@@ -38,12 +38,12 @@ export default async function GuidesPage({ searchParams }: Props) {
   if (!category) {
     const { data } = await supabase
       .from('guides')
-      .select('id, slug, title, category, excerpt, image_url, published_at, reading_time_minutes')
+      .select('id, slug, title, category, excerpt, image_url, published_at, reading_time_minutes, featured')
       .eq('status', 'approved')
       .eq('is_visible', true)
       .order('published_at', { ascending: false })
 
-    const guides = (data ?? []) as GuideRow[]
+    const guides = (data ?? []) as (GuideRow & { featured?: boolean })[]
 
     const sections = CATEGORIES
       .map(cat => ({
@@ -53,7 +53,11 @@ export default async function GuidesPage({ searchParams }: Props) {
       }))
       .filter(s => s.items.length > 0)
 
-    const featured = guides.find(g => g.image_url) ?? null
+    // Admin-flagged featured wins; fall back to first guide with an image.
+    const featured =
+      guides.find((g) => g.featured && g.image_url) ??
+      guides.find((g) => g.image_url) ??
+      null
 
     const categoryCount = new Set(guides.map(g => g.category)).size
     const avgReadTime = guides.filter(g => g.reading_time_minutes).length > 0

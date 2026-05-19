@@ -41,7 +41,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
   if (!category) {
     const { data } = await supabase
       .from('reviews')
-      .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at, product_slug')
+      .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at, product_slug, featured')
       .eq('status', 'approved')
       .eq('is_visible', true)
       .order('published_at', { ascending: false })
@@ -65,9 +65,12 @@ export default async function ReviewsPage({ searchParams }: Props) {
       }))
       .filter(s => s.items.length > 0)
 
-    const featured = reviews
-      .filter(r => r.image_url)
-      .sort((a, b) => b.rating - a.rating)[0] ?? null
+    // Featured card preference order: admin-flagged > highest-rated (the latter
+    // preserves prior behavior when nothing has been flagged yet).
+    const featured =
+      reviews.find((r) => r.featured && r.image_url) ??
+      reviews.filter((r) => r.image_url).sort((a, b) => b.rating - a.rating)[0] ??
+      null
 
     const categoryCount = new Set(reviews.map(r => r.category)).size
     const avgRating = reviews.length > 0

@@ -42,7 +42,7 @@ export default async function GearPage({ searchParams }: Props) {
   // miss in-category reviews ranked below position 120 globally.
   let reviewsQuery = supabase
     .from('reviews')
-    .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at, product_slug')
+    .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at, product_slug, is_top_pick')
     .eq('status', 'approved')
     .eq('is_visible', true)
     .gte('rating', 8)
@@ -115,7 +115,14 @@ export default async function GearPage({ searchParams }: Props) {
 
   const categoryCount = new Set((allApproved ?? []).map((r) => r.category)).size
   const bossPicks     = topPicks.filter((r) => (r.rating ?? 0) >= 9).length
-  const topPick       = !category ? (topPicks.find((r) => r.image_url) ?? null) : null
+  // #1 Pick: admin-flagged all-time champion wins. Fall back to the prior
+  // algorithmic pick (first high-rated review with an image) so the slot
+  // never goes empty if nothing has been flagged.
+  const topPick = !category
+    ? (topPicks.find((r) => r.is_top_pick && r.image_url)
+       ?? topPicks.find((r) => r.image_url)
+       ?? null)
+    : null
 
   const countByCategory = new Map<string, number>()
   for (const r of topPicks) {
@@ -532,6 +539,7 @@ type GearReview = {
   image_url: string | null
   published_at: string | null
   product_slug: string | null
+  is_top_pick?: boolean
   // Pre-resolved collection badges. Batch-fetched once at the page level.
   badges?: ProductBadge[]
 }
