@@ -1,14 +1,27 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { getCategoryBySlug } from '@/lib/categories'
+import CategoryIcon from '@/components/CategoryIcon'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import RatingScore from '@/components/RatingScore'
 import BadgesForProduct from '@/components/collections/BadgesForProduct'
 import type { ReviewRow } from '../actions'
 
-export default function ReviewCard({ review: r, priority = false }: { review: ReviewRow; priority?: boolean }) {
-  // Overlay-link pattern: see GearCard for explanation. Avoids <a>-inside-<a>
-  // hydration error when BadgesForProduct chips render inside the card.
+// Eyebrow doctrine: undefined = default to category (icon + label); null =
+// suppress (use on category/tag landing pages where the page header carries
+// the classifier); string = role override (e.g., "Winner", "Top Pick").
+export default function ReviewCard({
+  review: r,
+  priority = false,
+  eyebrow,
+}: {
+  review: ReviewRow
+  priority?: boolean
+  eyebrow?: string | null
+}) {
+  const cat = getCategoryBySlug(r.category)
+  const resolvedEyebrow = eyebrow === null ? null : eyebrow ?? cat?.label ?? null
+  const showCategoryIcon = eyebrow === undefined && Boolean(cat)
   return (
     <article className="group relative flex flex-col bg-surface rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200">
       {r.image_url ? (
@@ -37,10 +50,19 @@ export default function ReviewCard({ review: r, priority = false }: { review: Re
         </div>
       )}
       <div className="p-5 flex flex-col flex-1">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-medium text-eyebrow/80 uppercase tracking-widest bg-accent-tint/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
-            {r.product_name}
-          </span>
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <div className="flex items-center gap-1.5 min-w-0">
+            {resolvedEyebrow && (
+              <>
+                {showCategoryIcon && cat && (
+                  <CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text shrink-0" />
+                )}
+                <span className="text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-semibold truncate">
+                  {resolvedEyebrow}
+                </span>
+              </>
+            )}
+          </div>
           <RatingScore rating={r.rating} />
         </div>
         <h2 className="text-base font-bold leading-snug text-white flex-1">

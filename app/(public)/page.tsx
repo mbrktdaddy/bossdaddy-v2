@@ -2,7 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
-import { CATEGORIES } from '@/lib/categories'
+import { CATEGORIES, getCategoryBySlug } from '@/lib/categories'
 import { LABELS } from '@/lib/labels'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import CategoryIcon from '@/components/CategoryIcon'
@@ -161,21 +161,23 @@ export default async function HomePage() {
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                       sizes="(max-width: 1024px) 100vw, 520px"
                     />
-                    <span className="absolute top-4 left-4 bg-accent text-white px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-black/40">
-                      Editor&apos;s Pick · Top Rated
-                    </span>
-                    {(featuredReview.rating ?? 0) >= 8 && (
-                      <div className="absolute top-4 right-4">
-                        <BossApprovedBadge size="sm" variant="card" />
-                      </div>
-                    )}
                   </div>
                 )}
                 <div className="p-6">
-                  <div className="flex items-center justify-between mb-3 gap-3">
-                    <span className="text-xs font-medium text-eyebrow/80 uppercase tracking-widest bg-accent-tint/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
-                      {featuredReview.product_name}
-                    </span>
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      {(() => {
+                        const cat = getCategoryBySlug(featuredReview.category)
+                        return cat ? (
+                          <>
+                            <CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text shrink-0" />
+                            <span className="text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-semibold truncate">
+                              {cat.label}
+                            </span>
+                          </>
+                        ) : null
+                      })()}
+                    </div>
                     <RatingScore rating={featuredReview.rating ?? 0} />
                   </div>
                   <h2 className="text-xl md:text-2xl font-black leading-tight text-white group-hover:text-accent-text-soft transition-colors mb-3">
@@ -404,10 +406,20 @@ export default async function HomePage() {
                       </div>
                     )}
                     <div className={`flex flex-col flex-1 ${isHero ? 'p-6 lg:p-7' : 'p-5'}`}>
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-medium text-eyebrow/80 uppercase tracking-widest bg-accent-tint/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
-                          {r.product_name}
-                        </span>
+                      <div className="flex items-center justify-between gap-3 mb-3">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          {(() => {
+                            const cat = getCategoryBySlug(r.category)
+                            return cat ? (
+                              <>
+                                <CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text shrink-0" />
+                                <span className="text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-semibold truncate">
+                                  {cat.label}
+                                </span>
+                              </>
+                            ) : null
+                          })()}
+                        </div>
                         <RatingScore rating={r.rating ?? 0} />
                       </div>
                       <h3

@@ -124,9 +124,6 @@ export default async function CategoryPage({ params }: Props) {
                   </div>
                 )}
                 <div className="p-5 space-y-2">
-                  <span className="text-xs font-medium text-eyebrow uppercase tracking-widest bg-accent-tint/40 px-2.5 py-0.5 rounded-full">
-                    {r.product_name}
-                  </span>
                   <h2 className="font-black text-base leading-snug group-hover:text-accent-text-soft transition-colors line-clamp-2">
                     {r.title}
                   </h2>

@@ -160,10 +160,7 @@ export default async function CategoryHubPage({ params }: Props) {
                     </div>
                   )}
                   <div className="p-5 flex flex-col flex-1">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-medium text-eyebrow/80 uppercase tracking-widest bg-accent-tint/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
-                        {r.product_name}
-                      </span>
+                    <div className="flex items-center justify-end mb-3">
                       <RatingScore rating={r.rating ?? 0} size="sm" />
                     </div>
                     <h3 className="text-base font-semibold leading-snug group-hover:text-accent-text-soft transition-colors flex-1">

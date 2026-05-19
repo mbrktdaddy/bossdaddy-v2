@@ -333,7 +333,6 @@ export default async function StackDetailPage({ params }: Props) {
                         )}
                         <div className="flex items-start justify-between gap-3 mb-2">
                           <div>
-                            <p className="text-xs font-medium text-eyebrow/80 uppercase tracking-widest mb-1">{review.product_name}</p>
                             <Link href={`/reviews/${review.slug}`} className="text-lg font-bold text-white hover:text-accent-text-soft transition-colors leading-snug block">
                               {review.title}
                             </Link>

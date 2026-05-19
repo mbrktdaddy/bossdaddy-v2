@@ -366,10 +366,7 @@ export default async function GuidePage({ params }: Props) {
                         </div>
                       )}
                       <div className="p-4 flex flex-col flex-1">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-medium text-eyebrow/80 uppercase tracking-widest bg-accent-tint/40 px-2 py-0.5 rounded-full truncate max-w-[60%]">
-                            {r.product_name}
-                          </span>
+                        <div className="flex items-center justify-end mb-2">
                           <RatingScore rating={r.rating ?? 0} size="sm" />
                         </div>
                         <p className="text-sm font-semibold leading-snug group-hover:text-accent-text-soft transition-colors flex-1">

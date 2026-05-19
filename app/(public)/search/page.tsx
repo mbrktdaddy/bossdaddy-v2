@@ -103,10 +103,7 @@ export default async function SearchPage({ searchParams }: Props) {
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1 flex-wrap">
- <span className="text-xs font-medium text-eyebrow/80 uppercase tracking-widest bg-accent-tint/40 px-2 py-0.5 rounded-full">
- {r.product_name}
- </span>
- {cat && <span className={`flex items-center gap-1 text-xs ${cat.accent}`}><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text" /> {cat.label}</span>}
+ {cat && <span className="flex items-center gap-1.5 text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-semibold"><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text shrink-0" /> {cat.label}</span>}
  </div>
  <p className="font-semibold text-sm group-hover:text-accent-text-soft transition-colors">{r.title}</p>
  {r.excerpt && <p className="text-prose-faint text-xs mt-1 line-clamp-1">{r.excerpt}</p>}

@@ -536,8 +536,18 @@ type GearReview = {
   badges?: ProductBadge[]
 }
 
-function GearCard({ review: r, isHero = false }: { review: GearReview; isHero?: boolean }) {
+function GearCard({
+  review: r,
+  isHero = false,
+  eyebrow,
+}: {
+  review: GearReview
+  isHero?: boolean
+  eyebrow?: string | null
+}) {
   const cat = getCategoryBySlug(r.category)
+  const resolvedEyebrow = eyebrow === null ? null : eyebrow ?? cat?.label ?? null
+  const showCategoryIcon = eyebrow === undefined && Boolean(cat)
   // Overlay-link pattern: article wrapper is non-clickable; title <Link> uses
   // after:absolute after:inset-0 to make the whole card clickable as a link.
   // Badges sit above the overlay via relative z-10, so their own links work.
@@ -572,10 +582,19 @@ function GearCard({ review: r, isHero = false }: { review: GearReview; isHero?: 
         </div>
       )}
       <div className={`flex flex-col flex-1 ${isHero ? 'p-6 lg:p-7' : 'p-5'}`}>
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-medium text-eyebrow/80 uppercase tracking-widest bg-accent-tint/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
-            {r.product_name}
-          </span>
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <div className="flex items-center gap-1.5 min-w-0">
+            {resolvedEyebrow && (
+              <>
+                {showCategoryIcon && cat && (
+                  <CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text shrink-0" />
+                )}
+                <span className="text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-semibold truncate">
+                  {resolvedEyebrow}
+                </span>
+              </>
+            )}
+          </div>
           <RatingScore rating={r.rating ?? 0} />
         </div>
         <h3 className={`leading-snug flex-1 ${

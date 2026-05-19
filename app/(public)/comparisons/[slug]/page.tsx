@@ -491,7 +491,6 @@ export default async function ComparisonDetailPage({ params }: Props) {
                               {itemBestFor && (
                                 <p className="text-sm italic text-orange-300/90 mb-2">Best for {itemBestFor}</p>
                               )}
-                              <p className="text-xs font-medium text-eyebrow/80 uppercase tracking-widest mb-1">{review.product_name}</p>
                               <Link href={`/reviews/${review.slug}`} className="text-xl font-black text-white hover:text-accent-text-soft transition-colors leading-tight block">
                                 {review.title}
                               </Link>

@@ -46,7 +46,6 @@ export default function FeaturedReviewCard({ review: r, label = 'Featured Review
             )}
           </div>
 
-          <p className="text-xs text-accent-text-soft/80 font-semibold uppercase tracking-widest mb-2">{r.product_name}</p>
           <h2 className="text-xl sm:text-2xl font-black leading-snug text-white group-hover:text-accent-text-soft transition-colors mb-3">
             {r.title}
           </h2>

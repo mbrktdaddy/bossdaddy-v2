@@ -350,7 +350,6 @@ export default async function GiftOccasionPage({ params }: Props) {
                                   {itemRoleLabel}
                                 </span>
                               )}
-                              <p className="text-xs font-medium text-eyebrow/80 uppercase tracking-widest mb-1">{review.product_name}</p>
                               <Link href={`/reviews/${review.slug}`} className="text-base font-bold text-white hover:text-accent-text-soft transition-colors leading-snug block">
                                 {review.title}
                               </Link>
