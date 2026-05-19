@@ -99,9 +99,9 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
 
   if (items.length === 0) {
     return (
-      <div className="bg-gray-900 rounded-2xl p-12 text-center">
-        <p className="text-gray-400 text-lg font-semibold mb-6">Your cart is empty.</p>
-        <Link href="/gear" className="inline-flex items-center gap-2 px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl transition-colors">
+      <div className="bg-surface rounded-2xl p-12 text-center">
+        <p className="text-prose-muted text-lg font-semibold mb-6">Your cart is empty.</p>
+        <Link href="/gear" className="inline-flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent-hover text-white font-bold rounded-xl transition-colors">
           Browse Gear
         </Link>
       </div>
@@ -121,10 +121,10 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
           return (
             <div
               key={item.id}
-              className={`flex gap-4 bg-gray-900 rounded-2xl p-4 transition-opacity ${isBusy ? 'opacity-50 pointer-events-none' : ''}`}
+              className={`flex gap-4 bg-surface rounded-2xl p-4 transition-opacity ${isBusy ? 'opacity-50 pointer-events-none' : ''}`}
             >
               <Link href={`/gear/${item.merch.slug}`} className="shrink-0">
-                <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-gray-800">
+                <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-surface-raised">
                   {imageUrl ? (
                     <Image src={imageUrl} alt={item.merch.name} fill className="object-cover" sizes="80px" />
                   ) : (
@@ -134,18 +134,18 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
               </Link>
 
               <div className="flex-1 min-w-0">
-                <Link href={`/gear/${item.merch.slug}`} className="font-semibold text-white hover:text-orange-400 transition-colors line-clamp-2 leading-snug">
+                <Link href={`/gear/${item.merch.slug}`} className="font-semibold text-white hover:text-accent-text-soft transition-colors line-clamp-2 leading-snug">
                   {item.merch.name}
                 </Link>
-                {variantLabel && <p className="text-xs text-gray-500 mt-0.5">{variantLabel}</p>}
-                <p className="text-orange-400 font-bold text-sm mt-1.5">{formatPrice(item.variant.retail_price_cents)}</p>
+                {variantLabel && <p className="text-xs text-prose-faint mt-0.5">{variantLabel}</p>}
+                <p className="text-accent-text-soft font-bold text-sm mt-1.5">{formatPrice(item.variant.retail_price_cents)}</p>
               </div>
 
               <div className="flex flex-col items-end justify-between shrink-0">
-                <div className="flex items-center gap-1 bg-gray-800 rounded-xl px-2 py-1">
+                <div className="flex items-center gap-1 bg-surface-raised rounded-xl px-2 py-1">
                   <button
                     onClick={() => updateQty(item.id, item.qty - 1)}
-                    className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                    className="w-7 h-7 flex items-center justify-center text-prose-muted hover:text-white transition-colors"
                     aria-label="Decrease quantity"
                   >
                     −
@@ -154,7 +154,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
                   <button
                     onClick={() => updateQty(item.id, item.qty + 1)}
                     disabled={item.qty >= 10}
-                    className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-white disabled:opacity-30 transition-colors"
+                    className="w-7 h-7 flex items-center justify-center text-prose-muted hover:text-white disabled:opacity-30 transition-colors"
                     aria-label="Increase quantity"
                   >
                     +
@@ -162,7 +162,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
                 </div>
                 <button
                   onClick={() => removeItem(item.id)}
-                  className="text-xs text-gray-600 hover:text-red-400 transition-colors mt-2"
+                  className="text-xs text-prose-faint hover:text-red-400 transition-colors mt-2"
                 >
                   Remove
                 </button>
@@ -173,22 +173,22 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
       </div>
 
       {/* Order summary */}
-      <div className="bg-gray-900/60 rounded-2xl p-6 flex flex-col gap-3">
+      <div className="bg-surface/60 rounded-2xl p-6 flex flex-col gap-3">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-400">Subtotal</span>
+          <span className="text-prose-muted">Subtotal</span>
           <span className="text-white font-semibold">{formatPrice(subtotal)}</span>
         </div>
         <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-400">Shipping</span>
+          <span className="text-prose-muted">Shipping</span>
           <span className="text-green-400 font-semibold">Free</span>
         </div>
-        <div className="flex items-center justify-between text-sm text-gray-600">
+        <div className="flex items-center justify-between text-sm text-prose-faint">
           <span>Tax</span>
           <span>Calculated at checkout</span>
         </div>
-        <div className="border-t border-gray-800 pt-4 mt-1 flex items-center justify-between">
+        <div className="border-t border-soft pt-4 mt-1 flex items-center justify-between">
           <span className="font-black text-white">Total</span>
-          <span className="text-2xl font-black text-orange-400">{formatPrice(subtotal)}</span>
+          <span className="text-2xl font-black text-accent-text-soft">{formatPrice(subtotal)}</span>
         </div>
 
         {checkoutError && (
@@ -197,22 +197,22 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
         <button
           onClick={handleCheckout}
           disabled={checkingOut}
-          className="w-full py-3.5 mt-1 bg-orange-600 hover:bg-orange-500 disabled:bg-orange-600/40 disabled:text-white/40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors text-sm"
+          className="w-full py-3.5 mt-1 bg-accent hover:bg-accent-hover disabled:bg-accent/40 disabled:text-white/40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors text-sm"
         >
           {checkingOut ? 'Redirecting to Stripe...' : 'Proceed to Checkout'}
         </button>
-        <p className="text-center text-xs text-gray-600">Secure checkout via Stripe · Free US shipping</p>
+        <p className="text-center text-xs text-prose-faint">Secure checkout via Stripe · Free US shipping</p>
       </div>
 
       <div className="flex items-center justify-between text-sm">
-        <Link href="/gear" className="text-gray-500 hover:text-orange-400 transition-colors">
+        <Link href="/gear" className="text-prose-faint hover:text-accent-text-soft transition-colors">
           ← Continue Shopping
         </Link>
         <button
           type="button"
           onClick={emptyCart}
           disabled={busy === '__all__'}
-          className="text-gray-600 hover:text-red-400 disabled:opacity-50 transition-colors text-xs"
+          className="text-prose-faint hover:text-red-400 disabled:opacity-50 transition-colors text-xs"
         >
           {busy === '__all__' ? 'Emptying…' : 'Empty cart'}
         </button>

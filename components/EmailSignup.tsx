@@ -53,7 +53,7 @@ export function EmailSignup({
   if (state === 'success' || state === 'already') {
     const isAlready = state === 'already'
     return (
-      <div className={`${isAlready ? 'bg-orange-950/30 border-orange-800/40' : 'bg-green-950/30 border-green-800/40'} border rounded-2xl ${compact ? 'p-3' : 'p-5'}`}>
+      <div className={`${isAlready ? 'bg-accent-tint/30 border-accent-border/40' : 'bg-green-950/30 border-green-800/40'} border rounded-2xl ${compact ? 'p-3' : 'p-5'}`}>
         <p className={`${isAlready ? 'text-orange-300' : 'text-green-400'} ${compact ? 'text-sm' : 'text-base'} font-semibold flex items-center gap-2`}>
           <span>{isAlready ? '✓' : '✓'}</span>
           {isAlready ? alreadySubscribedMessage : successMessage}
@@ -68,7 +68,7 @@ export function EmailSignup({
         <p className={`font-bold ${compact ? 'text-sm' : 'text-lg'} text-white`}>{heading}</p>
       )}
       {description && (
-        <p className={`text-gray-400 ${compact ? 'text-xs' : 'text-sm'}`}>{description}</p>
+        <p className={`text-prose-muted ${compact ? 'text-xs' : 'text-sm'}`}>{description}</p>
       )}
       <form onSubmit={handleSubmit} className={`flex gap-2 ${compact ? '' : 'flex-col sm:flex-row mt-3'}`}>
         <input
@@ -80,12 +80,12 @@ export function EmailSignup({
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
           disabled={state === 'submitting'}
-          className={`min-w-0 ${compact ? 'flex-1 px-3 py-2 text-sm' : 'w-full sm:flex-1 px-4 py-3'} bg-gray-900 border border-gray-700 focus:border-orange-500 rounded-xl text-white placeholder-gray-500 focus:outline-none transition-colors disabled:opacity-60`}
+          className={`min-w-0 ${compact ? 'flex-1 px-3 py-2 text-sm' : 'w-full sm:flex-1 px-4 py-3'} bg-surface border border-strong focus:border-accent rounded-xl text-white placeholder-gray-500 focus:outline-none transition-colors disabled:opacity-60`}
         />
         <button
           type="submit"
           disabled={state === 'submitting' || !email.trim()}
-          className={`${compact ? 'shrink-0 px-4 py-2 text-sm' : 'w-full sm:w-auto px-5 py-3'} bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white font-semibold rounded-xl transition-colors`}
+          className={`${compact ? 'shrink-0 px-4 py-2 text-sm' : 'w-full sm:w-auto px-5 py-3'} bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-semibold rounded-xl transition-colors`}
         >
           {state === 'submitting' ? 'Sending…' : buttonLabel}
         </button>

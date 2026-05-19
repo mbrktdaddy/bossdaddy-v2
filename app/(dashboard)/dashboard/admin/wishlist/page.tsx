@@ -28,22 +28,22 @@ export default async function WishlistAdminPage() {
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black">{LABELS.bench.short}</h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-prose-faint text-sm mt-1">
             Products you plan to test. Members vote on what to review next.
           </p>
         </div>
         <Link
           href="/dashboard/admin/wishlist/new"
-          className="shrink-0 px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold rounded-xl transition-colors"
+          className="shrink-0 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
         >
           + New item
         </Link>
       </div>
 
       {items.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center">
-          <p className="text-gray-400 mb-2">No {LABELS.bench.short.toLowerCase()} items yet.</p>
-          <p className="text-xs text-gray-600">Add products you&apos;re considering or currently testing.</p>
+        <div className="bg-surface border border-soft rounded-2xl p-8 text-center">
+          <p className="text-prose-muted mb-2">No {LABELS.bench.short.toLowerCase()} items yet.</p>
+          <p className="text-xs text-prose-faint">Add products you&apos;re considering or currently testing.</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -51,10 +51,10 @@ export default async function WishlistAdminPage() {
             <Link
               key={item.id}
               href={`/dashboard/admin/wishlist/${item.id}`}
-              className="flex items-center gap-4 p-4 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-2xl transition-colors"
+              className="flex items-center gap-4 p-4 bg-surface hover:bg-surface-raised border border-soft rounded-2xl transition-colors"
             >
               {/* Thumbnail */}
-              <div className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-gray-950 border border-gray-800">
+              <div className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-surface-sunken border border-soft">
                 {item.image_url ? (
                   <Image src={item.image_url} alt={item.title} fill className="object-contain p-1" sizes="48px" />
                 ) : (
@@ -68,16 +68,16 @@ export default async function WishlistAdminPage() {
 
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold truncate">{item.title}</p>
-                <p className="text-xs text-gray-600 mt-0.5">{item.slug}</p>
+                <p className="text-xs text-prose-faint mt-0.5">{item.slug}</p>
               </div>
 
               <div className="shrink-0 flex items-center gap-2 sm:gap-3 text-xs flex-wrap justify-end">
-                <span className="hidden sm:inline text-gray-500">{item.vote_count as unknown as number} votes</span>
-                <span className={`px-2 py-1 rounded-md bg-gray-800 border border-gray-700 font-medium ${getStatusColor(item.status)}`}>
+                <span className="hidden sm:inline text-prose-faint">{item.vote_count as unknown as number} votes</span>
+                <span className={`px-2 py-1 rounded-md bg-surface-raised border border-strong font-medium ${getStatusColor(item.status)}`}>
                   {getStatusLabel(item.status)}
                 </span>
                 {item.review_id && (
-                  <span className="px-2 py-1 rounded-md bg-orange-950/40 border border-orange-900/40 text-orange-400">Promoted</span>
+                  <span className="px-2 py-1 rounded-md bg-accent-tint/40 border border-accent-border/40 text-accent-text-soft">Promoted</span>
                 )}
               </div>
             </Link>

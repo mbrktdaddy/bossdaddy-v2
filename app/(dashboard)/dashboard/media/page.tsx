@@ -100,9 +100,9 @@ function AssetCard({
   }
 
   return (
-    <div className="group relative bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden flex flex-col">
+    <div className="group relative bg-surface border border-soft rounded-2xl overflow-hidden flex flex-col">
       {/* Thumbnail */}
-      <div className="relative aspect-video bg-gray-950 overflow-hidden">
+      <div className="relative aspect-video bg-surface-sunken overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={asset.url}
@@ -114,7 +114,7 @@ function AssetCard({
         {/* Product badge overlay */}
         {productName && (
           <div className="absolute bottom-0 left-0 right-0 px-2 py-1 bg-black/70">
-            <p className="text-[10px] text-orange-400 font-semibold truncate">
+            <p className="text-[10px] text-accent-text-soft font-semibold truncate">
               {asset.is_primary && <span className="text-orange-300">★ </span>}
               {asset.label ? `${asset.label} · ${productName}` : productName}
             </p>
@@ -125,7 +125,7 @@ function AssetCard({
         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
           <button
             onClick={() => onCopy(asset.id, asset.url)}
-            className="px-3 py-1.5 bg-orange-600 hover:bg-orange-500 text-white text-xs font-semibold rounded-lg transition-colors"
+            className="px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-xs font-semibold rounded-lg transition-colors"
           >
             {copiedId === asset.id ? '✓ Copied' : 'Copy URL'}
           </button>
@@ -134,7 +134,7 @@ function AssetCard({
 
       {/* Meta */}
       <div className="p-3 flex flex-col gap-2 flex-1">
-        <p className="text-xs text-gray-500 truncate" title={asset.filename}>{asset.filename}</p>
+        <p className="text-xs text-prose-faint truncate" title={asset.filename}>{asset.filename}</p>
 
         {/* Alt text */}
         {editingAlt ? (
@@ -145,16 +145,16 @@ function AssetCard({
               onChange={(e) => setAltDraft(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleAltSave(); if (e.key === 'Escape') setEditingAlt(false) }}
               placeholder="Alt text…"
-              className="flex-1 min-w-0 px-2 py-1 bg-gray-950 border border-gray-700 rounded text-xs text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500"
+              className="flex-1 min-w-0 px-2 py-1 bg-surface-sunken border border-strong rounded text-xs text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover"
             />
             <button
               onClick={handleAltSave}
               disabled={savingAlt}
-              className="px-2 py-1 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white text-xs rounded transition-colors"
+              className="px-2 py-1 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white text-xs rounded transition-colors"
             >
               {savingAlt ? '…' : 'Save'}
             </button>
-            <button onClick={() => setEditingAlt(false)} className="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-gray-400 text-xs rounded transition-colors">
+            <button onClick={() => setEditingAlt(false)} className="px-2 py-1 bg-surface-raised hover:bg-gray-700 text-prose-muted text-xs rounded transition-colors">
               ✕
             </button>
           </div>
@@ -162,10 +162,10 @@ function AssetCard({
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setEditingAlt(true)}
-              className="flex-1 text-left text-xs text-gray-500 hover:text-gray-300 transition-colors truncate"
+              className="flex-1 text-left text-xs text-prose-faint hover:text-gray-300 transition-colors truncate"
               title="Click to edit alt text"
             >
-              {asset.alt_text ? asset.alt_text : <span className="italic text-gray-600">Add alt text…</span>}
+              {asset.alt_text ? asset.alt_text : <span className="italic text-prose-faint">Add alt text…</span>}
             </button>
             <button
               onClick={handleAIGenerate}
@@ -182,7 +182,7 @@ function AssetCard({
         <div className="flex items-center justify-between mt-auto pt-1">
           <div className="flex flex-col gap-0.5">
             {asset.profiles?.username && (
-              <span className="text-xs text-gray-600">@{asset.profiles.username}</span>
+              <span className="text-xs text-prose-faint">@{asset.profiles.username}</span>
             )}
             {asset.file_size ? (
               <span className="text-xs text-gray-700">{formatBytes(asset.file_size)}</span>
@@ -194,7 +194,7 @@ function AssetCard({
             className={`text-xs px-2 py-1 rounded transition-colors ${
               confirmDelete
                 ? 'bg-red-900/60 text-red-400 hover:bg-red-800'
-                : 'text-gray-600 hover:text-red-400'
+                : 'text-prose-faint hover:text-red-400'
             }`}
           >
             {deleting ? '…' : confirmDelete ? 'Confirm delete' : 'Delete'}
@@ -344,7 +344,7 @@ export default function MediaLibraryPage() {
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-black">Media Library</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{total} asset{total !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-prose-faint mt-0.5">{total} asset{total !== 1 ? 's' : ''}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {/* Product filter */}
@@ -352,7 +352,7 @@ export default function MediaLibraryPage() {
             <select
               value={filterProductId}
               onChange={(e) => handleFilterChange(e.target.value)}
-              className="px-3 py-2 bg-gray-800 border border-gray-700 text-sm text-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="px-3 py-2 bg-surface-raised border border-strong text-sm text-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-hover"
             >
               <option value="">All images</option>
               <option value="__none__">Unassigned only</option>
@@ -364,7 +364,7 @@ export default function MediaLibraryPage() {
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="flex items-center gap-2 px-4 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors"
           >
             {uploading ? (
               <>
@@ -402,16 +402,16 @@ export default function MediaLibraryPage() {
         onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
-        className={`${dragOver ? 'ring-2 ring-orange-500 ring-inset' : ''} rounded-2xl transition-all`}
+        className={`${dragOver ? 'ring-2 ring-accent-hover ring-inset' : ''} rounded-2xl transition-all`}
       >
         {loading ? (
-          <div className="flex items-center gap-3 text-gray-500 py-16 justify-center">
-            <div className="w-5 h-5 border-2 border-gray-700 border-t-orange-500 rounded-full animate-spin" />
+          <div className="flex items-center gap-3 text-prose-faint py-16 justify-center">
+            <div className="w-5 h-5 border-2 border-strong border-t-orange-500 rounded-full animate-spin" />
             Loading…
           </div>
         ) : assets.length === 0 ? (
           <div
-            className="border-2 border-dashed border-gray-700 rounded-2xl py-20 flex flex-col items-center gap-3 text-gray-600 cursor-pointer hover:border-gray-600 hover:text-gray-500 transition-colors"
+            className="border-2 border-dashed border-strong rounded-2xl py-20 flex flex-col items-center gap-3 text-prose-faint cursor-pointer hover:border-gray-600 hover:text-prose-faint transition-colors"
             onClick={() => fileInputRef.current?.click()}
           >
             <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -445,15 +445,15 @@ export default function MediaLibraryPage() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="px-4 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-sm text-white rounded-lg transition-colors"
+            className="px-4 py-2 bg-surface-raised hover:bg-gray-700 disabled:opacity-40 text-sm text-white rounded-lg transition-colors"
           >
             ← Prev
           </button>
-          <span className="text-sm text-gray-500">Page {page} of {totalPages}</span>
+          <span className="text-sm text-prose-faint">Page {page} of {totalPages}</span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="px-4 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-sm text-white rounded-lg transition-colors"
+            className="px-4 py-2 bg-surface-raised hover:bg-gray-700 disabled:opacity-40 text-sm text-white rounded-lg transition-colors"
           >
             Next →
           </button>
@@ -462,7 +462,7 @@ export default function MediaLibraryPage() {
 
       {/* Drag-over overlay */}
       {dragOver && (
-        <div className="fixed inset-0 bg-black/50 border-4 border-dashed border-orange-500 pointer-events-none z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/50 border-4 border-dashed border-accent pointer-events-none z-50 flex items-center justify-center">
           <p className="text-white text-xl font-black">Drop to upload</p>
         </div>
       )}
@@ -470,10 +470,10 @@ export default function MediaLibraryPage() {
       {/* Usage-aware delete modal */}
       {usageData && pendingDeleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-          <div className="bg-gray-950 border border-gray-800 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-5">
+          <div className="bg-surface-sunken border border-soft rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-5">
             <div>
               <p className="text-base font-black text-white">This image is in use</p>
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="text-sm text-prose-muted mt-1">
                 Deleting will auto-clear the hero image on the items below. Body mentions can&apos;t be auto-fixed.
               </p>
             </div>
@@ -512,7 +512,7 @@ export default function MediaLibraryPage() {
             <div className="flex gap-3 pt-1">
               <button
                 onClick={() => { setPendingDeleteId(null); setUsageData(null) }}
-                className="flex-1 px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-xl transition-colors"
+                className="flex-1 px-4 py-2.5 bg-surface-raised hover:bg-gray-700 text-gray-300 text-sm rounded-xl transition-colors"
               >
                 Cancel
               </button>
@@ -540,22 +540,22 @@ function UsageSection({
 }) {
   return (
     <div className="space-y-1.5">
-      <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">{label}</p>
+      <p className="text-xs font-semibold text-prose-muted uppercase tracking-widest">{label}</p>
       {items.map((item) => (
-        <div key={item.id} className="flex items-center justify-between gap-2 px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg">
+        <div key={item.id} className="flex items-center justify-between gap-2 px-3 py-2 bg-surface border border-soft rounded-lg">
           <a
             href={item.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-white hover:text-orange-400 truncate transition-colors"
+            className="text-sm text-white hover:text-accent-text-soft truncate transition-colors"
           >
             {item.label}
           </a>
           <div className="flex items-center gap-2 shrink-0">
             {item.status && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-800 text-gray-500">{item.status}</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-surface-raised text-prose-faint">{item.status}</span>
             )}
-            <span className="text-[10px] text-gray-600">{note}</span>
+            <span className="text-[10px] text-prose-faint">{note}</span>
           </div>
         </div>
       ))}

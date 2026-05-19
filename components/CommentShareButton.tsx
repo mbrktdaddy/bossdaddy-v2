@@ -32,8 +32,8 @@ export default function CommentShareButton({ commentId, shareCount }: Props) {
 
   if (needsAuth) {
     return (
-      <span className="flex items-center gap-1.5 text-xs text-gray-600">
-        <Link href="/login" className="text-orange-400 hover:text-orange-300 transition-colors">
+      <span className="flex items-center gap-1.5 text-xs text-prose-faint">
+        <Link href="/login" className="text-accent-text-soft hover:text-orange-300 transition-colors">
           Sign in
         </Link>
         <span>to share</span>
@@ -44,7 +44,7 @@ export default function CommentShareButton({ commentId, shareCount }: Props) {
   return (
     <button
       onClick={handleShare}
-      className="flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-400 transition-colors"
+      className="flex items-center gap-1.5 text-xs text-prose-faint hover:text-prose-muted transition-colors"
     >
       {copied ? (
         <>

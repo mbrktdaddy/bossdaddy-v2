@@ -114,7 +114,7 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
           if (visibleItems.length === 0) return null
           return (
             <div key={section.label} className="mb-4">
-              <p className="text-xs text-gray-600 font-medium uppercase tracking-widest px-3 mb-2">{section.label}</p>
+              <p className="text-xs text-prose-faint font-medium uppercase tracking-widest px-3 mb-2">{section.label}</p>
               {visibleItems.map((item) => {
                 const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
                 return (
@@ -123,7 +123,7 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
                     href={item.href}
                     onClick={onNav}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
-                      active ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                      active ? 'bg-surface-raised text-white' : 'text-prose-muted hover:bg-surface-raised hover:text-white'
                     }`}
                   >
                     {item.icon}
@@ -141,20 +141,20 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
   const sidebarContent = (onNav?: () => void) => (
     <>
       {/* Brand + user */}
-      <div className="px-5 py-5 border-b border-gray-800/60 space-y-3">
+      <div className="px-5 py-5 border-b border-soft/60 space-y-3">
         <Link href="/" className="flex items-center gap-2">
           <span className="font-black text-base tracking-tight">
-            <span className="text-orange-500">BOSS</span>
+            <span className="text-accent-text">BOSS</span>
             <span className="text-white"> DADDY</span>
           </span>
         </Link>
         <Link href="/dashboard/profile" onClick={onNav} className="flex items-center gap-2 group">
-          <div className="w-6 h-6 rounded-full bg-orange-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
+          <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center text-xs font-bold text-white shrink-0">
             {username[0]?.toUpperCase() ?? 'B'}
           </div>
           <div className="min-w-0">
             <p className="text-xs text-gray-300 group-hover:text-white truncate font-medium transition-colors">@{username}</p>
-            <p className="text-xs text-gray-600">{ROLE_LABEL[role] ?? 'Member'}</p>
+            <p className="text-xs text-prose-faint">{ROLE_LABEL[role] ?? 'Member'}</p>
           </div>
         </Link>
         {isAdmin && <GlobalSearch />}
@@ -166,12 +166,12 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
       </nav>
 
       {/* Footer */}
-      <div className="px-3 py-4 border-t border-gray-800/60 space-y-0.5">
+      <div className="px-3 py-4 border-t border-soft/60 space-y-0.5">
         <Link
           href="/"
           target="_blank"
           onClick={onNav}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-500 hover:text-white hover:bg-gray-800 transition-colors"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-prose-faint hover:text-white hover:bg-surface-raised transition-colors"
         >
           <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -181,7 +181,7 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
         <form action="/api/auth/signout" method="POST">
           <button
             type="submit"
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-500 hover:text-white hover:bg-gray-800 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-prose-faint hover:text-white hover:bg-surface-raised transition-colors"
           >
             <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -196,19 +196,19 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-60 bg-gray-900 border-r border-gray-800/60 flex-col shrink-0">
+      <aside className="hidden md:flex w-60 bg-surface border-r border-soft/60 flex-col shrink-0">
         {sidebarContent()}
       </aside>
 
       {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-gray-900 border-b border-gray-800/60 flex items-center justify-between px-4">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-surface border-b border-soft/60 flex items-center justify-between px-4">
         <Link href="/" className="font-black text-base tracking-tight">
-          <span className="text-orange-500">BOSS</span>
+          <span className="text-accent-text">BOSS</span>
           <span className="text-white"> DADDY</span>
         </Link>
         <button
           onClick={() => setOpen(!open)}
-          className="p-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+          className="p-3 rounded-lg text-prose-muted hover:text-white hover:bg-surface-raised transition-colors"
           aria-label="Toggle menu"
         >
           {open ? (
@@ -229,7 +229,7 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
       )}
 
       {/* Mobile drawer */}
-      <aside className={`md:hidden fixed inset-y-0 left-0 z-40 w-72 bg-gray-900 border-r border-gray-800/60 flex flex-col transform transition-transform duration-200 ${
+      <aside className={`md:hidden fixed inset-y-0 left-0 z-40 w-72 bg-surface border-r border-soft/60 flex flex-col transform transition-transform duration-200 ${
         open ? 'translate-x-0' : '-translate-x-full'
       }`}>
         {sidebarContent(() => setOpen(false))}

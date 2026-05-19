@@ -57,7 +57,7 @@ export default function AddToCartForm({ variants }: { variants: Variant[] }) {
       {/* Size selector — only shown when multiple variants */}
       {hasSizes && variants.length > 1 && (
         <div>
-          <p className="text-xs text-gray-500 uppercase tracking-widest mb-2.5">Size</p>
+          <p className="text-xs text-prose-faint uppercase tracking-widest mb-2.5">Size</p>
           <div className="flex flex-wrap gap-2">
             {variants.map(v => (
               <button
@@ -66,10 +66,10 @@ export default function AddToCartForm({ variants }: { variants: Variant[] }) {
                 disabled={!v.in_stock}
                 className={`px-4 py-2.5 rounded-xl text-sm font-semibold border transition-colors min-w-[52px] ${
                   selectedId === v.id
-                    ? 'bg-orange-600 border-orange-600 text-white'
+                    ? 'bg-accent border-accent text-white'
                     : v.in_stock
-                    ? 'bg-gray-900 border-gray-700 text-gray-300 hover:border-orange-500 hover:text-white'
-                    : 'bg-gray-900/50 border-gray-800 text-gray-600 cursor-not-allowed line-through'
+                    ? 'bg-surface border-strong text-gray-300 hover:border-accent hover:text-white'
+                    : 'bg-surface/50 border-soft text-prose-faint cursor-not-allowed line-through'
                 }`}
               >
                 {v.size}
@@ -81,7 +81,7 @@ export default function AddToCartForm({ variants }: { variants: Variant[] }) {
 
       {/* Single variant info (hat / one-size) */}
       {(!hasSizes || variants.length === 1) && selected && (
-        <div className="flex gap-3 text-sm text-gray-500">
+        <div className="flex gap-3 text-sm text-prose-faint">
           {selected.color && <span>Color: <span className="text-gray-300">{selected.color}</span></span>}
           {selected.size && <span>Size: <span className="text-gray-300">{selected.size}</span></span>}
         </div>
@@ -89,18 +89,18 @@ export default function AddToCartForm({ variants }: { variants: Variant[] }) {
 
       {/* Qty stepper */}
       <div className="flex items-center gap-3">
-        <p className="text-xs text-gray-500 uppercase tracking-widest">Qty</p>
-        <div className="flex items-center gap-1 bg-gray-900 border border-gray-800 rounded-xl px-2 py-1">
+        <p className="text-xs text-prose-faint uppercase tracking-widest">Qty</p>
+        <div className="flex items-center gap-1 bg-surface border border-soft rounded-xl px-2 py-1">
           <button
             onClick={() => setQty(q => Math.max(1, q - 1))}
-            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white transition-colors text-lg leading-none"
+            className="w-8 h-8 flex items-center justify-center text-prose-muted hover:text-white transition-colors text-lg leading-none"
           >
             −
           </button>
           <span className="w-7 text-center text-sm font-bold text-white tabular-nums">{qty}</span>
           <button
             onClick={() => setQty(q => Math.min(10, q + 1))}
-            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white transition-colors text-lg leading-none"
+            className="w-8 h-8 flex items-center justify-center text-prose-muted hover:text-white transition-colors text-lg leading-none"
           >
             +
           </button>
@@ -115,8 +115,8 @@ export default function AddToCartForm({ variants }: { variants: Variant[] }) {
           added
             ? 'bg-green-700 text-white cursor-default'
             : selected?.in_stock
-            ? 'bg-orange-600 hover:bg-orange-500 active:bg-orange-700 text-white disabled:opacity-60'
-            : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+            ? 'bg-accent hover:bg-accent-hover active:bg-orange-700 text-white disabled:opacity-60'
+            : 'bg-surface-raised text-prose-faint cursor-not-allowed'
         }`}
       >
         {loading
@@ -131,7 +131,7 @@ export default function AddToCartForm({ variants }: { variants: Variant[] }) {
       {error && <p className="text-sm text-red-400">{error}</p>}
 
       {added && (
-        <a href="/cart" className="text-center text-sm text-orange-400 hover:text-orange-300 transition-colors font-medium">
+        <a href="/cart" className="text-center text-sm text-accent-text-soft hover:text-orange-300 transition-colors font-medium">
           View Cart →
         </a>
       )}

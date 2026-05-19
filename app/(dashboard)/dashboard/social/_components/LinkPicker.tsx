@@ -88,7 +88,7 @@ export default function LinkPicker({ value, onChange, sourceLinks }: Props) {
 
   return (
     <div className="space-y-2">
-      <p className="text-xs text-gray-400 font-medium">Link (optional)</p>
+      <p className="text-xs text-prose-muted font-medium">Link (optional)</p>
       <div className="flex flex-wrap gap-1.5">
         {MODES.map((m) => (
           <button
@@ -97,8 +97,8 @@ export default function LinkPicker({ value, onChange, sourceLinks }: Props) {
             onClick={() => handleMode(m.key)}
             className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
               m.key === mode
-                ? 'bg-orange-600 text-white'
-                : 'bg-gray-800 text-gray-400 hover:text-white'
+                ? 'bg-accent text-white'
+                : 'bg-surface-raised text-prose-muted hover:text-white'
             }`}
           >
             {m.label}
@@ -110,7 +110,7 @@ export default function LinkPicker({ value, onChange, sourceLinks }: Props) {
         <select
           value={itemId}
           onChange={(e) => handleItem(e.target.value)}
-          className="w-full bg-gray-900 border border-gray-700 text-white text-xs rounded-lg px-3 py-2 focus:border-orange-600 focus:outline-none"
+          className="w-full bg-surface border border-strong text-white text-xs rounded-lg px-3 py-2 focus:border-accent focus:outline-none"
         >
           <option value="">— Select —</option>
           {(mode === 'review' ? sourceLinks.reviews : mode === 'guide' ? sourceLinks.guides : sourceLinks.merch).map((item) => (
@@ -125,14 +125,14 @@ export default function LinkPicker({ value, onChange, sourceLinks }: Props) {
           value={custom}
           onChange={(e) => handleCustom(e.target.value)}
           placeholder="https://…"
-          className="w-full bg-gray-900 border border-gray-700 text-white text-xs rounded-lg px-3 py-2 focus:border-orange-600 focus:outline-none"
+          className="w-full bg-surface border border-strong text-white text-xs rounded-lg px-3 py-2 focus:border-accent focus:outline-none"
         />
       )}
 
       {builtUrl && (
-        <p className="text-xs text-gray-500 truncate">
-          ↳ <span className="text-orange-400">{builtUrl}</span>
-          <span className="ml-2 text-gray-600">(counts as 23 chars on X)</span>
+        <p className="text-xs text-prose-faint truncate">
+          ↳ <span className="text-accent-text-soft">{builtUrl}</span>
+          <span className="ml-2 text-prose-faint">(counts as 23 chars on X)</span>
         </p>
       )}
     </div>

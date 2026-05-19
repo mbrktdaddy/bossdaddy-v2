@@ -67,27 +67,27 @@ export function VersionHistoryPanel({ contentType, contentId }: Props) {
 
   return (
     <details
-      className="bg-gray-900 border border-gray-800 rounded-xl"
+      className="bg-surface border border-soft rounded-xl"
       onToggle={(e) => { if ((e.target as HTMLDetailsElement).open) load() }}
     >
       <summary className="cursor-pointer px-4 py-3 text-sm font-semibold flex items-center justify-between">
         <span className="flex items-center gap-2">
           <span className="text-cyan-400">🕰️</span> Version history
         </span>
-        <span className="text-xs text-gray-600">
+        <span className="text-xs text-prose-faint">
           {loaded ? `${revisions.length} saved version${revisions.length !== 1 ? 's' : ''}` : 'Click to load'}
         </span>
       </summary>
 
       <div className="px-4 pb-4">
         {loading && (
-          <div className="flex items-center gap-2 text-gray-500 py-4 text-sm">
-            <div className="w-3 h-3 border-2 border-gray-700 border-t-orange-500 rounded-full animate-spin" />
+          <div className="flex items-center gap-2 text-prose-faint py-4 text-sm">
+            <div className="w-3 h-3 border-2 border-strong border-t-orange-500 rounded-full animate-spin" />
             Loading history…
           </div>
         )}
         {loaded && revisions.length === 0 && (
-          <p className="text-sm text-gray-600 py-3">No previous versions yet. Each time you save, the prior state is recorded here.</p>
+          <p className="text-sm text-prose-faint py-3">No previous versions yet. Each time you save, the prior state is recorded here.</p>
         )}
         {loaded && revisions.length > 0 && (
           <div className="divide-y divide-gray-800 -mx-4">
@@ -95,15 +95,15 @@ export function VersionHistoryPanel({ contentType, contentId }: Props) {
               const p = Array.isArray(r.profiles) ? r.profiles[0] : r.profiles
               const username = p?.username ?? 'unknown'
               return (
-                <div key={r.id} className="px-4 py-2 flex items-center justify-between gap-3 hover:bg-gray-950/40 transition-colors">
+                <div key={r.id} className="px-4 py-2 flex items-center justify-between gap-3 hover:bg-surface-sunken/40 transition-colors">
                   <div className="min-w-0">
                     <p className="text-sm font-mono text-gray-300">v{r.version_number}</p>
-                    <p className="text-xs text-gray-600">{timeAgo(r.created_at)} · @{username}</p>
+                    <p className="text-xs text-prose-faint">{timeAgo(r.created_at)} · @{username}</p>
                   </div>
                   <button
                     onClick={() => handleRevert(r.id, r.version_number)}
                     disabled={reverting === r.id}
-                    className="text-xs px-3 py-1 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-gray-300 rounded-lg transition-colors"
+                    className="text-xs px-3 py-1 bg-surface-raised hover:bg-gray-700 disabled:opacity-50 text-gray-300 rounded-lg transition-colors"
                   >
                     {reverting === r.id ? '…' : '↻ Revert'}
                   </button>

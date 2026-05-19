@@ -29,29 +29,29 @@ export default function EditUsernameForm({ current }: { current: string }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <div>
-        <label className="block text-xs text-gray-500 uppercase tracking-widest mb-2">
+        <label className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
           Username
         </label>
         <div className="flex gap-3">
           <div className="relative flex-1">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-sm select-none">@</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-prose-faint text-sm select-none">@</span>
             <input
               type="text"
               value={username}
               onChange={e => { setUsername(e.target.value); setSuccess(false); setError(null) }}
               maxLength={20}
-              className="w-full pl-7 pr-3 py-2.5 bg-gray-950 border border-gray-700 focus:border-orange-500 rounded-xl text-white text-sm focus:outline-none transition-colors"
+              className="w-full pl-7 pr-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-white text-sm focus:outline-none transition-colors"
             />
           </div>
           <button
             type="submit"
             disabled={saving || username.trim() === current || username.trim().length < 3}
-            className="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors shrink-0"
+            className="px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors shrink-0"
           >
             {saving ? 'Saving…' : 'Save'}
           </button>
         </div>
-        <p className="text-xs text-gray-600 mt-1.5">3–20 characters, letters, numbers, and underscores only.</p>
+        <p className="text-xs text-prose-faint mt-1.5">3–20 characters, letters, numbers, and underscores only.</p>
       </div>
 
       {success && (

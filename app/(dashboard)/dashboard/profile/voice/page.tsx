@@ -18,20 +18,20 @@ export default async function VoiceProfilePage() {
       <div className="mb-6">
         <Link
           href="/dashboard/profile"
-          className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+          className="text-sm text-prose-faint hover:text-gray-300 transition-colors"
         >
           ← Profile
         </Link>
       </div>
 
       <h1 className="text-2xl font-black mb-1">Voice Profile</h1>
-      <p className="text-gray-500 text-sm mb-6">
+      <p className="text-prose-faint text-sm mb-6">
         Facts Claude uses as ground truth whenever it drafts or refines your reviews and articles.
         Ages auto-update from dates of birth. Edit anytime — changes apply to all future content,
         and you can trigger a one-click refine on existing posts.
       </p>
 
-      <div className="mb-8 p-4 rounded-xl bg-orange-950/30 border border-orange-900/40">
+      <div className="mb-8 p-4 rounded-xl bg-accent-tint/30 border border-accent-border/40">
         <p className="text-xs text-orange-300 font-semibold uppercase tracking-wide mb-1.5">
           Why this matters
         </p>

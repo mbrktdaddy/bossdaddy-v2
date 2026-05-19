@@ -231,9 +231,9 @@ export function GuideCreateWizard() {
     const label = step === 'generating' ? '✍️ Writing full guide with Claude…' : '💾 Saving draft…'
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
-        <div className="w-8 h-8 border-4 border-gray-800 border-t-orange-500 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-soft border-t-orange-500 rounded-full animate-spin" />
         <p className="text-gray-300 font-medium">{label}</p>
-        <p className="text-xs text-gray-600">This can take 30–60 seconds</p>
+        <p className="text-xs text-prose-faint">This can take 30–60 seconds</p>
       </div>
     )
   }
@@ -243,11 +243,11 @@ export function GuideCreateWizard() {
     const preview = plainText.length > 500 ? plainText.slice(0, 500) + '…' : plainText
     return (
       <div className="space-y-5">
-        <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5 space-y-3">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold">Draft preview</p>
+        <div className="bg-surface border border-strong rounded-2xl p-5 space-y-3">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Draft preview</p>
           <h2 className="text-lg font-black text-white leading-snug">{previewDraft.title}</h2>
           {previewDraft.excerpt && (
-            <p className="text-sm text-gray-400 italic">{previewDraft.excerpt}</p>
+            <p className="text-sm text-prose-muted italic">{previewDraft.excerpt}</p>
           )}
           <p className="text-sm text-gray-300 leading-relaxed">{preview}</p>
         </div>
@@ -258,21 +258,21 @@ export function GuideCreateWizard() {
           <button
             type="button"
             onClick={handleSaveDraft}
-            className="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold rounded-xl transition-colors"
+            className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
           >
             ✓ Save &amp; open editor
           </button>
           <button
             type="button"
             onClick={() => { setPreviewDraft(null); setStep('generating'); handleGenerate() }}
-            className="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-xl transition-colors"
+            className="px-5 py-2.5 bg-surface-raised hover:bg-gray-700 text-gray-300 text-sm rounded-xl transition-colors"
           >
             ↺ Regenerate
           </button>
           <button
             type="button"
             onClick={() => { setPreviewDraft(null); setStep('idea') }}
-            className="px-5 py-2.5 text-gray-500 hover:text-gray-300 text-sm transition-colors"
+            className="px-5 py-2.5 text-prose-faint hover:text-gray-300 text-sm transition-colors"
           >
             ← Edit inputs
           </button>
@@ -285,10 +285,10 @@ export function GuideCreateWizard() {
     <div className="space-y-6">
 
       {/* Step 1: Suggest prompt from rough description */}
-      <div className="bg-gray-900 border border-orange-900/30 rounded-xl p-5">
+      <div className="bg-surface border border-accent-border/30 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-sm font-semibold text-orange-400">✨ Describe your idea</p>
-          <span className="text-xs text-gray-600">Claude will suggest a topic and key points</span>
+          <p className="text-sm font-semibold text-accent-text-soft">✨ Describe your idea</p>
+          <span className="text-xs text-prose-faint">Claude will suggest a topic and key points</span>
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
           <input
@@ -296,14 +296,14 @@ export function GuideCreateWizard() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="e.g. 'help dads pick their first cordless drill'"
-            className="flex-1 px-4 py-2.5 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="flex-1 px-4 py-2.5 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
             onKeyDown={(e) => { if (e.key === 'Enter' && !suggesting) handleSuggest() }}
           />
           <button
             type="button"
             onClick={handleSuggest}
             disabled={suggesting || !description.trim()}
-            className="shrink-0 px-4 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition-colors"
+            className="shrink-0 px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition-colors"
           >
             {suggesting ? 'Thinking…' : 'Suggest'}
           </button>
@@ -313,22 +313,22 @@ export function GuideCreateWizard() {
       {/* Suggestion cards */}
       {suggestions.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs text-gray-500">Pick an angle to fill the form — or dismiss to write your own:</p>
+          <p className="text-xs text-prose-faint">Pick an angle to fill the form — or dismiss to write your own:</p>
           <div className="grid gap-2 sm:grid-cols-3">
             {suggestions.map((s, i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => pickSuggestion(s)}
-                className="text-left p-3 bg-gray-950 border border-gray-700 hover:border-orange-600/60 rounded-xl transition-colors group"
+                className="text-left p-3 bg-surface-sunken border border-strong hover:border-accent/60 rounded-xl transition-colors group"
               >
-                <p className="text-xs text-orange-400 font-medium mb-1 group-hover:text-orange-300">{s.angle}</p>
+                <p className="text-xs text-accent-text-soft font-medium mb-1 group-hover:text-orange-300">{s.angle}</p>
                 <p className="text-sm text-white font-semibold leading-snug mb-2">{s.topic}</p>
                 <ul className="space-y-0.5">
                   {s.keyPoints.slice(0, 3).map((kp, j) => (
-                    <li key={j} className="text-xs text-gray-500">· {kp}</li>
+                    <li key={j} className="text-xs text-prose-faint">· {kp}</li>
                   ))}
-                  {s.keyPoints.length > 3 && <li className="text-xs text-gray-600">+{s.keyPoints.length - 3} more</li>}
+                  {s.keyPoints.length > 3 && <li className="text-xs text-prose-faint">+{s.keyPoints.length - 3} more</li>}
                 </ul>
               </button>
             ))}
@@ -336,7 +336,7 @@ export function GuideCreateWizard() {
           <button
             type="button"
             onClick={() => setSuggestions([])}
-            className="text-xs text-gray-600 hover:text-gray-400 transition-colors"
+            className="text-xs text-prose-faint hover:text-prose-muted transition-colors"
           >
             Dismiss — I&apos;ll write my own
           </button>
@@ -352,18 +352,18 @@ export function GuideCreateWizard() {
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             placeholder="What's this guide about?"
-            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
           />
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Key points <span className="text-gray-600">(one per line, optional)</span></label>
+          <label className="block text-sm text-gray-300 mb-1.5">Key points <span className="text-prose-faint">(one per line, optional)</span></label>
           <textarea
             value={keyPoints}
             onChange={(e) => setKeyPoints(e.target.value)}
             rows={4}
             placeholder={"safety tips\nbudget options\nbest for beginners"}
-            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
           />
         </div>
 
@@ -373,7 +373,7 @@ export function GuideCreateWizard() {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             required
-            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
           >
             <option value="" disabled>Select a category…</option>
             {CATEGORIES.map(c => <option key={c.slug} value={c.slug}>{c.icon} {c.label}</option>)}
@@ -382,7 +382,7 @@ export function GuideCreateWizard() {
 
         <div>
           <label className="block text-sm text-gray-300 mb-1.5">
-            Inline image slots <span className="text-gray-600">(empty placeholders to fill from the editor)</span>
+            Inline image slots <span className="text-prose-faint">(empty placeholders to fill from the editor)</span>
           </label>
           <div className="flex flex-wrap gap-1.5">
             {([
@@ -398,27 +398,27 @@ export function GuideCreateWizard() {
                 onClick={() => setImageSlots(opt.v)}
                 className={`px-3 py-2 text-xs font-semibold rounded-lg min-h-[36px] transition-colors ${
                   imageSlots === opt.v
-                    ? 'bg-orange-600 text-white'
-                    : 'bg-gray-900 border border-gray-800 text-gray-300 hover:border-orange-700/60'
+                    ? 'bg-accent text-white'
+                    : 'bg-surface border border-soft text-gray-300 hover:border-accent-border/60'
                 }`}
               >{opt.l}</button>
             ))}
           </div>
-          <p className="mt-1 text-xs text-gray-600">Fill or replace each one from the inline-images panel after the draft is created.</p>
+          <p className="mt-1 text-xs text-prose-faint">Fill or replace each one from the inline-images panel after the draft is created.</p>
         </div>
 
         <div>
           <label className="block text-sm text-gray-300 mb-1.5">
-            Affiliate products <span className="text-gray-600">(optional — for roundups, gift guides)</span>
+            Affiliate products <span className="text-prose-faint">(optional — for roundups, gift guides)</span>
           </label>
           {!productsLoaded ? (
-            <div className="px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-sm text-gray-500">
+            <div className="px-4 py-2.5 bg-surface border border-strong rounded-lg text-sm text-prose-faint">
               Loading products…
             </div>
           ) : products.length === 0 ? (
-            <div className="px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-sm text-gray-500">
+            <div className="px-4 py-2.5 bg-surface border border-strong rounded-lg text-sm text-prose-faint">
               No products yet.{' '}
-              <Link href="/dashboard/admin/products/new" className="text-orange-400 hover:text-orange-300">Add one →</Link>
+              <Link href="/dashboard/admin/products/new" className="text-accent-text-soft hover:text-orange-300">Add one →</Link>
             </div>
           ) : (
             <div className="space-y-2">
@@ -427,9 +427,9 @@ export function GuideCreateWizard() {
                 value={productFilter}
                 onChange={(e) => setProductFilter(e.target.value)}
                 placeholder="Filter by name or slug…"
-                className="w-full px-4 py-2 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-4 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
               />
-              <div className="max-h-56 overflow-y-auto bg-gray-900 border border-gray-700 rounded-lg divide-y divide-gray-800">
+              <div className="max-h-56 overflow-y-auto bg-surface border border-strong rounded-lg divide-y divide-gray-800">
                 {products
                   .filter((p) => {
                     const q = productFilter.trim().toLowerCase()
@@ -439,7 +439,7 @@ export function GuideCreateWizard() {
                     const checked = selectedSlugs.includes(p.slug)
                     const tag = p.affiliate_url ? (p.store === 'amazon' ? 'Amazon' : 'Affiliate') : p.non_affiliate_url ? 'Link' : 'No URL'
                     return (
-                      <label key={p.id} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-950">
+                      <label key={p.id} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-surface-sunken">
                         <input
                           type="checkbox"
                           checked={checked}
@@ -447,12 +447,12 @@ export function GuideCreateWizard() {
                           className="shrink-0"
                         />
                         <span className="min-w-0 flex-1 text-sm text-white truncate">{p.name}</span>
-                        <span className="shrink-0 text-xs text-gray-500">{tag}</span>
+                        <span className="shrink-0 text-xs text-prose-faint">{tag}</span>
                       </label>
                     )
                   })}
               </div>
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-prose-faint">
                 {selectedSlugs.length === 0
                   ? 'Leave empty to skip affiliate links. Each selection embeds one [[BUY:slug]] into the draft.'
                   : `${selectedSlugs.length} selected — Claude will embed one affiliate link per product, spaced across the guide.`}
@@ -471,20 +471,20 @@ export function GuideCreateWizard() {
           type="button"
           onClick={handleGenerate}
           disabled={!topic.trim()}
-          className="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
+          className="px-5 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
         >
           ✨ Generate with AI → Edit
         </button>
         <button
           type="button"
           onClick={handleSkipToBlank}
-          className="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-xl transition-colors"
+          className="px-5 py-2.5 bg-surface-raised hover:bg-gray-700 text-gray-300 text-sm rounded-xl transition-colors"
         >
           Skip to blank draft
         </button>
         <Link
           href="/dashboard/guides"
-          className="px-5 py-2.5 text-gray-500 hover:text-gray-300 text-sm transition-colors"
+          className="px-5 py-2.5 text-prose-faint hover:text-gray-300 text-sm transition-colors"
         >
           Cancel
         </Link>

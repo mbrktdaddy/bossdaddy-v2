@@ -12,10 +12,10 @@ export async function FollowupsDueCard() {
   if (due.length === 0) return null
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
-      <div className="px-5 py-3 border-b border-gray-800">
+    <div className="bg-surface border border-soft rounded-2xl overflow-hidden">
+      <div className="px-5 py-3 border-b border-soft">
         <p className="text-sm font-semibold text-white">Follow-ups due this month</p>
-        <p className="text-xs text-gray-500 mt-0.5">
+        <p className="text-xs text-prose-faint mt-0.5">
           Top-level reviews that haven&apos;t been updated in 5+ months.
         </p>
       </div>
@@ -29,7 +29,7 @@ export async function FollowupsDueCard() {
               >
                 {row.title}
               </Link>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-prose-faint mt-0.5">
                 {row.followupCount === 0
                   ? `No follow-ups · published ${row.daysSincePublished} days ago`
                   : `${row.followupCount} follow-up${row.followupCount === 1 ? '' : 's'} · last updated ${row.daysSinceLastUpdate} days ago`}
@@ -37,7 +37,7 @@ export async function FollowupsDueCard() {
             </div>
             <Link
               href={`/dashboard/reviews/${row.id}`}
-              className="shrink-0 text-xs font-semibold text-orange-400 hover:text-orange-300 whitespace-nowrap"
+              className="shrink-0 text-xs font-semibold text-accent-text-soft hover:text-orange-300 whitespace-nowrap"
             >
               Schedule follow-up →
             </Link>

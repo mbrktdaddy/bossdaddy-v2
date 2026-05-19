@@ -78,11 +78,11 @@ export default function EditEmailForm({ current }: { current: string }) {
     return (
       <div className="bg-green-950/30 border border-green-900/40 rounded-xl p-4">
         <p className="text-green-400 text-sm font-semibold mb-1">Confirmation sent</p>
-        <p className="text-gray-400 text-sm">
+        <p className="text-prose-muted text-sm">
           Check <span className="text-white">{email.trim()}</span> for a confirmation link.
           Your email won&apos;t change until you click it.
         </p>
-        <button onClick={reset} className="text-xs text-gray-500 hover:text-gray-300 mt-3 transition-colors">
+        <button onClick={reset} className="text-xs text-prose-faint hover:text-gray-300 mt-3 transition-colors">
           Done
         </button>
       </div>
@@ -93,9 +93,9 @@ export default function EditEmailForm({ current }: { current: string }) {
   if (step === 'verifying') {
     return (
       <form onSubmit={handleOtpSubmit} className="space-y-3">
-        <div className="bg-orange-950/30 border border-orange-900/40 rounded-xl p-4">
-          <p className="text-orange-400 text-sm font-semibold mb-1">Check your current email</p>
-          <p className="text-gray-400 text-xs">
+        <div className="bg-accent-tint/30 border border-accent-border/40 rounded-xl p-4">
+          <p className="text-accent-text-soft text-sm font-semibold mb-1">Check your current email</p>
+          <p className="text-prose-muted text-xs">
             We sent a 6-digit verification code to <span className="text-white">{current}</span>. Enter it below to confirm the change.
           </p>
         </div>
@@ -107,18 +107,18 @@ export default function EditEmailForm({ current }: { current: string }) {
           onChange={e => { setOtp(e.target.value.replace(/\D/g, '')); setError(null) }}
           placeholder="000000"
           required
-          className="w-full px-3 py-2.5 bg-gray-950 border border-gray-700 focus:border-orange-500 rounded-xl text-white text-sm focus:outline-none transition-colors placeholder-gray-600 tracking-widest text-center text-lg font-bold"
+          className="w-full px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-white text-sm focus:outline-none transition-colors placeholder-gray-600 tracking-widest text-center text-lg font-bold"
         />
         {error && <p className="text-red-400 text-xs">{error}</p>}
         <div className="flex items-center gap-3">
           <button
             type="submit"
             disabled={busy || otp.length < 6}
-            className="px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
+            className="px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
           >
             {busy ? 'Verifying…' : 'Verify & Change Email'}
           </button>
-          <button type="button" onClick={reset} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">
+          <button type="button" onClick={reset} className="text-xs text-prose-faint hover:text-gray-300 transition-colors">
             Cancel
           </button>
         </div>
@@ -136,9 +136,9 @@ export default function EditEmailForm({ current }: { current: string }) {
           onChange={e => { setEmail(e.target.value); setError(null) }}
           placeholder="New email address"
           required
-          className="w-full px-3 py-2.5 bg-gray-950 border border-gray-700 focus:border-orange-500 rounded-xl text-white text-sm focus:outline-none transition-colors placeholder-gray-600"
+          className="w-full px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-white text-sm focus:outline-none transition-colors placeholder-gray-600"
         />
-        <p className="text-xs text-gray-600">
+        <p className="text-xs text-prose-faint">
           We&apos;ll send a verification code to your current email to confirm it&apos;s you.
         </p>
         {error && <p className="text-red-400 text-xs">{error}</p>}
@@ -146,11 +146,11 @@ export default function EditEmailForm({ current }: { current: string }) {
           <button
             type="submit"
             disabled={busy || !email.trim() || email.trim() === current}
-            className="px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
+            className="px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
           >
             {busy ? 'Sending code…' : 'Continue'}
           </button>
-          <button type="button" onClick={reset} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">
+          <button type="button" onClick={reset} className="text-xs text-prose-faint hover:text-gray-300 transition-colors">
             Cancel
           </button>
         </div>
@@ -161,10 +161,10 @@ export default function EditEmailForm({ current }: { current: string }) {
   // ── Idle ──────────────────────────────────────────────────────────────────
   return (
     <div className="flex items-center justify-between gap-4">
-      <p className="text-sm text-gray-400">{current}</p>
+      <p className="text-sm text-prose-muted">{current}</p>
       <button
         onClick={() => setStep('editing')}
-        className="text-xs text-orange-400 hover:text-orange-300 transition-colors shrink-0"
+        className="text-xs text-accent-text-soft hover:text-orange-300 transition-colors shrink-0"
       >
         Change
       </button>

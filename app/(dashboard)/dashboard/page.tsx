@@ -88,23 +88,23 @@ export default async function DashboardHome() {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black">Welcome back, Boss.</h1>
-          <p className="text-gray-500 text-sm mt-1">Here&apos;s what&apos;s happening with your site.</p>
+          <p className="text-prose-faint text-sm mt-1">Here&apos;s what&apos;s happening with your site.</p>
         </div>
         <ExportButton />
       </div>
 
       {/* Stats */}
       <section className="space-y-3">
-        <p className="text-xs text-gray-600 font-medium uppercase tracking-widest">At a Glance</p>
+        <p className="text-xs text-prose-faint font-medium uppercase tracking-widest">At a Glance</p>
         <HomeStats counts={counts} />
       </section>
 
       {/* Attention feed — first so urgent items are visible without scrolling */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <p className="text-xs text-gray-600 font-medium uppercase tracking-widest">Needs Your Attention</p>
+          <p className="text-xs text-prose-faint font-medium uppercase tracking-widest">Needs Your Attention</p>
           {pendingItems.length > 0 && (
-            <span className="text-xs text-gray-500">{pendingItems.length} pending</span>
+            <span className="text-xs text-prose-faint">{pendingItems.length} pending</span>
           )}
         </div>
         <AttentionFeed
@@ -118,7 +118,7 @@ export default async function DashboardHome() {
 
       {/* Quick actions */}
       <section className="space-y-3">
-        <p className="text-xs text-gray-600 font-medium uppercase tracking-widest">Quick Actions</p>
+        <p className="text-xs text-prose-faint font-medium uppercase tracking-widest">Quick Actions</p>
         <QuickActions />
       </section>
 
@@ -130,7 +130,7 @@ export default async function DashboardHome() {
 
       {/* Top performers */}
       <section className="space-y-3">
-        <p className="text-xs text-gray-600 font-medium uppercase tracking-widest">Top Performing</p>
+        <p className="text-xs text-prose-faint font-medium uppercase tracking-widest">Top Performing</p>
         <TopPerformers items={topPerformers} />
       </section>
 

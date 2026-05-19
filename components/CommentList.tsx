@@ -41,18 +41,18 @@ export default async function CommentList({ contentType, contentId }: Props) {
         )?.username ?? 'Anonymous'
 
         return (
-          <div key={c.id} id={`comment-${c.id}`} className="bg-gray-900 border border-gray-800 rounded-2xl p-5 scroll-mt-24">
+          <div key={c.id} id={`comment-${c.id}`} className="bg-surface border border-soft rounded-2xl p-5 scroll-mt-24">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-7 h-7 rounded-full bg-orange-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
+              <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center text-xs font-bold text-white shrink-0">
                 {author[0].toUpperCase()}
               </div>
               <span className="text-sm font-medium text-gray-300">@{author}</span>
-              <span className="text-xs text-gray-600">
+              <span className="text-xs text-prose-faint">
                 {new Date(c.created_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
               </span>
             </div>
             <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">{c.body}</p>
-            <div className="mt-3 pt-3 border-t border-gray-800/60 flex items-center justify-between">
+            <div className="mt-3 pt-3 border-t border-soft/60 flex items-center justify-between">
               <LikeButton contentType="comment" contentId={c.id} size="sm" />
               <CommentShareButton commentId={c.id} shareCount={shareCountMap[c.id] ?? 0} />
             </div>

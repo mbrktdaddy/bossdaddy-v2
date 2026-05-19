@@ -33,16 +33,16 @@ export async function MerchPanel() {
       <div className="pt-12">
         {/* Section opener — vertical orange rule + eyebrow + h2 */}
         <div className="flex items-stretch gap-4 mb-6">
-          <div className="w-[3px] bg-orange-600 rounded-full" />
+          <div className="w-[3px] bg-accent rounded-full" />
           <div>
-            <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-1">— Made by Boss Daddy</p>
+            <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-1">— Made by Boss Daddy</p>
             <h2 className="text-2xl font-black text-white leading-tight">Boss Daddy Merch</h2>
           </div>
         </div>
 
         {isEmpty ? (
           /* Empty state — tight callout + email capture */
-          <div className="bg-gray-900 rounded-2xl shadow-lg shadow-black/40 px-6 py-8 sm:px-8 sm:py-10">
+          <div className="bg-surface rounded-2xl shadow-lg shadow-black/40 px-6 py-8 sm:px-8 sm:py-10">
             <div className="flex flex-col sm:flex-row sm:items-center gap-6">
               <div className="flex-1">
                 <p className="text-base text-gray-300 leading-relaxed">
@@ -70,7 +70,7 @@ export async function MerchPanel() {
               const displayImage = getMerchDisplayImage(p as Parameters<typeof getMerchDisplayImage>[0]) ?? p.image_url
               const inner = (
                 <>
-                  <div className="relative w-full aspect-square bg-gray-800/40">
+                  <div className="relative w-full aspect-square bg-surface-raised/40">
                     {displayImage ? (
                       <Image
                         src={displayImage}
@@ -87,23 +87,23 @@ export async function MerchPanel() {
                       </div>
                     )}
                     {!isAvailable && (
-                      <div className="absolute top-3 left-3 bg-orange-950/90 backdrop-blur-sm px-2.5 py-1 rounded-full shadow-md shadow-black/40">
-                        <p className="text-[10px] font-bold text-orange-400 uppercase tracking-widest">Coming soon</p>
+                      <div className="absolute top-3 left-3 bg-accent-tint/90 backdrop-blur-sm px-2.5 py-1 rounded-full shadow-md shadow-black/40">
+                        <p className="text-[10px] font-bold text-accent-text-soft uppercase tracking-widest">Coming soon</p>
                       </div>
                     )}
                   </div>
                   <div className="p-5 flex flex-col flex-1">
-                    <h3 className="text-base font-semibold leading-snug mb-1.5 group-hover:text-orange-400 transition-colors">
+                    <h3 className="text-base font-semibold leading-snug mb-1.5 group-hover:text-accent-text-soft transition-colors">
                       {p.name}
                     </h3>
                     {p.description && (
-                      <p className="text-gray-500 text-sm line-clamp-2 mb-3 flex-1">{p.description}</p>
+                      <p className="text-prose-faint text-sm line-clamp-2 mb-3 flex-1">{p.description}</p>
                     )}
                     <div className="flex items-center justify-between pt-3">
-                      <span className="text-orange-500 font-bold text-sm">
+                      <span className="text-accent-text font-bold text-sm">
                         {p.price_cents != null ? formatPrice(p.price_cents) : '—'}
                       </span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-prose-faint">
                         {isAvailable ? 'Buy' : 'Notify me'}
                       </span>
                     </div>
@@ -111,7 +111,7 @@ export async function MerchPanel() {
                 </>
               )
 
-              const className = 'group flex flex-col bg-gray-900 rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200'
+              const className = 'group flex flex-col bg-surface rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200'
 
               // Printful products → internal detail page
               if (isPrintful) {

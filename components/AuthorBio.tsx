@@ -34,14 +34,14 @@ export default async function AuthorBio({ username }: Props) {
 
   return (
     <div className="mt-12 pt-8">
-      <div className="bg-gray-900 rounded-2xl p-6 sm:p-7 shadow-lg shadow-black/40">
+      <div className="bg-surface rounded-2xl p-6 sm:p-7 shadow-lg shadow-black/40">
         <div className="flex items-start gap-4">
           {avatarUrl ? (
-            <div className="w-14 h-14 shrink-0 rounded-full overflow-hidden bg-gray-950 relative">
+            <div className="w-14 h-14 shrink-0 rounded-full overflow-hidden bg-surface-sunken relative">
               <Image src={avatarUrl} alt={displayName} fill sizes="56px" className="object-cover" />
             </div>
           ) : (
-            <div className="w-14 h-14 shrink-0 rounded-full bg-gradient-to-br from-orange-700 to-orange-950 flex items-center justify-center text-white font-black text-lg border border-orange-700/40">
+            <div className="w-14 h-14 shrink-0 rounded-full bg-gradient-to-br from-orange-700 to-orange-950 flex items-center justify-center text-white font-black text-lg border border-accent-border/40">
               {initials || 'BD'}
             </div>
           )}
@@ -50,15 +50,15 @@ export default async function AuthorBio({ username }: Props) {
               <p className="font-black text-base">{displayName}</p>
               <Link
                 href={`/author/${username}`}
-                className="text-xs text-orange-500 hover:text-orange-400 transition-colors"
+                className="text-xs text-accent-text hover:text-accent-text-soft transition-colors"
               >
                 @{username}
               </Link>
             </div>
-            <p className="text-xs text-orange-500/80 uppercase tracking-widest font-semibold mb-3">
+            <p className="text-xs text-eyebrow/80 uppercase tracking-widest font-semibold mb-3">
               {tagline}
             </p>
-            <p className="text-sm text-gray-400 leading-relaxed">{bio}</p>
+            <p className="text-sm text-prose-muted leading-relaxed">{bio}</p>
           </div>
         </div>
       </div>

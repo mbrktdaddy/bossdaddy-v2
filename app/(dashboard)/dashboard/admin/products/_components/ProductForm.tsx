@@ -187,10 +187,10 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
           onChange={(e) => setSlug(e.target.value.toLowerCase())}
           pattern="[a-z0-9-]+"
           placeholder="enfamil-enspire"
-          className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
         />
-        <p className="mt-1 text-xs text-gray-600">
-          Used in tokens: <code className="text-orange-400">[[BUY:{slug || 'your-slug'}]]</code>. Lowercase letters, numbers, hyphens only.
+        <p className="mt-1 text-xs text-prose-faint">
+          Used in tokens: <code className="text-accent-text-soft">[[BUY:{slug || 'your-slug'}]]</code>. Lowercase letters, numbers, hyphens only.
         </p>
       </div>
 
@@ -204,7 +204,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Enfamil Enspire"
-          className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
         />
       </div>
 
@@ -213,7 +213,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
         <select
           value={store}
           onChange={(e) => setStore(e.target.value)}
-          className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
         >
           {STORE_OPTIONS.map((s) => (
             <option key={s.value} value={s.value}>{s.label}</option>
@@ -229,9 +229,9 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
             value={customStoreName}
             onChange={(e) => setCustomStoreName(e.target.value)}
             placeholder="e.g. REI, Costco, Target Canada"
-            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
           />
-          <p className="mt-1 text-xs text-gray-600">
+          <p className="mt-1 text-xs text-prose-faint">
             Used in the CTA button: &quot;Check Price at [store name]&quot;.
           </p>
         </div>
@@ -259,9 +259,9 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
             'Paste your affiliate link from this retailer\'s program'
           }
           disabled={store === 'costco' || store === 'sams-club'}
-          className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
         />
-        <p className="mt-1 text-xs text-gray-600">
+        <p className="mt-1 text-xs text-prose-faint">
           {store === 'amazon'    && 'Use the SiteStripe "Text Only" button on Amazon — your associate tag is embedded automatically.'}
           {store === 'walmart'   && 'Get your link from the Walmart Creator portal (Impact.com). Your publisher ID is embedded in the URL.'}
           {store === 'target'    && 'Get your link from Target\'s affiliate portal (Impact.com). Your publisher ID is embedded in the URL.'}
@@ -288,10 +288,10 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
             value={asin}
             onChange={(e) => setAsin(e.target.value)}
             placeholder="B07XYZ1234"
-            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
           />
           <div className="mt-2 flex items-center gap-3 flex-wrap">
-            <p className="text-xs text-gray-600 flex-1">10-character Amazon product ID — find it in the product URL after <code className="text-orange-400">/dp/</code></p>
+            <p className="text-xs text-prose-faint flex-1">10-character Amazon product ID — find it in the product URL after <code className="text-accent-text-soft">/dp/</code></p>
             {isValidAsin(asin) && amazonAssociateTag && (
               <button
                 type="button"
@@ -312,7 +312,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
                   }
                   setAffiliateUrl(buildAmazonAffiliateUrl(asin, amazonAssociateTag))
                 }}
-                className="text-xs px-3 py-1.5 bg-orange-700/60 hover:bg-orange-600/60 text-orange-200 font-semibold rounded-lg transition-colors shrink-0"
+                className="text-xs px-3 py-1.5 bg-orange-700/60 hover:bg-accent/60 text-orange-200 font-semibold rounded-lg transition-colors shrink-0"
                 title={`https://www.amazon.com/dp/${asin.trim().toUpperCase()}?tag=${amazonAssociateTag}`}
               >
                 {affiliateUrl.trim() ? '↻ Rebuild URL from ASIN' : 'Build affiliate URL'}
@@ -339,7 +339,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
         <label className="block text-sm text-gray-300 mb-1.5">
           Non-affiliate URL
           {(store === 'costco' || store === 'sams-club') && (
-            <span className="ml-2 text-orange-400 text-xs font-semibold">← use this for {store === 'costco' ? 'Costco' : "Sam's Club"}</span>
+            <span className="ml-2 text-accent-text-soft text-xs font-semibold">← use this for {store === 'costco' ? 'Costco' : "Sam's Club"}</span>
           )}
         </label>
         <input
@@ -347,9 +347,9 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
           value={nonAffiliateUrl}
           onChange={(e) => setNonAffUrl(e.target.value)}
           placeholder="https://www.costco.com/product.html"
-          className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
         />
-        <p className="mt-1 text-xs text-gray-600">
+        <p className="mt-1 text-xs text-prose-faint">
           {(store === 'costco' || store === 'sams-club')
             ? 'Paste the direct product page URL. Shown as "View [product name]" — no sponsored/nofollow since there\'s no affiliate relationship.'
             : 'Fallback used only when no affiliate URL is set. Rendered without sponsored/nofollow attributes.'
@@ -364,17 +364,17 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
             productId={product!.id}
             onPrimaryChange={(url) => setImageUrl(url ?? '')}
           />
-          <details className="text-xs text-gray-600">
-            <summary className="cursor-pointer hover:text-gray-400 transition-colors">Manual image URL override</summary>
+          <details className="text-xs text-prose-faint">
+            <summary className="cursor-pointer hover:text-prose-muted transition-colors">Manual image URL override</summary>
             <div className="mt-2 space-y-1">
               <input
                 type="url"
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
                 placeholder="https://... paste a URL directly"
-                className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
               />
-              <p className="text-gray-600">
+              <p className="text-prose-faint">
                 Overrides the gallery primary. Useful for external image URLs (e.g. Amazon CDN).
                 {store === 'amazon' && ' On the Amazon product page, right-click the main image → Copy image address.'}
               </p>
@@ -390,17 +390,17 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
             disabled={busy}
           />
 
-          <details className="text-xs text-gray-600">
-            <summary className="cursor-pointer hover:text-gray-400 transition-colors">Manual URL override (skip the gallery)</summary>
+          <details className="text-xs text-prose-faint">
+            <summary className="cursor-pointer hover:text-prose-muted transition-colors">Manual URL override (skip the gallery)</summary>
             <div className="mt-2 space-y-1">
               <input
                 type="url"
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
                 placeholder="https://... paste a URL directly"
-                className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
               />
-              <p className="text-gray-600">
+              <p className="text-prose-faint">
                 Sets the product&apos;s hero directly. If you also stage gallery images above,
                 the one marked Primary will overwrite this on save.
                 {store === 'amazon' && ' On the Amazon product page, right-click the main image → Copy image address.'}
@@ -419,9 +419,9 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
           maxLength={400}
           rows={3}
           placeholder="1–2 sentences: what this product is and why it matters. Used as fallback card copy in picks, gift guides, and /stuff."
-          className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
         />
-        <p className="mt-1 text-xs text-gray-600">{description.length}/400 characters</p>
+        <p className="mt-1 text-xs text-prose-faint">{description.length}/400 characters</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -430,7 +430,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
           >
             <option value="">— none —</option>
             {CATEGORIES.map((c) => (
@@ -448,10 +448,10 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
             value={priceCents}
             onChange={(e) => setPriceCents(e.target.value.replace(/\D/g, ''))}
             placeholder="e.g. 2999 = $29.99"
-            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
           />
           {priceCents && !isNaN(parseInt(priceCents, 10)) && (
-            <p className="mt-1 text-xs text-orange-400">${(parseInt(priceCents, 10) / 100).toFixed(2)}</p>
+            <p className="mt-1 text-xs text-accent-text-soft">${(parseInt(priceCents, 10) / 100).toFixed(2)}</p>
           )}
         </div>
       </div>
@@ -461,13 +461,13 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
         >
           {PRODUCT_STATUS_OPTIONS.map((s) => (
             <option key={s.value} value={s.value}>{s.label}</option>
           ))}
         </select>
-        <p className="mt-1 text-xs text-gray-600">Auto-flips to &quot;Reviewed&quot; when a linked review is approved.</p>
+        <p className="mt-1 text-xs text-prose-faint">Auto-flips to &quot;Reviewed&quot; when a linked review is approved.</p>
       </div>
 
       {error && (
@@ -478,7 +478,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
         <p className={`text-sm rounded-lg px-4 py-3 ${
           createdProductId
             ? 'text-amber-300 bg-amber-950/40 border border-amber-900/40'
-            : 'text-gray-300 bg-gray-900 border border-gray-800'
+            : 'text-gray-300 bg-surface border border-soft'
         }`}>
           {uploadStatus}
         </p>
@@ -488,7 +488,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
         <button
           type="submit"
           disabled={busy || !slug.trim() || !name.trim()}
-          className="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
+          className="px-5 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
         >
           {busy
             ? 'Saving…'

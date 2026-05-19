@@ -26,7 +26,7 @@ export function SchedulePanel({ scheduledAt, onChange, disabled }: Props) {
   const isPast = scheduledDate ? scheduledDate.getTime() < Date.now() : false
 
   return (
-    <details className="bg-gray-900 border border-gray-800 rounded-xl" open={isScheduled}>
+    <details className="bg-surface border border-soft rounded-xl" open={isScheduled}>
       <summary className="cursor-pointer px-4 py-3 text-sm font-semibold flex items-center justify-between">
         <span className="flex items-center gap-2">
           <span className="text-purple-400">📅</span> Schedule
@@ -36,13 +36,13 @@ export function SchedulePanel({ scheduledAt, onChange, disabled }: Props) {
             {isPast ? 'overdue' : scheduledDate!.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'UTC' })}
           </span>
         ) : (
-          <span className="text-xs text-gray-600">Publish at a specific time</span>
+          <span className="text-xs text-prose-faint">Publish at a specific time</span>
         )}
       </summary>
 
       <div className="px-4 pb-4 space-y-3">
         <div>
-          <label className="block text-xs text-gray-400 mb-1.5">Publish date & time (local)</label>
+          <label className="block text-xs text-prose-muted mb-1.5">Publish date & time (local)</label>
           <input
             type="datetime-local"
             value={localValue}
@@ -51,19 +51,19 @@ export function SchedulePanel({ scheduledAt, onChange, disabled }: Props) {
               const v = e.target.value
               onChange(v ? fromDateTimeLocal(v) : null)
             }}
-            className="w-full px-3 py-2 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+            className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-accent-hover"
           />
         </div>
         {isScheduled && (
           <button
             type="button"
             onClick={() => onChange(null)}
-            className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded-lg transition-colors"
+            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-gray-700 text-prose-muted hover:text-white rounded-lg transition-colors"
           >
             Clear schedule
           </button>
         )}
-        <p className="text-xs text-gray-600">
+        <p className="text-xs text-prose-faint">
           Content will publish automatically at the scheduled time. The cron runs once daily at
           noon UTC — your scheduled item will go live on the next daily run after the scheduled
           time passes. (Vercel Hobby plan limitation; upgrade to Pro for more frequent checks.)

@@ -12,7 +12,7 @@ function styleFor(v: VerdictChange): { bg: string; text: string; border: string;
     case 'improved':
       return { bg: 'bg-green-950/40', text: 'text-green-300', border: 'border-green-900/60', icon: '↑', label: 'Improved' }
     case 'unchanged':
-      return { bg: 'bg-gray-800/60', text: 'text-gray-300', border: 'border-gray-700/60', icon: '→', label: 'Unchanged' }
+      return { bg: 'bg-surface-raised/60', text: 'text-gray-300', border: 'border-strong/60', icon: '→', label: 'Unchanged' }
     case 'declined':
       return { bg: 'bg-amber-950/40', text: 'text-amber-200', border: 'border-amber-900/60', icon: '↓', label: 'Declined' }
     case 'complete_reversal':
@@ -39,9 +39,9 @@ export function VerdictChangeBadge({
       role="status"
       aria-label={`Verdict ${s.label.toLowerCase()} from ${prev} out of 10 to ${curr} out of 10`}
     >
-      <span className="text-xs font-medium text-gray-400 uppercase tracking-widest">Initial</span>
-      <span className="text-sm font-black tabular-nums text-gray-200">{prev}<span className="text-xs text-gray-500">/10</span></span>
-      <span aria-hidden className="text-gray-500">→</span>
+      <span className="text-xs font-medium text-prose-muted uppercase tracking-widest">Initial</span>
+      <span className="text-sm font-black tabular-nums text-prose">{prev}<span className="text-xs text-prose-faint">/10</span></span>
+      <span aria-hidden className="text-prose-faint">→</span>
       <span className="text-xs font-medium uppercase tracking-widest">{milestoneLabel}</span>
       <span className="text-sm font-black tabular-nums">{curr}<span className="text-xs opacity-60">/10</span></span>
       <span className={`text-sm font-bold ml-1`} aria-hidden>{s.icon}</span>

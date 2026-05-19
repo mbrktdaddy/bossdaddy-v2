@@ -82,7 +82,7 @@ export default async function GuideCategoryPage({ params }: Props) {
               href={`/guides/category/${c.slug}`}
               className={`${PILL_BASE} ${c.slug === slug ? PILL_ACTIVE : PILL_INACTIVE}`}
             >
-              <CategoryIcon slug={c.slug} className="w-4 h-4 text-orange-500" />
+              <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
               <span>{c.label}</span>
             </Link>
           ))}
@@ -90,12 +90,12 @@ export default async function GuideCategoryPage({ params }: Props) {
 
         {/* Category header */}
         <div className="mb-10">
-          <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-          <p className="flex items-center gap-1.5 text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">
-            <CategoryIcon slug={cat.slug} className="w-4 h-4 text-orange-500" /> Guides
+          <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+          <p className="flex items-center gap-1.5 text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">
+            <CategoryIcon slug={cat.slug} className="w-4 h-4 text-accent-text" /> Guides
           </p>
           <h1 className="text-3xl md:text-4xl font-black mb-4">{cat.label}</h1>
-          <p className="text-gray-400 max-w-2xl leading-relaxed">{cat.description}</p>
+          <p className="text-prose-muted max-w-2xl leading-relaxed">{cat.description}</p>
         </div>
 
         {/* Guide grid */}
@@ -105,7 +105,7 @@ export default async function GuideCategoryPage({ params }: Props) {
               <Link
                 key={g.id}
                 href={`/guides/${g.slug}`}
-                className="group bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 hover:border-orange-900/40 hover:-translate-y-0.5 transition-all"
+                className="group bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 hover:border-accent-border/40 hover:-translate-y-0.5 transition-all"
               >
                 {g.image_url ? (
                   <div className="relative w-full h-48">
@@ -118,29 +118,29 @@ export default async function GuideCategoryPage({ params }: Props) {
                     />
                   </div>
                 ) : (
-                  <div className="w-full h-48 bg-gray-800 flex items-center justify-center">
-                    <CategoryIcon slug={cat.slug} className="w-8 h-8 text-orange-500" />
+                  <div className="w-full h-48 bg-surface-raised flex items-center justify-center">
+                    <CategoryIcon slug={cat.slug} className="w-8 h-8 text-accent-text" />
                   </div>
                 )}
                 <div className="p-5 space-y-2">
-                  <h2 className="font-black text-base leading-snug group-hover:text-orange-400 transition-colors line-clamp-2">
+                  <h2 className="font-black text-base leading-snug group-hover:text-accent-text-soft transition-colors line-clamp-2">
                     {g.title}
                   </h2>
                   {g.excerpt && (
-                    <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">{g.excerpt}</p>
+                    <p className="text-sm text-prose-faint line-clamp-2 leading-relaxed">{g.excerpt}</p>
                   )}
                   {g.reading_time_minutes && (
-                    <p className="text-xs text-gray-600">{g.reading_time_minutes} min read</p>
+                    <p className="text-xs text-prose-faint">{g.reading_time_minutes} min read</p>
                   )}
                 </div>
               </Link>
             ))}
           </div>
         ) : (
-          <div className="text-center py-24 bg-gray-900/40 rounded-2xl">
-            <CategoryIcon slug={cat.slug} className="w-10 h-10 text-orange-500 mb-4 mx-auto" />
-            <p className="text-gray-400 text-lg font-semibold mb-2">No {cat.label} guides yet.</p>
-            <p className="text-gray-600 text-sm">Check back soon — the first one is in progress.</p>
+          <div className="text-center py-24 bg-surface/40 rounded-2xl">
+            <CategoryIcon slug={cat.slug} className="w-10 h-10 text-accent-text mb-4 mx-auto" />
+            <p className="text-prose-muted text-lg font-semibold mb-2">No {cat.label} guides yet.</p>
+            <p className="text-prose-faint text-sm">Check back soon — the first one is in progress.</p>
           </div>
         )}
 

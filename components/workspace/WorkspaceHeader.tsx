@@ -14,7 +14,7 @@ export function WorkspaceHeader({ backHref, backLabel = 'Back', title, subtitle,
     <div className="mb-6">
       <Link
         href={backHref}
-        className="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-white transition-colors mb-3"
+        className="inline-flex items-center gap-2 text-xs text-prose-faint hover:text-white transition-colors mb-3"
       >
         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -24,7 +24,7 @@ export function WorkspaceHeader({ backHref, backLabel = 'Back', title, subtitle,
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="min-w-0 flex-1">
           <h1 className="text-xl sm:text-2xl font-black leading-tight line-clamp-2 sm:line-clamp-none">{title}</h1>
-          {subtitle && <p className="text-sm text-gray-500 mt-1 line-clamp-1 sm:line-clamp-none">{subtitle}</p>}
+          {subtitle && <p className="text-sm text-prose-faint mt-1 line-clamp-1 sm:line-clamp-none">{subtitle}</p>}
         </div>
         {rightSlot && <div className="shrink-0">{rightSlot}</div>}
       </div>

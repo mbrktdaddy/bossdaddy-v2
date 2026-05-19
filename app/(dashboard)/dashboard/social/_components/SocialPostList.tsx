@@ -36,7 +36,7 @@ export default function SocialPostList({ posts: initial, charLimit, sourceLinks,
 
       {/* Posts */}
       {posts.length === 0 ? (
-        <div className="text-center py-16 text-gray-600">
+        <div className="text-center py-16 text-prose-faint">
           <p className="text-sm">No posts yet. Hit Generate to create your first one.</p>
         </div>
       ) : (

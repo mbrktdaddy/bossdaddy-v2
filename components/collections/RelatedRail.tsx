@@ -37,10 +37,10 @@ export default function RelatedRail({
   if (!items || items.length === 0) return null
 
   return (
-    <section id={id} aria-label={heading} className="mt-14 pt-10 border-t border-gray-800/60">
+    <section id={id} aria-label={heading} className="mt-14 pt-10 border-t border-soft/60">
       <div className="mb-6">
-        <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">{eyebrow}</p>
+        <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">{eyebrow}</p>
         <h2 className="text-2xl font-black text-white leading-tight">{heading}</h2>
       </div>
 
@@ -69,31 +69,31 @@ function RelatedCard({ item, className }: { item: RelatedItem; className?: strin
   return (
     <Link
       href={href}
-      className={`group flex flex-col bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-md shadow-black/30 hover:border-orange-900/40 hover:shadow-lg hover:shadow-black/50 hover:-translate-y-0.5 transition-all ${className ?? ''}`}
+      className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-md shadow-black/30 hover:border-accent-border/40 hover:shadow-lg hover:shadow-black/50 hover:-translate-y-0.5 transition-all ${className ?? ''}`}
     >
-      <div className="relative aspect-video bg-gray-950">
+      <div className="relative aspect-video bg-surface-sunken">
         {item.hero_image_url ? (
           <Image src={item.hero_image_url} alt={item.title} fill className="object-cover" sizes="(max-width: 640px) 256px, (max-width: 1024px) 50vw, 33vw" />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-orange-500/30">
+          <div className="absolute inset-0 flex items-center justify-center text-accent-text/30">
             <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5zM13.5 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5z" />
             </svg>
           </div>
         )}
-        <span className="absolute top-2 left-2 inline-flex items-center gap-1 bg-gray-950/85 backdrop-blur border border-gray-800 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-orange-400">
+        <span className="absolute top-2 left-2 inline-flex items-center gap-1 bg-surface-sunken/85 backdrop-blur border border-soft rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-accent-text-soft">
           {meta.icon}
           {meta.label}
         </span>
       </div>
       <div className="p-4 flex-1 flex flex-col">
-        <p className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors leading-snug line-clamp-2 mb-1">
+        <p className="text-sm font-bold text-white group-hover:text-accent-text-soft transition-colors leading-snug line-clamp-2 mb-1">
           {item.title}
         </p>
         {item.description && (
-          <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed flex-1">{item.description}</p>
+          <p className="text-xs text-prose-faint line-clamp-2 leading-relaxed flex-1">{item.description}</p>
         )}
-        <p className="mt-3 text-[10px] text-gray-500 uppercase tracking-widest font-semibold group-hover:text-orange-400 transition-colors">
+        <p className="mt-3 text-[10px] text-prose-faint uppercase tracking-widest font-semibold group-hover:text-accent-text-soft transition-colors">
           Read →
         </p>
       </div>

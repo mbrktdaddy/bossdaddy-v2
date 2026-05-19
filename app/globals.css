@@ -53,6 +53,36 @@
   --color-gray-600: #757580;
   --color-gray-500: #8e8e96;
   --color-gray-400: #b8b8c0;
+
+  /* ── Semantic role tokens ─────────────────────────────────────────────
+     Components must consume these, not raw shades.
+     Remapping a visual shifts site-wide; policing raw classes is now linting.
+     ─────────────────────────────────────────────────────────────────── */
+
+  /* Accent / orange roles */
+  --color-accent:           var(--bd-orange);          /* bg-accent, border-accent */
+  --color-accent-hover:     var(--bd-orange-light);    /* hover:bg-accent-hover */
+  --color-accent-text:      var(--bd-orange-light);    /* text-accent-text — links, inline */
+  --color-accent-text-soft: #e87030;                   /* text-accent-text-soft — on dark */
+  --color-eyebrow:          var(--bd-orange-light);    /* text-eyebrow — xs uppercase labels */
+  --color-card-title:       var(--bd-orange-light);    /* text-card-title — card h3 */
+  --color-accent-border:    #a34400;                   /* border-accent-border/60 — brand borders */
+  --color-accent-tint:      #3d1a00;                   /* bg-accent-tint/40 — brand washes */
+
+  /* Surface roles */
+  --color-surface:          var(--bd-surface);         /* bg-surface — card / panel */
+  --color-surface-raised:   var(--bd-surface-raised);  /* bg-surface-raised — hover / elevated */
+  --color-surface-sunken:   var(--bd-bg);              /* bg-surface-sunken — wells, page bg */
+
+  /* Prose roles */
+  --color-prose:            var(--bd-text);            /* text-prose — body text */
+  --color-prose-muted:      var(--bd-text-muted);      /* text-prose-muted — captions */
+  --color-prose-faint:      var(--bd-text-faint);      /* text-prose-faint — timestamps */
+
+  /* Edge roles — defined as colors (not @utility) so border-soft/60 opacity works.
+     Side-effect utilities text-soft/bg-soft/etc. exist but are unused. */
+  --color-soft:             var(--bd-border);          /* border-soft — subtle dividers */
+  --color-strong:           #404040;                   /* border-strong — inputs, prominent */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -156,4 +186,98 @@ h1, h2, h3, h4 {
 /* ── Code blocks in review/article body — scroll wide blocks, not the page ── */
 .bd-editorial pre {
   overflow-x: auto;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Modern Palette Experiment — 2026-05-19 (slightly-warm neutral, premium feel)
+   Activate by setting <html data-palette="modern">.
+   Apple / Linear / Vercel / Huckberry territory — quiet gallery, crisp edges,
+   orange does more work against neutral. Cream tokens stay as editorial accent.
+   ───────────────────────────────────────────────────────────────────────── */
+:root[data-palette="modern"] {
+  --background: #0e0e10;
+  --foreground: #f4f4f5;
+
+  --bd-bg: #0e0e10;
+  --bd-surface: #18181b;
+  --bd-surface-raised: #27272a;
+  --bd-border: #3f3f46;
+
+  --bd-text: #f4f4f5;
+  --bd-text-muted: #a1a1aa;
+  --bd-text-faint: #71717a;
+
+  /* Cream stays — editorial accent against neutral dark (gift-guide hero, pull-quotes) */
+  --bd-paper: #fff4d6;
+  --bd-paper-muted: #e5d1ca;
+
+  /* Tailwind neutral scale → zinc-derived (slightly warm neutral) */
+  --color-neutral-50:  #fafafa;
+  --color-neutral-100: #f4f4f5;
+  --color-neutral-200: #e4e4e7;
+  --color-neutral-300: #d4d4d8;
+  --color-neutral-400: #a1a1aa;
+  --color-neutral-500: #71717a;
+  --color-neutral-600: #52525b;
+  --color-neutral-700: #3f3f46;
+  --color-neutral-800: #27272a;
+  --color-neutral-900: #18181b;
+  --color-neutral-950: #0e0e10;
+
+  /* Tailwind gray scale — same neutral approach */
+  --color-gray-400: #a1a1aa;
+  --color-gray-500: #71717a;
+  --color-gray-600: #52525b;
+  --color-gray-700: #3f3f46;
+  --color-gray-800: #27272a;
+  --color-gray-900: #18181b;
+  --color-gray-950: #0e0e10;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Warm Palette Experiment — 2026-05-19 (woodsy / mahogany — currently paused)
+   Activate by setting <html data-palette="warm">.
+   Kept for A/B comparison against modern. Delete when modern is promoted.
+   ───────────────────────────────────────────────────────────────────────── */
+:root[data-palette="warm"] {
+  /* body{} consumes these */
+  --background: #100c07;
+  --foreground: #f5efe4;
+
+  /* Semantic surface tokens */
+  --bd-bg: #100c07;
+  --bd-surface: #1a1411;
+  --bd-surface-raised: #241c17;
+  --bd-border: #2e251f;
+
+  --bd-text: #f5efe4;
+  --bd-text-muted: #aaa195;
+  --bd-text-faint: #756a5d;
+
+  /* Cream — brightened toward SR006's buttery #fff9e6 / peach #e5d1ca */
+  --bd-paper: #fff4d6;
+  --bd-paper-muted: #e5d1ca;
+
+  /* Tailwind neutral scale (default = cool gray) → warm brown undertone.
+     This is what shifts the site visually — most components use bg-neutral-*. */
+  --color-neutral-50:  #f8f4eb;
+  --color-neutral-100: #ede5d3;
+  --color-neutral-200: #d8ccb5;
+  --color-neutral-300: #beb09a;
+  --color-neutral-400: #95897b;
+  --color-neutral-500: #756a5d;
+  --color-neutral-600: #4d463e;
+  --color-neutral-700: #383128;
+  --color-neutral-800: #241c17;
+  --color-neutral-900: #1a1411;
+  --color-neutral-950: #100c07;
+
+  /* Tailwind gray scale — warm to match (existing values are cool-neutral) */
+  --color-gray-400: #beb09a;
+  --color-gray-500: #8e8378;
+  --color-gray-600: #756a5d;
+  --color-gray-700: #383128;
+  --color-gray-800: #241c17;
+  --color-gray-900: #1a1411;
+  --color-gray-950: #100c07;
 }

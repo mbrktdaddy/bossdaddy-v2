@@ -21,7 +21,7 @@ import { PrimaryProductPanel } from '@/components/workspace/PrimaryProductPanel'
 
 const InlineMediaPanel = dynamic(
   () => import('@/components/workspace/InlineMediaPanel').then((m) => ({ default: m.InlineMediaPanel })),
-  { ssr: false, loading: () => <div className="h-32 bg-gray-950 border border-gray-800 rounded-xl animate-pulse" /> },
+  { ssr: false, loading: () => <div className="h-32 bg-surface-sunken border border-soft rounded-xl animate-pulse" /> },
 )
 import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader'
 import { WorkspaceToolbar } from '@/components/workspace/WorkspaceToolbar'
@@ -307,8 +307,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
 
         {/* ── FOLLOW-UP CONTEXT (only when this review is itself a follow-up) ── */}
         {isFollowup && (
-          <div className="bg-orange-950/30 border border-orange-900/40 rounded-2xl p-4 sm:p-5">
-            <p className="text-xs text-orange-400 uppercase tracking-widest font-semibold mb-2">
+          <div className="bg-accent-tint/30 border border-accent-border/40 rounded-2xl p-4 sm:p-5">
+            <p className="text-xs text-accent-text-soft uppercase tracking-widest font-semibold mb-2">
               Follow-up Review
             </p>
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-3 text-sm">
@@ -316,24 +316,24 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                 {review.milestone_label ?? 'Update'}
               </span>
               {review.milestone_days != null && (
-                <span className="text-gray-400">{review.milestone_days} days after the original</span>
+                <span className="text-prose-muted">{review.milestone_days} days after the original</span>
               )}
               {review.previous_rating != null && (
-                <span className="text-gray-400">
+                <span className="text-prose-muted">
                   · Original verdict {Number(review.previous_rating).toFixed(1)}/10
                 </span>
               )}
             </div>
 
             {parent ? (
-              <p className="text-xs text-gray-400 mb-4">
+              <p className="text-xs text-prose-muted mb-4">
                 Updating:{' '}
                 {parent.slug ? (
                   <a
                     href={`/reviews/${parent.slug}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-orange-400 hover:text-orange-300 underline underline-offset-2"
+                    className="text-accent-text-soft hover:text-orange-300 underline underline-offset-2"
                   >
                     {parent.title}
                   </a>
@@ -342,13 +342,13 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                 )}
                 <a
                   href={`/dashboard/reviews/${parent.id}`}
-                  className="ml-2 text-gray-500 hover:text-gray-300"
+                  className="ml-2 text-prose-faint hover:text-gray-300"
                 >
                   (open original workspace →)
                 </a>
               </p>
             ) : (
-              <p className="text-xs text-gray-500 italic mb-4">
+              <p className="text-xs text-prose-faint italic mb-4">
                 Original review unavailable — it may have been deleted.
               </p>
             )}
@@ -370,8 +370,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                       onClick={() => setVerdictChange(active ? null : val)}
                       className={`px-3 py-2.5 min-h-[44px] rounded-lg text-sm font-semibold border transition-colors ${
                         active
-                          ? 'bg-orange-600 border-orange-500 text-white'
-                          : 'bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800'
+                          ? 'bg-accent border-accent text-white'
+                          : 'bg-surface border-strong text-gray-300 hover:bg-surface-raised'
                       }`}
                     >
                       <span className="mr-1.5">{icon}</span>{label}
@@ -379,7 +379,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                   )
                 })}
               </div>
-              <p className="mt-2 text-xs text-gray-600">
+              <p className="mt-2 text-xs text-prose-faint">
                 Editorial judgment — drives the badge color on the public timeline. Tap again to clear.
               </p>
             </div>
@@ -387,7 +387,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         )}
 
         {/* ── STORY ────────────────────────────────────────────────────── */}
-        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold">Story</p>
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Story</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -396,7 +396,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
               type="text"
               value={productName}
               onChange={(e) => setProductName(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
             />
           </div>
           <div>
@@ -404,7 +404,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
             >
               {CATEGORIES.map(c => <option key={c.slug} value={c.slug}>{c.icon} {c.label}</option>)}
             </select>
@@ -417,24 +417,24 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
           />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm text-gray-300 mb-1.5">Overall Rating</label>
-            <div className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg flex items-baseline gap-1.5 min-h-[42px]">
+            <div className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg flex items-baseline gap-1.5 min-h-[42px]">
               {computedRating != null ? (
                 <>
-                  <span className="text-xl font-black text-orange-400 tabular-nums">{computedRating.toFixed(2)}</span>
-                  <span className="text-sm font-semibold text-gray-500">/10</span>
+                  <span className="text-xl font-black text-accent-text-soft tabular-nums">{computedRating.toFixed(2)}</span>
+                  <span className="text-sm font-semibold text-prose-faint">/10</span>
                 </>
               ) : (
-                <span className="text-xs text-gray-500 italic">Set all 4 sub-scores below</span>
+                <span className="text-xs text-prose-faint italic">Set all 4 sub-scores below</span>
               )}
             </div>
-            <p className="mt-1 text-xs text-gray-600">Computed from the 4 sub-scores. Adjust those to change.</p>
+            <p className="mt-1 text-xs text-prose-faint">Computed from the 4 sub-scores. Adjust those to change.</p>
           </div>
           <div className="sm:col-span-2">
             <label className="block text-sm text-gray-300 mb-1.5">Excerpt</label>
@@ -442,15 +442,15 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
               value={excerpt}
               onChange={(e) => setExcerpt(e.target.value)}
               rows={2}
-              className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
             />
           </div>
         </div>
 
         {/* ── Your Experience ───────────────────────────────────────────── */}
-        <div className="pt-4 border-t border-gray-800/60">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Your Experience</p>
-          <p className="text-xs text-gray-600 mb-3">Backfill testing context — used to drive future AI refines and stored on the review.</p>
+        <div className="pt-4 border-t border-soft/60">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Your Experience</p>
+          <p className="text-xs text-prose-faint mb-3">Backfill testing context — used to drive future AI refines and stored on the review.</p>
           <div className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
@@ -458,7 +458,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                 <select
                   value={testingDuration}
                   onChange={(e) => setTestingDuration(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
                 >
                   <option value="">— not set —</option>
                   {TESTING_DURATION_OPTIONS.map((o) => (
@@ -475,10 +475,10 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                   value={pricePaidCents}
                   onChange={(e) => setPricePaidCents(e.target.value.replace(/\D/g, ''))}
                   placeholder="e.g. 2999 = $29.99"
-                  className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
                 />
                 {pricePaidCents && !isNaN(parseInt(pricePaidCents, 10)) && (
-                  <p className="mt-1 text-xs text-orange-400">${(parseInt(pricePaidCents, 10) / 100).toFixed(2)}</p>
+                  <p className="mt-1 text-xs text-accent-text-soft">${(parseInt(pricePaidCents, 10) / 100).toFixed(2)}</p>
                 )}
               </div>
             </div>
@@ -490,7 +490,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                 maxLength={300}
                 rows={2}
                 placeholder="e.g. Built a backyard deck over 3 weekends — pilot holes, screws, mixing grout."
-                className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+                className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
               />
             </div>
             <div>
@@ -501,16 +501,16 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                 maxLength={300}
                 rows={2}
                 placeholder="e.g. Battery lasted the entire weekend — never had to stop and charge."
-                className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+                className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
               />
             </div>
           </div>
         </div>
 
         {/* ── Verdict Breakdown ────────────────────────────────────────── */}
-        <div className="pt-4 border-t border-gray-800/60">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Verdict Breakdown</p>
-          <p className="text-xs text-gray-600 mb-3">Four 1–10 sub-scores that defend the overall rating, plus the honest re-buy signal. All render on the public Verdict Card.</p>
+        <div className="pt-4 border-t border-soft/60">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Verdict Breakdown</p>
+          <p className="text-xs text-prose-faint mb-3">Four 1–10 sub-scores that defend the overall rating, plus the honest re-buy signal. All render on the public Verdict Card.</p>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {([
@@ -524,7 +524,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                 <select
                   value={value ?? ''}
                   onChange={(e) => setter(e.target.value === '' ? null : Number(e.target.value))}
-                  className="w-full px-3 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                  className="w-full px-3 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover text-sm"
                 >
                   <option value="">—</option>
                   {[1,2,3,4,5,6,7,8,9,10].map((n) => (
@@ -551,8 +551,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                     onClick={() => setWouldRebuy(val)}
                     className={`px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-semibold border transition-colors ${
                       active
-                        ? 'bg-orange-600 border-orange-500 text-white'
-                        : 'bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800'
+                        ? 'bg-accent border-accent text-white'
+                        : 'bg-surface border-strong text-gray-300 hover:bg-surface-raised'
                     }`}
                   >
                     {label}
@@ -564,8 +564,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         </div>
 
         {/* Tags */}
-        <div className="pt-4 border-t border-gray-800/60">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">Tags</p>
+        <div className="pt-4 border-t border-soft/60">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Tags</p>
           <TagPicker selected={tags} onChange={setTags} />
         </div>
 
@@ -617,26 +617,26 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
             onChange={setContent}
             targetWords={CATEGORIES.find(c => c.slug === category)?.targetWords}
           />
-          <p className="mt-1.5 text-xs text-gray-600">
-            Primary CTA is set via Product &amp; Monetization below. Use <code className="text-orange-400">[[BUY:product-slug]]</code> inline for mid-article mentions — resolves to a link on save.
+          <p className="mt-1.5 text-xs text-prose-faint">
+            Primary CTA is set via Product &amp; Monetization below. Use <code className="text-accent-text-soft">[[BUY:product-slug]]</code> inline for mid-article mentions — resolves to a link on save.
           </p>
         </div>
 
         {/* ── CONTENT BLOCKS ───────────────────────────────────────────── */}
-        <div className="pt-6 border-t border-gray-800/60">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Content Blocks</p>
-          <p className="text-xs text-gray-600 mb-4">These render as structured UI elements on the public page — not prose. Generated automatically by AI drafts; edit freely.</p>
+        <div className="pt-6 border-t border-soft/60">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Content Blocks</p>
+          <p className="text-xs text-prose-faint mb-4">These render as structured UI elements on the public page — not prose. Generated automatically by AI drafts; edit freely.</p>
           <div className="space-y-6">
 
             {/* TL;DR */}
             <div>
-              <label className="block text-sm text-gray-300 mb-1.5">TL;DR <span className="text-gray-600 font-normal">— 2–3 sentence skimmer summary</span></label>
+              <label className="block text-sm text-gray-300 mb-1.5">TL;DR <span className="text-prose-faint font-normal">— 2–3 sentence skimmer summary</span></label>
               <textarea
                 value={tldr}
                 onChange={(e) => setTldr(e.target.value)}
                 rows={3}
                 placeholder="e.g. The Enfamil Enspire Ready-to-Feed is the easiest formula I've ever used at 4 AM. The nutritional profile is the closest thing to breast milk on the market, and our daughter took to it immediately after rejecting two other brands. The price is steep, but for tired dads doing solo feedings, it's worth it."
-                className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-y text-sm"
+                className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-y text-sm"
               />
             </div>
 
@@ -647,7 +647,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                 items={keyTakeaways}
                 onChange={setKeyTakeaways}
                 placeholder="e.g. Zero prep at 4 AM — crack and pour"
-                accent="text-orange-400"
+                accent="text-accent-text-soft"
               />
               <ListEditor
                 label="Best For"
@@ -672,45 +672,45 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                 <button
                   type="button"
                   onClick={() => setFaqs([...faqs, { question: '', answer: '' }])}
-                  className="text-xs text-orange-400 hover:text-orange-300 transition-colors"
+                  className="text-xs text-accent-text-soft hover:text-orange-300 transition-colors"
                 >
                   + Add question
                 </button>
               </div>
               <div className="space-y-3">
                 {faqs.map((faq, i) => (
-                  <div key={i} className="bg-gray-900 border border-gray-800 rounded-xl p-3 space-y-2">
+                  <div key={i} className="bg-surface border border-soft rounded-xl p-3 space-y-2">
                     <div className="flex items-start gap-2">
-                      <span className="text-xs text-gray-600 mt-2 shrink-0">Q</span>
+                      <span className="text-xs text-prose-faint mt-2 shrink-0">Q</span>
                       <input
                         type="text"
                         value={faq.question}
                         onChange={(e) => setFaqs(faqs.map((f, j) => j === i ? { ...f, question: e.target.value } : f))}
                         placeholder="e.g. Is Enfamil Enspire Ready-to-Feed worth the price?"
-                        className="flex-1 px-3 py-1.5 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                        className="flex-1 px-3 py-1.5 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover"
                       />
                       <button
                         type="button"
                         onClick={() => setFaqs(faqs.filter((_, j) => j !== i))}
-                        className="text-gray-600 hover:text-red-400 transition-colors text-xs mt-2"
+                        className="text-prose-faint hover:text-red-400 transition-colors text-xs mt-2"
                       >
                         ✕
                       </button>
                     </div>
                     <div className="flex items-start gap-2">
-                      <span className="text-xs text-gray-600 mt-2 shrink-0">A</span>
+                      <span className="text-xs text-prose-faint mt-2 shrink-0">A</span>
                       <textarea
                         value={faq.answer}
                         onChange={(e) => setFaqs(faqs.map((f, j) => j === i ? { ...f, answer: e.target.value } : f))}
                         placeholder="2–3 sentences. Direct, specific, first-person."
                         rows={2}
-                        className="flex-1 px-3 py-1.5 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 resize-none"
+                        className="flex-1 px-3 py-1.5 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none"
                       />
                     </div>
                   </div>
                 ))}
                 {faqs.length === 0 && (
-                  <p className="text-xs text-gray-600 italic">No FAQs yet. Add questions readers commonly search for — great for SEO.</p>
+                  <p className="text-xs text-prose-faint italic">No FAQs yet. Add questions readers commonly search for — great for SEO.</p>
                 )}
               </div>
             </div>
@@ -719,11 +719,11 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         </div>
 
         {/* ── MEDIA ────────────────────────────────────────────────────── */}
-        <div className="pt-6 border-t border-gray-800/60">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Media</p>
+        <div className="pt-6 border-t border-soft/60">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Media</p>
           <div className="space-y-4">
-            <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4">
-              <p className="text-xs text-gray-500 font-medium uppercase tracking-widest mb-3">Product / hero image</p>
+            <div className="bg-surface/50 border border-soft rounded-2xl p-4">
+              <p className="text-xs text-prose-faint font-medium uppercase tracking-widest mb-3">Product / hero image</p>
               <HeroImagePanel
                 imageUrl={imageUrl}
                 onChange={setImageUrl}
@@ -736,8 +736,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                 initialPrompt={heroPromptSuggestion}
               />
             </div>
-            <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4">
-              <p className="text-xs text-gray-500 font-medium uppercase tracking-widest mb-3">Inline images</p>
+            <div className="bg-surface/50 border border-soft rounded-2xl p-4">
+              <p className="text-xs text-prose-faint font-medium uppercase tracking-widest mb-3">Inline images</p>
               <InlineMediaPanel
                 content={content}
                 onChangeContent={setContent}
@@ -749,8 +749,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         </div>
 
         {/* ── COMMERCE ─────────────────────────────────────────────────── */}
-        <div className="pt-6 border-t border-gray-800/60">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Commerce</p>
+        <div className="pt-6 border-t border-soft/60">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Commerce</p>
           <div className="space-y-6">
             <PrimaryProductPanel value={productSlug} onChange={setProductSlug} />
             <ProductLinkPanel
@@ -758,7 +758,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
               onChangeContent={setContent}
             />
             {hasAffiliate && (
-              <div className="bg-orange-950/40 border border-orange-900/40 rounded-xl p-4">
+              <div className="bg-accent-tint/40 border border-accent-border/40 rounded-xl p-4">
                 <p className="text-sm text-orange-300 font-semibold mb-2">⚠ Affiliate links detected</p>
                 <label className="flex items-start gap-2 text-sm text-gray-300 cursor-pointer">
                   <input
@@ -769,7 +769,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                   />
                   <span>
                     I confirm this review contains affiliate links. FTC disclosure will be auto-inserted before publishing.
-                    <a href="/affiliate-disclosure" target="_blank" className="ml-1 text-orange-400 hover:text-orange-300">Learn more →</a>
+                    <a href="/affiliate-disclosure" target="_blank" className="ml-1 text-accent-text-soft hover:text-orange-300">Learn more →</a>
                   </span>
                 </label>
               </div>
@@ -778,8 +778,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         </div>
 
         {/* ── DISTRIBUTION ─────────────────────────────────────────────── */}
-        <div className="pt-6 border-t border-gray-800/60">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Publish &amp; Distribute</p>
+        <div className="pt-6 border-t border-soft/60">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Publish &amp; Distribute</p>
           <div className="space-y-6">
             <SEOPanel
               metaTitle={metaTitle}
@@ -801,8 +801,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
 
             {/* Schedule follow-up — top-level published reviews only */}
             {!isFollowup && isPublished && review.is_visible && (
-              <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4">
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-widest mb-2">
+              <div className="bg-surface/50 border border-soft rounded-2xl p-4">
+                <p className="text-xs text-prose-faint font-medium uppercase tracking-widest mb-2">
                   Follow-up Reviews
                 </p>
                 <p className="text-sm text-gray-300 mb-1">
@@ -810,19 +810,19 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                     ? 'No follow-ups scheduled yet.'
                     : `${followupCount} follow-up${followupCount === 1 ? '' : 's'} already in the timeline.`}
                 </p>
-                <p className="text-xs text-gray-500 mb-3">
+                <p className="text-xs text-prose-faint mb-3">
                   A follow-up is a longform update — what changed, what you got wrong, would you buy it again.
                 </p>
                 {canScheduleFollowup ? (
                   <button
                     type="button"
                     onClick={() => setScheduleOpen(true)}
-                    className="px-4 py-2.5 min-h-[44px] rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold transition-colors"
+                    className="px-4 py-2.5 min-h-[44px] rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-semibold transition-colors"
                   >
                     + Schedule follow-up
                   </button>
                 ) : (
-                  <p className="text-xs text-gray-600 italic">
+                  <p className="text-xs text-prose-faint italic">
                     {parentAgeDays === null
                       ? 'Available once this review is published.'
                       : `Available in ${MIN_PARENT_AGE_DAYS - parentAgeDays} more day${MIN_PARENT_AGE_DAYS - parentAgeDays === 1 ? '' : 's'} (parent must be at least ${MIN_PARENT_AGE_DAYS} days old).`}
@@ -844,8 +844,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         </div>
 
         {/* ── ADMIN ────────────────────────────────────────────────────── */}
-        <div className="pt-6 border-t border-gray-800/60">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Admin</p>
+        <div className="pt-6 border-t border-soft/60">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Admin</p>
           <div className="space-y-6">
             <VersionHistoryPanel contentType="review" contentId={review.id} />
             <ModerationInfo
@@ -867,8 +867,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
           <p className="text-green-400 text-sm bg-green-950/40 border border-green-800/40 rounded-lg px-4 py-3">{actionMsg}</p>
         )}
 
-        <p className="text-xs text-gray-600">
-          ⌨ <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘S</kbd> save · <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘↵</kbd> publish · <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘Z</kbd> undo · <kbd className="px-1 py-0.5 bg-gray-800 rounded">⌘⇧Z</kbd> redo
+        <p className="text-xs text-prose-faint">
+          ⌨ <kbd className="px-1 py-0.5 bg-surface-raised rounded">⌘S</kbd> save · <kbd className="px-1 py-0.5 bg-surface-raised rounded">⌘↵</kbd> publish · <kbd className="px-1 py-0.5 bg-surface-raised rounded">⌘Z</kbd> undo · <kbd className="px-1 py-0.5 bg-surface-raised rounded">⌘⇧Z</kbd> redo
         </p>
 
       </div>{/* end editor column */}

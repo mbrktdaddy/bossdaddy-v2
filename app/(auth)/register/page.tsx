@@ -66,10 +66,10 @@ function RegisterForm() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
+    <main className="min-h-screen flex items-center justify-center bg-surface-sunken px-4">
       <div className="w-full max-w-sm">
         <h1 className="text-2xl font-bold text-white mb-2">Join the Crew</h1>
-        <p className="text-gray-400 mb-8 text-sm">Create your Boss Daddy account</p>
+        <p className="text-prose-muted mb-8 text-sm">Create your Boss Daddy account</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -83,7 +83,7 @@ function RegisterForm() {
               minLength={3}
               value={username}
               onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s/g, ''))}
-              className="w-full px-4 py-2.5 rounded-lg bg-gray-900 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
               placeholder="bossdad42"
             />
           </div>
@@ -98,7 +98,7 @@ function RegisterForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg bg-gray-900 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
               placeholder="you@example.com"
             />
           </div>
@@ -114,7 +114,7 @@ function RegisterForm() {
               minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg bg-gray-900 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
               placeholder="8+ characters"
             />
           </div>
@@ -124,7 +124,7 @@ function RegisterForm() {
               {error === 'already_exists' ? (
                 <p className="text-red-400">
                   An account with that email already exists.{' '}
-                  <Link href={`/login?next=${encodeURIComponent(redirectTo)}`} className="text-orange-400 hover:text-orange-300 font-semibold">
+                  <Link href={`/login?next=${encodeURIComponent(redirectTo)}`} className="text-accent-text-soft hover:text-orange-300 font-semibold">
                     Sign in instead →
                   </Link>
                 </p>
@@ -137,15 +137,15 @@ function RegisterForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 px-4 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white font-semibold rounded-lg transition-colors"
+            className="w-full py-2.5 px-4 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-semibold rounded-lg transition-colors"
           >
             {loading ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
+        <p className="mt-6 text-center text-sm text-prose-faint">
           Already have an account?{' '}
-          <Link href="/login" className="text-orange-400 hover:text-orange-300">
+          <Link href="/login" className="text-accent-text-soft hover:text-orange-300">
             Sign in
           </Link>
         </p>

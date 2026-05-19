@@ -87,8 +87,8 @@ export default async function BenchPage() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
       {/* Header */}
       <div className="mb-10">
-        <div className="inline-flex items-center gap-2 bg-orange-950/50 border border-orange-800/50 rounded-full px-4 py-1.5 text-xs text-orange-400 font-medium mb-4">
-          <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+        <div className="inline-flex items-center gap-2 bg-accent-tint/50 border border-accent-border/50 rounded-full px-4 py-1.5 text-xs text-accent-text-soft font-medium mb-4">
+          <span className="w-1.5 h-1.5 rounded-full bg-accent-hover animate-pulse" />
           Live Testing Pipeline
         </div>
         <h1 className="text-3xl sm:text-4xl font-black mb-3">
@@ -101,8 +101,8 @@ export default async function BenchPage() {
       </div>
 
       {!hasContent ? (
-        <div className="bg-gray-900/40 rounded-2xl p-12 text-center">
-          <p className="text-gray-500 font-semibold">Loading up the bench. Check back soon.</p>
+        <div className="bg-surface/40 rounded-2xl p-12 text-center">
+          <p className="text-prose-faint font-semibold">Loading up the bench. Check back soon.</p>
         </div>
       ) : (
         <div className="space-y-12">
@@ -137,9 +137,9 @@ export default async function BenchPage() {
             return (
               <section key={key}>
                 <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
                   <h2 className="text-lg font-black inline-flex items-center">
-                    {icon && <span className="text-orange-400">{icon}</span>}
+                    {icon && <span className="text-accent-text-soft">{icon}</span>}
                     {heading}
                   </h2>
                   <p className="text-xs text-[var(--bd-text-muted)] mt-0.5">{sub}</p>

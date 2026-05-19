@@ -106,7 +106,7 @@ export default async function HomePage() {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              'radial-gradient(ellipse 70% 60% at 50% -10%, rgba(204,85,0,0.18), transparent 70%), linear-gradient(180deg, rgba(204,85,0,0.10), transparent 70%)',
+              'radial-gradient(ellipse 70% 60% at 50% -10%, rgba(204,85,0,0.12), transparent 70%), linear-gradient(180deg, rgba(204,85,0,0.06), transparent 70%)',
           }}
         />
         <div className="relative max-w-6xl mx-auto px-6 py-16 md:py-24">
@@ -114,12 +114,12 @@ export default async function HomePage() {
             <div className="grid lg:grid-cols-[1fr_1.05fr] gap-10 lg:gap-14 items-center">
               {/* Copy column */}
               <div>
-                <p className="text-[11px] md:text-xs uppercase tracking-[0.3em] font-bold text-orange-500 mb-5">
+                <p className="text-[11px] md:text-xs uppercase tracking-[0.3em] font-bold text-accent-text mb-5">
                   Dad Like A BOSS.
                 </p>
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.05] tracking-tight mb-5 text-white">
                   Reviews, Guides, and Gear{' '}
-                  <span className="text-orange-500">for Boss Dads.</span>
+                  <span className="text-accent-text">for Boss Dads.</span>
                 </h1>
                 <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-8 max-w-xl">
                   Tested firsthand with my own money. No sponsors, no paid placements, no BS.
@@ -127,20 +127,20 @@ export default async function HomePage() {
                 <div className="flex flex-wrap items-center gap-3 mb-5">
                   <Link
                     href="/reviews"
-                    className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-2xl transition-colors"
+                    className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-2xl transition-colors"
                   >
                     See This Month&apos;s Top Picks →
                   </Link>
                   <Link
                     href="/guides"
-                    className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white font-semibold rounded-2xl transition-colors"
+                    className="px-6 py-3 bg-surface-raised hover:bg-gray-700 text-gray-300 hover:text-white font-semibold rounded-2xl transition-colors"
                   >
                     Browse Guides
                   </Link>
                 </div>
                 <Link
                   href="/about"
-                  className="inline-block text-sm text-orange-400 hover:text-orange-300 font-medium transition-colors"
+                  className="inline-block text-sm text-accent-text-soft hover:text-orange-300 font-medium transition-colors"
                 >
                   Read my story →
                 </Link>
@@ -149,10 +149,10 @@ export default async function HomePage() {
               {/* Featured review card — visual anchor with tactile depth */}
               <Link
                 href={`/reviews/${featuredReview.slug}`}
-                className="group block bg-gradient-to-br from-gray-900 to-gray-900/60 rounded-2xl overflow-hidden border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-xl shadow-black/40 hover:border-orange-900/40 hover:shadow-2xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200"
+                className="group block bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-white/[0.02] shadow-xl shadow-black/40 hover:border-accent-border/40 hover:shadow-2xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200"
               >
                 {featuredReview.image_url && (
-                  <div className="relative w-full aspect-[5/4] bg-gray-800">
+                  <div className="relative w-full aspect-[5/4] bg-surface-raised">
                     <Image
                       src={featuredReview.image_url}
                       alt={featuredReview.product_name}
@@ -161,7 +161,7 @@ export default async function HomePage() {
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                       sizes="(max-width: 1024px) 100vw, 520px"
                     />
-                    <span className="absolute top-4 left-4 bg-orange-600 text-white px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-black/40">
+                    <span className="absolute top-4 left-4 bg-accent text-white px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-black/40">
                       Editor&apos;s Pick · Top Rated
                     </span>
                     {(featuredReview.rating ?? 0) >= 8 && (
@@ -173,32 +173,32 @@ export default async function HomePage() {
                 )}
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-3 gap-3">
-                    <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
+                    <span className="text-xs font-medium text-eyebrow/80 uppercase tracking-widest bg-accent-tint/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
                       {featuredReview.product_name}
                     </span>
                     <RatingScore rating={featuredReview.rating ?? 0} />
                   </div>
-                  <h2 className="text-xl md:text-2xl font-black leading-tight text-white group-hover:text-orange-400 transition-colors mb-3">
+                  <h2 className="text-xl md:text-2xl font-black leading-tight text-white group-hover:text-accent-text-soft transition-colors mb-3">
                     {featuredReview.title}
                   </h2>
                   {featuredReview.excerpt && (
-                    <p className="text-gray-400 text-sm leading-relaxed line-clamp-2">
+                    <p className="text-prose-muted text-sm leading-relaxed line-clamp-2">
                       {featuredReview.excerpt}
                     </p>
                   )}
-                  <p className="text-sm text-orange-500 font-semibold mt-4">Read review →</p>
+                  <p className="text-sm text-accent-text font-semibold mt-4">Read review →</p>
                 </div>
               </Link>
             </div>
           ) : (
             // Fallback: centered text-only when no reviews exist yet
             <div className="max-w-3xl mx-auto text-center py-12">
-              <p className="text-[11px] md:text-xs uppercase tracking-[0.3em] font-bold text-orange-500 mb-5">
+              <p className="text-[11px] md:text-xs uppercase tracking-[0.3em] font-bold text-accent-text mb-5">
                 Dad Like A BOSS.
               </p>
               <h1 className="text-5xl md:text-7xl font-black leading-[0.95] tracking-tight mb-6 text-white">
                 Reviews, Guides, and Gear{' '}
-                <span className="text-orange-500">for Boss Dads.</span>
+                <span className="text-accent-text">for Boss Dads.</span>
               </h1>
               <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-8 max-w-2xl mx-auto">
                 Tested firsthand with my own money. No sponsors, no paid placements, no BS.
@@ -206,13 +206,13 @@ export default async function HomePage() {
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <Link
                   href="/reviews"
-                  className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-2xl transition-colors"
+                  className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-2xl transition-colors"
                 >
                   Browse Reviews
                 </Link>
                 <Link
                   href="/guides"
-                  className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white font-semibold rounded-2xl transition-colors"
+                  className="px-6 py-3 bg-surface-raised hover:bg-gray-700 text-gray-300 hover:text-white font-semibold rounded-2xl transition-colors"
                 >
                   Browse Guides
                 </Link>
@@ -222,12 +222,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ═══ MOVEMENT 1 — The Open (warm wash) ═══════════════════════════ */}
-      <div className="relative bg-gradient-to-b from-orange-950/[0.12] to-orange-950/[0.04]">
-        <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-orange-600/40" />
+      {/* Page runs on a single neutral dark canvas. Section rhythm comes
+          from typography, padding, and per-section accent ticks (the small
+          w-6 h-px bg-accent/60 line above each section h2). No bg washes —
+          the modern palette doesn't need them. */}
 
       {/* ── Trust strip ─────────────────────────────────────────────────── */}
-      <section className="relative border-b border-gray-800/60">
+      <section className="relative">
         <div className="relative max-w-6xl mx-auto px-6 py-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-4">
             <TrustBadge
@@ -274,14 +275,13 @@ export default async function HomePage() {
             assertion is right under the hero, not 4 sections deep where
             most mobile readers never reached it. This is the trust *proof*
             that backs the hero's "my own money, no sponsors" *promise*. */}
-      <section className="relative border-b border-gray-800/40">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-px bg-orange-600/40" />
+      <section className="relative">
         <div className="max-w-5xl mx-auto px-6 py-16 md:py-20">
-          <p className="text-[11px] md:text-xs text-orange-500 uppercase tracking-[0.3em] font-bold mb-4 text-center">— The Rules</p>
+          <p className="text-[11px] md:text-xs text-accent-text uppercase tracking-[0.3em] font-bold mb-4 text-center">— The Rules</p>
           <h2 className="text-3xl md:text-4xl font-black text-center text-white mb-4 leading-tight">
             Three rules. That&apos;s the whole standard.
           </h2>
-          <p className="text-gray-400 text-center mb-12 max-w-xl mx-auto text-sm md:text-base">
+          <p className="text-prose-muted text-center mb-12 max-w-xl mx-auto text-sm md:text-base">
             Why you can trust what you read here — and why I can tell you the truth without hedging.
           </p>
           <div className="grid md:grid-cols-3 gap-10 md:gap-12">
@@ -303,11 +303,11 @@ export default async function HomePage() {
               },
             ].map((rule) => (
               <div key={rule.n} className="text-center md:text-left">
-                <p className="text-5xl md:text-6xl font-black text-orange-500/30 mb-4 leading-none tabular-nums">
+                <p className="text-5xl md:text-6xl font-black text-accent-text/30 mb-4 leading-none tabular-nums">
                   {rule.n}
                 </p>
                 <p className="text-xl font-black text-white mb-3">{rule.title}</p>
-                <p className="text-gray-400 leading-relaxed text-sm max-w-sm mx-auto md:max-w-none md:mx-0">
+                <p className="text-prose-muted leading-relaxed text-sm max-w-sm mx-auto md:max-w-none md:mx-0">
                   {rule.body}
                 </p>
               </div>
@@ -316,26 +316,53 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── Categories — orientation moment after Rules establishes trust.
+            Quiet utility ribbon (single eyebrow + 8 pills) — content weight
+            matches visual weight. Placed before Recent Reviews so the reader
+            sees the BREADTH of coverage first, then enjoys the curated picks.
+            Gift-shoppers (wives/moms) can jump straight to their category
+            without scrolling through unrelated featured content. */}
+      <section className="relative">
+        <div className="relative max-w-6xl mx-auto px-6 py-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
+            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold whitespace-nowrap">
+              Pick your lane
+            </p>
+
+            {/* Mobile: horizontal scroll strip — break out of padded container,
+                restore padding inside per CLAUDE.md horizontal-scroll rule */}
+            <div className="sm:hidden -mx-6">
+              <div className="flex gap-2.5 overflow-x-auto px-6 pb-1 scrollbar-hide">
+                {CATEGORIES.map((cat) => (
+                  <CategoryPill key={cat.slug} slug={cat.slug} label={cat.shortLabel} />
+                ))}
+              </div>
+            </div>
+
+            {/* Desktop: wrap to fit, all 8 visible at once */}
+            <div className="hidden sm:flex flex-wrap gap-2 flex-1 justify-end">
+              {CATEGORIES.map((cat) => (
+                <CategoryPill key={cat.slug} slug={cat.slug} label={cat.shortLabel} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── Recent Reviews — asymmetric magazine grid (1 hero + 2 stacked) ─ */}
       {latestReviews && latestReviews.length > 0 && (
         <section className="relative">
-          <div
-            aria-hidden
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                'radial-gradient(ellipse 60% 50% at 50% 0%, rgba(204,85,0,0.10), transparent 60%)',
-            }}
-          />
           <div className="relative max-w-6xl mx-auto px-6 py-16">
-            <div className="flex items-end justify-between mb-8">
-              <div>
-                <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Recent Reviews</p>
-                <h2 className="text-2xl font-black text-white">Bought, tested, and Boss Daddy Approved</h2>
+            <div className="flex items-end justify-between mb-8 gap-4">
+              <div className="flex items-stretch gap-4 min-w-0">
+                <div className="w-[3px] bg-accent rounded-full shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-2">— Recent Reviews</p>
+                  <h2 className="text-2xl md:text-3xl font-black text-white leading-tight">Bought, tested, and Boss Daddy Approved</h2>
+                </div>
               </div>
-              <Link href="/reviews" className="text-sm text-orange-400 hover:text-orange-300 transition-colors">
-                View all
+              <Link href="/reviews" className="hidden sm:inline-flex items-center text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold shrink-0">
+                View all →
               </Link>
             </div>
 
@@ -347,13 +374,13 @@ export default async function HomePage() {
                   <Link
                     key={r.id}
                     href={`/reviews/${r.slug}`}
-                    className={`group flex flex-col bg-gradient-to-br from-gray-900 to-gray-900/60 rounded-2xl overflow-hidden border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-orange-900/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200 ${
+                    className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-accent-border/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200 ${
                       isHero ? 'lg:col-span-2 lg:row-span-2' : ''
                     }`}
                   >
                     {r.image_url && (
                       <div
-                        className={`relative w-full bg-gray-800 shrink-0 ${
+                        className={`relative w-full bg-surface-raised shrink-0 ${
                           isHero ? 'h-64 sm:h-80 lg:h-[420px]' : 'h-44'
                         }`}
                       >
@@ -378,13 +405,13 @@ export default async function HomePage() {
                     )}
                     <div className={`flex flex-col flex-1 ${isHero ? 'p-6 lg:p-7' : 'p-5'}`}>
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
+                        <span className="text-xs font-medium text-eyebrow/80 uppercase tracking-widest bg-accent-tint/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
                           {r.product_name}
                         </span>
                         <RatingScore rating={r.rating ?? 0} />
                       </div>
                       <h3
-                        className={`leading-snug group-hover:text-orange-400 transition-colors flex-1 ${
+                        className={`leading-snug group-hover:text-accent-text-soft transition-colors flex-1 ${
                           isHero ? 'text-xl md:text-2xl font-black text-white' : 'text-base font-semibold'
                         }`}
                       >
@@ -392,7 +419,7 @@ export default async function HomePage() {
                       </h3>
                       {r.excerpt && (
                         <p
-                          className={`text-gray-500 mt-2 ${
+                          className={`text-prose-faint mt-2 ${
                             isHero ? 'text-sm sm:text-base line-clamp-3' : 'text-sm line-clamp-2'
                           }`}
                         >
@@ -400,7 +427,7 @@ export default async function HomePage() {
                         </p>
                       )}
                       <div className="flex items-center justify-between mt-4 pt-4">
-                        <span className="text-xs text-gray-600">
+                        <span className="text-xs text-prose-faint">
                           {r.published_at
                             ? new Date(r.published_at).toLocaleDateString('en-US', {
                                 month: 'short',
@@ -409,7 +436,7 @@ export default async function HomePage() {
                               })
                             : ''}
                         </span>
-                        <span className="text-xs text-orange-500 font-medium">Read review</span>
+                        <span className="text-xs text-accent-text font-medium">Read review</span>
                       </div>
                     </div>
                   </Link>
@@ -425,16 +452,18 @@ export default async function HomePage() {
         <section className="relative">
           <div className="relative max-w-6xl mx-auto px-6 py-16">
             <div className="flex items-end justify-between mb-8 gap-4">
-              <div className="min-w-0">
-                <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">From The Vault</p>
-                <h2 className="text-2xl font-black text-white">Comparisons, kits, and curated picks</h2>
-                <p className="mt-2 text-sm text-gray-500">{LABELS.vault.tagline}</p>
+              <div className="flex items-stretch gap-4 min-w-0">
+                <div className="w-[3px] bg-accent rounded-full shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-2">— From The Vault</p>
+                  <h2 className="text-2xl md:text-3xl font-black text-white leading-tight">Comparisons, kits, and curated picks</h2>
+                  <p className="mt-2 text-sm text-prose-faint">{LABELS.vault.tagline}</p>
+                </div>
               </div>
               <Link
                 href="/vault"
                 title={LABELS.vault.tagline}
-                className="shrink-0 text-sm text-orange-400 hover:text-orange-300 transition-colors whitespace-nowrap"
+                className="hidden sm:inline-flex items-center text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold shrink-0 whitespace-nowrap"
               >
                 Open the Vault →
               </Link>
@@ -448,24 +477,24 @@ export default async function HomePage() {
                   <Link
                     key={`${card.collection_type}:${card.slug}`}
                     href={href}
-                    className="group flex flex-col bg-gradient-to-br from-gray-900 to-gray-900/60 rounded-2xl overflow-hidden border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-orange-900/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200"
+                    className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-accent-border/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200"
                   >
-                    <div className="relative aspect-video bg-gray-950">
+                    <div className="relative aspect-video bg-surface-sunken">
                       {card.hero_image_url ? (
                         <Image src={card.hero_image_url} alt={card.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
                       ) : (
-                        <div className="absolute inset-0 flex items-center justify-center text-orange-500/30">{meta.icon}</div>
+                        <div className="absolute inset-0 flex items-center justify-center text-accent-text/30">{meta.icon}</div>
                       )}
-                      <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-gray-950/85 backdrop-blur border border-gray-800 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-orange-400">
+                      <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-surface-sunken/85 backdrop-blur border border-soft rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-accent-text-soft">
                         {meta.label}
                       </span>
                     </div>
                     <div className="p-5 flex flex-col flex-1">
-                      <p className="text-base font-bold text-white group-hover:text-orange-400 transition-colors leading-snug mb-2 line-clamp-2">{card.title}</p>
+                      <p className="text-base font-bold text-white group-hover:text-accent-text-soft transition-colors leading-snug mb-2 line-clamp-2">{card.title}</p>
                       {card.description && (
-                        <p className="text-sm text-gray-500 leading-relaxed line-clamp-2 flex-1">{card.description}</p>
+                        <p className="text-sm text-prose-faint leading-relaxed line-clamp-2 flex-1">{card.description}</p>
                       )}
-                      <p className="mt-4 text-xs text-orange-500 font-semibold">Read →</p>
+                      <p className="mt-4 text-xs text-accent-text font-semibold">Read →</p>
                     </div>
                   </Link>
                 )
@@ -474,54 +503,6 @@ export default async function HomePage() {
           </div>
         </section>
       )}
-
-      </div>{/* ═══ End Movement 1 ═════════════════════════════════════════ */}
-
-      {/* ═══ MOVEMENT 2 — Voice & Browse (plain dark) ════════════════════ */}
-      <div className="relative bg-gray-950">
-        <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gray-800/60" />
-
-      {/* The Rules previously lived here in Movement 2 — moved up into
-          Movement 1 right after the hero so the strongest authority
-          statement is above the fold for the trust-questioning reader.
-          Categories now opens Movement 2. */}
-
-      {/* ── Categories — pill rail (utility nav, not a feature grid) ────
-          Reclaims ~500px of vertical scroll on mobile vs the prior 2×4 tile
-          grid. Treats category navigation as the editorial-ribbon utility it
-          actually is, not feature content. */}
-      <section className="relative">
-        <div className="relative max-w-6xl mx-auto px-6 py-10">
-          <div className="mb-6">
-            <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Browse</p>
-            <h2 className="text-2xl font-black">Pick your lane.</h2>
-          </div>
-
-          {/* Mobile: horizontal scroll strip — break out of the padded container
-              per CLAUDE.md horizontal-scroll rule, restore padding inside */}
-          <div className="sm:hidden -mx-6">
-            <div className="flex gap-2.5 overflow-x-auto px-6 pb-2 scrollbar-hide">
-              {CATEGORIES.map((cat) => (
-                <CategoryPill key={cat.slug} slug={cat.slug} label={cat.shortLabel} />
-              ))}
-            </div>
-          </div>
-
-          {/* Desktop: wrap to fit, all 8 visible at once */}
-          <div className="hidden sm:flex flex-wrap gap-2.5">
-            {CATEGORIES.map((cat) => (
-              <CategoryPill key={cat.slug} slug={cat.slug} label={cat.shortLabel} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      </div>{/* ═══ End Movement 2 ═════════════════════════════════════════ */}
-
-      {/* ═══ MOVEMENT 3 — Editorial Queue (sunken) ═══════════════════════ */}
-      <div className="relative bg-black/40">
-        <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gray-900" />
 
       {/* ── Latest Guides ──────────────────────────────────────────────── */}
       <Suspense fallback={<LatestGuidesSkeleton />}>
@@ -538,12 +519,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      </div>{/* ═══ End Movement 3 ═════════════════════════════════════════ */}
-
-      {/* ═══ MOVEMENT 4 — Action (warm wash ↗) ═══════════════════════════ */}
-      <div className="relative bg-gradient-to-b from-orange-950/[0.04] to-orange-950/[0.14]">
-        <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-orange-600/40" />
-
       {/* ── Merch strip ────────────────────────────────────────────────── */}
       <Suspense fallback={null}>
         <HomepageMerchStrip />
@@ -552,15 +527,16 @@ export default async function HomePage() {
       {/* ── Newsletter ──────────────────────────────────────────────────── */}
       <section id="crew" className="relative">
         <div className="relative max-w-6xl mx-auto px-6 py-16">
-          <div className="bg-gradient-to-br from-orange-950/40 to-gray-900 rounded-2xl shadow-xl shadow-black/40 px-8 py-12 text-center max-w-2xl mx-auto">
-            <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3 mx-auto" />
-            <p className="text-orange-400 text-xs font-semibold uppercase tracking-widest mb-3">
+          <div className="relative bg-gradient-to-br from-accent/[0.05] to-surface border border-soft/60 rounded-2xl shadow-xl shadow-black/40 px-8 py-12 text-center max-w-2xl mx-auto overflow-hidden">
+            {/* Confident left-edge accent — single orange treatment marks this as the CTA panel */}
+            <span aria-hidden className="absolute left-0 inset-y-6 w-0.5 bg-accent rounded-full" />
+            <p className="text-accent-text-soft text-xs font-semibold uppercase tracking-widest mb-3">
               Join the Boss Daddy Crew
             </p>
             <h2 className="text-2xl font-black text-white mb-3">
               Real Talk. Honest Reviews.<br />No BS Ever.
             </h2>
-            <p className="text-gray-400 mb-8">
+            <p className="text-prose-muted mb-8">
               The good stuff, straight from the trenches — reviews, wins, and real talk from a dad who shows up.
               No spam. No sponsors. Just the crew.
             </p>
@@ -577,25 +553,23 @@ export default async function HomePage() {
                 interests={['newsletter']}
               />
             </div>
-            <p className="text-xs text-gray-600 mt-4 text-center">Unsubscribe anytime. We mean it.</p>
+            <p className="text-xs text-prose-faint mt-4 text-center">Unsubscribe anytime. We mean it.</p>
           </div>
         </div>
       </section>
 
       {/* ── Closing tagline — magazine-style signoff, no CTA button ────── */}
       <section className="relative py-24 md:py-32">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-px bg-orange-600/40" />
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-6">— The Bottom Line</p>
+          <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-6">— The Bottom Line</p>
           <p className="text-3xl md:text-5xl font-black text-white leading-[1.1] mb-10">
             Now let&apos;s dad like a BOSS —{' '}
-            <span className="text-orange-500">together.</span>
+            <span className="text-accent-text">together.</span>
           </p>
-          <p className="text-sm text-gray-500 italic">— Boss Daddy</p>
+          <p className="text-sm text-prose-faint italic">— Boss Daddy</p>
         </div>
       </section>
 
-      </div>{/* ═══ End Movement 4 ═════════════════════════════════════════ */}
     </>
   )
 }
@@ -604,9 +578,9 @@ function CategoryPill({ slug, label }: { slug: string; label: string }) {
   return (
     <Link
       href={`/category/${slug}`}
-      className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] px-4 py-2.5 text-sm font-semibold text-gray-200 min-h-[44px] whitespace-nowrap hover:border-orange-900/60 hover:bg-gray-800 hover:text-orange-400 transition-colors"
+      className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] px-4 py-2.5 text-sm font-semibold text-prose min-h-[44px] whitespace-nowrap hover:border-accent-border/60 hover:bg-surface-raised hover:text-accent-text-soft transition-colors"
     >
-      <CategoryIcon slug={slug} className="w-4 h-4 text-orange-500 shrink-0" />
+      <CategoryIcon slug={slug} className="w-4 h-4 text-accent-text shrink-0" />
       <span>{label}</span>
     </Link>
   )
@@ -623,7 +597,7 @@ function TrustBadge({
 }) {
   const inner = (
     <span className="flex items-center gap-2.5 group">
-      <span className="w-7 h-7 rounded-lg bg-orange-950/40 border border-orange-900/40 flex items-center justify-center text-orange-400 shrink-0 group-hover:border-orange-700/60 transition-colors">
+      <span className="w-7 h-7 rounded-lg bg-accent-tint/40 border border-accent-border/40 flex items-center justify-center text-accent-text-soft shrink-0 group-hover:border-accent-border/60 transition-colors">
         {icon}
       </span>
       <span className="text-[11px] md:text-xs font-bold uppercase tracking-wider text-gray-300 group-hover:text-white transition-colors leading-tight">
@@ -675,19 +649,19 @@ function LatestGuidesSkeleton() {
   return (
     <section className="max-w-5xl mx-auto px-6 py-16">
       <div className="mb-8">
-        <div className="h-px w-6 bg-gray-800 mb-3" />
-        <div className="h-3 w-32 bg-gray-900 rounded mb-3 animate-pulse" />
-        <div className="h-7 w-72 bg-gray-900 rounded animate-pulse" />
+        <div className="h-px w-6 bg-surface-raised mb-3" />
+        <div className="h-3 w-32 bg-surface rounded mb-3 animate-pulse" />
+        <div className="h-7 w-72 bg-surface rounded animate-pulse" />
       </div>
       <div className="divide-y divide-gray-800/60">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="flex items-center gap-5 py-6">
             <div className="flex-1 space-y-2">
-              <div className="h-3 w-24 bg-gray-800 rounded animate-pulse" />
-              <div className="h-5 w-full bg-gray-800 rounded animate-pulse" />
-              <div className="h-3 w-3/4 bg-gray-800 rounded animate-pulse" />
+              <div className="h-3 w-24 bg-surface-raised rounded animate-pulse" />
+              <div className="h-5 w-full bg-surface-raised rounded animate-pulse" />
+              <div className="h-3 w-3/4 bg-surface-raised rounded animate-pulse" />
             </div>
-            <div className="w-20 h-20 sm:w-28 sm:h-24 bg-gray-800/50 rounded-xl animate-pulse shrink-0" />
+            <div className="w-20 h-20 sm:w-28 sm:h-24 bg-surface-raised/50 rounded-xl animate-pulse shrink-0" />
           </div>
         ))}
       </div>

@@ -88,21 +88,21 @@ export default async function CollectionEmbed({ slug }: Props) {
 
   return (
     <aside
-      className="not-prose my-8 bg-gradient-to-br from-orange-950/20 to-gray-900/60 border border-orange-900/40 ring-1 ring-inset ring-white/[0.02] rounded-2xl p-5 sm:p-6 shadow-lg shadow-black/40"
+      className="not-prose my-8 bg-gradient-to-br from-orange-950/20 to-surface/60 border border-accent-border/40 ring-1 ring-inset ring-white/[0.02] rounded-2xl p-5 sm:p-6 shadow-lg shadow-black/40"
       aria-label={`Featured ${meta.eyebrow}: ${c.title}`}
     >
       <div className="mb-4">
-        <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-        <p className="text-[10px] sm:text-xs text-orange-400 uppercase tracking-[0.2em] font-black mb-2">
+        <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+        <p className="text-[10px] sm:text-xs text-accent-text-soft uppercase tracking-[0.2em] font-black mb-2">
           {meta.eyebrow}
         </p>
         <Link href={finalHref} className="group inline-block">
-          <h3 className="text-xl sm:text-2xl font-black text-white leading-snug group-hover:text-orange-400 transition-colors">
+          <h3 className="text-xl sm:text-2xl font-black text-white leading-snug group-hover:text-accent-text-soft transition-colors">
             {c.title}
           </h3>
         </Link>
         {c.description && (
-          <p className="mt-2 text-sm text-gray-400 leading-relaxed">{c.description}</p>
+          <p className="mt-2 text-sm text-prose-muted leading-relaxed">{c.description}</p>
         )}
       </div>
 
@@ -115,9 +115,9 @@ export default async function CollectionEmbed({ slug }: Props) {
               <li key={r.id}>
                 <Link
                   href={`/reviews/${r.slug}`}
-                  className="group flex flex-col bg-gray-950/60 border border-gray-800/60 rounded-xl overflow-hidden hover:border-orange-900/40 transition-colors"
+                  className="group flex flex-col bg-surface-sunken/60 border border-soft/60 rounded-xl overflow-hidden hover:border-accent-border/40 transition-colors"
                 >
-                  <div className="relative w-full aspect-square bg-gray-900">
+                  <div className="relative w-full aspect-square bg-surface">
                     {r.image_url ? (
                       <Image src={r.image_url} alt={r.product_name} fill className="object-cover" sizes="120px" />
                     ) : null}
@@ -130,7 +130,7 @@ export default async function CollectionEmbed({ slug }: Props) {
                     )}
                   </div>
                   <div className="p-2">
-                    <p className="text-[10px] sm:text-xs font-semibold text-gray-200 group-hover:text-orange-400 transition-colors line-clamp-2 leading-tight">
+                    <p className="text-[10px] sm:text-xs font-semibold text-prose group-hover:text-accent-text-soft transition-colors line-clamp-2 leading-tight">
                       {r.product_name}
                     </p>
                   </div>
@@ -143,7 +143,7 @@ export default async function CollectionEmbed({ slug }: Props) {
 
       <Link
         href={finalHref}
-        className="inline-flex items-center gap-1.5 text-sm font-bold text-orange-400 hover:text-orange-300 transition-colors uppercase tracking-widest"
+        className="inline-flex items-center gap-1.5 text-sm font-bold text-accent-text-soft hover:text-orange-300 transition-colors uppercase tracking-widest"
       >
         {meta.cta}
       </Link>

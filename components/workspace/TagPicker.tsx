@@ -34,7 +34,7 @@ export function TagPicker({ selected, onChange }: Props) {
     )
   }
 
-  if (loading) return <div className="h-20 bg-gray-950 border border-gray-800 rounded-xl animate-pulse" />
+  if (loading) return <div className="h-20 bg-surface-sunken border border-soft rounded-xl animate-pulse" />
 
   return (
     <div className="space-y-4">
@@ -43,7 +43,7 @@ export function TagPicker({ selected, onChange }: Props) {
         if (!tags?.length) return null
         return (
           <div key={group}>
-            <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold mb-2">
+            <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold mb-2">
               {TAG_GROUP_LABELS[group]}
             </p>
             <div className="flex flex-wrap gap-1.5">
@@ -56,8 +56,8 @@ export function TagPicker({ selected, onChange }: Props) {
                     onClick={() => toggle(tag.slug)}
                     className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
                       active
-                        ? 'bg-orange-600 text-white'
-                        : 'bg-gray-900 text-gray-400 hover:text-white hover:bg-gray-800 border border-gray-700'
+                        ? 'bg-accent text-white'
+                        : 'bg-surface text-prose-muted hover:text-white hover:bg-surface-raised border border-strong'
                     }`}
                   >
                     {tag.label}

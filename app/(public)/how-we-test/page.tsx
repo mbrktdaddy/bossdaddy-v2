@@ -7,7 +7,7 @@ export const metadata: Metadata = {
  alternates: { canonical: '/how-we-test' },
 }
 
-const ICON_CLS = 'w-7 h-7 text-orange-500'
+const ICON_CLS = 'w-7 h-7 text-accent-text'
 
 // Outlined Heroicons-style SVGs per the no-emoji-on-web brand rule.
 const PILLAR_TESTING: { icon: React.ReactNode; title: string; description: string }[] = [
@@ -89,17 +89,17 @@ export default function HowWeTestPage() {
  <div className="max-w-3xl mx-auto px-6 py-16">
 
  <h1 className="text-3xl font-black mb-2 text-white">How We Test</h1>
- <p className="text-gray-500 text-sm mb-10">
+ <p className="text-prose-faint text-sm mb-10">
  Real products. Real testing. Real dads. No lab coats, no paid placements, no shortcuts.
  </p>
 
  <div className="prose prose-invert prose-orange max-w-none
- prose-p:text-gray-400 prose-p:leading-relaxed
+ prose-p:text-prose-muted prose-p:leading-relaxed
  prose-h2:font-black prose-h2:text-white prose-h2:text-xl prose-h2:mt-10
- prose-h3:font-bold prose-h3:text-gray-200 prose-h3:text-lg prose-h3:mt-8
- prose-a:text-orange-400 prose-a:no-underline hover:prose-a:text-orange-300
+ prose-h3:font-bold prose-h3:text-prose prose-h3:text-lg prose-h3:mt-8
+ prose-a:text-accent-text-soft prose-a:no-underline hover:prose-a:text-orange-300
  prose-strong:text-white
- prose-ul:text-gray-400 prose-li:my-1">
+ prose-ul:text-prose-muted prose-li:my-1">
 
  <h2>Our Philosophy</h2>
  <p>
@@ -154,21 +154,21 @@ export default function HowWeTestPage() {
 
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 not-prose mb-12">
  {PILLAR_TESTING.map(({ icon, title, description }) => (
- <div key={title} className="bg-gray-900 rounded-2xl p-5">
+ <div key={title} className="bg-surface rounded-2xl p-5">
  <div className="mb-3">{icon}</div>
- <h3 className="font-bold text-orange-500 text-base mb-2">{title}</h3>
- <p className="text-gray-500 text-sm leading-relaxed">{description}</p>
+ <h3 className="font-bold text-card-title text-base mb-2">{title}</h3>
+ <p className="text-prose-faint text-sm leading-relaxed">{description}</p>
  </div>
  ))}
  </div>
 
  <div className="prose prose-invert prose-orange max-w-none
- prose-p:text-gray-400 prose-p:leading-relaxed
+ prose-p:text-prose-muted prose-p:leading-relaxed
  prose-h2:font-black prose-h2:text-white prose-h2:text-xl prose-h2:mt-10
- prose-h3:font-bold prose-h3:text-gray-200 prose-h3:text-lg prose-h3:mt-8
- prose-a:text-orange-400 prose-a:no-underline hover:prose-a:text-orange-300
+ prose-h3:font-bold prose-h3:text-prose prose-h3:text-lg prose-h3:mt-8
+ prose-a:text-accent-text-soft prose-a:no-underline hover:prose-a:text-orange-300
  prose-strong:text-white
- prose-ul:text-gray-400 prose-li:my-1">
+ prose-ul:text-prose-muted prose-li:my-1">
 
  <h2>The Rating System</h2>
  <p>
@@ -195,8 +195,8 @@ export default function HowWeTestPage() {
 
  </div>
 
- <div className="not-prose bg-gradient-to-br from-orange-950/40 to-gray-900 rounded-2xl p-6 mb-12">
- <div className="text-xs uppercase tracking-widest text-orange-500 font-bold mb-2">
+ <div className="not-prose bg-gradient-to-br from-orange-950/40 to-surface rounded-2xl p-6 mb-12">
+ <div className="text-xs uppercase tracking-widest text-eyebrow font-bold mb-2">
  The Highest Designation
  </div>
  <h2 className="text-3xl font-black text-white mb-4">Boss Daddy Approved</h2>
@@ -204,16 +204,16 @@ export default function HowWeTestPage() {
  <strong className="text-white">Boss Daddy Approved</strong> is the top designation on
  this site. It&apos;s not a sticker we slap on anything we want to sell. It&apos;s earned.
  </p>
- <p className="text-gray-400 leading-relaxed mb-4">
+ <p className="text-prose-muted leading-relaxed mb-4">
  To earn it, a product has to hold up over time, deliver on everything it claims, and
  be something we&apos;d put our own money down for again — today, tomorrow, a year from
  now. One good weekend doesn&apos;t earn the badge. Neither does a spec sheet.
  </p>
- <p className="text-gray-400 leading-relaxed mb-4">
+ <p className="text-prose-muted leading-relaxed mb-4">
  Most products we review <strong className="text-white">don&apos;t</strong> earn it. That&apos;s
  on purpose. If everything were Boss Daddy Approved, the badge would mean nothing.
  </p>
- <p className="text-gray-400 leading-relaxed">
+ <p className="text-prose-muted leading-relaxed">
  Commission rate, brand size, marketing budget, relationship with the company —{' '}
  <strong className="text-white">zero influence</strong>. A brand paying more doesn&apos;t
  move their product up the list. A brand paying less doesn&apos;t keep a great product
@@ -222,12 +222,12 @@ export default function HowWeTestPage() {
  </div>
 
  <div className="prose prose-invert prose-orange max-w-none
- prose-p:text-gray-400 prose-p:leading-relaxed
+ prose-p:text-prose-muted prose-p:leading-relaxed
  prose-h2:font-black prose-h2:text-white prose-h2:text-xl prose-h2:mt-10
- prose-h3:font-bold prose-h3:text-gray-200 prose-h3:text-lg prose-h3:mt-8
- prose-a:text-orange-400 prose-a:no-underline hover:prose-a:text-orange-300
+ prose-h3:font-bold prose-h3:text-prose prose-h3:text-lg prose-h3:mt-8
+ prose-a:text-accent-text-soft prose-a:no-underline hover:prose-a:text-orange-300
  prose-strong:text-white
- prose-ul:text-gray-400 prose-li:my-1">
+ prose-ul:text-prose-muted prose-li:my-1">
 
  <h2>AI&apos;s Role — and Its Limits</h2>
  <p>
@@ -273,13 +273,13 @@ export default function HowWeTestPage() {
  </div>
 
  <div className="mt-10 pt-8 flex items-center gap-6 flex-wrap text-sm">
- <Link href="/editorial-standards" className="py-2 inline-block text-gray-500 hover:text-gray-400 transition-colors">
+ <Link href="/editorial-standards" className="py-2 inline-block text-prose-faint hover:text-prose-muted transition-colors">
  Editorial Standards
  </Link>
- <Link href="/affiliate-disclosure" className="py-2 inline-block text-gray-500 hover:text-gray-400 transition-colors">
+ <Link href="/affiliate-disclosure" className="py-2 inline-block text-prose-faint hover:text-prose-muted transition-colors">
  Affiliate Disclosure
  </Link>
- <Link href="/about" className="py-2 inline-block text-gray-500 hover:text-gray-400 transition-colors">
+ <Link href="/about" className="py-2 inline-block text-prose-faint hover:text-prose-muted transition-colors">
  About
  </Link>
  </div>

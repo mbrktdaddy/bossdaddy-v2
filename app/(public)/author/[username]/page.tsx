@@ -92,24 +92,24 @@ export default async function AuthorPage({ params }: Props) {
  )}
  <div>
  <h1 className="text-3xl font-black mb-1">{profile.display_name ?? `@${username}`}</h1>
- <p className="text-sm text-gray-500">
- <span className="text-orange-500">@{username}</span>
+ <p className="text-sm text-prose-faint">
+ <span className="text-accent-text">@{username}</span>
  <span className="mx-2 text-gray-700">·</span>
  {profile.role === 'admin' ? 'Editor' : 'Contributor'}
  </p>
  {profile.tagline && (
- <p className="text-xs text-orange-500/80 uppercase tracking-widest font-semibold mt-2">
+ <p className="text-xs text-eyebrow/80 uppercase tracking-widest font-semibold mt-2">
  {profile.tagline}
  </p>
  )}
- <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
+ <div className="flex items-center gap-4 mt-3 text-sm text-prose-faint">
  <span><span className="text-white font-semibold">{totalReviews}</span> {totalReviews === 1 ? 'review' : 'reviews'}</span>
  <span><span className="text-white font-semibold">{totalGuides}</span> {totalGuides === 1 ? 'guide' : 'guides'}</span>
  </div>
  </div>
  </div>
  {profile.bio && (
- <p className="mt-6 text-gray-400 text-sm leading-relaxed max-w-2xl">{profile.bio}</p>
+ <p className="mt-6 text-prose-muted text-sm leading-relaxed max-w-2xl">{profile.bio}</p>
  )}
  </div>
 
@@ -117,7 +117,7 @@ export default async function AuthorPage({ params }: Props) {
  {totalReviews > 0 && (
  <div className="mb-12">
  <div className="mb-5">
- <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+ <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
  <h2 className="text-lg font-black">Reviews</h2>
  </div>
  <div className="space-y-2">
@@ -127,18 +127,18 @@ export default async function AuthorPage({ params }: Props) {
  <Link
  key={r.id}
  href={`/reviews/${r.slug}`}
- className="flex items-center justify-between p-4 bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 rounded-2xl transition-colors group"
+ className="flex items-center justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:border-accent-border/40 rounded-2xl transition-colors group"
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1 flex-wrap">
- <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2 py-0.5 rounded-full">
+ <span className="text-xs font-medium text-eyebrow/80 uppercase tracking-widest bg-accent-tint/40 px-2 py-0.5 rounded-full">
  {r.product_name}
  </span>
- {cat && <span className={`flex items-center gap-1 text-xs ${cat.accent}`}><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-orange-500" /> {cat.label}</span>}
+ {cat && <span className={`flex items-center gap-1 text-xs ${cat.accent}`}><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text" /> {cat.label}</span>}
  </div>
- <p className="text-sm font-semibold group-hover:text-orange-400 transition-colors truncate">{r.title}</p>
+ <p className="text-sm font-semibold group-hover:text-accent-text-soft transition-colors truncate">{r.title}</p>
  {r.published_at && (
- <p className="text-xs text-gray-600 mt-0.5">
+ <p className="text-xs text-prose-faint mt-0.5">
  {new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
  </p>
  )}
@@ -155,7 +155,7 @@ export default async function AuthorPage({ params }: Props) {
  {totalGuides > 0 && (
  <div>
  <div className="mb-5">
- <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+ <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
  <h2 className="text-lg font-black">Guides</h2>
  </div>
  <div className="space-y-2">
@@ -165,21 +165,21 @@ export default async function AuthorPage({ params }: Props) {
  <Link
  key={a.id}
  href={`/guides/${a.slug}`}
- className="flex items-center justify-between p-4 bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 rounded-2xl transition-colors group"
+ className="flex items-center justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:border-accent-border/40 rounded-2xl transition-colors group"
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1">
- {cat && <span className={`flex items-center gap-1 text-xs ${cat.accent}`}><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-orange-500" /> {cat.label}</span>}
+ {cat && <span className={`flex items-center gap-1 text-xs ${cat.accent}`}><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text" /> {cat.label}</span>}
  </div>
- <p className="text-sm font-semibold group-hover:text-orange-400 transition-colors truncate">{a.title}</p>
+ <p className="text-sm font-semibold group-hover:text-accent-text-soft transition-colors truncate">{a.title}</p>
  {a.published_at && (
- <p className="text-xs text-gray-600 mt-0.5">
+ <p className="text-xs text-prose-faint mt-0.5">
  {new Date(a.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
  </p>
  )}
  </div>
  {a.reading_time_minutes && (
- <span className="text-xs text-gray-600 ml-4 shrink-0">{a.reading_time_minutes} min</span>
+ <span className="text-xs text-prose-faint ml-4 shrink-0">{a.reading_time_minutes} min</span>
  )}
  </Link>
  )
@@ -189,8 +189,8 @@ export default async function AuthorPage({ params }: Props) {
  )}
 
  {totalReviews === 0 && totalGuides === 0 && (
- <div className="text-center py-24 bg-gray-900/40 rounded-2xl">
- <p className="text-gray-600">No published content yet.</p>
+ <div className="text-center py-24 bg-surface/40 rounded-2xl">
+ <p className="text-prose-faint">No published content yet.</p>
  </div>
  )}
 

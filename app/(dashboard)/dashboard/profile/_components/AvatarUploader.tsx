@@ -92,8 +92,8 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
       </button>
 
       <div className="flex flex-col gap-2 items-center sm:items-start min-w-0">
-        <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold">Avatar</p>
-        <p className="text-xs text-gray-600 max-w-xs text-center sm:text-left">
+        <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold">Avatar</p>
+        <p className="text-xs text-prose-faint max-w-xs text-center sm:text-left">
           JPG, PNG, or WebP. Up to 2 MB. Click the circle or drag a file onto it.
         </p>
         <div className="flex gap-2 mt-1">
@@ -101,7 +101,7 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={busy}
-            className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-xs font-semibold text-white rounded-lg transition-colors"
+            className="px-3 py-1.5 bg-surface-raised hover:bg-gray-700 disabled:opacity-50 text-xs font-semibold text-white rounded-lg transition-colors"
           >
             {busy ? 'Uploading…' : avatarUrl ? 'Replace' : 'Upload'}
           </button>
@@ -110,7 +110,7 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
               type="button"
               onClick={handleRemove}
               disabled={busy}
-              className="px-3 py-1.5 bg-transparent hover:bg-red-950/50 border border-gray-800 hover:border-red-900/60 disabled:opacity-50 text-xs font-semibold text-gray-400 hover:text-red-400 rounded-lg transition-colors"
+              className="px-3 py-1.5 bg-transparent hover:bg-red-950/50 border border-soft hover:border-red-900/60 disabled:opacity-50 text-xs font-semibold text-prose-muted hover:text-red-400 rounded-lg transition-colors"
             >
               Remove
             </button>

@@ -7,13 +7,12 @@ import BadgesForProduct from '@/components/collections/BadgesForProduct'
 import type { ReviewRow } from '../actions'
 
 export default function ReviewCard({ review: r, priority = false }: { review: ReviewRow; priority?: boolean }) {
+  // Overlay-link pattern: see GearCard for explanation. Avoids <a>-inside-<a>
+  // hydration error when BadgesForProduct chips render inside the card.
   return (
-    <Link
-      href={`/reviews/${r.slug}`}
-      className="group flex flex-col bg-gray-900 rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200"
-    >
+    <article className="group relative flex flex-col bg-surface rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200">
       {r.image_url ? (
-        <div className="relative w-full h-44 bg-gray-800 shrink-0">
+        <div className="relative w-full h-44 bg-surface-raised shrink-0">
           <Image
             src={r.image_url}
             alt={r.product_name}
@@ -30,7 +29,7 @@ export default function ReviewCard({ review: r, priority = false }: { review: Re
         </div>
       ) : (
         <div className={`w-full h-44 shrink-0 bg-gradient-to-br ${
-          getCategoryBySlug(r.category)?.color ?? 'from-gray-800 to-gray-900'
+          getCategoryBySlug(r.category)?.color ?? 'from-surface-raised to-surface'
         } flex items-center justify-center`}>
           <span className="text-4xl opacity-40">
             {getCategoryBySlug(r.category)?.icon ?? '📦'}
@@ -39,29 +38,36 @@ export default function ReviewCard({ review: r, priority = false }: { review: Re
       )}
       <div className="p-5 flex flex-col flex-1">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
+          <span className="text-xs font-medium text-eyebrow/80 uppercase tracking-widest bg-accent-tint/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
             {r.product_name}
           </span>
           <RatingScore rating={r.rating} />
         </div>
-        <h2 className="text-base font-bold leading-snug text-white group-hover:text-orange-400 transition-colors flex-1">
-          {r.title}
+        <h2 className="text-base font-bold leading-snug text-white flex-1">
+          <Link
+            href={`/reviews/${r.slug}`}
+            className="after:absolute after:inset-0 group-hover:text-accent-text-soft transition-colors"
+          >
+            {r.title}
+          </Link>
         </h2>
         {r.excerpt && (
-          <p className="text-gray-400 text-sm mt-2 line-clamp-2">{r.excerpt}</p>
+          <p className="text-prose-muted text-sm mt-2 line-clamp-2">{r.excerpt}</p>
         )}
         {r.badges && r.badges.length > 0 && (
-          <BadgesForProduct badges={r.badges} max={2} compact />
+          <div className="relative z-10">
+            <BadgesForProduct badges={r.badges} max={2} compact />
+          </div>
         )}
         <div className="flex items-center justify-between mt-4 pt-4">
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-prose-faint">
             {r.published_at
               ? new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
               : ''}
           </span>
-          <span className="text-xs text-orange-500 font-medium">Read review</span>
+          <span className="text-xs text-accent-text font-medium">Read review</span>
         </div>
       </div>
-    </Link>
+    </article>
   )
 }

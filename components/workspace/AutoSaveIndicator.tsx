@@ -4,8 +4,8 @@ export type SaveState = 'idle' | 'saving' | 'saved' | 'dirty' | 'error'
 
 export function AutoSaveIndicator({ state, error }: { state: SaveState; error?: string | null }) {
   const config = {
-    idle:   { text: '',                  className: 'text-gray-600' },
-    saving: { text: 'Saving…',           className: 'text-orange-400' },
+    idle:   { text: '',                  className: 'text-prose-faint' },
+    saving: { text: 'Saving…',           className: 'text-accent-text-soft' },
     saved:  { text: '✓ All changes saved', className: 'text-green-400' },
     dirty:  { text: '● Unsaved changes', className: 'text-yellow-500' },
     error:  { text: `⚠ ${error ?? 'Save failed'}`, className: 'text-red-400' },

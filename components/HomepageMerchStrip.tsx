@@ -19,19 +19,18 @@ export async function HomepageMerchStrip() {
 
   return (
     <section className="relative">
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-600/50 to-transparent" />
       <div className="max-w-6xl mx-auto px-6 py-16">
         <div className="flex items-end justify-between mb-8">
           <div className="flex items-stretch gap-4">
-            <div className="w-[3px] bg-orange-600 rounded-full" />
+            <div className="w-[3px] bg-accent rounded-full" />
             <div>
-              <p className="text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold mb-2">— Rep the Brand</p>
-              <h2 className="text-2xl font-black text-white leading-tight">Boss Daddy Gear</h2>
+              <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-2">— Rep the Brand</p>
+              <h2 className="text-2xl md:text-3xl font-black text-white leading-tight">Boss Daddy Gear</h2>
             </div>
           </div>
           <Link
             href="/gear"
-            className="hidden sm:inline-flex items-center text-xs text-gray-500 hover:text-orange-400 transition-colors uppercase tracking-widest font-semibold"
+            className="hidden sm:inline-flex items-center text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold"
           >
             Shop All Gear →
           </Link>
@@ -60,7 +59,7 @@ export async function HomepageMerchStrip() {
         <div className="mt-6 sm:hidden text-center">
           <Link
             href="/gear"
-            className="text-sm text-orange-400 hover:text-orange-300 font-semibold transition-colors"
+            className="text-sm text-accent-text-soft hover:text-orange-300 font-semibold transition-colors"
           >
             Shop All Gear →
           </Link>

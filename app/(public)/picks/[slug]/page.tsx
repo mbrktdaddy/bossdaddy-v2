@@ -215,20 +215,20 @@ export default async function PickDetailPage({ params }: Props) {
       {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="flex items-center gap-2 text-xs text-gray-500 mb-8">
-          <Link href="/picks" className="hover:text-orange-400 transition-colors">Boss Daddy Picks</Link>
+        <div className="flex items-center gap-2 text-xs text-prose-faint mb-8">
+          <Link href="/picks" className="hover:text-accent-text-soft transition-colors">Boss Daddy Picks</Link>
           <span>/</span>
-          <span className="text-gray-400">{pick.title}</span>
+          <span className="text-prose-muted">{pick.title}</span>
         </div>
 
         <div className="lg:flex lg:gap-10 lg:items-start">
           <main className="lg:flex-1 lg:max-w-3xl min-w-0">
             <header className="mb-8">
-              <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-              <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">Boss Daddy Picks</p>
+              <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Boss Daddy Picks</p>
               <h1 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tight leading-tight">{pick.title}</h1>
               {pick.description && (
-                <p className="text-lg text-gray-400 leading-relaxed mb-6">{pick.description}</p>
+                <p className="text-lg text-prose-muted leading-relaxed mb-6">{pick.description}</p>
               )}
               <EditorialMeta
                 publishedAt={pick.published_at}
@@ -240,7 +240,7 @@ export default async function PickDetailPage({ params }: Props) {
             <ArticleTOC items={tocItems} variant="mobile" />
 
             {pick.hero_image_url && (
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-10 bg-gray-900">
+              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-10 bg-surface">
                 <Image src={pick.hero_image_url} alt={pick.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 768px" priority />
               </div>
             )}
@@ -249,12 +249,12 @@ export default async function PickDetailPage({ params }: Props) {
             {pick.intro_html && (
               <section id="overview" className="mb-10">
                 <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Why These</p>
+                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Why These</p>
                   <h2 className="text-2xl font-black text-white leading-tight">Behind the picks</h2>
                 </div>
                 <div
-                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-orange-400 hover:prose-a:text-orange-300 prose-a:no-underline"
+                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-accent-text-soft hover:prose-a:text-orange-300 prose-a:no-underline"
                   dangerouslySetInnerHTML={{ __html: pick.intro_html }}
                 />
               </section>
@@ -272,8 +272,8 @@ export default async function PickDetailPage({ params }: Props) {
             {/* The Picks — eyebrow matches the TOC entry. */}
             <section id="picks" className="mb-12" aria-label="The picks">
               <div className="mb-5">
-                <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">
+                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">
                   {items.length === 1 ? 'The Pick' : 'The Picks'}
                 </p>
                 <h2 className="text-2xl font-black text-white leading-tight">
@@ -288,14 +288,14 @@ export default async function PickDetailPage({ params }: Props) {
                   const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                   const rank = idx + 1
                   return (
-                    <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 rounded-2xl p-5 shadow-lg shadow-black/40 transition-colors">
+                    <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:border-accent-border/40 rounded-2xl p-5 shadow-lg shadow-black/40 transition-colors">
                       {/* Rank — medal for top 3, number for the rest */}
                       <div className="flex sm:flex-col items-center gap-3 sm:gap-1 shrink-0">
                         <RankMedal rank={rank} />
                       </div>
 
                       {review.image_url && (
-                        <div className="relative w-full sm:w-40 h-40 sm:h-32 shrink-0 rounded-xl overflow-hidden bg-gray-800">
+                        <div className="relative w-full sm:w-40 h-40 sm:h-32 shrink-0 rounded-xl overflow-hidden bg-surface-raised">
                           <Image src={review.image_url} alt={review.product_name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 160px" />
                           {review.rating >= 8 && (
                             <div className="absolute top-2 right-2"><BossApprovedBadge size="sm" variant="card" /></div>
@@ -308,12 +308,12 @@ export default async function PickDetailPage({ params }: Props) {
                           <div className="min-w-0">
                             {/* Role chip — editorial tag from the workspace. */}
                             {itemRoleLabel && (
-                              <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-orange-600/15 border border-orange-700/40 text-[10px] font-black uppercase tracking-widest text-orange-300">
+                              <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-accent/15 border border-accent-border/40 text-[10px] font-black uppercase tracking-widest text-orange-300">
                                 {itemRoleLabel}
                               </span>
                             )}
-                            <p className="text-xs font-medium text-orange-500/80 uppercase tracking-widest mb-1">{review.product_name}</p>
-                            <Link href={`/reviews/${review.slug}`} className="text-lg font-bold text-white hover:text-orange-400 transition-colors leading-snug block">
+                            <p className="text-xs font-medium text-eyebrow/80 uppercase tracking-widest mb-1">{review.product_name}</p>
+                            <Link href={`/reviews/${review.slug}`} className="text-lg font-bold text-white hover:text-accent-text-soft transition-colors leading-snug block">
                               {review.title}
                             </Link>
                           </div>
@@ -331,17 +331,17 @@ export default async function PickDetailPage({ params }: Props) {
 
                         {/* Review's own best_for tags — generic audience hints */}
                         {(review.best_for?.length ?? 0) > 0 && (
-                          <p className="text-xs text-gray-500 mb-3">
-                            <span className="text-orange-400 font-bold uppercase tracking-widest">Also good for:</span> {review.best_for!.slice(0, 3).join(' · ')}
+                          <p className="text-xs text-prose-faint mb-3">
+                            <span className="text-accent-text-soft font-bold uppercase tracking-widest">Also good for:</span> {review.best_for!.slice(0, 3).join(' · ')}
                           </p>
                         )}
 
                         <div className="flex flex-wrap items-center gap-3 mt-auto pt-1">
-                          <Link href={`/reviews/${review.slug}`} className="text-xs text-gray-400 hover:text-orange-400 transition-colors font-semibold uppercase tracking-widest">
+                          <Link href={`/reviews/${review.slug}`} className="text-xs text-prose-muted hover:text-accent-text-soft transition-colors font-semibold uppercase tracking-widest">
                             Read full review →
                           </Link>
                           {product?.price_cents != null && (
-                            <span className="text-xs text-gray-400 font-bold tabular-nums">${(product.price_cents / 100).toFixed(0)}</span>
+                            <span className="text-xs text-prose-muted font-bold tabular-nums">${(product.price_cents / 100).toFixed(0)}</span>
                           )}
                           {href && (
                             <a
@@ -349,7 +349,7 @@ export default async function PickDetailPage({ params }: Props) {
                               target="_blank"
                               rel={product?.affiliate_url ? 'sponsored nofollow noopener' : 'noopener'}
                               data-product-slug={review.product_slug ?? undefined}
-                              className="ml-auto px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
+                              className="ml-auto px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
                             >
                               Check Price
                             </a>
@@ -371,7 +371,7 @@ export default async function PickDetailPage({ params }: Props) {
                 RelatedRail above handles cross-flavor discovery; this is
                 the "I want another list like this" path. */}
             <div className="mt-8 text-center">
-              <Link href="/picks" className="text-sm text-gray-500 hover:text-orange-400 transition-colors">
+              <Link href="/picks" className="text-sm text-prose-faint hover:text-accent-text-soft transition-colors">
                 Browse all Boss Daddy Picks →
               </Link>
             </div>
@@ -394,17 +394,17 @@ function RankMedal({ rank }: { rank: number }) {
     return (
       <div className="flex sm:flex-col items-center gap-2">
         <span className={`relative w-12 h-12 rounded-full ${colors.bg} flex items-center justify-center font-black text-base ${colors.text} shadow-lg shadow-black/40 ring-2 ring-black/30`}>
-          <svg className="absolute -top-1 -right-1 w-4 h-4 text-orange-400 drop-shadow" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+          <svg className="absolute -top-1 -right-1 w-4 h-4 text-accent-text-soft drop-shadow" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
           </svg>
           {rank}
         </span>
-        <span className="hidden sm:block text-[10px] text-gray-500 uppercase tracking-widest font-bold">{colors.label}</span>
+        <span className="hidden sm:block text-[10px] text-prose-faint uppercase tracking-widest font-bold">{colors.label}</span>
       </div>
     )
   }
   return (
-    <span className="w-12 h-12 rounded-full bg-orange-950/60 border border-orange-900/40 flex items-center justify-center text-orange-400 font-black text-sm tabular-nums">
+    <span className="w-12 h-12 rounded-full bg-accent-tint/60 border border-accent-border/40 flex items-center justify-center text-accent-text-soft font-black text-sm tabular-nums">
       {rank}
     </span>
   )

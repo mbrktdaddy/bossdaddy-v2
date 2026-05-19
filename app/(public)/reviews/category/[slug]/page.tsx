@@ -83,7 +83,7 @@ export default async function CategoryPage({ params }: Props) {
               href={`/reviews/category/${c.slug}`}
               className={`${PILL_BASE} ${c.slug === slug ? PILL_ACTIVE : PILL_INACTIVE}`}
             >
-              <CategoryIcon slug={c.slug} className="w-4 h-4 text-orange-500" />
+              <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
               <span>{c.label}</span>
             </Link>
           ))}
@@ -91,12 +91,12 @@ export default async function CategoryPage({ params }: Props) {
 
         {/* Category header */}
         <div className="mb-10">
-          <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-          <p className="flex items-center gap-1.5 text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">
-            <CategoryIcon slug={cat.slug} className="w-4 h-4 text-orange-500" /> Reviews
+          <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+          <p className="flex items-center gap-1.5 text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">
+            <CategoryIcon slug={cat.slug} className="w-4 h-4 text-accent-text" /> Reviews
           </p>
           <h1 className="text-3xl md:text-4xl font-black mb-4">{cat.label}</h1>
-          <p className="text-gray-400 max-w-2xl leading-relaxed">{cat.description}</p>
+          <p className="text-prose-muted max-w-2xl leading-relaxed">{cat.description}</p>
         </div>
 
         {/* Review grid */}
@@ -106,7 +106,7 @@ export default async function CategoryPage({ params }: Props) {
               <Link
                 key={r.id}
                 href={`/reviews/${r.slug}`}
-                className="group bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 hover:border-orange-900/40 hover:-translate-y-0.5 transition-all"
+                className="group bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 hover:border-accent-border/40 hover:-translate-y-0.5 transition-all"
               >
                 {r.image_url ? (
                   <div className="relative w-full h-48">
@@ -119,19 +119,19 @@ export default async function CategoryPage({ params }: Props) {
                     />
                   </div>
                 ) : (
-                  <div className="w-full h-48 bg-gray-800 flex items-center justify-center">
-                    <CategoryIcon slug={cat.slug} className="w-8 h-8 text-orange-500" />
+                  <div className="w-full h-48 bg-surface-raised flex items-center justify-center">
+                    <CategoryIcon slug={cat.slug} className="w-8 h-8 text-accent-text" />
                   </div>
                 )}
                 <div className="p-5 space-y-2">
-                  <span className="text-xs font-medium text-orange-500 uppercase tracking-widest bg-orange-950/40 px-2.5 py-0.5 rounded-full">
+                  <span className="text-xs font-medium text-eyebrow uppercase tracking-widest bg-accent-tint/40 px-2.5 py-0.5 rounded-full">
                     {r.product_name}
                   </span>
-                  <h2 className="font-black text-base leading-snug group-hover:text-orange-400 transition-colors line-clamp-2">
+                  <h2 className="font-black text-base leading-snug group-hover:text-accent-text-soft transition-colors line-clamp-2">
                     {r.title}
                   </h2>
                   {r.excerpt && (
-                    <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">{r.excerpt}</p>
+                    <p className="text-sm text-prose-faint line-clamp-2 leading-relaxed">{r.excerpt}</p>
                   )}
                   <RatingScore rating={r.rating ?? 0} size="sm" />
                 </div>
@@ -139,10 +139,10 @@ export default async function CategoryPage({ params }: Props) {
             ))}
           </div>
         ) : (
-          <div className="text-center py-24 bg-gray-900/40 rounded-2xl">
-            <CategoryIcon slug={cat.slug} className="w-10 h-10 text-orange-500 mb-4 mx-auto" />
-            <p className="text-gray-400 text-lg font-semibold mb-2">No {cat.label} reviews yet.</p>
-            <p className="text-gray-600 text-sm">Check back soon — the first one is in progress.</p>
+          <div className="text-center py-24 bg-surface/40 rounded-2xl">
+            <CategoryIcon slug={cat.slug} className="w-10 h-10 text-accent-text mb-4 mx-auto" />
+            <p className="text-prose-muted text-lg font-semibold mb-2">No {cat.label} reviews yet.</p>
+            <p className="text-prose-faint text-sm">Check back soon — the first one is in progress.</p>
           </div>
         )}
 

@@ -41,10 +41,10 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
 
   if (!hasItems) {
     return (
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center">
+      <div className="bg-surface border border-soft rounded-2xl p-8 text-center">
         <p className="text-2xl mb-2">✅</p>
-        <p className="text-gray-400 font-semibold">All clear.</p>
-        <p className="text-gray-600 text-sm mt-1">Nothing needs your attention right now.</p>
+        <p className="text-prose-muted font-semibold">All clear.</p>
+        <p className="text-prose-faint text-sm mt-1">Nothing needs your attention right now.</p>
       </div>
     )
   }
@@ -63,7 +63,7 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
           <Link
             key={`${item.type}-${item.id}`}
             href={href}
-            className="block bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-2xl p-4 transition-colors"
+            className="block bg-surface border border-soft hover:border-strong rounded-2xl p-4 transition-colors"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
@@ -71,12 +71,12 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
                   <span className={`text-xs px-2 py-0.5 rounded-full border ${
                     item.type === 'guide'
                       ? 'bg-blue-950/40 text-blue-400 border-blue-900/40'
-                      : 'bg-orange-950/40 text-orange-400 border-orange-900/40'
+                      : 'bg-accent-tint/40 text-accent-text-soft border-accent-border/40'
                   }`}>
                     {item.type === 'guide' ? 'Guide' : 'Review'}
                   </span>
-                  {category && <span className={`flex items-center gap-1 text-xs ${category.accent}`}><CategoryIcon slug={category.slug} className="w-3.5 h-3.5 text-orange-500" /> {category.label}</span>}
-                  <span className="text-xs text-gray-600">{timeAgo(item.created_at)}</span>
+                  {category && <span className={`flex items-center gap-1 text-xs ${category.accent}`}><CategoryIcon slug={category.slug} className="w-3.5 h-3.5 text-accent-text" /> {category.label}</span>}
+                  <span className="text-xs text-prose-faint">{timeAgo(item.created_at)}</span>
                 </div>
                 <p className="text-sm font-semibold truncate">{item.title}</p>
                 {item.moderation_flags && item.moderation_flags.length > 0 && (
@@ -87,7 +87,7 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
               </div>
               <div className="shrink-0 text-right">
                 {score === null ? (
-                  <span className="text-xs text-gray-600 font-mono">—</span>
+                  <span className="text-xs text-prose-faint font-mono">—</span>
                 ) : (
                   <span className={`text-sm font-mono font-bold ${
                     isHighRisk ? 'text-red-400' : score >= 0.4 ? 'text-yellow-400' : 'text-green-400'
@@ -104,14 +104,14 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
       {pendingComments.length > 0 && (
         <Link
           href="/dashboard/comments"
-          className="block bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-2xl p-4 transition-colors"
+          className="block bg-surface border border-soft hover:border-strong rounded-2xl p-4 transition-colors"
         >
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-semibold">
                 {pendingComments.length} pending comment{pendingComments.length > 1 ? 's' : ''}
               </p>
-              <p className="text-xs text-gray-500 mt-0.5 truncate">
+              <p className="text-xs text-prose-faint mt-0.5 truncate">
                 Latest from @{pendingComments[0]?.profiles?.username ?? 'anonymous'} — {pendingComments[0]?.body?.slice(0, 80)}…
               </p>
             </div>

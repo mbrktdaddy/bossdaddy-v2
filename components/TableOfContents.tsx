@@ -84,8 +84,8 @@ export default function TableOfContents({ target = '.bd-content', minHeadings = 
   if (items.length < minHeadings) return null
 
   return (
-    <nav aria-label="Table of contents" className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-      <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">In this guide</p>
+    <nav aria-label="Table of contents" className="bg-surface border border-soft rounded-2xl p-5">
+      <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">In this guide</p>
       <ul className="space-y-1.5 text-sm">
         {items.map((item) => {
           const isActive = activeId === item.id
@@ -96,7 +96,7 @@ export default function TableOfContents({ target = '.bd-content', minHeadings = 
                 className={`block py-1 leading-snug transition-colors ${
                   item.level === 3 ? 'pl-4 text-xs' : ''
                 } ${
-                  isActive ? 'text-orange-400 font-semibold' : 'text-gray-400 hover:text-white'
+                  isActive ? 'text-accent-text-soft font-semibold' : 'text-prose-muted hover:text-white'
                 }`}
               >
                 {item.text}

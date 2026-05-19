@@ -1,5 +1,5 @@
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  draft:    { label: 'Draft',     className: 'bg-gray-800 text-gray-400 border-gray-700' },
+  draft:    { label: 'Draft',     className: 'bg-surface-raised text-prose-muted border-strong' },
   pending:  { label: 'Pending',   className: 'bg-yellow-950/60 text-yellow-400 border-yellow-900/60' },
   approved: { label: 'Live',      className: 'bg-green-950/60 text-green-400 border-green-900/60' },
   rejected: { label: 'Rejected',  className: 'bg-red-950/60 text-red-400 border-red-900/60' },

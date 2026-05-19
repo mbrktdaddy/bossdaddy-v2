@@ -67,19 +67,19 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
   if (submitted === 'approved') {
     return (
       <div className="space-y-3">
-        <div className="bg-gray-900 border border-green-900/40 rounded-2xl p-5">
+        <div className="bg-surface border border-green-900/40 rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-7 h-7 rounded-full bg-orange-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
+            <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center text-xs font-bold text-white shrink-0">
               ✓
             </div>
             <span className="text-sm font-medium text-green-400">Just posted</span>
-            <span className="text-xs text-gray-600">moments ago</span>
+            <span className="text-xs text-prose-faint">moments ago</span>
           </div>
           <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">{submittedBody}</p>
         </div>
         <button
           onClick={() => { setSubmitted(false); setSubmittedBody('') }}
-          className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+          className="text-xs text-prose-faint hover:text-gray-300 transition-colors"
         >
           Leave another comment
         </button>
@@ -89,12 +89,12 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
 
   if (submitted === 'pending') {
     return (
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+      <div className="bg-surface border border-soft rounded-2xl p-5">
         <p className="font-semibold text-sm mb-1 text-gray-300">Comment submitted</p>
-        <p className="text-gray-400 text-sm">Your comment is pending approval and will appear once reviewed.</p>
+        <p className="text-prose-muted text-sm">Your comment is pending approval and will appear once reviewed.</p>
         <button
           onClick={() => { setSubmitted(false); setSubmittedBody('') }}
-          className="text-xs text-gray-500 hover:text-gray-300 mt-3 transition-colors"
+          className="text-xs text-prose-faint hover:text-gray-300 mt-3 transition-colors"
         >
           Leave another comment
         </button>
@@ -104,19 +104,19 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
 
   if (needsAuth) {
     return (
-      <div className="bg-orange-950/30 border border-orange-900/40 rounded-2xl p-5">
-        <p className="text-orange-400 font-semibold text-sm mb-1">Sign in to comment</p>
-        <p className="text-gray-400 text-sm mb-4">You need to be signed in to leave a comment.</p>
+      <div className="bg-accent-tint/30 border border-accent-border/40 rounded-2xl p-5">
+        <p className="text-accent-text-soft font-semibold text-sm mb-1">Sign in to comment</p>
+        <p className="text-prose-muted text-sm mb-4">You need to be signed in to leave a comment.</p>
         <div className="flex items-center gap-3">
           <Link
             href={`/login?next=${encodeURIComponent(pathname)}`}
-            className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold rounded-xl transition-colors"
+            className="px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
           >
             Sign In
           </Link>
           <button
             onClick={() => setNeedsAuth(false)}
-            className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+            className="text-xs text-prose-faint hover:text-gray-300 transition-colors"
           >
             Cancel
           </button>
@@ -128,7 +128,7 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       {prompt && (
-        <p className="text-sm text-gray-400 italic">{prompt}</p>
+        <p className="text-sm text-prose-muted italic">{prompt}</p>
       )}
       <textarea
         value={body}
@@ -136,15 +136,15 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
         placeholder={prompt ? 'Your answer...' : 'Share your thoughts... (sign in required)'}
         rows={4}
         maxLength={2000}
-        className="w-full px-4 py-3 bg-gray-900 border border-gray-700 focus:border-orange-500 rounded-xl text-white placeholder-gray-500 focus:outline-none resize-none text-base sm:text-sm transition-colors"
+        className="w-full px-4 py-3 bg-surface border border-strong focus:border-accent rounded-xl text-white placeholder-gray-500 focus:outline-none resize-none text-base sm:text-sm transition-colors"
       />
       <div className="flex items-center justify-between gap-3">
-        <span className="text-xs text-gray-600 shrink-0">{body.length}/2000</span>
+        <span className="text-xs text-prose-faint shrink-0">{body.length}/2000</span>
         {error && <p className="text-red-400 text-xs flex-1">{error}</p>}
         <button
           type="submit"
           disabled={submitting || body.trim().length < 5}
-          className="shrink-0 px-5 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
+          className="shrink-0 px-5 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
         >
           {submitting ? 'Posting...' : 'Post Comment'}
         </button>

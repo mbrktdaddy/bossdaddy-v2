@@ -78,23 +78,23 @@ export default async function TagPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="w-full max-w-6xl mx-auto px-6 py-12">
 
-        <nav className="flex items-center gap-2 text-xs text-gray-500 mb-8">
-          <Link href="/reviews" className="hover:text-orange-400 transition-colors">Reviews</Link>
+        <nav className="flex items-center gap-2 text-xs text-prose-faint mb-8">
+          <Link href="/reviews" className="hover:text-accent-text-soft transition-colors">Reviews</Link>
           <span>/</span>
           <span className="text-gray-300">#{tag.label}</span>
         </nav>
 
         <div className="mb-10">
-          <span className="text-xs text-orange-500 uppercase tracking-widest font-semibold">{tag.tag_group}</span>
+          <span className="text-xs text-eyebrow uppercase tracking-widest font-semibold">{tag.tag_group}</span>
           <h1 className="text-3xl md:text-4xl font-black mt-2 mb-3">{tag.label}</h1>
-          <p className="text-gray-400">Dad-tested reviews tagged <strong>{tag.label}</strong>.</p>
+          <p className="text-prose-muted">Dad-tested reviews tagged <strong>{tag.label}</strong>.</p>
         </div>
 
         {reviews.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {reviews.map((r) => (
               <Link key={r.id} href={`/reviews/${r.slug}`}
-                className="group bg-gray-900 rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all">
+                className="group bg-surface rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all">
                 {r.image_url ? (
                   <div className="relative w-full h-48">
                     <Image
@@ -106,14 +106,14 @@ export default async function TagPage({ params }: Props) {
                     />
                   </div>
                 ) : (
-                  <div className="w-full h-48 bg-gray-800" />
+                  <div className="w-full h-48 bg-surface-raised" />
                 )}
                 <div className="p-5 space-y-2">
-                  <span className="text-xs font-medium text-orange-500 uppercase tracking-widest bg-orange-950/40 px-2.5 py-0.5 rounded-full">
+                  <span className="text-xs font-medium text-eyebrow uppercase tracking-widest bg-accent-tint/40 px-2.5 py-0.5 rounded-full">
                     {r.product_name}
                   </span>
-                  <h2 className="font-black text-base leading-snug group-hover:text-orange-400 transition-colors line-clamp-2">{r.title}</h2>
-                  {r.excerpt && <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">{r.excerpt}</p>}
+                  <h2 className="font-black text-base leading-snug group-hover:text-accent-text-soft transition-colors line-clamp-2">{r.title}</h2>
+                  {r.excerpt && <p className="text-sm text-prose-faint line-clamp-2 leading-relaxed">{r.excerpt}</p>}
                   <RatingScore rating={r.rating ?? 0} size="sm" />
                 </div>
               </Link>

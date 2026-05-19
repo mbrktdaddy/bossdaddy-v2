@@ -63,7 +63,7 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
         <button
           onClick={cancel}
           disabled={loading}
-          className="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors"
+          className="px-5 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors"
         >
           {loading ? 'Canceling…' : 'Cancel deletion — keep my account'}
         </button>
@@ -90,17 +90,17 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
   }
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6">
+    <div className="bg-surface border border-soft rounded-2xl p-6 mb-6">
       <p className="text-xs text-red-400 uppercase tracking-widest font-semibold mb-1">Danger zone</p>
-      <p className="text-xs text-gray-600 mb-4">Permanent actions. Use with care.</p>
+      <p className="text-xs text-prose-faint mb-4">Permanent actions. Use with care.</p>
 
       {hasPublishedContent ? (
-        <div className="border border-gray-800 rounded-xl p-4 bg-gray-950">
-          <p className="text-sm text-gray-400 leading-relaxed">
+        <div className="border border-soft rounded-xl p-4 bg-surface-sunken">
+          <p className="text-sm text-prose-muted leading-relaxed">
             You&apos;ve published reviews or guides on Boss Daddy. Account deletion is a manual
             process for authors — please reach out to{' '}
             <a href="mailto:boss@bossdaddylife.com?subject=Account%20deletion%20request"
-               className="text-orange-400 hover:text-orange-300">boss@bossdaddylife.com</a>.
+               className="text-accent-text-soft hover:text-orange-300">boss@bossdaddylife.com</a>.
           </p>
         </div>
       ) : !confirming ? (
@@ -112,18 +112,18 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
         </button>
       ) : (
         <div className="border border-red-900/40 bg-red-950/20 rounded-xl p-4 space-y-3">
-          <p className="text-sm text-gray-200 leading-relaxed">
+          <p className="text-sm text-prose leading-relaxed">
             This schedules your account for permanent deletion in <strong>{COOLDOWN_DAYS} days</strong>.
             You can cancel any time before then by signing back in. After {COOLDOWN_DAYS} days,
             comments, votes, and subscriptions are wiped and the account can&apos;t be recovered.
           </p>
 
-          <label className="block text-xs text-gray-400">
+          <label className="block text-xs text-prose-muted">
             Reason for leaving (optional, helps us improve)
             <select
               value={reasonChoice}
               onChange={(e) => setReasonChoice(e.target.value)}
-              className="w-full mt-1 px-3 py-2 bg-gray-900 border border-gray-700 rounded text-white text-sm focus:outline-none focus:border-orange-500"
+              className="w-full mt-1 px-3 py-2 bg-surface border border-strong rounded text-white text-sm focus:outline-none focus:border-accent"
             >
               <option value="">— Prefer not to say —</option>
               {SELF_DELETION_REASONS.map((r) => (
@@ -132,26 +132,26 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
             </select>
           </label>
           {isOther && (
-            <label className="block text-xs text-gray-400">
+            <label className="block text-xs text-prose-muted">
               Tell us more
               <input
                 type="text" maxLength={200}
                 value={customReason}
                 onChange={(e) => setCustomReason(e.target.value)}
                 placeholder="What's the reason?"
-                className="w-full mt-1 px-3 py-2 bg-gray-900 border border-gray-700 rounded text-white text-sm focus:outline-none focus:border-orange-500"
+                className="w-full mt-1 px-3 py-2 bg-surface border border-strong rounded text-white text-sm focus:outline-none focus:border-accent"
               />
             </label>
           )}
 
-          <label className="block text-xs text-gray-400">
+          <label className="block text-xs text-prose-muted">
             Type <code className="text-red-400">DELETE</code> to confirm:
             <input
               type="text"
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
               autoComplete="off"
-              className="w-full mt-1 px-3 py-2 bg-gray-900 border border-red-900/60 rounded text-white text-sm focus:outline-none focus:border-red-500"
+              className="w-full mt-1 px-3 py-2 bg-surface border border-red-900/60 rounded text-white text-sm focus:outline-none focus:border-red-500"
             />
           </label>
           {error && <p className="text-sm text-red-400">{error}</p>}
@@ -166,7 +166,7 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
             <button
               onClick={() => { setConfirming(false); setConfirmText(''); setError(null) }}
               disabled={loading}
-              className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-semibold rounded-lg transition-colors"
+              className="px-4 py-2 bg-surface-raised hover:bg-gray-700 text-gray-300 text-sm font-semibold rounded-lg transition-colors"
             >
               Never mind
             </button>

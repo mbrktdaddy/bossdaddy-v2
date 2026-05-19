@@ -178,7 +178,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
           <button
             type="button"
             onClick={() => setShowPicker(true)}
-            className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-lg transition-colors"
+            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-gray-700 text-gray-300 font-semibold rounded-lg transition-colors"
           >
             Pick from library
           </button>
@@ -186,7 +186,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="text-xs px-3 py-1.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white font-semibold rounded-lg transition-colors"
+            className="text-xs px-3 py-1.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-semibold rounded-lg transition-colors"
           >
             {uploading ? 'Uploading…' : '+ Upload'}
           </button>
@@ -201,7 +201,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
         />
       </div>
 
-      <p className="text-xs text-gray-600">
+      <p className="text-xs text-prose-faint">
         Upload one or many at once — every image is auto-tagged to this product. Click &quot;Set primary&quot; to choose the product card image.
       </p>
 
@@ -217,23 +217,23 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
       )}
 
       {loading ? (
-        <div className="flex items-center gap-2 text-gray-500 text-sm py-2">
-          <div className="w-3 h-3 border-2 border-gray-700 border-t-orange-500 rounded-full animate-spin" />
+        <div className="flex items-center gap-2 text-prose-faint text-sm py-2">
+          <div className="w-3 h-3 border-2 border-strong border-t-orange-500 rounded-full animate-spin" />
           Loading…
         </div>
       ) : images.length === 0 ? (
-        <div className="border-2 border-dashed border-gray-800 rounded-xl p-6 text-center">
-          <p className="text-sm text-gray-600">No images yet. Upload one to get started.</p>
+        <div className="border-2 border-dashed border-soft rounded-xl p-6 text-center">
+          <p className="text-sm text-prose-faint">No images yet. Upload one to get started.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {images.map((img) => (
             <div
               key={img.id}
-              className={`relative rounded-xl border overflow-hidden bg-gray-950 group ${
+              className={`relative rounded-xl border overflow-hidden bg-surface-sunken group ${
                 img.is_primary
-                  ? 'border-orange-500/60 ring-1 ring-orange-500/30'
-                  : 'border-gray-800'
+                  ? 'border-accent/60 ring-1 ring-accent-hover/30'
+                  : 'border-soft'
               }`}
             >
               <div className="relative w-full h-28">
@@ -247,7 +247,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
               </div>
 
               {img.is_primary && (
-                <div className="absolute top-1.5 left-1.5 text-[10px] px-1.5 py-0.5 bg-orange-600 text-white rounded font-semibold">
+                <div className="absolute top-1.5 left-1.5 text-[10px] px-1.5 py-0.5 bg-accent text-white rounded font-semibold">
                   Primary
                 </div>
               )}
@@ -255,7 +255,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
               <button
                 type="button"
                 onClick={() => handleDelete(img)}
-                className="absolute top-1.5 right-1.5 p-1 bg-gray-900/80 hover:bg-red-900/80 text-gray-500 hover:text-red-400 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                className="absolute top-1.5 right-1.5 p-1 bg-surface/80 hover:bg-red-900/80 text-prose-faint hover:text-red-400 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                 title="Remove image"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -271,13 +271,13 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
                     if (e.target.value !== (img.label ?? '')) handleLabelChange(img, e.target.value)
                   }}
                   placeholder="Label (e.g. front)"
-                  className="w-full px-2 py-1 text-xs bg-gray-900 border border-gray-800 rounded text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  className="w-full px-2 py-1 text-xs bg-surface border border-soft rounded text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover"
                 />
                 {!img.is_primary && (
                   <button
                     type="button"
                     onClick={() => handleSetPrimary(img)}
-                    className="w-full text-[10px] py-1 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded transition-colors"
+                    className="w-full text-[10px] py-1 bg-surface-raised hover:bg-gray-700 text-prose-muted hover:text-white rounded transition-colors"
                   >
                     Set primary
                   </button>
@@ -291,10 +291,10 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
       {/* Usage-aware delete modal */}
       {usageModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-          <div className="bg-gray-950 border border-gray-800 rounded-2xl w-full max-w-md shadow-2xl p-6 space-y-4">
+          <div className="bg-surface-sunken border border-soft rounded-2xl w-full max-w-md shadow-2xl p-6 space-y-4">
             <div>
               <p className="text-base font-black text-white">This image is in use</p>
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="text-sm text-prose-muted mt-1">
                 Deleting will auto-clear hero references. Body mentions can&apos;t be auto-fixed.
               </p>
             </div>
@@ -304,8 +304,8 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
               ...usageModal.usage.guides_hero.map((a) => `Guide hero: ${a.title ?? a.slug}`),
               ...usageModal.usage.reviews_hero.map((r) => `Review hero: ${r.title ?? r.slug}`),
             ].map((label, i) => (
-              <p key={i} className="text-sm text-gray-300 bg-gray-900 border border-gray-800 rounded-lg px-3 py-2">
-                {label} <span className="text-gray-600 text-xs">— will be cleared</span>
+              <p key={i} className="text-sm text-gray-300 bg-surface border border-soft rounded-lg px-3 py-2">
+                {label} <span className="text-prose-faint text-xs">— will be cleared</span>
               </p>
             ))}
 
@@ -322,7 +322,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
               <button
                 type="button"
                 onClick={() => setUsageModal(null)}
-                className="flex-1 px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-xl transition-colors"
+                className="flex-1 px-4 py-2.5 bg-surface-raised hover:bg-gray-700 text-gray-300 text-sm rounded-xl transition-colors"
               >
                 Cancel
               </button>

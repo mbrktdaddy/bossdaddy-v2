@@ -73,7 +73,7 @@ function ScoreArc({ rating, size }: { rating: number; size: 'lg' | 'md' }) {
         <span className={`${numCls} font-black leading-none text-white`}>
           {safe.toFixed(1)}
         </span>
-        <span className={`${denomCls} mt-0.5 font-semibold text-orange-500/80`}>/10</span>
+        <span className={`${denomCls} mt-0.5 font-semibold text-accent-text/80`}>/10</span>
       </div>
     </div>
   )
@@ -120,14 +120,14 @@ function SubScoreBars({ scores, size = 'md' }: { scores: SubScores; size?: 'sm' 
         return (
           <li key={label} className="grid grid-cols-[minmax(0,auto)_1fr_minmax(0,auto)] items-center gap-3">
             <span className={`${labelCls} font-medium text-gray-300`}>{label}</span>
-            <div className={`relative w-full overflow-hidden rounded-full bg-orange-950/40 ${barH}`}>
+            <div className={`relative w-full overflow-hidden rounded-full bg-surface-raised ${barH}`}>
               <div
-                className={`absolute inset-y-0 left-0 rounded-full bg-orange-600 transition-[width] duration-700 ${barH}`}
+                className={`absolute inset-y-0 left-0 rounded-full bg-accent transition-[width] duration-700 ${barH}`}
                 style={{ width: `${pct}%` }}
                 aria-hidden
               />
             </div>
-            <span className={`${scoreCls} font-bold tabular-nums ${isSet ? 'text-white' : 'text-gray-600'}`}>
+            <span className={`${scoreCls} font-bold tabular-nums ${isSet ? 'text-white' : 'text-prose-faint'}`}>
               {isSet ? value : '—'}
             </span>
           </li>
@@ -161,13 +161,13 @@ function ProductCtaButton({
         target="_blank"
         rel={rel}
         data-product-slug={product.slug}
-        className={`inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-2xl bg-orange-600 font-bold text-white transition-colors hover:bg-orange-500 ${padding}`}
+        className={`inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-2xl bg-accent font-bold text-white transition-colors hover:bg-accent-hover ${padding}`}
       >
         {label}
         <span aria-hidden>→</span>
       </a>
       {isAmazon && (
-        <p className="mt-2 text-[11px] text-gray-500">
+        <p className="mt-2 text-[11px] text-prose-faint">
           As an Amazon Associate I earn from qualifying purchases.
         </p>
       )}
@@ -196,10 +196,10 @@ export default function VerdictCard({
   if (variant === 'sidebar') {
     return (
       <section
-        className="rounded-2xl border border-orange-900/40 bg-orange-950/20 p-5 shadow-lg shadow-black/40"
+        className="rounded-2xl border border-accent-border/40 bg-surface p-5 shadow-lg shadow-black/40"
         aria-label="Quick verdict"
       >
-        <p className="text-xs font-semibold uppercase tracking-widest text-orange-500">Quick Verdict</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-eyebrow">Quick Verdict</p>
         <p className="mt-1 mb-4 text-xs font-black uppercase tracking-wide text-white/90 line-clamp-2">{productName}</p>
 
         <div className="flex flex-col items-center gap-3">
@@ -212,7 +212,7 @@ export default function VerdictCard({
         )}
 
         {hasSubScores && (
-          <div className="mt-4 border-t border-orange-900/30 pt-4">
+          <div className="mt-4 border-t border-soft/60 pt-4">
             <SubScoreBars scores={subScores!} size="sm" />
           </div>
         )}
@@ -230,12 +230,12 @@ export default function VerdictCard({
   if (variant === 'preview') {
     return (
       <section
-        className="rounded-2xl border border-orange-900/40 bg-orange-950/20 p-4"
+        className="rounded-2xl border border-accent-border/40 bg-surface p-4"
         aria-label="Verdict preview"
       >
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-orange-500">The Verdict</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-eyebrow">The Verdict</p>
         <p className="mt-0.5 mb-4 text-xs font-black uppercase tracking-wide text-white/90 line-clamp-1">
-          {productName || <span className="text-gray-600 italic normal-case font-normal">no product name</span>}
+          {productName || <span className="text-prose-faint italic normal-case font-normal">no product name</span>}
         </p>
 
         <div className="flex flex-col items-center gap-3">
@@ -244,11 +244,11 @@ export default function VerdictCard({
         </div>
 
         {tldr && (
-          <p className="mt-4 text-xs leading-relaxed text-gray-200">{tldr}</p>
+          <p className="mt-4 text-xs leading-relaxed text-prose">{tldr}</p>
         )}
 
         {hasSubScores && (
-          <div className="mt-4 border-t border-orange-900/30 pt-3">
+          <div className="mt-4 border-t border-soft/60 pt-3">
             <SubScoreBars scores={subScores!} size="sm" />
           </div>
         )}
@@ -259,11 +259,11 @@ export default function VerdictCard({
   // ── In-body variant — primary mobile/desktop placement on the public page ──
   return (
     <section
-      className="mb-8 rounded-2xl border border-orange-900/40 bg-orange-950/30 p-5 shadow-md shadow-black/30 sm:p-6"
+      className="mb-8 rounded-2xl border border-accent-border/40 bg-surface p-5 shadow-md shadow-black/30 sm:p-6"
       aria-label="The verdict"
     >
       {/* Header — section label + product name */}
-      <p className="text-xs font-semibold uppercase tracking-widest text-orange-500">The Verdict</p>
+      <p className="text-xs font-semibold uppercase tracking-widest text-eyebrow">The Verdict</p>
       <p className="mt-1 mb-5 text-sm font-black uppercase tracking-wide text-white/90 sm:text-base">{productName}</p>
 
       {/* Conclusion cluster — arc (with approved check baked in) + rebuy chip */}
@@ -277,19 +277,19 @@ export default function VerdictCard({
       </div>
 
       {tldr && (
-        <p className="mt-5 text-base leading-relaxed text-gray-200 sm:text-lg">
+        <p className="mt-5 text-base leading-relaxed text-prose sm:text-lg">
           {tldr}
         </p>
       )}
 
       {hasSubScores && (
-        <div className="mt-5 border-t border-orange-900/30 pt-4">
+        <div className="mt-5 border-t border-soft/60 pt-4">
           <SubScoreBars scores={subScores!} />
         </div>
       )}
 
       {product && (
-        <div className="mt-5 border-t border-orange-900/30 pt-4">
+        <div className="mt-5 border-t border-soft/60 pt-4">
           <ProductCtaButton product={product} size="md" />
         </div>
       )}

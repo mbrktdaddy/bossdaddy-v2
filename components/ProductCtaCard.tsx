@@ -23,16 +23,16 @@ export default function ProductCtaCard({ product, rating, variant = 'prominent' 
   return (
     <aside
       data-product-cta
-      className="my-8 bg-gradient-to-br from-orange-950/60 to-gray-900 rounded-2xl p-5 sm:p-6 shadow-xl shadow-black/40"
+      className="my-8 bg-gradient-to-br from-orange-950/60 to-surface rounded-2xl p-5 sm:p-6 shadow-xl shadow-black/40"
       aria-label="Product offer"
     >
-      <p className="text-xs text-orange-400 uppercase tracking-widest font-semibold mb-3">
+      <p className="text-xs text-accent-text-soft uppercase tracking-widest font-semibold mb-3">
         {heading}
       </p>
 
       <div className="flex flex-col sm:flex-row gap-5 sm:items-center">
         {product.image_url && (
-          <div className="relative w-full sm:w-32 h-32 shrink-0 rounded-2xl overflow-hidden bg-gray-950">
+          <div className="relative w-full sm:w-32 h-32 shrink-0 rounded-2xl overflow-hidden bg-surface-sunken">
             <Image
               src={product.image_url}
               alt={product.name}
@@ -57,12 +57,12 @@ export default function ProductCtaCard({ product, rating, variant = 'prominent' 
             target="_blank"
             rel={rel}
             data-product-slug={product.slug}
-            className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-2xl transition-colors min-h-[44px] w-full sm:w-auto"
+            className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-accent hover:bg-accent-hover text-white font-bold rounded-2xl transition-colors min-h-[44px] w-full sm:w-auto"
           >
             {buttonLabel}
           </a>
           {isAmazon && (
-            <p className="mt-2 text-[11px] text-gray-500">
+            <p className="mt-2 text-[11px] text-prose-faint">
               As an Amazon Associate I earn from qualifying purchases.
             </p>
           )}

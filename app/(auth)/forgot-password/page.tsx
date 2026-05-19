@@ -33,20 +33,20 @@ export default function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
+      <main className="min-h-screen flex items-center justify-center bg-surface-sunken px-4">
         <div className="w-full max-w-sm text-center">
-          <div className="w-14 h-14 rounded-full bg-orange-950/50 border border-orange-800/50 flex items-center justify-center mx-auto mb-6">
-            <svg className="w-6 h-6 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="w-14 h-14 rounded-full bg-accent-tint/50 border border-accent-border/50 flex items-center justify-center mx-auto mb-6">
+            <svg className="w-6 h-6 text-accent-text-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
           </div>
           <h1 className="text-2xl font-black text-white mb-2">Check your inbox</h1>
-          <p className="text-gray-400 text-sm mb-6">
-            We sent a reset link to <span className="text-orange-400">{email}</span>. Click it to set a new password.
+          <p className="text-prose-muted text-sm mb-6">
+            We sent a reset link to <span className="text-accent-text-soft">{email}</span>. Click it to set a new password.
           </p>
-          <p className="text-gray-600 text-xs">
+          <p className="text-prose-faint text-xs">
             Didn&apos;t get it? Check your spam folder or{' '}
-            <button onClick={() => setSent(false)} className="text-orange-400 hover:text-orange-300">
+            <button onClick={() => setSent(false)} className="text-accent-text-soft hover:text-orange-300">
               try again
             </button>
             .
@@ -57,10 +57,10 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
+    <main className="min-h-screen flex items-center justify-center bg-surface-sunken px-4">
       <div className="w-full max-w-sm">
         <h1 className="text-2xl font-black text-white mb-2">Reset your password</h1>
-        <p className="text-gray-400 mb-8 text-sm">
+        <p className="text-prose-muted mb-8 text-sm">
           Enter your email and we&apos;ll send you a reset link.
         </p>
 
@@ -73,7 +73,7 @@ export default function ForgotPasswordPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg bg-gray-900 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
               placeholder="you@example.com"
             />
           </div>
@@ -87,15 +87,15 @@ export default function ForgotPasswordPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 px-4 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white font-semibold rounded-lg transition-colors"
+            className="w-full py-2.5 px-4 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-semibold rounded-lg transition-colors"
           >
             {loading ? 'Sending…' : 'Send Reset Link'}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
+        <p className="mt-6 text-center text-sm text-prose-faint">
           Remember it?{' '}
-          <Link href="/login" className="text-orange-400 hover:text-orange-300">
+          <Link href="/login" className="text-accent-text-soft hover:text-orange-300">
             Sign in
           </Link>
         </p>

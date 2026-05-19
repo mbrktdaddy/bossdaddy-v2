@@ -67,14 +67,14 @@ export default async function GuidesPage({ searchParams }: Props) {
       <div className="max-w-6xl mx-auto px-6 py-16">
         {/* Page header — tick-line eyebrow pattern */}
         <div className="mb-8">
-          <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">The Field Notes</p>
+          <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">The Field Notes</p>
           <h1 className="text-4xl md:text-5xl font-black mb-3 text-white tracking-tight">Guides</h1>
         </div>
 
         {/* Stats bar */}
         {guides.length > 0 && (
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 pb-4 border-b border-gray-800/40 text-sm text-gray-500">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 pb-4 border-b border-soft/40 text-sm text-prose-faint">
             <span><span className="text-white font-bold tabular-nums">{guides.length}</span> {guides.length === 1 ? 'guide' : 'guides'}</span>
             <span className="text-gray-700 hidden sm:block">·</span>
             <span><span className="text-white font-bold tabular-nums">{categoryCount}</span> {categoryCount === 1 ? 'category' : 'categories'}</span>
@@ -92,13 +92,13 @@ export default async function GuidesPage({ searchParams }: Props) {
         {/* Category filter — horizontal scroll strip */}
         <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
           <Link href="/guides"
-            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-orange-600 text-white shadow-md shadow-black/30 hover:bg-orange-500 transition-colors">
+            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-accent text-white shadow-md shadow-black/30 hover:bg-accent-hover transition-colors">
             All Guides
           </Link>
           {CATEGORIES.map((c) => (
             <Link key={c.slug} href={`/guides?category=${c.slug}`}
-              className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 transition-colors">
-              <CategoryIcon slug={c.slug} className="w-4 h-4 text-orange-500" />
+              className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-surface text-prose-muted hover:bg-surface-raised hover:text-white shadow-sm shadow-black/20 transition-colors">
+              <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
               <span>{c.label}</span>
             </Link>
           ))}
@@ -115,28 +115,28 @@ export default async function GuidesPage({ searchParams }: Props) {
             replaces 8 identical 3-col card grids with a tighter, scannable
             list per category. Featured card above carries the visual weight. */}
         {sections.length === 0 ? (
-          <div className="text-center py-24 bg-gray-900/40 rounded-2xl border border-gray-800/60 ring-1 ring-inset ring-white/[0.02]">
-            <p className="text-gray-500 text-lg font-semibold">No guides here yet.</p>
-            <p className="text-gray-600 text-sm mt-2">Check back soon, Boss.</p>
+          <div className="text-center py-24 bg-surface/40 rounded-2xl border border-soft/60 ring-1 ring-inset ring-white/[0.02]">
+            <p className="text-prose-faint text-lg font-semibold">No guides here yet.</p>
+            <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
           </div>
         ) : (
           sections.map(({ cat, items, total }, i) => (
             <section key={cat.slug} className={i > 0 ? 'mt-12' : ''}>
               <div className="flex items-end justify-between mb-5 gap-4">
                 <div className="min-w-0">
-                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
+                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
                   <h2 className="text-xl md:text-2xl font-black text-white flex items-center gap-2.5 leading-tight">
-                    <CategoryIcon slug={cat.slug} className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500 shrink-0" />
+                    <CategoryIcon slug={cat.slug} className="w-5 h-5 sm:w-6 sm:h-6 text-accent-text shrink-0" />
                     <span className="truncate">{cat.label}</span>
                   </h2>
                   {cat.description && (
-                    <p className="text-sm text-gray-500 mt-1.5 line-clamp-1">{cat.description}</p>
+                    <p className="text-sm text-prose-faint mt-1.5 line-clamp-1">{cat.description}</p>
                   )}
                 </div>
                 {total > items.length && (
                   <Link
                     href={`/guides?category=${cat.slug}`}
-                    className="self-end shrink-0 text-xs text-gray-500 hover:text-orange-400 transition-colors uppercase tracking-widest font-semibold"
+                    className="self-end shrink-0 text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold"
                   >
                     View all {total}
                   </Link>
@@ -170,18 +170,18 @@ export default async function GuidesPage({ searchParams }: Props) {
     <div className="max-w-6xl mx-auto px-6 py-16">
       {/* Page header — tick-line eyebrow + breadcrumb */}
       <div className="mb-12">
-        <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">
+        <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">
           Guides{cat ? ` / ${cat.label.toUpperCase()}` : ''}
         </p>
         <h1 className="text-4xl md:text-5xl font-black mb-3 text-white tracking-tight flex items-center gap-3">
-          {cat && <CategoryIcon slug={cat.slug} className="w-10 h-10 text-orange-500" />}
+          {cat && <CategoryIcon slug={cat.slug} className="w-10 h-10 text-accent-text" />}
           <span>{cat ? cat.label : 'Guides'}</span>
         </h1>
         {cat?.description && (
-          <p className="text-gray-400 mb-2 max-w-2xl">{cat.description}</p>
+          <p className="text-prose-muted mb-2 max-w-2xl">{cat.description}</p>
         )}
-        <p className="text-gray-500 text-sm tabular-nums">
+        <p className="text-prose-faint text-sm tabular-nums">
           {count ?? 0} {(count ?? 0) === 1 ? 'guide' : 'guides'}{cat ? ` in ${cat.label}` : ''}
         </p>
       </div>
@@ -189,26 +189,26 @@ export default async function GuidesPage({ searchParams }: Props) {
       {/* Category filter pills */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
         <Link href="/guides"
-          className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 transition-colors">
+          className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-surface text-prose-muted hover:bg-surface-raised hover:text-white shadow-sm shadow-black/20 transition-colors">
           All Guides
         </Link>
         {CATEGORIES.map((c) => (
           <Link key={c.slug} href={`/guides?category=${c.slug}`}
             className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
               category === c.slug
-                ? 'bg-orange-600 text-white shadow-md shadow-black/30'
-                : 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20'
+                ? 'bg-accent text-white shadow-md shadow-black/30'
+                : 'bg-surface text-prose-muted hover:bg-surface-raised hover:text-white shadow-sm shadow-black/20'
             }`}>
-            <CategoryIcon slug={c.slug} className="w-4 h-4 text-orange-500" />
+            <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
             <span>{c.label}</span>
           </Link>
         ))}
       </div>
 
       {!guides.length ? (
-        <div className="text-center py-24 bg-gray-900/40 rounded-2xl border border-gray-800/60 ring-1 ring-inset ring-white/[0.02]">
-          <p className="text-gray-500 text-lg font-semibold">No guides here yet.</p>
-          <p className="text-gray-600 text-sm mt-2">Check back soon, Boss.</p>
+        <div className="text-center py-24 bg-surface/40 rounded-2xl border border-soft/60 ring-1 ring-inset ring-white/[0.02]">
+          <p className="text-prose-faint text-lg font-semibold">No guides here yet.</p>
+          <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
         </div>
       ) : (
         <GuidesGrid initialItems={guides} total={count ?? 0} category={category} />
@@ -224,9 +224,9 @@ function GuideRowItem({ guide: a }: { guide: GuideRow }) {
   return (
     <Link
       href={`/guides/${a.slug}`}
-      className="group flex items-center gap-5 py-5 -mx-4 px-4 rounded-2xl hover:bg-gray-900/40 transition-colors"
+      className="group flex items-center gap-5 py-5 -mx-4 px-4 rounded-2xl hover:bg-surface/40 transition-colors"
     >
-      <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-gray-800 shrink-0">
+      <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-surface-raised shrink-0">
         {a.image_url ? (
           <Image
             src={a.image_url}
@@ -236,18 +236,18 @@ function GuideRowItem({ guide: a }: { guide: GuideRow }) {
             sizes="(max-width: 640px) 80px, 96px"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-gray-800/50 to-gray-900/40 flex items-center justify-center">
-            <CategoryIcon slug={a.category} className="w-6 h-6 text-orange-500/40" />
+          <div className="w-full h-full bg-gradient-to-br from-surface-raised/50 to-surface/40 flex items-center justify-center">
+            <CategoryIcon slug={a.category} className="w-6 h-6 text-accent-text/40" />
           </div>
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <h3 className="text-base md:text-lg font-bold text-white group-hover:text-orange-400 transition-colors leading-snug">
+        <h3 className="text-base md:text-lg font-bold text-white group-hover:text-accent-text-soft transition-colors leading-snug">
           {a.title}
         </h3>
-        <div className="flex items-center gap-2 text-xs text-gray-500 mt-1.5">
+        <div className="flex items-center gap-2 text-xs text-prose-faint mt-1.5">
           {a.reading_time_minutes && <span>{a.reading_time_minutes} min read</span>}
-          {a.reading_time_minutes && a.published_at && <span className="text-gray-800">·</span>}
+          {a.reading_time_minutes && a.published_at && <span className="text-prose-faint">·</span>}
           {a.published_at && (
             <span>
               {new Date(a.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -255,7 +255,7 @@ function GuideRowItem({ guide: a }: { guide: GuideRow }) {
           )}
         </div>
       </div>
-      <div className="shrink-0 text-gray-600 group-hover:text-orange-400 transition-colors">
+      <div className="shrink-0 text-prose-faint group-hover:text-accent-text-soft transition-colors">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden>
           <path d="M9 18l6-6-6-6" />
         </svg>

@@ -132,17 +132,17 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
   }
 
   return (
-    <details className="bg-gray-900 border border-gray-800 rounded-xl">
+    <details className="bg-surface border border-soft rounded-xl">
       <summary className="cursor-pointer px-4 py-3 text-sm font-semibold flex items-center justify-between">
         <span className="flex items-center gap-2">
-          <span className="text-orange-400">📣</span> Social posts
+          <span className="text-accent-text-soft">📣</span> Social posts
           {posts.length > 0 && (
-            <span className="px-2 py-0.5 bg-orange-950/40 border border-orange-900/40 text-orange-400 rounded-full text-xs">
+            <span className="px-2 py-0.5 bg-accent-tint/40 border border-accent-border/40 text-accent-text-soft rounded-full text-xs">
               {posts.length} saved
             </span>
           )}
         </span>
-        <span className="text-xs text-gray-600 hidden sm:block">
+        <span className="text-xs text-prose-faint hidden sm:block">
           AI-generate platform-native copy
         </span>
       </summary>
@@ -150,8 +150,8 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
       <div className="px-4 pb-4 space-y-4">
 
         {/* Generation controls */}
-        <div className="bg-gray-950 border border-gray-800 rounded-xl p-4 space-y-3">
-          <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold">Generate for</p>
+        <div className="bg-surface-sunken border border-soft rounded-xl p-4 space-y-3">
+          <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold">Generate for</p>
           <div className="flex flex-wrap gap-2">
             {(Object.keys(PLATFORM_META) as Platform[]).map((p) => {
               const m = PLATFORM_META[p]
@@ -163,8 +163,8 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
                   onClick={() => togglePlatform(p)}
                   className={`px-3 py-2 rounded-lg text-xs font-semibold transition-colors border min-h-[36px] ${
                     isOn
-                      ? 'bg-orange-600 hover:bg-orange-500 text-white border-orange-700'
-                      : 'bg-gray-900 hover:bg-gray-800 text-gray-400 border-gray-800'
+                      ? 'bg-accent hover:bg-accent-hover text-white border-accent-border'
+                      : 'bg-surface hover:bg-surface-raised text-prose-muted border-soft'
                   }`}
                 >
                   <span className="mr-1.5 font-bold">{m.icon}</span>{m.label}
@@ -177,18 +177,18 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
             value={instr}
             onChange={(e) => setInstr(e.target.value)}
             placeholder="Optional nudge — e.g. 'lead with the price', 'casual tone', 'focus on the kid angle'"
-            className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500"
+            className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover"
             onKeyDown={(e) => { if (e.key === 'Enter' && !busy) handleGenerate(selected, false) }}
           />
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-prose-faint">
               {posts.length > 0 ? 'Generating again will overwrite the selected platforms.' : 'Drafts save automatically.'}
             </p>
             <button
               type="button"
               onClick={() => handleGenerate(selected, false)}
               disabled={busy || selected.length === 0}
-              className="px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-xs font-semibold rounded-lg min-h-[36px] transition-colors"
+              className="px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-xs font-semibold rounded-lg min-h-[36px] transition-colors"
             >
               {busy && busyPlatform === null ? 'Generating…' : posts.length > 0 ? '↺ Regenerate selected' : '✨ Generate'}
             </button>
@@ -200,9 +200,9 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
 
         {/* Generated posts */}
         {loading ? (
-          <p className="text-xs text-gray-500 text-center py-4">Loading saved posts…</p>
+          <p className="text-xs text-prose-faint text-center py-4">Loading saved posts…</p>
         ) : posts.length === 0 ? (
-          <p className="text-xs text-gray-600 text-center py-4">
+          <p className="text-xs text-prose-faint text-center py-4">
             No social posts yet. Generate above to draft platform-native copy.
           </p>
         ) : (
@@ -276,13 +276,13 @@ function PostCard({ post, busy, copied, onCopy, onBodyCommit, onHashtagsCommit, 
   }
 
   return (
-    <div className="p-3 bg-gray-950 border border-gray-800 rounded-lg space-y-2">
+    <div className="p-3 bg-surface-sunken border border-soft rounded-lg space-y-2">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <p className="text-xs font-semibold text-gray-300 flex items-center gap-2">
-          <span className="text-orange-400 font-bold">{m.icon}</span>
+          <span className="text-accent-text-soft font-bold">{m.icon}</span>
           {m.label}
           {m.charLimit != null && (
-            <span className={`text-xs font-mono ${overLimit ? 'text-red-400' : 'text-gray-600'}`}>
+            <span className={`text-xs font-mono ${overLimit ? 'text-red-400' : 'text-prose-faint'}`}>
               {total}/{m.charLimit}
             </span>
           )}
@@ -292,21 +292,21 @@ function PostCard({ post, busy, copied, onCopy, onBodyCommit, onHashtagsCommit, 
             type="button"
             onClick={onCopy}
             disabled={busy}
-            className="px-2.5 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xs rounded-lg min-h-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-gray-700 text-gray-300 hover:text-white text-xs rounded-lg min-h-[36px] transition-colors"
             title="Copy body + hashtags to clipboard"
           >{copied ? '✓ Copied' : 'Copy'}</button>
           <button
             type="button"
             onClick={onRegenerate}
             disabled={busy}
-            className="px-2.5 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs rounded-lg min-h-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-gray-700 text-gray-300 text-xs rounded-lg min-h-[36px] transition-colors"
             title="Regenerate just this platform"
           >{busy ? '…' : '🔄'}</button>
           <button
             type="button"
             onClick={onDelete}
             disabled={busy}
-            className="px-2.5 py-1.5 bg-transparent hover:bg-red-950/40 text-gray-500 hover:text-red-400 text-xs rounded-lg min-h-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-transparent hover:bg-red-950/40 text-prose-faint hover:text-red-400 text-xs rounded-lg min-h-[36px] transition-colors"
             title="Delete this post"
           >🗑</button>
         </div>
@@ -318,16 +318,16 @@ function PostCard({ post, busy, copied, onCopy, onBodyCommit, onHashtagsCommit, 
         onBlur={commitBody}
         rows={Math.max(3, Math.min(10, body.split('\n').length))}
         disabled={busy}
-        className="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-sm text-gray-200 leading-relaxed focus:outline-none focus:ring-1 focus:ring-orange-500 resize-y"
+        className="w-full px-3 py-2 bg-surface border border-soft rounded-lg text-sm text-prose leading-relaxed focus:outline-none focus:ring-1 focus:ring-accent-hover resize-y"
       />
 
       <div>
-        <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Hashtags</p>
+        <p className="text-[10px] uppercase tracking-widest text-prose-faint mb-1">Hashtags</p>
         <div className="flex flex-wrap items-center gap-1.5">
           {hashtags.map((t) => (
             <span
               key={t}
-              className="inline-flex items-center gap-1 px-2 py-1 bg-orange-950/40 border border-orange-900/40 text-orange-400 text-xs rounded-full"
+              className="inline-flex items-center gap-1 px-2 py-1 bg-accent-tint/40 border border-accent-border/40 text-accent-text-soft text-xs rounded-full"
             >
               <span className="font-mono">#{t}</span>
               <button
@@ -352,7 +352,7 @@ function PostCard({ post, busy, copied, onCopy, onBodyCommit, onHashtagsCommit, 
             onBlur={() => { if (tagInput.trim()) addTag() }}
             placeholder="+ tag"
             disabled={busy}
-            className="px-2 py-1 bg-gray-900 border border-gray-800 rounded-full text-xs text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 w-20"
+            className="px-2 py-1 bg-surface border border-soft rounded-full text-xs text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover w-20"
           />
         </div>
       </div>

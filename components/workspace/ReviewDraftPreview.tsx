@@ -50,35 +50,35 @@ export function ReviewDraftPreview({
   }
 
   return (
-    <div className="bg-gray-950 border border-gray-800 rounded-2xl overflow-hidden text-sm">
+    <div className="bg-surface-sunken border border-soft rounded-2xl overflow-hidden text-sm">
       {/* Header strip */}
-      <div className="bg-gray-900 border-b border-gray-800 px-4 py-2 flex items-center justify-between">
-        <span className="text-xs text-gray-500 font-medium">Public preview</span>
-        <span className="text-xs text-orange-400/70 font-medium">bossdaddylife.com</span>
+      <div className="bg-surface border-b border-soft px-4 py-2 flex items-center justify-between">
+        <span className="text-xs text-prose-faint font-medium">Public preview</span>
+        <span className="text-xs text-accent-text-soft/70 font-medium">bossdaddylife.com</span>
       </div>
 
       <div className="px-5 py-6 space-y-5 overflow-y-auto max-h-[calc(100vh-180px)]">
 
         {/* Eyebrow */}
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-xs font-medium text-orange-400 uppercase tracking-widest bg-orange-950/40 px-2.5 py-0.5 rounded-full">
+          <span className="text-xs font-medium text-accent-text-soft uppercase tracking-widest bg-accent-tint/40 px-2.5 py-0.5 rounded-full">
             {productName || 'Product Name'}
           </span>
           {cat && (
-            <span className="flex items-center gap-1 text-xs font-medium text-gray-400 bg-gray-900 px-2.5 py-0.5 rounded-full">
-              <CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-gray-400" /> {cat.label}
+            <span className="flex items-center gap-1 text-xs font-medium text-prose-muted bg-surface px-2.5 py-0.5 rounded-full">
+              <CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-prose-muted" /> {cat.label}
             </span>
           )}
         </div>
 
         {/* Title */}
         <h1 className="text-xl font-black leading-tight text-white">
-          {title || <span className="text-gray-600 italic">Untitled review</span>}
+          {title || <span className="text-prose-faint italic">Untitled review</span>}
         </h1>
 
         {/* Author meta + trust receipt — mirrors the public page layout */}
         <div>
-          <p className="text-xs text-gray-500">by @{author}</p>
+          <p className="text-xs text-prose-faint">by @{author}</p>
           <TrustReceipt
             pricePaidCents={pricePaidCents}
             testingDuration={testingDuration}
@@ -88,7 +88,7 @@ export function ReviewDraftPreview({
 
         {/* Excerpt */}
         {excerpt && (
-          <p className="text-gray-400 text-xs leading-relaxed italic border-l-2 border-gray-800 pl-3">{excerpt}</p>
+          <p className="text-prose-muted text-xs leading-relaxed italic border-l-2 border-soft pl-3">{excerpt}</p>
         )}
 
         {/* Hero image — moved above verdict to mirror the public page.
@@ -152,7 +152,7 @@ export function ReviewDraftPreview({
         {(bestFor.length > 0 || notFor.length > 0) && (
           <div className="grid grid-cols-2 gap-3">
             {bestFor.length > 0 && (
-              <div className="bg-gray-900 rounded-xl p-3">
+              <div className="bg-surface rounded-xl p-3">
                 <p className="text-xs text-green-400 uppercase tracking-widest font-semibold mb-2">Best For</p>
                 <ul className="space-y-1">
                   {bestFor.slice(0, 3).map((item, i) => (
@@ -164,7 +164,7 @@ export function ReviewDraftPreview({
               </div>
             )}
             {notFor.length > 0 && (
-              <div className="bg-gray-900 rounded-xl p-3">
+              <div className="bg-surface rounded-xl p-3">
                 <p className="text-xs text-red-400 uppercase tracking-widest font-semibold mb-2">Not For</p>
                 <ul className="space-y-1">
                   {notFor.slice(0, 3).map((item, i) => (
@@ -185,7 +185,7 @@ export function ReviewDraftPreview({
               prose-headings:font-black prose-headings:font-sans prose-headings:tracking-tight
               prose-h2:text-base prose-h2:mt-6 prose-h2:mb-2
               prose-p:text-gray-300 prose-p:leading-relaxed prose-p:text-xs
-              prose-a:text-orange-400 prose-a:no-underline
+              prose-a:text-accent-text-soft prose-a:no-underline
               prose-strong:text-white prose-li:text-xs prose-li:text-gray-300"
             dangerouslySetInnerHTML={{ __html: content }}
           />
@@ -193,10 +193,10 @@ export function ReviewDraftPreview({
 
         {/* FAQs */}
         {faqs.length > 0 && (
-          <div className="space-y-3 pt-3 border-t border-gray-800/60">
+          <div className="space-y-3 pt-3 border-t border-soft/60">
             <p className="text-xs font-black text-white">Frequently Asked Questions</p>
             {faqs.map((faq, i) => (
-              <div key={i} className="bg-gray-900 rounded-xl p-3">
+              <div key={i} className="bg-surface rounded-xl p-3">
                 <p className="font-bold text-xs text-white mb-1">{faq.question}</p>
                 <p className="text-xs text-gray-300 leading-relaxed">{faq.answer}</p>
               </div>

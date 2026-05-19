@@ -57,6 +57,33 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  {
+    // Prevent raw Tailwind color shades from re-appearing anywhere in the codebase.
+    // Use semantic role tokens instead (defined in globals.css @theme inline).
+    // Note: cn()/clsx() call expressions are NOT caught by this rule — review those manually.
+    files: ['app/**/*.{ts,tsx}', 'components/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "JSXAttribute[name.name='className'] Literal[value=/\\btext-orange-[456]00\\b/]",
+          message: 'Use text-eyebrow, text-card-title, text-accent-text, or text-accent-text-soft instead of raw text-orange-N.',
+        },
+        {
+          selector: "JSXAttribute[name.name='className'] Literal[value=/\\bbg-orange-(5|6|8|9)00\\b|\\bbg-orange-950\\b/]",
+          message: 'Use bg-accent, bg-accent-hover, or bg-accent-tint instead of raw bg-orange-N.',
+        },
+        {
+          selector: "JSXAttribute[name.name='className'] Literal[value=/\\b(bg|text|border)-(neutral|gray)-(800|900|950)\\b/]",
+          message: 'Use bg-surface/bg-surface-raised/bg-surface-sunken, text-prose/text-prose-muted/text-prose-faint, or border-soft/border-strong instead of raw neutral/gray-N.',
+        },
+        {
+          selector: "JSXAttribute[name.name='className'] Literal[value=/\\btext-(neutral|gray)-(100|200|400|500|600)\\b/]",
+          message: 'Use text-prose, text-prose-muted, or text-prose-faint instead of raw text-neutral/gray-N.',
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

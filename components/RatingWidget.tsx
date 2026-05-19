@@ -54,10 +54,10 @@ export default function RatingWidget({ reviewId }: Props) {
   const activeRating = hovered ?? data.userRating
 
   return (
-    <div className="py-3 border-t border-gray-800/60">
+    <div className="py-3 border-t border-soft/60">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
 
-        <span className="text-xs text-gray-500 shrink-0 select-none">Rate this product:</span>
+        <span className="text-xs text-prose-faint shrink-0 select-none">Rate this product:</span>
 
         {data.authed ? (
           <div
@@ -75,8 +75,8 @@ export default function RatingWidget({ reviewId }: Props) {
                   onMouseEnter={() => setHovered(r)}
                   className={`w-7 h-7 text-xs font-bold rounded-md border transition-all disabled:opacity-50
                     ${filled
-                      ? 'bg-orange-600 border-orange-600 text-white'
-                      : 'bg-gray-900 border-gray-700 text-gray-500 hover:border-orange-600 hover:text-orange-400'
+                      ? 'bg-accent border-accent text-white'
+                      : 'bg-surface border-strong text-prose-faint hover:border-accent hover:text-accent-text-soft'
                     }
                     ${isChosen ? 'ring-1 ring-orange-300 ring-offset-1 ring-offset-black' : ''}
                   `}
@@ -89,14 +89,14 @@ export default function RatingWidget({ reviewId }: Props) {
         ) : (
           <Link
             href={`/login?next=${encodeURIComponent(pathname)}`}
-            className="text-xs text-orange-500 hover:text-orange-400 transition-colors"
+            className="text-xs text-accent-text hover:text-accent-text-soft transition-colors"
           >
             Sign in to rate
           </Link>
         )}
 
         {data.count >= THRESHOLD && (
-          <span className="text-xs text-gray-600">
+          <span className="text-xs text-prose-faint">
             · Reader avg:{' '}
             <span className="text-gray-300 font-medium">{data.avg}/10</span>
             {' '}

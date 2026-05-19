@@ -5,7 +5,7 @@ interface Props {
 
 function scoreColor(r: number) {
   if (r >= 8) return 'text-green-400'
-  if (r >= 7) return 'text-orange-400'
+  if (r >= 7) return 'text-accent-text-soft'
   if (r >= 5) return 'text-yellow-500'
   return 'text-red-400'
 }
@@ -21,7 +21,7 @@ export default function RatingScore({ rating, size = 'sm' }: Props) {
     return (
       <div className="flex items-baseline gap-1">
         <span className={`text-3xl font-black ${color}`}>{fmt(rating)}</span>
-        <span className="text-base text-gray-600 font-semibold">/10</span>
+        <span className="text-base text-prose-faint font-semibold">/10</span>
       </div>
     )
   }
@@ -29,7 +29,7 @@ export default function RatingScore({ rating, size = 'sm' }: Props) {
   return (
     <div className="flex items-baseline gap-0.5">
       <span className={`text-sm font-bold ${color}`}>{fmt(rating)}</span>
-      <span className="text-xs text-gray-600">/10</span>
+      <span className="text-xs text-prose-faint">/10</span>
     </div>
   )
 }

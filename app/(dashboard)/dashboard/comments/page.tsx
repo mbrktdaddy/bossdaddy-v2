@@ -55,11 +55,11 @@ export default async function CommentsPage({ searchParams }: Props) {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl sm:text-3xl font-black">Comments</h1>
-        <p className="text-gray-500 text-sm mt-1">Review pending comments and manage reader engagement.</p>
+        <p className="text-prose-faint text-sm mt-1">Review pending comments and manage reader engagement.</p>
       </div>
 
       {/* Status tabs */}
-      <div className="mb-6 flex gap-1 bg-gray-900 border border-gray-800 rounded-xl p-1 w-fit max-w-full overflow-x-auto scrollbar-hide">
+      <div className="mb-6 flex gap-1 bg-surface border border-soft rounded-xl p-1 w-fit max-w-full overflow-x-auto scrollbar-hide">
         {STATUS_TABS.map((t) => {
           const active = status === t.key
           const count = counts[t.key as keyof typeof counts]
@@ -68,12 +68,12 @@ export default async function CommentsPage({ searchParams }: Props) {
               key={t.key}
               href={`/dashboard/comments?status=${t.key}`}
               className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors whitespace-nowrap ${
-                active ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-gray-300'
+                active ? 'bg-surface-raised text-white' : 'text-prose-faint hover:text-gray-300'
               }`}
             >
               {t.label}
               {count > 0 && (
-                <span className={`ml-2 px-1.5 py-0.5 text-xs rounded-full ${active ? 'bg-orange-600 text-white' : 'bg-gray-800 text-gray-500'}`}>
+                <span className={`ml-2 px-1.5 py-0.5 text-xs rounded-full ${active ? 'bg-accent text-white' : 'bg-surface-raised text-prose-faint'}`}>
                   {count}
                 </span>
               )}
@@ -84,9 +84,9 @@ export default async function CommentsPage({ searchParams }: Props) {
 
       {/* Comments list */}
       {!comments?.length ? (
-        <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
+        <div className="text-center py-24 border border-dashed border-soft rounded-2xl">
           <p className="text-2xl mb-2">{status === 'pending' ? '✅' : '—'}</p>
-          <p className="text-gray-400 font-semibold">No {status} comments.</p>
+          <p className="text-prose-muted font-semibold">No {status} comments.</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -98,16 +98,16 @@ export default async function CommentsPage({ searchParams }: Props) {
             const flags   = (c.moderation_flags ?? []) as string[]
 
             return (
-              <div key={c.id} className="p-4 bg-gray-900 border border-gray-800 rounded-2xl">
+              <div key={c.id} className="p-4 bg-surface border border-soft rounded-2xl">
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
                     c.content_type === 'review'
-                      ? 'bg-orange-950/40 text-orange-400 border-orange-900/30'
+                      ? 'bg-accent-tint/40 text-accent-text-soft border-accent-border/30'
                       : 'bg-blue-950/40 text-blue-400 border-blue-900/30'
                   }`}>
                     {c.content_type === 'review' ? 'Review' : 'Guide'}
                   </span>
-                  <span className="text-xs text-gray-500">by @{author}</span>
+                  <span className="text-xs text-prose-faint">by @{author}</span>
                   <span className="text-xs text-gray-700">
                     {new Date(c.created_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
@@ -125,7 +125,7 @@ export default async function CommentsPage({ searchParams }: Props) {
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-gray-400 hover:text-orange-400 transition-colors block mb-2 truncate"
+                    className="text-xs text-prose-muted hover:text-accent-text-soft transition-colors block mb-2 truncate"
                   >
                     ↗ {content.title}
                   </Link>

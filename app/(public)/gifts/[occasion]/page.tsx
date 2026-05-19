@@ -229,33 +229,33 @@ export default async function GiftOccasionPage({ params }: Props) {
       {faqLd      && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
       <div className={`${pick ? 'max-w-7xl' : 'max-w-4xl'} mx-auto px-6 py-12`}>
-        <div className="flex items-center gap-2 text-xs text-gray-500 mb-6">
-          <Link href="/gifts" className="hover:text-orange-400 transition-colors">Gift Guides</Link>
+        <div className="flex items-center gap-2 text-xs text-prose-faint mb-6">
+          <Link href="/gifts" className="hover:text-accent-text-soft transition-colors">Gift Guides</Link>
           <span>/</span>
-          <span className="text-gray-400">{occ.label}</span>
+          <span className="text-prose-muted">{occ.label}</span>
         </div>
 
         <div className={pick ? 'lg:flex lg:gap-10 lg:items-start' : ''}>
           <main className={pick ? 'lg:flex-1 lg:max-w-3xl min-w-0' : ''}>
             {/* Hero — image if present, big occasion icon otherwise */}
             {pick?.hero_image_url ? (
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-8 bg-gray-900">
+              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-8 bg-surface">
                 <Image src={pick.hero_image_url} alt={pick.title ?? occ.label} fill className="object-cover" sizes={pick ? '(max-width: 768px) 100vw, 768px' : '(max-width: 768px) 100vw, 896px'} priority />
               </div>
             ) : (
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-8 bg-gradient-to-br from-orange-950/40 to-gray-900 flex items-center justify-center border border-orange-900/20">
-                <OccasionIcon value={occ.value} className="w-20 h-20 md:w-24 md:h-24 text-orange-500/70" />
+              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-8 bg-gradient-to-br from-orange-950/40 to-surface flex items-center justify-center border border-accent-border/20">
+                <OccasionIcon value={occ.value} className="w-20 h-20 md:w-24 md:h-24 text-accent-text/70" />
               </div>
             )}
 
             {/* Header */}
             <header className="mb-8">
-              <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-              <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">Gift Guide · {occ.label}</p>
+              <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Gift Guide · {occ.label}</p>
               <h1 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tight leading-tight">
                 {pick?.title ?? occ.label}
               </h1>
-              <p className="text-lg text-gray-400 leading-relaxed mb-6">
+              <p className="text-lg text-prose-muted leading-relaxed mb-6">
                 {pick?.description ?? occ.longBlurb}
               </p>
               {pick && (
@@ -266,8 +266,8 @@ export default async function GiftOccasionPage({ params }: Props) {
                     readingMinutes={readingMinutes}
                   />
                   {priceRangeLabel && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-950/40 border border-orange-900/40 text-xs font-bold text-orange-300 tabular-nums">
-                      <span className="text-orange-500/70 uppercase tracking-widest text-[10px]">Range</span>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-tint/40 border border-accent-border/40 text-xs font-bold text-orange-300 tabular-nums">
+                      <span className="text-eyebrow/70 uppercase tracking-widest text-[10px]">Range</span>
                       {priceRangeLabel}
                     </span>
                   )}
@@ -283,12 +283,12 @@ export default async function GiftOccasionPage({ params }: Props) {
             {pick?.intro_html && (
               <section id="overview" className="mb-10">
                 <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Why These</p>
+                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Why These</p>
                   <h2 className="text-2xl font-black text-white leading-tight">Behind the picks</h2>
                 </div>
                 <div
-                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-orange-400 hover:prose-a:text-orange-300 prose-a:no-underline"
+                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-accent-text-soft hover:prose-a:text-orange-300 prose-a:no-underline"
                   dangerouslySetInnerHTML={{ __html: pick.intro_html }}
                 />
               </section>
@@ -310,8 +310,8 @@ export default async function GiftOccasionPage({ params }: Props) {
             {items.length > 0 ? (
               <section id="picks" className="mb-12">
                 <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">The Gifts</p>
+                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Gifts</p>
                   <h2 className="text-2xl font-black text-white leading-tight">
                     {items.length} dad-tested {items.length === 1 ? 'gift' : 'gifts'}, all personally bought
                   </h2>
@@ -322,15 +322,15 @@ export default async function GiftOccasionPage({ params }: Props) {
                     const product = review.product_slug ? productMap.get(review.product_slug) : null
                     const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                     return (
-                      <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 rounded-2xl p-5 shadow-lg shadow-black/40 transition-colors">
+                      <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:border-accent-border/40 rounded-2xl p-5 shadow-lg shadow-black/40 transition-colors">
                         <div className="flex sm:flex-col items-center gap-3 sm:gap-0 shrink-0">
-                          <span className="w-10 h-10 rounded-full bg-orange-950/60 border border-orange-900/40 flex items-center justify-center text-orange-400 font-black text-sm tabular-nums">
+                          <span className="w-10 h-10 rounded-full bg-accent-tint/60 border border-accent-border/40 flex items-center justify-center text-accent-text-soft font-black text-sm tabular-nums">
                             {idx + 1}
                           </span>
                         </div>
 
                         {review.image_url && (
-                          <div className="relative w-full sm:w-40 h-40 sm:h-32 shrink-0 rounded-xl overflow-hidden bg-gray-800">
+                          <div className="relative w-full sm:w-40 h-40 sm:h-32 shrink-0 rounded-xl overflow-hidden bg-surface-raised">
                             <Image src={review.image_url} alt={review.product_name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 160px" />
                             {review.rating != null && review.rating >= 8 && (
                               <div className="absolute top-2 right-2"><BossApprovedBadge size="sm" variant="card" /></div>
@@ -346,12 +346,12 @@ export default async function GiftOccasionPage({ params }: Props) {
                                   the product name eyebrow so it lands as the
                                   first thing the eye catches. */}
                               {itemRoleLabel && (
-                                <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-orange-600/15 border border-orange-700/40 text-[10px] font-black uppercase tracking-widest text-orange-300">
+                                <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-accent/15 border border-accent-border/40 text-[10px] font-black uppercase tracking-widest text-orange-300">
                                   {itemRoleLabel}
                                 </span>
                               )}
-                              <p className="text-xs font-medium text-orange-500/80 uppercase tracking-widest mb-1">{review.product_name}</p>
-                              <Link href={`/reviews/${review.slug}`} className="text-base font-bold text-white hover:text-orange-400 transition-colors leading-snug block">
+                              <p className="text-xs font-medium text-eyebrow/80 uppercase tracking-widest mb-1">{review.product_name}</p>
+                              <Link href={`/reviews/${review.slug}`} className="text-base font-bold text-white hover:text-accent-text-soft transition-colors leading-snug block">
                                 {review.title}
                               </Link>
                             </div>
@@ -368,17 +368,17 @@ export default async function GiftOccasionPage({ params }: Props) {
                           </p>
 
                           {(review.best_for?.length ?? 0) > 0 && (
-                            <p className="text-xs text-gray-500 mb-3">
-                              <span className="text-orange-400 font-bold uppercase tracking-widest">Also good for:</span> {review.best_for!.slice(0, 3).join(' · ')}
+                            <p className="text-xs text-prose-faint mb-3">
+                              <span className="text-accent-text-soft font-bold uppercase tracking-widest">Also good for:</span> {review.best_for!.slice(0, 3).join(' · ')}
                             </p>
                           )}
 
                           <div className="flex flex-wrap items-center gap-3 mt-auto pt-1">
-                            <Link href={`/reviews/${review.slug}`} className="text-xs text-gray-400 hover:text-orange-400 transition-colors font-semibold uppercase tracking-widest">
+                            <Link href={`/reviews/${review.slug}`} className="text-xs text-prose-muted hover:text-accent-text-soft transition-colors font-semibold uppercase tracking-widest">
                               Read review →
                             </Link>
                             {product?.price_cents != null && (
-                              <span className="text-xs text-gray-400 font-bold tabular-nums">${(product.price_cents / 100).toFixed(0)}</span>
+                              <span className="text-xs text-prose-muted font-bold tabular-nums">${(product.price_cents / 100).toFixed(0)}</span>
                             )}
                             {href && (
                               <a
@@ -386,7 +386,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                                 target="_blank"
                                 rel={product?.affiliate_url ? 'sponsored nofollow noopener' : 'noopener'}
                                 data-product-slug={review.product_slug ?? undefined}
-                                className="ml-auto px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
+                                className="ml-auto px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
                               >
                                 Check Price
                               </a>
@@ -400,9 +400,9 @@ export default async function GiftOccasionPage({ params }: Props) {
               </section>
             ) : (
               /* Empty state — proper SEO landing page with email capture */
-              <div className="bg-gradient-to-br from-orange-950/30 to-gray-900 rounded-2xl p-8 md:p-10 border border-orange-900/30 mb-10">
-                <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                <p className="text-xs text-orange-500 uppercase tracking-widest font-bold mb-3">Coming Soon</p>
+              <div className="bg-gradient-to-br from-orange-950/30 to-surface rounded-2xl p-8 md:p-10 border border-accent-border/30 mb-10">
+                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                <p className="text-xs text-eyebrow uppercase tracking-widest font-bold mb-3">Coming Soon</p>
                 <h2 className="text-2xl md:text-3xl font-black text-white mb-3">
                   The {occ.label} list is being built
                 </h2>
@@ -427,23 +427,23 @@ export default async function GiftOccasionPage({ params }: Props) {
 
             {/* Related occasions strip — siblings in the same occasion group */}
             {relatedOccasions.length > 0 && (
-              <section className="mt-14 pt-10 border-t border-gray-800/60">
-                <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-5">More Gift Guides</p>
+              <section className="mt-14 pt-10 border-t border-soft/60">
+                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-5">More Gift Guides</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {relatedOccasions.map((r) => (
                     <Link
                       key={r.value}
                       href={`/gifts/${r.slug}`}
-                      className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:bg-gray-800 hover:border-orange-900/40 rounded-xl transition-colors min-h-[44px]"
+                      className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:bg-surface-raised hover:border-accent-border/40 rounded-xl transition-colors min-h-[44px]"
                     >
-                      <OccasionIcon value={r.value} className="w-6 h-6 shrink-0 text-orange-400" />
+                      <OccasionIcon value={r.value} className="w-6 h-6 shrink-0 text-accent-text-soft" />
                       <span className="text-sm font-semibold text-gray-300 hover:text-white transition-colors truncate">{r.label}</span>
                     </Link>
                   ))}
                 </div>
                 <div className="mt-4 text-center">
-                  <Link href="/gifts" className="text-sm text-gray-500 hover:text-orange-400 transition-colors">
+                  <Link href="/gifts" className="text-sm text-prose-faint hover:text-accent-text-soft transition-colors">
                     See all gift guides →
                   </Link>
                 </div>

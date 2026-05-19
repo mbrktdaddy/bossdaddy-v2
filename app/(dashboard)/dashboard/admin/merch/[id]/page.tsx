@@ -34,7 +34,7 @@ export default async function AdminMerchDetailPage({
     <div className="p-8 max-w-2xl">
       <Link
         href="/dashboard/admin/merch"
-        className="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-white transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-xs text-prose-faint hover:text-white transition-colors mb-6"
       >
         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -45,7 +45,7 @@ export default async function AdminMerchDetailPage({
       <h1 className="text-2xl font-black mb-1">
         {isNew ? 'New merch item' : item!.name}
       </h1>
-      <p className="text-gray-500 text-sm mb-8">
+      <p className="text-prose-faint text-sm mb-8">
         {isNew
           ? 'Add a new piece of branded merch — start with status "Coming soon" to show a Notify me card.'
           : 'Edit this merch item.'}

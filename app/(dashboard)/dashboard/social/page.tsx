@@ -61,7 +61,7 @@ export default async function SocialPage({ searchParams }: Props) {
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-black text-white">Social Posts</h1>
-          <p className="text-sm text-gray-400 mt-0.5">Generate, edit, and copy posts to your accounts.</p>
+          <p className="text-sm text-prose-muted mt-0.5">Generate, edit, and copy posts to your accounts.</p>
         </div>
         <GenerateDrawer
           reviews={sourceLinks.reviews}
@@ -78,8 +78,8 @@ export default async function SocialPage({ searchParams }: Props) {
             href={`/dashboard/social?platform=${p.id}&status=${status}`}
             className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
               p.id === platform
-                ? 'bg-orange-600 text-white'
-                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                ? 'bg-accent text-white'
+                : 'text-prose-muted hover:bg-surface-raised hover:text-white'
             }`}
           >
             {p.id === 'x' ? 'X (Twitter)' : (
@@ -98,7 +98,7 @@ export default async function SocialPage({ searchParams }: Props) {
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors capitalize ${
               s === status
                 ? 'bg-gray-700 text-white'
-                : 'text-gray-500 hover:text-white'
+                : 'text-prose-faint hover:text-white'
             }`}
           >
             {s}

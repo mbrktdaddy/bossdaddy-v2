@@ -9,13 +9,13 @@ export const metadata: Metadata = { title: 'Orders — Admin' }
 type OrderStatus = 'pending_payment' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded'
 
 const STATUS_STYLES: Record<OrderStatus, { label: string; cls: string }> = {
-  pending_payment: { label: 'Pending',    cls: 'bg-gray-800 text-gray-400' },
+  pending_payment: { label: 'Pending',    cls: 'bg-surface-raised text-prose-muted' },
   paid:            { label: 'Paid',       cls: 'bg-amber-950/60 text-amber-400' },
   processing:      { label: 'Processing', cls: 'bg-blue-950/60 text-blue-400' },
   shipped:         { label: 'Shipped',    cls: 'bg-green-950/60 text-green-400' },
   delivered:       { label: 'Delivered',  cls: 'bg-green-950/80 text-green-300' },
   cancelled:       { label: 'Cancelled',  cls: 'bg-red-950/60 text-red-400' },
-  refunded:        { label: 'Refunded',   cls: 'bg-orange-950/60 text-orange-400' },
+  refunded:        { label: 'Refunded',   cls: 'bg-accent-tint/60 text-accent-text-soft' },
 }
 
 export default async function AdminOrdersPage() {
@@ -56,21 +56,21 @@ export default async function AdminOrdersPage() {
 
       <div className="mb-8">
         <h1 className="text-2xl font-black">Orders</h1>
-        <p className="text-gray-500 text-sm mt-1">
+        <p className="text-prose-faint text-sm mt-1">
           {orders.length} order{orders.length !== 1 ? 's' : ''} total
         </p>
       </div>
 
       {orders.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-12 text-center">
-          <p className="text-gray-400 text-lg font-semibold mb-2">No orders yet.</p>
-          <p className="text-gray-600 text-sm">Orders will appear here after your first Stripe checkout.</p>
+        <div className="bg-surface border border-soft rounded-2xl p-12 text-center">
+          <p className="text-prose-muted text-lg font-semibold mb-2">No orders yet.</p>
+          <p className="text-prose-faint text-sm">Orders will appear here after your first Stripe checkout.</p>
         </div>
       ) : (
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+        <div className="bg-surface border border-soft rounded-2xl overflow-hidden">
 
           {/* Table header */}
-          <div className="grid grid-cols-[1fr_1fr_auto_auto_auto] gap-4 px-5 py-3 border-b border-gray-800 text-xs text-gray-500 uppercase tracking-widest font-semibold">
+          <div className="grid grid-cols-[1fr_1fr_auto_auto_auto] gap-4 px-5 py-3 border-b border-soft text-xs text-prose-faint uppercase tracking-widest font-semibold">
             <span>Order</span>
             <span>Customer</span>
             <span>Status</span>
@@ -86,7 +86,7 @@ export default async function AdminOrdersPage() {
             return (
               <div
                 key={order.id}
-                className="grid grid-cols-[1fr_1fr_auto_auto_auto] gap-4 px-5 py-4 border-b border-gray-800/60 last:border-0 items-center hover:bg-gray-800/30 transition-colors"
+                className="grid grid-cols-[1fr_1fr_auto_auto_auto] gap-4 px-5 py-4 border-b border-soft/60 last:border-0 items-center hover:bg-surface-raised/30 transition-colors"
               >
                 <div>
                   <div className="flex items-center gap-2">
@@ -100,16 +100,16 @@ export default async function AdminOrdersPage() {
                       </span>
                     )}
                   </div>
-                  <p className="text-gray-600 text-xs mt-0.5">{date}</p>
+                  <p className="text-prose-faint text-xs mt-0.5">{date}</p>
                 </div>
-                <p className="text-gray-400 text-sm truncate">{order.email}</p>
+                <p className="text-prose-muted text-sm truncate">{order.email}</p>
                 <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${badge.cls}`}>
                   {badge.label}
                 </span>
-                <p className="text-orange-400 font-bold text-sm text-right">
+                <p className="text-accent-text-soft font-bold text-sm text-right">
                   {formatPrice(order.total_cents)}
                 </p>
-                <p className="text-gray-600 text-xs text-right font-mono">
+                <p className="text-prose-faint text-xs text-right font-mono">
                   {order.printful_order_id ?? '—'}
                 </p>
               </div>

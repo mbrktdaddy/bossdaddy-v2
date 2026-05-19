@@ -8,9 +8,9 @@ import AccountDeletion from './_components/AccountDeletion'
 import AvatarUploader from './_components/AvatarUploader'
 
 const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
-  admin:  { label: 'Admin',  className: 'bg-orange-950/60 text-orange-400 border border-orange-900/60' },
+  admin:  { label: 'Admin',  className: 'bg-accent-tint/60 text-accent-text-soft border border-accent-border/60' },
   author: { label: 'Author', className: 'bg-blue-950/60 text-blue-400 border border-blue-900/60' },
-  member: { label: 'Member', className: 'bg-gray-800 text-gray-400 border border-gray-700' },
+  member: { label: 'Member', className: 'bg-surface-raised text-prose-muted border border-strong' },
 }
 
 export default async function ProfilePage() {
@@ -127,7 +127,7 @@ export default async function ProfilePage() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-black">My Profile</h1>
-        <p className="text-gray-500 text-sm mt-1">Manage your account and view your activity</p>
+        <p className="text-prose-faint text-sm mt-1">Manage your account and view your activity</p>
       </div>
 
       {/* Pending-deletion banner — sits at top so it can't be missed */}
@@ -140,7 +140,7 @@ export default async function ProfilePage() {
       )}
 
       {/* Identity hero — avatar + name + role pill + joined date */}
-      <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-orange-950/40 border border-gray-800 rounded-2xl p-6 mb-6">
+      <div className="bg-gradient-to-br from-surface via-surface to-orange-950/40 border border-soft rounded-2xl p-6 mb-6">
         <AvatarUploader
           initialAvatarUrl={(profile as { avatar_url?: string | null } | null)?.avatar_url ?? null}
           initial={profile?.username?.[0]?.toUpperCase() ?? '?'}
@@ -153,36 +153,36 @@ export default async function ProfilePage() {
           </span>
         </div>
         {memberSince && (
-          <p className="text-sm text-gray-500 mt-1">Member since {memberSince}</p>
+          <p className="text-sm text-prose-faint mt-1">Member since {memberSince}</p>
         )}
       </div>
 
       {/* Account — username + email */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6">
-        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Account</p>
+      <div className="bg-surface border border-soft rounded-2xl p-6 mb-6">
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Account</p>
         <EditUsernameForm current={profile?.username ?? ''} />
-        <div className="mt-5 pt-5 border-t border-gray-800">
-          <label className="block text-xs text-gray-500 uppercase tracking-widest mb-2">Email</label>
+        <div className="mt-5 pt-5 border-t border-soft">
+          <label className="block text-xs text-prose-faint uppercase tracking-widest mb-2">Email</label>
           <EditEmailForm current={user.email ?? ''} />
         </div>
       </div>
 
       {/* Writing settings — authors only */}
       {isAuthor && (
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Writing Settings</p>
+        <div className="bg-surface border border-soft rounded-2xl p-6 mb-6">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Writing Settings</p>
           <Link
             href="/dashboard/profile/voice"
-            className="flex items-center gap-3 p-4 bg-gray-950 border border-gray-800 hover:border-orange-700/50 rounded-xl transition-colors group"
+            className="flex items-center gap-3 p-4 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group"
           >
             <span className="text-xl shrink-0">🎙️</span>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-white group-hover:text-orange-400 transition-colors">Voice Profile</p>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-sm font-semibold text-white group-hover:text-accent-text-soft transition-colors">Voice Profile</p>
+              <p className="text-xs text-prose-faint mt-0.5">
                 Facts Claude uses as ground truth — family ages, occupation, values, and evolving notes.
               </p>
             </div>
-            <svg className="w-4 h-4 text-gray-700 group-hover:text-orange-400 shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4 text-gray-700 group-hover:text-accent-text-soft shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </Link>
@@ -191,10 +191,10 @@ export default async function ProfilePage() {
 
       {/* Public bio — authors + admins only */}
       {isAuthor && (
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Public Bio</p>
-          <p className="text-xs text-gray-600 mb-4">
-            Shown at the bottom of every piece you publish, on your <Link href={`/author/${profile?.username}`} target="_blank" className="text-orange-500 hover:text-orange-400">public author page</Link>.
+        <div className="bg-surface border border-soft rounded-2xl p-6 mb-6">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Public Bio</p>
+          <p className="text-xs text-prose-faint mb-4">
+            Shown at the bottom of every piece you publish, on your <Link href={`/author/${profile?.username}`} target="_blank" className="text-accent-text hover:text-accent-text-soft">public author page</Link>.
           </p>
           <BioForm
             initialDisplayName={(profile as { display_name?: string | null } | null)?.display_name ?? null}
@@ -205,49 +205,49 @@ export default async function ProfilePage() {
       )}
 
       {/* Activity stats */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6">
-        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Activity</p>
+      <div className="bg-surface border border-soft rounded-2xl p-6 mb-6">
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Activity</p>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {isAuthor && (
             <>
               <div className="text-center">
                 <p className="text-2xl font-black text-white">{reviewCount ?? 0}</p>
-                <p className="text-xs text-gray-500 mt-1">Published Reviews</p>
+                <p className="text-xs text-prose-faint mt-1">Published Reviews</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-black text-white">{guideCount ?? 0}</p>
-                <p className="text-xs text-gray-500 mt-1">Published Guides</p>
+                <p className="text-xs text-prose-faint mt-1">Published Guides</p>
               </div>
             </>
           )}
           <div className="text-center">
             <p className="text-2xl font-black text-white">{commentCount ?? 0}</p>
-            <p className="text-xs text-gray-500 mt-1">Comments Left</p>
+            <p className="text-xs text-prose-faint mt-1">Comments Left</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-black text-orange-400">{likesGiven ?? 0}</p>
-            <p className="text-xs text-gray-500 mt-1">Likes Given</p>
+            <p className="text-2xl font-black text-accent-text-soft">{likesGiven ?? 0}</p>
+            <p className="text-xs text-prose-faint mt-1">Likes Given</p>
           </div>
           <div className="text-center">
             <p className="text-2xl font-black text-red-400">{commentLikesReceived ?? 0}</p>
-            <p className="text-xs text-gray-500 mt-1">Comment Likes</p>
+            <p className="text-xs text-prose-faint mt-1">Comment Likes</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-black text-gray-400">{sharesReceived ?? 0}</p>
-            <p className="text-xs text-gray-500 mt-1">Comments Shared</p>
+            <p className="text-2xl font-black text-prose-muted">{sharesReceived ?? 0}</p>
+            <p className="text-xs text-prose-faint mt-1">Comments Shared</p>
           </div>
           {isAuthor && (
             <div className="text-center">
               <p className="text-2xl font-black text-white">{likesReceived ?? 0}</p>
-              <p className="text-xs text-gray-500 mt-1">Content Likes</p>
+              <p className="text-xs text-prose-faint mt-1">Content Likes</p>
             </div>
           )}
           {isAuthor && ((draftCount ?? 0) > 0 || (awaitingCount ?? 0) > 0) && (
-            <div className="col-span-2 sm:col-span-3 pt-4 border-t border-gray-800 flex items-center justify-center gap-3 flex-wrap">
+            <div className="col-span-2 sm:col-span-3 pt-4 border-t border-soft flex items-center justify-center gap-3 flex-wrap">
               {(draftCount ?? 0) > 0 && (
                 <Link
                   href="/dashboard/reviews"
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 border border-gray-700 hover:border-gray-500 rounded-lg text-xs font-medium text-gray-300 hover:text-white transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-raised border border-strong hover:border-gray-500 rounded-lg text-xs font-medium text-gray-300 hover:text-white transition-colors"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-gray-400 shrink-0" />
                   {draftCount} Draft{draftCount !== 1 ? 's' : ''} →
@@ -268,13 +268,13 @@ export default async function ProfilePage() {
       </div>
 
       {/* Liked content — browsable history */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6">
-        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">
+      <div className="bg-surface border border-soft rounded-2xl p-6 mb-6">
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">
           Liked Content
         </p>
 
         {!hasLikedContent ? (
-          <p className="text-sm text-gray-600 text-center py-4">
+          <p className="text-sm text-prose-faint text-center py-4">
             Nothing liked yet — heart a review or article and it will appear here.
           </p>
         ) : (
@@ -283,18 +283,18 @@ export default async function ProfilePage() {
               <Link
                 key={r.id}
                 href={`/reviews/${r.slug}`}
-                className="flex items-center gap-3 p-3 bg-gray-950 border border-gray-800 hover:border-orange-700/50 rounded-xl transition-colors group"
+                className="flex items-center gap-3 p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group"
               >
-                <span className="text-xs px-2 py-0.5 rounded-full bg-orange-950/60 text-orange-400 border border-orange-900/60 shrink-0">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-accent-tint/60 text-accent-text-soft border border-accent-border/60 shrink-0">
                   Review
                 </span>
                 <div className="min-w-0">
                   <p className="text-sm text-gray-300 group-hover:text-white transition-colors truncate">
                     {r.title}
                   </p>
-                  <p className="text-xs text-gray-600 truncate">{r.product_name}</p>
+                  <p className="text-xs text-prose-faint truncate">{r.product_name}</p>
                 </div>
-                <svg className="w-4 h-4 text-gray-700 group-hover:text-orange-400 shrink-0 ml-auto transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 text-gray-700 group-hover:text-accent-text-soft shrink-0 ml-auto transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </Link>
@@ -304,7 +304,7 @@ export default async function ProfilePage() {
               <Link
                 key={a.id}
                 href={`/guides/${a.slug}`}
-                className="flex items-center gap-3 p-3 bg-gray-950 border border-gray-800 hover:border-orange-700/50 rounded-xl transition-colors group"
+                className="flex items-center gap-3 p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group"
               >
                 <span className="text-xs px-2 py-0.5 rounded-full bg-blue-950/60 text-blue-400 border border-blue-900/60 shrink-0">
                   Article
@@ -314,7 +314,7 @@ export default async function ProfilePage() {
                     {a.title}
                   </p>
                 </div>
-                <svg className="w-4 h-4 text-gray-700 group-hover:text-orange-400 shrink-0 ml-auto transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 text-gray-700 group-hover:text-accent-text-soft shrink-0 ml-auto transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </Link>
@@ -325,36 +325,36 @@ export default async function ProfilePage() {
 
       {/* Author/Admin — public profile + content management */}
       {isAuthor && (
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Content</p>
+        <div className="bg-surface border border-soft rounded-2xl p-6 mb-6">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Content</p>
           <div className="space-y-2">
             <Link
               href={`/author/${profile?.username}`}
               target="_blank"
-              className="flex items-center justify-between p-3 bg-gray-950 border border-gray-800 hover:border-orange-700/50 rounded-xl transition-colors group"
+              className="flex items-center justify-between p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group"
             >
               <span className="text-sm text-gray-300 group-hover:text-white transition-colors">
                 View public author profile
               </span>
-              <svg className="w-4 h-4 text-gray-600 group-hover:text-orange-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
             </Link>
             <Link
               href="/dashboard/reviews"
-              className="flex items-center justify-between p-3 bg-gray-950 border border-gray-800 hover:border-gray-700 rounded-xl transition-colors group"
+              className="flex items-center justify-between p-3 bg-surface-sunken border border-soft hover:border-strong rounded-xl transition-colors group"
             >
               <span className="text-sm text-gray-300 group-hover:text-white transition-colors">Manage reviews</span>
-              <svg className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4 text-prose-faint group-hover:text-prose-muted transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
             <Link
               href="/dashboard/guides"
-              className="flex items-center justify-between p-3 bg-gray-950 border border-gray-800 hover:border-gray-700 rounded-xl transition-colors group"
+              className="flex items-center justify-between p-3 bg-surface-sunken border border-soft hover:border-strong rounded-xl transition-colors group"
             >
               <span className="text-sm text-gray-300 group-hover:text-white transition-colors">Manage guides</span>
-              <svg className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4 text-prose-faint group-hover:text-prose-muted transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
@@ -373,24 +373,24 @@ export default async function ProfilePage() {
 
       {/* Admin quick links */}
       {isAdmin && (
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">Admin</p>
+        <div className="bg-surface border border-soft rounded-2xl p-6">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Admin</p>
           <div className="space-y-2">
             <Link
               href="/dashboard/moderation"
-              className="flex items-center justify-between p-3 bg-gray-950 border border-gray-800 hover:border-orange-700/50 rounded-xl transition-colors group"
+              className="flex items-center justify-between p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group"
             >
               <span className="text-sm text-gray-300 group-hover:text-white transition-colors">Moderation queue</span>
-              <svg className="w-4 h-4 text-gray-600 group-hover:text-orange-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
             <Link
               href="/dashboard/users"
-              className="flex items-center justify-between p-3 bg-gray-950 border border-gray-800 hover:border-orange-700/50 rounded-xl transition-colors group"
+              className="flex items-center justify-between p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group"
             >
               <span className="text-sm text-gray-300 group-hover:text-white transition-colors">User management</span>
-              <svg className="w-4 h-4 text-gray-600 group-hover:text-orange-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>

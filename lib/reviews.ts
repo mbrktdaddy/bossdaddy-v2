@@ -78,7 +78,7 @@ export function transformFollowupContent(html: string): { html: string; toc: Fol
       out += `<details open id="${escapedAnchor}" class="bd-followup-section group" style="margin-top:2.5rem;margin-bottom:1rem">`
         + `<summary class="cursor-pointer list-none flex items-baseline justify-between gap-3 hover:text-orange-300 transition-colors" style="margin:0">`
         + `<h2 style="margin:0">${escapedHeading}</h2>`
-        + `<svg class="w-4 h-4 text-orange-500 group-open:rotate-180 transition-transform shrink-0 self-center" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>`
+        + `<svg class="w-4 h-4 text-accent-text group-open:rotate-180 transition-transform shrink-0 self-center" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>`
         + `</summary>`
         + body
         + `</details>`

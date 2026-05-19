@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import type { ProductBadge } from '@/lib/collection-listings'
 
@@ -78,14 +80,14 @@ export default function BadgesForProduct({ badges, max = 2, compact = false }: P
             <Link
               href={`${meta.section}/${b.slug}`}
               onClick={(e) => e.stopPropagation()}
-              className={`inline-flex items-center gap-1.5 rounded-full bg-orange-950/40 border border-orange-900/40 hover:border-orange-700/60 hover:bg-orange-900/50 transition-colors group/badge ${
+              className={`inline-flex items-center gap-1.5 rounded-full bg-accent-tint/40 border border-accent-border/40 hover:border-accent-border/60 hover:bg-accent-tint/50 transition-colors group/badge ${
                 compact
                   ? 'px-2 py-0.5 text-[10px]'
                   : 'px-2.5 py-1 text-[11px]'
               }`}
             >
-              <span className="text-orange-400 group-hover/badge:text-orange-300 transition-colors">{meta.icon}</span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400 group-hover/badge:text-orange-300 transition-colors">
+              <span className="text-accent-text-soft group-hover/badge:text-orange-300 transition-colors">{meta.icon}</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-accent-text-soft group-hover/badge:text-orange-300 transition-colors">
                 {meta.label}
               </span>
               <span className={`font-semibold text-gray-300 group-hover/badge:text-white transition-colors truncate max-w-[160px] ${compact ? '' : 'max-w-[200px]'}`}>

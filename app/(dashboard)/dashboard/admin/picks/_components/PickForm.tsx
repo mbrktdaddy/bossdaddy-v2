@@ -493,9 +493,9 @@ export function PickForm({ pick, initialItems }: Props) {
           <input
             type="text" required value={slug} onChange={(e) => setSlug(e.target.value.toLowerCase())}
             pattern="[a-z0-9-]+" placeholder="fathers-day-gift-guide"
-            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-base"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
           />
-          <p className="mt-1 text-xs text-gray-600">
+          <p className="mt-1 text-xs text-prose-faint">
             Public URL: {pickType === 'comparison'
               ? `/comparisons/${slug || 'your-slug'}`
               : pickType === 'stack'
@@ -516,7 +516,7 @@ export function PickForm({ pick, initialItems }: Props) {
           <input
             type="text" required value={title} onChange={(e) => setTitle(e.target.value)}
             placeholder="Father's Day Gift Guide 2026"
-            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-base"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
           />
           {titleLint(title) && (
             <p className="mt-1 text-xs text-amber-400">⚠ {titleLint(title)}</p>
@@ -524,24 +524,24 @@ export function PickForm({ pick, initialItems }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Short description <span className="text-gray-600">(shows on index cards)</span></label>
+          <label className="block text-sm text-gray-300 mb-1.5">Short description <span className="text-prose-faint">(shows on index cards)</span></label>
           <input
             type="text" value={description} onChange={(e) => setDesc(e.target.value)}
             placeholder="Dad-tested picks that actually earn a spot in the garage or kitchen."
-            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-base"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
           />
         </div>
 
         <div>
           <div className="flex items-end justify-between mb-1.5 gap-2 flex-wrap">
             <label className="block text-sm text-gray-300">
-              Editorial intro <span className="text-gray-600">(shows above the body of the detail page)</span>
+              Editorial intro <span className="text-prose-faint">(shows above the body of the detail page)</span>
             </label>
             <button
               type="button"
               onClick={() => callIntroAI(false)}
               disabled={aiBusy || items.length < 2}
-              className="text-xs px-3 py-1.5 bg-orange-700/60 hover:bg-orange-600/60 disabled:opacity-40 text-orange-200 font-semibold rounded-lg transition-colors min-h-[32px]"
+              className="text-xs px-3 py-1.5 bg-orange-700/60 hover:bg-accent/60 disabled:opacity-40 text-orange-200 font-semibold rounded-lg transition-colors min-h-[32px]"
               title={items.length < 2 ? 'Add at least 2 reviews first' : 'Generate intro with AI'}
             >
               {aiBusy && !refineInstruction ? '✨ Generating…' : introHtml.trim() ? '↻ Regenerate with AI' : '✨ Generate with AI'}
@@ -561,13 +561,13 @@ export function PickForm({ pick, initialItems }: Props) {
                 value={refineInstruction}
                 onChange={(e) => setRefineInstruction(e.target.value)}
                 placeholder="Refine instruction — e.g. 'tighter', 'more dad voice', 'lead with the testing scenario'…"
-                className="flex-1 px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-sm"
+                className="flex-1 px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm"
               />
               <button
                 type="button"
                 onClick={() => callIntroAI(true)}
                 disabled={aiBusy || !refineInstruction.trim() || items.length < 2}
-                className="shrink-0 text-xs px-3 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-gray-200 font-semibold rounded-lg transition-colors min-h-[36px]"
+                className="shrink-0 text-xs px-3 py-2 bg-surface-raised hover:bg-gray-700 disabled:opacity-40 text-prose font-semibold rounded-lg transition-colors min-h-[36px]"
               >
                 {aiBusy && refineInstruction ? 'Refining…' : 'Refine →'}
               </button>
@@ -579,8 +579,8 @@ export function PickForm({ pick, initialItems }: Props) {
           )}
 
           {/* Inline images — manages bd-image-placeholder figures inside the intro */}
-          <div className="mt-3 bg-gray-950/60 border border-gray-800/60 rounded-xl p-4">
-            <p className="text-xs text-gray-500 font-medium uppercase tracking-widest mb-3">Inline images</p>
+          <div className="mt-3 bg-surface-sunken/60 border border-soft/60 rounded-xl p-4">
+            <p className="text-xs text-prose-faint font-medium uppercase tracking-widest mb-3">Inline images</p>
             <InlineMediaPanel
               content={introHtml}
               onChangeContent={setIntro}
@@ -598,7 +598,7 @@ export function PickForm({ pick, initialItems }: Props) {
           category={heroCategory}
           excerpt={description}
         />
-        <p className="-mt-3 text-xs text-gray-600">
+        <p className="-mt-3 text-xs text-prose-faint">
           📷 Take a real photo, 📁 pick from the media library, or generate an editorial scene with AI.
         </p>
 
@@ -606,7 +606,7 @@ export function PickForm({ pick, initialItems }: Props) {
           <label className="block text-sm text-gray-300 mb-1.5">Collection type</label>
           <select
             value={pickType} onChange={(e) => setPickType(e.target.value)}
-            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500 text-base"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
           >
             <option value="general">Pick (general curated list, /picks)</option>
             <option value="best_of">Best Of (ranked category list, /picks)</option>
@@ -619,7 +619,7 @@ export function PickForm({ pick, initialItems }: Props) {
         {pickType === 'comparison' && (
           <div>
             <label className="block text-sm text-gray-300 mb-1.5">
-              Bottom line <span className="text-gray-600">(one-line verdict shown above the scorecard)</span>
+              Bottom line <span className="text-prose-faint">(one-line verdict shown above the scorecard)</span>
             </label>
             <textarea
               value={winnerSummary}
@@ -627,16 +627,16 @@ export function PickForm({ pick, initialItems }: Props) {
               maxLength={500}
               rows={2}
               placeholder="Buy the Yeti for everyday use, the RTIC if you need it bigger, and skip the Igloo unless you're on a budget."
-              className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none text-base"
+              className="w-full px-4 py-3 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none text-base"
             />
-            <p className="mt-1 text-xs text-gray-600">{winnerSummary.length}/500</p>
+            <p className="mt-1 text-xs text-prose-faint">{winnerSummary.length}/500</p>
           </div>
         )}
 
         {pickType === 'stack' && (
           <div>
             <label className="block text-sm text-gray-300 mb-1.5">
-              Bundle total <span className="text-gray-600">(cents — optional; otherwise computed from items)</span>
+              Bundle total <span className="text-prose-faint">(cents — optional; otherwise computed from items)</span>
             </label>
             <input
               type="text"
@@ -645,10 +645,10 @@ export function PickForm({ pick, initialItems }: Props) {
               value={bundleTotalCents}
               onChange={(e) => setBundleTotal(e.target.value.replace(/\D/g, ''))}
               placeholder="e.g. 49999 = $499.99"
-              className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-base"
+              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
             />
             {bundleTotalCents && !isNaN(parseInt(bundleTotalCents, 10)) && (
-              <p className="mt-1 text-xs text-orange-400">${(parseInt(bundleTotalCents, 10) / 100).toFixed(2)}</p>
+              <p className="mt-1 text-xs text-accent-text-soft">${(parseInt(bundleTotalCents, 10) / 100).toFixed(2)}</p>
             )}
           </div>
         )}
@@ -658,7 +658,7 @@ export function PickForm({ pick, initialItems }: Props) {
             <label className="block text-sm text-gray-300 mb-1.5">Occasion <span className="text-red-400">*</span></label>
             <select
               value={occasion} onChange={(e) => setOccasion(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500 text-base"
+              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
             >
               <option value="">Select an occasion…</option>
               {OCCASION_GROUPS.map((group) => (
@@ -669,8 +669,8 @@ export function PickForm({ pick, initialItems }: Props) {
                 </optgroup>
               ))}
             </select>
-            <p className="mt-1 text-xs text-gray-600">
-              This list will replace any previous gift guide for this occasion at <code className="text-orange-400">/gifts/{OCCASIONS.find((o) => o.value === occasion)?.slug ?? '[occasion]'}</code>
+            <p className="mt-1 text-xs text-prose-faint">
+              This list will replace any previous gift guide for this occasion at <code className="text-accent-text-soft">/gifts/{OCCASIONS.find((o) => o.value === occasion)?.slug ?? '[occasion]'}</code>
             </p>
           </div>
         )}
@@ -688,20 +688,20 @@ export function PickForm({ pick, initialItems }: Props) {
         )}
 
         {/* SEO overrides — collapsible since they're optional */}
-        <details className="group rounded-xl bg-gray-950/60 border border-gray-800/60">
+        <details className="group rounded-xl bg-surface-sunken/60 border border-soft/60">
           <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between gap-3 min-h-[44px]">
             <div>
-              <p className="text-sm font-semibold text-gray-200">SEO overrides</p>
-              <p className="text-xs text-gray-600">Optional. Fall back to title + description if left empty.</p>
+              <p className="text-sm font-semibold text-prose">SEO overrides</p>
+              <p className="text-xs text-prose-faint">Optional. Fall back to title + description if left empty.</p>
             </div>
-            <svg className="w-4 h-4 text-gray-500 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-4 h-4 text-prose-faint group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </summary>
-          <div className="px-4 pb-4 pt-1 space-y-3 border-t border-gray-800/60">
+          <div className="px-4 pb-4 pt-1 space-y-3 border-t border-soft/60">
             <div>
-              <label className="block text-xs text-gray-400 mb-1.5">
-                Meta title <span className="text-gray-600">(HTML &lt;title&gt; tag; ~70 char limit)</span>
+              <label className="block text-xs text-prose-muted mb-1.5">
+                Meta title <span className="text-prose-faint">(HTML &lt;title&gt; tag; ~70 char limit)</span>
               </label>
               <input
                 type="text"
@@ -709,13 +709,13 @@ export function PickForm({ pick, initialItems }: Props) {
                 onChange={(e) => setMetaTitle(e.target.value)}
                 maxLength={120}
                 placeholder={title ? `${title.slice(0, 60)}${title.length > 60 ? '…' : ''}` : 'Defaults to title'}
-                className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-sm"
+                className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm"
               />
-              <p className="mt-1 text-xs text-gray-600 tabular-nums">{metaTitle.length}/120</p>
+              <p className="mt-1 text-xs text-prose-faint tabular-nums">{metaTitle.length}/120</p>
             </div>
             <div>
-              <label className="block text-xs text-gray-400 mb-1.5">
-                Meta description <span className="text-gray-600">(search snippet; ~155 char limit)</span>
+              <label className="block text-xs text-prose-muted mb-1.5">
+                Meta description <span className="text-prose-faint">(search snippet; ~155 char limit)</span>
               </label>
               <textarea
                 value={metaDescription}
@@ -723,9 +723,9 @@ export function PickForm({ pick, initialItems }: Props) {
                 maxLength={300}
                 rows={3}
                 placeholder={description || 'Defaults to short description'}
-                className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-sm resize-none"
+                className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm resize-none"
               />
-              <p className="mt-1 text-xs text-gray-600 tabular-nums">{metaDescription.length}/300</p>
+              <p className="mt-1 text-xs text-prose-faint tabular-nums">{metaDescription.length}/300</p>
             </div>
           </div>
         </details>
@@ -734,21 +734,21 @@ export function PickForm({ pick, initialItems }: Props) {
             item-category's pov from lib/categories.ts on public pages when
             left empty (the normal case). Use this to write a per-collection
             "How I Tested" when the standard category voice doesn't fit. */}
-        <details className="group rounded-xl bg-gray-950/60 border border-gray-800/60">
+        <details className="group rounded-xl bg-surface-sunken/60 border border-soft/60">
           <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between gap-3 min-h-[44px]">
             <div>
-              <p className="text-sm font-semibold text-gray-200">Methodology override</p>
-              <p className="text-xs text-gray-600">
+              <p className="text-sm font-semibold text-prose">Methodology override</p>
+              <p className="text-xs text-prose-faint">
                 Optional. Public pages fall back to the category&apos;s &quot;how I test&quot; voice when empty.
               </p>
             </div>
-            <svg className="w-4 h-4 text-gray-500 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-4 h-4 text-prose-faint group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </summary>
-          <div className="px-4 pb-4 pt-1 space-y-2 border-t border-gray-800/60">
-            <label className="block text-xs text-gray-400 mb-1.5">
-              How I Tested <span className="text-gray-600">(plain text — line breaks preserved)</span>
+          <div className="px-4 pb-4 pt-1 space-y-2 border-t border-soft/60">
+            <label className="block text-xs text-prose-muted mb-1.5">
+              How I Tested <span className="text-prose-faint">(plain text — line breaks preserved)</span>
             </label>
             <textarea
               value={methodologyHtml}
@@ -756,41 +756,41 @@ export function PickForm({ pick, initialItems }: Props) {
               maxLength={10000}
               rows={6}
               placeholder="Tell the reader how the testing was done for this specific collection. Skipped categories, time windows, real-life conditions, etc."
-              className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-sm resize-y"
+              className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm resize-y"
             />
-            <p className="text-xs text-gray-600 tabular-nums">{methodologyHtml.length}/10000</p>
+            <p className="text-xs text-prose-faint tabular-nums">{methodologyHtml.length}/10000</p>
           </div>
         </details>
 
         {/* FAQ override — collapsible. Falls back to the dominant
             item-category's faqs from lib/categories.ts on public pages when
             empty. Up to 12 rows; each is question + answer text. */}
-        <details className="group rounded-xl bg-gray-950/60 border border-gray-800/60">
+        <details className="group rounded-xl bg-surface-sunken/60 border border-soft/60">
           <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between gap-3 min-h-[44px]">
             <div>
-              <p className="text-sm font-semibold text-gray-200">FAQ override</p>
-              <p className="text-xs text-gray-600">
+              <p className="text-sm font-semibold text-prose">FAQ override</p>
+              <p className="text-xs text-prose-faint">
                 Optional. {faqs.length > 0 ? `${faqs.length} of 12 entries.` : 'Public pages fall back to the category FAQs when empty.'}
               </p>
             </div>
-            <svg className="w-4 h-4 text-gray-500 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-4 h-4 text-prose-faint group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </summary>
-          <div className="px-4 pb-4 pt-2 border-t border-gray-800/60 space-y-3">
+          <div className="px-4 pb-4 pt-2 border-t border-soft/60 space-y-3">
             {faqs.length === 0 && (
-              <p className="text-xs text-gray-600 italic">
+              <p className="text-xs text-prose-faint italic">
                 No custom FAQs yet — readers will see the category&apos;s default Q&amp;A.
               </p>
             )}
             {faqs.map((faq, idx) => (
-              <div key={idx} className="rounded-lg bg-gray-900 border border-gray-800 p-3 space-y-2 relative">
+              <div key={idx} className="rounded-lg bg-surface border border-soft p-3 space-y-2 relative">
                 <div className="flex items-start justify-between gap-3">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500">Q&amp;A {idx + 1}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-eyebrow">Q&amp;A {idx + 1}</span>
                   <button
                     type="button"
                     onClick={() => setFaqs((f) => f.filter((_, i) => i !== idx))}
-                    className="text-xs text-gray-500 hover:text-red-400 transition-colors"
+                    className="text-xs text-prose-faint hover:text-red-400 transition-colors"
                     title="Remove this Q&A"
                   >
                     Remove
@@ -805,7 +805,7 @@ export function PickForm({ pick, initialItems }: Props) {
                   }}
                   maxLength={200}
                   placeholder="Question (e.g. How long did you test these?)"
-                  className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-sm"
+                  className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm"
                 />
                 <textarea
                   value={faq.answer}
@@ -816,7 +816,7 @@ export function PickForm({ pick, initialItems }: Props) {
                   maxLength={1000}
                   rows={3}
                   placeholder="Answer — concise and direct."
-                  className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-sm resize-y"
+                  className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm resize-y"
                 />
               </div>
             ))}
@@ -824,7 +824,7 @@ export function PickForm({ pick, initialItems }: Props) {
               <button
                 type="button"
                 onClick={() => setFaqs((f) => [...f, { question: '', answer: '' }])}
-                className="w-full px-3 py-2 bg-gray-900 hover:bg-gray-800 border border-dashed border-gray-700 hover:border-orange-700 text-xs text-gray-400 hover:text-orange-300 rounded-lg transition-colors min-h-[44px]"
+                className="w-full px-3 py-2 bg-surface hover:bg-surface-raised border border-dashed border-strong hover:border-accent-border text-xs text-prose-muted hover:text-orange-300 rounded-lg transition-colors min-h-[44px]"
               >
                 + Add Q&amp;A
               </button>
@@ -833,9 +833,9 @@ export function PickForm({ pick, initialItems }: Props) {
         </details>
 
         {/* Readiness — quick visual checklist of what's set vs missing */}
-        <div className="bg-gray-950/60 border border-gray-800/60 rounded-xl p-4">
+        <div className="bg-surface-sunken/60 border border-soft/60 rounded-xl p-4">
           <div className="flex items-baseline justify-between mb-3">
-            <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest">Ready to publish?</p>
+            <p className="text-xs text-prose-muted font-semibold uppercase tracking-widest">Ready to publish?</p>
             <p className={`text-xs font-bold tabular-nums ${requiredMissing > 0 ? 'text-amber-400' : 'text-green-400'}`}>
               {requiredMissing > 0 ? `${requiredMissing} required missing` : 'All required ✓'}
             </p>
@@ -850,12 +850,12 @@ export function PickForm({ pick, initialItems }: Props) {
                       ? 'bg-green-500/20 text-green-400'
                       : c.required
                       ? 'bg-amber-500/20 text-amber-400'
-                      : 'bg-gray-800 text-gray-600'
+                      : 'bg-surface-raised text-prose-faint'
                   }`}
                 >
                   {c.done ? '✓' : c.required ? '!' : '·'}
                 </span>
-                <span className={c.done ? 'text-gray-300' : c.required ? 'text-amber-300' : 'text-gray-500'}>
+                <span className={c.done ? 'text-gray-300' : c.required ? 'text-amber-300' : 'text-prose-faint'}>
                   {c.label}{c.required && !c.done ? ' (required)' : ''}
                 </span>
               </li>
@@ -879,7 +879,7 @@ export function PickForm({ pick, initialItems }: Props) {
         <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
           <div>
             <p className="text-sm font-semibold text-white">
-              Picks <span className="text-gray-500 font-normal">({items.length})</span>
+              Picks <span className="text-prose-faint font-normal">({items.length})</span>
             </p>
             {(() => {
               const range = priceRangeSummary(items)
@@ -888,8 +888,8 @@ export function PickForm({ pick, initialItems }: Props) {
                 const fmt = (c: number) => `$${(c / 100).toFixed(0)}`
                 const label = range.min === range.max ? fmt(range.min) : `${fmt(range.min)} – ${fmt(range.max)}`
                 return (
-                  <p className="text-xs text-gray-500 mt-0.5 tabular-nums">
-                    Price range: <span className="text-orange-400 font-semibold">{label}</span>
+                  <p className="text-xs text-prose-faint mt-0.5 tabular-nums">
+                    Price range: <span className="text-accent-text-soft font-semibold">{label}</span>
                     {range.priced < range.total && (
                       <span className="text-amber-400/80 ml-2">({range.total - range.priced} unpriced)</span>
                     )}
@@ -904,7 +904,7 @@ export function PickForm({ pick, initialItems }: Props) {
               type="button"
               onClick={callFillAI}
               disabled={fillBusy}
-              className="text-xs px-3 py-2 bg-orange-700/60 hover:bg-orange-600/60 disabled:opacity-40 text-orange-200 font-semibold rounded-lg transition-colors min-h-[36px]"
+              className="text-xs px-3 py-2 bg-orange-700/60 hover:bg-accent/60 disabled:opacity-40 text-orange-200 font-semibold rounded-lg transition-colors min-h-[36px]"
               title="Generate per-pick blurbs, role labels, and flavor-specific FAQs in one shot"
             >
               {fillBusy ? '✨ Filling…' : '✨ Fill blurbs, roles & FAQs'}
@@ -924,25 +924,25 @@ export function PickForm({ pick, initialItems }: Props) {
             type="text" value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); searchReviews(e.target.value) }}
             placeholder="Search approved reviews to add..."
-            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 text-base"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
           />
           {(searchResults.length > 0 || searching) && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-gray-950 border border-gray-800 rounded-xl shadow-2xl z-10 overflow-hidden">
-              {searching && <p className="text-xs text-gray-500 px-4 py-3">Searching...</p>}
+            <div className="absolute top-full left-0 right-0 mt-1 bg-surface-sunken border border-soft rounded-xl shadow-2xl z-10 overflow-hidden">
+              {searching && <p className="text-xs text-prose-faint px-4 py-3">Searching...</p>}
               {searchResults.map((r) => (
                 <button
                   key={r.id} type="button" onClick={() => addItem(r)}
                   disabled={items.some((i) => i.review_id === r.id)}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-900 transition-colors text-left disabled:opacity-40"
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-surface transition-colors text-left disabled:opacity-40"
                 >
                   {r.image_url && (
-                    <div className="relative w-8 h-8 rounded shrink-0 bg-gray-800 overflow-hidden">
+                    <div className="relative w-8 h-8 rounded shrink-0 bg-surface-raised overflow-hidden">
                       <Image src={r.image_url} alt={r.product_name} fill className="object-cover" sizes="32px" />
                     </div>
                   )}
                   <div className="min-w-0">
                     <p className="text-sm text-white truncate">{r.title}</p>
-                    <p className="text-xs text-gray-500">{r.product_name} · {r.rating}/10</p>
+                    <p className="text-xs text-prose-faint">{r.product_name} · {r.rating}/10</p>
                   </div>
                   {items.some((i) => i.review_id === r.id) && <span className="text-xs text-green-400 ml-auto shrink-0">Added</span>}
                 </button>
@@ -953,30 +953,30 @@ export function PickForm({ pick, initialItems }: Props) {
 
         {/* Items list */}
         {items.length === 0 ? (
-          <p className="text-sm text-gray-600 py-4 text-center">No picks yet — search for reviews above.</p>
+          <p className="text-sm text-prose-faint py-4 text-center">No picks yet — search for reviews above.</p>
         ) : (
           <div className="space-y-2">
             {items.map((item, idx) => {
               const review = getReview(item)
               return (
-                <div key={item.review_id} className="bg-gray-900 border border-gray-800 rounded-xl p-3">
+                <div key={item.review_id} className="bg-surface border border-soft rounded-xl p-3">
                   <div className="flex items-start gap-3">
                     {review?.image_url && (
-                      <div className="relative w-12 h-12 shrink-0 rounded-lg bg-gray-800 overflow-hidden">
+                      <div className="relative w-12 h-12 shrink-0 rounded-lg bg-surface-raised overflow-hidden">
                         <Image src={review.image_url} alt={review.product_name} fill className="object-contain p-1" sizes="48px" />
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-white leading-tight">{review?.title ?? item.review_id}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{review?.product_name} · {review?.rating}/10</p>
+                      <p className="text-xs text-prose-faint mt-0.5">{review?.product_name} · {review?.rating}/10</p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <button type="button" onClick={() => moveItem(idx, -1)} disabled={idx === 0}
-                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-base text-gray-500 hover:text-white disabled:opacity-30 transition-colors rounded-lg hover:bg-gray-800" title="Move up" aria-label="Move up">↑</button>
+                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-base text-prose-faint hover:text-white disabled:opacity-30 transition-colors rounded-lg hover:bg-surface-raised" title="Move up" aria-label="Move up">↑</button>
                       <button type="button" onClick={() => moveItem(idx, 1)} disabled={idx === items.length - 1}
-                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-base text-gray-500 hover:text-white disabled:opacity-30 transition-colors rounded-lg hover:bg-gray-800" title="Move down" aria-label="Move down">↓</button>
+                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-base text-prose-faint hover:text-white disabled:opacity-30 transition-colors rounded-lg hover:bg-surface-raised" title="Move down" aria-label="Move down">↓</button>
                       <button type="button" onClick={() => removeItem(item.review_id)}
-                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-lg text-gray-600 hover:text-red-400 hover:bg-red-950/30 transition-colors rounded-lg" title="Remove" aria-label="Remove">×</button>
+                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-lg text-prose-faint hover:text-red-400 hover:bg-red-950/30 transition-colors rounded-lg" title="Remove" aria-label="Remove">×</button>
                     </div>
                   </div>
                   <textarea
@@ -984,7 +984,7 @@ export function PickForm({ pick, initialItems }: Props) {
                     onChange={(e) => updateBlurb(item.review_id, e.target.value)}
                     placeholder="Optional editorial blurb for this pick (2-3 sentences)..."
                     rows={2}
-                    className="mt-2 w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 resize-none text-base sm:text-sm"
+                    className="mt-2 w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none text-base sm:text-sm"
                   />
                   {pickType === 'comparison' && (
                     <input
@@ -993,7 +993,7 @@ export function PickForm({ pick, initialItems }: Props) {
                       onChange={(e) => updateWinsCategory(item.review_id, e.target.value)}
                       placeholder="Winner badge (e.g. 'Best Overall', 'Best Budget', 'Best for Solo Use')"
                       maxLength={80}
-                      className="mt-2 w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-base sm:text-sm"
+                      className="mt-2 w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover text-base sm:text-sm"
                     />
                   )}
                   {/* Role label — every non-comparison flavor renders this as
@@ -1011,7 +1011,7 @@ export function PickForm({ pick, initialItems }: Props) {
                           placeholder={cfg.placeholder}
                           maxLength={80}
                           aria-label={cfg.label}
-                          className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-base sm:text-sm"
+                          className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover text-base sm:text-sm"
                         />
                       </div>
                     )
@@ -1029,7 +1029,7 @@ export function PickForm({ pick, initialItems }: Props) {
                       onChange={(e) => updateBestFor(item.review_id, e.target.value)}
                       placeholder="Best for… (e.g. 'the grill master', 'weekend warriors')"
                       maxLength={120}
-                      className="mt-2 w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 text-base sm:text-sm"
+                      className="mt-2 w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover text-base sm:text-sm"
                     />
                   )}
                 </div>
@@ -1045,10 +1045,10 @@ export function PickForm({ pick, initialItems }: Props) {
           Publish / View Live / Delete are reachable from anywhere in this
           long form, especially on mobile. Matches the VoiceProfileForm
           pattern. */}
-      <div className="sticky bottom-2 sm:bottom-4 z-20 mt-4 -mx-3 sm:mx-0 px-3 sm:px-4 py-3 bg-gray-950/85 backdrop-blur border border-gray-800 rounded-2xl shadow-lg shadow-black/40">
+      <div className="sticky bottom-2 sm:bottom-4 z-20 mt-4 -mx-3 sm:mx-0 px-3 sm:px-4 py-3 bg-surface-sunken/85 backdrop-blur border border-soft rounded-2xl shadow-lg shadow-black/40">
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <button type="submit" disabled={busy || !slug.trim() || !title.trim()}
-            className="px-4 sm:px-5 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors min-h-[44px]">
+            className="px-4 sm:px-5 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors min-h-[44px]">
             {busy ? 'Saving…' : isNew ? 'Create List' : 'Save Changes'}
           </button>
 
@@ -1065,7 +1065,7 @@ export function PickForm({ pick, initialItems }: Props) {
 
           {!isNew && visible && publicPath && (
             <a href={publicPath} target="_blank" rel="noopener noreferrer"
-               className="px-4 sm:px-5 py-2.5 bg-orange-950/40 hover:bg-orange-900/40 border border-orange-900/40 text-orange-400 hover:text-orange-300 text-sm font-semibold rounded-xl transition-colors min-h-[44px] inline-flex items-center gap-1.5">
+               className="px-4 sm:px-5 py-2.5 bg-accent-tint/40 hover:bg-accent-tint/40 border border-accent-border/40 text-accent-text-soft hover:text-orange-300 text-sm font-semibold rounded-xl transition-colors min-h-[44px] inline-flex items-center gap-1.5">
               View Live →
             </a>
           )}
@@ -1086,8 +1086,8 @@ export function PickForm({ pick, initialItems }: Props) {
               <span className="text-green-400 font-semibold">Saved at {savedAt}</span>
             )}
             {!isNew && !visible && publicPath && (
-              <span className="text-gray-500">
-                Hidden — will live at <code className="text-orange-400/70">{publicPath}</code>
+              <span className="text-prose-faint">
+                Hidden — will live at <code className="text-accent-text-soft/70">{publicPath}</code>
               </span>
             )}
           </div>

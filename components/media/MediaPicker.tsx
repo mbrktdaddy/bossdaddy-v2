@@ -236,17 +236,17 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70" onClick={onClose}>
       <div
-        className="bg-gray-950 border border-gray-800 rounded-2xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl"
+        className="bg-surface-sunken border border-soft rounded-2xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-800 shrink-0">
-          <div className="flex items-center gap-1 bg-gray-900 border border-gray-800 rounded-xl p-1">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-soft shrink-0">
+          <div className="flex items-center gap-1 bg-surface border border-soft rounded-xl p-1">
             <button
               type="button"
               onClick={() => setTab('library')}
               className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
-                tab === 'library' ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-gray-300'
+                tab === 'library' ? 'bg-surface-raised text-white' : 'text-prose-faint hover:text-gray-300'
               }`}
             >
               Library
@@ -255,7 +255,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
               type="button"
               onClick={() => setTab('generate')}
               className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
-                tab === 'generate' ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-gray-300'
+                tab === 'generate' ? 'bg-surface-raised text-white' : 'text-prose-faint hover:text-gray-300'
               }`}
             >
               Generate
@@ -269,7 +269,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search…"
-                className="w-28 sm:w-36 px-2 py-1.5 bg-gray-800 border border-gray-700 text-xs text-gray-300 placeholder-gray-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="w-28 sm:w-36 px-2 py-1.5 bg-surface-raised border border-strong text-xs text-gray-300 placeholder-gray-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-hover"
               />
             )}
             {/* Category filter — editorial axis. Independent of the product
@@ -279,7 +279,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 value={filterCategory}
                 onChange={(e) => handleCategoryFilterChange(e.target.value)}
                 title="Filter library by editorial category"
-                className="px-2 py-1.5 bg-gray-800 border border-gray-700 text-xs text-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="px-2 py-1.5 bg-surface-raised border border-strong text-xs text-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-hover"
               >
                 <option value="">All categories</option>
                 <option value="__none__">Uncategorized only</option>
@@ -294,7 +294,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 value={filterProductId}
                 onChange={(e) => handleProductFilterChange(e.target.value)}
                 title="Filter library by attached product"
-                className="px-2 py-1.5 bg-gray-800 border border-gray-700 text-xs text-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="px-2 py-1.5 bg-surface-raised border border-strong text-xs text-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-hover"
               >
                 <option value="">All products</option>
                 <option value="__none__">Unassigned only</option>
@@ -308,7 +308,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-raised hover:bg-gray-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg transition-colors"
               >
                 {uploading ? (
                   <span className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin" />
@@ -320,7 +320,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 Upload
               </button>
             )}
-            <button type="button" onClick={onClose} className="p-1.5 text-gray-500 hover:text-white transition-colors rounded-lg hover:bg-gray-800">
+            <button type="button" onClick={onClose} className="p-1.5 text-prose-faint hover:text-white transition-colors rounded-lg hover:bg-surface-raised">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -337,8 +337,8 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
         </div>
 
         {tab === 'library' && !uploadError && (
-          <p className="text-gray-500 text-xs border-b border-gray-800/60 px-5 py-2 shrink-0">
-            📐 For best results upload <span className="text-gray-400 font-medium">landscape images (16:9)</span> — recommended for hero slots on bench items, reviews, and guides.
+          <p className="text-prose-faint text-xs border-b border-soft/60 px-5 py-2 shrink-0">
+            📐 For best results upload <span className="text-prose-muted font-medium">landscape images (16:9)</span> — recommended for hero slots on bench items, reviews, and guides.
           </p>
         )}
         {uploadError && tab === 'library' && (
@@ -349,13 +349,13 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
         <div className="flex-1 overflow-y-auto p-4">
           {tab === 'library' ? (
             loading ? (
-              <div className="flex items-center justify-center gap-2 text-gray-500 py-16">
-                <div className="w-4 h-4 border-2 border-gray-700 border-t-orange-500 rounded-full animate-spin" />
+              <div className="flex items-center justify-center gap-2 text-prose-faint py-16">
+                <div className="w-4 h-4 border-2 border-strong border-t-orange-500 rounded-full animate-spin" />
                 Loading…
               </div>
             ) : filteredAssets.length === 0 ? (
               <div
-                className="border-2 border-dashed border-gray-700 rounded-xl py-16 flex flex-col items-center gap-2 text-gray-600 cursor-pointer hover:border-gray-600 transition-colors"
+                className="border-2 border-dashed border-strong rounded-xl py-16 flex flex-col items-center gap-2 text-prose-faint cursor-pointer hover:border-gray-600 transition-colors"
                 onClick={() => !searchQuery && setTab('generate')}
               >
                 <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -388,7 +388,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                       }
                       className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all ${
                         isSelected
-                          ? 'border-orange-500 ring-2 ring-orange-500/30'
+                          ? 'border-accent ring-2 ring-accent-hover/30'
                           : 'border-transparent hover:border-gray-600'
                       }`}
                     >
@@ -396,7 +396,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                       <img src={asset.url} alt={asset.alt_text ?? asset.filename} className="w-full h-full object-cover" loading="lazy" />
 
                       {isSelected && (
-                        <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center shadow">
+                        <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-accent-hover rounded-full flex items-center justify-center shadow">
                           {multi && selectionIdx >= 0 ? (
                             <span className="text-[9px] text-white font-bold leading-none">{selectionIdx + 1}</span>
                           ) : (
@@ -409,8 +409,8 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
 
                       {/* Product badge */}
                       {productName && (
-                        <div className="absolute bottom-0 left-0 right-0 px-1.5 py-1 bg-gray-950/80">
-                          <p className="text-[9px] text-orange-400 font-semibold truncate leading-tight">
+                        <div className="absolute bottom-0 left-0 right-0 px-1.5 py-1 bg-surface-sunken/80">
+                          <p className="text-[9px] text-accent-text-soft font-semibold truncate leading-tight">
                             {asset.is_primary && <span className="text-orange-300">★ </span>}
                             {asset.label ?? productName}
                           </p>
@@ -431,7 +431,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                   onChange={(e) => setGenPrompt(e.target.value)}
                   rows={5}
                   placeholder="Describe the image — include subject, setting, lighting, style. Example: 'a DeWalt cordless drill on a wooden workbench, warm natural light, editorial photography, no people, no text'"
-                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+                  className="w-full px-4 py-3 bg-surface border border-strong rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
                 />
               </div>
               <div>
@@ -447,11 +447,11 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                       type="button"
                       onClick={() => setGenSize(opt.value as typeof genSize)}
                       className={`relative flex-1 flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg transition-colors ${
-                        genSize === opt.value ? 'bg-orange-600 text-white' : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600'
+                        genSize === opt.value ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:border-gray-600'
                       }`}
                     >
                       {opt.recommended && (
-                        <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full leading-none">
+                        <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-accent-hover text-white text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full leading-none">
                           Best
                         </span>
                       )}
@@ -465,40 +465,40 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 type="button"
                 onClick={handleGenerate}
                 disabled={genLoading || !genPrompt.trim()}
-                className="w-full px-5 py-3 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white font-semibold rounded-xl transition-colors"
+                className="w-full px-5 py-3 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-semibold rounded-xl transition-colors"
               >
                 {genLoading ? 'Generating…' : 'Generate & Use'}
               </button>
               {genError && (
                 <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">{genError}</p>
               )}
-              <p className="text-xs text-gray-600">Generated image will be added to the library and auto-selected.</p>
+              <p className="text-xs text-prose-faint">Generated image will be added to the library and auto-selected.</p>
             </div>
           )}
         </div>
 
         {/* Pagination — library tab only */}
         {tab === 'library' && totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 px-5 py-2 border-t border-gray-800 shrink-0">
+          <div className="flex items-center justify-center gap-2 px-5 py-2 border-t border-soft shrink-0">
             <button
               type="button"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-xs text-white rounded-lg transition-colors"
+              className="px-3 py-1.5 bg-surface-raised hover:bg-gray-700 disabled:opacity-40 text-xs text-white rounded-lg transition-colors"
             >← Prev</button>
-            <span className="text-xs text-gray-500">{page} / {totalPages}</span>
+            <span className="text-xs text-prose-faint">{page} / {totalPages}</span>
             <button
               type="button"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-xs text-white rounded-lg transition-colors"
+              className="px-3 py-1.5 bg-surface-raised hover:bg-gray-700 disabled:opacity-40 text-xs text-white rounded-lg transition-colors"
             >Next →</button>
           </div>
         )}
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-5 py-3 border-t border-gray-800 shrink-0">
-          <p className="text-xs text-gray-600">
+        <div className="flex items-center justify-between px-5 py-3 border-t border-soft shrink-0">
+          <p className="text-xs text-prose-faint">
             {multi
               ? multiSelected.size > 0
                 ? `${multiSelected.size} image${multiSelected.size === 1 ? '' : 's'} selected`
@@ -512,13 +512,13 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
+              className="px-4 py-2 bg-surface-raised hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
             >Cancel</button>
             <button
               type="button"
               onClick={handleConfirm}
               disabled={multi ? multiSelected.size === 0 : !selected}
-              className="px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition-colors"
+              className="px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition-colors"
             >
               {multi
                 ? multiSelected.size > 1

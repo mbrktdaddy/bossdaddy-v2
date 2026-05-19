@@ -152,13 +152,13 @@ export default async function GuidePage({ params }: Props) {
       <div className="max-w-[1100px] mx-auto px-6 py-12">
 
         {/* Breadcrumb */}
-        <div className="flex items-center gap-3 text-sm text-gray-400 mb-8 flex-wrap">
+        <div className="flex items-center gap-3 text-sm text-prose-muted mb-8 flex-wrap">
           <Link href="/guides" className="py-2 inline-block hover:text-white transition-colors">← Guides</Link>
           {category && (
             <>
               <span className="text-gray-700">/</span>
               <Link href={`/category/${category.slug}`} className={`flex items-center gap-1.5 py-2 inline-block hover:text-white transition-colors ${category.accent}`}>
-                <CategoryIcon slug={category.slug} className="w-4 h-4 text-orange-500" /> {category.label}
+                <CategoryIcon slug={category.slug} className="w-4 h-4 text-accent-text" /> {category.label}
               </Link>
             </>
           )}
@@ -167,7 +167,7 @@ export default async function GuidePage({ params }: Props) {
         {/* FTC Disclosure — rendered whenever the guide contains affiliate links */}
         {guide.has_affiliate_links && (
           <div
-            className="mb-8 text-xs text-gray-500 bg-gray-900 rounded-2xl px-4 py-3 shadow-md shadow-black/30"
+            className="mb-8 text-xs text-prose-faint bg-surface rounded-2xl px-4 py-3 shadow-md shadow-black/30"
             dangerouslySetInnerHTML={{ __html: FTC_DISCLOSURE_HTML }}
           />
         )}
@@ -175,8 +175,8 @@ export default async function GuidePage({ params }: Props) {
         {/* Header */}
         <div className="mb-10">
           <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6 tracking-tight">{guide.title}</h1>
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400 pb-6">
-            <span>by <Link href={`/author/${author}`} className="text-gray-300 hover:text-orange-400 transition-colors">@{author}</Link></span>
+          <div className="flex flex-wrap items-center gap-4 text-sm text-prose-muted pb-6">
+            <span>by <Link href={`/author/${author}`} className="text-gray-300 hover:text-accent-text-soft transition-colors">@{author}</Link></span>
             {guide.published_at && (
               <span>
                 {new Date(guide.published_at).toLocaleDateString('en-US', {
@@ -193,7 +193,7 @@ export default async function GuidePage({ params }: Props) {
         {/* Hero image */}
         {guide.image_url && (
           <LightboxImage src={guide.image_url} alt={guide.title}>
-            <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden mb-10 bg-gray-900">
+            <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden mb-10 bg-surface">
               <Image
                 src={guide.image_url}
                 alt={guide.title}
@@ -208,17 +208,17 @@ export default async function GuidePage({ params }: Props) {
 
         {/* TL;DR box */}
         {(guide.tldr || guideKeyTakeaways.length > 0) && (
-          <div className="mb-10 bg-orange-950/30 border border-orange-900/40 rounded-2xl p-5 sm:p-6">
-            <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">TL;DR</p>
+          <div className="mb-10 bg-accent-tint/30 border border-accent-border/40 rounded-2xl p-5 sm:p-6">
+            <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">TL;DR</p>
             {guide.tldr && (
-              <p className="text-gray-200 leading-relaxed text-sm sm:text-base mb-4">{guide.tldr}</p>
+              <p className="text-prose leading-relaxed text-sm sm:text-base mb-4">{guide.tldr}</p>
             )}
             {guideKeyTakeaways.length > 0 && (
               <ul className="space-y-2">
                 {guideKeyTakeaways.map((item, i) => (
                   <li key={i} className="flex items-start gap-2.5 text-sm text-gray-300">
-                    <span className="text-orange-500 mt-0.5 shrink-0">→</span>
+                    <span className="text-accent-text mt-0.5 shrink-0">→</span>
                     <span>{item}</span>
                   </li>
                 ))}
@@ -257,14 +257,15 @@ export default async function GuidePage({ params }: Props) {
                   return segment.content ? (
                     <div
                       key={`html-${i}`}
-                      className="bd-editorial prose prose-lg prose-invert prose-orange max-w-none
-                        prose-headings:font-black prose-headings:tracking-tight prose-headings:font-sans
-                        prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4
+                      className="bd-editorial prose prose-lg prose-invert prose-orange mx-auto max-w-[68ch]
+                        prose-headings:font-black prose-headings:tracking-tight prose-headings:font-sans prose-headings:leading-[1.15]
+                        prose-h2:text-2xl prose-h2:mt-14 prose-h2:mb-5
+                        prose-h3:mt-10 prose-h3:mb-3
                         [&>*:first-child]:mt-0
-                        prose-p:text-gray-300 prose-p:leading-[1.75]
-                        prose-a:text-orange-400 prose-a:no-underline hover:prose-a:text-orange-300
+                        prose-p:text-gray-300 prose-p:leading-[1.85]
+                        prose-a:text-accent-text-soft prose-a:no-underline hover:prose-a:text-orange-300
                         prose-strong:text-white
-                        prose-li:text-gray-300 prose-li:leading-[1.75]"
+                        prose-li:text-gray-300 prose-li:leading-[1.85]"
                       dangerouslySetInnerHTML={{ __html: segment.content }}
                     />
                   ) : null
@@ -274,22 +275,22 @@ export default async function GuidePage({ params }: Props) {
 
             {/* FAQ accordion */}
             {guideFaqs.length > 0 && (
-              <div className="mt-12 pt-8 border-t border-gray-800/60">
+              <div className="mt-12 pt-8 border-t border-soft/60">
                 <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Common Questions</p>
+                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Common Questions</p>
                   <h2 className="text-xl font-black">Frequently Asked Questions</h2>
                 </div>
                 <div className="space-y-2">
                   {guideFaqs.map((faq, i) => (
-                    <details key={i} className="group bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 transition-colors rounded-xl overflow-hidden">
+                    <details key={i} className="group bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:border-accent-border/40 transition-colors rounded-xl overflow-hidden">
                       <summary className="flex items-center justify-between gap-3 px-4 py-3.5 cursor-pointer list-none min-h-[44px]">
                         <span className="text-sm font-semibold text-white leading-snug">{faq.question}</span>
-                        <svg className="w-4 h-4 shrink-0 text-orange-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <svg className="w-4 h-4 shrink-0 text-accent-text transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                         </svg>
                       </summary>
-                      <div className="px-4 pb-4 pt-1 text-sm text-gray-400 leading-relaxed border-t border-gray-800">
+                      <div className="px-4 pb-4 pt-1 text-sm text-prose-muted leading-relaxed border-t border-soft">
                         {faq.answer}
                       </div>
                     </details>
@@ -300,11 +301,11 @@ export default async function GuidePage({ params }: Props) {
 
             {/* Email signup CTA */}
             <div className="mt-12 pt-8">
-              <div className="bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl p-6 sm:p-8 text-center shadow-xl shadow-black/40">
-                <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3 mx-auto" />
-                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Liked this guide?</p>
+              <div className="bg-gradient-to-br from-surface to-surface-sunken border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl p-6 sm:p-8 text-center shadow-xl shadow-black/40">
+                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3 mx-auto" />
+                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Liked this guide?</p>
                 <h3 className="text-xl font-black mb-2">Get the next one in your inbox</h3>
-                <p className="text-sm text-gray-400 mb-5 max-w-md mx-auto">
+                <p className="text-sm text-prose-muted mb-5 max-w-md mx-auto">
                   One email when there&apos;s actually something worth saying. Plus dad-tested stuff before they go up.
                 </p>
                 <div className="max-w-md mx-auto">
@@ -324,14 +325,14 @@ export default async function GuidePage({ params }: Props) {
               <div className="mt-12">
                 <div className="flex items-end justify-between mb-5">
                   <div>
-                    <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                    <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Reviews</p>
+                    <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                    <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Reviews</p>
                     <h2 className="text-lg font-black">
                       {category ? `${category.label} Reviews` : 'Related Reviews'}
                     </h2>
                   </div>
                   {category && (
-                    <Link href={`/category/${category.slug}`} className="text-xs text-gray-500 hover:text-orange-400 transition-colors font-medium">
+                    <Link href={`/category/${category.slug}`} className="text-xs text-prose-faint hover:text-accent-text-soft transition-colors font-medium">
                       Browse all →
                     </Link>
                   )}
@@ -341,10 +342,10 @@ export default async function GuidePage({ params }: Props) {
                     <Link
                       key={r.id}
                       href={`/reviews/${r.slug}`}
-                      className="group flex flex-col bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/50 hover:border-orange-900/40 hover:-translate-y-0.5 transition-all duration-200"
+                      className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/50 hover:border-accent-border/40 hover:-translate-y-0.5 transition-all duration-200"
                     >
                       {r.image_url ? (
-                        <div className="relative w-full h-36 bg-gray-800 shrink-0">
+                        <div className="relative w-full h-36 bg-surface-raised shrink-0">
                           <Image
                             src={r.image_url}
                             alt={r.product_name}
@@ -360,18 +361,18 @@ export default async function GuidePage({ params }: Props) {
                           )}
                         </div>
                       ) : (
-                        <div className="w-full h-36 bg-gray-800 flex items-center justify-center shrink-0">
-                          {category && <CategoryIcon slug={category.slug} className="w-7 h-7 text-orange-500 opacity-30" />}
+                        <div className="w-full h-36 bg-surface-raised flex items-center justify-center shrink-0">
+                          {category && <CategoryIcon slug={category.slug} className="w-7 h-7 text-accent-text opacity-30" />}
                         </div>
                       )}
                       <div className="p-4 flex flex-col flex-1">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2 py-0.5 rounded-full truncate max-w-[60%]">
+                          <span className="text-[10px] font-medium text-eyebrow/80 uppercase tracking-widest bg-accent-tint/40 px-2 py-0.5 rounded-full truncate max-w-[60%]">
                             {r.product_name}
                           </span>
                           <RatingScore rating={r.rating ?? 0} size="sm" />
                         </div>
-                        <p className="text-sm font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
+                        <p className="text-sm font-semibold leading-snug group-hover:text-accent-text-soft transition-colors flex-1">
                           {r.title}
                         </p>
                       </div>
@@ -385,8 +386,8 @@ export default async function GuidePage({ params }: Props) {
             {related && related.length > 0 && (
               <div className="mt-12">
                 <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Guides</p>
+                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Guides</p>
                   <h2 className="text-lg font-black">More Guides</h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -394,10 +395,10 @@ export default async function GuidePage({ params }: Props) {
                     <Link
                       key={a.id}
                       href={`/guides/${a.slug}`}
-                      className="group flex flex-col bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/50 hover:border-orange-900/40 hover:-translate-y-0.5 transition-all duration-200"
+                      className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/50 hover:border-accent-border/40 hover:-translate-y-0.5 transition-all duration-200"
                     >
                       {a.image_url ? (
-                        <div className="relative w-full h-36 bg-gray-800 shrink-0 overflow-hidden">
+                        <div className="relative w-full h-36 bg-surface-raised shrink-0 overflow-hidden">
                           <Image
                             src={a.image_url}
                             alt={a.title}
@@ -408,23 +409,23 @@ export default async function GuidePage({ params }: Props) {
                           />
                         </div>
                       ) : (
-                        <div className="w-full h-36 bg-gradient-to-br from-gray-800/50 to-gray-900/40 flex items-center justify-center shrink-0">
-                          {category && <CategoryIcon slug={category.slug} className="w-7 h-7 text-orange-500 opacity-30" />}
+                        <div className="w-full h-36 bg-gradient-to-br from-surface-raised/50 to-surface/40 flex items-center justify-center shrink-0">
+                          {category && <CategoryIcon slug={category.slug} className="w-7 h-7 text-accent-text opacity-30" />}
                         </div>
                       )}
                       <div className="p-4 flex flex-col flex-1">
-                        <p className="text-sm font-semibold leading-snug group-hover:text-orange-400 transition-colors flex-1">
+                        <p className="text-sm font-semibold leading-snug group-hover:text-accent-text-soft transition-colors flex-1">
                           {a.title}
                         </p>
                         {a.excerpt && (
-                          <p className="text-xs text-gray-500 mt-1.5 line-clamp-2">{a.excerpt}</p>
+                          <p className="text-xs text-prose-faint mt-1.5 line-clamp-2">{a.excerpt}</p>
                         )}
                         <div className="flex items-center justify-between mt-3">
-                          <span className="text-xs text-gray-600">
+                          <span className="text-xs text-prose-faint">
                             {a.published_at ? new Date(a.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
                           </span>
                           {a.reading_time_minutes && (
-                            <span className="text-xs text-gray-500">{a.reading_time_minutes} min read</span>
+                            <span className="text-xs text-prose-faint">{a.reading_time_minutes} min read</span>
                           )}
                         </div>
                       </div>
@@ -468,9 +469,9 @@ export default async function GuidePage({ params }: Props) {
 
               {/* Compact products panel — in mention order */}
               {mentionedProducts && mentionedProducts.length > 0 && (
-                <div className="bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 transition-colors rounded-2xl p-4">
-                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">Products Mentioned</p>
+                <div className="bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:border-accent-border/40 transition-colors rounded-2xl p-4">
+                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Products Mentioned</p>
                   <ul className="space-y-3">
                     {mentionedSlugs
                       .map((s) => mentionedProducts.find((p) => p.slug === s))
@@ -482,7 +483,7 @@ export default async function GuidePage({ params }: Props) {
                         return (
                           <li key={product!.slug} className="flex items-start gap-2.5">
                             {product!.image_url && (
-                              <div className="relative w-9 h-9 shrink-0 rounded-lg overflow-hidden bg-gray-950">
+                              <div className="relative w-9 h-9 shrink-0 rounded-lg overflow-hidden bg-surface-sunken">
                                 <Image
                                   src={product!.image_url}
                                   alt={product!.name}
@@ -499,7 +500,7 @@ export default async function GuidePage({ params }: Props) {
                                 target="_blank"
                                 rel={isAffiliate ? 'sponsored nofollow noopener' : 'noopener'}
                                 data-product-slug={product!.slug}
-                                className="text-[10px] font-bold text-orange-400 hover:text-orange-300 transition-colors uppercase tracking-wide"
+                                className="text-[10px] font-bold text-accent-text-soft hover:text-orange-300 transition-colors uppercase tracking-wide"
                               >
                                 Check Price →
                               </a>

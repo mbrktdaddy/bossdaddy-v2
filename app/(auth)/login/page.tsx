@@ -53,7 +53,7 @@ function LoginForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-2.5 rounded-lg bg-gray-900 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
           placeholder="you@example.com"
         />
       </div>
@@ -61,7 +61,7 @@ function LoginForm() {
       <div>
         <div className="flex items-center justify-between mb-1">
           <label htmlFor="password" className="block text-sm text-gray-300">Password</label>
-          <Link href="/forgot-password" className="text-xs text-gray-500 hover:text-orange-400 transition-colors">
+          <Link href="/forgot-password" className="text-xs text-prose-faint hover:text-accent-text-soft transition-colors">
             Forgot password?
           </Link>
         </div>
@@ -71,7 +71,7 @@ function LoginForm() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-2.5 rounded-lg bg-gray-900 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
           placeholder="••••••••"
         />
       </div>
@@ -85,7 +85,7 @@ function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-2.5 px-4 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white font-semibold rounded-lg transition-colors"
+        className="w-full py-2.5 px-4 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-semibold rounded-lg transition-colors"
       >
         {loading ? 'Signing in...' : 'Sign In'}
       </button>
@@ -95,18 +95,18 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
+    <main className="min-h-screen flex items-center justify-center bg-surface-sunken px-4">
       <div className="w-full max-w-sm">
         <h1 className="text-2xl font-bold text-white mb-2">Welcome back, Boss</h1>
-        <p className="text-gray-400 mb-8 text-sm">Sign in to your account</p>
+        <p className="text-prose-muted mb-8 text-sm">Sign in to your account</p>
 
-        <Suspense fallback={<div className="h-48 animate-pulse bg-gray-900 rounded-lg" />}>
+        <Suspense fallback={<div className="h-48 animate-pulse bg-surface rounded-lg" />}>
           <LoginForm />
         </Suspense>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
+        <p className="mt-6 text-center text-sm text-prose-faint">
           New here?{' '}
-          <Link href="/register" className="text-orange-400 hover:text-orange-300">
+          <Link href="/register" className="text-accent-text-soft hover:text-orange-300">
             Create an account
           </Link>
         </p>

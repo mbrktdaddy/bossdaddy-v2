@@ -38,11 +38,11 @@ export function LoginPromptModal({ onClose, returnPath }: Props) {
         aria-modal="true"
         aria-labelledby="login-modal-title"
         tabIndex={-1}
-        className="relative z-10 w-full max-w-sm bg-gray-950 border border-gray-800 rounded-2xl p-6 shadow-2xl outline-none"
+        className="relative z-10 w-full max-w-sm bg-surface-sunken border border-soft rounded-2xl p-6 shadow-2xl outline-none"
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-600 hover:text-gray-400 transition-colors"
+          className="absolute top-4 right-4 text-prose-faint hover:text-prose-muted transition-colors"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -50,27 +50,27 @@ export function LoginPromptModal({ onClose, returnPath }: Props) {
         </button>
 
         <div className="text-center">
-          <div className="w-12 h-12 rounded-full bg-orange-950/50 border border-orange-800/50 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-12 h-12 rounded-full bg-accent-tint/50 border border-accent-border/50 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-accent-text-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
 
           <h3 id="login-modal-title" className="text-lg font-black mb-1">Join to vote</h3>
-          <p className="text-sm text-gray-400 mb-6">
+          <p className="text-sm text-prose-muted mb-6">
             Create a free account to vote on what Boss Daddy reviews next and get notified when it&apos;s live.
           </p>
 
           <div className="space-y-3">
             <Link
               href={`/register?next=${encodeURIComponent(returnPath)}`}
-              className="block w-full py-3 bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold rounded-xl transition-colors text-center"
+              className="block w-full py-3 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors text-center"
             >
               Create free account
             </Link>
             <Link
               href={`/login?next=${encodeURIComponent(returnPath)}`}
-              className="block w-full py-3 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-white text-sm font-semibold rounded-xl transition-colors text-center"
+              className="block w-full py-3 bg-surface hover:bg-surface-raised border border-strong text-white text-sm font-semibold rounded-xl transition-colors text-center"
             >
               Log in
             </Link>

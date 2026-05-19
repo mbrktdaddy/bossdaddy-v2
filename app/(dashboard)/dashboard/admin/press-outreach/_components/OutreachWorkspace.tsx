@@ -36,11 +36,11 @@ const METHOD_LABELS: Record<ContactMethod, string> = {
 }
 
 const STATUS_CONFIG: Record<OutreachStatus, { label: string; classes: string }> = {
-  draft:       { label: 'Draft',       classes: 'bg-gray-800 text-gray-400 border-gray-700' },
+  draft:       { label: 'Draft',       classes: 'bg-surface-raised text-prose-muted border-strong' },
   sent:        { label: 'Sent',        classes: 'bg-blue-950/50 text-blue-400 border-blue-800/50' },
   responded:   { label: 'Responded',   classes: 'bg-green-950/50 text-green-400 border-green-800/50' },
   no_response: { label: 'No Response', classes: 'bg-amber-950/50 text-amber-400 border-amber-800/50' },
-  follow_up:   { label: 'Follow Up',   classes: 'bg-orange-950/50 text-orange-400 border-orange-800/50' },
+  follow_up:   { label: 'Follow Up',   classes: 'bg-accent-tint/50 text-accent-text-soft border-accent-border/50' },
 }
 
 function buildTemplate(productName: string, brandName: string, contactName: string) {
@@ -82,7 +82,7 @@ function MethodBadge({ method }: { method: ContactMethod }) {
     email:    'bg-blue-950/40 text-blue-400 border-blue-800/40',
     web_form: 'bg-purple-950/40 text-purple-400 border-purple-800/40',
     amazon:   'bg-amber-950/40 text-amber-400 border-amber-800/40',
-    phone:    'bg-gray-800 text-gray-400 border-gray-700',
+    phone:    'bg-surface-raised text-prose-muted border-strong',
   }
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs border ${colors[method]}`}>
@@ -310,7 +310,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
     }
   }
 
-  const inputCls = 'w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-orange-600 transition-colors'
+  const inputCls = 'w-full bg-surface-sunken border border-soft rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-prose-faint focus:outline-none focus:border-accent transition-colors'
 
   const filteredHistory = statusFilter === 'all'
     ? history
@@ -341,20 +341,20 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
       {/* Header */}
       <div>
         <h1 className="text-xl md:text-2xl font-black">Press Outreach</h1>
-        <p className="text-gray-500 text-xs md:text-sm mt-1">
-          Request product images from brands. Emails send from <span className="text-orange-400">boss@bossdaddylife.com</span> via Resend.
+        <p className="text-prose-faint text-xs md:text-sm mt-1">
+          Request product images from brands. Emails send from <span className="text-accent-text-soft">boss@bossdaddylife.com</span> via Resend.
         </p>
       </div>
 
       {/* Composer */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+      <div className="bg-surface border border-soft rounded-2xl overflow-hidden">
 
         {/* Section 1 — Product */}
-        <div className="p-4 md:p-6 border-b border-gray-800">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-medium mb-4">1 · Product</p>
+        <div className="p-4 md:p-6 border-b border-soft">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-medium mb-4">1 · Product</p>
           <div className="space-y-3">
             <div>
-              <label className="block text-xs text-gray-500 mb-1.5">Select from your products</label>
+              <label className="block text-xs text-prose-faint mb-1.5">Select from your products</label>
               <select
                 value={selectedProductId}
                 onChange={e => handleProductSelect(e.target.value)}
@@ -368,7 +368,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs text-gray-500 mb-1.5">Product name <span className="text-orange-500">*</span></label>
+                <label className="block text-xs text-prose-faint mb-1.5">Product name <span className="text-accent-text">*</span></label>
                 <input
                   value={productName}
                   onChange={e => setProductName(e.target.value)}
@@ -378,7 +378,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-500 mb-1.5">Brand name <span className="text-orange-500">*</span></label>
+                <label className="block text-xs text-prose-faint mb-1.5">Brand name <span className="text-accent-text">*</span></label>
                 <input
                   value={brandName}
                   onChange={e => setBrandName(e.target.value)}
@@ -392,13 +392,13 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
         </div>
 
         {/* Section 2 — Contact */}
-        <div className="p-4 md:p-6 border-b border-gray-800">
-          <p className="text-xs text-orange-500 uppercase tracking-widest font-medium mb-4">2 · Contact</p>
+        <div className="p-4 md:p-6 border-b border-soft">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-medium mb-4">2 · Contact</p>
           <div className="space-y-3">
 
             {/* Method toggle — horizontal scroll on narrow screens, wraps within bounds otherwise */}
             <div>
-              <label className="block text-xs text-gray-500 mb-1.5">Contact method</label>
+              <label className="block text-xs text-prose-faint mb-1.5">Contact method</label>
               <div
                 role="tablist"
                 aria-label="Contact method"
@@ -413,8 +413,8 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                     onClick={() => setMethod(m)}
                     className={`shrink-0 px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-medium border transition-colors ${
                       method === m
-                        ? 'bg-orange-600 border-orange-500 text-white'
-                        : 'bg-gray-950 border-gray-700 text-gray-400 hover:border-gray-600 hover:text-white'
+                        ? 'bg-accent border-accent text-white'
+                        : 'bg-surface-sunken border-strong text-prose-muted hover:border-gray-600 hover:text-white'
                     }`}
                   >
                     {METHOD_LABELS[m]}
@@ -425,7 +425,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs text-gray-500 mb-1.5">Contact name <span className="text-gray-700">(optional)</span></label>
+                <label className="block text-xs text-prose-faint mb-1.5">Contact name <span className="text-gray-700">(optional)</span></label>
                 <input
                   value={contactName}
                   onChange={e => setContactName(e.target.value)}
@@ -436,7 +436,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
 
               {method === 'email' && (
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1.5">Contact email <span className="text-orange-500">*</span></label>
+                  <label className="block text-xs text-prose-faint mb-1.5">Contact email <span className="text-accent-text">*</span></label>
                   <input
                     type="email"
                     inputMode="email"
@@ -452,7 +452,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
 
               {(method === 'web_form' || method === 'amazon') && (
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1.5">
+                  <label className="block text-xs text-prose-faint mb-1.5">
                     {method === 'web_form' ? 'Form URL' : 'Amazon seller URL'}
                     <span className="text-gray-700 ml-1">(optional)</span>
                   </label>
@@ -471,7 +471,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
 
               {method === 'phone' && (
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1.5">Phone number <span className="text-gray-700">(optional)</span></label>
+                  <label className="block text-xs text-prose-faint mb-1.5">Phone number <span className="text-gray-700">(optional)</span></label>
                   <input
                     type="tel"
                     inputMode="tel"
@@ -485,7 +485,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
             </div>
 
             {method !== 'email' && (
-              <p className="text-xs text-gray-600 leading-relaxed">
+              <p className="text-xs text-prose-faint leading-relaxed">
                 {method === 'web_form' && 'Logs the outreach as a draft, copies the body to your clipboard, and opens the form in a new tab. Mark as Sent in history once you submit.'}
                 {method === 'amazon' && 'Logs as a draft and copies the body. Open the Amazon listing’s "Contact Seller" button and paste.'}
                 {method === 'phone' && 'Logs the call without copying anything. Track the conversation in the notes.'}
@@ -497,18 +497,18 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
         {/* Section 3 — Message */}
         <div className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-4 gap-2">
-            <p className="text-xs text-orange-500 uppercase tracking-widest font-medium">3 · Message</p>
+            <p className="text-xs text-eyebrow uppercase tracking-widest font-medium">3 · Message</p>
             <button
               type="button"
               onClick={handleResetTemplate}
-              className="text-xs text-gray-600 hover:text-gray-400 transition-colors shrink-0"
+              className="text-xs text-prose-faint hover:text-prose-muted transition-colors shrink-0"
             >
               Reset to template
             </button>
           </div>
           <div className="space-y-3">
             <div>
-              <label className="block text-xs text-gray-500 mb-1.5">Subject line</label>
+              <label className="block text-xs text-prose-faint mb-1.5">Subject line</label>
               <input
                 value={subject}
                 onChange={e => setSubject(e.target.value)}
@@ -517,7 +517,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1.5">Message body</label>
+              <label className="block text-xs text-prose-faint mb-1.5">Message body</label>
               <textarea
                 value={body}
                 onChange={e => setBody(e.target.value)}
@@ -530,14 +530,14 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
           {/* Action row — stack on mobile, row on desktop */}
           <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <p className="text-xs text-gray-700 order-2 sm:order-1">
-              Sending from <span className="text-gray-500">boss@bossdaddylife.com</span>
+              Sending from <span className="text-prose-faint">boss@bossdaddylife.com</span>
             </p>
             <div className="order-1 sm:order-2">
               {method === 'email' ? (
                 <button
                   onClick={handleSend}
                   disabled={busy}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 min-h-[44px] bg-orange-600 hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 min-h-[44px] bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors"
                 >
                   {busy ? (
                     <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
@@ -550,7 +550,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                 <button
                   onClick={handleLogAndCopy}
                   disabled={busy}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 min-h-[44px] bg-orange-600 hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 min-h-[44px] bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors"
                 >
                   {busy ? (
                     <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
@@ -577,7 +577,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
           <h2 className="text-lg font-black">
             Outreach History
             {history.length > 0 && (
-              <span className="ml-2 text-sm font-normal text-gray-600">({history.length})</span>
+              <span className="ml-2 text-sm font-normal text-prose-faint">({history.length})</span>
             )}
           </h2>
           {history.length > 0 && (
@@ -585,7 +585,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value as OutreachStatus | 'all')}
               aria-label="Filter outreach by status"
-              className="bg-gray-900 border border-gray-800 text-gray-400 text-sm rounded-xl px-3 py-2.5 min-h-[44px] focus:outline-none focus:border-orange-600 transition-colors"
+              className="bg-surface border border-soft text-prose-muted text-sm rounded-xl px-3 py-2.5 min-h-[44px] focus:outline-none focus:border-accent transition-colors"
             >
               <option value="all">All statuses ({history.length})</option>
               {Object.entries(STATUS_CONFIG).map(([val, cfg]) => {
@@ -598,17 +598,17 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
         </div>
 
         {history.length === 0 ? (
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center">
-            <p className="text-gray-500 text-sm">No outreach logged yet. Send your first email above.</p>
+          <div className="bg-surface border border-soft rounded-2xl p-8 text-center">
+            <p className="text-prose-faint text-sm">No outreach logged yet. Send your first email above.</p>
           </div>
         ) : filteredHistory.length === 0 ? (
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center">
-            <p className="text-gray-500 text-sm">No records match this filter.</p>
+          <div className="bg-surface border border-soft rounded-2xl p-8 text-center">
+            <p className="text-prose-faint text-sm">No records match this filter.</p>
           </div>
         ) : (
           <div className="space-y-2">
             {filteredHistory.map(record => (
-              <div key={record.id} className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+              <div key={record.id} className="bg-surface border border-soft rounded-2xl overflow-hidden">
 
                 {/* Row summary — stacked on mobile, side-by-side on desktop */}
                 <div className="p-4 flex flex-col gap-3 sm:flex-row sm:items-start">
@@ -620,13 +620,13 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                         {STATUS_CONFIG[record.status].label}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 truncate">{record.product_name}</p>
+                    <p className="text-xs text-prose-faint truncate">{record.product_name}</p>
                     <p className="text-xs text-gray-700 mt-0.5 truncate">
                       {record.contact_email ?? record.contact_url ?? '—'}
                       {record.sent_at && <span className="ml-2">· {formatDate(record.sent_at)}</span>}
                     </p>
                     {record.notes && (
-                      <p className="text-xs text-gray-500 mt-1 italic line-clamp-2">{record.notes}</p>
+                      <p className="text-xs text-prose-faint mt-1 italic line-clamp-2">{record.notes}</p>
                     )}
                   </div>
 
@@ -637,7 +637,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                       disabled={updatingId === record.id}
                       onChange={e => handleStatusUpdate(record.id, e.target.value as OutreachStatus)}
                       aria-label={`Update status for ${record.brand_name}`}
-                      className="flex-1 sm:flex-none bg-gray-800 border border-gray-700 text-gray-400 text-xs rounded-lg px-3 min-h-[44px] sm:min-h-[36px] sm:py-1.5 focus:outline-none focus:border-orange-600 transition-colors disabled:opacity-50"
+                      className="flex-1 sm:flex-none bg-surface-raised border border-strong text-prose-muted text-xs rounded-lg px-3 min-h-[44px] sm:min-h-[36px] sm:py-1.5 focus:outline-none focus:border-accent transition-colors disabled:opacity-50"
                     >
                       {Object.entries(STATUS_CONFIG).map(([val, cfg]) => (
                         <option key={val} value={val}>{cfg.label}</option>
@@ -654,7 +654,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                         }
                       }}
                       aria-label={record.notes ? 'Edit note' : 'Add note'}
-                      className="w-11 h-11 flex items-center justify-center rounded-lg text-gray-600 hover:text-gray-300 hover:bg-gray-800 transition-colors shrink-0"
+                      className="w-11 h-11 flex items-center justify-center rounded-lg text-prose-faint hover:text-gray-300 hover:bg-surface-raised transition-colors shrink-0"
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                     </button>
@@ -662,7 +662,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                     <button
                       onClick={() => setExpandedId(expandedId === record.id ? null : record.id)}
                       aria-label={expandedId === record.id ? 'Collapse message' : 'View full message'}
-                      className="w-11 h-11 flex items-center justify-center rounded-lg text-gray-600 hover:text-gray-300 hover:bg-gray-800 transition-colors shrink-0"
+                      className="w-11 h-11 flex items-center justify-center rounded-lg text-prose-faint hover:text-gray-300 hover:bg-surface-raised transition-colors shrink-0"
                     >
                       <svg
                         className={`w-4 h-4 transition-transform ${expandedId === record.id ? 'rotate-180' : ''}`}
@@ -676,18 +676,18 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
 
                 {/* Notes editor */}
                 {editingNotesId === record.id && (
-                  <div className="px-4 pb-4 border-t border-gray-800 pt-3 space-y-2">
+                  <div className="px-4 pb-4 border-t border-soft pt-3 space-y-2">
                     <textarea
                       value={notesDraft}
                       onChange={e => setNotesDraft(e.target.value)}
                       rows={3}
                       placeholder="Add a note (e.g. 'Replied — assets coming Friday')"
-                      className="w-full bg-gray-950 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-orange-600 resize-none transition-colors"
+                      className="w-full bg-surface-sunken border border-strong rounded-xl px-3 py-2 text-sm text-white placeholder:text-prose-faint focus:outline-none focus:border-accent resize-none transition-colors"
                     />
                     <div className="flex gap-2 justify-end">
                       <button
                         onClick={() => setEditingNotesId(null)}
-                        className="px-4 py-2.5 min-h-[44px] text-xs text-gray-500 hover:text-white transition-colors"
+                        className="px-4 py-2.5 min-h-[44px] text-xs text-prose-faint hover:text-white transition-colors"
                       >
                         Cancel
                       </button>
@@ -704,19 +704,19 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
 
                 {/* Expanded body */}
                 {expandedId === record.id && (
-                  <div className="border-t border-gray-800 px-4 py-4">
+                  <div className="border-t border-soft px-4 py-4">
                     {record.subject && (
-                      <p className="text-xs text-gray-600 mb-2 break-words">
-                        <span className="text-gray-500 font-medium">Subject:</span> {record.subject}
+                      <p className="text-xs text-prose-faint mb-2 break-words">
+                        <span className="text-prose-faint font-medium">Subject:</span> {record.subject}
                       </p>
                     )}
-                    <pre className="text-xs text-gray-400 whitespace-pre-wrap leading-relaxed font-mono bg-gray-950 rounded-xl p-3 md:p-4 border border-gray-800 overflow-x-auto">
+                    <pre className="text-xs text-prose-muted whitespace-pre-wrap leading-relaxed font-mono bg-surface-sunken rounded-xl p-3 md:p-4 border border-soft overflow-x-auto">
                       {record.body}
                     </pre>
                     <div className="mt-3 flex items-center justify-between gap-3">
                       <button
                         onClick={() => handleCopyHistoryBody(record.body)}
-                        className="text-xs text-gray-500 hover:text-orange-400 transition-colors"
+                        className="text-xs text-prose-faint hover:text-accent-text-soft transition-colors"
                       >
                         Copy body
                       </button>

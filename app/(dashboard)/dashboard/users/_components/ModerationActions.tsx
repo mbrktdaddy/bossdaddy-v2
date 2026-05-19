@@ -110,17 +110,17 @@ export default function ModerationActions({ userId, username, status, suspendedU
 
       <button
         onClick={() => setOpen((v) => !v)}
-        className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md text-base text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+        className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md text-base text-prose-muted hover:bg-surface-raised hover:text-white transition-colors"
         aria-label={`Moderation actions for @${username}`}
       >
         ⋯
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1 w-64 bg-gray-950 border border-gray-800 rounded-xl shadow-2xl z-50 p-1.5">
+        <div className="absolute right-0 top-full mt-1 w-64 bg-surface-sunken border border-soft rounded-xl shadow-2xl z-50 p-1.5">
           {pendingAction == null ? (
             <>
-              <p className="text-[10px] uppercase tracking-widest text-gray-600 px-3 pt-2 pb-1">
+              <p className="text-[10px] uppercase tracking-widest text-prose-faint px-3 pt-2 pb-1">
                 Moderate @{username}
               </p>
               {actions.map(({ key, label, tone }) => (
@@ -130,7 +130,7 @@ export default function ModerationActions({ userId, username, status, suspendedU
                   className={`block w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                     tone === 'danger' ? 'text-red-400 hover:bg-red-950/40'
                     : tone === 'warn' ? 'text-yellow-400 hover:bg-yellow-950/30'
-                    : 'text-gray-300 hover:bg-gray-900 hover:text-white'
+                    : 'text-gray-300 hover:bg-surface hover:text-white'
                   }`}
                 >
                   {label}
@@ -149,25 +149,25 @@ export default function ModerationActions({ userId, username, status, suspendedU
               </p>
 
               {pendingAction === 'suspend' && (
-                <label className="block text-xs text-gray-400">
+                <label className="block text-xs text-prose-muted">
                   Duration (days)
                   <input
                     type="number" min={1} max={365}
                     value={durationDays}
                     onChange={(e) => setDurationDays(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-full mt-1 px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs focus:outline-none focus:border-orange-500"
+                    className="w-full mt-1 px-2 py-1 bg-surface border border-strong rounded text-white text-xs focus:outline-none focus:border-accent"
                   />
                 </label>
               )}
 
               {(pendingAction === 'suspend' || pendingAction === 'ban' || pendingAction === 'delete') && (
                 <div className="space-y-2">
-                  <label className="block text-xs text-gray-400">
+                  <label className="block text-xs text-prose-muted">
                     Reason
                     <select
                       value={reasonChoice}
                       onChange={(e) => setReasonChoice(e.target.value)}
-                      className="w-full mt-1 px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs focus:outline-none focus:border-orange-500"
+                      className="w-full mt-1 px-2 py-1 bg-surface border border-strong rounded text-white text-xs focus:outline-none focus:border-accent"
                     >
                       <option value="">— Select a reason —</option>
                       {ADMIN_MODERATION_REASONS.map((r) => (
@@ -176,14 +176,14 @@ export default function ModerationActions({ userId, username, status, suspendedU
                     </select>
                   </label>
                   {isOther && (
-                    <label className="block text-xs text-gray-400">
+                    <label className="block text-xs text-prose-muted">
                       Specify
                       <input
                         type="text" maxLength={200}
                         value={customReason}
                         onChange={(e) => setCustomReason(e.target.value)}
                         placeholder="Describe the violation"
-                        className="w-full mt-1 px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs focus:outline-none focus:border-orange-500"
+                        className="w-full mt-1 px-2 py-1 bg-surface border border-strong rounded text-white text-xs focus:outline-none focus:border-accent"
                       />
                     </label>
                   )}
@@ -196,14 +196,14 @@ export default function ModerationActions({ userId, username, status, suspendedU
                 <button
                   onClick={() => submit(pendingAction)}
                   disabled={loading}
-                  className="flex-1 px-3 py-1.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white text-xs font-semibold rounded transition-colors"
+                  className="flex-1 px-3 py-1.5 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white text-xs font-semibold rounded transition-colors"
                 >
                   {loading ? 'Working…' : 'Confirm'}
                 </button>
                 <button
                   onClick={() => { setPendingAction(null); setReasonChoice(''); setCustomReason('') }}
                   disabled={loading}
-                  className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold rounded transition-colors"
+                  className="px-3 py-1.5 bg-surface-raised hover:bg-gray-700 text-gray-300 text-xs font-semibold rounded transition-colors"
                 >
                   Cancel
                 </button>

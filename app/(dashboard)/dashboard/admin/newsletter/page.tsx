@@ -41,7 +41,7 @@ export default async function AdminNewsletterPage() {
       <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-black">Newsletter</h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-prose-faint text-sm mt-1">
             {total.toLocaleString()} subscriber{total === 1 ? '' : 's'} · weekly digest sends Tuesday at 14:00 UTC.
           </p>
         </div>
@@ -58,15 +58,15 @@ export default async function AdminNewsletterPage() {
 
       {/* Interests breakdown (recent 50) */}
       {interestRows.length > 0 && (
-        <div className="mb-8 bg-gray-900 border border-gray-800 rounded-2xl p-5">
-          <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold mb-3">
+        <div className="mb-8 bg-surface border border-soft rounded-2xl p-5">
+          <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold mb-3">
             Interest tags (most recent 50)
           </p>
           <div className="flex flex-wrap gap-2">
             {interestRows.map(([tag, n]) => (
-              <span key={tag} className="px-3 py-1.5 bg-gray-950 border border-gray-700 rounded-full text-xs">
-                <span className="text-gray-400">{tag}</span>
-                <span className="ml-2 text-orange-400 font-semibold">{n}</span>
+              <span key={tag} className="px-3 py-1.5 bg-surface-sunken border border-strong rounded-full text-xs">
+                <span className="text-prose-muted">{tag}</span>
+                <span className="ml-2 text-accent-text-soft font-semibold">{n}</span>
               </span>
             ))}
           </div>
@@ -74,13 +74,13 @@ export default async function AdminNewsletterPage() {
       )}
 
       {/* Recent subscribers */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
-        <div className="px-5 py-3 border-b border-gray-800 flex items-center justify-between">
+      <div className="bg-surface border border-soft rounded-2xl overflow-hidden">
+        <div className="px-5 py-3 border-b border-soft flex items-center justify-between">
           <p className="text-sm font-semibold">Recent signups</p>
-          <p className="text-xs text-gray-600">Showing latest 50</p>
+          <p className="text-xs text-prose-faint">Showing latest 50</p>
         </div>
         {subs.length === 0 ? (
-          <p className="px-5 py-12 text-center text-gray-500 text-sm">
+          <p className="px-5 py-12 text-center text-prose-faint text-sm">
             No subscribers yet.
           </p>
         ) : (
@@ -88,18 +88,18 @@ export default async function AdminNewsletterPage() {
             {subs.map((s) => (
               <div key={s.email} className="px-5 py-3 flex items-center justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm text-gray-200 truncate">{s.email}</p>
+                  <p className="text-sm text-prose truncate">{s.email}</p>
                   {(s.interests ?? []).length > 0 && (
                     <div className="flex gap-1 mt-1 flex-wrap">
                       {s.interests!.map((t) => (
-                        <span key={t} className="text-[10px] text-orange-400 bg-orange-950/30 px-1.5 py-0.5 rounded border border-orange-900/30">
+                        <span key={t} className="text-[10px] text-accent-text-soft bg-accent-tint/30 px-1.5 py-0.5 rounded border border-accent-border/30">
                           {t}
                         </span>
                       ))}
                     </div>
                   )}
                 </div>
-                <div className="text-xs text-gray-600 shrink-0 text-right">
+                <div className="text-xs text-prose-faint shrink-0 text-right">
                   <p>{new Date(s.created_at).toLocaleDateString()}</p>
                   {!s.confirmed && (
                     <p className="text-yellow-500 mt-0.5">unconfirmed</p>
@@ -116,8 +116,8 @@ export default async function AdminNewsletterPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
-      <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold mb-1">{label}</p>
+    <div className="bg-surface border border-soft rounded-2xl p-4">
+      <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold mb-1">{label}</p>
       <p className="text-2xl font-black text-white">{value}</p>
     </div>
   )

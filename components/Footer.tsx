@@ -81,12 +81,12 @@ const SOCIAL_ICONS = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-gray-800/60 bg-gray-900/30">
+    <footer className="border-t border-soft/60 bg-surface/30">
       {/* Newsletter band — min-h reserves space so font-swap reflow doesn't shift content below */}
       <div className="max-w-2xl mx-auto px-6 pt-12 pb-8 text-center min-h-[300px]">
-        <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">— Welcome to the crew.</p>
+        <p className="text-prose-faint text-xs uppercase tracking-widest mb-2">— Welcome to the crew.</p>
         <h3 className="text-2xl font-black mb-2">Get the good stuff in your inbox</h3>
-        <p className="text-gray-400 text-sm mb-6">
+        <p className="text-prose-muted text-sm mb-6">
           One email when there&apos;s actually something worth saying. No spam, no fluff — just the good stuff.
         </p>
         <EmailSignup
@@ -99,7 +99,7 @@ export default function Footer() {
       </div>
 
       {/* Social */}
-      <div className="max-w-6xl mx-auto px-6 pb-6 text-center border-b border-gray-800/40">
+      <div className="max-w-6xl mx-auto px-6 pb-6 text-center border-b border-soft/40">
         <div className="flex items-center justify-center gap-5">
           {SOCIAL_ICONS.map(({ key, label, href, icon }) =>
             href ? (
@@ -109,7 +109,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="text-gray-500 hover:text-gray-100 transition-colors"
+                className="text-prose-faint hover:text-prose transition-colors"
               >
                 {icon}
               </a>
@@ -128,8 +128,8 @@ export default function Footer() {
         </div>
       </div>
       <div className="max-w-6xl mx-auto px-6 py-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-          <Link href="/" className="flex items-center gap-2 font-black text-gray-400 tracking-tight hover:text-gray-200 transition-colors py-2">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-prose-faint">
+          <Link href="/" className="flex items-center gap-2 font-black text-prose-muted tracking-tight hover:text-prose transition-colors py-2">
             <Image
               src="/images/bd-logo-badge.png"
               alt=""

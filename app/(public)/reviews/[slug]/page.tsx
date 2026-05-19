@@ -213,7 +213,7 @@ export default async function ReviewPage({ params }: Props) {
         {isFollowup && parentNode?.slug && (
           <Link
             href={`/reviews/${parentNode.slug}`}
-            className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-orange-400 transition-colors mb-4"
+            className="inline-flex items-center gap-1.5 text-xs text-prose-muted hover:text-accent-text-soft transition-colors mb-4"
           >
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -229,7 +229,7 @@ export default async function ReviewPage({ params }: Props) {
         {/* FTC Disclosure */}
         {review.has_affiliate_links && (
           <div
-            className="mb-8 text-xs text-gray-500 bg-gray-900 rounded-2xl px-4 py-3 shadow-md shadow-black/30"
+            className="mb-8 text-xs text-prose-faint bg-surface rounded-2xl px-4 py-3 shadow-md shadow-black/30"
             dangerouslySetInnerHTML={{ __html: FTC_DISCLOSURE_HTML }}
           />
         )}
@@ -238,16 +238,16 @@ export default async function ReviewPage({ params }: Props) {
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-4 flex-wrap">
             {/* Product name — primary context, orange chip */}
-            <span className="text-xs font-medium text-orange-500 uppercase tracking-widest bg-orange-950/40 px-3 py-1 rounded-full">
+            <span className="text-xs font-medium text-eyebrow uppercase tracking-widest bg-accent-tint/40 px-3 py-1 rounded-full">
               {review.product_name}
             </span>
             {/* Category — secondary context, gray chip with icon */}
             {category && (
               <Link
                 href={`/category/${category.slug}`}
-                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
+                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-surface-raised text-prose-muted hover:bg-gray-700 hover:text-white transition-colors"
               >
-                <CategoryIcon slug={category.slug} className="w-4 h-4 text-orange-500" /> {category.label}
+                <CategoryIcon slug={category.slug} className="w-4 h-4 text-accent-text" /> {category.label}
               </Link>
             )}
             {/* "From the Bench" — closes the lifecycle loop when this review
@@ -258,9 +258,9 @@ export default async function ReviewPage({ params }: Props) {
               <Link
                 href={`/bench/${benchItem.slug}`}
                 title="Products lined up for testing — vote on what gets reviewed next."
-                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-orange-950/40 border border-orange-900/40 text-orange-300 hover:border-orange-700/60 hover:bg-orange-900/40 hover:text-orange-200 transition-colors"
+                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-accent-tint/40 border border-accent-border/40 text-orange-300 hover:border-accent-border/60 hover:bg-accent-tint/40 hover:text-orange-200 transition-colors"
               >
-                <svg className="w-3.5 h-3.5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+                <svg className="w-3.5 h-3.5 text-accent-text-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 From the Bench
@@ -283,8 +283,8 @@ export default async function ReviewPage({ params }: Props) {
           <h1 className="text-4xl md:text-5xl font-black leading-tight mb-4 tracking-tight">{review.title}</h1>
 
           {/* Author + date meta */}
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
-            <span>by <Link href={`/author/${author}`} className="text-gray-300 hover:text-orange-400 transition-colors">@{author}</Link></span>
+          <div className="flex flex-wrap items-center gap-4 text-sm text-prose-muted">
+            <span>by <Link href={`/author/${author}`} className="text-gray-300 hover:text-accent-text-soft transition-colors">@{author}</Link></span>
             {review.published_at && (
               <span>
                 {new Date(review.published_at).toLocaleDateString('en-US', {
@@ -309,7 +309,7 @@ export default async function ReviewPage({ params }: Props) {
         {review.image_url && (
           <div className="relative mb-8">
             <LightboxImage src={review.image_url} alt={review.product_name}>
-              <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden bg-gray-900">
+              <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden bg-surface">
                 <Image
                   src={review.image_url}
                   alt={review.product_name}
@@ -346,17 +346,17 @@ export default async function ReviewPage({ params }: Props) {
         {isFollowup && followupToc.length >= 2 && (
           <nav
             aria-label="Follow-up sections"
-            className="mt-8 mb-4 px-4 py-3 rounded-xl bg-gray-900/60 border border-gray-800/60"
+            className="mt-8 mb-4 px-4 py-3 rounded-xl bg-surface/60 border border-soft/60"
           >
-            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">In this update</p>
+            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">In this update</p>
             <ol className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
               {followupToc.map((entry) => (
                 <li key={entry.anchor}>
                   <a
                     href={`#${entry.anchor}`}
-                    className="inline-flex items-center gap-2 text-sm text-gray-300 hover:text-orange-400 transition-colors min-h-[36px]"
+                    className="inline-flex items-center gap-2 text-sm text-gray-300 hover:text-accent-text-soft transition-colors min-h-[36px]"
                   >
-                    <span aria-hidden className="text-gray-600">›</span>
+                    <span aria-hidden className="text-prose-faint">›</span>
                     <span className="capitalize">{entry.label}</span>
                   </a>
                 </li>
@@ -369,13 +369,14 @@ export default async function ReviewPage({ params }: Props) {
         <div className="min-w-0 w-full">
           <ImageLightbox className="bd-content">
             <div
-              className="bd-editorial prose prose-lg prose-invert prose-orange max-w-none
-                prose-headings:font-black prose-headings:tracking-tight prose-headings:font-sans
-                prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4
-                prose-p:text-gray-300 prose-p:leading-[1.75]
-                prose-a:text-orange-400 prose-a:no-underline hover:prose-a:text-orange-300
+              className="bd-editorial prose prose-lg prose-invert prose-orange mx-auto max-w-[68ch]
+                prose-headings:font-black prose-headings:tracking-tight prose-headings:font-sans prose-headings:leading-[1.15]
+                prose-h2:text-2xl prose-h2:mt-14 prose-h2:mb-5
+                prose-h3:mt-10 prose-h3:mb-3
+                prose-p:text-gray-300 prose-p:leading-[1.85]
+                prose-a:text-accent-text-soft prose-a:no-underline hover:prose-a:text-orange-300
                 prose-strong:text-white
-                prose-li:text-gray-300 prose-li:leading-[1.75]"
+                prose-li:text-gray-300 prose-li:leading-[1.85]"
               dangerouslySetInnerHTML={{ __html: renderedBodyHtml }}
             />
           </ImageLightbox>
@@ -388,22 +389,22 @@ export default async function ReviewPage({ params }: Props) {
 
         {/* FAQs — collapsible, SEO + reader utility */}
         {faqs.length > 0 && (
-          <div className="mt-12 pt-8 border-t border-gray-800/60">
+          <div className="mt-12 pt-8 border-t border-soft/60">
             <div className="mb-6">
-              <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-              <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Common Questions</p>
+              <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Common Questions</p>
               <h2 className="text-xl font-black">Frequently Asked Questions</h2>
             </div>
             <div className="space-y-3">
               {faqs.map((faq, i) => (
                 <details
                   key={i}
-                  className="group bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 rounded-2xl shadow-md shadow-black/30 overflow-hidden transition-colors"
+                  className="group bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:border-accent-border/40 rounded-2xl shadow-md shadow-black/30 overflow-hidden transition-colors"
                 >
-                  <summary className="flex items-center justify-between gap-4 cursor-pointer list-none px-5 py-4 hover:bg-gray-800/60 transition-colors min-h-[44px]">
+                  <summary className="flex items-center justify-between gap-4 cursor-pointer list-none px-5 py-4 hover:bg-surface-raised/60 transition-colors min-h-[44px]">
                     <p className="font-bold text-sm text-white leading-snug">{faq.question}</p>
                     <svg
-                      className="w-4 h-4 text-orange-500 shrink-0 transition-transform duration-200 group-open:rotate-180"
+                      className="w-4 h-4 text-accent-text shrink-0 transition-transform duration-200 group-open:rotate-180"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -424,9 +425,9 @@ export default async function ReviewPage({ params }: Props) {
 
         {/* Bottom CTA — email signup */}
         <div className="mt-12 pt-8">
-          <div className="bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl p-6 sm:p-8 text-center shadow-xl shadow-black/40">
-            <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3 mx-auto" />
-            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Liked this review?</p>
+          <div className="bg-gradient-to-br from-surface to-surface-sunken border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl p-6 sm:p-8 text-center shadow-xl shadow-black/40">
+            <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3 mx-auto" />
+            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Liked this review?</p>
             <h3 className="text-xl font-black mb-4">Get the next one in your inbox</h3>
             <div className="max-w-md mx-auto">
               <EmailSignup
@@ -454,7 +455,7 @@ export default async function ReviewPage({ params }: Props) {
 
         {/* On the Bench */}
         <div className="mt-12">
-          <p className="text-xs text-gray-500 mb-3">Liked this review? Here&apos;s what I&apos;m testing next — vote to move it up.</p>
+          <p className="text-xs text-prose-faint mb-3">Liked this review? Here&apos;s what I&apos;m testing next — vote to move it up.</p>
           <BenchStrip ctaText="See all on the bench" />
         </div>
 
@@ -477,8 +478,8 @@ export default async function ReviewPage({ params }: Props) {
         {related && related.length > 0 && (
           <div className="mt-12 xl:hidden">
             <div className="mb-4">
-              <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-              <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">More Reviews</p>
+              <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">More Reviews</p>
               <h2 className="text-lg font-black">Keep reading</h2>
             </div>
             <div className="space-y-2">
@@ -486,9 +487,9 @@ export default async function ReviewPage({ params }: Props) {
                 <Link
                   key={r.id}
                   href={`/reviews/${r.slug}`}
-                  className="flex items-center justify-between p-4 bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/40 hover:border-orange-900/40 hover:-translate-y-0.5 transition-all group"
+                  className="flex items-center justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/40 hover:border-accent-border/40 hover:-translate-y-0.5 transition-all group"
                 >
-                  <p className="text-sm font-semibold group-hover:text-orange-400 transition-colors truncate min-w-0 mr-4">{r.title}</p>
+                  <p className="text-sm font-semibold group-hover:text-accent-text-soft transition-colors truncate min-w-0 mr-4">{r.title}</p>
                   <RatingScore rating={r.rating ?? 0} size="sm" />
                 </Link>
               ))}
@@ -515,18 +516,18 @@ export default async function ReviewPage({ params }: Props) {
           {category && (
             <Link
               href={`/category/${category.slug}`}
-              className="flex items-center gap-2 px-1 text-xs text-gray-400 hover:text-orange-400 transition-colors"
+              className="flex items-center gap-2 px-1 text-xs text-prose-muted hover:text-accent-text-soft transition-colors"
             >
-              <CategoryIcon slug={category.slug} className="w-4 h-4 text-gray-400" />
+              <CategoryIcon slug={category.slug} className="w-4 h-4 text-prose-muted" />
               <span>Browse all {category.label} →</span>
             </Link>
           )}
 
           {/* Related Reviews */}
           {related && related.length > 0 && (
-            <div className="bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl p-5 shadow-lg shadow-black/40">
-              <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-              <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-4">More Reviews</p>
+            <div className="bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl p-5 shadow-lg shadow-black/40">
+              <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">More Reviews</p>
               <div className="space-y-4">
                 {related.map((r) => (
                   <Link
@@ -534,7 +535,7 @@ export default async function ReviewPage({ params }: Props) {
                     href={`/reviews/${r.slug}`}
                     className="block group"
                   >
-                    <p className="text-sm font-semibold group-hover:text-orange-400 transition-colors leading-snug">{r.title}</p>
+                    <p className="text-sm font-semibold group-hover:text-accent-text-soft transition-colors leading-snug">{r.title}</p>
                     <RatingScore rating={r.rating ?? 0} />
                   </Link>
                 ))}

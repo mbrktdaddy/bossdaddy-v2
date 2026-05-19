@@ -23,7 +23,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           className="h-10 w-10 object-contain"
         />
         <span className="font-black tracking-tight text-sm">
-          <span className="text-orange-500">BOSS</span>
+          <span className="text-accent-text">BOSS</span>
           <span className="text-white"> DADDY</span>
         </span>
       </Link>

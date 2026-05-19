@@ -23,8 +23,8 @@ export function TopPerformers({ items }: { items: TopItem[] }) {
 
   if (!items.length) {
     return (
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 text-center">
-        <p className="text-sm text-gray-500">No published content with views yet. Publish something and check back!</p>
+      <div className="bg-surface border border-soft rounded-2xl p-6 text-center">
+        <p className="text-sm text-prose-faint">No published content with views yet. Publish something and check back!</p>
       </div>
     )
   }
@@ -35,12 +35,12 @@ export function TopPerformers({ items }: { items: TopItem[] }) {
   const hasMore = items.length > DEFAULT_VISIBLE
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
-      <div className="px-5 py-3 border-b border-gray-800 flex items-center justify-between">
+    <div className="bg-surface border border-soft rounded-2xl overflow-hidden">
+      <div className="px-5 py-3 border-b border-soft flex items-center justify-between">
         <p className="text-sm font-semibold">
           {expanded ? `All ${items.length} published` : 'Top 5 by views'}
         </p>
-        <p className="text-xs text-gray-600 font-mono">{totalViews.toLocaleString()} total</p>
+        <p className="text-xs text-prose-faint font-mono">{totalViews.toLocaleString()} total</p>
       </div>
       <div className="divide-y divide-gray-800">
         {visible.map((item, i) => {
@@ -48,12 +48,12 @@ export function TopPerformers({ items }: { items: TopItem[] }) {
           const percent = Math.round(((item.view_count ?? 0) / max) * 100)
           const href = item.type === 'guide' ? `/dashboard/guides/${item.id}` : `/dashboard/reviews/${item.id}`
           return (
-            <Link key={`${item.type}-${item.id}`} href={href} className="block px-5 py-3 hover:bg-gray-950/40 transition-colors">
+            <Link key={`${item.type}-${item.id}`} href={href} className="block px-5 py-3 hover:bg-surface-sunken/40 transition-colors">
               <div className="flex items-center gap-3">
-                <span className="text-sm font-mono text-gray-600 w-4 shrink-0">{i + 1}</span>
+                <span className="text-sm font-mono text-prose-faint w-4 shrink-0">{i + 1}</span>
 
                 {/* Thumbnail */}
-                <div className="relative w-10 h-10 shrink-0 rounded-lg overflow-hidden bg-gray-950 border border-gray-800">
+                <div className="relative w-10 h-10 shrink-0 rounded-lg overflow-hidden bg-surface-sunken border border-soft">
                   {item.image_url ? (
                     <Image src={item.image_url} alt={item.title} fill className="object-cover" sizes="40px" />
                   ) : (
@@ -70,16 +70,16 @@ export function TopPerformers({ items }: { items: TopItem[] }) {
                     <span className={`text-xs px-1.5 py-0.5 rounded border ${
                       item.type === 'guide'
                         ? 'bg-blue-950/40 text-blue-400 border-blue-900/40'
-                        : 'bg-orange-950/40 text-orange-400 border-orange-900/40'
+                        : 'bg-accent-tint/40 text-accent-text-soft border-accent-border/40'
                     }`}>
                       {item.type}
                     </span>
                     <p className="text-sm text-white truncate">{item.title}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1 bg-gray-800 rounded-full overflow-hidden max-w-xs">
+                    <div className="flex-1 h-1 bg-surface-raised rounded-full overflow-hidden max-w-xs">
                       <div
-                        className="h-full bg-orange-500 rounded-full"
+                        className="h-full bg-accent-hover rounded-full"
                         style={{ width: `${percent}%` }}
                       />
                     </div>
@@ -98,7 +98,7 @@ export function TopPerformers({ items }: { items: TopItem[] }) {
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="w-full px-5 py-2.5 text-xs text-gray-500 hover:text-gray-300 hover:bg-gray-950/40 border-t border-gray-800 transition-colors text-center"
+          className="w-full px-5 py-2.5 text-xs text-prose-faint hover:text-gray-300 hover:bg-surface-sunken/40 border-t border-soft transition-colors text-center"
         >
           {expanded ? '↑ Show top 5 only' : `↓ Show all ${items.length} published`}
         </button>

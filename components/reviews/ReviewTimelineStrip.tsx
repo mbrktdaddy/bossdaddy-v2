@@ -51,16 +51,16 @@ export function ReviewTimelineStrip({ nodes, activeId }: Props) {
             <div
               className={`flex flex-col items-center justify-center min-w-[88px] sm:min-w-[104px] px-3 py-2 rounded-xl border transition-colors ${
                 active
-                  ? 'bg-orange-950/40 border-orange-600 text-white'
-                  : 'bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-orange-700/60'
+                  ? 'bg-accent-tint/40 border-accent text-white'
+                  : 'bg-surface border-strong text-gray-300 hover:bg-surface-raised hover:border-accent-border/60'
               }`}
             >
-              <span className={`text-[10px] uppercase tracking-widest font-semibold leading-none mb-1 ${active ? 'text-orange-300' : 'text-gray-500'}`}>
+              <span className={`text-[10px] uppercase tracking-widest font-semibold leading-none mb-1 ${active ? 'text-orange-300' : 'text-prose-faint'}`}>
                 {nodeLabel(node)}
               </span>
               <span className="flex items-baseline gap-1">
                 <span className="text-sm font-black tabular-nums">{ratingStr}</span>
-                <span className="text-[10px] text-gray-500">/10</span>
+                <span className="text-[10px] text-prose-faint">/10</span>
               </span>
               {icon && (
                 <span

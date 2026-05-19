@@ -61,10 +61,10 @@ export default async function VaultLandingPage({ searchParams }: Props) {
     <div className="max-w-6xl mx-auto px-6 py-16">
       {/* Hero */}
       <div className="mb-12">
-        <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">{activeTab.eyebrow}</p>
+        <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">{activeTab.eyebrow}</p>
         <h1 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tight">{LABELS.vault.full}</h1>
-        <p className="text-gray-400 max-w-2xl leading-relaxed text-base md:text-lg">
+        <p className="text-prose-muted max-w-2xl leading-relaxed text-base md:text-lg">
           Every comparison, best-of list, gift guide, and stack — in one place. Real-tested picks from a real dad, organized so you can find what you need in one click.
         </p>
       </div>
@@ -83,13 +83,13 @@ export default async function VaultLandingPage({ searchParams }: Props) {
                 scroll={false}
                 className={`shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-full border text-sm font-semibold transition-colors min-h-[44px] ${
                   isActive
-                    ? 'bg-orange-600 text-white border-orange-600'
-                    : 'bg-gray-900 text-gray-400 border-gray-800 hover:border-gray-700 hover:text-gray-200'
+                    ? 'bg-accent text-white border-accent'
+                    : 'bg-surface text-prose-muted border-soft hover:border-strong hover:text-prose'
                 }`}
               >
                 {t.label}
                 <span className={`text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-full ${
-                  isActive ? 'bg-orange-700 text-orange-100' : 'bg-gray-800 text-gray-500'
+                  isActive ? 'bg-orange-700 text-orange-100' : 'bg-surface-raised text-prose-faint'
                 }`}>
                   {count}
                 </span>
@@ -101,9 +101,9 @@ export default async function VaultLandingPage({ searchParams }: Props) {
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <div className="bg-gray-900/40 border border-dashed border-gray-800 rounded-2xl p-12 text-center">
-          <p className="text-gray-500 font-semibold mb-1">Nothing here yet.</p>
-          <p className="text-sm text-gray-600">Check back soon — content lands here every week.</p>
+        <div className="bg-surface/40 border border-dashed border-soft rounded-2xl p-12 text-center">
+          <p className="text-prose-faint font-semibold mb-1">Nothing here yet.</p>
+          <p className="text-sm text-prose-faint">Check back soon — content lands here every week.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -122,26 +122,26 @@ function VaultCardLink({ card }: { card: VaultCard }) {
   return (
     <Link
       href={href}
-      className="group flex flex-col bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-md shadow-black/30 hover:border-orange-900/40 hover:shadow-lg hover:shadow-black/50 hover:-translate-y-0.5 transition-all"
+      className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-md shadow-black/30 hover:border-accent-border/40 hover:shadow-lg hover:shadow-black/50 hover:-translate-y-0.5 transition-all"
     >
-      <div className="relative aspect-video bg-gray-950">
+      <div className="relative aspect-video bg-surface-sunken">
         {card.hero_image_url ? (
           <Image src={card.hero_image_url} alt={card.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-orange-500/30">
+          <div className="absolute inset-0 flex items-center justify-center text-accent-text/30">
             {meta.icon}
           </div>
         )}
-        <span className="absolute top-2 left-2 inline-flex items-center gap-1 bg-gray-950/85 backdrop-blur border border-gray-800 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-orange-400">
+        <span className="absolute top-2 left-2 inline-flex items-center gap-1 bg-surface-sunken/85 backdrop-blur border border-soft rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-accent-text-soft">
           {meta.label}
         </span>
       </div>
       <div className="p-4 flex flex-col flex-1">
-        <p className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors leading-snug mb-1 line-clamp-2">{card.title}</p>
+        <p className="text-sm font-bold text-white group-hover:text-accent-text-soft transition-colors leading-snug mb-1 line-clamp-2">{card.title}</p>
         {card.description && (
-          <p className="text-xs text-gray-500 leading-relaxed line-clamp-2 flex-1">{card.description}</p>
+          <p className="text-xs text-prose-faint leading-relaxed line-clamp-2 flex-1">{card.description}</p>
         )}
-        <p className="mt-3 text-[10px] text-gray-500 uppercase tracking-widest font-semibold group-hover:text-orange-400 transition-colors">
+        <p className="mt-3 text-[10px] text-prose-faint uppercase tracking-widest font-semibold group-hover:text-accent-text-soft transition-colors">
           Read →
         </p>
       </div>

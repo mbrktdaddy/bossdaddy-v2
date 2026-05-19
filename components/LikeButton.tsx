@@ -49,7 +49,7 @@ export default function LikeButton({ contentType, contentId, size = 'md' }: Prop
         onClick={toggle}
         disabled={loading}
         className={`flex items-center gap-1.5 text-xs transition-colors disabled:opacity-50 ${
-          liked ? 'text-red-400' : 'text-gray-600 hover:text-gray-400'
+          liked ? 'text-red-400' : 'text-prose-faint hover:text-prose-muted'
         }`}
       >
         <svg
@@ -73,7 +73,7 @@ export default function LikeButton({ contentType, contentId, size = 'md' }: Prop
       className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all disabled:opacity-50 ${
         liked
           ? 'bg-red-950/50 border-red-900/60 text-red-400 hover:bg-red-900/40'
-          : 'bg-gray-900 border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'
+          : 'bg-surface border-soft text-prose-muted hover:border-gray-600 hover:text-white'
       }`}
     >
       <svg

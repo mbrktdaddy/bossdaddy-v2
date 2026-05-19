@@ -224,20 +224,20 @@ export default async function StackDetailPage({ params }: Props) {
       {faqLd      && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="flex items-center gap-2 text-xs text-gray-500 mb-8">
-          <Link href="/stacks" className="hover:text-orange-400 transition-colors">Stacks</Link>
+        <div className="flex items-center gap-2 text-xs text-prose-faint mb-8">
+          <Link href="/stacks" className="hover:text-accent-text-soft transition-colors">Stacks</Link>
           <span>/</span>
-          <span className="text-gray-400">{stack.title}</span>
+          <span className="text-prose-muted">{stack.title}</span>
         </div>
 
         <div className="lg:flex lg:gap-10 lg:items-start">
           <main className="lg:flex-1 lg:max-w-3xl min-w-0">
             <header className="mb-8">
-              <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-              <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">The Stack</p>
+              <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">The Stack</p>
               <h1 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tight leading-tight">{stack.title}</h1>
               {stack.description && (
-                <p className="text-lg text-gray-400 leading-relaxed mb-6">{stack.description}</p>
+                <p className="text-lg text-prose-muted leading-relaxed mb-6">{stack.description}</p>
               )}
               <EditorialMeta
                 publishedAt={stack.published_at}
@@ -248,12 +248,12 @@ export default async function StackDetailPage({ params }: Props) {
               {total != null && total > 0 && (
                 <a
                   href="#cost"
-                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-orange-950/40 border border-orange-900/40 hover:border-orange-700/60 rounded-full text-xs font-bold text-orange-300 hover:text-orange-200 transition-colors min-h-[36px]"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-accent-tint/40 border border-accent-border/40 hover:border-accent-border/60 rounded-full text-xs font-bold text-orange-300 hover:text-orange-200 transition-colors min-h-[36px]"
                 >
-                  <span className="text-orange-500/80 uppercase tracking-widest text-[10px]">Build cost</span>
+                  <span className="text-eyebrow/80 uppercase tracking-widest text-[10px]">Build cost</span>
                   <span className="tabular-nums">${(total / 100).toFixed(0)}</span>
-                  <span className="text-orange-500/60">·</span>
-                  <span className="text-orange-500/80 text-[10px] uppercase tracking-widest">{items.length} pieces</span>
+                  <span className="text-accent-text/60">·</span>
+                  <span className="text-eyebrow/80 text-[10px] uppercase tracking-widest">{items.length} pieces</span>
                 </a>
               )}
             </header>
@@ -261,7 +261,7 @@ export default async function StackDetailPage({ params }: Props) {
             <ArticleTOC items={tocItems} variant="mobile" />
 
             {stack.hero_image_url && (
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-10 bg-gray-900">
+              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-10 bg-surface">
                 <Image src={stack.hero_image_url} alt={stack.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 768px" priority />
               </div>
             )}
@@ -270,12 +270,12 @@ export default async function StackDetailPage({ params }: Props) {
             {stack.intro_html && (
               <section id="overview" className="mb-10">
                 <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Why These</p>
+                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Why These</p>
                   <h2 className="text-2xl font-black text-white leading-tight">Why this kit works together</h2>
                 </div>
                 <div
-                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-orange-400 hover:prose-a:text-orange-300 prose-a:no-underline"
+                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-accent-text-soft hover:prose-a:text-orange-300 prose-a:no-underline"
                   dangerouslySetInnerHTML={{ __html: stack.intro_html }}
                 />
               </section>
@@ -293,8 +293,8 @@ export default async function StackDetailPage({ params }: Props) {
             {/* Lineup */}
             <section id="lineup" className="mb-12" aria-label="Stack lineup">
               <div className="mb-5">
-                <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">The Lineup</p>
+                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Lineup</p>
                 <h2 className="text-2xl font-black text-white leading-tight">
                   {items.length} {items.length === 1 ? 'piece' : 'pieces'} in this kit
                 </h2>
@@ -309,15 +309,15 @@ export default async function StackDetailPage({ params }: Props) {
                   return (
                     <article
                       key={review.id}
-                      className="relative flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 rounded-2xl p-5 shadow-lg shadow-black/40 transition-colors"
+                      className="relative flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:border-accent-border/40 rounded-2xl p-5 shadow-lg shadow-black/40 transition-colors"
                     >
                       {/* Position number — subtle ordering signal */}
-                      <span aria-hidden className="absolute top-3 left-3 text-[10px] font-black text-orange-500/30 tabular-nums tracking-widest">
+                      <span aria-hidden className="absolute top-3 left-3 text-[10px] font-black text-accent-text/30 tabular-nums tracking-widest">
                         {String(idx + 1).padStart(2, '0')}
                       </span>
 
                       {review.image_url && (
-                        <div className="relative w-full sm:w-44 h-44 sm:h-36 shrink-0 rounded-xl overflow-hidden bg-gray-800">
+                        <div className="relative w-full sm:w-44 h-44 sm:h-36 shrink-0 rounded-xl overflow-hidden bg-surface-raised">
                           <Image src={review.image_url} alt={review.product_name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 176px" />
                           {(review.rating ?? 0) >= 8 && (
                             <div className="absolute top-2 right-2"><BossApprovedBadge size="sm" variant="card" /></div>
@@ -327,14 +327,14 @@ export default async function StackDetailPage({ params }: Props) {
 
                       <div className="flex-1 min-w-0 flex flex-col">
                         {role_label && (
-                          <span className="self-start text-[10px] font-black uppercase tracking-[0.2em] text-orange-300 bg-orange-950/60 border border-orange-900/40 px-3 py-1 rounded-full mb-2">
+                          <span className="self-start text-[10px] font-black uppercase tracking-[0.2em] text-orange-300 bg-accent-tint/60 border border-accent-border/40 px-3 py-1 rounded-full mb-2">
                             {role_label}
                           </span>
                         )}
                         <div className="flex items-start justify-between gap-3 mb-2">
                           <div>
-                            <p className="text-xs font-medium text-orange-500/80 uppercase tracking-widest mb-1">{review.product_name}</p>
-                            <Link href={`/reviews/${review.slug}`} className="text-lg font-bold text-white hover:text-orange-400 transition-colors leading-snug block">
+                            <p className="text-xs font-medium text-eyebrow/80 uppercase tracking-widest mb-1">{review.product_name}</p>
+                            <Link href={`/reviews/${review.slug}`} className="text-lg font-bold text-white hover:text-accent-text-soft transition-colors leading-snug block">
                               {review.title}
                             </Link>
                           </div>
@@ -344,15 +344,15 @@ export default async function StackDetailPage({ params }: Props) {
                           <p className="text-sm text-gray-300 leading-relaxed flex-1 mb-3">{blurb ?? review.tldr}</p>
                         )}
                         {(review.best_for?.length ?? 0) > 0 && (
-                          <p className="text-xs text-gray-500 mb-3">
-                            <span className="text-orange-400 font-bold uppercase tracking-widest">Best for:</span> {review.best_for!.slice(0, 3).join(' · ')}
+                          <p className="text-xs text-prose-faint mb-3">
+                            <span className="text-accent-text-soft font-bold uppercase tracking-widest">Best for:</span> {review.best_for!.slice(0, 3).join(' · ')}
                           </p>
                         )}
                         <div className="flex flex-wrap items-center gap-3 mt-auto pt-1">
                           {priceCents != null && (
                             <span className="text-base font-black text-white tabular-nums">${(priceCents / 100).toFixed(0)}</span>
                           )}
-                          <Link href={`/reviews/${review.slug}`} className="text-xs text-gray-400 hover:text-orange-400 transition-colors font-semibold uppercase tracking-widest">
+                          <Link href={`/reviews/${review.slug}`} className="text-xs text-prose-muted hover:text-accent-text-soft transition-colors font-semibold uppercase tracking-widest">
                             Read review →
                           </Link>
                           {href && (
@@ -361,7 +361,7 @@ export default async function StackDetailPage({ params }: Props) {
                               target="_blank"
                               rel={product?.affiliate_url ? 'sponsored nofollow noopener' : 'noopener'}
                               data-product-slug={review.product_slug ?? undefined}
-                              className="ml-auto px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
+                              className="ml-auto px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
                             >
                               Check Price
                             </a>
@@ -379,11 +379,11 @@ export default async function StackDetailPage({ params }: Props) {
               <section
                 id="cost"
                 aria-label="Build cost"
-                className="mb-12 rounded-2xl border border-orange-900/40 bg-gradient-to-br from-orange-950/30 to-gray-900/60 ring-1 ring-inset ring-white/[0.02] p-6 sm:p-8 shadow-lg shadow-black/40 text-center"
+                className="mb-12 rounded-2xl border border-accent-border/40 bg-gradient-to-br from-orange-950/30 to-surface/60 ring-1 ring-inset ring-white/[0.02] p-6 sm:p-8 shadow-lg shadow-black/40 text-center"
               >
-                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">Build Cost</p>
+                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Build Cost</p>
                 <p className="text-4xl sm:text-5xl font-black text-white tabular-nums mb-2">${(total / 100).toFixed(2)}</p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-prose-faint">
                   {partialPricing
                     ? `Partial total · ${pricedCount} of ${items.length} pieces have a listed price`
                     : `Estimated total · ${items.length} ${items.length === 1 ? 'piece' : 'pieces'}`}
@@ -398,7 +398,7 @@ export default async function StackDetailPage({ params }: Props) {
             {/* Same-flavor browse link — quiet footer affordance, mirrors the
                 "See all gift guides" link gift pages already have. */}
             <div className="mt-8 text-center">
-              <Link href="/stacks" className="text-sm text-gray-500 hover:text-orange-400 transition-colors">
+              <Link href="/stacks" className="text-sm text-prose-faint hover:text-accent-text-soft transition-colors">
                 Browse all Stacks →
               </Link>
             </div>

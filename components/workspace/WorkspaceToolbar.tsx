@@ -37,13 +37,13 @@ export function WorkspaceToolbar({
   const readyTooltip = readinessChecks?.map((c) => `${c.done ? '✓' : '✗'} ${c.label}`).join('\n')
 
   return (
-    <div className="sticky bottom-0 left-0 right-0 -mx-4 sm:-mx-8 px-4 sm:px-8 py-3 bg-gray-950/95 backdrop-blur border-t border-gray-800 flex items-center gap-2 flex-wrap z-10">
+    <div className="sticky bottom-0 left-0 right-0 -mx-4 sm:-mx-8 px-4 sm:px-8 py-3 bg-surface-sunken/95 backdrop-blur border-t border-soft flex items-center gap-2 flex-wrap z-10">
       <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
         <button
           type="button"
           onClick={onSave}
           disabled={isSaving}
-          className="px-4 py-3 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+          className="px-4 py-3 bg-surface-raised hover:bg-gray-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
         >
           {isSaving ? 'Saving…' : 'Save'}
         </button>
@@ -51,7 +51,7 @@ export function WorkspaceToolbar({
           <button
             type="button"
             onClick={onDuplicate}
-            className="px-3 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
+            className="px-3 py-3 bg-surface-raised hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
             title="Create a new draft with this content"
           >
             📋 Duplicate
@@ -63,8 +63,8 @@ export function WorkspaceToolbar({
             onClick={onTogglePreview}
             className={`hidden xl:flex items-center gap-1.5 px-3 py-3 text-sm rounded-lg transition-colors ${
               previewOpen
-                ? 'bg-orange-950/60 text-orange-400 border border-orange-900/40'
-                : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                ? 'bg-accent-tint/60 text-accent-text-soft border border-accent-border/40'
+                : 'bg-surface-raised hover:bg-gray-700 text-gray-300'
             }`}
             title="Toggle live preview panel"
           >
@@ -75,7 +75,7 @@ export function WorkspaceToolbar({
           <Link
             href={previewUrl}
             target="_blank"
-            className="px-3 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
+            className="px-3 py-3 bg-surface-raised hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
           >
             🔗 Preview
           </Link>

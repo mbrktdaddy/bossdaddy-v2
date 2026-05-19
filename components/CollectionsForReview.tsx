@@ -63,10 +63,10 @@ export default async function CollectionsForReview({ reviewId }: Props) {
   if (collections.length === 0) return null
 
   return (
-    <section className="mt-12 pt-8 border-t border-gray-800/60" aria-label="Featured in collections">
+    <section className="mt-12 pt-8 border-t border-soft/60" aria-label="Featured in collections">
       <div className="mb-5">
-        <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">Featured in</p>
+        <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Featured in</p>
         <h2 className="text-lg font-black">Boss Daddy collections</h2>
       </div>
       <ul className="space-y-2">
@@ -77,14 +77,14 @@ export default async function CollectionsForReview({ reviewId }: Props) {
             <li key={c.id}>
               <Link
                 href={href}
-                className="group flex items-center gap-4 p-4 bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:border-orange-900/40 hover:-translate-y-0.5 rounded-2xl shadow-md shadow-black/30 transition-all"
+                className="group flex items-center gap-4 p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:border-accent-border/40 hover:-translate-y-0.5 rounded-2xl shadow-md shadow-black/30 transition-all"
               >
-                <span className="text-orange-400 shrink-0">{meta.icon}</span>
+                <span className="text-accent-text-soft shrink-0">{meta.icon}</span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[10px] sm:text-xs text-orange-500 uppercase tracking-widest font-bold mb-0.5">{meta.label}</p>
-                  <p className="text-sm sm:text-base font-bold text-white group-hover:text-orange-400 transition-colors line-clamp-1">{c.title}</p>
+                  <p className="text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-bold mb-0.5">{meta.label}</p>
+                  <p className="text-sm sm:text-base font-bold text-white group-hover:text-accent-text-soft transition-colors line-clamp-1">{c.title}</p>
                 </div>
-                <span aria-hidden className="text-gray-600 group-hover:text-orange-400 transition-colors text-xl shrink-0">→</span>
+                <span aria-hidden className="text-prose-faint group-hover:text-accent-text-soft transition-colors text-xl shrink-0">→</span>
               </Link>
             </li>
           )

@@ -64,7 +64,7 @@ export default async function MerchDetailPage({ params }: Props) {
     <div className="max-w-4xl mx-auto px-6 py-12">
       <Link
         href="/gear"
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-orange-400 transition-colors mb-8"
+        className="inline-flex items-center gap-1.5 text-sm text-prose-faint hover:text-accent-text-soft transition-colors mb-8"
       >
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -82,20 +82,20 @@ export default async function MerchDetailPage({ params }: Props) {
 
         {/* Details */}
         <div className="flex flex-col">
-          <p className="text-xs text-orange-500 uppercase tracking-[0.2em] font-bold mb-2">Boss Daddy Merch</p>
+          <p className="text-xs text-accent-text uppercase tracking-[0.2em] font-bold mb-2">Boss Daddy Merch</p>
           <h1 className="text-3xl font-black text-white mb-3">{merch.name}</h1>
-          <p className="text-2xl font-bold text-orange-400 mb-1">{priceDisplay}</p>
-          <p className="text-sm text-gray-500 mb-6">Free US shipping included</p>
+          <p className="text-2xl font-bold text-accent-text-soft mb-1">{priceDisplay}</p>
+          <p className="text-sm text-prose-faint mb-6">Free US shipping included</p>
 
           {merch.description && (
-            <p className="text-gray-400 leading-relaxed mb-8">{merch.description}</p>
+            <p className="text-prose-muted leading-relaxed mb-8">{merch.description}</p>
           )}
 
           {isAvailable && variants.length > 0 ? (
             <AddToCartForm variants={variants} />
           ) : (
-            <div className="mt-auto pt-6 border-t border-gray-800">
-              <p className="text-gray-500 text-sm">This item is coming soon — check back for the drop.</p>
+            <div className="mt-auto pt-6 border-t border-soft">
+              <p className="text-prose-faint text-sm">This item is coming soon — check back for the drop.</p>
             </div>
           )}
         </div>

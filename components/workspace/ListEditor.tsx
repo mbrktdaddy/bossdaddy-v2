@@ -28,12 +28,12 @@ export function ListEditor({ label, items, onChange, placeholder, accent }: Prop
               value={item}
               onChange={(e) => update(i, e.target.value)}
               placeholder={placeholder}
-              className="flex-1 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="flex-1 px-4 py-2 bg-surface border border-strong rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
             />
             <button
               type="button"
               onClick={() => remove(i)}
-              className="px-3 py-2 text-gray-600 hover:text-red-400 transition-colors text-lg leading-none"
+              className="px-3 py-2 text-prose-faint hover:text-red-400 transition-colors text-lg leading-none"
             >×</button>
           </div>
         ))}

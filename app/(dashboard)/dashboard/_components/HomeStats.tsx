@@ -26,10 +26,10 @@ export function HomeStats({ counts }: { counts: Counts }) {
         <Link
           key={c.label}
           href={c.href}
-          className="block bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-2xl px-4 py-3 sm:px-5 sm:py-4 transition-colors"
+          className="block bg-surface border border-soft hover:border-gray-600 rounded-2xl px-4 py-3 sm:px-5 sm:py-4 transition-colors"
         >
           <p className={`text-xl sm:text-2xl font-black ${c.color}`}>{c.value}</p>
-          <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">{c.label}</p>
+          <p className="text-xs text-prose-faint mt-1 uppercase tracking-wide">{c.label}</p>
         </Link>
       ))}
     </div>

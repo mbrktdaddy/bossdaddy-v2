@@ -129,9 +129,9 @@ export function MerchForm({ item }: Props) {
           onChange={(e) => setSlug(e.target.value.toLowerCase())}
           pattern="[a-z0-9-]+"
           placeholder="boss-daddy-tee"
-          className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
         />
-        <p className="mt-1 text-xs text-gray-600">
+        <p className="mt-1 text-xs text-prose-faint">
           URL identifier — lowercase letters, numbers, hyphens only.
         </p>
       </div>
@@ -146,7 +146,7 @@ export function MerchForm({ item }: Props) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Boss Daddy Tee"
-          className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
         />
       </div>
 
@@ -157,7 +157,7 @@ export function MerchForm({ item }: Props) {
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
           placeholder="Heavyweight cotton tee with the Boss Daddy mark..."
-          className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
         />
       </div>
 
@@ -171,7 +171,7 @@ export function MerchForm({ item }: Props) {
             value={priceDollars}
             onChange={(e) => setPrice(e.target.value)}
             placeholder="28.00"
-            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
           />
         </div>
         <div>
@@ -179,7 +179,7 @@ export function MerchForm({ item }: Props) {
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value as MerchCategory | '')}
-            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
           >
             <option value="">— none —</option>
             {MERCH_CATEGORIES.map((c) => (
@@ -192,7 +192,7 @@ export function MerchForm({ item }: Props) {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as MerchStatus)}
-            className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
           >
             {MERCH_STATUSES.map((s) => (
               <option key={s.value} value={s.value}>{s.label}</option>
@@ -208,9 +208,9 @@ export function MerchForm({ item }: Props) {
           value={externalUrl}
           onChange={(e) => setExternalUrl(e.target.value)}
           placeholder="https://amazon.com/dp/..."
-          className="w-full px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
         />
-        <p className="mt-1 text-xs text-gray-600">
+        <p className="mt-1 text-xs text-prose-faint">
           Leave blank for Printful items — native checkout handles those automatically. Only fill this in to bypass checkout and send customers to an external site (e.g. Amazon, a partner store).
         </p>
       </div>
@@ -223,9 +223,9 @@ export function MerchForm({ item }: Props) {
           step="1"
           value={position}
           onChange={(e) => setPosition(Number(e.target.value))}
-          className="w-32 px-4 py-2.5 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="w-32 px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
         />
-        <p className="mt-1 text-xs text-gray-600">Lower numbers display first.</p>
+        <p className="mt-1 text-xs text-prose-faint">Lower numbers display first.</p>
       </div>
 
       <div>
@@ -237,12 +237,12 @@ export function MerchForm({ item }: Props) {
               onChange={(e) => setFeatured(e.target.checked)}
               className="sr-only"
             />
-            <div className={`w-10 h-6 rounded-full transition-colors ${featured ? 'bg-orange-600' : 'bg-gray-700'}`} />
+            <div className={`w-10 h-6 rounded-full transition-colors ${featured ? 'bg-accent' : 'bg-gray-700'}`} />
             <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${featured ? 'translate-x-4' : 'translate-x-0'}`} />
           </div>
           <div>
             <p className="text-sm text-gray-300 font-medium">Featured</p>
-            <p className="text-xs text-gray-600">Show on homepage strip and end-of-article callouts.</p>
+            <p className="text-xs text-prose-faint">Show on homepage strip and end-of-article callouts.</p>
           </div>
         </label>
       </div>
@@ -257,14 +257,14 @@ export function MerchForm({ item }: Props) {
           const isPrintfulDefault = !imageUrl && !!item?.default_image_url
           return displayImg ? (
             <div className="space-y-1.5">
-              <div className="relative w-32 h-32 rounded-xl overflow-hidden border border-gray-800 bg-gray-950">
+              <div className="relative w-32 h-32 rounded-xl overflow-hidden border border-soft bg-surface-sunken">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={displayImg} alt={name} className="w-full h-full object-cover" />
                 {imageUrl && (
                   <button
                     type="button"
                     onClick={() => setImageUrl('')}
-                    className="absolute top-1 right-1 p-1 bg-gray-900/80 hover:bg-red-900/80 text-gray-400 hover:text-red-400 rounded transition-colors"
+                    className="absolute top-1 right-1 p-1 bg-surface/80 hover:bg-red-900/80 text-prose-muted hover:text-red-400 rounded transition-colors"
                     title="Clear override image"
                   >
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -274,12 +274,12 @@ export function MerchForm({ item }: Props) {
                 )}
               </div>
               {isPrintfulDefault && (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-prose-faint">
                   Printful default — upload or pick from library to override.
                 </p>
               )}
               {imageUrl && (
-                <p className="text-xs text-orange-400">
+                <p className="text-xs text-accent-text-soft">
                   Manual override active. Clear it to revert to Printful image.
                 </p>
               )}
@@ -291,7 +291,7 @@ export function MerchForm({ item }: Props) {
           <button
             type="button"
             onClick={() => setShowPicker(true)}
-            className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-lg transition-colors"
+            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-gray-700 text-gray-300 font-semibold rounded-lg transition-colors"
           >
             📁 Pick from library
           </button>
@@ -299,7 +299,7 @@ export function MerchForm({ item }: Props) {
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="text-xs px-3 py-1.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white font-semibold rounded-lg transition-colors"
+            className="text-xs px-3 py-1.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-semibold rounded-lg transition-colors"
           >
             {uploading ? 'Uploading…' : '+ Upload'}
           </button>
@@ -324,7 +324,7 @@ export function MerchForm({ item }: Props) {
         <div className="space-y-3">
           <div>
             <p className="text-sm font-semibold text-white">Synced Images</p>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-prose-faint mt-0.5">
               Click to toggle which images show on the product page. All images are from Printful — re-syncing won&apos;t remove your choices.
             </p>
           </div>
@@ -346,7 +346,7 @@ export function MerchForm({ item }: Props) {
                     }
                   }}
                   className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${
-                    isEnabled ? 'border-orange-500 opacity-100' : 'border-gray-700 opacity-30'
+                    isEnabled ? 'border-accent opacity-100' : 'border-strong opacity-30'
                   }`}
                   title={isEnabled ? 'Click to hide' : 'Click to show'}
                 >
@@ -367,7 +367,7 @@ export function MerchForm({ item }: Props) {
             <button
               type="button"
               onClick={() => setEnabledImages([])}
-              className="text-xs text-gray-500 hover:text-orange-400 transition-colors"
+              className="text-xs text-prose-faint hover:text-accent-text-soft transition-colors"
             >
               Reset — show all images
             </button>
@@ -383,7 +383,7 @@ export function MerchForm({ item }: Props) {
         <button
           type="submit"
           disabled={busy || !slug.trim() || !name.trim()}
-          className="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
+          className="px-5 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
         >
           {busy ? 'Saving…' : isNew ? 'Create item' : 'Save changes'}
         </button>

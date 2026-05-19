@@ -88,7 +88,7 @@ export default async function EngagementPage() {
 
       <div className="mb-8">
         <h1 className="text-2xl font-black">Engagement</h1>
-        <p className="text-gray-500 text-sm mt-1">
+        <p className="text-prose-faint text-sm mt-1">
           Scroll completion + affiliate click attribution per piece of content.
         </p>
       </div>
@@ -102,17 +102,17 @@ export default async function EngagementPage() {
       </div>
 
       {/* Per-content table */}
-      <div className="mb-10 bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
-        <div className="px-5 py-3 border-b border-gray-800">
+      <div className="mb-10 bg-surface border border-soft rounded-2xl overflow-hidden">
+        <div className="px-5 py-3 border-b border-soft">
           <p className="text-sm font-semibold">Per-content engagement</p>
-          <p className="text-xs text-gray-600 mt-0.5">Sorted by views. Completion = % of viewers who scrolled to the end.</p>
+          <p className="text-xs text-prose-faint mt-0.5">Sorted by views. Completion = % of viewers who scrolled to the end.</p>
         </div>
         {rows.length === 0 ? (
-          <p className="px-5 py-12 text-center text-gray-500 text-sm">No published content yet.</p>
+          <p className="px-5 py-12 text-center text-prose-faint text-sm">No published content yet.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-950/40 text-xs uppercase tracking-widest text-gray-500">
+              <thead className="bg-surface-sunken/40 text-xs uppercase tracking-widest text-prose-faint">
                 <tr>
                   <th className="text-left  px-5 py-2.5 font-semibold">Title</th>
                   <th className="text-right px-3 py-2.5 font-semibold">Views</th>
@@ -131,35 +131,35 @@ export default async function EngagementPage() {
                     ? Math.round(((r.scroll_100_count ?? 0) / r.view_count) * 100)
                     : 0
                   return (
-                    <tr key={`${r.type}-${r.id}`} className="hover:bg-gray-950/40">
+                    <tr key={`${r.type}-${r.id}`} className="hover:bg-surface-sunken/40">
                       <td className="px-5 py-2.5 max-w-md">
                         <Link
                           href={r.type === 'guide' ? `/guides/${r.slug}` : `/reviews/${r.slug}`}
-                          className="text-gray-200 hover:text-orange-400 truncate block"
+                          className="text-prose hover:text-accent-text-soft truncate block"
                         >
                           {r.title}
                         </Link>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[10px] text-orange-500/80 uppercase tracking-widest">
+                          <span className="text-[10px] text-eyebrow/80 uppercase tracking-widest">
                             {r.type}
                           </span>
-                          {cat && <span className="flex items-center gap-1 text-[10px] text-gray-600"><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-gray-600" /> {cat.label}</span>}
+                          {cat && <span className="flex items-center gap-1 text-[10px] text-prose-faint"><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-prose-faint" /> {cat.label}</span>}
                         </div>
                       </td>
                       <td className="text-right px-3 py-2.5 text-gray-300 font-mono">{(r.view_count ?? 0).toLocaleString()}</td>
-                      <td className="text-right px-3 py-2.5 text-gray-500 font-mono text-xs">{(r.scroll_25_count  ?? 0).toLocaleString()}</td>
-                      <td className="text-right px-3 py-2.5 text-gray-500 font-mono text-xs">{(r.scroll_50_count  ?? 0).toLocaleString()}</td>
-                      <td className="text-right px-3 py-2.5 text-gray-500 font-mono text-xs">{(r.scroll_75_count  ?? 0).toLocaleString()}</td>
+                      <td className="text-right px-3 py-2.5 text-prose-faint font-mono text-xs">{(r.scroll_25_count  ?? 0).toLocaleString()}</td>
+                      <td className="text-right px-3 py-2.5 text-prose-faint font-mono text-xs">{(r.scroll_50_count  ?? 0).toLocaleString()}</td>
+                      <td className="text-right px-3 py-2.5 text-prose-faint font-mono text-xs">{(r.scroll_75_count  ?? 0).toLocaleString()}</td>
                       <td className="text-right px-3 py-2.5 text-gray-300 font-mono">{(r.scroll_100_count ?? 0).toLocaleString()}</td>
                       <td className={`text-right px-3 py-2.5 font-mono font-semibold ${
                         completion >= 50 ? 'text-green-400' :
                         completion >= 25 ? 'text-yellow-400' :
-                        'text-gray-500'
+                        'text-prose-faint'
                       }`}>
                         {completion}%
                       </td>
                       <td className={`text-right px-5 py-2.5 font-mono font-semibold ${
-                        (r.click_count ?? 0) > 0 ? 'text-orange-400' : 'text-gray-600'
+                        (r.click_count ?? 0) > 0 ? 'text-accent-text-soft' : 'text-prose-faint'
                       }`}>
                         {r.click_count.toLocaleString()}
                       </td>
@@ -176,22 +176,22 @@ export default async function EngagementPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
         {/* Product leaderboard */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
-          <div className="px-5 py-3 border-b border-gray-800">
+        <div className="bg-surface border border-soft rounded-2xl overflow-hidden">
+          <div className="px-5 py-3 border-b border-soft">
             <p className="text-sm font-semibold">Top products by clicks</p>
-            <p className="text-xs text-gray-600 mt-0.5">Across all content.</p>
+            <p className="text-xs text-prose-faint mt-0.5">Across all content.</p>
           </div>
           {productLeaderboard.length === 0 ? (
-            <p className="px-5 py-12 text-center text-gray-500 text-sm">No clicks recorded yet.</p>
+            <p className="px-5 py-12 text-center text-prose-faint text-sm">No clicks recorded yet.</p>
           ) : (
             <div className="divide-y divide-gray-800">
               {productLeaderboard.map(([slug, count], i) => (
                 <div key={slug} className="px-5 py-3 flex items-center justify-between">
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-xs text-gray-600 font-mono w-5 text-right">{i + 1}.</span>
-                    <code className="text-xs text-orange-400 truncate">{slug}</code>
+                    <span className="text-xs text-prose-faint font-mono w-5 text-right">{i + 1}.</span>
+                    <code className="text-xs text-accent-text-soft truncate">{slug}</code>
                   </div>
-                  <span className="text-sm text-gray-200 font-mono font-semibold">{count.toLocaleString()}</span>
+                  <span className="text-sm text-prose font-mono font-semibold">{count.toLocaleString()}</span>
                 </div>
               ))}
             </div>
@@ -199,26 +199,26 @@ export default async function EngagementPage() {
         </div>
 
         {/* Recent clicks */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
-          <div className="px-5 py-3 border-b border-gray-800">
+        <div className="bg-surface border border-soft rounded-2xl overflow-hidden">
+          <div className="px-5 py-3 border-b border-soft">
             <p className="text-sm font-semibold">Recent clicks</p>
-            <p className="text-xs text-gray-600 mt-0.5">Last 15 affiliate link clicks.</p>
+            <p className="text-xs text-prose-faint mt-0.5">Last 15 affiliate link clicks.</p>
           </div>
           {(recentClicks ?? []).length === 0 ? (
-            <p className="px-5 py-12 text-center text-gray-500 text-sm">No clicks yet.</p>
+            <p className="px-5 py-12 text-center text-prose-faint text-sm">No clicks yet.</p>
           ) : (
             <div className="divide-y divide-gray-800">
               {(recentClicks ?? []).map((c, i) => (
                 <div key={i} className="px-5 py-3">
                   <div className="flex items-center justify-between gap-2">
-                    <code className="text-xs text-orange-400 truncate">
+                    <code className="text-xs text-accent-text-soft truncate">
                       {c.product_slug ?? '(unmatched)'}
                     </code>
-                    <span className="text-[10px] text-gray-600 shrink-0">
+                    <span className="text-[10px] text-prose-faint shrink-0">
                       {new Date(c.clicked_at).toLocaleString()}
                     </span>
                   </div>
-                  <p className="text-[11px] text-gray-600 truncate mt-0.5">{c.destination_url}</p>
+                  <p className="text-[11px] text-prose-faint truncate mt-0.5">{c.destination_url}</p>
                 </div>
               ))}
             </div>
@@ -231,8 +231,8 @@ export default async function EngagementPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
-      <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold mb-1">{label}</p>
+    <div className="bg-surface border border-soft rounded-2xl p-4">
+      <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold mb-1">{label}</p>
       <p className="text-2xl font-black text-white">{value}</p>
     </div>
   )

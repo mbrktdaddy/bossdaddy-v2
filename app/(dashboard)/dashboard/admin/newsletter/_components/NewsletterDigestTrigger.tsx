@@ -38,7 +38,7 @@ export function NewsletterDigestTrigger() {
           type="button"
           onClick={() => trigger(true)}
           disabled={busy}
-          className="px-3 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-gray-300 text-xs font-semibold rounded-lg transition-colors"
+          className="px-3 py-2 bg-surface-raised hover:bg-gray-700 disabled:opacity-40 text-gray-300 text-xs font-semibold rounded-lg transition-colors"
         >
           {busy ? '…' : 'Dry run'}
         </button>
@@ -46,7 +46,7 @@ export function NewsletterDigestTrigger() {
           type="button"
           onClick={() => trigger(false)}
           disabled={busy}
-          className="px-3 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-xs font-semibold rounded-lg transition-colors"
+          className="px-3 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-xs font-semibold rounded-lg transition-colors"
         >
           {busy ? 'Sending…' : 'Send digest now'}
         </button>

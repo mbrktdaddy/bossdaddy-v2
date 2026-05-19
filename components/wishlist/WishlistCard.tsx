@@ -39,7 +39,7 @@ export function WishlistCard({ item }: Props) {
       {/* Body */}
       <div className="p-4 flex flex-col flex-1 gap-3">
         <div className="flex items-start justify-between gap-2">
-          <Link href={detailHref} className="text-sm font-bold leading-snug hover:text-orange-400 transition-colors line-clamp-2">
+          <Link href={detailHref} className="text-sm font-bold leading-snug hover:text-accent-text-soft transition-colors line-clamp-2">
             {item.title}
           </Link>
           <StatusBadge status={item.status} className="shrink-0" />
@@ -56,8 +56,8 @@ export function WishlistCard({ item }: Props) {
           <span
             className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold tabular-nums ${
               voteCount > 0
-                ? 'bg-orange-950/40 border border-orange-900/40 text-orange-300'
-                : 'bg-gray-900/60 border border-gray-800/60 text-gray-500'
+                ? 'bg-accent-tint/40 border border-accent-border/40 text-orange-300'
+                : 'bg-surface/60 border border-soft/60 text-prose-faint'
             }`}
             title={voteCount > 0 ? `${voteCount} ${voteCount === 1 ? 'reader has' : 'readers have'} voted for this` : 'No votes yet — be the first'}
           >
@@ -74,7 +74,7 @@ export function WishlistCard({ item }: Props) {
           {item.status === 'reviewed' && item.review_id ? (
             <Link
               href={detailHref}
-              className="text-xs font-semibold text-orange-400 hover:text-orange-300 transition-colors"
+              className="text-xs font-semibold text-accent-text-soft hover:text-orange-300 transition-colors"
             >
               Read review →
             </Link>
@@ -83,14 +83,14 @@ export function WishlistCard({ item }: Props) {
               href={`/go/${item.slug}`}
               target="_blank"
               rel="sponsored nofollow noopener"
-              className="text-xs font-semibold text-orange-400 hover:text-orange-300 transition-colors"
+              className="text-xs font-semibold text-accent-text-soft hover:text-orange-300 transition-colors"
             >
               {getBuyLabel(item.store, item.custom_store_name)}
             </a>
           ) : (
             <Link
               href={detailHref}
-              className="text-xs font-bold text-orange-400 hover:text-orange-300 transition-colors uppercase tracking-widest"
+              className="text-xs font-bold text-accent-text-soft hover:text-orange-300 transition-colors uppercase tracking-widest"
             >
               Vote →
             </Link>

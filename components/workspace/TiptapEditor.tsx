@@ -31,7 +31,7 @@ function FigureView({ node }: NodeViewProps) {
     >
       {isPlaceholder ? (
         <div className="bd-image-placeholder">
-          <figcaption className="text-gray-500 text-sm">🖼 {caption || 'Image placeholder — fill via the Media panel'}</figcaption>
+          <figcaption className="text-prose-faint text-sm">🖼 {caption || 'Image placeholder — fill via the Media panel'}</figcaption>
         </div>
       ) : (
         <>
@@ -159,7 +159,7 @@ function LinkDialog({ initial, onConfirm, onCancel }: {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onCancel}>
       <div
-        className="bg-gray-900 border border-gray-700 rounded-xl p-5 w-full max-w-sm shadow-2xl"
+        className="bg-surface border border-strong rounded-xl p-5 w-full max-w-sm shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <p className="text-sm font-semibold text-white mb-3">Insert link</p>
@@ -173,20 +173,20 @@ function LinkDialog({ initial, onConfirm, onCancel }: {
           }}
           placeholder="https://..."
           autoFocus
-          className="w-full px-3 py-2 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500 mb-3"
+          className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover mb-3"
         />
         <div className="flex gap-2">
           <button
             type="button"
             onClick={() => onConfirm(url)}
-            className="flex-1 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold rounded-lg transition-colors"
+            className="flex-1 px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-lg transition-colors"
           >
             {url ? 'Insert' : 'Remove link'}
           </button>
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
+            className="px-4 py-2 bg-surface-raised hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
           >
             Cancel
           </button>
@@ -242,10 +242,10 @@ function CollectionDialog({ onConfirm, onCancel }: {
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 bg-black/60" onClick={onCancel}>
       <div
-        className="bg-gray-900 border border-gray-700 rounded-xl w-full max-w-lg mx-4 shadow-2xl overflow-hidden flex flex-col max-h-[70vh]"
+        className="bg-surface border border-strong rounded-xl w-full max-w-lg mx-4 shadow-2xl overflow-hidden flex flex-col max-h-[70vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-5 pt-5 pb-3 border-b border-gray-800">
+        <div className="px-5 pt-5 pb-3 border-b border-soft">
           <p className="text-sm font-semibold text-white mb-3">Insert collection</p>
           <input
             type="text"
@@ -254,15 +254,15 @@ function CollectionDialog({ onConfirm, onCancel }: {
             onKeyDown={(e) => { if (e.key === 'Escape') onCancel() }}
             placeholder="Search picks, stacks, comparisons by title or slug…"
             autoFocus
-            className="w-full px-3 py-2 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500"
+            className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover"
           />
         </div>
 
         <div className="flex-1 overflow-y-auto px-2 py-2">
           {searching && results.length === 0 ? (
-            <p className="text-xs text-gray-500 px-3 py-4">Searching…</p>
+            <p className="text-xs text-prose-faint px-3 py-4">Searching…</p>
           ) : results.length === 0 ? (
-            <p className="text-xs text-gray-500 px-3 py-4">No collections match. Try a shorter or different term.</p>
+            <p className="text-xs text-prose-faint px-3 py-4">No collections match. Try a shorter or different term.</p>
           ) : (
             <ul className="space-y-1">
               {results.map((c) => {
@@ -272,14 +272,14 @@ function CollectionDialog({ onConfirm, onCancel }: {
                     <button
                       type="button"
                       onClick={() => onConfirm(c.slug)}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800/80 text-left transition-colors"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-raised/80 text-left transition-colors"
                     >
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400 bg-orange-950/40 border border-orange-900/40 px-2 py-0.5 rounded-full shrink-0">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-accent-text-soft bg-accent-tint/40 border border-accent-border/40 px-2 py-0.5 rounded-full shrink-0">
                         {label}
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold text-white truncate">{c.title}</p>
-                        <p className="text-xs text-gray-500 truncate">/{c.slug}</p>
+                        <p className="text-xs text-prose-faint truncate">/{c.slug}</p>
                       </div>
                     </button>
                   </li>
@@ -289,11 +289,11 @@ function CollectionDialog({ onConfirm, onCancel }: {
           )}
         </div>
 
-        <div className="px-5 py-3 border-t border-gray-800 flex justify-end">
+        <div className="px-5 py-3 border-t border-soft flex justify-end">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
+            className="px-4 py-2 bg-surface-raised hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
           >
             Cancel
           </button>
@@ -357,9 +357,9 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
           'prose prose-invert prose-sm max-w-none',
           'prose-headings:font-black prose-headings:font-sans prose-headings:tracking-tight',
           'prose-h2:text-xl prose-h3:text-lg',
-          'prose-a:text-orange-400 prose-a:no-underline',
+          'prose-a:text-accent-text-soft prose-a:no-underline',
           'prose-p:text-gray-300 prose-li:text-gray-300',
-          'prose-strong:text-white prose-blockquote:border-orange-600',
+          'prose-strong:text-white prose-blockquote:border-accent',
           'min-h-[480px] px-4 py-4 focus:outline-none',
         ].join(' '),
       },
@@ -447,12 +447,12 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
 
   if (!editor) {
     return (
-      <div className="bg-gray-900 border border-gray-700 rounded-xl min-h-[480px] animate-pulse" />
+      <div className="bg-surface border border-strong rounded-xl min-h-[480px] animate-pulse" />
     )
   }
 
   const btn = (active: boolean) =>
-    `px-2 py-1 rounded-lg text-xs font-semibold transition-colors ${active ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700'}`
+    `px-2 py-1 rounded-lg text-xs font-semibold transition-colors ${active ? 'bg-gray-700 text-white' : 'text-prose-muted hover:text-white hover:bg-gray-700'}`
 
   return (
     <div className="space-y-2">
@@ -463,18 +463,18 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
           <span className={
             wordCount >= targetWords         ? 'text-green-500' :
             wordCount >= targetWords * 0.8   ? 'text-yellow-500' :
-            'text-gray-600'
+            'text-prose-faint'
           }>
             {wordCount.toLocaleString()} / {targetWords.toLocaleString()} words
           </span>
         ) : (
-          <span className="text-gray-600">{wordCount.toLocaleString()} words</span>
+          <span className="text-prose-faint">{wordCount.toLocaleString()} words</span>
         )}
-        <span className="text-gray-600">{readMin} min read</span>
+        <span className="text-prose-faint">{readMin} min read</span>
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center gap-1 flex-wrap bg-gray-900/60 border border-gray-800 rounded-xl px-2 py-1.5">
+      <div className="flex items-center gap-1 flex-wrap bg-surface/60 border border-soft rounded-xl px-2 py-1.5">
         <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBold().run() }}
           className={`${btn(editor.isActive('bold'))} font-black`}>B</button>
         <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleItalic().run() }}
@@ -524,24 +524,24 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
 
         <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().undo().run() }}
           disabled={!editor.can().undo()}
-          className="px-2 py-1 rounded-lg text-xs text-gray-400 hover:text-white hover:bg-gray-700 disabled:opacity-30 transition-colors"
+          className="px-2 py-1 rounded-lg text-xs text-prose-muted hover:text-white hover:bg-gray-700 disabled:opacity-30 transition-colors"
           title="Undo (⌘Z)">↩</button>
         <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().redo().run() }}
           disabled={!editor.can().redo()}
-          className="px-2 py-1 rounded-lg text-xs text-gray-400 hover:text-white hover:bg-gray-700 disabled:opacity-30 transition-colors"
+          className="px-2 py-1 rounded-lg text-xs text-prose-muted hover:text-white hover:bg-gray-700 disabled:opacity-30 transition-colors"
           title="Redo (⌘⇧Z)">↪</button>
       </div>
 
       {/* Editor surface */}
-      <div className="bg-gray-900 border border-gray-700 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-orange-500 transition-shadow">
+      <div className="bg-surface border border-strong rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-accent-hover transition-shadow">
         <EditorContent editor={editor} />
       </div>
 
       {/* Selection-based AI refine */}
       {selection && (
-        <div className="bg-orange-950/30 border border-orange-800/40 rounded-xl p-3 space-y-2">
-          <p className="text-xs text-orange-400 font-semibold">
-            ✨ Refine selection <span className="text-gray-500 font-normal ml-1">({selection.text.length} chars selected)</span>
+        <div className="bg-accent-tint/30 border border-accent-border/40 rounded-xl p-3 space-y-2">
+          <p className="text-xs text-accent-text-soft font-semibold">
+            ✨ Refine selection <span className="text-prose-faint font-normal ml-1">({selection.text.length} chars selected)</span>
           </p>
           <div className="flex gap-2">
             <input
@@ -551,15 +551,15 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
               onKeyDown={(e) => { if (e.key === 'Enter' && !aiRefining) handleAiRefine() }}
               placeholder="e.g. 'make this punchier', 'add a statistic', 'shorten'"
               autoFocus
-              className="flex-1 px-3 py-2 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500"
+              className="flex-1 px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover"
             />
             <button type="button" onClick={handleAiRefine}
               disabled={aiRefining || !aiInstruction.trim()}
-              className="shrink-0 px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-xs font-semibold rounded-lg transition-colors">
+              className="shrink-0 px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-xs font-semibold rounded-lg transition-colors">
               {aiRefining ? 'Refining…' : 'Apply'}
             </button>
             <button type="button" onClick={() => { setSelection(null); setAiInstruction(''); setAiError(null) }}
-              className="shrink-0 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-400 text-xs rounded-lg transition-colors">
+              className="shrink-0 px-3 py-2 bg-surface-raised hover:bg-gray-700 text-prose-muted text-xs rounded-lg transition-colors">
               ✕
             </button>
           </div>

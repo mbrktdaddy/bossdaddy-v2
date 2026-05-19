@@ -60,7 +60,7 @@ Tips:
 - Include lighting ('warm natural light', 'soft indoor daylight')
 - Specify style ('editorial photography', 'photo-realistic')
 - Say what to exclude ('no people', 'no text')"
-            className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none font-mono"
+            className="w-full px-4 py-3 bg-surface border border-strong rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none font-mono"
           />
         </div>
 
@@ -78,8 +78,8 @@ Tips:
                 onClick={() => setSize(opt.value as typeof size)}
                 className={`flex-1 flex flex-col items-center gap-1 px-3 py-3 rounded-xl transition-colors ${
                   size === opt.value
-                    ? 'bg-orange-600 text-white'
-                    : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600'
+                    ? 'bg-accent text-white'
+                    : 'bg-surface border border-soft text-prose-muted hover:border-gray-600'
                 }`}
               >
                 <span className="text-xs font-semibold">{opt.label}</span>
@@ -102,8 +102,8 @@ Tips:
                 onClick={() => setPremium(opt.value)}
                 className={`flex-1 flex flex-col items-center gap-1 px-3 py-3 rounded-xl transition-colors ${
                   premium === opt.value
-                    ? 'bg-orange-600 text-white'
-                    : 'bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-600'
+                    ? 'bg-accent text-white'
+                    : 'bg-surface border border-soft text-prose-muted hover:border-gray-600'
                 }`}
               >
                 <span className="text-xs font-semibold">{opt.label}</span>
@@ -117,7 +117,7 @@ Tips:
           type="button"
           onClick={handleGenerate}
           disabled={loading || !prompt.trim()}
-          className="w-full px-5 py-3 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white font-semibold rounded-xl transition-colors"
+          className="w-full px-5 py-3 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-semibold rounded-xl transition-colors"
         >
           {loading ? '✨ Generating…' : '✨ Generate'}
         </button>
@@ -128,7 +128,7 @@ Tips:
           </p>
         )}
 
-        <p className="text-xs text-gray-600">
+        <p className="text-xs text-prose-faint">
           Generated images are automatically saved to your media library.
         </p>
       </div>
@@ -136,12 +136,12 @@ Tips:
       {/* Right: session history */}
       <div className="lg:col-span-3 space-y-4">
         <div className="flex items-center justify-between">
-          <p className="text-xs text-gray-600 font-medium uppercase tracking-widest">This Session</p>
-          <span className="text-xs text-gray-500">{session.length} image{session.length !== 1 ? 's' : ''}</span>
+          <p className="text-xs text-prose-faint font-medium uppercase tracking-widest">This Session</p>
+          <span className="text-xs text-prose-faint">{session.length} image{session.length !== 1 ? 's' : ''}</span>
         </div>
 
         {session.length === 0 ? (
-          <div className="border-2 border-dashed border-gray-800 rounded-2xl py-20 flex flex-col items-center gap-3 text-gray-600">
+          <div className="border-2 border-dashed border-soft rounded-2xl py-20 flex flex-col items-center gap-3 text-prose-faint">
             <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
@@ -150,25 +150,25 @@ Tips:
         ) : (
           <div className="space-y-4">
             {session.map((img, i) => (
-              <div key={i} className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+              <div key={i} className="bg-surface border border-soft rounded-2xl overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img.url} alt={img.prompt} className="w-full object-contain bg-gray-950 max-h-[500px]" />
+                <img src={img.url} alt={img.prompt} className="w-full object-contain bg-surface-sunken max-h-[500px]" />
                 <div className="p-4 space-y-2">
-                  <p className="text-xs text-gray-500 font-mono leading-relaxed">{img.prompt}</p>
+                  <p className="text-xs text-prose-faint font-mono leading-relaxed">{img.prompt}</p>
                   <div className="flex items-center gap-2 flex-wrap pt-1">
-                    <span className="text-xs text-gray-600 font-mono">{img.size}</span>
+                    <span className="text-xs text-prose-faint font-mono">{img.size}</span>
                     <div className="flex-1" />
                     <button
                       type="button"
                       onClick={() => handleCopyUrl(img.url)}
-                      className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
+                      className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
                     >
                       {copiedUrl === img.url ? '✓ Copied' : 'Copy URL'}
                     </button>
                     <button
                       type="button"
                       onClick={() => setPrompt(img.prompt)}
-                      className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
+                      className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
                       title="Load this prompt to tweak and regenerate"
                     >
                       ✎ Reuse prompt

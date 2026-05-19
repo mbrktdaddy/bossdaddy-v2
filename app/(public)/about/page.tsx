@@ -33,14 +33,14 @@ export default async function AboutPage() {
 
  {/* Hero */}
  <div className="mb-16">
- <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
- <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">The Real Story Behind Boss Daddy</p>
+ <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+ <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">The Real Story Behind Boss Daddy</p>
  <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6">
  The Dad Who Thought
  <br />
- <span className="text-orange-500">He&apos;d Never Be One.</span>
+ <span className="text-accent-text">He&apos;d Never Be One.</span>
  </h1>
- <p className="text-gray-400 text-lg leading-relaxed max-w-2xl">
+ <p className="text-prose-muted text-lg leading-relaxed max-w-2xl">
  After separating from my ex-wife of 13 years — who was unable to have children — and
  being 46 years old, I had accepted that having kids probably wasn&apos;t in the cards for me.
  After a rough couple of years and some serious soul-searching, I became dead serious about
@@ -51,16 +51,16 @@ export default async function AboutPage() {
  {/* Stats */}
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
  {STATS.map((s) => (
- <div key={s.label} className="bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl p-5 text-center">
- <p className="text-3xl font-black text-orange-500 mb-1">{s.value}</p>
- <p className="text-xs text-gray-500 uppercase tracking-wide">{s.label}</p>
+ <div key={s.label} className="bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl p-5 text-center">
+ <p className="text-3xl font-black text-accent-text mb-1">{s.value}</p>
+ <p className="text-xs text-prose-faint uppercase tracking-wide">{s.label}</p>
  </div>
  ))}
  </div>
 
  {/* Story */}
  <div className="prose prose-invert prose-orange max-w-none mb-16
- prose-p:text-gray-400 prose-p:leading-relaxed
+ prose-p:text-prose-muted prose-p:leading-relaxed
  prose-h2:font-black prose-h2:text-white prose-h2:text-2xl
  prose-strong:text-white">
 
@@ -74,7 +74,7 @@ export default async function AboutPage() {
  shifted.
  </p>
 
- <blockquote className="not-prose my-10 border-l-2 border-orange-500 pl-6 sm:pl-8">
+ <blockquote className="not-prose my-10 border-l-2 border-accent pl-6 sm:pl-8">
  <p className="text-xl sm:text-2xl font-black leading-snug text-white">
  I went from &ldquo;probably never&rdquo; to &ldquo;this is everything&rdquo; in a single heartbeat.
  </p>
@@ -151,18 +151,18 @@ export default async function AboutPage() {
 
  {/* Pillars */}
  <div className="mb-16">
- <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
- <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Categories</p>
+ <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+ <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Categories</p>
  <h2 className="text-2xl font-black mb-2">What We Cover</h2>
- <p className="text-gray-500 text-sm mb-6">Real-world testing across everything modern dads actually love.</p>
+ <p className="text-prose-faint text-sm mb-6">Real-world testing across everything modern dads actually love.</p>
  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
  {CATEGORIES.map((cat) => (
  <Link
  key={cat.slug}
  href={`/category/${cat.slug}`}
- className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] text-gray-400 hover:bg-gray-800 hover:text-white hover:border-orange-900/40 shadow-sm shadow-black/20 transition-colors"
+ className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] text-prose-muted hover:bg-surface-raised hover:text-white hover:border-accent-border/40 shadow-sm shadow-black/20 transition-colors"
  >
- <CategoryIcon slug={cat.slug} className="w-4 h-4 text-orange-500 shrink-0" />
+ <CategoryIcon slug={cat.slug} className="w-4 h-4 text-accent-text shrink-0" />
  <span className="truncate">{cat.label}</span>
  </Link>
  ))}
@@ -170,22 +170,22 @@ export default async function AboutPage() {
  </div>
 
  {/* CTA + Newsletter */}
- <div className="bg-gradient-to-br from-orange-950/40 to-gray-900 rounded-2xl px-8 py-10 text-center">
+ <div className="bg-gradient-to-br from-orange-950/40 to-surface rounded-2xl px-8 py-10 text-center">
  <h2 className="text-2xl font-black mb-3">Built for Dads Who Show Up.</h2>
- <p className="text-gray-400 mb-2">
+ <p className="text-prose-muted mb-2">
  This isn&apos;t just another review site. This is Boss Daddy — a resource, a community, and
  a brand for every man who&apos;s decided that being a Boss Dad isn&apos;t a compromise of his
  strength… it&apos;s the ultimate expression of it.
  </p>
- <p className="text-gray-500 text-sm mb-8">
+ <p className="text-prose-faint text-sm mb-8">
  Welcome to the Boss Daddy crew. Now let&apos;s dad like a boss — together.
  </p>
 
  {/* Newsletter signup */}
  <div className="mb-8 max-w-md mx-auto">
- <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3 mx-auto" />
- <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Join the Crew</p>
- <p className="text-gray-400 text-sm mb-4">
+ <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3 mx-auto" />
+ <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Join the Crew</p>
+ <p className="text-prose-muted text-sm mb-4">
  Weekly reviews, the good stuff, and dad-life wins. No spam. No sponsors. Just the crew.
  </p>
  <EmailSignup
@@ -195,14 +195,14 @@ export default async function AboutPage() {
  successMessage="You're in. Welcome to the crew."
  interests={['newsletter']}
  />
- <p className="text-xs text-gray-600 mt-3">Unsubscribe anytime. We mean it.</p>
+ <p className="text-xs text-prose-faint mt-3">Unsubscribe anytime. We mean it.</p>
  </div>
 
  <div className="pt-6 flex items-center justify-center gap-4 flex-wrap">
- <Link href="/reviews" className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-2xl transition-colors text-sm">
+ <Link href="/reviews" className="px-6 py-3 bg-surface-raised hover:bg-gray-700 text-gray-300 font-semibold rounded-2xl transition-colors text-sm">
  Browse Reviews
  </Link>
- <Link href="/guides" className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-2xl transition-colors text-sm">
+ <Link href="/guides" className="px-6 py-3 bg-surface-raised hover:bg-gray-700 text-gray-300 font-semibold rounded-2xl transition-colors text-sm">
  Browse Guides
  </Link>
  </div>

@@ -247,21 +247,21 @@ export default async function ComparisonDetailPage({ params }: Props) {
 
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-gray-500 mb-8">
-          <Link href="/comparisons" className="hover:text-orange-400 transition-colors">Comparisons</Link>
+        <div className="flex items-center gap-2 text-xs text-prose-faint mb-8">
+          <Link href="/comparisons" className="hover:text-accent-text-soft transition-colors">Comparisons</Link>
           <span>/</span>
-          <span className="text-gray-400">{comparison.title}</span>
+          <span className="text-prose-muted">{comparison.title}</span>
         </div>
 
         <div className="lg:flex lg:gap-10 lg:items-start">
           <main className="lg:flex-1 lg:max-w-3xl min-w-0">
             {/* Editorial header — eyebrow + H1 + dek + byline */}
             <header className="mb-8">
-              <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-              <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">Comparison</p>
+              <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Comparison</p>
               <h1 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tight leading-tight">{comparison.title}</h1>
               {comparison.description && (
-                <p className="text-lg text-gray-400 leading-relaxed mb-6">{comparison.description}</p>
+                <p className="text-lg text-prose-muted leading-relaxed mb-6">{comparison.description}</p>
               )}
               <EditorialMeta
                 publishedAt={comparison.published_at}
@@ -275,7 +275,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
 
             {/* Hero image */}
             {comparison.hero_image_url && (
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-10 bg-gray-900">
+              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-10 bg-surface">
                 <Image
                   src={comparison.hero_image_url}
                   alt={comparison.title}
@@ -292,20 +292,20 @@ export default async function ComparisonDetailPage({ params }: Props) {
               <section
                 id="bottom-line"
                 aria-label="Bottom line"
-                className="mb-12 rounded-2xl border border-orange-900/40 bg-gradient-to-br from-orange-950/30 to-gray-900/60 ring-1 ring-inset ring-white/[0.02] p-5 sm:p-7 shadow-lg shadow-black/40"
+                className="mb-12 rounded-2xl border border-accent-border/40 bg-gradient-to-br from-orange-950/30 to-surface/60 ring-1 ring-inset ring-white/[0.02] p-5 sm:p-7 shadow-lg shadow-black/40"
               >
-                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">The Bottom Line</p>
-                <p className="text-base sm:text-lg text-gray-100 leading-relaxed font-medium">{comparison.winner_summary}</p>
+                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">The Bottom Line</p>
+                <p className="text-base sm:text-lg text-prose leading-relaxed font-medium">{comparison.winner_summary}</p>
                 {/* Quick verdict chips per item */}
                 {items.some((i) => i.wins_category) && (
-                  <div className="mt-4 pt-4 border-t border-orange-900/30 flex flex-wrap gap-2">
+                  <div className="mt-4 pt-4 border-t border-accent-border/30 flex flex-wrap gap-2">
                     {items.filter((i) => i.wins_category).map(({ review, wins_category }) => (
                       <a
                         key={review!.id}
                         href={`#dive-${review!.slug}`}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-900/60 border border-orange-900/40 hover:border-orange-700/60 rounded-full text-xs text-gray-300 hover:text-orange-300 transition-colors min-h-[36px]"
+                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-surface/60 border border-accent-border/40 hover:border-accent-border/60 rounded-full text-xs text-gray-300 hover:text-orange-300 transition-colors min-h-[36px]"
                       >
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400">{wins_category}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-accent-text-soft">{wins_category}</span>
                         <span className="font-semibold">{review!.product_name}</span>
                       </a>
                     ))}
@@ -317,8 +317,8 @@ export default async function ComparisonDetailPage({ params }: Props) {
             {/* At-a-glance contender strip */}
             <section id="contenders" className="mb-12" aria-label="Contenders">
               <div className="mb-5">
-                <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">The Contenders</p>
+                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Contenders</p>
                 <h2 className="text-2xl font-black text-white leading-tight">
                   {items.length} on the scorecard
                 </h2>
@@ -347,12 +347,12 @@ export default async function ComparisonDetailPage({ params }: Props) {
             {comparison.intro_html && (
               <section id="overview" className="mb-12">
                 <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">The Take</p>
+                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Take</p>
                   <h2 className="text-2xl font-black text-white leading-tight">What sets these apart</h2>
                 </div>
                 <div
-                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-orange-400 hover:prose-a:text-orange-300 prose-a:no-underline"
+                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-accent-text-soft hover:prose-a:text-orange-300 prose-a:no-underline"
                   dangerouslySetInnerHTML={{ __html: comparison.intro_html }}
                 />
               </section>
@@ -371,27 +371,27 @@ export default async function ComparisonDetailPage({ params }: Props) {
             {items.length >= 2 && (
               <section id="scorecard" className="mb-12" aria-label="Scorecard">
                 <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                  <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">The Scorecard</p>
+                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Scorecard</p>
                   <h2 className="text-2xl font-black text-white leading-tight">Head-to-head</h2>
                 </div>
 
                 <div className="overflow-x-auto -mx-6 px-6">
-                  <table className="w-full min-w-[640px] border-separate border-spacing-0 bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden">
+                  <table className="w-full min-w-[640px] border-separate border-spacing-0 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden">
                     <thead>
                       <tr>
-                        <th className="text-left px-4 py-3 text-xs uppercase tracking-widest text-gray-500 font-semibold border-b border-gray-800/60 align-bottom">
+                        <th className="text-left px-4 py-3 text-xs uppercase tracking-widest text-prose-faint font-semibold border-b border-soft/60 align-bottom">
                           Criterion
                         </th>
                         {items.map(({ review }) => (
-                          <th key={review!.id} className="px-3 py-3 border-b border-gray-800/60 align-bottom min-w-[120px]">
+                          <th key={review!.id} className="px-3 py-3 border-b border-soft/60 align-bottom min-w-[120px]">
                             <a href={`#dive-${review!.slug}`} className="group block text-center">
-                              <div className="relative w-14 h-14 mx-auto mb-2 rounded-xl overflow-hidden bg-gray-950 border border-gray-800 group-hover:border-orange-700 transition-colors">
+                              <div className="relative w-14 h-14 mx-auto mb-2 rounded-xl overflow-hidden bg-surface-sunken border border-soft group-hover:border-accent-border transition-colors">
                                 {review!.image_url && (
                                   <Image src={review!.image_url} alt={review!.product_name} fill className="object-cover" sizes="56px" />
                                 )}
                               </div>
-                              <p className="text-[11px] font-bold text-orange-400 leading-tight line-clamp-2 group-hover:text-orange-300 transition-colors">
+                              <p className="text-[11px] font-bold text-accent-text-soft leading-tight line-clamp-2 group-hover:text-orange-300 transition-colors">
                                 {review!.product_name}
                               </p>
                             </a>
@@ -403,16 +403,16 @@ export default async function ComparisonDetailPage({ params }: Props) {
                       {SUBSCORE_ROWS.map(({ key, label }) => {
                         const winnerIdx = rowWinners.get(key)
                         return (
-                          <tr key={key} className="border-t border-gray-800/40">
-                            <td className="px-4 py-3 text-sm text-gray-300 font-medium border-t border-gray-800/40">{label}</td>
+                          <tr key={key} className="border-t border-soft/40">
+                            <td className="px-4 py-3 text-sm text-gray-300 font-medium border-t border-soft/40">{label}</td>
                             {items.map(({ review }, idx) => {
                               const v = review?.[key] ?? null
                               const isWinner = winnerIdx === idx && v != null
                               return (
                                 <td
                                   key={review!.id}
-                                  className={`px-4 py-3 text-center text-sm tabular-nums border-t border-gray-800/40 ${
-                                    isWinner ? 'bg-orange-600/15 text-orange-300 font-bold' : 'text-gray-300'
+                                  className={`px-4 py-3 text-center text-sm tabular-nums border-t border-soft/40 ${
+                                    isWinner ? 'bg-accent/15 text-orange-300 font-bold' : 'text-gray-300'
                                   }`}
                                 >
                                   {v != null ? `${v}/10` : '—'}
@@ -422,22 +422,22 @@ export default async function ComparisonDetailPage({ params }: Props) {
                           </tr>
                         )
                       })}
-                      <tr className="border-t border-gray-800/60">
-                        <td className="px-4 py-3 text-sm text-white font-black uppercase tracking-widest text-xs border-t border-gray-800/60">Overall</td>
+                      <tr className="border-t border-soft/60">
+                        <td className="px-4 py-3 text-sm text-white font-black uppercase tracking-widest text-xs border-t border-soft/60">Overall</td>
                         {items.map(({ review }) => (
-                          <td key={review!.id} className="px-4 py-3 text-center border-t border-gray-800/60">
+                          <td key={review!.id} className="px-4 py-3 text-center border-t border-soft/60">
                             <RatingScore rating={review!.rating ?? 0} size="sm" />
                           </td>
                         ))}
                       </tr>
                       {/* Price row — only renders if any item has a price */}
                       {items.some((i) => productMap.get(i.review!.product_slug ?? '')?.price_cents != null) && (
-                        <tr className="border-t border-gray-800/40">
-                          <td className="px-4 py-3 text-sm text-gray-300 font-medium border-t border-gray-800/40">Price</td>
+                        <tr className="border-t border-soft/40">
+                          <td className="px-4 py-3 text-sm text-gray-300 font-medium border-t border-soft/40">Price</td>
                           {items.map(({ review }) => {
                             const cents = productMap.get(review!.product_slug ?? '')?.price_cents ?? null
                             return (
-                              <td key={review!.id} className="px-4 py-3 text-center text-sm text-gray-300 tabular-nums border-t border-gray-800/40">
+                              <td key={review!.id} className="px-4 py-3 text-center text-sm text-gray-300 tabular-nums border-t border-soft/40">
                                 {cents != null ? `$${(cents / 100).toFixed(0)}` : '—'}
                               </td>
                             )
@@ -453,8 +453,8 @@ export default async function ComparisonDetailPage({ params }: Props) {
             {/* Per-product deep dives — alternating image position */}
             <section className="mb-12" aria-label="Per-product deep dives">
               <div className="mb-5">
-                <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-                <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">The Breakdown</p>
+                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Breakdown</p>
                 <h2 className="text-2xl font-black text-white leading-tight">Each contender, examined</h2>
               </div>
 
@@ -468,12 +468,12 @@ export default async function ComparisonDetailPage({ params }: Props) {
                     <article
                       key={review.id}
                       id={`dive-${review.slug}`}
-                      className="scroll-mt-28 rounded-2xl overflow-hidden bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40"
+                      className="scroll-mt-28 rounded-2xl overflow-hidden bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40"
                     >
                       <div className={`flex flex-col ${imageLeft ? 'sm:flex-row' : 'sm:flex-row-reverse'} gap-0`}>
                         {/* Hero image column */}
                         {review.image_url && (
-                          <div className="relative w-full sm:w-2/5 aspect-[4/3] sm:aspect-auto sm:min-h-[280px] bg-gray-950 shrink-0">
+                          <div className="relative w-full sm:w-2/5 aspect-[4/3] sm:aspect-auto sm:min-h-[280px] bg-surface-sunken shrink-0">
                             <Image src={review.image_url} alt={review.product_name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 320px" />
                             {(review.rating ?? 0) >= 8 && (
                               <div className="absolute top-3 right-3"><BossApprovedBadge size="sm" variant="card" /></div>
@@ -486,13 +486,13 @@ export default async function ComparisonDetailPage({ params }: Props) {
                           <div className="flex items-start justify-between gap-3 mb-3">
                             <div className="min-w-0 flex-1">
                               {wins_category && (
-                                <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-orange-300 bg-orange-950/60 border border-orange-900/40 px-2.5 py-1 rounded-full mb-2">{wins_category}</span>
+                                <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-orange-300 bg-accent-tint/60 border border-accent-border/40 px-2.5 py-1 rounded-full mb-2">{wins_category}</span>
                               )}
                               {itemBestFor && (
                                 <p className="text-sm italic text-orange-300/90 mb-2">Best for {itemBestFor}</p>
                               )}
-                              <p className="text-xs font-medium text-orange-500/80 uppercase tracking-widest mb-1">{review.product_name}</p>
-                              <Link href={`/reviews/${review.slug}`} className="text-xl font-black text-white hover:text-orange-400 transition-colors leading-tight block">
+                              <p className="text-xs font-medium text-eyebrow/80 uppercase tracking-widest mb-1">{review.product_name}</p>
+                              <Link href={`/reviews/${review.slug}`} className="text-xl font-black text-white hover:text-accent-text-soft transition-colors leading-tight block">
                                 {review.title}
                               </Link>
                             </div>
@@ -542,19 +542,19 @@ export default async function ComparisonDetailPage({ params }: Props) {
 
                           {/* Best for / Not for */}
                           {((review.best_for?.length ?? 0) > 0 || (review.not_for?.length ?? 0) > 0) && (
-                            <div className="text-xs text-gray-500 space-y-1 mb-4">
+                            <div className="text-xs text-prose-faint space-y-1 mb-4">
                               {(review.best_for?.length ?? 0) > 0 && (
-                                <p><span className="text-orange-400 font-bold uppercase tracking-widest">Best for:</span> {review.best_for!.join(' · ')}</p>
+                                <p><span className="text-accent-text-soft font-bold uppercase tracking-widest">Best for:</span> {review.best_for!.join(' · ')}</p>
                               )}
                               {(review.not_for?.length ?? 0) > 0 && (
-                                <p><span className="text-gray-400 font-bold uppercase tracking-widest">Skip if:</span> {review.not_for!.join(' · ')}</p>
+                                <p><span className="text-prose-muted font-bold uppercase tracking-widest">Skip if:</span> {review.not_for!.join(' · ')}</p>
                               )}
                             </div>
                           )}
 
                           {/* CTAs */}
                           <div className="flex flex-wrap items-center gap-3 mt-auto pt-2">
-                            <Link href={`/reviews/${review.slug}`} className="text-xs text-gray-400 hover:text-orange-400 transition-colors font-semibold uppercase tracking-widest">
+                            <Link href={`/reviews/${review.slug}`} className="text-xs text-prose-muted hover:text-accent-text-soft transition-colors font-semibold uppercase tracking-widest">
                               Read full review →
                             </Link>
                             {href && (
@@ -563,7 +563,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
                                 target="_blank"
                                 rel={product?.affiliate_url ? 'sponsored nofollow noopener' : 'noopener'}
                                 data-product-slug={review.product_slug ?? undefined}
-                                className="ml-auto px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
+                                className="ml-auto px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
                               >
                                 Check Price
                               </a>
@@ -588,7 +588,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
             {/* Same-flavor browse link — quiet footer affordance for readers
                 who finished one head-to-head and want another. */}
             <div className="mt-8 text-center">
-              <Link href="/comparisons" className="text-sm text-gray-500 hover:text-orange-400 transition-colors">
+              <Link href="/comparisons" className="text-sm text-prose-faint hover:text-accent-text-soft transition-colors">
                 Browse all Comparisons →
               </Link>
             </div>
@@ -618,9 +618,9 @@ function ContenderCard({
   return (
     <a
       href={`#dive-${review.slug}`}
-      className={`group flex flex-col bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/50 hover:border-orange-900/40 hover:-translate-y-0.5 transition-all ${className ?? ''}`}
+      className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/50 hover:border-accent-border/40 hover:-translate-y-0.5 transition-all ${className ?? ''}`}
     >
-      <div className="relative w-full aspect-square bg-gray-950">
+      <div className="relative w-full aspect-square bg-surface-sunken">
         {review.image_url && (
           <Image src={review.image_url} alt={review.product_name} fill className="object-cover" sizes="200px" />
         )}
@@ -634,12 +634,12 @@ function ContenderCard({
         )}
       </div>
       <div className="p-3 flex flex-col flex-1">
-        <p className="text-xs text-gray-500 mb-1 truncate">{review.product_name}</p>
-        <p className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors line-clamp-2 leading-snug flex-1">{review.title}</p>
+        <p className="text-xs text-prose-faint mb-1 truncate">{review.product_name}</p>
+        <p className="text-sm font-bold text-white group-hover:text-accent-text-soft transition-colors line-clamp-2 leading-snug flex-1">{review.title}</p>
         <div className="mt-2 flex items-center justify-between gap-2">
           <RatingScore rating={review.rating ?? 0} size="sm" />
           {priceCents != null && (
-            <span className="text-xs text-gray-400 font-bold tabular-nums">${(priceCents / 100).toFixed(0)}</span>
+            <span className="text-xs text-prose-muted font-bold tabular-nums">${(priceCents / 100).toFixed(0)}</span>
           )}
         </div>
       </div>

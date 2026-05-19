@@ -43,10 +43,10 @@ export default async function GiftsIndexPage() {
     <div className="max-w-6xl mx-auto px-6 py-16">
       {/* Header */}
       <div className="mb-12">
-        <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">The Gift Vault</p>
+        <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">The Gift Vault</p>
         <h1 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tight">Gift Guides</h1>
-        <p className="text-gray-400 max-w-2xl leading-relaxed text-base md:text-lg">
+        <p className="text-prose-muted max-w-2xl leading-relaxed text-base md:text-lg">
           Real-tested gift guides for every holiday, milestone, and occasion. Each list curated from a dad who actually buys, tests, and lives with this stuff. No corporate gift-list filler.
         </p>
       </div>
@@ -55,8 +55,8 @@ export default async function GiftsIndexPage() {
       {OCCASION_GROUPS.map((group) => (
         <section key={group.id} className="mb-14">
           <div className="mb-6">
-            <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-            <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">{group.label}</p>
+            <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">{group.label}</p>
             <h2 className="text-2xl font-black text-white">{group.label}</h2>
           </div>
 
@@ -67,9 +67,9 @@ export default async function GiftsIndexPage() {
                 <Link
                   key={occ.value}
                   href={`/gifts/${occ.slug}`}
-                  className="group flex flex-col bg-gradient-to-br from-gray-900 to-gray-900/60 border border-gray-800/60 ring-1 ring-inset ring-white/[0.02] hover:bg-gray-800/90 hover:border-orange-900/40 hover:-translate-y-0.5 rounded-2xl overflow-hidden shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/50 transition-all"
+                  className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:bg-surface-raised/90 hover:border-accent-border/40 hover:-translate-y-0.5 rounded-2xl overflow-hidden shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/50 transition-all"
                 >
-                  <div className="relative aspect-video bg-gray-950 flex items-center justify-center">
+                  <div className="relative aspect-video bg-surface-sunken flex items-center justify-center">
                     {live?.hero_image_url ? (
                       <Image
                         src={live.hero_image_url}
@@ -79,21 +79,21 @@ export default async function GiftsIndexPage() {
                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       />
                     ) : (
-                      <OccasionIcon value={occ.value} className="w-12 h-12 text-orange-500/70" />
+                      <OccasionIcon value={occ.value} className="w-12 h-12 text-accent-text/70" />
                     )}
                     {live && (
                       <div className="absolute top-2 right-2">
-                        <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-orange-600 text-white">
+                        <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-accent text-white">
                           Live
                         </span>
                       </div>
                     )}
                   </div>
                   <div className="p-4 flex-1 flex flex-col">
-                    <p className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors leading-snug mb-1">
+                    <p className="text-sm font-bold text-white group-hover:text-accent-text-soft transition-colors leading-snug mb-1">
                       {occ.label}
                     </p>
-                    <p className="text-xs text-gray-500 leading-relaxed line-clamp-2 flex-1">
+                    <p className="text-xs text-prose-faint leading-relaxed line-clamp-2 flex-1">
                       {occ.shortBlurb}
                     </p>
                   </div>
@@ -105,16 +105,16 @@ export default async function GiftsIndexPage() {
       ))}
 
       {/* Newsletter pitch */}
-      <div className="mt-16 pt-10 border-t border-gray-800/60 text-center max-w-2xl mx-auto">
-        <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3 mx-auto" />
-        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-2">Stay in the loop</p>
+      <div className="mt-16 pt-10 border-t border-soft/60 text-center max-w-2xl mx-auto">
+        <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3 mx-auto" />
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Stay in the loop</p>
         <h3 className="text-xl font-black text-white mb-2">New gift guides drop with the seasons</h3>
-        <p className="text-sm text-gray-400 mb-4">
+        <p className="text-sm text-prose-muted mb-4">
           Subscribe to the Boss Daddy Crew for fresh gift picks before each major holiday.
         </p>
         <Link
           href="/#newsletter"
-          className="inline-block px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white text-sm font-bold rounded-xl transition-colors min-h-[44px]"
+          className="inline-block px-5 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors min-h-[44px]"
         >
           Get on the list →
         </Link>

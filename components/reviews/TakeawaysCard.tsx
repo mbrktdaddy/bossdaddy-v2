@@ -16,11 +16,11 @@ export default function TakeawaysCard({ items, variant = 'inbody' }: Props) {
 
   const isPreview = variant === 'preview'
   const containerCls = isPreview
-    ? 'rounded-2xl border border-gray-800 bg-gray-950/60 p-4'
-    : 'mb-10 rounded-2xl border border-gray-800 bg-gray-950/60 p-5 shadow-md shadow-black/30 sm:p-6'
+    ? 'rounded-2xl border border-soft bg-surface-sunken/60 p-4'
+    : 'mb-10 rounded-2xl border border-soft bg-surface-sunken/60 p-5 shadow-md shadow-black/30 sm:p-6'
   const eyebrowCls = isPreview
-    ? 'mb-3 text-[10px] font-semibold uppercase tracking-widest text-orange-500'
-    : 'mb-4 text-xs font-semibold uppercase tracking-widest text-orange-500'
+    ? 'mb-3 text-[10px] font-semibold uppercase tracking-widest text-eyebrow'
+    : 'mb-4 text-xs font-semibold uppercase tracking-widest text-eyebrow'
   const itemCls = isPreview ? 'text-xs leading-relaxed' : 'text-sm leading-relaxed sm:text-base'
   const dotMt = isPreview ? 'mt-1.5' : 'mt-2 sm:mt-2.5'
 
@@ -32,10 +32,10 @@ export default function TakeawaysCard({ items, variant = 'inbody' }: Props) {
       <p className={eyebrowCls}>Key Takeaways</p>
       <ul className="space-y-2.5">
         {items.map((item, i) => (
-          <li key={i} className={`flex items-start gap-3 text-gray-200 ${itemCls}`}>
+          <li key={i} className={`flex items-start gap-3 text-prose ${itemCls}`}>
             <span
               aria-hidden
-              className={`block h-2 w-2 shrink-0 rounded-full bg-orange-600 ${dotMt}`}
+              className={`block h-2 w-2 shrink-0 rounded-full bg-accent ${dotMt}`}
             />
             <span className="min-w-0">{item}</span>
           </li>

@@ -23,10 +23,10 @@ export default function TrustReceipt({ pricePaidCents, testingDuration, classNam
   if (!hasPrice && !durationLabel) return null
 
   return (
-    <p className={`text-xs text-gray-400 sm:text-sm ${className}`}>
+    <p className={`text-xs text-prose-muted sm:text-sm ${className}`}>
       {hasPrice && (
         <span className="whitespace-nowrap">
-          <span aria-hidden className="text-orange-500">💵</span>{' '}
+          <span aria-hidden className="text-accent-text">💵</span>{' '}
           Paid ${(pricePaidCents! / 100).toFixed(2)}
         </span>
       )}
@@ -35,7 +35,7 @@ export default function TrustReceipt({ pricePaidCents, testingDuration, classNam
       )}
       {durationLabel && (
         <span className="whitespace-nowrap">
-          <span aria-hidden className="text-orange-500">⏱</span>{' '}
+          <span aria-hidden className="text-accent-text">⏱</span>{' '}
           Tested {durationLabel}
         </span>
       )}

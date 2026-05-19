@@ -126,8 +126,8 @@ export function WishlistForm({ item }: Props) {
     }
   }
 
-  const inputCls = 'w-full px-3 py-2.5 bg-gray-950 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-600'
-  const labelCls = 'block text-xs font-semibold text-gray-400 mb-1.5'
+  const inputCls = 'w-full px-3 py-2.5 bg-surface-sunken border border-strong rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-accent'
+  const labelCls = 'block text-xs font-semibold text-prose-muted mb-1.5'
 
   return (
     <form onSubmit={handleSave} className="space-y-6 max-w-2xl">
@@ -180,7 +180,7 @@ export function WishlistForm({ item }: Props) {
       {/* Skip reason — only when skipped */}
       {status === 'skipped' && (
         <div>
-          <label className={labelCls}>Skip Reason * <span className="text-gray-500 font-normal">(shown publicly)</span></label>
+          <label className={labelCls}>Skip Reason * <span className="text-prose-faint font-normal">(shown publicly)</span></label>
           <textarea className={`${inputCls} resize-none`} rows={2} value={skipReason} onChange={(e) => setSkipReason(e.target.value)} required placeholder="Not enough differentiation from products I've already reviewed." />
         </div>
       )}
@@ -198,7 +198,7 @@ export function WishlistForm({ item }: Props) {
         <label className={labelCls}>Image</label>
         <div className="flex gap-2">
           <input className={`${inputCls} flex-1`} value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." />
-          <button type="button" onClick={() => setShowPicker(true)} className="shrink-0 px-3 py-2.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-xl text-sm text-gray-300 transition-colors">
+          <button type="button" onClick={() => setShowPicker(true)} className="shrink-0 px-3 py-2.5 bg-surface-raised hover:bg-gray-700 border border-strong rounded-xl text-sm text-gray-300 transition-colors">
             Library
           </button>
         </div>
@@ -244,9 +244,9 @@ export function WishlistForm({ item }: Props) {
 
       {/* Linked review (read-only) */}
       {item?.review_id && (
-        <div className="px-4 py-3 bg-orange-950/30 border border-orange-800/50 rounded-xl text-sm">
-          <span className="text-orange-400 font-semibold">Promoted to review</span>
-          <span className="text-gray-400 ml-2">Review ID: {item.review_id}</span>
+        <div className="px-4 py-3 bg-accent-tint/30 border border-accent-border/50 rounded-xl text-sm">
+          <span className="text-accent-text-soft font-semibold">Promoted to review</span>
+          <span className="text-prose-muted ml-2">Review ID: {item.review_id}</span>
         </div>
       )}
 
@@ -255,7 +255,7 @@ export function WishlistForm({ item }: Props) {
         <button
           type="submit"
           disabled={busy}
-          className="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors"
+          className="px-5 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors"
         >
           {busy ? 'Saving…' : isNew ? 'Create Item' : 'Save Changes'}
         </button>
@@ -265,7 +265,7 @@ export function WishlistForm({ item }: Props) {
             type="button"
             onClick={handlePromote}
             disabled={busy}
-            className="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 border border-gray-700 text-white text-sm font-semibold rounded-xl transition-colors"
+            className="px-5 py-2.5 bg-surface-raised hover:bg-gray-700 disabled:opacity-50 border border-strong text-white text-sm font-semibold rounded-xl transition-colors"
           >
             Promote to Review
           </button>

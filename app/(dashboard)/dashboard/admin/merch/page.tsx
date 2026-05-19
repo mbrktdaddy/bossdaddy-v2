@@ -26,23 +26,23 @@ export default async function AdminMerchListPage() {
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black">Merch</h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-prose-faint text-sm mt-1">
             Boss Daddy branded merch. {rows.length} item{rows.length === 1 ? '' : 's'} total · {visibleCount} publicly visible.
           </p>
         </div>
         <Link
           href="/dashboard/admin/merch/new"
-          className="shrink-0 px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold rounded-xl transition-colors"
+          className="shrink-0 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
         >
           + New item
         </Link>
       </div>
 
       {rows.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center">
-          <p className="text-gray-400 mb-2">No merch items yet.</p>
-          <p className="text-xs text-gray-600">
-            Add your first item — set status to <code className="text-orange-400">coming_soon</code> to show it on /gear with a &quot;Notify me&quot; CTA.
+        <div className="bg-surface border border-soft rounded-2xl p-8 text-center">
+          <p className="text-prose-muted mb-2">No merch items yet.</p>
+          <p className="text-xs text-prose-faint">
+            Add your first item — set status to <code className="text-accent-text-soft">coming_soon</code> to show it on /gear with a &quot;Notify me&quot; CTA.
           </p>
         </div>
       ) : (
@@ -54,10 +54,10 @@ export default async function AdminMerchListPage() {
               <Link
                 key={p.id}
                 href={`/dashboard/admin/merch/${p.id}`}
-                className="flex items-center gap-4 p-4 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-2xl transition-colors"
+                className="flex items-center gap-4 p-4 bg-surface hover:bg-surface-raised border border-soft rounded-2xl transition-colors"
               >
                 {/* Thumbnail */}
-                <div className="relative w-14 h-14 shrink-0 rounded-lg overflow-hidden bg-gray-950 border border-gray-800">
+                <div className="relative w-14 h-14 shrink-0 rounded-lg overflow-hidden bg-surface-sunken border border-soft">
                   {getMerchDisplayImage(p) ? (
                     <Image src={getMerchDisplayImage(p)!} alt={p.name} fill className="object-cover" sizes="56px" />
                   ) : (
@@ -71,16 +71,16 @@ export default async function AdminMerchListPage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-sm font-semibold truncate">{p.name}</p>
                     {p.featured && (
-                      <span className="text-xs text-orange-400 font-bold">★ Featured</span>
+                      <span className="text-xs text-accent-text-soft font-bold">★ Featured</span>
                     )}
                     {cat && (
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-prose-faint">
                         {cat.icon} {cat.label}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-600 mt-0.5">
-                    <code className="text-orange-400">{p.slug}</code>
+                  <p className="text-xs text-prose-faint mt-0.5">
+                    <code className="text-accent-text-soft">{p.slug}</code>
                     <span className="ml-3">{formatPrice(p.price_cents) || 'no price'}</span>
                     <span className="ml-3 text-gray-700">pos {p.position}</span>
                   </p>
@@ -90,8 +90,8 @@ export default async function AdminMerchListPage() {
                   <span
                     className={`px-2 py-1 text-xs rounded-md border ${
                       p.status === 'available'   ? 'bg-green-950/40 text-green-400 border-green-900/40'  :
-                      p.status === 'coming_soon' ? 'bg-orange-950/40 text-orange-400 border-orange-900/40' :
-                      p.status === 'concept'     ? 'bg-gray-800 text-gray-400 border-gray-700' :
+                      p.status === 'coming_soon' ? 'bg-accent-tint/40 text-accent-text-soft border-accent-border/40' :
+                      p.status === 'concept'     ? 'bg-surface-raised text-prose-muted border-strong' :
                       'bg-red-950/40 text-red-400 border-red-900/40'
                     }`}
                   >

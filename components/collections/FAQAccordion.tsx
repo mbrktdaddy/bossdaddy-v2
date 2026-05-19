@@ -25,8 +25,8 @@ export default function FAQAccordion({ faqs, id = 'faq', heading = 'Frequently A
   return (
     <section id={id} aria-label={heading} className="mb-12">
       <div className="mb-5">
-        <span aria-hidden className="block h-px w-6 bg-orange-600/60 mb-3" />
-        <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-1">FAQ</p>
+        <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">FAQ</p>
         <h2 className="text-2xl font-black text-white leading-tight">{heading}</h2>
       </div>
 
@@ -36,8 +36,8 @@ export default function FAQAccordion({ faqs, id = 'faq', heading = 'Frequently A
           return (
             <div
               key={`${idx}-${faq.question.slice(0, 30)}`}
-              className={`bg-gradient-to-br from-gray-900 to-gray-900/60 border ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden transition-colors ${
-                isOpen ? 'border-orange-900/40' : 'border-gray-800/60 hover:border-gray-700'
+              className={`bg-gradient-to-br from-surface to-surface/60 border ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden transition-colors ${
+                isOpen ? 'border-accent-border/40' : 'border-soft/60 hover:border-strong'
               }`}
             >
               <button
@@ -46,11 +46,11 @@ export default function FAQAccordion({ faqs, id = 'faq', heading = 'Frequently A
                 aria-expanded={isOpen}
                 className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left min-h-[56px]"
               >
-                <span className={`text-sm sm:text-base font-bold leading-snug ${isOpen ? 'text-white' : 'text-gray-200'}`}>
+                <span className={`text-sm sm:text-base font-bold leading-snug ${isOpen ? 'text-white' : 'text-prose'}`}>
                   {faq.question}
                 </span>
                 <svg
-                  className={`w-4 h-4 shrink-0 text-orange-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                  className={`w-4 h-4 shrink-0 text-accent-text-soft transition-transform ${isOpen ? 'rotate-180' : ''}`}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -62,7 +62,7 @@ export default function FAQAccordion({ faqs, id = 'faq', heading = 'Frequently A
               </button>
 
               {isOpen && (
-                <div className="px-5 pb-5 -mt-1 text-sm sm:text-base text-gray-400 leading-relaxed">
+                <div className="px-5 pb-5 -mt-1 text-sm sm:text-base text-prose-muted leading-relaxed">
                   {faq.answer}
                 </div>
               )}

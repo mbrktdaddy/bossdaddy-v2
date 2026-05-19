@@ -9,10 +9,10 @@ export default function GuideCard({ guide: a, priority = false }: { guide: Guide
   return (
     <Link
       href={`/guides/${a.slug}`}
-      className="group flex flex-col bg-gray-900 rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200"
+      className="group flex flex-col bg-surface rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200"
     >
       {a.image_url ? (
-        <div className="relative w-full h-44 bg-gray-800 shrink-0 overflow-hidden">
+        <div className="relative w-full h-44 bg-surface-raised shrink-0 overflow-hidden">
           <Image
             src={a.image_url}
             alt={a.title}
@@ -24,34 +24,34 @@ export default function GuideCard({ guide: a, priority = false }: { guide: Guide
         </div>
       ) : (
         <div className={`w-full h-44 shrink-0 bg-gradient-to-br ${
-          getCategoryBySlug(a.category)?.color ?? 'from-gray-800 to-gray-900'
+          getCategoryBySlug(a.category)?.color ?? 'from-surface-raised to-surface'
         } flex items-center justify-center`}>
-          {cat ? <CategoryIcon slug={cat.slug} className="w-8 h-8 text-orange-500 opacity-40" /> : <span className="text-4xl opacity-40">📄</span>}
+          {cat ? <CategoryIcon slug={cat.slug} className="w-8 h-8 text-accent-text opacity-40" /> : <span className="text-4xl opacity-40">📄</span>}
         </div>
       )}
       <div className="p-5 flex flex-col flex-1">
         {cat && (
-          <span className="flex items-center gap-1 text-xs font-medium text-orange-500 uppercase tracking-widest mb-3">
-            <CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-orange-500" /> {cat.label}
+          <span className="flex items-center gap-1 text-xs font-medium text-eyebrow uppercase tracking-widest mb-3">
+            <CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text" /> {cat.label}
           </span>
         )}
-        <h2 className="text-base font-bold leading-snug text-white group-hover:text-orange-400 transition-colors flex-1">
+        <h2 className="text-base font-bold leading-snug text-white group-hover:text-accent-text-soft transition-colors flex-1">
           {a.title}
         </h2>
         {a.excerpt && (
-          <p className="text-gray-400 text-sm mt-2 line-clamp-2">{a.excerpt}</p>
+          <p className="text-prose-muted text-sm mt-2 line-clamp-2">{a.excerpt}</p>
         )}
         <div className="flex items-center justify-between mt-4 pt-4">
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-prose-faint">
             {a.published_at
               ? new Date(a.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
               : ''}
           </span>
           <div className="flex items-center gap-3">
             {a.reading_time_minutes && (
-              <span className="text-xs text-gray-500">{a.reading_time_minutes} min read</span>
+              <span className="text-xs text-prose-faint">{a.reading_time_minutes} min read</span>
             )}
-            <span className="text-xs text-orange-500 font-medium">Read guide</span>
+            <span className="text-xs text-accent-text font-medium">Read guide</span>
           </div>
         </div>
       </div>

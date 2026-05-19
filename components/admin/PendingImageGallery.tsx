@@ -138,7 +138,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <p className="text-sm font-semibold text-white">Product Images</p>
-          <p className="text-xs text-gray-600 mt-0.5">
+          <p className="text-xs text-prose-faint mt-0.5">
             Add as many as you want — all attached to this product when you click Save.
           </p>
         </div>
@@ -147,7 +147,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
             type="button"
             onClick={() => setShowPicker(true)}
             disabled={disabled || processing}
-            className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 text-gray-300 font-semibold rounded-lg transition-colors"
+            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-gray-700 disabled:opacity-40 text-gray-300 font-semibold rounded-lg transition-colors"
           >
             Pick from library
           </button>
@@ -155,7 +155,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={disabled || processing}
-            className="text-xs px-3 py-1.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white font-semibold rounded-lg transition-colors"
+            className="text-xs px-3 py-1.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-semibold rounded-lg transition-colors"
           >
             + Upload
           </button>
@@ -176,7 +176,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
 
       {images.length === 0 ? (
         <div
-          className="border-2 border-dashed border-gray-800 rounded-xl py-10 text-center text-xs text-gray-600 cursor-pointer hover:border-gray-700 transition-colors"
+          className="border-2 border-dashed border-soft rounded-xl py-10 text-center text-xs text-prose-faint cursor-pointer hover:border-strong transition-colors"
           onClick={() => !disabled && fileRef.current?.click()}
         >
           <svg className="w-7 h-7 mx-auto mb-2 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
@@ -192,7 +192,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
               <div
                 key={img.kind === 'upload' ? `u-${idx}-${img.file.name}` : `l-${img.assetId}`}
                 className={`relative aspect-square rounded-xl overflow-hidden border-2 ${
-                  img.isPrimary ? 'border-orange-500 ring-2 ring-orange-500/30' : 'border-gray-800'
+                  img.isPrimary ? 'border-accent ring-2 ring-accent-hover/30' : 'border-soft'
                 }`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -201,7 +201,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
                 {/* Source badge */}
                 <span
                   className={`absolute top-1.5 left-1.5 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full leading-none ${
-                    img.kind === 'upload' ? 'bg-orange-600/90 text-white' : 'bg-gray-900/90 text-gray-300'
+                    img.kind === 'upload' ? 'bg-accent/90 text-white' : 'bg-surface/90 text-gray-300'
                   }`}
                 >
                   {img.kind === 'upload' ? 'New' : 'Library'}
@@ -209,7 +209,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
 
                 {/* Primary indicator */}
                 {img.isPrimary && (
-                  <span className="absolute top-1.5 right-1.5 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full leading-none bg-orange-500 text-white">
+                  <span className="absolute top-1.5 right-1.5 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full leading-none bg-accent-hover text-white">
                     Primary
                   </span>
                 )}
@@ -221,14 +221,14 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
                       type="button"
                       onClick={() => handleMove(idx, -1)}
                       disabled={disabled || idx === 0}
-                      className="w-6 h-6 flex items-center justify-center text-xs text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      className="w-6 h-6 flex items-center justify-center text-xs text-prose-muted hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                       title="Move left"
                     >←</button>
                     <button
                       type="button"
                       onClick={() => handleMove(idx, +1)}
                       disabled={disabled || idx === images.length - 1}
-                      className="w-6 h-6 flex items-center justify-center text-xs text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      className="w-6 h-6 flex items-center justify-center text-xs text-prose-muted hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                       title="Move right"
                     >→</button>
                   </div>
@@ -238,7 +238,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
                         type="button"
                         onClick={() => handleSetPrimary(idx)}
                         disabled={disabled}
-                        className="text-[10px] px-1.5 py-1 text-orange-400 hover:text-orange-300 disabled:opacity-40 font-semibold uppercase tracking-wide transition-colors"
+                        className="text-[10px] px-1.5 py-1 text-accent-text-soft hover:text-orange-300 disabled:opacity-40 font-semibold uppercase tracking-wide transition-colors"
                         title="Set as primary product image"
                       >
                         Star
@@ -248,7 +248,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
                       type="button"
                       onClick={() => handleRemove(idx)}
                       disabled={disabled}
-                      className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-red-400 disabled:opacity-40 transition-colors"
+                      className="w-6 h-6 flex items-center justify-center text-prose-muted hover:text-red-400 disabled:opacity-40 transition-colors"
                       title="Remove from staging"
                     >
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
@@ -264,9 +264,9 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
       )}
 
       {images.length > 0 && (
-        <p className="text-xs text-gray-600">
+        <p className="text-xs text-prose-faint">
           {images.length} image{images.length === 1 ? '' : 's'} staged. The one marked Primary becomes the product&apos;s hero — change with the Star button.
-          {category && <> All new uploads will be tagged <code className="text-orange-400/80">{category}</code>.</>}
+          {category && <> All new uploads will be tagged <code className="text-accent-text-soft/80">{category}</code>.</>}
         </p>
       )}
 

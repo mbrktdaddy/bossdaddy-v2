@@ -34,7 +34,7 @@ export default async function MyReviewsPage({ searchParams }: Props) {
     { label: 'Total',   value: counts.total,   color: 'text-white',      filterKey: null },
     { label: 'Live',    value: counts.live,    color: 'text-green-400',  filterKey: 'live' },
     { label: 'Pending', value: counts.pending, color: 'text-yellow-400', filterKey: 'pending' },
-    { label: 'Drafts',  value: counts.draft,   color: 'text-gray-400',   filterKey: 'drafts' },
+    { label: 'Drafts',  value: counts.draft,   color: 'text-prose-muted',   filterKey: 'drafts' },
   ]
 
   return (
@@ -44,11 +44,11 @@ export default async function MyReviewsPage({ searchParams }: Props) {
       <div className="flex items-center justify-between mb-6 sm:mb-8">
         <div>
           <h1 className="text-2xl font-black">My Reviews</h1>
-          <p className="text-gray-500 text-sm mt-1">Manage your content</p>
+          <p className="text-prose-faint text-sm mt-1">Manage your content</p>
         </div>
         <Link
           href="/dashboard/reviews/new"
-          className="flex items-center gap-2 px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold rounded-xl transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -68,14 +68,14 @@ export default async function MyReviewsPage({ searchParams }: Props) {
             <Link
               key={s.label}
               href={href}
-              className={`block bg-gray-900 rounded-2xl px-4 py-3 sm:px-5 sm:py-4 border transition-colors ${
+              className={`block bg-surface rounded-2xl px-4 py-3 sm:px-5 sm:py-4 border transition-colors ${
                 isActive
-                  ? 'border-orange-600 bg-orange-950/20'
-                  : 'border-gray-800 hover:border-gray-600'
+                  ? 'border-accent bg-accent-tint/20'
+                  : 'border-soft hover:border-gray-600'
               }`}
             >
               <p className={`text-xl sm:text-2xl font-black ${s.color}`}>{s.value}</p>
-              <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">{s.label}</p>
+              <p className="text-xs text-prose-faint mt-1 uppercase tracking-wide">{s.label}</p>
             </Link>
           )
         })}
@@ -84,18 +84,18 @@ export default async function MyReviewsPage({ searchParams }: Props) {
       {/* Active filter label */}
       {filter && (
         <div className="flex items-center gap-2 mb-4">
-          <p className="text-sm text-gray-500">
-            Showing: <span className="text-orange-400 font-medium capitalize">{filter}</span>
+          <p className="text-sm text-prose-faint">
+            Showing: <span className="text-accent-text-soft font-medium capitalize">{filter}</span>
           </p>
-          <Link href="/dashboard/reviews" className="text-xs text-gray-600 hover:text-gray-400 underline">clear</Link>
+          <Link href="/dashboard/reviews" className="text-xs text-prose-faint hover:text-prose-muted underline">clear</Link>
         </div>
       )}
 
       {/* Reviews list with bulk actions */}
       {!displayed?.length && !filter && (
-        <div className="text-center py-24 border border-dashed border-gray-800 rounded-2xl">
-          <p className="text-gray-500 text-lg mb-2">No reviews yet, Boss.</p>
-          <Link href="/dashboard/reviews/new" className="text-orange-400 hover:text-orange-300 text-sm">
+        <div className="text-center py-24 border border-dashed border-soft rounded-2xl">
+          <p className="text-prose-faint text-lg mb-2">No reviews yet, Boss.</p>
+          <Link href="/dashboard/reviews/new" className="text-accent-text-soft hover:text-orange-300 text-sm">
             Write your first one →
           </Link>
         </div>

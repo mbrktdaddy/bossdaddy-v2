@@ -70,17 +70,17 @@ export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      <p className="text-xs text-orange-500 uppercase tracking-widest font-semibold mb-3">Top Picks</p>
+      <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Top Picks</p>
 
       {/* Card + arrow buttons */}
       <div className="relative group">
         <Link
           href={`/reviews/${r.slug}`}
           onClick={onLinkClick}
-          className="block bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-orange-700/60 transition-all duration-200"
+          className="block bg-surface border border-soft rounded-2xl overflow-hidden hover:border-accent-border/60 transition-all duration-200"
         >
           {r.image_url && (
-            <div className="relative w-full h-44 bg-gray-800">
+            <div className="relative w-full h-44 bg-surface-raised">
               <Image
                 src={r.image_url}
                 alt={r.product_name}
@@ -98,10 +98,10 @@ export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
             </div>
           )}
           <div className="p-5">
-            <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest">
+            <span className="text-xs font-medium text-eyebrow/80 uppercase tracking-widest">
               {r.product_name}
             </span>
-            <p className="text-sm font-semibold mt-1 leading-snug group-hover:text-orange-400 transition-colors">
+            <p className="text-sm font-semibold mt-1 leading-snug group-hover:text-accent-text-soft transition-colors">
               {r.title}
             </p>
             <div className="mt-2">
@@ -148,7 +148,7 @@ export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
           >
             <span className={`rounded-full transition-all duration-200 block ${
               i === current
-                ? 'w-4 h-1.5 bg-orange-500'
+                ? 'w-4 h-1.5 bg-accent-hover'
                 : 'w-1.5 h-1.5 bg-gray-700 hover:bg-gray-500'
             }`} />
           </button>

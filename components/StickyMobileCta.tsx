@@ -53,13 +53,13 @@ export default function StickyMobileCta({ product }: Props) {
 
   return (
     <div
-      className={`md:hidden fixed bottom-0 left-0 right-0 z-40 bg-gray-950/95 backdrop-blur-md border-t border-orange-900/40 shadow-2xl shadow-black/60 px-4 pt-3 transition-transform duration-300 ${show ? 'translate-y-0' : 'translate-y-full'}`}
+      className={`md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface-sunken/95 backdrop-blur-md border-t border-accent-border/40 shadow-2xl shadow-black/60 px-4 pt-3 transition-transform duration-300 ${show ? 'translate-y-0' : 'translate-y-full'}`}
       style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 0.75rem)' }}
       aria-hidden={!show}
     >
       <div className="flex items-center gap-3">
         {product.image_url && (
-          <div className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-gray-900">
+          <div className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-surface">
             <Image
               src={product.image_url}
               alt={product.name}
@@ -77,7 +77,7 @@ export default function StickyMobileCta({ product }: Props) {
           target="_blank"
           rel={rel}
           data-product-slug={product.slug}
-          className="shrink-0 px-4 py-2.5 bg-orange-600 hover:bg-orange-500 active:bg-orange-700 text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
+          className="shrink-0 px-4 py-2.5 bg-accent hover:bg-accent-hover active:bg-orange-700 text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
         >
           Check Price
         </a>

@@ -67,10 +67,10 @@ export function AIRefinePanel({ title, category, content, productName, contentTy
   }
 
   return (
-    <div className="bg-gray-900 border border-orange-900/30 rounded-xl p-4">
+    <div className="bg-surface border border-accent-border/30 rounded-xl p-4">
       <div className="flex items-center justify-between mb-2">
-        <p className="text-sm font-semibold text-orange-400">✨ AI Refine</p>
-        <span className="text-xs text-gray-600">Iterate without losing structure</span>
+        <p className="text-sm font-semibold text-accent-text-soft">✨ AI Refine</p>
+        <span className="text-xs text-prose-faint">Iterate without losing structure</span>
       </div>
       <div className="flex gap-2">
         <input
@@ -79,14 +79,14 @@ export function AIRefinePanel({ title, category, content, productName, contentTy
           value={instruction}
           onChange={(e) => setInstruction(e.target.value)}
           placeholder="e.g. 'make it more casual', 'add a section on safety', 'shorten the intro'"
-          className="flex-1 px-3 py-2 bg-gray-950 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500"
+          className="flex-1 px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover"
           onKeyDown={(e) => { if (e.key === 'Enter' && !loading) handleRefine() }}
         />
         <button
           type="button"
           onClick={handleRefine}
           disabled={loading || !instruction.trim()}
-          className="shrink-0 text-sm px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white font-semibold rounded-lg transition-colors"
+          className="shrink-0 text-sm px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-semibold rounded-lg transition-colors"
         >
           {loading ? 'Refining…' : 'Apply'}
         </button>

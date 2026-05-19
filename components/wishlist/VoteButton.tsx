@@ -41,8 +41,8 @@ export function VoteButton({ itemId, initialVoted, initialCount, isAuthenticated
         disabled={loading}
         className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all disabled:opacity-50 ${
           voted
-            ? 'bg-orange-950/50 border-orange-700 text-orange-400'
-            : 'bg-gray-900 border-gray-700 text-gray-300 hover:border-orange-700 hover:text-orange-400'
+            ? 'bg-accent-tint/50 border-accent-border text-accent-text-soft'
+            : 'bg-surface border-strong text-gray-300 hover:border-accent-border hover:text-accent-text-soft'
         }`}
       >
         <svg className="w-4 h-4" fill={voted ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

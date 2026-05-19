@@ -29,13 +29,13 @@ export default async function ProductEditPage({
       <div className="mb-6">
         <Link
           href="/dashboard/admin/products"
-          className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+          className="text-sm text-prose-faint hover:text-gray-300 transition-colors"
         >
           ← All products
         </Link>
       </div>
       <h1 className="text-2xl font-black mb-1">{isNew ? 'New product' : product?.name}</h1>
-      <p className="text-gray-500 text-sm mb-8">
+      <p className="text-prose-faint text-sm mb-8">
         {isNew
           ? 'Create a product row so [[BUY:slug]] tokens can resolve to this affiliate URL.'
           : 'Editing this product updates every future review token — existing resolved links in already-saved reviews are unaffected.'}

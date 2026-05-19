@@ -56,10 +56,10 @@ export default function ArticleTOC({ items, variant }: Props) {
       // behind it as the user scrolls. z-10 stays under the header z-50.
       <nav
         aria-label="On this page"
-        className="lg:hidden -mx-6 mb-8 px-6 sticky top-16 z-10 bg-gray-950/95 backdrop-blur py-3 border-y border-gray-800/60"
+        className="lg:hidden -mx-6 mb-8 px-6 sticky top-16 z-10 bg-surface-sunken/95 backdrop-blur py-3 border-y border-soft/60"
       >
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-          <span className="shrink-0 text-[10px] font-bold text-orange-500 uppercase tracking-widest mr-1">
+          <span className="shrink-0 text-[10px] font-bold text-eyebrow uppercase tracking-widest mr-1">
             On this page
           </span>
           {items.map((item) => (
@@ -68,8 +68,8 @@ export default function ArticleTOC({ items, variant }: Props) {
               href={`#${item.id}`}
               className={`shrink-0 px-3 py-1.5 text-xs font-semibold rounded-full border transition-colors min-h-[36px] inline-flex items-center ${
                 activeId === item.id
-                  ? 'bg-orange-600 text-white border-orange-600'
-                  : 'bg-gray-900 text-gray-400 border-gray-800 hover:border-gray-700 hover:text-gray-200'
+                  ? 'bg-accent text-white border-accent'
+                  : 'bg-surface text-prose-muted border-soft hover:border-strong hover:text-prose'
               }`}
             >
               {item.label}
@@ -85,16 +85,16 @@ export default function ArticleTOC({ items, variant }: Props) {
       aria-label="On this page"
       className="hidden lg:block sticky top-24 self-start w-56 shrink-0"
     >
-      <p className="text-[10px] font-bold text-orange-500 uppercase tracking-widest mb-3">On this page</p>
-      <ul className="space-y-1 border-l border-gray-800/60 pl-3">
+      <p className="text-[10px] font-bold text-eyebrow uppercase tracking-widest mb-3">On this page</p>
+      <ul className="space-y-1 border-l border-soft/60 pl-3">
         {items.map((item) => (
           <li key={item.id}>
             <a
               href={`#${item.id}`}
               className={`block py-1.5 text-xs font-medium border-l-2 -ml-3 pl-3 transition-colors ${
                 activeId === item.id
-                  ? 'text-orange-400 border-orange-500 font-bold'
-                  : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-700'
+                  ? 'text-accent-text-soft border-accent font-bold'
+                  : 'text-prose-faint border-transparent hover:text-gray-300 hover:border-strong'
               }`}
             >
               {item.label}

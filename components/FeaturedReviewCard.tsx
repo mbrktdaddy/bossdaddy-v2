@@ -12,10 +12,10 @@ export default function FeaturedReviewCard({ review: r, label = 'Featured Review
   return (
     <Link
       href={`/reviews/${r.slug}`}
-      className="group relative flex flex-col sm:flex-row overflow-hidden rounded-2xl bg-gray-900 shadow-xl shadow-black/50 hover:shadow-2xl hover:shadow-black/60 transition-all duration-300 mt-2 mb-20"
+      className="group relative flex flex-col sm:flex-row overflow-hidden rounded-2xl bg-surface shadow-xl shadow-black/50 hover:shadow-2xl hover:shadow-black/60 transition-all duration-300 mt-2 mb-20"
     >
       {/* Image */}
-      <div className="relative w-full sm:w-[55%] h-56 sm:h-auto shrink-0 bg-gray-800">
+      <div className="relative w-full sm:w-[55%] h-56 sm:h-auto shrink-0 bg-surface-raised">
         {r.image_url ? (
           <Image
             src={r.image_url}
@@ -26,41 +26,41 @@ export default function FeaturedReviewCard({ review: r, label = 'Featured Review
             sizes="(max-width: 640px) 100vw, 55vw"
           />
         ) : (
-          <div className={`w-full h-full bg-gradient-to-br ${cat?.color ?? 'from-gray-800 to-gray-900'} flex items-center justify-center`}>
-            {cat ? <CategoryIcon slug={cat.slug} className="w-10 h-10 text-orange-500 opacity-30" /> : <span className="text-6xl opacity-30">📦</span>}
+          <div className={`w-full h-full bg-gradient-to-br ${cat?.color ?? 'from-surface-raised to-surface'} flex items-center justify-center`}>
+            {cat ? <CategoryIcon slug={cat.slug} className="w-10 h-10 text-accent-text opacity-30" /> : <span className="text-6xl opacity-30">📦</span>}
           </div>
         )}
         {/* Gradient overlay on mobile bottom edge */}
-        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-gray-900 to-transparent sm:hidden" />
+        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-surface to-transparent sm:hidden" />
       </div>
 
       {/* Content */}
       <div className="flex flex-col justify-between p-6 sm:p-8 flex-1 min-w-0">
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500 bg-orange-950/60 px-2.5 py-1 rounded-full">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent-text bg-accent-tint/60 px-2.5 py-1 rounded-full">
               {label}
             </span>
             {cat && (
-              <span className="flex items-center gap-1 text-[10px] text-gray-500 uppercase tracking-widest"><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-gray-500" /> {cat.label}</span>
+              <span className="flex items-center gap-1 text-[10px] text-prose-faint uppercase tracking-widest"><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-prose-faint" /> {cat.label}</span>
             )}
           </div>
 
-          <p className="text-xs text-orange-400/80 font-semibold uppercase tracking-widest mb-2">{r.product_name}</p>
-          <h2 className="text-xl sm:text-2xl font-black leading-snug text-white group-hover:text-orange-400 transition-colors mb-3">
+          <p className="text-xs text-accent-text-soft/80 font-semibold uppercase tracking-widest mb-2">{r.product_name}</p>
+          <h2 className="text-xl sm:text-2xl font-black leading-snug text-white group-hover:text-accent-text-soft transition-colors mb-3">
             {r.title}
           </h2>
           {r.excerpt && (
-            <p className="text-gray-400 text-sm leading-relaxed line-clamp-3">{r.excerpt}</p>
+            <p className="text-prose-muted text-sm leading-relaxed line-clamp-3">{r.excerpt}</p>
           )}
         </div>
 
-        <div className="flex items-center justify-between mt-6 pt-5 border-t border-gray-800/60">
+        <div className="flex items-center justify-between mt-6 pt-5 border-t border-soft/60">
           <div className="flex items-center gap-3">
             <RatingScore rating={r.rating} />
             {r.rating >= 8 && <BossApprovedBadge size="sm" variant="card" />}
           </div>
-          <span className="text-sm font-semibold text-orange-500 group-hover:text-orange-400 transition-colors">
+          <span className="text-sm font-semibold text-accent-text group-hover:text-accent-text-soft transition-colors">
             Read review →
           </span>
         </div>
