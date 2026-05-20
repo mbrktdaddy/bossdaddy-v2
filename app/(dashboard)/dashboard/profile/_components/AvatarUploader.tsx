@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { compressImage } from '@/lib/compress-image'
 
 interface Props {
   initialAvatarUrl: string | null
@@ -16,10 +17,14 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function handleFile(file: File) {
+  async function handleFile(raw: File) {
     setError(null)
     setBusy(true)
     try {
+      // Phone photos are 3-5MB; avatars get cropped to 256px anyway, so a
+      // tight client-side compress keeps the upload fast and well under the
+      // server cap regardless of source.
+      const file = await compressImage(raw, { maxPx: 512, quality: 0.85 }).catch(() => raw)
       const form = new FormData()
       form.append('file', file)
       const res = await fetch('/api/profile/avatar', { method: 'POST', body: form })
@@ -94,7 +99,7 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
       <div className="flex flex-col gap-2 items-center sm:items-start min-w-0">
         <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold">Avatar</p>
         <p className="text-xs text-prose-faint max-w-xs text-center sm:text-left">
-          JPG, PNG, or WebP. Up to 2 MB. Click the circle or drag a file onto it.
+          JPG, PNG, or WebP — any size. Click the circle or drag a file onto it.
         </p>
         <div className="flex gap-2 mt-1">
           <button

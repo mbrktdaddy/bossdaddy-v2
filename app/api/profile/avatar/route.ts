@@ -1,9 +1,12 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import sharp from 'sharp'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
-const MAX_BYTES = 2 * 1024 * 1024  // 2 MB — matches bucket file_size_limit
+// Generous input cap — we always re-encode to a 256px WebP server-side, so
+// the stored file is tiny regardless of input size.
+const MAX_BYTES = 10 * 1024 * 1024  // 10 MB
 
 // POST /api/profile/avatar
 // Multipart form: { file: File }
@@ -23,29 +26,35 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Avatar must be a JPEG, PNG, or WebP image' }, { status: 400 })
   }
   if (file.size > MAX_BYTES) {
-    return NextResponse.json({ error: 'Avatar must be 2 MB or smaller' }, { status: 400 })
+    return NextResponse.json({ error: 'Avatar must be 10 MB or smaller' }, { status: 400 })
   }
 
-  // Derive extension from MIME to ignore filename trickery
-  const ext = file.type === 'image/jpeg' ? 'jpg'
-    : file.type === 'image/png'  ? 'png'
-    : 'webp'
+  const rawBuffer = Buffer.from(await file.arrayBuffer())
+  let buffer: Buffer
+  try {
+    buffer = await sharp(rawBuffer)
+      .rotate()
+      .resize({ width: 256, height: 256, fit: 'cover', position: 'attention' })
+      .webp({ quality: 85 })
+      .toBuffer()
+  } catch {
+    return NextResponse.json({ error: 'Could not process avatar image' }, { status: 400 })
+  }
 
   const admin = createAdminClient()
   const userFolder = user.id
 
-  // Wipe any prior file(s) in this user's folder so we don't accumulate orphans
-  // when extension changes (jpg → png) or a previous upload partially failed.
+  // Wipe any prior file(s) so we don't accumulate orphans when the extension
+  // previously changed (jpg → png → webp) or an upload partially failed.
   const { data: existing } = await admin.storage.from('avatars').list(userFolder)
   if (existing && existing.length > 0) {
     const paths = existing.map((f) => `${userFolder}/${f.name}`)
     await admin.storage.from('avatars').remove(paths)
   }
 
-  const path = `${userFolder}/avatar.${ext}`
-  const buffer = Buffer.from(await file.arrayBuffer())
+  const path = `${userFolder}/avatar.webp`
   const { error: uploadErr } = await admin.storage.from('avatars').upload(path, buffer, {
-    contentType: file.type,
+    contentType: 'image/webp',
     upsert: true,
   })
   if (uploadErr) {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { compressImage } from '@/lib/compress-image'
 import MediaPicker, { type MultiSelectItem } from '@/components/media/MediaPicker'
 import {
   type H2Heading,
@@ -330,9 +331,10 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const raw = e.target.files?.[0]
+    if (!raw) return
+    const file = await compressImage(raw).catch(() => raw)
     if (uploadingForNew) { handleNewUploadFile(file); return }
     if (uploadSlotId) {
       const slot = allSlots.find(s => s.slotId === uploadSlotId)
@@ -582,7 +584,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif"
+        accept="image/jpeg,image/png,image/webp"
         className="hidden"
         onChange={handleFileChange}
       />

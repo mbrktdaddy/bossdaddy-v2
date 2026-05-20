@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/auth-cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { fetchProductImages } from '@/lib/amazon-pa-api'
+import { normalizeImage } from '@/lib/images/normalize'
 
 export async function POST(
   _req: NextRequest,
@@ -68,15 +69,15 @@ export async function POST(
       const imgRes = await fetch(img.url)
       if (!imgRes.ok) continue
 
-      const buffer   = Buffer.from(await imgRes.arrayBuffer())
-      const ext      = img.url.toLowerCase().includes('.png') ? 'png' : 'jpg'
-      const filename = `amazon-${product.asin}-${i}.${ext}`
+      const rawBuffer = Buffer.from(await imgRes.arrayBuffer())
+      const { buffer } = await normalizeImage(rawBuffer)
+
+      const filename = `amazon-${product.asin}-${i}.webp`
       const path     = `products/${id}/${Date.now()}-${i}-${filename}`
-      const mime     = ext === 'png' ? 'image/png' : 'image/jpeg'
 
       const { error: uploadError } = await admin.storage
         .from('media')
-        .upload(path, buffer, { contentType: mime, upsert: false })
+        .upload(path, buffer, { contentType: 'image/webp', upsert: false })
 
       if (uploadError) continue
 
@@ -92,7 +93,7 @@ export async function POST(
         is_primary: isPrimary,
         position:   i + 1,
         file_size:  buffer.length,
-        mime_type:  mime,
+        mime_type:  'image/webp',
       })
 
       if (assetError) continue

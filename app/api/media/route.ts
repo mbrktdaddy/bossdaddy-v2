@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { normalizeImage } from '@/lib/images/normalize'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+const ALLOWED_TYPES  = ['image/jpeg', 'image/png', 'image/webp']
 const MAX_SIZE_BYTES = 8 * 1024 * 1024 // 8 MB
 
 // GET /api/media — paginated list for library/picker
@@ -113,16 +114,25 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'is_primary requires a product_id' }, { status: 400 })
   }
 
-  const ext = file.type.split('/')[1].replace('jpeg', 'jpg')
   const folder = productId ? `products/${productId}` : 'general'
-  const filename = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+  const filename = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`
 
   const admin = createAdminClient()
-  const buffer = Buffer.from(await file.arrayBuffer())
+  const rawBuffer = Buffer.from(await file.arrayBuffer())
+
+  let buffer: Buffer
+  try {
+    const result = await normalizeImage(rawBuffer)
+    buffer = result.buffer
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Could not process image — file may be corrupt'
+    const status = (err as { status?: number }).status ?? 400
+    return NextResponse.json({ error: msg }, { status })
+  }
 
   const { error: uploadError } = await admin.storage
     .from('media')
-    .upload(filename, buffer, { contentType: file.type, upsert: false })
+    .upload(filename, buffer, { contentType: 'image/webp', upsert: false })
 
   if (uploadError) {
     console.error('Media upload error:', uploadError)
@@ -158,8 +168,8 @@ export async function POST(request: NextRequest) {
       filename,
       alt_text: altText || null,
       uploaded_by: user.id,
-      file_size: file.size,
-      mime_type: file.type,
+      file_size: buffer.length,
+      mime_type: 'image/webp',
       product_id: productId,
       label,
       is_primary: isPrimary,

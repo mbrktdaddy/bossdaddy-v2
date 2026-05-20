@@ -1,62 +1,70 @@
 /**
- * Client-side image compression using the browser Canvas API.
+ * Client-side image normalization using the browser Canvas API.
  *
- * Resizes to a max dimension and re-encodes as JPEG. Runs entirely in the
+ * Resizes to a max dimension and re-encodes as WebP. Runs entirely in the
  * browser — nothing is sent to the server until after compression. Typical
- * savings: a 12MP phone photo (~8 MB) → ~150–300 KB at quality 0.85.
+ * savings: a 12MP phone photo (~8 MB) → ~150–300 KB at quality 0.82.
+ *
+ * EXIF metadata (including GPS coords) is stripped naturally by canvas re-encoding.
+ * EXIF orientation is auto-applied before the canvas draw in modern browsers
+ * (Chrome 81+, Safari 14+, Firefox 26+), so rotated phone shots land correctly.
  *
  * Safe fallback: if anything goes wrong the original file is returned unchanged.
  *
  * iOS Safari auto-converts HEIC → JPEG before the file reaches JS, so HEIC
  * files from iPhone are handled transparently.
+ *
+ * @throws if minPx is set and the image's shortest edge is below it
  */
 export async function compressImage(
   file: File,
   {
-    maxPx   = 1920,   // longest edge in pixels — more than enough for any card/hero
-    quality = 0.85,   // JPEG quality 0–1; 0.85 keeps visible quality while halving size
-  }: { maxPx?: number; quality?: number } = {},
+    maxPx   = 1600,   // longest edge — covers any hero or card size
+    quality = 0.82,   // WebP quality 0–1; matches server-side re-encode target
+    minPx   = 0,      // reject if shortest edge is below this (0 = no check)
+  }: { maxPx?: number; quality?: number; minPx?: number } = {},
 ): Promise<File> {
-  // Skip files that are already small — no point re-encoding
-  if (file.size < 200_000) return file
+  // Already optimal: small WebP that doesn't need resizing
+  if (file.type === 'image/webp' && file.size < 200_000) return file
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const img = new Image()
     const url = URL.createObjectURL(file)
 
     img.onload = () => {
       URL.revokeObjectURL(url)
 
-      let { width, height } = img
-      if (width > maxPx || height > maxPx) {
-        if (width >= height) {
-          height = Math.round((height * maxPx) / width)
-          width  = maxPx
-        } else {
-          width  = Math.round((width * maxPx) / height)
-          height = maxPx
-        }
+      const { width, height } = img
+
+      if (minPx > 0 && Math.min(width, height) < minPx) {
+        reject(new Error(`Image too small — minimum ${minPx}px on shortest side (got ${Math.min(width, height)}px)`))
+        return
+      }
+
+      let w = width, h = height
+      if (w > maxPx || h > maxPx) {
+        if (w >= h) { h = Math.round((h * maxPx) / w); w = maxPx }
+        else        { w = Math.round((w * maxPx) / h); h = maxPx }
       }
 
       const canvas = document.createElement('canvas')
-      canvas.width  = width
-      canvas.height = height
+      canvas.width  = w
+      canvas.height = h
 
       const ctx = canvas.getContext('2d')
       if (!ctx) { resolve(file); return }
 
-      ctx.drawImage(img, 0, 0, width, height)
+      ctx.drawImage(img, 0, 0, w, h)
 
       canvas.toBlob(
         (blob) => {
           if (!blob) { resolve(file); return }
-          const outName = file.name.replace(/\.[^.]+$/, '.jpg')
-          resolve(new File([blob], outName, {
-            type: 'image/jpeg',
+          resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.webp'), {
+            type: 'image/webp',
             lastModified: Date.now(),
           }))
         },
-        'image/jpeg',
+        'image/webp',
         quality,
       )
     }

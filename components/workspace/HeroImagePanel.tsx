@@ -2,9 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
-import { compressImage } from '@/lib/compress-image'
-
-const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
+const MediaPicker   = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
+const ImageCropper  = dynamic(() => import('@/components/ui/ImageCropper'),   { ssr: false })
 
 interface Props {
   imageUrl: string | null
@@ -23,6 +22,7 @@ export function HeroImagePanel({
   contentType, title, category, excerpt, productName, initialPrompt,
 }: Props) {
   const [showPicker, setShowPicker] = useState(false)
+  const [pendingCrop, setPendingCrop] = useState<File | null>(null)
   const [imagePrompt, setImagePrompt] = useState('')
 
   // When the workspace reads its sessionStorage suggestion and passes it in,
@@ -52,13 +52,19 @@ export function HeroImagePanel({
     return parsed
   }
 
-  async function handleCameraCapture(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleCameraCapture(e: React.ChangeEvent<HTMLInputElement>) {
     const raw = e.target.files?.[0]
     if (!raw) return
+    setPendingCrop(raw)
+    e.target.value = ''
+  }
+
+  async function handleCropConfirm(blob: Blob) {
+    setPendingCrop(null)
     setUploading(true)
     setError(null)
     try {
-      const file = await compressImage(raw)
+      const file = new File([blob], 'hero.webp', { type: 'image/webp' })
       const fd = new FormData()
       fd.append('file', file)
       const res = await fetch('/api/media', { method: 'POST', body: fd })
@@ -68,7 +74,6 @@ export function HeroImagePanel({
       setError(err instanceof Error ? err.message : 'Upload failed')
     }
     setUploading(false)
-    e.target.value = ''
   }
 
   async function handleGenerate() {
@@ -207,6 +212,15 @@ export function HeroImagePanel({
           onSelect={(url) => { onChange(url); setShowPicker(false) }}
           onClose={() => setShowPicker(false)}
           defaultCategory={category}
+        />
+      )}
+
+      {pendingCrop && (
+        <ImageCropper
+          file={pendingCrop}
+          aspect={16 / 9}
+          onCrop={handleCropConfirm}
+          onCancel={() => setPendingCrop(null)}
         />
       )}
     </div>
