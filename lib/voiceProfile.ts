@@ -7,12 +7,20 @@ export interface VoiceFact {
   value: string
 }
 
+export type Gender = 'male' | 'female' | 'other'
+
+export interface FamilyMember {
+  id: string
+  relationship: string
+  name: string | null
+  dob: string | null
+  gender: Gender | null
+}
+
 export interface VoiceProfile {
   id: string
   user_id: string
-  self_dob: string | null
-  wife_dob: string | null
-  daughter_dob: string | null
+  family_members: FamilyMember[]
   occupation: string | null
   faith_values: string | null
   region: string | null
@@ -24,9 +32,7 @@ export type VoiceProfileInput = Omit<VoiceProfile, 'id' | 'user_id' | 'updated_a
 
 export function emptyVoiceProfile(): VoiceProfileInput {
   return {
-    self_dob: null,
-    wife_dob: null,
-    daughter_dob: null,
+    family_members: [],
     occupation: null,
     faith_values: null,
     region: null,
@@ -44,7 +50,7 @@ function ageFromDob(dob: string | null, today: Date): number | null {
   return years < 0 ? null : years
 }
 
-function daughterAgeLabel(dob: string | null, today: Date): string | null {
+function personAgeLabel(dob: string | null, today: Date): string | null {
   if (!dob) return null
   const d = new Date(dob)
   if (Number.isNaN(d.getTime())) return null
@@ -86,13 +92,21 @@ export function formatVoiceProfileForPrompt(
   if (!profile) return null
 
   const lines: string[] = []
-  const selfAge = ageFromDob(profile.self_dob, now)
-  if (selfAge !== null) lines.push(`- Author age: ${selfAge}`)
-  const wifeAge = ageFromDob(profile.wife_dob, now)
-  if (wifeAge !== null) lines.push(`- Wife age: ${wifeAge}`)
-  const daughterLabel = daughterAgeLabel(profile.daughter_dob, now)
-  if (daughterLabel) lines.push(`- Daughter: ${daughterLabel}`)
-  if (profile.occupation?.trim()) lines.push(`- Occupation: ${profile.occupation.trim()}`)
+
+  for (const m of profile.family_members ?? []) {
+    const relationship = m.relationship?.trim()
+    if (!relationship) continue
+    const name = m.name?.trim()
+    const namePart = name ? ` (${name})` : ''
+    const ageLabel = personAgeLabel(m.dob, now)
+    if (ageLabel) {
+      lines.push(`- ${relationship}${namePart}: ${ageLabel}`)
+    } else {
+      lines.push(`- ${relationship}${namePart}`)
+    }
+  }
+
+  if (profile.occupation?.trim()) lines.push(`- Background / experience: ${profile.occupation.trim()}`)
   if (profile.faith_values?.trim()) lines.push(`- Faith / values: ${profile.faith_values.trim()}`)
   if (profile.region?.trim()) lines.push(`- Region: ${profile.region.trim()}`)
 
@@ -135,4 +149,3 @@ export async function buildBossDaddySystemBlocks(
   if (voiceBlock) blocks.push({ type: 'text', text: voiceBlock })
   return blocks
 }
-

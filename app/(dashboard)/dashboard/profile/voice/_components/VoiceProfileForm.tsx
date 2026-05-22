@@ -1,12 +1,12 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import type { VoiceFact, VoiceProfile } from '@/lib/voiceProfile'
+import { useState } from 'react'
+import type { FamilyMember, Gender, VoiceFact, VoiceProfile } from '@/lib/voiceProfile'
 
 interface Props {
   initial: Pick<
     VoiceProfile,
-    'self_dob' | 'wife_dob' | 'daughter_dob' | 'occupation' | 'faith_values' | 'region' | 'facts'
+    'family_members' | 'occupation' | 'faith_values' | 'region' | 'facts'
   >
 }
 
@@ -15,22 +15,23 @@ function ageFromDob(dob: string | null): string {
   const d = new Date(dob)
   if (Number.isNaN(d.getTime())) return ''
   const now = new Date()
+  const diffMs = now.getTime() - d.getTime()
+  const months = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24 * 30.44)))
+  if (months < 24) return `${months} months`
   let years = now.getFullYear() - d.getFullYear()
   const m = now.getMonth() - d.getMonth()
   if (m < 0 || (m === 0 && now.getDate() < d.getDate())) years -= 1
   return years >= 0 ? `${years} years` : ''
 }
 
-function newFactId(): string {
+function newId(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()
     : `f_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
 }
 
 export function VoiceProfileForm({ initial }: Props) {
-  const [selfDob, setSelfDob]         = useState<string>(initial.self_dob ?? '')
-  const [wifeDob, setWifeDob]         = useState<string>(initial.wife_dob ?? '')
-  const [daughterDob, setDaughterDob] = useState<string>(initial.daughter_dob ?? '')
+  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>(initial.family_members ?? [])
   const [occupation, setOccupation]   = useState<string>(initial.occupation ?? '')
   const [faithValues, setFaithValues] = useState<string>(initial.faith_values ?? '')
   const [region, setRegion]           = useState<string>(initial.region ?? '')
@@ -40,16 +41,27 @@ export function VoiceProfileForm({ initial }: Props) {
   const [error, setError]     = useState<string | null>(null)
   const [savedAt, setSavedAt] = useState<string | null>(null)
 
-  const selfAge     = useMemo(() => ageFromDob(selfDob), [selfDob])
-  const wifeAge     = useMemo(() => ageFromDob(wifeDob), [wifeDob])
-  const daughterAge = useMemo(() => ageFromDob(daughterDob), [daughterDob])
+  function updateMember(id: string, patch: Partial<FamilyMember>) {
+    setFamilyMembers((list) => list.map((m) => (m.id === id ? { ...m, ...patch } : m)))
+  }
+
+  function addMember() {
+    setFamilyMembers((list) => [
+      ...list,
+      { id: newId(), relationship: '', name: null, dob: null, gender: null },
+    ])
+  }
+
+  function removeMember(id: string) {
+    setFamilyMembers((list) => list.filter((m) => m.id !== id))
+  }
 
   function updateFact(id: string, patch: Partial<VoiceFact>) {
     setFacts((list) => list.map((f) => (f.id === id ? { ...f, ...patch } : f)))
   }
 
   function addFact() {
-    setFacts((list) => [...list, { id: newFactId(), label: '', value: '' }])
+    setFacts((list) => [...list, { id: newId(), label: '', value: '' }])
   }
 
   function removeFact(id: string) {
@@ -63,9 +75,13 @@ export function VoiceProfileForm({ initial }: Props) {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          self_dob:     selfDob || null,
-          wife_dob:     wifeDob || null,
-          daughter_dob: daughterDob || null,
+          family_members: familyMembers.map((m) => ({
+            id:           m.id,
+            relationship: m.relationship ?? '',
+            name:         m.name ?? null,
+            dob:          m.dob ?? null,
+            gender:       m.gender ?? null,
+          })),
           occupation:   occupation || null,
           faith_values: faithValues || null,
           region:       region || null,
@@ -85,19 +101,41 @@ export function VoiceProfileForm({ initial }: Props) {
   return (
     <div className="space-y-8">
 
-      {/* ── Dates of birth ───────────────────────────────────────────── */}
+      {/* ── Family members ───────────────────────────────────────────── */}
       <section className="space-y-4">
-        <div>
-          <h2 className="text-lg font-black mb-1">Family dates of birth</h2>
-          <p className="text-xs text-prose-faint">
-            Stored as dates so Claude computes current ages on every draft — no yearly edits.
-          </p>
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-black mb-1">Family</h2>
+            <p className="text-xs text-prose-faint">
+              People Claude can reference in your reviews. Dates of birth stay stable; ages
+              recompute on every draft. Add yourself, a spouse, kids, stepkids — whoever
+              shows up in your writing.
+            </p>
+          </div>
+          <button
+            onClick={addMember}
+            type="button"
+            className="shrink-0 text-xs px-3 py-2 bg-accent hover:bg-accent-hover text-white font-semibold rounded-lg transition-colors"
+          >
+            + Add family member
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <DobField label="Your DOB" value={selfDob} onChange={setSelfDob} age={selfAge} />
-          <DobField label="Wife's DOB" value={wifeDob} onChange={setWifeDob} age={wifeAge} />
-          <DobField label="Daughter's DOB" value={daughterDob} onChange={setDaughterDob} age={daughterAge} />
+        {familyMembers.length === 0 && (
+          <p className="text-sm text-prose-faint italic">
+            No family members yet. Click <strong>+ Add family member</strong> to start.
+          </p>
+        )}
+
+        <div className="space-y-3">
+          {familyMembers.map((m) => (
+            <FamilyMemberRow
+              key={m.id}
+              member={m}
+              onChange={(patch) => updateMember(m.id, patch)}
+              onRemove={() => removeMember(m.id)}
+            />
+          ))}
         </div>
       </section>
 
@@ -106,16 +144,17 @@ export function VoiceProfileForm({ initial }: Props) {
         <div>
           <h2 className="text-lg font-black mb-1">About you</h2>
           <p className="text-xs text-prose-faint">
-            Claude references these verbatim when context helps (&ldquo;as a {occupation || 'remote-working dad'}
-            &rdquo;). Leave blank to exclude.
+            Claude pulls from these to add credibility where it fits — current roles, real-world
+            experience, beliefs, and where you live. Leave any blank to exclude.
           </p>
         </div>
 
-        <TextField
-          label="Occupation"
-          placeholder="e.g. software engineer, contractor, stay-at-home dad"
+        <TextAreaField
+          label="Background / experience"
+          placeholder="Current roles + prior real-world experience. Lead with what you do now, then list the trades, jobs, and ventures Claude can reference where credibly relevant."
           value={occupation}
           onChange={setOccupation}
+          rows={6}
         />
         <TextAreaField
           label="Faith / values"
@@ -207,24 +246,83 @@ export function VoiceProfileForm({ initial }: Props) {
   )
 }
 
-function DobField({ label, value, onChange, age }: {
-  label: string
-  value: string
-  onChange: (v: string) => void
-  age: string
+const RELATIONSHIP_SUGGESTIONS = [
+  'Self', 'Wife', 'Husband', 'Partner', 'Fiancée', 'Fiancé',
+  'Son', 'Daughter', 'Stepson', 'Stepdaughter',
+  'Fiancée\'s son', 'Fiancée\'s daughter', "Fiancé's son", "Fiancé's daughter",
+  'Father', 'Mother', 'Brother', 'Sister',
+]
+
+function FamilyMemberRow({
+  member,
+  onChange,
+  onRemove,
+}: {
+  member: FamilyMember
+  onChange: (patch: Partial<FamilyMember>) => void
+  onRemove: () => void
 }) {
+  const age = ageFromDob(member.dob)
   return (
-    <div>
-      <label className="block text-sm text-gray-300 mb-1.5">{label}</label>
+    <div className="bg-surface border border-soft rounded-xl p-3 space-y-3">
+      <div className="flex items-start gap-3">
+        <input
+          type="text"
+          value={member.relationship}
+          onChange={(e) => onChange({ relationship: e.target.value })}
+          placeholder="Relationship — e.g. Wife, Stepson, Fiancée's son"
+          list="relationship-suggestions"
+          className="flex-1 px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+        />
+        <button
+          type="button"
+          onClick={onRemove}
+          className="text-xs px-2 py-2 text-red-400 hover:text-red-300 transition-colors"
+          title="Remove family member"
+        >
+          ✕
+        </button>
+      </div>
+
       <input
-        type="date"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
+        type="text"
+        value={member.name ?? ''}
+        onChange={(e) => onChange({ name: e.target.value || null })}
+        placeholder="First name (optional) — helpful if you have more than one of the same role"
+        className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-accent-hover"
       />
-      <p className="mt-1 text-xs text-prose-faint">
-        {age ? `Currently ${age}` : '—'}
-      </p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs text-prose-faint mb-1">Date of birth</label>
+          <input
+            type="date"
+            value={member.dob ?? ''}
+            onChange={(e) => onChange({ dob: e.target.value || null })}
+            className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          />
+          <p className="mt-1 text-xs text-prose-faint">{age ? `Currently ${age}` : '—'}</p>
+        </div>
+        <div>
+          <label className="block text-xs text-prose-faint mb-1">Gender (optional)</label>
+          <select
+            value={member.gender ?? ''}
+            onChange={(e) => onChange({ gender: (e.target.value || null) as Gender | null })}
+            className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          >
+            <option value="">—</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <datalist id="relationship-suggestions">
+        {RELATIONSHIP_SUGGESTIONS.map((r) => (
+          <option key={r} value={r} />
+        ))}
+      </datalist>
     </div>
   )
 }
@@ -249,11 +347,12 @@ function TextField({ label, value, onChange, placeholder }: {
   )
 }
 
-function TextAreaField({ label, value, onChange, placeholder }: {
+function TextAreaField({ label, value, onChange, placeholder, rows = 2 }: {
   label: string
   value: string
   onChange: (v: string) => void
   placeholder?: string
+  rows?: number
 }) {
   return (
     <div>
@@ -262,7 +361,7 @@ function TextAreaField({ label, value, onChange, placeholder }: {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        rows={2}
+        rows={rows}
         className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-y"
       />
     </div>

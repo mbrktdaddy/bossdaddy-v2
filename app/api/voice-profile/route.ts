@@ -20,19 +20,29 @@ const nullableText = (max: number) =>
 
 const nullableDate = z.string().optional().nullable().transform((v) => {
   if (!v) return null
-  // Accept 'YYYY-MM-DD'
   if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return null
   return v
 })
 
+const nullableGender = z.enum(['male', 'female', 'other'])
+  .optional()
+  .nullable()
+  .transform((v) => v ?? null)
+
+const FamilyMemberSchema = z.object({
+  id:           z.string().min(1).max(64),
+  relationship: z.string().max(80).default(''),
+  name:         nullableText(80),
+  dob:          nullableDate,
+  gender:       nullableGender,
+})
+
 const UpsertSchema = z.object({
-  self_dob:     nullableDate,
-  wife_dob:     nullableDate,
-  daughter_dob: nullableDate,
-  occupation:   nullableText(500),
-  faith_values: nullableText(1000),
-  region:       nullableText(200),
-  facts:        z.array(FactSchema).max(100).default([]),
+  family_members: z.array(FamilyMemberSchema).max(20).default([]),
+  occupation:     nullableText(1500),
+  faith_values:   nullableText(1000),
+  region:         nullableText(200),
+  facts:          z.array(FactSchema).max(100).default([]),
 })
 
 // Voice profiles only exist to inform Claude when an author drafts content.
@@ -82,13 +92,16 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  // Drop empty facts server-side too — the client may submit blank rows mid-edit.
+  // Drop empty rows server-side — the client may submit blank entries mid-edit.
   const facts = parsed.data.facts.filter((f) => f.value?.trim() || f.label?.trim())
+  const family_members = parsed.data.family_members.filter(
+    (m) => m.relationship?.trim() || m.name || m.dob,
+  )
 
   const { data, error } = await supabase
     .from('voice_profiles')
     .upsert(
-      { user_id: user.id, ...parsed.data, facts },
+      { user_id: user.id, ...parsed.data, facts, family_members },
       { onConflict: 'user_id' },
     )
     .select()

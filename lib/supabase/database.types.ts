@@ -1203,10 +1203,10 @@ export type Database = {
           faqs: Json
           featured: boolean
           has_affiliate_links: boolean | null
-          is_top_pick: boolean
           how_you_used_it: string | null
           id: string
           image_url: string | null
+          is_top_pick: boolean
           is_visible: boolean
           key_takeaways: Json
           legacy_slugs: string[]
@@ -1260,10 +1260,10 @@ export type Database = {
           faqs?: Json
           featured?: boolean
           has_affiliate_links?: boolean | null
-          is_top_pick?: boolean
           how_you_used_it?: string | null
           id?: string
           image_url?: string | null
+          is_top_pick?: boolean
           is_visible?: boolean
           key_takeaways?: Json
           legacy_slugs?: string[]
@@ -1317,10 +1317,10 @@ export type Database = {
           faqs?: Json
           featured?: boolean
           has_affiliate_links?: boolean | null
-          is_top_pick?: boolean
           how_you_used_it?: string | null
           id?: string
           image_url?: string | null
+          is_top_pick?: boolean
           is_visible?: boolean
           key_takeaways?: Json
           legacy_slugs?: string[]
@@ -1381,21 +1381,21 @@ export type Database = {
       }
       site_settings: {
         Row: {
-          id: number
-          homepage_hero_type: string | null
           homepage_hero_id: string | null
+          homepage_hero_type: string | null
+          id: number
           updated_at: string
         }
         Insert: {
-          id?: number
-          homepage_hero_type?: string | null
           homepage_hero_id?: string | null
+          homepage_hero_type?: string | null
+          id?: number
           updated_at?: string
         }
         Update: {
-          id?: number
-          homepage_hero_type?: string | null
           homepage_hero_id?: string | null
+          homepage_hero_type?: string | null
+          id?: number
           updated_at?: string
         }
         Relationships: []
@@ -1519,40 +1519,34 @@ export type Database = {
       }
       voice_profiles: {
         Row: {
-          daughter_dob: string | null
           facts: Json
           faith_values: string | null
+          family_members: Json
           id: string
           occupation: string | null
           region: string | null
-          self_dob: string | null
           updated_at: string
           user_id: string
-          wife_dob: string | null
         }
         Insert: {
-          daughter_dob?: string | null
           facts?: Json
           faith_values?: string | null
+          family_members?: Json
           id?: string
           occupation?: string | null
           region?: string | null
-          self_dob?: string | null
           updated_at?: string
           user_id: string
-          wife_dob?: string | null
         }
         Update: {
-          daughter_dob?: string | null
           facts?: Json
           faith_values?: string | null
+          family_members?: Json
           id?: string
           occupation?: string | null
           region?: string | null
-          self_dob?: string | null
           updated_at?: string
           user_id?: string
-          wife_dob?: string | null
         }
         Relationships: [
           {
