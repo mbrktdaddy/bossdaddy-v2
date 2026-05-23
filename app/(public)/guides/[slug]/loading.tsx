@@ -11,7 +11,7 @@ export default function Loading() {
           <div className="h-3 w-20 bg-surface rounded" />
         </div>
       </div>
-      <div className="aspect-[16/9] bg-surface-raised rounded-2xl mb-8" />
+      <div className="aspect-[16/9] bg-surface-raised rounded-xl mb-8" />
       <div className="space-y-3">
         <div className="h-4 w-full bg-surface rounded" />
         <div className="h-4 w-full bg-surface rounded" />

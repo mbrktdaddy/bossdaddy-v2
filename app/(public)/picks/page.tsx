@@ -42,7 +42,7 @@ export default async function PicksIndexPage({ searchParams }: Props) {
       <CategoryFilterPills basePath="/picks" active={active} counts={counts} total={all.length} />
 
       {filtered.length === 0 ? (
-        <div className="text-center py-24 bg-surface/40 rounded-2xl">
+        <div className="text-center py-24 bg-surface/40 rounded-xl">
           <p className="text-prose-faint text-lg font-semibold">
             {active ? 'No picks in this category yet.' : 'First list dropping soon.'}
           </p>
@@ -56,7 +56,7 @@ export default async function PicksIndexPage({ searchParams }: Props) {
             <Link
               key={pick.id}
               href={`/picks/${pick.slug}`}
-              className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl overflow-hidden shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] hover:border-accent-border/40 hover:-translate-y-0.5 transition-all duration-200"
+              className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
             >
               <div className="relative w-full aspect-video bg-surface-raised shrink-0">
                 {pick.hero_image_url ? (

@@ -36,7 +36,7 @@ export default async function ProductsListPage() {
       </div>
 
       {rows.length === 0 ? (
-        <div className="bg-surface border border-soft rounded-2xl p-8 text-center">
+        <div className="bg-surface border border-soft rounded-xl p-8 text-center">
           <p className="text-prose-muted mb-2">No products yet.</p>
           <p className="text-xs text-prose-faint">
             Create one to start embedding <code className="text-accent-text-soft">[[BUY:slug]]</code> affiliate links in reviews.
@@ -48,7 +48,7 @@ export default async function ProductsListPage() {
             <Link
               key={p.id}
               href={`/dashboard/admin/products/${p.id}`}
-              className="flex items-center gap-4 p-4 bg-surface hover:bg-surface-raised border border-soft rounded-2xl transition-colors"
+              className="flex items-center gap-4 p-4 bg-surface hover:bg-surface-raised border border-soft rounded-xl transition-colors"
             >
               {/* Thumbnail */}
               <div className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-surface-sunken border border-soft">

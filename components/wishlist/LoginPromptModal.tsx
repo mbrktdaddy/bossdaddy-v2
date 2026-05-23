@@ -38,7 +38,7 @@ export function LoginPromptModal({ onClose, returnPath }: Props) {
         aria-modal="true"
         aria-labelledby="login-modal-title"
         tabIndex={-1}
-        className="relative z-10 w-full max-w-sm bg-surface-sunken border border-soft rounded-2xl p-6 shadow-2xl outline-none"
+        className="relative z-10 w-full max-w-sm bg-surface-sunken border border-soft rounded-xl p-6 shadow-2xl outline-none"
       >
         <button
           onClick={onClose}

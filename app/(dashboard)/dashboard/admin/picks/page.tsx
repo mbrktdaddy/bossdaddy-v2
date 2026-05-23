@@ -41,7 +41,7 @@ export default async function PicksListPage() {
       </div>
 
       {!picks?.length ? (
-        <div className="bg-surface border border-soft rounded-2xl p-8 text-center">
+        <div className="bg-surface border border-soft rounded-xl p-8 text-center">
           <p className="text-prose-muted mb-2">The Vault is empty.</p>
           <p className="text-xs text-prose-faint">
             Build your first collection — a Father&apos;s Day gift guide, a Yeti-vs-RTIC comparison, a Newborn Survival stack.
@@ -55,7 +55,7 @@ export default async function PicksListPage() {
               <Link
                 key={p.id}
                 href={`/dashboard/admin/picks/${p.id}`}
-                className="flex items-center justify-between gap-4 p-4 bg-surface hover:bg-surface-raised border border-soft rounded-2xl transition-colors"
+                className="flex items-center justify-between gap-4 p-4 bg-surface hover:bg-surface-raised border border-soft rounded-xl transition-colors"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1">

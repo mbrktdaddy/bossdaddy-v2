@@ -141,7 +141,7 @@ Tips:
         </div>
 
         {session.length === 0 ? (
-          <div className="border-2 border-dashed border-soft rounded-2xl py-20 flex flex-col items-center gap-3 text-prose-faint">
+          <div className="border-2 border-dashed border-soft rounded-xl py-20 flex flex-col items-center gap-3 text-prose-faint">
             <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
@@ -150,7 +150,7 @@ Tips:
         ) : (
           <div className="space-y-4">
             {session.map((img, i) => (
-              <div key={i} className="bg-surface border border-soft rounded-2xl overflow-hidden">
+              <div key={i} className="bg-surface border border-soft rounded-xl overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={img.url} alt={img.prompt} className="w-full object-contain bg-surface-sunken max-h-[500px]" />
                 <div className="p-4 space-y-2">

@@ -90,7 +90,7 @@ export default function GlobalSearch() {
   return (
     <div className="fixed inset-0 z-50 bg-stone-900/70 flex items-start justify-center pt-20 px-4" onClick={() => setOpen(false)}>
       <div
-        className="bg-surface-sunken border border-soft rounded-2xl w-full max-w-2xl max-h-[70vh] flex flex-col shadow-2xl"
+        className="bg-surface-sunken border border-soft rounded-xl w-full max-w-2xl max-h-[70vh] flex flex-col shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 px-4 py-3 border-b border-soft shrink-0">

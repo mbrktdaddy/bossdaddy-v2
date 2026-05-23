@@ -332,7 +332,7 @@ export function GuideWorkspace({ guide: article }: Props) {
         <div className="pt-6 border-t border-soft/60">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Media</p>
           <div className="space-y-4">
-            <div className="bg-surface/50 border border-soft rounded-2xl p-4 space-y-1.5">
+            <div className="bg-surface/50 border border-soft rounded-xl p-4 space-y-1.5">
               <p className="text-xs text-prose-faint font-medium uppercase tracking-widest mb-3">Hero image</p>
               <HeroImagePanel
                 imageUrl={imageUrl}
@@ -344,7 +344,7 @@ export function GuideWorkspace({ guide: article }: Props) {
                 initialPrompt={heroPromptSuggestion}
               />
             </div>
-            <div className="bg-surface/50 border border-soft rounded-2xl p-4">
+            <div className="bg-surface/50 border border-soft rounded-xl p-4">
               <p className="text-xs text-prose-faint font-medium uppercase tracking-widest mb-3">Inline images</p>
               <InlineMediaPanel
                 content={content}

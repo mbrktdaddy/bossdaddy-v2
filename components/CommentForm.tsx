@@ -67,7 +67,7 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
   if (submitted === 'approved') {
     return (
       <div className="space-y-3">
-        <div className="bg-surface border border-green-200 rounded-2xl p-5">
+        <div className="bg-surface border border-green-200 rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center text-xs font-bold text-white shrink-0">
               ✓
@@ -89,7 +89,7 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
 
   if (submitted === 'pending') {
     return (
-      <div className="bg-surface border border-soft rounded-2xl p-5">
+      <div className="bg-surface border border-soft rounded-xl p-5">
         <p className="font-semibold text-sm mb-1 text-prose-muted">Comment submitted</p>
         <p className="text-prose-muted text-sm">Your comment is pending approval and will appear once reviewed.</p>
         <button
@@ -104,7 +104,7 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
 
   if (needsAuth) {
     return (
-      <div className="bg-accent-tint border border-accent-border/40 rounded-2xl p-5">
+      <div className="bg-accent-tint border border-accent-border/40 rounded-xl p-5">
         <p className="text-accent-text-soft font-semibold text-sm mb-1">Sign in to comment</p>
         <p className="text-prose-muted text-sm mb-4">You need to be signed in to leave a comment.</p>
         <div className="flex items-center gap-3">

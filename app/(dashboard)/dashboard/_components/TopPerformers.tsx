@@ -23,7 +23,7 @@ export function TopPerformers({ items }: { items: TopItem[] }) {
 
   if (!items.length) {
     return (
-      <div className="bg-surface border border-soft rounded-2xl p-6 text-center">
+      <div className="bg-surface border border-soft rounded-xl p-6 text-center">
         <p className="text-sm text-prose-faint">No published content with views yet. Publish something and check back!</p>
       </div>
     )
@@ -35,7 +35,7 @@ export function TopPerformers({ items }: { items: TopItem[] }) {
   const hasMore = items.length > DEFAULT_VISIBLE
 
   return (
-    <div className="bg-surface border border-soft rounded-2xl overflow-hidden">
+    <div className="bg-surface border border-soft rounded-xl overflow-hidden">
       <div className="px-5 py-3 border-b border-soft flex items-center justify-between">
         <p className="text-sm font-semibold">
           {expanded ? `All ${items.length} published` : 'Top 5 by views'}

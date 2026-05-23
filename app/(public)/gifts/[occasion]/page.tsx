@@ -239,11 +239,11 @@ export default async function GiftOccasionPage({ params }: Props) {
           <main className={pick ? 'lg:flex-1 lg:max-w-3xl min-w-0' : ''}>
             {/* Hero — image if present, big occasion icon otherwise */}
             {pick?.hero_image_url ? (
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-8 bg-surface">
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-8 bg-surface">
                 <Image src={pick.hero_image_url} alt={pick.title ?? occ.label} fill className="object-cover" sizes={pick ? '(max-width: 768px) 100vw, 768px' : '(max-width: 768px) 100vw, 896px'} priority />
               </div>
             ) : (
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-8 bg-gradient-to-br from-accent-tint to-white flex items-center justify-center border border-accent-border/20">
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-8 bg-gradient-to-br from-accent-tint to-white flex items-center justify-center border border-accent-border/20">
                 <OccasionIcon value={occ.value} className="w-20 h-20 md:w-24 md:h-24 text-accent-text/70" />
               </div>
             )}
@@ -322,7 +322,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                     const product = review.product_slug ? productMap.get(review.product_slug) : null
                     const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                     return (
-                      <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-2xl p-5 shadow-lg shadow-stone-900/[0.06] transition-colors">
+                      <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-stone-900/[0.06] transition-colors">
                         <div className="flex sm:flex-col items-center gap-3 sm:gap-0 shrink-0">
                           <span className="w-10 h-10 rounded-full bg-accent-tint border border-accent-border/40 flex items-center justify-center text-accent-text-soft font-black text-sm tabular-nums">
                             {idx + 1}
@@ -399,7 +399,7 @@ export default async function GiftOccasionPage({ params }: Props) {
               </section>
             ) : (
               /* Empty state — proper SEO landing page with email capture */
-              <div className="bg-gradient-to-br from-accent-tint to-white rounded-2xl p-8 md:p-10 border border-accent-border/30 mb-10">
+              <div className="bg-gradient-to-br from-accent-tint to-white rounded-xl p-8 md:p-10 border border-accent-border/30 mb-10">
                 <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-bold mb-3">Coming Soon</p>
                 <h2 className="text-2xl md:text-3xl font-black text-prose mb-3">

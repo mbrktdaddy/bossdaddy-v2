@@ -229,7 +229,7 @@ export default async function ReviewPage({ params }: Props) {
         {/* FTC Disclosure */}
         {review.has_affiliate_links && (
           <div
-            className="mb-8 text-xs text-prose-faint bg-surface rounded-2xl px-4 py-3 shadow-md shadow-stone-900/[0.05]"
+            className="mb-8 text-xs text-prose-faint bg-surface rounded-xl px-4 py-3 shadow-md shadow-stone-900/[0.05]"
             dangerouslySetInnerHTML={{ __html: FTC_DISCLOSURE_HTML }}
           />
         )}
@@ -309,7 +309,7 @@ export default async function ReviewPage({ params }: Props) {
         {review.image_url && (
           <div className="relative mb-8">
             <LightboxImage src={review.image_url} alt={review.product_name}>
-              <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden bg-surface">
+              <div className="relative w-full h-64 md:h-80 rounded-xl overflow-hidden bg-surface">
                 <Image
                   src={review.image_url}
                   alt={review.product_name}
@@ -399,7 +399,7 @@ export default async function ReviewPage({ params }: Props) {
               {faqs.map((faq, i) => (
                 <details
                   key={i}
-                  className="group bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-2xl shadow-md shadow-stone-900/[0.05] overflow-hidden transition-colors"
+                  className="group bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-xl shadow-md shadow-stone-900/[0.05] overflow-hidden transition-colors"
                 >
                   <summary className="flex items-center justify-between gap-4 cursor-pointer list-none px-5 py-4 hover:bg-surface-raised/60 transition-colors min-h-[44px]">
                     <p className="font-bold text-sm text-prose leading-snug">{faq.question}</p>
@@ -425,7 +425,7 @@ export default async function ReviewPage({ params }: Props) {
 
         {/* Bottom CTA — email signup */}
         <div className="mt-12 pt-8">
-          <div className="bg-gradient-to-br from-surface to-surface-sunken border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl p-6 sm:p-8 text-center shadow-xl shadow-stone-900/[0.06]">
+          <div className="bg-gradient-to-br from-surface to-surface-sunken border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-xl p-6 sm:p-8 text-center shadow-xl shadow-stone-900/[0.06]">
             <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3 mx-auto" />
             <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Liked this review?</p>
             <h3 className="text-xl font-black mb-4">Get the next one in your inbox</h3>
@@ -487,7 +487,7 @@ export default async function ReviewPage({ params }: Props) {
                 <Link
                   key={r.id}
                   href={`/reviews/${r.slug}`}
-                  className="flex items-center justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl shadow-md shadow-stone-900/[0.05] hover:shadow-lg hover:shadow-stone-900/[0.06] hover:border-accent-border/40 hover:-translate-y-0.5 transition-all group"
+                  className="flex items-center justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-xl shadow-md shadow-stone-900/[0.05] hover:shadow-lg hover:shadow-stone-900/[0.06] hover:border-accent-border/40 hover:-translate-y-1 transition-all group"
                 >
                   <p className="text-sm font-semibold group-hover:text-accent-text-soft transition-colors truncate min-w-0 mr-4">{r.title}</p>
                   <RatingScore rating={r.rating ?? 0} size="sm" />
@@ -525,7 +525,7 @@ export default async function ReviewPage({ params }: Props) {
 
           {/* Related Reviews */}
           {related && related.length > 0 && (
-            <div className="bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl p-5 shadow-lg shadow-stone-900/[0.06]">
+            <div className="bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-xl p-5 shadow-lg shadow-stone-900/[0.06]">
               <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
               <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">More Reviews</p>
               <div className="space-y-4">

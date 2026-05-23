@@ -1045,7 +1045,7 @@ export function PickForm({ pick, initialItems }: Props) {
           Publish / View Live / Delete are reachable from anywhere in this
           long form, especially on mobile. Matches the VoiceProfileForm
           pattern. */}
-      <div className="sticky bottom-2 sm:bottom-4 z-20 mt-4 -mx-3 sm:mx-0 px-3 sm:px-4 py-3 bg-surface-sunken/85 backdrop-blur border border-soft rounded-2xl shadow-lg shadow-stone-900/[0.06]">
+      <div className="sticky bottom-2 sm:bottom-4 z-20 mt-4 -mx-3 sm:mx-0 px-3 sm:px-4 py-3 bg-surface-sunken/85 backdrop-blur border border-soft rounded-xl shadow-lg shadow-stone-900/[0.06]">
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <button type="submit" disabled={busy || !slug.trim() || !title.trim()}
             className="px-4 sm:px-5 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors min-h-[44px]">

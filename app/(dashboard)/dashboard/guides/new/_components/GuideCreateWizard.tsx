@@ -243,7 +243,7 @@ export function GuideCreateWizard() {
     const preview = plainText.length > 500 ? plainText.slice(0, 500) + '…' : plainText
     return (
       <div className="space-y-5">
-        <div className="bg-surface border border-strong rounded-2xl p-5 space-y-3">
+        <div className="bg-surface border border-strong rounded-xl p-5 space-y-3">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Draft preview</p>
           <h2 className="text-lg font-black text-prose leading-snug">{previewDraft.title}</h2>
           {previewDraft.excerpt && (

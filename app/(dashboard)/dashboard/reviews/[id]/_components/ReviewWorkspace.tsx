@@ -307,7 +307,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
 
         {/* ── FOLLOW-UP CONTEXT (only when this review is itself a follow-up) ── */}
         {isFollowup && (
-          <div className="bg-accent-tint border border-accent-border/40 rounded-2xl p-4 sm:p-5">
+          <div className="bg-accent-tint border border-accent-border/40 rounded-xl p-4 sm:p-5">
             <p className="text-xs text-accent-text-soft uppercase tracking-widest font-semibold mb-2">
               Follow-up Review
             </p>
@@ -722,7 +722,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         <div className="pt-6 border-t border-soft/60">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Media</p>
           <div className="space-y-4">
-            <div className="bg-surface/50 border border-soft rounded-2xl p-4">
+            <div className="bg-surface/50 border border-soft rounded-xl p-4">
               <p className="text-xs text-prose-faint font-medium uppercase tracking-widest mb-3">Product / hero image</p>
               <HeroImagePanel
                 imageUrl={imageUrl}
@@ -736,7 +736,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                 initialPrompt={heroPromptSuggestion}
               />
             </div>
-            <div className="bg-surface/50 border border-soft rounded-2xl p-4">
+            <div className="bg-surface/50 border border-soft rounded-xl p-4">
               <p className="text-xs text-prose-faint font-medium uppercase tracking-widest mb-3">Inline images</p>
               <InlineMediaPanel
                 content={content}
@@ -801,7 +801,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
 
             {/* Schedule follow-up — top-level published reviews only */}
             {!isFollowup && isPublished && review.is_visible && (
-              <div className="bg-surface/50 border border-soft rounded-2xl p-4">
+              <div className="bg-surface/50 border border-soft rounded-xl p-4">
                 <p className="text-xs text-prose-faint font-medium uppercase tracking-widest mb-2">
                   Follow-up Reviews
                 </p>

@@ -100,7 +100,7 @@ function AssetCard({
   }
 
   return (
-    <div className="group relative bg-surface border border-soft rounded-2xl overflow-hidden flex flex-col">
+    <div className="group relative bg-surface border border-soft rounded-xl overflow-hidden flex flex-col">
       {/* Thumbnail */}
       <div className="relative aspect-video bg-surface-sunken overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -402,7 +402,7 @@ export default function MediaLibraryPage() {
         onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
-        className={`${dragOver ? 'ring-2 ring-accent-hover ring-inset' : ''} rounded-2xl transition-all`}
+        className={`${dragOver ? 'ring-2 ring-accent-hover ring-inset' : ''} rounded-xl transition-all`}
       >
         {loading ? (
           <div className="flex items-center gap-3 text-prose-faint py-16 justify-center">
@@ -411,7 +411,7 @@ export default function MediaLibraryPage() {
           </div>
         ) : assets.length === 0 ? (
           <div
-            className="border-2 border-dashed border-strong rounded-2xl py-20 flex flex-col items-center gap-3 text-prose-faint cursor-pointer hover:border-strong hover:text-prose-faint transition-colors"
+            className="border-2 border-dashed border-strong rounded-xl py-20 flex flex-col items-center gap-3 text-prose-faint cursor-pointer hover:border-strong hover:text-prose-faint transition-colors"
             onClick={() => fileInputRef.current?.click()}
           >
             <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -470,7 +470,7 @@ export default function MediaLibraryPage() {
       {/* Usage-aware delete modal */}
       {usageData && pendingDeleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/70">
-          <div className="bg-surface-sunken border border-soft rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-5">
+          <div className="bg-surface-sunken border border-soft rounded-xl w-full max-w-lg shadow-2xl p-6 space-y-5">
             <div>
               <p className="text-base font-black text-prose">This image is in use</p>
               <p className="text-sm text-prose-muted mt-1">

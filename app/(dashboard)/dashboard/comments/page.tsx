@@ -84,7 +84,7 @@ export default async function CommentsPage({ searchParams }: Props) {
 
       {/* Comments list */}
       {!comments?.length ? (
-        <div className="text-center py-24 border border-dashed border-soft rounded-2xl">
+        <div className="text-center py-24 border border-dashed border-soft rounded-xl">
           <p className="text-2xl mb-2">{status === 'pending' ? '✅' : '—'}</p>
           <p className="text-prose-muted font-semibold">No {status} comments.</p>
         </div>
@@ -98,7 +98,7 @@ export default async function CommentsPage({ searchParams }: Props) {
             const flags   = (c.moderation_flags ?? []) as string[]
 
             return (
-              <div key={c.id} className="p-4 bg-surface border border-soft rounded-2xl">
+              <div key={c.id} className="p-4 bg-surface border border-soft rounded-xl">
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
                     c.content_type === 'review'

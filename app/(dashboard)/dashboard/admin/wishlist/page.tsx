@@ -41,7 +41,7 @@ export default async function WishlistAdminPage() {
       </div>
 
       {items.length === 0 ? (
-        <div className="bg-surface border border-soft rounded-2xl p-8 text-center">
+        <div className="bg-surface border border-soft rounded-xl p-8 text-center">
           <p className="text-prose-muted mb-2">No {LABELS.bench.short.toLowerCase()} items yet.</p>
           <p className="text-xs text-prose-faint">Add products you&apos;re considering or currently testing.</p>
         </div>
@@ -51,7 +51,7 @@ export default async function WishlistAdminPage() {
             <Link
               key={item.id}
               href={`/dashboard/admin/wishlist/${item.id}`}
-              className="flex items-center gap-4 p-4 bg-surface hover:bg-surface-raised border border-soft rounded-2xl transition-colors"
+              className="flex items-center gap-4 p-4 bg-surface hover:bg-surface-raised border border-soft rounded-xl transition-colors"
             >
               {/* Thumbnail */}
               <div className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-surface-sunken border border-soft">

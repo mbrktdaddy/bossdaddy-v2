@@ -39,7 +39,7 @@ export default async function AdminMerchListPage() {
       </div>
 
       {rows.length === 0 ? (
-        <div className="bg-surface border border-soft rounded-2xl p-8 text-center">
+        <div className="bg-surface border border-soft rounded-xl p-8 text-center">
           <p className="text-prose-muted mb-2">No merch items yet.</p>
           <p className="text-xs text-prose-faint">
             Add your first item — set status to <code className="text-accent-text-soft">coming_soon</code> to show it on /gear with a &quot;Notify me&quot; CTA.
@@ -54,7 +54,7 @@ export default async function AdminMerchListPage() {
               <Link
                 key={p.id}
                 href={`/dashboard/admin/merch/${p.id}`}
-                className="flex items-center gap-4 p-4 bg-surface hover:bg-surface-raised border border-soft rounded-2xl transition-colors"
+                className="flex items-center gap-4 p-4 bg-surface hover:bg-surface-raised border border-soft rounded-xl transition-colors"
               >
                 {/* Thumbnail */}
                 <div className="relative w-14 h-14 shrink-0 rounded-lg overflow-hidden bg-surface-sunken border border-soft">

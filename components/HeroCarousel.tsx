@@ -77,7 +77,7 @@ export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
         <Link
           href={`/reviews/${r.slug}`}
           onClick={onLinkClick}
-          className="block bg-surface border border-soft rounded-2xl overflow-hidden hover:border-accent-border/60 transition-all duration-200"
+          className="block bg-surface border border-soft rounded-xl overflow-hidden hover:border-accent-border/60 transition-all duration-200"
         >
           {r.image_url && (
             <div className="relative w-full h-44 bg-surface-raised">

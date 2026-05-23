@@ -119,7 +119,7 @@ export default async function GuidesPage({ searchParams }: Props) {
             replaces 8 identical 3-col card grids with a tighter, scannable
             list per category. Featured card above carries the visual weight. */}
         {sections.length === 0 ? (
-          <div className="text-center py-24 bg-surface/40 rounded-2xl border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04]">
+          <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04]">
             <p className="text-prose-faint text-lg font-semibold">No guides here yet.</p>
             <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
           </div>
@@ -210,7 +210,7 @@ export default async function GuidesPage({ searchParams }: Props) {
       </div>
 
       {!guides.length ? (
-        <div className="text-center py-24 bg-surface/40 rounded-2xl border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04]">
+        <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04]">
           <p className="text-prose-faint text-lg font-semibold">No guides here yet.</p>
           <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
         </div>
@@ -228,7 +228,7 @@ function GuideRowItem({ guide: a }: { guide: GuideRow }) {
   return (
     <Link
       href={`/guides/${a.slug}`}
-      className="group flex items-center gap-5 py-5 -mx-4 px-4 rounded-2xl hover:bg-surface/40 transition-colors"
+      className="group flex items-center gap-5 py-5 -mx-4 px-4 rounded-xl hover:bg-surface/40 transition-colors"
     >
       <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-surface-raised shrink-0">
         {a.image_url ? (

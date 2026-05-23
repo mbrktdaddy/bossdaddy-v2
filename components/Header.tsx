@@ -177,7 +177,7 @@ export default function Header({ username }: HeaderProps) {
 
             {/* Mega-menu panel */}
             {catOpen && (
-              <div className="absolute right-0 top-full mt-2 w-[580px] bg-surface-sunken border border-soft rounded-2xl shadow-2xl shadow-stone-900/[0.10] p-5 z-50">
+              <div className="absolute right-0 top-full mt-2 w-[580px] bg-surface-sunken border border-soft rounded-xl shadow-2xl shadow-stone-900/[0.10] p-5 z-50">
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Browse by Category</p>
                 <div className="grid grid-cols-2 gap-1">
                   {CATEGORIES.map((cat) => (
@@ -318,7 +318,7 @@ export default function Header({ username }: HeaderProps) {
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-surface-sunken border border-soft rounded-2xl shadow-2xl shadow-stone-900/[0.10] p-1.5 z-50">
+                <div className="absolute right-0 top-full mt-2 w-56 bg-surface-sunken border border-soft rounded-xl shadow-2xl shadow-stone-900/[0.10] p-1.5 z-50">
                   <div className="px-3 py-2 border-b border-soft/60 mb-1">
                     <p className="text-[10px] uppercase tracking-widest text-prose-faint font-semibold">Signed in as</p>
                     <p className="text-sm font-bold text-prose truncate">@{username}</p>

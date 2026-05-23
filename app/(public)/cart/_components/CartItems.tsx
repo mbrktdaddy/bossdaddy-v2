@@ -99,7 +99,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
 
   if (items.length === 0) {
     return (
-      <div className="bg-surface rounded-2xl p-12 text-center">
+      <div className="bg-surface rounded-xl p-12 text-center">
         <p className="text-prose-muted text-lg font-semibold mb-6">Your cart is empty.</p>
         <Link href="/gear" className="inline-flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent-hover text-white font-bold rounded-xl transition-colors">
           Browse Gear
@@ -121,7 +121,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
           return (
             <div
               key={item.id}
-              className={`flex gap-4 bg-surface rounded-2xl p-4 transition-opacity ${isBusy ? 'opacity-50 pointer-events-none' : ''}`}
+              className={`flex gap-4 bg-surface rounded-xl p-4 transition-opacity ${isBusy ? 'opacity-50 pointer-events-none' : ''}`}
             >
               <Link href={`/gear/${item.merch.slug}`} className="shrink-0">
                 <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-surface-raised">
@@ -173,7 +173,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
       </div>
 
       {/* Order summary */}
-      <div className="bg-surface/60 rounded-2xl p-6 flex flex-col gap-3">
+      <div className="bg-surface/60 rounded-xl p-6 flex flex-col gap-3">
         <div className="flex items-center justify-between text-sm">
           <span className="text-prose-muted">Subtotal</span>
           <span className="text-prose font-semibold">{formatPrice(subtotal)}</span>

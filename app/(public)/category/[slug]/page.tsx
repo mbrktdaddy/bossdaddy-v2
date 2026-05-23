@@ -136,7 +136,7 @@ export default async function CategoryHubPage({ params }: Props) {
                 <Link
                   key={r.id}
                   href={`/reviews/${r.slug}`}
-                  className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl overflow-hidden shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] hover:border-accent-border/40 hover:-translate-y-0.5 transition-all duration-200"
+                  className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
                 >
                   {r.image_url ? (
                     <div className="relative w-full h-48 bg-surface-raised shrink-0">
@@ -256,7 +256,7 @@ export default async function CategoryHubPage({ params }: Props) {
 
         {/* ── Empty state ───────────────────────────────────────────────── */}
         {!hasReviews && !hasGuides && (
-          <div className="text-center py-24 bg-surface/40 rounded-2xl">
+          <div className="text-center py-24 bg-surface/40 rounded-xl">
             <CategoryIcon slug={cat.slug} className="w-10 h-10 text-accent-text mb-4 mx-auto" />
             <p className="text-prose-muted text-lg font-semibold mb-2">No {cat.label} content yet.</p>
             <p className="text-prose-faint text-sm">Check back soon — it&apos;s on the bench.</p>

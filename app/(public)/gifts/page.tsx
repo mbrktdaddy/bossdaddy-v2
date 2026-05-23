@@ -67,7 +67,7 @@ export default async function GiftsIndexPage() {
                 <Link
                   key={occ.value}
                   href={`/gifts/${occ.slug}`}
-                  className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:bg-surface-raised/90 hover:border-accent-border/40 hover:-translate-y-0.5 rounded-2xl overflow-hidden shadow-md shadow-stone-900/[0.05] hover:shadow-lg hover:shadow-stone-900/[0.08] transition-all"
+                  className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:bg-surface-raised/90 hover:border-accent-border/40 hover:-translate-y-1 rounded-xl overflow-hidden shadow-md shadow-stone-900/[0.05] hover:shadow-lg hover:shadow-stone-900/[0.08] transition-all"
                 >
                   <div className="relative aspect-video bg-surface-sunken flex items-center justify-center">
                     {live?.hero_image_url ? (

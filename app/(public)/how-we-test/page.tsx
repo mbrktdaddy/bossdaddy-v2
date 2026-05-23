@@ -154,7 +154,7 @@ export default function HowWeTestPage() {
 
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 not-prose mb-12">
  {PILLAR_TESTING.map(({ icon, title, description }) => (
- <div key={title} className="bg-surface rounded-2xl p-5">
+ <div key={title} className="bg-surface rounded-xl p-5">
  <div className="mb-3">{icon}</div>
  <h3 className="font-bold text-card-title text-base mb-2">{title}</h3>
  <p className="text-prose-faint text-sm leading-relaxed">{description}</p>
@@ -195,7 +195,7 @@ export default function HowWeTestPage() {
 
  </div>
 
- <div className="not-prose bg-gradient-to-br from-accent-tint to-white rounded-2xl p-6 mb-12">
+ <div className="not-prose bg-gradient-to-br from-accent-tint to-white rounded-xl p-6 mb-12">
  <div className="text-xs uppercase tracking-widest text-eyebrow font-bold mb-2">
  The Highest Designation
  </div>

@@ -44,7 +44,7 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
     }
 
     return (
-      <div className="bg-red-50 border border-red-200 rounded-2xl p-6 mb-6">
+      <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-6">
         <p className="text-xs text-red-600 uppercase tracking-widest font-semibold mb-2">
           Account scheduled for deletion
         </p>
@@ -90,7 +90,7 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
   }
 
   return (
-    <div className="bg-surface border border-soft rounded-2xl p-6 mb-6">
+    <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
       <p className="text-xs text-red-600 uppercase tracking-widest font-semibold mb-1">Danger zone</p>
       <p className="text-xs text-prose-faint mb-4">Permanent actions. Use with care.</p>
 

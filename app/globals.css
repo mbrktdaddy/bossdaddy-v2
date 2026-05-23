@@ -8,7 +8,7 @@
    app/layout.tsx to revert temporarily.
    ───────────────────────────────────────────────────────────────────────── */
 :root {
-  --background: #fafaf9;        /* page bg — off-white so cards pop */
+  --background: #ffffff;        /* pure white canvas — Heritage Pro */
   --foreground: #0a0a0a;
 
   /* ── Brand orange — TWO-COLOR SYSTEM ─────────────────────────────────
@@ -26,17 +26,26 @@
   /* ── Forest green — warm "dad's nod" instead of clinical green-700 ──── */
   --bd-forest: #3D7C3F;
 
-  /* ── Dark drama — for footer + newsletter CTA section bg ─────────────── */
+  /* ── Dark drama — charcoal for full-bleed bands (Rules, Vault),
+        footer, and the Newsletter CTA panel. The "leather divider"
+        between white pages in the field-binder metaphor. ─────────── */
   --bd-drama: #1a1410;
 
-  /* ── Surfaces — 4-tier rhythm ────────────────────────────────────────
-     Page (canvas) → cream-paper bands (alternating) → cards → editorial
-     cream feature panels. Plus dark drama at footer / newsletter.
+  /* ── Copper — premium signal accent, used sparingly (<5% of surfaces).
+        Sits between brand orange and charcoal; reads as "metalwork /
+        leather hardware." For premium card frames, dark-band link
+        hovers, the closing-tagline highlight. NOT a primary CTA color. */
+  --bd-copper: #92400e;
+
+  /* ── Surfaces — Heritage Pro 3-tier value structure ──────────────────
+        White canvas → cool-neutral wells/placeholders → charcoal drama.
+        No warm cream tones in bg roles (cream stays for editorial
+        blockquotes via --bd-paper only).
      ─────────────────────────────────────────────────────────────────── */
-  --bd-bg: #fafaf9;
+  --bd-bg: #ffffff;                   /* pure white canvas (was #fafaf9 off-white) */
   --bd-surface: #ffffff;
   --bd-surface-raised: #ffffff;
-  --bd-surface-sunken: #f5efe0;       /* WARM cream-paper for bands — was stone-100 #f5f5f4 */
+  --bd-surface-sunken: #f4f4f5;       /* COOL neutral stone — image wells, code blocks */
   --bd-border: #e7e5e4;
 
   /* Per-theme variants for literals (so dark escape hatch can flip them) */
@@ -101,8 +110,11 @@
   /* Status — forest green replaces institutional green-700 */
   --color-forest:           var(--bd-forest);
 
-  /* Drama — dark dramatic moments (footer, newsletter) */
+  /* Drama — dark dramatic moments (footer, newsletter, alternating bands) */
   --color-drama:            var(--bd-drama);
+
+  /* Copper — premium signal accent */
+  --color-copper:           var(--bd-copper);
 
   /* Surface roles */
   --color-surface:          var(--bd-surface);
@@ -129,6 +141,10 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   overflow-x: clip;
+  /* Paper grain — 1.5% SVG noise. Imperceptible per-pixel; adds tactile
+     "fine paper" material quality across the page bg. Reads as premium
+     editorial without warming color. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.015'/%3E%3C/svg%3E");
 }
 
 h1, h2, h3, h4 {

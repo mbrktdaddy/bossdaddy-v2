@@ -16,7 +16,7 @@ export function MerchImageGallery({ images, alt, comingSoon = false }: Props) {
   return (
     <div className="flex flex-col gap-3">
       {/* Main image */}
-      <div className="relative aspect-square bg-surface rounded-2xl overflow-hidden">
+      <div className="relative aspect-square bg-surface rounded-xl overflow-hidden">
         {main ? (
           <Image
             src={main}

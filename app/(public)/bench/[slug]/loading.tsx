@@ -3,7 +3,7 @@ export default function Loading() {
     <div className="max-w-4xl mx-auto px-4 py-8 animate-pulse">
       <div className="h-3 w-24 bg-surface-raised rounded mb-3" />
       <div className="h-10 w-2/3 bg-surface-raised rounded mb-6" />
-      <div className="aspect-[16/9] bg-surface-raised rounded-2xl mb-8" />
+      <div className="aspect-[16/9] bg-surface-raised rounded-xl mb-8" />
       <div className="space-y-3 mb-10">
         <div className="h-4 w-full bg-surface rounded" />
         <div className="h-4 w-5/6 bg-surface rounded" />

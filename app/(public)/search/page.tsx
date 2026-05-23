@@ -55,7 +55,7 @@ export default async function SearchPage({ searchParams }: Props) {
  defaultValue={query}
  placeholder="Search reviews, articles, products..."
  autoFocus
- className="w-full pl-10 pr-4 py-3 bg-surface focus:border-accent rounded-2xl text-prose placeholder-gray-500 focus:outline-none transition-colors"
+ className="w-full pl-10 pr-4 py-3 bg-surface focus:border-accent rounded-xl text-prose placeholder-gray-500 focus:outline-none transition-colors"
  />
  <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -63,7 +63,7 @@ export default async function SearchPage({ searchParams }: Props) {
  </div>
  <button
  type="submit"
- className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-2xl transition-colors"
+ className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition-colors"
  >
  Search
  </button>
@@ -81,7 +81,7 @@ export default async function SearchPage({ searchParams }: Props) {
  </p>
 
  {total === 0 && (
- <div className="text-center py-24 bg-surface/40 rounded-2xl">
+ <div className="text-center py-24 bg-surface/40 rounded-xl">
  <p className="text-prose-faint mb-2">Nothing matched that search.</p>
  <p className="text-gray-700 text-sm">Try a product name, category, or topic.</p>
  </div>
@@ -99,7 +99,7 @@ export default async function SearchPage({ searchParams }: Props) {
  <Link
  key={r.id}
  href={`/reviews/${r.slug}`}
- className="flex items-start justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-2xl transition-colors group"
+ className="flex items-start justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-xl transition-colors group"
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -128,7 +128,7 @@ export default async function SearchPage({ searchParams }: Props) {
  <Link
  key={a.id}
  href={`/guides/${a.slug}`}
- className="flex items-start justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-2xl transition-colors group"
+ className="flex items-start justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-xl transition-colors group"
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -151,7 +151,7 @@ export default async function SearchPage({ searchParams }: Props) {
  )}
 
  {query.length < 2 && !query && (
- <div className="text-center py-24 bg-surface/40 rounded-2xl">
+ <div className="text-center py-24 bg-surface/40 rounded-xl">
  <p className="text-prose-faint">Type something above to search reviews and guides.</p>
  </div>
  )}

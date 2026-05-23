@@ -236,7 +236,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/70" onClick={onClose}>
       <div
-        className="bg-surface-sunken border border-soft rounded-2xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl"
+        className="bg-surface-sunken border border-soft rounded-xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

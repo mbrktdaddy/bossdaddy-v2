@@ -161,7 +161,7 @@ function ProductCtaButton({
         target="_blank"
         rel={rel}
         data-product-slug={product.slug}
-        className={`inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-2xl bg-accent font-bold text-white transition-colors hover:bg-accent-hover ${padding}`}
+        className={`inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-xl bg-accent font-bold text-white transition-colors hover:bg-accent-hover ${padding}`}
       >
         {label}
         <span aria-hidden>→</span>
@@ -196,7 +196,7 @@ export default function VerdictCard({
   if (variant === 'sidebar') {
     return (
       <section
-        className="rounded-2xl border border-accent-border/40 bg-surface p-5 shadow-lg shadow-stone-900/[0.06]"
+        className="rounded-xl border border-accent-border/40 bg-surface p-5 shadow-lg shadow-stone-900/[0.06]"
         aria-label="Quick verdict"
       >
         <p className="text-xs font-semibold uppercase tracking-widest text-eyebrow">Quick Verdict</p>
@@ -230,7 +230,7 @@ export default function VerdictCard({
   if (variant === 'preview') {
     return (
       <section
-        className="rounded-2xl border border-accent-border/40 bg-surface p-4"
+        className="rounded-xl border border-accent-border/40 bg-surface p-4"
         aria-label="Verdict preview"
       >
         <p className="text-[10px] font-semibold uppercase tracking-widest text-eyebrow">The Verdict</p>
@@ -259,7 +259,7 @@ export default function VerdictCard({
   // ── In-body variant — primary mobile/desktop placement on the public page ──
   return (
     <section
-      className="mb-8 rounded-2xl border border-accent-border/40 bg-surface p-5 shadow-md shadow-stone-900/[0.05] sm:p-6"
+      className="mb-8 rounded-xl border border-accent-border/40 bg-surface p-5 shadow-md shadow-stone-900/[0.05] sm:p-6"
       aria-label="The verdict"
     >
       {/* Header — section label + product name */}

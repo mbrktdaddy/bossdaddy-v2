@@ -62,12 +62,12 @@ export default async function AdminOrdersPage() {
       </div>
 
       {orders.length === 0 ? (
-        <div className="bg-surface border border-soft rounded-2xl p-12 text-center">
+        <div className="bg-surface border border-soft rounded-xl p-12 text-center">
           <p className="text-prose-muted text-lg font-semibold mb-2">No orders yet.</p>
           <p className="text-prose-faint text-sm">Orders will appear here after your first Stripe checkout.</p>
         </div>
       ) : (
-        <div className="bg-surface border border-soft rounded-2xl overflow-hidden">
+        <div className="bg-surface border border-soft rounded-xl overflow-hidden">
 
           {/* Table header */}
           <div className="grid grid-cols-[1fr_1fr_auto_auto_auto] gap-4 px-5 py-3 border-b border-soft text-xs text-prose-faint uppercase tracking-widest font-semibold">

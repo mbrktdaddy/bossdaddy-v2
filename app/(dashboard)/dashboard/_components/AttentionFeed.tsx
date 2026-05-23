@@ -41,7 +41,7 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
 
   if (!hasItems) {
     return (
-      <div className="bg-surface border border-soft rounded-2xl p-8 text-center">
+      <div className="bg-surface border border-soft rounded-xl p-8 text-center">
         <p className="text-2xl mb-2">✅</p>
         <p className="text-prose-muted font-semibold">All clear.</p>
         <p className="text-prose-faint text-sm mt-1">Nothing needs your attention right now.</p>
@@ -63,7 +63,7 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
           <Link
             key={`${item.type}-${item.id}`}
             href={href}
-            className="block bg-surface border border-soft hover:border-strong rounded-2xl p-4 transition-colors"
+            className="block bg-surface border border-soft hover:border-strong rounded-xl p-4 transition-colors"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
@@ -104,7 +104,7 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
       {pendingComments.length > 0 && (
         <Link
           href="/dashboard/comments"
-          className="block bg-surface border border-soft hover:border-strong rounded-2xl p-4 transition-colors"
+          className="block bg-surface border border-soft hover:border-strong rounded-xl p-4 transition-colors"
         >
           <div className="flex items-center justify-between gap-3">
             <div>

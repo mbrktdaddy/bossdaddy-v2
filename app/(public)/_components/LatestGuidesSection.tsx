@@ -42,7 +42,7 @@ export async function LatestGuidesSection() {
             <Link
               key={a.id}
               href={`/guides/${a.slug}`}
-              className="group flex items-center gap-5 py-6 -mx-4 px-4 rounded-2xl hover:bg-surface/40 transition-colors"
+              className="group flex items-center gap-5 py-6 -mx-4 px-4 rounded-xl hover:bg-surface/40 transition-colors"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">

@@ -69,7 +69,7 @@ export function ScheduleFollowupModal({ reviewId, onClose }: Props) {
     >
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-lg bg-surface-sunken border border-soft rounded-2xl overflow-hidden shadow-2xl"
+        className="w-full max-w-lg bg-surface-sunken border border-soft rounded-xl overflow-hidden shadow-2xl"
       >
         <div className="px-5 py-4 border-b border-soft">
           <p className="text-sm font-bold text-prose">Schedule a follow-up review</p>

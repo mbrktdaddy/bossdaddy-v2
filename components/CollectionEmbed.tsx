@@ -88,7 +88,7 @@ export default async function CollectionEmbed({ slug }: Props) {
 
   return (
     <aside
-      className="not-prose my-8 bg-gradient-to-br from-accent-tint to-white border border-accent-border/40 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl p-5 sm:p-6 shadow-lg shadow-stone-900/[0.06]"
+      className="not-prose my-8 bg-gradient-to-br from-accent-tint to-white border border-accent-border/40 ring-1 ring-inset ring-stone-900/[0.04] rounded-xl p-5 sm:p-6 shadow-lg shadow-stone-900/[0.06]"
       aria-label={`Featured ${meta.eyebrow}: ${c.title}`}
     >
       <div className="mb-4">

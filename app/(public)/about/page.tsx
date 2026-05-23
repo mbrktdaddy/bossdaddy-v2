@@ -51,7 +51,7 @@ export default async function AboutPage() {
  {/* Stats */}
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
  {STATS.map((s) => (
- <div key={s.label} className="bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl p-5 text-center">
+ <div key={s.label} className="bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-xl p-5 text-center">
  <p className="text-3xl font-black text-accent-text mb-1">{s.value}</p>
  <p className="text-xs text-prose-faint uppercase tracking-wide">{s.label}</p>
  </div>
@@ -170,7 +170,7 @@ export default async function AboutPage() {
  </div>
 
  {/* CTA + Newsletter */}
- <div className="bg-gradient-to-br from-accent-tint to-white rounded-2xl px-8 py-10 text-center">
+ <div className="bg-gradient-to-br from-accent-tint to-white rounded-xl px-8 py-10 text-center">
  <h2 className="text-2xl font-black mb-3">Built for Dads Who Show Up.</h2>
  <p className="text-prose-muted mb-2">
  This isn&apos;t just another review site. This is Boss Daddy — a resource, a community, and
@@ -199,10 +199,10 @@ export default async function AboutPage() {
  </div>
 
  <div className="pt-6 flex items-center justify-center gap-4 flex-wrap">
- <Link href="/reviews" className="px-6 py-3 bg-surface-raised hover:bg-stone-100 text-prose-muted font-semibold rounded-2xl transition-colors text-sm">
+ <Link href="/reviews" className="px-6 py-3 bg-surface-raised hover:bg-stone-100 text-prose-muted font-semibold rounded-xl transition-colors text-sm">
  Browse Reviews
  </Link>
- <Link href="/guides" className="px-6 py-3 bg-surface-raised hover:bg-stone-100 text-prose-muted font-semibold rounded-2xl transition-colors text-sm">
+ <Link href="/guides" className="px-6 py-3 bg-surface-raised hover:bg-stone-100 text-prose-muted font-semibold rounded-xl transition-colors text-sm">
  Browse Guides
  </Link>
  </div>

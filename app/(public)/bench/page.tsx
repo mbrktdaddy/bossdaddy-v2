@@ -101,7 +101,7 @@ export default async function BenchPage() {
       </div>
 
       {!hasContent ? (
-        <div className="bg-surface/40 rounded-2xl p-12 text-center">
+        <div className="bg-surface/40 rounded-xl p-12 text-center">
           <p className="text-prose-faint font-semibold">Loading up the bench. Check back soon.</p>
         </div>
       ) : (
@@ -122,7 +122,7 @@ export default async function BenchPage() {
                   </summary>
                   <div className="space-y-3">
                     {sectionItems.map((item) => (
-                      <div key={item.id} className="p-4 bg-[var(--bd-surface)] rounded-2xl shadow-md shadow-stone-900/[0.05]">
+                      <div key={item.id} className="p-4 bg-[var(--bd-surface)] rounded-xl shadow-md shadow-stone-900/[0.05]">
                         <p className="text-sm font-semibold text-zinc-400">{item.title}</p>
                         {item.skip_reason && (
                           <p className="text-xs text-zinc-600 mt-1">{item.skip_reason}</p>

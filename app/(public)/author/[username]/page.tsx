@@ -83,10 +83,10 @@ export default async function AuthorPage({ params }: Props) {
  <img
  src={profile.avatar_url}
  alt={profile.display_name ?? username}
- className="w-16 h-16 rounded-2xl object-cover shrink-0"
+ className="w-16 h-16 rounded-xl object-cover shrink-0"
  />
  ) : (
- <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-700 to-orange-950 flex items-center justify-center text-2xl font-black text-white shrink-0">
+ <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-orange-700 to-orange-950 flex items-center justify-center text-2xl font-black text-white shrink-0">
  {(profile.display_name ?? username)[0].toUpperCase()}
  </div>
  )}
@@ -127,7 +127,7 @@ export default async function AuthorPage({ params }: Props) {
  <Link
  key={r.id}
  href={`/reviews/${r.slug}`}
- className="flex items-center justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-2xl transition-colors group"
+ className="flex items-center justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-xl transition-colors group"
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -162,7 +162,7 @@ export default async function AuthorPage({ params }: Props) {
  <Link
  key={a.id}
  href={`/guides/${a.slug}`}
- className="flex items-center justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-2xl transition-colors group"
+ className="flex items-center justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-xl transition-colors group"
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1">
@@ -186,7 +186,7 @@ export default async function AuthorPage({ params }: Props) {
  )}
 
  {totalReviews === 0 && totalGuides === 0 && (
- <div className="text-center py-24 bg-surface/40 rounded-2xl">
+ <div className="text-center py-24 bg-surface/40 rounded-xl">
  <p className="text-prose-faint">No published content yet.</p>
  </div>
  )}

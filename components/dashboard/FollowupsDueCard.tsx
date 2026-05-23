@@ -12,7 +12,7 @@ export async function FollowupsDueCard() {
   if (due.length === 0) return null
 
   return (
-    <div className="bg-surface border border-soft rounded-2xl overflow-hidden">
+    <div className="bg-surface border border-soft rounded-xl overflow-hidden">
       <div className="px-5 py-3 border-b border-soft">
         <p className="text-sm font-semibold text-prose">Follow-ups due this month</p>
         <p className="text-xs text-prose-faint mt-0.5">

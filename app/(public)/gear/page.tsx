@@ -244,7 +244,7 @@ export default async function GearPage({ searchParams }: Props) {
                   <Link
                     key={occ.slug}
                     href={`/gifts/${occ.slug}`}
-                    className="shrink-0 w-40 rounded-2xl overflow-hidden bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-xl hover:shadow-stone-900/[0.10] hover:-translate-y-0.5 transition-all"
+                    className="shrink-0 w-40 rounded-xl overflow-hidden bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-xl hover:shadow-stone-900/[0.10] hover:-translate-y-1 transition-all"
                   >
                     <div className="relative w-full h-24 bg-surface-raised">
                       {pick?.hero_image_url ? (
@@ -269,7 +269,7 @@ export default async function GearPage({ searchParams }: Props) {
                   <Link
                     key={occ.slug}
                     href={`/gifts/${occ.slug}`}
-                    className="group relative rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-xl hover:shadow-stone-900/[0.10] hover:-translate-y-0.5 transition-all"
+                    className="group relative rounded-xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-xl hover:shadow-stone-900/[0.10] hover:-translate-y-1 transition-all"
                   >
                     <div className="relative w-full h-36 bg-surface-raised">
                       {pick?.hero_image_url ? (
@@ -314,7 +314,7 @@ export default async function GearPage({ searchParams }: Props) {
 
               <Link
                 href={`/picks/${featuredPick.slug}`}
-                className="group block bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-xl shadow-stone-900/[0.08] hover:border-accent-border/40 hover:shadow-stone-900/[0.10] hover:-translate-y-0.5 transition-all"
+                className="group block bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-xl shadow-stone-900/[0.08] hover:border-accent-border/40 hover:shadow-stone-900/[0.10] hover:-translate-y-1 transition-all"
               >
                 <div className="flex flex-col sm:flex-row">
                   <div className="relative w-full sm:w-72 h-48 sm:h-auto sm:min-h-[220px] shrink-0 bg-surface-raised">
@@ -399,7 +399,7 @@ export default async function GearPage({ searchParams }: Props) {
                     <Link
                       key={c.slug}
                       href={`/category/${c.slug}`}
-                      className="group flex flex-col items-center justify-center text-center gap-2 bg-gradient-to-br from-surface to-surface/60 hover:bg-surface-raised rounded-2xl p-4 min-h-[120px] border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-md shadow-stone-900/[0.05] hover:border-accent-border/40 hover:shadow-lg hover:shadow-stone-900/[0.06] hover:-translate-y-0.5 transition-all"
+                      className="group flex flex-col items-center justify-center text-center gap-2 bg-gradient-to-br from-surface to-surface/60 hover:bg-surface-raised rounded-xl p-4 min-h-[120px] border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-md shadow-stone-900/[0.05] hover:border-accent-border/40 hover:shadow-lg hover:shadow-stone-900/[0.06] hover:-translate-y-1 transition-all"
                     >
                       <CategoryIcon slug={c.slug} className="w-7 h-7 text-accent-text" />
                       <span className="text-sm font-bold text-prose leading-tight group-hover:text-accent-text-soft transition-colors">
@@ -427,7 +427,7 @@ export default async function GearPage({ searchParams }: Props) {
             9+:  standard 3-col card grid (workhorse middle)
             8+:  compact editorial rows (browse-and-scan base) */}
       {!topPicks.length ? (
-        <div className="text-center py-24 bg-surface/40 rounded-2xl border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04]">
+        <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04]">
           <p className="text-prose-faint text-lg font-semibold">Nothing here yet.</p>
           <p className="text-prose-faint text-sm mt-2">Reviews are being added.</p>
         </div>
@@ -562,7 +562,7 @@ function GearCard({
   // Avoids invalid <a>-inside-<a> HTML that nested cards had previously.
   return (
     <article
-      className={`group relative flex flex-col bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-xl hover:shadow-stone-900/[0.10] hover:-translate-y-0.5 transition-all duration-200 ${
+      className={`group relative flex flex-col bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-xl hover:shadow-stone-900/[0.10] hover:-translate-y-1 transition-all duration-200 ${
         isHero ? 'lg:col-span-2 lg:row-span-2' : ''
       }`}
     >
@@ -643,7 +643,7 @@ function GearRow({ review: r }: { review: GearReview }) {
   return (
     <Link
       href={`/reviews/${r.slug}`}
-      className="group flex items-center gap-5 py-5 -mx-4 px-4 rounded-2xl hover:bg-surface/40 transition-colors"
+      className="group flex items-center gap-5 py-5 -mx-4 px-4 rounded-xl hover:bg-surface/40 transition-colors"
     >
       <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-surface-raised shrink-0">
         {r.image_url ? (

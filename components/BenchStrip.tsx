@@ -35,7 +35,7 @@ export default async function BenchStrip({
   if (items.length === 0) return null
 
   return (
-    <div className="rounded-2xl bg-surface/60 border border-soft/60 p-5 sm:p-6">
+    <div className="rounded-xl bg-surface/60 border border-soft/60 p-5 sm:p-6">
       {/* Header — eyebrow + invitation tagline + CTA. Tagline teaches the
           metaphor wherever this strip lands (currently /reviews + /gear). */}
       <div className="flex items-start justify-between gap-4 mb-4">

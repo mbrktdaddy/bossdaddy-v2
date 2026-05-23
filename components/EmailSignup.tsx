@@ -53,7 +53,7 @@ export function EmailSignup({
   if (state === 'success' || state === 'already') {
     const isAlready = state === 'already'
     return (
-      <div className={`${isAlready ? 'bg-accent-tint border-accent-border/40' : 'bg-green-50 border-green-200'} border rounded-2xl ${compact ? 'p-3' : 'p-5'}`}>
+      <div className={`${isAlready ? 'bg-accent-tint border-accent-border/40' : 'bg-green-50 border-green-200'} border rounded-xl ${compact ? 'p-3' : 'p-5'}`}>
         <p className={`${isAlready ? 'text-accent-text' : 'text-forest'} ${compact ? 'text-sm' : 'text-base'} font-semibold flex items-center gap-2`}>
           <span>{isAlready ? '✓' : '✓'}</span>
           {isAlready ? alreadySubscribedMessage : successMessage}

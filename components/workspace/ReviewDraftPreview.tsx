@@ -50,7 +50,7 @@ export function ReviewDraftPreview({
   }
 
   return (
-    <div className="bg-surface-sunken border border-soft rounded-2xl overflow-hidden text-sm">
+    <div className="bg-surface-sunken border border-soft rounded-xl overflow-hidden text-sm">
       {/* Header strip */}
       <div className="bg-surface border-b border-soft px-4 py-2 flex items-center justify-between">
         <span className="text-xs text-prose-faint font-medium">Public preview</span>

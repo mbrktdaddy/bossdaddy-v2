@@ -347,7 +347,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
       </div>
 
       {/* Composer */}
-      <div className="bg-surface border border-soft rounded-2xl overflow-hidden">
+      <div className="bg-surface border border-soft rounded-xl overflow-hidden">
 
         {/* Section 1 — Product */}
         <div className="p-4 md:p-6 border-b border-soft">
@@ -598,17 +598,17 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
         </div>
 
         {history.length === 0 ? (
-          <div className="bg-surface border border-soft rounded-2xl p-8 text-center">
+          <div className="bg-surface border border-soft rounded-xl p-8 text-center">
             <p className="text-prose-faint text-sm">No outreach logged yet. Send your first email above.</p>
           </div>
         ) : filteredHistory.length === 0 ? (
-          <div className="bg-surface border border-soft rounded-2xl p-8 text-center">
+          <div className="bg-surface border border-soft rounded-xl p-8 text-center">
             <p className="text-prose-faint text-sm">No records match this filter.</p>
           </div>
         ) : (
           <div className="space-y-2">
             {filteredHistory.map(record => (
-              <div key={record.id} className="bg-surface border border-soft rounded-2xl overflow-hidden">
+              <div key={record.id} className="bg-surface border border-soft rounded-xl overflow-hidden">
 
                 {/* Row summary — stacked on mobile, side-by-side on desktop */}
                 <div className="p-4 flex flex-col gap-3 sm:flex-row sm:items-start">

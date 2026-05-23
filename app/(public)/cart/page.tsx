@@ -26,7 +26,7 @@ export default async function CartPage() {
       </div>
 
       {items.length === 0 ? (
-        <div className="bg-surface rounded-2xl p-12 text-center">
+        <div className="bg-surface rounded-xl p-12 text-center">
           <p className="text-5xl mb-4 opacity-30">🛒</p>
           <p className="text-prose-muted text-lg font-semibold mb-2">Your cart is empty.</p>
           <p className="text-prose-faint text-sm mb-8">Add some gear and come back.</p>

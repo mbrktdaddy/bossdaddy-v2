@@ -23,7 +23,7 @@ export default function ProductCtaCard({ product, rating, variant = 'prominent' 
   return (
     <aside
       data-product-cta
-      className="my-8 bg-gradient-to-br from-accent-tint to-white rounded-2xl p-5 sm:p-6 shadow-xl shadow-stone-900/[0.06]"
+      className="my-8 bg-gradient-to-br from-accent-tint to-white rounded-xl p-5 sm:p-6 shadow-xl shadow-stone-900/[0.06]"
       aria-label="Product offer"
     >
       <p className="text-xs text-accent-text-soft uppercase tracking-widest font-semibold mb-3">
@@ -32,7 +32,7 @@ export default function ProductCtaCard({ product, rating, variant = 'prominent' 
 
       <div className="flex flex-col sm:flex-row gap-5 sm:items-center">
         {product.image_url && (
-          <div className="relative w-full sm:w-32 h-32 shrink-0 rounded-2xl overflow-hidden bg-surface-sunken">
+          <div className="relative w-full sm:w-32 h-32 shrink-0 rounded-xl overflow-hidden bg-surface-sunken">
             <Image
               src={product.image_url}
               alt={product.name}
@@ -57,7 +57,7 @@ export default function ProductCtaCard({ product, rating, variant = 'prominent' 
             target="_blank"
             rel={rel}
             data-product-slug={product.slug}
-            className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-accent hover:bg-accent-hover text-white font-bold rounded-2xl transition-colors min-h-[44px] w-full sm:w-auto"
+            className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-accent hover:bg-accent-hover text-white font-bold rounded-xl transition-colors min-h-[44px] w-full sm:w-auto"
           >
             {buttonLabel}
           </a>

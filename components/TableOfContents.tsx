@@ -84,7 +84,7 @@ export default function TableOfContents({ target = '.bd-content', minHeadings = 
   if (items.length < minHeadings) return null
 
   return (
-    <nav aria-label="Table of contents" className="bg-surface border border-soft rounded-2xl p-5">
+    <nav aria-label="Table of contents" className="bg-surface border border-soft rounded-xl p-5">
       <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">In this guide</p>
       <ul className="space-y-1.5 text-sm">
         {items.map((item) => {

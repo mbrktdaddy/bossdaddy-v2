@@ -275,7 +275,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
 
             {/* Hero image */}
             {comparison.hero_image_url && (
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-10 bg-surface">
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-10 bg-surface">
                 <Image
                   src={comparison.hero_image_url}
                   alt={comparison.title}
@@ -292,7 +292,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
               <section
                 id="bottom-line"
                 aria-label="Bottom line"
-                className="mb-12 rounded-2xl border border-accent-border/40 bg-gradient-to-br from-accent-tint to-white ring-1 ring-inset ring-stone-900/[0.04] p-5 sm:p-7 shadow-lg shadow-stone-900/[0.06]"
+                className="mb-12 rounded-xl border border-accent-border/40 bg-gradient-to-br from-accent-tint to-white ring-1 ring-inset ring-stone-900/[0.04] p-5 sm:p-7 shadow-lg shadow-stone-900/[0.06]"
               >
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">The Bottom Line</p>
                 <p className="text-base sm:text-lg text-prose leading-relaxed font-medium">{comparison.winner_summary}</p>
@@ -377,7 +377,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
                 </div>
 
                 <div className="overflow-x-auto -mx-6 px-6">
-                  <table className="w-full min-w-[640px] border-separate border-spacing-0 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl overflow-hidden">
+                  <table className="w-full min-w-[640px] border-separate border-spacing-0 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden">
                     <thead>
                       <tr>
                         <th className="text-left px-4 py-3 text-xs uppercase tracking-widest text-prose-faint font-semibold border-b border-soft/60 align-bottom">
@@ -468,7 +468,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
                     <article
                       key={review.id}
                       id={`dive-${review.slug}`}
-                      className="scroll-mt-28 rounded-2xl overflow-hidden bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06]"
+                      className="scroll-mt-28 rounded-xl overflow-hidden bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06]"
                     >
                       <div className={`flex flex-col ${imageLeft ? 'sm:flex-row' : 'sm:flex-row-reverse'} gap-0`}>
                         {/* Hero image column */}
@@ -617,7 +617,7 @@ function ContenderCard({
   return (
     <a
       href={`#dive-${review.slug}`}
-      className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl overflow-hidden shadow-md shadow-stone-900/[0.05] hover:shadow-lg hover:shadow-stone-900/[0.08] hover:border-accent-border/40 hover:-translate-y-0.5 transition-all ${className ?? ''}`}
+      className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden shadow-md shadow-stone-900/[0.05] hover:shadow-lg hover:shadow-stone-900/[0.08] hover:border-accent-border/40 hover:-translate-y-1 transition-all ${className ?? ''}`}
     >
       <div className="relative w-full aspect-square bg-surface-sunken">
         {review.image_url && (

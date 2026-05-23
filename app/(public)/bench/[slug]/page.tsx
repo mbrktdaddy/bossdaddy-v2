@@ -101,7 +101,7 @@ export default async function BenchDetailPage({ params }: Props) {
 
       {wishlistItem.image_url && (
         <LightboxImage src={wishlistItem.image_url} alt={wishlistItem.title}>
-          <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-zinc-900 shadow-md shadow-stone-900/[0.05] mb-8">
+          <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-zinc-900 shadow-md shadow-stone-900/[0.05] mb-8">
             <Image
               src={wishlistItem.image_url}
               alt={wishlistItem.title}
@@ -124,7 +124,7 @@ export default async function BenchDetailPage({ params }: Props) {
           )}
 
           {isSkipped && wishlistItem.skip_reason && (
-            <div className="p-4 bg-zinc-900 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl mb-4 shadow-md shadow-stone-900/[0.05]">
+            <div className="p-4 bg-zinc-900 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-xl mb-4 shadow-md shadow-stone-900/[0.05]">
               <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
               <p className="text-xs font-black uppercase tracking-widest text-zinc-500 mb-1">Why I&apos;m not testing this</p>
               <p className="text-sm text-zinc-400">{wishlistItem.skip_reason}</p>
@@ -141,7 +141,7 @@ export default async function BenchDetailPage({ params }: Props) {
             <div className="mt-4">
               <Link
                 href={linkedReviewSlug ? `/reviews/${linkedReviewSlug}` : '/reviews'}
-                className="inline-flex items-center gap-2 px-5 py-3 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-2xl transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-3 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors"
               >
                 Read the full review
               </Link>
@@ -165,7 +165,7 @@ export default async function BenchDetailPage({ params }: Props) {
                     href={`/go/${wishlistItem.slug}`}
                     target="_blank"
                     rel="sponsored nofollow noopener"
-                    className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-2xl transition-colors"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
                   >
                     {getBuyLabel(wishlistItem.store, wishlistItem.custom_store_name)}
                   </a>
@@ -177,7 +177,7 @@ export default async function BenchDetailPage({ params }: Props) {
       </div>
 
       {!isReviewed && !isSkipped && (
-        <div className="mt-8 p-4 bg-accent-tint rounded-2xl shadow-md shadow-stone-900/[0.05]">
+        <div className="mt-8 p-4 bg-accent-tint rounded-xl shadow-md shadow-stone-900/[0.05]">
           <p className="text-sm text-accent-text/80">
             <strong className="text-accent-text-soft">{wishlistItem.vote_count as number} {wishlistItem.vote_count === 1 ? 'person has' : 'people have'} voted</strong> for this review.
             The more votes, the sooner it gets done.

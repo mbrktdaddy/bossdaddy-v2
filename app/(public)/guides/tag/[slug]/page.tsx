@@ -99,7 +99,7 @@ export default async function GuideTagPage({ params }: Props) {
                 <Link
                   key={g.id}
                   href={`/guides/${g.slug}`}
-                  className="group bg-surface rounded-2xl overflow-hidden shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] transition-all"
+                  className="group bg-surface rounded-xl overflow-hidden shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] transition-all"
                 >
                   {g.image_url ? (
                     <div className="relative w-full h-48">

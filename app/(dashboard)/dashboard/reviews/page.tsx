@@ -68,7 +68,7 @@ export default async function MyReviewsPage({ searchParams }: Props) {
             <Link
               key={s.label}
               href={href}
-              className={`block bg-surface rounded-2xl px-4 py-3 sm:px-5 sm:py-4 border transition-colors ${
+              className={`block bg-surface rounded-xl px-4 py-3 sm:px-5 sm:py-4 border transition-colors ${
                 isActive
                   ? 'border-accent bg-accent-tint'
                   : 'border-soft hover:border-strong'
@@ -93,7 +93,7 @@ export default async function MyReviewsPage({ searchParams }: Props) {
 
       {/* Reviews list with bulk actions */}
       {!displayed?.length && !filter && (
-        <div className="text-center py-24 border border-dashed border-soft rounded-2xl">
+        <div className="text-center py-24 border border-dashed border-soft rounded-xl">
           <p className="text-prose-faint text-lg mb-2">No reviews yet, Boss.</p>
           <Link href="/dashboard/reviews/new" className="text-accent-text-soft hover:text-accent text-sm">
             Write your first one →

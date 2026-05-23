@@ -65,7 +65,7 @@ export function QuickActions() {
         <Link
           key={a.href}
           href={a.href}
-          className="group bg-surface border border-soft hover:border-accent/40 rounded-2xl p-5 transition-colors"
+          className="group bg-surface border border-soft hover:border-accent/40 rounded-xl p-5 transition-colors"
         >
           <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 border ${a.accent}`}>
             {a.icon}

@@ -240,7 +240,7 @@ export default async function PickDetailPage({ params }: Props) {
             <ArticleTOC items={tocItems} variant="mobile" />
 
             {pick.hero_image_url && (
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-10 bg-surface">
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-10 bg-surface">
                 <Image src={pick.hero_image_url} alt={pick.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 768px" priority />
               </div>
             )}
@@ -288,7 +288,7 @@ export default async function PickDetailPage({ params }: Props) {
                   const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                   const rank = idx + 1
                   return (
-                    <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-2xl p-5 shadow-lg shadow-stone-900/[0.06] transition-colors">
+                    <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-stone-900/[0.06] transition-colors">
                       {/* Rank — medal for top 3, number for the rest */}
                       <div className="flex sm:flex-col items-center gap-3 sm:gap-1 shrink-0">
                         <RankMedal rank={rank} />

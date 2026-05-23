@@ -291,7 +291,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
       {/* Usage-aware delete modal */}
       {usageModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/70">
-          <div className="bg-surface-sunken border border-soft rounded-2xl w-full max-w-md shadow-2xl p-6 space-y-4">
+          <div className="bg-surface-sunken border border-soft rounded-xl w-full max-w-md shadow-2xl p-6 space-y-4">
             <div>
               <p className="text-base font-black text-prose">This image is in use</p>
               <p className="text-sm text-prose-muted mt-1">

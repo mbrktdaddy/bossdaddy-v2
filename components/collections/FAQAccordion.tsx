@@ -36,7 +36,7 @@ export default function FAQAccordion({ faqs, id = 'faq', heading = 'Frequently A
           return (
             <div
               key={`${idx}-${faq.question.slice(0, 30)}`}
-              className={`bg-gradient-to-br from-surface to-surface/60 border ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl overflow-hidden transition-colors ${
+              className={`bg-gradient-to-br from-surface to-surface/60 border ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden transition-colors ${
                 isOpen ? 'border-accent-border/40' : 'border-soft/60 hover:border-strong'
               }`}
             >

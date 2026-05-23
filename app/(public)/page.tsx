@@ -145,12 +145,11 @@ export default async function HomePage() {
         <InMotionTicker />
       </Suspense>
 
-      {/* ── Hero — cream-paper magazine-cover treatment.
-            No gradient washes, no splash decoration. The cream bg IS the
-            visual treatment; typography + the featured card carry the
-            rest. Thin brand-orange hairline at bottom of the hero acts
-            as a magazine masthead binding line. ───────────────────── */}
-      <section className="relative overflow-hidden bg-surface-sunken border-b-2 border-accent-brand/70">
+      {/* ── Hero — Heritage Pro: white canvas, typography-led.
+            No bg decoration. Paper grain on the body adds tactile
+            material quality without warming color. The dark Rules
+            section that follows provides the dramatic rhythm break. */}
+      <section className="relative overflow-hidden">
         <div className="relative max-w-6xl mx-auto px-6 py-16 md:py-24">
           {featuredHero ? (
             <div className="grid lg:grid-cols-[1fr_1.05fr] gap-10 lg:gap-14 items-center">
@@ -169,20 +168,20 @@ export default async function HomePage() {
                 <div className="flex flex-wrap items-center gap-3 mb-5">
                   <Link
                     href="/reviews"
-                    className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-2xl transition-colors"
+                    className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition-colors"
                   >
                     See This Month&apos;s Top Picks →
                   </Link>
                   <Link
                     href="/guides"
-                    className="px-6 py-3 bg-white border border-strong hover:border-prose/40 text-prose font-semibold rounded-2xl transition-colors"
+                    className="px-6 py-3 bg-white border border-strong hover:border-prose/40 hover:bg-stone-50 text-prose font-semibold rounded-xl transition-colors"
                   >
                     Browse Guides
                   </Link>
                 </div>
                 <Link
                   href="/about"
-                  className="inline-block text-sm text-accent-text-soft hover:text-accent font-medium transition-colors"
+                  className="inline-block text-sm text-copper hover:text-accent font-medium transition-colors"
                 >
                   Read my story →
                 </Link>
@@ -191,7 +190,7 @@ export default async function HomePage() {
               {featuredHero.kind === 'review' ? (
                 <Link
                   href={`/reviews/${featuredHero.data.slug}`}
-                  className="group block bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-xl shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-2xl hover:shadow-stone-900/[0.10] hover:-translate-y-0.5 transition-all duration-200"
+                  className="group block bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-xl shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-2xl hover:shadow-stone-900/[0.10] hover:-translate-y-1 transition-all duration-200"
                 >
                   {featuredHero.data.image_url && (
                     <div className="relative w-full aspect-[5/4] bg-surface-raised">
@@ -236,7 +235,7 @@ export default async function HomePage() {
               ) : (
                 <Link
                   href={`/guides/${featuredHero.data.slug}`}
-                  className="group block bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-xl shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-2xl hover:shadow-stone-900/[0.10] hover:-translate-y-0.5 transition-all duration-200"
+                  className="group block bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-xl shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-2xl hover:shadow-stone-900/[0.10] hover:-translate-y-1 transition-all duration-200"
                 >
                   {featuredHero.data.image_url && (
                     <div className="relative w-full aspect-[5/4] bg-surface-raised">
@@ -300,13 +299,13 @@ export default async function HomePage() {
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <Link
                   href="/reviews"
-                  className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-2xl transition-colors"
+                  className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition-colors"
                 >
                   Browse Reviews
                 </Link>
                 <Link
                   href="/guides"
-                  className="px-6 py-3 bg-white border border-strong hover:border-prose/40 text-prose font-semibold rounded-2xl transition-colors"
+                  className="px-6 py-3 bg-white border border-strong hover:border-prose/40 text-prose font-semibold rounded-xl transition-colors"
                 >
                   Browse Guides
                 </Link>
@@ -365,19 +364,17 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── The Rules — moved up from Movement 2 so the strongest authority
-            assertion is right under the hero, not 4 sections deep where
-            most mobile readers never reached it. This is the trust *proof*
-            that backs the hero's "my own money, no sponsors" *promise*.
-            Page bg now — hero wears the cream-paper, so Rules alternates
-            back to white to keep rhythm. */}
-      <section className="relative">
-        <div className="max-w-5xl mx-auto px-6 py-16 md:py-20">
-          <p className="text-[11px] md:text-xs text-accent-text uppercase tracking-[0.3em] font-bold mb-4 text-center">— The Rules</p>
-          <h2 className="text-3xl md:text-4xl font-black text-center text-prose mb-4 leading-tight">
+      {/* ── The Rules — Heritage Pro DARK BAND.
+            First charcoal moment in the page rhythm. Trust manifesto
+            against the leather-divider backdrop. Numerals in copper for
+            premium metalwork signal. */}
+      <section className="relative bg-drama">
+        <div className="max-w-5xl mx-auto px-6 py-20 md:py-24">
+          <p className="text-[11px] md:text-xs text-copper uppercase tracking-[0.3em] font-bold mb-4 text-center">— The Rules</p>
+          <h2 className="text-3xl md:text-4xl font-black text-center text-stone-50 mb-4 leading-tight">
             Three rules. That&apos;s the whole standard.
           </h2>
-          <p className="text-prose-muted text-center mb-12 max-w-xl mx-auto text-sm md:text-base">
+          <p className="text-stone-300 text-center mb-14 max-w-xl mx-auto text-sm md:text-base">
             Why you can trust what you read here — and why I can tell you the truth without hedging.
           </p>
           <div className="grid md:grid-cols-3 gap-10 md:gap-12">
@@ -399,11 +396,11 @@ export default async function HomePage() {
               },
             ].map((rule) => (
               <div key={rule.n} className="text-center md:text-left">
-                <p className="text-5xl md:text-6xl font-black text-accent-text/30 mb-4 leading-none tabular-nums">
+                <p className="text-5xl md:text-6xl font-black text-copper mb-4 leading-none tabular-nums">
                   {rule.n}
                 </p>
-                <p className="text-xl font-black text-prose mb-3">{rule.title}</p>
-                <p className="text-prose-muted leading-relaxed text-sm max-w-sm mx-auto md:max-w-none md:mx-0">
+                <p className="text-xl font-black text-stone-50 mb-3">{rule.title}</p>
+                <p className="text-stone-300 leading-relaxed text-sm max-w-sm mx-auto md:max-w-none md:mx-0">
                   {rule.body}
                 </p>
               </div>
@@ -470,7 +467,7 @@ export default async function HomePage() {
                   <Link
                     key={r.id}
                     href={`/reviews/${r.slug}`}
-                    className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-xl hover:shadow-stone-900/[0.10] hover:-translate-y-0.5 transition-all duration-200 ${
+                    className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-xl hover:shadow-stone-900/[0.10] hover:-translate-y-1 transition-all duration-200 ${
                       isHero ? 'lg:col-span-2 lg:row-span-2' : ''
                     }`}
                   >
@@ -557,21 +554,21 @@ export default async function HomePage() {
             Cream-paper band — second rhythm break, separates editorial
             collections from review feed. ───────────────────────────── */}
       {vaultTrio.length > 0 && (
-        <section className="relative bg-surface-sunken border-y border-soft">
-          <div className="relative max-w-6xl mx-auto px-6 py-16">
-            <div className="flex items-end justify-between mb-8 gap-4">
+        <section className="relative bg-drama">
+          <div className="relative max-w-6xl mx-auto px-6 py-20 md:py-24">
+            <div className="flex items-end justify-between mb-10 gap-4">
               <div className="flex items-stretch gap-4 min-w-0">
-                <div className="w-[3px] bg-accent-brand rounded-full shrink-0" />
+                <div className="w-[3px] bg-copper rounded-full shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-2">— From The Vault</p>
-                  <h2 className="text-2xl md:text-3xl font-black text-prose leading-tight">Comparisons, kits, and curated picks</h2>
-                  <p className="mt-2 text-sm text-prose-faint">{LABELS.vault.tagline}</p>
+                  <p className="text-[11px] text-copper uppercase tracking-[0.2em] font-bold mb-2">— From The Vault</p>
+                  <h2 className="text-2xl md:text-3xl font-black text-stone-50 leading-tight">Comparisons, kits, and curated picks</h2>
+                  <p className="mt-2 text-sm text-stone-400">{LABELS.vault.tagline}</p>
                 </div>
               </div>
               <Link
                 href="/vault"
                 title={LABELS.vault.tagline}
-                className="hidden sm:inline-flex items-center text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold shrink-0 whitespace-nowrap"
+                className="hidden sm:inline-flex items-center text-xs text-stone-400 hover:text-copper transition-colors uppercase tracking-widest font-semibold shrink-0 whitespace-nowrap"
               >
                 Open the Vault →
               </Link>
@@ -585,15 +582,15 @@ export default async function HomePage() {
                   <Link
                     key={`${card.collection_type}:${card.slug}`}
                     href={href}
-                    className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-xl hover:shadow-stone-900/[0.10] hover:-translate-y-0.5 transition-all duration-200"
+                    className="group flex flex-col bg-surface rounded-xl overflow-hidden border border-stone-700 shadow-lg shadow-stone-900/40 hover:border-copper hover:shadow-xl hover:shadow-stone-900/60 hover:-translate-y-1 transition-all duration-200"
                   >
-                    <div className="relative aspect-video bg-surface-sunken">
+                    <div className="relative aspect-video bg-stone-100">
                       {card.hero_image_url ? (
                         <Image src={card.hero_image_url} alt={card.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
                       ) : (
-                        <div className="absolute inset-0 flex items-center justify-center text-accent-text/30">{meta.icon}</div>
+                        <div className="absolute inset-0 flex items-center justify-center text-copper/40">{meta.icon}</div>
                       )}
-                      <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-surface-sunken/85 backdrop-blur border border-soft rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-accent-text-soft">
+                      <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-drama/85 backdrop-blur border border-stone-700 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-copper">
                         {meta.label}
                       </span>
                     </div>
@@ -638,16 +635,16 @@ export default async function HomePage() {
             Creates the "clubhouse invitation" feel. ─────────────────── */}
       <section id="crew" className="relative">
         <div className="relative max-w-6xl mx-auto px-6 py-16">
-          <div className="relative bg-drama rounded-2xl shadow-2xl shadow-stone-900/[0.15] px-8 py-14 text-center max-w-3xl mx-auto overflow-hidden">
-            {/* Brand-orange left-edge accent — heritage signature on dark */}
-            <span aria-hidden className="absolute left-0 inset-y-8 w-0.5 bg-accent-brand rounded-full" />
+          <div className="relative bg-drama rounded-xl shadow-2xl shadow-stone-900/[0.15] px-8 py-14 text-center max-w-3xl mx-auto overflow-hidden border border-stone-800">
+            {/* Copper left-edge accent — metalwork signature on dark */}
+            <span aria-hidden className="absolute left-0 inset-y-8 w-0.5 bg-copper rounded-full" />
             {/* Subtle radial warmth from top */}
             <div
-              className="absolute inset-0 pointer-events-none opacity-60"
-              style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 0%, rgba(204,85,0,0.15), transparent 70%)' }}
+              className="absolute inset-0 pointer-events-none opacity-50"
+              style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 0%, rgba(146,64,14,0.20), transparent 70%)' }}
             />
             <div className="relative">
-              <p className="text-accent-text-soft text-xs font-bold uppercase tracking-[0.25em] mb-4">
+              <p className="text-copper text-xs font-bold uppercase tracking-[0.25em] mb-4">
                 Join the Boss Daddy Crew
               </p>
               <h2 className="text-3xl md:text-4xl font-black text-stone-50 mb-4 leading-tight">
@@ -672,13 +669,15 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Closing tagline — magazine-style signoff, no CTA button ────── */}
+      {/* ── Closing tagline — magazine-style signoff, no CTA button.
+            Copper accent for the "together" highlight — premium
+            metalwork-finish on the final flourish. */}
       <section className="relative py-24 md:py-32">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-6">— The Bottom Line</p>
+          <p className="text-[11px] text-copper uppercase tracking-[0.2em] font-bold mb-6">— The Bottom Line</p>
           <p className="text-3xl md:text-5xl font-black text-prose leading-[1.1] mb-10">
             Now let&apos;s dad like a BOSS —{' '}
-            <span className="text-accent-text">together.</span>
+            <span className="text-copper">together.</span>
           </p>
           <p className="text-sm text-prose-faint italic">— Boss Daddy</p>
         </div>

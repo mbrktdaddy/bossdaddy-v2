@@ -88,7 +88,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
 
   if (!items.length) {
     return (
-      <div className="text-center py-24 border border-dashed border-soft rounded-2xl">
+      <div className="text-center py-24 border border-dashed border-soft rounded-xl">
         <p className="text-prose-faint text-lg">{emptyMessage}</p>
       </div>
     )
@@ -154,7 +154,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
 
       {/* No search results */}
       {filteredItems.length === 0 && (
-        <div className="text-center py-16 border border-dashed border-soft rounded-2xl">
+        <div className="text-center py-16 border border-dashed border-soft rounded-xl">
           <p className="text-prose-faint">No results for &ldquo;{search}&rdquo;</p>
         </div>
       )}
@@ -168,7 +168,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
           return (
             <div
               key={item.id}
-              className={`p-4 rounded-2xl border transition-colors ${
+              className={`p-4 rounded-xl border transition-colors ${
                 isSelected
                   ? 'bg-accent-tint border-accent/50'
                   : 'bg-surface border-soft hover:border-strong'
@@ -252,7 +252,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
       {/* Sticky bulk action bar */}
       {selected.size > 0 && (
         <div className="sticky bottom-4 mt-4 z-20">
-          <div className="mx-auto max-w-2xl bg-surface border border-accent/40 rounded-2xl shadow-2xl p-3 flex items-center gap-3 flex-wrap">
+          <div className="mx-auto max-w-2xl bg-surface border border-accent/40 rounded-xl shadow-2xl p-3 flex items-center gap-3 flex-wrap">
             <p className="text-sm text-prose font-semibold shrink-0">{selected.size} selected</p>
             <div className="flex items-center gap-2 flex-wrap flex-1">
               <button

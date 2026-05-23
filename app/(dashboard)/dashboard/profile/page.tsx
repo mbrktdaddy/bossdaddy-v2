@@ -140,7 +140,7 @@ export default async function ProfilePage() {
       )}
 
       {/* Identity hero — avatar + name + role pill + joined date */}
-      <div className="bg-gradient-to-br from-white via-white to-accent-tint border border-soft rounded-2xl p-6 mb-6">
+      <div className="bg-gradient-to-br from-white via-white to-accent-tint border border-soft rounded-xl p-6 mb-6">
         <AvatarUploader
           initialAvatarUrl={(profile as { avatar_url?: string | null } | null)?.avatar_url ?? null}
           initial={profile?.username?.[0]?.toUpperCase() ?? '?'}
@@ -158,7 +158,7 @@ export default async function ProfilePage() {
       </div>
 
       {/* Account — username + email */}
-      <div className="bg-surface border border-soft rounded-2xl p-6 mb-6">
+      <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Account</p>
         <EditUsernameForm current={profile?.username ?? ''} />
         <div className="mt-5 pt-5 border-t border-soft">
@@ -169,7 +169,7 @@ export default async function ProfilePage() {
 
       {/* Writing settings — authors only */}
       {isAuthor && (
-        <div className="bg-surface border border-soft rounded-2xl p-6 mb-6">
+        <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Writing Settings</p>
           <Link
             href="/dashboard/profile/voice"
@@ -191,7 +191,7 @@ export default async function ProfilePage() {
 
       {/* Public bio — authors + admins only */}
       {isAuthor && (
-        <div className="bg-surface border border-soft rounded-2xl p-6 mb-6">
+        <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Public Bio</p>
           <p className="text-xs text-prose-faint mb-4">
             Shown at the bottom of every piece you publish, on your <Link href={`/author/${profile?.username}`} target="_blank" className="text-accent-text hover:text-accent-text-soft">public author page</Link>.
@@ -205,7 +205,7 @@ export default async function ProfilePage() {
       )}
 
       {/* Activity stats */}
-      <div className="bg-surface border border-soft rounded-2xl p-6 mb-6">
+      <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Activity</p>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {isAuthor && (
@@ -268,7 +268,7 @@ export default async function ProfilePage() {
       </div>
 
       {/* Liked content — browsable history */}
-      <div className="bg-surface border border-soft rounded-2xl p-6 mb-6">
+      <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">
           Liked Content
         </p>
@@ -325,7 +325,7 @@ export default async function ProfilePage() {
 
       {/* Author/Admin — public profile + content management */}
       {isAuthor && (
-        <div className="bg-surface border border-soft rounded-2xl p-6 mb-6">
+        <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Content</p>
           <div className="space-y-2">
             <Link
@@ -373,7 +373,7 @@ export default async function ProfilePage() {
 
       {/* Admin quick links */}
       {isAdmin && (
-        <div className="bg-surface border border-soft rounded-2xl p-6">
+        <div className="bg-surface border border-soft rounded-xl p-6">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Admin</p>
           <div className="space-y-2">
             <Link
