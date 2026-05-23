@@ -1,4 +1,4 @@
-import { cache } from 'react'
+﻿import { cache } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -125,7 +125,7 @@ export default async function BenchDetailPage({ params }: Props) {
 
           {isSkipped && wishlistItem.skip_reason && (
             <div className="p-4 bg-zinc-900 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl mb-4 shadow-md shadow-stone-900/[0.05]">
-              <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+              <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
               <p className="text-xs font-black uppercase tracking-widest text-zinc-500 mb-1">Why I&apos;m not testing this</p>
               <p className="text-sm text-zinc-400">{wishlistItem.skip_reason}</p>
             </div>

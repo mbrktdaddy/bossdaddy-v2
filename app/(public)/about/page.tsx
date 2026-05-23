@@ -33,7 +33,7 @@ export default async function AboutPage() {
 
  {/* Hero */}
  <div className="mb-16">
- <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+ <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">The Real Story Behind Boss Daddy</p>
  <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6">
  The Dad Who Thought
@@ -151,7 +151,7 @@ export default async function AboutPage() {
 
  {/* Pillars */}
  <div className="mb-16">
- <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+ <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Categories</p>
  <h2 className="text-2xl font-black mb-2">What We Cover</h2>
  <p className="text-prose-faint text-sm mb-6">Real-world testing across everything modern dads actually love.</p>
@@ -183,7 +183,7 @@ export default async function AboutPage() {
 
  {/* Newsletter signup */}
  <div className="mb-8 max-w-md mx-auto">
- <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3 mx-auto" />
+ <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3 mx-auto" />
  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Join the Crew</p>
  <p className="text-prose-muted text-sm mb-4">
  Weekly reviews, the good stuff, and dad-life wins. No spam. No sponsors. Just the crew.

@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+﻿import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
@@ -250,7 +250,7 @@ export default async function GiftOccasionPage({ params }: Props) {
 
             {/* Header */}
             <header className="mb-8">
-              <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+              <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
               <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Gift Guide · {occ.label}</p>
               <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight leading-tight">
                 {pick?.title ?? occ.label}
@@ -283,7 +283,7 @@ export default async function GiftOccasionPage({ params }: Props) {
             {pick?.intro_html && (
               <section id="overview" className="mb-10">
                 <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Why These</p>
                   <h2 className="text-2xl font-black text-prose leading-tight">Behind the picks</h2>
                 </div>
@@ -310,7 +310,7 @@ export default async function GiftOccasionPage({ params }: Props) {
             {items.length > 0 ? (
               <section id="picks" className="mb-12">
                 <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Gifts</p>
                   <h2 className="text-2xl font-black text-prose leading-tight">
                     {items.length} dad-tested {items.length === 1 ? 'gift' : 'gifts'}, all personally bought
@@ -400,7 +400,7 @@ export default async function GiftOccasionPage({ params }: Props) {
             ) : (
               /* Empty state — proper SEO landing page with email capture */
               <div className="bg-gradient-to-br from-accent-tint to-white rounded-2xl p-8 md:p-10 border border-accent-border/30 mb-10">
-                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-bold mb-3">Coming Soon</p>
                 <h2 className="text-2xl md:text-3xl font-black text-prose mb-3">
                   The {occ.label} list is being built
@@ -427,7 +427,7 @@ export default async function GiftOccasionPage({ params }: Props) {
             {/* Related occasions strip — siblings in the same occasion group */}
             {relatedOccasions.length > 0 && (
               <section className="mt-14 pt-10 border-t border-soft/60">
-                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-5">More Gift Guides</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {relatedOccasions.map((r) => (

@@ -138,7 +138,7 @@ export default async function GearPage({ searchParams }: Props) {
 
       {/* ── Header — tick-line eyebrow pattern (matches homepage) ─────────── */}
       <div className="mb-8">
-        <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Daddy Tested, Boss Approved</p>
         <h1 className="text-4xl md:text-5xl font-black mb-3 text-prose tracking-tight flex items-center gap-3">
           {cat && <CategoryIcon slug={cat.slug} className="w-10 h-10 text-accent-text" />}
@@ -224,7 +224,7 @@ export default async function GearPage({ searchParams }: Props) {
           <section className="mb-16">
             <div className="flex items-end justify-between mb-6">
               <div>
-                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Gift Guides</p>
                 <h2 className="text-2xl font-black text-prose leading-tight">Shop by Occasion</h2>
               </div>
@@ -300,7 +300,7 @@ export default async function GearPage({ searchParams }: Props) {
             <section className="mb-16">
               <div className="flex items-end justify-between mb-6">
                 <div>
-                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Curated Pick</p>
                   <h2 className="text-2xl font-black text-prose leading-tight">Featured Collection</h2>
                 </div>
@@ -388,7 +388,7 @@ export default async function GearPage({ searchParams }: Props) {
             />
             <div className="relative">
               <div className="mb-6">
-                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Browse</p>
                 <h2 className="text-2xl font-black text-prose leading-tight">Shop by Category</h2>
               </div>
@@ -451,7 +451,7 @@ export default async function GearPage({ searchParams }: Props) {
               />
               <div className="relative">
                 <div className="mb-6">
-                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Top Tier</p>
                   <h2 className="text-xl font-black text-prose">Perfect Score</h2>
                   <p className="text-xs text-prose-faint mt-0.5">Flawless. Nothing I tested came close.</p>
@@ -480,7 +480,7 @@ export default async function GearPage({ searchParams }: Props) {
           {nines.length > 0 && (
             <section id="boss-picks" className="mb-16">
               <div className="mb-6">
-                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Boss Approved</p>
                 <h2 className="text-xl font-black text-prose">Boss Picks</h2>
                 <p className="text-xs text-prose-faint mt-0.5">Earned it. These are the ones I recommend without hesitation.</p>
@@ -495,7 +495,7 @@ export default async function GearPage({ searchParams }: Props) {
           {eights.length > 0 && (
             <section className="mb-16">
               <div className="mb-6">
-                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Worth It</p>
                 <h2 className="text-xl font-black text-prose">Solid Gear</h2>
                 <p className="text-xs text-prose-faint mt-0.5">Good enough that I kept them. Not perfect, but worth it.</p>

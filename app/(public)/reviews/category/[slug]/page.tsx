@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+﻿import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -91,7 +91,7 @@ export default async function CategoryPage({ params }: Props) {
 
         {/* Category header */}
         <div className="mb-10">
-          <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+          <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
           <p className="flex items-center gap-1.5 text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">
             <CategoryIcon slug={cat.slug} className="w-4 h-4 text-accent-text" /> Reviews
           </p>

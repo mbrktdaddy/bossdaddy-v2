@@ -65,7 +65,7 @@ export default async function CollectionsForReview({ reviewId }: Props) {
   return (
     <section className="mt-12 pt-8 border-t border-soft/60" aria-label="Featured in collections">
       <div className="mb-5">
-        <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Featured in</p>
         <h2 className="text-lg font-black">Boss Daddy collections</h2>
       </div>

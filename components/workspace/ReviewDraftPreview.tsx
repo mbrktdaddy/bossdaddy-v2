@@ -123,7 +123,7 @@ export function ReviewDraftPreview({
           <div className="grid grid-cols-2 gap-3">
             {pros.length > 0 && (
               <div className="bg-green-50 rounded-xl p-3">
-                <p className="text-xs text-green-700 font-bold uppercase tracking-wide mb-2">✓ Good</p>
+                <p className="text-xs text-forest font-bold uppercase tracking-wide mb-2">✓ Good</p>
                 <ul className="space-y-1">
                   {pros.slice(0, 4).map((p, i) => (
                     <li key={i} className="flex items-start gap-1 text-xs text-prose-muted">
@@ -153,7 +153,7 @@ export function ReviewDraftPreview({
           <div className="grid grid-cols-2 gap-3">
             {bestFor.length > 0 && (
               <div className="bg-surface rounded-xl p-3">
-                <p className="text-xs text-green-700 uppercase tracking-widest font-semibold mb-2">Best For</p>
+                <p className="text-xs text-forest uppercase tracking-widest font-semibold mb-2">Best For</p>
                 <ul className="space-y-1">
                   {bestFor.slice(0, 3).map((item, i) => (
                     <li key={i} className="flex items-start gap-1 text-xs text-prose-muted">

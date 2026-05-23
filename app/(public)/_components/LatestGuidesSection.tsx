@@ -24,7 +24,7 @@ export async function LatestGuidesSection() {
     <section className="max-w-5xl mx-auto px-6 py-16">
       <div className="flex items-end justify-between mb-8 gap-4">
         <div className="flex items-stretch gap-4 min-w-0">
-          <div className="w-[3px] bg-accent rounded-full shrink-0" />
+          <div className="w-[3px] bg-accent-brand rounded-full shrink-0" />
           <div className="min-w-0">
             <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-2">— Latest Guides</p>
             <h2 className="text-2xl md:text-3xl font-black text-prose leading-tight">Skills, builds, and hard-won dad wisdom.</h2>

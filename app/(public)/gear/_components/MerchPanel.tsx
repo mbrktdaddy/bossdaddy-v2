@@ -33,7 +33,7 @@ export async function MerchPanel() {
       <div className="pt-12">
         {/* Section opener — vertical orange rule + eyebrow + h2 */}
         <div className="flex items-stretch gap-4 mb-6">
-          <div className="w-[3px] bg-accent rounded-full" />
+          <div className="w-[3px] bg-accent-brand rounded-full" />
           <div>
             <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-1">— Made by Boss Daddy</p>
             <h2 className="text-2xl font-black text-prose leading-tight">Boss Daddy Merch</h2>

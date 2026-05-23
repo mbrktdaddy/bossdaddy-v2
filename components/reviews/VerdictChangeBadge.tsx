@@ -10,7 +10,7 @@ interface Props {
 function styleFor(v: VerdictChange): { bg: string; text: string; border: string; icon: string; label: string } {
   switch (v) {
     case 'improved':
-      return { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200', icon: '↑', label: 'Improved' }
+      return { bg: 'bg-green-50', text: 'text-forest', border: 'border-green-200', icon: '↑', label: 'Improved' }
     case 'unchanged':
       return { bg: 'bg-surface-raised/60', text: 'text-prose-muted', border: 'border-strong/60', icon: '→', label: 'Unchanged' }
     case 'declined':

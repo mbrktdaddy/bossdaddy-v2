@@ -151,7 +151,7 @@ export default async function HomePage() {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              'radial-gradient(ellipse 70% 60% at 50% -10%, rgba(204,85,0,0.12), transparent 70%), linear-gradient(180deg, rgba(204,85,0,0.06), transparent 70%)',
+              'radial-gradient(ellipse 70% 60% at 50% -10%, rgba(204,85,0,0.18), transparent 70%), linear-gradient(180deg, rgba(229,90,26,0.06), transparent 60%)',
           }}
         />
         <div className="relative max-w-6xl mx-auto px-6 py-16 md:py-24">
@@ -371,8 +371,9 @@ export default async function HomePage() {
       {/* ── The Rules — moved up from Movement 2 so the strongest authority
             assertion is right under the hero, not 4 sections deep where
             most mobile readers never reached it. This is the trust *proof*
-            that backs the hero's "my own money, no sponsors" *promise*. */}
-      <section className="relative">
+            that backs the hero's "my own money, no sponsors" *promise*.
+            Cream-paper band — first rhythm break after the hero. */}
+      <section className="relative bg-surface-sunken border-y border-soft">
         <div className="max-w-5xl mx-auto px-6 py-16 md:py-20">
           <p className="text-[11px] md:text-xs text-accent-text uppercase tracking-[0.3em] font-bold mb-4 text-center">— The Rules</p>
           <h2 className="text-3xl md:text-4xl font-black text-center text-prose mb-4 leading-tight">
@@ -452,7 +453,7 @@ export default async function HomePage() {
           <div className="relative max-w-6xl mx-auto px-6 py-16">
             <div className="flex items-end justify-between mb-8 gap-4">
               <div className="flex items-stretch gap-4 min-w-0">
-                <div className="w-[3px] bg-accent rounded-full shrink-0" />
+                <div className="w-[3px] bg-accent-brand rounded-full shrink-0" />
                 <div className="min-w-0">
                   <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-2">— Recent Reviews</p>
                   <h2 className="text-2xl md:text-3xl font-black text-prose leading-tight">Bought, tested, and Boss Daddy Approved</h2>
@@ -554,13 +555,15 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ── From The Vault — diverse trio of collections ───────────────── */}
+      {/* ── From The Vault — diverse trio of collections.
+            Cream-paper band — second rhythm break, separates editorial
+            collections from review feed. ───────────────────────────── */}
       {vaultTrio.length > 0 && (
-        <section className="relative">
+        <section className="relative bg-surface-sunken border-y border-soft">
           <div className="relative max-w-6xl mx-auto px-6 py-16">
             <div className="flex items-end justify-between mb-8 gap-4">
               <div className="flex items-stretch gap-4 min-w-0">
-                <div className="w-[3px] bg-accent rounded-full shrink-0" />
+                <div className="w-[3px] bg-accent-brand rounded-full shrink-0" />
                 <div className="min-w-0">
                   <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-2">— From The Vault</p>
                   <h2 className="text-2xl md:text-3xl font-black text-prose leading-tight">Comparisons, kits, and curated picks</h2>
@@ -631,36 +634,42 @@ export default async function HomePage() {
         <HomepageMerchStrip />
       </Suspense>
 
-      {/* ── Newsletter ──────────────────────────────────────────────────── */}
+      {/* ── Newsletter — DARK DRAMATIC MOMENT.
+            Full-bleed dark panel against the light page rhythm. Cream
+            headline + brand orange accent strip + action-orange CTA.
+            Creates the "clubhouse invitation" feel. ─────────────────── */}
       <section id="crew" className="relative">
         <div className="relative max-w-6xl mx-auto px-6 py-16">
-          <div className="relative bg-gradient-to-br from-accent/[0.05] to-surface border border-soft/60 rounded-2xl shadow-xl shadow-stone-900/[0.06] px-8 py-12 text-center max-w-2xl mx-auto overflow-hidden">
-            {/* Confident left-edge accent — single orange treatment marks this as the CTA panel */}
-            <span aria-hidden className="absolute left-0 inset-y-6 w-0.5 bg-accent rounded-full" />
-            <p className="text-accent-text-soft text-xs font-semibold uppercase tracking-widest mb-3">
-              Join the Boss Daddy Crew
-            </p>
-            <h2 className="text-2xl font-black text-prose mb-3">
-              Real Talk. Honest Reviews.<br />No BS Ever.
-            </h2>
-            <p className="text-prose-muted mb-8">
-              The good stuff, straight from the trenches — reviews, wins, and real talk from a dad who shows up.
-              No spam. No sponsors. Just the crew.
-            </p>
-            {/* Routed through EmailSignup (server action) so the duplicate-
-                signup welcome-email gate fires and returning subscribers see
-                the "you're already on the list" toast instead of a cold
-                redirect that triggers another welcome email. */}
-            <div className="max-w-md mx-auto text-left">
-              <EmailSignup
-                heading={null}
-                description={null}
-                buttonLabel="Join Free"
-                successMessage="You're in, Boss. Welcome to the crew."
-                interests={['newsletter']}
-              />
+          <div className="relative bg-drama rounded-2xl shadow-2xl shadow-stone-900/[0.15] px-8 py-14 text-center max-w-3xl mx-auto overflow-hidden">
+            {/* Brand-orange left-edge accent — heritage signature on dark */}
+            <span aria-hidden className="absolute left-0 inset-y-8 w-0.5 bg-accent-brand rounded-full" />
+            {/* Subtle radial warmth from top */}
+            <div
+              className="absolute inset-0 pointer-events-none opacity-60"
+              style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 0%, rgba(204,85,0,0.15), transparent 70%)' }}
+            />
+            <div className="relative">
+              <p className="text-accent-text-soft text-xs font-bold uppercase tracking-[0.25em] mb-4">
+                Join the Boss Daddy Crew
+              </p>
+              <h2 className="text-3xl md:text-4xl font-black text-stone-50 mb-4 leading-tight">
+                Real Talk. Honest Reviews.<br />No BS Ever.
+              </h2>
+              <p className="text-stone-300 text-base mb-8 max-w-lg mx-auto">
+                The good stuff, straight from the trenches — reviews, wins, and real talk from a dad who shows up.
+                No spam. No sponsors. Just the crew.
+              </p>
+              <div className="max-w-md mx-auto text-left">
+                <EmailSignup
+                  heading={null}
+                  description={null}
+                  buttonLabel="Join Free"
+                  successMessage="You're in, Boss. Welcome to the crew."
+                  interests={['newsletter']}
+                />
+              </div>
+              <p className="text-xs text-stone-500 mt-5 text-center">Unsubscribe anytime. We mean it.</p>
             </div>
-            <p className="text-xs text-prose-faint mt-4 text-center">Unsubscribe anytime. We mean it.</p>
           </div>
         </div>
       </section>

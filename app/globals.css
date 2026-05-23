@@ -2,42 +2,54 @@
 @plugin "@tailwindcss/typography";
 
 /* ─────────────────────────────────────────────────────────────────────────
-   LIGHT THEME — default as of 2026-05-23.
+   LIGHT THEME — refined 2026-05-23.
    The dark palette is preserved at :root[data-palette="dark"] as an
-   emergency escape hatch — to revert temporarily, add data-palette="dark"
-   to the <html> tag in app/layout.tsx.
+   emergency escape hatch — add data-palette="dark" to <html> in
+   app/layout.tsx to revert temporarily.
    ───────────────────────────────────────────────────────────────────────── */
 :root {
   --background: #fafaf9;        /* page bg — off-white so cards pop */
   --foreground: #0a0a0a;
 
-  /* Brand */
-  --bd-orange: #CC5500;
-  /* In light mode --bd-orange-light is a DARKER orange (orange-700) that
-     clears WCAG AA on white for inline text + eyebrows. Name preserved
-     for stability across the codebase; semantic role is "accent text". */
-  --bd-orange-light: #a34400;
+  /* ── Brand orange — TWO-COLOR SYSTEM ─────────────────────────────────
+     Brand   #CC5500 = signature only (badge, BOSS wordmark, tick strips).
+     Action  #E55A1A = punchy, used for ALL interactive elements (CTAs,
+                       active pills, button bg). Has more energy on white.
+     Text    #B85A14 = inline accent text (links, eyebrows, card titles).
+                       Lifted from old #a34400 (too somber); still passes
+                       AA on white at 4.6:1.
+     ─────────────────────────────────────────────────────────────────── */
+  --bd-orange-brand: #CC5500;
+  --bd-orange:       #E55A1A;
+  --bd-orange-light: #B85A14;   /* "accent text" semantic — name kept stable */
 
-  /* Surfaces — page off-white, cards white, sunken stone */
+  /* ── Forest green — warm "dad's nod" instead of clinical green-700 ──── */
+  --bd-forest: #3D7C3F;
+
+  /* ── Dark drama — for footer + newsletter CTA section bg ─────────────── */
+  --bd-drama: #1a1410;
+
+  /* ── Surfaces — 4-tier rhythm ────────────────────────────────────────
+     Page (canvas) → cream-paper bands (alternating) → cards → editorial
+     cream feature panels. Plus dark drama at footer / newsletter.
+     ─────────────────────────────────────────────────────────────────── */
   --bd-bg: #fafaf9;
   --bd-surface: #ffffff;
   --bd-surface-raised: #ffffff;
-  --bd-surface-sunken: #f5f5f4;
+  --bd-surface-sunken: #f5efe0;       /* WARM cream-paper for bands — was stone-100 #f5f5f4 */
   --bd-border: #e7e5e4;
 
-  /* Per-theme variants for literals that previously couldn't flip
-     (because @theme inline bakes literals into utilities). These ARE
-     overridable per-theme because they're consumed via var() below. */
+  /* Per-theme variants for literals (so dark escape hatch can flip them) */
   --bd-border-strong: #d4d4d8;
   --bd-accent-border-soft: #fdba74;   /* orange-300 hairline */
-  --bd-accent-tint: #fff7ed;          /* orange-50 wash */
+  --bd-accent-tint: #fff7ed;          /* orange-50 wash for callouts */
 
   /* Text */
   --bd-text: #0a0a0a;
   --bd-text-muted: #52525b;
   --bd-text-faint: #71717a;
 
-  /* Cream — editorial accent, kept for pull-quotes + gift-guide hero */
+  /* Cream — editorial accent for feature panels (gift guide, pull-quotes) */
   --bd-paper: #fff4d6;
   --bd-paper-muted: #e5d1ca;
 }
@@ -50,16 +62,17 @@
   --font-display: var(--font-montserrat), system-ui, sans-serif;
   --font-editorial: var(--font-serif), Georgia, 'Times New Roman', serif;
 
-  /* Brand orange scale — earthy, not vivid. orange-600 stays brand. */
-  --color-orange-400: #e87030;
-  --color-orange-500: #d96200;
+  /* Raw orange scale — earthy but tuned for light. orange-600 = brand
+     signature; orange-500 = action; lighter values for fades + hovers. */
+  --color-orange-400: #f48a4a;
+  --color-orange-500: #E55A1A;
   --color-orange-600: #CC5500;
-  --color-orange-700: #a34400;
-  --color-orange-800: #7d3300;
+  --color-orange-700: #B85A14;
+  --color-orange-800: #8a3f0e;
   --color-orange-900: #5c2600;
   --color-orange-950: #3d1a00;
 
-  /* Neutral gray scale — Tailwind zinc-derived (works on light + dark) */
+  /* Neutral gray scale — Tailwind zinc-derived */
   --color-gray-950: #09090b;
   --color-gray-900: #18181b;
   --color-gray-800: #27272a;
@@ -72,24 +85,30 @@
   --color-gray-100: #f4f4f5;
   --color-gray-50:  #fafafa;
 
-  /* ── Semantic role tokens ─────────────────────────────────────────────
-     Components consume these, not raw shades. Theme flips through here.
-     ─────────────────────────────────────────────────────────────────── */
+  /* ── Semantic role tokens — components consume these ──────────────── */
 
-  /* Accent / orange roles */
-  --color-accent:           var(--bd-orange);          /* bg-accent — CTAs */
-  --color-accent-hover:     var(--bd-orange-light);    /* hover darkens on light */
+  /* Accent / orange roles — TWO-COLOR SYSTEM */
+  --color-accent:           var(--bd-orange);          /* bg-accent — ACTION orange, CTAs */
+  --color-accent-hover:     #c44615;                   /* darker action for button hover */
+  --color-accent-brand:     var(--bd-orange-brand);    /* bg-accent-brand — SIGNATURE only */
   --color-accent-text:      var(--bd-orange-light);    /* inline text/links — AA on white */
-  --color-accent-text-soft: var(--bd-orange-light);    /* same in light mode */
+  --color-accent-text-soft: var(--bd-orange-light);    /* alias */
   --color-eyebrow:          var(--bd-orange-light);    /* xs uppercase labels */
-  --color-card-title:       var(--bd-orange);          /* card h3 — passes AA at lg/bold */
-  --color-accent-border:    var(--bd-accent-border-soft); /* peach hairline */
-  --color-accent-tint:      var(--bd-accent-tint);     /* orange-50 wash */
+  --color-card-title:       var(--bd-orange-brand);    /* card h3 — uses BRAND orange for gravitas */
+  --color-accent-border:    var(--bd-accent-border-soft);
+  --color-accent-tint:      var(--bd-accent-tint);
+
+  /* Status — forest green replaces institutional green-700 */
+  --color-forest:           var(--bd-forest);
+
+  /* Drama — dark dramatic moments (footer, newsletter) */
+  --color-drama:            var(--bd-drama);
 
   /* Surface roles */
   --color-surface:          var(--bd-surface);
   --color-surface-raised:   var(--bd-surface-raised);
-  --color-surface-sunken:   var(--bd-surface-sunken);
+  --color-surface-sunken:   var(--bd-surface-sunken);   /* now WARM cream-paper */
+  --color-paper:            var(--bd-paper);            /* bg-paper — editorial feature panels */
 
   /* Prose roles */
   --color-prose:            var(--bd-text);
@@ -110,7 +129,6 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   overflow-x: clip;
-  /* Body grain dropped — was tuned for dark canvas, muddied light surface */
 }
 
 h1, h2, h3, h4 {
@@ -132,10 +150,22 @@ h1, h2, h3, h4 {
   font-family: var(--font-editorial);
 }
 
-/* Pull-quote / blockquote — cream paper treatment.
-   On light bg the cream stripe reads as quiet warm accent (gift-guide tone). */
+/* Inline links inside article body — orange + underline on hover */
+.bd-editorial a:not(.bd-no-link) {
+  color: var(--bd-orange-light);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+.bd-editorial a:not(.bd-no-link):hover {
+  color: var(--bd-orange);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Pull-quote / blockquote — cream paper treatment */
 .bd-editorial blockquote {
-  border-left-color: var(--bd-orange);
+  border-left-color: var(--bd-orange-brand);
   background: color-mix(in srgb, var(--bd-paper) 50%, transparent);
   border-radius: 0 0.5rem 0.5rem 0;
   padding: 1rem 1.25rem;
@@ -146,7 +176,7 @@ h1, h2, h3, h4 {
   font-size: 1.05em;
 }
 
-/* ── Inline image grid (replaces a carousel) ──────────────────────────── */
+/* ── Inline image grid ──────────────────────────────────────────────── */
 .bd-image-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -178,7 +208,7 @@ h1, h2, h3, h4 {
   padding: 1rem;
   border: 2px dashed var(--bd-border);
   border-radius: 0.75rem;
-  background: rgba(204, 85, 0, 0.05);
+  background: rgba(229, 90, 26, 0.05);
   color: var(--bd-text-muted);
 }
 .bd-image-placeholder figcaption {
@@ -210,18 +240,21 @@ h1, h2, h3, h4 {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   DARK ESCAPE HATCH — :root[data-palette="dark"].
-   Preserved so we can revert the whole site to dark by setting the
-   attribute on <html> in app/layout.tsx. Used to also scope to .bd-dark
-   for the dashboard, but the dashboard is now light too — selector
-   trimmed. Don't delete without operator approval — emergency fallback.
+   DARK ESCAPE HATCH — :root[data-palette="dark"]
+   Add data-palette="dark" to <html> in app/layout.tsx to revert whole site.
+   Note: in the dark escape, --bd-orange goes back to the heritage #CC5500
+   (single-orange world), since the two-orange split is a light-mode design.
    ───────────────────────────────────────────────────────────────────────── */
 :root[data-palette="dark"] {
   --background: #0e0e10;
   --foreground: #f4f4f5;
 
-  --bd-orange: #CC5500;
+  --bd-orange-brand: #CC5500;
+  --bd-orange: #CC5500;          /* unified in dark — no need for action variant */
   --bd-orange-light: #d96200;
+
+  --bd-forest: #4ade80;          /* greens read brighter on dark */
+  --bd-drama: #0e0e10;           /* drama = page bg in dark mode (no contrast moment) */
 
   --bd-bg: #0e0e10;
   --bd-surface: #18181b;

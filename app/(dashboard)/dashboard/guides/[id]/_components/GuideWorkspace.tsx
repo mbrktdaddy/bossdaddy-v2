@@ -415,7 +415,7 @@ export function GuideWorkspace({ guide: article }: Props) {
           <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{actionErr}</p>
         )}
         {actionMsg && (
-          <p className="text-green-700 text-sm bg-green-50 border border-green-200 rounded-lg px-4 py-3">{actionMsg}</p>
+          <p className="text-forest text-sm bg-green-50 border border-green-200 rounded-lg px-4 py-3">{actionMsg}</p>
         )}
 
         <p className="text-xs text-prose-faint">

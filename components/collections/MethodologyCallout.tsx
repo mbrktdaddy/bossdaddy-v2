@@ -51,7 +51,7 @@ export default function MethodologyCallout({
         </div>
 
         <div className="flex-1 min-w-0">
-          <span aria-hidden className="block h-px w-6 bg-accent/60 mb-2" />
+          <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-2" />
           <p className="text-xs text-eyebrow uppercase tracking-widest font-bold mb-2">{eyebrowLabel}</p>
           {html ? (
             <div

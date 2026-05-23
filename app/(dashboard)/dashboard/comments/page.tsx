@@ -8,7 +8,7 @@ interface Props {
 
 const STATUS_TABS = [
   { key: 'pending',  label: 'Pending',  color: 'text-amber-600' },
-  { key: 'approved', label: 'Approved', color: 'text-green-700'  },
+  { key: 'approved', label: 'Approved', color: 'text-forest'  },
   { key: 'rejected', label: 'Rejected', color: 'text-red-600'    },
 ]
 
@@ -113,7 +113,7 @@ export default async function CommentsPage({ searchParams }: Props) {
                   </span>
                   {score !== null && (
                     <span className={`text-xs font-mono ${
-                      score >= 0.7 ? 'text-red-600' : score >= 0.4 ? 'text-amber-600' : 'text-green-700'
+                      score >= 0.7 ? 'text-red-600' : score >= 0.4 ? 'text-amber-600' : 'text-forest'
                     }`}>
                       {score.toFixed(2)}
                     </span>

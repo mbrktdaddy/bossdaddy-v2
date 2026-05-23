@@ -257,7 +257,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
           <main className="lg:flex-1 lg:max-w-3xl min-w-0">
             {/* Editorial header — eyebrow + H1 + dek + byline */}
             <header className="mb-8">
-              <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+              <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
               <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Comparison</p>
               <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight leading-tight">{comparison.title}</h1>
               {comparison.description && (
@@ -317,7 +317,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
             {/* At-a-glance contender strip */}
             <section id="contenders" className="mb-12" aria-label="Contenders">
               <div className="mb-5">
-                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Contenders</p>
                 <h2 className="text-2xl font-black text-prose leading-tight">
                   {items.length} on the scorecard
@@ -347,7 +347,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
             {comparison.intro_html && (
               <section id="overview" className="mb-12">
                 <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Take</p>
                   <h2 className="text-2xl font-black text-prose leading-tight">What sets these apart</h2>
                 </div>
@@ -371,7 +371,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
             {items.length >= 2 && (
               <section id="scorecard" className="mb-12" aria-label="Scorecard">
                 <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Scorecard</p>
                   <h2 className="text-2xl font-black text-prose leading-tight">Head-to-head</h2>
                 </div>
@@ -453,7 +453,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
             {/* Per-product deep dives — alternating image position */}
             <section className="mb-12" aria-label="Per-product deep dives">
               <div className="mb-5">
-                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Breakdown</p>
                 <h2 className="text-2xl font-black text-prose leading-tight">Each contender, examined</h2>
               </div>
@@ -508,11 +508,11 @@ export default async function ComparisonDetailPage({ params }: Props) {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                               {(review.pros?.length ?? 0) > 0 && (
                                 <div className="rounded-xl border border-green-200 bg-green-50 p-3">
-                                  <p className="text-[10px] font-bold uppercase tracking-widest text-green-700 mb-2">What works</p>
+                                  <p className="text-[10px] font-bold uppercase tracking-widest text-forest mb-2">What works</p>
                                   <ul className="space-y-1.5">
                                     {review.pros!.slice(0, 4).map((p, i) => (
                                       <li key={i} className="text-xs text-prose-muted flex items-start gap-1.5 leading-snug">
-                                        <svg className="w-3 h-3 mt-0.5 shrink-0 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
+                                        <svg className="w-3 h-3 mt-0.5 shrink-0 text-forest" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
                                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                         </svg>
                                         <span>{p}</span>

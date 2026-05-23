@@ -22,7 +22,7 @@ export async function HomepageMerchStrip() {
       <div className="max-w-6xl mx-auto px-6 py-16">
         <div className="flex items-end justify-between mb-8">
           <div className="flex items-stretch gap-4">
-            <div className="w-[3px] bg-accent rounded-full" />
+            <div className="w-[3px] bg-accent-brand rounded-full" />
             <div>
               <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-2">— Rep the Brand</p>
               <h2 className="text-2xl md:text-3xl font-black text-prose leading-tight">Boss Daddy Gear</h2>

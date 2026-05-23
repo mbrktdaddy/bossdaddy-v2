@@ -209,7 +209,7 @@ export default async function GuidePage({ params }: Props) {
         {/* TL;DR box */}
         {(guide.tldr || guideKeyTakeaways.length > 0) && (
           <div className="mb-10 bg-accent-tint border border-accent-border/40 rounded-2xl p-5 sm:p-6">
-            <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+            <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
             <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">TL;DR</p>
             {guide.tldr && (
               <p className="text-prose leading-relaxed text-sm sm:text-base mb-4">{guide.tldr}</p>
@@ -277,7 +277,7 @@ export default async function GuidePage({ params }: Props) {
             {guideFaqs.length > 0 && (
               <div className="mt-12 pt-8 border-t border-soft/60">
                 <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Common Questions</p>
                   <h2 className="text-xl font-black">Frequently Asked Questions</h2>
                 </div>
@@ -302,7 +302,7 @@ export default async function GuidePage({ params }: Props) {
             {/* Email signup CTA */}
             <div className="mt-12 pt-8">
               <div className="bg-gradient-to-br from-surface to-surface-sunken border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl p-6 sm:p-8 text-center shadow-xl shadow-stone-900/[0.06]">
-                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3 mx-auto" />
+                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3 mx-auto" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Liked this guide?</p>
                 <h3 className="text-xl font-black mb-2">Get the next one in your inbox</h3>
                 <p className="text-sm text-prose-muted mb-5 max-w-md mx-auto">
@@ -325,7 +325,7 @@ export default async function GuidePage({ params }: Props) {
               <div className="mt-12">
                 <div className="flex items-end justify-between mb-5">
                   <div>
-                    <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                    <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                     <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Reviews</p>
                     <h2 className="text-lg font-black">
                       {category ? `${category.label} Reviews` : 'Related Reviews'}
@@ -383,7 +383,7 @@ export default async function GuidePage({ params }: Props) {
             {related && related.length > 0 && (
               <div className="mt-12">
                 <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Guides</p>
                   <h2 className="text-lg font-black">More Guides</h2>
                 </div>
@@ -467,7 +467,7 @@ export default async function GuidePage({ params }: Props) {
               {/* Compact products panel — in mention order */}
               {mentionedProducts && mentionedProducts.length > 0 && (
                 <div className="bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 transition-colors rounded-2xl p-4">
-                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Products Mentioned</p>
                   <ul className="space-y-3">
                     {mentionedSlugs

@@ -224,7 +224,7 @@ export default async function PickDetailPage({ params }: Props) {
         <div className="lg:flex lg:gap-10 lg:items-start">
           <main className="lg:flex-1 lg:max-w-3xl min-w-0">
             <header className="mb-8">
-              <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+              <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
               <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Boss Daddy Picks</p>
               <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight leading-tight">{pick.title}</h1>
               {pick.description && (
@@ -249,7 +249,7 @@ export default async function PickDetailPage({ params }: Props) {
             {pick.intro_html && (
               <section id="overview" className="mb-10">
                 <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Why These</p>
                   <h2 className="text-2xl font-black text-prose leading-tight">Behind the picks</h2>
                 </div>
@@ -272,7 +272,7 @@ export default async function PickDetailPage({ params }: Props) {
             {/* The Picks — eyebrow matches the TOC entry. */}
             <section id="picks" className="mb-12" aria-label="The picks">
               <div className="mb-5">
-                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">
                   {items.length === 1 ? 'The Pick' : 'The Picks'}
                 </p>

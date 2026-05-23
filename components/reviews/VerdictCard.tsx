@@ -83,7 +83,7 @@ function RebuyChip({ rebuy, size = 'md' }: { rebuy: boolean; size?: 'sm' | 'md' 
   const padding = size === 'sm' ? 'px-2.5 py-1 text-[11px]' : 'px-3 py-1.5 text-xs'
   if (rebuy) {
     return (
-      <span className={`inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 font-semibold text-green-700 ${padding}`}>
+      <span className={`inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 font-semibold text-forest ${padding}`}>
         <span aria-hidden>✓</span>
         I&apos;d buy it again
       </span>

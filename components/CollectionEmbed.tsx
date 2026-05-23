@@ -92,7 +92,7 @@ export default async function CollectionEmbed({ slug }: Props) {
       aria-label={`Featured ${meta.eyebrow}: ${c.title}`}
     >
       <div className="mb-4">
-        <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
         <p className="text-[10px] sm:text-xs text-accent-text-soft uppercase tracking-[0.2em] font-black mb-2">
           {meta.eyebrow}
         </p>

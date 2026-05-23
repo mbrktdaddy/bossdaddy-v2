@@ -233,7 +233,7 @@ export default async function StackDetailPage({ params }: Props) {
         <div className="lg:flex lg:gap-10 lg:items-start">
           <main className="lg:flex-1 lg:max-w-3xl min-w-0">
             <header className="mb-8">
-              <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+              <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
               <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">The Stack</p>
               <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight leading-tight">{stack.title}</h1>
               {stack.description && (
@@ -270,7 +270,7 @@ export default async function StackDetailPage({ params }: Props) {
             {stack.intro_html && (
               <section id="overview" className="mb-10">
                 <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Why These</p>
                   <h2 className="text-2xl font-black text-prose leading-tight">Why this kit works together</h2>
                 </div>
@@ -293,7 +293,7 @@ export default async function StackDetailPage({ params }: Props) {
             {/* Lineup */}
             <section id="lineup" className="mb-12" aria-label="Stack lineup">
               <div className="mb-5">
-                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Lineup</p>
                 <h2 className="text-2xl font-black text-prose leading-tight">
                   {items.length} {items.length === 1 ? 'piece' : 'pieces'} in this kit

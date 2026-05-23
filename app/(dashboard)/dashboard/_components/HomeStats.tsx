@@ -10,8 +10,8 @@ interface Counts {
 
 export function HomeStats({ counts }: { counts: Counts }) {
   const cards = [
-    { label: 'Live Guides',      value: counts.articles.live,    href: '/dashboard/guides?filter=live',      color: 'text-green-700' },
-    { label: 'Live Reviews',     value: counts.reviews.live,     href: '/dashboard/reviews?filter=live',     color: 'text-green-700' },
+    { label: 'Live Guides',      value: counts.articles.live,    href: '/dashboard/guides?filter=live',      color: 'text-forest' },
+    { label: 'Live Reviews',     value: counts.reviews.live,     href: '/dashboard/reviews?filter=live',     color: 'text-forest' },
     { label: 'Guide Drafts',     value: counts.articles.draft,   href: '/dashboard/guides?filter=drafts',    color: 'text-prose' },
     { label: 'Review Drafts',    value: counts.reviews.draft,    href: '/dashboard/reviews?filter=drafts',   color: 'text-prose' },
     { label: 'Pending Review',   value: counts.articles.pending + counts.reviews.pending, href: '/dashboard/guides?filter=pending', color: 'text-amber-600' },

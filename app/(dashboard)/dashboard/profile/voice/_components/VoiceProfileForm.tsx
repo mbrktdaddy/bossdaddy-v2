@@ -231,7 +231,7 @@ export function VoiceProfileForm({ initial }: Props) {
       <div className="sticky bottom-4 flex items-center justify-between gap-3 bg-surface-sunken/80 backdrop-blur px-4 py-3 rounded-xl border border-soft">
         <div className="min-w-0 text-sm">
           {error && <span className="text-red-600">{error}</span>}
-          {!error && savedAt && <span className="text-green-700">✓ Saved at {savedAt}</span>}
+          {!error && savedAt && <span className="text-forest">✓ Saved at {savedAt}</span>}
           {!error && !savedAt && <span className="text-prose-faint">Changes apply to new drafts immediately after saving.</span>}
         </div>
         <button

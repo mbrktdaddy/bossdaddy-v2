@@ -77,7 +77,7 @@ export default function EditEmailForm({ current }: { current: string }) {
   if (step === 'sent') {
     return (
       <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-        <p className="text-green-700 text-sm font-semibold mb-1">Confirmation sent</p>
+        <p className="text-forest text-sm font-semibold mb-1">Confirmation sent</p>
         <p className="text-prose-muted text-sm">
           Check <span className="text-prose">{email.trim()}</span> for a confirmation link.
           Your email won&apos;t change until you click it.

@@ -606,7 +606,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <ListEditor label="The Good (Pros)" items={pros} onChange={setPros} placeholder="e.g. Long battery life" accent="text-green-700" />
+          <ListEditor label="The Good (Pros)" items={pros} onChange={setPros} placeholder="e.g. Long battery life" accent="text-forest" />
           <ListEditor label="The Not-So-Good (Cons)" items={cons} onChange={setCons} placeholder="e.g. Runs hot under load" accent="text-red-600" />
         </div>
 
@@ -654,7 +654,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                 items={bestFor}
                 onChange={setBestFor}
                 placeholder="e.g. Dads doing solo overnight feedings"
-                accent="text-green-700"
+                accent="text-forest"
               />
               <ListEditor
                 label="Not For"
@@ -864,7 +864,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
           <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{actionErr}</p>
         )}
         {actionMsg && (
-          <p className="text-green-700 text-sm bg-green-50 border border-green-200 rounded-lg px-4 py-3">{actionMsg}</p>
+          <p className="text-forest text-sm bg-green-50 border border-green-200 rounded-lg px-4 py-3">{actionMsg}</p>
         )}
 
         <p className="text-xs text-prose-faint">

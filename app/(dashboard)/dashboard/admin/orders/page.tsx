@@ -12,8 +12,8 @@ const STATUS_STYLES: Record<OrderStatus, { label: string; cls: string }> = {
   pending_payment: { label: 'Pending',    cls: 'bg-surface-raised text-prose-muted' },
   paid:            { label: 'Paid',       cls: 'bg-amber-950/60 text-amber-400' },
   processing:      { label: 'Processing', cls: 'bg-blue-50 text-blue-700' },
-  shipped:         { label: 'Shipped',    cls: 'bg-green-50 text-green-700' },
-  delivered:       { label: 'Delivered',  cls: 'bg-green-50 text-green-700' },
+  shipped:         { label: 'Shipped',    cls: 'bg-green-50 text-forest' },
+  delivered:       { label: 'Delivered',  cls: 'bg-green-50 text-forest' },
   cancelled:       { label: 'Cancelled',  cls: 'bg-red-50 text-red-600' },
   refunded:        { label: 'Refunded',   cls: 'bg-accent-tint text-accent-text-soft' },
 }

@@ -38,7 +38,7 @@ const METHOD_LABELS: Record<ContactMethod, string> = {
 const STATUS_CONFIG: Record<OutreachStatus, { label: string; classes: string }> = {
   draft:       { label: 'Draft',       classes: 'bg-surface-raised text-prose-muted border-strong' },
   sent:        { label: 'Sent',        classes: 'bg-blue-50 text-blue-700 border-blue-200' },
-  responded:   { label: 'Responded',   classes: 'bg-green-50 text-green-700 border-green-200/50' },
+  responded:   { label: 'Responded',   classes: 'bg-green-50 text-forest border-green-200/50' },
   no_response: { label: 'No Response', classes: 'bg-amber-950/50 text-amber-400 border-amber-800/50' },
   follow_up:   { label: 'Follow Up',   classes: 'bg-accent-tint text-accent-text-soft border-accent-border/50' },
 }
@@ -325,7 +325,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
           role="status"
           className={`fixed top-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-md z-50 flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium shadow-xl ${
             toast.type === 'success'
-              ? 'bg-green-50 border-green-200 text-green-700'
+              ? 'bg-green-50 border-green-200 text-forest'
               : 'bg-red-50 border-red-200 text-red-700'
           }`}
         >

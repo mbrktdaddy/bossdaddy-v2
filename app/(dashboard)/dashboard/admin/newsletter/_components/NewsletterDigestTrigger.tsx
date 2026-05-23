@@ -51,7 +51,7 @@ export function NewsletterDigestTrigger() {
           {busy ? 'Sending…' : 'Send digest now'}
         </button>
       </div>
-      {result && <p className="text-xs text-green-700 max-w-xs text-right">{result}</p>}
+      {result && <p className="text-xs text-forest max-w-xs text-right">{result}</p>}
       {error  && <p className="text-xs text-red-600  max-w-xs text-right">{error}</p>}
     </div>
   )

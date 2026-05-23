@@ -359,7 +359,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
         <span className="flex items-center gap-2 flex-wrap">
           <span className="text-accent-text-soft">🎨</span> Inline images
           {filledCount > 0 && (
-            <span className="px-2 py-0.5 bg-green-50 border border-green-200 text-green-700 rounded-full text-xs">
+            <span className="px-2 py-0.5 bg-green-50 border border-green-200 text-forest rounded-full text-xs">
               {filledCount} filled
             </span>
           )}
@@ -717,7 +717,7 @@ function GalleryCard(p: GalleryCardProps) {
             <div key={child.slotId} className={`p-3 rounded-lg space-y-2.5 ${child.filled ? 'bg-surface border border-green-200' : 'bg-surface border border-accent-border/20'}`}>
               {/* Child header */}
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <span className={`text-xs font-semibold ${child.filled ? 'text-green-700' : 'text-accent-text-soft'}`}>
+                <span className={`text-xs font-semibold ${child.filled ? 'text-forest' : 'text-accent-text-soft'}`}>
                   {child.filled ? 'Image' : 'Slot'} {childIdx + 1}/{item.children.length}
                 </span>
                 <div className="flex items-center gap-1">
@@ -868,7 +868,7 @@ function SlotCard(p: SlotCardProps) {
       {/* Header: position + reorder + remove */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className={`text-xs font-semibold ${filled ? 'text-green-700' : 'text-accent-text-soft'}`}>
+          <span className={`text-xs font-semibold ${filled ? 'text-forest' : 'text-accent-text-soft'}`}>
             {filled ? 'Image' : 'Slot'}
           </span>
           <select

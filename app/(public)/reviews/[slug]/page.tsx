@@ -391,7 +391,7 @@ export default async function ReviewPage({ params }: Props) {
         {faqs.length > 0 && (
           <div className="mt-12 pt-8 border-t border-soft/60">
             <div className="mb-6">
-              <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+              <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
               <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Common Questions</p>
               <h2 className="text-xl font-black">Frequently Asked Questions</h2>
             </div>
@@ -426,7 +426,7 @@ export default async function ReviewPage({ params }: Props) {
         {/* Bottom CTA — email signup */}
         <div className="mt-12 pt-8">
           <div className="bg-gradient-to-br from-surface to-surface-sunken border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl p-6 sm:p-8 text-center shadow-xl shadow-stone-900/[0.06]">
-            <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3 mx-auto" />
+            <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3 mx-auto" />
             <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Liked this review?</p>
             <h3 className="text-xl font-black mb-4">Get the next one in your inbox</h3>
             <div className="max-w-md mx-auto">
@@ -478,7 +478,7 @@ export default async function ReviewPage({ params }: Props) {
         {related && related.length > 0 && (
           <div className="mt-12 xl:hidden">
             <div className="mb-4">
-              <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+              <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
               <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">More Reviews</p>
               <h2 className="text-lg font-black">Keep reading</h2>
             </div>
@@ -526,7 +526,7 @@ export default async function ReviewPage({ params }: Props) {
           {/* Related Reviews */}
           {related && related.length > 0 && (
             <div className="bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl p-5 shadow-lg shadow-stone-900/[0.06]">
-              <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+              <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
               <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">More Reviews</p>
               <div className="space-y-4">
                 {related.map((r) => (

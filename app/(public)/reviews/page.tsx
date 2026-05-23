@@ -84,7 +84,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
       <div className="max-w-6xl mx-auto px-6 py-16">
         {/* Page header — tick-line eyebrow pattern */}
         <div className="mb-8">
-          <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+          <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">The Stuff</p>
           <h1 className="text-4xl md:text-5xl font-black mb-3 text-prose tracking-tight">All Reviews</h1>
         </div>
@@ -147,7 +147,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
             <section key={cat.slug} className={i > 0 ? 'mt-12' : ''}>
               <div className="flex items-end justify-between mb-5 gap-4">
                 <div className="min-w-0">
-                  <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                   <h2 className="text-xl md:text-2xl font-black text-prose flex items-center gap-2.5 leading-tight">
                     <CategoryIcon slug={cat.slug} className="w-5 h-5 sm:w-6 sm:h-6 text-accent-text shrink-0" />
                     <span className="truncate">{cat.label}</span>
@@ -204,7 +204,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
     <div className="max-w-6xl mx-auto px-6 py-16">
       {/* Page header — tick-line eyebrow + breadcrumb */}
       <div className="mb-12">
-        <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">
           Reviews / {getCategoryLabel(category).toUpperCase()}
         </p>

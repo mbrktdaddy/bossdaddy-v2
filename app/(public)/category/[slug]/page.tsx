@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+﻿import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -95,7 +95,7 @@ export default async function CategoryHubPage({ params }: Props) {
 
         {/* ── Category hero ─────────────────────────────────────────────── */}
         <div className="mb-16">
-          <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+          <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
           <p className="flex items-center gap-1.5 text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">
             <CategoryIcon slug={cat.slug} className="w-4 h-4 text-accent-text" /> Boss Daddy
           </p>
@@ -119,7 +119,7 @@ export default async function CategoryHubPage({ params }: Props) {
           <section className="mb-20">
             <div className="flex items-end justify-between mb-8">
               <div>
-                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Top Rated</p>
                 <h2 className="text-2xl font-black text-prose leading-tight">Best {cat.label}</h2>
               </div>
@@ -182,7 +182,7 @@ export default async function CategoryHubPage({ params }: Props) {
           <section className="mb-20">
             <div className="flex items-end justify-between mb-8">
               <div>
-                <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Know-How</p>
                 <h2 className="text-2xl font-black text-prose leading-tight">{cat.label} Guides</h2>
               </div>
@@ -273,7 +273,7 @@ export default async function CategoryHubPage({ params }: Props) {
         {catFaqs.length > 0 && (
           <section className="mb-16">
             <div className="mb-6">
-              <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+              <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
               <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Common Questions</p>
               <h2 className="text-2xl font-black text-prose leading-tight">{cat.label} FAQ</h2>
             </div>
@@ -297,7 +297,7 @@ export default async function CategoryHubPage({ params }: Props) {
 
         {/* ── Other categories ──────────────────────────────────────────── */}
         <section className="mt-12 pt-12 border-t border-soft/60">
-          <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+          <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
           <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold mb-5">More Categories</p>
           <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 pb-1">
             {CATEGORIES.filter((c) => c.slug !== slug).map((c) => (

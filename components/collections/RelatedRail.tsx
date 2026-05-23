@@ -39,7 +39,7 @@ export default function RelatedRail({
   return (
     <section id={id} aria-label={heading} className="mt-14 pt-10 border-t border-soft/60">
       <div className="mb-6">
-        <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">{eyebrow}</p>
         <h2 className="text-2xl font-black text-prose leading-tight">{heading}</h2>
       </div>

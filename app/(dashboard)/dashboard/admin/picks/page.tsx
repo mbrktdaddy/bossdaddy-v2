@@ -69,7 +69,7 @@ export default async function PicksListPage() {
                 </div>
                 <span className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full ${
                   p.is_visible
-                    ? 'bg-green-50 text-green-700'
+                    ? 'bg-green-50 text-forest'
                     : 'bg-surface-raised text-prose-faint'
                 }`}>
                   {p.is_visible ? 'Live' : 'Draft'}

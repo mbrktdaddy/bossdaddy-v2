@@ -72,7 +72,7 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
             <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center text-xs font-bold text-white shrink-0">
               ✓
             </div>
-            <span className="text-sm font-medium text-green-700">Just posted</span>
+            <span className="text-sm font-medium text-forest">Just posted</span>
             <span className="text-xs text-prose-faint">moments ago</span>
           </div>
           <p className="text-prose-muted text-sm leading-relaxed whitespace-pre-line">{submittedBody}</p>

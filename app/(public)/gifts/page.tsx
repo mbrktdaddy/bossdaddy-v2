@@ -43,7 +43,7 @@ export default async function GiftsIndexPage() {
     <div className="max-w-6xl mx-auto px-6 py-16">
       {/* Header */}
       <div className="mb-12">
-        <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">The Gift Vault</p>
         <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight">Gift Guides</h1>
         <p className="text-prose-muted max-w-2xl leading-relaxed text-base md:text-lg">
@@ -55,7 +55,7 @@ export default async function GiftsIndexPage() {
       {OCCASION_GROUPS.map((group) => (
         <section key={group.id} className="mb-14">
           <div className="mb-6">
-            <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+            <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
             <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">{group.label}</p>
             <h2 className="text-2xl font-black text-prose">{group.label}</h2>
           </div>
@@ -106,7 +106,7 @@ export default async function GiftsIndexPage() {
 
       {/* Newsletter pitch */}
       <div className="mt-16 pt-10 border-t border-soft/60 text-center max-w-2xl mx-auto">
-        <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3 mx-auto" />
+        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3 mx-auto" />
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Stay in the loop</p>
         <h3 className="text-xl font-black text-prose mb-2">New gift guides drop with the seasons</h3>
         <p className="text-sm text-prose-muted mb-4">

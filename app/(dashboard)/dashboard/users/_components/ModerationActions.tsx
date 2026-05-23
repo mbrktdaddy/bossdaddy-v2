@@ -16,7 +16,7 @@ interface Props {
 }
 
 const STATUS_BADGE: Record<Status, { label: string; classes: string }> = {
-  active:            { label: 'Active',     classes: 'bg-green-50 text-green-700 border-green-200' },
+  active:            { label: 'Active',     classes: 'bg-green-50 text-forest border-green-200' },
   suspended:         { label: 'Suspended',  classes: 'bg-amber-50 text-amber-600 border-amber-200' },
   banned:            { label: 'Banned',     classes: 'bg-red-50 text-red-600 border-red-200' },
   pending_deletion:  { label: 'Pending delete', classes: 'bg-zinc-950/60 text-zinc-400 border-zinc-800' },

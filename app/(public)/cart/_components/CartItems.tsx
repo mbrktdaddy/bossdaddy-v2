@@ -180,7 +180,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
         </div>
         <div className="flex items-center justify-between text-sm">
           <span className="text-prose-muted">Shipping</span>
-          <span className="text-green-700 font-semibold">Free</span>
+          <span className="text-forest font-semibold">Free</span>
         </div>
         <div className="flex items-center justify-between text-sm text-prose-faint">
           <span>Tax</span>

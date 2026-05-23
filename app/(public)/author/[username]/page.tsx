@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+﻿import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -117,7 +117,7 @@ export default async function AuthorPage({ params }: Props) {
  {totalReviews > 0 && (
  <div className="mb-12">
  <div className="mb-5">
- <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+ <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
  <h2 className="text-lg font-black">Reviews</h2>
  </div>
  <div className="space-y-2">
@@ -152,7 +152,7 @@ export default async function AuthorPage({ params }: Props) {
  {totalGuides > 0 && (
  <div>
  <div className="mb-5">
- <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+ <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
  <h2 className="text-lg font-black">Guides</h2>
  </div>
  <div className="space-y-2">

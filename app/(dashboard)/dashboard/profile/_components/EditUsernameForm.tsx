@@ -55,7 +55,7 @@ export default function EditUsernameForm({ current }: { current: string }) {
       </div>
 
       {success && (
-        <p className="text-green-700 text-xs">Username updated successfully.</p>
+        <p className="text-forest text-xs">Username updated successfully.</p>
       )}
       {error && (
         <p className="text-red-600 text-xs">{error}</p>

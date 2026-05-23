@@ -330,7 +330,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
             )}
           </div>
           {importResult && (
-            <p className="mt-1.5 text-xs text-green-700">{importResult}</p>
+            <p className="mt-1.5 text-xs text-forest">{importResult}</p>
           )}
         </div>
       )}

@@ -108,7 +108,7 @@ export default async function OrderPage({ params }: Props) {
         </div>
         <div className="flex justify-between text-prose-muted">
           <span>Shipping</span>
-          <span className="text-green-700">Free</span>
+          <span className="text-forest">Free</span>
         </div>
         {(order.tax_cents ?? 0) > 0 && (
           <div className="flex justify-between text-prose-muted">

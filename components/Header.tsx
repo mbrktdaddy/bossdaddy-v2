@@ -135,7 +135,7 @@ export default function Header({ username }: HeaderProps) {
             className="h-9 w-9 object-contain"
           />
           <span>
-            <span className="text-accent-text">BOSS</span>
+            <span className="text-accent-brand">BOSS</span>
             <span className="text-prose"> DADDY</span>
           </span>
         </Link>

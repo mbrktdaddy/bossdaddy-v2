@@ -31,7 +31,7 @@ export default async function PicksIndexPage({ searchParams }: Props) {
   return (
     <div className="max-w-6xl mx-auto px-6 py-16">
       <div className="mb-10">
-        <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">The Picks</p>
         <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight">Boss Daddy Picks</h1>
         <p className="text-prose-muted max-w-2xl leading-relaxed">

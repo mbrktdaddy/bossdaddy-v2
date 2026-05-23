@@ -22,7 +22,7 @@ export function ModerationInfo({ score, flags, onAddressFlag }: Props) {
   const levelConfig = {
     high:   { label: 'High Risk',      bg: 'bg-red-50',    border: 'border-red-200',    text: 'text-red-600'    },
     medium: { label: 'Needs Review',   bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-600' },
-    low:    { label: 'Low Risk',       bg: 'bg-green-50',  border: 'border-green-200',  text: 'text-green-700'  },
+    low:    { label: 'Low Risk',       bg: 'bg-green-50',  border: 'border-green-200',  text: 'text-forest'  },
     null:   { label: 'Unscored',       bg: 'bg-surface',      border: 'border-soft',      text: 'text-prose-faint'   },
   }[level ?? 'null']
 

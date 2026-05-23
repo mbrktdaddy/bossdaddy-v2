@@ -187,7 +187,7 @@ export function ProductLinkPanel({ content, onChangeContent }: Props) {
                       {alreadyMentioned ? (
                         <span
                           title="Already mentioned in this article"
-                          className="shrink-0 text-xs px-3 py-2 bg-green-50 border border-green-200 text-green-700 rounded-lg min-h-[36px]"
+                          className="shrink-0 text-xs px-3 py-2 bg-green-50 border border-green-200 text-forest rounded-lg min-h-[36px]"
                         >
                           ✓ In article
                         </span>
@@ -242,7 +242,7 @@ function ExistingMentionCard({ mention, productName, total, onMove, onRemove }: 
 
   const kindCls =
     mention.kind === 'token' ? 'bg-accent-tint text-accent-text-soft border-accent-border/40' :
-                                'bg-green-50 text-green-700 border-green-200'
+                                'bg-green-50 text-forest border-green-200'
 
   return (
     <div className="p-3 bg-surface-sunken border border-soft rounded-lg space-y-2">

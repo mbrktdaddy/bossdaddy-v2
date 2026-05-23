@@ -25,7 +25,7 @@ export default function FAQAccordion({ faqs, id = 'faq', heading = 'Frequently A
   return (
     <section id={id} aria-label={heading} className="mb-12">
       <div className="mb-5">
-        <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
+        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">FAQ</p>
         <h2 className="text-2xl font-black text-prose leading-tight">{heading}</h2>
       </div>

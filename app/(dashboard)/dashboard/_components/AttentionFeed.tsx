@@ -90,7 +90,7 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
                   <span className="text-xs text-prose-faint font-mono">—</span>
                 ) : (
                   <span className={`text-sm font-mono font-bold ${
-                    isHighRisk ? 'text-red-600' : score >= 0.4 ? 'text-amber-600' : 'text-green-700'
+                    isHighRisk ? 'text-red-600' : score >= 0.4 ? 'text-amber-600' : 'text-forest'
                   }`}>
                     {score.toFixed(2)}
                   </span>
