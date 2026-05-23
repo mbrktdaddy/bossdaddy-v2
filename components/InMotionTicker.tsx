@@ -109,12 +109,12 @@ export default async function InMotionTicker() {
   return (
     <section
       aria-label="Currently in motion on Boss Daddy"
-      className="relative bg-gradient-to-b from-accent-tint to-orange-50/40 border-b border-accent-border/30"
+      className="relative bg-drama border-b border-copper/40"
     >
       <div className="max-w-6xl mx-auto px-6 py-2">
         <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide text-xs whitespace-nowrap">
-          <span className="shrink-0 text-accent-text-soft font-black uppercase tracking-[0.18em]">In Motion</span>
-          <span aria-hidden className="shrink-0 text-orange-900/60">·</span>
+          <span className="shrink-0 text-copper font-black uppercase tracking-[0.18em]">In Motion</span>
+          <span aria-hidden className="shrink-0 text-stone-700">·</span>
           {items.map((item, i) => {
             const meta = STATUS_META[item.status] ?? STATUS_META.testing
             const href = item.kind === 'review' ? `/reviews/${item.slug}` : `/bench/${item.slug}`
@@ -122,23 +122,23 @@ export default async function InMotionTicker() {
               <span key={`${item.kind}:${item.id}`} className="shrink-0 inline-flex items-center gap-2">
                 <Link
                   href={href}
-                  className="inline-flex items-center gap-1.5 text-prose-muted hover:text-accent transition-colors"
+                  className="inline-flex items-center gap-1.5 text-stone-300 hover:text-stone-50 transition-colors"
                 >
-                  <StatusIcon kind={meta.kind} className="w-3.5 h-3.5 shrink-0 text-accent-text-soft" />
-                  <span className="text-accent-text-soft/80 font-semibold tracking-wide">{meta.label}:</span>
+                  <StatusIcon kind={meta.kind} className="w-3.5 h-3.5 shrink-0 text-copper" />
+                  <span className="text-copper/90 font-semibold tracking-wide">{meta.label}:</span>
                   <span className="font-medium">{item.title}</span>
                 </Link>
                 {i < items.length - 1 && (
-                  <span aria-hidden className="text-orange-900/60">·</span>
+                  <span aria-hidden className="text-stone-700">·</span>
                 )}
               </span>
             )
           })}
-          <span aria-hidden className="shrink-0 text-orange-900/60">·</span>
+          <span aria-hidden className="shrink-0 text-stone-700">·</span>
           <Link
             href="/bench"
             title={LABELS.bench.tagline}
-            className="shrink-0 inline-flex items-center gap-1 text-accent-text-soft hover:text-accent transition-colors font-semibold uppercase tracking-widest"
+            className="shrink-0 inline-flex items-center gap-1 text-copper hover:text-stone-50 transition-colors font-semibold uppercase tracking-widest"
           >
             See the Bench — what&apos;s next →
           </Link>
