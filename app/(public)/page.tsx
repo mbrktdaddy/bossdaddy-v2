@@ -145,15 +145,12 @@ export default async function HomePage() {
         <InMotionTicker />
       </Suspense>
 
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden">
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              'radial-gradient(ellipse 70% 60% at 50% -10%, rgba(204,85,0,0.18), transparent 70%), linear-gradient(180deg, rgba(229,90,26,0.06), transparent 60%)',
-          }}
-        />
+      {/* ── Hero — cream-paper magazine-cover treatment.
+            No gradient washes, no splash decoration. The cream bg IS the
+            visual treatment; typography + the featured card carry the
+            rest. Thin brand-orange hairline at bottom of the hero acts
+            as a magazine masthead binding line. ───────────────────── */}
+      <section className="relative overflow-hidden bg-surface-sunken border-b-2 border-accent-brand/70">
         <div className="relative max-w-6xl mx-auto px-6 py-16 md:py-24">
           {featuredHero ? (
             <div className="grid lg:grid-cols-[1fr_1.05fr] gap-10 lg:gap-14 items-center">
@@ -178,7 +175,7 @@ export default async function HomePage() {
                   </Link>
                   <Link
                     href="/guides"
-                    className="px-6 py-3 bg-surface-raised hover:bg-stone-100 text-prose-muted hover:text-prose font-semibold rounded-2xl transition-colors"
+                    className="px-6 py-3 bg-white border border-strong hover:border-prose/40 text-prose font-semibold rounded-2xl transition-colors"
                   >
                     Browse Guides
                   </Link>
@@ -309,7 +306,7 @@ export default async function HomePage() {
                 </Link>
                 <Link
                   href="/guides"
-                  className="px-6 py-3 bg-surface-raised hover:bg-stone-100 text-prose-muted hover:text-prose font-semibold rounded-2xl transition-colors"
+                  className="px-6 py-3 bg-white border border-strong hover:border-prose/40 text-prose font-semibold rounded-2xl transition-colors"
                 >
                   Browse Guides
                 </Link>
@@ -372,8 +369,9 @@ export default async function HomePage() {
             assertion is right under the hero, not 4 sections deep where
             most mobile readers never reached it. This is the trust *proof*
             that backs the hero's "my own money, no sponsors" *promise*.
-            Cream-paper band — first rhythm break after the hero. */}
-      <section className="relative bg-surface-sunken border-y border-soft">
+            Page bg now — hero wears the cream-paper, so Rules alternates
+            back to white to keep rhythm. */}
+      <section className="relative">
         <div className="max-w-5xl mx-auto px-6 py-16 md:py-20">
           <p className="text-[11px] md:text-xs text-accent-text uppercase tracking-[0.3em] font-bold mb-4 text-center">— The Rules</p>
           <h2 className="text-3xl md:text-4xl font-black text-center text-prose mb-4 leading-tight">
