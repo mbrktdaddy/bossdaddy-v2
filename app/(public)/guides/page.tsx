@@ -96,12 +96,12 @@ export default async function GuidesPage({ searchParams }: Props) {
         {/* Category filter — horizontal scroll strip */}
         <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
           <Link href="/guides"
-            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-accent text-white shadow-md shadow-stone-900/[0.05] hover:bg-accent-hover transition-colors">
+            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-drama text-stone-50 border border-drama shadow-sm shadow-stone-900/20 transition-colors">
             All Guides
           </Link>
           {CATEGORIES.map((c) => (
             <Link key={c.slug} href={`/guides?category=${c.slug}`}
-              className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-surface text-prose-muted hover:bg-surface-raised hover:text-prose shadow-sm shadow-stone-900/[0.04] transition-colors">
+              className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-white text-prose border border-strong hover:border-prose hover:bg-stone-50 transition-colors">
               <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
               <span>{c.label}</span>
             </Link>
@@ -193,15 +193,15 @@ export default async function GuidesPage({ searchParams }: Props) {
       {/* Category filter pills */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
         <Link href="/guides"
-          className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-surface text-prose-muted hover:bg-surface-raised hover:text-prose shadow-sm shadow-stone-900/[0.04] transition-colors">
+          className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-white text-prose border border-strong hover:border-prose hover:bg-stone-50 transition-colors">
           All Guides
         </Link>
         {CATEGORIES.map((c) => (
           <Link key={c.slug} href={`/guides?category=${c.slug}`}
             className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
               category === c.slug
-                ? 'bg-accent text-white shadow-md shadow-stone-900/[0.05]'
-                : 'bg-surface text-prose-muted hover:bg-surface-raised hover:text-prose shadow-sm shadow-stone-900/[0.04]'
+                ? 'bg-drama text-stone-50 border border-drama shadow-sm shadow-stone-900/20'
+                : 'bg-white text-prose border border-strong hover:border-prose hover:bg-stone-50'
             }`}>
             <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
             <span>{c.label}</span>

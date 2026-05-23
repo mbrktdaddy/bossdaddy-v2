@@ -74,13 +74,13 @@ function FilterPill({
       scroll={false}
       className={`shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-colors min-h-[44px] ${
         active
-          ? 'bg-accent text-white border-accent'
-          : 'bg-surface text-prose-muted border-soft hover:border-strong hover:text-prose'
+          ? 'bg-drama text-stone-50 border-drama'
+          : 'bg-white text-prose border-strong hover:border-prose hover:bg-stone-50'
       }`}
     >
       {label}
       <span className={`text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-full ${
-        active ? 'bg-orange-700 text-orange-100' : 'bg-surface-raised text-prose-faint'
+        active ? 'bg-copper text-stone-50' : 'bg-stone-100 text-prose-muted'
       }`}>
         {count}
       </span>

@@ -188,8 +188,8 @@ export default async function GearPage({ searchParams }: Props) {
           href="/gear"
           className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold transition-colors ${
             !category
-              ? 'bg-accent text-white shadow-md shadow-stone-900/[0.05] hover:bg-accent-hover'
-              : 'bg-surface text-prose-muted hover:bg-surface-raised hover:text-prose shadow-sm shadow-stone-900/[0.04]'
+              ? 'bg-drama text-stone-50 border border-drama shadow-sm shadow-stone-900/20'
+              : 'bg-white text-prose border border-strong hover:border-prose hover:bg-stone-50'
           }`}
         >
           All Gear
@@ -200,8 +200,8 @@ export default async function GearPage({ searchParams }: Props) {
             href={`/gear?category=${c.slug}`}
             className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
               category === c.slug
-                ? 'bg-accent text-white shadow-md shadow-stone-900/[0.05]'
-                : 'bg-surface text-prose-muted hover:bg-surface-raised hover:text-prose shadow-sm shadow-stone-900/[0.04]'
+                ? 'bg-drama text-stone-50 border border-drama shadow-sm shadow-stone-900/20'
+                : 'bg-white text-prose border border-strong hover:border-prose hover:bg-stone-50'
             }`}
           >
             <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
