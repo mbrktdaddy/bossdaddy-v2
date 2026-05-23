@@ -19,7 +19,7 @@ export function ListEditor({ label, items, onChange, placeholder, accent }: Prop
 
   return (
     <div>
-      <label className="block text-sm text-gray-300 mb-1.5">{label}</label>
+      <label className="block text-sm text-prose-muted mb-1.5">{label}</label>
       <div className="space-y-2">
         {items.map((item, i) => (
           <div key={i} className="flex gap-2">
@@ -28,12 +28,12 @@ export function ListEditor({ label, items, onChange, placeholder, accent }: Prop
               value={item}
               onChange={(e) => update(i, e.target.value)}
               placeholder={placeholder}
-              className="flex-1 px-4 py-2 bg-surface border border-strong rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+              className="flex-1 px-4 py-2 bg-surface border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
             />
             <button
               type="button"
               onClick={() => remove(i)}
-              className="px-3 py-2 text-prose-faint hover:text-red-400 transition-colors text-lg leading-none"
+              className="px-3 py-2 text-prose-faint hover:text-red-600 transition-colors text-lg leading-none"
             >×</button>
           </div>
         ))}

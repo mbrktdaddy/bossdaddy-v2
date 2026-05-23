@@ -36,16 +36,16 @@ export async function MerchPanel() {
           <div className="w-[3px] bg-accent rounded-full" />
           <div>
             <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-1">— Made by Boss Daddy</p>
-            <h2 className="text-2xl font-black text-white leading-tight">Boss Daddy Merch</h2>
+            <h2 className="text-2xl font-black text-prose leading-tight">Boss Daddy Merch</h2>
           </div>
         </div>
 
         {isEmpty ? (
           /* Empty state — tight callout + email capture */
-          <div className="bg-surface rounded-2xl shadow-lg shadow-black/40 px-6 py-8 sm:px-8 sm:py-10">
+          <div className="bg-surface rounded-2xl shadow-lg shadow-stone-900/[0.06] px-6 py-8 sm:px-8 sm:py-10">
             <div className="flex flex-col sm:flex-row sm:items-center gap-6">
               <div className="flex-1">
-                <p className="text-base text-gray-300 leading-relaxed">
+                <p className="text-base text-prose-muted leading-relaxed">
                   Branded gear, coming soon — apparel, drinkware, and accessories built for the dads who get it done.
                   Get notified when the first drop lands.
                 </p>
@@ -87,7 +87,7 @@ export async function MerchPanel() {
                       </div>
                     )}
                     {!isAvailable && (
-                      <div className="absolute top-3 left-3 bg-accent-tint/90 backdrop-blur-sm px-2.5 py-1 rounded-full shadow-md shadow-black/40">
+                      <div className="absolute top-3 left-3 bg-accent-tint/90 backdrop-blur-sm px-2.5 py-1 rounded-full shadow-md shadow-stone-900/[0.06]">
                         <p className="text-[10px] font-bold text-accent-text-soft uppercase tracking-widest">Coming soon</p>
                       </div>
                     )}
@@ -111,7 +111,7 @@ export async function MerchPanel() {
                 </>
               )
 
-              const className = 'group flex flex-col bg-surface rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200'
+              const className = 'group flex flex-col bg-surface rounded-2xl overflow-hidden shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] transition-all duration-200'
 
               // Printful products → internal detail page
               if (isPrintful) {

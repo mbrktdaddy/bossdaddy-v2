@@ -87,7 +87,7 @@ export default async function BenchPage() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
       {/* Header */}
       <div className="mb-10">
-        <div className="inline-flex items-center gap-2 bg-accent-tint/50 border border-accent-border/50 rounded-full px-4 py-1.5 text-xs text-accent-text-soft font-medium mb-4">
+        <div className="inline-flex items-center gap-2 bg-accent-tint border border-accent-border/50 rounded-full px-4 py-1.5 text-xs text-accent-text-soft font-medium mb-4">
           <span className="w-1.5 h-1.5 rounded-full bg-accent-hover animate-pulse" />
           Live Testing Pipeline
         </div>
@@ -122,7 +122,7 @@ export default async function BenchPage() {
                   </summary>
                   <div className="space-y-3">
                     {sectionItems.map((item) => (
-                      <div key={item.id} className="p-4 bg-[var(--bd-surface)] rounded-2xl shadow-md shadow-black/30">
+                      <div key={item.id} className="p-4 bg-[var(--bd-surface)] rounded-2xl shadow-md shadow-stone-900/[0.05]">
                         <p className="text-sm font-semibold text-zinc-400">{item.title}</p>
                         {item.skip_reason && (
                           <p className="text-xs text-zinc-600 mt-1">{item.skip_reason}</p>

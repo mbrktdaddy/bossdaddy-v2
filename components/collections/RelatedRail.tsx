@@ -41,7 +41,7 @@ export default function RelatedRail({
       <div className="mb-6">
         <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">{eyebrow}</p>
-        <h2 className="text-2xl font-black text-white leading-tight">{heading}</h2>
+        <h2 className="text-2xl font-black text-prose leading-tight">{heading}</h2>
       </div>
 
       {/* Mobile: horizontal scroll strip */}
@@ -69,7 +69,7 @@ function RelatedCard({ item, className }: { item: RelatedItem; className?: strin
   return (
     <Link
       href={href}
-      className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-md shadow-black/30 hover:border-accent-border/40 hover:shadow-lg hover:shadow-black/50 hover:-translate-y-0.5 transition-all ${className ?? ''}`}
+      className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl overflow-hidden shadow-md shadow-stone-900/[0.05] hover:border-accent-border/40 hover:shadow-lg hover:shadow-stone-900/[0.08] hover:-translate-y-0.5 transition-all ${className ?? ''}`}
     >
       <div className="relative aspect-video bg-surface-sunken">
         {item.hero_image_url ? (
@@ -87,7 +87,7 @@ function RelatedCard({ item, className }: { item: RelatedItem; className?: strin
         </span>
       </div>
       <div className="p-4 flex-1 flex flex-col">
-        <p className="text-sm font-bold text-white group-hover:text-accent-text-soft transition-colors leading-snug line-clamp-2 mb-1">
+        <p className="text-sm font-bold text-prose group-hover:text-accent-text-soft transition-colors leading-snug line-clamp-2 mb-1">
           {item.title}
         </p>
         {item.description && (

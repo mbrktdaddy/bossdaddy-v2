@@ -54,7 +54,7 @@ export default async function BenchStrip({
       </div>
 
       {/* Queue rows */}
-      <ul className="divide-y divide-gray-800/60">
+      <ul className="divide-y divide-soft">
         {items.map((item) => (
           <li key={item.id}>
             <Link
@@ -73,7 +73,7 @@ export default async function BenchStrip({
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <svg className="w-5 h-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-5 h-5 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
@@ -88,7 +88,7 @@ export default async function BenchStrip({
               </span>
 
               {/* Title */}
-              <p className="text-sm font-bold text-gray-300 group-hover:text-accent-text-soft transition-colors line-clamp-1 flex-1">
+              <p className="text-sm font-bold text-prose-muted group-hover:text-accent-text-soft transition-colors line-clamp-1 flex-1">
                 {item.title}
               </p>
 

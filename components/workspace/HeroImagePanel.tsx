@@ -105,7 +105,7 @@ export function HeroImagePanel({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <label className="text-sm text-gray-300 font-medium">{label}</label>
+        <label className="text-sm text-prose-muted font-medium">{label}</label>
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -118,7 +118,7 @@ export function HeroImagePanel({
           <button
             type="button"
             onClick={() => setShowPicker(true)}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-gray-700 text-prose-muted hover:text-white rounded-lg transition-colors min-h-[36px]"
+            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose-muted hover:text-prose rounded-lg transition-colors min-h-[36px]"
           >
             📁 Library
           </button>
@@ -140,7 +140,7 @@ export function HeroImagePanel({
           <button
             type="button"
             onClick={() => onChange(null)}
-            className="absolute top-2 right-2 p-1.5 bg-surface/80 hover:bg-red-900/80 text-prose-muted hover:text-red-400 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+            className="absolute top-2 right-2 p-1.5 bg-surface/80 hover:bg-red-50 text-prose-muted hover:text-red-600 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
             title="Remove image"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -164,7 +164,7 @@ export function HeroImagePanel({
           value={imagePrompt}
           onChange={(e) => setImagePrompt(e.target.value)}
           placeholder="Custom prompt for editorial scene (optional). Use 📷 for the actual product."
-          className="flex-1 px-3 py-2 bg-surface border border-strong rounded-lg text-xs text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover"
+          className="flex-1 px-3 py-2 bg-surface border border-strong rounded-lg text-xs text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover"
         />
         <button
           type="button"
@@ -182,7 +182,7 @@ export function HeroImagePanel({
           type="button"
           onClick={() => setPremium(false)}
           className={`px-2.5 py-1 rounded-md transition-colors ${
-            !premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-white'
+            !premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-prose'
           }`}
         >
           Standard
@@ -191,7 +191,7 @@ export function HeroImagePanel({
           type="button"
           onClick={() => setPremium(true)}
           className={`px-2.5 py-1 rounded-md transition-colors ${
-            premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-white'
+            premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-prose'
           }`}
         >
           Premium
@@ -202,7 +202,7 @@ export function HeroImagePanel({
       </div>
 
       {error && (
-        <p className="text-xs text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">
+        <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
           {error}
         </p>
       )}

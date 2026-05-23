@@ -56,7 +56,7 @@ export default async function EditPickPage({ params }: { params: Promise<{ id: s
   return (
     <div className="p-4 sm:p-8 max-w-3xl">
       <div className="mb-6">
-        <Link href="/dashboard/admin/picks" className="text-xs text-prose-faint hover:text-gray-300 transition-colors">
+        <Link href="/dashboard/admin/picks" className="text-xs text-prose-faint hover:text-prose transition-colors">
           ← All Lists
         </Link>
         <div className="flex items-center justify-between mt-2">
@@ -65,7 +65,7 @@ export default async function EditPickPage({ params }: { params: Promise<{ id: s
             <Link
               href={`/picks/${pick.slug}`}
               target="_blank"
-              className="text-xs text-accent-text-soft hover:text-orange-300 transition-colors"
+              className="text-xs text-accent-text-soft hover:text-accent transition-colors"
             >
               View live →
             </Link>

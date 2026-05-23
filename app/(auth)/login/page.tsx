@@ -46,21 +46,21 @@ function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="email" className="block text-sm text-gray-300 mb-1">Email</label>
+        <label htmlFor="email" className="block text-sm text-prose-muted mb-1">Email</label>
         <input
           id="email"
           type="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
           placeholder="you@example.com"
         />
       </div>
 
       <div>
         <div className="flex items-center justify-between mb-1">
-          <label htmlFor="password" className="block text-sm text-gray-300">Password</label>
+          <label htmlFor="password" className="block text-sm text-prose-muted">Password</label>
           <Link href="/forgot-password" className="text-xs text-prose-faint hover:text-accent-text-soft transition-colors">
             Forgot password?
           </Link>
@@ -71,13 +71,13 @@ function LoginForm() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
           placeholder="••••••••"
         />
       </div>
 
       {error && (
-        <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-2">
+        <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-2">
           {error}
         </p>
       )}
@@ -97,7 +97,7 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-surface-sunken px-4">
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-white mb-2">Welcome back, Boss</h1>
+        <h1 className="text-2xl font-bold text-prose mb-2">Welcome back, Boss</h1>
         <p className="text-prose-muted mb-8 text-sm">Sign in to your account</p>
 
         <Suspense fallback={<div className="h-48 animate-pulse bg-surface rounded-lg" />}>
@@ -106,7 +106,7 @@ export default function LoginPage() {
 
         <p className="mt-6 text-center text-sm text-prose-faint">
           New here?{' '}
-          <Link href="/register" className="text-accent-text-soft hover:text-orange-300">
+          <Link href="/register" className="text-accent-text-soft hover:text-accent">
             Create an account
           </Link>
         </p>

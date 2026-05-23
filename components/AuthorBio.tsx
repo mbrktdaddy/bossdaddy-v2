@@ -34,7 +34,7 @@ export default async function AuthorBio({ username }: Props) {
 
   return (
     <div className="mt-12 pt-8">
-      <div className="bg-surface rounded-2xl p-6 sm:p-7 shadow-lg shadow-black/40">
+      <div className="bg-surface rounded-2xl p-6 sm:p-7 shadow-lg shadow-stone-900/[0.06]">
         <div className="flex items-start gap-4">
           {avatarUrl ? (
             <div className="w-14 h-14 shrink-0 rounded-full overflow-hidden bg-surface-sunken relative">

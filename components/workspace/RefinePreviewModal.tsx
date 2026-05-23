@@ -13,9 +13,9 @@ const proseClasses = `
   prose prose-sm prose-invert prose-orange max-w-none
   prose-headings:font-black prose-headings:font-sans prose-headings:tracking-tight
   prose-h2:text-sm prose-h2:mt-4 prose-h2:mb-1
-  prose-p:text-gray-300 prose-p:leading-relaxed prose-p:text-xs
+  prose-p:text-prose-muted prose-p:leading-relaxed prose-p:text-xs
   prose-a:text-accent-text-soft prose-a:no-underline
-  prose-strong:text-white prose-li:text-xs prose-li:text-gray-300
+  prose-strong:text-prose prose-li:text-xs prose-li:text-prose-muted
 `.trim()
 
 export function RefinePreviewModal({ before, after, onAccept, onDiscard }: Props) {
@@ -28,20 +28,20 @@ export function RefinePreviewModal({ before, after, onAccept, onDiscard }: Props
   }, [onDiscard])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-stretch bg-black/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-stretch bg-stone-900/80 backdrop-blur-sm">
       <div className="flex flex-col w-full max-w-6xl mx-auto my-4 mx-4 bg-surface-sunken border border-soft rounded-2xl overflow-hidden shadow-2xl">
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-soft shrink-0">
           <div>
-            <p className="text-sm font-bold text-white">Review AI changes before applying</p>
+            <p className="text-sm font-bold text-prose">Review AI changes before applying</p>
             <p className="text-xs text-prose-faint mt-0.5">Left = current content · Right = proposed changes</p>
           </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={onDiscard}
-              className="px-4 py-2 bg-surface-raised hover:bg-gray-700 text-gray-300 text-sm font-medium rounded-lg transition-colors"
+              className="px-4 py-2 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm font-medium rounded-lg transition-colors"
             >
               Discard
             </button>
@@ -73,7 +73,7 @@ export function RefinePreviewModal({ before, after, onAccept, onDiscard }: Props
 
           {/* After */}
           <div className="flex-1 min-w-0 flex flex-col">
-            <div className="px-4 py-2 bg-accent-tint/40 border-b border-accent-border/30 shrink-0">
+            <div className="px-4 py-2 bg-accent-tint border-b border-accent-border/30 shrink-0">
               <span className="text-xs font-semibold text-accent-text-soft uppercase tracking-widest">After (proposed)</span>
             </div>
             <div className="flex-1 overflow-y-auto px-5 py-4">

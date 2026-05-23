@@ -134,7 +134,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
               </Link>
 
               <div className="flex-1 min-w-0">
-                <Link href={`/gear/${item.merch.slug}`} className="font-semibold text-white hover:text-accent-text-soft transition-colors line-clamp-2 leading-snug">
+                <Link href={`/gear/${item.merch.slug}`} className="font-semibold text-prose hover:text-accent-text-soft transition-colors line-clamp-2 leading-snug">
                   {item.merch.name}
                 </Link>
                 {variantLabel && <p className="text-xs text-prose-faint mt-0.5">{variantLabel}</p>}
@@ -145,16 +145,16 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
                 <div className="flex items-center gap-1 bg-surface-raised rounded-xl px-2 py-1">
                   <button
                     onClick={() => updateQty(item.id, item.qty - 1)}
-                    className="w-7 h-7 flex items-center justify-center text-prose-muted hover:text-white transition-colors"
+                    className="w-7 h-7 flex items-center justify-center text-prose-muted hover:text-prose transition-colors"
                     aria-label="Decrease quantity"
                   >
                     −
                   </button>
-                  <span className="w-5 text-center text-sm font-bold text-white tabular-nums">{item.qty}</span>
+                  <span className="w-5 text-center text-sm font-bold text-prose tabular-nums">{item.qty}</span>
                   <button
                     onClick={() => updateQty(item.id, item.qty + 1)}
                     disabled={item.qty >= 10}
-                    className="w-7 h-7 flex items-center justify-center text-prose-muted hover:text-white disabled:opacity-30 transition-colors"
+                    className="w-7 h-7 flex items-center justify-center text-prose-muted hover:text-prose disabled:opacity-30 transition-colors"
                     aria-label="Increase quantity"
                   >
                     +
@@ -162,7 +162,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
                 </div>
                 <button
                   onClick={() => removeItem(item.id)}
-                  className="text-xs text-prose-faint hover:text-red-400 transition-colors mt-2"
+                  className="text-xs text-prose-faint hover:text-red-600 transition-colors mt-2"
                 >
                   Remove
                 </button>
@@ -176,23 +176,23 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
       <div className="bg-surface/60 rounded-2xl p-6 flex flex-col gap-3">
         <div className="flex items-center justify-between text-sm">
           <span className="text-prose-muted">Subtotal</span>
-          <span className="text-white font-semibold">{formatPrice(subtotal)}</span>
+          <span className="text-prose font-semibold">{formatPrice(subtotal)}</span>
         </div>
         <div className="flex items-center justify-between text-sm">
           <span className="text-prose-muted">Shipping</span>
-          <span className="text-green-400 font-semibold">Free</span>
+          <span className="text-green-700 font-semibold">Free</span>
         </div>
         <div className="flex items-center justify-between text-sm text-prose-faint">
           <span>Tax</span>
           <span>Calculated at checkout</span>
         </div>
         <div className="border-t border-soft pt-4 mt-1 flex items-center justify-between">
-          <span className="font-black text-white">Total</span>
+          <span className="font-black text-prose">Total</span>
           <span className="text-2xl font-black text-accent-text-soft">{formatPrice(subtotal)}</span>
         </div>
 
         {checkoutError && (
-          <p className="text-red-400 text-xs text-center">{checkoutError}</p>
+          <p className="text-red-600 text-xs text-center">{checkoutError}</p>
         )}
         <button
           onClick={handleCheckout}
@@ -212,7 +212,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
           type="button"
           onClick={emptyCart}
           disabled={busy === '__all__'}
-          className="text-prose-faint hover:text-red-400 disabled:opacity-50 transition-colors text-xs"
+          className="text-prose-faint hover:text-red-600 disabled:opacity-50 transition-colors text-xs"
         >
           {busy === '__all__' ? 'Emptying…' : 'Empty cart'}
         </button>

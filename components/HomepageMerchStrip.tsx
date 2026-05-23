@@ -25,7 +25,7 @@ export async function HomepageMerchStrip() {
             <div className="w-[3px] bg-accent rounded-full" />
             <div>
               <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-2">— Rep the Brand</p>
-              <h2 className="text-2xl md:text-3xl font-black text-white leading-tight">Boss Daddy Gear</h2>
+              <h2 className="text-2xl md:text-3xl font-black text-prose leading-tight">Boss Daddy Gear</h2>
             </div>
           </div>
           <Link
@@ -59,7 +59,7 @@ export async function HomepageMerchStrip() {
         <div className="mt-6 sm:hidden text-center">
           <Link
             href="/gear"
-            className="text-sm text-accent-text-soft hover:text-orange-300 font-semibold transition-colors"
+            className="text-sm text-accent-text-soft hover:text-accent font-semibold transition-colors"
           >
             Shop All Gear →
           </Link>

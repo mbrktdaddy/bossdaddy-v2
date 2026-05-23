@@ -235,7 +235,7 @@ export default async function StackDetailPage({ params }: Props) {
             <header className="mb-8">
               <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
               <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">The Stack</p>
-              <h1 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tight leading-tight">{stack.title}</h1>
+              <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight leading-tight">{stack.title}</h1>
               {stack.description && (
                 <p className="text-lg text-prose-muted leading-relaxed mb-6">{stack.description}</p>
               )}
@@ -248,7 +248,7 @@ export default async function StackDetailPage({ params }: Props) {
               {total != null && total > 0 && (
                 <a
                   href="#cost"
-                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-accent-tint/40 border border-accent-border/40 hover:border-accent-border/60 rounded-full text-xs font-bold text-orange-300 hover:text-orange-200 transition-colors min-h-[36px]"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-accent-tint border border-accent-border/40 hover:border-accent-border/60 rounded-full text-xs font-bold text-accent-text hover:text-accent transition-colors min-h-[36px]"
                 >
                   <span className="text-eyebrow/80 uppercase tracking-widest text-[10px]">Build cost</span>
                   <span className="tabular-nums">${(total / 100).toFixed(0)}</span>
@@ -272,10 +272,10 @@ export default async function StackDetailPage({ params }: Props) {
                 <div className="mb-5">
                   <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Why These</p>
-                  <h2 className="text-2xl font-black text-white leading-tight">Why this kit works together</h2>
+                  <h2 className="text-2xl font-black text-prose leading-tight">Why this kit works together</h2>
                 </div>
                 <div
-                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-accent-text-soft hover:prose-a:text-orange-300 prose-a:no-underline"
+                  className="prose prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
                   dangerouslySetInnerHTML={{ __html: stack.intro_html }}
                 />
               </section>
@@ -295,7 +295,7 @@ export default async function StackDetailPage({ params }: Props) {
               <div className="mb-5">
                 <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Lineup</p>
-                <h2 className="text-2xl font-black text-white leading-tight">
+                <h2 className="text-2xl font-black text-prose leading-tight">
                   {items.length} {items.length === 1 ? 'piece' : 'pieces'} in this kit
                 </h2>
               </div>
@@ -309,7 +309,7 @@ export default async function StackDetailPage({ params }: Props) {
                   return (
                     <article
                       key={review.id}
-                      className="relative flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:border-accent-border/40 rounded-2xl p-5 shadow-lg shadow-black/40 transition-colors"
+                      className="relative flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-2xl p-5 shadow-lg shadow-stone-900/[0.06] transition-colors"
                     >
                       {/* Position number — subtle ordering signal */}
                       <span aria-hidden className="absolute top-3 left-3 text-[10px] font-black text-accent-text/30 tabular-nums tracking-widest">
@@ -327,20 +327,20 @@ export default async function StackDetailPage({ params }: Props) {
 
                       <div className="flex-1 min-w-0 flex flex-col">
                         {role_label && (
-                          <span className="self-start text-[10px] font-black uppercase tracking-[0.2em] text-orange-300 bg-accent-tint/60 border border-accent-border/40 px-3 py-1 rounded-full mb-2">
+                          <span className="self-start text-[10px] font-black uppercase tracking-[0.2em] text-accent-text bg-accent-tint border border-accent-border/40 px-3 py-1 rounded-full mb-2">
                             {role_label}
                           </span>
                         )}
                         <div className="flex items-start justify-between gap-3 mb-2">
                           <div>
-                            <Link href={`/reviews/${review.slug}`} className="text-lg font-bold text-white hover:text-accent-text-soft transition-colors leading-snug block">
+                            <Link href={`/reviews/${review.slug}`} className="text-lg font-bold text-prose hover:text-accent-text-soft transition-colors leading-snug block">
                               {review.title}
                             </Link>
                           </div>
                           <RatingScore rating={review.rating ?? 0} size="sm" />
                         </div>
                         {(blurb || review.tldr) && (
-                          <p className="text-sm text-gray-300 leading-relaxed flex-1 mb-3">{blurb ?? review.tldr}</p>
+                          <p className="text-sm text-prose-muted leading-relaxed flex-1 mb-3">{blurb ?? review.tldr}</p>
                         )}
                         {(review.best_for?.length ?? 0) > 0 && (
                           <p className="text-xs text-prose-faint mb-3">
@@ -349,7 +349,7 @@ export default async function StackDetailPage({ params }: Props) {
                         )}
                         <div className="flex flex-wrap items-center gap-3 mt-auto pt-1">
                           {priceCents != null && (
-                            <span className="text-base font-black text-white tabular-nums">${(priceCents / 100).toFixed(0)}</span>
+                            <span className="text-base font-black text-prose tabular-nums">${(priceCents / 100).toFixed(0)}</span>
                           )}
                           <Link href={`/reviews/${review.slug}`} className="text-xs text-prose-muted hover:text-accent-text-soft transition-colors font-semibold uppercase tracking-widest">
                             Read review →
@@ -378,10 +378,10 @@ export default async function StackDetailPage({ params }: Props) {
               <section
                 id="cost"
                 aria-label="Build cost"
-                className="mb-12 rounded-2xl border border-accent-border/40 bg-gradient-to-br from-orange-950/30 to-surface/60 ring-1 ring-inset ring-white/[0.02] p-6 sm:p-8 shadow-lg shadow-black/40 text-center"
+                className="mb-12 rounded-2xl border border-accent-border/40 bg-gradient-to-br from-accent-tint to-white ring-1 ring-inset ring-stone-900/[0.04] p-6 sm:p-8 shadow-lg shadow-stone-900/[0.06] text-center"
               >
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Build Cost</p>
-                <p className="text-4xl sm:text-5xl font-black text-white tabular-nums mb-2">${(total / 100).toFixed(2)}</p>
+                <p className="text-4xl sm:text-5xl font-black text-prose tabular-nums mb-2">${(total / 100).toFixed(2)}</p>
                 <p className="text-xs text-prose-faint">
                   {partialPricing
                     ? `Partial total · ${pricedCount} of ${items.length} pieces have a listed price`

@@ -489,11 +489,11 @@ export function PickForm({ pick, initialItems }: Props) {
       {/* Metadata */}
       <div className="space-y-4">
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Slug <span className="text-red-400">*</span></label>
+          <label className="block text-sm text-prose-muted mb-1.5">Slug <span className="text-red-600">*</span></label>
           <input
             type="text" required value={slug} onChange={(e) => setSlug(e.target.value.toLowerCase())}
             pattern="[a-z0-9-]+" placeholder="fathers-day-gift-guide"
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
           />
           <p className="mt-1 text-xs text-prose-faint">
             Public URL: {pickType === 'comparison'
@@ -512,11 +512,11 @@ export function PickForm({ pick, initialItems }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Title <span className="text-red-400">*</span></label>
+          <label className="block text-sm text-prose-muted mb-1.5">Title <span className="text-red-600">*</span></label>
           <input
             type="text" required value={title} onChange={(e) => setTitle(e.target.value)}
             placeholder="Father's Day Gift Guide 2026"
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
           />
           {titleLint(title) && (
             <p className="mt-1 text-xs text-amber-400">⚠ {titleLint(title)}</p>
@@ -524,17 +524,17 @@ export function PickForm({ pick, initialItems }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Short description <span className="text-prose-faint">(shows on index cards)</span></label>
+          <label className="block text-sm text-prose-muted mb-1.5">Short description <span className="text-prose-faint">(shows on index cards)</span></label>
           <input
             type="text" value={description} onChange={(e) => setDesc(e.target.value)}
             placeholder="Dad-tested picks that actually earn a spot in the garage or kitchen."
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
           />
         </div>
 
         <div>
           <div className="flex items-end justify-between mb-1.5 gap-2 flex-wrap">
-            <label className="block text-sm text-gray-300">
+            <label className="block text-sm text-prose-muted">
               Editorial intro <span className="text-prose-faint">(shows above the body of the detail page)</span>
             </label>
             <button
@@ -561,13 +561,13 @@ export function PickForm({ pick, initialItems }: Props) {
                 value={refineInstruction}
                 onChange={(e) => setRefineInstruction(e.target.value)}
                 placeholder="Refine instruction — e.g. 'tighter', 'more dad voice', 'lead with the testing scenario'…"
-                className="flex-1 px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm"
+                className="flex-1 px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm"
               />
               <button
                 type="button"
                 onClick={() => callIntroAI(true)}
                 disabled={aiBusy || !refineInstruction.trim() || items.length < 2}
-                className="shrink-0 text-xs px-3 py-2 bg-surface-raised hover:bg-gray-700 disabled:opacity-40 text-prose font-semibold rounded-lg transition-colors min-h-[36px]"
+                className="shrink-0 text-xs px-3 py-2 bg-surface-raised hover:bg-stone-100 disabled:opacity-40 text-prose font-semibold rounded-lg transition-colors min-h-[36px]"
               >
                 {aiBusy && refineInstruction ? 'Refining…' : 'Refine →'}
               </button>
@@ -575,7 +575,7 @@ export function PickForm({ pick, initialItems }: Props) {
           )}
 
           {aiError && (
-            <p className="mt-2 text-xs text-red-400 bg-red-950/40 border border-red-900/40 rounded-lg px-3 py-2">{aiError}</p>
+            <p className="mt-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{aiError}</p>
           )}
 
           {/* Inline images — manages bd-image-placeholder figures inside the intro */}
@@ -603,10 +603,10 @@ export function PickForm({ pick, initialItems }: Props) {
         </p>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Collection type</label>
+          <label className="block text-sm text-prose-muted mb-1.5">Collection type</label>
           <select
             value={pickType} onChange={(e) => setPickType(e.target.value)}
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
           >
             <option value="general">Pick (general curated list, /picks)</option>
             <option value="best_of">Best Of (ranked category list, /picks)</option>
@@ -618,7 +618,7 @@ export function PickForm({ pick, initialItems }: Props) {
 
         {pickType === 'comparison' && (
           <div>
-            <label className="block text-sm text-gray-300 mb-1.5">
+            <label className="block text-sm text-prose-muted mb-1.5">
               Bottom line <span className="text-prose-faint">(one-line verdict shown above the scorecard)</span>
             </label>
             <textarea
@@ -627,7 +627,7 @@ export function PickForm({ pick, initialItems }: Props) {
               maxLength={500}
               rows={2}
               placeholder="Buy the Yeti for everyday use, the RTIC if you need it bigger, and skip the Igloo unless you're on a budget."
-              className="w-full px-4 py-3 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none text-base"
+              className="w-full px-4 py-3 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none text-base"
             />
             <p className="mt-1 text-xs text-prose-faint">{winnerSummary.length}/500</p>
           </div>
@@ -635,7 +635,7 @@ export function PickForm({ pick, initialItems }: Props) {
 
         {pickType === 'stack' && (
           <div>
-            <label className="block text-sm text-gray-300 mb-1.5">
+            <label className="block text-sm text-prose-muted mb-1.5">
               Bundle total <span className="text-prose-faint">(cents — optional; otherwise computed from items)</span>
             </label>
             <input
@@ -645,7 +645,7 @@ export function PickForm({ pick, initialItems }: Props) {
               value={bundleTotalCents}
               onChange={(e) => setBundleTotal(e.target.value.replace(/\D/g, ''))}
               placeholder="e.g. 49999 = $499.99"
-              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
+              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
             />
             {bundleTotalCents && !isNaN(parseInt(bundleTotalCents, 10)) && (
               <p className="mt-1 text-xs text-accent-text-soft">${(parseInt(bundleTotalCents, 10) / 100).toFixed(2)}</p>
@@ -655,10 +655,10 @@ export function PickForm({ pick, initialItems }: Props) {
 
         {pickType === 'gift_guide' && (
           <div>
-            <label className="block text-sm text-gray-300 mb-1.5">Occasion <span className="text-red-400">*</span></label>
+            <label className="block text-sm text-prose-muted mb-1.5">Occasion <span className="text-red-600">*</span></label>
             <select
               value={occasion} onChange={(e) => setOccasion(e.target.value)}
-              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
+              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
             >
               <option value="">Select an occasion…</option>
               {OCCASION_GROUPS.map((group) => (
@@ -709,7 +709,7 @@ export function PickForm({ pick, initialItems }: Props) {
                 onChange={(e) => setMetaTitle(e.target.value)}
                 maxLength={120}
                 placeholder={title ? `${title.slice(0, 60)}${title.length > 60 ? '…' : ''}` : 'Defaults to title'}
-                className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm"
+                className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm"
               />
               <p className="mt-1 text-xs text-prose-faint tabular-nums">{metaTitle.length}/120</p>
             </div>
@@ -723,7 +723,7 @@ export function PickForm({ pick, initialItems }: Props) {
                 maxLength={300}
                 rows={3}
                 placeholder={description || 'Defaults to short description'}
-                className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm resize-none"
+                className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm resize-none"
               />
               <p className="mt-1 text-xs text-prose-faint tabular-nums">{metaDescription.length}/300</p>
             </div>
@@ -756,7 +756,7 @@ export function PickForm({ pick, initialItems }: Props) {
               maxLength={10000}
               rows={6}
               placeholder="Tell the reader how the testing was done for this specific collection. Skipped categories, time windows, real-life conditions, etc."
-              className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm resize-y"
+              className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm resize-y"
             />
             <p className="text-xs text-prose-faint tabular-nums">{methodologyHtml.length}/10000</p>
           </div>
@@ -790,7 +790,7 @@ export function PickForm({ pick, initialItems }: Props) {
                   <button
                     type="button"
                     onClick={() => setFaqs((f) => f.filter((_, i) => i !== idx))}
-                    className="text-xs text-prose-faint hover:text-red-400 transition-colors"
+                    className="text-xs text-prose-faint hover:text-red-600 transition-colors"
                     title="Remove this Q&A"
                   >
                     Remove
@@ -805,7 +805,7 @@ export function PickForm({ pick, initialItems }: Props) {
                   }}
                   maxLength={200}
                   placeholder="Question (e.g. How long did you test these?)"
-                  className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm"
+                  className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm"
                 />
                 <textarea
                   value={faq.answer}
@@ -816,7 +816,7 @@ export function PickForm({ pick, initialItems }: Props) {
                   maxLength={1000}
                   rows={3}
                   placeholder="Answer — concise and direct."
-                  className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm resize-y"
+                  className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm resize-y"
                 />
               </div>
             ))}
@@ -824,7 +824,7 @@ export function PickForm({ pick, initialItems }: Props) {
               <button
                 type="button"
                 onClick={() => setFaqs((f) => [...f, { question: '', answer: '' }])}
-                className="w-full px-3 py-2 bg-surface hover:bg-surface-raised border border-dashed border-strong hover:border-accent-border text-xs text-prose-muted hover:text-orange-300 rounded-lg transition-colors min-h-[44px]"
+                className="w-full px-3 py-2 bg-surface hover:bg-surface-raised border border-dashed border-strong hover:border-accent-border text-xs text-prose-muted hover:text-accent rounded-lg transition-colors min-h-[44px]"
               >
                 + Add Q&amp;A
               </button>
@@ -836,7 +836,7 @@ export function PickForm({ pick, initialItems }: Props) {
         <div className="bg-surface-sunken/60 border border-soft/60 rounded-xl p-4">
           <div className="flex items-baseline justify-between mb-3">
             <p className="text-xs text-prose-muted font-semibold uppercase tracking-widest">Ready to publish?</p>
-            <p className={`text-xs font-bold tabular-nums ${requiredMissing > 0 ? 'text-amber-400' : 'text-green-400'}`}>
+            <p className={`text-xs font-bold tabular-nums ${requiredMissing > 0 ? 'text-amber-400' : 'text-green-700'}`}>
               {requiredMissing > 0 ? `${requiredMissing} required missing` : 'All required ✓'}
             </p>
           </div>
@@ -847,7 +847,7 @@ export function PickForm({ pick, initialItems }: Props) {
                   aria-hidden
                   className={`w-3.5 h-3.5 rounded-full shrink-0 flex items-center justify-center text-[10px] font-black ${
                     c.done
-                      ? 'bg-green-500/20 text-green-400'
+                      ? 'bg-green-500/20 text-green-700'
                       : c.required
                       ? 'bg-amber-500/20 text-amber-400'
                       : 'bg-surface-raised text-prose-faint'
@@ -855,7 +855,7 @@ export function PickForm({ pick, initialItems }: Props) {
                 >
                   {c.done ? '✓' : c.required ? '!' : '·'}
                 </span>
-                <span className={c.done ? 'text-gray-300' : c.required ? 'text-amber-300' : 'text-prose-faint'}>
+                <span className={c.done ? 'text-prose-muted' : c.required ? 'text-amber-300' : 'text-prose-faint'}>
                   {c.label}{c.required && !c.done ? ' (required)' : ''}
                 </span>
               </li>
@@ -869,7 +869,7 @@ export function PickForm({ pick, initialItems }: Props) {
               type="checkbox" checked={visible} onChange={(e) => setVisible(e.target.checked)}
               className="w-4 h-4 rounded accent-orange-500"
             />
-            <span className="text-sm text-gray-300">Publish (make visible on site)</span>
+            <span className="text-sm text-prose-muted">Publish (make visible on site)</span>
           </label>
         )}
       </div>
@@ -878,7 +878,7 @@ export function PickForm({ pick, initialItems }: Props) {
       <div>
         <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
           <div>
-            <p className="text-sm font-semibold text-white">
+            <p className="text-sm font-semibold text-prose">
               Picks <span className="text-prose-faint font-normal">({items.length})</span>
             </p>
             {(() => {
@@ -912,10 +912,10 @@ export function PickForm({ pick, initialItems }: Props) {
           )}
         </div>
         {fillError && (
-          <p className="mb-3 text-xs text-red-400 bg-red-950/40 border border-red-900/40 rounded-lg px-3 py-2">{fillError}</p>
+          <p className="mb-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{fillError}</p>
         )}
         {fillNote && !fillError && (
-          <p className="mb-3 text-xs text-green-400 bg-green-950/30 border border-green-900/40 rounded-lg px-3 py-2">{fillNote}</p>
+          <p className="mb-3 text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">{fillNote}</p>
         )}
 
         {/* Search to add */}
@@ -924,7 +924,7 @@ export function PickForm({ pick, initialItems }: Props) {
             type="text" value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); searchReviews(e.target.value) }}
             placeholder="Search approved reviews to add..."
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
           />
           {(searchResults.length > 0 || searching) && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-surface-sunken border border-soft rounded-xl shadow-2xl z-10 overflow-hidden">
@@ -941,10 +941,10 @@ export function PickForm({ pick, initialItems }: Props) {
                     </div>
                   )}
                   <div className="min-w-0">
-                    <p className="text-sm text-white truncate">{r.title}</p>
+                    <p className="text-sm text-prose truncate">{r.title}</p>
                     <p className="text-xs text-prose-faint">{r.product_name} · {r.rating}/10</p>
                   </div>
-                  {items.some((i) => i.review_id === r.id) && <span className="text-xs text-green-400 ml-auto shrink-0">Added</span>}
+                  {items.some((i) => i.review_id === r.id) && <span className="text-xs text-green-700 ml-auto shrink-0">Added</span>}
                 </button>
               ))}
             </div>
@@ -967,16 +967,16 @@ export function PickForm({ pick, initialItems }: Props) {
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-white leading-tight">{review?.title ?? item.review_id}</p>
+                      <p className="text-sm font-semibold text-prose leading-tight">{review?.title ?? item.review_id}</p>
                       <p className="text-xs text-prose-faint mt-0.5">{review?.product_name} · {review?.rating}/10</p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <button type="button" onClick={() => moveItem(idx, -1)} disabled={idx === 0}
-                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-base text-prose-faint hover:text-white disabled:opacity-30 transition-colors rounded-lg hover:bg-surface-raised" title="Move up" aria-label="Move up">↑</button>
+                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-base text-prose-faint hover:text-prose disabled:opacity-30 transition-colors rounded-lg hover:bg-surface-raised" title="Move up" aria-label="Move up">↑</button>
                       <button type="button" onClick={() => moveItem(idx, 1)} disabled={idx === items.length - 1}
-                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-base text-prose-faint hover:text-white disabled:opacity-30 transition-colors rounded-lg hover:bg-surface-raised" title="Move down" aria-label="Move down">↓</button>
+                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-base text-prose-faint hover:text-prose disabled:opacity-30 transition-colors rounded-lg hover:bg-surface-raised" title="Move down" aria-label="Move down">↓</button>
                       <button type="button" onClick={() => removeItem(item.review_id)}
-                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-lg text-prose-faint hover:text-red-400 hover:bg-red-950/30 transition-colors rounded-lg" title="Remove" aria-label="Remove">×</button>
+                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-lg text-prose-faint hover:text-red-600 hover:bg-red-50 transition-colors rounded-lg" title="Remove" aria-label="Remove">×</button>
                     </div>
                   </div>
                   <textarea
@@ -984,7 +984,7 @@ export function PickForm({ pick, initialItems }: Props) {
                     onChange={(e) => updateBlurb(item.review_id, e.target.value)}
                     placeholder="Optional editorial blurb for this pick (2-3 sentences)..."
                     rows={2}
-                    className="mt-2 w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none text-base sm:text-sm"
+                    className="mt-2 w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none text-base sm:text-sm"
                   />
                   {pickType === 'comparison' && (
                     <input
@@ -993,7 +993,7 @@ export function PickForm({ pick, initialItems }: Props) {
                       onChange={(e) => updateWinsCategory(item.review_id, e.target.value)}
                       placeholder="Winner badge (e.g. 'Best Overall', 'Best Budget', 'Best for Solo Use')"
                       maxLength={80}
-                      className="mt-2 w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover text-base sm:text-sm"
+                      className="mt-2 w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover text-base sm:text-sm"
                     />
                   )}
                   {/* Role label — every non-comparison flavor renders this as
@@ -1011,7 +1011,7 @@ export function PickForm({ pick, initialItems }: Props) {
                           placeholder={cfg.placeholder}
                           maxLength={80}
                           aria-label={cfg.label}
-                          className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover text-base sm:text-sm"
+                          className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover text-base sm:text-sm"
                         />
                       </div>
                     )
@@ -1029,7 +1029,7 @@ export function PickForm({ pick, initialItems }: Props) {
                       onChange={(e) => updateBestFor(item.review_id, e.target.value)}
                       placeholder="Best for… (e.g. 'the grill master', 'weekend warriors')"
                       maxLength={120}
-                      className="mt-2 w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover text-base sm:text-sm"
+                      className="mt-2 w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover text-base sm:text-sm"
                     />
                   )}
                 </div>
@@ -1039,13 +1039,13 @@ export function PickForm({ pick, initialItems }: Props) {
         )}
       </div>
 
-      {error && <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">{error}</p>}
+      {error && <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>}
 
       {/* Sticky action bar — pins to the bottom of the viewport so Save /
           Publish / View Live / Delete are reachable from anywhere in this
           long form, especially on mobile. Matches the VoiceProfileForm
           pattern. */}
-      <div className="sticky bottom-2 sm:bottom-4 z-20 mt-4 -mx-3 sm:mx-0 px-3 sm:px-4 py-3 bg-surface-sunken/85 backdrop-blur border border-soft rounded-2xl shadow-lg shadow-black/40">
+      <div className="sticky bottom-2 sm:bottom-4 z-20 mt-4 -mx-3 sm:mx-0 px-3 sm:px-4 py-3 bg-surface-sunken/85 backdrop-blur border border-soft rounded-2xl shadow-lg shadow-stone-900/[0.06]">
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <button type="submit" disabled={busy || !slug.trim() || !title.trim()}
             className="px-4 sm:px-5 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors min-h-[44px]">
@@ -1057,7 +1057,7 @@ export function PickForm({ pick, initialItems }: Props) {
               onClick={() => handleSave(null, { visible: !visible })}
               disabled={busy || !slug.trim() || !title.trim()}
               className={visible
-                ? 'px-4 sm:px-5 py-2.5 bg-yellow-900/40 hover:bg-yellow-900/60 border border-yellow-900/50 text-yellow-300 text-sm font-semibold rounded-xl transition-colors min-h-[44px] disabled:opacity-40'
+                ? 'px-4 sm:px-5 py-2.5 bg-amber-50 hover:bg-amber-50 border border-amber-200 text-amber-700 text-sm font-semibold rounded-xl transition-colors min-h-[44px] disabled:opacity-40'
                 : 'px-4 sm:px-5 py-2.5 bg-green-700 hover:bg-green-600 text-white text-sm font-semibold rounded-xl transition-colors min-h-[44px] disabled:opacity-40'}>
               {busy ? '…' : visible ? 'Unpublish' : 'Publish Live'}
             </button>
@@ -1065,14 +1065,14 @@ export function PickForm({ pick, initialItems }: Props) {
 
           {!isNew && visible && publicPath && (
             <a href={publicPath} target="_blank" rel="noopener noreferrer"
-               className="px-4 sm:px-5 py-2.5 bg-accent-tint/40 hover:bg-accent-tint/40 border border-accent-border/40 text-accent-text-soft hover:text-orange-300 text-sm font-semibold rounded-xl transition-colors min-h-[44px] inline-flex items-center gap-1.5">
+               className="px-4 sm:px-5 py-2.5 bg-accent-tint hover:bg-accent-tint border border-accent-border/40 text-accent-text-soft hover:text-accent text-sm font-semibold rounded-xl transition-colors min-h-[44px] inline-flex items-center gap-1.5">
               View Live →
             </a>
           )}
 
           {!isNew && (
             <button type="button" onClick={handleDelete} disabled={deleting}
-              className="ml-auto px-4 sm:px-5 py-2.5 text-red-400 hover:text-red-300 text-sm transition-colors disabled:opacity-40 min-h-[44px]">
+              className="ml-auto px-4 sm:px-5 py-2.5 text-red-600 hover:text-red-700 text-sm transition-colors disabled:opacity-40 min-h-[44px]">
               {deleting ? 'Deleting…' : 'Delete'}
             </button>
           )}
@@ -1083,7 +1083,7 @@ export function PickForm({ pick, initialItems }: Props) {
         {(savedAt || (!isNew && !visible && publicPath)) && !busy && !error && (
           <div className="mt-2 text-xs flex flex-wrap items-center gap-x-3 gap-y-1">
             {savedAt && (
-              <span className="text-green-400 font-semibold">Saved at {savedAt}</span>
+              <span className="text-green-700 font-semibold">Saved at {savedAt}</span>
             )}
             {!isNew && !visible && publicPath && (
               <span className="text-prose-faint">

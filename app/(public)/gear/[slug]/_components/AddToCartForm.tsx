@@ -68,7 +68,7 @@ export default function AddToCartForm({ variants }: { variants: Variant[] }) {
                   selectedId === v.id
                     ? 'bg-accent border-accent text-white'
                     : v.in_stock
-                    ? 'bg-surface border-strong text-gray-300 hover:border-accent hover:text-white'
+                    ? 'bg-surface border-strong text-prose-muted hover:border-accent hover:text-prose'
                     : 'bg-surface/50 border-soft text-prose-faint cursor-not-allowed line-through'
                 }`}
               >
@@ -82,8 +82,8 @@ export default function AddToCartForm({ variants }: { variants: Variant[] }) {
       {/* Single variant info (hat / one-size) */}
       {(!hasSizes || variants.length === 1) && selected && (
         <div className="flex gap-3 text-sm text-prose-faint">
-          {selected.color && <span>Color: <span className="text-gray-300">{selected.color}</span></span>}
-          {selected.size && <span>Size: <span className="text-gray-300">{selected.size}</span></span>}
+          {selected.color && <span>Color: <span className="text-prose-muted">{selected.color}</span></span>}
+          {selected.size && <span>Size: <span className="text-prose-muted">{selected.size}</span></span>}
         </div>
       )}
 
@@ -93,14 +93,14 @@ export default function AddToCartForm({ variants }: { variants: Variant[] }) {
         <div className="flex items-center gap-1 bg-surface border border-soft rounded-xl px-2 py-1">
           <button
             onClick={() => setQty(q => Math.max(1, q - 1))}
-            className="w-8 h-8 flex items-center justify-center text-prose-muted hover:text-white transition-colors text-lg leading-none"
+            className="w-8 h-8 flex items-center justify-center text-prose-muted hover:text-prose transition-colors text-lg leading-none"
           >
             −
           </button>
-          <span className="w-7 text-center text-sm font-bold text-white tabular-nums">{qty}</span>
+          <span className="w-7 text-center text-sm font-bold text-prose tabular-nums">{qty}</span>
           <button
             onClick={() => setQty(q => Math.min(10, q + 1))}
-            className="w-8 h-8 flex items-center justify-center text-prose-muted hover:text-white transition-colors text-lg leading-none"
+            className="w-8 h-8 flex items-center justify-center text-prose-muted hover:text-prose transition-colors text-lg leading-none"
           >
             +
           </button>
@@ -128,10 +128,10 @@ export default function AddToCartForm({ variants }: { variants: Variant[] }) {
           : `Add to Cart · ${selected ? formatPrice(selected.retail_price_cents) : ''}`}
       </button>
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
 
       {added && (
-        <a href="/cart" className="text-center text-sm text-accent-text-soft hover:text-orange-300 transition-colors font-medium">
+        <a href="/cart" className="text-center text-sm text-accent-text-soft hover:text-accent transition-colors font-medium">
           View Cart →
         </a>
       )}

@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 // Per-flavor display metadata for the Vault index. Reader-facing sections stay
 // as Picks / Gifts / Comparisons / Stacks; this is the admin umbrella view.
 const TYPE_META: Record<string, { label: string; chip: string }> = {
-  general:    { label: 'Pick',       chip: 'bg-accent-tint/50 text-orange-300 border-accent-border/40' },
+  general:    { label: 'Pick',       chip: 'bg-accent-tint text-accent-text border-accent-border/40' },
   best_of:    { label: 'Best Of',    chip: 'bg-amber-950/50 text-amber-300 border-amber-900/40' },
   gift_guide: { label: 'Gift Guide', chip: 'bg-rose-950/50 text-rose-300 border-rose-900/40' },
   comparison: { label: 'Comparison', chip: 'bg-sky-950/50 text-sky-300 border-sky-900/40' },
@@ -64,12 +64,12 @@ export default async function PicksListPage() {
                     </span>
                     <span className="text-xs text-prose-faint truncate">/{p.slug}</span>
                   </div>
-                  <p className="font-semibold text-white truncate">{p.title}</p>
+                  <p className="font-semibold text-prose truncate">{p.title}</p>
                   {p.description && <p className="text-sm text-prose-faint truncate mt-0.5">{p.description}</p>}
                 </div>
                 <span className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full ${
                   p.is_visible
-                    ? 'bg-green-950/40 text-green-400'
+                    ? 'bg-green-50 text-green-700'
                     : 'bg-surface-raised text-prose-faint'
                 }`}>
                   {p.is_visible ? 'Live' : 'Draft'}

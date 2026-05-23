@@ -48,7 +48,7 @@ export function ImageGeneratorStudio() {
       {/* Left: prompt + controls (sticky on desktop) */}
       <div className="lg:col-span-2 space-y-5 lg:sticky lg:top-4 lg:self-start">
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Prompt</label>
+          <label className="block text-sm text-prose-muted mb-1.5">Prompt</label>
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
@@ -60,12 +60,12 @@ Tips:
 - Include lighting ('warm natural light', 'soft indoor daylight')
 - Specify style ('editorial photography', 'photo-realistic')
 - Say what to exclude ('no people', 'no text')"
-            className="w-full px-4 py-3 bg-surface border border-strong rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none font-mono"
+            className="w-full px-4 py-3 bg-surface border border-strong rounded-xl text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none font-mono"
           />
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-2">Aspect ratio</label>
+          <label className="block text-sm text-prose-muted mb-2">Aspect ratio</label>
           <div className="flex gap-2">
             {[
               { value: '1536x1024', label: 'Landscape', ratio: '3:2' },
@@ -79,7 +79,7 @@ Tips:
                 className={`flex-1 flex flex-col items-center gap-1 px-3 py-3 rounded-xl transition-colors ${
                   size === opt.value
                     ? 'bg-accent text-white'
-                    : 'bg-surface border border-soft text-prose-muted hover:border-gray-600'
+                    : 'bg-surface border border-soft text-prose-muted hover:border-strong'
                 }`}
               >
                 <span className="text-xs font-semibold">{opt.label}</span>
@@ -90,7 +90,7 @@ Tips:
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-2">Model tier</label>
+          <label className="block text-sm text-prose-muted mb-2">Model tier</label>
           <div className="flex gap-2">
             {[
               { value: false, label: 'Standard', tag: 'gpt-image-1 · medium' },
@@ -103,7 +103,7 @@ Tips:
                 className={`flex-1 flex flex-col items-center gap-1 px-3 py-3 rounded-xl transition-colors ${
                   premium === opt.value
                     ? 'bg-accent text-white'
-                    : 'bg-surface border border-soft text-prose-muted hover:border-gray-600'
+                    : 'bg-surface border border-soft text-prose-muted hover:border-strong'
                 }`}
               >
                 <span className="text-xs font-semibold">{opt.label}</span>
@@ -123,7 +123,7 @@ Tips:
         </button>
 
         {error && (
-          <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">
+          <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">
             {error}
           </p>
         )}
@@ -161,14 +161,14 @@ Tips:
                     <button
                       type="button"
                       onClick={() => handleCopyUrl(img.url)}
-                      className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
+                      className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose-muted rounded-lg transition-colors"
                     >
                       {copiedUrl === img.url ? '✓ Copied' : 'Copy URL'}
                     </button>
                     <button
                       type="button"
                       onClick={() => setPrompt(img.prompt)}
-                      className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
+                      className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose-muted rounded-lg transition-colors"
                       title="Load this prompt to tweak and regenerate"
                     >
                       ✎ Reuse prompt

@@ -77,12 +77,12 @@ export default async function CollectionsForReview({ reviewId }: Props) {
             <li key={c.id}>
               <Link
                 href={href}
-                className="group flex items-center gap-4 p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:border-accent-border/40 hover:-translate-y-0.5 rounded-2xl shadow-md shadow-black/30 transition-all"
+                className="group flex items-center gap-4 p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 hover:-translate-y-0.5 rounded-2xl shadow-md shadow-stone-900/[0.05] transition-all"
               >
                 <span className="text-accent-text-soft shrink-0">{meta.icon}</span>
                 <div className="min-w-0 flex-1">
                   <p className="text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-bold mb-0.5">{meta.label}</p>
-                  <p className="text-sm sm:text-base font-bold text-white group-hover:text-accent-text-soft transition-colors line-clamp-1">{c.title}</p>
+                  <p className="text-sm sm:text-base font-bold text-prose group-hover:text-accent-text-soft transition-colors line-clamp-1">{c.title}</p>
                 </div>
                 <span aria-hidden className="text-prose-faint group-hover:text-accent-text-soft transition-colors text-xl shrink-0">→</span>
               </Link>

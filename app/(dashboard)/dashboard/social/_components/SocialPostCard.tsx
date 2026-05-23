@@ -49,7 +49,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
   const effectiveLength = content.length + (linkUrl ? LINK_CHAR_COST : 0)
   const overLimit = charLimit ? effectiveLength > charLimit : false
   const nearLimit = charLimit ? effectiveLength > charLimit * 0.88 : false
-  const charColor = overLimit ? 'text-red-400' : nearLimit ? 'text-yellow-400' : 'text-prose-faint'
+  const charColor = overLimit ? 'text-red-600' : nearLimit ? 'text-amber-600' : 'text-prose-faint'
 
   async function save() {
     if (overLimit) return
@@ -123,8 +123,8 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
   }
 
   const statusBadge =
-    post.status === 'posted' ? 'bg-blue-900/40 text-blue-400 border border-blue-700/40'
-    : post.status === 'ready' ? 'bg-green-900/40 text-green-400 border border-green-700/40'
+    post.status === 'posted' ? 'bg-blue-50 text-blue-700 border border-blue-700/40'
+    : post.status === 'ready' ? 'bg-green-50 text-green-700 border border-green-200'
     : 'bg-surface-raised text-prose-muted border border-strong/40'
 
   return (
@@ -165,7 +165,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
             />
             <button
               onClick={removeImage}
-              className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white p-1 rounded-lg transition-colors"
+              className="absolute top-2 right-2 bg-stone-900/60 hover:bg-stone-900/80 text-white p-1 rounded-lg transition-colors"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -182,7 +182,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 rows={6}
-                className="w-full bg-surface-raised text-white text-sm rounded-lg px-3 py-2.5 border border-strong focus:border-accent focus:outline-none resize-y"
+                className="w-full bg-surface-raised text-prose text-sm rounded-lg px-3 py-2.5 border border-strong focus:border-accent focus:outline-none resize-y"
                 autoFocus
               />
               {/* Hashtag preset dropdown */}
@@ -191,7 +191,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
                   <button
                     type="button"
                     onClick={() => setShowPresets(!showPresets)}
-                    className="text-xs text-accent-text-soft hover:text-orange-300 transition-colors"
+                    className="text-xs text-accent-text-soft hover:text-accent transition-colors"
                   >
                     # Apply hashtag preset
                   </button>
@@ -201,9 +201,9 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
                         <button
                           key={preset.id}
                           onClick={() => applyPreset(preset)}
-                          className="w-full text-left px-3 py-2.5 hover:bg-gray-700 transition-colors first:rounded-t-xl last:rounded-b-xl"
+                          className="w-full text-left px-3 py-2.5 hover:bg-stone-100 transition-colors first:rounded-t-xl last:rounded-b-xl"
                         >
-                          <p className="text-xs text-white font-medium">{preset.name}</p>
+                          <p className="text-xs text-prose font-medium">{preset.name}</p>
                           <p className="text-xs text-prose-faint">{preset.tags.map((t) => `#${t}`).join(' ')}</p>
                         </button>
                       ))}
@@ -229,7 +229,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
               <div className="flex gap-2">
                 <button
                   onClick={cancelEdit}
-                  className="text-xs text-prose-faint hover:text-white px-3 py-1.5 rounded-lg transition-colors"
+                  className="text-xs text-prose-faint hover:text-prose px-3 py-1.5 rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
@@ -251,7 +251,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
                 href={post.link_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block text-xs text-accent-text-soft hover:text-orange-300 truncate transition-colors"
+                className="block text-xs text-accent-text-soft hover:text-accent truncate transition-colors"
               >
                 ↗ {post.link_url}
               </a>
@@ -265,10 +265,10 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
             {/* Copy */}
             <button
               onClick={copyToClipboard}
-              className="flex items-center gap-1.5 text-xs text-prose-muted hover:text-white px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
+              className="flex items-center gap-1.5 text-xs text-prose-muted hover:text-prose px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
             >
               {copied ? (
-                <><svg className="w-3.5 h-3.5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-green-400">Copied!</span></>
+                <><svg className="w-3.5 h-3.5 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-green-700">Copied!</span></>
               ) : (
                 <><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>Copy</>
               )}
@@ -277,7 +277,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
             {/* Edit */}
             <button
               onClick={() => setEditing(true)}
-              className="flex items-center gap-1.5 text-xs text-prose-muted hover:text-white px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
+              className="flex items-center gap-1.5 text-xs text-prose-muted hover:text-prose px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
               Edit
@@ -286,7 +286,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
             {/* Image */}
             <button
               onClick={() => setShowImagePicker(true)}
-              className="flex items-center gap-1.5 text-xs text-prose-muted hover:text-white px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
+              className="flex items-center gap-1.5 text-xs text-prose-muted hover:text-prose px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
               {post.image_url ? 'Swap image' : 'Add image'}
@@ -296,7 +296,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
             {post.status === 'draft' && (
               <button
                 onClick={() => setStatus('ready')}
-                className="flex items-center gap-1.5 text-xs text-prose-muted hover:text-white px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
+                className="flex items-center gap-1.5 text-xs text-prose-muted hover:text-prose px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 Mark Ready
@@ -306,14 +306,14 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
               <>
                 <button
                   onClick={() => setStatus('posted')}
-                  className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-white px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-blue-700 hover:text-prose px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" /></svg>
                   Mark Posted
                 </button>
                 <button
                   onClick={() => setStatus('draft')}
-                  className="flex items-center gap-1.5 text-xs text-prose-muted hover:text-white px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-prose-muted hover:text-prose px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
                 >
                   Mark Draft
                 </button>
@@ -322,7 +322,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
             {post.status === 'posted' && (
               <button
                 onClick={() => setStatus('draft')}
-                className="flex items-center gap-1.5 text-xs text-prose-muted hover:text-white px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
+                className="flex items-center gap-1.5 text-xs text-prose-muted hover:text-prose px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
               >
                 Revert to Draft
               </button>
@@ -332,7 +332,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
             <button
               onClick={remove}
               disabled={deleting}
-              className="ml-auto flex items-center gap-1.5 text-xs text-prose-faint hover:text-red-400 px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
+              className="ml-auto flex items-center gap-1.5 text-xs text-prose-faint hover:text-red-600 px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
               Delete

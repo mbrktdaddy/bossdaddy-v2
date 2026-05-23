@@ -70,8 +70,8 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
                 <div className="flex items-center gap-2 mb-1">
                   <span className={`text-xs px-2 py-0.5 rounded-full border ${
                     item.type === 'guide'
-                      ? 'bg-blue-950/40 text-blue-400 border-blue-900/40'
-                      : 'bg-accent-tint/40 text-accent-text-soft border-accent-border/40'
+                      ? 'bg-blue-50 text-blue-700 border-blue-200'
+                      : 'bg-accent-tint text-accent-text-soft border-accent-border/40'
                   }`}>
                     {item.type === 'guide' ? 'Guide' : 'Review'}
                   </span>
@@ -80,7 +80,7 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
                 </div>
                 <p className="text-sm font-semibold truncate">{item.title}</p>
                 {item.moderation_flags && item.moderation_flags.length > 0 && (
-                  <p className="text-xs text-red-400/80 mt-1 truncate">
+                  <p className="text-xs text-red-600/80 mt-1 truncate">
                     ⚑ {item.moderation_flags.slice(0, 2).join(' · ')}
                   </p>
                 )}
@@ -90,7 +90,7 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
                   <span className="text-xs text-prose-faint font-mono">—</span>
                 ) : (
                   <span className={`text-sm font-mono font-bold ${
-                    isHighRisk ? 'text-red-400' : score >= 0.4 ? 'text-yellow-400' : 'text-green-400'
+                    isHighRisk ? 'text-red-600' : score >= 0.4 ? 'text-amber-600' : 'text-green-700'
                   }`}>
                     {score.toFixed(2)}
                   </span>
@@ -115,7 +115,7 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
                 Latest from @{pendingComments[0]?.profiles?.username ?? 'anonymous'} — {pendingComments[0]?.body?.slice(0, 80)}…
               </p>
             </div>
-            <span className="text-sm font-bold text-blue-400">→</span>
+            <span className="text-sm font-bold text-blue-700">→</span>
           </div>
         </Link>
       )}

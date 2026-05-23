@@ -119,8 +119,8 @@ export function MerchForm({ item }: Props) {
     <form onSubmit={handleSave} className="space-y-5">
 
       <div>
-        <label className="block text-sm text-gray-300 mb-1.5">
-          Slug <span className="text-red-400">*</span>
+        <label className="block text-sm text-prose-muted mb-1.5">
+          Slug <span className="text-red-600">*</span>
         </label>
         <input
           type="text"
@@ -129,7 +129,7 @@ export function MerchForm({ item }: Props) {
           onChange={(e) => setSlug(e.target.value.toLowerCase())}
           pattern="[a-z0-9-]+"
           placeholder="boss-daddy-tee"
-          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
         />
         <p className="mt-1 text-xs text-prose-faint">
           URL identifier — lowercase letters, numbers, hyphens only.
@@ -137,8 +137,8 @@ export function MerchForm({ item }: Props) {
       </div>
 
       <div>
-        <label className="block text-sm text-gray-300 mb-1.5">
-          Name <span className="text-red-400">*</span>
+        <label className="block text-sm text-prose-muted mb-1.5">
+          Name <span className="text-red-600">*</span>
         </label>
         <input
           type="text"
@@ -146,24 +146,24 @@ export function MerchForm({ item }: Props) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Boss Daddy Tee"
-          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
         />
       </div>
 
       <div>
-        <label className="block text-sm text-gray-300 mb-1.5">Description</label>
+        <label className="block text-sm text-prose-muted mb-1.5">Description</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
           placeholder="Heavyweight cotton tee with the Boss Daddy mark..."
-          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
         />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Price (USD)</label>
+          <label className="block text-sm text-prose-muted mb-1.5">Price (USD)</label>
           <input
             type="number"
             step="0.01"
@@ -171,15 +171,15 @@ export function MerchForm({ item }: Props) {
             value={priceDollars}
             onChange={(e) => setPrice(e.target.value)}
             placeholder="28.00"
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
           />
         </div>
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Category</label>
+          <label className="block text-sm text-prose-muted mb-1.5">Category</label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value as MerchCategory | '')}
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
           >
             <option value="">— none —</option>
             {MERCH_CATEGORIES.map((c) => (
@@ -188,11 +188,11 @@ export function MerchForm({ item }: Props) {
           </select>
         </div>
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Status</label>
+          <label className="block text-sm text-prose-muted mb-1.5">Status</label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as MerchStatus)}
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
           >
             {MERCH_STATUSES.map((s) => (
               <option key={s.value} value={s.value}>{s.label}</option>
@@ -202,13 +202,13 @@ export function MerchForm({ item }: Props) {
       </div>
 
       <div>
-        <label className="block text-sm text-gray-300 mb-1.5">External URL</label>
+        <label className="block text-sm text-prose-muted mb-1.5">External URL</label>
         <input
           type="url"
           value={externalUrl}
           onChange={(e) => setExternalUrl(e.target.value)}
           placeholder="https://amazon.com/dp/..."
-          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
         />
         <p className="mt-1 text-xs text-prose-faint">
           Leave blank for Printful items — native checkout handles those automatically. Only fill this in to bypass checkout and send customers to an external site (e.g. Amazon, a partner store).
@@ -216,14 +216,14 @@ export function MerchForm({ item }: Props) {
       </div>
 
       <div>
-        <label className="block text-sm text-gray-300 mb-1.5">Position</label>
+        <label className="block text-sm text-prose-muted mb-1.5">Position</label>
         <input
           type="number"
           min="0"
           step="1"
           value={position}
           onChange={(e) => setPosition(Number(e.target.value))}
-          className="w-32 px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          className="w-32 px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
         />
         <p className="mt-1 text-xs text-prose-faint">Lower numbers display first.</p>
       </div>
@@ -237,11 +237,11 @@ export function MerchForm({ item }: Props) {
               onChange={(e) => setFeatured(e.target.checked)}
               className="sr-only"
             />
-            <div className={`w-10 h-6 rounded-full transition-colors ${featured ? 'bg-accent' : 'bg-gray-700'}`} />
+            <div className={`w-10 h-6 rounded-full transition-colors ${featured ? 'bg-accent' : 'bg-stone-300'}`} />
             <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${featured ? 'translate-x-4' : 'translate-x-0'}`} />
           </div>
           <div>
-            <p className="text-sm text-gray-300 font-medium">Featured</p>
+            <p className="text-sm text-prose-muted font-medium">Featured</p>
             <p className="text-xs text-prose-faint">Show on homepage strip and end-of-article callouts.</p>
           </div>
         </label>
@@ -249,7 +249,7 @@ export function MerchForm({ item }: Props) {
 
       {/* Image */}
       <div className="space-y-3">
-        <p className="text-sm font-semibold text-white">Product Image</p>
+        <p className="text-sm font-semibold text-prose">Product Image</p>
 
         {/* Show effective image — manual override takes priority over Printful default */}
         {(() => {
@@ -264,7 +264,7 @@ export function MerchForm({ item }: Props) {
                   <button
                     type="button"
                     onClick={() => setImageUrl('')}
-                    className="absolute top-1 right-1 p-1 bg-surface/80 hover:bg-red-900/80 text-prose-muted hover:text-red-400 rounded transition-colors"
+                    className="absolute top-1 right-1 p-1 bg-surface/80 hover:bg-red-50 text-prose-muted hover:text-red-600 rounded transition-colors"
                     title="Clear override image"
                   >
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -291,7 +291,7 @@ export function MerchForm({ item }: Props) {
           <button
             type="button"
             onClick={() => setShowPicker(true)}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-gray-700 text-gray-300 font-semibold rounded-lg transition-colors"
+            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose-muted font-semibold rounded-lg transition-colors"
           >
             📁 Pick from library
           </button>
@@ -323,7 +323,7 @@ export function MerchForm({ item }: Props) {
       {item?.images && item.images.length > 0 && (
         <div className="space-y-3">
           <div>
-            <p className="text-sm font-semibold text-white">Synced Images</p>
+            <p className="text-sm font-semibold text-prose">Synced Images</p>
             <p className="text-xs text-prose-faint mt-0.5">
               Click to toggle which images show on the product page. All images are from Printful — re-syncing won&apos;t remove your choices.
             </p>
@@ -376,7 +376,7 @@ export function MerchForm({ item }: Props) {
       )}
 
       {error && (
-        <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">{error}</p>
+        <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
       )}
 
       <div className="flex items-center gap-3 pt-2">
@@ -392,7 +392,7 @@ export function MerchForm({ item }: Props) {
             type="button"
             onClick={handleDelete}
             disabled={deleting}
-            className="px-5 py-2.5 text-red-400 hover:text-red-300 text-sm transition-colors disabled:opacity-40"
+            className="px-5 py-2.5 text-red-600 hover:text-red-700 text-sm transition-colors disabled:opacity-40"
           >
             {deleting ? 'Deleting…' : 'Delete'}
           </button>

@@ -226,7 +226,7 @@ export default async function PickDetailPage({ params }: Props) {
             <header className="mb-8">
               <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
               <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Boss Daddy Picks</p>
-              <h1 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tight leading-tight">{pick.title}</h1>
+              <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight leading-tight">{pick.title}</h1>
               {pick.description && (
                 <p className="text-lg text-prose-muted leading-relaxed mb-6">{pick.description}</p>
               )}
@@ -251,10 +251,10 @@ export default async function PickDetailPage({ params }: Props) {
                 <div className="mb-5">
                   <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Why These</p>
-                  <h2 className="text-2xl font-black text-white leading-tight">Behind the picks</h2>
+                  <h2 className="text-2xl font-black text-prose leading-tight">Behind the picks</h2>
                 </div>
                 <div
-                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-accent-text-soft hover:prose-a:text-orange-300 prose-a:no-underline"
+                  className="prose prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
                   dangerouslySetInnerHTML={{ __html: pick.intro_html }}
                 />
               </section>
@@ -276,7 +276,7 @@ export default async function PickDetailPage({ params }: Props) {
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">
                   {items.length === 1 ? 'The Pick' : 'The Picks'}
                 </p>
-                <h2 className="text-2xl font-black text-white leading-tight">
+                <h2 className="text-2xl font-black text-prose leading-tight">
                   {items.length} dad-tested {items.length === 1 ? 'pick' : 'picks'}, all personally tested
                 </h2>
               </div>
@@ -288,7 +288,7 @@ export default async function PickDetailPage({ params }: Props) {
                   const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                   const rank = idx + 1
                   return (
-                    <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:border-accent-border/40 rounded-2xl p-5 shadow-lg shadow-black/40 transition-colors">
+                    <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-2xl p-5 shadow-lg shadow-stone-900/[0.06] transition-colors">
                       {/* Rank — medal for top 3, number for the rest */}
                       <div className="flex sm:flex-col items-center gap-3 sm:gap-1 shrink-0">
                         <RankMedal rank={rank} />
@@ -308,11 +308,11 @@ export default async function PickDetailPage({ params }: Props) {
                           <div className="min-w-0">
                             {/* Role chip — editorial tag from the workspace. */}
                             {itemRoleLabel && (
-                              <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-accent/15 border border-accent-border/40 text-[10px] font-black uppercase tracking-widest text-orange-300">
+                              <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-accent/15 border border-accent-border/40 text-[10px] font-black uppercase tracking-widest text-accent-text">
                                 {itemRoleLabel}
                               </span>
                             )}
-                            <Link href={`/reviews/${review.slug}`} className="text-lg font-bold text-white hover:text-accent-text-soft transition-colors leading-snug block">
+                            <Link href={`/reviews/${review.slug}`} className="text-lg font-bold text-prose hover:text-accent-text-soft transition-colors leading-snug block">
                               {review.title}
                             </Link>
                           </div>
@@ -321,10 +321,10 @@ export default async function PickDetailPage({ params }: Props) {
 
                         {/* Editor's per-collection "best for" tagline — italic, prominent */}
                         {itemBestFor && (
-                          <p className="text-sm italic text-orange-300/90 mb-2">Best for {itemBestFor}</p>
+                          <p className="text-sm italic text-accent-text/90 mb-2">Best for {itemBestFor}</p>
                         )}
 
-                        <p className="text-sm text-gray-300 leading-relaxed mb-3">
+                        <p className="text-sm text-prose-muted leading-relaxed mb-3">
                           {blurb ?? review.tldr ?? review.excerpt ?? product?.description ?? ''}
                         </p>
 
@@ -392,7 +392,7 @@ function RankMedal({ rank }: { rank: number }) {
     }[rank as 1 | 2 | 3]!
     return (
       <div className="flex sm:flex-col items-center gap-2">
-        <span className={`relative w-12 h-12 rounded-full ${colors.bg} flex items-center justify-center font-black text-base ${colors.text} shadow-lg shadow-black/40 ring-2 ring-black/30`}>
+        <span className={`relative w-12 h-12 rounded-full ${colors.bg} flex items-center justify-center font-black text-base ${colors.text} shadow-lg shadow-stone-900/[0.06] ring-2 ring-stone-900/30`}>
           <svg className="absolute -top-1 -right-1 w-4 h-4 text-accent-text-soft drop-shadow" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
           </svg>
@@ -403,7 +403,7 @@ function RankMedal({ rank }: { rank: number }) {
     )
   }
   return (
-    <span className="w-12 h-12 rounded-full bg-accent-tint/60 border border-accent-border/40 flex items-center justify-center text-accent-text-soft font-black text-sm tabular-nums">
+    <span className="w-12 h-12 rounded-full bg-accent-tint border border-accent-border/40 flex items-center justify-center text-accent-text-soft font-black text-sm tabular-nums">
       {rank}
     </span>
   )

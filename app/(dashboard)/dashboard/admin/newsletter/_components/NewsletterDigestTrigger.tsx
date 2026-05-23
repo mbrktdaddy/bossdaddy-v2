@@ -38,7 +38,7 @@ export function NewsletterDigestTrigger() {
           type="button"
           onClick={() => trigger(true)}
           disabled={busy}
-          className="px-3 py-2 bg-surface-raised hover:bg-gray-700 disabled:opacity-40 text-gray-300 text-xs font-semibold rounded-lg transition-colors"
+          className="px-3 py-2 bg-surface-raised hover:bg-stone-100 disabled:opacity-40 text-prose-muted text-xs font-semibold rounded-lg transition-colors"
         >
           {busy ? '…' : 'Dry run'}
         </button>
@@ -51,8 +51,8 @@ export function NewsletterDigestTrigger() {
           {busy ? 'Sending…' : 'Send digest now'}
         </button>
       </div>
-      {result && <p className="text-xs text-green-400 max-w-xs text-right">{result}</p>}
-      {error  && <p className="text-xs text-red-400  max-w-xs text-right">{error}</p>}
+      {result && <p className="text-xs text-green-700 max-w-xs text-right">{result}</p>}
+      {error  && <p className="text-xs text-red-600  max-w-xs text-right">{error}</p>}
     </div>
   )
 }

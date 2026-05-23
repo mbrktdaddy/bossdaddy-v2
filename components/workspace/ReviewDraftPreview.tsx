@@ -61,7 +61,7 @@ export function ReviewDraftPreview({
 
         {/* Eyebrow */}
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-xs font-medium text-accent-text-soft uppercase tracking-widest bg-accent-tint/40 px-2.5 py-0.5 rounded-full">
+          <span className="text-xs font-medium text-accent-text-soft uppercase tracking-widest bg-accent-tint px-2.5 py-0.5 rounded-full">
             {productName || 'Product Name'}
           </span>
           {cat && (
@@ -72,7 +72,7 @@ export function ReviewDraftPreview({
         </div>
 
         {/* Title */}
-        <h1 className="text-xl font-black leading-tight text-white">
+        <h1 className="text-xl font-black leading-tight text-prose">
           {title || <span className="text-prose-faint italic">Untitled review</span>}
         </h1>
 
@@ -122,11 +122,11 @@ export function ReviewDraftPreview({
         {(pros.length > 0 || cons.length > 0) && (
           <div className="grid grid-cols-2 gap-3">
             {pros.length > 0 && (
-              <div className="bg-green-950/30 rounded-xl p-3">
-                <p className="text-xs text-green-400 font-bold uppercase tracking-wide mb-2">✓ Good</p>
+              <div className="bg-green-50 rounded-xl p-3">
+                <p className="text-xs text-green-700 font-bold uppercase tracking-wide mb-2">✓ Good</p>
                 <ul className="space-y-1">
                   {pros.slice(0, 4).map((p, i) => (
-                    <li key={i} className="flex items-start gap-1 text-xs text-gray-300">
+                    <li key={i} className="flex items-start gap-1 text-xs text-prose-muted">
                       <span className="text-green-500 shrink-0">+</span>{p}
                     </li>
                   ))}
@@ -134,11 +134,11 @@ export function ReviewDraftPreview({
               </div>
             )}
             {cons.length > 0 && (
-              <div className="bg-red-950/30 rounded-xl p-3">
-                <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">✗ Bad</p>
+              <div className="bg-red-50 rounded-xl p-3">
+                <p className="text-xs text-red-600 font-bold uppercase tracking-wide mb-2">✗ Bad</p>
                 <ul className="space-y-1">
                   {cons.slice(0, 4).map((c, i) => (
-                    <li key={i} className="flex items-start gap-1 text-xs text-gray-300">
+                    <li key={i} className="flex items-start gap-1 text-xs text-prose-muted">
                       <span className="text-red-500 shrink-0">−</span>{c}
                     </li>
                   ))}
@@ -153,10 +153,10 @@ export function ReviewDraftPreview({
           <div className="grid grid-cols-2 gap-3">
             {bestFor.length > 0 && (
               <div className="bg-surface rounded-xl p-3">
-                <p className="text-xs text-green-400 uppercase tracking-widest font-semibold mb-2">Best For</p>
+                <p className="text-xs text-green-700 uppercase tracking-widest font-semibold mb-2">Best For</p>
                 <ul className="space-y-1">
                   {bestFor.slice(0, 3).map((item, i) => (
-                    <li key={i} className="flex items-start gap-1 text-xs text-gray-300">
+                    <li key={i} className="flex items-start gap-1 text-xs text-prose-muted">
                       <span className="text-green-500 shrink-0">+</span>{item}
                     </li>
                   ))}
@@ -165,10 +165,10 @@ export function ReviewDraftPreview({
             )}
             {notFor.length > 0 && (
               <div className="bg-surface rounded-xl p-3">
-                <p className="text-xs text-red-400 uppercase tracking-widest font-semibold mb-2">Not For</p>
+                <p className="text-xs text-red-600 uppercase tracking-widest font-semibold mb-2">Not For</p>
                 <ul className="space-y-1">
                   {notFor.slice(0, 3).map((item, i) => (
-                    <li key={i} className="flex items-start gap-1 text-xs text-gray-300">
+                    <li key={i} className="flex items-start gap-1 text-xs text-prose-muted">
                       <span className="text-red-500 shrink-0">−</span>{item}
                     </li>
                   ))}
@@ -184,9 +184,9 @@ export function ReviewDraftPreview({
             className="prose prose-sm prose-invert prose-orange max-w-none
               prose-headings:font-black prose-headings:font-sans prose-headings:tracking-tight
               prose-h2:text-base prose-h2:mt-6 prose-h2:mb-2
-              prose-p:text-gray-300 prose-p:leading-relaxed prose-p:text-xs
+              prose-p:text-prose-muted prose-p:leading-relaxed prose-p:text-xs
               prose-a:text-accent-text-soft prose-a:no-underline
-              prose-strong:text-white prose-li:text-xs prose-li:text-gray-300"
+              prose-strong:text-prose prose-li:text-xs prose-li:text-prose-muted"
             dangerouslySetInnerHTML={{ __html: content }}
           />
         )}
@@ -194,11 +194,11 @@ export function ReviewDraftPreview({
         {/* FAQs */}
         {faqs.length > 0 && (
           <div className="space-y-3 pt-3 border-t border-soft/60">
-            <p className="text-xs font-black text-white">Frequently Asked Questions</p>
+            <p className="text-xs font-black text-prose">Frequently Asked Questions</p>
             {faqs.map((faq, i) => (
               <div key={i} className="bg-surface rounded-xl p-3">
-                <p className="font-bold text-xs text-white mb-1">{faq.question}</p>
-                <p className="text-xs text-gray-300 leading-relaxed">{faq.answer}</p>
+                <p className="font-bold text-xs text-prose mb-1">{faq.question}</p>
+                <p className="text-xs text-prose-muted leading-relaxed">{faq.answer}</p>
               </div>
             ))}
           </div>

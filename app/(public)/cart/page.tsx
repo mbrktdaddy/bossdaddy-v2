@@ -19,7 +19,7 @@ export default async function CartPage() {
     <div className="max-w-3xl mx-auto px-6 py-12">
       <div className="mb-8">
         <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-2">— Boss Daddy Merch</p>
-        <h1 className="text-3xl font-black text-white">Your Cart</h1>
+        <h1 className="text-3xl font-black text-prose">Your Cart</h1>
         {count > 0 && (
           <p className="text-prose-faint text-sm mt-1">{count} item{count !== 1 ? 's' : ''} · {formatPrice(subtotal)} subtotal</p>
         )}

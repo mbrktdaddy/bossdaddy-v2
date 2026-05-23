@@ -61,7 +61,7 @@ export default function HashtagPresetsPanel({ presets, platform, onPresetsChange
         <p className="text-xs text-prose-muted uppercase tracking-widest font-medium">Hashtag Presets</p>
         <button
           onClick={() => setOpen(!open)}
-          className="text-xs text-accent-text-soft hover:text-orange-300 transition-colors"
+          className="text-xs text-accent-text-soft hover:text-accent transition-colors"
         >
           {open ? 'Cancel' : '+ New preset'}
         </button>
@@ -73,12 +73,12 @@ export default function HashtagPresetsPanel({ presets, platform, onPresetsChange
           {presets.map((preset) => (
             <div key={preset.id} className="flex items-start justify-between gap-2 bg-surface rounded-lg px-3 py-2">
               <div className="min-w-0">
-                <p className="text-xs text-white font-medium">{preset.name}</p>
+                <p className="text-xs text-prose font-medium">{preset.name}</p>
                 <p className="text-xs text-prose-faint truncate">{preset.tags.map((t) => `#${t}`).join(' ')}</p>
               </div>
               <button
                 onClick={() => remove(preset.id)}
-                className="text-prose-faint hover:text-red-400 transition-colors shrink-0 mt-0.5"
+                className="text-prose-faint hover:text-red-600 transition-colors shrink-0 mt-0.5"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -97,16 +97,16 @@ export default function HashtagPresetsPanel({ presets, platform, onPresetsChange
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Preset name (e.g. Dad Life)"
-            className="w-full bg-surface-raised border border-strong text-white text-xs rounded-lg px-3 py-2 focus:border-accent focus:outline-none"
+            className="w-full bg-surface-raised border border-strong text-prose text-xs rounded-lg px-3 py-2 focus:border-accent focus:outline-none"
           />
           <input
             type="text"
             value={tagsInput}
             onChange={(e) => setTagsInput(e.target.value)}
             placeholder="#DadLife #BossDaddy #FatherFirst"
-            className="w-full bg-surface-raised border border-strong text-white text-xs rounded-lg px-3 py-2 focus:border-accent focus:outline-none"
+            className="w-full bg-surface-raised border border-strong text-prose text-xs rounded-lg px-3 py-2 focus:border-accent focus:outline-none"
           />
-          {error && <p className="text-xs text-red-400">{error}</p>}
+          {error && <p className="text-xs text-red-600">{error}</p>}
           <button
             onClick={save}
             disabled={saving}

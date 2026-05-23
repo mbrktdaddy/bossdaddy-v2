@@ -96,7 +96,7 @@ export default function TableOfContents({ target = '.bd-content', minHeadings = 
                 className={`block py-1 leading-snug transition-colors ${
                   item.level === 3 ? 'pl-4 text-xs' : ''
                 } ${
-                  isActive ? 'text-accent-text-soft font-semibold' : 'text-prose-muted hover:text-white'
+                  isActive ? 'text-accent-text-soft font-semibold' : 'text-prose-muted hover:text-prose'
                 }`}
               >
                 {item.text}

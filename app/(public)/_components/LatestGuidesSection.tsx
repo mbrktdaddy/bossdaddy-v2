@@ -27,7 +27,7 @@ export async function LatestGuidesSection() {
           <div className="w-[3px] bg-accent rounded-full shrink-0" />
           <div className="min-w-0">
             <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-2">— Latest Guides</p>
-            <h2 className="text-2xl md:text-3xl font-black text-white leading-tight">Skills, builds, and hard-won dad wisdom.</h2>
+            <h2 className="text-2xl md:text-3xl font-black text-prose leading-tight">Skills, builds, and hard-won dad wisdom.</h2>
           </div>
         </div>
         <Link href="/guides" className="hidden sm:inline-flex items-center text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold shrink-0">
@@ -35,7 +35,7 @@ export async function LatestGuidesSection() {
         </Link>
       </div>
 
-      <div className="divide-y divide-gray-800/60">
+      <div className="divide-y divide-soft">
         {guides.map((a, i) => {
           const cat = getCategoryBySlug(a.category ?? '')
           return (
@@ -53,7 +53,7 @@ export async function LatestGuidesSection() {
                     {cat?.label ?? a.category}
                   </span>
                 </div>
-                <h3 className="text-base md:text-lg font-bold text-white group-hover:text-accent-text-soft transition-colors mt-1.5 leading-snug">
+                <h3 className="text-base md:text-lg font-bold text-prose group-hover:text-accent-text-soft transition-colors mt-1.5 leading-snug">
                   {a.title}
                 </h3>
                 {a.excerpt && (
@@ -89,7 +89,7 @@ export async function LatestGuidesSection() {
       </div>
 
       <div className="mt-6 sm:hidden">
-        <Link href="/guides" className="inline-block text-sm text-accent-text-soft hover:text-orange-300 transition-colors font-semibold">
+        <Link href="/guides" className="inline-block text-sm text-accent-text-soft hover:text-accent transition-colors font-semibold">
           View all guides →
         </Link>
       </div>

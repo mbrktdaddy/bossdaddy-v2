@@ -137,7 +137,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
     <div className="space-y-3">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <p className="text-sm font-semibold text-white">Product Images</p>
+          <p className="text-sm font-semibold text-prose">Product Images</p>
           <p className="text-xs text-prose-faint mt-0.5">
             Add as many as you want — all attached to this product when you click Save.
           </p>
@@ -147,7 +147,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
             type="button"
             onClick={() => setShowPicker(true)}
             disabled={disabled || processing}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-gray-700 disabled:opacity-40 text-gray-300 font-semibold rounded-lg transition-colors"
+            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-40 text-prose-muted font-semibold rounded-lg transition-colors"
           >
             Pick from library
           </button>
@@ -171,7 +171,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
       </div>
 
       {error && (
-        <p className="text-xs text-red-400 bg-red-950/50 border border-red-900/40 rounded-lg px-3 py-2">{error}</p>
+        <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
       )}
 
       {images.length === 0 ? (
@@ -179,7 +179,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
           className="border-2 border-dashed border-soft rounded-xl py-10 text-center text-xs text-prose-faint cursor-pointer hover:border-strong transition-colors"
           onClick={() => !disabled && fileRef.current?.click()}
         >
-          <svg className="w-7 h-7 mx-auto mb-2 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+          <svg className="w-7 h-7 mx-auto mb-2 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
           </svg>
           No images staged yet — click here, drop files in, or pick from library.
@@ -215,7 +215,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
                 )}
 
                 {/* Controls */}
-                <div className="absolute bottom-0 left-0 right-0 p-1.5 bg-gradient-to-t from-black/90 to-transparent flex items-center justify-between gap-1">
+                <div className="absolute bottom-0 left-0 right-0 p-1.5 bg-gradient-to-t from-stone-900/60 to-transparent flex items-center justify-between gap-1">
                   <div className="flex items-center gap-0.5">
                     <button
                       type="button"
@@ -238,7 +238,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
                         type="button"
                         onClick={() => handleSetPrimary(idx)}
                         disabled={disabled}
-                        className="text-[10px] px-1.5 py-1 text-accent-text-soft hover:text-orange-300 disabled:opacity-40 font-semibold uppercase tracking-wide transition-colors"
+                        className="text-[10px] px-1.5 py-1 text-accent-text-soft hover:text-accent disabled:opacity-40 font-semibold uppercase tracking-wide transition-colors"
                         title="Set as primary product image"
                       >
                         Star
@@ -248,7 +248,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
                       type="button"
                       onClick={() => handleRemove(idx)}
                       disabled={disabled}
-                      className="w-6 h-6 flex items-center justify-center text-prose-muted hover:text-red-400 disabled:opacity-40 transition-colors"
+                      className="w-6 h-6 flex items-center justify-center text-prose-muted hover:text-red-600 disabled:opacity-40 transition-colors"
                       title="Remove from staging"
                     >
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>

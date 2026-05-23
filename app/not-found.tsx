@@ -15,7 +15,7 @@ export default function NotFound() {
         />
       </Link>
       <p className="text-eyebrow text-xs uppercase tracking-widest font-semibold mb-4">404</p>
-      <h1 className="text-4xl font-black text-white mb-3">Page not found</h1>
+      <h1 className="text-4xl font-black text-prose mb-3">Page not found</h1>
       <p className="text-prose-muted text-sm mb-8 max-w-sm">
         This page doesn&apos;t exist — or it may have moved. Head back and keep dadding like a boss.
       </p>
@@ -23,7 +23,7 @@ export default function NotFound() {
         <Link href="/" className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition-colors text-sm">
           Go Home
         </Link>
-        <Link href="/reviews" className="px-6 py-3 bg-surface-raised hover:bg-gray-700 border border-strong text-gray-300 font-semibold rounded-xl transition-colors text-sm">
+        <Link href="/reviews" className="px-6 py-3 bg-surface-raised hover:bg-stone-100 border border-strong text-prose-muted font-semibold rounded-xl transition-colors text-sm">
           Browse Reviews
         </Link>
       </div>

@@ -86,22 +86,22 @@ export default async function ReviewsPage({ searchParams }: Props) {
         <div className="mb-8">
           <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">The Stuff</p>
-          <h1 className="text-4xl md:text-5xl font-black mb-3 text-white tracking-tight">All Reviews</h1>
+          <h1 className="text-4xl md:text-5xl font-black mb-3 text-prose tracking-tight">All Reviews</h1>
         </div>
 
         {/* Stats bar */}
         {reviews.length > 0 && (
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 pb-4 border-b border-soft/40 text-sm text-prose-faint">
-            <span><span className="text-white font-bold tabular-nums">{reviews.length}</span> dad-tested {reviews.length === 1 ? 'review' : 'reviews'}</span>
+            <span><span className="text-prose font-bold tabular-nums">{reviews.length}</span> dad-tested {reviews.length === 1 ? 'review' : 'reviews'}</span>
             <span className="text-gray-700 hidden sm:block">·</span>
-            <span><span className="text-white font-bold tabular-nums">{categoryCount}</span> {categoryCount === 1 ? 'category' : 'categories'}</span>
+            <span><span className="text-prose font-bold tabular-nums">{categoryCount}</span> {categoryCount === 1 ? 'category' : 'categories'}</span>
             {avgRating && <>
               <span className="text-gray-700 hidden sm:block">·</span>
               <span>Avg rating <span className="text-accent-text-soft font-bold tabular-nums">{avgRating}/10</span></span>
             </>}
             {lastAdded && <>
               <span className="text-gray-700 hidden sm:block">·</span>
-              <span>Last added <span className="text-white font-medium">{lastAdded}</span></span>
+              <span>Last added <span className="text-prose font-medium">{lastAdded}</span></span>
             </>}
           </div>
         )}
@@ -110,7 +110,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
         <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
           <Link
             href="/reviews"
-            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-accent text-white shadow-md shadow-black/30 hover:bg-accent-hover transition-colors"
+            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-accent text-white shadow-md shadow-stone-900/[0.05] hover:bg-accent-hover transition-colors"
           >
             All Reviews
           </Link>
@@ -118,7 +118,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
             <Link
               key={c.slug}
               href={`/reviews/category/${c.slug}`}
-              className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-surface text-prose-muted hover:bg-surface-raised hover:text-white shadow-sm shadow-black/20 transition-colors"
+              className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-surface text-prose-muted hover:bg-surface-raised hover:text-prose shadow-sm shadow-stone-900/[0.04] transition-colors"
             >
               <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
               <span>{c.label}</span>
@@ -138,7 +138,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
             scannable list per category. Featured card above does the visual
             heavy-lifting; these are quick browse-and-tap entries. */}
         {sections.length === 0 ? (
-          <div className="text-center py-24 bg-surface/40 rounded-2xl border border-soft/60 ring-1 ring-inset ring-white/[0.02]">
+          <div className="text-center py-24 bg-surface/40 rounded-2xl border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04]">
             <p className="text-prose-faint text-lg font-semibold">No reviews here yet.</p>
             <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
           </div>
@@ -148,7 +148,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
               <div className="flex items-end justify-between mb-5 gap-4">
                 <div className="min-w-0">
                   <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
-                  <h2 className="text-xl md:text-2xl font-black text-white flex items-center gap-2.5 leading-tight">
+                  <h2 className="text-xl md:text-2xl font-black text-prose flex items-center gap-2.5 leading-tight">
                     <CategoryIcon slug={cat.slug} className="w-5 h-5 sm:w-6 sm:h-6 text-accent-text shrink-0" />
                     <span className="truncate">{cat.label}</span>
                   </h2>
@@ -165,7 +165,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
                   </Link>
                 )}
               </div>
-              <div className="divide-y divide-gray-800/60">
+              <div className="divide-y divide-soft">
                 {items.map((r) => <ReviewRow key={r.id} review={r} />)}
               </div>
             </section>
@@ -208,7 +208,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">
           Reviews / {getCategoryLabel(category).toUpperCase()}
         </p>
-        <h1 className="text-4xl md:text-5xl font-black mb-3 text-white tracking-tight flex items-center gap-3">
+        <h1 className="text-4xl md:text-5xl font-black mb-3 text-prose tracking-tight flex items-center gap-3">
           {cat && <CategoryIcon slug={cat.slug} className="w-10 h-10 text-accent-text" />}
           <span>{getCategoryLabel(category)}</span>
         </h1>
@@ -224,7 +224,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
       <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
         <Link
           href="/reviews"
-          className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-surface text-prose-muted hover:bg-surface-raised hover:text-white shadow-sm shadow-black/20 transition-colors"
+          className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-surface text-prose-muted hover:bg-surface-raised hover:text-prose shadow-sm shadow-stone-900/[0.04] transition-colors"
         >
           All Reviews
         </Link>
@@ -234,8 +234,8 @@ export default async function ReviewsPage({ searchParams }: Props) {
             href={`/reviews/category/${c.slug}`}
             className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
               category === c.slug
-                ? 'bg-accent text-white shadow-md shadow-black/30'
-                : 'bg-surface text-prose-muted hover:bg-surface-raised hover:text-white shadow-sm shadow-black/20'
+                ? 'bg-accent text-white shadow-md shadow-stone-900/[0.05]'
+                : 'bg-surface text-prose-muted hover:bg-surface-raised hover:text-prose shadow-sm shadow-stone-900/[0.04]'
             }`}
           >
             <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
@@ -245,7 +245,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
       </div>
 
       {!reviews.length ? (
-        <div className="text-center py-24 bg-surface/40 rounded-2xl border border-soft/60 ring-1 ring-inset ring-white/[0.02]">
+        <div className="text-center py-24 bg-surface/40 rounded-2xl border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04]">
           <p className="text-prose-faint text-lg font-semibold">No reviews here yet.</p>
           <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
         </div>
@@ -286,7 +286,7 @@ function ReviewRow({ review: r }: { review: ReviewRow }) {
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <h3 className="text-base md:text-lg font-bold text-white group-hover:text-accent-text-soft transition-colors leading-snug">
+        <h3 className="text-base md:text-lg font-bold text-prose group-hover:text-accent-text-soft transition-colors leading-snug">
           {r.title}
         </h3>
         <p className="text-xs text-prose-faint mt-1 truncate">{r.product_name}</p>

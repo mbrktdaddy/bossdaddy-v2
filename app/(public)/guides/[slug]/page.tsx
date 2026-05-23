@@ -153,11 +153,11 @@ export default async function GuidePage({ params }: Props) {
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-3 text-sm text-prose-muted mb-8 flex-wrap">
-          <Link href="/guides" className="py-2 inline-block hover:text-white transition-colors">← Guides</Link>
+          <Link href="/guides" className="py-2 inline-block hover:text-prose transition-colors">← Guides</Link>
           {category && (
             <>
               <span className="text-gray-700">/</span>
-              <Link href={`/category/${category.slug}`} className={`flex items-center gap-1.5 py-2 inline-block hover:text-white transition-colors ${category.accent}`}>
+              <Link href={`/category/${category.slug}`} className={`flex items-center gap-1.5 py-2 inline-block hover:text-prose transition-colors ${category.accent}`}>
                 <CategoryIcon slug={category.slug} className="w-4 h-4 text-accent-text" /> {category.label}
               </Link>
             </>
@@ -167,7 +167,7 @@ export default async function GuidePage({ params }: Props) {
         {/* FTC Disclosure — rendered whenever the guide contains affiliate links */}
         {guide.has_affiliate_links && (
           <div
-            className="mb-8 text-xs text-prose-faint bg-surface rounded-2xl px-4 py-3 shadow-md shadow-black/30"
+            className="mb-8 text-xs text-prose-faint bg-surface rounded-2xl px-4 py-3 shadow-md shadow-stone-900/[0.05]"
             dangerouslySetInnerHTML={{ __html: FTC_DISCLOSURE_HTML }}
           />
         )}
@@ -176,7 +176,7 @@ export default async function GuidePage({ params }: Props) {
         <div className="mb-10">
           <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6 tracking-tight">{guide.title}</h1>
           <div className="flex flex-wrap items-center gap-4 text-sm text-prose-muted pb-6">
-            <span>by <Link href={`/author/${author}`} className="text-gray-300 hover:text-accent-text-soft transition-colors">@{author}</Link></span>
+            <span>by <Link href={`/author/${author}`} className="text-prose-muted hover:text-accent-text-soft transition-colors">@{author}</Link></span>
             {guide.published_at && (
               <span>
                 {new Date(guide.published_at).toLocaleDateString('en-US', {
@@ -208,7 +208,7 @@ export default async function GuidePage({ params }: Props) {
 
         {/* TL;DR box */}
         {(guide.tldr || guideKeyTakeaways.length > 0) && (
-          <div className="mb-10 bg-accent-tint/30 border border-accent-border/40 rounded-2xl p-5 sm:p-6">
+          <div className="mb-10 bg-accent-tint border border-accent-border/40 rounded-2xl p-5 sm:p-6">
             <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
             <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">TL;DR</p>
             {guide.tldr && (
@@ -217,7 +217,7 @@ export default async function GuidePage({ params }: Props) {
             {guideKeyTakeaways.length > 0 && (
               <ul className="space-y-2">
                 {guideKeyTakeaways.map((item, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm text-gray-300">
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-prose-muted">
                     <span className="text-accent-text mt-0.5 shrink-0">→</span>
                     <span>{item}</span>
                   </li>
@@ -257,15 +257,15 @@ export default async function GuidePage({ params }: Props) {
                   return segment.content ? (
                     <div
                       key={`html-${i}`}
-                      className="bd-editorial prose prose-lg prose-invert prose-orange mx-auto max-w-[68ch]
+                      className="bd-editorial prose prose-lg prose-orange mx-auto max-w-[68ch]
                         prose-headings:font-black prose-headings:tracking-tight prose-headings:font-sans prose-headings:leading-[1.15]
                         prose-h2:text-2xl prose-h2:mt-14 prose-h2:mb-5
                         prose-h3:mt-10 prose-h3:mb-3
                         [&>*:first-child]:mt-0
-                        prose-p:text-gray-300 prose-p:leading-[1.85]
-                        prose-a:text-accent-text-soft prose-a:no-underline hover:prose-a:text-orange-300
-                        prose-strong:text-white
-                        prose-li:text-gray-300 prose-li:leading-[1.85]"
+                        prose-p:text-prose-muted prose-p:leading-[1.85]
+                        prose-a:text-accent-text-soft prose-a:no-underline hover:prose-a:text-accent
+                        prose-strong:text-prose
+                        prose-li:text-prose-muted prose-li:leading-[1.85]"
                       dangerouslySetInnerHTML={{ __html: segment.content }}
                     />
                   ) : null
@@ -283,9 +283,9 @@ export default async function GuidePage({ params }: Props) {
                 </div>
                 <div className="space-y-2">
                   {guideFaqs.map((faq, i) => (
-                    <details key={i} className="group bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:border-accent-border/40 transition-colors rounded-xl overflow-hidden">
+                    <details key={i} className="group bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 transition-colors rounded-xl overflow-hidden">
                       <summary className="flex items-center justify-between gap-3 px-4 py-3.5 cursor-pointer list-none min-h-[44px]">
-                        <span className="text-sm font-semibold text-white leading-snug">{faq.question}</span>
+                        <span className="text-sm font-semibold text-prose leading-snug">{faq.question}</span>
                         <svg className="w-4 h-4 shrink-0 text-accent-text transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                         </svg>
@@ -301,7 +301,7 @@ export default async function GuidePage({ params }: Props) {
 
             {/* Email signup CTA */}
             <div className="mt-12 pt-8">
-              <div className="bg-gradient-to-br from-surface to-surface-sunken border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl p-6 sm:p-8 text-center shadow-xl shadow-black/40">
+              <div className="bg-gradient-to-br from-surface to-surface-sunken border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl p-6 sm:p-8 text-center shadow-xl shadow-stone-900/[0.06]">
                 <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3 mx-auto" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Liked this guide?</p>
                 <h3 className="text-xl font-black mb-2">Get the next one in your inbox</h3>
@@ -342,7 +342,7 @@ export default async function GuidePage({ params }: Props) {
                     <Link
                       key={r.id}
                       href={`/reviews/${r.slug}`}
-                      className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/50 hover:border-accent-border/40 hover:-translate-y-0.5 transition-all duration-200"
+                      className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl overflow-hidden shadow-md shadow-stone-900/[0.05] hover:shadow-lg hover:shadow-stone-900/[0.08] hover:border-accent-border/40 hover:-translate-y-0.5 transition-all duration-200"
                     >
                       {r.image_url ? (
                         <div className="relative w-full h-36 bg-surface-raised shrink-0">
@@ -392,7 +392,7 @@ export default async function GuidePage({ params }: Props) {
                     <Link
                       key={a.id}
                       href={`/guides/${a.slug}`}
-                      className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/50 hover:border-accent-border/40 hover:-translate-y-0.5 transition-all duration-200"
+                      className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl overflow-hidden shadow-md shadow-stone-900/[0.05] hover:shadow-lg hover:shadow-stone-900/[0.08] hover:border-accent-border/40 hover:-translate-y-0.5 transition-all duration-200"
                     >
                       {a.image_url ? (
                         <div className="relative w-full h-36 bg-surface-raised shrink-0 overflow-hidden">
@@ -466,7 +466,7 @@ export default async function GuidePage({ params }: Props) {
 
               {/* Compact products panel — in mention order */}
               {mentionedProducts && mentionedProducts.length > 0 && (
-                <div className="bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:border-accent-border/40 transition-colors rounded-2xl p-4">
+                <div className="bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 transition-colors rounded-2xl p-4">
                   <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Products Mentioned</p>
                   <ul className="space-y-3">
@@ -491,13 +491,13 @@ export default async function GuidePage({ params }: Props) {
                               </div>
                             )}
                             <div className="min-w-0 flex-1">
-                              <p className="text-xs font-semibold text-white leading-snug line-clamp-2 mb-1.5">{product!.name}</p>
+                              <p className="text-xs font-semibold text-prose leading-snug line-clamp-2 mb-1.5">{product!.name}</p>
                               <a
                                 href={href}
                                 target="_blank"
                                 rel={isAffiliate ? 'sponsored nofollow noopener' : 'noopener'}
                                 data-product-slug={product!.slug}
-                                className="text-[10px] font-bold text-accent-text-soft hover:text-orange-300 transition-colors uppercase tracking-wide"
+                                className="text-[10px] font-bold text-accent-text-soft hover:text-accent transition-colors uppercase tracking-wide"
                               >
                                 Check Price →
                               </a>

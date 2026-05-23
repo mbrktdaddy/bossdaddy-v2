@@ -292,8 +292,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
       />
 
       {review.rejection_reason && ['draft', 'rejected'].includes(status) && (
-        <div className="mb-4 px-4 py-3 rounded-xl bg-yellow-950/40 border border-yellow-900/40">
-          <p className="text-sm text-yellow-300">
+        <div className="mb-4 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200">
+          <p className="text-sm text-amber-700">
             <strong>Edits requested:</strong> {review.rejection_reason}
           </p>
         </div>
@@ -307,12 +307,12 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
 
         {/* ── FOLLOW-UP CONTEXT (only when this review is itself a follow-up) ── */}
         {isFollowup && (
-          <div className="bg-accent-tint/30 border border-accent-border/40 rounded-2xl p-4 sm:p-5">
+          <div className="bg-accent-tint border border-accent-border/40 rounded-2xl p-4 sm:p-5">
             <p className="text-xs text-accent-text-soft uppercase tracking-widest font-semibold mb-2">
               Follow-up Review
             </p>
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-3 text-sm">
-              <span className="text-white font-semibold">
+              <span className="text-prose font-semibold">
                 {review.milestone_label ?? 'Update'}
               </span>
               {review.milestone_days != null && (
@@ -333,16 +333,16 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                     href={`/reviews/${parent.slug}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-accent-text-soft hover:text-orange-300 underline underline-offset-2"
+                    className="text-accent-text-soft hover:text-accent underline underline-offset-2"
                   >
                     {parent.title}
                   </a>
                 ) : (
-                  <span className="text-gray-300">{parent.title}</span>
+                  <span className="text-prose-muted">{parent.title}</span>
                 )}
                 <a
                   href={`/dashboard/reviews/${parent.id}`}
-                  className="ml-2 text-prose-faint hover:text-gray-300"
+                  className="ml-2 text-prose-faint hover:text-prose"
                 >
                   (open original workspace →)
                 </a>
@@ -354,7 +354,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
             )}
 
             <div>
-              <p className="block text-sm text-gray-300 mb-2">Verdict change vs. original</p>
+              <p className="block text-sm text-prose-muted mb-2">Verdict change vs. original</p>
               <div className="flex gap-2 flex-wrap">
                 {([
                   ['Improved',          'improved',           '↑'],
@@ -371,7 +371,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                       className={`px-3 py-2.5 min-h-[44px] rounded-lg text-sm font-semibold border transition-colors ${
                         active
                           ? 'bg-accent border-accent text-white'
-                          : 'bg-surface border-strong text-gray-300 hover:bg-surface-raised'
+                          : 'bg-surface border-strong text-prose-muted hover:bg-surface-raised'
                       }`}
                     >
                       <span className="mr-1.5">{icon}</span>{label}
@@ -391,20 +391,20 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-gray-300 mb-1.5">Product Name</label>
+            <label className="block text-sm text-prose-muted mb-1.5">Product Name</label>
             <input
               type="text"
               value={productName}
               onChange={(e) => setProductName(e.target.value)}
-              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
+              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-300 mb-1.5">Category</label>
+            <label className="block text-sm text-prose-muted mb-1.5">Category</label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
+              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
             >
               {CATEGORIES.map(c => <option key={c.slug} value={c.slug}>{c.icon} {c.label}</option>)}
             </select>
@@ -412,18 +412,18 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Review Title</label>
+          <label className="block text-sm text-prose-muted mb-1.5">Review Title</label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
           />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm text-gray-300 mb-1.5">Overall Rating</label>
+            <label className="block text-sm text-prose-muted mb-1.5">Overall Rating</label>
             <div className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg flex items-baseline gap-1.5 min-h-[42px]">
               {computedRating != null ? (
                 <>
@@ -437,12 +437,12 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
             <p className="mt-1 text-xs text-prose-faint">Computed from the 4 sub-scores. Adjust those to change.</p>
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-sm text-gray-300 mb-1.5">Excerpt</label>
+            <label className="block text-sm text-prose-muted mb-1.5">Excerpt</label>
             <textarea
               value={excerpt}
               onChange={(e) => setExcerpt(e.target.value)}
               rows={2}
-              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
+              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
             />
           </div>
         </div>
@@ -454,11 +454,11 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
           <div className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm text-gray-300 mb-1.5">How long tested</label>
+                <label className="block text-sm text-prose-muted mb-1.5">How long tested</label>
                 <select
                   value={testingDuration}
                   onChange={(e) => setTestingDuration(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
+                  className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
                 >
                   <option value="">— not set —</option>
                   {TESTING_DURATION_OPTIONS.map((o) => (
@@ -467,7 +467,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-gray-300 mb-1.5">Price paid (cents)</label>
+                <label className="block text-sm text-prose-muted mb-1.5">Price paid (cents)</label>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -475,7 +475,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                   value={pricePaidCents}
                   onChange={(e) => setPricePaidCents(e.target.value.replace(/\D/g, ''))}
                   placeholder="e.g. 2999 = $29.99"
-                  className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+                  className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
                 />
                 {pricePaidCents && !isNaN(parseInt(pricePaidCents, 10)) && (
                   <p className="mt-1 text-xs text-accent-text-soft">${(parseInt(pricePaidCents, 10) / 100).toFixed(2)}</p>
@@ -483,25 +483,25 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
               </div>
             </div>
             <div>
-              <label className="block text-sm text-gray-300 mb-1.5">How did you use it?</label>
+              <label className="block text-sm text-prose-muted mb-1.5">How did you use it?</label>
               <textarea
                 value={howYouUsedIt}
                 onChange={(e) => setHowYouUsedIt(e.target.value)}
                 maxLength={300}
                 rows={2}
                 placeholder="e.g. Built a backyard deck over 3 weekends — pilot holes, screws, mixing grout."
-                className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
+                className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-300 mb-1.5">Standout moment</label>
+              <label className="block text-sm text-prose-muted mb-1.5">Standout moment</label>
               <textarea
                 value={standoutMoment}
                 onChange={(e) => setStandoutMoment(e.target.value)}
                 maxLength={300}
                 rows={2}
                 placeholder="e.g. Battery lasted the entire weekend — never had to stop and charge."
-                className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
+                className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
               />
             </div>
           </div>
@@ -520,11 +520,11 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
               ['Daily Use',   scoreDailyUse, setScoreDailyUse] as const,
             ]).map(([label, value, setter]) => (
               <div key={label}>
-                <label className="block text-xs text-gray-300 mb-1.5">{label}</label>
+                <label className="block text-xs text-prose-muted mb-1.5">{label}</label>
                 <select
                   value={value ?? ''}
                   onChange={(e) => setter(e.target.value === '' ? null : Number(e.target.value))}
-                  className="w-full px-3 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover text-sm"
+                  className="w-full px-3 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover text-sm"
                 >
                   <option value="">—</option>
                   {[1,2,3,4,5,6,7,8,9,10].map((n) => (
@@ -536,7 +536,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
           </div>
 
           <div className="mt-4">
-            <p className="block text-sm text-gray-300 mb-1.5">Would you buy it again?</p>
+            <p className="block text-sm text-prose-muted mb-1.5">Would you buy it again?</p>
             <div className="flex gap-2 flex-wrap">
               {([
                 ['Yes', true],
@@ -552,7 +552,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                     className={`px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-semibold border transition-colors ${
                       active
                         ? 'bg-accent border-accent text-white'
-                        : 'bg-surface border-strong text-gray-300 hover:bg-surface-raised'
+                        : 'bg-surface border-strong text-prose-muted hover:bg-surface-raised'
                     }`}
                   >
                     {label}
@@ -606,12 +606,12 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <ListEditor label="The Good (Pros)" items={pros} onChange={setPros} placeholder="e.g. Long battery life" accent="text-green-400" />
-          <ListEditor label="The Not-So-Good (Cons)" items={cons} onChange={setCons} placeholder="e.g. Runs hot under load" accent="text-red-400" />
+          <ListEditor label="The Good (Pros)" items={pros} onChange={setPros} placeholder="e.g. Long battery life" accent="text-green-700" />
+          <ListEditor label="The Not-So-Good (Cons)" items={cons} onChange={setCons} placeholder="e.g. Runs hot under load" accent="text-red-600" />
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Content</label>
+          <label className="block text-sm text-prose-muted mb-1.5">Content</label>
           <TiptapEditor
             value={content}
             onChange={setContent}
@@ -630,13 +630,13 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
 
             {/* TL;DR */}
             <div>
-              <label className="block text-sm text-gray-300 mb-1.5">TL;DR <span className="text-prose-faint font-normal">— 2–3 sentence skimmer summary</span></label>
+              <label className="block text-sm text-prose-muted mb-1.5">TL;DR <span className="text-prose-faint font-normal">— 2–3 sentence skimmer summary</span></label>
               <textarea
                 value={tldr}
                 onChange={(e) => setTldr(e.target.value)}
                 rows={3}
                 placeholder="e.g. The Enfamil Enspire Ready-to-Feed is the easiest formula I've ever used at 4 AM. The nutritional profile is the closest thing to breast milk on the market, and our daughter took to it immediately after rejecting two other brands. The price is steep, but for tired dads doing solo feedings, it's worth it."
-                className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-y text-sm"
+                className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-y text-sm"
               />
             </div>
 
@@ -654,25 +654,25 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                 items={bestFor}
                 onChange={setBestFor}
                 placeholder="e.g. Dads doing solo overnight feedings"
-                accent="text-green-400"
+                accent="text-green-700"
               />
               <ListEditor
                 label="Not For"
                 items={notFor}
                 onChange={setNotFor}
                 placeholder="e.g. Families on a tight formula budget"
-                accent="text-red-400"
+                accent="text-red-600"
               />
             </div>
 
             {/* FAQs */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm text-gray-300">FAQs</label>
+                <label className="text-sm text-prose-muted">FAQs</label>
                 <button
                   type="button"
                   onClick={() => setFaqs([...faqs, { question: '', answer: '' }])}
-                  className="text-xs text-accent-text-soft hover:text-orange-300 transition-colors"
+                  className="text-xs text-accent-text-soft hover:text-accent transition-colors"
                 >
                   + Add question
                 </button>
@@ -687,12 +687,12 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                         value={faq.question}
                         onChange={(e) => setFaqs(faqs.map((f, j) => j === i ? { ...f, question: e.target.value } : f))}
                         placeholder="e.g. Is Enfamil Enspire Ready-to-Feed worth the price?"
-                        className="flex-1 px-3 py-1.5 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover"
+                        className="flex-1 px-3 py-1.5 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover"
                       />
                       <button
                         type="button"
                         onClick={() => setFaqs(faqs.filter((_, j) => j !== i))}
-                        className="text-prose-faint hover:text-red-400 transition-colors text-xs mt-2"
+                        className="text-prose-faint hover:text-red-600 transition-colors text-xs mt-2"
                       >
                         ✕
                       </button>
@@ -704,7 +704,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                         onChange={(e) => setFaqs(faqs.map((f, j) => j === i ? { ...f, answer: e.target.value } : f))}
                         placeholder="2–3 sentences. Direct, specific, first-person."
                         rows={2}
-                        className="flex-1 px-3 py-1.5 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none"
+                        className="flex-1 px-3 py-1.5 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none"
                       />
                     </div>
                   </div>
@@ -758,9 +758,9 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
               onChangeContent={setContent}
             />
             {hasAffiliate && (
-              <div className="bg-accent-tint/40 border border-accent-border/40 rounded-xl p-4">
-                <p className="text-sm text-orange-300 font-semibold mb-2">⚠ Affiliate links detected</p>
-                <label className="flex items-start gap-2 text-sm text-gray-300 cursor-pointer">
+              <div className="bg-accent-tint border border-accent-border/40 rounded-xl p-4">
+                <p className="text-sm text-accent-text font-semibold mb-2">⚠ Affiliate links detected</p>
+                <label className="flex items-start gap-2 text-sm text-prose-muted cursor-pointer">
                   <input
                     type="checkbox"
                     checked={disclosureAck}
@@ -769,7 +769,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                   />
                   <span>
                     I confirm this review contains affiliate links. FTC disclosure will be auto-inserted before publishing.
-                    <a href="/affiliate-disclosure" target="_blank" className="ml-1 text-accent-text-soft hover:text-orange-300">Learn more →</a>
+                    <a href="/affiliate-disclosure" target="_blank" className="ml-1 text-accent-text-soft hover:text-accent">Learn more →</a>
                   </span>
                 </label>
               </div>
@@ -805,7 +805,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                 <p className="text-xs text-prose-faint font-medium uppercase tracking-widest mb-2">
                   Follow-up Reviews
                 </p>
-                <p className="text-sm text-gray-300 mb-1">
+                <p className="text-sm text-prose-muted mb-1">
                   {followupCount === 0
                     ? 'No follow-ups scheduled yet.'
                     : `${followupCount} follow-up${followupCount === 1 ? '' : 's'} already in the timeline.`}
@@ -861,10 +861,10 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         </div>
 
         {actionErr && (
-          <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">{actionErr}</p>
+          <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{actionErr}</p>
         )}
         {actionMsg && (
-          <p className="text-green-400 text-sm bg-green-950/40 border border-green-800/40 rounded-lg px-4 py-3">{actionMsg}</p>
+          <p className="text-green-700 text-sm bg-green-50 border border-green-200 rounded-lg px-4 py-3">{actionMsg}</p>
         )}
 
         <p className="text-xs text-prose-faint">

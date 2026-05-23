@@ -63,7 +63,7 @@ export default async function VaultLandingPage({ searchParams }: Props) {
       <div className="mb-12">
         <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">{activeTab.eyebrow}</p>
-        <h1 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tight">{LABELS.vault.full}</h1>
+        <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight">{LABELS.vault.full}</h1>
         <p className="text-prose-muted max-w-2xl leading-relaxed text-base md:text-lg">
           Every comparison, best-of list, gift guide, and stack — in one place. Real-tested picks from a real dad, organized so you can find what you need in one click.
         </p>
@@ -122,7 +122,7 @@ function VaultCardLink({ card }: { card: VaultCard }) {
   return (
     <Link
       href={href}
-      className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-md shadow-black/30 hover:border-accent-border/40 hover:shadow-lg hover:shadow-black/50 hover:-translate-y-0.5 transition-all"
+      className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl overflow-hidden shadow-md shadow-stone-900/[0.05] hover:border-accent-border/40 hover:shadow-lg hover:shadow-stone-900/[0.08] hover:-translate-y-0.5 transition-all"
     >
       <div className="relative aspect-video bg-surface-sunken">
         {card.hero_image_url ? (
@@ -137,7 +137,7 @@ function VaultCardLink({ card }: { card: VaultCard }) {
         </span>
       </div>
       <div className="p-4 flex flex-col flex-1">
-        <p className="text-sm font-bold text-white group-hover:text-accent-text-soft transition-colors leading-snug mb-1 line-clamp-2">{card.title}</p>
+        <p className="text-sm font-bold text-prose group-hover:text-accent-text-soft transition-colors leading-snug mb-1 line-clamp-2">{card.title}</p>
         {card.description && (
           <p className="text-xs text-prose-faint leading-relaxed line-clamp-2 flex-1">{card.description}</p>
         )}

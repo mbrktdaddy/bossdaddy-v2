@@ -98,7 +98,7 @@ export default function LinkPicker({ value, onChange, sourceLinks }: Props) {
             className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
               m.key === mode
                 ? 'bg-accent text-white'
-                : 'bg-surface-raised text-prose-muted hover:text-white'
+                : 'bg-surface-raised text-prose-muted hover:text-prose'
             }`}
           >
             {m.label}
@@ -110,7 +110,7 @@ export default function LinkPicker({ value, onChange, sourceLinks }: Props) {
         <select
           value={itemId}
           onChange={(e) => handleItem(e.target.value)}
-          className="w-full bg-surface border border-strong text-white text-xs rounded-lg px-3 py-2 focus:border-accent focus:outline-none"
+          className="w-full bg-surface border border-strong text-prose text-xs rounded-lg px-3 py-2 focus:border-accent focus:outline-none"
         >
           <option value="">— Select —</option>
           {(mode === 'review' ? sourceLinks.reviews : mode === 'guide' ? sourceLinks.guides : sourceLinks.merch).map((item) => (
@@ -125,7 +125,7 @@ export default function LinkPicker({ value, onChange, sourceLinks }: Props) {
           value={custom}
           onChange={(e) => handleCustom(e.target.value)}
           placeholder="https://…"
-          className="w-full bg-surface border border-strong text-white text-xs rounded-lg px-3 py-2 focus:border-accent focus:outline-none"
+          className="w-full bg-surface border border-strong text-prose text-xs rounded-lg px-3 py-2 focus:border-accent focus:outline-none"
         />
       )}
 

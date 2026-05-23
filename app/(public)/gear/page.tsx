@@ -140,7 +140,7 @@ export default async function GearPage({ searchParams }: Props) {
       <div className="mb-8">
         <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Daddy Tested, Boss Approved</p>
-        <h1 className="text-4xl md:text-5xl font-black mb-3 text-white tracking-tight flex items-center gap-3">
+        <h1 className="text-4xl md:text-5xl font-black mb-3 text-prose tracking-tight flex items-center gap-3">
           {cat && <CategoryIcon slug={cat.slug} className="w-10 h-10 text-accent-text" />}
           <span>{cat ? `${cat.label} Gear` : "Boss Daddy's Gear"}</span>
         </h1>
@@ -152,30 +152,30 @@ export default async function GearPage({ searchParams }: Props) {
       {/* ── Stats bar ───────────────────────────────────────────────────────── */}
       {topPicks.length > 0 && (
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 pb-4 border-b border-soft/40 text-sm text-prose-faint">
-          <Link href="/reviews" className="hover:text-gray-300 transition-colors">
-            <span className="text-white font-bold tabular-nums">{topPicks.length}</span> {topPicks.length === 1 ? 'pick' : 'picks'} rated 8+
+          <Link href="/reviews" className="hover:text-prose transition-colors">
+            <span className="text-prose font-bold tabular-nums">{topPicks.length}</span> {topPicks.length === 1 ? 'pick' : 'picks'} rated 8+
           </Link>
           {!category && (
             <>
-              <span className="text-gray-700 hidden sm:block">·</span>
-              <Link href="/reviews" className="hover:text-gray-300 transition-colors">
-                <span className="text-white font-bold tabular-nums">{categoryCount}</span> {categoryCount === 1 ? 'category' : 'categories'}
+              <span className="text-prose-faint hidden sm:block">·</span>
+              <Link href="/reviews" className="hover:text-prose transition-colors">
+                <span className="text-prose font-bold tabular-nums">{categoryCount}</span> {categoryCount === 1 ? 'category' : 'categories'}
               </Link>
             </>
           )}
           {!category && bossPicks > 0 && (
             <>
-              <span className="text-gray-700 hidden sm:block">·</span>
-              <a href="#boss-picks" className="hover:text-gray-300 transition-colors">
+              <span className="text-prose-faint hidden sm:block">·</span>
+              <a href="#boss-picks" className="hover:text-prose transition-colors">
                 <span className="text-accent-text-soft font-bold tabular-nums">{bossPicks}</span> Boss {bossPicks === 1 ? 'Pick' : 'Picks'} (9+)
               </a>
             </>
           )}
           {!category && tens.length > 0 && (
             <>
-              <span className="text-gray-700 hidden sm:block">·</span>
-              <a href="#perfect-score" className="hover:text-gray-300 transition-colors">
-                <span className="text-white font-bold tabular-nums">{tens.length}</span> perfect {tens.length === 1 ? 'score' : 'scores'} (10/10)
+              <span className="text-prose-faint hidden sm:block">·</span>
+              <a href="#perfect-score" className="hover:text-prose transition-colors">
+                <span className="text-prose font-bold tabular-nums">{tens.length}</span> perfect {tens.length === 1 ? 'score' : 'scores'} (10/10)
               </a>
             </>
           )}
@@ -188,8 +188,8 @@ export default async function GearPage({ searchParams }: Props) {
           href="/gear"
           className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold transition-colors ${
             !category
-              ? 'bg-accent text-white shadow-md shadow-black/30 hover:bg-accent-hover'
-              : 'bg-surface text-prose-muted hover:bg-surface-raised hover:text-white shadow-sm shadow-black/20'
+              ? 'bg-accent text-white shadow-md shadow-stone-900/[0.05] hover:bg-accent-hover'
+              : 'bg-surface text-prose-muted hover:bg-surface-raised hover:text-prose shadow-sm shadow-stone-900/[0.04]'
           }`}
         >
           All Gear
@@ -200,8 +200,8 @@ export default async function GearPage({ searchParams }: Props) {
             href={`/gear?category=${c.slug}`}
             className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
               category === c.slug
-                ? 'bg-accent text-white shadow-md shadow-black/30'
-                : 'bg-surface text-prose-muted hover:bg-surface-raised hover:text-white shadow-sm shadow-black/20'
+                ? 'bg-accent text-white shadow-md shadow-stone-900/[0.05]'
+                : 'bg-surface text-prose-muted hover:bg-surface-raised hover:text-prose shadow-sm shadow-stone-900/[0.04]'
             }`}
           >
             <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
@@ -226,7 +226,7 @@ export default async function GearPage({ searchParams }: Props) {
               <div>
                 <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Gift Guides</p>
-                <h2 className="text-2xl font-black text-white leading-tight">Shop by Occasion</h2>
+                <h2 className="text-2xl font-black text-prose leading-tight">Shop by Occasion</h2>
               </div>
               <Link
                 href="/gifts"
@@ -244,7 +244,7 @@ export default async function GearPage({ searchParams }: Props) {
                   <Link
                     key={occ.slug}
                     href={`/gifts/${occ.slug}`}
-                    className="shrink-0 w-40 rounded-2xl overflow-hidden bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-accent-border/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all"
+                    className="shrink-0 w-40 rounded-2xl overflow-hidden bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-xl hover:shadow-stone-900/[0.10] hover:-translate-y-0.5 transition-all"
                   >
                     <div className="relative w-full h-24 bg-surface-raised">
                       {pick?.hero_image_url ? (
@@ -252,7 +252,7 @@ export default async function GearPage({ searchParams }: Props) {
                       ) : (
                         <div className="w-full h-full flex items-center justify-center"><OccasionIcon value={occ.value} className="w-9 h-9 text-accent-text/60" /></div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent" />
                       <p className="absolute bottom-2 left-3 right-3 text-white text-xs font-black leading-tight">{occ.label}</p>
                     </div>
                     <p className="px-3 py-2 text-xs text-prose-muted line-clamp-2 leading-relaxed">{occ.shortBlurb}</p>
@@ -269,7 +269,7 @@ export default async function GearPage({ searchParams }: Props) {
                   <Link
                     key={occ.slug}
                     href={`/gifts/${occ.slug}`}
-                    className="group relative rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-accent-border/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all"
+                    className="group relative rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-xl hover:shadow-stone-900/[0.10] hover:-translate-y-0.5 transition-all"
                   >
                     <div className="relative w-full h-36 bg-surface-raised">
                       {pick?.hero_image_url ? (
@@ -277,11 +277,11 @@ export default async function GearPage({ searchParams }: Props) {
                       ) : (
                         <div className="w-full h-full flex items-center justify-center"><OccasionIcon value={occ.value} className="w-12 h-12 text-accent-text/60" /></div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-stone-900/60 via-stone-900/20 to-transparent" />
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 p-4">
                       <p className="text-white font-black text-sm leading-tight mb-0.5">{occ.label}</p>
-                      <p className="text-gray-300 text-xs line-clamp-1">{occ.shortBlurb}</p>
+                      <p className="text-stone-200 text-xs line-clamp-1">{occ.shortBlurb}</p>
                     </div>
                   </Link>
                 )
@@ -289,7 +289,7 @@ export default async function GearPage({ searchParams }: Props) {
             </div>
 
             <div className="mt-4 sm:hidden text-right">
-              <Link href="/gifts" className="text-xs text-accent-text-soft hover:text-orange-300 font-semibold transition-colors">
+              <Link href="/gifts" className="text-xs text-accent-text-soft hover:text-accent font-semibold transition-colors">
                 All gift guides →
               </Link>
             </div>
@@ -302,7 +302,7 @@ export default async function GearPage({ searchParams }: Props) {
                 <div>
                   <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Curated Pick</p>
-                  <h2 className="text-2xl font-black text-white leading-tight">Featured Collection</h2>
+                  <h2 className="text-2xl font-black text-prose leading-tight">Featured Collection</h2>
                 </div>
                 <Link
                   href="/picks"
@@ -314,7 +314,7 @@ export default async function GearPage({ searchParams }: Props) {
 
               <Link
                 href={`/picks/${featuredPick.slug}`}
-                className="group block bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-white/[0.02] shadow-xl shadow-black/50 hover:border-accent-border/40 hover:shadow-black/70 hover:-translate-y-0.5 transition-all"
+                className="group block bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-xl shadow-stone-900/[0.08] hover:border-accent-border/40 hover:shadow-stone-900/[0.10] hover:-translate-y-0.5 transition-all"
               >
                 <div className="flex flex-col sm:flex-row">
                   <div className="relative w-full sm:w-72 h-48 sm:h-auto sm:min-h-[220px] shrink-0 bg-surface-raised">
@@ -336,7 +336,7 @@ export default async function GearPage({ searchParams }: Props) {
                   </div>
                   <div className="flex-1 p-5 sm:p-6 flex flex-col justify-between">
                     <div>
-                      <h3 className="text-lg font-black text-white leading-snug mb-2 group-hover:text-accent-text-soft transition-colors">
+                      <h3 className="text-lg font-black text-prose leading-snug mb-2 group-hover:text-accent-text-soft transition-colors">
                         {featuredPick.title}
                       </h3>
                       {featuredPick.description && (
@@ -356,7 +356,7 @@ export default async function GearPage({ searchParams }: Props) {
                                     <Image src={r.image_url} alt={r.product_name} fill className="object-cover" sizes="24px" />
                                   </div>
                                 )}
-                                <span className="text-xs text-gray-300 font-medium truncate max-w-[120px]">{r.product_name}</span>
+                                <span className="text-xs text-prose-muted font-medium truncate max-w-[120px]">{r.product_name}</span>
                               </div>
                             )
                           })}
@@ -373,7 +373,7 @@ export default async function GearPage({ searchParams }: Props) {
               </Link>
 
               <div className="mt-3 sm:hidden text-right">
-                <Link href="/picks" className="text-xs text-accent-text-soft hover:text-orange-300 font-semibold transition-colors">
+                <Link href="/picks" className="text-xs text-accent-text-soft hover:text-accent font-semibold transition-colors">
                   All collections →
                 </Link>
               </div>
@@ -384,13 +384,13 @@ export default async function GearPage({ searchParams }: Props) {
           <section className="relative mb-16">
             <div
               aria-hidden
-              className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-orange-950/[0.05] to-transparent"
+              className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-accent/[0.04] to-transparent"
             />
             <div className="relative">
               <div className="mb-6">
                 <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Browse</p>
-                <h2 className="text-2xl font-black text-white leading-tight">Shop by Category</h2>
+                <h2 className="text-2xl font-black text-prose leading-tight">Shop by Category</h2>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {CATEGORIES.map((c) => {
@@ -399,10 +399,10 @@ export default async function GearPage({ searchParams }: Props) {
                     <Link
                       key={c.slug}
                       href={`/category/${c.slug}`}
-                      className="group flex flex-col items-center justify-center text-center gap-2 bg-gradient-to-br from-surface to-surface/60 hover:bg-surface-raised rounded-2xl p-4 min-h-[120px] border border-soft/60 ring-1 ring-inset ring-white/[0.02] shadow-md shadow-black/30 hover:border-accent-border/40 hover:shadow-lg hover:shadow-black/40 hover:-translate-y-0.5 transition-all"
+                      className="group flex flex-col items-center justify-center text-center gap-2 bg-gradient-to-br from-surface to-surface/60 hover:bg-surface-raised rounded-2xl p-4 min-h-[120px] border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-md shadow-stone-900/[0.05] hover:border-accent-border/40 hover:shadow-lg hover:shadow-stone-900/[0.06] hover:-translate-y-0.5 transition-all"
                     >
                       <CategoryIcon slug={c.slug} className="w-7 h-7 text-accent-text" />
-                      <span className="text-sm font-bold text-white leading-tight group-hover:text-accent-text-soft transition-colors">
+                      <span className="text-sm font-bold text-prose leading-tight group-hover:text-accent-text-soft transition-colors">
                         {c.shortLabel}
                       </span>
                       <span className="text-xs text-prose-faint">
@@ -427,7 +427,7 @@ export default async function GearPage({ searchParams }: Props) {
             9+:  standard 3-col card grid (workhorse middle)
             8+:  compact editorial rows (browse-and-scan base) */}
       {!topPicks.length ? (
-        <div className="text-center py-24 bg-surface/40 rounded-2xl border border-soft/60 ring-1 ring-inset ring-white/[0.02]">
+        <div className="text-center py-24 bg-surface/40 rounded-2xl border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04]">
           <p className="text-prose-faint text-lg font-semibold">Nothing here yet.</p>
           <p className="text-prose-faint text-sm mt-2">Reviews are being added.</p>
         </div>
@@ -453,7 +453,7 @@ export default async function GearPage({ searchParams }: Props) {
                 <div className="mb-6">
                   <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Top Tier</p>
-                  <h2 className="text-xl font-black text-white">Perfect Score</h2>
+                  <h2 className="text-xl font-black text-prose">Perfect Score</h2>
                   <p className="text-xs text-prose-faint mt-0.5">Flawless. Nothing I tested came close.</p>
                 </div>
                 {tens.length === 1 ? (
@@ -482,7 +482,7 @@ export default async function GearPage({ searchParams }: Props) {
               <div className="mb-6">
                 <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Boss Approved</p>
-                <h2 className="text-xl font-black text-white">Boss Picks</h2>
+                <h2 className="text-xl font-black text-prose">Boss Picks</h2>
                 <p className="text-xs text-prose-faint mt-0.5">Earned it. These are the ones I recommend without hesitation.</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -497,10 +497,10 @@ export default async function GearPage({ searchParams }: Props) {
               <div className="mb-6">
                 <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Worth It</p>
-                <h2 className="text-xl font-black text-white">Solid Gear</h2>
+                <h2 className="text-xl font-black text-prose">Solid Gear</h2>
                 <p className="text-xs text-prose-faint mt-0.5">Good enough that I kept them. Not perfect, but worth it.</p>
               </div>
-              <div className="divide-y divide-gray-800/60">
+              <div className="divide-y divide-soft">
                 {eights.map((r) => <GearRow key={r.id} review={r} />)}
               </div>
             </section>
@@ -562,7 +562,7 @@ function GearCard({
   // Avoids invalid <a>-inside-<a> HTML that nested cards had previously.
   return (
     <article
-      className={`group relative flex flex-col bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-accent-border/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200 ${
+      className={`group relative flex flex-col bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-xl hover:shadow-stone-900/[0.10] hover:-translate-y-0.5 transition-all duration-200 ${
         isHero ? 'lg:col-span-2 lg:row-span-2' : ''
       }`}
     >
@@ -606,7 +606,7 @@ function GearCard({
           <RatingScore rating={r.rating ?? 0} />
         </div>
         <h3 className={`leading-snug flex-1 ${
-          isHero ? 'text-xl md:text-2xl font-black text-white' : 'text-base font-semibold'
+          isHero ? 'text-xl md:text-2xl font-black text-prose' : 'text-base font-semibold'
         }`}>
           <Link
             href={`/reviews/${r.slug}`}
@@ -667,7 +667,7 @@ function GearRow({ review: r }: { review: GearReview }) {
             {cat?.shortLabel ?? r.category}
           </span>
         </div>
-        <h3 className="text-base md:text-lg font-bold text-white group-hover:text-accent-text-soft transition-colors leading-snug">
+        <h3 className="text-base md:text-lg font-bold text-prose group-hover:text-accent-text-soft transition-colors leading-snug">
           {r.title}
         </h3>
         <p className="text-xs text-prose-faint mt-1 truncate">{r.product_name}</p>

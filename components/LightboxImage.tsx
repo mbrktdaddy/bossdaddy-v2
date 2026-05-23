@@ -31,12 +31,12 @@ export function LightboxImage({ src, alt, children }: Props) {
 
       {open && createPortal(
         <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 bg-stone-900/90 flex items-center justify-center p-4 animate-in fade-in duration-150"
           onClick={() => setOpen(false)}
         >
           {/* Close button */}
           <button
-            className="absolute top-4 right-4 text-white/60 hover:text-white transition-colors p-2"
+            className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors p-2"
             onClick={() => setOpen(false)}
             aria-label="Close"
           >

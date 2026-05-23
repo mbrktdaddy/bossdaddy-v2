@@ -76,7 +76,7 @@ export default function GlobalSearch() {
       <button
         onClick={() => setOpen(true)}
         title="Search (⌘K)"
-        className="flex items-center gap-2 px-3 py-1.5 bg-surface-raised hover:bg-gray-700 text-prose-muted hover:text-white text-xs rounded-lg transition-colors"
+        className="flex items-center gap-2 px-3 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose-muted hover:text-prose text-xs rounded-lg transition-colors"
       >
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -88,7 +88,7 @@ export default function GlobalSearch() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 flex items-start justify-center pt-20 px-4" onClick={() => setOpen(false)}>
+    <div className="fixed inset-0 z-50 bg-stone-900/70 flex items-start justify-center pt-20 px-4" onClick={() => setOpen(false)}>
       <div
         className="bg-surface-sunken border border-soft rounded-2xl w-full max-w-2xl max-h-[70vh] flex flex-col shadow-2xl"
         onClick={(e) => e.stopPropagation()}
@@ -104,7 +104,7 @@ export default function GlobalSearch() {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Search articles, reviews, media…"
-            className="flex-1 bg-transparent text-white placeholder-gray-600 focus:outline-none text-sm"
+            className="flex-1 bg-transparent text-prose placeholder:text-prose-faint focus:outline-none text-sm"
           />
           {loading && <span className="w-3 h-3 border-2 border-strong border-t-orange-500 rounded-full animate-spin shrink-0" />}
           <button onClick={() => setOpen(false)} className="text-xs text-prose-faint hover:text-prose-muted">Esc</button>
@@ -130,7 +130,7 @@ export default function GlobalSearch() {
                           cursor === flatIdx ? 'bg-surface-raised' : 'hover:bg-surface'
                         }`}
                       >
-                        <p className="text-sm text-white truncate">{a.title}</p>
+                        <p className="text-sm text-prose truncate">{a.title}</p>
                         <p className="text-xs text-prose-faint">{a.category} · {a.status}</p>
                       </button>
                     )
@@ -151,7 +151,7 @@ export default function GlobalSearch() {
                           cursor === flatIdx ? 'bg-surface-raised' : 'hover:bg-surface'
                         }`}
                       >
-                        <p className="text-sm text-white truncate">{r.title}</p>
+                        <p className="text-sm text-prose truncate">{r.title}</p>
                         <p className="text-xs text-prose-faint">{r.product_name} · {r.status}</p>
                       </button>
                     )
@@ -175,7 +175,7 @@ export default function GlobalSearch() {
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={m.url} alt="" className="w-8 h-8 rounded object-cover shrink-0" loading="lazy" />
                         <div className="min-w-0">
-                          <p className="text-sm text-white truncate">{m.alt_text ?? m.filename}</p>
+                          <p className="text-sm text-prose truncate">{m.alt_text ?? m.filename}</p>
                           <p className="text-xs text-prose-faint truncate">{m.filename}</p>
                         </div>
                       </button>

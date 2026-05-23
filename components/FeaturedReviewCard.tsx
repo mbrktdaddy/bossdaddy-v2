@@ -12,7 +12,7 @@ export default function FeaturedReviewCard({ review: r, label = 'Featured Review
   return (
     <Link
       href={`/reviews/${r.slug}`}
-      className="group relative flex flex-col sm:flex-row overflow-hidden rounded-2xl bg-surface shadow-xl shadow-black/50 hover:shadow-2xl hover:shadow-black/60 transition-all duration-300 mt-2 mb-20"
+      className="group relative flex flex-col sm:flex-row overflow-hidden rounded-2xl bg-surface shadow-xl shadow-stone-900/[0.08] hover:shadow-2xl hover:shadow-stone-900/[0.10] transition-all duration-300 mt-2 mb-20"
     >
       {/* Image */}
       <div className="relative w-full sm:w-[55%] h-56 sm:h-auto shrink-0 bg-surface-raised">
@@ -38,7 +38,7 @@ export default function FeaturedReviewCard({ review: r, label = 'Featured Review
       <div className="flex flex-col justify-between p-6 sm:p-8 flex-1 min-w-0">
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent-text bg-accent-tint/60 px-2.5 py-1 rounded-full">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent-text bg-accent-tint px-2.5 py-1 rounded-full">
               {label}
             </span>
             {cat && (
@@ -46,7 +46,7 @@ export default function FeaturedReviewCard({ review: r, label = 'Featured Review
             )}
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-black leading-snug text-white group-hover:text-accent-text-soft transition-colors mb-3">
+          <h2 className="text-xl sm:text-2xl font-black leading-snug text-prose group-hover:text-accent-text-soft transition-colors mb-3">
             {r.title}
           </h2>
           {r.excerpt && (

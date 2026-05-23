@@ -10,13 +10,13 @@ interface Props {
 function styleFor(v: VerdictChange): { bg: string; text: string; border: string; icon: string; label: string } {
   switch (v) {
     case 'improved':
-      return { bg: 'bg-green-950/40', text: 'text-green-300', border: 'border-green-900/60', icon: '↑', label: 'Improved' }
+      return { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200', icon: '↑', label: 'Improved' }
     case 'unchanged':
-      return { bg: 'bg-surface-raised/60', text: 'text-gray-300', border: 'border-strong/60', icon: '→', label: 'Unchanged' }
+      return { bg: 'bg-surface-raised/60', text: 'text-prose-muted', border: 'border-strong/60', icon: '→', label: 'Unchanged' }
     case 'declined':
       return { bg: 'bg-amber-950/40', text: 'text-amber-200', border: 'border-amber-900/60', icon: '↓', label: 'Declined' }
     case 'complete_reversal':
-      return { bg: 'bg-red-950/40', text: 'text-red-200', border: 'border-red-900/60', icon: '↓↓', label: 'Complete reversal' }
+      return { bg: 'bg-red-50', text: 'text-red-200', border: 'border-red-200', icon: '↓↓', label: 'Complete reversal' }
   }
 }
 

@@ -121,7 +121,7 @@ export default function Header({ username }: HeaderProps) {
   const isCategoryActive = pathname.startsWith('/reviews/category') || pathname.startsWith('/guides/category') || pathname.startsWith('/category/')
 
   return (
-    <header className="sticky top-0 z-50 bg-surface-sunken/95 backdrop-blur-sm border-b border-soft/60">
+    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-soft">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 
         {/* Logo */}
@@ -136,7 +136,7 @@ export default function Header({ username }: HeaderProps) {
           />
           <span>
             <span className="text-accent-text">BOSS</span>
-            <span className="text-white"> DADDY</span>
+            <span className="text-prose"> DADDY</span>
           </span>
         </Link>
 
@@ -148,8 +148,8 @@ export default function Header({ username }: HeaderProps) {
               href={href}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive(pathname, href)
-                  ? 'text-white bg-surface-raised'
-                  : 'text-prose-muted hover:text-white hover:bg-surface'
+                  ? 'text-prose bg-surface-raised'
+                  : 'text-prose-muted hover:text-prose hover:bg-surface'
               }`}
             >
               {label}
@@ -162,8 +162,8 @@ export default function Header({ username }: HeaderProps) {
               onClick={() => setCatOpen(!catOpen)}
               className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 catOpen || isCategoryActive
-                  ? 'text-white bg-surface-raised'
-                  : 'text-prose-muted hover:text-white hover:bg-surface'
+                  ? 'text-prose bg-surface-raised'
+                  : 'text-prose-muted hover:text-prose hover:bg-surface'
               }`}
             >
               Browse
@@ -177,7 +177,7 @@ export default function Header({ username }: HeaderProps) {
 
             {/* Mega-menu panel */}
             {catOpen && (
-              <div className="absolute right-0 top-full mt-2 w-[580px] bg-surface-sunken border border-soft rounded-2xl shadow-2xl shadow-black/60 p-5 z-50">
+              <div className="absolute right-0 top-full mt-2 w-[580px] bg-surface-sunken border border-soft rounded-2xl shadow-2xl shadow-stone-900/[0.10] p-5 z-50">
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Browse by Category</p>
                 <div className="grid grid-cols-2 gap-1">
                   {CATEGORIES.map((cat) => (
@@ -189,7 +189,7 @@ export default function Header({ username }: HeaderProps) {
                     >
                       <CategoryIcon slug={cat.slug} className="w-6 h-6 text-accent-text mt-0.5 shrink-0" />
                       <div className="min-w-0">
-                        <p className="text-sm font-bold text-white group-hover:text-accent-text-soft transition-colors leading-tight">
+                        <p className="text-sm font-bold text-prose group-hover:text-accent-text-soft transition-colors leading-tight">
                           {cat.label}
                         </p>
                         <p className="text-xs text-prose-faint mt-0.5 line-clamp-1">{cat.description}</p>
@@ -219,7 +219,7 @@ export default function Header({ username }: HeaderProps) {
                       >
                         <span className="text-accent-text mt-0.5 shrink-0">{v.icon}</span>
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-white group-hover:text-accent-text-soft transition-colors leading-tight">{v.label}</p>
+                          <p className="text-xs font-bold text-prose group-hover:text-accent-text-soft transition-colors leading-tight">{v.label}</p>
                           <p className="text-[11px] text-prose-faint mt-0.5 line-clamp-1">{v.blurb}</p>
                         </div>
                       </Link>
@@ -229,21 +229,21 @@ export default function Header({ username }: HeaderProps) {
                     <Link
                       href="/reviews"
                       onClick={() => setCatOpen(false)}
-                      className="text-xs text-prose-faint hover:text-gray-300 font-semibold transition-colors"
+                      className="text-xs text-prose-faint hover:text-prose font-semibold transition-colors"
                     >
                       All {LABELS.reviews.plural.toLowerCase()} →
                     </Link>
                     <Link
                       href="/guides"
                       onClick={() => setCatOpen(false)}
-                      className="text-xs text-prose-faint hover:text-gray-300 font-semibold transition-colors"
+                      className="text-xs text-prose-faint hover:text-prose font-semibold transition-colors"
                     >
                       All {LABELS.guides.plural.toLowerCase()} →
                     </Link>
                     <Link
                       href="/gear"
                       onClick={() => setCatOpen(false)}
-                      className="text-xs text-prose-faint hover:text-gray-300 font-semibold transition-colors"
+                      className="text-xs text-prose-faint hover:text-prose font-semibold transition-colors"
                     >
                       All {LABELS.stuff.short.toLowerCase()} →
                     </Link>
@@ -273,7 +273,7 @@ export default function Header({ username }: HeaderProps) {
                     autoComplete="off"
                     placeholder="Search..."
                     onKeyDown={(e) => { if (e.key === 'Escape') setSearchOpen(false) }}
-                    className="w-44 lg:w-56 pl-8 pr-3 py-1.5 bg-surface border border-strong focus:border-accent rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none transition-colors"
+                    className="w-44 lg:w-56 pl-8 pr-3 py-1.5 bg-surface border border-strong focus:border-accent rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none transition-colors"
                   />
                   <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -284,7 +284,7 @@ export default function Header({ username }: HeaderProps) {
               <button
                 onClick={openSearch}
                 aria-label="Search"
-                className="p-2 rounded-lg text-prose-muted hover:text-white hover:bg-surface transition-colors"
+                className="p-2 rounded-lg text-prose-muted hover:text-prose hover:bg-surface transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -308,7 +308,7 @@ export default function Header({ username }: HeaderProps) {
                 <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center text-xs font-bold text-white shrink-0">
                   {username[0].toUpperCase()}
                 </div>
-                <span className="text-sm text-gray-300 max-w-[120px] truncate">@{username}</span>
+                <span className="text-sm text-prose-muted max-w-[120px] truncate">@{username}</span>
                 <svg
                   className={`w-3 h-3 text-prose-faint transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`}
                   fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
@@ -318,15 +318,15 @@ export default function Header({ username }: HeaderProps) {
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-surface-sunken border border-soft rounded-2xl shadow-2xl shadow-black/60 p-1.5 z-50">
+                <div className="absolute right-0 top-full mt-2 w-56 bg-surface-sunken border border-soft rounded-2xl shadow-2xl shadow-stone-900/[0.10] p-1.5 z-50">
                   <div className="px-3 py-2 border-b border-soft/60 mb-1">
                     <p className="text-[10px] uppercase tracking-widest text-prose-faint font-semibold">Signed in as</p>
-                    <p className="text-sm font-bold text-white truncate">@{username}</p>
+                    <p className="text-sm font-bold text-prose truncate">@{username}</p>
                   </div>
                   <Link
                     href="/dashboard/profile"
                     onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-300 hover:bg-surface hover:text-white transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-surface hover:text-prose transition-colors"
                   >
                     <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -336,7 +336,7 @@ export default function Header({ username }: HeaderProps) {
                   <Link
                     href="/dashboard"
                     onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-300 hover:bg-surface hover:text-white transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-surface hover:text-prose transition-colors"
                   >
                     <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h6v6H4zM14 6h6v4h-6zM14 14h6v4h-6zM4 16h6v2H4z" />
@@ -347,7 +347,7 @@ export default function Header({ username }: HeaderProps) {
                     <form action="/api/auth/signout" method="POST">
                       <button
                         type="submit"
-                        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-red-950/40 hover:text-red-400 transition-colors text-left"
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-red-50 hover:text-red-600 transition-colors text-left"
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -362,7 +362,7 @@ export default function Header({ username }: HeaderProps) {
           ) : (
             <Link
               href={`/login?next=${encodeURIComponent(pathname)}`}
-              className="hidden md:block text-sm px-4 py-2 rounded-lg border border-strong text-gray-300 hover:border-accent hover:text-white transition-colors"
+              className="hidden md:block text-sm px-4 py-2 rounded-lg border border-strong text-prose-muted hover:border-accent hover:text-prose transition-colors"
             >
               Sign In
             </Link>
@@ -371,7 +371,7 @@ export default function Header({ username }: HeaderProps) {
           {/* Hamburger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-3 rounded-lg text-prose-muted hover:text-white hover:bg-surface-raised transition-colors"
+            className="md:hidden p-3 rounded-lg text-prose-muted hover:text-prose hover:bg-surface-raised transition-colors"
             aria-label="Toggle menu"
           >
             {mobileOpen ? (
@@ -396,7 +396,7 @@ export default function Header({ username }: HeaderProps) {
               type="search"
               autoComplete="off"
               placeholder="Search reviews and guides..."
-              className="w-full pl-9 pr-3 py-2.5 bg-surface border border-soft rounded-xl text-base text-white placeholder-gray-500 focus:outline-none focus:border-accent transition-colors"
+              className="w-full pl-9 pr-3 py-2.5 bg-surface border border-soft rounded-xl text-base text-prose placeholder:text-prose-faint focus:outline-none focus:border-accent transition-colors"
             />
             <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -417,8 +417,8 @@ export default function Header({ username }: HeaderProps) {
                 onClick={() => setMobileOpen(false)}
                 className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                   isActive(pathname, href)
-                    ? 'bg-surface-raised text-white'
-                    : 'text-prose-muted hover:text-white hover:bg-surface'
+                    ? 'bg-surface-raised text-prose'
+                    : 'text-prose-muted hover:text-prose hover:bg-surface'
                 }`}
               >
                 {label}
@@ -449,8 +449,8 @@ export default function Header({ username }: HeaderProps) {
                     onClick={() => setMobileOpen(false)}
                     className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                       pathname === `/category/${cat.slug}`
-                        ? 'bg-accent-tint/60 text-accent-text-soft border border-accent-border/40'
-                        : 'bg-surface text-gray-300 hover:text-white hover:bg-surface-raised'
+                        ? 'bg-accent-tint text-accent-text-soft border border-accent-border/40'
+                        : 'bg-surface text-prose-muted hover:text-prose hover:bg-surface-raised'
                     }`}
                   >
                     <CategoryIcon slug={cat.slug} className="w-4 h-4 text-accent-text" />
@@ -482,7 +482,7 @@ export default function Header({ username }: HeaderProps) {
                   className="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface hover:bg-surface-raised transition-colors min-h-[44px]"
                 >
                   <span className="text-accent-text shrink-0">{v.icon}</span>
-                  <span className="text-xs font-semibold text-gray-300 truncate">{v.label}</span>
+                  <span className="text-xs font-semibold text-prose-muted truncate">{v.label}</span>
                 </Link>
               ))}
             </div>
@@ -498,13 +498,13 @@ export default function Header({ username }: HeaderProps) {
                   </div>
                   <div className="min-w-0">
                     <p className="text-[10px] uppercase tracking-widest text-prose-faint font-semibold">Signed in as</p>
-                    <p className="text-sm font-bold text-white truncate">@{username}</p>
+                    <p className="text-sm font-bold text-prose truncate">@{username}</p>
                   </div>
                 </div>
                 <Link
                   href="/dashboard/profile"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-surface transition-colors"
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-prose-muted hover:text-prose hover:bg-surface transition-colors"
                 >
                   <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -514,7 +514,7 @@ export default function Header({ username }: HeaderProps) {
                 <Link
                   href="/dashboard"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-surface transition-colors"
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-prose-muted hover:text-prose hover:bg-surface transition-colors"
                 >
                   <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h6v6H4zM14 6h6v4h-6zM14 14h6v4h-6zM4 16h6v2H4z" />
@@ -524,7 +524,7 @@ export default function Header({ username }: HeaderProps) {
                 <form action="/api/auth/signout" method="POST" className="mt-1">
                   <button
                     type="submit"
-                    className="w-full flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-prose-muted hover:bg-red-950/40 hover:text-red-400 transition-colors text-left border-t border-soft/60 pt-3"
+                    className="w-full flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-prose-muted hover:bg-red-50 hover:text-red-600 transition-colors text-left border-t border-soft/60 pt-3"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

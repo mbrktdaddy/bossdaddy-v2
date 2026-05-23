@@ -39,12 +39,12 @@ export default function ResetPasswordPage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-surface-sunken px-4">
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-black text-white mb-2">Set new password</h1>
+        <h1 className="text-2xl font-black text-prose mb-2">Set new password</h1>
         <p className="text-prose-muted mb-8 text-sm">Choose a strong password for your account.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="password" className="block text-sm text-gray-300 mb-1">New password</label>
+            <label htmlFor="password" className="block text-sm text-prose-muted mb-1">New password</label>
             <input
               id="password"
               type="password"
@@ -52,29 +52,29 @@ export default function ResetPasswordPage() {
               minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
               placeholder="8+ characters"
             />
           </div>
 
           <div>
-            <label htmlFor="confirm" className="block text-sm text-gray-300 mb-1">Confirm password</label>
+            <label htmlFor="confirm" className="block text-sm text-prose-muted mb-1">Confirm password</label>
             <input
               id="confirm"
               type="password"
               required
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
               placeholder="Same password again"
             />
           </div>
 
           {error && (
-            <div className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-2">
+            <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-2">
               <p>{error}</p>
               {error.includes('expired') && (
-                <a href="/forgot-password" className="text-accent-text-soft hover:text-orange-300 text-xs mt-1 inline-block">
+                <a href="/forgot-password" className="text-accent-text-soft hover:text-accent text-xs mt-1 inline-block">
                   Request a new reset link →
                 </a>
               )}

@@ -157,12 +157,12 @@ function LinkDialog({ initial, onConfirm, onCancel }: {
 }) {
   const [url, setUrl] = useState(initial)
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onCancel}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60" onClick={onCancel}>
       <div
         className="bg-surface border border-strong rounded-xl p-5 w-full max-w-sm shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <p className="text-sm font-semibold text-white mb-3">Insert link</p>
+        <p className="text-sm font-semibold text-prose mb-3">Insert link</p>
         <input
           type="url"
           value={url}
@@ -173,7 +173,7 @@ function LinkDialog({ initial, onConfirm, onCancel }: {
           }}
           placeholder="https://..."
           autoFocus
-          className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover mb-3"
+          className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover mb-3"
         />
         <div className="flex gap-2">
           <button
@@ -186,7 +186,7 @@ function LinkDialog({ initial, onConfirm, onCancel }: {
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 bg-surface-raised hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
+            className="px-4 py-2 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm rounded-lg transition-colors"
           >
             Cancel
           </button>
@@ -240,13 +240,13 @@ function CollectionDialog({ onConfirm, onCancel }: {
   }, [q])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 bg-black/60" onClick={onCancel}>
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 bg-stone-900/60" onClick={onCancel}>
       <div
         className="bg-surface border border-strong rounded-xl w-full max-w-lg mx-4 shadow-2xl overflow-hidden flex flex-col max-h-[70vh]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-5 pt-5 pb-3 border-b border-soft">
-          <p className="text-sm font-semibold text-white mb-3">Insert collection</p>
+          <p className="text-sm font-semibold text-prose mb-3">Insert collection</p>
           <input
             type="text"
             value={q}
@@ -254,7 +254,7 @@ function CollectionDialog({ onConfirm, onCancel }: {
             onKeyDown={(e) => { if (e.key === 'Escape') onCancel() }}
             placeholder="Search picks, stacks, comparisons by title or slug…"
             autoFocus
-            className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover"
+            className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover"
           />
         </div>
 
@@ -274,11 +274,11 @@ function CollectionDialog({ onConfirm, onCancel }: {
                       onClick={() => onConfirm(c.slug)}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-raised/80 text-left transition-colors"
                     >
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-accent-text-soft bg-accent-tint/40 border border-accent-border/40 px-2 py-0.5 rounded-full shrink-0">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-accent-text-soft bg-accent-tint border border-accent-border/40 px-2 py-0.5 rounded-full shrink-0">
                         {label}
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-white truncate">{c.title}</p>
+                        <p className="text-sm font-semibold text-prose truncate">{c.title}</p>
                         <p className="text-xs text-prose-faint truncate">/{c.slug}</p>
                       </div>
                     </button>
@@ -293,7 +293,7 @@ function CollectionDialog({ onConfirm, onCancel }: {
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 bg-surface-raised hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
+            className="px-4 py-2 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm rounded-lg transition-colors"
           >
             Cancel
           </button>
@@ -358,8 +358,8 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
           'prose-headings:font-black prose-headings:font-sans prose-headings:tracking-tight',
           'prose-h2:text-xl prose-h3:text-lg',
           'prose-a:text-accent-text-soft prose-a:no-underline',
-          'prose-p:text-gray-300 prose-li:text-gray-300',
-          'prose-strong:text-white prose-blockquote:border-accent',
+          'prose-p:text-prose-muted prose-li:text-prose-muted',
+          'prose-strong:text-prose prose-blockquote:border-accent',
           'min-h-[480px] px-4 py-4 focus:outline-none',
         ].join(' '),
       },
@@ -452,7 +452,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
   }
 
   const btn = (active: boolean) =>
-    `px-2 py-1 rounded-lg text-xs font-semibold transition-colors ${active ? 'bg-gray-700 text-white' : 'text-prose-muted hover:text-white hover:bg-gray-700'}`
+    `px-2 py-1 rounded-lg text-xs font-semibold transition-colors ${active ? 'bg-stone-100 text-prose' : 'text-prose-muted hover:text-prose hover:bg-stone-100'}`
 
   return (
     <div className="space-y-2">
@@ -462,7 +462,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
         {targetWords ? (
           <span className={
             wordCount >= targetWords         ? 'text-green-500' :
-            wordCount >= targetWords * 0.8   ? 'text-yellow-500' :
+            wordCount >= targetWords * 0.8   ? 'text-amber-600' :
             'text-prose-faint'
           }>
             {wordCount.toLocaleString()} / {targetWords.toLocaleString()} words
@@ -480,7 +480,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
         <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleItalic().run() }}
           className={`${btn(editor.isActive('italic'))} italic`}>I</button>
 
-        <div className="w-px h-4 bg-gray-700 mx-1" />
+        <div className="w-px h-4 bg-soft mx-1" />
 
         <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 2 }).run() }}
           className={btn(editor.isActive('heading', { level: 2 }))}>H2</button>
@@ -489,7 +489,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
         <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 4 }).run() }}
           className={btn(editor.isActive('heading', { level: 4 }))}>H4</button>
 
-        <div className="w-px h-4 bg-gray-700 mx-1" />
+        <div className="w-px h-4 bg-soft mx-1" />
 
         <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBulletList().run() }}
           className={btn(editor.isActive('bulletList'))}>UL</button>
@@ -500,20 +500,20 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
         <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleCode().run() }}
           className={btn(editor.isActive('code'))}>{'<>'}</button>
 
-        <div className="w-px h-4 bg-gray-700 mx-1" />
+        <div className="w-px h-4 bg-soft mx-1" />
 
         <button type="button" onMouseDown={(e) => { e.preventDefault(); openLinkDialog() }}
           className={btn(editor.isActive('link'))}>🔗</button>
         {editor.isActive('link') && (
           <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetLink().run() }}
-            className="px-2 py-1 rounded-lg text-xs font-semibold text-red-400 hover:bg-gray-700 transition-colors">✕ link</button>
+            className="px-2 py-1 rounded-lg text-xs font-semibold text-red-600 hover:bg-stone-100 transition-colors">✕ link</button>
         )}
 
         {enableCollectionEmbed && (
           <button
             type="button"
             onMouseDown={(e) => { e.preventDefault(); setCollectionOpen(true) }}
-            className="px-2 py-1 rounded-lg text-xs font-semibold text-gray-300 hover:bg-gray-700 transition-colors"
+            className="px-2 py-1 rounded-lg text-xs font-semibold text-prose-muted hover:bg-stone-100 transition-colors"
             title="Insert a Boss Daddy collection (pick / stack / comparison) inline"
           >
             + Collection
@@ -524,11 +524,11 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
 
         <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().undo().run() }}
           disabled={!editor.can().undo()}
-          className="px-2 py-1 rounded-lg text-xs text-prose-muted hover:text-white hover:bg-gray-700 disabled:opacity-30 transition-colors"
+          className="px-2 py-1 rounded-lg text-xs text-prose-muted hover:text-prose hover:bg-stone-100 disabled:opacity-30 transition-colors"
           title="Undo (⌘Z)">↩</button>
         <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().redo().run() }}
           disabled={!editor.can().redo()}
-          className="px-2 py-1 rounded-lg text-xs text-prose-muted hover:text-white hover:bg-gray-700 disabled:opacity-30 transition-colors"
+          className="px-2 py-1 rounded-lg text-xs text-prose-muted hover:text-prose hover:bg-stone-100 disabled:opacity-30 transition-colors"
           title="Redo (⌘⇧Z)">↪</button>
       </div>
 
@@ -539,7 +539,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
 
       {/* Selection-based AI refine */}
       {selection && (
-        <div className="bg-accent-tint/30 border border-accent-border/40 rounded-xl p-3 space-y-2">
+        <div className="bg-accent-tint border border-accent-border/40 rounded-xl p-3 space-y-2">
           <p className="text-xs text-accent-text-soft font-semibold">
             ✨ Refine selection <span className="text-prose-faint font-normal ml-1">({selection.text.length} chars selected)</span>
           </p>
@@ -551,7 +551,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
               onKeyDown={(e) => { if (e.key === 'Enter' && !aiRefining) handleAiRefine() }}
               placeholder="e.g. 'make this punchier', 'add a statistic', 'shorten'"
               autoFocus
-              className="flex-1 px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover"
+              className="flex-1 px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover"
             />
             <button type="button" onClick={handleAiRefine}
               disabled={aiRefining || !aiInstruction.trim()}
@@ -559,11 +559,11 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
               {aiRefining ? 'Refining…' : 'Apply'}
             </button>
             <button type="button" onClick={() => { setSelection(null); setAiInstruction(''); setAiError(null) }}
-              className="shrink-0 px-3 py-2 bg-surface-raised hover:bg-gray-700 text-prose-muted text-xs rounded-lg transition-colors">
+              className="shrink-0 px-3 py-2 bg-surface-raised hover:bg-stone-100 text-prose-muted text-xs rounded-lg transition-colors">
               ✕
             </button>
           </div>
-          {aiError && <p className="text-xs text-red-400">{aiError}</p>}
+          {aiError && <p className="text-xs text-red-600">{aiError}</p>}
         </div>
       )}
 

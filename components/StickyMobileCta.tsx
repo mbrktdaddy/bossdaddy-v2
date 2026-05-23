@@ -53,7 +53,7 @@ export default function StickyMobileCta({ product }: Props) {
 
   return (
     <div
-      className={`md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface-sunken/95 backdrop-blur-md border-t border-accent-border/40 shadow-2xl shadow-black/60 px-4 pt-3 transition-transform duration-300 ${show ? 'translate-y-0' : 'translate-y-full'}`}
+      className={`md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface-sunken/95 backdrop-blur-md border-t border-accent-border/40 shadow-2xl shadow-stone-900/[0.10] px-4 pt-3 transition-transform duration-300 ${show ? 'translate-y-0' : 'translate-y-full'}`}
       style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 0.75rem)' }}
       aria-hidden={!show}
     >
@@ -69,7 +69,7 @@ export default function StickyMobileCta({ product }: Props) {
             />
           </div>
         )}
-        <p className="flex-1 min-w-0 text-sm font-bold text-white leading-tight line-clamp-2">
+        <p className="flex-1 min-w-0 text-sm font-bold text-prose leading-tight line-clamp-2">
           {product.name}
         </p>
         <a

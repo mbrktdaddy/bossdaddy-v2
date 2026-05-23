@@ -126,7 +126,7 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
                     href={item.href}
                     onClick={onNav}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
-                      active ? 'bg-surface-raised text-white' : 'text-prose-muted hover:bg-surface-raised hover:text-white'
+                      active ? 'bg-surface-raised text-prose' : 'text-prose-muted hover:bg-surface-raised hover:text-prose'
                     }`}
                   >
                     {item.icon}
@@ -148,7 +148,7 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
         <Link href="/" className="flex items-center gap-2">
           <span className="font-black text-base tracking-tight">
             <span className="text-accent-text">BOSS</span>
-            <span className="text-white"> DADDY</span>
+            <span className="text-prose"> DADDY</span>
           </span>
         </Link>
         <Link href="/dashboard/profile" onClick={onNav} className="flex items-center gap-2 group">
@@ -156,7 +156,7 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
             {username[0]?.toUpperCase() ?? 'B'}
           </div>
           <div className="min-w-0">
-            <p className="text-xs text-gray-300 group-hover:text-white truncate font-medium transition-colors">@{username}</p>
+            <p className="text-xs text-prose group-hover:text-prose truncate font-medium transition-colors">@{username}</p>
             <p className="text-xs text-prose-faint">{ROLE_LABEL[role] ?? 'Member'}</p>
           </div>
         </Link>
@@ -174,7 +174,7 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
           href="/"
           target="_blank"
           onClick={onNav}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-prose-faint hover:text-white hover:bg-surface-raised transition-colors"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-prose-faint hover:text-prose hover:bg-surface-raised transition-colors"
         >
           <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -184,7 +184,7 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
         <form action="/api/auth/signout" method="POST">
           <button
             type="submit"
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-prose-faint hover:text-white hover:bg-surface-raised transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-prose-faint hover:text-prose hover:bg-surface-raised transition-colors"
           >
             <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -207,11 +207,11 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
       <div className="md:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-surface border-b border-soft/60 flex items-center justify-between px-4">
         <Link href="/" className="font-black text-base tracking-tight">
           <span className="text-accent-text">BOSS</span>
-          <span className="text-white"> DADDY</span>
+          <span className="text-prose"> DADDY</span>
         </Link>
         <button
           onClick={() => setOpen(!open)}
-          className="p-3 rounded-lg text-prose-muted hover:text-white hover:bg-surface-raised transition-colors"
+          className="p-3 rounded-lg text-prose-muted hover:text-prose hover:bg-surface-raised transition-colors"
           aria-label="Toggle menu"
         >
           {open ? (
@@ -228,7 +228,7 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
 
       {/* Mobile overlay */}
       {open && (
-        <div className="md:hidden fixed inset-0 z-30 bg-black/60" onClick={() => setOpen(false)} />
+        <div className="md:hidden fixed inset-0 z-30 bg-stone-900/60" onClick={() => setOpen(false)} />
       )}
 
       {/* Mobile drawer */}

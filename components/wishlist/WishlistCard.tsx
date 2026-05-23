@@ -16,7 +16,7 @@ export function WishlistCard({ item }: Props) {
   const detailHref = `/bench/${item.slug}`
 
   return (
-    <div className="bg-[var(--bd-surface)] rounded-2xl overflow-hidden flex flex-col shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200">
+    <div className="bg-[var(--bd-surface)] rounded-2xl overflow-hidden flex flex-col shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] transition-all duration-200">
       {/* Image */}
       <Link href={detailHref} className="block relative aspect-[4/3] bg-zinc-900">
         {item.image_url ? (
@@ -56,7 +56,7 @@ export function WishlistCard({ item }: Props) {
           <span
             className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold tabular-nums ${
               voteCount > 0
-                ? 'bg-accent-tint/40 border border-accent-border/40 text-orange-300'
+                ? 'bg-accent-tint border border-accent-border/40 text-accent-text'
                 : 'bg-surface/60 border border-soft/60 text-prose-faint'
             }`}
             title={voteCount > 0 ? `${voteCount} ${voteCount === 1 ? 'reader has' : 'readers have'} voted for this` : 'No votes yet — be the first'}
@@ -74,7 +74,7 @@ export function WishlistCard({ item }: Props) {
           {item.status === 'reviewed' && item.review_id ? (
             <Link
               href={detailHref}
-              className="text-xs font-semibold text-accent-text-soft hover:text-orange-300 transition-colors"
+              className="text-xs font-semibold text-accent-text-soft hover:text-accent transition-colors"
             >
               Read review →
             </Link>
@@ -83,14 +83,14 @@ export function WishlistCard({ item }: Props) {
               href={`/go/${item.slug}`}
               target="_blank"
               rel="sponsored nofollow noopener"
-              className="text-xs font-semibold text-accent-text-soft hover:text-orange-300 transition-colors"
+              className="text-xs font-semibold text-accent-text-soft hover:text-accent transition-colors"
             >
               {getBuyLabel(item.store, item.custom_store_name)}
             </a>
           ) : (
             <Link
               href={detailHref}
-              className="text-xs font-bold text-accent-text-soft hover:text-orange-300 transition-colors uppercase tracking-widest"
+              className="text-xs font-bold text-accent-text-soft hover:text-accent transition-colors uppercase tracking-widest"
             >
               Vote →
             </Link>

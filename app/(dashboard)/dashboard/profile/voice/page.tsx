@@ -18,7 +18,7 @@ export default async function VoiceProfilePage() {
       <div className="mb-6">
         <Link
           href="/dashboard/profile"
-          className="text-sm text-prose-faint hover:text-gray-300 transition-colors"
+          className="text-sm text-prose-faint hover:text-prose transition-colors"
         >
           ← Profile
         </Link>
@@ -31,11 +31,11 @@ export default async function VoiceProfilePage() {
         and you can trigger a one-click refine on existing posts.
       </p>
 
-      <div className="mb-8 p-4 rounded-xl bg-accent-tint/30 border border-accent-border/40">
-        <p className="text-xs text-orange-300 font-semibold uppercase tracking-wide mb-1.5">
+      <div className="mb-8 p-4 rounded-xl bg-accent-tint border border-accent-border/40">
+        <p className="text-xs text-accent-text font-semibold uppercase tracking-wide mb-1.5">
           Why this matters
         </p>
-        <p className="text-sm text-gray-300">
+        <p className="text-sm text-prose-muted">
           Reviews reference your real family and work. Fabricated personal details create FTC
           truth-in-advertising risk. Keep this profile current and Claude will only draw from
           these facts — never invent a daughter&rsquo;s age or a job you don&rsquo;t hold.

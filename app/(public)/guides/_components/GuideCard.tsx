@@ -9,7 +9,7 @@ export default function GuideCard({ guide: a, priority = false }: { guide: Guide
   return (
     <Link
       href={`/guides/${a.slug}`}
-      className="group flex flex-col bg-surface rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200"
+      className="group flex flex-col bg-surface rounded-2xl overflow-hidden shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] transition-all duration-200"
     >
       {a.image_url ? (
         <div className="relative w-full h-44 bg-surface-raised shrink-0 overflow-hidden">
@@ -35,7 +35,7 @@ export default function GuideCard({ guide: a, priority = false }: { guide: Guide
             <CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text" /> {cat.label}
           </span>
         )}
-        <h2 className="text-base font-bold leading-snug text-white group-hover:text-accent-text-soft transition-colors flex-1">
+        <h2 className="text-base font-bold leading-snug text-prose group-hover:text-accent-text-soft transition-colors flex-1">
           {a.title}
         </h2>
         {a.excerpt && (

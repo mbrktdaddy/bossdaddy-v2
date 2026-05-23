@@ -77,7 +77,7 @@ export default async function WishlistAdminPage() {
                   {getStatusLabel(item.status)}
                 </span>
                 {item.review_id && (
-                  <span className="px-2 py-1 rounded-md bg-accent-tint/40 border border-accent-border/40 text-accent-text-soft">Promoted</span>
+                  <span className="px-2 py-1 rounded-md bg-accent-tint border border-accent-border/40 text-accent-text-soft">Promoted</span>
                 )}
               </div>
             </Link>

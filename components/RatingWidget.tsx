@@ -98,9 +98,9 @@ export default function RatingWidget({ reviewId }: Props) {
         {data.count >= THRESHOLD && (
           <span className="text-xs text-prose-faint">
             · Reader avg:{' '}
-            <span className="text-gray-300 font-medium">{data.avg}/10</span>
+            <span className="text-prose-muted font-medium">{data.avg}/10</span>
             {' '}
-            <span className="text-gray-700">
+            <span className="text-prose-faint">
               ({data.count} {data.count === 1 ? 'rating' : 'ratings'})
             </span>
           </span>

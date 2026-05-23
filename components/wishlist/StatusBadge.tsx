@@ -2,10 +2,10 @@ import type { WishlistStatus } from '@/lib/wishlist'
 import { getStatusLabel } from '@/lib/wishlist'
 
 const STATUS_STYLES: Record<WishlistStatus, string> = {
-  considering: 'bg-surface-raised border-strong text-gray-300',
-  queued:      'bg-blue-950/40 border-blue-800/50 text-blue-400',
-  testing:     'bg-green-950/40 border-green-800/50 text-green-400',
-  reviewed:    'bg-accent-tint/40 border-accent-border/50 text-accent-text-soft',
+  considering: 'bg-surface-raised border-strong text-prose-muted',
+  queued:      'bg-blue-50 border-blue-200 text-blue-700',
+  testing:     'bg-green-50 border-green-200/50 text-green-700',
+  reviewed:    'bg-accent-tint border-accent-border/50 text-accent-text-soft',
   skipped:     'bg-surface border-soft text-prose-faint',
 }
 

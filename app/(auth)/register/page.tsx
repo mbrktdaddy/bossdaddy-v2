@@ -68,12 +68,12 @@ function RegisterForm() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-surface-sunken px-4">
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-white mb-2">Join the Crew</h1>
+        <h1 className="text-2xl font-bold text-prose mb-2">Join the Crew</h1>
         <p className="text-prose-muted mb-8 text-sm">Create your Boss Daddy account</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="username" className="block text-sm text-gray-300 mb-1">
+            <label htmlFor="username" className="block text-sm text-prose-muted mb-1">
               Username
             </label>
             <input
@@ -83,13 +83,13 @@ function RegisterForm() {
               minLength={3}
               value={username}
               onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s/g, ''))}
-              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
               placeholder="bossdad42"
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm text-gray-300 mb-1">
+            <label htmlFor="email" className="block text-sm text-prose-muted mb-1">
               Email
             </label>
             <input
@@ -98,13 +98,13 @@ function RegisterForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm text-gray-300 mb-1">
+            <label htmlFor="password" className="block text-sm text-prose-muted mb-1">
               Password
             </label>
             <input
@@ -114,22 +114,22 @@ function RegisterForm() {
               minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
               placeholder="8+ characters"
             />
           </div>
 
           {error && (
-            <div className="text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">
+            <div className="text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">
               {error === 'already_exists' ? (
-                <p className="text-red-400">
+                <p className="text-red-600">
                   An account with that email already exists.{' '}
-                  <Link href={`/login?next=${encodeURIComponent(redirectTo)}`} className="text-accent-text-soft hover:text-orange-300 font-semibold">
+                  <Link href={`/login?next=${encodeURIComponent(redirectTo)}`} className="text-accent-text-soft hover:text-accent font-semibold">
                     Sign in instead →
                   </Link>
                 </p>
               ) : (
-                <p className="text-red-400">{error}</p>
+                <p className="text-red-600">{error}</p>
               )}
             </div>
           )}
@@ -145,7 +145,7 @@ function RegisterForm() {
 
         <p className="mt-6 text-center text-sm text-prose-faint">
           Already have an account?{' '}
-          <Link href="/login" className="text-accent-text-soft hover:text-orange-300">
+          <Link href="/login" className="text-accent-text-soft hover:text-accent">
             Sign in
           </Link>
         </p>

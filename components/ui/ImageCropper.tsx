@@ -81,7 +81,7 @@ export default function ImageCropper({ file, aspect, onCrop, onCancel }: Props) 
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2.5 text-sm text-prose-muted hover:text-white rounded-lg border border-soft hover:border-gray-500 transition-colors"
+          className="px-4 py-2.5 text-sm text-prose-muted hover:text-prose rounded-lg border border-soft hover:border-strong transition-colors"
         >
           Cancel
         </button>

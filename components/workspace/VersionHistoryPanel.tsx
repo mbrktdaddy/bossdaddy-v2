@@ -90,20 +90,20 @@ export function VersionHistoryPanel({ contentType, contentId }: Props) {
           <p className="text-sm text-prose-faint py-3">No previous versions yet. Each time you save, the prior state is recorded here.</p>
         )}
         {loaded && revisions.length > 0 && (
-          <div className="divide-y divide-gray-800 -mx-4">
+          <div className="divide-y divide-soft -mx-4">
             {revisions.map((r) => {
               const p = Array.isArray(r.profiles) ? r.profiles[0] : r.profiles
               const username = p?.username ?? 'unknown'
               return (
                 <div key={r.id} className="px-4 py-2 flex items-center justify-between gap-3 hover:bg-surface-sunken/40 transition-colors">
                   <div className="min-w-0">
-                    <p className="text-sm font-mono text-gray-300">v{r.version_number}</p>
+                    <p className="text-sm font-mono text-prose-muted">v{r.version_number}</p>
                     <p className="text-xs text-prose-faint">{timeAgo(r.created_at)} · @{username}</p>
                   </div>
                   <button
                     onClick={() => handleRevert(r.id, r.version_number)}
                     disabled={reverting === r.id}
-                    className="text-xs px-3 py-1 bg-surface-raised hover:bg-gray-700 disabled:opacity-50 text-gray-300 rounded-lg transition-colors"
+                    className="text-xs px-3 py-1 bg-surface-raised hover:bg-stone-100 disabled:opacity-50 text-prose-muted rounded-lg transition-colors"
                   >
                     {reverting === r.id ? '…' : '↻ Revert'}
                   </button>
@@ -113,7 +113,7 @@ export function VersionHistoryPanel({ contentType, contentId }: Props) {
           </div>
         )}
         {error && (
-          <p className="text-xs text-red-400 bg-red-950/50 border border-red-800 rounded px-3 py-2 mt-2">{error}</p>
+          <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2 mt-2">{error}</p>
         )}
       </div>
     </details>

@@ -92,13 +92,13 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
       {/* Overlay */}
       {open && (
         <div className="fixed inset-0 z-50 flex">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setOpen(false)} />
+          <div className="absolute inset-0 bg-stone-900/60" onClick={() => setOpen(false)} />
           <div className="relative ml-auto w-full max-w-lg bg-surface-sunken border-l border-soft flex flex-col h-full overflow-y-auto">
 
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-soft">
-              <h2 className="text-base font-bold text-white">Generate Post</h2>
-              <button onClick={() => setOpen(false)} className="text-prose-faint hover:text-white p-1">
+              <h2 className="text-base font-bold text-prose">Generate Post</h2>
+              <button onClick={() => setOpen(false)} className="text-prose-faint hover:text-prose p-1">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -119,7 +119,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
                         p.id === platform
                           ? 'bg-accent text-white'
-                          : 'bg-surface-raised text-prose-muted hover:text-white'
+                          : 'bg-surface-raised text-prose-muted hover:text-prose'
                       }`}
                     >
                       {p.label}
@@ -138,8 +138,8 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                       onClick={() => { setSourceType(t); setSourceId('') }}
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors ${
                         t === sourceType
-                          ? 'bg-gray-700 text-white'
-                          : 'bg-surface-raised text-prose-muted hover:text-white'
+                          ? 'bg-stone-100 text-prose'
+                          : 'bg-surface-raised text-prose-muted hover:text-prose'
                       }`}
                     >
                       {t}
@@ -153,13 +153,13 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                     onChange={(e) => setTopic(e.target.value)}
                     placeholder="What's this post about? (e.g. 'best hiking backpacks for dads', 'morning routine tips')"
                     rows={3}
-                    className="w-full bg-surface border border-strong text-white text-sm rounded-lg px-3 py-2.5 focus:border-accent focus:outline-none resize-none"
+                    className="w-full bg-surface border border-strong text-prose text-sm rounded-lg px-3 py-2.5 focus:border-accent focus:outline-none resize-none"
                   />
                 ) : (
                   <select
                     value={sourceId}
                     onChange={(e) => setSourceId(e.target.value)}
-                    className="w-full bg-surface border border-strong text-white text-sm rounded-lg px-3 py-2.5 focus:border-accent focus:outline-none"
+                    className="w-full bg-surface border border-strong text-prose text-sm rounded-lg px-3 py-2.5 focus:border-accent focus:outline-none"
                   >
                     <option value="">— Select a {sourceType} —</option>
                     {sourceItems.map((item) => (
@@ -180,8 +180,8 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                         onClick={() => setFormat(f)}
                         className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors ${
                           f === format
-                            ? 'bg-gray-700 text-white'
-                            : 'bg-surface-raised text-prose-muted hover:text-white'
+                            ? 'bg-stone-100 text-prose'
+                            : 'bg-surface-raised text-prose-muted hover:text-prose'
                         }`}
                       >
                         {f === 'thread' ? 'Thread (3–4 posts)' : 'Single post'}
@@ -200,7 +200,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                 {loading ? 'Generating 3 variants…' : 'Generate 3 Variants'}
               </button>
 
-              {error && <p className="text-sm text-red-400">{error}</p>}
+              {error && <p className="text-sm text-red-600">{error}</p>}
 
               {/* Variants */}
               {variants.length > 0 && (
@@ -213,7 +213,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                       <div key={i} className="bg-surface border border-strong rounded-xl p-4 space-y-3">
                         <p className="text-sm text-prose whitespace-pre-wrap leading-relaxed">{v.content}</p>
                         <div className="flex items-center justify-between">
-                          <span className={`text-xs tabular-nums ${over ? 'text-red-400' : 'text-prose-faint'}`}>
+                          <span className={`text-xs tabular-nums ${over ? 'text-red-600' : 'text-prose-faint'}`}>
                             {len}{platformConfig.charLimit ? ` / ${platformConfig.charLimit}` : ''}
                           </span>
                           <button
@@ -230,7 +230,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                   <button
                     onClick={generate}
                     disabled={loading}
-                    className="w-full text-sm text-prose-faint hover:text-white py-2 transition-colors"
+                    className="w-full text-sm text-prose-faint hover:text-prose py-2 transition-colors"
                   >
                     ↺ Regenerate 3 more
                   </button>

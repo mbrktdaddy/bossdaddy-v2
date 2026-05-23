@@ -102,7 +102,7 @@ export default async function CategoryHubPage({ params }: Props) {
           <h1 className="text-4xl md:text-5xl font-black mb-5 leading-tight">{cat.label}</h1>
           <p className="text-prose-muted max-w-2xl leading-relaxed text-lg">{cat.description}</p>
           {cat.pov && (
-            <p className="mt-5 text-gray-300 max-w-2xl leading-relaxed italic border-l-2 border-accent/50 pl-4">
+            <p className="mt-5 text-prose-muted max-w-2xl leading-relaxed italic border-l-2 border-accent/50 pl-4">
               {cat.pov as string}
             </p>
           )}
@@ -121,7 +121,7 @@ export default async function CategoryHubPage({ params }: Props) {
               <div>
                 <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Top Rated</p>
-                <h2 className="text-2xl font-black text-white leading-tight">Best {cat.label}</h2>
+                <h2 className="text-2xl font-black text-prose leading-tight">Best {cat.label}</h2>
               </div>
               <Link
                 href={`/reviews/category/${slug}`}
@@ -136,7 +136,7 @@ export default async function CategoryHubPage({ params }: Props) {
                 <Link
                   key={r.id}
                   href={`/reviews/${r.slug}`}
-                  className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 hover:border-accent-border/40 hover:-translate-y-0.5 transition-all duration-200"
+                  className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl overflow-hidden shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] hover:border-accent-border/40 hover:-translate-y-0.5 transition-all duration-200"
                 >
                   {r.image_url ? (
                     <div className="relative w-full h-48 bg-surface-raised shrink-0">
@@ -184,7 +184,7 @@ export default async function CategoryHubPage({ params }: Props) {
               <div>
                 <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Know-How</p>
-                <h2 className="text-2xl font-black text-white leading-tight">{cat.label} Guides</h2>
+                <h2 className="text-2xl font-black text-prose leading-tight">{cat.label} Guides</h2>
               </div>
               <Link
                 href={`/guides/category/${slug}`}
@@ -194,7 +194,7 @@ export default async function CategoryHubPage({ params }: Props) {
               </Link>
             </div>
 
-            <ul className="divide-y divide-gray-800/60">
+            <ul className="divide-y divide-soft">
               {latestGuides.map((g) => (
                 <li key={g.id}>
                   <Link
@@ -262,7 +262,7 @@ export default async function CategoryHubPage({ params }: Props) {
             <p className="text-prose-faint text-sm">Check back soon — it&apos;s on the bench.</p>
             <Link
               href="/bench"
-              className="inline-block mt-6 text-sm text-accent-text-soft hover:text-orange-300 font-medium transition-colors"
+              className="inline-block mt-6 text-sm text-accent-text-soft hover:text-accent font-medium transition-colors"
             >
               See what&apos;s coming →
             </Link>
@@ -275,13 +275,13 @@ export default async function CategoryHubPage({ params }: Props) {
             <div className="mb-6">
               <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
               <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Common Questions</p>
-              <h2 className="text-2xl font-black text-white leading-tight">{cat.label} FAQ</h2>
+              <h2 className="text-2xl font-black text-prose leading-tight">{cat.label} FAQ</h2>
             </div>
             <div className="space-y-2">
               {catFaqs.map((faq, i) => (
-                <details key={i} className="group bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:border-accent-border/40 transition-colors rounded-xl overflow-hidden">
+                <details key={i} className="group bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 transition-colors rounded-xl overflow-hidden">
                   <summary className="flex items-center justify-between gap-3 px-4 py-3.5 cursor-pointer list-none min-h-[44px]">
-                    <span className="text-sm font-semibold text-white leading-snug">{faq.question}</span>
+                    <span className="text-sm font-semibold text-prose leading-snug">{faq.question}</span>
                     <svg className="w-4 h-4 shrink-0 text-accent-text transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                     </svg>
@@ -304,7 +304,7 @@ export default async function CategoryHubPage({ params }: Props) {
               <Link
                 key={c.slug}
                 href={`/category/${c.slug}`}
-                className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-surface text-prose-muted hover:bg-surface-raised hover:text-white shadow-sm shadow-black/20 transition-colors"
+                className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-surface text-prose-muted hover:bg-surface-raised hover:text-prose shadow-sm shadow-stone-900/[0.04] transition-colors"
               >
                 <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
                 <span>{c.label}</span>

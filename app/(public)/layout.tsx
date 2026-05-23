@@ -16,7 +16,7 @@ export default async function PublicLayout({ children }: { children: React.React
   }
 
   return (
-    <div className="min-h-screen bg-surface-sunken text-white flex flex-col">
+    <div className="min-h-screen bg-background text-prose flex flex-col">
       <Header username={username} />
       <main className="flex-1 w-full overflow-x-clip">
         {children}

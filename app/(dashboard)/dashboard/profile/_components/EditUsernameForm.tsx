@@ -40,7 +40,7 @@ export default function EditUsernameForm({ current }: { current: string }) {
               value={username}
               onChange={e => { setUsername(e.target.value); setSuccess(false); setError(null) }}
               maxLength={20}
-              className="w-full pl-7 pr-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-white text-sm focus:outline-none transition-colors"
+              className="w-full pl-7 pr-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm focus:outline-none transition-colors"
             />
           </div>
           <button
@@ -55,10 +55,10 @@ export default function EditUsernameForm({ current }: { current: string }) {
       </div>
 
       {success && (
-        <p className="text-green-400 text-xs">Username updated successfully.</p>
+        <p className="text-green-700 text-xs">Username updated successfully.</p>
       )}
       {error && (
-        <p className="text-red-400 text-xs">{error}</p>
+        <p className="text-red-600 text-xs">{error}</p>
       )}
     </form>
   )

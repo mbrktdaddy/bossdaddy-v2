@@ -4,7 +4,7 @@ import { GuideCreateWizard } from './_components/GuideCreateWizard'
 export default function NewGuidePage() {
   return (
     <div className="p-4 sm:p-8 max-w-3xl">
-      <Link href="/dashboard/guides" className="inline-flex items-center gap-2 text-xs text-prose-faint hover:text-white transition-colors mb-3">
+      <Link href="/dashboard/guides" className="inline-flex items-center gap-2 text-xs text-prose-faint hover:text-prose transition-colors mb-3">
         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>

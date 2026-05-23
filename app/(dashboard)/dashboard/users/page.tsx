@@ -33,8 +33,8 @@ export default async function UsersPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
         {[
-          { label: 'Total',   value: counts.total,  color: 'text-white' },
-          { label: 'Admins',  value: counts.admin,  color: 'text-red-400' },
+          { label: 'Total',   value: counts.total,  color: 'text-prose' },
+          { label: 'Admins',  value: counts.admin,  color: 'text-red-600' },
           { label: 'Authors', value: counts.author, color: 'text-accent-text-soft' },
           { label: 'Members', value: counts.member, color: 'text-prose-muted' },
         ].map((s) => (
@@ -48,8 +48,8 @@ export default async function UsersPage() {
       {/* Role legend */}
       <div className="grid grid-cols-3 gap-3 mb-8 text-xs">
         {[
-          { role: 'admin',  color: 'text-red-400',    bg: 'bg-red-950/30 border-red-900/40',       desc: 'Full access. Moderate content, manage users.' },
-          { role: 'author', color: 'text-accent-text-soft', bg: 'bg-accent-tint/30 border-accent-border/40', desc: 'Create reviews and articles. Comment and like.' },
+          { role: 'admin',  color: 'text-red-600',    bg: 'bg-red-50 border-red-200',       desc: 'Full access. Moderate content, manage users.' },
+          { role: 'author', color: 'text-accent-text-soft', bg: 'bg-accent-tint border-accent-border/40', desc: 'Create reviews and articles. Comment and like.' },
           { role: 'member', color: 'text-prose-muted',   bg: 'bg-surface border-soft',           desc: 'Comment and like. Cannot create content.' },
         ].map(r => (
           <div key={r.role} className={`rounded-xl border px-4 py-3 ${r.bg}`}>

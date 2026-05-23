@@ -14,7 +14,7 @@ export function WorkspaceHeader({ backHref, backLabel = 'Back', title, subtitle,
     <div className="mb-6">
       <Link
         href={backHref}
-        className="inline-flex items-center gap-2 text-xs text-prose-faint hover:text-white transition-colors mb-3"
+        className="inline-flex items-center gap-2 text-xs text-prose-faint hover:text-prose transition-colors mb-3"
       >
         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />

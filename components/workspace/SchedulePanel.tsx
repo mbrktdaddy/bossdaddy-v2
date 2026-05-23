@@ -32,7 +32,7 @@ export function SchedulePanel({ scheduledAt, onChange, disabled }: Props) {
           <span className="text-purple-400">📅</span> Schedule
         </span>
         {isScheduled ? (
-          <span className={`text-xs font-mono ${isPast ? 'text-yellow-500' : 'text-purple-400'}`}>
+          <span className={`text-xs font-mono ${isPast ? 'text-amber-600' : 'text-purple-400'}`}>
             {isPast ? 'overdue' : scheduledDate!.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'UTC' })}
           </span>
         ) : (
@@ -51,14 +51,14 @@ export function SchedulePanel({ scheduledAt, onChange, disabled }: Props) {
               const v = e.target.value
               onChange(v ? fromDateTimeLocal(v) : null)
             }}
-            className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-accent-hover"
+            className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-prose focus:outline-none focus:ring-1 focus:ring-accent-hover"
           />
         </div>
         {isScheduled && (
           <button
             type="button"
             onClick={() => onChange(null)}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-gray-700 text-prose-muted hover:text-white rounded-lg transition-colors"
+            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose-muted hover:text-prose rounded-lg transition-colors"
           >
             Clear schedule
           </button>

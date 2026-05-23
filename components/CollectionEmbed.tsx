@@ -88,7 +88,7 @@ export default async function CollectionEmbed({ slug }: Props) {
 
   return (
     <aside
-      className="not-prose my-8 bg-gradient-to-br from-orange-950/20 to-surface/60 border border-accent-border/40 ring-1 ring-inset ring-white/[0.02] rounded-2xl p-5 sm:p-6 shadow-lg shadow-black/40"
+      className="not-prose my-8 bg-gradient-to-br from-accent-tint to-white border border-accent-border/40 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl p-5 sm:p-6 shadow-lg shadow-stone-900/[0.06]"
       aria-label={`Featured ${meta.eyebrow}: ${c.title}`}
     >
       <div className="mb-4">
@@ -97,7 +97,7 @@ export default async function CollectionEmbed({ slug }: Props) {
           {meta.eyebrow}
         </p>
         <Link href={finalHref} className="group inline-block">
-          <h3 className="text-xl sm:text-2xl font-black text-white leading-snug group-hover:text-accent-text-soft transition-colors">
+          <h3 className="text-xl sm:text-2xl font-black text-prose leading-snug group-hover:text-accent-text-soft transition-colors">
             {c.title}
           </h3>
         </Link>
@@ -122,7 +122,7 @@ export default async function CollectionEmbed({ slug }: Props) {
                       <Image src={r.image_url} alt={r.product_name} fill className="object-cover" sizes="120px" />
                     ) : null}
                     {badge && (
-                      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 to-transparent px-1.5 py-1">
+                      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-stone-900/85 to-transparent px-1.5 py-1">
                         <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-orange-300 leading-tight line-clamp-1">
                           {badge}
                         </p>
@@ -143,7 +143,7 @@ export default async function CollectionEmbed({ slug }: Props) {
 
       <Link
         href={finalHref}
-        className="inline-flex items-center gap-1.5 text-sm font-bold text-accent-text-soft hover:text-orange-300 transition-colors uppercase tracking-widest"
+        className="inline-flex items-center gap-1.5 text-sm font-bold text-accent-text-soft hover:text-accent transition-colors uppercase tracking-widest"
       >
         {meta.cta}
       </Link>

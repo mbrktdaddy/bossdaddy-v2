@@ -37,10 +37,10 @@ const METHOD_LABELS: Record<ContactMethod, string> = {
 
 const STATUS_CONFIG: Record<OutreachStatus, { label: string; classes: string }> = {
   draft:       { label: 'Draft',       classes: 'bg-surface-raised text-prose-muted border-strong' },
-  sent:        { label: 'Sent',        classes: 'bg-blue-950/50 text-blue-400 border-blue-800/50' },
-  responded:   { label: 'Responded',   classes: 'bg-green-950/50 text-green-400 border-green-800/50' },
+  sent:        { label: 'Sent',        classes: 'bg-blue-50 text-blue-700 border-blue-200' },
+  responded:   { label: 'Responded',   classes: 'bg-green-50 text-green-700 border-green-200/50' },
   no_response: { label: 'No Response', classes: 'bg-amber-950/50 text-amber-400 border-amber-800/50' },
-  follow_up:   { label: 'Follow Up',   classes: 'bg-accent-tint/50 text-accent-text-soft border-accent-border/50' },
+  follow_up:   { label: 'Follow Up',   classes: 'bg-accent-tint text-accent-text-soft border-accent-border/50' },
 }
 
 function buildTemplate(productName: string, brandName: string, contactName: string) {
@@ -79,7 +79,7 @@ function formatDate(iso: string) {
 
 function MethodBadge({ method }: { method: ContactMethod }) {
   const colors: Record<ContactMethod, string> = {
-    email:    'bg-blue-950/40 text-blue-400 border-blue-800/40',
+    email:    'bg-blue-50 text-blue-700 border-blue-200',
     web_form: 'bg-purple-950/40 text-purple-400 border-purple-800/40',
     amazon:   'bg-amber-950/40 text-amber-400 border-amber-800/40',
     phone:    'bg-surface-raised text-prose-muted border-strong',
@@ -310,7 +310,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
     }
   }
 
-  const inputCls = 'w-full bg-surface-sunken border border-soft rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-prose-faint focus:outline-none focus:border-accent transition-colors'
+  const inputCls = 'w-full bg-surface-sunken border border-soft rounded-xl px-3 py-2.5 text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:border-accent transition-colors'
 
   const filteredHistory = statusFilter === 'all'
     ? history
@@ -325,8 +325,8 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
           role="status"
           className={`fixed top-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-md z-50 flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium shadow-xl ${
             toast.type === 'success'
-              ? 'bg-green-950 border-green-800 text-green-300'
-              : 'bg-red-950 border-red-800 text-red-300'
+              ? 'bg-green-50 border-green-200 text-green-700'
+              : 'bg-red-50 border-red-200 text-red-700'
           }`}
         >
           {toast.type === 'success' ? (
@@ -414,7 +414,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                     className={`shrink-0 px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-medium border transition-colors ${
                       method === m
                         ? 'bg-accent border-accent text-white'
-                        : 'bg-surface-sunken border-strong text-prose-muted hover:border-gray-600 hover:text-white'
+                        : 'bg-surface-sunken border-strong text-prose-muted hover:border-strong hover:text-prose'
                     }`}
                   >
                     {METHOD_LABELS[m]}
@@ -654,7 +654,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                         }
                       }}
                       aria-label={record.notes ? 'Edit note' : 'Add note'}
-                      className="w-11 h-11 flex items-center justify-center rounded-lg text-prose-faint hover:text-gray-300 hover:bg-surface-raised transition-colors shrink-0"
+                      className="w-11 h-11 flex items-center justify-center rounded-lg text-prose-faint hover:text-prose hover:bg-surface-raised transition-colors shrink-0"
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                     </button>
@@ -662,7 +662,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                     <button
                       onClick={() => setExpandedId(expandedId === record.id ? null : record.id)}
                       aria-label={expandedId === record.id ? 'Collapse message' : 'View full message'}
-                      className="w-11 h-11 flex items-center justify-center rounded-lg text-prose-faint hover:text-gray-300 hover:bg-surface-raised transition-colors shrink-0"
+                      className="w-11 h-11 flex items-center justify-center rounded-lg text-prose-faint hover:text-prose hover:bg-surface-raised transition-colors shrink-0"
                     >
                       <svg
                         className={`w-4 h-4 transition-transform ${expandedId === record.id ? 'rotate-180' : ''}`}
@@ -682,19 +682,19 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                       onChange={e => setNotesDraft(e.target.value)}
                       rows={3}
                       placeholder="Add a note (e.g. 'Replied — assets coming Friday')"
-                      className="w-full bg-surface-sunken border border-strong rounded-xl px-3 py-2 text-sm text-white placeholder:text-prose-faint focus:outline-none focus:border-accent resize-none transition-colors"
+                      className="w-full bg-surface-sunken border border-strong rounded-xl px-3 py-2 text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:border-accent resize-none transition-colors"
                     />
                     <div className="flex gap-2 justify-end">
                       <button
                         onClick={() => setEditingNotesId(null)}
-                        className="px-4 py-2.5 min-h-[44px] text-xs text-prose-faint hover:text-white transition-colors"
+                        className="px-4 py-2.5 min-h-[44px] text-xs text-prose-faint hover:text-prose transition-colors"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={() => handleNotesSave(record.id)}
                         disabled={updatingId === record.id}
-                        className="px-4 py-2.5 min-h-[44px] bg-gray-700 hover:bg-gray-600 text-white text-xs rounded-lg transition-colors disabled:opacity-50"
+                        className="px-4 py-2.5 min-h-[44px] bg-stone-700 hover:bg-stone-600 text-white text-xs rounded-lg transition-colors disabled:opacity-50"
                       >
                         Save Note
                       </button>
@@ -723,7 +723,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                       <button
                         onClick={() => handleDelete(record.id, record.brand_name)}
                         disabled={updatingId === record.id}
-                        className="text-xs text-red-500/80 hover:text-red-400 transition-colors disabled:opacity-50"
+                        className="text-xs text-red-500/80 hover:text-red-600 transition-colors disabled:opacity-50"
                       >
                         Delete record
                       </button>

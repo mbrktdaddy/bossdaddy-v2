@@ -50,7 +50,7 @@ export default function ImageLightbox({ children, className }: Props) {
 
       {current && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/90 backdrop-blur-sm"
           onClick={() => setCurrent(null)}
           role="dialog"
           aria-modal="true"
@@ -68,7 +68,7 @@ export default function ImageLightbox({ children, className }: Props) {
               style={{ touchAction: 'pinch-zoom' }}
             />
             {current.caption && (
-              <p className="text-sm text-gray-300 italic text-center max-w-2xl">
+              <p className="text-sm text-prose-muted italic text-center max-w-2xl">
                 {current.caption}
               </p>
             )}
@@ -76,7 +76,7 @@ export default function ImageLightbox({ children, className }: Props) {
               type="button"
               onClick={() => setCurrent(null)}
               aria-label="Close image"
-              className="absolute top-2 right-2 w-9 h-9 bg-black/60 hover:bg-black/80 text-white rounded-full flex items-center justify-center transition-colors"
+              className="absolute top-2 right-2 w-9 h-9 bg-stone-900/60 hover:bg-stone-900/80 text-white rounded-full flex items-center justify-center transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

@@ -30,8 +30,8 @@ function countLabel(value: string, recommended: number) {
   const color = {
     empty: 'text-prose-faint',
     ok:    'text-prose-faint',
-    close: 'text-yellow-500',
-    over:  'text-red-400',
+    close: 'text-amber-600',
+    over:  'text-red-600',
   }[state]
   return <span className={`text-xs font-mono ${color}`}>{len}/{recommended}</span>
 }
@@ -77,9 +77,9 @@ export function SEOPanel({
     <details className="bg-surface border border-soft rounded-xl" open={defaultOpen}>
       <summary className="cursor-pointer px-4 py-3 text-sm font-semibold flex items-center justify-between">
         <span className="flex items-center gap-2">
-          <span className="text-blue-400">🔍</span> SEO
+          <span className="text-blue-700">🔍</span> SEO
           {(!metaTitle && !metaDescription) && (
-            <span className="text-xs text-yellow-500/80 font-normal">· not filled in</span>
+            <span className="text-xs text-amber-600/80 font-normal">· not filled in</span>
           )}
         </span>
         <span className="text-xs text-prose-faint">meta_title + meta_description</span>
@@ -93,23 +93,23 @@ export function SEOPanel({
             type="button"
             onClick={handleGenerate}
             disabled={generating}
-            className="text-xs px-3 py-1.5 bg-accent-tint/50 hover:bg-accent-tint/50 disabled:opacity-50 text-accent-text-soft border border-accent-border/40 rounded-lg transition-colors font-medium"
+            className="text-xs px-3 py-1.5 bg-accent-tint hover:bg-accent-tint disabled:opacity-50 text-accent-text-soft border border-accent-border/40 rounded-lg transition-colors font-medium"
           >
             {generating ? 'Generating…' : '✨ Generate with AI'}
           </button>
-          {genError && <span className="text-xs text-red-400">{genError}</span>}
+          {genError && <span className="text-xs text-red-600">{genError}</span>}
         </div>
 
         {/* Meta title */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-sm text-gray-300">Meta title</label>
+            <label className="text-sm text-prose-muted">Meta title</label>
             <div className="flex items-center gap-2">
               {!metaTitle && suggestedTitle && (
                 <button
                   type="button"
                   onClick={() => onChangeTitle(suggestedTitle)}
-                  className="text-xs text-accent-text-soft hover:text-orange-300 transition-colors"
+                  className="text-xs text-accent-text-soft hover:text-accent transition-colors"
                 >
                   ← Use title
                 </button>
@@ -122,7 +122,7 @@ export function SEOPanel({
             value={metaTitle}
             onChange={(e) => onChangeTitle(e.target.value)}
             placeholder={`Defaults to: ${fallbackTitle.slice(0, 50)}${fallbackTitle.length > 50 ? '…' : ''}`}
-            className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover"
+            className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover"
           />
           <p className="text-xs text-prose-faint mt-1">Shows in browser tab and Google results. Aim for 50–60 chars.</p>
         </div>
@@ -130,13 +130,13 @@ export function SEOPanel({
         {/* Meta description */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-sm text-gray-300">Meta description</label>
+            <label className="text-sm text-prose-muted">Meta description</label>
             <div className="flex items-center gap-2">
               {!metaDescription && suggestedDesc && (
                 <button
                   type="button"
                   onClick={() => onChangeDescription(suggestedDesc)}
-                  className="text-xs text-accent-text-soft hover:text-orange-300 transition-colors"
+                  className="text-xs text-accent-text-soft hover:text-accent transition-colors"
                 >
                   ← Use excerpt
                 </button>
@@ -149,7 +149,7 @@ export function SEOPanel({
             onChange={(e) => onChangeDescription(e.target.value)}
             rows={2}
             placeholder={`Defaults to excerpt: ${fallbackDescription.slice(0, 80)}${fallbackDescription.length > 80 ? '…' : ''}`}
-            className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none"
+            className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none"
           />
           <p className="text-xs text-prose-faint mt-1">Shows as the snippet under your title in search results. 140–160 chars is ideal.</p>
         </div>
@@ -159,7 +159,7 @@ export function SEOPanel({
           <p className="text-xs text-prose-faint uppercase tracking-wider font-semibold mb-2">Search preview</p>
           <div className="bg-surface-sunken border border-soft rounded-lg p-4 space-y-1">
             <p className="text-xs text-prose-faint font-mono truncate">{previewUrl}</p>
-            <p className="text-base text-blue-400 leading-tight line-clamp-1">{displayTitle}</p>
+            <p className="text-base text-blue-700 leading-tight line-clamp-1">{displayTitle}</p>
             <p className="text-xs text-prose-muted leading-snug line-clamp-2">{displayDescription || <span className="italic text-prose-faint">Add a description to see the full preview</span>}</p>
           </div>
         </div>

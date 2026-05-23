@@ -359,12 +359,12 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
         <span className="flex items-center gap-2 flex-wrap">
           <span className="text-accent-text-soft">🎨</span> Inline images
           {filledCount > 0 && (
-            <span className="px-2 py-0.5 bg-green-950/40 border border-green-900/40 text-green-400 rounded-full text-xs">
+            <span className="px-2 py-0.5 bg-green-50 border border-green-200 text-green-700 rounded-full text-xs">
               {filledCount} filled
             </span>
           )}
           {openCount > 0 && (
-            <span className="px-2 py-0.5 bg-accent-tint/40 border border-accent-border/40 text-accent-text-soft rounded-full text-xs">
+            <span className="px-2 py-0.5 bg-accent-tint border border-accent-border/40 text-accent-text-soft rounded-full text-xs">
               {openCount} open
             </span>
           )}
@@ -383,7 +383,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
             type="button"
             onClick={() => setPremium(false)}
             className={`px-2.5 py-1 rounded-md transition-colors ${
-              !premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-white'
+              !premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-prose'
             }`}
           >
             Standard
@@ -392,7 +392,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
             type="button"
             onClick={() => setPremium(true)}
             className={`px-2.5 py-1 rounded-md transition-colors ${
-              premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-white'
+              premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-prose'
             }`}
           >
             Premium
@@ -430,7 +430,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
           <div className="p-3 bg-surface-sunken border border-accent-border/30 rounded-lg space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-xs text-accent-text-soft font-semibold uppercase tracking-widest">New inline image</p>
-              <button type="button" onClick={resetAddForm} className="text-prose-faint hover:text-gray-300 text-xs">Cancel</button>
+              <button type="button" onClick={resetAddForm} className="text-prose-faint hover:text-prose text-xs">Cancel</button>
             </div>
 
             {/* Mode tabs */}
@@ -449,7 +449,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
                   className={`px-3 py-2 text-xs font-semibold rounded-lg min-h-[36px] transition-colors ${
                     addMode === opt.v
                       ? 'bg-accent text-white'
-                      : 'bg-surface-raised text-gray-300 hover:bg-gray-700'
+                      : 'bg-surface-raised text-prose-muted hover:bg-stone-100'
                   }`}
                 >{opt.l}</button>
               ))}
@@ -466,14 +466,14 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
             {(addMode === 'generate' || addMode === 'placeholder') && (
               <div>
                 <label className="block text-xs text-prose-muted mb-1">
-                  Image prompt {addMode === 'generate' && <span className="text-red-400">*</span>}
+                  Image prompt {addMode === 'generate' && <span className="text-red-600">*</span>}
                 </label>
                 <textarea
                   value={addPrompt}
                   onChange={(e) => setAddPrompt(e.target.value)}
                   rows={2}
                   placeholder="e.g. close-up of a worn cordless drill on a workbench, warm natural light, editorial"
-                  className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none"
+                  className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none"
                 />
               </div>
             )}
@@ -488,7 +488,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
                     value={addCaption}
                     onChange={(e) => setAddCaption(e.target.value)}
                     placeholder="Shown under the image"
-                    className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover"
+                    className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover"
                   />
                 </div>
                 <div>
@@ -498,7 +498,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
                     value={addAlt}
                     onChange={(e) => setAddAlt(e.target.value)}
                     placeholder="Short description for screen readers"
-                    className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover"
+                    className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover"
                   />
                 </div>
               </div>
@@ -509,7 +509,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
               <select
                 value={addPosKey}
                 onChange={(e) => setAddPosKey(e.target.value)}
-                className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-accent-hover"
+                className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-sm text-prose focus:outline-none focus:ring-1 focus:ring-accent-hover"
               >
                 {positionOptions.map(o => (
                   <option key={o.value} value={o.value}>{o.label}</option>
@@ -576,7 +576,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
         )}
 
         {error && (
-          <p className="text-xs text-red-400 bg-red-950/50 border border-red-800 rounded px-3 py-2">{error}</p>
+          <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">{error}</p>
         )}
       </div>
 
@@ -653,18 +653,18 @@ function GalleryCard(p: GalleryCardProps) {
   const [expanded, setExpanded] = useState(true)
 
   return (
-    <div className="bg-surface-sunken border border-blue-900/30 rounded-lg overflow-hidden">
+    <div className="bg-surface-sunken border border-blue-200 rounded-lg overflow-hidden">
       {/* Gallery header */}
-      <div className="flex items-center justify-between gap-2 flex-wrap px-3 py-2.5 bg-blue-950/20 border-b border-blue-900/20">
+      <div className="flex items-center justify-between gap-2 flex-wrap px-3 py-2.5 bg-blue-50 border-b border-blue-200">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setExpanded(e => !e)}
-            className="text-blue-400 text-xs font-semibold flex items-center gap-1.5 hover:text-blue-300 transition-colors"
+            className="text-blue-700 text-xs font-semibold flex items-center gap-1.5 hover:text-blue-700 transition-colors"
           >
             <span>{expanded ? '▾' : '▸'}</span>
             <span>🖼 Gallery</span>
-            <span className="px-1.5 py-0.5 bg-blue-900/40 text-blue-400 rounded-full text-[10px]">
+            <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded-full text-[10px]">
               {item.children.length} image{item.children.length === 1 ? '' : 's'}
             </span>
           </button>
@@ -672,7 +672,7 @@ function GalleryCard(p: GalleryCardProps) {
             value={position}
             onChange={(e) => p.onMoveGallery(Number(e.target.value))}
             disabled={total <= 1}
-            className="px-2 py-1 bg-surface border border-strong rounded-lg text-xs text-white min-h-[32px] focus:outline-none focus:ring-1 focus:ring-accent-hover disabled:opacity-50"
+            className="px-2 py-1 bg-surface border border-strong rounded-lg text-xs text-prose min-h-[32px] focus:outline-none focus:ring-1 focus:ring-accent-hover disabled:opacity-50"
             title="Move gallery to position"
           >
             {Array.from({ length: total }, (_, i) => i + 1).map(n => (
@@ -685,14 +685,14 @@ function GalleryCard(p: GalleryCardProps) {
             type="button"
             onClick={() => p.onMoveGallery(position - 1)}
             disabled={position === 1}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-gray-700 disabled:opacity-30 text-gray-300 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
             title="Move gallery up"
           >↑</button>
           <button
             type="button"
             onClick={() => p.onMoveGallery(position + 1)}
             disabled={position === total}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-gray-700 disabled:opacity-30 text-gray-300 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
             title="Move gallery down"
           >↓</button>
           <button
@@ -704,7 +704,7 @@ function GalleryCard(p: GalleryCardProps) {
           <button
             type="button"
             onClick={p.onRemoveGallery}
-            className="px-2.5 py-1.5 bg-transparent hover:bg-red-950/40 text-prose-faint hover:text-red-400 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-transparent hover:bg-red-50 text-prose-faint hover:text-red-600 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
             title="Remove entire gallery"
           ><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg></button>
         </div>
@@ -714,10 +714,10 @@ function GalleryCard(p: GalleryCardProps) {
       {expanded && (
         <div className="p-2 space-y-2">
           {item.children.map((child, childIdx) => (
-            <div key={child.slotId} className={`p-3 rounded-lg space-y-2.5 ${child.filled ? 'bg-surface border border-green-900/20' : 'bg-surface border border-accent-border/20'}`}>
+            <div key={child.slotId} className={`p-3 rounded-lg space-y-2.5 ${child.filled ? 'bg-surface border border-green-200' : 'bg-surface border border-accent-border/20'}`}>
               {/* Child header */}
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <span className={`text-xs font-semibold ${child.filled ? 'text-green-400' : 'text-accent-text-soft'}`}>
+                <span className={`text-xs font-semibold ${child.filled ? 'text-green-700' : 'text-accent-text-soft'}`}>
                   {child.filled ? 'Image' : 'Slot'} {childIdx + 1}/{item.children.length}
                 </span>
                 <div className="flex items-center gap-1">
@@ -725,28 +725,28 @@ function GalleryCard(p: GalleryCardProps) {
                     type="button"
                     onClick={() => p.onMoveChild(child.slotId, 'up')}
                     disabled={childIdx === 0 || busySlotId === child.slotId}
-                    className="px-2 py-1 bg-surface-raised hover:bg-gray-700 disabled:opacity-30 text-gray-300 text-xs rounded-lg min-h-[32px] min-w-[32px] transition-colors"
+                    className="px-2 py-1 bg-surface-raised hover:bg-stone-100 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[32px] min-w-[32px] transition-colors"
                     title="Move left in gallery"
                   >←</button>
                   <button
                     type="button"
                     onClick={() => p.onMoveChild(child.slotId, 'down')}
                     disabled={childIdx === item.children.length - 1 || busySlotId === child.slotId}
-                    className="px-2 py-1 bg-surface-raised hover:bg-gray-700 disabled:opacity-30 text-gray-300 text-xs rounded-lg min-h-[32px] min-w-[32px] transition-colors"
+                    className="px-2 py-1 bg-surface-raised hover:bg-stone-100 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[32px] min-w-[32px] transition-colors"
                     title="Move right in gallery"
                   >→</button>
                   <button
                     type="button"
                     onClick={() => p.onDetachChild(child.slotId)}
                     disabled={busySlotId === child.slotId}
-                    className="px-2 py-1 bg-surface-raised hover:bg-gray-700 text-prose-muted hover:text-prose text-xs rounded-lg min-h-[32px] transition-colors"
+                    className="px-2 py-1 bg-surface-raised hover:bg-stone-100 text-prose-muted hover:text-prose text-xs rounded-lg min-h-[32px] transition-colors"
                     title="Remove from gallery and place standalone after it"
                   >⤴ Detach</button>
                   <button
                     type="button"
                     onClick={() => p.onRemoveChild(child.slotId)}
                     disabled={busySlotId === child.slotId}
-                    className="px-2 py-1 bg-transparent hover:bg-red-950/40 text-prose-faint hover:text-red-400 text-xs rounded-lg min-h-[32px] min-w-[32px] transition-colors"
+                    className="px-2 py-1 bg-transparent hover:bg-red-50 text-prose-faint hover:text-red-600 text-xs rounded-lg min-h-[32px] min-w-[32px] transition-colors"
                     title="Remove image"
                   ><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg></button>
                 </div>
@@ -787,20 +787,20 @@ function GalleryCard(p: GalleryCardProps) {
                   type="button"
                   onClick={() => p.onPickReplaceChild(child)}
                   disabled={busySlotId === child.slotId}
-                  className="px-3 py-1.5 bg-surface-raised hover:bg-gray-700 text-prose text-xs font-semibold rounded-lg min-h-[36px] transition-colors"
+                  className="px-3 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose text-xs font-semibold rounded-lg min-h-[36px] transition-colors"
                 >📁 {child.filled ? 'Replace' : 'Library'}</button>
                 <button
                   type="button"
                   onClick={() => p.onUploadChild(child.slotId)}
                   disabled={busySlotId === child.slotId}
-                  className="px-3 py-1.5 bg-surface-raised hover:bg-gray-700 text-prose text-xs font-semibold rounded-lg min-h-[36px] transition-colors"
+                  className="px-3 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose text-xs font-semibold rounded-lg min-h-[36px] transition-colors"
                 >⬆ Upload</button>
                 {child.filled && (
                   <button
                     type="button"
                     onClick={() => p.onRevertChild(child.slotId)}
                     disabled={busySlotId === child.slotId}
-                    className="px-3 py-1.5 bg-transparent hover:bg-yellow-950/40 text-prose-faint hover:text-yellow-400 text-xs rounded-lg min-h-[36px] transition-colors"
+                    className="px-3 py-1.5 bg-transparent hover:bg-amber-50 text-prose-faint hover:text-amber-600 text-xs rounded-lg min-h-[36px] transition-colors"
                   >↩ Revert</button>
                 )}
               </div>
@@ -861,21 +861,21 @@ function SlotCard(p: SlotCardProps) {
   return (
     <div className={`p-3 rounded-lg space-y-3 ${
       filled
-        ? 'bg-surface-sunken border border-green-900/30'
+        ? 'bg-surface-sunken border border-green-200'
         : 'bg-surface-sunken border border-accent-border/30'
     }`}>
 
       {/* Header: position + reorder + remove */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className={`text-xs font-semibold ${filled ? 'text-green-400' : 'text-accent-text-soft'}`}>
+          <span className={`text-xs font-semibold ${filled ? 'text-green-700' : 'text-accent-text-soft'}`}>
             {filled ? 'Image' : 'Slot'}
           </span>
           <select
             value={position}
             onChange={(e) => p.onMove(Number(e.target.value))}
             disabled={busy || total <= 1}
-            className="px-2 py-1.5 bg-surface border border-strong rounded-lg text-xs text-white min-h-[36px] focus:outline-none focus:ring-1 focus:ring-accent-hover disabled:opacity-50"
+            className="px-2 py-1.5 bg-surface border border-strong rounded-lg text-xs text-prose min-h-[36px] focus:outline-none focus:ring-1 focus:ring-accent-hover disabled:opacity-50"
             title="Reorder among images"
           >
             {Array.from({ length: total }, (_, i) => i + 1).map(n => (
@@ -890,7 +890,7 @@ function SlotCard(p: SlotCardProps) {
                 if (opt) p.onMoveToSection(opt.pos)
               }}
               disabled={busy}
-              className="px-2 py-1.5 bg-surface border border-accent-border/40 rounded-lg text-xs text-orange-300 min-h-[36px] focus:outline-none focus:ring-1 focus:ring-accent-hover disabled:opacity-50"
+              className="px-2 py-1.5 bg-surface border border-accent-border/40 rounded-lg text-xs text-accent-text min-h-[36px] focus:outline-none focus:ring-1 focus:ring-accent-hover disabled:opacity-50"
               title="Move to article section"
             >
               {sectionOptions.map((opt, i) => (
@@ -901,11 +901,11 @@ function SlotCard(p: SlotCardProps) {
         </div>
         <div className="flex items-center gap-1">
           <button type="button" onClick={() => p.onMove(position - 1)} disabled={busy || position === 1}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-gray-700 disabled:opacity-30 text-gray-300 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors" title="Move up">↑</button>
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors" title="Move up">↑</button>
           <button type="button" onClick={() => p.onMove(position + 1)} disabled={busy || position === total}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-gray-700 disabled:opacity-30 text-gray-300 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors" title="Move down">↓</button>
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors" title="Move down">↓</button>
           <button type="button" onClick={p.onRemove} disabled={busy}
-            className="px-2.5 py-1.5 bg-transparent hover:bg-red-950/40 text-prose-faint hover:text-red-400 text-xs rounded-lg min-h-[36px] min-w-[36px] inline-flex items-center justify-center transition-colors" title="Remove image"><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg></button>
+            className="px-2.5 py-1.5 bg-transparent hover:bg-red-50 text-prose-faint hover:text-red-600 text-xs rounded-lg min-h-[36px] min-w-[36px] inline-flex items-center justify-center transition-colors" title="Remove image"><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg></button>
         </div>
       </div>
 
@@ -935,16 +935,16 @@ function SlotCard(p: SlotCardProps) {
           {busy ? '✨ Working…' : filled ? '🔄 Regenerate' : '✨ Generate'}
         </button>
         <button type="button" onClick={p.onPickReplace} disabled={busy}
-          className="px-3 py-2 bg-surface-raised hover:bg-gray-700 text-prose text-xs font-semibold rounded-lg min-h-[36px] transition-colors">
+          className="px-3 py-2 bg-surface-raised hover:bg-stone-100 text-prose text-xs font-semibold rounded-lg min-h-[36px] transition-colors">
           📁 {filled ? 'Replace' : 'Library'}
         </button>
         <button type="button" onClick={p.onUpload} disabled={busy}
-          className="px-3 py-2 bg-surface-raised hover:bg-gray-700 text-prose text-xs font-semibold rounded-lg min-h-[36px] transition-colors">
+          className="px-3 py-2 bg-surface-raised hover:bg-stone-100 text-prose text-xs font-semibold rounded-lg min-h-[36px] transition-colors">
           ⬆ Upload {filled ? 'new' : ''}
         </button>
         {filled && (
           <button type="button" onClick={p.onRevert} disabled={busy}
-            className="px-3 py-2 bg-transparent hover:bg-yellow-950/40 text-prose-faint hover:text-yellow-400 text-xs rounded-lg min-h-[36px] transition-colors"
+            className="px-3 py-2 bg-transparent hover:bg-amber-50 text-prose-faint hover:text-amber-600 text-xs rounded-lg min-h-[36px] transition-colors"
             title="Convert back to empty slot (keeps prompt + caption)">↩ Revert</button>
         )}
       </div>
@@ -970,7 +970,7 @@ function EditableField({ label, value, placeholder, multiline, disabled, onCommi
 
   function commit() { if (local !== value) onCommit(local) }
 
-  const cls = 'w-full px-2.5 py-1.5 bg-surface border border-soft rounded-lg text-xs text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover disabled:opacity-50'
+  const cls = 'w-full px-2.5 py-1.5 bg-surface border border-soft rounded-lg text-xs text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover disabled:opacity-50'
 
   return (
     <div>

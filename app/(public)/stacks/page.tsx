@@ -33,7 +33,7 @@ export default async function StacksIndexPage({ searchParams }: Props) {
       <div className="mb-10">
         <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Stacks</p>
-        <h1 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tight">The Kit For The Job</h1>
+        <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight">The Kit For The Job</h1>
         <p className="text-prose-muted max-w-2xl leading-relaxed">
           Curated kits for a specific goal. The newborn-night setup. The weekend cookout. The first-apartment toolbox. Each piece earned its spot, no fluff.
         </p>
@@ -47,7 +47,7 @@ export default async function StacksIndexPage({ searchParams }: Props) {
             {active ? 'No stacks in this category yet.' : 'First stack dropping soon.'}
           </p>
           <p className="text-prose-faint text-sm mt-2">
-            {active ? <Link href="/stacks" className="text-accent-text-soft hover:text-orange-300">See all stacks →</Link> : 'Check back soon, Boss.'}
+            {active ? <Link href="/stacks" className="text-accent-text-soft hover:text-accent">See all stacks →</Link> : 'Check back soon, Boss.'}
           </p>
         </div>
       ) : (
@@ -56,7 +56,7 @@ export default async function StacksIndexPage({ searchParams }: Props) {
             <Link
               key={s.id}
               href={`/stacks/${s.slug}`}
-              className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 hover:border-accent-border/40 hover:-translate-y-0.5 transition-all duration-200"
+              className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl overflow-hidden shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] hover:border-accent-border/40 hover:-translate-y-0.5 transition-all duration-200"
             >
               <div className="relative w-full aspect-video bg-surface-raised shrink-0">
                 {s.hero_image_url ? (
@@ -81,7 +81,7 @@ export default async function StacksIndexPage({ searchParams }: Props) {
                 </div>
               </div>
               <div className="p-5 flex flex-col flex-1">
-                <h2 className="text-base font-black text-white group-hover:text-accent-text-soft transition-colors leading-snug mb-2">
+                <h2 className="text-base font-black text-prose group-hover:text-accent-text-soft transition-colors leading-snug mb-2">
                   {s.title}
                 </h2>
                 {s.description && (

@@ -21,7 +21,7 @@ export default function WelcomeToast() {
   if (!username || !visible) return null
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-surface border border-accent-border/60 text-white px-5 py-3 rounded-2xl shadow-xl">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-surface border border-accent-border/60 text-prose px-5 py-3 rounded-2xl shadow-xl">
       <span className="text-accent-text text-base">👊</span>
       <p className="text-sm font-medium whitespace-nowrap">
         Welcome back, <span className="text-accent-text-soft">@{username}</span>
@@ -29,7 +29,7 @@ export default function WelcomeToast() {
       <button
         onClick={() => setVisible(false)}
         aria-label="Dismiss"
-        className="ml-1 text-prose-faint hover:text-white transition-colors leading-none"
+        className="ml-1 text-prose-faint hover:text-prose transition-colors leading-none"
       >
         ✕
       </button>

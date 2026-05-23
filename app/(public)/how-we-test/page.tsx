@@ -88,17 +88,17 @@ export default function HowWeTestPage() {
  return (
  <div className="max-w-3xl mx-auto px-6 py-16">
 
- <h1 className="text-3xl font-black mb-2 text-white">How We Test</h1>
+ <h1 className="text-3xl font-black mb-2 text-prose">How We Test</h1>
  <p className="text-prose-faint text-sm mb-10">
  Real products. Real testing. Real dads. No lab coats, no paid placements, no shortcuts.
  </p>
 
- <div className="prose prose-invert prose-orange max-w-none
+ <div className="prose prose-orange max-w-none
  prose-p:text-prose-muted prose-p:leading-relaxed
- prose-h2:font-black prose-h2:text-white prose-h2:text-xl prose-h2:mt-10
+ prose-h2:font-black prose-h2:text-prose prose-h2:text-xl prose-h2:mt-10
  prose-h3:font-bold prose-h3:text-prose prose-h3:text-lg prose-h3:mt-8
- prose-a:text-accent-text-soft prose-a:no-underline hover:prose-a:text-orange-300
- prose-strong:text-white
+ prose-a:text-accent-text-soft prose-a:no-underline hover:prose-a:text-accent
+ prose-strong:text-prose
  prose-ul:text-prose-muted prose-li:my-1">
 
  <h2>Our Philosophy</h2>
@@ -162,12 +162,12 @@ export default function HowWeTestPage() {
  ))}
  </div>
 
- <div className="prose prose-invert prose-orange max-w-none
+ <div className="prose prose-orange max-w-none
  prose-p:text-prose-muted prose-p:leading-relaxed
- prose-h2:font-black prose-h2:text-white prose-h2:text-xl prose-h2:mt-10
+ prose-h2:font-black prose-h2:text-prose prose-h2:text-xl prose-h2:mt-10
  prose-h3:font-bold prose-h3:text-prose prose-h3:text-lg prose-h3:mt-8
- prose-a:text-accent-text-soft prose-a:no-underline hover:prose-a:text-orange-300
- prose-strong:text-white
+ prose-a:text-accent-text-soft prose-a:no-underline hover:prose-a:text-accent
+ prose-strong:text-prose
  prose-ul:text-prose-muted prose-li:my-1">
 
  <h2>The Rating System</h2>
@@ -195,13 +195,13 @@ export default function HowWeTestPage() {
 
  </div>
 
- <div className="not-prose bg-gradient-to-br from-orange-950/40 to-surface rounded-2xl p-6 mb-12">
+ <div className="not-prose bg-gradient-to-br from-accent-tint to-white rounded-2xl p-6 mb-12">
  <div className="text-xs uppercase tracking-widest text-eyebrow font-bold mb-2">
  The Highest Designation
  </div>
- <h2 className="text-3xl font-black text-white mb-4">Boss Daddy Approved</h2>
- <p className="text-gray-300 leading-relaxed mb-4">
- <strong className="text-white">Boss Daddy Approved</strong> is the top designation on
+ <h2 className="text-3xl font-black text-prose mb-4">Boss Daddy Approved</h2>
+ <p className="text-prose-muted leading-relaxed mb-4">
+ <strong className="text-prose">Boss Daddy Approved</strong> is the top designation on
  this site. It&apos;s not a sticker we slap on anything we want to sell. It&apos;s earned.
  </p>
  <p className="text-prose-muted leading-relaxed mb-4">
@@ -210,23 +210,23 @@ export default function HowWeTestPage() {
  now. One good weekend doesn&apos;t earn the badge. Neither does a spec sheet.
  </p>
  <p className="text-prose-muted leading-relaxed mb-4">
- Most products we review <strong className="text-white">don&apos;t</strong> earn it. That&apos;s
+ Most products we review <strong className="text-prose">don&apos;t</strong> earn it. That&apos;s
  on purpose. If everything were Boss Daddy Approved, the badge would mean nothing.
  </p>
  <p className="text-prose-muted leading-relaxed">
  Commission rate, brand size, marketing budget, relationship with the company —{' '}
- <strong className="text-white">zero influence</strong>. A brand paying more doesn&apos;t
+ <strong className="text-prose">zero influence</strong>. A brand paying more doesn&apos;t
  move their product up the list. A brand paying less doesn&apos;t keep a great product
  off it. The badge is earned in use, by a human, or it isn&apos;t earned.
  </p>
  </div>
 
- <div className="prose prose-invert prose-orange max-w-none
+ <div className="prose prose-orange max-w-none
  prose-p:text-prose-muted prose-p:leading-relaxed
- prose-h2:font-black prose-h2:text-white prose-h2:text-xl prose-h2:mt-10
+ prose-h2:font-black prose-h2:text-prose prose-h2:text-xl prose-h2:mt-10
  prose-h3:font-bold prose-h3:text-prose prose-h3:text-lg prose-h3:mt-8
- prose-a:text-accent-text-soft prose-a:no-underline hover:prose-a:text-orange-300
- prose-strong:text-white
+ prose-a:text-accent-text-soft prose-a:no-underline hover:prose-a:text-accent
+ prose-strong:text-prose
  prose-ul:text-prose-muted prose-li:my-1">
 
  <h2>AI&apos;s Role — and Its Limits</h2>

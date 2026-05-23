@@ -124,7 +124,7 @@ export default async function EngagementPage() {
                   <th className="text-right px-5 py-2.5 font-semibold">Clicks</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-800">
+              <tbody className="divide-y divide-soft">
                 {rows.map((r) => {
                   const cat = getCategoryBySlug(r.category)
                   const completion = (r.view_count ?? 0) > 0
@@ -146,14 +146,14 @@ export default async function EngagementPage() {
                           {cat && <span className="flex items-center gap-1 text-[10px] text-prose-faint"><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-prose-faint" /> {cat.label}</span>}
                         </div>
                       </td>
-                      <td className="text-right px-3 py-2.5 text-gray-300 font-mono">{(r.view_count ?? 0).toLocaleString()}</td>
+                      <td className="text-right px-3 py-2.5 text-prose-muted font-mono">{(r.view_count ?? 0).toLocaleString()}</td>
                       <td className="text-right px-3 py-2.5 text-prose-faint font-mono text-xs">{(r.scroll_25_count  ?? 0).toLocaleString()}</td>
                       <td className="text-right px-3 py-2.5 text-prose-faint font-mono text-xs">{(r.scroll_50_count  ?? 0).toLocaleString()}</td>
                       <td className="text-right px-3 py-2.5 text-prose-faint font-mono text-xs">{(r.scroll_75_count  ?? 0).toLocaleString()}</td>
-                      <td className="text-right px-3 py-2.5 text-gray-300 font-mono">{(r.scroll_100_count ?? 0).toLocaleString()}</td>
+                      <td className="text-right px-3 py-2.5 text-prose-muted font-mono">{(r.scroll_100_count ?? 0).toLocaleString()}</td>
                       <td className={`text-right px-3 py-2.5 font-mono font-semibold ${
-                        completion >= 50 ? 'text-green-400' :
-                        completion >= 25 ? 'text-yellow-400' :
+                        completion >= 50 ? 'text-green-700' :
+                        completion >= 25 ? 'text-amber-600' :
                         'text-prose-faint'
                       }`}>
                         {completion}%
@@ -184,7 +184,7 @@ export default async function EngagementPage() {
           {productLeaderboard.length === 0 ? (
             <p className="px-5 py-12 text-center text-prose-faint text-sm">No clicks recorded yet.</p>
           ) : (
-            <div className="divide-y divide-gray-800">
+            <div className="divide-y divide-soft">
               {productLeaderboard.map(([slug, count], i) => (
                 <div key={slug} className="px-5 py-3 flex items-center justify-between">
                   <div className="flex items-center gap-3 min-w-0">
@@ -207,7 +207,7 @@ export default async function EngagementPage() {
           {(recentClicks ?? []).length === 0 ? (
             <p className="px-5 py-12 text-center text-prose-faint text-sm">No clicks yet.</p>
           ) : (
-            <div className="divide-y divide-gray-800">
+            <div className="divide-y divide-soft">
               {(recentClicks ?? []).map((c, i) => (
                 <div key={i} className="px-5 py-3">
                   <div className="flex items-center justify-between gap-2">
@@ -233,7 +233,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-surface border border-soft rounded-2xl p-4">
       <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold mb-1">{label}</p>
-      <p className="text-2xl font-black text-white">{value}</p>
+      <p className="text-2xl font-black text-prose">{value}</p>
     </div>
   )
 }

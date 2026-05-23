@@ -57,7 +57,7 @@ export function TagPicker({ selected, onChange }: Props) {
                     className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
                       active
                         ? 'bg-accent text-white'
-                        : 'bg-surface text-prose-muted hover:text-white hover:bg-surface-raised border border-strong'
+                        : 'bg-surface text-prose-muted hover:text-prose hover:bg-surface-raised border border-strong'
                     }`}
                   >
                     {tag.label}

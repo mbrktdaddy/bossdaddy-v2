@@ -152,8 +152,8 @@ export function GuideWorkspace({ guide: article }: Props) {
       />
 
       {article.rejection_reason && ['draft', 'rejected'].includes(status) && (
-        <div className="mb-4 px-4 py-3 rounded-xl bg-yellow-950/40 border border-yellow-900/40">
-          <p className="text-sm text-yellow-300">
+        <div className="mb-4 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200">
+          <p className="text-sm text-amber-700">
             <strong>Edits requested:</strong> {article.rejection_reason}
           </p>
         </div>
@@ -166,20 +166,20 @@ export function GuideWorkspace({ guide: article }: Props) {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="sm:col-span-2">
-            <label className="block text-sm text-gray-300 mb-1.5">Title</label>
+            <label className="block text-sm text-prose-muted mb-1.5">Title</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
+              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-300 mb-1.5">Category</label>
+            <label className="block text-sm text-prose-muted mb-1.5">Category</label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
+              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
             >
               {CATEGORIES.map(c => (
                 <option key={c.slug} value={c.slug}>{c.icon} {c.label}</option>
@@ -189,12 +189,12 @@ export function GuideWorkspace({ guide: article }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Excerpt <span className="text-prose-faint">(shown on listing pages)</span></label>
+          <label className="block text-sm text-prose-muted mb-1.5">Excerpt <span className="text-prose-faint">(shown on listing pages)</span></label>
           <textarea
             value={excerpt}
             onChange={(e) => setExcerpt(e.target.value)}
             rows={2}
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
           />
         </div>
 
@@ -234,7 +234,7 @@ export function GuideWorkspace({ guide: article }: Props) {
         />
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Content</label>
+          <label className="block text-sm text-prose-muted mb-1.5">Content</label>
           <TiptapEditor
             value={content}
             onChange={setContent}
@@ -254,13 +254,13 @@ export function GuideWorkspace({ guide: article }: Props) {
 
             {/* TL;DR */}
             <div>
-              <label className="block text-sm text-gray-300 mb-1.5">TL;DR <span className="text-prose-faint font-normal">— 2–3 sentence skimmer summary</span></label>
+              <label className="block text-sm text-prose-muted mb-1.5">TL;DR <span className="text-prose-faint font-normal">— 2–3 sentence skimmer summary</span></label>
               <textarea
                 value={tldr}
                 onChange={(e) => setTldr(e.target.value)}
                 rows={3}
                 placeholder="e.g. Choosing the right formula comes down to three things: your baby's digestive needs, your budget, and how they respond in the first week. Most healthy full-term babies do fine on any standard formula. If you see gassiness or fussiness, a gentle or sensitive version is worth trying before going straight to specialty."
-                className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-y text-sm"
+                className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-y text-sm"
               />
             </div>
 
@@ -278,11 +278,11 @@ export function GuideWorkspace({ guide: article }: Props) {
             {/* FAQs */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm text-gray-300">FAQs</label>
+                <label className="text-sm text-prose-muted">FAQs</label>
                 <button
                   type="button"
                   onClick={() => setFaqs([...faqs, { question: '', answer: '' }])}
-                  className="text-xs text-accent-text-soft hover:text-orange-300 transition-colors"
+                  className="text-xs text-accent-text-soft hover:text-accent transition-colors"
                 >
                   + Add question
                 </button>
@@ -297,12 +297,12 @@ export function GuideWorkspace({ guide: article }: Props) {
                         value={faq.question}
                         onChange={(e) => setFaqs(faqs.map((f, j) => j === i ? { ...f, question: e.target.value } : f))}
                         placeholder="e.g. How do I know if my baby needs a different formula?"
-                        className="flex-1 px-3 py-1.5 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover"
+                        className="flex-1 px-3 py-1.5 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover"
                       />
                       <button
                         type="button"
                         onClick={() => setFaqs(faqs.filter((_, j) => j !== i))}
-                        className="text-prose-faint hover:text-red-400 transition-colors text-xs mt-2"
+                        className="text-prose-faint hover:text-red-600 transition-colors text-xs mt-2"
                       >
                         ✕
                       </button>
@@ -314,7 +314,7 @@ export function GuideWorkspace({ guide: article }: Props) {
                         onChange={(e) => setFaqs(faqs.map((f, j) => j === i ? { ...f, answer: e.target.value } : f))}
                         placeholder="2–3 sentences. Direct and practical."
                         rows={2}
-                        className="flex-1 px-3 py-1.5 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none"
+                        className="flex-1 px-3 py-1.5 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none"
                       />
                     </div>
                   </div>
@@ -412,10 +412,10 @@ export function GuideWorkspace({ guide: article }: Props) {
         </div>
 
         {actionErr && (
-          <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">{actionErr}</p>
+          <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{actionErr}</p>
         )}
         {actionMsg && (
-          <p className="text-green-400 text-sm bg-green-950/40 border border-green-800/40 rounded-lg px-4 py-3">{actionMsg}</p>
+          <p className="text-green-700 text-sm bg-green-50 border border-green-200 rounded-lg px-4 py-3">{actionMsg}</p>
         )}
 
         <p className="text-xs text-prose-faint">

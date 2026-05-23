@@ -34,7 +34,7 @@ export default async function AdminMerchDetailPage({
     <div className="p-8 max-w-2xl">
       <Link
         href="/dashboard/admin/merch"
-        className="inline-flex items-center gap-2 text-xs text-prose-faint hover:text-white transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-xs text-prose-faint hover:text-prose transition-colors mb-6"
       >
         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />

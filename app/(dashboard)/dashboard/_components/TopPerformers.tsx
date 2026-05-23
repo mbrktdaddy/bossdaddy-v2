@@ -42,7 +42,7 @@ export function TopPerformers({ items }: { items: TopItem[] }) {
         </p>
         <p className="text-xs text-prose-faint font-mono">{totalViews.toLocaleString()} total</p>
       </div>
-      <div className="divide-y divide-gray-800">
+      <div className="divide-y divide-soft">
         {visible.map((item, i) => {
           const category = getCategoryBySlug(item.category)
           const percent = Math.round(((item.view_count ?? 0) / max) * 100)
@@ -58,7 +58,7 @@ export function TopPerformers({ items }: { items: TopItem[] }) {
                     <Image src={item.image_url} alt={item.title} fill className="object-cover" sizes="40px" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <svg className="w-4 h-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                     </div>
@@ -69,12 +69,12 @@ export function TopPerformers({ items }: { items: TopItem[] }) {
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className={`text-xs px-1.5 py-0.5 rounded border ${
                       item.type === 'guide'
-                        ? 'bg-blue-950/40 text-blue-400 border-blue-900/40'
-                        : 'bg-accent-tint/40 text-accent-text-soft border-accent-border/40'
+                        ? 'bg-blue-50 text-blue-700 border-blue-200'
+                        : 'bg-accent-tint text-accent-text-soft border-accent-border/40'
                     }`}>
                       {item.type}
                     </span>
-                    <p className="text-sm text-white truncate">{item.title}</p>
+                    <p className="text-sm text-prose truncate">{item.title}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 h-1 bg-surface-raised rounded-full overflow-hidden max-w-xs">
@@ -86,7 +86,7 @@ export function TopPerformers({ items }: { items: TopItem[] }) {
                     {category && <span className={`text-xs ${category.accent}`}>{category.label}</span>}
                   </div>
                 </div>
-                <span className="text-sm font-mono font-bold text-white shrink-0">
+                <span className="text-sm font-mono font-bold text-prose shrink-0">
                   {(item.view_count ?? 0).toLocaleString()}
                 </span>
               </div>
@@ -98,7 +98,7 @@ export function TopPerformers({ items }: { items: TopItem[] }) {
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="w-full px-5 py-2.5 text-xs text-prose-faint hover:text-gray-300 hover:bg-surface-sunken/40 border-t border-soft transition-colors text-center"
+          className="w-full px-5 py-2.5 text-xs text-prose-faint hover:text-prose hover:bg-surface-sunken/40 border-t border-soft transition-colors text-center"
         >
           {expanded ? '↑ Show top 5 only' : `↓ Show all ${items.length} published`}
         </button>

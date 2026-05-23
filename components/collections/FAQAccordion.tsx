@@ -27,7 +27,7 @@ export default function FAQAccordion({ faqs, id = 'faq', heading = 'Frequently A
       <div className="mb-5">
         <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">FAQ</p>
-        <h2 className="text-2xl font-black text-white leading-tight">{heading}</h2>
+        <h2 className="text-2xl font-black text-prose leading-tight">{heading}</h2>
       </div>
 
       <div className="space-y-2">
@@ -36,7 +36,7 @@ export default function FAQAccordion({ faqs, id = 'faq', heading = 'Frequently A
           return (
             <div
               key={`${idx}-${faq.question.slice(0, 30)}`}
-              className={`bg-gradient-to-br from-surface to-surface/60 border ring-1 ring-inset ring-white/[0.02] rounded-2xl overflow-hidden transition-colors ${
+              className={`bg-gradient-to-br from-surface to-surface/60 border ring-1 ring-inset ring-stone-900/[0.04] rounded-2xl overflow-hidden transition-colors ${
                 isOpen ? 'border-accent-border/40' : 'border-soft/60 hover:border-strong'
               }`}
             >
@@ -46,7 +46,7 @@ export default function FAQAccordion({ faqs, id = 'faq', heading = 'Frequently A
                 aria-expanded={isOpen}
                 className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left min-h-[56px]"
               >
-                <span className={`text-sm sm:text-base font-bold leading-snug ${isOpen ? 'text-white' : 'text-prose'}`}>
+                <span className={`text-sm sm:text-base font-bold leading-snug ${isOpen ? 'text-prose' : 'text-prose'}`}>
                   {faq.question}
                 </span>
                 <svg

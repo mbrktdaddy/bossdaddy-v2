@@ -234,7 +234,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
   const productMap = Object.fromEntries(products.map((p) => [p.id, p.name]))
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/70" onClick={onClose}>
       <div
         className="bg-surface-sunken border border-soft rounded-2xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl"
         onClick={(e) => e.stopPropagation()}
@@ -246,7 +246,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
               type="button"
               onClick={() => setTab('library')}
               className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
-                tab === 'library' ? 'bg-surface-raised text-white' : 'text-prose-faint hover:text-gray-300'
+                tab === 'library' ? 'bg-surface-raised text-prose' : 'text-prose-faint hover:text-prose'
               }`}
             >
               Library
@@ -255,7 +255,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
               type="button"
               onClick={() => setTab('generate')}
               className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
-                tab === 'generate' ? 'bg-surface-raised text-white' : 'text-prose-faint hover:text-gray-300'
+                tab === 'generate' ? 'bg-surface-raised text-prose' : 'text-prose-faint hover:text-prose'
               }`}
             >
               Generate
@@ -269,7 +269,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search…"
-                className="w-28 sm:w-36 px-2 py-1.5 bg-surface-raised border border-strong text-xs text-gray-300 placeholder-gray-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-hover"
+                className="w-28 sm:w-36 px-2 py-1.5 bg-surface-raised border border-strong text-xs text-prose-muted placeholder:text-prose-faint rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-hover"
               />
             )}
             {/* Category filter — editorial axis. Independent of the product
@@ -279,7 +279,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 value={filterCategory}
                 onChange={(e) => handleCategoryFilterChange(e.target.value)}
                 title="Filter library by editorial category"
-                className="px-2 py-1.5 bg-surface-raised border border-strong text-xs text-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-hover"
+                className="px-2 py-1.5 bg-surface-raised border border-strong text-xs text-prose-muted rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-hover"
               >
                 <option value="">All categories</option>
                 <option value="__none__">Uncategorized only</option>
@@ -294,7 +294,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 value={filterProductId}
                 onChange={(e) => handleProductFilterChange(e.target.value)}
                 title="Filter library by attached product"
-                className="px-2 py-1.5 bg-surface-raised border border-strong text-xs text-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-hover"
+                className="px-2 py-1.5 bg-surface-raised border border-strong text-xs text-prose-muted rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-hover"
               >
                 <option value="">All products</option>
                 <option value="__none__">Unassigned only</option>
@@ -308,7 +308,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-raised hover:bg-gray-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-50 text-prose text-xs font-medium rounded-lg transition-colors"
               >
                 {uploading ? (
                   <span className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin" />
@@ -320,7 +320,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 Upload
               </button>
             )}
-            <button type="button" onClick={onClose} className="p-1.5 text-prose-faint hover:text-white transition-colors rounded-lg hover:bg-surface-raised">
+            <button type="button" onClick={onClose} className="p-1.5 text-prose-faint hover:text-prose transition-colors rounded-lg hover:bg-surface-raised">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -342,7 +342,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
           </p>
         )}
         {uploadError && tab === 'library' && (
-          <p className="text-red-400 text-xs bg-red-950/50 border-b border-red-900/40 px-5 py-2.5 shrink-0">{uploadError}</p>
+          <p className="text-red-600 text-xs bg-red-50 border-b border-red-200 px-5 py-2.5 shrink-0">{uploadError}</p>
         )}
 
         {/* Content */}
@@ -355,7 +355,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
               </div>
             ) : filteredAssets.length === 0 ? (
               <div
-                className="border-2 border-dashed border-strong rounded-xl py-16 flex flex-col items-center gap-2 text-prose-faint cursor-pointer hover:border-gray-600 transition-colors"
+                className="border-2 border-dashed border-strong rounded-xl py-16 flex flex-col items-center gap-2 text-prose-faint cursor-pointer hover:border-strong transition-colors"
                 onClick={() => !searchQuery && setTab('generate')}
               >
                 <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -389,7 +389,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                       className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all ${
                         isSelected
                           ? 'border-accent ring-2 ring-accent-hover/30'
-                          : 'border-transparent hover:border-gray-600'
+                          : 'border-transparent hover:border-strong'
                       }`}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -411,7 +411,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                       {productName && (
                         <div className="absolute bottom-0 left-0 right-0 px-1.5 py-1 bg-surface-sunken/80">
                           <p className="text-[9px] text-accent-text-soft font-semibold truncate leading-tight">
-                            {asset.is_primary && <span className="text-orange-300">★ </span>}
+                            {asset.is_primary && <span className="text-accent-text">★ </span>}
                             {asset.label ?? productName}
                           </p>
                         </div>
@@ -425,17 +425,17 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
             /* Generate tab */
             <div className="space-y-4 max-w-2xl mx-auto">
               <div>
-                <label className="block text-sm text-gray-300 mb-2">Prompt</label>
+                <label className="block text-sm text-prose-muted mb-2">Prompt</label>
                 <textarea
                   value={genPrompt}
                   onChange={(e) => setGenPrompt(e.target.value)}
                   rows={5}
                   placeholder="Describe the image — include subject, setting, lighting, style. Example: 'a DeWalt cordless drill on a wooden workbench, warm natural light, editorial photography, no people, no text'"
-                  className="w-full px-4 py-3 bg-surface border border-strong rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
+                  className="w-full px-4 py-3 bg-surface border border-strong rounded-xl text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-300 mb-2">Aspect ratio</label>
+                <label className="block text-sm text-prose-muted mb-2">Aspect ratio</label>
                 <div className="flex gap-2">
                   {[
                     { value: '1536x1024', label: 'Landscape', ratio: '3:2', recommended: true },
@@ -447,7 +447,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                       type="button"
                       onClick={() => setGenSize(opt.value as typeof genSize)}
                       className={`relative flex-1 flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg transition-colors ${
-                        genSize === opt.value ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:border-gray-600'
+                        genSize === opt.value ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:border-strong'
                       }`}
                     >
                       {opt.recommended && (
@@ -470,7 +470,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 {genLoading ? 'Generating…' : 'Generate & Use'}
               </button>
               {genError && (
-                <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">{genError}</p>
+                <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{genError}</p>
               )}
               <p className="text-xs text-prose-faint">Generated image will be added to the library and auto-selected.</p>
             </div>
@@ -484,14 +484,14 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
               type="button"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-3 py-1.5 bg-surface-raised hover:bg-gray-700 disabled:opacity-40 text-xs text-white rounded-lg transition-colors"
+              className="px-3 py-1.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-40 text-xs text-prose rounded-lg transition-colors"
             >← Prev</button>
             <span className="text-xs text-prose-faint">{page} / {totalPages}</span>
             <button
               type="button"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="px-3 py-1.5 bg-surface-raised hover:bg-gray-700 disabled:opacity-40 text-xs text-white rounded-lg transition-colors"
+              className="px-3 py-1.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-40 text-xs text-prose rounded-lg transition-colors"
             >Next →</button>
           </div>
         )}
@@ -512,7 +512,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-surface-raised hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
+              className="px-4 py-2 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm rounded-lg transition-colors"
             >Cancel</button>
             <button
               type="button"

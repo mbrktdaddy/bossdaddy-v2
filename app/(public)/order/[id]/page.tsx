@@ -46,10 +46,10 @@ export default async function OrderPage({ params }: Props) {
     return (
       <div className="max-w-2xl mx-auto px-6 py-16 text-center">
         <div className="bg-surface rounded-2xl p-10">
-          <div className="w-16 h-16 rounded-full bg-green-900/40 flex items-center justify-center mx-auto mb-6 text-3xl">
+          <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-6 text-3xl">
             ✓
           </div>
-          <h1 className="text-2xl font-black text-white mb-3">Payment confirmed!</h1>
+          <h1 className="text-2xl font-black text-prose mb-3">Payment confirmed!</h1>
           <p className="text-prose-muted mb-2">Finalizing your order — usually just a few seconds.</p>
           <p className="text-prose-faint text-sm">This page will refresh automatically.</p>
           <OrderPoller />
@@ -69,14 +69,14 @@ export default async function OrderPage({ params }: Props) {
 
       {/* Header */}
       <div className="mb-10 text-center">
-        <div className="w-16 h-16 rounded-full bg-green-900/40 flex items-center justify-center mx-auto mb-4 text-3xl">
+        <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4 text-3xl">
           ✓
         </div>
         <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-2">— Order Confirmed</p>
-        <h1 className="text-3xl font-black text-white mb-2">{order.order_number}</h1>
+        <h1 className="text-3xl font-black text-prose mb-2">{order.order_number}</h1>
         <p className="text-prose-faint text-sm">
           Confirmation sent to{' '}
-          <span className="text-gray-300">{order.email ?? session.customer_details?.email}</span>
+          <span className="text-prose-muted">{order.email ?? session.customer_details?.email}</span>
         </p>
       </div>
 
@@ -92,7 +92,7 @@ export default async function OrderPage({ params }: Props) {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-white leading-snug">{item.name_snapshot}</p>
+              <p className="font-semibold text-prose leading-snug">{item.name_snapshot}</p>
               <p className="text-prose-faint text-sm mt-0.5">Qty {item.qty}</p>
             </div>
             <p className="text-accent-text-soft font-bold text-sm shrink-0">{formatPrice(item.unit_price_cents * item.qty)}</p>
@@ -104,20 +104,20 @@ export default async function OrderPage({ params }: Props) {
       <div className="bg-surface/60 rounded-2xl p-6 mb-4 space-y-2 text-sm">
         <div className="flex justify-between text-prose-muted">
           <span>Subtotal</span>
-          <span className="text-white">{formatPrice(order.subtotal_cents)}</span>
+          <span className="text-prose">{formatPrice(order.subtotal_cents)}</span>
         </div>
         <div className="flex justify-between text-prose-muted">
           <span>Shipping</span>
-          <span className="text-green-400">Free</span>
+          <span className="text-green-700">Free</span>
         </div>
         {(order.tax_cents ?? 0) > 0 && (
           <div className="flex justify-between text-prose-muted">
             <span>Tax</span>
-            <span className="text-white">{formatPrice(order.tax_cents)}</span>
+            <span className="text-prose">{formatPrice(order.tax_cents)}</span>
           </div>
         )}
         <div className="flex justify-between pt-3 border-t border-soft">
-          <span className="font-black text-white">Total</span>
+          <span className="font-black text-prose">Total</span>
           <span className="font-black text-accent-text-soft text-lg">{formatPrice(order.total_cents)}</span>
         </div>
       </div>
@@ -126,7 +126,7 @@ export default async function OrderPage({ params }: Props) {
       {addr && (
         <div className="bg-surface/60 rounded-2xl p-6 mb-10">
           <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold mb-3">Ships to</p>
-          <p className="text-white font-semibold">{addr.name}</p>
+          <p className="text-prose font-semibold">{addr.name}</p>
           <p className="text-prose-muted text-sm">{addr.line1}</p>
           {addr.line2 && <p className="text-prose-muted text-sm">{addr.line2}</p>}
           <p className="text-prose-muted text-sm">

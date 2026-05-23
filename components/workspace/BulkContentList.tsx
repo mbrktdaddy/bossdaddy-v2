@@ -115,7 +115,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by title…"
-            className="w-full pl-9 pr-3 py-2 bg-surface border border-soft rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-accent/60"
+            className="w-full pl-9 pr-3 py-2 bg-surface border border-soft rounded-xl text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:border-accent/60"
           />
         </div>
         <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
@@ -126,8 +126,8 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
               onClick={() => setSortKey(key)}
               className={`shrink-0 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
                 sortKey === key
-                  ? 'bg-accent-tint/40 text-accent-text-soft border border-accent-border/50'
-                  : 'bg-surface text-prose-faint border border-soft hover:border-gray-600 hover:text-gray-300'
+                  ? 'bg-accent-tint text-accent-text-soft border border-accent-border/50'
+                  : 'bg-surface text-prose-faint border border-soft hover:border-strong hover:text-prose'
               }`}
             >
               {SORT_LABELS[key]}
@@ -138,7 +138,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
 
       {/* Select all header */}
       <div className="flex items-center gap-3 mb-3 px-1">
-        <label className="flex items-center gap-2 cursor-pointer text-sm text-prose-faint hover:text-gray-300">
+        <label className="flex items-center gap-2 cursor-pointer text-sm text-prose-faint hover:text-prose">
           <input
             type="checkbox"
             checked={allSelected}
@@ -170,7 +170,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
               key={item.id}
               className={`p-4 rounded-2xl border transition-colors ${
                 isSelected
-                  ? 'bg-accent-tint/20 border-accent/50'
+                  ? 'bg-accent-tint border-accent/50'
                   : 'bg-surface border-soft hover:border-strong'
               }`}
             >
@@ -188,7 +188,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       {contentType === 'reviews' && item.rating !== undefined && item.rating !== null
-                        ? <span className="text-sm font-bold text-yellow-400">{item.rating}</span>
+                        ? <span className="text-sm font-bold text-amber-600">{item.rating}</span>
                         : (category ? <CategoryIcon slug={category.slug} className="w-5 h-5 text-accent-text" /> : (
                           contentType === 'guides' ? (
                             <svg className="w-5 h-5 text-accent-text" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
@@ -213,12 +213,12 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
                     {item.product_name && <span className="text-xs text-prose-faint">{item.product_name}</span>}
                     {category && <span className={`flex items-center gap-1 text-xs ${category.accent}`}><CategoryIcon slug={category.slug} className="w-3.5 h-3.5 text-accent-text" /> {category.label}</span>}
                     {item.reading_time_minutes && <span className="text-xs text-prose-faint">{item.reading_time_minutes} min</span>}
-                    <span className="text-xs text-gray-700">
+                    <span className="text-xs text-prose-faint">
                       {new Date(item.updated_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })}
                     </span>
                   </div>
                   {item.rejection_reason && ['draft', 'rejected'].includes(item.status) && (
-                    <p className="text-xs text-yellow-400/80 mt-1.5">↩ Edits requested: {item.rejection_reason}</p>
+                    <p className="text-xs text-amber-600/80 mt-1.5">↩ Edits requested: {item.rejection_reason}</p>
                   )}
                   {item.status === 'pending' && (
                     <p className="text-xs text-prose-faint mt-1.5">
@@ -228,7 +228,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
                   <div className="flex items-center gap-2 mt-3 flex-wrap">
                     <Link
                       href={`/dashboard/${contentType}/${item.id}`}
-                      className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg transition-colors"
+                      className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose-muted hover:text-prose rounded-lg transition-colors"
                     >
                       {['draft', 'rejected'].includes(item.status) ? 'Edit' : 'Open'}
                     </Link>
@@ -236,7 +236,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
                       <Link
                         href={`${publicRoute}/${item.slug}`}
                         target="_blank"
-                        className="text-xs px-3 py-1.5 bg-accent-tint/50 hover:bg-accent-tint/50 text-accent-text-soft hover:text-orange-300 rounded-lg transition-colors border border-accent-border/40"
+                        className="text-xs px-3 py-1.5 bg-accent-tint hover:bg-accent-tint text-accent-text-soft hover:text-accent rounded-lg transition-colors border border-accent-border/40"
                       >
                         View Live →
                       </Link>
@@ -253,7 +253,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
       {selected.size > 0 && (
         <div className="sticky bottom-4 mt-4 z-20">
           <div className="mx-auto max-w-2xl bg-surface border border-accent/40 rounded-2xl shadow-2xl p-3 flex items-center gap-3 flex-wrap">
-            <p className="text-sm text-white font-semibold shrink-0">{selected.size} selected</p>
+            <p className="text-sm text-prose font-semibold shrink-0">{selected.size} selected</p>
             <div className="flex items-center gap-2 flex-wrap flex-1">
               <button
                 onClick={() => runAction('publish')}
@@ -265,27 +265,27 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
               <button
                 onClick={() => runAction('unpublish')}
                 disabled={!!busy}
-                className="px-3 py-1.5 text-xs font-semibold bg-yellow-900/60 hover:bg-yellow-900 disabled:opacity-50 text-yellow-300 rounded-lg transition-colors border border-yellow-900/40"
+                className="px-3 py-1.5 text-xs font-semibold bg-amber-50 hover:bg-amber-50 disabled:opacity-50 text-amber-700 rounded-lg transition-colors border border-amber-200"
               >
                 {busy === 'unpublish' ? '…' : 'Unpublish'}
               </button>
               <button
                 onClick={() => runAction('delete')}
                 disabled={!!busy}
-                className="px-3 py-1.5 text-xs font-semibold bg-red-950/60 hover:bg-red-900/60 disabled:opacity-50 text-red-400 rounded-lg transition-colors border border-red-900/40"
+                className="px-3 py-1.5 text-xs font-semibold bg-red-50 hover:bg-red-50 disabled:opacity-50 text-red-600 rounded-lg transition-colors border border-red-200"
               >
                 {busy === 'delete' ? '…' : 'Delete'}
               </button>
             </div>
             <button
               onClick={clear}
-              className="text-xs text-prose-faint hover:text-gray-300 transition-colors shrink-0"
+              className="text-xs text-prose-faint hover:text-prose transition-colors shrink-0"
             >
               Clear
             </button>
           </div>
           {error && (
-            <p className="mt-2 mx-auto max-w-2xl text-xs text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">
+            <p className="mt-2 mx-auto max-w-2xl text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
               {error}
             </p>
           )}

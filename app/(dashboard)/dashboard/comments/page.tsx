@@ -7,9 +7,9 @@ interface Props {
 }
 
 const STATUS_TABS = [
-  { key: 'pending',  label: 'Pending',  color: 'text-yellow-400' },
-  { key: 'approved', label: 'Approved', color: 'text-green-400'  },
-  { key: 'rejected', label: 'Rejected', color: 'text-red-400'    },
+  { key: 'pending',  label: 'Pending',  color: 'text-amber-600' },
+  { key: 'approved', label: 'Approved', color: 'text-green-700'  },
+  { key: 'rejected', label: 'Rejected', color: 'text-red-600'    },
 ]
 
 export default async function CommentsPage({ searchParams }: Props) {
@@ -68,7 +68,7 @@ export default async function CommentsPage({ searchParams }: Props) {
               key={t.key}
               href={`/dashboard/comments?status=${t.key}`}
               className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors whitespace-nowrap ${
-                active ? 'bg-surface-raised text-white' : 'text-prose-faint hover:text-gray-300'
+                active ? 'bg-surface-raised text-prose' : 'text-prose-faint hover:text-prose'
               }`}
             >
               {t.label}
@@ -102,18 +102,18 @@ export default async function CommentsPage({ searchParams }: Props) {
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
                     c.content_type === 'review'
-                      ? 'bg-accent-tint/40 text-accent-text-soft border-accent-border/30'
-                      : 'bg-blue-950/40 text-blue-400 border-blue-900/30'
+                      ? 'bg-accent-tint text-accent-text-soft border-accent-border/30'
+                      : 'bg-blue-50 text-blue-700 border-blue-200'
                   }`}>
                     {c.content_type === 'review' ? 'Review' : 'Guide'}
                   </span>
                   <span className="text-xs text-prose-faint">by @{author}</span>
-                  <span className="text-xs text-gray-700">
+                  <span className="text-xs text-prose-faint">
                     {new Date(c.created_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
                   {score !== null && (
                     <span className={`text-xs font-mono ${
-                      score >= 0.7 ? 'text-red-400' : score >= 0.4 ? 'text-yellow-400' : 'text-green-400'
+                      score >= 0.7 ? 'text-red-600' : score >= 0.4 ? 'text-amber-600' : 'text-green-700'
                     }`}>
                       {score.toFixed(2)}
                     </span>
@@ -131,10 +131,10 @@ export default async function CommentsPage({ searchParams }: Props) {
                   </Link>
                 )}
 
-                <p className="text-sm text-gray-300 leading-relaxed mb-3 whitespace-pre-wrap">{c.body}</p>
+                <p className="text-sm text-prose-muted leading-relaxed mb-3 whitespace-pre-wrap">{c.body}</p>
 
                 {flags.length > 0 && (
-                  <p className="text-xs text-red-400/80 mb-3">
+                  <p className="text-xs text-red-600/80 mb-3">
                     ⚑ {flags.slice(0, 3).join(' · ')}{flags.length > 3 ? ` +${flags.length - 3} more` : ''}
                   </p>
                 )}

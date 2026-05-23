@@ -94,7 +94,7 @@ export default function ArticleTOC({ items, variant }: Props) {
               className={`block py-1.5 text-xs font-medium border-l-2 -ml-3 pl-3 transition-colors ${
                 activeId === item.id
                   ? 'text-accent-text-soft border-accent font-bold'
-                  : 'text-prose-faint border-transparent hover:text-gray-300 hover:border-strong'
+                  : 'text-prose-faint border-transparent hover:text-prose hover:border-strong'
               }`}
             >
               {item.label}

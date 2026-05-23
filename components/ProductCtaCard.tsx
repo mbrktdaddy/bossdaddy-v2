@@ -23,7 +23,7 @@ export default function ProductCtaCard({ product, rating, variant = 'prominent' 
   return (
     <aside
       data-product-cta
-      className="my-8 bg-gradient-to-br from-orange-950/60 to-surface rounded-2xl p-5 sm:p-6 shadow-xl shadow-black/40"
+      className="my-8 bg-gradient-to-br from-accent-tint to-white rounded-2xl p-5 sm:p-6 shadow-xl shadow-stone-900/[0.06]"
       aria-label="Product offer"
     >
       <p className="text-xs text-accent-text-soft uppercase tracking-widest font-semibold mb-3">
@@ -44,7 +44,7 @@ export default function ProductCtaCard({ product, rating, variant = 'prominent' 
         )}
 
         <div className="flex-1 min-w-0">
-          <p className="font-black text-lg sm:text-xl text-white leading-tight mb-2">
+          <p className="font-black text-lg sm:text-xl text-prose leading-tight mb-2">
             {product.name}
           </p>
           {typeof rating === 'number' && (

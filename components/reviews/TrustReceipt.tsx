@@ -31,7 +31,7 @@ export default function TrustReceipt({ pricePaidCents, testingDuration, classNam
         </span>
       )}
       {hasPrice && durationLabel && (
-        <span aria-hidden className="mx-2 text-gray-700">·</span>
+        <span aria-hidden className="mx-2 text-prose-faint">·</span>
       )}
       {durationLabel && (
         <span className="whitespace-nowrap">

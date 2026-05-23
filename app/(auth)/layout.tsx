@@ -24,7 +24,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         />
         <span className="font-black tracking-tight text-sm">
           <span className="text-accent-text">BOSS</span>
-          <span className="text-white"> DADDY</span>
+          <span className="text-prose"> DADDY</span>
         </span>
       </Link>
       {children}

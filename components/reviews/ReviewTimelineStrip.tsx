@@ -51,11 +51,11 @@ export function ReviewTimelineStrip({ nodes, activeId }: Props) {
             <div
               className={`flex flex-col items-center justify-center min-w-[88px] sm:min-w-[104px] px-3 py-2 rounded-xl border transition-colors ${
                 active
-                  ? 'bg-accent-tint/40 border-accent text-white'
-                  : 'bg-surface border-strong text-gray-300 hover:bg-surface-raised hover:border-accent-border/60'
+                  ? 'bg-accent-tint border-accent text-prose'
+                  : 'bg-surface border-strong text-prose-muted hover:bg-surface-raised hover:border-accent-border/60'
               }`}
             >
-              <span className={`text-[10px] uppercase tracking-widest font-semibold leading-none mb-1 ${active ? 'text-orange-300' : 'text-prose-faint'}`}>
+              <span className={`text-[10px] uppercase tracking-widest font-semibold leading-none mb-1 ${active ? 'text-accent-text' : 'text-prose-faint'}`}>
                 {nodeLabel(node)}
               </span>
               <span className="flex items-baseline gap-1">
@@ -83,7 +83,7 @@ export function ReviewTimelineStrip({ nodes, activeId }: Props) {
               {i < nodes.length - 1 && (
                 <span
                   aria-hidden
-                  className="block w-4 sm:w-6 h-px bg-gray-700 mx-0.5 sm:mx-1 shrink-0"
+                  className="block w-4 sm:w-6 h-px bg-soft mx-0.5 sm:mx-1 shrink-0"
                 />
               )}
             </li>

@@ -5,7 +5,7 @@ export function ExportButton() {
     <a
       href="/api/admin/export"
       download
-      className="inline-flex items-center gap-2 px-3 py-2 bg-surface-raised hover:bg-gray-700 text-gray-300 hover:text-white text-xs font-semibold rounded-lg transition-colors"
+      className="inline-flex items-center gap-2 px-3 py-2 bg-surface-raised hover:bg-stone-100 text-prose-muted hover:text-prose text-xs font-semibold rounded-lg transition-colors"
       title="Download all content as JSON"
     >
       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

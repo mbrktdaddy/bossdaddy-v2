@@ -29,7 +29,7 @@ export default async function ProductEditPage({
       <div className="mb-6">
         <Link
           href="/dashboard/admin/products"
-          className="text-sm text-prose-faint hover:text-gray-300 transition-colors"
+          className="text-sm text-prose-faint hover:text-prose transition-colors"
         >
           ← All products
         </Link>

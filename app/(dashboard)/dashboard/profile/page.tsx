@@ -8,8 +8,8 @@ import AccountDeletion from './_components/AccountDeletion'
 import AvatarUploader from './_components/AvatarUploader'
 
 const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
-  admin:  { label: 'Admin',  className: 'bg-accent-tint/60 text-accent-text-soft border border-accent-border/60' },
-  author: { label: 'Author', className: 'bg-blue-950/60 text-blue-400 border border-blue-900/60' },
+  admin:  { label: 'Admin',  className: 'bg-accent-tint text-accent-text-soft border border-accent-border/60' },
+  author: { label: 'Author', className: 'bg-blue-50 text-blue-700 border border-blue-200' },
   member: { label: 'Member', className: 'bg-surface-raised text-prose-muted border border-strong' },
 }
 
@@ -140,14 +140,14 @@ export default async function ProfilePage() {
       )}
 
       {/* Identity hero — avatar + name + role pill + joined date */}
-      <div className="bg-gradient-to-br from-surface via-surface to-orange-950/40 border border-soft rounded-2xl p-6 mb-6">
+      <div className="bg-gradient-to-br from-white via-white to-accent-tint border border-soft rounded-2xl p-6 mb-6">
         <AvatarUploader
           initialAvatarUrl={(profile as { avatar_url?: string | null } | null)?.avatar_url ?? null}
           initial={profile?.username?.[0]?.toUpperCase() ?? '?'}
         />
 
         <div className="mt-6 flex items-center gap-2 flex-wrap">
-          <p className="font-black text-xl text-white">@{profile?.username}</p>
+          <p className="font-black text-xl text-prose">@{profile?.username}</p>
           <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${roleCfg.className}`}>
             {roleCfg.label}
           </span>
@@ -177,12 +177,12 @@ export default async function ProfilePage() {
           >
             <span className="text-xl shrink-0">🎙️</span>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-white group-hover:text-accent-text-soft transition-colors">Voice Profile</p>
+              <p className="text-sm font-semibold text-prose group-hover:text-accent-text-soft transition-colors">Voice Profile</p>
               <p className="text-xs text-prose-faint mt-0.5">
                 Facts Claude uses as ground truth — family ages, occupation, values, and evolving notes.
               </p>
             </div>
-            <svg className="w-4 h-4 text-gray-700 group-hover:text-accent-text-soft shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </Link>
@@ -211,17 +211,17 @@ export default async function ProfilePage() {
           {isAuthor && (
             <>
               <div className="text-center">
-                <p className="text-2xl font-black text-white">{reviewCount ?? 0}</p>
+                <p className="text-2xl font-black text-prose">{reviewCount ?? 0}</p>
                 <p className="text-xs text-prose-faint mt-1">Published Reviews</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-black text-white">{guideCount ?? 0}</p>
+                <p className="text-2xl font-black text-prose">{guideCount ?? 0}</p>
                 <p className="text-xs text-prose-faint mt-1">Published Guides</p>
               </div>
             </>
           )}
           <div className="text-center">
-            <p className="text-2xl font-black text-white">{commentCount ?? 0}</p>
+            <p className="text-2xl font-black text-prose">{commentCount ?? 0}</p>
             <p className="text-xs text-prose-faint mt-1">Comments Left</p>
           </div>
           <div className="text-center">
@@ -229,7 +229,7 @@ export default async function ProfilePage() {
             <p className="text-xs text-prose-faint mt-1">Likes Given</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-black text-red-400">{commentLikesReceived ?? 0}</p>
+            <p className="text-2xl font-black text-red-600">{commentLikesReceived ?? 0}</p>
             <p className="text-xs text-prose-faint mt-1">Comment Likes</p>
           </div>
           <div className="text-center">
@@ -238,7 +238,7 @@ export default async function ProfilePage() {
           </div>
           {isAuthor && (
             <div className="text-center">
-              <p className="text-2xl font-black text-white">{likesReceived ?? 0}</p>
+              <p className="text-2xl font-black text-prose">{likesReceived ?? 0}</p>
               <p className="text-xs text-prose-faint mt-1">Content Likes</p>
             </div>
           )}
@@ -247,7 +247,7 @@ export default async function ProfilePage() {
               {(draftCount ?? 0) > 0 && (
                 <Link
                   href="/dashboard/reviews"
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-raised border border-strong hover:border-gray-500 rounded-lg text-xs font-medium text-gray-300 hover:text-white transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-raised border border-strong hover:border-strong rounded-lg text-xs font-medium text-prose-muted hover:text-prose transition-colors"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-gray-400 shrink-0" />
                   {draftCount} Draft{draftCount !== 1 ? 's' : ''} →
@@ -256,7 +256,7 @@ export default async function ProfilePage() {
               {(awaitingCount ?? 0) > 0 && (
                 <Link
                   href="/dashboard/reviews"
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-950/50 border border-yellow-900/60 hover:border-yellow-700 rounded-lg text-xs font-medium text-yellow-400 hover:text-yellow-300 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 hover:border-amber-200 rounded-lg text-xs font-medium text-amber-600 hover:text-amber-700 transition-colors"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 shrink-0" />
                   {awaitingCount} Pending Approval →
@@ -285,16 +285,16 @@ export default async function ProfilePage() {
                 href={`/reviews/${r.slug}`}
                 className="flex items-center gap-3 p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group"
               >
-                <span className="text-xs px-2 py-0.5 rounded-full bg-accent-tint/60 text-accent-text-soft border border-accent-border/60 shrink-0">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-accent-tint text-accent-text-soft border border-accent-border/60 shrink-0">
                   Review
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm text-gray-300 group-hover:text-white transition-colors truncate">
+                  <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate">
                     {r.title}
                   </p>
                   <p className="text-xs text-prose-faint truncate">{r.product_name}</p>
                 </div>
-                <svg className="w-4 h-4 text-gray-700 group-hover:text-accent-text-soft shrink-0 ml-auto transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 ml-auto transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </Link>
@@ -306,15 +306,15 @@ export default async function ProfilePage() {
                 href={`/guides/${a.slug}`}
                 className="flex items-center gap-3 p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group"
               >
-                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-950/60 text-blue-400 border border-blue-900/60 shrink-0">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
                   Article
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm text-gray-300 group-hover:text-white transition-colors truncate">
+                  <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate">
                     {a.title}
                   </p>
                 </div>
-                <svg className="w-4 h-4 text-gray-700 group-hover:text-accent-text-soft shrink-0 ml-auto transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 ml-auto transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </Link>
@@ -333,7 +333,7 @@ export default async function ProfilePage() {
               target="_blank"
               className="flex items-center justify-between p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group"
             >
-              <span className="text-sm text-gray-300 group-hover:text-white transition-colors">
+              <span className="text-sm text-prose-muted group-hover:text-prose transition-colors">
                 View public author profile
               </span>
               <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -344,7 +344,7 @@ export default async function ProfilePage() {
               href="/dashboard/reviews"
               className="flex items-center justify-between p-3 bg-surface-sunken border border-soft hover:border-strong rounded-xl transition-colors group"
             >
-              <span className="text-sm text-gray-300 group-hover:text-white transition-colors">Manage reviews</span>
+              <span className="text-sm text-prose-muted group-hover:text-prose transition-colors">Manage reviews</span>
               <svg className="w-4 h-4 text-prose-faint group-hover:text-prose-muted transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
@@ -353,7 +353,7 @@ export default async function ProfilePage() {
               href="/dashboard/guides"
               className="flex items-center justify-between p-3 bg-surface-sunken border border-soft hover:border-strong rounded-xl transition-colors group"
             >
-              <span className="text-sm text-gray-300 group-hover:text-white transition-colors">Manage guides</span>
+              <span className="text-sm text-prose-muted group-hover:text-prose transition-colors">Manage guides</span>
               <svg className="w-4 h-4 text-prose-faint group-hover:text-prose-muted transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
@@ -380,7 +380,7 @@ export default async function ProfilePage() {
               href="/dashboard/moderation"
               className="flex items-center justify-between p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group"
             >
-              <span className="text-sm text-gray-300 group-hover:text-white transition-colors">Moderation queue</span>
+              <span className="text-sm text-prose-muted group-hover:text-prose transition-colors">Moderation queue</span>
               <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
@@ -389,7 +389,7 @@ export default async function ProfilePage() {
               href="/dashboard/users"
               className="flex items-center justify-between p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group"
             >
-              <span className="text-sm text-gray-300 group-hover:text-white transition-colors">User management</span>
+              <span className="text-sm text-prose-muted group-hover:text-prose transition-colors">User management</span>
               <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>

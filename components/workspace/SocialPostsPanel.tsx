@@ -137,7 +137,7 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
         <span className="flex items-center gap-2">
           <span className="text-accent-text-soft">📣</span> Social posts
           {posts.length > 0 && (
-            <span className="px-2 py-0.5 bg-accent-tint/40 border border-accent-border/40 text-accent-text-soft rounded-full text-xs">
+            <span className="px-2 py-0.5 bg-accent-tint border border-accent-border/40 text-accent-text-soft rounded-full text-xs">
               {posts.length} saved
             </span>
           )}
@@ -177,7 +177,7 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
             value={instr}
             onChange={(e) => setInstr(e.target.value)}
             placeholder="Optional nudge — e.g. 'lead with the price', 'casual tone', 'focus on the kid angle'"
-            className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover"
+            className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover"
             onKeyDown={(e) => { if (e.key === 'Enter' && !busy) handleGenerate(selected, false) }}
           />
           <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -194,7 +194,7 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
             </button>
           </div>
           {error && (
-            <p className="text-xs text-red-400 bg-red-950/40 border border-red-800 rounded-lg px-3 py-2">{error}</p>
+            <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
           )}
         </div>
 
@@ -278,11 +278,11 @@ function PostCard({ post, busy, copied, onCopy, onBodyCommit, onHashtagsCommit, 
   return (
     <div className="p-3 bg-surface-sunken border border-soft rounded-lg space-y-2">
       <div className="flex items-center justify-between gap-2 flex-wrap">
-        <p className="text-xs font-semibold text-gray-300 flex items-center gap-2">
+        <p className="text-xs font-semibold text-prose-muted flex items-center gap-2">
           <span className="text-accent-text-soft font-bold">{m.icon}</span>
           {m.label}
           {m.charLimit != null && (
-            <span className={`text-xs font-mono ${overLimit ? 'text-red-400' : 'text-prose-faint'}`}>
+            <span className={`text-xs font-mono ${overLimit ? 'text-red-600' : 'text-prose-faint'}`}>
               {total}/{m.charLimit}
             </span>
           )}
@@ -292,21 +292,21 @@ function PostCard({ post, busy, copied, onCopy, onBodyCommit, onHashtagsCommit, 
             type="button"
             onClick={onCopy}
             disabled={busy}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-gray-700 text-gray-300 hover:text-white text-xs rounded-lg min-h-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose-muted hover:text-prose text-xs rounded-lg min-h-[36px] transition-colors"
             title="Copy body + hashtags to clipboard"
           >{copied ? '✓ Copied' : 'Copy'}</button>
           <button
             type="button"
             onClick={onRegenerate}
             disabled={busy}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-gray-700 text-gray-300 text-xs rounded-lg min-h-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose-muted text-xs rounded-lg min-h-[36px] transition-colors"
             title="Regenerate just this platform"
           >{busy ? '…' : '🔄'}</button>
           <button
             type="button"
             onClick={onDelete}
             disabled={busy}
-            className="px-2.5 py-1.5 bg-transparent hover:bg-red-950/40 text-prose-faint hover:text-red-400 text-xs rounded-lg min-h-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-transparent hover:bg-red-50 text-prose-faint hover:text-red-600 text-xs rounded-lg min-h-[36px] transition-colors"
             title="Delete this post"
           >🗑</button>
         </div>
@@ -327,14 +327,14 @@ function PostCard({ post, busy, copied, onCopy, onBodyCommit, onHashtagsCommit, 
           {hashtags.map((t) => (
             <span
               key={t}
-              className="inline-flex items-center gap-1 px-2 py-1 bg-accent-tint/40 border border-accent-border/40 text-accent-text-soft text-xs rounded-full"
+              className="inline-flex items-center gap-1 px-2 py-1 bg-accent-tint border border-accent-border/40 text-accent-text-soft text-xs rounded-full"
             >
               <span className="font-mono">#{t}</span>
               <button
                 type="button"
                 onClick={() => removeTag(t)}
                 disabled={busy}
-                className="text-orange-300 hover:text-red-400 -mr-0.5 px-1"
+                className="text-accent-text hover:text-red-600 -mr-0.5 px-1"
                 title={`Remove #${t}`}
               >×</button>
             </span>
@@ -352,7 +352,7 @@ function PostCard({ post, busy, copied, onCopy, onBodyCommit, onHashtagsCommit, 
             onBlur={() => { if (tagInput.trim()) addTag() }}
             placeholder="+ tag"
             disabled={busy}
-            className="px-2 py-1 bg-surface border border-soft rounded-full text-xs text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover w-20"
+            className="px-2 py-1 bg-surface border border-soft rounded-full text-xs text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover w-20"
           />
         </div>
       </div>

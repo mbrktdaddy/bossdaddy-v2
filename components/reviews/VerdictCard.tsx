@@ -70,7 +70,7 @@ function ScoreArc({ rating, size }: { rating: number; size: 'lg' | 'md' }) {
         </g>
       </svg>
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <span className={`${numCls} font-black leading-none text-white`}>
+        <span className={`${numCls} font-black leading-none text-prose`}>
           {safe.toFixed(1)}
         </span>
         <span className={`${denomCls} mt-0.5 font-semibold text-accent-text/80`}>/10</span>
@@ -83,14 +83,14 @@ function RebuyChip({ rebuy, size = 'md' }: { rebuy: boolean; size?: 'sm' | 'md' 
   const padding = size === 'sm' ? 'px-2.5 py-1 text-[11px]' : 'px-3 py-1.5 text-xs'
   if (rebuy) {
     return (
-      <span className={`inline-flex items-center gap-1.5 rounded-full border border-green-700/40 bg-green-950/40 font-semibold text-green-300 ${padding}`}>
+      <span className={`inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 font-semibold text-green-700 ${padding}`}>
         <span aria-hidden>✓</span>
         I&apos;d buy it again
       </span>
     )
   }
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border border-red-800/40 bg-red-950/40 font-semibold text-red-300 ${padding}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full border border-red-200/40 bg-red-50 font-semibold text-red-700 ${padding}`}>
       <span aria-hidden>✗</span>
       Wouldn&apos;t buy again
     </span>
@@ -119,7 +119,7 @@ function SubScoreBars({ scores, size = 'md' }: { scores: SubScores; size?: 'sm' 
         const isSet = value != null
         return (
           <li key={label} className="grid grid-cols-[minmax(0,auto)_1fr_minmax(0,auto)] items-center gap-3">
-            <span className={`${labelCls} font-medium text-gray-300`}>{label}</span>
+            <span className={`${labelCls} font-medium text-prose-muted`}>{label}</span>
             <div className={`relative w-full overflow-hidden rounded-full bg-surface-raised ${barH}`}>
               <div
                 className={`absolute inset-y-0 left-0 rounded-full bg-accent transition-[width] duration-700 ${barH}`}
@@ -127,7 +127,7 @@ function SubScoreBars({ scores, size = 'md' }: { scores: SubScores; size?: 'sm' 
                 aria-hidden
               />
             </div>
-            <span className={`${scoreCls} font-bold tabular-nums ${isSet ? 'text-white' : 'text-prose-faint'}`}>
+            <span className={`${scoreCls} font-bold tabular-nums ${isSet ? 'text-prose' : 'text-prose-faint'}`}>
               {isSet ? value : '—'}
             </span>
           </li>
@@ -196,11 +196,11 @@ export default function VerdictCard({
   if (variant === 'sidebar') {
     return (
       <section
-        className="rounded-2xl border border-accent-border/40 bg-surface p-5 shadow-lg shadow-black/40"
+        className="rounded-2xl border border-accent-border/40 bg-surface p-5 shadow-lg shadow-stone-900/[0.06]"
         aria-label="Quick verdict"
       >
         <p className="text-xs font-semibold uppercase tracking-widest text-eyebrow">Quick Verdict</p>
-        <p className="mt-1 mb-4 text-xs font-black uppercase tracking-wide text-white/90 line-clamp-2">{productName}</p>
+        <p className="mt-1 mb-4 text-xs font-black uppercase tracking-wide text-prose/90 line-clamp-2">{productName}</p>
 
         <div className="flex flex-col items-center gap-3">
           <ScoreArc rating={rating} size="md" />
@@ -208,7 +208,7 @@ export default function VerdictCard({
         </div>
 
         {tldr && (
-          <p className="mt-4 line-clamp-3 text-xs leading-relaxed text-gray-300">{tldr}</p>
+          <p className="mt-4 line-clamp-3 text-xs leading-relaxed text-prose-muted">{tldr}</p>
         )}
 
         {hasSubScores && (
@@ -234,7 +234,7 @@ export default function VerdictCard({
         aria-label="Verdict preview"
       >
         <p className="text-[10px] font-semibold uppercase tracking-widest text-eyebrow">The Verdict</p>
-        <p className="mt-0.5 mb-4 text-xs font-black uppercase tracking-wide text-white/90 line-clamp-1">
+        <p className="mt-0.5 mb-4 text-xs font-black uppercase tracking-wide text-prose/90 line-clamp-1">
           {productName || <span className="text-prose-faint italic normal-case font-normal">no product name</span>}
         </p>
 
@@ -259,12 +259,12 @@ export default function VerdictCard({
   // ── In-body variant — primary mobile/desktop placement on the public page ──
   return (
     <section
-      className="mb-8 rounded-2xl border border-accent-border/40 bg-surface p-5 shadow-md shadow-black/30 sm:p-6"
+      className="mb-8 rounded-2xl border border-accent-border/40 bg-surface p-5 shadow-md shadow-stone-900/[0.05] sm:p-6"
       aria-label="The verdict"
     >
       {/* Header — section label + product name */}
       <p className="text-xs font-semibold uppercase tracking-widest text-eyebrow">The Verdict</p>
-      <p className="mt-1 mb-5 text-sm font-black uppercase tracking-wide text-white/90 sm:text-base">{productName}</p>
+      <p className="mt-1 mb-5 text-sm font-black uppercase tracking-wide text-prose/90 sm:text-base">{productName}</p>
 
       {/* Conclusion cluster — arc (with approved check baked in) + rebuy chip */}
       <div className="flex flex-wrap items-center justify-center gap-5 sm:flex-nowrap sm:justify-start sm:gap-6">

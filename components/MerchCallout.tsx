@@ -22,7 +22,7 @@ export async function MerchCallout() {
       <div className="flex items-end justify-between mb-6">
         <div>
           <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-1">— Boss Daddy Gear</p>
-          <h3 className="text-lg font-black text-white">Rep the brand while you&apos;re at it.</h3>
+          <h3 className="text-lg font-black text-prose">Rep the brand while you&apos;re at it.</h3>
         </div>
         <Link
           href="/gear"
@@ -53,7 +53,7 @@ export async function MerchCallout() {
       </div>
 
       <div className="mt-5 sm:hidden text-center">
-        <Link href="/gear" className="text-sm text-accent-text-soft hover:text-orange-300 font-semibold transition-colors">
+        <Link href="/gear" className="text-sm text-accent-text-soft hover:text-accent font-semibold transition-colors">
           Shop All Gear →
         </Link>
       </div>

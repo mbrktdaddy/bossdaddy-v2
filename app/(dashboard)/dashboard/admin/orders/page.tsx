@@ -11,11 +11,11 @@ type OrderStatus = 'pending_payment' | 'paid' | 'processing' | 'shipped' | 'deli
 const STATUS_STYLES: Record<OrderStatus, { label: string; cls: string }> = {
   pending_payment: { label: 'Pending',    cls: 'bg-surface-raised text-prose-muted' },
   paid:            { label: 'Paid',       cls: 'bg-amber-950/60 text-amber-400' },
-  processing:      { label: 'Processing', cls: 'bg-blue-950/60 text-blue-400' },
-  shipped:         { label: 'Shipped',    cls: 'bg-green-950/60 text-green-400' },
-  delivered:       { label: 'Delivered',  cls: 'bg-green-950/80 text-green-300' },
-  cancelled:       { label: 'Cancelled',  cls: 'bg-red-950/60 text-red-400' },
-  refunded:        { label: 'Refunded',   cls: 'bg-accent-tint/60 text-accent-text-soft' },
+  processing:      { label: 'Processing', cls: 'bg-blue-50 text-blue-700' },
+  shipped:         { label: 'Shipped',    cls: 'bg-green-50 text-green-700' },
+  delivered:       { label: 'Delivered',  cls: 'bg-green-50 text-green-700' },
+  cancelled:       { label: 'Cancelled',  cls: 'bg-red-50 text-red-600' },
+  refunded:        { label: 'Refunded',   cls: 'bg-accent-tint text-accent-text-soft' },
 }
 
 export default async function AdminOrdersPage() {
@@ -32,7 +32,7 @@ export default async function AdminOrdersPage() {
   if (error) {
     return (
       <div className="p-8">
-        <p className="text-red-400 text-sm">Failed to load orders: {error.message}</p>
+        <p className="text-red-600 text-sm">Failed to load orders: {error.message}</p>
       </div>
     )
   }
@@ -90,11 +90,11 @@ export default async function AdminOrdersPage() {
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="text-white font-bold text-sm">{order.order_number}</p>
+                    <p className="text-prose font-bold text-sm">{order.order_number}</p>
                     {!order.confirmation_email_sent_at && order.confirmation_email_attempts > 0 && (
                       <span
                         title={order.confirmation_email_error ?? 'No confirmation email sent'}
-                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-950/60 text-red-400"
+                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-600"
                       >
                         ✉ failed ({order.confirmation_email_attempts})
                       </span>

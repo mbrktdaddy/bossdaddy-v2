@@ -103,8 +103,8 @@ export default async function AuthorPage({ params }: Props) {
  </p>
  )}
  <div className="flex items-center gap-4 mt-3 text-sm text-prose-faint">
- <span><span className="text-white font-semibold">{totalReviews}</span> {totalReviews === 1 ? 'review' : 'reviews'}</span>
- <span><span className="text-white font-semibold">{totalGuides}</span> {totalGuides === 1 ? 'guide' : 'guides'}</span>
+ <span><span className="text-prose font-semibold">{totalReviews}</span> {totalReviews === 1 ? 'review' : 'reviews'}</span>
+ <span><span className="text-prose font-semibold">{totalGuides}</span> {totalGuides === 1 ? 'guide' : 'guides'}</span>
  </div>
  </div>
  </div>
@@ -127,7 +127,7 @@ export default async function AuthorPage({ params }: Props) {
  <Link
  key={r.id}
  href={`/reviews/${r.slug}`}
- className="flex items-center justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:border-accent-border/40 rounded-2xl transition-colors group"
+ className="flex items-center justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-2xl transition-colors group"
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -162,7 +162,7 @@ export default async function AuthorPage({ params }: Props) {
  <Link
  key={a.id}
  href={`/guides/${a.slug}`}
- className="flex items-center justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:border-accent-border/40 rounded-2xl transition-colors group"
+ className="flex items-center justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-2xl transition-colors group"
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1">

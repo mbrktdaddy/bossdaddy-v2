@@ -31,9 +31,9 @@ export default async function MyReviewsPage({ searchParams }: Props) {
     : reviews
 
   const statCards = [
-    { label: 'Total',   value: counts.total,   color: 'text-white',      filterKey: null },
-    { label: 'Live',    value: counts.live,    color: 'text-green-400',  filterKey: 'live' },
-    { label: 'Pending', value: counts.pending, color: 'text-yellow-400', filterKey: 'pending' },
+    { label: 'Total',   value: counts.total,   color: 'text-prose',      filterKey: null },
+    { label: 'Live',    value: counts.live,    color: 'text-green-700',  filterKey: 'live' },
+    { label: 'Pending', value: counts.pending, color: 'text-amber-600', filterKey: 'pending' },
     { label: 'Drafts',  value: counts.draft,   color: 'text-prose-muted',   filterKey: 'drafts' },
   ]
 
@@ -70,8 +70,8 @@ export default async function MyReviewsPage({ searchParams }: Props) {
               href={href}
               className={`block bg-surface rounded-2xl px-4 py-3 sm:px-5 sm:py-4 border transition-colors ${
                 isActive
-                  ? 'border-accent bg-accent-tint/20'
-                  : 'border-soft hover:border-gray-600'
+                  ? 'border-accent bg-accent-tint'
+                  : 'border-soft hover:border-strong'
               }`}
             >
               <p className={`text-xl sm:text-2xl font-black ${s.color}`}>{s.value}</p>
@@ -95,7 +95,7 @@ export default async function MyReviewsPage({ searchParams }: Props) {
       {!displayed?.length && !filter && (
         <div className="text-center py-24 border border-dashed border-soft rounded-2xl">
           <p className="text-prose-faint text-lg mb-2">No reviews yet, Boss.</p>
-          <Link href="/dashboard/reviews/new" className="text-accent-text-soft hover:text-orange-300 text-sm">
+          <Link href="/dashboard/reviews/new" className="text-accent-text-soft hover:text-accent text-sm">
             Write your first one →
           </Link>
         </div>

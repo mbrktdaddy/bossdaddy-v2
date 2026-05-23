@@ -48,7 +48,7 @@ export default function CategoryFilterPills({ basePath, active, counts, total }:
       {active && (
         <p className="mt-3 text-xs text-prose-faint">
           Showing collections tagged <code className="text-accent-text-soft/80">{getCategoryBySlug(active)?.label ?? active}</code> ·{' '}
-          <Link href={basePath} className="text-accent-text-soft hover:text-orange-300 font-semibold transition-colors">
+          <Link href={basePath} className="text-accent-text-soft hover:text-accent font-semibold transition-colors">
             Clear filter
           </Link>
         </p>

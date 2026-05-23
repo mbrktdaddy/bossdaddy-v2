@@ -51,7 +51,7 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
     <div className="bg-surface border border-soft rounded-xl p-4">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <p className="text-sm font-semibold text-white flex items-center gap-2">
+          <p className="text-sm font-semibold text-prose flex items-center gap-2">
             <span className="text-accent-text-soft">★</span> Primary Product
           </p>
           <p className="text-xs text-prose-faint mt-0.5">
@@ -61,7 +61,7 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
         {selected && (
           <button
             onClick={() => onChange(null)}
-            className="text-xs text-prose-faint hover:text-red-400 transition-colors"
+            className="text-xs text-prose-faint hover:text-red-600 transition-colors"
           >
             Clear
           </button>
@@ -76,13 +76,13 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
       )}
 
       {error && (
-        <p className="text-xs text-red-400 bg-red-950/50 border border-red-800 rounded px-3 py-2">{error}</p>
+        <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">{error}</p>
       )}
 
       {!loading && !error && products.length === 0 && (
         <p className="text-sm text-prose-faint py-2">
           No products yet.{' '}
-          <Link href="/dashboard/admin/products/new" className="text-accent-text-soft hover:text-orange-300">Add one →</Link>
+          <Link href="/dashboard/admin/products/new" className="text-accent-text-soft hover:text-accent">Add one →</Link>
         </p>
       )}
 
@@ -98,14 +98,14 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-white truncate">{selected.name}</p>
+            <p className="text-sm font-semibold text-prose truncate">{selected.name}</p>
             <div className="flex items-center gap-2 mt-0.5">
               <p className="text-xs text-prose-faint truncate">{selected.slug}</p>
               <a
                 href={`/dashboard/admin/products/${selected.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-accent-text-soft hover:text-orange-300 shrink-0 transition-colors"
+                className="text-xs text-accent-text-soft hover:text-accent shrink-0 transition-colors"
               >
                 Edit product →
               </a>
@@ -113,7 +113,7 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
           </div>
           <button
             onClick={() => setPicking(true)}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-gray-700 text-gray-300 rounded-lg transition-colors shrink-0"
+            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose-muted rounded-lg transition-colors shrink-0"
           >
             Change
           </button>
@@ -127,7 +127,7 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Filter by name or slug…"
-            className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+            className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
           />
           <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
             {filtered.map((p) => (
@@ -146,11 +146,11 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm text-white truncate">{p.name}</p>
+                  <p className="text-sm text-prose truncate">{p.name}</p>
                   <p className="text-xs text-prose-faint truncate">{p.slug}</p>
                 </div>
                 {!p.affiliate_url && !p.non_affiliate_url && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-950/40 border border-red-900/40 text-red-400 shrink-0">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-50 border border-red-200 text-red-600 shrink-0">
                     No URL
                   </span>
                 )}
@@ -163,7 +163,7 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
           {picking && (
             <button
               onClick={() => { setPicking(false); setQuery('') }}
-              className="text-xs text-prose-faint hover:text-gray-300 transition-colors"
+              className="text-xs text-prose-faint hover:text-prose transition-colors"
             >
               Cancel
             </button>

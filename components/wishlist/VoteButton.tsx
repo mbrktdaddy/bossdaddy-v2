@@ -41,8 +41,8 @@ export function VoteButton({ itemId, initialVoted, initialCount, isAuthenticated
         disabled={loading}
         className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all disabled:opacity-50 ${
           voted
-            ? 'bg-accent-tint/50 border-accent-border text-accent-text-soft'
-            : 'bg-surface border-strong text-gray-300 hover:border-accent-border hover:text-accent-text-soft'
+            ? 'bg-accent-tint border-accent-border text-accent-text-soft'
+            : 'bg-surface border-strong text-prose-muted hover:border-accent-border hover:text-accent-text-soft'
         }`}
       >
         <svg className="w-4 h-4" fill={voted ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -51,7 +51,7 @@ export function VoteButton({ itemId, initialVoted, initialCount, isAuthenticated
         <span>{count > 0 ? count : ''} {voted ? 'Voted' : 'Vote'}</span>
       </button>
 
-      {error && <p className="mt-1.5 text-xs text-red-400">{error}</p>}
+      {error && <p className="mt-1.5 text-xs text-red-600">{error}</p>}
 
       {showModal && (
         <LoginPromptModal

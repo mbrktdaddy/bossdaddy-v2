@@ -20,9 +20,9 @@ export function ModerationInfo({ score, flags, onAddressFlag }: Props) {
     : 'low'
 
   const levelConfig = {
-    high:   { label: 'High Risk',      bg: 'bg-red-950/40',    border: 'border-red-900/60',    text: 'text-red-400'    },
-    medium: { label: 'Needs Review',   bg: 'bg-yellow-950/40', border: 'border-yellow-900/60', text: 'text-yellow-400' },
-    low:    { label: 'Low Risk',       bg: 'bg-green-950/40',  border: 'border-green-900/60',  text: 'text-green-400'  },
+    high:   { label: 'High Risk',      bg: 'bg-red-50',    border: 'border-red-200',    text: 'text-red-600'    },
+    medium: { label: 'Needs Review',   bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-600' },
+    low:    { label: 'Low Risk',       bg: 'bg-green-50',  border: 'border-green-200',  text: 'text-green-700'  },
     null:   { label: 'Unscored',       bg: 'bg-surface',      border: 'border-soft',      text: 'text-prose-faint'   },
   }[level ?? 'null']
 
@@ -41,7 +41,7 @@ export function ModerationInfo({ score, flags, onAddressFlag }: Props) {
         <div className="space-y-2 mt-2">
           {flags.map((f, i) => (
             <div key={i} className="flex items-start justify-between gap-2">
-              <div className="flex items-start gap-2 text-sm text-gray-300 flex-1">
+              <div className="flex items-start gap-2 text-sm text-prose-muted flex-1">
                 <span className={`${levelConfig.text} mt-0.5 shrink-0`}>⚑</span>
                 {f}
               </div>
@@ -49,7 +49,7 @@ export function ModerationInfo({ score, flags, onAddressFlag }: Props) {
                 <button
                   type="button"
                   onClick={() => onAddressFlag(f)}
-                  className="shrink-0 text-xs px-2 py-1 bg-surface-raised hover:bg-accent-tint/50 text-prose-muted hover:text-accent-text-soft border border-strong hover:border-accent-border/50 rounded-lg transition-colors"
+                  className="shrink-0 text-xs px-2 py-1 bg-surface-raised hover:bg-accent-tint text-prose-muted hover:text-accent-text-soft border border-strong hover:border-accent-border/50 rounded-lg transition-colors"
                 >
                   ✨ Fix with AI
                 </button>

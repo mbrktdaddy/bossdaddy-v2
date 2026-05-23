@@ -43,7 +43,7 @@ export function WorkspaceToolbar({
           type="button"
           onClick={onSave}
           disabled={isSaving}
-          className="px-4 py-3 bg-surface-raised hover:bg-gray-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+          className="px-4 py-3 bg-surface-raised hover:bg-stone-100 disabled:opacity-50 text-prose text-sm font-medium rounded-lg transition-colors"
         >
           {isSaving ? 'Saving…' : 'Save'}
         </button>
@@ -51,7 +51,7 @@ export function WorkspaceToolbar({
           <button
             type="button"
             onClick={onDuplicate}
-            className="px-3 py-3 bg-surface-raised hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
+            className="px-3 py-3 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm rounded-lg transition-colors"
             title="Create a new draft with this content"
           >
             📋 Duplicate
@@ -63,8 +63,8 @@ export function WorkspaceToolbar({
             onClick={onTogglePreview}
             className={`hidden xl:flex items-center gap-1.5 px-3 py-3 text-sm rounded-lg transition-colors ${
               previewOpen
-                ? 'bg-accent-tint/60 text-accent-text-soft border border-accent-border/40'
-                : 'bg-surface-raised hover:bg-gray-700 text-gray-300'
+                ? 'bg-accent-tint text-accent-text-soft border border-accent-border/40'
+                : 'bg-surface-raised hover:bg-stone-100 text-prose-muted'
             }`}
             title="Toggle live preview panel"
           >
@@ -75,7 +75,7 @@ export function WorkspaceToolbar({
           <Link
             href={previewUrl}
             target="_blank"
-            className="px-3 py-3 bg-surface-raised hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
+            className="px-3 py-3 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm rounded-lg transition-colors"
           >
             🔗 Preview
           </Link>
@@ -85,7 +85,7 @@ export function WorkspaceToolbar({
             type="button"
             onClick={onDelete}
             disabled={isDeleting}
-            className="px-3 py-3 text-red-400 hover:bg-red-950/40 disabled:opacity-50 text-sm rounded-lg transition-colors"
+            className="px-3 py-3 text-red-600 hover:bg-red-50 disabled:opacity-50 text-sm rounded-lg transition-colors"
           >
             {isDeleting ? 'Deleting…' : '🗑 Delete'}
           </button>
@@ -100,8 +100,8 @@ export function WorkspaceToolbar({
               title={readyTooltip}
               className={`sm:hidden text-xs px-2.5 py-1 rounded-full font-medium border ${
                 readyCount === readyTotal
-                  ? 'bg-green-950/60 text-green-500 border-green-900/40'
-                  : 'bg-yellow-950/60 text-yellow-400 border-yellow-900/40'
+                  ? 'bg-green-50 text-green-500 border-green-200'
+                  : 'bg-amber-50 text-amber-600 border-amber-200'
               }`}
             >
               {readyCount === readyTotal
@@ -115,8 +115,8 @@ export function WorkspaceToolbar({
                   title={check.label}
                   className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                     check.done
-                      ? 'bg-green-950/60 text-green-500 border border-green-900/40'
-                      : 'bg-red-950/60 text-red-400 border border-red-900/40'
+                      ? 'bg-green-50 text-green-500 border border-green-200'
+                      : 'bg-red-50 text-red-600 border border-red-200'
                   }`}
                 >
                   {check.done ? '✓' : '✗'} {check.label}
@@ -130,7 +130,7 @@ export function WorkspaceToolbar({
             type="button"
             onClick={onUnpublish}
             disabled={isPublishing}
-            className="px-4 py-3 bg-yellow-900/60 hover:bg-yellow-900 disabled:opacity-50 text-yellow-300 text-sm font-semibold rounded-lg transition-colors border border-yellow-900/40"
+            className="px-4 py-3 bg-amber-50 hover:bg-amber-50 disabled:opacity-50 text-amber-700 text-sm font-semibold rounded-lg transition-colors border border-amber-200"
           >
             {isPublishing ? '…' : 'Unpublish'}
           </button>

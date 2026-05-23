@@ -319,7 +319,7 @@ export function ReviewCreateWizard() {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <div className="w-8 h-8 border-4 border-soft border-t-orange-500 rounded-full animate-spin" />
-        <p className="text-gray-300 font-medium">{label}</p>
+        <p className="text-prose-muted font-medium">{label}</p>
         <p className="text-xs text-prose-faint">This can take 30–60 seconds</p>
       </div>
     )
@@ -333,13 +333,13 @@ export function ReviewCreateWizard() {
         <div className="bg-surface border border-strong rounded-2xl p-5 space-y-3">
           <div className="flex items-center gap-3">
             <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold flex-1">Draft preview</p>
-            <span className="text-sm font-bold text-yellow-400">{previewDraft.rating}/10</span>
+            <span className="text-sm font-bold text-amber-600">{previewDraft.rating}/10</span>
           </div>
-          <h2 className="text-lg font-black text-white leading-snug">{previewDraft.title}</h2>
+          <h2 className="text-lg font-black text-prose leading-snug">{previewDraft.title}</h2>
           {previewDraft.excerpt && (
             <p className="text-sm text-prose-muted italic">{previewDraft.excerpt}</p>
           )}
-          <p className="text-sm text-gray-300 leading-relaxed">{preview}</p>
+          <p className="text-sm text-prose-muted leading-relaxed">{preview}</p>
           {previewDraft.pros.length > 0 && (
             <div className="grid grid-cols-2 gap-3 pt-2">
               <div>
@@ -349,7 +349,7 @@ export function ReviewCreateWizard() {
                 </ul>
               </div>
               <div>
-                <p className="text-xs text-red-400 font-semibold mb-1">Cons</p>
+                <p className="text-xs text-red-600 font-semibold mb-1">Cons</p>
                 <ul className="space-y-0.5">
                   {previewDraft.cons.map((c, i) => <li key={i} className="text-xs text-prose-muted">- {c}</li>)}
                 </ul>
@@ -376,7 +376,7 @@ export function ReviewCreateWizard() {
           )}
         </div>
         {error && (
-          <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">{error}</p>
+          <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
         )}
         <div className="flex items-center gap-3 flex-wrap">
           <button
@@ -389,14 +389,14 @@ export function ReviewCreateWizard() {
           <button
             type="button"
             onClick={() => { setPreviewDraft(null); setStep('generating'); handleGenerate() }}
-            className="px-5 py-2.5 bg-surface-raised hover:bg-gray-700 text-gray-300 text-sm rounded-xl transition-colors"
+            className="px-5 py-2.5 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm rounded-xl transition-colors"
           >
             ↺ Regenerate
           </button>
           <button
             type="button"
             onClick={() => { setPreviewDraft(null); setStep('idea') }}
-            className="px-5 py-2.5 text-prose-faint hover:text-gray-300 text-sm transition-colors"
+            className="px-5 py-2.5 text-prose-faint hover:text-prose text-sm transition-colors"
           >
             ← Edit inputs
           </button>
@@ -419,7 +419,7 @@ export function ReviewCreateWizard() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="e.g. 'review of the DeWalt 20V cordless drill I've been using for deck projects'"
-            className="flex-1 px-4 py-2.5 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+            className="flex-1 px-4 py-2.5 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
             onKeyDown={(e) => { if (e.key === 'Enter' && !suggesting) handleSuggest() }}
           />
           <button
@@ -444,8 +444,8 @@ export function ReviewCreateWizard() {
                 onClick={() => pickSuggestion(s)}
                 className="text-left p-3 bg-surface-sunken border border-strong hover:border-accent/60 rounded-xl transition-colors group"
               >
-                <p className="text-xs text-accent-text-soft font-medium mb-1 group-hover:text-orange-300">{s.angle}</p>
-                <p className="text-sm text-white font-semibold leading-snug mb-2">{s.productName}</p>
+                <p className="text-xs text-accent-text-soft font-medium mb-1 group-hover:text-accent">{s.angle}</p>
+                <p className="text-sm text-prose font-semibold leading-snug mb-2">{s.productName}</p>
                 <ul className="space-y-0.5">
                   {s.keyFeatures.slice(0, 3).map((kf, j) => (
                     <li key={j} className="text-xs text-prose-faint">· {kf}</li>
@@ -467,25 +467,25 @@ export function ReviewCreateWizard() {
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Product name</label>
+          <label className="block text-sm text-prose-muted mb-1.5">Product name</label>
           <input
             type="text"
             value={productName}
             onChange={(e) => setProductName(e.target.value)}
             placeholder="What product is this?"
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
           />
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">
+          <label className="block text-sm text-prose-muted mb-1.5">
             Affiliate product <span className="text-prose-faint">(optional — auto-embeds a [[BUY:slug]] link)</span>
           </label>
           <select
             value={productSlug}
             onChange={(e) => handlePickProduct(e.target.value)}
             disabled={!productsLoaded}
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover disabled:opacity-50"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover disabled:opacity-50"
           >
             <option value="">
               {productsLoaded ? '— None (no affiliate link) —' : 'Loading products…'}
@@ -501,28 +501,28 @@ export function ReviewCreateWizard() {
           </select>
           <p className="mt-1 text-xs text-prose-faint">
             Picking a product locks the product name to match and embeds one affiliate link in the draft. Manage the list at{' '}
-            <Link href="/dashboard/admin/products" className="text-accent-text-soft hover:text-orange-300">/dashboard/admin/products</Link>.
+            <Link href="/dashboard/admin/products" className="text-accent-text-soft hover:text-accent">/dashboard/admin/products</Link>.
           </p>
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Key features <span className="text-prose-faint">(one per line, optional)</span></label>
+          <label className="block text-sm text-prose-muted mb-1.5">Key features <span className="text-prose-faint">(one per line, optional)</span></label>
           <textarea
             value={keyFeatures}
             onChange={(e) => setKeyFeatures(e.target.value)}
             rows={4}
             placeholder={"cordless\n2-hour battery\ncompact design"}
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
           />
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Category</label>
+          <label className="block text-sm text-prose-muted mb-1.5">Category</label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             required
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
           >
             <option value="" disabled>Select a category…</option>
             {CATEGORIES.map(c => <option key={c.slug} value={c.slug}>{c.icon} {c.label}</option>)}
@@ -538,8 +538,8 @@ export function ReviewCreateWizard() {
 
         {/* Rating picker — hint only, not persisted */}
         <div>
-          <label className="block text-sm text-gray-300 mb-2">
-            Your gut-feel rating <span className="text-red-400">*</span>
+          <label className="block text-sm text-prose-muted mb-2">
+            Your gut-feel rating <span className="text-red-600">*</span>
           </label>
           <div className="grid grid-cols-5 gap-1.5">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
@@ -550,7 +550,7 @@ export function ReviewCreateWizard() {
                 className={`min-h-[44px] py-3 text-sm font-bold rounded-lg transition-colors ${
                   inputRating === n
                     ? 'bg-accent text-white'
-                    : 'bg-surface-sunken border border-soft text-prose-muted hover:border-accent-border/60 hover:text-white'
+                    : 'bg-surface-sunken border border-soft text-prose-muted hover:border-accent-border/60 hover:text-prose'
                 }`}
               >
                 {n}
@@ -567,11 +567,11 @@ export function ReviewCreateWizard() {
         {/* Testing duration + Price in a 2-col grid on sm+ */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-gray-300 mb-1.5">How long tested</label>
+            <label className="block text-sm text-prose-muted mb-1.5">How long tested</label>
             <select
               value={testingDuration}
               onChange={(e) => setTestingDuration(e.target.value)}
-              className="w-full px-4 py-2.5 bg-surface-sunken border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
+              className="w-full px-4 py-2.5 bg-surface-sunken border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
             >
               <option value="">— select —</option>
               {TESTING_DURATION_OPTIONS.map((o) => (
@@ -581,7 +581,7 @@ export function ReviewCreateWizard() {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-300 mb-1.5">Price paid (cents)</label>
+            <label className="block text-sm text-prose-muted mb-1.5">Price paid (cents)</label>
             <input
               type="text"
               inputMode="numeric"
@@ -589,7 +589,7 @@ export function ReviewCreateWizard() {
               value={pricePaid}
               onChange={(e) => setPricePaid(e.target.value.replace(/\D/g, ''))}
               placeholder="e.g. 2999 = $29.99"
-              className="w-full px-4 py-2.5 bg-surface-sunken border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+              className="w-full px-4 py-2.5 bg-surface-sunken border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
             />
             {pricePaid && !isNaN(parseInt(pricePaid, 10)) && (
               <p className="mt-1 text-xs text-accent-text-soft">${(parseInt(pricePaid, 10) / 100).toFixed(2)}</p>
@@ -598,32 +598,32 @@ export function ReviewCreateWizard() {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">How did you use it? <span className="text-prose-faint">(optional)</span></label>
+          <label className="block text-sm text-prose-muted mb-1.5">How did you use it? <span className="text-prose-faint">(optional)</span></label>
           <textarea
             value={howYouUsedIt}
             onChange={(e) => setHowYouUsedIt(e.target.value)}
             maxLength={300}
             rows={2}
             placeholder="e.g. Built a backyard deck over 3 weekends. Used it for pilot holes, driving screws, mixing grout."
-            className="w-full px-4 py-2.5 bg-surface-sunken border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
+            className="w-full px-4 py-2.5 bg-surface-sunken border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
           />
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Standout moment <span className="text-prose-faint">(optional)</span></label>
+          <label className="block text-sm text-prose-muted mb-1.5">Standout moment <span className="text-prose-faint">(optional)</span></label>
           <textarea
             value={standoutMoment}
             onChange={(e) => setStandoutMoment(e.target.value)}
             maxLength={300}
             rows={2}
             placeholder="e.g. Battery lasted the entire weekend — never had to stop and charge."
-            className="w-full px-4 py-2.5 bg-surface-sunken border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
+            className="w-full px-4 py-2.5 bg-surface-sunken border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
           />
         </div>
       </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">
+          <label className="block text-sm text-prose-muted mb-1.5">
             Inline image slots <span className="text-prose-faint">(empty placeholders to fill from the editor)</span>
           </label>
           <div className="flex flex-wrap gap-1.5">
@@ -641,7 +641,7 @@ export function ReviewCreateWizard() {
                 className={`px-3 py-2 text-xs font-semibold rounded-lg min-h-[36px] transition-colors ${
                   imageSlots === opt.v
                     ? 'bg-accent text-white'
-                    : 'bg-surface border border-soft text-gray-300 hover:border-accent-border/60'
+                    : 'bg-surface border border-soft text-prose-muted hover:border-accent-border/60'
                 }`}
               >{opt.l}</button>
             ))}
@@ -651,7 +651,7 @@ export function ReviewCreateWizard() {
       </div>
 
       {error && (
-        <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">{error}</p>
+        <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
       )}
 
       <div className="flex items-center gap-3 pt-2">
@@ -667,11 +667,11 @@ export function ReviewCreateWizard() {
           type="button"
           onClick={handleSkipToBlank}
           disabled={!productName.trim()}
-          className="px-5 py-2.5 bg-surface-raised hover:bg-gray-700 disabled:opacity-40 text-gray-300 text-sm rounded-xl transition-colors"
+          className="px-5 py-2.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-40 text-prose-muted text-sm rounded-xl transition-colors"
         >
           Skip to blank draft
         </button>
-        <Link href="/dashboard/reviews" className="px-5 py-2.5 text-prose-faint hover:text-gray-300 text-sm transition-colors">
+        <Link href="/dashboard/reviews" className="px-5 py-2.5 text-prose-faint hover:text-prose text-sm transition-colors">
           Cancel
         </Link>
       </div>

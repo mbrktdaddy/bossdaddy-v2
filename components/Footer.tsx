@@ -119,7 +119,7 @@ export default function Footer() {
                 role="img"
                 aria-label={`${label} — coming soon`}
                 title={`${label} — coming soon`}
-                className="text-gray-700 cursor-not-allowed"
+                className="text-prose-faint cursor-not-allowed"
               >
                 {icon}
               </span>
@@ -145,7 +145,7 @@ export default function Footer() {
                 key={href}
                 href={href}
                 title={hint}
-                className="py-2 inline-block hover:text-gray-300 transition-colors"
+                className="py-2 inline-block hover:text-prose transition-colors"
               >
                 {label}
               </Link>

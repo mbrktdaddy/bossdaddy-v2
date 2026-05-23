@@ -204,12 +204,12 @@ export function VoiceProfileForm({ initial }: Props) {
                   value={f.label}
                   onChange={(e) => updateFact(f.id, { label: e.target.value })}
                   placeholder="Short label (optional) — e.g. Testing approach"
-                  className="flex-1 px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+                  className="flex-1 px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
                 />
                 <button
                   type="button"
                   onClick={() => removeFact(f.id)}
-                  className="text-xs px-2 py-2 text-red-400 hover:text-red-300 transition-colors"
+                  className="text-xs px-2 py-2 text-red-600 hover:text-red-700 transition-colors"
                   title="Remove fact"
                 >
                   ✕
@@ -220,7 +220,7 @@ export function VoiceProfileForm({ initial }: Props) {
                 onChange={(e) => updateFact(f.id, { value: e.target.value })}
                 placeholder="Fact — e.g. I test every product for at least two weekends before writing the review."
                 rows={2}
-                className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-y"
+                className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-y"
               />
             </div>
           ))}
@@ -230,8 +230,8 @@ export function VoiceProfileForm({ initial }: Props) {
       {/* ── Save bar ─────────────────────────────────────────────────── */}
       <div className="sticky bottom-4 flex items-center justify-between gap-3 bg-surface-sunken/80 backdrop-blur px-4 py-3 rounded-xl border border-soft">
         <div className="min-w-0 text-sm">
-          {error && <span className="text-red-400">{error}</span>}
-          {!error && savedAt && <span className="text-green-400">✓ Saved at {savedAt}</span>}
+          {error && <span className="text-red-600">{error}</span>}
+          {!error && savedAt && <span className="text-green-700">✓ Saved at {savedAt}</span>}
           {!error && !savedAt && <span className="text-prose-faint">Changes apply to new drafts immediately after saving.</span>}
         </div>
         <button
@@ -272,12 +272,12 @@ function FamilyMemberRow({
           onChange={(e) => onChange({ relationship: e.target.value })}
           placeholder="Relationship — e.g. Wife, Stepson, Fiancée's son"
           list="relationship-suggestions"
-          className="flex-1 px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          className="flex-1 px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
         />
         <button
           type="button"
           onClick={onRemove}
-          className="text-xs px-2 py-2 text-red-400 hover:text-red-300 transition-colors"
+          className="text-xs px-2 py-2 text-red-600 hover:text-red-700 transition-colors"
           title="Remove family member"
         >
           ✕
@@ -289,7 +289,7 @@ function FamilyMemberRow({
         value={member.name ?? ''}
         onChange={(e) => onChange({ name: e.target.value || null })}
         placeholder="First name (optional) — helpful if you have more than one of the same role"
-        className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+        className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -299,7 +299,7 @@ function FamilyMemberRow({
             type="date"
             value={member.dob ?? ''}
             onChange={(e) => onChange({ dob: e.target.value || null })}
-            className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
+            className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-sm text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
           />
           <p className="mt-1 text-xs text-prose-faint">{age ? `Currently ${age}` : '—'}</p>
         </div>
@@ -308,7 +308,7 @@ function FamilyMemberRow({
           <select
             value={member.gender ?? ''}
             onChange={(e) => onChange({ gender: (e.target.value || null) as Gender | null })}
-            className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
+            className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-sm text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
           >
             <option value="">—</option>
             <option value="male">Male</option>
@@ -335,13 +335,13 @@ function TextField({ label, value, onChange, placeholder }: {
 }) {
   return (
     <div>
-      <label className="block text-sm text-gray-300 mb-1.5">{label}</label>
+      <label className="block text-sm text-prose-muted mb-1.5">{label}</label>
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+        className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
       />
     </div>
   )
@@ -356,13 +356,13 @@ function TextAreaField({ label, value, onChange, placeholder, rows = 2 }: {
 }) {
   return (
     <div>
-      <label className="block text-sm text-gray-300 mb-1.5">{label}</label>
+      <label className="block text-sm text-prose-muted mb-1.5">{label}</label>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-y"
+        className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-y"
       />
     </div>
   )

@@ -19,7 +19,7 @@ export default function Error({
   return (
     <main className="min-h-screen bg-surface-sunken flex flex-col items-center justify-center px-6 text-center">
       <p className="text-red-500 text-xs uppercase tracking-widest font-semibold mb-4">Something went wrong</p>
-      <h1 className="text-4xl font-black text-white mb-3">Unexpected error</h1>
+      <h1 className="text-4xl font-black text-prose mb-3">Unexpected error</h1>
       <p className="text-prose-muted text-sm mb-8 max-w-sm">
         We hit a snag. Try again or head back home — we&apos;re on it.
       </p>
@@ -30,7 +30,7 @@ export default function Error({
         >
           Try Again
         </button>
-        <Link href="/" className="px-6 py-3 bg-surface-raised hover:bg-gray-700 border border-strong text-gray-300 font-semibold rounded-xl transition-colors text-sm">
+        <Link href="/" className="px-6 py-3 bg-surface-raised hover:bg-stone-100 border border-strong text-prose-muted font-semibold rounded-xl transition-colors text-sm">
           Go Home
         </Link>
       </div>

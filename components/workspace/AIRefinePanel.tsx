@@ -79,7 +79,7 @@ export function AIRefinePanel({ title, category, content, productName, contentTy
           value={instruction}
           onChange={(e) => setInstruction(e.target.value)}
           placeholder="e.g. 'make it more casual', 'add a section on safety', 'shorten the intro'"
-          className="flex-1 px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-hover"
+          className="flex-1 px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover"
           onKeyDown={(e) => { if (e.key === 'Enter' && !loading) handleRefine() }}
         />
         <button
@@ -92,7 +92,7 @@ export function AIRefinePanel({ title, category, content, productName, contentTy
         </button>
       </div>
       {error && (
-        <p className="mt-2 text-xs text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2">
+        <p className="mt-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
           {error}
         </p>
       )}

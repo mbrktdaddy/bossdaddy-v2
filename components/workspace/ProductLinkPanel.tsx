@@ -97,7 +97,7 @@ export function ProductLinkPanel({ content, onChangeContent }: Props) {
         <span className="flex items-center gap-2 flex-wrap">
           <span className="text-accent-text-soft">🛒</span> Inline product mentions
           {mentions.length > 0 && (
-            <span className="px-2 py-0.5 bg-accent-tint/40 border border-accent-border/40 text-accent-text-soft rounded-full text-xs">
+            <span className="px-2 py-0.5 bg-accent-tint border border-accent-border/40 text-accent-text-soft rounded-full text-xs">
               {mentions.length} in article
             </span>
           )}
@@ -137,7 +137,7 @@ export function ProductLinkPanel({ content, onChangeContent }: Props) {
           {loaded && products.length === 0 && (
             <p className="text-sm text-prose-faint py-2">
               No products yet.{' '}
-              <Link href="/dashboard/admin/products/new" className="text-accent-text-soft hover:text-orange-300">Add one →</Link>
+              <Link href="/dashboard/admin/products/new" className="text-accent-text-soft hover:text-accent">Add one →</Link>
             </p>
           )}
 
@@ -148,7 +148,7 @@ export function ProductLinkPanel({ content, onChangeContent }: Props) {
                 <select
                   value={posKey}
                   onChange={(e) => setPosKey(e.target.value)}
-                  className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-accent-hover"
+                  className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-prose focus:outline-none focus:ring-1 focus:ring-accent-hover"
                 >
                   {positionOptions.map(o => (
                     <option key={o.value} value={o.value}>{o.label}</option>
@@ -161,7 +161,7 @@ export function ProductLinkPanel({ content, onChangeContent }: Props) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filter by name or slug…"
-                className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+                className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
               />
 
               <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
@@ -169,16 +169,16 @@ export function ProductLinkPanel({ content, onChangeContent }: Props) {
                   const token = `[[BUY:${p.slug}]]`
                   const alreadyMentioned = mentions.some((m) => m.slug === p.slug)
                   const tag = p.affiliate_url
-                    ? { label: p.store === 'amazon' ? 'Amazon' : 'Affiliate', cls: 'bg-accent-tint/40 text-accent-text-soft border-accent-border/40' }
-                    : p.non_affiliate_url ? { label: 'Link', cls: 'bg-surface-raised text-gray-300 border-strong' }
-                    : { label: 'No URL', cls: 'bg-red-950/40 text-red-400 border-red-900/40' }
+                    ? { label: p.store === 'amazon' ? 'Amazon' : 'Affiliate', cls: 'bg-accent-tint text-accent-text-soft border-accent-border/40' }
+                    : p.non_affiliate_url ? { label: 'Link', cls: 'bg-surface-raised text-prose-muted border-strong' }
+                    : { label: 'No URL', cls: 'bg-red-50 text-red-600 border-red-200' }
 
                   return (
                     <div key={p.id} className="flex items-center gap-3 p-3 bg-surface-sunken border border-soft rounded-lg">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-0.5">
                           <span className={`text-xs px-2 py-0.5 rounded-full border ${tag.cls}`}>{tag.label}</span>
-                          <p className="text-sm text-white truncate">{p.name}</p>
+                          <p className="text-sm text-prose truncate">{p.name}</p>
                         </div>
                         <p className="text-xs text-prose-faint truncate">
                           <code className="text-accent-text-soft">{token}</code>
@@ -187,7 +187,7 @@ export function ProductLinkPanel({ content, onChangeContent }: Props) {
                       {alreadyMentioned ? (
                         <span
                           title="Already mentioned in this article"
-                          className="shrink-0 text-xs px-3 py-2 bg-green-950/40 border border-green-900/40 text-green-400 rounded-lg min-h-[36px]"
+                          className="shrink-0 text-xs px-3 py-2 bg-green-50 border border-green-200 text-green-700 rounded-lg min-h-[36px]"
                         >
                           ✓ In article
                         </span>
@@ -209,7 +209,7 @@ export function ProductLinkPanel({ content, onChangeContent }: Props) {
 
               <button
                 onClick={load}
-                className="text-xs text-prose-faint hover:text-gray-300 transition-colors"
+                className="text-xs text-prose-faint hover:text-prose transition-colors"
               >
                 ↻ Refresh
               </button>
@@ -218,7 +218,7 @@ export function ProductLinkPanel({ content, onChangeContent }: Props) {
         </section>
 
         {error && (
-          <p className="text-xs text-red-400 bg-red-950/50 border border-red-800 rounded px-3 py-2">{error}</p>
+          <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">{error}</p>
         )}
       </div>
     </details>
@@ -241,8 +241,8 @@ function ExistingMentionCard({ mention, productName, total, onMove, onRemove }: 
                                        'Anchor (legacy)'
 
   const kindCls =
-    mention.kind === 'token' ? 'bg-accent-tint/40 text-accent-text-soft border-accent-border/40' :
-                                'bg-green-950/40 text-green-400 border-green-900/40'
+    mention.kind === 'token' ? 'bg-accent-tint text-accent-text-soft border-accent-border/40' :
+                                'bg-green-50 text-green-700 border-green-200'
 
   return (
     <div className="p-3 bg-surface-sunken border border-soft rounded-lg space-y-2">
@@ -253,7 +253,7 @@ function ExistingMentionCard({ mention, productName, total, onMove, onRemove }: 
             value={mention.position}
             onChange={(e) => onMove(Number(e.target.value))}
             disabled={total <= 1}
-            className="px-2 py-1.5 bg-surface border border-strong rounded-lg text-xs text-white min-h-[36px] focus:outline-none focus:ring-1 focus:ring-accent-hover disabled:opacity-50"
+            className="px-2 py-1.5 bg-surface border border-strong rounded-lg text-xs text-prose min-h-[36px] focus:outline-none focus:ring-1 focus:ring-accent-hover disabled:opacity-50"
             title="Move to position"
           >
             {Array.from({ length: total }, (_, i) => i + 1).map(n => (
@@ -266,26 +266,26 @@ function ExistingMentionCard({ mention, productName, total, onMove, onRemove }: 
             type="button"
             onClick={() => onMove(mention.position - 1)}
             disabled={mention.position === 1}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-gray-700 disabled:opacity-30 text-gray-300 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
             title="Move up"
           >↑</button>
           <button
             type="button"
             onClick={() => onMove(mention.position + 1)}
             disabled={mention.position === total}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-gray-700 disabled:opacity-30 text-gray-300 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
             title="Move down"
           >↓</button>
           <button
             type="button"
             onClick={onRemove}
-            className="px-2.5 py-1.5 bg-transparent hover:bg-red-950/40 text-prose-faint hover:text-red-400 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-transparent hover:bg-red-50 text-prose-faint hover:text-red-600 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
             title="Remove mention"
           >🗑</button>
         </div>
       </div>
       <div>
-        <p className="text-sm text-white truncate">{productName ?? mention.slug}</p>
+        <p className="text-sm text-prose truncate">{productName ?? mention.slug}</p>
         <p className="text-xs text-prose-faint truncate" title={mention.label}>{mention.label}</p>
       </div>
     </div>

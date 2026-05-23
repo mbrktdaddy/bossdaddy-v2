@@ -162,11 +162,11 @@ export default async function HomePage() {
                 <p className="text-[11px] md:text-xs uppercase tracking-[0.3em] font-bold text-accent-text mb-5">
                   Dad Like A BOSS.
                 </p>
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.05] tracking-tight mb-5 text-white">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.05] tracking-tight mb-5 text-prose">
                   Reviews, Guides, and Gear{' '}
                   <span className="text-accent-text">for Boss Dads.</span>
                 </h1>
-                <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-8 max-w-xl">
+                <p className="text-prose-muted text-base md:text-lg leading-relaxed mb-8 max-w-xl">
                   Tested firsthand with my own money. No sponsors, no paid placements, no BS.
                 </p>
                 <div className="flex flex-wrap items-center gap-3 mb-5">
@@ -178,14 +178,14 @@ export default async function HomePage() {
                   </Link>
                   <Link
                     href="/guides"
-                    className="px-6 py-3 bg-surface-raised hover:bg-gray-700 text-gray-300 hover:text-white font-semibold rounded-2xl transition-colors"
+                    className="px-6 py-3 bg-surface-raised hover:bg-stone-100 text-prose-muted hover:text-prose font-semibold rounded-2xl transition-colors"
                   >
                     Browse Guides
                   </Link>
                 </div>
                 <Link
                   href="/about"
-                  className="inline-block text-sm text-accent-text-soft hover:text-orange-300 font-medium transition-colors"
+                  className="inline-block text-sm text-accent-text-soft hover:text-accent font-medium transition-colors"
                 >
                   Read my story →
                 </Link>
@@ -194,7 +194,7 @@ export default async function HomePage() {
               {featuredHero.kind === 'review' ? (
                 <Link
                   href={`/reviews/${featuredHero.data.slug}`}
-                  className="group block bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-white/[0.02] shadow-xl shadow-black/40 hover:border-accent-border/40 hover:shadow-2xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200"
+                  className="group block bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-xl shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-2xl hover:shadow-stone-900/[0.10] hover:-translate-y-0.5 transition-all duration-200"
                 >
                   {featuredHero.data.image_url && (
                     <div className="relative w-full aspect-[5/4] bg-surface-raised">
@@ -225,7 +225,7 @@ export default async function HomePage() {
                       </div>
                       <RatingScore rating={featuredHero.data.rating ?? 0} />
                     </div>
-                    <h2 className="text-xl md:text-2xl font-black leading-tight text-white group-hover:text-accent-text-soft transition-colors mb-3">
+                    <h2 className="text-xl md:text-2xl font-black leading-tight text-prose group-hover:text-accent-text-soft transition-colors mb-3">
                       {featuredHero.data.title}
                     </h2>
                     {featuredHero.data.excerpt && (
@@ -239,7 +239,7 @@ export default async function HomePage() {
               ) : (
                 <Link
                   href={`/guides/${featuredHero.data.slug}`}
-                  className="group block bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-white/[0.02] shadow-xl shadow-black/40 hover:border-accent-border/40 hover:shadow-2xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200"
+                  className="group block bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-xl shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-2xl hover:shadow-stone-900/[0.10] hover:-translate-y-0.5 transition-all duration-200"
                 >
                   {featuredHero.data.image_url && (
                     <div className="relative w-full aspect-[5/4] bg-surface-raised">
@@ -274,7 +274,7 @@ export default async function HomePage() {
                         </span>
                       )}
                     </div>
-                    <h2 className="text-xl md:text-2xl font-black leading-tight text-white group-hover:text-accent-text-soft transition-colors mb-3">
+                    <h2 className="text-xl md:text-2xl font-black leading-tight text-prose group-hover:text-accent-text-soft transition-colors mb-3">
                       {featuredHero.data.title}
                     </h2>
                     {featuredHero.data.excerpt && (
@@ -293,11 +293,11 @@ export default async function HomePage() {
               <p className="text-[11px] md:text-xs uppercase tracking-[0.3em] font-bold text-accent-text mb-5">
                 Dad Like A BOSS.
               </p>
-              <h1 className="text-5xl md:text-7xl font-black leading-[0.95] tracking-tight mb-6 text-white">
+              <h1 className="text-5xl md:text-7xl font-black leading-[0.95] tracking-tight mb-6 text-prose">
                 Reviews, Guides, and Gear{' '}
                 <span className="text-accent-text">for Boss Dads.</span>
               </h1>
-              <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-8 max-w-2xl mx-auto">
+              <p className="text-prose-muted text-base md:text-lg leading-relaxed mb-8 max-w-2xl mx-auto">
                 Tested firsthand with my own money. No sponsors, no paid placements, no BS.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-3">
@@ -309,7 +309,7 @@ export default async function HomePage() {
                 </Link>
                 <Link
                   href="/guides"
-                  className="px-6 py-3 bg-surface-raised hover:bg-gray-700 text-gray-300 hover:text-white font-semibold rounded-2xl transition-colors"
+                  className="px-6 py-3 bg-surface-raised hover:bg-stone-100 text-prose-muted hover:text-prose font-semibold rounded-2xl transition-colors"
                 >
                   Browse Guides
                 </Link>
@@ -375,7 +375,7 @@ export default async function HomePage() {
       <section className="relative">
         <div className="max-w-5xl mx-auto px-6 py-16 md:py-20">
           <p className="text-[11px] md:text-xs text-accent-text uppercase tracking-[0.3em] font-bold mb-4 text-center">— The Rules</p>
-          <h2 className="text-3xl md:text-4xl font-black text-center text-white mb-4 leading-tight">
+          <h2 className="text-3xl md:text-4xl font-black text-center text-prose mb-4 leading-tight">
             Three rules. That&apos;s the whole standard.
           </h2>
           <p className="text-prose-muted text-center mb-12 max-w-xl mx-auto text-sm md:text-base">
@@ -403,7 +403,7 @@ export default async function HomePage() {
                 <p className="text-5xl md:text-6xl font-black text-accent-text/30 mb-4 leading-none tabular-nums">
                   {rule.n}
                 </p>
-                <p className="text-xl font-black text-white mb-3">{rule.title}</p>
+                <p className="text-xl font-black text-prose mb-3">{rule.title}</p>
                 <p className="text-prose-muted leading-relaxed text-sm max-w-sm mx-auto md:max-w-none md:mx-0">
                   {rule.body}
                 </p>
@@ -455,7 +455,7 @@ export default async function HomePage() {
                 <div className="w-[3px] bg-accent rounded-full shrink-0" />
                 <div className="min-w-0">
                   <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-2">— Recent Reviews</p>
-                  <h2 className="text-2xl md:text-3xl font-black text-white leading-tight">Bought, tested, and Boss Daddy Approved</h2>
+                  <h2 className="text-2xl md:text-3xl font-black text-prose leading-tight">Bought, tested, and Boss Daddy Approved</h2>
                 </div>
               </div>
               <Link href="/reviews" className="hidden sm:inline-flex items-center text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold shrink-0">
@@ -471,7 +471,7 @@ export default async function HomePage() {
                   <Link
                     key={r.id}
                     href={`/reviews/${r.slug}`}
-                    className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-accent-border/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200 ${
+                    className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-xl hover:shadow-stone-900/[0.10] hover:-translate-y-0.5 transition-all duration-200 ${
                       isHero ? 'lg:col-span-2 lg:row-span-2' : ''
                     }`}
                   >
@@ -519,7 +519,7 @@ export default async function HomePage() {
                       </div>
                       <h3
                         className={`leading-snug group-hover:text-accent-text-soft transition-colors flex-1 ${
-                          isHero ? 'text-xl md:text-2xl font-black text-white' : 'text-base font-semibold'
+                          isHero ? 'text-xl md:text-2xl font-black text-prose' : 'text-base font-semibold'
                         }`}
                       >
                         {r.title}
@@ -563,7 +563,7 @@ export default async function HomePage() {
                 <div className="w-[3px] bg-accent rounded-full shrink-0" />
                 <div className="min-w-0">
                   <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-2">— From The Vault</p>
-                  <h2 className="text-2xl md:text-3xl font-black text-white leading-tight">Comparisons, kits, and curated picks</h2>
+                  <h2 className="text-2xl md:text-3xl font-black text-prose leading-tight">Comparisons, kits, and curated picks</h2>
                   <p className="mt-2 text-sm text-prose-faint">{LABELS.vault.tagline}</p>
                 </div>
               </div>
@@ -584,7 +584,7 @@ export default async function HomePage() {
                   <Link
                     key={`${card.collection_type}:${card.slug}`}
                     href={href}
-                    className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-white/[0.02] shadow-lg shadow-black/40 hover:border-accent-border/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200"
+                    className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 rounded-2xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-xl hover:shadow-stone-900/[0.10] hover:-translate-y-0.5 transition-all duration-200"
                   >
                     <div className="relative aspect-video bg-surface-sunken">
                       {card.hero_image_url ? (
@@ -597,7 +597,7 @@ export default async function HomePage() {
                       </span>
                     </div>
                     <div className="p-5 flex flex-col flex-1">
-                      <p className="text-base font-bold text-white group-hover:text-accent-text-soft transition-colors leading-snug mb-2 line-clamp-2">{card.title}</p>
+                      <p className="text-base font-bold text-prose group-hover:text-accent-text-soft transition-colors leading-snug mb-2 line-clamp-2">{card.title}</p>
                       {card.description && (
                         <p className="text-sm text-prose-faint leading-relaxed line-clamp-2 flex-1">{card.description}</p>
                       )}
@@ -634,13 +634,13 @@ export default async function HomePage() {
       {/* ── Newsletter ──────────────────────────────────────────────────── */}
       <section id="crew" className="relative">
         <div className="relative max-w-6xl mx-auto px-6 py-16">
-          <div className="relative bg-gradient-to-br from-accent/[0.05] to-surface border border-soft/60 rounded-2xl shadow-xl shadow-black/40 px-8 py-12 text-center max-w-2xl mx-auto overflow-hidden">
+          <div className="relative bg-gradient-to-br from-accent/[0.05] to-surface border border-soft/60 rounded-2xl shadow-xl shadow-stone-900/[0.06] px-8 py-12 text-center max-w-2xl mx-auto overflow-hidden">
             {/* Confident left-edge accent — single orange treatment marks this as the CTA panel */}
             <span aria-hidden className="absolute left-0 inset-y-6 w-0.5 bg-accent rounded-full" />
             <p className="text-accent-text-soft text-xs font-semibold uppercase tracking-widest mb-3">
               Join the Boss Daddy Crew
             </p>
-            <h2 className="text-2xl font-black text-white mb-3">
+            <h2 className="text-2xl font-black text-prose mb-3">
               Real Talk. Honest Reviews.<br />No BS Ever.
             </h2>
             <p className="text-prose-muted mb-8">
@@ -669,7 +669,7 @@ export default async function HomePage() {
       <section className="relative py-24 md:py-32">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-6">— The Bottom Line</p>
-          <p className="text-3xl md:text-5xl font-black text-white leading-[1.1] mb-10">
+          <p className="text-3xl md:text-5xl font-black text-prose leading-[1.1] mb-10">
             Now let&apos;s dad like a BOSS —{' '}
             <span className="text-accent-text">together.</span>
           </p>
@@ -685,7 +685,7 @@ function CategoryPill({ slug, label }: { slug: string; label: string }) {
   return (
     <Link
       href={`/category/${slug}`}
-      className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] px-4 py-2.5 text-sm font-semibold text-prose min-h-[44px] whitespace-nowrap hover:border-accent-border/60 hover:bg-surface-raised hover:text-accent-text-soft transition-colors"
+      className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] px-4 py-2.5 text-sm font-semibold text-prose min-h-[44px] whitespace-nowrap hover:border-accent-border/60 hover:bg-surface-raised hover:text-accent-text-soft transition-colors"
     >
       <CategoryIcon slug={slug} className="w-4 h-4 text-accent-text shrink-0" />
       <span>{label}</span>
@@ -704,10 +704,10 @@ function TrustBadge({
 }) {
   const inner = (
     <span className="flex items-center gap-2.5 group">
-      <span className="w-7 h-7 rounded-lg bg-accent-tint/40 border border-accent-border/40 flex items-center justify-center text-accent-text-soft shrink-0 group-hover:border-accent-border/60 transition-colors">
+      <span className="w-7 h-7 rounded-lg bg-accent-tint border border-accent-border/40 flex items-center justify-center text-accent-text-soft shrink-0 group-hover:border-accent-border/60 transition-colors">
         {icon}
       </span>
-      <span className="text-[11px] md:text-xs font-bold uppercase tracking-wider text-gray-300 group-hover:text-white transition-colors leading-tight">
+      <span className="text-[11px] md:text-xs font-bold uppercase tracking-wider text-prose-muted group-hover:text-prose transition-colors leading-tight">
         {label}
       </span>
     </span>
@@ -760,7 +760,7 @@ function LatestGuidesSkeleton() {
         <div className="h-3 w-32 bg-surface rounded mb-3 animate-pulse" />
         <div className="h-7 w-72 bg-surface rounded animate-pulse" />
       </div>
-      <div className="divide-y divide-gray-800/60">
+      <div className="divide-y divide-soft">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="flex items-center gap-5 py-6">
             <div className="flex-1 space-y-2">

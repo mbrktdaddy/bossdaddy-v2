@@ -19,13 +19,13 @@ export default function TermsPage() {
  <h1 className="text-3xl font-black mb-2">Terms of Use</h1>
  <p className="text-prose-faint text-sm mb-10">Last updated: {LAST_UPDATED}</p>
 
- <div className="prose prose-invert max-w-none
+ <div className="prose max-w-none
  prose-p:text-prose-muted prose-p:leading-relaxed
- prose-h2:font-black prose-h2:text-white prose-h2:text-xl prose-h2:mt-10
+ prose-h2:font-black prose-h2:text-prose prose-h2:text-xl prose-h2:mt-10
  prose-h3:font-bold prose-h3:text-prose prose-h3:text-base prose-h3:mt-6
- prose-a:text-accent-text-soft prose-a:no-underline hover:prose-a:text-orange-300
+ prose-a:text-accent-text-soft prose-a:no-underline hover:prose-a:text-accent
  prose-ul:text-prose-muted prose-li:my-1
- prose-strong:text-white">
+ prose-strong:text-prose">
 
  <p>
  These Terms of Use (&quot;Terms&quot;) govern your access to and use of{' '}

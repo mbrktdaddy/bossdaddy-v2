@@ -30,7 +30,7 @@ export function LoginPromptModal({ onClose, returnPath }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
+      <div className="absolute inset-0 bg-stone-900/70 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
 
       <div
         ref={dialogRef}
@@ -50,7 +50,7 @@ export function LoginPromptModal({ onClose, returnPath }: Props) {
         </button>
 
         <div className="text-center">
-          <div className="w-12 h-12 rounded-full bg-accent-tint/50 border border-accent-border/50 flex items-center justify-center mx-auto mb-4">
+          <div className="w-12 h-12 rounded-full bg-accent-tint border border-accent-border/50 flex items-center justify-center mx-auto mb-4">
             <svg className="w-6 h-6 text-accent-text-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
@@ -70,7 +70,7 @@ export function LoginPromptModal({ onClose, returnPath }: Props) {
             </Link>
             <Link
               href={`/login?next=${encodeURIComponent(returnPath)}`}
-              className="block w-full py-3 bg-surface hover:bg-surface-raised border border-strong text-white text-sm font-semibold rounded-xl transition-colors text-center"
+              className="block w-full py-3 bg-surface hover:bg-surface-raised border border-strong text-prose text-sm font-semibold rounded-xl transition-colors text-center"
             >
               Log in
             </Link>

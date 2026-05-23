@@ -177,8 +177,8 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
   return (
     <form onSubmit={handleSave} className="space-y-5">
       <div>
-        <label className="block text-sm text-gray-300 mb-1.5">
-          Slug <span className="text-red-400">*</span>
+        <label className="block text-sm text-prose-muted mb-1.5">
+          Slug <span className="text-red-600">*</span>
         </label>
         <input
           type="text"
@@ -187,7 +187,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
           onChange={(e) => setSlug(e.target.value.toLowerCase())}
           pattern="[a-z0-9-]+"
           placeholder="enfamil-enspire"
-          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
         />
         <p className="mt-1 text-xs text-prose-faint">
           Used in tokens: <code className="text-accent-text-soft">[[BUY:{slug || 'your-slug'}]]</code>. Lowercase letters, numbers, hyphens only.
@@ -195,8 +195,8 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
       </div>
 
       <div>
-        <label className="block text-sm text-gray-300 mb-1.5">
-          Product name <span className="text-red-400">*</span>
+        <label className="block text-sm text-prose-muted mb-1.5">
+          Product name <span className="text-red-600">*</span>
         </label>
         <input
           type="text"
@@ -204,16 +204,16 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Enfamil Enspire"
-          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
         />
       </div>
 
       <div>
-        <label className="block text-sm text-gray-300 mb-1.5">Store</label>
+        <label className="block text-sm text-prose-muted mb-1.5">Store</label>
         <select
           value={store}
           onChange={(e) => setStore(e.target.value)}
-          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
         >
           {STORE_OPTIONS.map((s) => (
             <option key={s.value} value={s.value}>{s.label}</option>
@@ -223,13 +223,13 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
 
       {store === 'other' && (
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Store name</label>
+          <label className="block text-sm text-prose-muted mb-1.5">Store name</label>
           <input
             type="text"
             value={customStoreName}
             onChange={(e) => setCustomStoreName(e.target.value)}
             placeholder="e.g. REI, Costco, Target Canada"
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
           />
           <p className="mt-1 text-xs text-prose-faint">
             Used in the CTA button: &quot;Check Price at [store name]&quot;.
@@ -238,7 +238,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
       )}
 
       <div>
-        <label className="block text-sm text-gray-300 mb-1.5">Affiliate URL</label>
+        <label className="block text-sm text-prose-muted mb-1.5">Affiliate URL</label>
         <input
           type="url"
           value={affiliateUrl}
@@ -259,7 +259,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
             'Paste your affiliate link from this retailer\'s program'
           }
           disabled={store === 'costco' || store === 'sams-club'}
-          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
         />
         <p className="mt-1 text-xs text-prose-faint">
           {store === 'amazon'    && 'Use the SiteStripe "Text Only" button on Amazon — your associate tag is embedded automatically.'}
@@ -282,13 +282,13 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
 
       {store === 'amazon' && (
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">ASIN</label>
+          <label className="block text-sm text-prose-muted mb-1.5">ASIN</label>
           <input
             type="text"
             value={asin}
             onChange={(e) => setAsin(e.target.value)}
             placeholder="B07XYZ1234"
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
           />
           <div className="mt-2 flex items-center gap-3 flex-wrap">
             <p className="text-xs text-prose-faint flex-1">10-character Amazon product ID — find it in the product URL after <code className="text-accent-text-soft">/dp/</code></p>
@@ -330,13 +330,13 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
             )}
           </div>
           {importResult && (
-            <p className="mt-1.5 text-xs text-green-400">{importResult}</p>
+            <p className="mt-1.5 text-xs text-green-700">{importResult}</p>
           )}
         </div>
       )}
 
       <div>
-        <label className="block text-sm text-gray-300 mb-1.5">
+        <label className="block text-sm text-prose-muted mb-1.5">
           Non-affiliate URL
           {(store === 'costco' || store === 'sams-club') && (
             <span className="ml-2 text-accent-text-soft text-xs font-semibold">← use this for {store === 'costco' ? 'Costco' : "Sam's Club"}</span>
@@ -347,7 +347,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
           value={nonAffiliateUrl}
           onChange={(e) => setNonAffUrl(e.target.value)}
           placeholder="https://www.costco.com/product.html"
-          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
         />
         <p className="mt-1 text-xs text-prose-faint">
           {(store === 'costco' || store === 'sams-club')
@@ -372,7 +372,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
                 placeholder="https://... paste a URL directly"
-                className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+                className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
               />
               <p className="text-prose-faint">
                 Overrides the gallery primary. Useful for external image URLs (e.g. Amazon CDN).
@@ -398,7 +398,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
                 placeholder="https://... paste a URL directly"
-                className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+                className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
               />
               <p className="text-prose-faint">
                 Sets the product&apos;s hero directly. If you also stage gallery images above,
@@ -412,25 +412,25 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
 
       {/* ── Editorial metadata ─────────────────────────────────────────── */}
       <div>
-        <label className="block text-sm text-gray-300 mb-1.5">Short description</label>
+        <label className="block text-sm text-prose-muted mb-1.5">Short description</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           maxLength={400}
           rows={3}
           placeholder="1–2 sentences: what this product is and why it matters. Used as fallback card copy in picks, gift guides, and /stuff."
-          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
         />
         <p className="mt-1 text-xs text-prose-faint">{description.length}/400 characters</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Category</label>
+          <label className="block text-sm text-prose-muted mb-1.5">Category</label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
           >
             <option value="">— none —</option>
             {CATEGORIES.map((c) => (
@@ -440,7 +440,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1.5">Price (cents)</label>
+          <label className="block text-sm text-prose-muted mb-1.5">Price (cents)</label>
           <input
             type="text"
             inputMode="numeric"
@@ -448,7 +448,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
             value={priceCents}
             onChange={(e) => setPriceCents(e.target.value.replace(/\D/g, ''))}
             placeholder="e.g. 2999 = $29.99"
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-hover"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
           />
           {priceCents && !isNaN(parseInt(priceCents, 10)) && (
             <p className="mt-1 text-xs text-accent-text-soft">${(parseInt(priceCents, 10) / 100).toFixed(2)}</p>
@@ -457,11 +457,11 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
       </div>
 
       <div>
-        <label className="block text-sm text-gray-300 mb-1.5">Status</label>
+        <label className="block text-sm text-prose-muted mb-1.5">Status</label>
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
         >
           {PRODUCT_STATUS_OPTIONS.map((s) => (
             <option key={s.value} value={s.value}>{s.label}</option>
@@ -471,14 +471,14 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
       </div>
 
       {error && (
-        <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded-lg px-4 py-3">{error}</p>
+        <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
       )}
 
       {uploadStatus && (
         <p className={`text-sm rounded-lg px-4 py-3 ${
           createdProductId
             ? 'text-amber-300 bg-amber-950/40 border border-amber-900/40'
-            : 'text-gray-300 bg-surface border border-soft'
+            : 'text-prose-muted bg-surface border border-soft'
         }`}>
           {uploadStatus}
         </p>
@@ -503,7 +503,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
             type="button"
             onClick={handleDelete}
             disabled={deleting}
-            className="px-5 py-2.5 text-red-400 hover:text-red-300 text-sm transition-colors disabled:opacity-40"
+            className="px-5 py-2.5 text-red-600 hover:text-red-700 text-sm transition-colors disabled:opacity-40"
           >
             {deleting ? 'Deleting…' : 'Delete'}
           </button>

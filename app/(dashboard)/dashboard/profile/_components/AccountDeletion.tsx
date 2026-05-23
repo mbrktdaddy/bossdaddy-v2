@@ -44,22 +44,22 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
     }
 
     return (
-      <div className="bg-red-950/30 border border-red-900/40 rounded-2xl p-6 mb-6">
-        <p className="text-xs text-red-400 uppercase tracking-widest font-semibold mb-2">
+      <div className="bg-red-50 border border-red-200 rounded-2xl p-6 mb-6">
+        <p className="text-xs text-red-600 uppercase tracking-widest font-semibold mb-2">
           Account scheduled for deletion
         </p>
-        <p className="text-sm text-gray-300 leading-relaxed mb-4">
+        <p className="text-sm text-prose-muted leading-relaxed mb-4">
           {deletionDate ? (
             <>
               Your account will be permanently deleted on{' '}
-              <strong className="text-red-400">{deletionDate}</strong>. After that, all comments,
+              <strong className="text-red-600">{deletionDate}</strong>. After that, all comments,
               votes, and subscriptions are wiped and the account can&apos;t be recovered.
             </>
           ) : (
             <>Your account is scheduled for deletion.</>
           )}
         </p>
-        {error && <p className="text-sm text-red-400 mb-3">{error}</p>}
+        {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
         <button
           onClick={cancel}
           disabled={loading}
@@ -91,7 +91,7 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
 
   return (
     <div className="bg-surface border border-soft rounded-2xl p-6 mb-6">
-      <p className="text-xs text-red-400 uppercase tracking-widest font-semibold mb-1">Danger zone</p>
+      <p className="text-xs text-red-600 uppercase tracking-widest font-semibold mb-1">Danger zone</p>
       <p className="text-xs text-prose-faint mb-4">Permanent actions. Use with care.</p>
 
       {hasPublishedContent ? (
@@ -100,18 +100,18 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
             You&apos;ve published reviews or guides on Boss Daddy. Account deletion is a manual
             process for authors — please reach out to{' '}
             <a href="mailto:boss@bossdaddylife.com?subject=Account%20deletion%20request"
-               className="text-accent-text-soft hover:text-orange-300">boss@bossdaddylife.com</a>.
+               className="text-accent-text-soft hover:text-accent">boss@bossdaddylife.com</a>.
           </p>
         </div>
       ) : !confirming ? (
         <button
           onClick={() => setConfirming(true)}
-          className="px-5 py-2.5 border border-red-900/60 hover:bg-red-950/40 hover:border-red-700 text-red-400 hover:text-red-300 text-sm font-semibold rounded-xl transition-colors"
+          className="px-5 py-2.5 border border-red-200 hover:bg-red-50 hover:border-red-700 text-red-600 hover:text-red-700 text-sm font-semibold rounded-xl transition-colors"
         >
           Delete my account
         </button>
       ) : (
-        <div className="border border-red-900/40 bg-red-950/20 rounded-xl p-4 space-y-3">
+        <div className="border border-red-200 bg-red-50 rounded-xl p-4 space-y-3">
           <p className="text-sm text-prose leading-relaxed">
             This schedules your account for permanent deletion in <strong>{COOLDOWN_DAYS} days</strong>.
             You can cancel any time before then by signing back in. After {COOLDOWN_DAYS} days,
@@ -123,7 +123,7 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
             <select
               value={reasonChoice}
               onChange={(e) => setReasonChoice(e.target.value)}
-              className="w-full mt-1 px-3 py-2 bg-surface border border-strong rounded text-white text-sm focus:outline-none focus:border-accent"
+              className="w-full mt-1 px-3 py-2 bg-surface border border-strong rounded text-prose text-sm focus:outline-none focus:border-accent"
             >
               <option value="">— Prefer not to say —</option>
               {SELF_DELETION_REASONS.map((r) => (
@@ -139,22 +139,22 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
                 value={customReason}
                 onChange={(e) => setCustomReason(e.target.value)}
                 placeholder="What's the reason?"
-                className="w-full mt-1 px-3 py-2 bg-surface border border-strong rounded text-white text-sm focus:outline-none focus:border-accent"
+                className="w-full mt-1 px-3 py-2 bg-surface border border-strong rounded text-prose text-sm focus:outline-none focus:border-accent"
               />
             </label>
           )}
 
           <label className="block text-xs text-prose-muted">
-            Type <code className="text-red-400">DELETE</code> to confirm:
+            Type <code className="text-red-600">DELETE</code> to confirm:
             <input
               type="text"
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
               autoComplete="off"
-              className="w-full mt-1 px-3 py-2 bg-surface border border-red-900/60 rounded text-white text-sm focus:outline-none focus:border-red-500"
+              className="w-full mt-1 px-3 py-2 bg-surface border border-red-200 rounded text-prose text-sm focus:outline-none focus:border-red-500"
             />
           </label>
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex gap-2">
             <button
               onClick={requestDelete}
@@ -166,7 +166,7 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
             <button
               onClick={() => { setConfirming(false); setConfirmText(''); setError(null) }}
               disabled={loading}
-              className="px-4 py-2 bg-surface-raised hover:bg-gray-700 text-gray-300 text-sm font-semibold rounded-lg transition-colors"
+              className="px-4 py-2 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm font-semibold rounded-lg transition-colors"
             >
               Never mind
             </button>

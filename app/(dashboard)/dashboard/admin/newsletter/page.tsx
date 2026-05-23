@@ -84,7 +84,7 @@ export default async function AdminNewsletterPage() {
             No subscribers yet.
           </p>
         ) : (
-          <div className="divide-y divide-gray-800">
+          <div className="divide-y divide-soft">
             {subs.map((s) => (
               <div key={s.email} className="px-5 py-3 flex items-center justify-between gap-4">
                 <div className="min-w-0 flex-1">
@@ -92,7 +92,7 @@ export default async function AdminNewsletterPage() {
                   {(s.interests ?? []).length > 0 && (
                     <div className="flex gap-1 mt-1 flex-wrap">
                       {s.interests!.map((t) => (
-                        <span key={t} className="text-[10px] text-accent-text-soft bg-accent-tint/30 px-1.5 py-0.5 rounded border border-accent-border/30">
+                        <span key={t} className="text-[10px] text-accent-text-soft bg-accent-tint px-1.5 py-0.5 rounded border border-accent-border/30">
                           {t}
                         </span>
                       ))}
@@ -102,7 +102,7 @@ export default async function AdminNewsletterPage() {
                 <div className="text-xs text-prose-faint shrink-0 text-right">
                   <p>{new Date(s.created_at).toLocaleDateString()}</p>
                   {!s.confirmed && (
-                    <p className="text-yellow-500 mt-0.5">unconfirmed</p>
+                    <p className="text-amber-600 mt-0.5">unconfirmed</p>
                   )}
                 </div>
               </div>
@@ -118,7 +118,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-surface border border-soft rounded-2xl p-4">
       <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold mb-1">{label}</p>
-      <p className="text-2xl font-black text-white">{value}</p>
+      <p className="text-2xl font-black text-prose">{value}</p>
     </div>
   )
 }

@@ -64,7 +64,7 @@ export function ScheduleFollowupModal({ reviewId, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/80 backdrop-blur-sm p-4"
       onClick={(e) => { if (e.target === e.currentTarget && !busy) onClose() }}
     >
       <form
@@ -72,7 +72,7 @@ export function ScheduleFollowupModal({ reviewId, onClose }: Props) {
         className="w-full max-w-lg bg-surface-sunken border border-soft rounded-2xl overflow-hidden shadow-2xl"
       >
         <div className="px-5 py-4 border-b border-soft">
-          <p className="text-sm font-bold text-white">Schedule a follow-up review</p>
+          <p className="text-sm font-bold text-prose">Schedule a follow-up review</p>
           <p className="text-xs text-prose-faint mt-0.5">
             We&apos;ll create a draft with a Claude-generated scaffold. You&apos;ll land in the new workspace to edit.
           </p>
@@ -80,7 +80,7 @@ export function ScheduleFollowupModal({ reviewId, onClose }: Props) {
 
         <div className="p-5 space-y-4">
           <div>
-            <label className="block text-sm text-gray-300 mb-2">Milestone</label>
+            <label className="block text-sm text-prose-muted mb-2">Milestone</label>
             <div className="flex flex-wrap gap-2 mb-3">
               {MILESTONE_SUGGESTIONS.map((s) => {
                 const active = label.trim() === s
@@ -93,7 +93,7 @@ export function ScheduleFollowupModal({ reviewId, onClose }: Props) {
                     className={`px-3 py-2 min-h-[44px] rounded-lg text-xs font-semibold border transition-colors ${
                       active
                         ? 'bg-accent border-accent text-white'
-                        : 'bg-surface border-strong text-gray-300 hover:bg-surface-raised'
+                        : 'bg-surface border-strong text-prose-muted hover:bg-surface-raised'
                     }`}
                   >
                     {s}
@@ -108,13 +108,13 @@ export function ScheduleFollowupModal({ reviewId, onClose }: Props) {
               maxLength={80}
               disabled={busy}
               placeholder="Or type a custom label (e.g. After Two Winters)"
-              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-accent-hover text-sm"
+              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover text-sm"
               autoFocus
             />
           </div>
 
           {err && (
-            <p className="text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg px-4 py-2.5">
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5">
               {err}
             </p>
           )}
@@ -129,7 +129,7 @@ export function ScheduleFollowupModal({ reviewId, onClose }: Props) {
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="px-4 py-2 bg-surface-raised hover:bg-gray-700 text-gray-300 text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+            className="px-4 py-2 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
           >
             Cancel
           </button>

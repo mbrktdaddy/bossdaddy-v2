@@ -36,7 +36,7 @@ export function FeaturedMerchCard({ item, compact = false }: Props) {
         )}
       </div>
       <div className={compact ? 'p-3' : 'p-4'}>
-        <p className={`font-semibold text-white leading-snug group-hover:text-accent-text-soft transition-colors line-clamp-2 ${compact ? 'text-xs' : 'text-sm'}`}>
+        <p className={`font-semibold text-prose leading-snug group-hover:text-accent-text-soft transition-colors line-clamp-2 ${compact ? 'text-xs' : 'text-sm'}`}>
           {item.name}
         </p>
         <p className={`text-accent-text font-bold mt-1 ${compact ? 'text-xs' : 'text-sm'}`}>
@@ -46,7 +46,7 @@ export function FeaturedMerchCard({ item, compact = false }: Props) {
     </>
   )
 
-  const className = 'group flex flex-col bg-surface rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200'
+  const className = 'group flex flex-col bg-surface rounded-2xl overflow-hidden shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] transition-all duration-200'
 
   if (isExternal) {
     return <a href={href} target="_blank" rel="noopener noreferrer" className={className}>{inner}</a>

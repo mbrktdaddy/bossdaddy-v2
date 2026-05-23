@@ -67,19 +67,19 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
   if (submitted === 'approved') {
     return (
       <div className="space-y-3">
-        <div className="bg-surface border border-green-900/40 rounded-2xl p-5">
+        <div className="bg-surface border border-green-200 rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center text-xs font-bold text-white shrink-0">
               ✓
             </div>
-            <span className="text-sm font-medium text-green-400">Just posted</span>
+            <span className="text-sm font-medium text-green-700">Just posted</span>
             <span className="text-xs text-prose-faint">moments ago</span>
           </div>
-          <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">{submittedBody}</p>
+          <p className="text-prose-muted text-sm leading-relaxed whitespace-pre-line">{submittedBody}</p>
         </div>
         <button
           onClick={() => { setSubmitted(false); setSubmittedBody('') }}
-          className="text-xs text-prose-faint hover:text-gray-300 transition-colors"
+          className="text-xs text-prose-faint hover:text-prose transition-colors"
         >
           Leave another comment
         </button>
@@ -90,11 +90,11 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
   if (submitted === 'pending') {
     return (
       <div className="bg-surface border border-soft rounded-2xl p-5">
-        <p className="font-semibold text-sm mb-1 text-gray-300">Comment submitted</p>
+        <p className="font-semibold text-sm mb-1 text-prose-muted">Comment submitted</p>
         <p className="text-prose-muted text-sm">Your comment is pending approval and will appear once reviewed.</p>
         <button
           onClick={() => { setSubmitted(false); setSubmittedBody('') }}
-          className="text-xs text-prose-faint hover:text-gray-300 mt-3 transition-colors"
+          className="text-xs text-prose-faint hover:text-prose mt-3 transition-colors"
         >
           Leave another comment
         </button>
@@ -104,7 +104,7 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
 
   if (needsAuth) {
     return (
-      <div className="bg-accent-tint/30 border border-accent-border/40 rounded-2xl p-5">
+      <div className="bg-accent-tint border border-accent-border/40 rounded-2xl p-5">
         <p className="text-accent-text-soft font-semibold text-sm mb-1">Sign in to comment</p>
         <p className="text-prose-muted text-sm mb-4">You need to be signed in to leave a comment.</p>
         <div className="flex items-center gap-3">
@@ -116,7 +116,7 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
           </Link>
           <button
             onClick={() => setNeedsAuth(false)}
-            className="text-xs text-prose-faint hover:text-gray-300 transition-colors"
+            className="text-xs text-prose-faint hover:text-prose transition-colors"
           >
             Cancel
           </button>
@@ -136,11 +136,11 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
         placeholder={prompt ? 'Your answer...' : 'Share your thoughts... (sign in required)'}
         rows={4}
         maxLength={2000}
-        className="w-full px-4 py-3 bg-surface border border-strong focus:border-accent rounded-xl text-white placeholder-gray-500 focus:outline-none resize-none text-base sm:text-sm transition-colors"
+        className="w-full px-4 py-3 bg-surface border border-strong focus:border-accent rounded-xl text-prose placeholder:text-prose-faint focus:outline-none resize-none text-base sm:text-sm transition-colors"
       />
       <div className="flex items-center justify-between gap-3">
         <span className="text-xs text-prose-faint shrink-0">{body.length}/2000</span>
-        {error && <p className="text-red-400 text-xs flex-1">{error}</p>}
+        {error && <p className="text-red-600 text-xs flex-1">{error}</p>}
         <button
           type="submit"
           disabled={submitting || body.trim().length < 5}

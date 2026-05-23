@@ -14,18 +14,18 @@ export async function FollowupsDueCard() {
   return (
     <div className="bg-surface border border-soft rounded-2xl overflow-hidden">
       <div className="px-5 py-3 border-b border-soft">
-        <p className="text-sm font-semibold text-white">Follow-ups due this month</p>
+        <p className="text-sm font-semibold text-prose">Follow-ups due this month</p>
         <p className="text-xs text-prose-faint mt-0.5">
           Top-level reviews that haven&apos;t been updated in 5+ months.
         </p>
       </div>
-      <ul className="divide-y divide-gray-800">
+      <ul className="divide-y divide-soft">
         {due.map((row) => (
           <li key={row.id} className="px-5 py-3 flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
               <Link
                 href={`/dashboard/reviews/${row.id}`}
-                className="block text-sm text-white hover:text-orange-300 truncate"
+                className="block text-sm text-prose hover:text-accent truncate"
               >
                 {row.title}
               </Link>
@@ -37,7 +37,7 @@ export async function FollowupsDueCard() {
             </div>
             <Link
               href={`/dashboard/reviews/${row.id}`}
-              className="shrink-0 text-xs font-semibold text-accent-text-soft hover:text-orange-300 whitespace-nowrap"
+              className="shrink-0 text-xs font-semibold text-accent-text-soft hover:text-accent whitespace-nowrap"
             >
               Schedule follow-up →
             </Link>

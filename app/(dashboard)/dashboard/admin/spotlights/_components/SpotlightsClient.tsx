@@ -131,7 +131,7 @@ export function SpotlightsClient({ reviews, guides, settings }: Props) {
   return (
     <div className="space-y-10">
       {error && (
-        <div className="bg-red-950/40 border border-red-900/40 text-red-300 text-sm rounded-xl px-4 py-3">
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
           {error}
         </div>
       )}
@@ -225,11 +225,11 @@ function Zone({ title, hint, busy, current, onClear, clearLabel = 'Clear', child
     <section className="rounded-2xl border border-soft/60 bg-surface overflow-hidden">
       <header className="px-5 py-4 border-b border-soft/60 flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h2 className="font-black text-white">{title}</h2>
+          <h2 className="font-black text-prose">{title}</h2>
           <p className="text-xs text-prose-faint mt-1 leading-relaxed">{hint}</p>
           {current && (
             <p className="text-xs text-accent-text-soft mt-2 font-semibold">
-              Currently: <span className="text-white font-normal">{current.item.title}</span>
+              Currently: <span className="text-prose font-normal">{current.item.title}</span>
               <span className="text-prose-faint font-normal"> · {current.type}{current.auto ? ' · Auto' : ''}</span>
             </p>
           )}
@@ -240,7 +240,7 @@ function Zone({ title, hint, busy, current, onClear, clearLabel = 'Clear', child
             <button
               onClick={onClear}
               disabled={busy}
-              className="text-xs text-prose-faint hover:text-white font-medium px-2 py-1 rounded transition-colors disabled:opacity-50"
+              className="text-xs text-prose-faint hover:text-prose font-medium px-2 py-1 rounded transition-colors disabled:opacity-50"
             >
               {clearLabel}
             </button>
@@ -270,7 +270,7 @@ function ZoneTabs({ reviews, guides, selectedId, selectedType, onSelectReview, o
         <button
           onClick={() => setTab('review')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-            tab === 'review' ? 'bg-accent text-white' : 'bg-surface-raised text-prose-muted hover:text-white'
+            tab === 'review' ? 'bg-accent text-white' : 'bg-surface-raised text-prose-muted hover:text-prose'
           }`}
         >
           Review
@@ -278,7 +278,7 @@ function ZoneTabs({ reviews, guides, selectedId, selectedType, onSelectReview, o
         <button
           onClick={() => setTab('guide')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-            tab === 'guide' ? 'bg-accent text-white' : 'bg-surface-raised text-prose-muted hover:text-white'
+            tab === 'guide' ? 'bg-accent text-white' : 'bg-surface-raised text-prose-muted hover:text-prose'
           }`}
         >
           Guide
@@ -315,7 +315,7 @@ function CandidateList({ items, selectedId, onSelect }: CandidateListProps) {
           placeholder="Filter by title or product name…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full mb-3 px-3 py-2 bg-surface-raised border border-soft rounded-lg text-sm text-white placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          className="w-full mb-3 px-3 py-2 bg-surface-raised border border-soft rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
         />
       )}
       {filtered.length === 0 ? (
@@ -331,7 +331,7 @@ function CandidateList({ items, selectedId, onSelect }: CandidateListProps) {
                 onClick={() => onSelect(item.id)}
                 className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition-colors ${
                   selected
-                    ? 'bg-accent-tint/40 border border-accent-border/40'
+                    ? 'bg-accent-tint border border-accent-border/40'
                     : 'bg-surface-raised/40 hover:bg-surface-raised border border-transparent'
                 }`}
               >
@@ -352,7 +352,7 @@ function CandidateList({ items, selectedId, onSelect }: CandidateListProps) {
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-white truncate">{item.title}</p>
+                  <p className="text-sm font-semibold text-prose truncate">{item.title}</p>
                   <div className="flex items-center gap-2 mt-0.5">
                     {cat && (
                       <span className="flex items-center gap-1 text-[10px] text-eyebrow uppercase tracking-widest font-semibold">

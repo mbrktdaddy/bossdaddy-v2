@@ -82,7 +82,7 @@ export default async function GuideTagPage({ params }: Props) {
         <nav className="flex items-center gap-2 text-xs text-prose-faint mb-8">
           <Link href="/guides" className="hover:text-accent-text-soft transition-colors">Guides</Link>
           <span>/</span>
-          <span className="text-gray-300">#{tag.label}</span>
+          <span className="text-prose-muted">#{tag.label}</span>
         </nav>
 
         <div className="mb-10">
@@ -99,7 +99,7 @@ export default async function GuideTagPage({ params }: Props) {
                 <Link
                   key={g.id}
                   href={`/guides/${g.slug}`}
-                  className="group bg-surface rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all"
+                  className="group bg-surface rounded-2xl overflow-hidden shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] transition-all"
                 >
                   {g.image_url ? (
                     <div className="relative w-full h-48">

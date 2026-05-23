@@ -22,7 +22,7 @@ export default async function EditWishlistItemPage({
   return (
     <div className="p-4 sm:p-8 max-w-2xl">
       <div className="mb-8">
-        <Link href="/dashboard/admin/wishlist" className="text-xs text-prose-faint hover:text-gray-300 transition-colors">
+        <Link href="/dashboard/admin/wishlist" className="text-xs text-prose-faint hover:text-prose transition-colors">
           ← Wishlist
         </Link>
         <h1 className="text-2xl font-black mt-2 truncate">{(item as WishlistItem).title}</h1>

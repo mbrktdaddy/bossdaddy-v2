@@ -243,7 +243,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                 <Image src={pick.hero_image_url} alt={pick.title ?? occ.label} fill className="object-cover" sizes={pick ? '(max-width: 768px) 100vw, 768px' : '(max-width: 768px) 100vw, 896px'} priority />
               </div>
             ) : (
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-8 bg-gradient-to-br from-orange-950/40 to-surface flex items-center justify-center border border-accent-border/20">
+              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-8 bg-gradient-to-br from-accent-tint to-white flex items-center justify-center border border-accent-border/20">
                 <OccasionIcon value={occ.value} className="w-20 h-20 md:w-24 md:h-24 text-accent-text/70" />
               </div>
             )}
@@ -252,7 +252,7 @@ export default async function GiftOccasionPage({ params }: Props) {
             <header className="mb-8">
               <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
               <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Gift Guide · {occ.label}</p>
-              <h1 className="text-4xl md:text-5xl font-black mb-4 text-white tracking-tight leading-tight">
+              <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight leading-tight">
                 {pick?.title ?? occ.label}
               </h1>
               <p className="text-lg text-prose-muted leading-relaxed mb-6">
@@ -266,7 +266,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                     readingMinutes={readingMinutes}
                   />
                   {priceRangeLabel && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-tint/40 border border-accent-border/40 text-xs font-bold text-orange-300 tabular-nums">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-tint border border-accent-border/40 text-xs font-bold text-accent-text tabular-nums">
                       <span className="text-eyebrow/70 uppercase tracking-widest text-[10px]">Range</span>
                       {priceRangeLabel}
                     </span>
@@ -285,10 +285,10 @@ export default async function GiftOccasionPage({ params }: Props) {
                 <div className="mb-5">
                   <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Why These</p>
-                  <h2 className="text-2xl font-black text-white leading-tight">Behind the picks</h2>
+                  <h2 className="text-2xl font-black text-prose leading-tight">Behind the picks</h2>
                 </div>
                 <div
-                  className="prose prose-invert prose-orange max-w-none prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-accent-text-soft hover:prose-a:text-orange-300 prose-a:no-underline"
+                  className="prose prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
                   dangerouslySetInnerHTML={{ __html: pick.intro_html }}
                 />
               </section>
@@ -312,7 +312,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                 <div className="mb-5">
                   <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Gifts</p>
-                  <h2 className="text-2xl font-black text-white leading-tight">
+                  <h2 className="text-2xl font-black text-prose leading-tight">
                     {items.length} dad-tested {items.length === 1 ? 'gift' : 'gifts'}, all personally bought
                   </h2>
                 </div>
@@ -322,9 +322,9 @@ export default async function GiftOccasionPage({ params }: Props) {
                     const product = review.product_slug ? productMap.get(review.product_slug) : null
                     const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                     return (
-                      <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:border-accent-border/40 rounded-2xl p-5 shadow-lg shadow-black/40 transition-colors">
+                      <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-2xl p-5 shadow-lg shadow-stone-900/[0.06] transition-colors">
                         <div className="flex sm:flex-col items-center gap-3 sm:gap-0 shrink-0">
-                          <span className="w-10 h-10 rounded-full bg-accent-tint/60 border border-accent-border/40 flex items-center justify-center text-accent-text-soft font-black text-sm tabular-nums">
+                          <span className="w-10 h-10 rounded-full bg-accent-tint border border-accent-border/40 flex items-center justify-center text-accent-text-soft font-black text-sm tabular-nums">
                             {idx + 1}
                           </span>
                         </div>
@@ -346,11 +346,11 @@ export default async function GiftOccasionPage({ params }: Props) {
                                   the product name eyebrow so it lands as the
                                   first thing the eye catches. */}
                               {itemRoleLabel && (
-                                <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-accent/15 border border-accent-border/40 text-[10px] font-black uppercase tracking-widest text-orange-300">
+                                <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-accent/15 border border-accent-border/40 text-[10px] font-black uppercase tracking-widest text-accent-text">
                                   {itemRoleLabel}
                                 </span>
                               )}
-                              <Link href={`/reviews/${review.slug}`} className="text-base font-bold text-white hover:text-accent-text-soft transition-colors leading-snug block">
+                              <Link href={`/reviews/${review.slug}`} className="text-base font-bold text-prose hover:text-accent-text-soft transition-colors leading-snug block">
                                 {review.title}
                               </Link>
                             </div>
@@ -359,10 +359,10 @@ export default async function GiftOccasionPage({ params }: Props) {
 
                           {/* Editor's per-collection "best for" tagline takes the prominent slot */}
                           {itemBestFor && (
-                            <p className="text-sm italic text-orange-300/90 mb-2">Best for {itemBestFor}</p>
+                            <p className="text-sm italic text-accent-text/90 mb-2">Best for {itemBestFor}</p>
                           )}
 
-                          <p className="text-sm text-gray-300 leading-relaxed mb-3">
+                          <p className="text-sm text-prose-muted leading-relaxed mb-3">
                             {blurb ?? review.tldr ?? review.excerpt ?? ''}
                           </p>
 
@@ -399,13 +399,13 @@ export default async function GiftOccasionPage({ params }: Props) {
               </section>
             ) : (
               /* Empty state — proper SEO landing page with email capture */
-              <div className="bg-gradient-to-br from-orange-950/30 to-surface rounded-2xl p-8 md:p-10 border border-accent-border/30 mb-10">
+              <div className="bg-gradient-to-br from-accent-tint to-white rounded-2xl p-8 md:p-10 border border-accent-border/30 mb-10">
                 <span aria-hidden className="block h-px w-6 bg-accent/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-bold mb-3">Coming Soon</p>
-                <h2 className="text-2xl md:text-3xl font-black text-white mb-3">
+                <h2 className="text-2xl md:text-3xl font-black text-prose mb-3">
                   The {occ.label} list is being built
                 </h2>
-                <p className="text-gray-300 leading-relaxed mb-6 max-w-xl">
+                <p className="text-prose-muted leading-relaxed mb-6 max-w-xl">
                   Boss Daddy is curating the {occ.label.toLowerCase()} guide right now — every pick personally tested, no corporate gift-list filler. Drop your email and you&apos;ll be the first to know when it goes live.
                 </p>
                 <div className="max-w-md">
@@ -434,10 +434,10 @@ export default async function GiftOccasionPage({ params }: Props) {
                     <Link
                       key={r.value}
                       href={`/gifts/${r.slug}`}
-                      className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-white/[0.02] hover:bg-surface-raised hover:border-accent-border/40 rounded-xl transition-colors min-h-[44px]"
+                      className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:bg-surface-raised hover:border-accent-border/40 rounded-xl transition-colors min-h-[44px]"
                     >
                       <OccasionIcon value={r.value} className="w-6 h-6 shrink-0 text-accent-text-soft" />
-                      <span className="text-sm font-semibold text-gray-300 hover:text-white transition-colors truncate">{r.label}</span>
+                      <span className="text-sm font-semibold text-prose-muted hover:text-prose transition-colors truncate">{r.label}</span>
                     </Link>
                   ))}
                 </div>
