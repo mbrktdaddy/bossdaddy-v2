@@ -174,7 +174,7 @@ export default async function HomePage() {
                   </Link>
                   <Link
                     href="/guides"
-                    className="px-6 py-3 bg-white border border-strong hover:border-prose/40 hover:bg-stone-50 text-prose font-semibold rounded-xl transition-colors"
+                    className="px-6 py-3 bg-transparent border border-stone-700 hover:border-copper hover:bg-stone-900/40 text-stone-200 hover:text-stone-50 font-semibold rounded-xl transition-colors"
                   >
                     Browse Guides
                   </Link>
@@ -365,16 +365,18 @@ export default async function HomePage() {
       </section>
 
       {/* ── The Rules — Heritage Pro DARK BAND.
-            First charcoal moment in the page rhythm. Trust manifesto
-            against the leather-divider backdrop. Numerals in copper for
-            premium metalwork signal. */}
-      <section className="relative bg-drama">
+            First CREAM EDITORIAL moment in the dark-canvas page rhythm.
+            Trust manifesto on a cream-paper section — reads as a "letter
+            from the editor" / page from a heritage field journal pinned
+            against the dark page. Numerals in copper for metalwork signal.
+            .bd-on-paper scope flips role tokens to dark-on-cream. */}
+      <section className="relative bg-paper bd-on-paper">
         <div className="max-w-5xl mx-auto px-6 py-20 md:py-24">
           <p className="text-[11px] md:text-xs text-copper uppercase tracking-[0.3em] font-bold mb-4 text-center">— The Rules</p>
-          <h2 className="text-3xl md:text-4xl font-black text-center text-stone-50 mb-4 leading-tight">
+          <h2 className="text-3xl md:text-4xl font-black text-center text-prose mb-4 leading-tight">
             Three rules. That&apos;s the whole standard.
           </h2>
-          <p className="text-stone-300 text-center mb-14 max-w-xl mx-auto text-sm md:text-base">
+          <p className="text-prose-muted text-center mb-14 max-w-xl mx-auto text-sm md:text-base">
             Why you can trust what you read here — and why I can tell you the truth without hedging.
           </p>
           <div className="grid md:grid-cols-3 gap-10 md:gap-12">
@@ -399,8 +401,8 @@ export default async function HomePage() {
                 <p className="text-5xl md:text-6xl font-black text-copper mb-4 leading-none tabular-nums">
                   {rule.n}
                 </p>
-                <p className="text-xl font-black text-stone-50 mb-3">{rule.title}</p>
-                <p className="text-stone-300 leading-relaxed text-sm max-w-sm mx-auto md:max-w-none md:mx-0">
+                <p className="text-xl font-black text-prose mb-3">{rule.title}</p>
+                <p className="text-prose-muted leading-relaxed text-sm max-w-sm mx-auto md:max-w-none md:mx-0">
                   {rule.body}
                 </p>
               </div>
@@ -551,24 +553,26 @@ export default async function HomePage() {
       )}
 
       {/* ── From The Vault — diverse trio of collections.
-            Cream-paper band — second rhythm break, separates editorial
-            collections from review feed. ───────────────────────────── */}
+            Second CREAM EDITORIAL moment. Curated picks deserve the
+            "magazine spread" treatment against the dark page. Cards
+            within are white surfaces on the cream — newspaper directory
+            inside a heritage binder. ─────────────────────────────── */}
       {vaultTrio.length > 0 && (
-        <section className="relative bg-drama">
+        <section className="relative bg-paper bd-on-paper">
           <div className="relative max-w-6xl mx-auto px-6 py-20 md:py-24">
             <div className="flex items-end justify-between mb-10 gap-4">
               <div className="flex items-stretch gap-4 min-w-0">
                 <div className="w-[3px] bg-copper rounded-full shrink-0" />
                 <div className="min-w-0">
                   <p className="text-[11px] text-copper uppercase tracking-[0.2em] font-bold mb-2">— From The Vault</p>
-                  <h2 className="text-2xl md:text-3xl font-black text-stone-50 leading-tight">Comparisons, kits, and curated picks</h2>
-                  <p className="mt-2 text-sm text-stone-400">{LABELS.vault.tagline}</p>
+                  <h2 className="text-2xl md:text-3xl font-black text-prose leading-tight">Comparisons, kits, and curated picks</h2>
+                  <p className="mt-2 text-sm text-prose-faint">{LABELS.vault.tagline}</p>
                 </div>
               </div>
               <Link
                 href="/vault"
                 title={LABELS.vault.tagline}
-                className="hidden sm:inline-flex items-center text-xs text-stone-400 hover:text-copper transition-colors uppercase tracking-widest font-semibold shrink-0 whitespace-nowrap"
+                className="hidden sm:inline-flex items-center text-xs text-prose-faint hover:text-copper transition-colors uppercase tracking-widest font-semibold shrink-0 whitespace-nowrap"
               >
                 Open the Vault →
               </Link>
@@ -582,15 +586,15 @@ export default async function HomePage() {
                   <Link
                     key={`${card.collection_type}:${card.slug}`}
                     href={href}
-                    className="group flex flex-col bg-surface rounded-xl overflow-hidden border border-stone-700 shadow-lg shadow-stone-900/40 hover:border-copper hover:shadow-xl hover:shadow-stone-900/60 hover:-translate-y-1 transition-all duration-200"
+                    className="group flex flex-col bg-surface rounded-xl overflow-hidden border border-soft shadow-lg shadow-stone-900/[0.06] hover:border-copper hover:shadow-xl hover:shadow-stone-900/[0.12] hover:-translate-y-1 transition-all duration-200"
                   >
-                    <div className="relative aspect-video bg-stone-100">
+                    <div className="relative aspect-video bg-surface-sunken">
                       {card.hero_image_url ? (
                         <Image src={card.hero_image_url} alt={card.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center text-copper/40">{meta.icon}</div>
                       )}
-                      <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-drama/85 backdrop-blur border border-stone-700 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-copper">
+                      <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-paper/95 backdrop-blur border border-soft rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-copper">
                         {meta.label}
                       </span>
                     </div>
@@ -669,17 +673,24 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Closing tagline — magazine-style signoff, no CTA button.
-            Copper accent for the "together" highlight — premium
-            metalwork-finish on the final flourish. */}
-      <section className="relative py-24 md:py-32">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <p className="text-[11px] text-copper uppercase tracking-[0.2em] font-bold mb-6">— The Bottom Line</p>
-          <p className="text-3xl md:text-5xl font-black text-prose leading-[1.1] mb-10">
+      {/* ── Closing tagline — ORANGE MANIFESTO MOMENT.
+            Full-bleed brand-orange section ending the page on a bold
+            statement. Cream highlight on "together" reads as heritage
+            masculine warmth on the action-orange canvas. The orange-
+            as-background treatment the brand has been missing. */}
+      <section className="relative bg-accent-brand py-24 md:py-32 overflow-hidden">
+        {/* Subtle vignette to anchor type and add depth */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 50%, transparent 40%, rgba(0,0,0,0.18))' }}
+        />
+        <div className="relative max-w-4xl mx-auto px-6 text-center">
+          <p className="text-[11px] text-stone-900/80 uppercase tracking-[0.3em] font-black mb-6">— The Bottom Line</p>
+          <p className="text-3xl md:text-5xl font-black text-white leading-[1.1] mb-10 tracking-tight">
             Now let&apos;s dad like a BOSS —{' '}
-            <span className="text-copper">together.</span>
+            <span className="text-paper italic">together.</span>
           </p>
-          <p className="text-sm text-prose-faint italic">— Boss Daddy</p>
+          <p className="text-sm text-stone-900/70 italic font-semibold">— Boss Daddy</p>
         </div>
       </section>
 

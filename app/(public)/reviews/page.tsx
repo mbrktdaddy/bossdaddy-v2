@@ -110,7 +110,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
         <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
           <Link
             href="/reviews"
-            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-drama text-stone-50 border border-drama shadow-sm shadow-stone-900/20 transition-colors"
+            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-prose text-background border border-prose shadow-sm shadow-stone-950/40 transition-colors"
           >
             All Reviews
           </Link>
@@ -118,7 +118,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
             <Link
               key={c.slug}
               href={`/reviews/category/${c.slug}`}
-              className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-white text-prose border border-strong hover:border-prose hover:bg-stone-50 transition-colors"
+              className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose transition-colors"
             >
               <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
               <span>{c.label}</span>
@@ -224,7 +224,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
       <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
         <Link
           href="/reviews"
-          className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-white text-prose border border-strong hover:border-prose hover:bg-stone-50 transition-colors"
+          className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose transition-colors"
         >
           All Reviews
         </Link>
@@ -234,8 +234,8 @@ export default async function ReviewsPage({ searchParams }: Props) {
             href={`/reviews/category/${c.slug}`}
             className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
               category === c.slug
-                ? 'bg-drama text-stone-50 border border-drama shadow-sm shadow-stone-900/20'
-                : 'bg-white text-prose border border-strong hover:border-prose hover:bg-stone-50'
+                ? 'bg-prose text-background border border-prose shadow-sm shadow-stone-950/40'
+                : 'bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose'
             }`}
           >
             <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
