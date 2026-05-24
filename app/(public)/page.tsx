@@ -99,31 +99,57 @@ export default async function HomePage() {
             asset arrives, set backgroundImage on the section to a 16:9
             hero photo (2880×1620 retina) and the dark scrim + vignette
             will frame it correctly. ───────────────────────────────── */}
+      {/* Hero — responsive shield watermark BG.
+          Mobile: faint centered watermark (50% height, 18% opacity, soft top-bottom dim).
+          Desktop: right-anchored stamp (85% height, 45% opacity, left-right dim + warm glow). */}
       <section className="relative overflow-hidden">
-        {/* BG LAYER 1 — the BD shield watermark, positioned right.
-            Reduced opacity so it reads as a brand stamp behind the type,
-            not a literal logo competition. Scales with section height
-            so it stays proportionate at any viewport. Hidden on small
-            mobile where it would crowd the copy. */}
+        {/* BG LAYER 1 — Mobile shield: centered, smaller, fainter.
+            Sits behind the text as a subtle brand watermark. */}
         <div
           aria-hidden
-          className="absolute inset-0 pointer-events-none opacity-25 sm:opacity-35 md:opacity-50"
+          className="md:hidden absolute inset-0 pointer-events-none opacity-15"
           style={{
             backgroundImage: "url('/images/bd-hero-bg.png')",
-            backgroundSize: 'auto 95%',
-            backgroundPosition: 'right -8% center',
+            backgroundSize: 'auto 50%',
+            backgroundPosition: 'center 65%',
             backgroundRepeat: 'no-repeat',
           }}
         />
 
-        {/* BG LAYER 2 — left-side dimming + corner vignette so the copy
-            reads cleanly on top regardless of where the shield bleeds. */}
+        {/* BG LAYER 1 — Desktop shield: right-anchored, larger, more present.
+            Anchored at 98% so it sits visible against the right edge
+            without bleeding off the screen. */}
         <div
           aria-hidden
-          className="absolute inset-0 pointer-events-none"
+          className="hidden md:block absolute inset-0 pointer-events-none opacity-45 lg:opacity-55"
+          style={{
+            backgroundImage: "url('/images/bd-hero-bg.png')",
+            backgroundSize: 'auto 85%',
+            backgroundPosition: '98% center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
+
+        {/* BG LAYER 2 — Mobile scrim: soft top-bottom dim so text reads
+            over the centered watermark. */}
+        <div
+          aria-hidden
+          className="md:hidden absolute inset-0 pointer-events-none"
           style={{
             background:
-              'linear-gradient(90deg, rgba(10,10,12,0.75) 0%, rgba(10,10,12,0.4) 40%, rgba(10,10,12,0.1) 65%, transparent 85%), radial-gradient(ellipse 60% 40% at 90% 50%, rgba(204,85,0,0.10), transparent 65%)',
+              'linear-gradient(180deg, rgba(10,10,12,0.6) 0%, rgba(10,10,12,0.2) 35%, rgba(10,10,12,0.5) 100%)',
+          }}
+        />
+
+        {/* BG LAYER 2 — Desktop scrim: left-right dim + warm right-side glow.
+            Ensures the left-aligned copy reads cleanly; the orange radial
+            warms the area behind the shield without overdoing it. */}
+        <div
+          aria-hidden
+          className="hidden md:block absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'linear-gradient(90deg, rgba(10,10,12,0.7) 0%, rgba(10,10,12,0.35) 35%, rgba(10,10,12,0.1) 60%, transparent 80%), radial-gradient(ellipse 55% 40% at 88% 50%, rgba(204,85,0,0.10), transparent 65%)',
           }}
         />
 
