@@ -309,7 +309,7 @@ export default async function StackDetailPage({ params }: Props) {
                   return (
                     <article
                       key={review.id}
-                      className="relative flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-stone-900/[0.06] transition-colors"
+                      className="relative flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-stone-900/[0.06] transition-colors"
                     >
                       {/* Position number — subtle ordering signal */}
                       <span aria-hidden className="absolute top-3 left-3 text-[10px] font-black text-accent-text/30 tabular-nums tracking-widest">

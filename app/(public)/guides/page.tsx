@@ -119,7 +119,7 @@ export default async function GuidesPage({ searchParams }: Props) {
             replaces 8 identical 3-col card grids with a tighter, scannable
             list per category. Featured card above carries the visual weight. */}
         {sections.length === 0 ? (
-          <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04]">
+          <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft ring-1 ring-inset ring-stone-900/[0.04]">
             <p className="text-prose-faint text-lg font-semibold">No guides here yet.</p>
             <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
           </div>
@@ -210,7 +210,7 @@ export default async function GuidesPage({ searchParams }: Props) {
       </div>
 
       {!guides.length ? (
-        <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04]">
+        <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft ring-1 ring-inset ring-stone-900/[0.04]">
           <p className="text-prose-faint text-lg font-semibold">No guides here yet.</p>
           <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
         </div>

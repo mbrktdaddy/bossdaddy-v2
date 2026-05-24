@@ -54,7 +54,7 @@ export default function RatingWidget({ reviewId }: Props) {
   const activeRating = hovered ?? data.userRating
 
   return (
-    <div className="py-3 border-t border-soft/60">
+    <div className="py-3 border-t border-soft">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
 
         <span className="text-xs text-prose-faint shrink-0 select-none">Rate this product:</span>

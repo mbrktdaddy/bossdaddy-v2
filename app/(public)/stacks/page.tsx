@@ -56,7 +56,7 @@ export default async function StacksIndexPage({ searchParams }: Props) {
             <Link
               key={s.id}
               href={`/stacks/${s.slug}`}
-              className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
+              className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
             >
               <div className="relative w-full aspect-video bg-surface-raised shrink-0">
                 {s.hero_image_url ? (

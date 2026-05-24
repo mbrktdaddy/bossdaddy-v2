@@ -136,7 +136,7 @@ export default async function CategoryHubPage({ params }: Props) {
                 <Link
                   key={r.id}
                   href={`/reviews/${r.slug}`}
-                  className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
+                  className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
                 >
                   {r.image_url ? (
                     <div className="relative w-full h-48 bg-surface-raised shrink-0">
@@ -202,7 +202,7 @@ export default async function CategoryHubPage({ params }: Props) {
                     className="group flex items-center gap-4 sm:gap-5 py-5 -mx-2 px-2 rounded-xl hover:bg-surface/50 transition-colors"
                   >
                     {/* Thumbnail — fixed square, fills */}
-                    <div className="relative shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-surface border border-soft/60">
+                    <div className="relative shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-surface border border-soft">
                       {g.image_url ? (
                         <Image
                           src={g.image_url}
@@ -279,7 +279,7 @@ export default async function CategoryHubPage({ params }: Props) {
             </div>
             <div className="space-y-2">
               {catFaqs.map((faq, i) => (
-                <details key={i} className="group bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 transition-colors rounded-xl overflow-hidden">
+                <details key={i} className="group bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 transition-colors rounded-xl overflow-hidden">
                   <summary className="flex items-center justify-between gap-3 px-4 py-3.5 cursor-pointer list-none min-h-[44px]">
                     <span className="text-sm font-semibold text-prose leading-snug">{faq.question}</span>
                     <svg className="w-4 h-4 shrink-0 text-accent-text transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -296,7 +296,7 @@ export default async function CategoryHubPage({ params }: Props) {
         )}
 
         {/* ── Other categories ──────────────────────────────────────────── */}
-        <section className="mt-12 pt-12 border-t border-soft/60">
+        <section className="mt-12 pt-12 border-t border-soft">
           <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
           <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold mb-5">More Categories</p>
           <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 pb-1">

@@ -52,7 +52,7 @@ export default async function CommentList({ contentType, contentId }: Props) {
               </span>
             </div>
             <p className="text-prose-muted text-sm leading-relaxed whitespace-pre-line">{c.body}</p>
-            <div className="mt-3 pt-3 border-t border-soft/60 flex items-center justify-between">
+            <div className="mt-3 pt-3 border-t border-soft flex items-center justify-between">
               <LikeButton contentType="comment" contentId={c.id} size="sm" />
               <CommentShareButton commentId={c.id} shareCount={shareCountMap[c.id] ?? 0} />
             </div>

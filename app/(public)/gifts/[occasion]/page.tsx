@@ -322,7 +322,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                     const product = review.product_slug ? productMap.get(review.product_slug) : null
                     const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                     return (
-                      <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-stone-900/[0.06] transition-colors">
+                      <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-stone-900/[0.06] transition-colors">
                         <div className="flex sm:flex-col items-center gap-3 sm:gap-0 shrink-0">
                           <span className="w-10 h-10 rounded-full bg-accent-tint border border-accent-border/40 flex items-center justify-center text-accent-text-soft font-black text-sm tabular-nums">
                             {idx + 1}
@@ -426,7 +426,7 @@ export default async function GiftOccasionPage({ params }: Props) {
 
             {/* Related occasions strip — siblings in the same occasion group */}
             {relatedOccasions.length > 0 && (
-              <section className="mt-14 pt-10 border-t border-soft/60">
+              <section className="mt-14 pt-10 border-t border-soft">
                 <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-5">More Gift Guides</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -434,7 +434,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                     <Link
                       key={r.value}
                       href={`/gifts/${r.slug}`}
-                      className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:bg-surface-raised hover:border-accent-border/40 rounded-xl transition-colors min-h-[44px]"
+                      className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] hover:bg-surface-raised hover:border-accent-border/40 rounded-xl transition-colors min-h-[44px]"
                     >
                       <OccasionIcon value={r.value} className="w-6 h-6 shrink-0 text-accent-text-soft" />
                       <span className="text-sm font-semibold text-prose-muted hover:text-prose transition-colors truncate">{r.label}</span>

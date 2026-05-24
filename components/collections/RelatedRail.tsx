@@ -37,7 +37,7 @@ export default function RelatedRail({
   if (!items || items.length === 0) return null
 
   return (
-    <section id={id} aria-label={heading} className="mt-14 pt-10 border-t border-soft/60">
+    <section id={id} aria-label={heading} className="mt-14 pt-10 border-t border-soft">
       <div className="mb-6">
         <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">{eyebrow}</p>
@@ -69,7 +69,7 @@ function RelatedCard({ item, className }: { item: RelatedItem; className?: strin
   return (
     <Link
       href={href}
-      className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden shadow-md shadow-stone-900/[0.05] hover:border-accent-border/40 hover:shadow-lg hover:shadow-stone-900/[0.08] hover:-translate-y-1 transition-all ${className ?? ''}`}
+      className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden shadow-md shadow-stone-900/[0.05] hover:border-accent-border/40 hover:shadow-lg hover:shadow-stone-900/[0.08] hover:-translate-y-1 transition-all ${className ?? ''}`}
     >
       <div className="relative aspect-video bg-surface-sunken">
         {item.hero_image_url ? (

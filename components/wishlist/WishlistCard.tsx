@@ -57,7 +57,7 @@ export function WishlistCard({ item }: Props) {
             className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold tabular-nums ${
               voteCount > 0
                 ? 'bg-accent-tint border border-accent-border/40 text-accent-text'
-                : 'bg-surface/60 border border-soft/60 text-prose-faint'
+                : 'bg-white border border-soft text-prose-faint'
             }`}
             title={voteCount > 0 ? `${voteCount} ${voteCount === 1 ? 'reader has' : 'readers have'} voted for this` : 'No votes yet — be the first'}
           >

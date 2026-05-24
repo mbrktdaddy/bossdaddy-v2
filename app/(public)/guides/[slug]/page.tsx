@@ -275,7 +275,7 @@ export default async function GuidePage({ params }: Props) {
 
             {/* FAQ accordion */}
             {guideFaqs.length > 0 && (
-              <div className="mt-12 pt-8 border-t border-soft/60">
+              <div className="mt-12 pt-8 border-t border-soft">
                 <div className="mb-5">
                   <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Common Questions</p>
@@ -283,7 +283,7 @@ export default async function GuidePage({ params }: Props) {
                 </div>
                 <div className="space-y-2">
                   {guideFaqs.map((faq, i) => (
-                    <details key={i} className="group bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 transition-colors rounded-xl overflow-hidden">
+                    <details key={i} className="group bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 transition-colors rounded-xl overflow-hidden">
                       <summary className="flex items-center justify-between gap-3 px-4 py-3.5 cursor-pointer list-none min-h-[44px]">
                         <span className="text-sm font-semibold text-prose leading-snug">{faq.question}</span>
                         <svg className="w-4 h-4 shrink-0 text-accent-text transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -301,7 +301,7 @@ export default async function GuidePage({ params }: Props) {
 
             {/* Email signup CTA */}
             <div className="mt-12 pt-8">
-              <div className="bg-gradient-to-br from-surface to-surface-sunken border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-xl p-6 sm:p-8 text-center shadow-xl shadow-stone-900/[0.06]">
+              <div className="bg-gradient-to-br from-surface to-surface-sunken border border-soft ring-1 ring-inset ring-stone-900/[0.04] rounded-xl p-6 sm:p-8 text-center shadow-xl shadow-stone-900/[0.06]">
                 <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3 mx-auto" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Liked this guide?</p>
                 <h3 className="text-xl font-black mb-2">Get the next one in your inbox</h3>
@@ -342,7 +342,7 @@ export default async function GuidePage({ params }: Props) {
                     <Link
                       key={r.id}
                       href={`/reviews/${r.slug}`}
-                      className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden shadow-md shadow-stone-900/[0.05] hover:shadow-lg hover:shadow-stone-900/[0.08] hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
+                      className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden shadow-md shadow-stone-900/[0.05] hover:shadow-lg hover:shadow-stone-900/[0.08] hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
                     >
                       {r.image_url ? (
                         <div className="relative w-full h-36 bg-surface-raised shrink-0">
@@ -392,7 +392,7 @@ export default async function GuidePage({ params }: Props) {
                     <Link
                       key={a.id}
                       href={`/guides/${a.slug}`}
-                      className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden shadow-md shadow-stone-900/[0.05] hover:shadow-lg hover:shadow-stone-900/[0.08] hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
+                      className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden shadow-md shadow-stone-900/[0.05] hover:shadow-lg hover:shadow-stone-900/[0.08] hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
                     >
                       {a.image_url ? (
                         <div className="relative w-full h-36 bg-surface-raised shrink-0 overflow-hidden">
@@ -466,7 +466,7 @@ export default async function GuidePage({ params }: Props) {
 
               {/* Compact products panel — in mention order */}
               {mentionedProducts && mentionedProducts.length > 0 && (
-                <div className="bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 transition-colors rounded-xl p-4">
+                <div className="bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 transition-colors rounded-xl p-4">
                   <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Products Mentioned</p>
                   <ul className="space-y-3">

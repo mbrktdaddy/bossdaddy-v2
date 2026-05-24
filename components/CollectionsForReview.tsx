@@ -63,7 +63,7 @@ export default async function CollectionsForReview({ reviewId }: Props) {
   if (collections.length === 0) return null
 
   return (
-    <section className="mt-12 pt-8 border-t border-soft/60" aria-label="Featured in collections">
+    <section className="mt-12 pt-8 border-t border-soft" aria-label="Featured in collections">
       <div className="mb-5">
         <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Featured in</p>
@@ -77,7 +77,7 @@ export default async function CollectionsForReview({ reviewId }: Props) {
             <li key={c.id}>
               <Link
                 href={href}
-                className="group flex items-center gap-4 p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 hover:-translate-y-1 rounded-xl shadow-md shadow-stone-900/[0.05] transition-all"
+                className="group flex items-center gap-4 p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 hover:-translate-y-1 rounded-xl shadow-md shadow-stone-900/[0.05] transition-all"
               >
                 <span className="text-accent-text-soft shrink-0">{meta.icon}</span>
                 <div className="min-w-0 flex-1">

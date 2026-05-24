@@ -56,7 +56,7 @@ export default function ArticleTOC({ items, variant }: Props) {
       // behind it as the user scrolls. z-10 stays under the header z-50.
       <nav
         aria-label="On this page"
-        className="lg:hidden -mx-6 mb-8 px-6 sticky top-16 z-10 bg-surface-sunken/95 backdrop-blur py-3 border-y border-soft/60"
+        className="lg:hidden -mx-6 mb-8 px-6 sticky top-16 z-10 bg-surface-sunken/95 backdrop-blur py-3 border-y border-soft"
       >
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
           <span className="shrink-0 text-[10px] font-bold text-eyebrow uppercase tracking-widest mr-1">
@@ -86,7 +86,7 @@ export default function ArticleTOC({ items, variant }: Props) {
       className="hidden lg:block sticky top-24 self-start w-56 shrink-0"
     >
       <p className="text-[10px] font-bold text-eyebrow uppercase tracking-widest mb-3">On this page</p>
-      <ul className="space-y-1 border-l border-soft/60 pl-3">
+      <ul className="space-y-1 border-l border-soft pl-3">
         {items.map((item) => (
           <li key={item.id}>
             <a

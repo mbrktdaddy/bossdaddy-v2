@@ -101,7 +101,7 @@ export default async function OrderPage({ params }: Props) {
       </div>
 
       {/* Totals */}
-      <div className="bg-surface/60 rounded-xl p-6 mb-4 space-y-2 text-sm">
+      <div className="bg-white rounded-xl p-6 mb-4 space-y-2 text-sm">
         <div className="flex justify-between text-prose-muted">
           <span>Subtotal</span>
           <span className="text-prose">{formatPrice(order.subtotal_cents)}</span>
@@ -124,7 +124,7 @@ export default async function OrderPage({ params }: Props) {
 
       {/* Shipping address */}
       {addr && (
-        <div className="bg-surface/60 rounded-xl p-6 mb-10">
+        <div className="bg-white rounded-xl p-6 mb-10">
           <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold mb-3">Ships to</p>
           <p className="text-prose font-semibold">{addr.name}</p>
           <p className="text-prose-muted text-sm">{addr.line1}</p>

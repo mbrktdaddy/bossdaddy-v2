@@ -303,7 +303,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
                       <a
                         key={review!.id}
                         href={`#dive-${review!.slug}`}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-surface/60 border border-accent-border/40 hover:border-accent-border/60 rounded-full text-xs text-prose-muted hover:text-accent transition-colors min-h-[36px]"
+                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-accent-border/40 hover:border-accent-border/60 rounded-full text-xs text-prose-muted hover:text-accent transition-colors min-h-[36px]"
                       >
                         <span className="text-[10px] font-bold uppercase tracking-widest text-accent-text-soft">{wins_category}</span>
                         <span className="font-semibold">{review!.product_name}</span>
@@ -377,14 +377,14 @@ export default async function ComparisonDetailPage({ params }: Props) {
                 </div>
 
                 <div className="overflow-x-auto -mx-6 px-6">
-                  <table className="w-full min-w-[640px] border-separate border-spacing-0 bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden">
+                  <table className="w-full min-w-[640px] border-separate border-spacing-0 bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden">
                     <thead>
                       <tr>
-                        <th className="text-left px-4 py-3 text-xs uppercase tracking-widest text-prose-faint font-semibold border-b border-soft/60 align-bottom">
+                        <th className="text-left px-4 py-3 text-xs uppercase tracking-widest text-prose-faint font-semibold border-b border-soft align-bottom">
                           Criterion
                         </th>
                         {items.map(({ review }) => (
-                          <th key={review!.id} className="px-3 py-3 border-b border-soft/60 align-bottom min-w-[120px]">
+                          <th key={review!.id} className="px-3 py-3 border-b border-soft align-bottom min-w-[120px]">
                             <a href={`#dive-${review!.slug}`} className="group block text-center">
                               <div className="relative w-14 h-14 mx-auto mb-2 rounded-xl overflow-hidden bg-surface-sunken border border-soft group-hover:border-accent-border transition-colors">
                                 {review!.image_url && (
@@ -422,10 +422,10 @@ export default async function ComparisonDetailPage({ params }: Props) {
                           </tr>
                         )
                       })}
-                      <tr className="border-t border-soft/60">
-                        <td className="px-4 py-3 text-sm text-prose font-black uppercase tracking-widest text-xs border-t border-soft/60">Overall</td>
+                      <tr className="border-t border-soft">
+                        <td className="px-4 py-3 text-sm text-prose font-black uppercase tracking-widest text-xs border-t border-soft">Overall</td>
                         {items.map(({ review }) => (
-                          <td key={review!.id} className="px-4 py-3 text-center border-t border-soft/60">
+                          <td key={review!.id} className="px-4 py-3 text-center border-t border-soft">
                             <RatingScore rating={review!.rating ?? 0} size="sm" />
                           </td>
                         ))}
@@ -468,7 +468,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
                     <article
                       key={review.id}
                       id={`dive-${review.slug}`}
-                      className="scroll-mt-28 rounded-xl overflow-hidden bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06]"
+                      className="scroll-mt-28 rounded-xl overflow-hidden bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06]"
                     >
                       <div className={`flex flex-col ${imageLeft ? 'sm:flex-row' : 'sm:flex-row-reverse'} gap-0`}>
                         {/* Hero image column */}
@@ -617,7 +617,7 @@ function ContenderCard({
   return (
     <a
       href={`#dive-${review.slug}`}
-      className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden shadow-md shadow-stone-900/[0.05] hover:shadow-lg hover:shadow-stone-900/[0.08] hover:border-accent-border/40 hover:-translate-y-1 transition-all ${className ?? ''}`}
+      className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden shadow-md shadow-stone-900/[0.05] hover:shadow-lg hover:shadow-stone-900/[0.08] hover:border-accent-border/40 hover:-translate-y-1 transition-all ${className ?? ''}`}
     >
       <div className="relative w-full aspect-square bg-surface-sunken">
         {review.image_url && (

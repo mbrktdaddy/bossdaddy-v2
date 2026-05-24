@@ -138,7 +138,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
             scannable list per category. Featured card above does the visual
             heavy-lifting; these are quick browse-and-tap entries. */}
         {sections.length === 0 ? (
-          <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04]">
+          <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft ring-1 ring-inset ring-stone-900/[0.04]">
             <p className="text-prose-faint text-lg font-semibold">No reviews here yet.</p>
             <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
           </div>
@@ -245,7 +245,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
       </div>
 
       {!reviews.length ? (
-        <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04]">
+        <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft ring-1 ring-inset ring-stone-900/[0.04]">
           <p className="text-prose-faint text-lg font-semibold">No reviews here yet.</p>
           <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
         </div>

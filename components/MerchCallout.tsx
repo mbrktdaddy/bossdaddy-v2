@@ -18,7 +18,7 @@ export async function MerchCallout() {
   if (items.length === 0) return null
 
   return (
-    <div className="mt-12 pt-10 border-t border-soft/60">
+    <div className="mt-12 pt-10 border-t border-soft">
       <div className="flex items-end justify-between mb-6">
         <div>
           <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-1">— Boss Daddy Gear</p>

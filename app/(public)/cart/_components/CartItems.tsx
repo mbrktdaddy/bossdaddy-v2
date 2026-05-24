@@ -173,7 +173,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
       </div>
 
       {/* Order summary */}
-      <div className="bg-surface/60 rounded-xl p-6 flex flex-col gap-3">
+      <div className="bg-white rounded-xl p-6 flex flex-col gap-3">
         <div className="flex items-center justify-between text-sm">
           <span className="text-prose-muted">Subtotal</span>
           <span className="text-prose font-semibold">{formatPrice(subtotal)}</span>
