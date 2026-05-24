@@ -2,22 +2,19 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
-import { CATEGORIES, getCategoryBySlug } from '@/lib/categories'
+import { getCategoryBySlug } from '@/lib/categories'
 import { LABELS } from '@/lib/labels'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
 import CodeRedirect from './_components/CodeRedirect'
 import { LatestGuidesSection } from './_components/LatestGuidesSection'
-import BenchStrip from '@/components/BenchStrip'
-import InMotionTicker from '@/components/InMotionTicker'
-import { HomepageMerchStrip } from '@/components/HomepageMerchStrip'
 import { EmailSignup } from '@/components/EmailSignup'
 import { OCCASIONS } from '@/lib/gift-occasions'
 import type { Metadata } from 'next'
 
-// Used by the From-The-Vault strip; small inline shape rather than reaching
-// for the full DB row type since we only consume a few fields here.
+// Shape used by the From-The-Vault strip. Small inline interface instead of
+// the full DB row type — we only consume a few fields here.
 interface VaultStripCard {
   slug:            string
   title:           string
@@ -35,20 +32,28 @@ export const metadata: Metadata = {
   alternates: { canonical: '/' },
 }
 
+/**
+ * Homepage v3 — "Click Into Content."
+ *
+ * Architecture: 7 surfaces on a single dark canvas. Orange is accent only —
+ * no full-bleed orange canvases. Content (Reviews + Guides + Vault) leads.
+ * Framing (The Standard + Newsletter) sits in supporting positions.
+ *
+ *   1. Hero — brand statement, one quiet CTA
+ *   2. Recent Reviews — magazine 1+3 grid, premium treatment
+ *   3. Latest Guides — editorial row list, breadth signal
+ *   4. From The Vault — derived collections, dark cards (no orange footer)
+ *   5. The Standard — quiet trust panel (replaces orange "Rules" manifesto)
+ *   6. Newsletter — single quiet signup row (Footer carries the heavy lift)
+ *   7. Closing signature
+ */
 export default async function HomePage() {
   const supabase = await createClient()
-
-  // Buildora hero pattern: brand-statement + info card + stats. No
-  // featured-product card in the hero anymore — featured content appears
-  // as the first card in Recent Reviews magazine grid below.
-  // (Admin spotlight pins on /reviews and /guides listing pages still
-  // respected; they just don't drive a hero-product slot on /.)
 
   const [
     { data: latestReviewsRaw },
     { data: vaultPicksRaw },
   ] = await Promise.all([
-    // Fetch 4 latest reviews for the magazine grid (1 hero card + 3 stacked).
     supabase
       .from('reviews')
       .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
@@ -56,9 +61,6 @@ export default async function HomePage() {
       .eq('is_visible', true)
       .order('published_at', { ascending: false })
       .limit(4),
-    // Up to 6 recent Vault collections — we pick a diverse trio downstream
-    // (one comparison + one pick/best-of + one stack/gift_guide) so the
-    // homepage strip signals the breadth of editorial content beyond reviews.
     supabase
       .from('collections')
       .select('slug, title, description, hero_image_url, collection_type, occasion, published_at')
@@ -70,8 +72,8 @@ export default async function HomePage() {
   const latestReviews = (latestReviewsRaw ?? []).slice(0, 4)
 
   // Pick a diverse Vault trio — one of each flavor when possible, falling
-  // back to whatever's most recent. Order on the homepage strip: Comparison →
-  // Pick → Stack → Gift Guide (drops as needed when we hit 3).
+  // back to whatever's most recent. Surface ordering: comparison → pick →
+  // stack → gift_guide (drops as needed when we hit 3).
   const vaultPool = (vaultPicksRaw ?? []) as VaultStripCard[]
   const vaultTrio: VaultStripCard[] = []
   for (const t of ['comparison', 'best_of', 'general', 'stack', 'gift_guide']) {
@@ -86,45 +88,28 @@ export default async function HomePage() {
         <CodeRedirect />
       </Suspense>
 
-      {/* ── In Motion ticker — auto-fed from Bench testing/queued items.
-            Renders nothing when nothing's in motion. ────────────────────── */}
-      <Suspense fallback={null}>
-        <InMotionTicker />
-      </Suspense>
-
-      {/* ── Hero — Buildora-inspired dark canvas + ORANGE info card overlay.
-            Big bold typography sets brand voice; the orange info card to
-            the right carries the trust manifesto (The Standard); the stats
-            row beneath establishes credibility. Photo-ready: when the
-            asset arrives, set backgroundImage on the section to a 16:9
-            hero photo (2880×1620 retina) and the dark scrim + vignette
-            will frame it correctly. ───────────────────────────────── */}
-      {/* Hero — responsive shield watermark BG.
-          Mobile: faint centered watermark (50% height, 18% opacity, soft top-bottom dim).
-          Desktop: right-anchored stamp (85% height, 45% opacity, left-right dim + warm glow). */}
+      {/* ── 1. HERO ──────────────────────────────────────────────────────
+            Brand identity moment. ONE primary CTA — the magazine grid
+            below carries the rest. Shield watermark sits at quieter
+            opacity (was 65-75% desktop / 18% mobile) so the H1 reads
+            cleanly without competing brand signals. */}
       <section className="relative overflow-hidden">
-        {/* BG LAYER 1 — Mobile shield: uses the square 1024×1024 badge
-            file where the shield IS centered. bg-position center now
-            lands the shield correctly. Quieter watermark sized at 65%
-            of section height. */}
+        {/* Mobile shield — centered watermark, faint */}
         <div
           aria-hidden
-          className="md:hidden absolute inset-0 pointer-events-none opacity-18"
+          className="md:hidden absolute inset-0 pointer-events-none opacity-[0.14]"
           style={{
             backgroundImage: "url('/images/bd-logo-badge.png')",
-            backgroundSize: 'auto 65%',
+            backgroundSize: 'auto 60%',
             backgroundPosition: 'center 55%',
             backgroundRepeat: 'no-repeat',
           }}
         />
 
-        {/* BG LAYER 1 — Desktop shield: right-anchored, BIG.
-            bg-size 140% intentionally overflows top/bottom (clipped by
-            section overflow-hidden) for a "bigger than the canvas"
-            stamped feel. */}
+        {/* Desktop shield — right-anchored stamp, quieter than before */}
         <div
           aria-hidden
-          className="hidden md:block absolute inset-0 pointer-events-none opacity-65 lg:opacity-75"
+          className="hidden md:block absolute inset-0 pointer-events-none opacity-50 lg:opacity-55"
           style={{
             backgroundImage: "url('/images/bd-hero-bg.png')",
             backgroundSize: 'auto 140%',
@@ -133,8 +118,7 @@ export default async function HomePage() {
           }}
         />
 
-        {/* BG LAYER 2 — Mobile scrim: soft top-bottom dim so text reads
-            over the centered watermark. */}
+        {/* Mobile scrim — soft top/bottom dim */}
         <div
           aria-hidden
           className="md:hidden absolute inset-0 pointer-events-none"
@@ -144,32 +128,25 @@ export default async function HomePage() {
           }}
         />
 
-        {/* BG LAYER 2 — Desktop scrim: covers the copy area on the left,
-            quickly fades to transparent at 50% width so the shield on
-            the right reads at full strength. Warm orange radial behind
-            the shield amplifies the brand glow. */}
+        {/* Desktop scrim — left copy coverage + warm right-side radial */}
         <div
           aria-hidden
           className="hidden md:block absolute inset-0 pointer-events-none"
           style={{
             background:
-              'linear-gradient(90deg, rgba(10,10,12,0.75) 0%, rgba(10,10,12,0.35) 30%, transparent 55%), radial-gradient(ellipse 55% 45% at 88% 50%, rgba(204,85,0,0.16), transparent 65%)',
+              'linear-gradient(90deg, rgba(10,10,12,0.78) 0%, rgba(10,10,12,0.4) 32%, transparent 58%), radial-gradient(ellipse 55% 45% at 88% 50%, rgba(204,85,0,0.14), transparent 65%)',
           }}
         />
 
-        {/* BG LAYER 3 — bottom fade to page bg for smooth transition
-            into the InMotionTicker below. */}
+        {/* Bottom fade into page bg — uses the dark token so the fade
+            tracks any future tone tuning of --bd-bg automatically. */}
         <div
           aria-hidden
-          className="absolute inset-x-0 bottom-0 h-40 pointer-events-none"
-          style={{
-            background: 'linear-gradient(180deg, transparent, #0a0a0c)',
-          }}
+          className="absolute inset-x-0 bottom-0 h-32 pointer-events-none"
+          style={{ background: 'linear-gradient(180deg, transparent, var(--bd-bg))' }}
         />
 
-        {/* Content — single column, text left-aligned. The shield BG
-            anchors the right side; the copy sits cleanly on the left. */}
-        <div className="relative max-w-6xl mx-auto px-6 pt-20 pb-28 md:pt-28 md:pb-36">
+        <div className="relative max-w-6xl mx-auto px-6 pt-20 pb-24 md:pt-28 md:pb-32">
           <div className="max-w-2xl">
             <p className="text-[11px] md:text-xs uppercase tracking-[0.3em] font-bold text-accent-text mb-5">
               Dad Like A BOSS.
@@ -181,196 +158,50 @@ export default async function HomePage() {
             <p className="text-stone-300 text-base md:text-lg leading-relaxed mb-8 max-w-xl">
               Tested firsthand with my own money. No sponsors, no paid placements, no BS.
             </p>
-            <div className="flex flex-wrap items-center gap-3 mb-4">
-              <Link
-                href="/reviews"
-                className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition-colors shadow-lg shadow-black/30"
-              >
-                See This Month&apos;s Top Picks →
-              </Link>
-              <Link
-                href="/guides"
-                className="px-6 py-3 bg-transparent border border-stone-700 hover:border-accent hover:bg-stone-900/60 text-stone-200 hover:text-white font-semibold rounded-xl transition-colors"
-              >
-                Browse Guides
-              </Link>
-            </div>
             <Link
-              href="/about"
-              className="inline-block text-sm text-accent-text hover:text-accent font-medium transition-colors"
+              href="/reviews"
+              className="inline-flex items-center px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-2xl transition-colors shadow-lg shadow-black/30"
             >
-              Read my story →
+              See the latest reviews →
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Page runs on a single neutral dark canvas. Section rhythm comes
-          from typography, padding, and per-section accent ticks (the small
-          w-6 h-px bg-accent/60 line above each section h2). No bg washes —
-          the modern palette doesn't need them. */}
+      {/* ── MAGAZINE SPREAD (light scope) ──────────────────────────────────
+            Reviews + Guides + Vault flip to the cool off-white reading
+            scope mid-page. Establishes the light surface BEFORE the
+            visitor clicks into a detail page so the click-into-content
+            transition is seamless. Closes at end of Vault — Standard,
+            Newsletter, and Closing return to the dark brand scope. */}
+      <div className="bd-light bg-background">
 
-      {/* ── Trust strip ─────────────────────────────────────────────────── */}
-      <section className="relative">
-        <div className="relative max-w-6xl mx-auto px-6 py-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-4">
-            <TrustBadge
-              href="/how-we-test"
-              label="How We Test"
-              icon={
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              }
-            />
-            <TrustBadge
-              href="/editorial-standards"
-              label="Editorial Standards"
-              icon={
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              }
-            />
-            <TrustBadge
-              href="/affiliate-disclosure"
-              label="Affiliate Disclosure"
-              icon={
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-                </svg>
-              }
-            />
-            <TrustBadge
-              label="Zero Paid Placements"
-              icon={
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                </svg>
-              }
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ── The Rules — ORANGE FULL-BLEED MANIFESTO STRIP.
-            Buildora "process strip" pattern. Three numbered steps
-            connected by a hairline running through the row. White type
-            on brand-orange canvas. The Boss Daddy promise stamped
-            across the page. */}
-      <section className="relative bg-accent overflow-hidden" aria-labelledby="rules-heading">
-        {/* Subtle inner top highlight — gives the orange slab depth */}
-        <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/15" />
-        <div className="relative max-w-6xl mx-auto px-6 py-16 md:py-20">
-          <div className="text-center mb-12 md:mb-14">
-            <p className="text-[11px] md:text-xs text-stone-50/80 uppercase tracking-[0.3em] font-black mb-3">— The Rules</p>
-            <h2 id="rules-heading" className="text-3xl md:text-4xl font-black text-white leading-tight">
-              Three rules. That&apos;s the whole standard.
-            </h2>
-          </div>
-
-          {/* Steps row — three numbered cells, hairline connector behind */}
-          <div className="relative">
-            {/* Connecting hairline (desktop only, runs behind the number circles) */}
-            <span
-              aria-hidden
-              className="hidden md:block absolute left-[16.66%] right-[16.66%] top-7 h-px bg-white/30"
-            />
-            <ol className="relative grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">
-              {[
-                {
-                  n: '01',
-                  title: 'I Bought It.',
-                  body: 'My money. No PR samples, no free units, no sponsor influence.',
-                },
-                {
-                  n: '02',
-                  title: 'I Used It.',
-                  body: 'Weeks, not minutes. My kid, my grill, my garage, my weekends.',
-                },
-                {
-                  n: '03',
-                  title: "I'll Tell The Truth.",
-                  body: "The score on the page is the score I'd give a friend.",
-                },
-              ].map((rule) => (
-                <li key={rule.n} className="flex flex-col items-center text-center px-2">
-                  {/* Numbered circle marker — sits on the connector line */}
-                  <span
-                    aria-hidden
-                    className="relative z-10 inline-flex items-center justify-center w-14 h-14 rounded-full bg-white text-accent font-black text-lg tabular-nums shadow-lg shadow-black/30 mb-5"
-                  >
-                    {rule.n}
-                  </span>
-                  <p className="text-xl md:text-2xl font-black text-white tracking-tight mb-2 leading-tight">{rule.title}</p>
-                  <p className="text-stone-50/85 leading-relaxed text-sm md:text-base max-w-xs">
-                    {rule.body}
-                  </p>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-        {/* Subtle inner bottom shadow — closes the slab */}
-        <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-black/15" />
-      </section>
-
-      {/* ── LIGHT CONTENT BLOCK — Categories + Recent Reviews.
-            First WHITE rhythm break, opening immediately after the orange
-            Rules manifesto. Two sections share the .bd-light scope so
-            their role tokens (text-prose, bg-surface, border-soft) flip
-            to light values automatically. The white block reads as the
-            "spotlight content moment" between dark mood sections. */}
-      <div className="bd-light bg-white">
-      {/* ── Categories — orientation moment after Rules establishes trust.
-            Quiet utility ribbon (single eyebrow + 8 pills) — content weight
-            matches visual weight. */}
-      <section className="relative">
-        <div className="relative max-w-6xl mx-auto px-6 pt-12 pb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
-            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold whitespace-nowrap">
-              Pick your lane
-            </p>
-
-            {/* Mobile: horizontal scroll strip — break out of padded container,
-                restore padding inside per CLAUDE.md horizontal-scroll rule */}
-            <div className="sm:hidden -mx-6">
-              <div className="flex gap-2.5 overflow-x-auto px-6 pb-1 scrollbar-hide">
-                {CATEGORIES.map((cat) => (
-                  <CategoryPill key={cat.slug} slug={cat.slug} label={cat.shortLabel} />
-                ))}
-              </div>
-            </div>
-
-            {/* Desktop: wrap to fit, all 8 visible at once */}
-            <div className="hidden sm:flex flex-wrap gap-2 flex-1 justify-end">
-              {CATEGORIES.map((cat) => (
-                <CategoryPill key={cat.slug} slug={cat.slug} label={cat.shortLabel} />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Recent Reviews — asymmetric magazine grid (1 hero + 2 stacked) ─ */}
-      {latestReviews && latestReviews.length > 0 && (
+      {/* ── 2. RECENT REVIEWS — magazine 1+3 grid ─────────────────────────
+            Premium treatment. Hero card spans 2×2; three supporting cards
+            stack on the right at lg+. Cards use Shadow Skin (no borders,
+            shadow elevation only) per brand-guide doctrine. */}
+      {latestReviews.length > 0 && (
         <section className="relative">
-          <div className="relative max-w-6xl mx-auto px-6 py-16">
+          <div className="relative max-w-6xl mx-auto px-6 py-20 md:py-24">
             <div className="flex items-end justify-between mb-8 gap-4">
               <div className="flex items-stretch gap-4 min-w-0">
-                <div className="w-[3px] bg-accent-brand rounded-full shrink-0" />
+                <div className="w-[3px] bg-accent rounded-full shrink-0" />
                 <div className="min-w-0">
                   <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-2">— Recent Reviews</p>
-                  <h2 className="text-2xl md:text-3xl font-black text-prose leading-tight">Bought, tested, and Boss Daddy Approved</h2>
+                  <h2 className="text-2xl md:text-3xl font-black text-prose leading-tight">
+                    Bought, tested, and Boss Daddy Approved.
+                  </h2>
+                  <p className="mt-2 text-sm text-prose-muted">What I actually used this month.</p>
                 </div>
               </div>
-              <Link href="/reviews" className="hidden sm:inline-flex items-center text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold shrink-0">
+              <Link
+                href="/reviews"
+                className="hidden sm:inline-flex items-center text-xs text-prose-muted hover:text-accent-text transition-colors uppercase tracking-widest font-semibold shrink-0 whitespace-nowrap"
+              >
                 View all →
               </Link>
             </div>
 
-            {/* Magazine "1 + 2" layout: hero spans 2x2 on lg, smalls stack 1x1 each on the right */}
             <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-2 gap-5">
               {latestReviews.map((r, i) => {
                 const isHero = i === 0
@@ -378,7 +209,7 @@ export default async function HomePage() {
                   <Link
                     key={r.id}
                     href={`/reviews/${r.slug}`}
-                    className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft shadow-lg shadow-stone-900/[0.06] hover:border-copper hover:shadow-xl hover:shadow-stone-900/[0.12] hover:-translate-y-1 transition-all duration-200 ${
+                    className={`group flex flex-col bg-surface rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200 ${
                       isHero ? 'lg:col-span-2 lg:row-span-2' : ''
                     }`}
                   >
@@ -415,7 +246,7 @@ export default async function HomePage() {
                             return cat ? (
                               <>
                                 <CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text shrink-0" />
-                                <span className="text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-semibold truncate">
+                                <span className="text-[10px] sm:text-xs text-accent-text uppercase tracking-widest font-semibold truncate">
                                   {cat.label}
                                 </span>
                               </>
@@ -425,15 +256,15 @@ export default async function HomePage() {
                         <RatingScore rating={r.rating ?? 0} />
                       </div>
                       <h3
-                        className={`leading-snug group-hover:text-accent-text-soft transition-colors flex-1 ${
-                          isHero ? 'text-xl md:text-2xl font-black text-prose' : 'text-base font-semibold'
+                        className={`leading-snug group-hover:text-accent-text transition-colors flex-1 text-prose ${
+                          isHero ? 'text-xl md:text-2xl font-black' : 'text-base font-semibold'
                         }`}
                       >
                         {r.title}
                       </h3>
                       {r.excerpt && (
                         <p
-                          className={`text-prose-faint mt-2 ${
+                          className={`text-prose-muted mt-2 ${
                             isHero ? 'text-sm sm:text-base line-clamp-3' : 'text-sm line-clamp-2'
                           }`}
                         >
@@ -450,7 +281,7 @@ export default async function HomePage() {
                               })
                             : ''}
                         </span>
-                        <span className="text-xs text-accent-text font-medium">Read review</span>
+                        <span className="text-xs text-accent-text font-medium">Read review →</span>
                       </div>
                     </div>
                   </Link>
@@ -460,31 +291,36 @@ export default async function HomePage() {
           </div>
         </section>
       )}
-      </div>
-      {/* End of LIGHT CONTENT BLOCK — Categories + Recent Reviews */}
 
-      {/* ── From The Vault — diverse trio of collections.
-            Dark canvas with Buildora project-card treatment: photo on
-            top, ORANGE FOOTER ribbon below with title + subtitle. Cards
-            hover up with stronger shadow. Sits between two white
-            blocks to break the rhythm. Thin orange top-rule = the
-            brand-stitching transition marker from the prior white block. */}
+      {/* ── 3. LATEST GUIDES — editorial row list ─────────────────────────
+            Breadth signal. Renders on the dark canvas (no .bd-light wrap)
+            so the page reads as one continuous surface. */}
+      <Suspense fallback={<LatestGuidesSkeleton />}>
+        <LatestGuidesSection />
+      </Suspense>
+
+      {/* ── 4. FROM THE VAULT — derived collections ───────────────────────
+            Comparisons, picks, stacks, gift guides. Dark surface cards
+            (no orange footer panel — that was the second "orange moment"
+            we eliminated in v3). Mobile: stacked single column. */}
       {vaultTrio.length > 0 && (
-        <section className="relative border-t-2 border-accent">
+        <section className="relative">
           <div className="relative max-w-6xl mx-auto px-6 py-20 md:py-24">
-            <div className="flex items-end justify-between mb-10 gap-4">
+            <div className="flex items-end justify-between mb-8 gap-4">
               <div className="flex items-stretch gap-4 min-w-0">
                 <div className="w-[3px] bg-accent rounded-full shrink-0" />
                 <div className="min-w-0">
                   <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-2">— From The Vault</p>
-                  <h2 className="text-2xl md:text-3xl font-black text-stone-50 leading-tight">Comparisons, kits, and curated picks</h2>
-                  <p className="mt-2 text-sm text-stone-400">{LABELS.vault.tagline}</p>
+                  <h2 className="text-2xl md:text-3xl font-black text-prose leading-tight">
+                    Comparisons, kits, and curated picks.
+                  </h2>
+                  <p className="mt-2 text-sm text-prose-muted">{LABELS.vault.tagline}</p>
                 </div>
               </div>
               <Link
                 href="/vault"
                 title={LABELS.vault.tagline}
-                className="hidden sm:inline-flex items-center text-xs text-stone-400 hover:text-accent-text transition-colors uppercase tracking-widest font-semibold shrink-0 whitespace-nowrap"
+                className="hidden sm:inline-flex items-center text-xs text-prose-muted hover:text-accent-text transition-colors uppercase tracking-widest font-semibold shrink-0 whitespace-nowrap"
               >
                 Open the Vault →
               </Link>
@@ -498,28 +334,34 @@ export default async function HomePage() {
                   <Link
                     key={`${card.collection_type}:${card.slug}`}
                     href={href}
-                    className="group flex flex-col rounded-xl overflow-hidden border border-stone-800 shadow-lg shadow-black/30 hover:border-accent hover:shadow-xl hover:shadow-black/50 hover:-translate-y-1 transition-all duration-200"
+                    className="group flex flex-col bg-surface rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 hover:-translate-y-0.5 transition-all duration-200"
                   >
-                    {/* Photo top */}
-                    <div className="relative aspect-video bg-stone-900">
+                    <div className="relative aspect-video bg-surface-raised">
                       {card.hero_image_url ? (
-                        <Image src={card.hero_image_url} alt={card.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
+                        <Image
+                          src={card.hero_image_url}
+                          alt={card.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        />
                       ) : (
-                        <div className="absolute inset-0 flex items-center justify-center text-accent/40">{meta.icon}</div>
+                        <div className="absolute inset-0 flex items-center justify-center text-accent/40">
+                          {meta.icon}
+                        </div>
                       )}
-                      {/* Type chip overlay — dark glass on photo */}
                       <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-stone-900/85 backdrop-blur border border-stone-700 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-accent-text">
                         {meta.label}
                       </span>
                     </div>
-                    {/* ORANGE FOOTER — Buildora project-card pattern */}
-                    <div className="bg-accent p-5 flex flex-col flex-1 relative overflow-hidden">
-                      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/15" />
-                      <p className="text-base font-black text-white leading-snug mb-2 line-clamp-2 tracking-tight">{card.title}</p>
+                    <div className="p-5 flex flex-col flex-1">
+                      <h3 className="text-base font-black text-prose leading-snug mb-2 line-clamp-2 tracking-tight group-hover:text-accent-text transition-colors">
+                        {card.title}
+                      </h3>
                       {card.description && (
-                        <p className="text-sm text-stone-50/80 leading-relaxed line-clamp-2 flex-1">{card.description}</p>
+                        <p className="text-sm text-prose-muted leading-relaxed line-clamp-2 flex-1">{card.description}</p>
                       )}
-                      <p className="mt-4 text-xs text-white font-bold uppercase tracking-widest inline-flex items-center gap-1">
+                      <p className="mt-4 text-xs text-accent-text font-bold uppercase tracking-widest inline-flex items-center gap-1">
                         Read <span aria-hidden>→</span>
                       </p>
                     </div>
@@ -531,140 +373,85 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ── LIGHT CONTENT BLOCK — Latest Guides.
-            Second WHITE rhythm break after the dark Vault section.
-            .bd-light scope flips role tokens; bg-white sets canvas. */}
-      <div className="bd-light bg-white">
-        <Suspense fallback={<LatestGuidesSkeleton />}>
-          <LatestGuidesSection />
-        </Suspense>
-      </div>
+      </div>{/* end .bd-light magazine spread — return to dark brand scope */}
 
-      {/* ── On the Bench — BenchStrip ships its own complete header
-            (pulsing dot eyebrow + tagline + CTA), so no outer section
-            header here. Thin orange top-rule = the brand-stitching
-            transition marker from the prior white Latest Guides block. */}
-      <section className="border-t-2 border-accent">
-        <div className="max-w-6xl mx-auto px-6 py-10">
-          <Suspense fallback={null}>
-            <BenchStrip />
-          </Suspense>
-        </div>
-      </section>
-
-      {/* ── Merch strip ────────────────────────────────────────────────── */}
-      <Suspense fallback={null}>
-        <HomepageMerchStrip />
-      </Suspense>
-
-      {/* ── Newsletter — DARK DRAMATIC MOMENT.
-            Full-bleed dark panel against the light page rhythm. Cream
-            headline + brand orange accent strip + action-orange CTA.
-            Creates the "clubhouse invitation" feel. ─────────────────── */}
-      {/* ── Newsletter CTA — Buildora "twin orange panels" pattern.
-            Dark section header (white H2 + trust bullets), then two
-            orange panels side-by-side: signup form on the left, value
-            props on the right. Strong conversion moment. */}
-      <section id="crew" className="relative">
-        <div className="relative max-w-6xl mx-auto px-6 py-20 md:py-24">
-          {/* Section header — white H2 on dark bg, with feature bullets */}
-          <div className="text-center mb-12">
-            <p className="text-[11px] text-accent-text uppercase tracking-[0.3em] font-bold mb-3">— Join the Crew</p>
-            <h2 className="text-3xl md:text-4xl font-black text-stone-50 leading-tight tracking-tight mb-6 max-w-2xl mx-auto">
-              Leading way in dad-tested reviews &amp; real-life gear.
-            </h2>
-            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-stone-300">
-              <span className="inline-flex items-center gap-2">
-                <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                Real dad
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                Real testing
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                Zero sponsors
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                No spam
-              </span>
+      {/* ── 5. THE STANDARD — quiet trust panel ───────────────────────────
+            Replaces the full-bleed orange "Rules" manifesto. Now a single
+            contained dark card on the page bg. Sits AFTER the content,
+            not before — visitors see the work first, then read why it's
+            trustworthy. */}
+      <section className="relative">
+        <div className="relative max-w-6xl mx-auto px-6 py-16 md:py-20">
+          <div className="bg-surface rounded-2xl shadow-lg shadow-black/40 p-8 md:p-12 lg:p-14">
+            <div className="text-center mb-10 md:mb-12 max-w-2xl mx-auto">
+              <p className="text-[11px] md:text-xs text-accent-text uppercase tracking-[0.3em] font-bold mb-3">— The Standard</p>
+              <h2 className="text-2xl md:text-3xl font-black text-stone-50 leading-tight">
+                Three rules. That&apos;s the whole standard.
+              </h2>
             </div>
-          </div>
-
-          {/* Twin orange panels — signup form (left) + value props (right) */}
-          <div className="grid md:grid-cols-2 gap-5 max-w-5xl mx-auto">
-            {/* Left — Newsletter signup */}
-            <div className="bg-accent rounded-xl p-6 sm:p-8 shadow-2xl shadow-black/40 relative overflow-hidden">
-              <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/15" />
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-stone-50/85 mb-4">— Sign Up</p>
-              <h3 className="text-xl sm:text-2xl font-black text-white mb-2 leading-tight">
-                Get the good stuff in your inbox.
-              </h3>
-              <p className="text-sm text-stone-50/85 mb-6 leading-relaxed">
-                One email when there&apos;s actually something worth saying. Drop your email and let&apos;s ride, Boss.
-              </p>
-              <EmailSignup
-                heading={null}
-                description={null}
-                buttonLabel="Join Free"
-                successMessage="You're in, Boss. Welcome to the crew."
-                interests={['newsletter']}
-              />
-              <p className="text-xs text-stone-50/70 mt-4">Unsubscribe anytime. We mean it.</p>
-            </div>
-
-            {/* Right — What You'll Get value props */}
-            <div className="bg-accent rounded-xl p-6 sm:p-8 shadow-2xl shadow-black/40 relative overflow-hidden">
-              <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/15" />
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-stone-50/85 mb-4">— What You&apos;ll Get</p>
-              <ul className="space-y-4">
-                <li className="flex items-start gap-3 text-white">
-                  <svg className="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <div>
-                    <p className="font-bold text-base leading-tight">Honest reviews, first.</p>
-                    <p className="text-sm text-stone-50/80 leading-snug mt-0.5">Boss Approved picks before anyone else sees them.</p>
-                  </div>
+            <ol className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+              {[
+                {
+                  n: '01',
+                  title: 'I Bought It.',
+                  body: 'My money. No PR samples, no free units, no sponsor influence.',
+                },
+                {
+                  n: '02',
+                  title: 'I Used It.',
+                  body: 'Weeks, not minutes. My kid, my grill, my garage, my weekends.',
+                },
+                {
+                  n: '03',
+                  title: "I'll Tell The Truth.",
+                  body: "The score on the page is the score I'd give a friend.",
+                },
+              ].map((rule) => (
+                <li key={rule.n} className="flex flex-col items-center text-center">
+                  <span
+                    aria-hidden
+                    className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent text-white font-black text-base tabular-nums mb-4 shadow-md shadow-black/30"
+                  >
+                    {rule.n}
+                  </span>
+                  <p className="text-lg md:text-xl font-black text-stone-50 tracking-tight mb-2 leading-tight">
+                    {rule.title}
+                  </p>
+                  <p className="text-stone-400 leading-relaxed text-sm max-w-xs">
+                    {rule.body}
+                  </p>
                 </li>
-                <li className="flex items-start gap-3 text-white">
-                  <svg className="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <div>
-                    <p className="font-bold text-base leading-tight">Real-dad guides.</p>
-                    <p className="text-sm text-stone-50/80 leading-snug mt-0.5">Skills, how-tos, and field notes worth your time.</p>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3 text-white">
-                  <svg className="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <div>
-                    <p className="font-bold text-base leading-tight">No spam, no fluff.</p>
-                    <p className="text-sm text-stone-50/80 leading-snug mt-0.5">One email when it&apos;s worth opening, never just to fill a slot.</p>
-                  </div>
-                </li>
-              </ul>
-            </div>
+              ))}
+            </ol>
           </div>
         </div>
       </section>
 
-      {/* ── Closing tagline — quiet dark signature.
-            Rules strip + Newsletter twin panels already carry the orange
-            manifesto weight; closing stays restrained dark + bold type
-            with single orange highlight on the key word. */}
+      {/* ── 6. NEWSLETTER — quiet secondary conversion ────────────────────
+            Single centered row. Low-pressure. Footer carries the heavier
+            newsletter band — this is just the in-page catch for visitors
+            who hit the bottom of the editorial content. */}
+      <section className="relative">
+        <div className="relative max-w-2xl mx-auto px-6 py-20 text-center">
+          <p className="text-[11px] text-accent-text uppercase tracking-[0.3em] font-bold mb-3">— Stay in the Loop</p>
+          <h3 className="text-2xl md:text-3xl font-black text-stone-50 leading-tight tracking-tight mb-3">
+            Want a heads-up when something worth saying drops?
+          </h3>
+          <p className="text-sm text-stone-400 mb-6">
+            One email when I publish. Unsubscribe anytime.
+          </p>
+          <EmailSignup
+            heading={null}
+            description={null}
+            buttonLabel="Join"
+            successMessage="You're in, Boss. Welcome to the crew."
+            interests={['newsletter']}
+          />
+          <p className="text-xs text-stone-500 mt-4">No spam. No sponsors. You know the rules.</p>
+        </div>
+      </section>
+
+      {/* ── 7. CLOSING SIGNATURE — quiet final beat ───────────────────── */}
       <section className="relative py-24 md:py-32">
         <div className="relative max-w-4xl mx-auto px-6 text-center">
           <p className="text-[11px] text-accent-text uppercase tracking-[0.3em] font-black mb-6">— The Bottom Line</p>
@@ -675,43 +462,8 @@ export default async function HomePage() {
           <p className="text-sm text-stone-400 italic font-semibold">— Boss Daddy</p>
         </div>
       </section>
-
     </>
   )
-}
-
-function CategoryPill({ slug, label }: { slug: string; label: string }) {
-  return (
-    <Link
-      href={`/category/${slug}`}
-      className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-white border border-soft px-4 py-2.5 text-sm font-semibold text-prose min-h-[44px] whitespace-nowrap hover:border-prose hover:bg-stone-50 hover:text-accent-text-soft transition-colors"
-    >
-      <CategoryIcon slug={slug} className="w-4 h-4 text-accent-text shrink-0" />
-      <span>{label}</span>
-    </Link>
-  )
-}
-
-function TrustBadge({
-  href,
-  label,
-  icon,
-}: {
-  href?: string
-  label: string
-  icon: React.ReactNode
-}) {
-  const inner = (
-    <span className="flex items-center gap-2.5 group">
-      <span className="w-7 h-7 rounded-lg bg-accent-tint border border-accent-border/40 flex items-center justify-center text-accent-text-soft shrink-0 group-hover:border-accent-border/60 transition-colors">
-        {icon}
-      </span>
-      <span className="text-[11px] md:text-xs font-bold uppercase tracking-wider text-prose-muted group-hover:text-prose transition-colors leading-tight">
-        {label}
-      </span>
-    </span>
-  )
-  return href ? <Link href={href}>{inner}</Link> : <span className="cursor-default">{inner}</span>
 }
 
 function vaultHrefFor(card: VaultStripCard): string {
@@ -753,21 +505,21 @@ function vaultTypeMeta(type: string): { label: string; icon: React.ReactNode } {
 
 function LatestGuidesSkeleton() {
   return (
-    <section className="max-w-5xl mx-auto px-6 py-16">
+    <section className="max-w-6xl mx-auto px-6 py-20">
       <div className="mb-8">
         <div className="h-px w-6 bg-surface-raised mb-3" />
-        <div className="h-3 w-32 bg-surface rounded mb-3 animate-pulse" />
-        <div className="h-7 w-72 bg-surface rounded animate-pulse" />
+        <div className="h-3 w-32 bg-surface-raised rounded mb-3 animate-pulse" />
+        <div className="h-7 w-72 bg-surface-raised rounded animate-pulse" />
       </div>
       <div className="divide-y divide-soft">
-        {Array.from({ length: 3 }).map((_, i) => (
+        {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="flex items-center gap-5 py-6">
             <div className="flex-1 space-y-2">
               <div className="h-3 w-24 bg-surface-raised rounded animate-pulse" />
               <div className="h-5 w-full bg-surface-raised rounded animate-pulse" />
               <div className="h-3 w-3/4 bg-surface-raised rounded animate-pulse" />
             </div>
-            <div className="w-20 h-20 sm:w-28 sm:h-24 bg-surface-raised/50 rounded-xl animate-pulse shrink-0" />
+            <div className="w-20 h-20 sm:w-28 sm:h-24 bg-surface-raised/50 rounded-2xl animate-pulse shrink-0" />
           </div>
         ))}
       </div>

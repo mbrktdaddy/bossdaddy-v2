@@ -203,6 +203,14 @@ export default async function ReviewPage({ params }: Props) {
       <EngagementTracker contentType="review" contentId={review.id} />
       {product && <StickyMobileCta product={product} />}
 
+      {/* ── LIGHT READING SCOPE ─────────────────────────────────────────────
+            Detail pages flip to a warm-paper canvas inside the dark site
+            chrome. The .bd-light wrapper scopes every role token (bg-surface,
+            text-prose, border-soft, etc.) to its light-mode values for the
+            entire article subtree. bg-background pulls the new warm-paper
+            page tint (--bd-bg / --background) so the article reads like a
+            magazine page rather than tech-UI white. */}
+      <div className="bd-light bg-background">
       <div className="w-full max-w-6xl mx-auto px-6 py-12 overflow-x-clip">
         <div className="flex flex-col xl:flex-row gap-12 xl:items-start">
 
@@ -547,6 +555,7 @@ export default async function ReviewPage({ params }: Props) {
 
         </div>
       </div>
+      </div>{/* end .bd-light reading scope */}
     </>
   )
 }

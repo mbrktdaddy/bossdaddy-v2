@@ -149,6 +149,10 @@ export default async function GuidePage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
       )}
+      {/* ── LIGHT READING SCOPE ─────────────────────────────────────────────
+            Detail pages flip to a warm-paper canvas inside the dark site
+            chrome. See /reviews/[slug]/page.tsx for the full doctrine note. */}
+      <div className="bd-light bg-background">
       <div className="max-w-[1100px] mx-auto px-6 py-12">
 
         {/* Breadcrumb */}
@@ -515,6 +519,7 @@ export default async function GuidePage({ params }: Props) {
         </div>{/* end two-column grid */}
 
       </div>
+      </div>{/* end .bd-light reading scope */}
     </>
   )
 }
