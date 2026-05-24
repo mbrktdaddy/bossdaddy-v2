@@ -46,7 +46,7 @@ export function FeaturedMerchCard({ item, compact = false }: Props) {
     </>
   )
 
-  const className = 'group flex flex-col bg-surface rounded-xl overflow-hidden shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] transition-all duration-200'
+  const className = 'group flex flex-col bg-surface rounded-xl overflow-hidden border border-soft shadow-lg shadow-stone-900/[0.06] hover:border-copper hover:shadow-xl hover:shadow-stone-900/[0.12] hover:-translate-y-1 transition-all duration-200'
 
   if (isExternal) {
     return <a href={href} target="_blank" rel="noopener noreferrer" className={className}>{inner}</a>

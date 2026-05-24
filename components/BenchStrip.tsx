@@ -35,20 +35,21 @@ export default async function BenchStrip({
   if (items.length === 0) return null
 
   return (
-    <div className="rounded-xl bg-surface/60 border border-soft/60 p-5 sm:p-6">
-      {/* Header — eyebrow + invitation tagline + CTA. Tagline teaches the
-          metaphor wherever this strip lands (currently /reviews + /gear). */}
-      <div className="flex items-start justify-between gap-4 mb-4">
+    <div className="rounded-xl bg-white border border-soft shadow-sm shadow-stone-900/[0.04] p-5 sm:p-6">
+      {/* Header — eyebrow + invitation tagline + CTA. The pulsing dot
+          uses the action orange (vibrant) for "live testing signal"
+          while the eyebrow text stays in the orange-700 brand voice. */}
+      <div className="flex items-start justify-between gap-4 mb-5">
         <div className="min-w-0">
           <div className="flex items-center gap-2.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-accent-hover animate-pulse shadow-[0_0_8px_rgba(204,85,0,0.8)]" />
-            <span className="text-xs font-black uppercase tracking-widest text-eyebrow">{heading}</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse shadow-[0_0_10px_rgba(229,90,26,0.7)]" />
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-eyebrow">{heading}</span>
           </div>
           {subhead && (
-            <p className="mt-1 text-xs text-prose-faint leading-snug">{subhead}</p>
+            <p className="mt-1.5 text-xs text-prose-muted leading-snug">{subhead}</p>
           )}
         </div>
-        <Link href="/bench" className="shrink-0 text-xs text-prose-faint hover:text-accent-text-soft transition-colors font-semibold whitespace-nowrap">
+        <Link href="/bench" className="shrink-0 text-xs text-prose-muted hover:text-copper transition-colors font-semibold whitespace-nowrap uppercase tracking-widest">
           {ctaText} →
         </Link>
       </div>
@@ -59,10 +60,10 @@ export default async function BenchStrip({
           <li key={item.id}>
             <Link
               href={`/bench/${item.slug}`}
-              className="group flex items-center gap-3 sm:gap-4 py-3 -mx-2 px-2 rounded-lg hover:bg-surface-raised/40 transition-colors min-h-[64px]"
+              className="group flex items-center gap-3 sm:gap-4 py-3 -mx-2 px-2 rounded-lg hover:bg-stone-50 transition-colors min-h-[64px]"
             >
               {/* Thumbnail — square, fills */}
-              <div className="relative shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-surface-sunken border border-soft/60">
+              <div className="relative shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-surface-sunken border border-soft">
                 {item.image_url ? (
                   <Image
                     src={item.image_url}
@@ -82,18 +83,18 @@ export default async function BenchStrip({
 
               {/* Status pill — fixed-width column so titles align */}
               <span
-                className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-surface-sunken/80 shrink-0 text-center sm:min-w-[88px] ${getStatusColor(item.status as WishlistStatus)}`}
+                className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-stone-100 border border-soft shrink-0 text-center sm:min-w-[88px] ${getStatusColor(item.status as WishlistStatus)}`}
               >
                 {getStatusLabel(item.status as WishlistStatus)}
               </span>
 
               {/* Title */}
-              <p className="text-sm font-bold text-prose-muted group-hover:text-accent-text-soft transition-colors line-clamp-1 flex-1">
+              <p className="text-sm font-bold text-prose group-hover:text-accent-text-soft transition-colors line-clamp-1 flex-1">
                 {item.title}
               </p>
 
               {/* Arrow */}
-              <span aria-hidden className="text-prose-faint group-hover:text-accent-text-soft transition-colors text-lg shrink-0">
+              <span aria-hidden className="text-prose-faint group-hover:text-copper transition-colors text-lg shrink-0">
                 →
               </span>
             </Link>

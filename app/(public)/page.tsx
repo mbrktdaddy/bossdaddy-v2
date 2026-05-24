@@ -190,7 +190,7 @@ export default async function HomePage() {
               {featuredHero.kind === 'review' ? (
                 <Link
                   href={`/reviews/${featuredHero.data.slug}`}
-                  className="group block bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-xl shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-2xl hover:shadow-stone-900/[0.10] hover:-translate-y-1 transition-all duration-200"
+                  className="group block bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft shadow-xl shadow-stone-900/[0.08] hover:border-copper hover:shadow-2xl hover:shadow-stone-900/[0.12] hover:-translate-y-1 transition-all duration-200"
                 >
                   {featuredHero.data.image_url && (
                     <div className="relative w-full aspect-[5/4] bg-surface-raised">
@@ -235,7 +235,7 @@ export default async function HomePage() {
               ) : (
                 <Link
                   href={`/guides/${featuredHero.data.slug}`}
-                  className="group block bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-xl shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-2xl hover:shadow-stone-900/[0.10] hover:-translate-y-1 transition-all duration-200"
+                  className="group block bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft shadow-xl shadow-stone-900/[0.08] hover:border-copper hover:shadow-2xl hover:shadow-stone-900/[0.12] hover:-translate-y-1 transition-all duration-200"
                 >
                   {featuredHero.data.image_url && (
                     <div className="relative w-full aspect-[5/4] bg-surface-raised">
@@ -467,7 +467,7 @@ export default async function HomePage() {
                   <Link
                     key={r.id}
                     href={`/reviews/${r.slug}`}
-                    className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-xl hover:shadow-stone-900/[0.10] hover:-translate-y-1 transition-all duration-200 ${
+                    className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft shadow-lg shadow-stone-900/[0.06] hover:border-copper hover:shadow-xl hover:shadow-stone-900/[0.12] hover:-translate-y-1 transition-all duration-200 ${
                       isHero ? 'lg:col-span-2 lg:row-span-2' : ''
                     }`}
                   >
@@ -691,7 +691,7 @@ function CategoryPill({ slug, label }: { slug: string; label: string }) {
   return (
     <Link
       href={`/category/${slug}`}
-      className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-gradient-to-br from-surface to-surface/60 border border-soft/60 ring-1 ring-inset ring-stone-900/[0.04] px-4 py-2.5 text-sm font-semibold text-prose min-h-[44px] whitespace-nowrap hover:border-accent-border/60 hover:bg-surface-raised hover:text-accent-text-soft transition-colors"
+      className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-white border border-soft px-4 py-2.5 text-sm font-semibold text-prose min-h-[44px] whitespace-nowrap hover:border-prose hover:bg-stone-50 hover:text-accent-text-soft transition-colors"
     >
       <CategoryIcon slug={slug} className="w-4 h-4 text-accent-text shrink-0" />
       <span>{label}</span>

@@ -12,7 +12,7 @@ export default function FeaturedReviewCard({ review: r, label = 'Featured Review
   return (
     <Link
       href={`/reviews/${r.slug}`}
-      className="group relative flex flex-col sm:flex-row overflow-hidden rounded-xl bg-surface shadow-xl shadow-stone-900/[0.08] hover:shadow-2xl hover:shadow-stone-900/[0.10] transition-all duration-300 mt-2 mb-20"
+      className="group relative flex flex-col sm:flex-row overflow-hidden rounded-xl bg-surface border border-soft shadow-xl shadow-stone-900/[0.08] hover:border-copper hover:shadow-2xl hover:shadow-stone-900/[0.12] hover:-translate-y-1 transition-all duration-300 mt-2 mb-20"
     >
       {/* Image */}
       <div className="relative w-full sm:w-[55%] h-56 sm:h-auto shrink-0 bg-surface-raised">
@@ -38,7 +38,7 @@ export default function FeaturedReviewCard({ review: r, label = 'Featured Review
       <div className="flex flex-col justify-between p-6 sm:p-8 flex-1 min-w-0">
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent-text bg-accent-tint px-2.5 py-1 rounded-full">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent-text bg-accent-tint border border-accent-border/50 px-2.5 py-1 rounded-full">
               {label}
             </span>
             {cat && (
@@ -54,7 +54,7 @@ export default function FeaturedReviewCard({ review: r, label = 'Featured Review
           )}
         </div>
 
-        <div className="flex items-center justify-between mt-6 pt-5 border-t border-soft/60">
+        <div className="flex items-center justify-between mt-6 pt-5 border-t border-soft">
           <div className="flex items-center gap-3">
             <RatingScore rating={r.rating} />
             {r.rating >= 8 && <BossApprovedBadge size="sm" variant="card" />}

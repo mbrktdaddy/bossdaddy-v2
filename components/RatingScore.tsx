@@ -19,17 +19,17 @@ export default function RatingScore({ rating, size = 'sm' }: Props) {
 
   if (size === 'lg') {
     return (
-      <div className="flex items-baseline gap-1">
-        <span className={`text-3xl font-black ${color}`}>{fmt(rating)}</span>
-        <span className="text-base text-prose-faint font-semibold">/10</span>
+      <div className="flex items-baseline gap-1 tabular-nums">
+        <span className={`text-3xl font-black tracking-tight ${color}`}>{fmt(rating)}</span>
+        <span className="text-sm text-prose-faint font-bold uppercase tracking-widest">/10</span>
       </div>
     )
   }
 
   return (
-    <div className="flex items-baseline gap-0.5">
-      <span className={`text-sm font-bold ${color}`}>{fmt(rating)}</span>
-      <span className="text-xs text-prose-faint">/10</span>
+    <div className="flex items-baseline gap-0.5 tabular-nums">
+      <span className={`text-sm font-black tracking-tight ${color}`}>{fmt(rating)}</span>
+      <span className="text-[10px] text-prose-faint font-bold uppercase tracking-widest">/10</span>
     </div>
   )
 }
