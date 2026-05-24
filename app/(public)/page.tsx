@@ -103,29 +103,31 @@ export default async function HomePage() {
           Mobile: faint centered watermark (50% height, 18% opacity, soft top-bottom dim).
           Desktop: right-anchored stamp (85% height, 45% opacity, left-right dim + warm glow). */}
       <section className="relative overflow-hidden">
-        {/* BG LAYER 1 — Mobile shield: centered, smaller, fainter.
-            Sits behind the text as a subtle brand watermark. */}
+        {/* BG LAYER 1 — Mobile shield: uses the square 1024×1024 badge
+            file where the shield IS centered. bg-position center now
+            lands the shield correctly. Quieter watermark sized at 65%
+            of section height. */}
         <div
           aria-hidden
-          className="md:hidden absolute inset-0 pointer-events-none opacity-15"
+          className="md:hidden absolute inset-0 pointer-events-none opacity-18"
           style={{
-            backgroundImage: "url('/images/bd-hero-bg.png')",
-            backgroundSize: 'auto 50%',
-            backgroundPosition: 'center 65%',
+            backgroundImage: "url('/images/bd-logo-badge.png')",
+            backgroundSize: 'auto 65%',
+            backgroundPosition: 'center 55%',
             backgroundRepeat: 'no-repeat',
           }}
         />
 
-        {/* BG LAYER 1 — Desktop shield: right-anchored, BIG and visible.
-            bg-size 120% intentionally overflows top/bottom (clipped by
-            section overflow-hidden) — gives a "stamped" feel where the
-            mark feels bigger than the canvas. */}
+        {/* BG LAYER 1 — Desktop shield: right-anchored, BIG.
+            bg-size 140% intentionally overflows top/bottom (clipped by
+            section overflow-hidden) for a "bigger than the canvas"
+            stamped feel. */}
         <div
           aria-hidden
           className="hidden md:block absolute inset-0 pointer-events-none opacity-65 lg:opacity-75"
           style={{
             backgroundImage: "url('/images/bd-hero-bg.png')",
-            backgroundSize: 'auto 120%',
+            backgroundSize: 'auto 140%',
             backgroundPosition: '98% center',
             backgroundRepeat: 'no-repeat',
           }}
