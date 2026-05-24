@@ -116,15 +116,16 @@ export default async function HomePage() {
           }}
         />
 
-        {/* BG LAYER 1 — Desktop shield: right-anchored, larger, more present.
-            Anchored at 98% so it sits visible against the right edge
-            without bleeding off the screen. */}
+        {/* BG LAYER 1 — Desktop shield: right-anchored, BIG and visible.
+            bg-size 120% intentionally overflows top/bottom (clipped by
+            section overflow-hidden) — gives a "stamped" feel where the
+            mark feels bigger than the canvas. */}
         <div
           aria-hidden
-          className="hidden md:block absolute inset-0 pointer-events-none opacity-45 lg:opacity-55"
+          className="hidden md:block absolute inset-0 pointer-events-none opacity-65 lg:opacity-75"
           style={{
             backgroundImage: "url('/images/bd-hero-bg.png')",
-            backgroundSize: 'auto 85%',
+            backgroundSize: 'auto 120%',
             backgroundPosition: '98% center',
             backgroundRepeat: 'no-repeat',
           }}
@@ -141,15 +142,16 @@ export default async function HomePage() {
           }}
         />
 
-        {/* BG LAYER 2 — Desktop scrim: left-right dim + warm right-side glow.
-            Ensures the left-aligned copy reads cleanly; the orange radial
-            warms the area behind the shield without overdoing it. */}
+        {/* BG LAYER 2 — Desktop scrim: covers the copy area on the left,
+            quickly fades to transparent at 50% width so the shield on
+            the right reads at full strength. Warm orange radial behind
+            the shield amplifies the brand glow. */}
         <div
           aria-hidden
           className="hidden md:block absolute inset-0 pointer-events-none"
           style={{
             background:
-              'linear-gradient(90deg, rgba(10,10,12,0.7) 0%, rgba(10,10,12,0.35) 35%, rgba(10,10,12,0.1) 60%, transparent 80%), radial-gradient(ellipse 55% 40% at 88% 50%, rgba(204,85,0,0.10), transparent 65%)',
+              'linear-gradient(90deg, rgba(10,10,12,0.75) 0%, rgba(10,10,12,0.35) 30%, transparent 55%), radial-gradient(ellipse 55% 45% at 88% 50%, rgba(204,85,0,0.16), transparent 65%)',
           }}
         />
 
