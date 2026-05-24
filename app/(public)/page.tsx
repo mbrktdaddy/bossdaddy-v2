@@ -340,14 +340,18 @@ export default async function HomePage() {
         <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-black/15" />
       </section>
 
+      {/* ── LIGHT CONTENT BLOCK — Categories + Recent Reviews.
+            First WHITE rhythm break, opening immediately after the orange
+            Rules manifesto. Two sections share the .bd-light scope so
+            their role tokens (text-prose, bg-surface, border-soft) flip
+            to light values automatically. The white block reads as the
+            "spotlight content moment" between dark mood sections. */}
+      <div className="bd-light bg-white">
       {/* ── Categories — orientation moment after Rules establishes trust.
             Quiet utility ribbon (single eyebrow + 8 pills) — content weight
-            matches visual weight. Placed before Recent Reviews so the reader
-            sees the BREADTH of coverage first, then enjoys the curated picks.
-            Gift-shoppers (wives/moms) can jump straight to their category
-            without scrolling through unrelated featured content. */}
+            matches visual weight. */}
       <section className="relative">
-        <div className="relative max-w-6xl mx-auto px-6 py-8">
+        <div className="relative max-w-6xl mx-auto px-6 pt-12 pb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
             <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold whitespace-nowrap">
               Pick your lane
@@ -480,13 +484,17 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+      </div>
+      {/* End of LIGHT CONTENT BLOCK — Categories + Recent Reviews */}
 
       {/* ── From The Vault — diverse trio of collections.
             Dark canvas with Buildora project-card treatment: photo on
             top, ORANGE FOOTER ribbon below with title + subtitle. Cards
-            hover up with stronger shadow. ──────────────────────────── */}
+            hover up with stronger shadow. Sits between two white
+            blocks to break the rhythm. Thin orange top-rule = the
+            brand-stitching transition marker from the prior white block. */}
       {vaultTrio.length > 0 && (
-        <section className="relative">
+        <section className="relative border-t-2 border-accent">
           <div className="relative max-w-6xl mx-auto px-6 py-20 md:py-24">
             <div className="flex items-end justify-between mb-10 gap-4">
               <div className="flex items-stretch gap-4 min-w-0">
@@ -547,15 +555,21 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ── Latest Guides ──────────────────────────────────────────────── */}
-      <Suspense fallback={<LatestGuidesSkeleton />}>
-        <LatestGuidesSection />
-      </Suspense>
+      {/* ── LIGHT CONTENT BLOCK — Latest Guides.
+            Second WHITE rhythm break after the dark Vault section.
+            .bd-light scope flips role tokens; bg-white sets canvas. */}
+      <div className="bd-light bg-white">
+        <Suspense fallback={<LatestGuidesSkeleton />}>
+          <LatestGuidesSection />
+        </Suspense>
+      </div>
 
       {/* ── On the Bench — BenchStrip ships its own complete header
-            (pulsing dot eyebrow + tagline + CTA), so no outer section header here. */}
-      <section>
-        <div className="max-w-6xl mx-auto px-6 py-6">
+            (pulsing dot eyebrow + tagline + CTA), so no outer section
+            header here. Thin orange top-rule = the brand-stitching
+            transition marker from the prior white Latest Guides block. */}
+      <section className="border-t-2 border-accent">
+        <div className="max-w-6xl mx-auto px-6 py-10">
           <Suspense fallback={null}>
             <BenchStrip />
           </Suspense>
