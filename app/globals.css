@@ -2,63 +2,49 @@
 @plugin "@tailwindcss/typography";
 
 /* ─────────────────────────────────────────────────────────────────────────
-   DARK EDITORIAL THEME — flipped back to dark canvas 2026-05-24.
-   Page is cool charcoal; cream-paper is the SEMANTIC editorial card
-   surface. Use the `.bd-on-paper` scope wrapper around any subtree
-   that sits on `bg-paper` so role tokens (text-prose, text-prose-muted,
-   border-soft) flip to dark-on-cream automatically.
-   Light mode (dashboard / escape hatch) at `.bd-light` and
-   `:root[data-palette="light"]`.
+   BOSS DADDY DESIGN SYSTEM — 2026-05-24
+   Locked palette: orange + black + white + grey. Four colors.
+   Dark canvas by default. Light scope (.bd-light) for dashboard.
+   No cream, no copper, no forest as chrome. Status colors (green/red)
+   reserved for chips + form validation only.
+   Reference: Buildora (Dribbble) — dark hero, white content sections,
+   ORANGE full-bleed manifesto strips, dark testimonial/CTA, dark footer.
    ───────────────────────────────────────────────────────────────────────── */
 :root {
-  --background: #0a0a0c;        /* cool clean charcoal — NO brown undertone */
-  --foreground: #fafaf9;
+  --background: #0a0a0c;
+  --foreground: #fafafa;
 
-  /* ── Brand orange — TWO-COLOR SYSTEM ─────────────────────────────────
-     Brand   #CC5500 = signature only (badge, BOSS wordmark, tick strips).
-     Action  #E55A1A = punchy, used for ALL interactive elements (CTAs,
-                       active pills, button bg).
-     Text    #E87030 = inline accent text on DARK bg. (Bright variant —
-                       on cream surfaces, .bd-on-paper flips this to the
-                       AA-passing #B85A14.)
-     ─────────────────────────────────────────────────────────────────── */
-  --bd-orange-brand: #CC5500;
-  --bd-orange:       #E55A1A;
-  --bd-orange-light: #E87030;   /* bright accent-text — readable on dark */
+  /* ── Brand orange — THE accent color.
+        Used for: buttons, CTAs, full-bleed manifesto sections, info
+        cards overlaying the hero, card footer accents, eyebrows on
+        dark, the "BOSS" wordmark. Bold and confident, not decorative. */
+  --bd-orange:       #CC5500;   /* primary brand orange */
+  --bd-orange-hover: #B85A14;   /* darker — buttons darken on hover */
+  --bd-orange-text:  #f48a4a;   /* lighter — inline accent text on dark, AA pass */
 
-  /* ── Forest green — brighter on dark (was #3D7C3F on light) ─────────── */
-  --bd-forest: #4ade80;
+  /* ── Surfaces — 3-tier dark hierarchy
+        Page → elevated card → hover/raised. Pure black reserved for
+        the absolute-darkest moments (optional footer). */
+  --bd-bg:             #0a0a0c;   /* page canvas */
+  --bd-surface:        #18181b;   /* zinc-900 — dark card */
+  --bd-surface-raised: #27272a;   /* zinc-800 — hover / elevated */
+  --bd-surface-sunken: #050507;   /* deeper than page — wells, code */
+  --bd-border:         #27272a;   /* stone-800 hairline */
+  --bd-border-strong:  #3f3f46;   /* stone-700 — confident edges */
 
-  /* ── Drama — pure void for the most-dramatic moments (footer, newsletter
-        CTA panel). Distinct from page bg so it reads as a real moment. ── */
-  --bd-drama: #050507;
+  /* ── Text — light on dark */
+  --bd-text:       #fafafa;       /* default body */
+  --bd-text-muted: #a1a1aa;       /* zinc-400 — captions */
+  --bd-text-faint: #71717a;       /* zinc-500 — timestamps */
 
-  /* ── Copper — premium signal accent, brighter on dark for visibility ── */
-  --bd-copper: #d97706;
+  /* ── Status accents — used in chips/validation only, never chrome */
+  --bd-success: #22c55e;          /* green-500 — Boss Approved, success states */
+  --bd-error:   #ef4444;          /* red-500 — destructive, validation errors */
+  --bd-warn:    #f59e0b;          /* amber-500 — caution */
 
-  /* ── Surfaces — 3-tier dark hierarchy + cream editorial surface ───────
-        Page (canvas) → elevated dark card → cream editorial card → drama.
-     ─────────────────────────────────────────────────────────────────── */
-  --bd-bg: #0a0a0c;             /* page canvas */
-  --bd-surface: #18181b;        /* elevated dark card (zinc-900) */
-  --bd-surface-raised: #27272a; /* hover / elevated (zinc-800) */
-  --bd-surface-sunken: #050507; /* wells, code blocks — deeper than page */
-  --bd-border: #27272a;         /* stone-800 hairline on dark */
-
-  --bd-border-strong: #3f3f46;
-  --bd-accent-border-soft: #a34400;
-  --bd-accent-tint: #3d1a00;    /* dark orange-950 wash for callouts on dark */
-
-  /* Text — light on dark by default */
-  --bd-text: #fafaf9;
-  --bd-text-muted: #a8a29e;     /* stone-400 */
-  --bd-text-faint: #78716c;     /* stone-500 */
-
-  /* Cream paper — SEMANTIC ROLE: editorial card surface.
-     Used as bg-paper. Wrap content in .bd-on-paper so prose tokens
-     flip to dark-on-cream automatically. */
-  --bd-paper: #f5efe0;
-  --bd-paper-muted: #e5d1ca;
+  /* ── Cream (kept ONLY for internal blockquote bg in articles).
+        Not exposed as bg-paper utility. */
+  --bd-paper: #fff4d6;
 }
 
 @theme inline {
@@ -69,7 +55,8 @@
   --font-display: var(--font-montserrat), system-ui, sans-serif;
   --font-editorial: var(--font-serif), Georgia, 'Times New Roman', serif;
 
-  /* Raw orange scale — earthy. orange-600 = brand signature. */
+  /* Brand orange scale */
+  --color-orange-300: #fdba74;
   --color-orange-400: #f48a4a;
   --color-orange-500: #E55A1A;
   --color-orange-600: #CC5500;
@@ -78,7 +65,7 @@
   --color-orange-900: #5c2600;
   --color-orange-950: #3d1a00;
 
-  /* Neutral gray scale — Tailwind zinc-derived */
+  /* Neutral gray scale — Tailwind zinc-derived (works on dark + light) */
   --color-gray-950: #09090b;
   --color-gray-900: #18181b;
   --color-gray-800: #27272a;
@@ -93,32 +80,28 @@
 
   /* ── Semantic role tokens — components consume these ──────────────── */
 
-  /* Accent / orange roles — TWO-COLOR SYSTEM */
-  --color-accent:           var(--bd-orange);          /* bg-accent — ACTION orange, CTAs */
-  --color-accent-hover:     #c44615;                   /* darker action for button hover */
-  --color-accent-brand:     var(--bd-orange-brand);    /* bg-accent-brand — SIGNATURE only */
-  --color-accent-text:      var(--bd-orange-light);    /* inline text/links — flips per scope */
-  --color-accent-text-soft: var(--bd-orange-light);    /* alias */
-  --color-eyebrow:          var(--bd-orange-light);    /* xs uppercase labels */
-  --color-card-title:       var(--bd-orange-brand);    /* card h3 — brand orange */
-  --color-accent-border:    var(--bd-accent-border-soft);
-  --color-accent-tint:      var(--bd-accent-tint);
+  /* Accent — orange is the ONE accent color */
+  --color-accent:           var(--bd-orange);            /* bg-accent — CTAs, manifesto bg */
+  --color-accent-hover:     var(--bd-orange-hover);      /* button hover */
+  --color-accent-brand:     var(--bd-orange);            /* alias for legacy components */
+  --color-accent-text:      var(--bd-orange-text);      /* inline text/links on dark — AA */
+  --color-accent-text-soft: var(--bd-orange-text);      /* alias */
+  --color-eyebrow:          var(--bd-orange-text);      /* xs uppercase labels */
+  --color-card-title:       var(--bd-orange);            /* card h3 */
+  --color-accent-border:    var(--bd-orange);            /* aliased — orange handles all */
+  --color-accent-tint:      #2a1810;                     /* very subtle orange wash for dark */
 
-  /* Status — forest green */
-  --color-forest:           var(--bd-forest);
+  /* Status — used sparingly in chips/validation only */
+  --color-forest:           var(--bd-success);           /* legacy alias → green-500 */
+  --color-copper:           var(--bd-orange);            /* legacy alias → brand orange */
 
-  /* Drama — the absolute dark moments (footer, newsletter CTA panel) */
-  --color-drama:            var(--bd-drama);
-
-  /* Copper — premium signal accent */
-  --color-copper:           var(--bd-copper);
+  /* Drama / dark moments — same as page in dark mode (kept for legacy) */
+  --color-drama:            #000000;
 
   /* Surface roles */
   --color-surface:          var(--bd-surface);
   --color-surface-raised:   var(--bd-surface-raised);
   --color-surface-sunken:   var(--bd-surface-sunken);
-  --color-paper:            var(--bd-paper);            /* bg-paper — editorial card surface */
-  --color-paper-muted:      var(--bd-paper-muted);
 
   /* Prose roles */
   --color-prose:            var(--bd-text);
@@ -139,9 +122,9 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   overflow-x: clip;
-  /* Paper grain on dark — slightly bumped (2.5%) so the texture reads.
-     White noise specks at very low opacity = "fine paper" feel on dark. */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  /* Subtle paper grain — 2% opacity white noise. Tactile material on
+     the dark canvas without warming color. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
 }
 
 h1, h2, h3, h4 {
@@ -156,31 +139,6 @@ h1, h2, h3, h4 {
   display: none;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────
-   .bd-on-paper — scope class for content sitting on bg-paper (cream).
-   Flips role tokens (prose, prose-muted, prose-faint, border, accent-text)
-   back to dark-on-cream so existing components render correctly without
-   per-element overrides. Wrap any cream-paper card/section like:
-     <section className="bg-paper bd-on-paper rounded-xl p-8">
-   ───────────────────────────────────────────────────────────────────────── */
-.bd-on-paper {
-  --bd-text: #1c1917;
-  --bd-text-muted: #57534e;
-  --bd-text-faint: #78716c;
-  --bd-border: #d8d0bb;
-  --bd-border-strong: #a8a094;
-  /* Accent text on cream → the darker AA-passing variant */
-  --bd-orange-light: #B85A14;
-  /* Nested surfaces on cream */
-  --bd-surface: #ffffff;
-  --bd-surface-raised: #ffffff;
-  --bd-surface-sunken: #ebe5d8;
-  /* Forest needs to flip back too (brighter forest is unreadable on cream) */
-  --bd-forest: #3D7C3F;
-  /* Copper darkens on cream */
-  --bd-copper: #92400e;
-}
-
 /* ── Editorial serif — article/review body prose only ─────────────────── */
 .bd-editorial p,
 .bd-editorial li,
@@ -190,7 +148,7 @@ h1, h2, h3, h4 {
 
 /* Inline links inside article body — orange + underline on hover */
 .bd-editorial a:not(.bd-no-link) {
-  color: var(--bd-orange-light);
+  color: var(--bd-orange-text);
   text-decoration: none;
   font-weight: 600;
   transition: color 0.15s;
@@ -201,17 +159,17 @@ h1, h2, h3, h4 {
   text-underline-offset: 2px;
 }
 
-/* Pull-quote / blockquote — cream paper treatment.
-   On dark canvas the blockquote bg fully renders as cream (no transparency
-   mix since dark page would muddy it). */
+/* Pull-quote / blockquote — cream paper preserved as INTERNAL article
+   accent only (not exposed as a chrome utility). Reads as a quiet warm
+   stripe against article prose on dark or light. */
 .bd-editorial blockquote {
-  border-left-color: var(--bd-orange-brand);
-  background: color-mix(in srgb, var(--bd-paper) 18%, transparent);
+  border-left: 3px solid var(--bd-orange);
+  background: color-mix(in srgb, var(--bd-paper) 14%, transparent);
   border-radius: 0 0.5rem 0.5rem 0;
   padding: 1rem 1.25rem;
 }
 .bd-editorial blockquote p {
-  color: var(--bd-paper);     /* cream-light italic on the cream-tinted bg */
+  color: var(--bd-paper);
   font-style: italic;
   font-size: 1.05em;
 }
@@ -248,7 +206,7 @@ h1, h2, h3, h4 {
   padding: 1rem;
   border: 2px dashed var(--bd-border);
   border-radius: 0.75rem;
-  background: rgba(229, 90, 26, 0.05);
+  background: rgba(204, 85, 0, 0.05);
   color: var(--bd-text-muted);
 }
 .bd-image-placeholder figcaption {
@@ -281,37 +239,33 @@ h1, h2, h3, h4 {
 
 /* ─────────────────────────────────────────────────────────────────────────
    LIGHT MODE — :root[data-palette="light"] + .bd-light scope.
-   :root variant flips the WHOLE site to light (escape hatch).
+   :root variant flips the WHOLE site to light (emergency escape hatch).
    .bd-light scopes one subtree to light — used by the dashboard layout
-   so operator UI stays light while the public site is dark.
+   so the operator UI stays light while the public site is dark.
    ───────────────────────────────────────────────────────────────────────── */
 :root[data-palette="light"],
 .bd-light {
   --background: #ffffff;
   --foreground: #0a0a0a;
 
-  --bd-orange-brand: #CC5500;
-  --bd-orange: #E55A1A;
-  --bd-orange-light: #B85A14;
+  --bd-orange:       #CC5500;
+  --bd-orange-hover: #B85A14;
+  --bd-orange-text:  #B85A14;     /* darker on white for AA */
 
-  --bd-forest: #3D7C3F;
-  --bd-drama: #1a1410;
-  --bd-copper: #92400e;
-
-  --bd-bg: #ffffff;
-  --bd-surface: #ffffff;
-  --bd-surface-raised: #ffffff;
+  --bd-bg:             #ffffff;
+  --bd-surface:        #ffffff;
+  --bd-surface-raised: #fafafa;
   --bd-surface-sunken: #f4f4f5;
-  --bd-border: #e7e5e4;
+  --bd-border:         #e7e5e4;
+  --bd-border-strong:  #d4d4d8;
 
-  --bd-border-strong: #d4d4d8;
-  --bd-accent-border-soft: #fdba74;
-  --bd-accent-tint: #fff7ed;
-
-  --bd-text: #0a0a0a;
+  --bd-text:       #0a0a0a;
   --bd-text-muted: #52525b;
   --bd-text-faint: #71717a;
 
-  --bd-paper: #f5efe0;
-  --bd-paper-muted: #e5d1ca;
+  --bd-success: #16a34a;          /* green-600 — slightly darker for AA on white */
+  --bd-error:   #dc2626;
+  --bd-warn:    #d97706;
+
+  --bd-paper: #fff4d6;
 }

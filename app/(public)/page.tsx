@@ -38,54 +38,20 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   const supabase = await createClient()
 
-  // Resolve homepage hero: site_settings pointer → reviews.featured → algorithmic.
-  // A guide can take the hero slot when the admin pins one; otherwise it's a review.
-  const { data: settings } = await supabase
-    .from('site_settings')
-    .select('homepage_hero_type, homepage_hero_id')
-    .eq('id', 1)
-    .single()
+  // Buildora hero pattern: brand-statement + info card + stats. No
+  // featured-product card in the hero anymore — featured content appears
+  // as the first card in Recent Reviews magazine grid below.
+  // (Admin spotlight pins on /reviews and /guides listing pages still
+  // respected; they just don't drive a hero-product slot on /.)
 
   const [
-    { data: heroReviewByOverride },
-    { data: heroReviewByFeatured },
-    { data: heroGuide },
     { data: latestReviewsRaw },
     { data: vaultPicksRaw },
+    { count: reviewCount },
+    { count: bossApprovedCount },
+    { data: categoriesData },
   ] = await Promise.all([
-    // If admin pinned a specific review as hero, fetch it.
-    settings?.homepage_hero_type === 'review' && settings.homepage_hero_id
-      ? supabase
-          .from('reviews')
-          .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
-          .eq('id', settings.homepage_hero_id)
-          .eq('status', 'approved')
-          .eq('is_visible', true)
-          .limit(1)
-      : Promise.resolve({ data: null }),
-    // Featured review fallback (also used by /reviews top card; we read it
-    // here so the same hero shows on / when no explicit override is set).
-    supabase
-      .from('reviews')
-      .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
-      .eq('status', 'approved')
-      .eq('is_visible', true)
-      .order('featured', { ascending: false })
-      .order('rating', { ascending: false })
-      .order('published_at', { ascending: false })
-      .limit(1),
-    // If admin pinned a guide as hero, fetch it.
-    settings?.homepage_hero_type === 'guide' && settings.homepage_hero_id
-      ? supabase
-          .from('guides')
-          .select('id, slug, title, category, excerpt, image_url, published_at, reading_time_minutes')
-          .eq('id', settings.homepage_hero_id)
-          .eq('status', 'approved')
-          .eq('is_visible', true)
-          .limit(1)
-      : Promise.resolve({ data: null }),
-    // Fetch 4 latest; we filter out whichever ends up as the hero feature so the
-    // Recent Reviews grid never duplicates the hero card.
+    // Fetch 4 latest reviews for the magazine grid (1 hero card + 3 stacked).
     supabase
       .from('reviews')
       .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
@@ -102,25 +68,30 @@ export default async function HomePage() {
       .eq('is_visible', true)
       .order('published_at', { ascending: false, nullsFirst: false })
       .limit(12),
+    // Stats for hero — total approved+visible reviews
+    supabase
+      .from('reviews')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'approved')
+      .eq('is_visible', true),
+    // Boss Approved count = reviews with rating ≥ 8
+    supabase
+      .from('reviews')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'approved')
+      .eq('is_visible', true)
+      .gte('rating', 8),
+    // Distinct categories with at least one review
+    supabase
+      .from('reviews')
+      .select('category')
+      .eq('status', 'approved')
+      .eq('is_visible', true),
   ])
 
-  // Hero resolution: explicit guide override > explicit review override >
-  // featured/top-rated review fallback. The first that resolves wins.
-  const overrideGuide  = heroGuide?.[0] ?? null
-  const overrideReview = heroReviewByOverride?.[0] ?? null
-  const fallbackReview = heroReviewByFeatured?.[0] ?? null
+  const categoryCount = new Set((categoriesData ?? []).map((r) => r.category)).size
 
-  const featuredHero = overrideGuide
-    ? { kind: 'guide' as const, data: overrideGuide }
-    : (overrideReview ?? fallbackReview)
-      ? { kind: 'review' as const, data: overrideReview ?? fallbackReview! }
-      : null
-
-  // Back-compat alias for the JSX below (which references featuredReview).
-  const featuredReview = featuredHero?.kind === 'review' ? featuredHero.data : null
-  const latestReviews = (latestReviewsRaw ?? [])
-    .filter((r) => r.id !== featuredReview?.id)
-    .slice(0, 3)
+  const latestReviews = (latestReviewsRaw ?? []).slice(0, 4)
 
   // Pick a diverse Vault trio — one of each flavor when possible, falling
   // back to whatever's most recent. Order on the homepage strip: Comparison →
@@ -145,173 +116,116 @@ export default async function HomePage() {
         <InMotionTicker />
       </Suspense>
 
-      {/* ── Hero — Heritage Pro: white canvas, typography-led.
-            No bg decoration. Paper grain on the body adds tactile
-            material quality without warming color. The dark Rules
-            section that follows provides the dramatic rhythm break. */}
-      <section className="relative overflow-hidden">
-        <div className="relative max-w-6xl mx-auto px-6 py-16 md:py-24">
-          {featuredHero ? (
-            <div className="grid lg:grid-cols-[1fr_1.05fr] gap-10 lg:gap-14 items-center">
-              {/* Copy column */}
-              <div>
-                <p className="text-[11px] md:text-xs uppercase tracking-[0.3em] font-bold text-accent-text mb-5">
-                  Dad Like A BOSS.
-                </p>
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.05] tracking-tight mb-5 text-prose">
-                  Reviews, Guides, and Gear{' '}
-                  <span className="text-accent-text">for Boss Dads.</span>
-                </h1>
-                <p className="text-prose-muted text-base md:text-lg leading-relaxed mb-8 max-w-xl">
-                  Tested firsthand with my own money. No sponsors, no paid placements, no BS.
-                </p>
-                <div className="flex flex-wrap items-center gap-3 mb-5">
-                  <Link
-                    href="/reviews"
-                    className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition-colors"
-                  >
-                    See This Month&apos;s Top Picks →
-                  </Link>
-                  <Link
-                    href="/guides"
-                    className="px-6 py-3 bg-transparent border border-stone-700 hover:border-copper hover:bg-stone-900/40 text-stone-200 hover:text-stone-50 font-semibold rounded-xl transition-colors"
-                  >
-                    Browse Guides
-                  </Link>
-                </div>
-                <Link
-                  href="/about"
-                  className="inline-block text-sm text-copper hover:text-accent font-medium transition-colors"
-                >
-                  Read my story →
-                </Link>
-              </div>
+      {/* ── Hero — Buildora-inspired dark canvas + ORANGE info card overlay.
+            Big bold typography sets brand voice; the orange info card to
+            the right carries the trust manifesto (The Standard); the stats
+            row beneath establishes credibility. Photo-ready: when the
+            asset arrives, set backgroundImage on the section to a 16:9
+            hero photo (2880×1620 retina) and the dark scrim + vignette
+            will frame it correctly. ───────────────────────────────── */}
+      <section
+        className="relative overflow-hidden"
+        style={{
+          /* Placeholder bg — radial dark vignette + subtle warm hint upper-right.
+             Replace with photo via: backgroundImage: 'url(/images/hero.jpg)' + cover. */
+          backgroundImage:
+            'radial-gradient(ellipse 80% 60% at 80% 15%, rgba(204,85,0,0.12), transparent 60%), radial-gradient(ellipse 110% 70% at 20% 90%, rgba(0,0,0,0.55), transparent 70%)',
+        }}
+      >
+        <div className="relative max-w-6xl mx-auto px-6 pt-16 pb-12 md:pt-24 md:pb-16">
+          <div className="grid lg:grid-cols-[1.2fr_0.95fr] gap-10 lg:gap-14 items-end">
 
-              {featuredHero.kind === 'review' ? (
-                <Link
-                  href={`/reviews/${featuredHero.data.slug}`}
-                  className="group block bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft shadow-xl shadow-stone-900/[0.08] hover:border-copper hover:shadow-2xl hover:shadow-stone-900/[0.12] hover:-translate-y-1 transition-all duration-200"
-                >
-                  {featuredHero.data.image_url && (
-                    <div className="relative w-full aspect-[5/4] bg-surface-raised">
-                      <Image
-                        src={featuredHero.data.image_url}
-                        alt={featuredHero.data.product_name}
-                        fill
-                        priority
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 1024px) 100vw, 520px"
-                      />
-                    </div>
-                  )}
-                  <div className="p-6">
-                    <div className="flex items-center justify-between gap-3 mb-3">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        {(() => {
-                          const cat = getCategoryBySlug(featuredHero.data.category)
-                          return cat ? (
-                            <>
-                              <CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text shrink-0" />
-                              <span className="text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-semibold truncate">
-                                {cat.label}
-                              </span>
-                            </>
-                          ) : null
-                        })()}
-                      </div>
-                      <RatingScore rating={featuredHero.data.rating ?? 0} />
-                    </div>
-                    <h2 className="text-xl md:text-2xl font-black leading-tight text-prose group-hover:text-accent-text-soft transition-colors mb-3">
-                      {featuredHero.data.title}
-                    </h2>
-                    {featuredHero.data.excerpt && (
-                      <p className="text-prose-muted text-sm leading-relaxed line-clamp-2">
-                        {featuredHero.data.excerpt}
-                      </p>
-                    )}
-                    <p className="text-sm text-accent-text font-semibold mt-4">Read review →</p>
-                  </div>
-                </Link>
-              ) : (
-                <Link
-                  href={`/guides/${featuredHero.data.slug}`}
-                  className="group block bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft shadow-xl shadow-stone-900/[0.08] hover:border-copper hover:shadow-2xl hover:shadow-stone-900/[0.12] hover:-translate-y-1 transition-all duration-200"
-                >
-                  {featuredHero.data.image_url && (
-                    <div className="relative w-full aspect-[5/4] bg-surface-raised">
-                      <Image
-                        src={featuredHero.data.image_url}
-                        alt={featuredHero.data.title}
-                        fill
-                        priority
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 1024px) 100vw, 520px"
-                      />
-                    </div>
-                  )}
-                  <div className="p-6">
-                    <div className="flex items-center justify-between gap-3 mb-3">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        {(() => {
-                          const cat = getCategoryBySlug(featuredHero.data.category ?? '')
-                          return cat ? (
-                            <>
-                              <CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text shrink-0" />
-                              <span className="text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-semibold truncate">
-                                {cat.label}
-                              </span>
-                            </>
-                          ) : null
-                        })()}
-                      </div>
-                      {featuredHero.data.reading_time_minutes && (
-                        <span className="text-xs text-prose-faint tabular-nums shrink-0">
-                          {featuredHero.data.reading_time_minutes} min read
-                        </span>
-                      )}
-                    </div>
-                    <h2 className="text-xl md:text-2xl font-black leading-tight text-prose group-hover:text-accent-text-soft transition-colors mb-3">
-                      {featuredHero.data.title}
-                    </h2>
-                    {featuredHero.data.excerpt && (
-                      <p className="text-prose-muted text-sm leading-relaxed line-clamp-2">
-                        {featuredHero.data.excerpt}
-                      </p>
-                    )}
-                    <p className="text-sm text-accent-text font-semibold mt-4">Read guide →</p>
-                  </div>
-                </Link>
-              )}
-            </div>
-          ) : (
-            // Fallback: centered text-only when no reviews exist yet
-            <div className="max-w-3xl mx-auto text-center py-12">
+            {/* Copy column */}
+            <div>
               <p className="text-[11px] md:text-xs uppercase tracking-[0.3em] font-bold text-accent-text mb-5">
                 Dad Like A BOSS.
               </p>
-              <h1 className="text-5xl md:text-7xl font-black leading-[0.95] tracking-tight mb-6 text-prose">
-                Reviews, Guides, and Gear{' '}
-                <span className="text-accent-text">for Boss Dads.</span>
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.02] tracking-tight mb-6 text-stone-50">
+                Reviews, Guides, and Gear<br />
+                <span className="text-accent">for Boss Dads.</span>
               </h1>
-              <p className="text-prose-muted text-base md:text-lg leading-relaxed mb-8 max-w-2xl mx-auto">
+              <p className="text-stone-300 text-base md:text-lg leading-relaxed mb-8 max-w-xl">
                 Tested firsthand with my own money. No sponsors, no paid placements, no BS.
               </p>
-              <div className="flex flex-wrap items-center justify-center gap-3">
+              <div className="flex flex-wrap items-center gap-3 mb-4">
                 <Link
                   href="/reviews"
-                  className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition-colors"
+                  className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition-colors shadow-lg shadow-black/30"
                 >
-                  Browse Reviews
+                  See This Month&apos;s Top Picks →
                 </Link>
                 <Link
                   href="/guides"
-                  className="px-6 py-3 bg-white border border-strong hover:border-prose/40 text-prose font-semibold rounded-xl transition-colors"
+                  className="px-6 py-3 bg-transparent border border-stone-700 hover:border-accent hover:bg-stone-900/60 text-stone-200 hover:text-white font-semibold rounded-xl transition-colors"
                 >
                   Browse Guides
                 </Link>
               </div>
+              <Link
+                href="/about"
+                className="inline-block text-sm text-accent-text hover:text-accent font-medium transition-colors"
+              >
+                Read my story →
+              </Link>
             </div>
-          )}
+
+            {/* Orange info card — The Standard. Buildora-style overlay carrying
+                the trust manifesto in three quick lines. */}
+            <aside
+              aria-label="The Standard"
+              className="bg-accent rounded-xl p-6 md:p-7 shadow-2xl shadow-black/40 relative overflow-hidden"
+            >
+              {/* Subtle inner highlight at top — gives the orange card depth */}
+              <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/20" />
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-stone-50/85 mb-5">— The Standard</p>
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3 text-white">
+                  <svg className="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <div>
+                    <p className="font-bold text-base leading-tight">My money. My testing.</p>
+                    <p className="text-sm text-stone-50/80 leading-snug mt-0.5">Every product purchased the way you would.</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3 text-white">
+                  <svg className="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <div>
+                    <p className="font-bold text-base leading-tight">Weeks, not minutes.</p>
+                    <p className="text-sm text-stone-50/80 leading-snug mt-0.5">Real use. Real flaws exposed.</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3 text-white">
+                  <svg className="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <div>
+                    <p className="font-bold text-base leading-tight">I&apos;ll tell you the truth.</p>
+                    <p className="text-sm text-stone-50/80 leading-snug mt-0.5">The score I&apos;d give a friend.</p>
+                  </div>
+                </li>
+              </ul>
+            </aside>
+          </div>
+
+          {/* Stats row — credibility numbers, Buildora pattern. Orange
+              numerals + small-caps labels for the editorial stamp feel. */}
+          <div className="mt-12 md:mt-16 pt-8 border-t border-stone-800 grid grid-cols-3 gap-6 sm:gap-12 max-w-2xl">
+            <div>
+              <p className="text-3xl md:text-4xl font-black text-accent tabular-nums leading-none">{reviewCount ?? 0}+</p>
+              <p className="text-[10px] sm:text-[11px] text-stone-400 uppercase tracking-widest font-bold mt-2 leading-tight">Dad-Tested<br />Reviews</p>
+            </div>
+            <div>
+              <p className="text-3xl md:text-4xl font-black text-accent tabular-nums leading-none">{bossApprovedCount ?? 0}</p>
+              <p className="text-[10px] sm:text-[11px] text-stone-400 uppercase tracking-widest font-bold mt-2 leading-tight">Boss<br />Approved</p>
+            </div>
+            <div>
+              <p className="text-3xl md:text-4xl font-black text-accent tabular-nums leading-none">{categoryCount}</p>
+              <p className="text-[10px] sm:text-[11px] text-stone-400 uppercase tracking-widest font-bold mt-2 leading-tight">Categories<br />Covered</p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -364,51 +278,66 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── The Rules — Heritage Pro DARK BAND.
-            First CREAM EDITORIAL moment in the dark-canvas page rhythm.
-            Trust manifesto on a cream-paper section — reads as a "letter
-            from the editor" / page from a heritage field journal pinned
-            against the dark page. Numerals in copper for metalwork signal.
-            .bd-on-paper scope flips role tokens to dark-on-cream. */}
-      <section className="relative bg-paper bd-on-paper">
-        <div className="max-w-5xl mx-auto px-6 py-20 md:py-24">
-          <p className="text-[11px] md:text-xs text-copper uppercase tracking-[0.3em] font-bold mb-4 text-center">— The Rules</p>
-          <h2 className="text-3xl md:text-4xl font-black text-center text-prose mb-4 leading-tight">
-            Three rules. That&apos;s the whole standard.
-          </h2>
-          <p className="text-prose-muted text-center mb-14 max-w-xl mx-auto text-sm md:text-base">
-            Why you can trust what you read here — and why I can tell you the truth without hedging.
-          </p>
-          <div className="grid md:grid-cols-3 gap-10 md:gap-12">
-            {[
-              {
-                n: '01',
-                title: 'I bought it.',
-                body: 'My money. No PR samples, no free units, no sponsor influence. Every product on this site is purchased the same way you would buy it.',
-              },
-              {
-                n: '02',
-                title: 'I used it.',
-                body: 'Weeks, not minutes. My kid, my grill, my garage, my weekends. If a product needs real testing to expose its flaws, it gets real testing.',
-              },
-              {
-                n: '03',
-                title: "I'll tell you the truth.",
-                body: "If I wouldn't buy it again, I say so. If it changed my life, I say so. The score on the page is the score I'd give a friend.",
-              },
-            ].map((rule) => (
-              <div key={rule.n} className="text-center md:text-left">
-                <p className="text-5xl md:text-6xl font-black text-copper mb-4 leading-none tabular-nums">
-                  {rule.n}
-                </p>
-                <p className="text-xl font-black text-prose mb-3">{rule.title}</p>
-                <p className="text-prose-muted leading-relaxed text-sm max-w-sm mx-auto md:max-w-none md:mx-0">
-                  {rule.body}
-                </p>
-              </div>
-            ))}
+      {/* ── The Rules — ORANGE FULL-BLEED MANIFESTO STRIP.
+            Buildora "process strip" pattern. Three numbered steps
+            connected by a hairline running through the row. White type
+            on brand-orange canvas. The Boss Daddy promise stamped
+            across the page. */}
+      <section className="relative bg-accent overflow-hidden" aria-labelledby="rules-heading">
+        {/* Subtle inner top highlight — gives the orange slab depth */}
+        <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/15" />
+        <div className="relative max-w-6xl mx-auto px-6 py-16 md:py-20">
+          <div className="text-center mb-12 md:mb-14">
+            <p className="text-[11px] md:text-xs text-stone-50/80 uppercase tracking-[0.3em] font-black mb-3">— The Rules</p>
+            <h2 id="rules-heading" className="text-3xl md:text-4xl font-black text-white leading-tight">
+              Three rules. That&apos;s the whole standard.
+            </h2>
+          </div>
+
+          {/* Steps row — three numbered cells, hairline connector behind */}
+          <div className="relative">
+            {/* Connecting hairline (desktop only, runs behind the number circles) */}
+            <span
+              aria-hidden
+              className="hidden md:block absolute left-[16.66%] right-[16.66%] top-7 h-px bg-white/30"
+            />
+            <ol className="relative grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">
+              {[
+                {
+                  n: '01',
+                  title: 'I Bought It.',
+                  body: 'My money. No PR samples, no free units, no sponsor influence.',
+                },
+                {
+                  n: '02',
+                  title: 'I Used It.',
+                  body: 'Weeks, not minutes. My kid, my grill, my garage, my weekends.',
+                },
+                {
+                  n: '03',
+                  title: "I'll Tell The Truth.",
+                  body: "The score on the page is the score I'd give a friend.",
+                },
+              ].map((rule) => (
+                <li key={rule.n} className="flex flex-col items-center text-center px-2">
+                  {/* Numbered circle marker — sits on the connector line */}
+                  <span
+                    aria-hidden
+                    className="relative z-10 inline-flex items-center justify-center w-14 h-14 rounded-full bg-white text-accent font-black text-lg tabular-nums shadow-lg shadow-black/30 mb-5"
+                  >
+                    {rule.n}
+                  </span>
+                  <p className="text-xl md:text-2xl font-black text-white tracking-tight mb-2 leading-tight">{rule.title}</p>
+                  <p className="text-stone-50/85 leading-relaxed text-sm md:text-base max-w-xs">
+                    {rule.body}
+                  </p>
+                </li>
+              ))}
+            </ol>
           </div>
         </div>
+        {/* Subtle inner bottom shadow — closes the slab */}
+        <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-black/15" />
       </section>
 
       {/* ── Categories — orientation moment after Rules establishes trust.
@@ -553,26 +482,25 @@ export default async function HomePage() {
       )}
 
       {/* ── From The Vault — diverse trio of collections.
-            Second CREAM EDITORIAL moment. Curated picks deserve the
-            "magazine spread" treatment against the dark page. Cards
-            within are white surfaces on the cream — newspaper directory
-            inside a heritage binder. ─────────────────────────────── */}
+            Dark canvas with Buildora project-card treatment: photo on
+            top, ORANGE FOOTER ribbon below with title + subtitle. Cards
+            hover up with stronger shadow. ──────────────────────────── */}
       {vaultTrio.length > 0 && (
-        <section className="relative bg-paper bd-on-paper">
+        <section className="relative">
           <div className="relative max-w-6xl mx-auto px-6 py-20 md:py-24">
             <div className="flex items-end justify-between mb-10 gap-4">
               <div className="flex items-stretch gap-4 min-w-0">
-                <div className="w-[3px] bg-copper rounded-full shrink-0" />
+                <div className="w-[3px] bg-accent rounded-full shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-[11px] text-copper uppercase tracking-[0.2em] font-bold mb-2">— From The Vault</p>
-                  <h2 className="text-2xl md:text-3xl font-black text-prose leading-tight">Comparisons, kits, and curated picks</h2>
-                  <p className="mt-2 text-sm text-prose-faint">{LABELS.vault.tagline}</p>
+                  <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-2">— From The Vault</p>
+                  <h2 className="text-2xl md:text-3xl font-black text-stone-50 leading-tight">Comparisons, kits, and curated picks</h2>
+                  <p className="mt-2 text-sm text-stone-400">{LABELS.vault.tagline}</p>
                 </div>
               </div>
               <Link
                 href="/vault"
                 title={LABELS.vault.tagline}
-                className="hidden sm:inline-flex items-center text-xs text-prose-faint hover:text-copper transition-colors uppercase tracking-widest font-semibold shrink-0 whitespace-nowrap"
+                className="hidden sm:inline-flex items-center text-xs text-stone-400 hover:text-accent-text transition-colors uppercase tracking-widest font-semibold shrink-0 whitespace-nowrap"
               >
                 Open the Vault →
               </Link>
@@ -586,24 +514,30 @@ export default async function HomePage() {
                   <Link
                     key={`${card.collection_type}:${card.slug}`}
                     href={href}
-                    className="group flex flex-col bg-surface rounded-xl overflow-hidden border border-soft shadow-lg shadow-stone-900/[0.06] hover:border-copper hover:shadow-xl hover:shadow-stone-900/[0.12] hover:-translate-y-1 transition-all duration-200"
+                    className="group flex flex-col rounded-xl overflow-hidden border border-stone-800 shadow-lg shadow-black/30 hover:border-accent hover:shadow-xl hover:shadow-black/50 hover:-translate-y-1 transition-all duration-200"
                   >
-                    <div className="relative aspect-video bg-surface-sunken">
+                    {/* Photo top */}
+                    <div className="relative aspect-video bg-stone-900">
                       {card.hero_image_url ? (
                         <Image src={card.hero_image_url} alt={card.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
                       ) : (
-                        <div className="absolute inset-0 flex items-center justify-center text-copper/40">{meta.icon}</div>
+                        <div className="absolute inset-0 flex items-center justify-center text-accent/40">{meta.icon}</div>
                       )}
-                      <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-paper/95 backdrop-blur border border-soft rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-copper">
+                      {/* Type chip overlay — dark glass on photo */}
+                      <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-stone-900/85 backdrop-blur border border-stone-700 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-accent-text">
                         {meta.label}
                       </span>
                     </div>
-                    <div className="p-5 flex flex-col flex-1">
-                      <p className="text-base font-bold text-prose group-hover:text-accent-text-soft transition-colors leading-snug mb-2 line-clamp-2">{card.title}</p>
+                    {/* ORANGE FOOTER — Buildora project-card pattern */}
+                    <div className="bg-accent p-5 flex flex-col flex-1 relative overflow-hidden">
+                      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/15" />
+                      <p className="text-base font-black text-white leading-snug mb-2 line-clamp-2 tracking-tight">{card.title}</p>
                       {card.description && (
-                        <p className="text-sm text-prose-faint leading-relaxed line-clamp-2 flex-1">{card.description}</p>
+                        <p className="text-sm text-stone-50/80 leading-relaxed line-clamp-2 flex-1">{card.description}</p>
                       )}
-                      <p className="mt-4 text-xs text-accent-text font-semibold">Read →</p>
+                      <p className="mt-4 text-xs text-white font-bold uppercase tracking-widest inline-flex items-center gap-1">
+                        Read <span aria-hidden>→</span>
+                      </p>
                     </div>
                   </Link>
                 )
@@ -637,60 +571,118 @@ export default async function HomePage() {
             Full-bleed dark panel against the light page rhythm. Cream
             headline + brand orange accent strip + action-orange CTA.
             Creates the "clubhouse invitation" feel. ─────────────────── */}
+      {/* ── Newsletter CTA — Buildora "twin orange panels" pattern.
+            Dark section header (white H2 + trust bullets), then two
+            orange panels side-by-side: signup form on the left, value
+            props on the right. Strong conversion moment. */}
       <section id="crew" className="relative">
-        <div className="relative max-w-6xl mx-auto px-6 py-16">
-          <div className="relative bg-drama rounded-xl shadow-2xl shadow-stone-900/[0.15] px-8 py-14 text-center max-w-3xl mx-auto overflow-hidden border border-stone-800">
-            {/* Copper left-edge accent — metalwork signature on dark */}
-            <span aria-hidden className="absolute left-0 inset-y-8 w-0.5 bg-copper rounded-full" />
-            {/* Subtle radial warmth from top */}
-            <div
-              className="absolute inset-0 pointer-events-none opacity-50"
-              style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 0%, rgba(146,64,14,0.20), transparent 70%)' }}
-            />
-            <div className="relative">
-              <p className="text-copper text-xs font-bold uppercase tracking-[0.25em] mb-4">
-                Join the Boss Daddy Crew
+        <div className="relative max-w-6xl mx-auto px-6 py-20 md:py-24">
+          {/* Section header — white H2 on dark bg, with feature bullets */}
+          <div className="text-center mb-12">
+            <p className="text-[11px] text-accent-text uppercase tracking-[0.3em] font-bold mb-3">— Join the Crew</p>
+            <h2 className="text-3xl md:text-4xl font-black text-stone-50 leading-tight tracking-tight mb-6 max-w-2xl mx-auto">
+              Leading way in dad-tested reviews &amp; real-life gear.
+            </h2>
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-stone-300">
+              <span className="inline-flex items-center gap-2">
+                <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                Real dad
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                Real testing
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                Zero sponsors
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                No spam
+              </span>
+            </div>
+          </div>
+
+          {/* Twin orange panels — signup form (left) + value props (right) */}
+          <div className="grid md:grid-cols-2 gap-5 max-w-5xl mx-auto">
+            {/* Left — Newsletter signup */}
+            <div className="bg-accent rounded-xl p-6 sm:p-8 shadow-2xl shadow-black/40 relative overflow-hidden">
+              <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/15" />
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-stone-50/85 mb-4">— Sign Up</p>
+              <h3 className="text-xl sm:text-2xl font-black text-white mb-2 leading-tight">
+                Get the good stuff in your inbox.
+              </h3>
+              <p className="text-sm text-stone-50/85 mb-6 leading-relaxed">
+                One email when there&apos;s actually something worth saying. Drop your email and let&apos;s ride, Boss.
               </p>
-              <h2 className="text-3xl md:text-4xl font-black text-stone-50 mb-4 leading-tight">
-                Real Talk. Honest Reviews.<br />No BS Ever.
-              </h2>
-              <p className="text-stone-300 text-base mb-8 max-w-lg mx-auto">
-                The good stuff, straight from the trenches — reviews, wins, and real talk from a dad who shows up.
-                No spam. No sponsors. Just the crew.
-              </p>
-              <div className="max-w-md mx-auto text-left">
-                <EmailSignup
-                  heading={null}
-                  description={null}
-                  buttonLabel="Join Free"
-                  successMessage="You're in, Boss. Welcome to the crew."
-                  interests={['newsletter']}
-                />
-              </div>
-              <p className="text-xs text-stone-500 mt-5 text-center">Unsubscribe anytime. We mean it.</p>
+              <EmailSignup
+                heading={null}
+                description={null}
+                buttonLabel="Join Free"
+                successMessage="You're in, Boss. Welcome to the crew."
+                interests={['newsletter']}
+              />
+              <p className="text-xs text-stone-50/70 mt-4">Unsubscribe anytime. We mean it.</p>
+            </div>
+
+            {/* Right — What You'll Get value props */}
+            <div className="bg-accent rounded-xl p-6 sm:p-8 shadow-2xl shadow-black/40 relative overflow-hidden">
+              <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/15" />
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-stone-50/85 mb-4">— What You&apos;ll Get</p>
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3 text-white">
+                  <svg className="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <div>
+                    <p className="font-bold text-base leading-tight">Honest reviews, first.</p>
+                    <p className="text-sm text-stone-50/80 leading-snug mt-0.5">Boss Approved picks before anyone else sees them.</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3 text-white">
+                  <svg className="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <div>
+                    <p className="font-bold text-base leading-tight">Real-dad guides.</p>
+                    <p className="text-sm text-stone-50/80 leading-snug mt-0.5">Skills, how-tos, and field notes worth your time.</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3 text-white">
+                  <svg className="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <div>
+                    <p className="font-bold text-base leading-tight">No spam, no fluff.</p>
+                    <p className="text-sm text-stone-50/80 leading-snug mt-0.5">One email when it&apos;s worth opening, never just to fill a slot.</p>
+                  </div>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Closing tagline — ORANGE MANIFESTO MOMENT.
-            Full-bleed brand-orange section ending the page on a bold
-            statement. Cream highlight on "together" reads as heritage
-            masculine warmth on the action-orange canvas. The orange-
-            as-background treatment the brand has been missing. */}
-      <section className="relative bg-accent-brand py-24 md:py-32 overflow-hidden">
-        {/* Subtle vignette to anchor type and add depth */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 50%, transparent 40%, rgba(0,0,0,0.18))' }}
-        />
+      {/* ── Closing tagline — quiet dark signature.
+            Rules strip + Newsletter twin panels already carry the orange
+            manifesto weight; closing stays restrained dark + bold type
+            with single orange highlight on the key word. */}
+      <section className="relative py-24 md:py-32">
         <div className="relative max-w-4xl mx-auto px-6 text-center">
-          <p className="text-[11px] text-stone-900/80 uppercase tracking-[0.3em] font-black mb-6">— The Bottom Line</p>
-          <p className="text-3xl md:text-5xl font-black text-white leading-[1.1] mb-10 tracking-tight">
+          <p className="text-[11px] text-accent-text uppercase tracking-[0.3em] font-black mb-6">— The Bottom Line</p>
+          <p className="text-3xl md:text-5xl font-black text-stone-50 leading-[1.1] mb-10 tracking-tight">
             Now let&apos;s dad like a BOSS —{' '}
-            <span className="text-paper italic">together.</span>
+            <span className="text-accent italic">together.</span>
           </p>
-          <p className="text-sm text-stone-900/70 italic font-semibold">— Boss Daddy</p>
+          <p className="text-sm text-stone-400 italic font-semibold">— Boss Daddy</p>
         </div>
       </section>
 
