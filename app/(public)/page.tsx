@@ -47,9 +47,6 @@ export default async function HomePage() {
   const [
     { data: latestReviewsRaw },
     { data: vaultPicksRaw },
-    { count: reviewCount },
-    { count: bossApprovedCount },
-    { data: categoriesData },
   ] = await Promise.all([
     // Fetch 4 latest reviews for the magazine grid (1 hero card + 3 stacked).
     supabase
@@ -68,28 +65,7 @@ export default async function HomePage() {
       .eq('is_visible', true)
       .order('published_at', { ascending: false, nullsFirst: false })
       .limit(12),
-    // Stats for hero — total approved+visible reviews
-    supabase
-      .from('reviews')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'approved')
-      .eq('is_visible', true),
-    // Boss Approved count = reviews with rating ≥ 8
-    supabase
-      .from('reviews')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'approved')
-      .eq('is_visible', true)
-      .gte('rating', 8),
-    // Distinct categories with at least one review
-    supabase
-      .from('reviews')
-      .select('category')
-      .eq('status', 'approved')
-      .eq('is_visible', true),
   ])
-
-  const categoryCount = new Set((categoriesData ?? []).map((r) => r.category)).size
 
   const latestReviews = (latestReviewsRaw ?? []).slice(0, 4)
 
@@ -210,22 +186,6 @@ export default async function HomePage() {
             </aside>
           </div>
 
-          {/* Stats row — credibility numbers, Buildora pattern. Orange
-              numerals + small-caps labels for the editorial stamp feel. */}
-          <div className="mt-12 md:mt-16 pt-8 border-t border-stone-800 grid grid-cols-3 gap-6 sm:gap-12 max-w-2xl">
-            <div>
-              <p className="text-3xl md:text-4xl font-black text-accent tabular-nums leading-none">{reviewCount ?? 0}+</p>
-              <p className="text-[10px] sm:text-[11px] text-stone-400 uppercase tracking-widest font-bold mt-2 leading-tight">Dad-Tested<br />Reviews</p>
-            </div>
-            <div>
-              <p className="text-3xl md:text-4xl font-black text-accent tabular-nums leading-none">{bossApprovedCount ?? 0}</p>
-              <p className="text-[10px] sm:text-[11px] text-stone-400 uppercase tracking-widest font-bold mt-2 leading-tight">Boss<br />Approved</p>
-            </div>
-            <div>
-              <p className="text-3xl md:text-4xl font-black text-accent tabular-nums leading-none">{categoryCount}</p>
-              <p className="text-[10px] sm:text-[11px] text-stone-400 uppercase tracking-widest font-bold mt-2 leading-tight">Categories<br />Covered</p>
-            </div>
-          </div>
         </div>
       </section>
 
