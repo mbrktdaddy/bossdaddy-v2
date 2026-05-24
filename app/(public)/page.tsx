@@ -99,93 +99,79 @@ export default async function HomePage() {
             asset arrives, set backgroundImage on the section to a 16:9
             hero photo (2880×1620 retina) and the dark scrim + vignette
             will frame it correctly. ───────────────────────────────── */}
-      <section
-        className="relative overflow-hidden"
-        style={{
-          /* Placeholder bg — radial dark vignette + subtle warm hint upper-right.
-             Replace with photo via: backgroundImage: 'url(/images/hero.jpg)' + cover. */
-          backgroundImage:
-            'radial-gradient(ellipse 80% 60% at 80% 15%, rgba(204,85,0,0.12), transparent 60%), radial-gradient(ellipse 110% 70% at 20% 90%, rgba(0,0,0,0.55), transparent 70%)',
-        }}
-      >
-        <div className="relative max-w-6xl mx-auto px-6 pt-16 pb-12 md:pt-24 md:pb-16">
-          <div className="grid lg:grid-cols-[1.2fr_0.95fr] gap-10 lg:gap-14 items-end">
+      <section className="relative overflow-hidden">
+        {/* BG LAYER 1 — the BD shield watermark, positioned right.
+            Reduced opacity so it reads as a brand stamp behind the type,
+            not a literal logo competition. Scales with section height
+            so it stays proportionate at any viewport. Hidden on small
+            mobile where it would crowd the copy. */}
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none opacity-25 sm:opacity-35 md:opacity-50"
+          style={{
+            backgroundImage: "url('/images/bd-hero-bg.png')",
+            backgroundSize: 'auto 95%',
+            backgroundPosition: 'right -8% center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
 
-            {/* Copy column */}
-            <div>
-              <p className="text-[11px] md:text-xs uppercase tracking-[0.3em] font-bold text-accent-text mb-5">
-                Dad Like A BOSS.
-              </p>
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.02] tracking-tight mb-6 text-stone-50">
-                Reviews, Guides, and Gear<br />
-                <span className="text-accent">for Boss Dads.</span>
-              </h1>
-              <p className="text-stone-300 text-base md:text-lg leading-relaxed mb-8 max-w-xl">
-                Tested firsthand with my own money. No sponsors, no paid placements, no BS.
-              </p>
-              <div className="flex flex-wrap items-center gap-3 mb-4">
-                <Link
-                  href="/reviews"
-                  className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition-colors shadow-lg shadow-black/30"
-                >
-                  See This Month&apos;s Top Picks →
-                </Link>
-                <Link
-                  href="/guides"
-                  className="px-6 py-3 bg-transparent border border-stone-700 hover:border-accent hover:bg-stone-900/60 text-stone-200 hover:text-white font-semibold rounded-xl transition-colors"
-                >
-                  Browse Guides
-                </Link>
-              </div>
+        {/* BG LAYER 2 — left-side dimming + corner vignette so the copy
+            reads cleanly on top regardless of where the shield bleeds. */}
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'linear-gradient(90deg, rgba(10,10,12,0.75) 0%, rgba(10,10,12,0.4) 40%, rgba(10,10,12,0.1) 65%, transparent 85%), radial-gradient(ellipse 60% 40% at 90% 50%, rgba(204,85,0,0.10), transparent 65%)',
+          }}
+        />
+
+        {/* BG LAYER 3 — bottom fade to page bg for smooth transition
+            into the InMotionTicker below. */}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-40 pointer-events-none"
+          style={{
+            background: 'linear-gradient(180deg, transparent, #0a0a0c)',
+          }}
+        />
+
+        {/* Content — single column, text left-aligned. The shield BG
+            anchors the right side; the copy sits cleanly on the left. */}
+        <div className="relative max-w-6xl mx-auto px-6 pt-20 pb-28 md:pt-28 md:pb-36">
+          <div className="max-w-2xl">
+            <p className="text-[11px] md:text-xs uppercase tracking-[0.3em] font-bold text-accent-text mb-5">
+              Dad Like A BOSS.
+            </p>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.02] tracking-tight mb-6 text-stone-50">
+              Reviews, Guides, and Gear<br />
+              <span className="text-accent">for Boss Dads.</span>
+            </h1>
+            <p className="text-stone-300 text-base md:text-lg leading-relaxed mb-8 max-w-xl">
+              Tested firsthand with my own money. No sponsors, no paid placements, no BS.
+            </p>
+            <div className="flex flex-wrap items-center gap-3 mb-4">
               <Link
-                href="/about"
-                className="inline-block text-sm text-accent-text hover:text-accent font-medium transition-colors"
+                href="/reviews"
+                className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition-colors shadow-lg shadow-black/30"
               >
-                Read my story →
+                See This Month&apos;s Top Picks →
+              </Link>
+              <Link
+                href="/guides"
+                className="px-6 py-3 bg-transparent border border-stone-700 hover:border-accent hover:bg-stone-900/60 text-stone-200 hover:text-white font-semibold rounded-xl transition-colors"
+              >
+                Browse Guides
               </Link>
             </div>
-
-            {/* Orange info card — The Standard. Buildora-style overlay carrying
-                the trust manifesto in three quick lines. */}
-            <aside
-              aria-label="The Standard"
-              className="bg-accent rounded-xl p-6 md:p-7 shadow-2xl shadow-black/40 relative overflow-hidden"
+            <Link
+              href="/about"
+              className="inline-block text-sm text-accent-text hover:text-accent font-medium transition-colors"
             >
-              {/* Subtle inner highlight at top — gives the orange card depth */}
-              <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/20" />
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-stone-50/85 mb-5">— The Standard</p>
-              <ul className="space-y-4">
-                <li className="flex items-start gap-3 text-white">
-                  <svg className="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <div>
-                    <p className="font-bold text-base leading-tight">My money. My testing.</p>
-                    <p className="text-sm text-stone-50/80 leading-snug mt-0.5">Every product purchased the way you would.</p>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3 text-white">
-                  <svg className="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <div>
-                    <p className="font-bold text-base leading-tight">Weeks, not minutes.</p>
-                    <p className="text-sm text-stone-50/80 leading-snug mt-0.5">Real use. Real flaws exposed.</p>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3 text-white">
-                  <svg className="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <div>
-                    <p className="font-bold text-base leading-tight">I&apos;ll tell you the truth.</p>
-                    <p className="text-sm text-stone-50/80 leading-snug mt-0.5">The score I&apos;d give a friend.</p>
-                  </div>
-                </li>
-              </ul>
-            </aside>
+              Read my story →
+            </Link>
           </div>
-
         </div>
       </section>
 
