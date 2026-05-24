@@ -74,7 +74,7 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
           const file = e.dataTransfer.files?.[0]
           if (file) handleFile(file)
         }}
-        className="group relative w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-orange-700 to-orange-950 flex items-center justify-center text-4xl font-black text-white shrink-0 ring-2 ring-stone-900/[0.06] hover:ring-orange-700 transition-all disabled:opacity-50 disabled:cursor-wait"
+        className="group relative w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-orange-700 to-orange-950 flex items-center justify-center text-4xl font-black text-white shrink-0 hover:ring-orange-700 transition-all disabled:opacity-50 disabled:cursor-wait"
         aria-label={avatarUrl ? 'Change avatar' : 'Upload avatar'}
       >
         {avatarUrl ? (
@@ -91,7 +91,7 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
         )}
 
         {/* Hover overlay */}
-        <span className="absolute inset-0 bg-stone-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-bold uppercase tracking-widest">
+        <span className="absolute inset-0 bg-zinc-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-bold uppercase tracking-widest">
           {busy ? '...' : 'Change'}
         </span>
       </button>
@@ -106,7 +106,7 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={busy}
-            className="px-3 py-1.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-50 text-xs font-semibold text-prose rounded-lg transition-colors"
+            className="px-3 py-1.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-50 text-xs font-semibold text-prose rounded-lg transition-colors"
           >
             {busy ? 'Uploading…' : avatarUrl ? 'Replace' : 'Upload'}
           </button>
@@ -115,13 +115,13 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
               type="button"
               onClick={handleRemove}
               disabled={busy}
-              className="px-3 py-1.5 bg-transparent hover:bg-red-50 border border-soft hover:border-red-200 disabled:opacity-50 text-xs font-semibold text-prose-muted hover:text-red-600 rounded-lg transition-colors"
+              className="px-3 py-1.5 bg-transparent hover:bg-red-950/40 border border-soft hover:border-red-700/40 disabled:opacity-50 text-xs font-semibold text-prose-muted hover:text-red-300 rounded-lg transition-colors"
             >
               Remove
             </button>
           )}
         </div>
-        {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
+        {error && <p className="text-xs text-red-300 mt-1">{error}</p>}
       </div>
 
       <input

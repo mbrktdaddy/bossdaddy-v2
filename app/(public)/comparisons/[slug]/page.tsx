@@ -292,7 +292,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
               <section
                 id="bottom-line"
                 aria-label="Bottom line"
-                className="mb-12 rounded-xl border border-accent-border/40 bg-gradient-to-br from-accent-tint to-white ring-1 ring-inset ring-stone-900/[0.04] p-5 sm:p-7 shadow-lg shadow-stone-900/[0.06]"
+                className="mb-12 rounded-xl border border-accent-border/40 bg-accent-tint p-5 sm:p-7 shadow-lg shadow-black/30"
               >
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">The Bottom Line</p>
                 <p className="text-base sm:text-lg text-prose leading-relaxed font-medium">{comparison.winner_summary}</p>
@@ -303,7 +303,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
                       <a
                         key={review!.id}
                         href={`#dive-${review!.slug}`}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-accent-border/40 hover:border-accent-border/60 rounded-full text-xs text-prose-muted hover:text-accent transition-colors min-h-[36px]"
+                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-surface border border-accent-border/40 hover:border-accent-border/60 rounded-full text-xs text-prose-muted hover:text-accent transition-colors min-h-[36px]"
                       >
                         <span className="text-[10px] font-bold uppercase tracking-widest text-accent-text-soft">{wins_category}</span>
                         <span className="font-semibold">{review!.product_name}</span>
@@ -352,7 +352,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
                   <h2 className="text-2xl font-black text-prose leading-tight">What sets these apart</h2>
                 </div>
                 <div
-                  className="prose prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
+                  className="prose prose-invert prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
                   dangerouslySetInnerHTML={{ __html: comparison.intro_html }}
                 />
               </section>
@@ -377,7 +377,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
                 </div>
 
                 <div className="overflow-x-auto -mx-6 px-6">
-                  <table className="w-full min-w-[640px] border-separate border-spacing-0 bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden">
+                  <table className="w-full min-w-[640px] border-separate border-spacing-0 bg-gradient-to-br from-surface to-surface/60 border border-soft rounded-xl overflow-hidden">
                     <thead>
                       <tr>
                         <th className="text-left px-4 py-3 text-xs uppercase tracking-widest text-prose-faint font-semibold border-b border-soft align-bottom">
@@ -468,7 +468,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
                     <article
                       key={review.id}
                       id={`dive-${review.slug}`}
-                      className="scroll-mt-28 rounded-xl overflow-hidden bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06]"
+                      className="scroll-mt-28 rounded-xl overflow-hidden bg-gradient-to-br from-surface to-surface/60 border border-soft shadow-lg shadow-black/30"
                     >
                       <div className={`flex flex-col ${imageLeft ? 'sm:flex-row' : 'sm:flex-row-reverse'} gap-0`}>
                         {/* Hero image column */}
@@ -507,7 +507,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
                           {((review.pros?.length ?? 0) > 0 || (review.cons?.length ?? 0) > 0) && (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                               {(review.pros?.length ?? 0) > 0 && (
-                                <div className="rounded-xl border border-green-200 bg-green-50 p-3">
+                                <div className="rounded-xl border border-green-700/40 bg-green-950/40 p-3">
                                   <p className="text-[10px] font-bold uppercase tracking-widest text-forest mb-2">What works</p>
                                   <ul className="space-y-1.5">
                                     {review.pros!.slice(0, 4).map((p, i) => (
@@ -522,12 +522,12 @@ export default async function ComparisonDetailPage({ params }: Props) {
                                 </div>
                               )}
                               {(review.cons?.length ?? 0) > 0 && (
-                                <div className="rounded-xl border border-red-200 bg-red-50 p-3">
-                                  <p className="text-[10px] font-bold uppercase tracking-widest text-red-600 mb-2">Watch outs</p>
+                                <div className="rounded-xl border border-red-700/40 bg-red-950/40 p-3">
+                                  <p className="text-[10px] font-bold uppercase tracking-widest text-red-300 mb-2">Watch outs</p>
                                   <ul className="space-y-1.5">
                                     {review.cons!.slice(0, 4).map((c, i) => (
                                       <li key={i} className="text-xs text-prose-muted flex items-start gap-1.5 leading-snug">
-                                        <svg className="w-3 h-3 mt-0.5 shrink-0 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
+                                        <svg className="w-3 h-3 mt-0.5 shrink-0 text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
                                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                                         </svg>
                                         <span>{c}</span>
@@ -617,7 +617,7 @@ function ContenderCard({
   return (
     <a
       href={`#dive-${review.slug}`}
-      className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden shadow-md shadow-stone-900/[0.05] hover:shadow-lg hover:shadow-stone-900/[0.08] hover:border-accent-border/40 hover:-translate-y-1 transition-all ${className ?? ''}`}
+      className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft rounded-xl overflow-hidden shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/50 hover:border-accent-border/40 hover:-translate-y-1 transition-all ${className ?? ''}`}
     >
       <div className="relative w-full aspect-square bg-surface-sunken">
         {review.image_url && (
@@ -627,7 +627,7 @@ function ContenderCard({
           <div className="absolute top-2 right-2"><BossApprovedBadge size="sm" variant="card" /></div>
         )}
         {winsCategory && (
-          <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-stone-900/85 via-stone-900/40 to-transparent px-2.5 py-2">
+          <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-zinc-900/85 via-zinc-900/40 to-transparent px-2.5 py-2">
             <p className="text-[10px] font-bold uppercase tracking-widest text-orange-300 leading-tight">{winsCategory}</p>
           </div>
         )}

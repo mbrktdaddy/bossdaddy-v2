@@ -178,7 +178,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
     <form onSubmit={handleSave} className="space-y-5">
       <div>
         <label className="block text-sm text-prose-muted mb-1.5">
-          Slug <span className="text-red-600">*</span>
+          Slug <span className="text-red-300">*</span>
         </label>
         <input
           type="text"
@@ -196,7 +196,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
 
       <div>
         <label className="block text-sm text-prose-muted mb-1.5">
-          Product name <span className="text-red-600">*</span>
+          Product name <span className="text-red-300">*</span>
         </label>
         <input
           type="text"
@@ -471,7 +471,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
       </div>
 
       {error && (
-        <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
+        <p className="text-red-300 text-sm bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-3">{error}</p>
       )}
 
       {uploadStatus && (
@@ -503,7 +503,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
             type="button"
             onClick={handleDelete}
             disabled={deleting}
-            className="px-5 py-2.5 text-red-600 hover:text-red-700 text-sm transition-colors disabled:opacity-40"
+            className="px-5 py-2.5 text-red-300 hover:text-red-300 text-sm transition-colors disabled:opacity-40"
           >
             {deleting ? 'Deleting…' : 'Delete'}
           </button>

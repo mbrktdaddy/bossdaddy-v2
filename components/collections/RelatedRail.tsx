@@ -69,7 +69,7 @@ function RelatedCard({ item, className }: { item: RelatedItem; className?: strin
   return (
     <Link
       href={href}
-      className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] rounded-xl overflow-hidden shadow-md shadow-stone-900/[0.05] hover:border-accent-border/40 hover:shadow-lg hover:shadow-stone-900/[0.08] hover:-translate-y-1 transition-all ${className ?? ''}`}
+      className={`group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft rounded-xl overflow-hidden shadow-md shadow-black/30 hover:border-accent-border/40 hover:shadow-lg hover:shadow-black/50 hover:-translate-y-1 transition-all ${className ?? ''}`}
     >
       <div className="relative aspect-video bg-surface-sunken">
         {item.hero_image_url ? (

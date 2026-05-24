@@ -94,7 +94,7 @@ export default async function TagPage({ params }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {reviews.map((r) => (
               <Link key={r.id} href={`/reviews/${r.slug}`}
-                className="group bg-surface rounded-xl overflow-hidden shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] transition-all">
+                className="group bg-surface rounded-xl overflow-hidden shadow-lg shadow-black/30 hover:shadow-xl hover:shadow-black/50 transition-all">
                 {r.image_url ? (
                   <div className="relative w-full h-48">
                     <Image

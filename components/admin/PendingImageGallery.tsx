@@ -147,7 +147,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
             type="button"
             onClick={() => setShowPicker(true)}
             disabled={disabled || processing}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-40 text-prose-muted font-semibold rounded-lg transition-colors"
+            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-40 text-prose-muted font-semibold rounded-lg transition-colors"
           >
             Pick from library
           </button>
@@ -171,7 +171,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
       </div>
 
       {error && (
-        <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
+        <p className="text-xs text-red-300 bg-red-950/40 border border-red-700/40 rounded-lg px-3 py-2">{error}</p>
       )}
 
       {images.length === 0 ? (
@@ -215,7 +215,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
                 )}
 
                 {/* Controls */}
-                <div className="absolute bottom-0 left-0 right-0 p-1.5 bg-gradient-to-t from-stone-900/60 to-transparent flex items-center justify-between gap-1">
+                <div className="absolute bottom-0 left-0 right-0 p-1.5 bg-gradient-to-t from-zinc-900/60 to-transparent flex items-center justify-between gap-1">
                   <div className="flex items-center gap-0.5">
                     <button
                       type="button"
@@ -248,7 +248,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
                       type="button"
                       onClick={() => handleRemove(idx)}
                       disabled={disabled}
-                      className="w-6 h-6 flex items-center justify-center text-prose-muted hover:text-red-600 disabled:opacity-40 transition-colors"
+                      className="w-6 h-6 flex items-center justify-center text-prose-muted hover:text-red-300 disabled:opacity-40 transition-colors"
                       title="Remove from staging"
                     >
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>

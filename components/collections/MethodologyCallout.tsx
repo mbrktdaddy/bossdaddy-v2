@@ -40,7 +40,7 @@ export default function MethodologyCallout({
     <section
       id={id}
       aria-label={eyebrowLabel}
-      className="mb-12 rounded-xl border border-accent-border/30 bg-gradient-to-br from-accent-tint to-white ring-1 ring-inset ring-stone-900/[0.04] shadow-md shadow-stone-900/[0.05]"
+      className="mb-12 rounded-xl border border-accent-border/30 bg-accent-tint shadow-md shadow-black/30"
     >
       <div className="flex items-start gap-4 p-5 sm:p-6">
         {/* Editorial seal icon */}
@@ -55,7 +55,7 @@ export default function MethodologyCallout({
           <p className="text-xs text-eyebrow uppercase tracking-widest font-bold mb-2">{eyebrowLabel}</p>
           {html ? (
             <div
-              className="prose prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-p:text-sm sm:prose-p:text-base prose-p:my-0 prose-p:mb-3 last:prose-p:mb-0"
+              className="prose prose-invert prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-p:text-sm sm:prose-p:text-base prose-p:my-0 prose-p:mb-3 last:prose-p:mb-0"
               dangerouslySetInnerHTML={{ __html: html }}
             />
           ) : (

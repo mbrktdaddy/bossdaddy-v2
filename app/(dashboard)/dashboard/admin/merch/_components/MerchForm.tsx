@@ -120,7 +120,7 @@ export function MerchForm({ item }: Props) {
 
       <div>
         <label className="block text-sm text-prose-muted mb-1.5">
-          Slug <span className="text-red-600">*</span>
+          Slug <span className="text-red-300">*</span>
         </label>
         <input
           type="text"
@@ -138,7 +138,7 @@ export function MerchForm({ item }: Props) {
 
       <div>
         <label className="block text-sm text-prose-muted mb-1.5">
-          Name <span className="text-red-600">*</span>
+          Name <span className="text-red-300">*</span>
         </label>
         <input
           type="text"
@@ -237,7 +237,7 @@ export function MerchForm({ item }: Props) {
               onChange={(e) => setFeatured(e.target.checked)}
               className="sr-only"
             />
-            <div className={`w-10 h-6 rounded-full transition-colors ${featured ? 'bg-accent' : 'bg-stone-300'}`} />
+            <div className={`w-10 h-6 rounded-full transition-colors ${featured ? 'bg-accent' : 'bg-zinc-300'}`} />
             <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${featured ? 'translate-x-4' : 'translate-x-0'}`} />
           </div>
           <div>
@@ -264,7 +264,7 @@ export function MerchForm({ item }: Props) {
                   <button
                     type="button"
                     onClick={() => setImageUrl('')}
-                    className="absolute top-1 right-1 p-1 bg-surface/80 hover:bg-red-50 text-prose-muted hover:text-red-600 rounded transition-colors"
+                    className="absolute top-1 right-1 p-1 bg-surface/80 hover:bg-red-950/40 text-prose-muted hover:text-red-300 rounded transition-colors"
                     title="Clear override image"
                   >
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -291,7 +291,7 @@ export function MerchForm({ item }: Props) {
           <button
             type="button"
             onClick={() => setShowPicker(true)}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose-muted font-semibold rounded-lg transition-colors"
+            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted font-semibold rounded-lg transition-colors"
           >
             📁 Pick from library
           </button>
@@ -376,7 +376,7 @@ export function MerchForm({ item }: Props) {
       )}
 
       {error && (
-        <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
+        <p className="text-red-300 text-sm bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-3">{error}</p>
       )}
 
       <div className="flex items-center gap-3 pt-2">
@@ -392,7 +392,7 @@ export function MerchForm({ item }: Props) {
             type="button"
             onClick={handleDelete}
             disabled={deleting}
-            className="px-5 py-2.5 text-red-600 hover:text-red-700 text-sm transition-colors disabled:opacity-40"
+            className="px-5 py-2.5 text-red-300 hover:text-red-300 text-sm transition-colors disabled:opacity-40"
           >
             {deleting ? 'Deleting…' : 'Delete'}
           </button>

@@ -76,7 +76,7 @@ export default function EditEmailForm({ current }: { current: string }) {
   // ── Sent ──────────────────────────────────────────────────────────────────
   if (step === 'sent') {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+      <div className="bg-green-950/40 border border-green-700/40 rounded-xl p-4">
         <p className="text-forest text-sm font-semibold mb-1">Confirmation sent</p>
         <p className="text-prose-muted text-sm">
           Check <span className="text-prose">{email.trim()}</span> for a confirmation link.
@@ -109,7 +109,7 @@ export default function EditEmailForm({ current }: { current: string }) {
           required
           className="w-full px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm focus:outline-none transition-colors placeholder:text-prose-faint tracking-widest text-center text-lg font-bold"
         />
-        {error && <p className="text-red-600 text-xs">{error}</p>}
+        {error && <p className="text-red-300 text-xs">{error}</p>}
         <div className="flex items-center gap-3">
           <button
             type="submit"
@@ -141,7 +141,7 @@ export default function EditEmailForm({ current }: { current: string }) {
         <p className="text-xs text-prose-faint">
           We&apos;ll send a verification code to your current email to confirm it&apos;s you.
         </p>
-        {error && <p className="text-red-600 text-xs">{error}</p>}
+        {error && <p className="text-red-300 text-xs">{error}</p>}
         <div className="flex items-center gap-3">
           <button
             type="submit"

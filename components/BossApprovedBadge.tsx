@@ -39,7 +39,7 @@ export default function BossApprovedBadge({ size = 'sm', variant = 'page' }: Pro
   if (variant === 'card') {
     return (
       <div className="rotate-[-3deg]" aria-label="Boss Daddy Approved">
-        <div className="flex flex-col items-center justify-center px-3 py-2 bg-accent-brand rounded-lg shadow-lg shadow-stone-900/40 ring-1 ring-copper/60">
+        <div className="flex flex-col items-center justify-center px-3 py-2 bg-accent-brand rounded-lg shadow-lg shadow-zinc-900/40 ring-1 ring-copper/60">
           <span className="text-[12px] leading-none text-white font-bold">✓</span>
           <span className="text-[10px] font-black tracking-[0.04em] uppercase leading-none text-white mt-0.5" style={DISPLAY_FONT}>
             Approved

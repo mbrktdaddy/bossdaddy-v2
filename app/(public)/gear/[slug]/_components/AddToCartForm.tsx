@@ -128,7 +128,7 @@ export default function AddToCartForm({ variants }: { variants: Variant[] }) {
           : `Add to Cart · ${selected ? formatPrice(selected.retail_price_cents) : ''}`}
       </button>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-300">{error}</p>}
 
       {added && (
         <a href="/cart" className="text-center text-sm text-accent-text-soft hover:text-accent transition-colors font-medium">

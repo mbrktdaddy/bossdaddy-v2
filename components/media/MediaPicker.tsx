@@ -234,7 +234,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
   const productMap = Object.fromEntries(products.map((p) => [p.id, p.name]))
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/70" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/70" onClick={onClose}>
       <div
         className="bg-surface-sunken border border-soft rounded-xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl"
         onClick={(e) => e.stopPropagation()}
@@ -308,7 +308,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-50 text-prose text-xs font-medium rounded-lg transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-50 text-prose text-xs font-medium rounded-lg transition-colors"
               >
                 {uploading ? (
                   <span className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin" />
@@ -342,7 +342,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
           </p>
         )}
         {uploadError && tab === 'library' && (
-          <p className="text-red-600 text-xs bg-red-50 border-b border-red-200 px-5 py-2.5 shrink-0">{uploadError}</p>
+          <p className="text-red-300 text-xs bg-red-950/40 border-b border-red-700/40 px-5 py-2.5 shrink-0">{uploadError}</p>
         )}
 
         {/* Content */}
@@ -470,7 +470,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 {genLoading ? 'Generating…' : 'Generate & Use'}
               </button>
               {genError && (
-                <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{genError}</p>
+                <p className="text-red-300 text-sm bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-3">{genError}</p>
               )}
               <p className="text-xs text-prose-faint">Generated image will be added to the library and auto-selected.</p>
             </div>
@@ -484,14 +484,14 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
               type="button"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-3 py-1.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-40 text-xs text-prose rounded-lg transition-colors"
+              className="px-3 py-1.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-40 text-xs text-prose rounded-lg transition-colors"
             >← Prev</button>
             <span className="text-xs text-prose-faint">{page} / {totalPages}</span>
             <button
               type="button"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="px-3 py-1.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-40 text-xs text-prose rounded-lg transition-colors"
+              className="px-3 py-1.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-40 text-xs text-prose rounded-lg transition-colors"
             >Next →</button>
           </div>
         )}
@@ -512,7 +512,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm rounded-lg transition-colors"
+              className="px-4 py-2 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm rounded-lg transition-colors"
             >Cancel</button>
             <button
               type="button"

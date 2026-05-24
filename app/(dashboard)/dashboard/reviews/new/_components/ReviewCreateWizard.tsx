@@ -333,7 +333,7 @@ export function ReviewCreateWizard() {
         <div className="bg-surface border border-strong rounded-xl p-5 space-y-3">
           <div className="flex items-center gap-3">
             <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold flex-1">Draft preview</p>
-            <span className="text-sm font-bold text-amber-600">{previewDraft.rating}/10</span>
+            <span className="text-sm font-bold text-amber-300">{previewDraft.rating}/10</span>
           </div>
           <h2 className="text-lg font-black text-prose leading-snug">{previewDraft.title}</h2>
           {previewDraft.excerpt && (
@@ -349,7 +349,7 @@ export function ReviewCreateWizard() {
                 </ul>
               </div>
               <div>
-                <p className="text-xs text-red-600 font-semibold mb-1">Cons</p>
+                <p className="text-xs text-red-300 font-semibold mb-1">Cons</p>
                 <ul className="space-y-0.5">
                   {previewDraft.cons.map((c, i) => <li key={i} className="text-xs text-prose-muted">- {c}</li>)}
                 </ul>
@@ -376,7 +376,7 @@ export function ReviewCreateWizard() {
           )}
         </div>
         {error && (
-          <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
+          <p className="text-red-300 text-sm bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-3">{error}</p>
         )}
         <div className="flex items-center gap-3 flex-wrap">
           <button
@@ -389,7 +389,7 @@ export function ReviewCreateWizard() {
           <button
             type="button"
             onClick={() => { setPreviewDraft(null); setStep('generating'); handleGenerate() }}
-            className="px-5 py-2.5 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm rounded-xl transition-colors"
+            className="px-5 py-2.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm rounded-xl transition-colors"
           >
             ↺ Regenerate
           </button>
@@ -539,7 +539,7 @@ export function ReviewCreateWizard() {
         {/* Rating picker — hint only, not persisted */}
         <div>
           <label className="block text-sm text-prose-muted mb-2">
-            Your gut-feel rating <span className="text-red-600">*</span>
+            Your gut-feel rating <span className="text-red-300">*</span>
           </label>
           <div className="grid grid-cols-5 gap-1.5">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
@@ -651,7 +651,7 @@ export function ReviewCreateWizard() {
       </div>
 
       {error && (
-        <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
+        <p className="text-red-300 text-sm bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-3">{error}</p>
       )}
 
       <div className="flex items-center gap-3 pt-2">
@@ -667,7 +667,7 @@ export function ReviewCreateWizard() {
           type="button"
           onClick={handleSkipToBlank}
           disabled={!productName.trim()}
-          className="px-5 py-2.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-40 text-prose-muted text-sm rounded-xl transition-colors"
+          className="px-5 py-2.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-40 text-prose-muted text-sm rounded-xl transition-colors"
         >
           Skip to blank draft
         </button>

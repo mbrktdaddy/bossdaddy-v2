@@ -71,7 +71,7 @@ export default function ResetPasswordPage() {
           </div>
 
           {error && (
-            <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-2">
+            <div className="text-red-300 text-sm bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-2">
               <p>{error}</p>
               {error.includes('expired') && (
                 <a href="/forgot-password" className="text-accent-text-soft hover:text-accent text-xs mt-1 inline-block">

@@ -81,12 +81,12 @@ const SOCIAL_ICONS = [
 
 export default function Footer() {
   return (
-    <footer className="bg-drama text-stone-200 mt-16">
+    <footer className="bg-drama text-zinc-200 mt-16">
       {/* Newsletter band — dark dramatic moment, magazine-style sign-off */}
       <div className="max-w-2xl mx-auto px-6 pt-16 pb-10 text-center min-h-[300px]">
         <p className="text-accent-text-soft text-xs uppercase tracking-widest font-bold mb-3">— Welcome to the crew.</p>
-        <h3 className="text-3xl font-black mb-3 text-stone-50">Get the good stuff in your inbox</h3>
-        <p className="text-stone-300 text-sm mb-6">
+        <h3 className="text-3xl font-black mb-3 text-zinc-50">Get the good stuff in your inbox</h3>
+        <p className="text-zinc-300 text-sm mb-6">
           One email when there&apos;s actually something worth saying. No spam, no fluff — just the good stuff.
         </p>
         <EmailSignup
@@ -99,7 +99,7 @@ export default function Footer() {
       </div>
 
       {/* Social */}
-      <div className="max-w-6xl mx-auto px-6 pb-6 text-center border-b border-stone-800">
+      <div className="max-w-6xl mx-auto px-6 pb-6 text-center border-b border-zinc-800">
         <div className="flex items-center justify-center gap-5">
           {SOCIAL_ICONS.map(({ key, label, href, icon }) =>
             href ? (
@@ -109,7 +109,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="text-stone-400 hover:text-stone-50 transition-colors"
+                className="text-zinc-400 hover:text-zinc-50 transition-colors"
               >
                 {icon}
               </a>
@@ -119,7 +119,7 @@ export default function Footer() {
                 role="img"
                 aria-label={`${label} — coming soon`}
                 title={`${label} — coming soon`}
-                className="text-stone-600 cursor-not-allowed"
+                className="text-zinc-600 cursor-not-allowed"
               >
                 {icon}
               </span>
@@ -128,8 +128,8 @@ export default function Footer() {
         </div>
       </div>
       <div className="max-w-6xl mx-auto px-6 py-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-stone-400">
-          <Link href="/" className="flex items-center gap-2 font-black tracking-tight hover:text-stone-50 transition-colors py-2">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-zinc-400">
+          <Link href="/" className="flex items-center gap-2 font-black tracking-tight hover:text-zinc-50 transition-colors py-2">
             <Image
               src="/images/bd-logo-badge.png"
               alt=""
@@ -139,7 +139,7 @@ export default function Footer() {
             />
             <span>
               <span className="text-accent-brand">BOSS</span>
-              <span className="text-stone-100"> DADDY LIFE</span>
+              <span className="text-zinc-100"> DADDY LIFE</span>
             </span>
           </Link>
           <div className="flex items-center gap-4 flex-wrap justify-center">
@@ -148,7 +148,7 @@ export default function Footer() {
                 key={href}
                 href={href}
                 title={hint}
-                className="py-2 inline-block hover:text-stone-50 transition-colors"
+                className="py-2 inline-block hover:text-zinc-50 transition-colors"
               >
                 {label}
               </Link>

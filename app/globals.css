@@ -4,11 +4,11 @@
 /* ─────────────────────────────────────────────────────────────────────────
    BOSS DADDY DESIGN SYSTEM — 2026-05-24
    Locked palette: orange + black + white + grey. Four colors.
-   Dark canvas by default. Light scope (.bd-light) for dashboard.
+   Single dark canvas across the entire site. No light scope — a brief
+   .bd-light experiment was tried 2026-05-22 through 2026-05-24 and
+   scrapped in favor of consistency.
    No cream, no copper, no forest as chrome. Status colors (green/red)
    reserved for chips + form validation only.
-   Reference: Buildora (Dribbble) — dark hero, white content sections,
-   ORANGE full-bleed manifesto strips, dark testimonial/CTA, dark footer.
    ───────────────────────────────────────────────────────────────────────── */
 :root {
   --background: #141418;
@@ -24,8 +24,7 @@
 
   /* ── Surfaces — 3-tier cool dark hierarchy
         Page → elevated card → hover/raised. Page bg sits at #141418
-        (lifted off near-pure black) so the dark feels softer and shares
-        a neutral-cool spine with the .bd-light scope's off-white grey.
+        (lifted off near-pure black) so the dark feels softer.
         Sunken kept at #050507 — strong "well" recess against the lifted
         page for blockquotes/code blocks. */
   --bd-bg:             #141418;   /* page canvas — lifted cool dark */
@@ -50,15 +49,12 @@
   --bd-paper: #fff4d6;
 
   /* ── Accent tint — chip/box highlight background.
-        Dark canvas: neutral lifted surface (no brown undertone).
-        Light canvas (.bd-light): pale peach orange wash.
-        Distinguishes "brand-territory" UI elements (TL;DR boxes, product
-        chips) from default surfaces — without coloring the dark scope. */
+        Neutral lifted surface (no brown undertone). Distinguishes
+        "brand-territory" UI elements (TL;DR boxes, product chips)
+        from default surfaces. */
   --bd-accent-tint: #26262c;
 
-  /* ── Editorial blockquote text — cream on dark, warm brown on light.
-        Lets the bd-editorial blockquote work in both scopes without
-        hardcoding a fragile color. */
+  /* ── Editorial blockquote text — cream on dark canvas. */
   --bd-blockquote-text: var(--bd-paper);
 }
 
@@ -104,7 +100,7 @@
   --color-eyebrow:          var(--bd-orange-text);      /* xs uppercase labels */
   --color-card-title:       var(--bd-orange);            /* card h3 */
   --color-accent-border:    var(--bd-orange);            /* aliased — orange handles all */
-  --color-accent-tint:      var(--bd-accent-tint);       /* dark in :root, light wash in .bd-light */
+  --color-accent-tint:      var(--bd-accent-tint);       /* neutral lifted surface */
 
   /* Status — used sparingly in chips/validation only */
   --color-forest:           var(--bd-success);           /* legacy alias → green-500 */
@@ -252,61 +248,3 @@ h1, h2, h3, h4 {
   font-size: 0.9em;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────
-   LIGHT MODE — :root[data-palette="light"] + .bd-light scope.
-   :root variant flips the WHOLE site to light (emergency escape hatch).
-   .bd-light scopes one subtree to light — used by the dashboard layout
-   so the operator UI stays light while the public site is dark.
-   ───────────────────────────────────────────────────────────────────────── */
-:root[data-palette="light"],
-.bd-light {
-  /* ── Cool off-white palette ─────────────────────────────────────────
-        Page bg is a neutral light grey (#f4f4f5 — zinc-100). Reads as
-        "magazine paper" without warmth — same cool-neutral hue family
-        as the dark scope, so the dark→light transition feels like ends
-        of a single scale rather than opposing palettes. Cards stay pure
-        white so they sit elevated on the grey as inset boxes. */
-  --background: #f4f4f5;
-  --foreground: #0a0a0a;
-
-  /* ── Inherited text color override ───────────────────────────────────
-        The site layout sets `text-prose` on its outer container, which
-        computes to WHITE outside the .bd-light scope. Child elements
-        inherit that explicit white, so any element inside .bd-light that
-        doesn't set its own color (most H1/H2/H3 headings rely on
-        inheritance) renders white-on-paper and disappears.
-        Re-declaring color on the .bd-light element gives the scope a
-        fresh dark inheritance root — every unstyled descendant inherits
-        dark text from here, not the white from outside. */
-  color: var(--bd-text);
-
-  --bd-orange:       #CC5500;
-  --bd-orange-hover: #B85A14;
-  --bd-orange-text:  #B85A14;     /* darker on white for AA */
-
-  --bd-bg:             #f4f4f5;   /* cool off-white — primary page bg */
-  --bd-surface:        #ffffff;   /* pure white cards stand out */
-  --bd-surface-raised: #ebebed;   /* cool grey hover/raised */
-  --bd-surface-sunken: #e4e4e7;   /* recessed wells / code blocks */
-  --bd-border:         #e4e4e7;   /* cool hairline */
-  --bd-border-strong:  #d4d4d8;   /* cool confident edge */
-
-  --bd-text:       #0a0a0a;
-  --bd-text-muted: #52525b;
-  --bd-text-faint: #71717a;
-
-  --bd-success: #16a34a;          /* green-600 — slightly darker for AA on white */
-  --bd-error:   #dc2626;
-  --bd-warn:    #d97706;
-
-  --bd-paper: #fff4d6;
-
-  /* Pale peach wash — chip/box BGs read as a brand-orange highlight on
-     the cool off-white page, signaling "brand-territory" surfaces (TL;DR,
-     product-name chip, etc.) without coloring the rest of the canvas. */
-  --bd-accent-tint: #fce8d4;
-
-  /* Dark warm-brown text for blockquote prose on the cream-tinted wash —
-     keeps the editorial moment legible at long read length. */
-  --bd-blockquote-text: #5c2600;
-}

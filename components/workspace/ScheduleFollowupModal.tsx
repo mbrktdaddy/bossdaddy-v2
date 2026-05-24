@@ -64,7 +64,7 @@ export function ScheduleFollowupModal({ reviewId, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/80 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/80 backdrop-blur-sm p-4"
       onClick={(e) => { if (e.target === e.currentTarget && !busy) onClose() }}
     >
       <form
@@ -114,7 +114,7 @@ export function ScheduleFollowupModal({ reviewId, onClose }: Props) {
           </div>
 
           {err && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5">
+            <p className="text-sm text-red-300 bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-2.5">
               {err}
             </p>
           )}
@@ -129,7 +129,7 @@ export function ScheduleFollowupModal({ reviewId, onClose }: Props) {
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="px-4 py-2 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+            className="px-4 py-2 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
           >
             Cancel
           </button>

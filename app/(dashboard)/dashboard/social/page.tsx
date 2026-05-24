@@ -97,7 +97,7 @@ export default async function SocialPage({ searchParams }: Props) {
             href={`/dashboard/social?platform=${platform}&status=${s}`}
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors capitalize ${
               s === status
-                ? 'bg-stone-100 text-prose'
+                ? 'bg-zinc-800 text-prose'
                 : 'text-prose-faint hover:text-prose'
             }`}
           >

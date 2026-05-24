@@ -254,7 +254,7 @@ export default async function PickDetailPage({ params }: Props) {
                   <h2 className="text-2xl font-black text-prose leading-tight">Behind the picks</h2>
                 </div>
                 <div
-                  className="prose prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
+                  className="prose prose-invert prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
                   dangerouslySetInnerHTML={{ __html: pick.intro_html }}
                 />
               </section>
@@ -288,7 +288,7 @@ export default async function PickDetailPage({ params }: Props) {
                   const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                   const rank = idx + 1
                   return (
-                    <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-stone-900/[0.06] transition-colors">
+                    <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-black/30 transition-colors">
                       {/* Rank — medal for top 3, number for the rest */}
                       <div className="flex sm:flex-col items-center gap-3 sm:gap-1 shrink-0">
                         <RankMedal rank={rank} />
@@ -392,7 +392,7 @@ function RankMedal({ rank }: { rank: number }) {
     }[rank as 1 | 2 | 3]!
     return (
       <div className="flex sm:flex-col items-center gap-2">
-        <span className={`relative w-12 h-12 rounded-full ${colors.bg} flex items-center justify-center font-black text-base ${colors.text} shadow-lg shadow-stone-900/[0.06] ring-2 ring-stone-900/30`}>
+        <span className={`relative w-12 h-12 rounded-full ${colors.bg} flex items-center justify-center font-black text-base ${colors.text} shadow-lg shadow-black/30 ring-2 ring-zinc-900/30`}>
           <svg className="absolute -top-1 -right-1 w-4 h-4 text-accent-text-soft drop-shadow" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
           </svg>

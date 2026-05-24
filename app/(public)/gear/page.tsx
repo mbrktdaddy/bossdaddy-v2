@@ -188,7 +188,7 @@ export default async function GearPage({ searchParams }: Props) {
           href="/gear"
           className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold transition-colors ${
             !category
-              ? 'bg-prose text-background border border-prose shadow-sm shadow-stone-950/40'
+              ? 'bg-prose text-background border border-prose shadow-sm shadow-zinc-950/40'
               : 'bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose'
           }`}
         >
@@ -200,7 +200,7 @@ export default async function GearPage({ searchParams }: Props) {
             href={`/gear?category=${c.slug}`}
             className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
               category === c.slug
-                ? 'bg-prose text-background border border-prose shadow-sm shadow-stone-950/40'
+                ? 'bg-prose text-background border border-prose shadow-sm shadow-zinc-950/40'
                 : 'bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose'
             }`}
           >
@@ -244,7 +244,7 @@ export default async function GearPage({ searchParams }: Props) {
                   <Link
                     key={occ.slug}
                     href={`/gifts/${occ.slug}`}
-                    className="shrink-0 w-40 rounded-xl overflow-hidden bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-xl hover:shadow-stone-900/[0.10] hover:-translate-y-1 transition-all"
+                    className="shrink-0 w-40 rounded-xl overflow-hidden bg-gradient-to-br from-surface to-surface/60 border border-soft shadow-lg shadow-black/30 hover:border-accent-border/40 hover:shadow-xl hover:shadow-black/50 hover:-translate-y-1 transition-all"
                   >
                     <div className="relative w-full h-24 bg-surface-raised">
                       {pick?.hero_image_url ? (
@@ -252,7 +252,7 @@ export default async function GearPage({ searchParams }: Props) {
                       ) : (
                         <div className="w-full h-full flex items-center justify-center"><OccasionIcon value={occ.value} className="w-9 h-9 text-accent-text/60" /></div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/60 to-transparent" />
                       <p className="absolute bottom-2 left-3 right-3 text-white text-xs font-black leading-tight">{occ.label}</p>
                     </div>
                     <p className="px-3 py-2 text-xs text-prose-muted line-clamp-2 leading-relaxed">{occ.shortBlurb}</p>
@@ -269,7 +269,7 @@ export default async function GearPage({ searchParams }: Props) {
                   <Link
                     key={occ.slug}
                     href={`/gifts/${occ.slug}`}
-                    className="group relative rounded-xl overflow-hidden border border-soft ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-xl hover:shadow-stone-900/[0.10] hover:-translate-y-1 transition-all"
+                    className="group relative rounded-xl overflow-hidden border border-soft shadow-lg shadow-black/30 hover:border-accent-border/40 hover:shadow-xl hover:shadow-black/50 hover:-translate-y-1 transition-all"
                   >
                     <div className="relative w-full h-36 bg-surface-raised">
                       {pick?.hero_image_url ? (
@@ -277,11 +277,11 @@ export default async function GearPage({ searchParams }: Props) {
                       ) : (
                         <div className="w-full h-full flex items-center justify-center"><OccasionIcon value={occ.value} className="w-12 h-12 text-accent-text/60" /></div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-stone-900/60 via-stone-900/20 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/60 via-zinc-900/20 to-transparent" />
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 p-4">
                       <p className="text-white font-black text-sm leading-tight mb-0.5">{occ.label}</p>
-                      <p className="text-stone-200 text-xs line-clamp-1">{occ.shortBlurb}</p>
+                      <p className="text-zinc-200 text-xs line-clamp-1">{occ.shortBlurb}</p>
                     </div>
                   </Link>
                 )
@@ -314,7 +314,7 @@ export default async function GearPage({ searchParams }: Props) {
 
               <Link
                 href={`/picks/${featuredPick.slug}`}
-                className="group block bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft ring-1 ring-inset ring-stone-900/[0.04] shadow-xl shadow-stone-900/[0.08] hover:border-accent-border/40 hover:shadow-stone-900/[0.10] hover:-translate-y-1 transition-all"
+                className="group block bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft shadow-xl shadow-black/50 hover:border-accent-border/40 hover:shadow-black/50 hover:-translate-y-1 transition-all"
               >
                 <div className="flex flex-col sm:flex-row">
                   <div className="relative w-full sm:w-72 h-48 sm:h-auto sm:min-h-[220px] shrink-0 bg-surface-raised">
@@ -399,7 +399,7 @@ export default async function GearPage({ searchParams }: Props) {
                     <Link
                       key={c.slug}
                       href={`/category/${c.slug}`}
-                      className="group flex flex-col items-center justify-center text-center gap-2 bg-gradient-to-br from-surface to-surface/60 hover:bg-surface-raised rounded-xl p-4 min-h-[120px] border border-soft ring-1 ring-inset ring-stone-900/[0.04] shadow-md shadow-stone-900/[0.05] hover:border-accent-border/40 hover:shadow-lg hover:shadow-stone-900/[0.06] hover:-translate-y-1 transition-all"
+                      className="group flex flex-col items-center justify-center text-center gap-2 bg-gradient-to-br from-surface to-surface/60 hover:bg-surface-raised rounded-xl p-4 min-h-[120px] border border-soft shadow-md shadow-black/30 hover:border-accent-border/40 hover:shadow-lg hover:shadow-black/30 hover:-translate-y-1 transition-all"
                     >
                       <CategoryIcon slug={c.slug} className="w-7 h-7 text-accent-text" />
                       <span className="text-sm font-bold text-prose leading-tight group-hover:text-accent-text-soft transition-colors">
@@ -427,7 +427,7 @@ export default async function GearPage({ searchParams }: Props) {
             9+:  standard 3-col card grid (workhorse middle)
             8+:  compact editorial rows (browse-and-scan base) */}
       {!topPicks.length ? (
-        <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft ring-1 ring-inset ring-stone-900/[0.04]">
+        <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft">
           <p className="text-prose-faint text-lg font-semibold">Nothing here yet.</p>
           <p className="text-prose-faint text-sm mt-2">Reviews are being added.</p>
         </div>
@@ -562,7 +562,7 @@ function GearCard({
   // Avoids invalid <a>-inside-<a> HTML that nested cards had previously.
   return (
     <article
-      className={`group relative flex flex-col bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft ring-1 ring-inset ring-stone-900/[0.04] shadow-lg shadow-stone-900/[0.06] hover:border-accent-border/40 hover:shadow-xl hover:shadow-stone-900/[0.10] hover:-translate-y-1 transition-all duration-200 ${
+      className={`group relative flex flex-col bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft shadow-lg shadow-black/30 hover:border-accent-border/40 hover:shadow-xl hover:shadow-black/50 hover:-translate-y-1 transition-all duration-200 ${
         isHero ? 'lg:col-span-2 lg:row-span-2' : ''
       }`}
     >

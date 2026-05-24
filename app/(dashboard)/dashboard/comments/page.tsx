@@ -7,9 +7,9 @@ interface Props {
 }
 
 const STATUS_TABS = [
-  { key: 'pending',  label: 'Pending',  color: 'text-amber-600' },
+  { key: 'pending',  label: 'Pending',  color: 'text-amber-300' },
   { key: 'approved', label: 'Approved', color: 'text-forest'  },
-  { key: 'rejected', label: 'Rejected', color: 'text-red-600'    },
+  { key: 'rejected', label: 'Rejected', color: 'text-red-300'    },
 ]
 
 export default async function CommentsPage({ searchParams }: Props) {
@@ -103,7 +103,7 @@ export default async function CommentsPage({ searchParams }: Props) {
                   <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
                     c.content_type === 'review'
                       ? 'bg-accent-tint text-accent-text-soft border-accent-border/30'
-                      : 'bg-blue-50 text-blue-700 border-blue-200'
+                      : 'bg-blue-950/40 text-blue-300 border-blue-700/40'
                   }`}>
                     {c.content_type === 'review' ? 'Review' : 'Guide'}
                   </span>
@@ -113,7 +113,7 @@ export default async function CommentsPage({ searchParams }: Props) {
                   </span>
                   {score !== null && (
                     <span className={`text-xs font-mono ${
-                      score >= 0.7 ? 'text-red-600' : score >= 0.4 ? 'text-amber-600' : 'text-forest'
+                      score >= 0.7 ? 'text-red-300' : score >= 0.4 ? 'text-amber-300' : 'text-forest'
                     }`}>
                       {score.toFixed(2)}
                     </span>
@@ -134,7 +134,7 @@ export default async function CommentsPage({ searchParams }: Props) {
                 <p className="text-sm text-prose-muted leading-relaxed mb-3 whitespace-pre-wrap">{c.body}</p>
 
                 {flags.length > 0 && (
-                  <p className="text-xs text-red-600/80 mb-3">
+                  <p className="text-xs text-red-300/80 mb-3">
                     ⚑ {flags.slice(0, 3).join(' · ')}{flags.length > 3 ? ` +${flags.length - 3} more` : ''}
                   </p>
                 )}

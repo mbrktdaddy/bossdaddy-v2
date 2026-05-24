@@ -35,7 +35,7 @@ export default async function BenchStrip({
   if (items.length === 0) return null
 
   return (
-    <div className="rounded-xl bg-white border border-soft shadow-sm shadow-stone-900/[0.04] p-5 sm:p-6">
+    <div className="rounded-xl bg-surface border border-soft shadow-md shadow-black/30 p-5 sm:p-6">
       {/* Header — eyebrow + invitation tagline + CTA. The pulsing dot
           uses the action orange (vibrant) for "live testing signal"
           while the eyebrow text stays in the orange-700 brand voice. */}
@@ -60,7 +60,7 @@ export default async function BenchStrip({
           <li key={item.id}>
             <Link
               href={`/bench/${item.slug}`}
-              className="group flex items-center gap-3 sm:gap-4 py-3 -mx-2 px-2 rounded-lg hover:bg-stone-50 transition-colors min-h-[64px]"
+              className="group flex items-center gap-3 sm:gap-4 py-3 -mx-2 px-2 rounded-lg hover:bg-surface-raised transition-colors min-h-[64px]"
             >
               {/* Thumbnail — square, fills */}
               <div className="relative shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-surface-sunken border border-soft">
@@ -83,7 +83,7 @@ export default async function BenchStrip({
 
               {/* Status pill — fixed-width column so titles align */}
               <span
-                className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-stone-100 border border-soft shrink-0 text-center sm:min-w-[88px] ${getStatusColor(item.status as WishlistStatus)}`}
+                className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-surface-raised border border-soft shrink-0 text-center sm:min-w-[88px] ${getStatusColor(item.status as WishlistStatus)}`}
               >
                 {getStatusLabel(item.status as WishlistStatus)}
               </span>

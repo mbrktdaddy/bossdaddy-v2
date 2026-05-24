@@ -131,7 +131,7 @@ export function SpotlightsClient({ reviews, guides, settings }: Props) {
   return (
     <div className="space-y-10">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+        <div className="bg-red-950/40 border border-red-700/40 text-red-300 text-sm rounded-xl px-4 py-3">
           {error}
         </div>
       )}

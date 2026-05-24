@@ -17,7 +17,7 @@ export default function TakeawaysCard({ items, variant = 'inbody' }: Props) {
   const isPreview = variant === 'preview'
   const containerCls = isPreview
     ? 'rounded-xl border border-soft bg-surface-sunken/60 p-4'
-    : 'mb-10 rounded-xl border border-soft bg-surface-sunken/60 p-5 shadow-md shadow-stone-900/[0.05] sm:p-6'
+    : 'mb-10 rounded-xl border border-soft bg-surface-sunken/60 p-5 shadow-md shadow-black/30 sm:p-6'
   const eyebrowCls = isPreview
     ? 'mb-3 text-[10px] font-semibold uppercase tracking-widest text-eyebrow'
     : 'mb-4 text-xs font-semibold uppercase tracking-widest text-eyebrow'

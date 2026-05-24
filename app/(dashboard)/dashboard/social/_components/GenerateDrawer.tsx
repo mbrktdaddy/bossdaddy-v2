@@ -92,7 +92,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
       {/* Overlay */}
       {open && (
         <div className="fixed inset-0 z-50 flex">
-          <div className="absolute inset-0 bg-stone-900/60" onClick={() => setOpen(false)} />
+          <div className="absolute inset-0 bg-zinc-900/60" onClick={() => setOpen(false)} />
           <div className="relative ml-auto w-full max-w-lg bg-surface-sunken border-l border-soft flex flex-col h-full overflow-y-auto">
 
             {/* Header */}
@@ -138,7 +138,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                       onClick={() => { setSourceType(t); setSourceId('') }}
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors ${
                         t === sourceType
-                          ? 'bg-stone-100 text-prose'
+                          ? 'bg-zinc-800 text-prose'
                           : 'bg-surface-raised text-prose-muted hover:text-prose'
                       }`}
                     >
@@ -180,7 +180,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                         onClick={() => setFormat(f)}
                         className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors ${
                           f === format
-                            ? 'bg-stone-100 text-prose'
+                            ? 'bg-zinc-800 text-prose'
                             : 'bg-surface-raised text-prose-muted hover:text-prose'
                         }`}
                       >
@@ -200,7 +200,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                 {loading ? 'Generating 3 variants…' : 'Generate 3 Variants'}
               </button>
 
-              {error && <p className="text-sm text-red-600">{error}</p>}
+              {error && <p className="text-sm text-red-300">{error}</p>}
 
               {/* Variants */}
               {variants.length > 0 && (
@@ -213,7 +213,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                       <div key={i} className="bg-surface border border-strong rounded-xl p-4 space-y-3">
                         <p className="text-sm text-prose whitespace-pre-wrap leading-relaxed">{v.content}</p>
                         <div className="flex items-center justify-between">
-                          <span className={`text-xs tabular-nums ${over ? 'text-red-600' : 'text-prose-faint'}`}>
+                          <span className={`text-xs tabular-nums ${over ? 'text-red-300' : 'text-prose-faint'}`}>
                             {len}{platformConfig.charLimit ? ` / ${platformConfig.charLimit}` : ''}
                           </span>
                           <button

@@ -292,8 +292,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
       />
 
       {review.rejection_reason && ['draft', 'rejected'].includes(status) && (
-        <div className="mb-4 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200">
-          <p className="text-sm text-amber-700">
+        <div className="mb-4 px-4 py-3 rounded-xl bg-amber-950/40 border border-amber-700/40">
+          <p className="text-sm text-amber-300">
             <strong>Edits requested:</strong> {review.rejection_reason}
           </p>
         </div>
@@ -607,7 +607,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <ListEditor label="The Good (Pros)" items={pros} onChange={setPros} placeholder="e.g. Long battery life" accent="text-forest" />
-          <ListEditor label="The Not-So-Good (Cons)" items={cons} onChange={setCons} placeholder="e.g. Runs hot under load" accent="text-red-600" />
+          <ListEditor label="The Not-So-Good (Cons)" items={cons} onChange={setCons} placeholder="e.g. Runs hot under load" accent="text-red-300" />
         </div>
 
         <div>
@@ -661,7 +661,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                 items={notFor}
                 onChange={setNotFor}
                 placeholder="e.g. Families on a tight formula budget"
-                accent="text-red-600"
+                accent="text-red-300"
               />
             </div>
 
@@ -692,7 +692,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                       <button
                         type="button"
                         onClick={() => setFaqs(faqs.filter((_, j) => j !== i))}
-                        className="text-prose-faint hover:text-red-600 transition-colors text-xs mt-2"
+                        className="text-prose-faint hover:text-red-300 transition-colors text-xs mt-2"
                       >
                         ✕
                       </button>
@@ -861,10 +861,10 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         </div>
 
         {actionErr && (
-          <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{actionErr}</p>
+          <p className="text-red-300 text-sm bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-3">{actionErr}</p>
         )}
         {actionMsg && (
-          <p className="text-forest text-sm bg-green-50 border border-green-200 rounded-lg px-4 py-3">{actionMsg}</p>
+          <p className="text-forest text-sm bg-green-950/40 border border-green-700/40 rounded-lg px-4 py-3">{actionMsg}</p>
         )}
 
         <p className="text-xs text-prose-faint">

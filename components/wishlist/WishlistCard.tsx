@@ -16,7 +16,7 @@ export function WishlistCard({ item }: Props) {
   const detailHref = `/bench/${item.slug}`
 
   return (
-    <div className="bg-[var(--bd-surface)] rounded-xl overflow-hidden flex flex-col shadow-lg shadow-stone-900/[0.06] hover:shadow-xl hover:shadow-stone-900/[0.10] transition-all duration-200">
+    <div className="bg-[var(--bd-surface)] rounded-xl overflow-hidden flex flex-col shadow-lg shadow-black/30 hover:shadow-xl hover:shadow-black/50 transition-all duration-200">
       {/* Image */}
       <Link href={detailHref} className="block relative aspect-[4/3] bg-zinc-900">
         {item.image_url ? (
@@ -57,7 +57,7 @@ export function WishlistCard({ item }: Props) {
             className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold tabular-nums ${
               voteCount > 0
                 ? 'bg-accent-tint border border-accent-border/40 text-accent-text'
-                : 'bg-white border border-soft text-prose-faint'
+                : 'bg-zinc-900 border border-soft text-prose-faint'
             }`}
             title={voteCount > 0 ? `${voteCount} ${voteCount === 1 ? 'reader has' : 'readers have'} voted for this` : 'No votes yet — be the first'}
           >

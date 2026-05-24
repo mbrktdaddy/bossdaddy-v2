@@ -89,10 +89,10 @@ export default async function AdminMerchListPage() {
                 <div className="shrink-0">
                   <span
                     className={`px-2 py-1 text-xs rounded-md border ${
-                      p.status === 'available'   ? 'bg-green-50 text-forest border-green-200'  :
+                      p.status === 'available'   ? 'bg-green-950/40 text-forest border-green-700/40'  :
                       p.status === 'coming_soon' ? 'bg-accent-tint text-accent-text-soft border-accent-border/40' :
                       p.status === 'concept'     ? 'bg-surface-raised text-prose-muted border-strong' :
-                      'bg-red-50 text-red-600 border-red-200'
+                      'bg-red-950/40 text-red-300 border-red-700/40'
                     }`}
                   >
                     {stat?.label ?? p.status}

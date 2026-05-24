@@ -171,7 +171,7 @@ export function ProductLinkPanel({ content, onChangeContent }: Props) {
                   const tag = p.affiliate_url
                     ? { label: p.store === 'amazon' ? 'Amazon' : 'Affiliate', cls: 'bg-accent-tint text-accent-text-soft border-accent-border/40' }
                     : p.non_affiliate_url ? { label: 'Link', cls: 'bg-surface-raised text-prose-muted border-strong' }
-                    : { label: 'No URL', cls: 'bg-red-50 text-red-600 border-red-200' }
+                    : { label: 'No URL', cls: 'bg-red-950/40 text-red-300 border-red-700/40' }
 
                   return (
                     <div key={p.id} className="flex items-center gap-3 p-3 bg-surface-sunken border border-soft rounded-lg">
@@ -187,7 +187,7 @@ export function ProductLinkPanel({ content, onChangeContent }: Props) {
                       {alreadyMentioned ? (
                         <span
                           title="Already mentioned in this article"
-                          className="shrink-0 text-xs px-3 py-2 bg-green-50 border border-green-200 text-forest rounded-lg min-h-[36px]"
+                          className="shrink-0 text-xs px-3 py-2 bg-green-950/40 border border-green-700/40 text-forest rounded-lg min-h-[36px]"
                         >
                           ✓ In article
                         </span>
@@ -218,7 +218,7 @@ export function ProductLinkPanel({ content, onChangeContent }: Props) {
         </section>
 
         {error && (
-          <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">{error}</p>
+          <p className="text-xs text-red-300 bg-red-950/40 border border-red-700/40 rounded px-3 py-2">{error}</p>
         )}
       </div>
     </details>
@@ -242,7 +242,7 @@ function ExistingMentionCard({ mention, productName, total, onMove, onRemove }: 
 
   const kindCls =
     mention.kind === 'token' ? 'bg-accent-tint text-accent-text-soft border-accent-border/40' :
-                                'bg-green-50 text-forest border-green-200'
+                                'bg-green-950/40 text-forest border-green-700/40'
 
   return (
     <div className="p-3 bg-surface-sunken border border-soft rounded-lg space-y-2">
@@ -266,20 +266,20 @@ function ExistingMentionCard({ mention, productName, total, onMove, onRemove }: 
             type="button"
             onClick={() => onMove(mention.position - 1)}
             disabled={mention.position === 1}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
             title="Move up"
           >↑</button>
           <button
             type="button"
             onClick={() => onMove(mention.position + 1)}
             disabled={mention.position === total}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
             title="Move down"
           >↓</button>
           <button
             type="button"
             onClick={onRemove}
-            className="px-2.5 py-1.5 bg-transparent hover:bg-red-50 text-prose-faint hover:text-red-600 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-transparent hover:bg-red-950/40 text-prose-faint hover:text-red-300 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
             title="Remove mention"
           >🗑</button>
         </div>

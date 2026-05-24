@@ -19,7 +19,7 @@ export default async function DashboardLayout({
   const isAdmin = profile?.role === 'admin'
 
   return (
-    <div className={`bd-light ${geistMono.variable} min-h-screen bg-background text-prose md:flex`}>
+    <div className={`${geistMono.variable} min-h-screen bg-background text-prose md:flex`}>
       <DashboardNav username={profile?.username ?? 'Boss'} isAdmin={isAdmin} role={profile?.role ?? 'member'} />
 
       {/* pt-14 on mobile clears the fixed top bar; desktop uses normal flow */}

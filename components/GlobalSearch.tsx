@@ -76,7 +76,7 @@ export default function GlobalSearch() {
       <button
         onClick={() => setOpen(true)}
         title="Search (⌘K)"
-        className="flex items-center gap-2 px-3 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose-muted hover:text-prose text-xs rounded-lg transition-colors"
+        className="flex items-center gap-2 px-3 py-1.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted hover:text-prose text-xs rounded-lg transition-colors"
       >
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -88,7 +88,7 @@ export default function GlobalSearch() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-stone-900/70 flex items-start justify-center pt-20 px-4" onClick={() => setOpen(false)}>
+    <div className="fixed inset-0 z-50 bg-zinc-900/70 flex items-start justify-center pt-20 px-4" onClick={() => setOpen(false)}>
       <div
         className="bg-surface-sunken border border-soft rounded-xl w-full max-w-2xl max-h-[70vh] flex flex-col shadow-2xl"
         onClick={(e) => e.stopPropagation()}

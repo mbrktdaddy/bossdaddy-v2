@@ -40,11 +40,11 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // unsafe-* required by Next.js
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com", // unsafe-* required by Next.js; vercel-scripts for Analytics + Speed Insights
               "style-src 'self' 'unsafe-inline'",
               `img-src 'self' data: blob: https://images.unsplash.com https://m.media-amazon.com https://${supabaseHostname} https://files.cdn.printful.com`,
               "font-src 'self' data:",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://*.sentry.io https://*.ingest.sentry.io",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://*.sentry.io https://*.ingest.sentry.io https://vitals.vercel-insights.com",
               "frame-ancestors 'none'",
             ].join('; '),
           },

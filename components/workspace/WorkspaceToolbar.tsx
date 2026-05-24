@@ -43,7 +43,7 @@ export function WorkspaceToolbar({
           type="button"
           onClick={onSave}
           disabled={isSaving}
-          className="px-4 py-3 bg-surface-raised hover:bg-stone-100 disabled:opacity-50 text-prose text-sm font-medium rounded-lg transition-colors"
+          className="px-4 py-3 bg-surface-raised hover:bg-zinc-700 disabled:opacity-50 text-prose text-sm font-medium rounded-lg transition-colors"
         >
           {isSaving ? 'Saving…' : 'Save'}
         </button>
@@ -51,7 +51,7 @@ export function WorkspaceToolbar({
           <button
             type="button"
             onClick={onDuplicate}
-            className="px-3 py-3 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm rounded-lg transition-colors"
+            className="px-3 py-3 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm rounded-lg transition-colors"
             title="Create a new draft with this content"
           >
             📋 Duplicate
@@ -64,7 +64,7 @@ export function WorkspaceToolbar({
             className={`hidden xl:flex items-center gap-1.5 px-3 py-3 text-sm rounded-lg transition-colors ${
               previewOpen
                 ? 'bg-accent-tint text-accent-text-soft border border-accent-border/40'
-                : 'bg-surface-raised hover:bg-stone-100 text-prose-muted'
+                : 'bg-surface-raised hover:bg-zinc-700 text-prose-muted'
             }`}
             title="Toggle live preview panel"
           >
@@ -75,7 +75,7 @@ export function WorkspaceToolbar({
           <Link
             href={previewUrl}
             target="_blank"
-            className="px-3 py-3 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm rounded-lg transition-colors"
+            className="px-3 py-3 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm rounded-lg transition-colors"
           >
             🔗 Preview
           </Link>
@@ -85,7 +85,7 @@ export function WorkspaceToolbar({
             type="button"
             onClick={onDelete}
             disabled={isDeleting}
-            className="px-3 py-3 text-red-600 hover:bg-red-50 disabled:opacity-50 text-sm rounded-lg transition-colors"
+            className="px-3 py-3 text-red-300 hover:bg-red-950/40 disabled:opacity-50 text-sm rounded-lg transition-colors"
           >
             {isDeleting ? 'Deleting…' : '🗑 Delete'}
           </button>
@@ -100,8 +100,8 @@ export function WorkspaceToolbar({
               title={readyTooltip}
               className={`sm:hidden text-xs px-2.5 py-1 rounded-full font-medium border ${
                 readyCount === readyTotal
-                  ? 'bg-green-50 text-green-500 border-green-200'
-                  : 'bg-amber-50 text-amber-600 border-amber-200'
+                  ? 'bg-green-950/40 text-green-500 border-green-700/40'
+                  : 'bg-amber-950/40 text-amber-300 border-amber-700/40'
               }`}
             >
               {readyCount === readyTotal
@@ -115,8 +115,8 @@ export function WorkspaceToolbar({
                   title={check.label}
                   className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                     check.done
-                      ? 'bg-green-50 text-green-500 border border-green-200'
-                      : 'bg-red-50 text-red-600 border border-red-200'
+                      ? 'bg-green-950/40 text-green-500 border border-green-700/40'
+                      : 'bg-red-950/40 text-red-300 border border-red-700/40'
                   }`}
                 >
                   {check.done ? '✓' : '✗'} {check.label}
@@ -130,7 +130,7 @@ export function WorkspaceToolbar({
             type="button"
             onClick={onUnpublish}
             disabled={isPublishing}
-            className="px-4 py-3 bg-amber-50 hover:bg-amber-50 disabled:opacity-50 text-amber-700 text-sm font-semibold rounded-lg transition-colors border border-amber-200"
+            className="px-4 py-3 bg-amber-950/40 hover:bg-amber-950/40 disabled:opacity-50 text-amber-300 text-sm font-semibold rounded-lg transition-colors border border-amber-700/40"
           >
             {isPublishing ? '…' : 'Unpublish'}
           </button>

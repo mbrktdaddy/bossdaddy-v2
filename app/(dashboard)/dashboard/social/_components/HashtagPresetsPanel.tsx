@@ -78,7 +78,7 @@ export default function HashtagPresetsPanel({ presets, platform, onPresetsChange
               </div>
               <button
                 onClick={() => remove(preset.id)}
-                className="text-prose-faint hover:text-red-600 transition-colors shrink-0 mt-0.5"
+                className="text-prose-faint hover:text-red-300 transition-colors shrink-0 mt-0.5"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -106,7 +106,7 @@ export default function HashtagPresetsPanel({ presets, platform, onPresetsChange
             placeholder="#DadLife #BossDaddy #FatherFirst"
             className="w-full bg-surface-raised border border-strong text-prose text-xs rounded-lg px-3 py-2 focus:border-accent focus:outline-none"
           />
-          {error && <p className="text-xs text-red-600">{error}</p>}
+          {error && <p className="text-xs text-red-300">{error}</p>}
           <button
             onClick={save}
             disabled={saving}

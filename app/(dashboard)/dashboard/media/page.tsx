@@ -113,7 +113,7 @@ function AssetCard({
 
         {/* Product badge overlay */}
         {productName && (
-          <div className="absolute bottom-0 left-0 right-0 px-2 py-1 bg-stone-900/70">
+          <div className="absolute bottom-0 left-0 right-0 px-2 py-1 bg-zinc-900/70">
             <p className="text-[10px] text-accent-text-soft font-semibold truncate">
               {asset.is_primary && <span className="text-orange-300">★ </span>}
               {asset.label ? `${asset.label} · ${productName}` : productName}
@@ -122,7 +122,7 @@ function AssetCard({
         )}
 
         {/* Hover overlay — copy URL */}
-        <div className="absolute inset-0 bg-stone-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+        <div className="absolute inset-0 bg-zinc-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
           <button
             onClick={() => onCopy(asset.id, asset.url)}
             className="px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-xs font-semibold rounded-lg transition-colors"
@@ -154,7 +154,7 @@ function AssetCard({
             >
               {savingAlt ? '…' : 'Save'}
             </button>
-            <button onClick={() => setEditingAlt(false)} className="px-2 py-1 bg-surface-raised hover:bg-stone-100 text-prose-muted text-xs rounded transition-colors">
+            <button onClick={() => setEditingAlt(false)} className="px-2 py-1 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-xs rounded transition-colors">
               ✕
             </button>
           </div>
@@ -171,7 +171,7 @@ function AssetCard({
               onClick={handleAIGenerate}
               disabled={generatingAlt}
               title="Generate alt text with AI"
-              className="shrink-0 text-xs px-1.5 py-0.5 bg-blue-50 hover:bg-blue-50 text-blue-700 rounded transition-colors disabled:opacity-50"
+              className="shrink-0 text-xs px-1.5 py-0.5 bg-blue-950/40 hover:bg-blue-950/40 text-blue-300 rounded transition-colors disabled:opacity-50"
             >
               {generatingAlt ? '…' : '✨ AI'}
             </button>
@@ -193,8 +193,8 @@ function AssetCard({
             disabled={deleting}
             className={`text-xs px-2 py-1 rounded transition-colors ${
               confirmDelete
-                ? 'bg-red-50 text-red-600 hover:bg-red-100'
-                : 'text-prose-faint hover:text-red-600'
+                ? 'bg-red-950/40 text-red-300 hover:bg-red-100'
+                : 'text-prose-faint hover:text-red-300'
             }`}
           >
             {deleting ? '…' : confirmDelete ? 'Confirm delete' : 'Delete'}
@@ -392,7 +392,7 @@ export default function MediaLibraryPage() {
       </div>
 
       {uploadError && (
-        <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4">
+        <p className="text-red-300 text-sm bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-3 mb-4">
           {uploadError}
         </p>
       )}
@@ -445,7 +445,7 @@ export default function MediaLibraryPage() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="px-4 py-2 bg-surface-raised hover:bg-stone-100 disabled:opacity-40 text-sm text-prose rounded-lg transition-colors"
+            className="px-4 py-2 bg-surface-raised hover:bg-zinc-700 disabled:opacity-40 text-sm text-prose rounded-lg transition-colors"
           >
             ← Prev
           </button>
@@ -453,7 +453,7 @@ export default function MediaLibraryPage() {
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="px-4 py-2 bg-surface-raised hover:bg-stone-100 disabled:opacity-40 text-sm text-prose rounded-lg transition-colors"
+            className="px-4 py-2 bg-surface-raised hover:bg-zinc-700 disabled:opacity-40 text-sm text-prose rounded-lg transition-colors"
           >
             Next →
           </button>
@@ -462,14 +462,14 @@ export default function MediaLibraryPage() {
 
       {/* Drag-over overlay */}
       {dragOver && (
-        <div className="fixed inset-0 bg-stone-900/50 border-4 border-dashed border-accent pointer-events-none z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-zinc-900/50 border-4 border-dashed border-accent pointer-events-none z-50 flex items-center justify-center">
           <p className="text-prose text-xl font-black">Drop to upload</p>
         </div>
       )}
 
       {/* Usage-aware delete modal */}
       {usageData && pendingDeleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/70">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/70">
           <div className="bg-surface-sunken border border-soft rounded-xl w-full max-w-lg shadow-2xl p-6 space-y-5">
             <div>
               <p className="text-base font-black text-prose">This image is in use</p>
@@ -500,19 +500,19 @@ export default function MediaLibraryPage() {
               />
             )}
             {(usageData.articles_body.length > 0 || usageData.reviews_body.length > 0) && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 space-y-1">
-                <p className="text-xs font-semibold text-amber-600">Body mentions — not auto-fixed</p>
+              <div className="bg-amber-950/40 border border-amber-700/40 rounded-xl px-4 py-3 space-y-1">
+                <p className="text-xs font-semibold text-amber-300">Body mentions — not auto-fixed</p>
                 {[...usageData.articles_body, ...usageData.reviews_body].map((item) => (
-                  <p key={item.id} className="text-xs text-amber-700/70 truncate">{item.title ?? item.slug}</p>
+                  <p key={item.id} className="text-xs text-amber-300/70 truncate">{item.title ?? item.slug}</p>
                 ))}
-                <p className="text-xs text-amber-600 mt-1">These inline images will be broken after deletion. Edit those pages to remove them.</p>
+                <p className="text-xs text-amber-300 mt-1">These inline images will be broken after deletion. Edit those pages to remove them.</p>
               </div>
             )}
 
             <div className="flex gap-3 pt-1">
               <button
                 onClick={() => { setPendingDeleteId(null); setUsageData(null) }}
-                className="flex-1 px-4 py-2.5 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm rounded-xl transition-colors"
+                className="flex-1 px-4 py-2.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm rounded-xl transition-colors"
               >
                 Cancel
               </button>

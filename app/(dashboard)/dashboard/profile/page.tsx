@@ -9,7 +9,7 @@ import AvatarUploader from './_components/AvatarUploader'
 
 const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
   admin:  { label: 'Admin',  className: 'bg-accent-tint text-accent-text-soft border border-accent-border/60' },
-  author: { label: 'Author', className: 'bg-blue-50 text-blue-700 border border-blue-200' },
+  author: { label: 'Author', className: 'bg-blue-950/40 text-blue-300 border border-blue-700/40' },
   member: { label: 'Member', className: 'bg-surface-raised text-prose-muted border border-strong' },
 }
 
@@ -140,7 +140,7 @@ export default async function ProfilePage() {
       )}
 
       {/* Identity hero — avatar + name + role pill + joined date */}
-      <div className="bg-gradient-to-br from-white via-white to-accent-tint border border-soft rounded-xl p-6 mb-6">
+      <div className="bg-accent-tint border border-soft rounded-xl p-6 mb-6">
         <AvatarUploader
           initialAvatarUrl={(profile as { avatar_url?: string | null } | null)?.avatar_url ?? null}
           initial={profile?.username?.[0]?.toUpperCase() ?? '?'}
@@ -229,7 +229,7 @@ export default async function ProfilePage() {
             <p className="text-xs text-prose-faint mt-1">Likes Given</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-black text-red-600">{commentLikesReceived ?? 0}</p>
+            <p className="text-2xl font-black text-red-300">{commentLikesReceived ?? 0}</p>
             <p className="text-xs text-prose-faint mt-1">Comment Likes</p>
           </div>
           <div className="text-center">
@@ -256,7 +256,7 @@ export default async function ProfilePage() {
               {(awaitingCount ?? 0) > 0 && (
                 <Link
                   href="/dashboard/reviews"
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 hover:border-amber-200 rounded-lg text-xs font-medium text-amber-600 hover:text-amber-700 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-950/40 border border-amber-700/40 hover:border-amber-700/40 rounded-lg text-xs font-medium text-amber-300 hover:text-amber-300 transition-colors"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 shrink-0" />
                   {awaitingCount} Pending Approval →
@@ -306,7 +306,7 @@ export default async function ProfilePage() {
                 href={`/guides/${a.slug}`}
                 className="flex items-center gap-3 p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group"
               >
-                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-950/40 text-blue-300 border border-blue-700/40 shrink-0">
                   Article
                 </span>
                 <div className="min-w-0">

@@ -228,7 +228,7 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
 
       {/* Mobile overlay */}
       {open && (
-        <div className="md:hidden fixed inset-0 z-30 bg-stone-900/60" onClick={() => setOpen(false)} />
+        <div className="md:hidden fixed inset-0 z-30 bg-zinc-900/60" onClick={() => setOpen(false)} />
       )}
 
       {/* Mobile drawer */}

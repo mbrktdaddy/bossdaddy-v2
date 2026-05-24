@@ -115,7 +115,7 @@ export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
           onClick={e => { e.preventDefault(); navigate(-1) }}
           className="hidden md:flex absolute left-2 top-[88px] -translate-y-1/2 z-10
             w-8 h-8 items-center justify-center
-            bg-stone-900/60 hover:bg-stone-900/80 text-white rounded-full
+            bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full
             opacity-0 group-hover:opacity-100 transition-opacity duration-200"
           aria-label="Previous"
         >
@@ -127,7 +127,7 @@ export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
           onClick={e => { e.preventDefault(); navigate(1) }}
           className="hidden md:flex absolute right-2 top-[88px] -translate-y-1/2 z-10
             w-8 h-8 items-center justify-center
-            bg-stone-900/60 hover:bg-stone-900/80 text-white rounded-full
+            bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full
             opacity-0 group-hover:opacity-100 transition-opacity duration-200"
           aria-label="Next"
         >
@@ -149,7 +149,7 @@ export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
             <span className={`rounded-full transition-all duration-200 block ${
               i === current
                 ? 'w-4 h-1.5 bg-accent-hover'
-                : 'w-1.5 h-1.5 bg-stone-300 hover:bg-stone-400'
+                : 'w-1.5 h-1.5 bg-zinc-300 hover:bg-zinc-400'
             }`} />
           </button>
         ))}

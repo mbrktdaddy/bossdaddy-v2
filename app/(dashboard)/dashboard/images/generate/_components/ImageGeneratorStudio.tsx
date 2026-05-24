@@ -123,7 +123,7 @@ Tips:
         </button>
 
         {error && (
-          <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+          <p className="text-red-300 text-sm bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-3">
             {error}
           </p>
         )}
@@ -161,14 +161,14 @@ Tips:
                     <button
                       type="button"
                       onClick={() => handleCopyUrl(img.url)}
-                      className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose-muted rounded-lg transition-colors"
+                      className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted rounded-lg transition-colors"
                     >
                       {copiedUrl === img.url ? '✓ Copied' : 'Copy URL'}
                     </button>
                     <button
                       type="button"
                       onClick={() => setPrompt(img.prompt)}
-                      className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose-muted rounded-lg transition-colors"
+                      className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted rounded-lg transition-colors"
                       title="Load this prompt to tweak and regenerate"
                     >
                       ✎ Reuse prompt

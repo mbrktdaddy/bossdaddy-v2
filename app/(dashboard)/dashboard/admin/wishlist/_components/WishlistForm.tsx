@@ -132,7 +132,7 @@ export function WishlistForm({ item }: Props) {
   return (
     <form onSubmit={handleSave} className="space-y-6 max-w-2xl">
       {error && (
-        <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
+        <div className="px-4 py-3 bg-red-950/40 border border-red-700/40 rounded-xl text-sm text-red-300">
           {error}
         </div>
       )}
@@ -198,7 +198,7 @@ export function WishlistForm({ item }: Props) {
         <label className={labelCls}>Image</label>
         <div className="flex gap-2">
           <input className={`${inputCls} flex-1`} value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." />
-          <button type="button" onClick={() => setShowPicker(true)} className="shrink-0 px-3 py-2.5 bg-surface-raised hover:bg-stone-100 border border-strong rounded-xl text-sm text-prose-muted transition-colors">
+          <button type="button" onClick={() => setShowPicker(true)} className="shrink-0 px-3 py-2.5 bg-surface-raised hover:bg-zinc-700 border border-strong rounded-xl text-sm text-prose-muted transition-colors">
             Library
           </button>
         </div>
@@ -265,7 +265,7 @@ export function WishlistForm({ item }: Props) {
             type="button"
             onClick={handlePromote}
             disabled={busy}
-            className="px-5 py-2.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-50 border border-strong text-prose text-sm font-semibold rounded-xl transition-colors"
+            className="px-5 py-2.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-50 border border-strong text-prose text-sm font-semibold rounded-xl transition-colors"
           >
             Promote to Review
           </button>
@@ -276,7 +276,7 @@ export function WishlistForm({ item }: Props) {
             type="button"
             onClick={handleDelete}
             disabled={deleting}
-            className="ml-auto px-4 py-2.5 text-sm text-red-600 hover:text-red-700 disabled:opacity-50 transition-colors"
+            className="ml-auto px-4 py-2.5 text-sm text-red-300 hover:text-red-300 disabled:opacity-50 transition-colors"
           >
             {deleting ? 'Deleting…' : 'Delete'}
           </button>

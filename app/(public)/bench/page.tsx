@@ -122,7 +122,7 @@ export default async function BenchPage() {
                   </summary>
                   <div className="space-y-3">
                     {sectionItems.map((item) => (
-                      <div key={item.id} className="p-4 bg-[var(--bd-surface)] rounded-xl shadow-md shadow-stone-900/[0.05]">
+                      <div key={item.id} className="p-4 bg-[var(--bd-surface)] rounded-xl shadow-md shadow-black/30">
                         <p className="text-sm font-semibold text-zinc-400">{item.title}</p>
                         {item.skip_reason && (
                           <p className="text-xs text-zinc-600 mt-1">{item.skip_reason}</p>

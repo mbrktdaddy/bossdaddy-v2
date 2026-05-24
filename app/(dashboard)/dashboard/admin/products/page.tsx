@@ -79,7 +79,7 @@ export default async function ProductsListPage() {
               <div className="shrink-0 flex items-center gap-2 text-xs text-prose-faint">
                 {p.affiliate_url ? <span className="px-2 py-1 rounded-md bg-accent-tint text-accent-text-soft border border-accent-border/40">{p.store === 'amazon' ? 'Amazon' : p.store === 'other' ? (p.custom_store_name ?? 'Other') : p.store}</span> : null}
                 {!p.affiliate_url && p.non_affiliate_url ? <span className="px-2 py-1 rounded-md bg-surface-raised text-prose-muted border border-strong">Link</span> : null}
-                {!p.affiliate_url && !p.non_affiliate_url ? <span className="px-2 py-1 rounded-md bg-red-50 text-red-600 border border-red-200">No URL</span> : null}
+                {!p.affiliate_url && !p.non_affiliate_url ? <span className="px-2 py-1 rounded-md bg-red-950/40 text-red-300 border border-red-700/40">No URL</span> : null}
               </div>
             </Link>
           ))}

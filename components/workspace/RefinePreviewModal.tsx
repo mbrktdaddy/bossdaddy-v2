@@ -28,7 +28,7 @@ export function RefinePreviewModal({ before, after, onAccept, onDiscard }: Props
   }, [onDiscard])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-stretch bg-stone-900/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-stretch bg-zinc-900/80 backdrop-blur-sm">
       <div className="flex flex-col w-full max-w-6xl mx-auto my-4 mx-4 bg-surface-sunken border border-soft rounded-xl overflow-hidden shadow-2xl">
 
         {/* Header */}
@@ -41,7 +41,7 @@ export function RefinePreviewModal({ before, after, onAccept, onDiscard }: Props
             <button
               type="button"
               onClick={onDiscard}
-              className="px-4 py-2 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm font-medium rounded-lg transition-colors"
+              className="px-4 py-2 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm font-medium rounded-lg transition-colors"
             >
               Discard
             </button>

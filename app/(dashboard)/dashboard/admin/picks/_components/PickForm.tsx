@@ -489,7 +489,7 @@ export function PickForm({ pick, initialItems }: Props) {
       {/* Metadata */}
       <div className="space-y-4">
         <div>
-          <label className="block text-sm text-prose-muted mb-1.5">Slug <span className="text-red-600">*</span></label>
+          <label className="block text-sm text-prose-muted mb-1.5">Slug <span className="text-red-300">*</span></label>
           <input
             type="text" required value={slug} onChange={(e) => setSlug(e.target.value.toLowerCase())}
             pattern="[a-z0-9-]+" placeholder="fathers-day-gift-guide"
@@ -512,7 +512,7 @@ export function PickForm({ pick, initialItems }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm text-prose-muted mb-1.5">Title <span className="text-red-600">*</span></label>
+          <label className="block text-sm text-prose-muted mb-1.5">Title <span className="text-red-300">*</span></label>
           <input
             type="text" required value={title} onChange={(e) => setTitle(e.target.value)}
             placeholder="Father's Day Gift Guide 2026"
@@ -567,7 +567,7 @@ export function PickForm({ pick, initialItems }: Props) {
                 type="button"
                 onClick={() => callIntroAI(true)}
                 disabled={aiBusy || !refineInstruction.trim() || items.length < 2}
-                className="shrink-0 text-xs px-3 py-2 bg-surface-raised hover:bg-stone-100 disabled:opacity-40 text-prose font-semibold rounded-lg transition-colors min-h-[36px]"
+                className="shrink-0 text-xs px-3 py-2 bg-surface-raised hover:bg-zinc-700 disabled:opacity-40 text-prose font-semibold rounded-lg transition-colors min-h-[36px]"
               >
                 {aiBusy && refineInstruction ? 'Refining…' : 'Refine →'}
               </button>
@@ -575,7 +575,7 @@ export function PickForm({ pick, initialItems }: Props) {
           )}
 
           {aiError && (
-            <p className="mt-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{aiError}</p>
+            <p className="mt-2 text-xs text-red-300 bg-red-950/40 border border-red-700/40 rounded-lg px-3 py-2">{aiError}</p>
           )}
 
           {/* Inline images — manages bd-image-placeholder figures inside the intro */}
@@ -655,7 +655,7 @@ export function PickForm({ pick, initialItems }: Props) {
 
         {pickType === 'gift_guide' && (
           <div>
-            <label className="block text-sm text-prose-muted mb-1.5">Occasion <span className="text-red-600">*</span></label>
+            <label className="block text-sm text-prose-muted mb-1.5">Occasion <span className="text-red-300">*</span></label>
             <select
               value={occasion} onChange={(e) => setOccasion(e.target.value)}
               className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
@@ -790,7 +790,7 @@ export function PickForm({ pick, initialItems }: Props) {
                   <button
                     type="button"
                     onClick={() => setFaqs((f) => f.filter((_, i) => i !== idx))}
-                    className="text-xs text-prose-faint hover:text-red-600 transition-colors"
+                    className="text-xs text-prose-faint hover:text-red-300 transition-colors"
                     title="Remove this Q&A"
                   >
                     Remove
@@ -912,10 +912,10 @@ export function PickForm({ pick, initialItems }: Props) {
           )}
         </div>
         {fillError && (
-          <p className="mb-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{fillError}</p>
+          <p className="mb-3 text-xs text-red-300 bg-red-950/40 border border-red-700/40 rounded-lg px-3 py-2">{fillError}</p>
         )}
         {fillNote && !fillError && (
-          <p className="mb-3 text-xs text-forest bg-green-50 border border-green-200 rounded-lg px-3 py-2">{fillNote}</p>
+          <p className="mb-3 text-xs text-forest bg-green-950/40 border border-green-700/40 rounded-lg px-3 py-2">{fillNote}</p>
         )}
 
         {/* Search to add */}
@@ -976,7 +976,7 @@ export function PickForm({ pick, initialItems }: Props) {
                       <button type="button" onClick={() => moveItem(idx, 1)} disabled={idx === items.length - 1}
                         className="min-h-[44px] min-w-[44px] flex items-center justify-center text-base text-prose-faint hover:text-prose disabled:opacity-30 transition-colors rounded-lg hover:bg-surface-raised" title="Move down" aria-label="Move down">↓</button>
                       <button type="button" onClick={() => removeItem(item.review_id)}
-                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-lg text-prose-faint hover:text-red-600 hover:bg-red-50 transition-colors rounded-lg" title="Remove" aria-label="Remove">×</button>
+                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-lg text-prose-faint hover:text-red-300 hover:bg-red-950/40 transition-colors rounded-lg" title="Remove" aria-label="Remove">×</button>
                     </div>
                   </div>
                   <textarea
@@ -1039,13 +1039,13 @@ export function PickForm({ pick, initialItems }: Props) {
         )}
       </div>
 
-      {error && <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>}
+      {error && <p className="text-red-300 text-sm bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-3">{error}</p>}
 
       {/* Sticky action bar — pins to the bottom of the viewport so Save /
           Publish / View Live / Delete are reachable from anywhere in this
           long form, especially on mobile. Matches the VoiceProfileForm
           pattern. */}
-      <div className="sticky bottom-2 sm:bottom-4 z-20 mt-4 -mx-3 sm:mx-0 px-3 sm:px-4 py-3 bg-surface-sunken/85 backdrop-blur border border-soft rounded-xl shadow-lg shadow-stone-900/[0.06]">
+      <div className="sticky bottom-2 sm:bottom-4 z-20 mt-4 -mx-3 sm:mx-0 px-3 sm:px-4 py-3 bg-surface-sunken/85 backdrop-blur border border-soft rounded-xl shadow-lg shadow-black/30">
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <button type="submit" disabled={busy || !slug.trim() || !title.trim()}
             className="px-4 sm:px-5 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors min-h-[44px]">
@@ -1057,7 +1057,7 @@ export function PickForm({ pick, initialItems }: Props) {
               onClick={() => handleSave(null, { visible: !visible })}
               disabled={busy || !slug.trim() || !title.trim()}
               className={visible
-                ? 'px-4 sm:px-5 py-2.5 bg-amber-50 hover:bg-amber-50 border border-amber-200 text-amber-700 text-sm font-semibold rounded-xl transition-colors min-h-[44px] disabled:opacity-40'
+                ? 'px-4 sm:px-5 py-2.5 bg-amber-950/40 hover:bg-amber-950/40 border border-amber-700/40 text-amber-300 text-sm font-semibold rounded-xl transition-colors min-h-[44px] disabled:opacity-40'
                 : 'px-4 sm:px-5 py-2.5 bg-green-700 hover:bg-green-600 text-white text-sm font-semibold rounded-xl transition-colors min-h-[44px] disabled:opacity-40'}>
               {busy ? '…' : visible ? 'Unpublish' : 'Publish Live'}
             </button>
@@ -1072,7 +1072,7 @@ export function PickForm({ pick, initialItems }: Props) {
 
           {!isNew && (
             <button type="button" onClick={handleDelete} disabled={deleting}
-              className="ml-auto px-4 sm:px-5 py-2.5 text-red-600 hover:text-red-700 text-sm transition-colors disabled:opacity-40 min-h-[44px]">
+              className="ml-auto px-4 sm:px-5 py-2.5 text-red-300 hover:text-red-300 text-sm transition-colors disabled:opacity-40 min-h-[44px]">
               {deleting ? 'Deleting…' : 'Delete'}
             </button>
           )}

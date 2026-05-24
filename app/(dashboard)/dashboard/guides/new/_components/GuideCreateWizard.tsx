@@ -252,7 +252,7 @@ export function GuideCreateWizard() {
           <p className="text-sm text-prose-muted leading-relaxed">{preview}</p>
         </div>
         {error && (
-          <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
+          <p className="text-red-300 text-sm bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-3">{error}</p>
         )}
         <div className="flex items-center gap-3 flex-wrap">
           <button
@@ -265,7 +265,7 @@ export function GuideCreateWizard() {
           <button
             type="button"
             onClick={() => { setPreviewDraft(null); setStep('generating'); handleGenerate() }}
-            className="px-5 py-2.5 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm rounded-xl transition-colors"
+            className="px-5 py-2.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm rounded-xl transition-colors"
           >
             ↺ Regenerate
           </button>
@@ -463,7 +463,7 @@ export function GuideCreateWizard() {
       </div>
 
       {error && (
-        <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
+        <p className="text-red-300 text-sm bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-3">{error}</p>
       )}
 
       <div className="flex items-center gap-3 pt-2">
@@ -478,7 +478,7 @@ export function GuideCreateWizard() {
         <button
           type="button"
           onClick={handleSkipToBlank}
-          className="px-5 py-2.5 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm rounded-xl transition-colors"
+          className="px-5 py-2.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm rounded-xl transition-colors"
         >
           Skip to blank draft
         </button>

@@ -209,7 +209,7 @@ export function VoiceProfileForm({ initial }: Props) {
                 <button
                   type="button"
                   onClick={() => removeFact(f.id)}
-                  className="text-xs px-2 py-2 text-red-600 hover:text-red-700 transition-colors"
+                  className="text-xs px-2 py-2 text-red-300 hover:text-red-300 transition-colors"
                   title="Remove fact"
                 >
                   ✕
@@ -230,7 +230,7 @@ export function VoiceProfileForm({ initial }: Props) {
       {/* ── Save bar ─────────────────────────────────────────────────── */}
       <div className="sticky bottom-4 flex items-center justify-between gap-3 bg-surface-sunken/80 backdrop-blur px-4 py-3 rounded-xl border border-soft">
         <div className="min-w-0 text-sm">
-          {error && <span className="text-red-600">{error}</span>}
+          {error && <span className="text-red-300">{error}</span>}
           {!error && savedAt && <span className="text-forest">✓ Saved at {savedAt}</span>}
           {!error && !savedAt && <span className="text-prose-faint">Changes apply to new drafts immediately after saving.</span>}
         </div>
@@ -277,7 +277,7 @@ function FamilyMemberRow({
         <button
           type="button"
           onClick={onRemove}
-          className="text-xs px-2 py-2 text-red-600 hover:text-red-700 transition-colors"
+          className="text-xs px-2 py-2 text-red-300 hover:text-red-300 transition-colors"
           title="Remove family member"
         >
           ✕

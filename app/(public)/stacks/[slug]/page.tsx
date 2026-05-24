@@ -275,7 +275,7 @@ export default async function StackDetailPage({ params }: Props) {
                   <h2 className="text-2xl font-black text-prose leading-tight">Why this kit works together</h2>
                 </div>
                 <div
-                  className="prose prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
+                  className="prose prose-invert prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
                   dangerouslySetInnerHTML={{ __html: stack.intro_html }}
                 />
               </section>
@@ -309,7 +309,7 @@ export default async function StackDetailPage({ params }: Props) {
                   return (
                     <article
                       key={review.id}
-                      className="relative flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-stone-900/[0.06] transition-colors"
+                      className="relative flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-black/30 transition-colors"
                     >
                       {/* Position number — subtle ordering signal */}
                       <span aria-hidden className="absolute top-3 left-3 text-[10px] font-black text-accent-text/30 tabular-nums tracking-widest">
@@ -378,7 +378,7 @@ export default async function StackDetailPage({ params }: Props) {
               <section
                 id="cost"
                 aria-label="Build cost"
-                className="mb-12 rounded-xl border border-accent-border/40 bg-gradient-to-br from-accent-tint to-white ring-1 ring-inset ring-stone-900/[0.04] p-6 sm:p-8 shadow-lg shadow-stone-900/[0.06] text-center"
+                className="mb-12 rounded-xl border border-accent-border/40 bg-accent-tint p-6 sm:p-8 shadow-lg shadow-black/30 text-center"
               >
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Build Cost</p>
                 <p className="text-4xl sm:text-5xl font-black text-prose tabular-nums mb-2">${(total / 100).toFixed(2)}</p>

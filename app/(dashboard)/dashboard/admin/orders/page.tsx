@@ -11,10 +11,10 @@ type OrderStatus = 'pending_payment' | 'paid' | 'processing' | 'shipped' | 'deli
 const STATUS_STYLES: Record<OrderStatus, { label: string; cls: string }> = {
   pending_payment: { label: 'Pending',    cls: 'bg-surface-raised text-prose-muted' },
   paid:            { label: 'Paid',       cls: 'bg-amber-950/60 text-amber-400' },
-  processing:      { label: 'Processing', cls: 'bg-blue-50 text-blue-700' },
-  shipped:         { label: 'Shipped',    cls: 'bg-green-50 text-forest' },
-  delivered:       { label: 'Delivered',  cls: 'bg-green-50 text-forest' },
-  cancelled:       { label: 'Cancelled',  cls: 'bg-red-50 text-red-600' },
+  processing:      { label: 'Processing', cls: 'bg-blue-950/40 text-blue-300' },
+  shipped:         { label: 'Shipped',    cls: 'bg-green-950/40 text-forest' },
+  delivered:       { label: 'Delivered',  cls: 'bg-green-950/40 text-forest' },
+  cancelled:       { label: 'Cancelled',  cls: 'bg-red-950/40 text-red-300' },
   refunded:        { label: 'Refunded',   cls: 'bg-accent-tint text-accent-text-soft' },
 }
 
@@ -32,7 +32,7 @@ export default async function AdminOrdersPage() {
   if (error) {
     return (
       <div className="p-8">
-        <p className="text-red-600 text-sm">Failed to load orders: {error.message}</p>
+        <p className="text-red-300 text-sm">Failed to load orders: {error.message}</p>
       </div>
     )
   }
@@ -94,7 +94,7 @@ export default async function AdminOrdersPage() {
                     {!order.confirmation_email_sent_at && order.confirmation_email_attempts > 0 && (
                       <span
                         title={order.confirmation_email_error ?? 'No confirmation email sent'}
-                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-600"
+                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-950/40 text-red-300"
                       >
                         ✉ failed ({order.confirmation_email_attempts})
                       </span>

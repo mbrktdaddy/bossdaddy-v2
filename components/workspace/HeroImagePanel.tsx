@@ -118,7 +118,7 @@ export function HeroImagePanel({
           <button
             type="button"
             onClick={() => setShowPicker(true)}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose-muted hover:text-prose rounded-lg transition-colors min-h-[36px]"
+            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted hover:text-prose rounded-lg transition-colors min-h-[36px]"
           >
             📁 Library
           </button>
@@ -140,7 +140,7 @@ export function HeroImagePanel({
           <button
             type="button"
             onClick={() => onChange(null)}
-            className="absolute top-2 right-2 p-1.5 bg-surface/80 hover:bg-red-50 text-prose-muted hover:text-red-600 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+            className="absolute top-2 right-2 p-1.5 bg-surface/80 hover:bg-red-950/40 text-prose-muted hover:text-red-300 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
             title="Remove image"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -202,7 +202,7 @@ export function HeroImagePanel({
       </div>
 
       {error && (
-        <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+        <p className="text-xs text-red-300 bg-red-950/40 border border-red-700/40 rounded-lg px-3 py-2">
           {error}
         </p>
       )}

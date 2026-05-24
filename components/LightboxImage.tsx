@@ -31,7 +31,7 @@ export function LightboxImage({ src, alt, children }: Props) {
 
       {open && createPortal(
         <div
-          className="fixed inset-0 z-50 bg-stone-900/90 flex items-center justify-center p-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 bg-zinc-900/90 flex items-center justify-center p-4 animate-in fade-in duration-150"
           onClick={() => setOpen(false)}
         >
           {/* Close button */}

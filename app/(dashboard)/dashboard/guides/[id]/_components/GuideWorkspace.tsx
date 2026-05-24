@@ -152,8 +152,8 @@ export function GuideWorkspace({ guide: article }: Props) {
       />
 
       {article.rejection_reason && ['draft', 'rejected'].includes(status) && (
-        <div className="mb-4 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200">
-          <p className="text-sm text-amber-700">
+        <div className="mb-4 px-4 py-3 rounded-xl bg-amber-950/40 border border-amber-700/40">
+          <p className="text-sm text-amber-300">
             <strong>Edits requested:</strong> {article.rejection_reason}
           </p>
         </div>
@@ -302,7 +302,7 @@ export function GuideWorkspace({ guide: article }: Props) {
                       <button
                         type="button"
                         onClick={() => setFaqs(faqs.filter((_, j) => j !== i))}
-                        className="text-prose-faint hover:text-red-600 transition-colors text-xs mt-2"
+                        className="text-prose-faint hover:text-red-300 transition-colors text-xs mt-2"
                       >
                         ✕
                       </button>
@@ -412,10 +412,10 @@ export function GuideWorkspace({ guide: article }: Props) {
         </div>
 
         {actionErr && (
-          <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{actionErr}</p>
+          <p className="text-red-300 text-sm bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-3">{actionErr}</p>
         )}
         {actionMsg && (
-          <p className="text-forest text-sm bg-green-50 border border-green-200 rounded-lg px-4 py-3">{actionMsg}</p>
+          <p className="text-forest text-sm bg-green-950/40 border border-green-700/40 rounded-lg px-4 py-3">{actionMsg}</p>
         )}
 
         <p className="text-xs text-prose-faint">

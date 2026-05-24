@@ -194,7 +194,7 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
             </button>
           </div>
           {error && (
-            <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
+            <p className="text-xs text-red-300 bg-red-950/40 border border-red-700/40 rounded-lg px-3 py-2">{error}</p>
           )}
         </div>
 
@@ -282,7 +282,7 @@ function PostCard({ post, busy, copied, onCopy, onBodyCommit, onHashtagsCommit, 
           <span className="text-accent-text-soft font-bold">{m.icon}</span>
           {m.label}
           {m.charLimit != null && (
-            <span className={`text-xs font-mono ${overLimit ? 'text-red-600' : 'text-prose-faint'}`}>
+            <span className={`text-xs font-mono ${overLimit ? 'text-red-300' : 'text-prose-faint'}`}>
               {total}/{m.charLimit}
             </span>
           )}
@@ -292,21 +292,21 @@ function PostCard({ post, busy, copied, onCopy, onBodyCommit, onHashtagsCommit, 
             type="button"
             onClick={onCopy}
             disabled={busy}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose-muted hover:text-prose text-xs rounded-lg min-h-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted hover:text-prose text-xs rounded-lg min-h-[36px] transition-colors"
             title="Copy body + hashtags to clipboard"
           >{copied ? '✓ Copied' : 'Copy'}</button>
           <button
             type="button"
             onClick={onRegenerate}
             disabled={busy}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose-muted text-xs rounded-lg min-h-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-xs rounded-lg min-h-[36px] transition-colors"
             title="Regenerate just this platform"
           >{busy ? '…' : '🔄'}</button>
           <button
             type="button"
             onClick={onDelete}
             disabled={busy}
-            className="px-2.5 py-1.5 bg-transparent hover:bg-red-50 text-prose-faint hover:text-red-600 text-xs rounded-lg min-h-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-transparent hover:bg-red-950/40 text-prose-faint hover:text-red-300 text-xs rounded-lg min-h-[36px] transition-colors"
             title="Delete this post"
           >🗑</button>
         </div>
@@ -334,7 +334,7 @@ function PostCard({ post, busy, copied, onCopy, onBodyCommit, onHashtagsCommit, 
                 type="button"
                 onClick={() => removeTag(t)}
                 disabled={busy}
-                className="text-accent-text hover:text-red-600 -mr-0.5 px-1"
+                className="text-accent-text hover:text-red-300 -mr-0.5 px-1"
                 title={`Remove #${t}`}
               >×</button>
             </span>

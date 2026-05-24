@@ -203,14 +203,6 @@ export default async function ReviewPage({ params }: Props) {
       <EngagementTracker contentType="review" contentId={review.id} />
       {product && <StickyMobileCta product={product} />}
 
-      {/* ── LIGHT READING SCOPE ─────────────────────────────────────────────
-            Detail pages flip to a warm-paper canvas inside the dark site
-            chrome. The .bd-light wrapper scopes every role token (bg-surface,
-            text-prose, border-soft, etc.) to its light-mode values for the
-            entire article subtree. bg-background pulls the new warm-paper
-            page tint (--bd-bg / --background) so the article reads like a
-            magazine page rather than tech-UI white. */}
-      <div className="bd-light bg-background">
       <div className="w-full max-w-6xl mx-auto px-6 py-12 overflow-x-clip">
         <div className="flex flex-col xl:flex-row gap-12 xl:items-start">
 
@@ -237,7 +229,7 @@ export default async function ReviewPage({ params }: Props) {
         {/* FTC Disclosure */}
         {review.has_affiliate_links && (
           <div
-            className="mb-8 text-xs text-prose-faint bg-surface rounded-xl px-4 py-3 shadow-md shadow-stone-900/[0.05]"
+            className="mb-8 text-xs text-prose-faint bg-surface rounded-xl px-4 py-3 shadow-md shadow-black/30"
             dangerouslySetInnerHTML={{ __html: FTC_DISCLOSURE_HTML }}
           />
         )}
@@ -253,7 +245,7 @@ export default async function ReviewPage({ params }: Props) {
             {category && (
               <Link
                 href={`/category/${category.slug}`}
-                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-surface-raised text-prose-muted hover:bg-stone-100 hover:text-prose transition-colors"
+                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-surface-raised text-prose-muted hover:bg-zinc-700 hover:text-prose transition-colors"
               >
                 <CategoryIcon slug={category.slug} className="w-4 h-4 text-accent-text" /> {category.label}
               </Link>
@@ -354,7 +346,7 @@ export default async function ReviewPage({ params }: Props) {
         {isFollowup && followupToc.length >= 2 && (
           <nav
             aria-label="Follow-up sections"
-            className="mt-8 mb-4 px-4 py-3 rounded-xl bg-white border border-soft"
+            className="mt-8 mb-4 px-4 py-3 rounded-xl bg-surface border border-soft"
           >
             <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">In this update</p>
             <ol className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
@@ -377,7 +369,7 @@ export default async function ReviewPage({ params }: Props) {
         <div className="min-w-0 w-full">
           <ImageLightbox className="bd-content">
             <div
-              className="bd-editorial prose prose-lg prose-orange mx-auto max-w-[68ch]
+              className="bd-editorial prose prose-lg prose-invert prose-orange mx-auto max-w-[68ch]
                 prose-headings:font-black prose-headings:tracking-tight prose-headings:font-sans prose-headings:leading-[1.15]
                 prose-h2:text-2xl prose-h2:mt-14 prose-h2:mb-5
                 prose-h3:mt-10 prose-h3:mb-3
@@ -407,7 +399,7 @@ export default async function ReviewPage({ params }: Props) {
               {faqs.map((faq, i) => (
                 <details
                   key={i}
-                  className="group bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-xl shadow-md shadow-stone-900/[0.05] overflow-hidden transition-colors"
+                  className="group bg-gradient-to-br from-surface to-surface/60 border border-soft hover:border-accent-border/40 rounded-xl shadow-md shadow-black/30 overflow-hidden transition-colors"
                 >
                   <summary className="flex items-center justify-between gap-4 cursor-pointer list-none px-5 py-4 hover:bg-surface-raised/60 transition-colors min-h-[44px]">
                     <p className="font-bold text-sm text-prose leading-snug">{faq.question}</p>
@@ -433,7 +425,7 @@ export default async function ReviewPage({ params }: Props) {
 
         {/* Bottom CTA — email signup */}
         <div className="mt-12 pt-8">
-          <div className="bg-gradient-to-br from-surface to-surface-sunken border border-soft ring-1 ring-inset ring-stone-900/[0.04] rounded-xl p-6 sm:p-8 text-center shadow-xl shadow-stone-900/[0.06]">
+          <div className="bg-gradient-to-br from-surface to-surface-sunken border border-soft rounded-xl p-6 sm:p-8 text-center shadow-xl shadow-black/30">
             <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3 mx-auto" />
             <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Liked this review?</p>
             <h3 className="text-xl font-black mb-4">Get the next one in your inbox</h3>
@@ -495,7 +487,7 @@ export default async function ReviewPage({ params }: Props) {
                 <Link
                   key={r.id}
                   href={`/reviews/${r.slug}`}
-                  className="flex items-center justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] rounded-xl shadow-md shadow-stone-900/[0.05] hover:shadow-lg hover:shadow-stone-900/[0.06] hover:border-accent-border/40 hover:-translate-y-1 transition-all group"
+                  className="flex items-center justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft rounded-xl shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/30 hover:border-accent-border/40 hover:-translate-y-1 transition-all group"
                 >
                   <p className="text-sm font-semibold group-hover:text-accent-text-soft transition-colors truncate min-w-0 mr-4">{r.title}</p>
                   <RatingScore rating={r.rating ?? 0} size="sm" />
@@ -533,7 +525,7 @@ export default async function ReviewPage({ params }: Props) {
 
           {/* Related Reviews */}
           {related && related.length > 0 && (
-            <div className="bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] rounded-xl p-5 shadow-lg shadow-stone-900/[0.06]">
+            <div className="bg-gradient-to-br from-surface to-surface/60 border border-soft rounded-xl p-5 shadow-lg shadow-black/30">
               <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
               <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">More Reviews</p>
               <div className="space-y-4">
@@ -555,7 +547,6 @@ export default async function ReviewPage({ params }: Props) {
 
         </div>
       </div>
-      </div>{/* end .bd-light reading scope */}
     </>
   )
 }

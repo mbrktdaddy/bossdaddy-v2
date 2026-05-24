@@ -20,9 +20,9 @@ export function ModerationInfo({ score, flags, onAddressFlag }: Props) {
     : 'low'
 
   const levelConfig = {
-    high:   { label: 'High Risk',      bg: 'bg-red-50',    border: 'border-red-200',    text: 'text-red-600'    },
-    medium: { label: 'Needs Review',   bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-600' },
-    low:    { label: 'Low Risk',       bg: 'bg-green-50',  border: 'border-green-200',  text: 'text-forest'  },
+    high:   { label: 'High Risk',      bg: 'bg-red-950/40',    border: 'border-red-700/40',    text: 'text-red-300'    },
+    medium: { label: 'Needs Review',   bg: 'bg-amber-950/40', border: 'border-amber-700/40', text: 'text-amber-300' },
+    low:    { label: 'Low Risk',       bg: 'bg-green-950/40',  border: 'border-green-700/40',  text: 'text-forest'  },
     null:   { label: 'Unscored',       bg: 'bg-surface',      border: 'border-soft',      text: 'text-prose-faint'   },
   }[level ?? 'null']
 

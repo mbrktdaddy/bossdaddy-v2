@@ -120,16 +120,16 @@ function RegisterForm() {
           </div>
 
           {error && (
-            <div className="text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+            <div className="text-sm bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-3">
               {error === 'already_exists' ? (
-                <p className="text-red-600">
+                <p className="text-red-300">
                   An account with that email already exists.{' '}
                   <Link href={`/login?next=${encodeURIComponent(redirectTo)}`} className="text-accent-text-soft hover:text-accent font-semibold">
                     Sign in instead →
                   </Link>
                 </p>
               ) : (
-                <p className="text-red-600">{error}</p>
+                <p className="text-red-300">{error}</p>
               )}
             </div>
           )}

@@ -103,7 +103,7 @@ export function VersionHistoryPanel({ contentType, contentId }: Props) {
                   <button
                     onClick={() => handleRevert(r.id, r.version_number)}
                     disabled={reverting === r.id}
-                    className="text-xs px-3 py-1 bg-surface-raised hover:bg-stone-100 disabled:opacity-50 text-prose-muted rounded-lg transition-colors"
+                    className="text-xs px-3 py-1 bg-surface-raised hover:bg-zinc-700 disabled:opacity-50 text-prose-muted rounded-lg transition-colors"
                   >
                     {reverting === r.id ? '…' : '↻ Revert'}
                   </button>
@@ -113,7 +113,7 @@ export function VersionHistoryPanel({ contentType, contentId }: Props) {
           </div>
         )}
         {error && (
-          <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2 mt-2">{error}</p>
+          <p className="text-xs text-red-300 bg-red-950/40 border border-red-700/40 rounded px-3 py-2 mt-2">{error}</p>
         )}
       </div>
     </details>

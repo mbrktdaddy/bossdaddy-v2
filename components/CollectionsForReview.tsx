@@ -77,7 +77,7 @@ export default async function CollectionsForReview({ reviewId }: Props) {
             <li key={c.id}>
               <Link
                 href={href}
-                className="group flex items-center gap-4 p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 hover:-translate-y-1 rounded-xl shadow-md shadow-stone-900/[0.05] transition-all"
+                className="group flex items-center gap-4 p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft hover:border-accent-border/40 hover:-translate-y-1 rounded-xl shadow-md shadow-black/30 transition-all"
               >
                 <span className="text-accent-text-soft shrink-0">{meta.icon}</span>
                 <div className="min-w-0 flex-1">

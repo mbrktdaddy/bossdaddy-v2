@@ -157,7 +157,7 @@ function LinkDialog({ initial, onConfirm, onCancel }: {
 }) {
   const [url, setUrl] = useState(initial)
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60" onClick={onCancel}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/60" onClick={onCancel}>
       <div
         className="bg-surface border border-strong rounded-xl p-5 w-full max-w-sm shadow-2xl"
         onClick={(e) => e.stopPropagation()}
@@ -186,7 +186,7 @@ function LinkDialog({ initial, onConfirm, onCancel }: {
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm rounded-lg transition-colors"
+            className="px-4 py-2 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm rounded-lg transition-colors"
           >
             Cancel
           </button>
@@ -240,7 +240,7 @@ function CollectionDialog({ onConfirm, onCancel }: {
   }, [q])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 bg-stone-900/60" onClick={onCancel}>
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 bg-zinc-900/60" onClick={onCancel}>
       <div
         className="bg-surface border border-strong rounded-xl w-full max-w-lg mx-4 shadow-2xl overflow-hidden flex flex-col max-h-[70vh]"
         onClick={(e) => e.stopPropagation()}
@@ -293,7 +293,7 @@ function CollectionDialog({ onConfirm, onCancel }: {
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm rounded-lg transition-colors"
+            className="px-4 py-2 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm rounded-lg transition-colors"
           >
             Cancel
           </button>
@@ -452,7 +452,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
   }
 
   const btn = (active: boolean) =>
-    `px-2 py-1 rounded-lg text-xs font-semibold transition-colors ${active ? 'bg-stone-100 text-prose' : 'text-prose-muted hover:text-prose hover:bg-stone-100'}`
+    `px-2 py-1 rounded-lg text-xs font-semibold transition-colors ${active ? 'bg-zinc-800 text-prose' : 'text-prose-muted hover:text-prose hover:bg-zinc-700'}`
 
   return (
     <div className="space-y-2">
@@ -462,7 +462,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
         {targetWords ? (
           <span className={
             wordCount >= targetWords         ? 'text-green-500' :
-            wordCount >= targetWords * 0.8   ? 'text-amber-600' :
+            wordCount >= targetWords * 0.8   ? 'text-amber-300' :
             'text-prose-faint'
           }>
             {wordCount.toLocaleString()} / {targetWords.toLocaleString()} words
@@ -506,14 +506,14 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
           className={btn(editor.isActive('link'))}>🔗</button>
         {editor.isActive('link') && (
           <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetLink().run() }}
-            className="px-2 py-1 rounded-lg text-xs font-semibold text-red-600 hover:bg-stone-100 transition-colors">✕ link</button>
+            className="px-2 py-1 rounded-lg text-xs font-semibold text-red-300 hover:bg-zinc-700 transition-colors">✕ link</button>
         )}
 
         {enableCollectionEmbed && (
           <button
             type="button"
             onMouseDown={(e) => { e.preventDefault(); setCollectionOpen(true) }}
-            className="px-2 py-1 rounded-lg text-xs font-semibold text-prose-muted hover:bg-stone-100 transition-colors"
+            className="px-2 py-1 rounded-lg text-xs font-semibold text-prose-muted hover:bg-zinc-700 transition-colors"
             title="Insert a Boss Daddy collection (pick / stack / comparison) inline"
           >
             + Collection
@@ -524,11 +524,11 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
 
         <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().undo().run() }}
           disabled={!editor.can().undo()}
-          className="px-2 py-1 rounded-lg text-xs text-prose-muted hover:text-prose hover:bg-stone-100 disabled:opacity-30 transition-colors"
+          className="px-2 py-1 rounded-lg text-xs text-prose-muted hover:text-prose hover:bg-zinc-700 disabled:opacity-30 transition-colors"
           title="Undo (⌘Z)">↩</button>
         <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().redo().run() }}
           disabled={!editor.can().redo()}
-          className="px-2 py-1 rounded-lg text-xs text-prose-muted hover:text-prose hover:bg-stone-100 disabled:opacity-30 transition-colors"
+          className="px-2 py-1 rounded-lg text-xs text-prose-muted hover:text-prose hover:bg-zinc-700 disabled:opacity-30 transition-colors"
           title="Redo (⌘⇧Z)">↪</button>
       </div>
 
@@ -559,11 +559,11 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
               {aiRefining ? 'Refining…' : 'Apply'}
             </button>
             <button type="button" onClick={() => { setSelection(null); setAiInstruction(''); setAiError(null) }}
-              className="shrink-0 px-3 py-2 bg-surface-raised hover:bg-stone-100 text-prose-muted text-xs rounded-lg transition-colors">
+              className="shrink-0 px-3 py-2 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-xs rounded-lg transition-colors">
               ✕
             </button>
           </div>
-          {aiError && <p className="text-xs text-red-600">{aiError}</p>}
+          {aiError && <p className="text-xs text-red-300">{aiError}</p>}
         </div>
       )}
 

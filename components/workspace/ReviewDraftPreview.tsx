@@ -122,7 +122,7 @@ export function ReviewDraftPreview({
         {(pros.length > 0 || cons.length > 0) && (
           <div className="grid grid-cols-2 gap-3">
             {pros.length > 0 && (
-              <div className="bg-green-50 rounded-xl p-3">
+              <div className="bg-green-950/40 rounded-xl p-3">
                 <p className="text-xs text-forest font-bold uppercase tracking-wide mb-2">✓ Good</p>
                 <ul className="space-y-1">
                   {pros.slice(0, 4).map((p, i) => (
@@ -134,8 +134,8 @@ export function ReviewDraftPreview({
               </div>
             )}
             {cons.length > 0 && (
-              <div className="bg-red-50 rounded-xl p-3">
-                <p className="text-xs text-red-600 font-bold uppercase tracking-wide mb-2">✗ Bad</p>
+              <div className="bg-red-950/40 rounded-xl p-3">
+                <p className="text-xs text-red-300 font-bold uppercase tracking-wide mb-2">✗ Bad</p>
                 <ul className="space-y-1">
                   {cons.slice(0, 4).map((c, i) => (
                     <li key={i} className="flex items-start gap-1 text-xs text-prose-muted">
@@ -165,7 +165,7 @@ export function ReviewDraftPreview({
             )}
             {notFor.length > 0 && (
               <div className="bg-surface rounded-xl p-3">
-                <p className="text-xs text-red-600 uppercase tracking-widest font-semibold mb-2">Not For</p>
+                <p className="text-xs text-red-300 uppercase tracking-widest font-semibold mb-2">Not For</p>
                 <ul className="space-y-1">
                   {notFor.slice(0, 3).map((item, i) => (
                     <li key={i} className="flex items-start gap-1 text-xs text-prose-muted">

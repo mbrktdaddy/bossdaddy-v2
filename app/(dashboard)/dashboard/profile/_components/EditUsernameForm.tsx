@@ -58,7 +58,7 @@ export default function EditUsernameForm({ current }: { current: string }) {
         <p className="text-forest text-xs">Username updated successfully.</p>
       )}
       {error && (
-        <p className="text-red-600 text-xs">{error}</p>
+        <p className="text-red-300 text-xs">{error}</p>
       )}
     </form>
   )

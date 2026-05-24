@@ -1,4 +1,4 @@
-﻿import { notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
@@ -243,7 +243,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                 <Image src={pick.hero_image_url} alt={pick.title ?? occ.label} fill className="object-cover" sizes={pick ? '(max-width: 768px) 100vw, 768px' : '(max-width: 768px) 100vw, 896px'} priority />
               </div>
             ) : (
-              <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-8 bg-gradient-to-br from-accent-tint to-white flex items-center justify-center border border-accent-border/20">
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-8 bg-accent-tint flex items-center justify-center border border-accent-border/20">
                 <OccasionIcon value={occ.value} className="w-20 h-20 md:w-24 md:h-24 text-accent-text/70" />
               </div>
             )}
@@ -288,7 +288,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                   <h2 className="text-2xl font-black text-prose leading-tight">Behind the picks</h2>
                 </div>
                 <div
-                  className="prose prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
+                  className="prose prose-invert prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
                   dangerouslySetInnerHTML={{ __html: pick.intro_html }}
                 />
               </section>
@@ -322,7 +322,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                     const product = review.product_slug ? productMap.get(review.product_slug) : null
                     const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                     return (
-                      <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-stone-900/[0.06] transition-colors">
+                      <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-black/30 transition-colors">
                         <div className="flex sm:flex-col items-center gap-3 sm:gap-0 shrink-0">
                           <span className="w-10 h-10 rounded-full bg-accent-tint border border-accent-border/40 flex items-center justify-center text-accent-text-soft font-black text-sm tabular-nums">
                             {idx + 1}
@@ -399,7 +399,7 @@ export default async function GiftOccasionPage({ params }: Props) {
               </section>
             ) : (
               /* Empty state — proper SEO landing page with email capture */
-              <div className="bg-gradient-to-br from-accent-tint to-white rounded-xl p-8 md:p-10 border border-accent-border/30 mb-10">
+              <div className="bg-accent-tint rounded-xl p-8 md:p-10 border border-accent-border/30 mb-10">
                 <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-bold mb-3">Coming Soon</p>
                 <h2 className="text-2xl md:text-3xl font-black text-prose mb-3">
@@ -434,7 +434,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                     <Link
                       key={r.value}
                       href={`/gifts/${r.slug}`}
-                      className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-surface to-surface/60 border border-soft ring-1 ring-inset ring-stone-900/[0.04] hover:bg-surface-raised hover:border-accent-border/40 rounded-xl transition-colors min-h-[44px]"
+                      className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-surface to-surface/60 border border-soft hover:bg-surface-raised hover:border-accent-border/40 rounded-xl transition-colors min-h-[44px]"
                     >
                       <OccasionIcon value={r.value} className="w-6 h-6 shrink-0 text-accent-text-soft" />
                       <span className="text-sm font-semibold text-prose-muted hover:text-prose transition-colors truncate">{r.label}</span>

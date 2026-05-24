@@ -9,7 +9,6 @@ import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
 import CodeRedirect from './_components/CodeRedirect'
 import { LatestGuidesSection } from './_components/LatestGuidesSection'
-import { EmailSignup } from '@/components/EmailSignup'
 import { OCCASIONS } from '@/lib/gift-occasions'
 import type { Metadata } from 'next'
 
@@ -35,17 +34,23 @@ export const metadata: Metadata = {
 /**
  * Homepage v3 — "Click Into Content."
  *
- * Architecture: 7 surfaces on a single dark canvas. Orange is accent only —
- * no full-bleed orange canvases. Content (Reviews + Guides + Vault) leads.
- * Framing (The Standard + Newsletter) sits in supporting positions.
+ * Architecture: 7 surfaces on a single dark canvas. Orange is accent only.
+ * Content leads. Framing sits in supporting positions. Single dark scope
+ * sitewide — every page (homepage, listings, detail, dashboard) reads as
+ * one room.
  *
- *   1. Hero — brand statement, one quiet CTA
- *   2. Recent Reviews — magazine 1+3 grid, premium treatment
- *   3. Latest Guides — editorial row list, breadth signal
- *   4. From The Vault — derived collections, dark cards (no orange footer)
- *   5. The Standard — quiet trust panel (replaces orange "Rules" manifesto)
- *   6. Newsletter — single quiet signup row (Footer carries the heavy lift)
- *   7. Closing signature
+ *   1. Hero — brand statement, one CTA
+ *   2. Trust strip — three quick proof numbers
+ *   3. Recent Reviews — magazine 1+3 grid
+ *   4. Latest Guides — editorial row list
+ *   5. From The Vault — derived collections
+ *   6. The Standard — trust panel
+ *   7. Closing signature — sign-off + "Read my story" ghost CTA
+ *
+ * In-page newsletter removed 2026-05-24 in favor of letting the Footer
+ * band carry email conversion — three sequential signup asks (in-page +
+ * closer + footer) was redundant. Trust strip seeds proof up front,
+ * closer drives into /about for the "who's behind this" door.
  */
 export default async function HomePage() {
   const supabase = await createClient()
@@ -53,6 +58,7 @@ export default async function HomePage() {
   const [
     { data: latestReviewsRaw },
     { data: vaultPicksRaw },
+    { count: reviewCountRaw },
   ] = await Promise.all([
     supabase
       .from('reviews')
@@ -67,7 +73,14 @@ export default async function HomePage() {
       .eq('is_visible', true)
       .order('published_at', { ascending: false, nullsFirst: false })
       .limit(12),
+    supabase
+      .from('reviews')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'approved')
+      .eq('is_visible', true),
   ])
+
+  const reviewCount = reviewCountRaw ?? 0
 
   const latestReviews = (latestReviewsRaw ?? []).slice(0, 4)
 
@@ -138,24 +151,16 @@ export default async function HomePage() {
           }}
         />
 
-        {/* Bottom fade into page bg — uses the dark token so the fade
-            tracks any future tone tuning of --bd-bg automatically. */}
-        <div
-          aria-hidden
-          className="absolute inset-x-0 bottom-0 h-32 pointer-events-none"
-          style={{ background: 'linear-gradient(180deg, transparent, var(--bd-bg))' }}
-        />
-
         <div className="relative max-w-6xl mx-auto px-6 pt-20 pb-24 md:pt-28 md:pb-32">
           <div className="max-w-2xl">
             <p className="text-[11px] md:text-xs uppercase tracking-[0.3em] font-bold text-accent-text mb-5">
               Dad Like A BOSS.
             </p>
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.02] tracking-tight mb-6 text-stone-50">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.02] tracking-tight mb-6 text-zinc-50">
               Reviews, Guides, and Gear<br />
               <span className="text-accent">for Boss Dads.</span>
             </h1>
-            <p className="text-stone-300 text-base md:text-lg leading-relaxed mb-8 max-w-xl">
+            <p className="text-zinc-300 text-base md:text-lg leading-relaxed mb-8 max-w-xl">
               Tested firsthand with my own money. No sponsors, no paid placements, no BS.
             </p>
             <Link
@@ -168,13 +173,47 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── MAGAZINE SPREAD (light scope) ──────────────────────────────────
-            Reviews + Guides + Vault flip to the cool off-white reading
-            scope mid-page. Establishes the light surface BEFORE the
-            visitor clicks into a detail page so the click-into-content
-            transition is seamless. Closes at end of Vault — Standard,
-            Newsletter, and Closing return to the dark brand scope. */}
-      <div className="bd-light bg-background">
+      {/* ── TRUST STRIP — quiet proof band ───────────────────────────────
+            Sits between the hero and the editorial spread. Lives on the
+            page's dark canvas with a top hairline anchoring it to the
+            hero. Three quick numbers — proof up front for cold traffic
+            so the "no sponsors" claim has evidence behind it. */}
+      <section
+        aria-labelledby="trust-strip-heading"
+        className="relative"
+      >
+        <div className="relative max-w-5xl mx-auto px-6 py-12 md:py-14">
+          <h2 id="trust-strip-heading" className="sr-only">
+            The Standard, in three numbers
+          </h2>
+          <ul className="grid grid-cols-3 gap-2 sm:gap-12">
+            <li className="text-center">
+              <p className="font-black text-3xl sm:text-4xl md:text-5xl text-accent tabular-nums leading-none">
+                {reviewCount}
+              </p>
+              <p className="mt-2 sm:mt-3 text-[10px] sm:text-xs uppercase tracking-[0.2em] font-bold text-zinc-400">
+                Reviews · My&nbsp;Money
+              </p>
+            </li>
+            <li className="text-center border-x border-zinc-800/60">
+              <p className="font-black text-3xl sm:text-4xl md:text-5xl text-accent tabular-nums leading-none">
+                0
+              </p>
+              <p className="mt-2 sm:mt-3 text-[10px] sm:text-xs uppercase tracking-[0.2em] font-bold text-zinc-400">
+                Sponsors · Paid&nbsp;Placements
+              </p>
+            </li>
+            <li className="text-center">
+              <p className="font-black text-3xl sm:text-4xl md:text-5xl text-accent tabular-nums leading-none">
+                100%
+              </p>
+              <p className="mt-2 sm:mt-3 text-[10px] sm:text-xs uppercase tracking-[0.2em] font-bold text-zinc-400">
+                Bought &amp;&nbsp;Tested
+              </p>
+            </li>
+          </ul>
+        </div>
+      </section>
 
       {/* ── 2. RECENT REVIEWS — magazine 1+3 grid ─────────────────────────
             Premium treatment. Hero card spans 2×2; three supporting cards
@@ -293,8 +332,7 @@ export default async function HomePage() {
       )}
 
       {/* ── 3. LATEST GUIDES — editorial row list ─────────────────────────
-            Breadth signal. Renders on the dark canvas (no .bd-light wrap)
-            so the page reads as one continuous surface. */}
+            Breadth signal. */}
       <Suspense fallback={<LatestGuidesSkeleton />}>
         <LatestGuidesSection />
       </Suspense>
@@ -350,7 +388,7 @@ export default async function HomePage() {
                           {meta.icon}
                         </div>
                       )}
-                      <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-stone-900/85 backdrop-blur border border-stone-700 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-accent-text">
+                      <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-zinc-900/85 backdrop-blur border border-zinc-700 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-accent-text">
                         {meta.label}
                       </span>
                     </div>
@@ -373,8 +411,6 @@ export default async function HomePage() {
         </section>
       )}
 
-      </div>{/* end .bd-light magazine spread — return to dark brand scope */}
-
       {/* ── 5. THE STANDARD — quiet trust panel ───────────────────────────
             Replaces the full-bleed orange "Rules" manifesto. Now a single
             contained dark card on the page bg. Sits AFTER the content,
@@ -385,7 +421,7 @@ export default async function HomePage() {
           <div className="bg-surface rounded-2xl shadow-lg shadow-black/40 p-8 md:p-12 lg:p-14">
             <div className="text-center mb-10 md:mb-12 max-w-2xl mx-auto">
               <p className="text-[11px] md:text-xs text-accent-text uppercase tracking-[0.3em] font-bold mb-3">— The Standard</p>
-              <h2 className="text-2xl md:text-3xl font-black text-stone-50 leading-tight">
+              <h2 className="text-2xl md:text-3xl font-black text-zinc-50 leading-tight">
                 Three rules. That&apos;s the whole standard.
               </h2>
             </div>
@@ -414,10 +450,10 @@ export default async function HomePage() {
                   >
                     {rule.n}
                   </span>
-                  <p className="text-lg md:text-xl font-black text-stone-50 tracking-tight mb-2 leading-tight">
+                  <p className="text-lg md:text-xl font-black text-zinc-50 tracking-tight mb-2 leading-tight">
                     {rule.title}
                   </p>
-                  <p className="text-stone-400 leading-relaxed text-sm max-w-xs">
+                  <p className="text-zinc-400 leading-relaxed text-sm max-w-xs">
                     {rule.body}
                   </p>
                 </li>
@@ -427,39 +463,24 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── 6. NEWSLETTER — quiet secondary conversion ────────────────────
-            Single centered row. Low-pressure. Footer carries the heavier
-            newsletter band — this is just the in-page catch for visitors
-            who hit the bottom of the editorial content. */}
-      <section className="relative">
-        <div className="relative max-w-2xl mx-auto px-6 py-20 text-center">
-          <p className="text-[11px] text-accent-text uppercase tracking-[0.3em] font-bold mb-3">— Stay in the Loop</p>
-          <h3 className="text-2xl md:text-3xl font-black text-stone-50 leading-tight tracking-tight mb-3">
-            Want a heads-up when something worth saying drops?
-          </h3>
-          <p className="text-sm text-stone-400 mb-6">
-            One email when I publish. Unsubscribe anytime.
-          </p>
-          <EmailSignup
-            heading={null}
-            description={null}
-            buttonLabel="Join"
-            successMessage="You're in, Boss. Welcome to the crew."
-            interests={['newsletter']}
-          />
-          <p className="text-xs text-stone-500 mt-4">No spam. No sponsors. You know the rules.</p>
-        </div>
-      </section>
-
-      {/* ── 7. CLOSING SIGNATURE — quiet final beat ───────────────────── */}
+      {/* ── 6. CLOSING SIGNATURE — final beat + quiet CTA ─────────────────
+            Page sign-off with one ghost CTA into /about. Newsletter
+            conversion lives in the Footer band, so this slot stays
+            focused on personality + a single "meet the dad" door. */}
       <section className="relative py-24 md:py-32">
         <div className="relative max-w-4xl mx-auto px-6 text-center">
           <p className="text-[11px] text-accent-text uppercase tracking-[0.3em] font-black mb-6">— The Bottom Line</p>
-          <p className="text-3xl md:text-5xl font-black text-stone-50 leading-[1.1] mb-10 tracking-tight">
+          <p className="text-3xl md:text-5xl font-black text-zinc-50 leading-[1.1] mb-8 tracking-tight">
             Now let&apos;s dad like a BOSS —{' '}
             <span className="text-accent italic">together.</span>
           </p>
-          <p className="text-sm text-stone-400 italic font-semibold">— Boss Daddy</p>
+          <p className="text-sm text-zinc-400 italic font-semibold mb-10">— Boss Daddy</p>
+          <Link
+            href="/about"
+            className="inline-flex items-center px-5 py-2.5 border border-zinc-700 hover:border-accent rounded-2xl text-sm font-semibold text-zinc-200 hover:text-accent-text transition-colors"
+          >
+            Read my story →
+          </Link>
         </div>
       </section>
     </>

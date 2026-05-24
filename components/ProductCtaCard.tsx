@@ -23,7 +23,7 @@ export default function ProductCtaCard({ product, rating, variant = 'prominent' 
   return (
     <aside
       data-product-cta
-      className="my-8 bg-gradient-to-br from-accent-tint to-white rounded-xl p-5 sm:p-6 shadow-xl shadow-stone-900/[0.06]"
+      className="my-8 bg-accent-tint border border-strong rounded-xl p-5 sm:p-6 shadow-xl shadow-black/30"
       aria-label="Product offer"
     >
       <p className="text-xs text-accent-text-soft uppercase tracking-widest font-semibold mb-3">

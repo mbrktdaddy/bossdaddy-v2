@@ -104,7 +104,7 @@ export function InternalLinkPanel({
         <span className="flex items-center gap-2 flex-wrap">
           <span className="text-forest">🔗</span> Internal links
           {existing.length > 0 && (
-            <span className="px-2 py-0.5 bg-green-50 border border-green-200 text-forest rounded-full text-xs">
+            <span className="px-2 py-0.5 bg-green-950/40 border border-green-700/40 text-forest rounded-full text-xs">
               {existing.length} in article
             </span>
           )}
@@ -182,7 +182,7 @@ export function InternalLinkPanel({
                         <div className="flex items-center gap-2 mb-0.5">
                           <span className={`text-xs px-2 py-0.5 rounded-full border ${
                             s.type === 'guide'
-                              ? 'bg-blue-50 text-blue-700 border-blue-200'
+                              ? 'bg-blue-950/40 text-blue-300 border-blue-700/40'
                               : 'bg-accent-tint text-accent-text-soft border-accent-border/40'
                           }`}>
                             {s.type}
@@ -194,14 +194,14 @@ export function InternalLinkPanel({
                       {alreadyInserted ? (
                         <span
                           title="Already linked in content"
-                          className="shrink-0 text-xs px-3 py-2 bg-green-50 border border-green-200 text-forest rounded-lg min-h-[36px]"
+                          className="shrink-0 text-xs px-3 py-2 bg-green-950/40 border border-green-700/40 text-forest rounded-lg min-h-[36px]"
                         >
                           ✓ Inserted
                         </span>
                       ) : (
                         <button
                           onClick={() => insertSuggestion(s)}
-                          className="shrink-0 text-xs px-3 py-2 bg-surface-raised hover:bg-stone-100 text-prose-muted rounded-lg min-h-[36px] transition-colors"
+                          className="shrink-0 text-xs px-3 py-2 bg-surface-raised hover:bg-zinc-700 text-prose-muted rounded-lg min-h-[36px] transition-colors"
                         >
                           + Insert link
                         </button>
@@ -215,7 +215,7 @@ export function InternalLinkPanel({
         </section>
 
         {error && (
-          <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">{error}</p>
+          <p className="text-xs text-red-300 bg-red-950/40 border border-red-700/40 rounded px-3 py-2">{error}</p>
         )}
       </div>
     </details>
@@ -247,7 +247,7 @@ function ExistingLinkCard({ link, total, onMove, onRemove, onTextCommit }: Exist
         <div className="flex items-center gap-2">
           <span className={`text-xs px-2 py-0.5 rounded-full border ${
             link.type === 'guide'
-              ? 'bg-blue-50 text-blue-700 border-blue-200'
+              ? 'bg-blue-950/40 text-blue-300 border-blue-700/40'
               : 'bg-accent-tint text-accent-text-soft border-accent-border/40'
           }`}>{link.type}</span>
           <select
@@ -267,20 +267,20 @@ function ExistingLinkCard({ link, total, onMove, onRemove, onTextCommit }: Exist
             type="button"
             onClick={() => onMove(link.position - 1)}
             disabled={link.position === 1}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
             title="Move up"
           >↑</button>
           <button
             type="button"
             onClick={() => onMove(link.position + 1)}
             disabled={link.position === total}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-stone-100 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
             title="Move down"
           >↓</button>
           <button
             type="button"
             onClick={onRemove}
-            className="px-2.5 py-1.5 bg-transparent hover:bg-red-50 text-prose-faint hover:text-red-600 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-transparent hover:bg-red-950/40 text-prose-faint hover:text-red-300 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
             title="Remove link"
           >🗑</button>
         </div>

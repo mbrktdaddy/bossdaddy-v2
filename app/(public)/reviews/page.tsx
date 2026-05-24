@@ -110,7 +110,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
         <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
           <Link
             href="/reviews"
-            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-prose text-background border border-prose shadow-sm shadow-stone-950/40 transition-colors"
+            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-prose text-background border border-prose shadow-sm shadow-zinc-950/40 transition-colors"
           >
             All Reviews
           </Link>
@@ -138,7 +138,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
             scannable list per category. Featured card above does the visual
             heavy-lifting; these are quick browse-and-tap entries. */}
         {sections.length === 0 ? (
-          <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft ring-1 ring-inset ring-stone-900/[0.04]">
+          <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft">
             <p className="text-prose-faint text-lg font-semibold">No reviews here yet.</p>
             <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
           </div>
@@ -234,7 +234,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
             href={`/reviews/category/${c.slug}`}
             className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
               category === c.slug
-                ? 'bg-prose text-background border border-prose shadow-sm shadow-stone-950/40'
+                ? 'bg-prose text-background border border-prose shadow-sm shadow-zinc-950/40'
                 : 'bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose'
             }`}
           >
@@ -245,7 +245,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
       </div>
 
       {!reviews.length ? (
-        <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft ring-1 ring-inset ring-stone-900/[0.04]">
+        <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft">
           <p className="text-prose-faint text-lg font-semibold">No reviews here yet.</p>
           <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
         </div>

@@ -50,7 +50,7 @@ export default function ImageLightbox({ children, className }: Props) {
 
       {current && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/90 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/90 backdrop-blur-sm"
           onClick={() => setCurrent(null)}
           role="dialog"
           aria-modal="true"
@@ -76,7 +76,7 @@ export default function ImageLightbox({ children, className }: Props) {
               type="button"
               onClick={() => setCurrent(null)}
               aria-label="Close image"
-              className="absolute top-2 right-2 w-9 h-9 bg-stone-900/60 hover:bg-stone-900/80 text-white rounded-full flex items-center justify-center transition-colors"
+              className="absolute top-2 right-2 w-9 h-9 bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full flex items-center justify-center transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

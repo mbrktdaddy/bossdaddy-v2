@@ -37,7 +37,7 @@ export default async function ImageStudioPage() {
           </Link>
           <Link
             href="/dashboard/media"
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-surface-raised hover:bg-stone-100 text-prose-muted text-sm font-semibold rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm font-semibold rounded-xl transition-colors"
           >
             Full library
           </Link>

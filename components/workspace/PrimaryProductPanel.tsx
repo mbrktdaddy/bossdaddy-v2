@@ -61,7 +61,7 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
         {selected && (
           <button
             onClick={() => onChange(null)}
-            className="text-xs text-prose-faint hover:text-red-600 transition-colors"
+            className="text-xs text-prose-faint hover:text-red-300 transition-colors"
           >
             Clear
           </button>
@@ -76,7 +76,7 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
       )}
 
       {error && (
-        <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">{error}</p>
+        <p className="text-xs text-red-300 bg-red-950/40 border border-red-700/40 rounded px-3 py-2">{error}</p>
       )}
 
       {!loading && !error && products.length === 0 && (
@@ -113,7 +113,7 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
           </div>
           <button
             onClick={() => setPicking(true)}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-stone-100 text-prose-muted rounded-lg transition-colors shrink-0"
+            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted rounded-lg transition-colors shrink-0"
           >
             Change
           </button>
@@ -150,7 +150,7 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
                   <p className="text-xs text-prose-faint truncate">{p.slug}</p>
                 </div>
                 {!p.affiliate_url && !p.non_affiliate_url && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-50 border border-red-200 text-red-600 shrink-0">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-950/40 border border-red-700/40 text-red-300 shrink-0">
                     No URL
                   </span>
                 )}
