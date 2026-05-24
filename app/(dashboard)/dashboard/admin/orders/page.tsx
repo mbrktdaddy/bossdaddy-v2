@@ -86,7 +86,7 @@ export default async function AdminOrdersPage() {
             return (
               <div
                 key={order.id}
-                className="grid grid-cols-[1fr_1fr_auto_auto_auto] gap-4 px-5 py-4 border-b border-soft/60 last:border-0 items-center hover:bg-surface-raised/30 transition-colors"
+                className="grid grid-cols-[1fr_1fr_auto_auto_auto] gap-4 px-5 py-4 border-b border-soft last:border-0 items-center hover:bg-surface-raised/30 transition-colors"
               >
                 <div>
                   <div className="flex items-center gap-2">

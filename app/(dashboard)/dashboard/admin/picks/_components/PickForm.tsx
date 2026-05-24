@@ -579,7 +579,7 @@ export function PickForm({ pick, initialItems }: Props) {
           )}
 
           {/* Inline images — manages bd-image-placeholder figures inside the intro */}
-          <div className="mt-3 bg-surface-sunken/60 border border-soft/60 rounded-xl p-4">
+          <div className="mt-3 bg-surface-sunken/60 border border-soft rounded-xl p-4">
             <p className="text-xs text-prose-faint font-medium uppercase tracking-widest mb-3">Inline images</p>
             <InlineMediaPanel
               content={introHtml}
@@ -688,7 +688,7 @@ export function PickForm({ pick, initialItems }: Props) {
         )}
 
         {/* SEO overrides — collapsible since they're optional */}
-        <details className="group rounded-xl bg-surface-sunken/60 border border-soft/60">
+        <details className="group rounded-xl bg-surface-sunken/60 border border-soft">
           <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between gap-3 min-h-[44px]">
             <div>
               <p className="text-sm font-semibold text-prose">SEO overrides</p>
@@ -698,7 +698,7 @@ export function PickForm({ pick, initialItems }: Props) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </summary>
-          <div className="px-4 pb-4 pt-1 space-y-3 border-t border-soft/60">
+          <div className="px-4 pb-4 pt-1 space-y-3 border-t border-soft">
             <div>
               <label className="block text-xs text-prose-muted mb-1.5">
                 Meta title <span className="text-prose-faint">(HTML &lt;title&gt; tag; ~70 char limit)</span>
@@ -734,7 +734,7 @@ export function PickForm({ pick, initialItems }: Props) {
             item-category's pov from lib/categories.ts on public pages when
             left empty (the normal case). Use this to write a per-collection
             "How I Tested" when the standard category voice doesn't fit. */}
-        <details className="group rounded-xl bg-surface-sunken/60 border border-soft/60">
+        <details className="group rounded-xl bg-surface-sunken/60 border border-soft">
           <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between gap-3 min-h-[44px]">
             <div>
               <p className="text-sm font-semibold text-prose">Methodology override</p>
@@ -746,7 +746,7 @@ export function PickForm({ pick, initialItems }: Props) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </summary>
-          <div className="px-4 pb-4 pt-1 space-y-2 border-t border-soft/60">
+          <div className="px-4 pb-4 pt-1 space-y-2 border-t border-soft">
             <label className="block text-xs text-prose-muted mb-1.5">
               How I Tested <span className="text-prose-faint">(plain text — line breaks preserved)</span>
             </label>
@@ -765,7 +765,7 @@ export function PickForm({ pick, initialItems }: Props) {
         {/* FAQ override — collapsible. Falls back to the dominant
             item-category's faqs from lib/categories.ts on public pages when
             empty. Up to 12 rows; each is question + answer text. */}
-        <details className="group rounded-xl bg-surface-sunken/60 border border-soft/60">
+        <details className="group rounded-xl bg-surface-sunken/60 border border-soft">
           <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between gap-3 min-h-[44px]">
             <div>
               <p className="text-sm font-semibold text-prose">FAQ override</p>
@@ -777,7 +777,7 @@ export function PickForm({ pick, initialItems }: Props) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </summary>
-          <div className="px-4 pb-4 pt-2 border-t border-soft/60 space-y-3">
+          <div className="px-4 pb-4 pt-2 border-t border-soft space-y-3">
             {faqs.length === 0 && (
               <p className="text-xs text-prose-faint italic">
                 No custom FAQs yet — readers will see the category&apos;s default Q&amp;A.
@@ -833,7 +833,7 @@ export function PickForm({ pick, initialItems }: Props) {
         </details>
 
         {/* Readiness — quick visual checklist of what's set vs missing */}
-        <div className="bg-surface-sunken/60 border border-soft/60 rounded-xl p-4">
+        <div className="bg-surface-sunken/60 border border-soft rounded-xl p-4">
           <div className="flex items-baseline justify-between mb-3">
             <p className="text-xs text-prose-muted font-semibold uppercase tracking-widest">Ready to publish?</p>
             <p className={`text-xs font-bold tabular-nums ${requiredMissing > 0 ? 'text-amber-400' : 'text-forest'}`}>

@@ -144,7 +144,7 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
   const sidebarContent = (onNav?: () => void) => (
     <>
       {/* Brand + user */}
-      <div className="px-5 py-5 border-b border-soft/60 space-y-3">
+      <div className="px-5 py-5 border-b border-soft space-y-3">
         <Link href="/" className="flex items-center gap-2">
           <span className="font-black text-base tracking-tight">
             <span className="text-accent-text">BOSS</span>
@@ -169,7 +169,7 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
       </nav>
 
       {/* Footer */}
-      <div className="px-3 py-4 border-t border-soft/60 space-y-0.5">
+      <div className="px-3 py-4 border-t border-soft space-y-0.5">
         <Link
           href="/"
           target="_blank"
@@ -199,12 +199,12 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-60 bg-surface border-r border-soft/60 flex-col shrink-0">
+      <aside className="hidden md:flex w-60 bg-surface border-r border-soft flex-col shrink-0">
         {sidebarContent()}
       </aside>
 
       {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-surface border-b border-soft/60 flex items-center justify-between px-4">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-surface border-b border-soft flex items-center justify-between px-4">
         <Link href="/" className="font-black text-base tracking-tight">
           <span className="text-accent-text">BOSS</span>
           <span className="text-prose"> DADDY</span>
@@ -232,7 +232,7 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
       )}
 
       {/* Mobile drawer */}
-      <aside className={`md:hidden fixed inset-y-0 left-0 z-40 w-72 bg-surface border-r border-soft/60 flex flex-col transform transition-transform duration-200 ${
+      <aside className={`md:hidden fixed inset-y-0 left-0 z-40 w-72 bg-surface border-r border-soft flex flex-col transform transition-transform duration-200 ${
         open ? 'translate-x-0' : '-translate-x-full'
       }`}>
         {sidebarContent(() => setOpen(false))}

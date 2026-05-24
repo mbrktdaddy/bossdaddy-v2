@@ -448,7 +448,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         </div>
 
         {/* ── Your Experience ───────────────────────────────────────────── */}
-        <div className="pt-4 border-t border-soft/60">
+        <div className="pt-4 border-t border-soft">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Your Experience</p>
           <p className="text-xs text-prose-faint mb-3">Backfill testing context — used to drive future AI refines and stored on the review.</p>
           <div className="space-y-3">
@@ -508,7 +508,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         </div>
 
         {/* ── Verdict Breakdown ────────────────────────────────────────── */}
-        <div className="pt-4 border-t border-soft/60">
+        <div className="pt-4 border-t border-soft">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Verdict Breakdown</p>
           <p className="text-xs text-prose-faint mb-3">Four 1–10 sub-scores that defend the overall rating, plus the honest re-buy signal. All render on the public Verdict Card.</p>
 
@@ -564,7 +564,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         </div>
 
         {/* Tags */}
-        <div className="pt-4 border-t border-soft/60">
+        <div className="pt-4 border-t border-soft">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Tags</p>
           <TagPicker selected={tags} onChange={setTags} />
         </div>
@@ -623,7 +623,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         </div>
 
         {/* ── CONTENT BLOCKS ───────────────────────────────────────────── */}
-        <div className="pt-6 border-t border-soft/60">
+        <div className="pt-6 border-t border-soft">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Content Blocks</p>
           <p className="text-xs text-prose-faint mb-4">These render as structured UI elements on the public page — not prose. Generated automatically by AI drafts; edit freely.</p>
           <div className="space-y-6">
@@ -719,7 +719,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         </div>
 
         {/* ── MEDIA ────────────────────────────────────────────────────── */}
-        <div className="pt-6 border-t border-soft/60">
+        <div className="pt-6 border-t border-soft">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Media</p>
           <div className="space-y-4">
             <div className="bg-surface/50 border border-soft rounded-xl p-4">
@@ -749,7 +749,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         </div>
 
         {/* ── COMMERCE ─────────────────────────────────────────────────── */}
-        <div className="pt-6 border-t border-soft/60">
+        <div className="pt-6 border-t border-soft">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Commerce</p>
           <div className="space-y-6">
             <PrimaryProductPanel value={productSlug} onChange={setProductSlug} />
@@ -778,7 +778,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         </div>
 
         {/* ── DISTRIBUTION ─────────────────────────────────────────────── */}
-        <div className="pt-6 border-t border-soft/60">
+        <div className="pt-6 border-t border-soft">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Publish &amp; Distribute</p>
           <div className="space-y-6">
             <SEOPanel
@@ -844,7 +844,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         </div>
 
         {/* ── ADMIN ────────────────────────────────────────────────────── */}
-        <div className="pt-6 border-t border-soft/60">
+        <div className="pt-6 border-t border-soft">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Admin</p>
           <div className="space-y-6">
             <VersionHistoryPanel contentType="review" contentId={review.id} />

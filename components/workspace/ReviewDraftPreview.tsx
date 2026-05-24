@@ -193,7 +193,7 @@ export function ReviewDraftPreview({
 
         {/* FAQs */}
         {faqs.length > 0 && (
-          <div className="space-y-3 pt-3 border-t border-soft/60">
+          <div className="space-y-3 pt-3 border-t border-soft">
             <p className="text-xs font-black text-prose">Frequently Asked Questions</p>
             {faqs.map((faq, i) => (
               <div key={i} className="bg-surface rounded-xl p-3">

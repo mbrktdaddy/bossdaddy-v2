@@ -358,7 +358,7 @@ export function ReviewCreateWizard() {
           )}
           {/* Sub-scores + re-buy — surface what Claude proposed so authors can review before saving */}
           {(previewDraft.subScores.quality != null || previewDraft.wouldRebuy != null) && (
-            <p className="pt-2 text-[11px] text-prose-faint border-t border-soft/60">
+            <p className="pt-2 text-[11px] text-prose-faint border-t border-soft">
               <span className="text-accent-text-soft font-semibold">Sub-scores:</span>{' '}
               Q{previewDraft.subScores.quality ?? '—'} ·
               V{previewDraft.subScores.value ?? '—'} ·

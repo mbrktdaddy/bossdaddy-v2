@@ -222,8 +222,8 @@ interface ZoneProps {
 
 function Zone({ title, hint, busy, current, onClear, clearLabel = 'Clear', children }: ZoneProps) {
   return (
-    <section className="rounded-xl border border-soft/60 bg-surface overflow-hidden">
-      <header className="px-5 py-4 border-b border-soft/60 flex items-start justify-between gap-4">
+    <section className="rounded-xl border border-soft bg-surface overflow-hidden">
+      <header className="px-5 py-4 border-b border-soft flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h2 className="font-black text-prose">{title}</h2>
           <p className="text-xs text-prose-faint mt-1 leading-relaxed">{hint}</p>

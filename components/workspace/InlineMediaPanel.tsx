@@ -774,7 +774,7 @@ function GalleryCard(p: GalleryCardProps) {
               </div>
 
               {/* Child actions */}
-              <div className="flex flex-wrap gap-1.5 pt-1 border-t border-soft/60">
+              <div className="flex flex-wrap gap-1.5 pt-1 border-t border-soft">
                 <button
                   type="button"
                   onClick={() => p.onRegenerateChild(child)}
@@ -928,7 +928,7 @@ function SlotCard(p: SlotCardProps) {
       </div>
 
       {/* Actions */}
-      <div className="flex flex-wrap gap-2 pt-1 border-t border-soft/60">
+      <div className="flex flex-wrap gap-2 pt-1 border-t border-soft">
         <button type="button" onClick={p.onRegenerate} disabled={busy || !slot.prompt.trim()}
           className="px-3 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-xs font-semibold rounded-lg min-h-[36px] transition-colors"
           title={!slot.prompt.trim() ? 'Add an AI prompt first' : 'Regenerate with current prompt'}>

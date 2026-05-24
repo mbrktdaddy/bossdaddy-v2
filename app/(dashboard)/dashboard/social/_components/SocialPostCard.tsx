@@ -261,7 +261,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
 
         {/* Actions bar */}
         {!editing && (
-          <div className="flex items-center gap-1 pt-1 border-t border-soft/60 flex-wrap">
+          <div className="flex items-center gap-1 pt-1 border-t border-soft flex-wrap">
             {/* Copy */}
             <button
               onClick={copyToClipboard}
