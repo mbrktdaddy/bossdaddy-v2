@@ -147,15 +147,37 @@ export default async function HomePage() {
 
       {/* ── EDITORIAL BANNER — opens the page with credibility ──────────── */}
       <div className="bg-accent">
-        <div className="max-w-6xl mx-auto px-6 py-2.5 flex items-center justify-between flex-wrap gap-x-4 gap-y-1">
+        <div className="max-w-6xl mx-auto px-6 py-2.5 text-center">
           <p className="text-xs font-bold text-white tracking-wide">
-            {reviewCount} field-tested reviews — zero sponsored content
+            Field-tested reviews — zero sponsored content
           </p>
-          <span className="text-[11px] text-white/75 tracking-wide shrink-0">
-            Honest verdicts, weekly.
-          </span>
         </div>
       </div>
+
+      {/* ── BRAND INTRO — answers "what is this?" before the content scrolls.
+            Sits between the editorial banner and the hero so first-time
+            visitors get the voice + context before evaluating reviews. The
+            trust band (further down) carries the formal stats; this carries
+            the first-person voice. */}
+      <section className="bg-background border-b border-soft">
+        <div className="max-w-3xl mx-auto px-6 py-12 md:py-14 text-center">
+          <h2 className="text-2xl md:text-3xl font-black text-prose leading-tight tracking-tight mb-4">
+            I buy it. I use it. I tell you if it&apos;s worth your money.
+          </h2>
+          <p className="text-base text-prose-muted leading-[1.7] mb-6 max-w-2xl mx-auto">
+            No PR samples. No affiliate pressure. Every product came out of my own pocket — and got real use on weekends, during family trips, in the garage, and at 3am with a screaming baby.
+          </p>
+          <Link
+            href="/about"
+            className="inline-flex items-center gap-1.5 text-sm font-bold text-accent hover:text-accent-hover transition-colors"
+          >
+            Who is Boss Daddy?
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </Link>
+        </div>
+      </section>
 
       {/* ── HERO ─────────────────────────────────────────────────────────
             Featured review on the left, On-the-Bench panel on the right.
@@ -350,33 +372,6 @@ export default async function HomePage() {
 
       {/* ── EMAIL CAPTURE — primary newsletter conversion ────────────────── */}
       <EmailCaptureSection />
-
-      {/* ── CLOSING STATEMENT ────────────────────────────────────────────── */}
-      <section className="bg-background">
-        <div className="max-w-2xl mx-auto px-6 py-20 text-center">
-          <div className="inline-block w-8 h-[3px] bg-accent mb-7" />
-          <h2 className="text-3xl md:text-4xl font-black text-prose leading-tight tracking-tight mb-5">
-            I buy it. I use it. I tell you if it&apos;s worth your money.
-          </h2>
-          <p className="text-base text-prose-muted leading-[1.75] mb-10">
-            No PR samples. No affiliate pressure shaping the verdict. Every product on this site came out of my own pocket and got real use — on weekends, during family trips, in the garage, and at 3am with a screaming baby. You&apos;re not reading sponsored content dressed up as a review. You&apos;re reading what actually happened.
-          </p>
-          <div className="flex gap-3 justify-center flex-wrap">
-            <Link
-              href="/reviews"
-              className="inline-flex items-center bg-accent hover:bg-accent-hover text-white font-extrabold text-sm px-7 py-3.5 rounded-xl transition-colors"
-            >
-              Browse All Reviews
-            </Link>
-            <Link
-              href="/about"
-              className="inline-flex items-center border-2 border-strong text-prose font-bold text-sm px-7 py-[13px] rounded-xl hover:border-accent hover:text-accent transition-colors"
-            >
-              Who Is Boss Daddy?
-            </Link>
-          </div>
-        </div>
-      </section>
     </>
   )
 }
