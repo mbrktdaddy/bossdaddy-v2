@@ -122,7 +122,7 @@ function VaultCardLink({ card }: { card: VaultCard }) {
   return (
     <Link
       href={href}
-      className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden shadow-md shadow-black/5 hover:border-accent-border/40 hover:shadow-lg hover:shadow-black/50 hover:-translate-y-1 transition-all"
+      className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden shadow-md shadow-black/5 hover:border-accent-border/40 hover:shadow-lg hover:shadow-black/10 hover:-translate-y-1 transition-all"
     >
       <div className="relative aspect-video bg-surface-sunken">
         {card.hero_image_url ? (

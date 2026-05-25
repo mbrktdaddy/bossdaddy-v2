@@ -12,11 +12,11 @@ export type WishlistStatus =
   | 'skipped'
 
 export const WISHLIST_STATUS_OPTIONS: { value: WishlistStatus; label: string; color: string }[] = [
-  { value: 'considering', label: 'Considering',  color: 'text-accent-text-soft' },
-  { value: 'queued',      label: 'Coming Soon',  color: 'text-blue-400' },
-  { value: 'testing',     label: 'Testing Now',  color: 'text-green-400' },
-  { value: 'reviewed',    label: 'Reviewed',     color: 'text-accent-text' },
-  { value: 'skipped',     label: 'Not Testing',  color: 'text-zinc-500' },
+  { value: 'considering', label: 'Considering',  color: 'text-accent' },
+  { value: 'queued',      label: 'Coming Soon',  color: 'text-blue-700' },
+  { value: 'testing',     label: 'Testing Now',  color: 'text-green-700' },
+  { value: 'reviewed',    label: 'Reviewed',     color: 'text-accent' },
+  { value: 'skipped',     label: 'Not Testing',  color: 'text-prose-faint' },
 ]
 
 export interface WishlistItem {

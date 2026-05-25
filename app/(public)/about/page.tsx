@@ -65,7 +65,7 @@ export default async function AboutPage() {
  </div>
 
  {/* Story */}
- <div className="prose prose-invert prose-orange max-w-none mb-16
+ <div className="prose prose-zinc prose-orange max-w-none mb-16
  prose-p:text-prose-muted prose-p:leading-relaxed
  prose-h2:font-black prose-h2:text-prose prose-h2:text-2xl
  prose-strong:text-prose">

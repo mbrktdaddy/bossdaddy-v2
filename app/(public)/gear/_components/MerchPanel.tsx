@@ -111,7 +111,7 @@ export async function MerchPanel() {
                 </>
               )
 
-              const className = 'group flex flex-col bg-surface rounded-xl overflow-hidden shadow-lg shadow-black/5 hover:shadow-xl hover:shadow-black/50 transition-all duration-200'
+              const className = 'group flex flex-col bg-surface rounded-xl overflow-hidden shadow-lg shadow-black/5 hover:shadow-xl hover:shadow-black/10 transition-all duration-200'
 
               // Printful products → internal detail page
               if (isPrintful) {

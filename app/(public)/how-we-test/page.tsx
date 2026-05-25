@@ -101,7 +101,7 @@ export default function HowWeTestPage() {
  Real products. Real testing. Real dads. No lab coats, no paid placements, no shortcuts.
  </p>
 
- <div className="prose prose-invert prose-orange max-w-none
+ <div className="prose prose-zinc prose-orange max-w-none
  prose-p:text-prose-muted prose-p:leading-relaxed
  prose-h2:font-black prose-h2:text-prose prose-h2:text-xl prose-h2:mt-10
  prose-h3:font-bold prose-h3:text-prose prose-h3:text-lg prose-h3:mt-8
@@ -170,7 +170,7 @@ export default function HowWeTestPage() {
  ))}
  </div>
 
- <div className="prose prose-invert prose-orange max-w-none
+ <div className="prose prose-zinc prose-orange max-w-none
  prose-p:text-prose-muted prose-p:leading-relaxed
  prose-h2:font-black prose-h2:text-prose prose-h2:text-xl prose-h2:mt-10
  prose-h3:font-bold prose-h3:text-prose prose-h3:text-lg prose-h3:mt-8
@@ -229,7 +229,7 @@ export default function HowWeTestPage() {
  </p>
  </div>
 
- <div className="prose prose-invert prose-orange max-w-none
+ <div className="prose prose-zinc prose-orange max-w-none
  prose-p:text-prose-muted prose-p:leading-relaxed
  prose-h2:font-black prose-h2:text-prose prose-h2:text-xl prose-h2:mt-10
  prose-h3:font-bold prose-h3:text-prose prose-h3:text-lg prose-h3:mt-8

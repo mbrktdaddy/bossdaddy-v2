@@ -355,7 +355,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
                   <h2 className="text-2xl font-black text-prose leading-tight">What sets these apart</h2>
                 </div>
                 <div
-                  className="prose prose-invert prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
+                  className="prose prose-zinc prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
                   dangerouslySetInnerHTML={{ __html: comparison.intro_html }}
                 />
               </section>
@@ -625,7 +625,7 @@ function ContenderCard({
   return (
     <a
       href={`#dive-${review.slug}`}
-      className={`group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden shadow-md shadow-black/5 hover:shadow-lg hover:shadow-black/50 hover:border-accent-border/40 hover:-translate-y-1 transition-all ${className ?? ''}`}
+      className={`group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden shadow-md shadow-black/5 hover:shadow-lg hover:shadow-black/10 hover:border-accent-border/40 hover:-translate-y-1 transition-all ${className ?? ''}`}
     >
       <div className="relative w-full aspect-square bg-surface-sunken">
         {review.image_url && (

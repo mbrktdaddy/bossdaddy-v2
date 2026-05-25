@@ -292,7 +292,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                   <h2 className="text-2xl font-black text-prose leading-tight">Behind the picks</h2>
                 </div>
                 <div
-                  className="prose prose-invert prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
+                  className="prose prose-zinc prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
                   dangerouslySetInnerHTML={{ __html: pick.intro_html }}
                 />
               </section>

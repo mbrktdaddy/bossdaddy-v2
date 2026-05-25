@@ -9,7 +9,7 @@ export default function GuideCard({ guide: a, priority = false }: { guide: Guide
   return (
     <Link
       href={`/guides/${a.slug}`}
-      className="group flex flex-col bg-surface rounded-xl overflow-hidden border border-soft shadow-lg shadow-black/5 hover:border-copper hover:shadow-xl hover:shadow-black/50 hover:-translate-y-1 transition-all duration-200"
+      className="group flex flex-col bg-surface rounded-xl overflow-hidden border border-soft shadow-lg shadow-black/5 hover:border-copper hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-200"
     >
       {a.image_url ? (
         <div className="relative w-full h-44 bg-surface-raised shrink-0 overflow-hidden">

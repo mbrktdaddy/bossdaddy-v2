@@ -285,7 +285,7 @@ export default async function GuidePage({ params }: Props) {
                   return segment.content ? (
                     <div
                       key={`html-${i}`}
-                      className="bd-editorial prose prose-lg prose-invert prose-orange mx-auto max-w-[68ch]
+                      className="bd-editorial prose prose-lg prose-zinc prose-orange mx-auto max-w-[68ch]
                         prose-headings:font-black prose-headings:tracking-tight prose-headings:font-sans prose-headings:leading-[1.15]
                         prose-h2:text-2xl prose-h2:mt-14 prose-h2:mb-5
                         prose-h3:mt-10 prose-h3:mb-3
@@ -370,7 +370,7 @@ export default async function GuidePage({ params }: Props) {
                     <Link
                       key={r.id}
                       href={`/reviews/${r.slug}`}
-                      className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden shadow-md shadow-black/5 hover:shadow-lg hover:shadow-black/50 hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
+                      className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden shadow-md shadow-black/5 hover:shadow-lg hover:shadow-black/10 hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
                     >
                       {r.image_url ? (
                         <div className="relative w-full h-36 bg-surface-raised shrink-0">
@@ -420,7 +420,7 @@ export default async function GuidePage({ params }: Props) {
                     <Link
                       key={a.id}
                       href={`/guides/${a.slug}`}
-                      className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden shadow-md shadow-black/5 hover:shadow-lg hover:shadow-black/50 hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
+                      className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden shadow-md shadow-black/5 hover:shadow-lg hover:shadow-black/10 hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
                     >
                       {a.image_url ? (
                         <div className="relative w-full h-36 bg-surface-raised shrink-0 overflow-hidden">

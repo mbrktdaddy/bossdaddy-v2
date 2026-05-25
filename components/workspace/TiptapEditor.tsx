@@ -354,7 +354,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
     editorProps: {
       attributes: {
         class: [
-          'prose prose-invert prose-sm max-w-none',
+          'prose prose-zinc prose-sm max-w-none',
           'prose-headings:font-black prose-headings:font-sans prose-headings:tracking-tight',
           'prose-h2:text-xl prose-h3:text-lg',
           'prose-a:text-accent-text-soft prose-a:no-underline',
