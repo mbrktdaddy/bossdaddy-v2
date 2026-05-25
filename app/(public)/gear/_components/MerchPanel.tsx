@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { EmailSignup } from '@/components/EmailSignup'
-import { MERCH_CATEGORIES, formatPrice, getMerchDisplayImage, type Merch } from '@/lib/merch'
+import { formatPrice, getMerchDisplayImage, type Merch } from '@/lib/merch'
 
 /**
  * MerchPanel — featured "Made by Boss Daddy" section on the unified /gear page.
