@@ -12,6 +12,7 @@ import { SubscribeButton } from '@/components/wishlist/SubscribeButton'
 import CommentForm from '@/components/CommentForm'
 import CommentList from '@/components/CommentList'
 import { LightboxImage } from '@/components/LightboxImage'
+import BenchStrip from '@/components/BenchStrip'
 import type { Metadata } from 'next'
 
 export const revalidate = 300
@@ -205,6 +206,10 @@ export default async function BenchDetailPage({ params }: Props) {
         <Link href="/bench" className="text-sm text-prose-faint hover:text-prose-muted transition-colors">
           ← Back to the bench
         </Link>
+      </div>
+
+      <div className="mt-12">
+        <BenchStrip ctaText="See more on the bench" />
       </div>
     </div>
   )
