@@ -17,6 +17,7 @@ import MethodologyCallout from '@/components/collections/MethodologyCallout'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { faqPageLd } from '@/lib/seo/faq-ld'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
+import BenchStrip from '@/components/BenchStrip'
 
 export const revalidate = 60
 
@@ -451,6 +452,10 @@ export default async function GiftOccasionPage({ params }: Props) {
                 </div>
               </section>
             )}
+            {/* On the Bench */}
+            <div className="mt-16">
+              <BenchStrip ctaText="See all on the bench" />
+            </div>
           </main>
 
           {pick && <ArticleTOC items={tocItems} variant="desktop" />}

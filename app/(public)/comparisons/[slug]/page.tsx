@@ -14,6 +14,7 @@ import MethodologyCallout from '@/components/collections/MethodologyCallout'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { faqPageLd } from '@/lib/seo/faq-ld'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
+import BenchStrip from '@/components/BenchStrip'
 
 export const revalidate = 60
 
@@ -592,6 +593,11 @@ export default async function ComparisonDetailPage({ params }: Props) {
               <Link href="/comparisons" className="text-sm text-prose-faint hover:text-accent-text-soft transition-colors">
                 Browse all Comparisons →
               </Link>
+            </div>
+
+            {/* On the Bench */}
+            <div className="mt-16">
+              <BenchStrip ctaText="See all on the bench" />
             </div>
           </main>
 
