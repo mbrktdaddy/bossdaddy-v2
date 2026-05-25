@@ -86,7 +86,7 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={busy}
-            className="px-3 py-1.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-50 text-xs font-semibold text-prose rounded-lg transition-colors"
+            className="px-3 py-1.5 bg-surface-raised hover:bg-surface disabled:opacity-50 text-xs font-semibold text-prose rounded-lg transition-colors"
           >
             {busy ? 'Uploading…' : avatarUrl ? 'Replace' : 'Upload'}
           </button>

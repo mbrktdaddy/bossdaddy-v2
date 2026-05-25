@@ -199,7 +199,7 @@ export function WishlistForm({ item }: Props) {
         <label htmlFor="wf-image" className={labelCls}>Image</label>
         <div className="flex gap-2">
           <input id="wf-image" className={`${inputCls} flex-1`} value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." />
-          <button type="button" onClick={() => setShowPicker(true)} className="shrink-0 px-3 py-2.5 bg-surface-raised hover:bg-zinc-700 border border-strong rounded-xl text-sm text-prose-muted transition-colors">
+          <button type="button" onClick={() => setShowPicker(true)} className="shrink-0 px-3 py-2.5 bg-surface-raised hover:bg-surface border border-strong rounded-xl text-sm text-prose-muted transition-colors">
             Library
           </button>
         </div>
@@ -267,7 +267,7 @@ export function WishlistForm({ item }: Props) {
             type="button"
             onClick={handlePromote}
             disabled={busy}
-            className="px-5 py-2.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-50 border border-strong text-prose text-sm font-semibold rounded-xl transition-colors"
+            className="px-5 py-2.5 bg-surface-raised hover:bg-surface disabled:opacity-50 border border-strong text-prose text-sm font-semibold rounded-xl transition-colors"
           >
             Promote to Review
           </button>

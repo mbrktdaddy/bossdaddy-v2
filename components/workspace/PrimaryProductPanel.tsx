@@ -113,7 +113,7 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
           </div>
           <button
             onClick={() => setPicking(true)}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted rounded-lg transition-colors shrink-0"
+            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted rounded-lg transition-colors shrink-0"
           >
             Change
           </button>

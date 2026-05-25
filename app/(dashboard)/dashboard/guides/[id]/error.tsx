@@ -12,7 +12,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
       {error.digest && <p className="text-prose-faint text-xs font-mono mb-6">ref: {error.digest}</p>}
       <div className="flex items-center gap-3 flex-wrap justify-center">
         <button onClick={reset} className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition-colors text-sm">Reload workspace</button>
-        <Link href="/dashboard" className="px-5 py-2.5 bg-surface-raised hover:bg-zinc-700 border border-strong text-prose-muted font-semibold rounded-xl transition-colors text-sm">Dashboard</Link>
+        <Link href="/dashboard" className="px-5 py-2.5 bg-surface-raised hover:bg-surface border border-strong text-prose-muted font-semibold rounded-xl transition-colors text-sm">Dashboard</Link>
       </div>
     </div>
   )

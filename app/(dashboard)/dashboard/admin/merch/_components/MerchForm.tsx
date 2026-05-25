@@ -299,7 +299,7 @@ export function MerchForm({ item }: Props) {
           <button
             type="button"
             onClick={() => setShowPicker(true)}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted font-semibold rounded-lg transition-colors"
+            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted font-semibold rounded-lg transition-colors"
           >
             📁 Pick from library
           </button>

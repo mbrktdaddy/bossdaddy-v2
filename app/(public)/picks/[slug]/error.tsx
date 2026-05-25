@@ -28,7 +28,7 @@ export default function Error({
         >
           Try Again
         </button>
-        <Link href="/gear" className="px-5 py-2.5 bg-surface-raised hover:bg-zinc-700 border border-strong text-prose-muted font-semibold rounded-xl transition-colors text-sm">
+        <Link href="/gear" className="px-5 py-2.5 bg-surface-raised hover:bg-surface border border-strong text-prose-muted font-semibold rounded-xl transition-colors text-sm">
           All Gear
         </Link>
       </div>

@@ -186,7 +186,7 @@ function LinkDialog({ initial, onConfirm, onCancel }: {
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm rounded-lg transition-colors"
+            className="px-4 py-2 bg-surface-raised hover:bg-surface text-prose-muted text-sm rounded-lg transition-colors"
           >
             Cancel
           </button>
@@ -293,7 +293,7 @@ function CollectionDialog({ onConfirm, onCancel }: {
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm rounded-lg transition-colors"
+            className="px-4 py-2 bg-surface-raised hover:bg-surface text-prose-muted text-sm rounded-lg transition-colors"
           >
             Cancel
           </button>
@@ -559,7 +559,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
               {aiRefining ? 'Refining…' : 'Apply'}
             </button>
             <button type="button" onClick={() => { setSelection(null); setAiInstruction(''); setAiError(null) }}
-              className="shrink-0 px-3 py-2 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-xs rounded-lg transition-colors">
+              className="shrink-0 px-3 py-2 bg-surface-raised hover:bg-surface text-prose-muted text-xs rounded-lg transition-colors">
               ✕
             </button>
           </div>

@@ -228,7 +228,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
                   <div className="flex items-center gap-2 mt-3 flex-wrap">
                     <Link
                       href={`/dashboard/${contentType}/${item.id}`}
-                      className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted hover:text-prose rounded-lg transition-colors"
+                      className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose rounded-lg transition-colors"
                     >
                       {['draft', 'rejected'].includes(item.status) ? 'Edit' : 'Open'}
                     </Link>

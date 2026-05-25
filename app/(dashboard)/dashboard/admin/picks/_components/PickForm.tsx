@@ -570,7 +570,7 @@ export function PickForm({ pick, initialItems }: Props) {
                 type="button"
                 onClick={() => callIntroAI(true)}
                 disabled={aiBusy || !refineInstruction.trim() || items.length < 2}
-                className="shrink-0 text-xs px-3 py-2 bg-surface-raised hover:bg-zinc-700 disabled:opacity-40 text-prose font-semibold rounded-lg transition-colors min-h-[36px]"
+                className="shrink-0 text-xs px-3 py-2 bg-surface-raised hover:bg-surface disabled:opacity-40 text-prose font-semibold rounded-lg transition-colors min-h-[36px]"
               >
                 {aiBusy && refineInstruction ? 'Refining…' : 'Refine →'}
               </button>

@@ -201,7 +201,7 @@ export function InternalLinkPanel({
                       ) : (
                         <button
                           onClick={() => insertSuggestion(s)}
-                          className="shrink-0 text-xs px-3 py-2 bg-surface-raised hover:bg-zinc-700 text-prose-muted rounded-lg min-h-[36px] transition-colors"
+                          className="shrink-0 text-xs px-3 py-2 bg-surface-raised hover:bg-surface text-prose-muted rounded-lg min-h-[36px] transition-colors"
                         >
                           + Insert link
                         </button>
@@ -267,14 +267,14 @@ function ExistingLinkCard({ link, total, onMove, onRemove, onTextCommit }: Exist
             type="button"
             onClick={() => onMove(link.position - 1)}
             disabled={link.position === 1}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-surface disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
             title="Move up"
           >↑</button>
           <button
             type="button"
             onClick={() => onMove(link.position + 1)}
             disabled={link.position === total}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-surface disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
             title="Move down"
           >↓</button>
           <button

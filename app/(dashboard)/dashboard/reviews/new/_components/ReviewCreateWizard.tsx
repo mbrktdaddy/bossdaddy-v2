@@ -389,7 +389,7 @@ export function ReviewCreateWizard() {
           <button
             type="button"
             onClick={() => { setPreviewDraft(null); setStep('generating'); handleGenerate() }}
-            className="px-5 py-2.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm rounded-xl transition-colors"
+            className="px-5 py-2.5 bg-surface-raised hover:bg-surface text-prose-muted text-sm rounded-xl transition-colors"
           >
             ↺ Regenerate
           </button>
@@ -667,7 +667,7 @@ export function ReviewCreateWizard() {
           type="button"
           onClick={handleSkipToBlank}
           disabled={!productName.trim()}
-          className="px-5 py-2.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-40 text-prose-muted text-sm rounded-xl transition-colors"
+          className="px-5 py-2.5 bg-surface-raised hover:bg-surface disabled:opacity-40 text-prose-muted text-sm rounded-xl transition-colors"
         >
           Skip to blank draft
         </button>

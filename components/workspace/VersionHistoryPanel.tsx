@@ -103,7 +103,7 @@ export function VersionHistoryPanel({ contentType, contentId }: Props) {
                   <button
                     onClick={() => handleRevert(r.id, r.version_number)}
                     disabled={reverting === r.id}
-                    className="text-xs px-3 py-1 bg-surface-raised hover:bg-zinc-700 disabled:opacity-50 text-prose-muted rounded-lg transition-colors"
+                    className="text-xs px-3 py-1 bg-surface-raised hover:bg-surface disabled:opacity-50 text-prose-muted rounded-lg transition-colors"
                   >
                     {reverting === r.id ? '…' : '↻ Revert'}
                   </button>

@@ -178,7 +178,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
           <button
             type="button"
             onClick={() => setShowPicker(true)}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted font-semibold rounded-lg transition-colors"
+            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted font-semibold rounded-lg transition-colors"
           >
             Pick from library
           </button>
@@ -277,7 +277,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
                   <button
                     type="button"
                     onClick={() => handleSetPrimary(img)}
-                    className="w-full text-[10px] py-1 bg-surface-raised hover:bg-zinc-700 text-prose-muted hover:text-prose rounded transition-colors"
+                    className="w-full text-[10px] py-1 bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose rounded transition-colors"
                   >
                     Set primary
                   </button>
@@ -322,7 +322,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
               <button
                 type="button"
                 onClick={() => setUsageModal(null)}
-                className="flex-1 px-4 py-2.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm rounded-xl transition-colors"
+                className="flex-1 px-4 py-2.5 bg-surface-raised hover:bg-surface text-prose-muted text-sm rounded-xl transition-colors"
               >
                 Cancel
               </button>

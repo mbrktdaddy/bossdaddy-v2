@@ -28,7 +28,7 @@ export default function AccountBlockedPage() {
         </a>
         <Link
           href="/"
-          className="px-6 py-3 bg-surface-raised hover:bg-zinc-700 border border-strong text-prose-muted font-semibold rounded-xl transition-colors text-sm"
+          className="px-6 py-3 bg-surface-raised hover:bg-surface border border-strong text-prose-muted font-semibold rounded-xl transition-colors text-sm"
         >
           Back to home
         </Link>

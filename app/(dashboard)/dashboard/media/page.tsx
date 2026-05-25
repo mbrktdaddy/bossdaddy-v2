@@ -154,7 +154,7 @@ function AssetCard({
             >
               {savingAlt ? '…' : 'Save'}
             </button>
-            <button onClick={() => setEditingAlt(false)} className="px-2 py-1 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-xs rounded transition-colors">
+            <button onClick={() => setEditingAlt(false)} className="px-2 py-1 bg-surface-raised hover:bg-surface text-prose-muted text-xs rounded transition-colors">
               ✕
             </button>
           </div>
@@ -445,7 +445,7 @@ export default function MediaLibraryPage() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="px-4 py-2 bg-surface-raised hover:bg-zinc-700 disabled:opacity-40 text-sm text-prose rounded-lg transition-colors"
+            className="px-4 py-2 bg-surface-raised hover:bg-surface disabled:opacity-40 text-sm text-prose rounded-lg transition-colors"
           >
             ← Prev
           </button>
@@ -453,7 +453,7 @@ export default function MediaLibraryPage() {
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="px-4 py-2 bg-surface-raised hover:bg-zinc-700 disabled:opacity-40 text-sm text-prose rounded-lg transition-colors"
+            className="px-4 py-2 bg-surface-raised hover:bg-surface disabled:opacity-40 text-sm text-prose rounded-lg transition-colors"
           >
             Next →
           </button>
@@ -512,7 +512,7 @@ export default function MediaLibraryPage() {
             <div className="flex gap-3 pt-1">
               <button
                 onClick={() => { setPendingDeleteId(null); setUsageData(null) }}
-                className="flex-1 px-4 py-2.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm rounded-xl transition-colors"
+                className="flex-1 px-4 py-2.5 bg-surface-raised hover:bg-surface text-prose-muted text-sm rounded-xl transition-colors"
               >
                 Cancel
               </button>

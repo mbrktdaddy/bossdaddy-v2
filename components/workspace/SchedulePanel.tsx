@@ -58,7 +58,7 @@ export function SchedulePanel({ scheduledAt, onChange, disabled }: Props) {
           <button
             type="button"
             onClick={() => onChange(null)}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted hover:text-prose rounded-lg transition-colors"
+            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose rounded-lg transition-colors"
           >
             Clear schedule
           </button>

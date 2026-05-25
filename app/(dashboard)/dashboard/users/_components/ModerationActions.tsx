@@ -206,7 +206,7 @@ export default function ModerationActions({ userId, username, status, suspendedU
                 <button
                   onClick={() => { setPendingAction(null); setReasonChoice(''); setCustomReason('') }}
                   disabled={loading}
-                  className="px-3 py-1.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-xs font-semibold rounded transition-colors"
+                  className="px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted text-xs font-semibold rounded transition-colors"
                 >
                   Cancel
                 </button>

@@ -41,7 +41,7 @@ export function RefinePreviewModal({ before, after, onAccept, onDiscard }: Props
             <button
               type="button"
               onClick={onDiscard}
-              className="px-4 py-2 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm font-medium rounded-lg transition-colors"
+              className="px-4 py-2 bg-surface-raised hover:bg-surface text-prose-muted text-sm font-medium rounded-lg transition-colors"
             >
               Discard
             </button>

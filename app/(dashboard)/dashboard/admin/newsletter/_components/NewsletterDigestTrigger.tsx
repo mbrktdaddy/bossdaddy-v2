@@ -38,7 +38,7 @@ export function NewsletterDigestTrigger() {
           type="button"
           onClick={() => trigger(true)}
           disabled={busy}
-          className="px-3 py-2 bg-surface-raised hover:bg-zinc-700 disabled:opacity-40 text-prose-muted text-xs font-semibold rounded-lg transition-colors"
+          className="px-3 py-2 bg-surface-raised hover:bg-surface disabled:opacity-40 text-prose-muted text-xs font-semibold rounded-lg transition-colors"
         >
           {busy ? '…' : 'Dry run'}
         </button>

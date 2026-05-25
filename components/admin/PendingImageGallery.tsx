@@ -147,7 +147,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
             type="button"
             onClick={() => setShowPicker(true)}
             disabled={disabled || processing}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-40 text-prose-muted font-semibold rounded-lg transition-colors"
+            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface disabled:opacity-40 text-prose-muted font-semibold rounded-lg transition-colors"
           >
             Pick from library
           </button>

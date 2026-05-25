@@ -43,7 +43,7 @@ export function WorkspaceToolbar({
           type="button"
           onClick={onSave}
           disabled={isSaving}
-          className="px-4 py-3 bg-surface-raised hover:bg-zinc-700 disabled:opacity-50 text-prose text-sm font-medium rounded-lg transition-colors"
+          className="px-4 py-3 bg-surface-raised hover:bg-surface disabled:opacity-50 text-prose text-sm font-medium rounded-lg transition-colors"
         >
           {isSaving ? 'Saving…' : 'Save'}
         </button>
@@ -51,7 +51,7 @@ export function WorkspaceToolbar({
           <button
             type="button"
             onClick={onDuplicate}
-            className="px-3 py-3 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm rounded-lg transition-colors"
+            className="px-3 py-3 bg-surface-raised hover:bg-surface text-prose-muted text-sm rounded-lg transition-colors"
             title="Create a new draft with this content"
           >
             <svg className="w-4 h-4 mr-1.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" /></svg>
@@ -65,7 +65,7 @@ export function WorkspaceToolbar({
             className={`hidden xl:flex items-center gap-1.5 px-3 py-3 text-sm rounded-lg transition-colors ${
               previewOpen
                 ? 'bg-accent-tint text-accent-text-soft border border-accent-border/40'
-                : 'bg-surface-raised hover:bg-zinc-700 text-prose-muted'
+                : 'bg-surface-raised hover:bg-surface text-prose-muted'
             }`}
             title="Toggle live preview panel"
           >
@@ -78,7 +78,7 @@ export function WorkspaceToolbar({
             href={previewUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center px-3 py-3 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm rounded-lg transition-colors"
+            className="inline-flex items-center px-3 py-3 bg-surface-raised hover:bg-surface text-prose-muted text-sm rounded-lg transition-colors"
           >
             <svg className="w-4 h-4 mr-1.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
             Preview

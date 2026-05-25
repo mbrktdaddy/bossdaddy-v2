@@ -266,14 +266,14 @@ function ExistingMentionCard({ mention, productName, total, onMove, onRemove }: 
             type="button"
             onClick={() => onMove(mention.position - 1)}
             disabled={mention.position === 1}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-surface disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
             title="Move up"
           >↑</button>
           <button
             type="button"
             onClick={() => onMove(mention.position + 1)}
             disabled={mention.position === total}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-surface disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
             title="Move down"
           >↓</button>
           <button

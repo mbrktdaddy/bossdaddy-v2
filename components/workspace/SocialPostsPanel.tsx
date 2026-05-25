@@ -292,14 +292,14 @@ function PostCard({ post, busy, copied, onCopy, onBodyCommit, onHashtagsCommit, 
             type="button"
             onClick={onCopy}
             disabled={busy}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted hover:text-prose text-xs rounded-lg min-h-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose text-xs rounded-lg min-h-[36px] transition-colors"
             title="Copy body + hashtags to clipboard"
           >{copied ? '✓ Copied' : 'Copy'}</button>
           <button
             type="button"
             onClick={onRegenerate}
             disabled={busy}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-xs rounded-lg min-h-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted text-xs rounded-lg min-h-[36px] transition-colors"
             title="Regenerate just this platform"
           >{busy ? '…' : '🔄'}</button>
           <button

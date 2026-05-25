@@ -205,10 +205,10 @@ export default async function AboutPage() {
  </div>
 
  <div className="pt-6 flex items-center justify-center gap-4 flex-wrap">
- <Link href="/reviews" className="px-6 py-3 bg-surface-raised hover:bg-zinc-700 text-prose-muted font-semibold rounded-xl transition-colors text-sm">
+ <Link href="/reviews" className="px-6 py-3 bg-surface-raised hover:bg-surface text-prose-muted font-semibold rounded-xl transition-colors text-sm">
  Browse Reviews
  </Link>
- <Link href="/guides" className="px-6 py-3 bg-surface-raised hover:bg-zinc-700 text-prose-muted font-semibold rounded-xl transition-colors text-sm">
+ <Link href="/guides" className="px-6 py-3 bg-surface-raised hover:bg-surface text-prose-muted font-semibold rounded-xl transition-colors text-sm">
  Browse Guides
  </Link>
  </div>

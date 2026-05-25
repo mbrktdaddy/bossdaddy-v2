@@ -132,7 +132,7 @@ export function ScheduleFollowupModal({ reviewId, onClose }: Props) {
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="px-4 py-2 bg-surface-raised hover:bg-zinc-700 text-prose-muted text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+            className="px-4 py-2 bg-surface-raised hover:bg-surface text-prose-muted text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
