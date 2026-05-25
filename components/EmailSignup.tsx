@@ -81,7 +81,7 @@ export function EmailSignup({
           placeholder="you@example.com"
           aria-label="Email address"
           disabled={state === 'submitting'}
-          className={`min-w-0 ${compact ? 'flex-1 px-3 py-2 text-sm' : 'w-full sm:flex-1 px-4 py-3'} bg-surface border border-strong focus:border-accent rounded-xl text-prose placeholder:text-prose-faint focus:outline-none transition-colors disabled:opacity-60`}
+          className={`min-w-0 ${compact ? 'flex-1 px-3 py-2 text-sm' : 'w-full sm:flex-1 px-4 py-3'} bg-surface border border-strong focus:border-accent focus-visible:ring-2 focus-visible:ring-accent-hover/50 rounded-xl text-prose placeholder:text-prose-faint focus:outline-none transition-colors disabled:opacity-60`}
         />
         <button
           type="submit"

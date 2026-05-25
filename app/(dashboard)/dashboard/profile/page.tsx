@@ -194,7 +194,7 @@ export default async function ProfilePage() {
         <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Public Bio</p>
           <p className="text-xs text-prose-faint mb-4">
-            Shown at the bottom of every piece you publish, on your <Link href={`/author/${profile?.username}`} target="_blank" className="text-accent-text hover:text-accent-text-soft">public author page</Link>.
+            Shown at the bottom of every piece you publish, on your <Link href={`/author/${profile?.username}`} target="_blank" rel="noopener noreferrer" className="text-accent-text hover:text-accent-text-soft">public author page</Link>.
           </p>
           <BioForm
             initialDisplayName={(profile as { display_name?: string | null } | null)?.display_name ?? null}
@@ -331,6 +331,7 @@ export default async function ProfilePage() {
             <Link
               href={`/author/${profile?.username}`}
               target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center justify-between p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group"
             >
               <span className="text-sm text-prose-muted group-hover:text-prose transition-colors">

@@ -65,6 +65,7 @@ export default async function EditPickPage({ params }: { params: Promise<{ id: s
             <Link
               href={`/picks/${pick.slug}`}
               target="_blank"
+              rel="noopener noreferrer"
               className="text-xs text-accent-text-soft hover:text-accent transition-colors"
             >
               View live →

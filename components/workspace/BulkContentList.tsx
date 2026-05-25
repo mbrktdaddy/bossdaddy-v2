@@ -236,6 +236,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
                       <Link
                         href={`${publicRoute}/${item.slug}`}
                         target="_blank"
+                        rel="noopener noreferrer"
                         className="text-xs px-3 py-1.5 bg-accent-tint hover:bg-accent-tint text-accent-text-soft hover:text-accent rounded-lg transition-colors border border-accent-border/40"
                       >
                         View Live →

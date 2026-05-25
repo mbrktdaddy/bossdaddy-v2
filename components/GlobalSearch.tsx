@@ -108,7 +108,7 @@ export default function GlobalSearch() {
             onKeyDown={handleKeyDown}
             placeholder="Search articles, reviews, media…"
             aria-label="Search"
-            className="flex-1 bg-transparent text-prose placeholder:text-prose-faint focus:outline-none text-sm"
+            className="flex-1 bg-transparent text-prose placeholder:text-prose-faint focus:outline-none focus-visible:ring-1 focus-visible:ring-accent-hover rounded text-sm"
           />
           {loading && <span className="w-3 h-3 border-2 border-strong border-t-orange-500 rounded-full animate-spin shrink-0" />}
           <button onClick={() => setOpen(false)} className="text-xs text-prose-faint hover:text-prose-muted">Esc</button>

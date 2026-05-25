@@ -769,7 +769,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                   />
                   <span>
                     I confirm this review contains affiliate links. FTC disclosure will be auto-inserted before publishing.
-                    <a href="/affiliate-disclosure" target="_blank" className="ml-1 text-accent-text-soft hover:text-accent">Learn more →</a>
+                    <a href="/affiliate-disclosure" target="_blank" rel="noopener noreferrer" className="ml-1 text-accent-text-soft hover:text-accent">Learn more →</a>
                   </span>
                 </label>
               </div>

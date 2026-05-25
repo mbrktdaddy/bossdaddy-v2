@@ -173,6 +173,7 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
         <Link
           href="/"
           target="_blank"
+          rel="noopener noreferrer"
           onClick={onNav}
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-prose-faint hover:text-prose hover:bg-surface-raised transition-colors"
         >

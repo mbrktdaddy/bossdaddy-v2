@@ -136,7 +136,7 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
         placeholder={prompt ? 'Your answer...' : 'Share your thoughts... (sign in required)'}
         rows={4}
         maxLength={2000}
-        className="w-full px-4 py-3 bg-surface border border-strong focus:border-accent rounded-xl text-prose placeholder:text-prose-faint focus:outline-none resize-none text-base sm:text-sm transition-colors"
+        className="w-full px-4 py-3 bg-surface border border-strong focus:border-accent focus-visible:ring-2 focus-visible:ring-accent-hover/50 rounded-xl text-prose placeholder:text-prose-faint focus:outline-none resize-none text-base sm:text-sm transition-colors"
       />
       <div className="flex items-center justify-between gap-3">
         <span className="text-xs text-prose-faint shrink-0">{body.length}/2000</span>
