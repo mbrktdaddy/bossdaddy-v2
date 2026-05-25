@@ -34,6 +34,8 @@ import CategoryIcon from '@/components/CategoryIcon'
 import { ReviewTimelineStrip } from '@/components/reviews/ReviewTimelineStrip'
 import { VerdictChangeBadge } from '@/components/reviews/VerdictChangeBadge'
 import { getReviewTimeline, transformFollowupContent, type VerdictChange } from '@/lib/reviews'
+import TrackView from '@/components/TrackView'
+import RecentlyViewedStrip from '@/components/RecentlyViewedStrip'
 
 const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
 
@@ -57,7 +59,7 @@ const getReview = cache(async (slug: string) => {
   const supabase = await createClient()
   const { data } = await supabase
     .from('reviews')
-    .select('id, title, product_name, category, content, rating, excerpt, image_url, has_affiliate_links, product_slug, published_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, parent_review_id, milestone_label, milestone_days, previous_rating, verdict_change, reading_time_minutes, profiles(username)')
+    .select('id, slug, title, product_name, category, content, rating, excerpt, image_url, has_affiliate_links, product_slug, published_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, parent_review_id, milestone_label, milestone_days, previous_rating, verdict_change, reading_time_minutes, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -212,6 +214,7 @@ export default async function ReviewPage({ params }: Props) {
       {faqJsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />}
       <ReadingProgressBar />
       <ViewTracker id={review.id} type="review" />
+      <TrackView slug={review.slug} title={review.title} type="review" category={review.category ?? null} image_url={review.image_url ?? null} />
       <EngagementTracker contentType="review" contentId={review.id} />
       {product && <StickyMobileCta product={product} />}
 
@@ -488,6 +491,12 @@ export default async function ReviewPage({ params }: Props) {
         <Suspense fallback={null}>
           <MerchCallout />
         </Suspense>
+
+        {/* Recently viewed — client-side localStorage, excludes current page */}
+        <RecentlyViewedStrip
+          exclude={{ slug: review.slug, type: 'review' }}
+          className="mt-12"
+        />
 
         {/* Related reviews — mobile only */}
         {related && related.length > 0 && (

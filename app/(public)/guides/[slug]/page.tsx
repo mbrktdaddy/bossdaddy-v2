@@ -24,6 +24,8 @@ import { LightboxImage } from '@/components/LightboxImage'
 import { EmailSignup } from '@/components/EmailSignup'
 import AuthorBio from '@/components/AuthorBio'
 import CategoryIcon from '@/components/CategoryIcon'
+import TrackView from '@/components/TrackView'
+import RecentlyViewedStrip from '@/components/RecentlyViewedStrip'
 
 const TableOfContents = dynamic(() => import('@/components/TableOfContents'))
 const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
@@ -165,6 +167,7 @@ export default async function GuidePage({ params }: Props) {
     <>
       <ReadingProgressBar />
       <ViewTracker id={guide.id} type="guide" />
+      <TrackView slug={guide.slug} title={guide.title} type="guide" category={guide.category ?? null} image_url={guide.image_url ?? null} />
       <EngagementTracker contentType="guide" contentId={guide.id} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
@@ -479,6 +482,12 @@ export default async function GuidePage({ params }: Props) {
             <Suspense fallback={null}>
               <MerchCallout />
             </Suspense>
+
+            {/* Recently viewed — client-side localStorage, excludes current page */}
+            <RecentlyViewedStrip
+              exclude={{ slug: guide.slug, type: 'guide' }}
+              className="mt-12"
+            />
 
           </div>{/* end main column */}
 
