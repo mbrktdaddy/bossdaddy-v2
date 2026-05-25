@@ -382,11 +382,11 @@ export default async function ComparisonDetailPage({ params }: Props) {
                   <table className="w-full min-w-[640px] border-separate border-spacing-0 bg-gradient-to-br from-surface to-surface/60 border border-soft rounded-xl overflow-hidden">
                     <thead>
                       <tr>
-                        <th className="text-left px-4 py-3 text-xs uppercase tracking-widest text-prose-faint font-semibold border-b border-soft align-bottom">
+                        <th scope="col" className="text-left px-4 py-3 text-xs uppercase tracking-widest text-prose-faint font-semibold border-b border-soft align-bottom">
                           Criterion
                         </th>
                         {items.map(({ review }) => (
-                          <th key={review!.id} className="px-3 py-3 border-b border-soft align-bottom min-w-[120px]">
+                          <th key={review!.id} scope="col" className="px-3 py-3 border-b border-soft align-bottom min-w-[120px]">
                             <a href={`#dive-${review!.slug}`} className="group block text-center">
                               <div className="relative w-14 h-14 mx-auto mb-2 rounded-xl overflow-hidden bg-surface-sunken border border-soft group-hover:border-accent-border transition-colors">
                                 {review!.image_url && (

@@ -14,12 +14,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const supabase = await createClient()
   const { data } = await supabase
-    .from('merch').select('name, description').eq('slug', slug).maybeSingle()
+    .from('merch').select('name, description, image_url, default_image_url').eq('slug', slug).maybeSingle()
   if (!data) return {}
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+  const ogImage = (data.image_url ?? data.default_image_url)
+    ? `${siteUrl}${data.image_url ?? data.default_image_url}`
+    : `${siteUrl}/api/og?title=${encodeURIComponent(data.name)}&type=guide`
   return {
     title: `${data.name} — Boss Daddy Life`,
     description: data.description ?? undefined,
-    alternates: { canonical: `/gear/${slug}` },
+    alternates: { canonical: `${siteUrl}/gear/${slug}` },
+    openGraph: {
+      title: `${data.name} | Boss Daddy`,
+      description: data.description ?? undefined,
+      url: `${siteUrl}/gear/${slug}`,
+      images: [{ url: ogImage, width: 1200, height: 630 }],
+    },
+    twitter: { card: 'summary_large_image' },
   }
 }
 

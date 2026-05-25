@@ -32,9 +32,16 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
  const { username } = await params
+ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
  return {
- title: `@${username} — Boss Daddy Life`,
- description: `Reviews and articles by @${username} on Boss Daddy Life.`,
+   title: `@${username} — Boss Daddy Life`,
+   description: `Reviews and articles by @${username} on Boss Daddy Life.`,
+   alternates: { canonical: `${siteUrl}/author/${username}` },
+   openGraph: {
+     title: `@${username} | Boss Daddy Life`,
+     description: `Reviews and articles by @${username} on Boss Daddy Life.`,
+     url: `${siteUrl}/author/${username}`,
+   },
  }
 }
 
