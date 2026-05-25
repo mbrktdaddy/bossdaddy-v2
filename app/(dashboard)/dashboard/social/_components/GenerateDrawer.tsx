@@ -67,12 +67,12 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
         source_title: selectedItem?.title || topic || undefined,
       }),
     })
+    const json = await res.json().catch(() => ({}))
     setSaving(null)
-    if (res.ok) {
-      router.refresh()
-      setOpen(false)
-      setVariants([])
-    }
+    if (!res.ok) { setError(json.error ?? 'Save failed'); return }
+    router.refresh()
+    setOpen(false)
+    setVariants([])
   }
 
   const platformConfig = PLATFORMS.find((p) => p.id === platform) ?? PLATFORMS[0]
