@@ -164,7 +164,7 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 overflow-y-auto">
+      <nav aria-label="Dashboard navigation" className="flex-1 px-3 py-4 overflow-y-auto">
         <NavLinks onNav={onNav} />
       </nav>
 

@@ -45,11 +45,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   const metaTitle       = data.meta_title       ?? `${data.title} — Boss Daddy Picks`
   const metaDescription = data.meta_description ?? data.description ?? 'Dad-tested picks curated by Boss Daddy.'
+  const ogImage = `${siteUrl}/api/og?title=${encodeURIComponent(metaTitle)}&type=guide`
   return {
     title:       metaTitle,
     description: metaDescription,
     alternates:  { canonical: `${siteUrl}/picks/${slug}` },
-    openGraph:   { title: metaTitle, description: metaDescription, url: `${siteUrl}/picks/${slug}` },
+    openGraph:   { title: metaTitle, description: metaDescription, url: `${siteUrl}/picks/${slug}`, images: [{ url: ogImage, width: 1200, height: 630 }] },
+    twitter:     { card: 'summary_large_image', title: metaTitle, description: metaDescription, images: [ogImage] },
   }
 }
 

@@ -153,7 +153,7 @@ export default function Header({ username }: HeaderProps) {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-1">
+        <nav aria-label="Site navigation" className="hidden md:flex items-center gap-1">
           {NAV_LINKS.map(({ href, label }) => (
             <Link
               key={href}
@@ -436,7 +436,7 @@ export default function Header({ username }: HeaderProps) {
       {mobileOpen && (
         <div className="md:hidden border-t border-zinc-800 bg-drama overflow-y-auto max-h-[calc(100dvh-4rem)]">
           {/* Main nav links */}
-          <nav className="flex flex-col px-4 pt-3 gap-1">
+          <nav aria-label="Mobile navigation" className="flex flex-col px-4 pt-3 gap-1">
             {NAV_LINKS.map(({ href, label }) => (
               <Link
                 key={href}

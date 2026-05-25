@@ -79,7 +79,7 @@ export default async function GuideTagPage({ params }: Props) {
 
       <div className="w-full max-w-6xl mx-auto px-6 py-12">
 
-        <nav className="flex items-center gap-2 text-xs text-prose-faint mb-8">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-prose-faint mb-8">
           <Link href="/guides" className="hover:text-accent-text-soft transition-colors">Guides</Link>
           <span>/</span>
           <span className="text-prose-muted">#{tag.label}</span>
