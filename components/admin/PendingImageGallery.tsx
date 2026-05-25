@@ -201,7 +201,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
                 {/* Source badge */}
                 <span
                   className={`absolute top-1.5 left-1.5 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full leading-none ${
-                    img.kind === 'upload' ? 'bg-accent/90 text-white' : 'bg-surface/90 text-gray-300'
+                    img.kind === 'upload' ? 'bg-accent/90 text-white' : 'bg-surface/90 text-prose-muted'
                   }`}
                 >
                   {img.kind === 'upload' ? 'New' : 'Library'}
