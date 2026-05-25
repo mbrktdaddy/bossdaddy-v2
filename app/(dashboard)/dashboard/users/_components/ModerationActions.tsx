@@ -110,6 +110,8 @@ export default function ModerationActions({ userId, username, status, suspendedU
 
       <button
         onClick={() => setOpen((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={open}
         className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md text-base text-prose-muted hover:bg-surface-raised hover:text-prose transition-colors"
         aria-label={`Moderation actions for @${username}`}
       >
@@ -117,7 +119,7 @@ export default function ModerationActions({ userId, username, status, suspendedU
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1 w-64 bg-surface-sunken border border-soft rounded-xl shadow-2xl z-50 p-1.5">
+        <div role="menu" aria-label={`Moderation actions for @${username}`} className="absolute right-0 top-full mt-1 w-64 bg-surface-sunken border border-soft rounded-xl shadow-2xl z-50 p-1.5">
           {pendingAction == null ? (
             <>
               <p className="text-[10px] uppercase tracking-widest text-prose-faint px-3 pt-2 pb-1">
@@ -126,6 +128,7 @@ export default function ModerationActions({ userId, username, status, suspendedU
               {actions.map(({ key, label, tone }) => (
                 <button
                   key={key}
+                  role="menuitem"
                   onClick={() => setPendingAction(key)}
                   className={`block w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                     tone === 'danger' ? 'text-red-300 hover:bg-red-950/40'
