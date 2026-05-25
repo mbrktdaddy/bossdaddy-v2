@@ -23,16 +23,16 @@ export default function ProductCtaCard({ product, rating, variant = 'prominent' 
   return (
     <aside
       data-product-cta
-      className="my-8 bg-accent-tint border border-strong rounded-xl p-5 sm:p-6 shadow-xl shadow-black/5"
+      className="my-8 bg-accent-tint border-l-[3px] border-accent border-y border-r border-soft rounded-xl p-5 sm:p-6"
       aria-label="Product offer"
     >
-      <p className="text-xs text-accent-text-soft uppercase tracking-widest font-semibold mb-3">
+      <p className="text-[11px] font-black text-accent uppercase tracking-[0.22em] mb-4">
         {heading}
       </p>
 
       <div className="flex flex-col sm:flex-row gap-5 sm:items-center">
         {product.image_url && (
-          <div className="relative w-full sm:w-32 h-32 shrink-0 rounded-xl overflow-hidden bg-surface-sunken">
+          <div className="relative w-full sm:w-32 h-32 shrink-0 rounded-xl overflow-hidden bg-white border border-soft">
             <Image
               src={product.image_url}
               alt={product.name}

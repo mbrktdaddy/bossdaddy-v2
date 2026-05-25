@@ -199,7 +199,7 @@ export default function VerdictCard({
         className="rounded-xl border border-soft bg-surface p-5"
         aria-label="Quick verdict"
       >
-        <p className="text-xs font-semibold uppercase tracking-widest text-eyebrow">Quick Verdict</p>
+        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-accent">Quick Verdict</p>
         <p className="mt-1 mb-4 text-xs font-black uppercase tracking-wide text-prose/90 line-clamp-2">{productName}</p>
 
         <div className="flex flex-col items-center gap-3">
@@ -233,7 +233,7 @@ export default function VerdictCard({
         className="rounded-xl border border-soft bg-surface p-4"
         aria-label="Verdict preview"
       >
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-eyebrow">The Verdict</p>
+        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-accent">The Verdict</p>
         <p className="mt-0.5 mb-4 text-xs font-black uppercase tracking-wide text-prose/90 line-clamp-1">
           {productName || <span className="text-prose-faint italic normal-case font-normal">no product name</span>}
         </p>
@@ -263,7 +263,7 @@ export default function VerdictCard({
       aria-label="The verdict"
     >
       {/* Header — section label + product name */}
-      <p className="text-xs font-semibold uppercase tracking-widest text-eyebrow">The Verdict</p>
+      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-accent">The Verdict</p>
       <p className="mt-1 mb-5 text-sm font-black uppercase tracking-wide text-prose/90 sm:text-base">{productName}</p>
 
       {/* Conclusion cluster — arc (with approved check baked in) + rebuy chip */}
