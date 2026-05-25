@@ -158,40 +158,61 @@ The edge exists to call up men who are *coasting*. It is never aimed at men in t
 
 ---
 
-## 2. Color System (Forge Base)
+## 2. Color System (Zinc Light — 2026-05-25)
+
+The site runs on a **light canvas with disciplined dark moments**. Page bg is zinc-100; cards are white; the dark island appears in the header, trust band, and footer. Brand orange (`#CC5500`) is the ONLY accent color — no gold, no per-type rainbow accents, no cream.
 
 ### Tokens — `app/globals.css`
 
 | Variable | Hex | Usage |
 |---|---|---|
-| `--bd-bg` / `--color-gray-950` | `#0b0b0d` | Page background — neutral warm-black |
-| `--bd-surface` / `--color-gray-900` | `#141418` | Card/panel surface |
-| `--bd-surface-raised` / `--color-gray-800` | `#1c1c22` | Elevated surfaces |
-| `--bd-border` / `--color-gray-700` | `#28282e` | Subtle borders (used sparingly) |
-| `--bd-text` | `#f5f5f5` | Primary text on dark |
-| `--bd-text-muted` | `#a8a8b0` | Secondary text |
-| `--bd-text-faint` | `#6a6a72` | Tertiary / metadata |
-| `--bd-orange` / `--color-orange-600` | `#CC5500` | **Primary brand accent** |
-| `--bd-orange-light` / `--color-orange-500` | `#d96200` / `#d96200` | Hover state |
-| `--color-orange-400` | `#e87030` | Accent text on dark |
-| `--color-orange-700` → `--color-orange-950` | earthy scale | Borders, bg tints |
-| `--bd-paper` | `#EDE6D3` | Cream — second voice for editorial moments |
-| `--bd-paper-muted` | `#C9BFA8` | Cream muted |
+| `--bd-bg` / `--background` | `#f4f4f5` | Page canvas (zinc-100) |
+| `--bd-surface` / `--color-surface` | `#ffffff` | Card/panel surface |
+| `--bd-surface-raised` | `#e4e4e7` | Alt-section bg, code wells (zinc-200) |
+| `--bd-surface-sunken` | `#e4e4e7` | Same value as raised — collapsed on light |
+| `--bd-border` / `--color-soft` | `#e4e4e7` | Hairlines, card edges (zinc-200) |
+| `--bd-border-strong` / `--color-strong` | `#a1a1aa` | Secondary CTA borders (zinc-400) |
+| `--bd-text` / `--foreground` | `#3f3f46` | Body text (zinc-700) |
+| `--bd-text-muted` | `#52525b` | Eyebrows, captions (zinc-600, WCAG AA on zinc-100) |
+| `--bd-text-faint` | `#71717a` | Timestamps, decorative (zinc-500) |
+| `--bd-orange` / `--color-accent` / `--color-orange-600` | `#CC5500` | **Primary brand accent** |
+| `--bd-orange-hover` / `--color-accent-hover` | `#B85A14` | Button hover state |
+| `--bd-orange-text` / `--color-accent-text` | `#CC5500` | Inline text on light — same as brand |
+| `--color-drama` | `#18181b` | Dark moments — header, trust band, footer (zinc-900) |
+| `--bd-accent-tint` | `#fff4eb` | Brand-territory surface (TL;DR boxes, chips) |
+
+### The four surfaces
+
+1. **Page** (`--bd-bg`, zinc-100) — primary canvas
+2. **Card** (`--bd-surface`, white) — elevated content, lifted with shadow
+3. **Alt section** (`--bd-surface-raised`, zinc-200) — alternating section bg for visual rhythm
+4. **Dark island** (`--color-drama`, zinc-900) — exactly one or two per page (header + trust band, header + footer, etc.)
 
 ### Tailwind utilities (mapped via `@theme inline`)
-- `bg-gray-950` → page bg
-- `bg-gray-900` → card surface
-- `text-orange-500` → accent text
-- `bg-orange-600` → primary CTA
-- `text-gray-400` / `text-gray-500` / `text-gray-600` → text muted scale
+- `bg-background` → page bg
+- `bg-surface` → white cards
+- `bg-surface-raised` → alt-section bg
+- `bg-drama` → dark island
+- `text-prose` → body text
+- `text-prose-muted` → secondary text
+- `text-accent` → inline orange text
+- `bg-accent` / `bg-accent-hover` → CTA buttons
+- `border-soft` → card edges
+- `border-strong` → secondary CTA borders
 
-### Status colors (wishlist + section indicators)
+### Status colors (wishlist + section indicators on LIGHT canvas)
 | Status | Color | Use |
 |---|---|---|
-| `testing` | `text-green-400` | Live testing pulse |
-| `queued` | `text-blue-400` | Coming soon |
-| `considering` | `text-orange-400` | Voting / pipeline |
-| `reviewed` | `text-orange-500` | Done / shipped |
+| `testing` | `text-green-600` | Live testing pulse |
+| `queued` | `text-blue-600` | Coming soon |
+| `considering` | `text-amber-600` | Voting / pipeline |
+| `reviewed` | `text-accent` | Done / shipped |
+
+### The dark island rule
+Each page gets **exactly one** dark content moment (e.g., the homepage's trust band). The header and footer are persistent dark chrome and do not count. Two dark content sections per page breaks the rhythm — light canvas with a single dark island is the deliberate structure.
+
+### The section header convention
+Every section heading sitewide uses the same shape: a 3px × 18px brand-orange vertical rule + uppercase tracked label, optional right-side link. Use the `SectionHeader` component — do not inline this pattern.
 
 ---
 

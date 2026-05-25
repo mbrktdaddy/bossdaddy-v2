@@ -59,7 +59,7 @@ export default function StickyMobileCta({ product }: Props) {
     >
       <div className="flex items-center gap-3">
         {product.image_url && (
-          <div className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-zinc-900 border border-zinc-800">
+          <div className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-zinc-800 border border-zinc-700">
             <Image
               src={product.image_url}
               alt={product.name}

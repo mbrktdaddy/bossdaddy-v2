@@ -167,8 +167,8 @@ export default function Header({ username, role }: HeaderProps) {
               href={href}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive(pathname, href)
-                  ? 'text-zinc-50 bg-zinc-800'
-                  : 'text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/60'
+                  ? 'bg-accent text-white'
+                  : 'text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800'
               }`}
             >
               {label}
@@ -181,8 +181,8 @@ export default function Header({ username, role }: HeaderProps) {
               onClick={() => setCatOpen(!catOpen)}
               className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 catOpen || isCategoryActive
-                  ? 'text-zinc-50 bg-zinc-800'
-                  : 'text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/60'
+                  ? 'bg-accent text-white'
+                  : 'text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800'
               }`}
             >
               Browse
@@ -194,9 +194,9 @@ export default function Header({ username, role }: HeaderProps) {
               </svg>
             </button>
 
-            {/* Mega-menu panel — dark to match nav */}
+            {/* Mega-menu panel — elevated zinc-800 to lift from masthead */}
             {catOpen && (
-              <div className="absolute right-0 top-full mt-2 w-[580px] bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl shadow-zinc-950/60 p-5 z-50">
+              <div className="absolute right-0 top-full mt-2 w-[580px] bg-zinc-800 border border-zinc-700 rounded-xl shadow-2xl shadow-black/40 p-5 z-50">
                 <p className="text-xs text-copper uppercase tracking-widest font-semibold mb-4">Browse by Category</p>
                 <div className="grid grid-cols-2 gap-1">
                   {CATEGORIES.map((cat) => (
@@ -204,7 +204,7 @@ export default function Header({ username, role }: HeaderProps) {
                       key={cat.slug}
                       href={`/category/${cat.slug}`}
                       onClick={() => setCatOpen(false)}
-                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-zinc-800 transition-colors group"
+                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-zinc-700 transition-colors group"
                     >
                       <CategoryIcon slug={cat.slug} className="w-6 h-6 text-copper mt-0.5 shrink-0" />
                       <div className="min-w-0">
@@ -234,7 +234,7 @@ export default function Header({ username, role }: HeaderProps) {
                         key={v.href}
                         href={v.href}
                         onClick={() => setCatOpen(false)}
-                        className="flex items-start gap-2.5 p-2.5 rounded-xl hover:bg-zinc-800 transition-colors group"
+                        className="flex items-start gap-2.5 p-2.5 rounded-xl hover:bg-zinc-700 transition-colors group"
                       >
                         <span className="text-copper mt-0.5 shrink-0">{v.icon}</span>
                         <div className="min-w-0">
@@ -292,7 +292,7 @@ export default function Header({ username, role }: HeaderProps) {
                     autoComplete="off"
                     placeholder="Search..."
                     onKeyDown={(e) => { if (e.key === 'Escape') setSearchOpen(false) }}
-                    className="w-44 lg:w-56 pl-8 pr-3 py-1.5 bg-zinc-900 border border-zinc-700 focus:border-copper focus-visible:ring-1 focus-visible:ring-copper/50 rounded-lg text-sm text-zinc-50 placeholder:text-zinc-500 focus:outline-none transition-colors"
+                    className="w-44 lg:w-56 pl-8 pr-3 py-1.5 bg-zinc-800 border border-zinc-700 focus:border-copper focus-visible:ring-1 focus-visible:ring-copper/50 rounded-lg text-sm text-zinc-50 placeholder:text-zinc-500 focus:outline-none transition-colors"
                   />
                   <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -305,13 +305,13 @@ export default function Header({ username, role }: HeaderProps) {
                   onClick={openSearch}
                   aria-label="Search"
                   aria-keyshortcuts="Meta+K Ctrl+K"
-                  className="hidden lg:flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-400 hover:text-zinc-50 hover:border-zinc-600 transition-colors text-sm"
+                  className="hidden lg:flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-zinc-50 hover:border-zinc-600 transition-colors text-sm"
                 >
                   <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                   <span className="text-xs text-zinc-400">Search</span>
-                  <kbd className="text-[10px] font-mono bg-zinc-800 border border-zinc-700 rounded px-1.5 py-0.5 leading-none">⌘K</kbd>
+                  <kbd className="text-[10px] font-mono bg-zinc-700 border border-zinc-600 rounded px-1.5 py-0.5 leading-none">⌘K</kbd>
                 </button>
                 <button
                   onClick={openSearch}
@@ -334,7 +334,7 @@ export default function Header({ username, role }: HeaderProps) {
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className={`flex items-center gap-2 p-1 pr-3 rounded-full transition-colors ${
-                  userMenuOpen ? 'bg-zinc-800' : 'bg-zinc-900 hover:bg-zinc-800'
+                  userMenuOpen ? 'bg-zinc-700' : 'bg-zinc-800 hover:bg-zinc-700'
                 }`}
                 aria-label="Account menu"
                 aria-expanded={userMenuOpen}
@@ -352,7 +352,7 @@ export default function Header({ username, role }: HeaderProps) {
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl shadow-zinc-950/60 p-1.5 z-50">
+                <div className="absolute right-0 top-full mt-2 w-56 bg-zinc-800 border border-zinc-700 rounded-xl shadow-2xl shadow-black/40 p-1.5 z-50">
                   <div className="px-3 py-2 border-b border-zinc-800 mb-1">
                     <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Signed in as</p>
                     <p className="text-sm font-bold text-zinc-100 truncate">@{username}</p>
@@ -360,7 +360,7 @@ export default function Header({ username, role }: HeaderProps) {
                   <Link
                     href={profileHref}
                     onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-zinc-300 hover:bg-zinc-700 hover:text-zinc-50 transition-colors"
                   >
                     <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -371,7 +371,7 @@ export default function Header({ username, role }: HeaderProps) {
                     <Link
                       href="/dashboard"
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 transition-colors"
+                      className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-zinc-300 hover:bg-zinc-700 hover:text-zinc-50 transition-colors"
                     >
                       <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h6v6H4zM14 6h6v4h-6zM14 14h6v4h-6zM4 16h6v2H4z" />
@@ -432,7 +432,7 @@ export default function Header({ username, role }: HeaderProps) {
               type="search"
               autoComplete="off"
               placeholder="Search reviews and guides..."
-              className="w-full pl-9 pr-3 py-2.5 bg-zinc-900 border border-zinc-700 rounded-xl text-base text-zinc-50 placeholder:text-zinc-500 focus:outline-none focus:border-copper focus-visible:ring-1 focus-visible:ring-copper/50 transition-colors"
+              className="w-full pl-9 pr-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-base text-zinc-50 placeholder:text-zinc-500 focus:outline-none focus:border-copper focus-visible:ring-1 focus-visible:ring-copper/50 transition-colors"
             />
             <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -453,8 +453,8 @@ export default function Header({ username, role }: HeaderProps) {
                 onClick={() => setMobileOpen(false)}
                 className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                   isActive(pathname, href)
-                    ? 'bg-zinc-800 text-zinc-50'
-                    : 'text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/60'
+                    ? 'bg-accent text-white'
+                    : 'text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800'
                 }`}
               >
                 {label}
@@ -486,7 +486,7 @@ export default function Header({ username, role }: HeaderProps) {
                     className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                       pathname === `/category/${cat.slug}`
                         ? 'bg-accent text-white'
-                        : 'bg-zinc-900 text-zinc-300 hover:text-zinc-50 hover:bg-zinc-800'
+                        : 'bg-zinc-800 text-zinc-300 hover:text-zinc-50 hover:bg-zinc-700'
                     }`}
                   >
                     <CategoryIcon slug={cat.slug} className="w-4 h-4 text-copper" />
@@ -515,7 +515,7 @@ export default function Header({ username, role }: HeaderProps) {
                   key={v.href}
                   href={v.href}
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 transition-colors min-h-[44px]"
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 transition-colors min-h-[44px]"
                 >
                   <span className="text-copper shrink-0">{v.icon}</span>
                   <span className="text-xs font-semibold text-zinc-300 truncate">{v.label}</span>

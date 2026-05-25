@@ -2,60 +2,45 @@
 @plugin "@tailwindcss/typography";
 
 /* ─────────────────────────────────────────────────────────────────────────
-   BOSS DADDY DESIGN SYSTEM — 2026-05-24
-   Locked palette: orange + black + white + grey. Four colors.
-   Single dark canvas across the entire site. No light scope — a brief
-   .bd-light experiment was tried 2026-05-22 through 2026-05-24 and
-   scrapped in favor of consistency.
-   No cream, no copper, no forest as chrome. Status colors (green/red)
-   reserved for chips + form validation only.
+   BOSS DADDY DESIGN SYSTEM — 2026-05-25 zinc-light direction
+   Locked palette: orange + zinc neutrals. Light canvas with disciplined
+   dark moments (header, trust bands, footer). Orange is the ONLY accent.
+   Status colors (green/red) reserved for chips + form validation only.
    ───────────────────────────────────────────────────────────────────────── */
 :root {
-  --background: #141418;
-  --foreground: #fafafa;
+  --background: #f4f4f5;       /* zinc-100 — page canvas */
+  --foreground: #3f3f46;       /* zinc-700 — body text */
 
   /* ── Brand orange — THE accent color.
-        Used for: buttons, CTAs, full-bleed manifesto sections, info
-        cards overlaying the hero, card footer accents, eyebrows on
-        dark, the "BOSS" wordmark. Bold and confident, not decorative. */
+        Used for: buttons, CTAs, section-header rules, eyebrows,
+        section top borders, "BOSS" wordmark. */
   --bd-orange:       #CC5500;   /* primary brand orange */
-  --bd-orange-hover: #B85A14;   /* darker — buttons darken on hover */
-  --bd-orange-text:  #f48a4a;   /* lighter — inline accent text on dark, AA pass */
+  --bd-orange-hover: #B85A14;   /* darker — button hover */
+  --bd-orange-text:  #CC5500;   /* inline text on light — same as brand */
 
-  /* ── Surfaces — 3-tier cool dark hierarchy
-        Page → elevated card → hover/raised. Page bg sits at #141418
-        (lifted off near-pure black) so the dark feels softer.
-        Sunken kept at #050507 — strong "well" recess against the lifted
-        page for blockquotes/code blocks. */
-  --bd-bg:             #141418;   /* page canvas — lifted cool dark */
-  --bd-surface:        #1c1c20;   /* dark card — small step from page */
-  --bd-surface-raised: #2a2a2e;   /* hover / elevated */
-  --bd-surface-sunken: #050507;   /* deeper than page — wells, code */
-  --bd-border:         #2a2a2e;   /* cool hairline */
-  --bd-border-strong:  #3f3f46;   /* confident edges */
+  /* ── Surfaces — light canvas hierarchy
+        page → card (white) → raised/sunken (zinc-200, same value:
+        both "recessed" and "alt-section" want slightly darker than page) */
+  --bd-bg:             #f4f4f5;   /* zinc-100 — page canvas */
+  --bd-surface:        #ffffff;   /* white card */
+  --bd-surface-raised: #e4e4e7;   /* zinc-200 — alt section bg, hover lift */
+  --bd-surface-sunken: #e4e4e7;   /* zinc-200 — wells, code blocks */
+  --bd-border:         #e4e4e7;   /* zinc-200 — hairline */
+  --bd-border-strong:  #a1a1aa;   /* zinc-400 — confident edges, secondary CTAs */
 
-  /* ── Text — light on dark */
-  --bd-text:       #fafafa;       /* default body */
-  --bd-text-muted: #a1a1aa;       /* zinc-400 — captions */
-  --bd-text-faint: #71717a;       /* zinc-500 — timestamps */
+  /* ── Text — dark on light */
+  --bd-text:       #3f3f46;       /* zinc-700 — body */
+  --bd-text-muted: #52525b;       /* zinc-600 — captions, eyebrows when not orange */
+  --bd-text-faint: #71717a;       /* zinc-500 — timestamps, decorative */
 
   /* ── Status accents — used in chips/validation only, never chrome */
-  --bd-success: #22c55e;          /* green-500 — Boss Approved, success states */
-  --bd-error:   #ef4444;          /* red-500 — destructive, validation errors */
-  --bd-warn:    #f59e0b;          /* amber-500 — caution */
+  --bd-success: #16a34a;          /* green-600 — Boss Approved on light (was green-500 for dark) */
+  --bd-error:   #dc2626;          /* red-600 — destructive on light */
+  --bd-warn:    #d97706;          /* amber-600 — caution on light */
 
-  /* ── Cream (kept ONLY for internal blockquote bg in articles).
-        Not exposed as bg-paper utility. */
-  --bd-paper: #fff4d6;
-
-  /* ── Accent tint — chip/box highlight background.
-        Neutral lifted surface (no brown undertone). Distinguishes
-        "brand-territory" UI elements (TL;DR boxes, product chips)
-        from default surfaces. */
-  --bd-accent-tint: #26262c;
-
-  /* ── Editorial blockquote text — cream on dark canvas. */
-  --bd-blockquote-text: var(--bd-paper);
+  /* ── Accent tint — secondary surface for brand-territory elements
+        (TL;DR boxes, product chips on light canvas). */
+  --bd-accent-tint: #fff4eb;      /* very pale orange wash on light */
 }
 
 @theme inline {
@@ -76,7 +61,7 @@
   --color-orange-900: #5c2600;
   --color-orange-950: #3d1a00;
 
-  /* Neutral gray scale — Tailwind zinc-derived (works on dark + light) */
+  /* Neutral zinc scale */
   --color-gray-950: #09090b;
   --color-gray-900: #18181b;
   --color-gray-800: #27272a;
@@ -92,22 +77,24 @@
   /* ── Semantic role tokens — components consume these ──────────────── */
 
   /* Accent — orange is the ONE accent color */
-  --color-accent:           var(--bd-orange);            /* bg-accent — CTAs, manifesto bg */
-  --color-accent-hover:     var(--bd-orange-hover);      /* button hover */
-  --color-accent-brand:     var(--bd-orange);            /* alias for legacy components */
-  --color-accent-text:      var(--bd-orange-text);      /* inline text/links on dark — AA */
-  --color-accent-text-soft: var(--bd-orange-text);      /* alias */
-  --color-eyebrow:          var(--bd-orange-text);      /* xs uppercase labels */
-  --color-card-title:       var(--bd-orange);            /* card h3 */
-  --color-accent-border:    var(--bd-orange);            /* aliased — orange handles all */
-  --color-accent-tint:      var(--bd-accent-tint);       /* neutral lifted surface */
+  --color-accent:           var(--bd-orange);
+  --color-accent-hover:     var(--bd-orange-hover);
+  --color-accent-brand:     var(--bd-orange);
+  --color-accent-text:      var(--bd-orange-text);
+  --color-accent-text-soft: var(--bd-orange-text);
+  --color-eyebrow:          var(--bd-orange-text);
+  --color-card-title:       var(--bd-orange);
+  --color-accent-border:    var(--bd-orange);
+  --color-accent-tint:      var(--bd-accent-tint);
 
-  /* Status — used sparingly in chips/validation only */
-  --color-forest:           var(--bd-success);           /* legacy alias → green-500 */
-  --color-copper:           var(--bd-orange);            /* legacy alias → brand orange */
+  /* Status — used sparingly */
+  --color-forest:           var(--bd-success);
+  --color-copper:           var(--bd-orange);
 
-  /* Drama / dark moments — same as page in dark mode (kept for legacy) */
-  --color-drama:            #000000;
+  /* Drama / dark moments — the disciplined dark island color.
+     Header, footer, trust bands, mobile bottom nav. Single value
+     so every dark surface across the site reads consistent. */
+  --color-drama:            #18181b;
 
   /* Surface roles */
   --color-surface:          var(--bd-surface);
@@ -133,9 +120,6 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   overflow-x: clip;
-  /* Subtle paper grain — 2% opacity white noise. Tactile material on
-     the dark canvas without warming color. */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
 }
 
 h1, h2, h3, h4 {
@@ -157,30 +141,29 @@ h1, h2, h3, h4 {
   font-family: var(--font-editorial);
 }
 
-/* Inline links inside article body — orange + underline on hover */
+/* Inline links inside article body — brand orange, underline on hover */
 .bd-editorial a:not(.bd-no-link) {
-  color: var(--bd-orange-text);
+  color: var(--bd-orange);
   text-decoration: none;
   font-weight: 600;
   transition: color 0.15s;
 }
 .bd-editorial a:not(.bd-no-link):hover {
-  color: var(--bd-orange);
+  color: var(--bd-orange-hover);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
-/* Pull-quote / blockquote — cream paper preserved as INTERNAL article
-   accent only (not exposed as a chrome utility). Reads as a quiet warm
-   stripe against article prose on dark or light. */
+/* Pull-quote / blockquote — zinc-200 well with orange left rule.
+   Body text color (no cream) — clean editorial pause on light canvas. */
 .bd-editorial blockquote {
   border-left: 3px solid var(--bd-orange);
-  background: color-mix(in srgb, var(--bd-paper) 14%, transparent);
+  background: var(--bd-surface-raised);
   border-radius: 0 0.5rem 0.5rem 0;
   padding: 1rem 1.25rem;
 }
 .bd-editorial blockquote p {
-  color: var(--bd-blockquote-text);
+  color: var(--bd-text);
   font-style: italic;
   font-size: 1.05em;
 }
@@ -217,7 +200,7 @@ h1, h2, h3, h4 {
   padding: 1rem;
   border: 2px dashed var(--bd-border);
   border-radius: 0.75rem;
-  background: rgba(204, 85, 0, 0.05);
+  background: var(--bd-accent-tint);
   color: var(--bd-text-muted);
 }
 .bd-image-placeholder figcaption {
@@ -273,4 +256,3 @@ h1, h2, h3, h4 {
 
   @page { margin: 1.5cm; }
 }
-
