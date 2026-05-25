@@ -1,0 +1,58 @@
+'use client'
+
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import { updateProfile } from '@/lib/profile-actions'
+
+export default function EditUsernameForm({ current }: { current: string }) {
+  const router = useRouter()
+  const [username, setUsername] = useState(current)
+  const [pending, startTransition] = useTransition()
+  const [success, setSuccess]   = useState(false)
+  const [error, setError]       = useState<string | null>(null)
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (username.trim() === current) return
+    setError(null)
+    setSuccess(false)
+    startTransition(async () => {
+      const result = await updateProfile({ username: username.trim() })
+      if (!result.ok) { setError(result.error); return }
+      setSuccess(true)
+      router.refresh()
+    })
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <div>
+        <label className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
+          Username
+        </label>
+        <div className="flex gap-3">
+          <div className="relative flex-1">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-prose-faint text-sm select-none">@</span>
+            <input
+              type="text"
+              value={username}
+              onChange={e => { setUsername(e.target.value); setSuccess(false); setError(null) }}
+              maxLength={20}
+              className="w-full pl-7 pr-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm focus:outline-none transition-colors"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={pending || username.trim() === current || username.trim().length < 3}
+            className="px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors shrink-0"
+          >
+            {pending ? 'Saving…' : 'Save'}
+          </button>
+        </div>
+        <p className="text-xs text-prose-faint mt-1.5">3–20 characters, letters, numbers, and underscores only.</p>
+      </div>
+      {success && <p className="text-forest text-xs">Username updated successfully.</p>}
+      {error && <p className="text-red-300 text-xs">{error}</p>}
+    </form>
+  )
+}

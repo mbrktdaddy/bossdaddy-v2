@@ -351,7 +351,7 @@ export default function Header({ username }: HeaderProps) {
                     <p className="text-sm font-bold text-zinc-100 truncate">@{username}</p>
                   </div>
                   <Link
-                    href="/dashboard/profile"
+                    href="/account/settings"
                     onClick={() => setUserMenuOpen(false)}
                     className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 transition-colors"
                   >
@@ -529,7 +529,7 @@ export default function Header({ username }: HeaderProps) {
                   </div>
                 </div>
                 <Link
-                  href="/dashboard/profile"
+                  href="/account/settings"
                   onClick={() => setMobileOpen(false)}
                   className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-zinc-300 hover:text-zinc-50 hover:bg-zinc-800 transition-colors"
                 >

@@ -2,8 +2,8 @@ import { NextResponse, type NextRequest } from 'next/server'
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 import { rewriteLegacyRoute } from './rewrites'
 
-// Members hitting an off-limits dashboard route get bounced here (safe public page).
-const NON_ADMIN_HOME = '/'
+// Members hitting the dashboard get their own account settings page.
+const MEMBER_ACCOUNT = '/account/settings'
 
 // Admin-only dashboard surfaces. Authors AND members are blocked from these.
 // Three pages live outside /dashboard/admin/ for historical reasons — list them
@@ -24,13 +24,9 @@ function isAdminOnlyRoute(pathname: string) {
   })
 }
 
-// Author-or-admin routes: everything else in /dashboard except /dashboard/profile.
+// Author-or-admin routes: everything in /dashboard (members have no CMS access).
 function needsAuthorOrAdmin(pathname: string) {
-  return (
-    pathname.startsWith('/dashboard') &&
-    !pathname.startsWith('/dashboard/profile') &&
-    !isAdminOnlyRoute(pathname)
-  )
+  return pathname.startsWith('/dashboard') && !isAdminOnlyRoute(pathname)
 }
 
 // Combined auth/route gates: dashboard auth requirement, legacy route 301s,
@@ -82,7 +78,7 @@ export async function checkAuthGuard(args: {
 
     if (blocked) {
       const url = request.nextUrl.clone()
-      url.pathname = NON_ADMIN_HOME
+      url.pathname = isAdminOnlyRoute(pathname) ? '/' : MEMBER_ACCOUNT
       return NextResponse.redirect(url)
     }
   }
