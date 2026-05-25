@@ -10,6 +10,12 @@ export const metadata: Metadata = {
   title: "On the Bench — Vote on What Boss Daddy Tests Next",
   description: "See what Boss Daddy is currently testing, what's coming next, and vote on what you want reviewed. Get notified when it goes live.",
   alternates: { canonical: '/bench' },
+  openGraph: {
+    title: 'On the Bench | Boss Daddy',
+    description: "Vote on what Boss Daddy tests next. See what's in progress, coming soon, and already reviewed.",
+    images: [{ url: '/api/og?title=On+the+Bench&type=guide', width: 1200, height: 630 }],
+  },
+  twitter: { card: 'summary_large_image' },
 }
 
 export default async function BenchPage() {
@@ -125,7 +131,7 @@ export default async function BenchPage() {
                       <div key={item.id} className="p-4 bg-[var(--bd-surface)] rounded-xl shadow-md shadow-black/30">
                         <p className="text-sm font-semibold text-zinc-400">{item.title}</p>
                         {item.skip_reason && (
-                          <p className="text-xs text-zinc-600 mt-1">{item.skip_reason}</p>
+                          <p className="text-xs text-prose-faint mt-1">{item.skip_reason}</p>
                         )}
                       </div>
                     ))}

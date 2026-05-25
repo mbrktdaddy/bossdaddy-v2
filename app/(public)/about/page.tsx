@@ -11,6 +11,12 @@ export const metadata: Metadata = {
  title: 'About — Boss Daddy Life',
  description: 'The real story behind Boss Daddy Life. A first-time dad on a mission to be the best version of himself — and help other dads do the same.',
  alternates: { canonical: '/about' },
+ openGraph: {
+   title: 'About Boss Daddy Life',
+   description: 'The real story behind Boss Daddy Life. A first-time dad on a mission to be the best version of himself — and help other dads do the same.',
+   images: [{ url: '/api/og?title=About+Boss+Daddy+Life&type=guide', width: 1200, height: 630 }],
+ },
+ twitter: { card: 'summary_large_image' },
 }
 
 export default async function AboutPage() {

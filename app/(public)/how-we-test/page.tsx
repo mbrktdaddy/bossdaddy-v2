@@ -5,6 +5,12 @@ export const metadata: Metadata = {
  title: 'How We Test — Boss Daddy Life',
  description: 'Real products, real testing, real dads. Here\'s exactly how Boss Daddy Life reviews stuff and earns the Boss Daddy Approved designation.',
  alternates: { canonical: '/how-we-test' },
+ openGraph: {
+   title: 'How We Test | Boss Daddy Life',
+   description: 'Real products, real testing, real dads. How Boss Daddy Life earns the Boss Daddy Approved designation.',
+   images: [{ url: '/api/og?title=How+We+Test&type=guide', width: 1200, height: 630 }],
+ },
+ twitter: { card: 'summary_large_image' },
 }
 
 const ICON_CLS = 'w-7 h-7 text-accent-text'

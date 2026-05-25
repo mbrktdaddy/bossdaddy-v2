@@ -11,6 +11,12 @@ export const metadata: Metadata = {
   title: 'Stacks — Dad-Tested Kits | Boss Daddy',
   description: 'Curated kits for a goal. The full setup for newborn nights, weekend cookouts, garage builds, and more.',
   alternates: { canonical: '/stacks' },
+  openGraph: {
+    title: 'Stacks — Dad-Tested Kits | Boss Daddy',
+    description: 'Curated kits for a goal. The full setup for newborn nights, weekend cookouts, garage builds, and more.',
+    images: [{ url: '/api/og?title=Dad-Tested+Stacks+%26+Kits&type=guide', width: 1200, height: 630 }],
+  },
+  twitter: { card: 'summary_large_image' },
 }
 
 interface Props { searchParams: Promise<{ cat?: string }> }

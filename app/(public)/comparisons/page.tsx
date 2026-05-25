@@ -11,6 +11,12 @@ export const metadata: Metadata = {
   title: 'Comparisons — Head-to-Head Reviews | Boss Daddy',
   description: 'Dad-tested head-to-head matchups. Real products, real scores, one clear winner per dimension.',
   alternates: { canonical: '/comparisons' },
+  openGraph: {
+    title: 'Comparisons | Boss Daddy',
+    description: 'Dad-tested head-to-head matchups. Real products, real scores, one clear winner per dimension.',
+    images: [{ url: '/api/og?title=Head-to-Head+Comparisons&type=guide', width: 1200, height: 630 }],
+  },
+  twitter: { card: 'summary_large_image' },
 }
 
 interface Props { searchParams: Promise<{ cat?: string }> }

@@ -11,6 +11,12 @@ export const metadata: Metadata = {
   title: 'Boss Daddy Picks — Curated Gear Lists',
   description: 'Dad-tested gift guides and curated gear lists. Every pick is personally bought, tested, and recommended by Boss Daddy.',
   alternates: { canonical: '/picks' },
+  openGraph: {
+    title: 'Boss Daddy Picks — Curated Gear Lists',
+    description: 'Dad-tested gift guides and curated gear lists. Every pick is personally bought, tested, and recommended by Boss Daddy.',
+    images: [{ url: '/api/og?title=Boss+Daddy+Picks&type=guide', width: 1200, height: 630 }],
+  },
+  twitter: { card: 'summary_large_image' },
 }
 
 interface Props { searchParams: Promise<{ cat?: string }> }
