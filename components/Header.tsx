@@ -14,6 +14,9 @@ interface HeaderProps {
    *  in the (public) layout so the Header doesn't need the Supabase client and
    *  the auth/postgrest libs stay out of the public bundle. */
   username: string | null
+  /** The current user's role, or null if not signed in. Used to route account
+   *  links — members go to /account/settings, authors/admins to /dashboard/profile. */
+  role?: string | null
 }
 
 const NAV_LINKS = [
@@ -74,7 +77,11 @@ function isActive(pathname: string, href: string) {
   return pathname.startsWith(href)
 }
 
-export default function Header({ username }: HeaderProps) {
+export default function Header({ username, role }: HeaderProps) {
+  // Members go to /account/settings; authors and admins go to /dashboard/profile.
+  const profileHref = (role === 'author' || role === 'admin') ? '/dashboard/profile' : '/account/settings'
+  const hasDashboard = role === 'author' || role === 'admin'
+
   const [mobileOpen, setMobileOpen]   = useState(false)
   const [catOpen, setCatOpen]         = useState(false)
   const [searchOpen, setSearchOpen]   = useState(false)
@@ -351,25 +358,27 @@ export default function Header({ username }: HeaderProps) {
                     <p className="text-sm font-bold text-zinc-100 truncate">@{username}</p>
                   </div>
                   <Link
-                    href="/account/settings"
+                    href={profileHref}
                     onClick={() => setUserMenuOpen(false)}
                     className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 transition-colors"
                   >
                     <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    Profile
+                    {hasDashboard ? 'Profile' : 'Account Settings'}
                   </Link>
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 transition-colors"
-                  >
-                    <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h6v6H4zM14 6h6v4h-6zM14 14h6v4h-6zM4 16h6v2H4z" />
-                    </svg>
-                    Dashboard
-                  </Link>
+                  {hasDashboard && (
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 transition-colors"
+                    >
+                      <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h6v6H4zM14 6h6v4h-6zM14 14h6v4h-6zM4 16h6v2H4z" />
+                      </svg>
+                      Dashboard
+                    </Link>
+                  )}
                   <div className="border-t border-zinc-800 mt-1 pt-1">
                     <form action="/api/auth/signout" method="POST">
                       <button
@@ -529,25 +538,27 @@ export default function Header({ username }: HeaderProps) {
                   </div>
                 </div>
                 <Link
-                  href="/account/settings"
+                  href={profileHref}
                   onClick={() => setMobileOpen(false)}
                   className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-zinc-300 hover:text-zinc-50 hover:bg-zinc-800 transition-colors"
                 >
                   <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
-                  Profile
+                  {hasDashboard ? 'Profile' : 'Account Settings'}
                 </Link>
-                <Link
-                  href="/dashboard"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-zinc-300 hover:text-zinc-50 hover:bg-zinc-800 transition-colors"
-                >
-                  <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h6v6H4zM14 6h6v4h-6zM14 14h6v4h-6zM4 16h6v2H4z" />
-                  </svg>
-                  Dashboard
-                </Link>
+                {hasDashboard && (
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-zinc-300 hover:text-zinc-50 hover:bg-zinc-800 transition-colors"
+                  >
+                    <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h6v6H4zM14 6h6v4h-6zM14 14h6v4h-6zM4 16h6v2H4z" />
+                    </svg>
+                    Dashboard
+                  </Link>
+                )}
                 <form action="/api/auth/signout" method="POST" className="mt-1">
                   <button
                     type="submit"
