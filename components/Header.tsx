@@ -303,7 +303,7 @@ export default function Header({ username }: HeaderProps) {
                   <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
-                  <span className="text-xs text-zinc-500">Search</span>
+                  <span className="text-xs text-zinc-400">Search</span>
                   <kbd className="text-[10px] font-mono bg-zinc-800 border border-zinc-700 rounded px-1.5 py-0.5 leading-none">⌘K</kbd>
                 </button>
                 <button

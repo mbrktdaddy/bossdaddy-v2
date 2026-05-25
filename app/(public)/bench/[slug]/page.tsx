@@ -126,13 +126,13 @@ export default async function BenchDetailPage({ params }: Props) {
           {isSkipped && wishlistItem.skip_reason && (
             <div className="p-4 bg-zinc-900 border border-soft rounded-xl mb-4 shadow-md shadow-black/30">
               <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-              <p className="text-xs font-black uppercase tracking-widest text-zinc-500 mb-1">Why I&apos;m not testing this</p>
+              <p className="text-xs font-black uppercase tracking-widest text-prose-muted mb-1">Why I&apos;m not testing this</p>
               <p className="text-sm text-zinc-400">{wishlistItem.skip_reason}</p>
             </div>
           )}
 
           {wishlistItem.estimated_review_date && ['queued','testing'].includes(wishlistItem.status) && (
-            <p className="text-xs text-zinc-500 mb-4">
+            <p className="text-xs text-prose-faint mb-4">
               Estimated review: {new Date(wishlistItem.estimated_review_date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
             </p>
           )}
@@ -202,7 +202,7 @@ export default async function BenchDetailPage({ params }: Props) {
       )}
 
       <div className="mt-8 pt-6">
-        <Link href="/bench" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+        <Link href="/bench" className="text-sm text-prose-faint hover:text-prose-muted transition-colors">
           ← Back to the bench
         </Link>
       </div>
