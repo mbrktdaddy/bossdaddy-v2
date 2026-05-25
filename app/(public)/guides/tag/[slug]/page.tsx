@@ -4,7 +4,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCategoryBySlug } from '@/lib/categories'
+import CategoryIcon from '@/components/CategoryIcon'
 import { EmptyState } from '@/components/ui/EmptyState'
+import BenchStrip from '@/components/BenchStrip'
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -99,7 +101,7 @@ export default async function GuideTagPage({ params }: Props) {
                 <Link
                   key={g.id}
                   href={`/guides/${g.slug}`}
-                  className="group bg-surface rounded-xl overflow-hidden shadow-lg shadow-black/30 hover:shadow-xl hover:shadow-black/50 transition-all"
+                  className="group bg-gradient-to-br from-surface to-surface/60 border border-soft rounded-xl overflow-hidden shadow-lg shadow-black/30 hover:shadow-xl hover:shadow-black/50 hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
                 >
                   {g.image_url ? (
                     <div className="relative w-full h-48">
@@ -112,8 +114,8 @@ export default async function GuideTagPage({ params }: Props) {
                       />
                     </div>
                   ) : (
-                    <div className="w-full h-48 bg-surface-raised flex items-center justify-center text-4xl">
-                      {cat?.icon ?? '📖'}
+                    <div className="w-full h-48 bg-surface-raised flex items-center justify-center">
+                      {cat && <CategoryIcon slug={cat.slug} className="w-8 h-8 text-accent-text opacity-40" />}
                     </div>
                   )}
                   <div className="p-5 space-y-2">
@@ -137,6 +139,11 @@ export default async function GuideTagPage({ params }: Props) {
             body="Check back soon — more guides are on the way."
           />
         )}
+
+        {/* On the Bench */}
+        <div className="mt-16">
+          <BenchStrip ctaText="See all on the bench" />
+        </div>
 
       </div>
     </>

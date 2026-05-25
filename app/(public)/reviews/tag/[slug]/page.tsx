@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
 import RatingScore from '@/components/RatingScore'
 import { EmptyState } from '@/components/ui/EmptyState'
+import BenchStrip from '@/components/BenchStrip'
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -94,7 +95,7 @@ export default async function TagPage({ params }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {reviews.map((r) => (
               <Link key={r.id} href={`/reviews/${r.slug}`}
-                className="group bg-surface rounded-xl overflow-hidden shadow-lg shadow-black/30 hover:shadow-xl hover:shadow-black/50 transition-all">
+                className="group bg-gradient-to-br from-surface to-surface/60 border border-soft rounded-xl overflow-hidden shadow-lg shadow-black/30 hover:shadow-xl hover:shadow-black/50 hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200">
                 {r.image_url ? (
                   <div className="relative w-full h-48">
                     <Image
@@ -122,6 +123,11 @@ export default async function TagPage({ params }: Props) {
             body="Check back soon — more reviews are on the way."
           />
         )}
+
+        {/* On the Bench */}
+        <div className="mt-16">
+          <BenchStrip ctaText="See all on the bench" />
+        </div>
 
       </div>
     </>
