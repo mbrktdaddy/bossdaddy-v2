@@ -69,6 +69,9 @@ export function ScheduleFollowupModal({ reviewId, onClose }: Props) {
     >
       <form
         onSubmit={handleSubmit}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Schedule a follow-up review"
         className="w-full max-w-lg bg-surface-sunken border border-soft rounded-xl overflow-hidden shadow-2xl"
       >
         <div className="px-5 py-4 border-b border-soft">

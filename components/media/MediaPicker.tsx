@@ -236,6 +236,9 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/70" onClick={onClose}>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Media picker"
         className="bg-surface-sunken border border-soft rounded-xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
@@ -320,7 +323,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 Upload
               </button>
             )}
-            <button type="button" onClick={onClose} className="p-1.5 text-prose-faint hover:text-prose transition-colors rounded-lg hover:bg-surface-raised">
+            <button type="button" onClick={onClose} aria-label="Close" className="p-1.5 text-prose-faint hover:text-prose transition-colors rounded-lg hover:bg-surface-raised">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>

@@ -29,7 +29,7 @@ export function RefinePreviewModal({ before, after, onAccept, onDiscard }: Props
 
   return (
     <div className="fixed inset-0 z-50 flex items-stretch bg-zinc-900/80 backdrop-blur-sm">
-      <div className="flex flex-col w-full max-w-6xl mx-auto my-4 mx-4 bg-surface-sunken border border-soft rounded-xl overflow-hidden shadow-2xl">
+      <div role="dialog" aria-modal="true" aria-label="Review AI changes" className="flex flex-col w-full max-w-6xl mx-auto my-4 mx-4 bg-surface-sunken border border-soft rounded-xl overflow-hidden shadow-2xl">
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-soft shrink-0">
