@@ -13,6 +13,8 @@ export const metadata: Metadata = {
  twitter: { card: 'summary_large_image' },
 }
 
+export const revalidate = 86400
+
 const ICON_CLS = 'w-7 h-7 text-accent-text'
 
 // Outlined Heroicons-style SVGs per the no-emoji-on-web brand rule.

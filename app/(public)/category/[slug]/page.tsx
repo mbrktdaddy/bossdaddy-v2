@@ -304,7 +304,7 @@ export default async function CategoryHubPage({ params }: Props) {
               <Link
                 key={c.slug}
                 href={`/category/${c.slug}`}
-                className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-surface text-prose-muted hover:bg-surface-raised hover:text-prose shadow-sm shadow-black/30 transition-colors"
+                className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-surface border border-soft text-prose-muted hover:border-copper hover:text-prose transition-colors"
               >
                 <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
                 <span>{c.label}</span>
