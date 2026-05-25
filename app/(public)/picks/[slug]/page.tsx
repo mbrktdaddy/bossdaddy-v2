@@ -243,7 +243,7 @@ export default async function PickDetailPage({ params }: Props) {
             <ArticleTOC items={tocItems} variant="mobile" />
 
             {pick.hero_image_url && (
-              <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-10 bg-surface">
+              <div className="relative w-full aspect-[16/10] rounded-xl overflow-hidden mb-10 bg-surface">
                 <Image src={pick.hero_image_url} alt={pick.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 768px" priority />
               </div>
             )}

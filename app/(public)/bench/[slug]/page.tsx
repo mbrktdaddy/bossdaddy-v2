@@ -102,12 +102,12 @@ export default async function BenchDetailPage({ params }: Props) {
 
       {wishlistItem.image_url && (
         <LightboxImage src={wishlistItem.image_url} alt={wishlistItem.title}>
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-surface-raised shadow-md shadow-black/5 mb-8">
+          <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-white border border-soft mb-8">
             <Image
               src={wishlistItem.image_url}
               alt={wishlistItem.title}
               fill
-              className="object-contain p-6"
+              className="object-contain p-3"
               sizes="(max-width: 768px) 100vw, 768px"
               priority
             />

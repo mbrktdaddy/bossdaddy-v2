@@ -102,7 +102,7 @@ function AssetCard({
   return (
     <div className="group relative bg-surface border border-soft rounded-xl overflow-hidden flex flex-col">
       {/* Thumbnail */}
-      <div className="relative aspect-video bg-surface-sunken overflow-hidden">
+      <div className="relative aspect-[4/3] bg-surface-sunken overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={asset.url}

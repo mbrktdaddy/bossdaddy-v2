@@ -278,7 +278,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
 
             {/* Hero image */}
             {comparison.hero_image_url && (
-              <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-10 bg-surface">
+              <div className="relative w-full aspect-[16/10] rounded-xl overflow-hidden mb-10 bg-surface">
                 <Image
                   src={comparison.hero_image_url}
                   alt={comparison.title}

@@ -71,7 +71,7 @@ function RelatedCard({ item, className }: { item: RelatedItem; className?: strin
       href={href}
       className={`group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden shadow-md shadow-black/5 hover:border-accent-border/40 hover:shadow-lg hover:shadow-black/10 hover:-translate-y-1 transition-all ${className ?? ''}`}
     >
-      <div className="relative aspect-video bg-surface-sunken">
+      <div className="relative aspect-[4/3] bg-surface-sunken">
         {item.hero_image_url ? (
           <Image src={item.hero_image_url} alt={item.title} fill className="object-cover" sizes="(max-width: 640px) 256px, (max-width: 1024px) 50vw, 33vw" />
         ) : (

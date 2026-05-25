@@ -69,7 +69,7 @@ export default async function GiftsIndexPage() {
                   href={`/gifts/${occ.slug}`}
                   className="group flex flex-col bg-surface border border-soft hover:bg-surface-raised/90 hover:border-accent-border/40 hover:-translate-y-1 rounded-xl overflow-hidden shadow-md shadow-black/5 hover:shadow-lg hover:shadow-black/10 transition-all"
                 >
-                  <div className="relative aspect-video bg-surface-sunken flex items-center justify-center">
+                  <div className="relative aspect-[4/3] bg-surface-sunken flex items-center justify-center">
                     {live?.hero_image_url ? (
                       <Image
                         src={live.hero_image_url}

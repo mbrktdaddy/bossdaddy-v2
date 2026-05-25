@@ -243,11 +243,11 @@ export default async function GiftOccasionPage({ params }: Props) {
           <main className={pick ? 'lg:flex-1 lg:max-w-3xl min-w-0' : ''}>
             {/* Hero — image if present, big occasion icon otherwise */}
             {pick?.hero_image_url ? (
-              <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-8 bg-surface">
+              <div className="relative w-full aspect-[16/10] rounded-xl overflow-hidden mb-8 bg-surface">
                 <Image src={pick.hero_image_url} alt={pick.title ?? occ.label} fill className="object-cover" sizes={pick ? '(max-width: 768px) 100vw, 768px' : '(max-width: 768px) 100vw, 896px'} priority />
               </div>
             ) : (
-              <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-8 bg-accent-tint flex items-center justify-center border border-accent-border/20">
+              <div className="relative w-full aspect-[16/10] rounded-xl overflow-hidden mb-8 bg-accent-tint flex items-center justify-center border border-accent-border/20">
                 <OccasionIcon value={occ.value} className="w-20 h-20 md:w-24 md:h-24 text-accent-text/70" />
               </div>
             )}
