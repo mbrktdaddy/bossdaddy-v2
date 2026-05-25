@@ -43,7 +43,7 @@ export function WeeklyDigestEmail({ email, items, weekLabel, siteUrl = 'https://
 
                 {/* Header */}
                 <tr>
-                  <td style={{ backgroundColor: '#1a0800', padding: '24px 40px', borderBottom: `1px solid #2a1000` }}>
+                  <td style={{ backgroundColor: '#111114', padding: '24px 40px', borderBottom: '1px solid #222226' }}>
                     <table cellPadding={0} cellSpacing={0}>
                       <tr>
                         <td style={{ paddingRight: '12px', verticalAlign: 'middle' }}>

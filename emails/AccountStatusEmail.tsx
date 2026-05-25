@@ -116,7 +116,7 @@ export function AccountStatusEmail({ event, username, siteUrl, reason, suspensio
               <table width='560' cellPadding={0} cellSpacing={0} style={{ backgroundColor: '#111111', borderRadius: '12px', overflow: 'hidden', maxWidth: '560px', width: '100%' }}>
 
                 <tr>
-                  <td style={{ backgroundColor: '#1a0800', padding: '24px 40px', borderBottom: '1px solid #2a1000' }}>
+                  <td style={{ backgroundColor: '#111114', padding: '24px 40px', borderBottom: '1px solid #222226' }}>
                     <table cellPadding={0} cellSpacing={0}>
                       <tr>
                         <td style={{ paddingRight: '12px', verticalAlign: 'middle' }}>

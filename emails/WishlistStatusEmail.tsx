@@ -69,7 +69,7 @@ export function WishlistStatusEmail({ status, itemTitle, itemSlug, itemImageUrl,
 
                 {/* Header */}
                 <tr>
-                  <td style={{ backgroundColor: '#1a0a00', padding: '20px 28px', borderBottom: '1px solid #3d1a00' }}>
+                  <td style={{ backgroundColor: '#111114', padding: '20px 28px', borderBottom: '1px solid #222226' }}>
                     <table cellPadding={0} cellSpacing={0}>
                       <tr>
                         <td style={{ paddingRight: '12px', verticalAlign: 'middle' }}>
@@ -171,7 +171,7 @@ export function WishlistStatusEmail({ status, itemTitle, itemSlug, itemImageUrl,
                       You&apos;re receiving this because you asked to be notified about <a href={benchUrl} style={{ color: '#9ca3af', textDecoration: 'underline' }}>{itemTitle}</a> on the Boss Daddy bench.
                     </p>
                     <p style={{ margin: 0, fontSize: '11px', color: '#6b6b6b' }}>
-                      <a href={`${siteUrl}/dashboard/profile`} style={{ color: '#9ca3af', textDecoration: 'underline' }}>Manage notifications</a>
+                      <a href={`${siteUrl}/account/settings`} style={{ color: '#9ca3af', textDecoration: 'underline' }}>Manage notifications</a>
                       {unsubscribeUrl && (
                         <>
                           {' · '}
