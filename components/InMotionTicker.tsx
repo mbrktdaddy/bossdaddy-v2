@@ -80,9 +80,9 @@ export default async function InMotionTicker() {
     admin
       .from('wishlist_items')
       .select('id, slug, title, status')
-      .in('status', ['testing', 'queued'])
+      .in('status', ['testing', 'queued', 'considering'])
       .order('priority', { ascending: false })
-      .limit(8),
+      .limit(6),
     admin
       .from('reviews')
       .select('id, slug, title')
