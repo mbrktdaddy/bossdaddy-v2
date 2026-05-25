@@ -40,6 +40,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
   const [linkUrl, setLinkUrl]       = useState<string | null>(post.link_url)
   const [imageUrl, setImageUrl]     = useState<string | null>(post.image_url)
   const [saving, setSaving]         = useState(false)
+  const [saveError, setSaveError]   = useState<string | null>(null)
   const [copied, setCopied]         = useState(false)
   const [deleting, setDeleting]     = useState(false)
   const [showImagePicker, setShowImagePicker] = useState(false)
@@ -53,14 +54,15 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
 
   async function save() {
     if (overLimit) return
-    setSaving(true)
+    setSaving(true); setSaveError(null)
     const res = await fetch(`/api/social-posts/${post.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content, link_url: linkUrl, image_url: imageUrl }),
     })
-    const json = await res.json()
+    const json = await res.json().catch(() => ({}))
     setSaving(false)
+    if (!res.ok) { setSaveError(json.error ?? 'Save failed'); return }
     if (json.post) { onUpdate(json.post); setEditing(false) }
   }
 
@@ -77,8 +79,8 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
     })
-    const json = await res.json()
-    if (json.post) onUpdate(json.post)
+    const json = await res.json().catch(() => ({}))
+    if (res.ok && json.post) onUpdate(json.post)
   }
 
   async function removeImage() {
@@ -87,8 +89,8 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ image_url: null }),
     })
-    const json = await res.json()
-    if (json.post) { onUpdate(json.post); setImageUrl(null) }
+    const json = await res.json().catch(() => ({}))
+    if (res.ok && json.post) { onUpdate(json.post); setImageUrl(null) }
   }
 
   async function remove() {
@@ -226,7 +228,8 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
                   )}
                 </span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
+                {saveError && <span className="text-xs text-red-300">{saveError}</span>}
                 <button
                   onClick={cancelEdit}
                   className="text-xs text-prose-faint hover:text-prose px-3 py-1.5 rounded-lg transition-colors"
@@ -286,7 +289,8 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
             {/* Image */}
             <button
               onClick={() => setShowImagePicker(true)}
-              className="flex items-center gap-1.5 text-xs text-prose-muted hover:text-prose px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
+              disabled={saving}
+              className="flex items-center gap-1.5 text-xs text-prose-muted hover:text-prose px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors disabled:opacity-50"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
               {post.image_url ? 'Swap image' : 'Add image'}
