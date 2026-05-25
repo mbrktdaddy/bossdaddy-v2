@@ -119,10 +119,11 @@ export function MerchForm({ item }: Props) {
     <form onSubmit={handleSave} className="space-y-5">
 
       <div>
-        <label className="block text-sm text-prose-muted mb-1.5">
+        <label htmlFor="mf-slug" className="block text-sm text-prose-muted mb-1.5">
           Slug <span className="text-red-300">*</span>
         </label>
         <input
+          id="mf-slug"
           type="text"
           required
           value={slug}
@@ -137,10 +138,11 @@ export function MerchForm({ item }: Props) {
       </div>
 
       <div>
-        <label className="block text-sm text-prose-muted mb-1.5">
+        <label htmlFor="mf-name" className="block text-sm text-prose-muted mb-1.5">
           Name <span className="text-red-300">*</span>
         </label>
         <input
+          id="mf-name"
           type="text"
           required
           value={name}
@@ -151,8 +153,9 @@ export function MerchForm({ item }: Props) {
       </div>
 
       <div>
-        <label className="block text-sm text-prose-muted mb-1.5">Description</label>
+        <label htmlFor="mf-description" className="block text-sm text-prose-muted mb-1.5">Description</label>
         <textarea
+          id="mf-description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
@@ -163,8 +166,9 @@ export function MerchForm({ item }: Props) {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm text-prose-muted mb-1.5">Price (USD)</label>
+          <label htmlFor="mf-price" className="block text-sm text-prose-muted mb-1.5">Price (USD)</label>
           <input
+            id="mf-price"
             type="number"
             step="0.01"
             min="0"
@@ -175,8 +179,9 @@ export function MerchForm({ item }: Props) {
           />
         </div>
         <div>
-          <label className="block text-sm text-prose-muted mb-1.5">Category</label>
+          <label htmlFor="mf-category" className="block text-sm text-prose-muted mb-1.5">Category</label>
           <select
+            id="mf-category"
             value={category}
             onChange={(e) => setCategory(e.target.value as MerchCategory | '')}
             className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
@@ -188,8 +193,9 @@ export function MerchForm({ item }: Props) {
           </select>
         </div>
         <div>
-          <label className="block text-sm text-prose-muted mb-1.5">Status</label>
+          <label htmlFor="mf-status" className="block text-sm text-prose-muted mb-1.5">Status</label>
           <select
+            id="mf-status"
             value={status}
             onChange={(e) => setStatus(e.target.value as MerchStatus)}
             className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
@@ -202,8 +208,9 @@ export function MerchForm({ item }: Props) {
       </div>
 
       <div>
-        <label className="block text-sm text-prose-muted mb-1.5">External URL</label>
+        <label htmlFor="mf-external-url" className="block text-sm text-prose-muted mb-1.5">External URL</label>
         <input
+          id="mf-external-url"
           type="url"
           value={externalUrl}
           onChange={(e) => setExternalUrl(e.target.value)}
@@ -216,8 +223,9 @@ export function MerchForm({ item }: Props) {
       </div>
 
       <div>
-        <label className="block text-sm text-prose-muted mb-1.5">Position</label>
+        <label htmlFor="mf-position" className="block text-sm text-prose-muted mb-1.5">Position</label>
         <input
+          id="mf-position"
           type="number"
           min="0"
           step="1"

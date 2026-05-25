@@ -114,14 +114,14 @@ export default async function EngagementPage() {
             <table className="w-full text-sm">
               <thead className="bg-surface-sunken/40 text-xs uppercase tracking-widest text-prose-faint">
                 <tr>
-                  <th className="text-left  px-5 py-2.5 font-semibold">Title</th>
-                  <th className="text-right px-3 py-2.5 font-semibold">Views</th>
-                  <th className="text-right px-3 py-2.5 font-semibold">25%</th>
-                  <th className="text-right px-3 py-2.5 font-semibold">50%</th>
-                  <th className="text-right px-3 py-2.5 font-semibold">75%</th>
-                  <th className="text-right px-3 py-2.5 font-semibold">100%</th>
-                  <th className="text-right px-3 py-2.5 font-semibold">Done %</th>
-                  <th className="text-right px-5 py-2.5 font-semibold">Clicks</th>
+                  <th scope="col" className="text-left  px-5 py-2.5 font-semibold">Title</th>
+                  <th scope="col" className="text-right px-3 py-2.5 font-semibold">Views</th>
+                  <th scope="col" className="text-right px-3 py-2.5 font-semibold">25%</th>
+                  <th scope="col" className="text-right px-3 py-2.5 font-semibold">50%</th>
+                  <th scope="col" className="text-right px-3 py-2.5 font-semibold">75%</th>
+                  <th scope="col" className="text-right px-3 py-2.5 font-semibold">100%</th>
+                  <th scope="col" className="text-right px-3 py-2.5 font-semibold">Done %</th>
+                  <th scope="col" className="text-right px-5 py-2.5 font-semibold">Clicks</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-soft">

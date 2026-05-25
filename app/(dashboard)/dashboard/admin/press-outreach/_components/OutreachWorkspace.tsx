@@ -354,8 +354,9 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
           <p className="text-xs text-eyebrow uppercase tracking-widest font-medium mb-4">1 · Product</p>
           <div className="space-y-3">
             <div>
-              <label className="block text-xs text-prose-faint mb-1.5">Select from your products</label>
+              <label htmlFor="ow-product-select" className="block text-xs text-prose-faint mb-1.5">Select from your products</label>
               <select
+                id="ow-product-select"
                 value={selectedProductId}
                 onChange={e => handleProductSelect(e.target.value)}
                 className={inputCls}
@@ -368,8 +369,9 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs text-prose-faint mb-1.5">Product name <span className="text-accent-text">*</span></label>
+                <label htmlFor="ow-product-name" className="block text-xs text-prose-faint mb-1.5">Product name <span className="text-accent-text">*</span></label>
                 <input
+                  id="ow-product-name"
                   value={productName}
                   onChange={e => setProductName(e.target.value)}
                   onBlur={handleProductFieldBlur}
@@ -378,8 +380,9 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                 />
               </div>
               <div>
-                <label className="block text-xs text-prose-faint mb-1.5">Brand name <span className="text-accent-text">*</span></label>
+                <label htmlFor="ow-brand-name" className="block text-xs text-prose-faint mb-1.5">Brand name <span className="text-accent-text">*</span></label>
                 <input
+                  id="ow-brand-name"
                   value={brandName}
                   onChange={e => setBrandName(e.target.value)}
                   onBlur={handleProductFieldBlur}
@@ -425,8 +428,9 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs text-prose-faint mb-1.5">Contact name <span className="text-prose-faint">(optional)</span></label>
+                <label htmlFor="ow-contact-name" className="block text-xs text-prose-faint mb-1.5">Contact name <span className="text-prose-faint">(optional)</span></label>
                 <input
+                  id="ow-contact-name"
                   value={contactName}
                   onChange={e => setContactName(e.target.value)}
                   placeholder="e.g. Media Team"
@@ -436,8 +440,9 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
 
               {method === 'email' && (
                 <div>
-                  <label className="block text-xs text-prose-faint mb-1.5">Contact email <span className="text-accent-text">*</span></label>
+                  <label htmlFor="ow-contact-email" className="block text-xs text-prose-faint mb-1.5">Contact email <span className="text-accent-text">*</span></label>
                   <input
+                    id="ow-contact-email"
                     type="email"
                     inputMode="email"
                     autoCapitalize="off"
@@ -452,11 +457,12 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
 
               {(method === 'web_form' || method === 'amazon') && (
                 <div>
-                  <label className="block text-xs text-prose-faint mb-1.5">
+                  <label htmlFor="ow-contact-url" className="block text-xs text-prose-faint mb-1.5">
                     {method === 'web_form' ? 'Form URL' : 'Amazon seller URL'}
                     <span className="text-prose-faint ml-1">(optional)</span>
                   </label>
                   <input
+                    id="ow-contact-url"
                     type="url"
                     inputMode="url"
                     autoCapitalize="off"
@@ -471,8 +477,9 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
 
               {method === 'phone' && (
                 <div>
-                  <label className="block text-xs text-prose-faint mb-1.5">Phone number <span className="text-prose-faint">(optional)</span></label>
+                  <label htmlFor="ow-contact-phone" className="block text-xs text-prose-faint mb-1.5">Phone number <span className="text-prose-faint">(optional)</span></label>
                   <input
+                    id="ow-contact-phone"
                     type="tel"
                     inputMode="tel"
                     value={contactUrl}
@@ -508,8 +515,9 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
           </div>
           <div className="space-y-3">
             <div>
-              <label className="block text-xs text-prose-faint mb-1.5">Subject line</label>
+              <label htmlFor="ow-subject" className="block text-xs text-prose-faint mb-1.5">Subject line</label>
               <input
+                id="ow-subject"
                 value={subject}
                 onChange={e => setSubject(e.target.value)}
                 placeholder="Product Image Request — [Product] | BossDaddyLife.com"
@@ -517,8 +525,9 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
               />
             </div>
             <div>
-              <label className="block text-xs text-prose-faint mb-1.5">Message body</label>
+              <label htmlFor="ow-message-body" className="block text-xs text-prose-faint mb-1.5">Message body</label>
               <textarea
+                id="ow-message-body"
                 value={body}
                 onChange={e => setBody(e.target.value)}
                 placeholder="Your message will auto-fill once you enter a product name above..."

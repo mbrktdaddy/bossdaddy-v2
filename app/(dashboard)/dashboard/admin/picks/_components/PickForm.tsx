@@ -489,8 +489,9 @@ export function PickForm({ pick, initialItems }: Props) {
       {/* Metadata */}
       <div className="space-y-4">
         <div>
-          <label className="block text-sm text-prose-muted mb-1.5">Slug <span className="text-red-300">*</span></label>
+          <label htmlFor="pf-slug" className="block text-sm text-prose-muted mb-1.5">Slug <span className="text-red-300">*</span></label>
           <input
+            id="pf-slug"
             type="text" required value={slug} onChange={(e) => setSlug(e.target.value.toLowerCase())}
             pattern="[a-z0-9-]+" placeholder="fathers-day-gift-guide"
             className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
@@ -512,8 +513,9 @@ export function PickForm({ pick, initialItems }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm text-prose-muted mb-1.5">Title <span className="text-red-300">*</span></label>
+          <label htmlFor="pf-title" className="block text-sm text-prose-muted mb-1.5">Title <span className="text-red-300">*</span></label>
           <input
+            id="pf-title"
             type="text" required value={title} onChange={(e) => setTitle(e.target.value)}
             placeholder="Father's Day Gift Guide 2026"
             className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
@@ -524,8 +526,9 @@ export function PickForm({ pick, initialItems }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm text-prose-muted mb-1.5">Short description <span className="text-prose-faint">(shows on index cards)</span></label>
+          <label htmlFor="pf-description" className="block text-sm text-prose-muted mb-1.5">Short description <span className="text-prose-faint">(shows on index cards)</span></label>
           <input
+            id="pf-description"
             type="text" value={description} onChange={(e) => setDesc(e.target.value)}
             placeholder="Dad-tested picks that actually earn a spot in the garage or kitchen."
             className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
@@ -603,8 +606,9 @@ export function PickForm({ pick, initialItems }: Props) {
         </p>
 
         <div>
-          <label className="block text-sm text-prose-muted mb-1.5">Collection type</label>
+          <label htmlFor="pf-type" className="block text-sm text-prose-muted mb-1.5">Collection type</label>
           <select
+            id="pf-type"
             value={pickType} onChange={(e) => setPickType(e.target.value)}
             className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
           >
@@ -618,10 +622,11 @@ export function PickForm({ pick, initialItems }: Props) {
 
         {pickType === 'comparison' && (
           <div>
-            <label className="block text-sm text-prose-muted mb-1.5">
+            <label htmlFor="pf-bottom-line" className="block text-sm text-prose-muted mb-1.5">
               Bottom line <span className="text-prose-faint">(one-line verdict shown above the scorecard)</span>
             </label>
             <textarea
+              id="pf-bottom-line"
               value={winnerSummary}
               onChange={(e) => setWinnerSummary(e.target.value)}
               maxLength={500}
@@ -635,10 +640,11 @@ export function PickForm({ pick, initialItems }: Props) {
 
         {pickType === 'stack' && (
           <div>
-            <label className="block text-sm text-prose-muted mb-1.5">
+            <label htmlFor="pf-bundle-total" className="block text-sm text-prose-muted mb-1.5">
               Bundle total <span className="text-prose-faint">(cents — optional; otherwise computed from items)</span>
             </label>
             <input
+              id="pf-bundle-total"
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
@@ -655,8 +661,9 @@ export function PickForm({ pick, initialItems }: Props) {
 
         {pickType === 'gift_guide' && (
           <div>
-            <label className="block text-sm text-prose-muted mb-1.5">Occasion <span className="text-red-300">*</span></label>
+            <label htmlFor="pf-occasion" className="block text-sm text-prose-muted mb-1.5">Occasion <span className="text-red-300">*</span></label>
             <select
+              id="pf-occasion"
               value={occasion} onChange={(e) => setOccasion(e.target.value)}
               className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
             >
@@ -700,10 +707,11 @@ export function PickForm({ pick, initialItems }: Props) {
           </summary>
           <div className="px-4 pb-4 pt-1 space-y-3 border-t border-soft">
             <div>
-              <label className="block text-xs text-prose-muted mb-1.5">
+              <label htmlFor="pf-meta-title" className="block text-xs text-prose-muted mb-1.5">
                 Meta title <span className="text-prose-faint">(HTML &lt;title&gt; tag; ~70 char limit)</span>
               </label>
               <input
+                id="pf-meta-title"
                 type="text"
                 value={metaTitle}
                 onChange={(e) => setMetaTitle(e.target.value)}
@@ -714,10 +722,11 @@ export function PickForm({ pick, initialItems }: Props) {
               <p className="mt-1 text-xs text-prose-faint tabular-nums">{metaTitle.length}/120</p>
             </div>
             <div>
-              <label className="block text-xs text-prose-muted mb-1.5">
+              <label htmlFor="pf-meta-desc" className="block text-xs text-prose-muted mb-1.5">
                 Meta description <span className="text-prose-faint">(search snippet; ~155 char limit)</span>
               </label>
               <textarea
+                id="pf-meta-desc"
                 value={metaDescription}
                 onChange={(e) => setMetaDesc(e.target.value)}
                 maxLength={300}
@@ -747,10 +756,11 @@ export function PickForm({ pick, initialItems }: Props) {
             </svg>
           </summary>
           <div className="px-4 pb-4 pt-1 space-y-2 border-t border-soft">
-            <label className="block text-xs text-prose-muted mb-1.5">
+            <label htmlFor="pf-methodology" className="block text-xs text-prose-muted mb-1.5">
               How I Tested <span className="text-prose-faint">(plain text — line breaks preserved)</span>
             </label>
             <textarea
+              id="pf-methodology"
               value={methodologyHtml}
               onChange={(e) => setMethodologyHtml(e.target.value)}
               maxLength={10000}

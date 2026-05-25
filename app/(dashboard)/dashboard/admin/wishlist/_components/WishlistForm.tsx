@@ -140,19 +140,20 @@ export function WishlistForm({ item }: Props) {
       {/* Title + Slug */}
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>Title *</label>
-          <input className={inputCls} value={title} onChange={(e) => handleTitleChange(e.target.value)} required placeholder="Weber Spirit II E-310" />
+          <label htmlFor="wf-title" className={labelCls}>Title *</label>
+          <input id="wf-title" className={inputCls} value={title} onChange={(e) => handleTitleChange(e.target.value)} required placeholder="Weber Spirit II E-310" />
         </div>
         <div>
-          <label className={labelCls}>Slug *</label>
-          <input className={inputCls} value={slug} onChange={(e) => handleSlugChange(e.target.value)} required placeholder="weber-spirit-ii-e310" />
+          <label htmlFor="wf-slug" className={labelCls}>Slug *</label>
+          <input id="wf-slug" className={inputCls} value={slug} onChange={(e) => handleSlugChange(e.target.value)} required placeholder="weber-spirit-ii-e310" />
         </div>
       </div>
 
       {/* Description */}
       <div>
-        <label className={labelCls}>Description</label>
+        <label htmlFor="wf-description" className={labelCls}>Description</label>
         <textarea
+          id="wf-description"
           className={`${inputCls} resize-none`}
           rows={3}
           value={description}
@@ -164,40 +165,40 @@ export function WishlistForm({ item }: Props) {
       {/* Status */}
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>Status *</label>
-          <select className={inputCls} value={status} onChange={(e) => setStatus(e.target.value as WishlistStatus)}>
+          <label htmlFor="wf-status" className={labelCls}>Status *</label>
+          <select id="wf-status" className={inputCls} value={status} onChange={(e) => setStatus(e.target.value as WishlistStatus)}>
             {WISHLIST_STATUS_OPTIONS.map((s) => (
               <option key={s.value} value={s.value}>{s.label}</option>
             ))}
           </select>
         </div>
         <div>
-          <label className={labelCls}>Priority (higher = shows first)</label>
-          <input type="number" className={inputCls} value={priority} onChange={(e) => setPriority(e.target.value)} />
+          <label htmlFor="wf-priority" className={labelCls}>Priority (higher = shows first)</label>
+          <input id="wf-priority" type="number" className={inputCls} value={priority} onChange={(e) => setPriority(e.target.value)} />
         </div>
       </div>
 
       {/* Skip reason — only when skipped */}
       {status === 'skipped' && (
         <div>
-          <label className={labelCls}>Skip Reason * <span className="text-prose-faint font-normal">(shown publicly)</span></label>
-          <textarea className={`${inputCls} resize-none`} rows={2} value={skipReason} onChange={(e) => setSkipReason(e.target.value)} required placeholder="Not enough differentiation from products I've already reviewed." />
+          <label htmlFor="wf-skip-reason" className={labelCls}>Skip Reason * <span className="text-prose-faint font-normal">(shown publicly)</span></label>
+          <textarea id="wf-skip-reason" className={`${inputCls} resize-none`} rows={2} value={skipReason} onChange={(e) => setSkipReason(e.target.value)} required placeholder="Not enough differentiation from products I've already reviewed." />
         </div>
       )}
 
       {/* Estimated review date — queued/testing */}
       {['queued', 'testing'].includes(status) && (
         <div>
-          <label className={labelCls}>Estimated Review Date</label>
-          <input type="date" className={inputCls} value={estimatedDate} onChange={(e) => setEstimatedDate(e.target.value)} />
+          <label htmlFor="wf-estimated-date" className={labelCls}>Estimated Review Date</label>
+          <input id="wf-estimated-date" type="date" className={inputCls} value={estimatedDate} onChange={(e) => setEstimatedDate(e.target.value)} />
         </div>
       )}
 
       {/* Image */}
       <div>
-        <label className={labelCls}>Image</label>
+        <label htmlFor="wf-image" className={labelCls}>Image</label>
         <div className="flex gap-2">
-          <input className={`${inputCls} flex-1`} value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." />
+          <input id="wf-image" className={`${inputCls} flex-1`} value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." />
           <button type="button" onClick={() => setShowPicker(true)} className="shrink-0 px-3 py-2.5 bg-surface-raised hover:bg-zinc-700 border border-strong rounded-xl text-sm text-prose-muted transition-colors">
             Library
           </button>
@@ -212,8 +213,8 @@ export function WishlistForm({ item }: Props) {
 
       {/* Store + Affiliate URL */}
       <div>
-        <label className={labelCls}>Store</label>
-        <select className={inputCls} value={store} onChange={(e) => setStore(e.target.value)}>
+        <label htmlFor="wf-store" className={labelCls}>Store</label>
+        <select id="wf-store" className={inputCls} value={store} onChange={(e) => setStore(e.target.value)}>
           <option value="">— none —</option>
           {STORE_OPTIONS.map((s) => (
             <option key={s.value} value={s.value}>{s.label}</option>
@@ -223,22 +224,22 @@ export function WishlistForm({ item }: Props) {
 
       {store === 'other' && (
         <div>
-          <label className={labelCls}>Custom Store Name</label>
-          <input className={inputCls} value={customStoreName} onChange={(e) => setCustomStoreName(e.target.value)} placeholder="REI, Costco, etc." />
+          <label htmlFor="wf-custom-store" className={labelCls}>Custom Store Name</label>
+          <input id="wf-custom-store" className={inputCls} value={customStoreName} onChange={(e) => setCustomStoreName(e.target.value)} placeholder="REI, Costco, etc." />
         </div>
       )}
 
       {store === 'amazon' && (
         <div>
-          <label className={labelCls}>ASIN</label>
-          <input className={inputCls} value={asin} onChange={(e) => setAsin(e.target.value)} placeholder="B07XXXXXXX" />
+          <label htmlFor="wf-asin" className={labelCls}>ASIN</label>
+          <input id="wf-asin" className={inputCls} value={asin} onChange={(e) => setAsin(e.target.value)} placeholder="B07XXXXXXX" />
         </div>
       )}
 
       {store && (
         <div>
-          <label className={labelCls}>Affiliate URL</label>
-          <input className={inputCls} type="url" value={affiliateUrl} onChange={(e) => setAffiliateUrl(e.target.value)} placeholder="https://..." />
+          <label htmlFor="wf-affiliate-url" className={labelCls}>Affiliate URL</label>
+          <input id="wf-affiliate-url" className={inputCls} type="url" value={affiliateUrl} onChange={(e) => setAffiliateUrl(e.target.value)} placeholder="https://..." />
         </div>
       )}
 
