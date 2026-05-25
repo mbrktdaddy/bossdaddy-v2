@@ -20,10 +20,16 @@ export default async function DashboardLayout({
 
   return (
     <div className={`${geistMono.variable} min-h-screen bg-background text-prose md:flex`}>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:bg-surface focus:text-prose focus:px-4 focus:py-2 focus:rounded-lg focus:border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent"
+      >
+        Skip to content
+      </a>
       <DashboardNav username={profile?.username ?? 'Boss'} isAdmin={isAdmin} role={profile?.role ?? 'member'} />
 
       {/* pt-14 on mobile clears the fixed top bar; desktop uses normal flow */}
-      <main className="flex-1 overflow-auto pt-14 md:pt-0">
+      <main id="main-content" className="flex-1 overflow-auto pt-14 md:pt-0">
         {children}
       </main>
     </div>
