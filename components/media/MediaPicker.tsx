@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { compressImage } from '@/lib/compress-image'
 import { CATEGORIES } from '@/lib/categories'
+import ImageCropper from '@/components/ui/ImageCropper'
 
 interface MediaAsset {
   id: string
@@ -41,11 +42,23 @@ interface MediaPickerProps {
   /** Enable multi-select mode — confirm fires onMultiSelect instead of onSelect */
   multi?: boolean
   onMultiSelect?: (items: MultiSelectItem[]) => void
+  /**
+   * If set, single-file uploads route through ImageCropper before save with
+   * this aspect ratio (width / height, e.g. 4/3 for 1.333). Multi-file
+   * uploads skip the cropper. Pass undefined to upload-without-cropping.
+   *
+   * Common values:
+   *   4/3   ← phone landscape, product photos, card grids
+   *   16/10 ← detail-page hero (cinematic but accepts landscape phone shots)
+   *   1     ← square (avatars, product gallery)
+   *   3/4   ← portrait (rare; phone portrait without rotation)
+   */
+  uploadAspect?: number
 }
 
 type Tab = 'library' | 'generate'
 
-export default function MediaPicker({ onSelect, onClose, defaultProductId, defaultCategory, multi, onMultiSelect }: MediaPickerProps) {
+export default function MediaPicker({ onSelect, onClose, defaultProductId, defaultCategory, multi, onMultiSelect, uploadAspect }: MediaPickerProps) {
   const [tab, setTab] = useState<Tab>('library')
 
   // Library state
@@ -58,6 +71,37 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Crop-on-upload state — populated when a single file is being processed
+  // and uploadAspect was provided. The ref holds the Promise resolver so the
+  // uploadFiles flow can await user interaction with the cropper.
+  const [cropPending, setCropPending] = useState<File | null>(null)
+  const cropResolveRef = useRef<((file: File | null) => void) | null>(null)
+
+  function awaitCrop(file: File): Promise<File | null> {
+    return new Promise((resolve) => {
+      cropResolveRef.current = resolve
+      setCropPending(file)
+    })
+  }
+
+  function handleCropDone(blob: Blob) {
+    const sourceName = cropPending?.name ?? 'image'
+    const file = new File(
+      [blob],
+      sourceName.replace(/\.[^.]+$/, '.webp'),
+      { type: 'image/webp', lastModified: Date.now() },
+    )
+    cropResolveRef.current?.(file)
+    cropResolveRef.current = null
+    setCropPending(null)
+  }
+
+  function handleCropCancel() {
+    cropResolveRef.current?.(null)
+    cropResolveRef.current = null
+    setCropPending(null)
+  }
 
   // Search
   const [searchQuery, setSearchQuery] = useState('')
@@ -139,9 +183,27 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
     if (!list.length) return
     setUploading(true); setUploadError(null)
 
+    // Crop-on-upload: when uploadAspect is set AND there's exactly one file,
+    // present the cropper after compression so we store a uniformly-cropped
+    // asset. Multi-file uploads skip the cropper (would require a per-file
+    // queue UI we haven't built yet) — drop them in and crop later if needed.
+    let prepared: File[]
+    if (uploadAspect && list.length === 1) {
+      const compressed = await compressImage(list[0])
+      const cropped = await awaitCrop(compressed)
+      if (!cropped) {
+        // User cancelled the cropper — abort upload, no error toast.
+        setUploading(false)
+        return
+      }
+      prepared = [cropped]
+    } else {
+      // Multi-file or no aspect requested — compress and upload as-is.
+      prepared = await Promise.all(list.map((f) => compressImage(f)))
+    }
+
     const results = await Promise.allSettled(
-      list.map(async (raw) => {
-        const file = await compressImage(raw)
+      prepared.map(async (file) => {
         const fd = new FormData()
         fd.append('file', file)
         // Tag new uploads with the active filter context so they're findable
@@ -535,6 +597,18 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
           </div>
         </div>
       </div>
+
+      {/* Crop-on-upload overlay — fixed inset-0 z-50, rendered above the
+          picker dialog. Only appears when uploadAspect is set, the upload
+          is single-file, and compression has finished. */}
+      {cropPending && uploadAspect && (
+        <ImageCropper
+          file={cropPending}
+          aspect={uploadAspect}
+          onCrop={handleCropDone}
+          onCancel={handleCropCancel}
+        />
+      )}
     </div>
   )
 }

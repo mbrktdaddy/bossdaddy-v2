@@ -207,6 +207,7 @@ export function WishlistForm({ item }: Props) {
           <MediaPicker
             onSelect={(url) => { setImageUrl(url); setShowPicker(false) }}
             onClose={() => setShowPicker(false)}
+            uploadAspect={4 / 3}
           />
         )}
       </div>

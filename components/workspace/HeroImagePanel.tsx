@@ -216,13 +216,14 @@ export function HeroImagePanel({
           onSelect={(url) => { onChange(url); setShowPicker(false) }}
           onClose={() => setShowPicker(false)}
           defaultCategory={category}
+          uploadAspect={16 / 10}
         />
       )}
 
       {pendingCrop && (
         <ImageCropper
           file={pendingCrop}
-          aspect={16 / 9}
+          aspect={16 / 10}
           onCrop={handleCropConfirm}
           onCancel={() => setPendingCrop(null)}
         />
