@@ -8,6 +8,7 @@ import { getCategoryBySlug, CATEGORIES } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
 import { PillFilterStrip, PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
+import BenchStrip from '@/components/BenchStrip'
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -142,6 +143,11 @@ export default async function CategoryPage({ params }: Props) {
             <p className="text-prose-faint text-sm">Check back soon — the first one is in progress.</p>
           </div>
         )}
+
+        {/* On the Bench */}
+        <div className="mt-16">
+          <BenchStrip ctaText="See all on the bench" />
+        </div>
 
       </div>
     </>

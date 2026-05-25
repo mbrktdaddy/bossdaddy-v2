@@ -42,6 +42,7 @@ export default async function GuidesPage({ searchParams }: Props) {
       .eq('status', 'approved')
       .eq('is_visible', true)
       .order('published_at', { ascending: false })
+      .limit(200)
 
     const guides = (data ?? []) as (GuideRow & { featured?: boolean })[]
 

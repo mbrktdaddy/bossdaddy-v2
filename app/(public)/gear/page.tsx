@@ -433,9 +433,23 @@ export default async function GearPage({ searchParams }: Props) {
         </div>
       ) : category ? (
         // Filtered view: simple 3-col grid (no tier separation when filtered)
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {topPicks.map((r) => <GearCard key={r.id} review={r} />)}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {topPicks.map((r) => <GearCard key={r.id} review={r} />)}
+          </div>
+          <div className="mt-16">
+            <p className="text-xs text-prose-faint mb-3">More gear is on the way. Vote on what gets tested next.</p>
+            <BenchStrip ctaText="See everything on the bench" />
+          </div>
+          <div className="mt-12 text-center">
+            <Link
+              href="/reviews"
+              className="inline-flex items-center gap-2 text-sm text-prose-faint hover:text-accent-text-soft transition-colors font-medium"
+            >
+              Browse the full review archive →
+            </Link>
+          </div>
+        </>
       ) : (
         <div>
           {/* ── Perfect Score — asymmetric magazine grid + radial glow ──── */}
