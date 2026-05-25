@@ -1,0 +1,27 @@
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Migration 075 — Drop wishlist_items.store CHECK constraint
+--
+-- Background
+--   Migration 030 (2026-04-21) added a CHECK constraint on wishlist_items.store
+--   pinning the allowed values to the 8 retailers known at the time:
+--     amazon, walmart, target, kohls, home-depot, lowes, menards, other
+--
+--   Since then `lib/products.ts` STORE_OPTIONS has grown to 16 retailers
+--   (costco, sams-club, best-buy, rei, dicks, bass-pro, buckle, ace-hardware,
+--   plus the originals). The DB-side enum drifted out of sync — any new
+--   bench item with a non-original store would fail INSERT with a 23514
+--   check violation that the form swallows as a generic "save failed" error.
+--
+--   The sibling `products.store` column was added in migration 020 with NO
+--   CHECK constraint and has worked fine — TypeScript's ProductStore union
+--   is the source of truth for valid values, and the admin forms use a
+--   fixed <select> so users can't enter free-text junk anyway.
+--
+-- Decision
+--   Drop the wishlist_items.store CHECK constraint to match the products
+--   table's approach. TypeScript's ProductStore type + the form's fixed
+--   <select> options are the validators going forward. Each future store
+--   addition is a one-line lib/products.ts edit, no migration required.
+-- ─────────────────────────────────────────────────────────────────────────────
+
+alter table wishlist_items drop constraint if exists wishlist_items_store_check;
