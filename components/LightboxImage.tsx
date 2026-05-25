@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import Image from 'next/image'
 
 interface Props {
   src: string
@@ -39,7 +40,7 @@ export function LightboxImage({ src, alt, children }: Props) {
         >
           {/* Close button */}
           <button
-            className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors p-2"
+            className="absolute top-4 right-4 z-10 text-white/70 hover:text-white transition-colors p-2"
             onClick={() => setOpen(false)}
             aria-label="Close"
           >
@@ -48,13 +49,28 @@ export function LightboxImage({ src, alt, children }: Props) {
             </svg>
           </button>
 
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={src}
-            alt={alt}
-            className="max-w-[92vw] max-h-[92vh] object-contain cursor-zoom-out rounded-lg shadow-2xl"
+          {/*
+            Next/Image routes through /_next/image?url=... so the browser
+            only sees a same-origin request — bypasses CSP img-src
+            restrictions AND handles upstream redirect chains (Amazon's
+            m.media-amazon.com → images-na.ssl-images-amazon.com pattern)
+            that break a raw <img> tag. Container takes 92vw × 92vh so
+            object-contain scales the image to fit while preserving its
+            aspect ratio.
+          */}
+          <div
+            className="relative w-[92vw] h-[92vh] cursor-zoom-out"
             onClick={(e) => e.stopPropagation()}
-          />
+          >
+            <Image
+              src={src}
+              alt={alt}
+              fill
+              priority
+              sizes="92vw"
+              className="object-contain rounded-lg shadow-2xl"
+            />
+          </div>
         </div>,
         document.body
       )}
