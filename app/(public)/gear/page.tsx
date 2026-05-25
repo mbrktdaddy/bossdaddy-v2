@@ -9,6 +9,7 @@ import BadgesForProduct from '@/components/collections/BadgesForProduct'
 import { MerchPanel } from './_components/MerchPanel'
 import FeaturedReviewCard from '@/components/FeaturedReviewCard'
 import BenchStrip from '@/components/BenchStrip'
+import SectionHeader from '@/components/SectionHeader'
 import { getSeasonalOccasions } from '@/lib/gift-occasions'
 import OccasionIcon from '@/components/OccasionIcon'
 import type { Metadata } from 'next'
@@ -188,7 +189,7 @@ export default async function GearPage({ searchParams }: Props) {
           href="/gear"
           className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold transition-colors ${
             !category
-              ? 'bg-prose text-background border border-prose shadow-sm shadow-black/10'
+              ? 'bg-accent text-white border border-accent'
               : 'bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose'
           }`}
         >
@@ -200,7 +201,7 @@ export default async function GearPage({ searchParams }: Props) {
             href={`/gear?category=${c.slug}`}
             className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
               category === c.slug
-                ? 'bg-prose text-background border border-prose shadow-sm shadow-black/10'
+                ? 'bg-accent text-white border border-accent'
                 : 'bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose'
             }`}
           >
@@ -220,21 +221,13 @@ export default async function GearPage({ searchParams }: Props) {
       {/* ── Unfiltered-only discovery sections ──────────────────────────────── */}
       {!category && (
         <>
-          {/* ── Shop by Occasion — tick-line header + tactile cards ────────── */}
+          {/* ── Shop by Occasion ─────────────────────────────────────────── */}
           <section className="mb-16">
-            <div className="flex items-end justify-between mb-6">
-              <div>
-                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Gift Guides</p>
-                <h2 className="text-2xl font-black text-prose leading-tight">Shop by Occasion</h2>
-              </div>
-              <Link
-                href="/gifts"
-                className="hidden sm:inline-flex text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold shrink-0"
-              >
-                All gift guides →
-              </Link>
-            </div>
+            <SectionHeader
+              label="Gift Guides"
+              heading="Shop by Occasion"
+              right={{ label: 'All gift guides', href: '/gifts' }}
+            />
 
             {/* Mobile: horizontal scroll */}
             <div className="sm:hidden flex gap-3 overflow-x-auto scrollbar-hide -mx-6 px-6 pb-1">
@@ -295,26 +288,18 @@ export default async function GearPage({ searchParams }: Props) {
             </div>
           </section>
 
-          {/* ── Featured Collection — tick-line header + tactile card ──────── */}
+          {/* ── Featured Collection ──────────────────────────────────────── */}
           {featuredPick && (
             <section className="mb-16">
-              <div className="flex items-end justify-between mb-6">
-                <div>
-                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Curated Pick</p>
-                  <h2 className="text-2xl font-black text-prose leading-tight">Featured Collection</h2>
-                </div>
-                <Link
-                  href="/picks"
-                  className="hidden sm:inline-flex text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold shrink-0"
-                >
-                  All collections →
-                </Link>
-              </div>
+              <SectionHeader
+                label="Curated Pick"
+                heading="Featured Collection"
+                right={{ label: 'All collections', href: '/picks' }}
+              />
 
               <Link
                 href={`/picks/${featuredPick.slug}`}
-                className="group block bg-surface rounded-xl overflow-hidden border border-soft shadow-xl shadow-black/10 hover:border-accent-border/40 hover:shadow-black/10 hover:-translate-y-1 transition-all"
+                className="group block bg-surface rounded-xl overflow-hidden border border-soft shadow-md shadow-black/5 hover:border-accent-border/40 hover:shadow-lg hover:shadow-black/10 hover:-translate-y-1 transition-all"
               >
                 <div className="flex flex-col sm:flex-row">
                   <div className="relative w-full sm:w-72 h-48 sm:h-auto sm:min-h-[220px] shrink-0 bg-surface-raised">
@@ -387,11 +372,10 @@ export default async function GearPage({ searchParams }: Props) {
               className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-accent/[0.04] to-transparent"
             />
             <div className="relative">
-              <div className="mb-6">
-                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Browse</p>
-                <h2 className="text-2xl font-black text-prose leading-tight">Shop by Category</h2>
-              </div>
+              <SectionHeader
+                label="Browse"
+                heading="Shop by Category"
+              />
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {CATEGORIES.map((c) => {
                   const count = countByCategory.get(c.slug) ?? 0
@@ -464,12 +448,11 @@ export default async function GearPage({ searchParams }: Props) {
                 }}
               />
               <div className="relative">
-                <div className="mb-6">
-                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Top Tier</p>
-                  <h2 className="text-xl font-black text-prose">Perfect Score</h2>
-                  <p className="text-xs text-prose-faint mt-0.5">Flawless. Nothing I tested came close.</p>
-                </div>
+                <SectionHeader
+                  label="Top Tier"
+                  heading="Perfect Score"
+                  sub="Flawless. Nothing I tested came close."
+                />
                 {tens.length === 1 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                     {tens.map((r) => <GearCard key={r.id} review={r} />)}
@@ -493,12 +476,11 @@ export default async function GearPage({ searchParams }: Props) {
           {/* ── Boss Picks — standard 3-col card grid ──────────────────── */}
           {nines.length > 0 && (
             <section id="boss-picks" className="mb-16">
-              <div className="mb-6">
-                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Boss Approved</p>
-                <h2 className="text-xl font-black text-prose">Boss Picks</h2>
-                <p className="text-xs text-prose-faint mt-0.5">Earned it. These are the ones I recommend without hesitation.</p>
-              </div>
+              <SectionHeader
+                label="Boss Approved"
+                heading="Boss Picks"
+                sub="Earned it. These are the ones I recommend without hesitation."
+              />
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {nines.map((r) => <GearCard key={r.id} review={r} />)}
               </div>
@@ -508,12 +490,11 @@ export default async function GearPage({ searchParams }: Props) {
           {/* ── Solid Gear — compact editorial rows ────────────────────── */}
           {eights.length > 0 && (
             <section className="mb-16">
-              <div className="mb-6">
-                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Worth It</p>
-                <h2 className="text-xl font-black text-prose">Solid Gear</h2>
-                <p className="text-xs text-prose-faint mt-0.5">Good enough that I kept them. Not perfect, but worth it.</p>
-              </div>
+              <SectionHeader
+                label="Worth It"
+                heading="Solid Gear"
+                sub="Good enough that I kept them. Not perfect, but worth it."
+              />
               <div className="divide-y divide-soft">
                 {eights.map((r) => <GearRow key={r.id} review={r} />)}
               </div>
