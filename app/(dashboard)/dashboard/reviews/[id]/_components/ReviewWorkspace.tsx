@@ -6,7 +6,6 @@ import { CATEGORIES } from '@/lib/categories'
 import { TESTING_DURATION_OPTIONS } from '@/lib/products'
 import { detectAffiliateLinks } from '@/lib/affiliate'
 import { preserveImagesAcrossRefine } from '@/lib/inlineImages'
-import { StatusBadge } from '@/components/workspace/StatusBadge'
 import { TiptapEditor } from '@/components/workspace/TiptapEditor'
 import { HeroImagePanel } from '@/components/workspace/HeroImagePanel'
 import { AIRefinePanel } from '@/components/workspace/AIRefinePanel'
@@ -23,9 +22,8 @@ const InlineMediaPanel = dynamic(
   () => import('@/components/workspace/InlineMediaPanel').then((m) => ({ default: m.InlineMediaPanel })),
   { ssr: false, loading: () => <div className="h-32 bg-surface-sunken border border-soft rounded-xl animate-pulse" /> },
 )
-import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader'
 import { WorkspaceToolbar } from '@/components/workspace/WorkspaceToolbar'
-import { AutoSaveIndicator } from '@/components/workspace/AutoSaveIndicator'
+import { WorkspaceShell } from '@/components/workspace/WorkspaceShell'
 import { ListEditor } from '@/components/workspace/ListEditor'
 import { TagPicker } from '@/components/workspace/TagPicker'
 import { useContentWorkspace } from '@/components/workspace/useContentWorkspace'
@@ -276,34 +274,80 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
   const createdAt  = new Date(review.created_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 
   return (
-    <div className="p-4 sm:p-8 max-w-4xl">
-
-      <WorkspaceHeader
-        backHref="/dashboard/reviews"
-        backLabel="All reviews"
-        title={title || 'Untitled'}
-        subtitle={`${productName || '—'} · ${computedRating != null ? `${computedRating.toFixed(1)}/10` : '—/10'} · Created ${createdAt}${review.reading_time_minutes ? ` · ${review.reading_time_minutes} min read` : ''}`}
-        rightSlot={
-          <div className="flex items-center gap-3 flex-wrap justify-end">
-            <AutoSaveIndicator state={autoSave.state} error={autoSave.error} />
-            <StatusBadge status={status} />
-          </div>
-        }
-      />
-
-      {review.rejection_reason && ['draft', 'rejected'].includes(status) && (
-        <div className="mb-4 px-4 py-3 rounded-xl bg-amber-50 border border-amber-300">
-          <p className="text-sm text-amber-700">
-            <strong>Edits requested:</strong> {review.rejection_reason}
-          </p>
-        </div>
-      )}
-
-      {/* Preview + edit two-column layout on xl screens */}
-      <div className={previewOpen ? 'xl:flex xl:gap-6 xl:items-start' : ''}>
-
-      {/* ── Editor column ─────────────────────────────────────────────── */}
-      <div className={`space-y-6 ${previewOpen ? 'xl:flex-1 xl:min-w-0' : ''}`}>
+    <WorkspaceShell
+      backHref="/dashboard/reviews"
+      backLabel="All reviews"
+      title={title}
+      subtitle={`${productName || '—'} · ${computedRating != null ? `${computedRating.toFixed(1)}/10` : '—/10'} · Created ${createdAt}${review.reading_time_minutes ? ` · ${review.reading_time_minutes} min read` : ''}`}
+      status={status}
+      autoSave={autoSave}
+      rejectionReason={review.rejection_reason}
+      actionErr={actionErr}
+      actionMsg={actionMsg}
+      previewSlot={previewOpen ? (
+        <ReviewDraftPreview
+          title={title}
+          productName={productName}
+          rating={computedRating ?? 0}
+          category={category}
+          excerpt={excerpt}
+          content={content}
+          imageUrl={imageUrl}
+          pros={pros.filter(p => p.trim())}
+          cons={cons.filter(c => c.trim())}
+          tldr={tldr}
+          keyTakeaways={keyTakeaways}
+          bestFor={bestFor}
+          notFor={notFor}
+          faqs={faqs}
+          author="Boss Daddy"
+          pricePaidCents={pricePaidCents.trim() && !isNaN(parseInt(pricePaidCents, 10)) ? parseInt(pricePaidCents, 10) : null}
+          testingDuration={testingDuration || null}
+          scoreQuality={scoreQuality}
+          scoreValue={scoreValue}
+          scoreEase={scoreEase}
+          scoreDailyUse={scoreDailyUse}
+          wouldRebuy={wouldRebuy}
+        />
+      ) : undefined}
+      toolbar={
+        <WorkspaceToolbar
+          isSaving={autoSave.state === 'saving' || busy}
+          isPublishing={busy}
+          isDeleting={deleting}
+          isPublished={isPublished}
+          onSave={manualSave}
+          onPublish={() => publishOrUnpublish('approve')}
+          onUnpublish={() => publishOrUnpublish('unpublish')}
+          onDelete={handleDelete}
+          onDuplicate={handleDuplicate}
+          previewUrl={previewUrl}
+          canPublish={canPublish}
+          publishBlockedReason={publishBlockedReason}
+          readinessChecks={readinessChecks}
+          previewOpen={previewOpen}
+          onTogglePreview={() => setPreviewOpen(p => !p)}
+        />
+      }
+      modals={
+        <>
+          {pendingRefine && (
+            <RefinePreviewModal
+              before={content}
+              after={pendingRefine.content}
+              onAccept={applyPendingRefine}
+              onDiscard={() => setPendingRefine(null)}
+            />
+          )}
+          {scheduleOpen && (
+            <ScheduleFollowupModal
+              reviewId={review.id}
+              onClose={() => setScheduleOpen(false)}
+            />
+          )}
+        </>
+      }
+    >
 
         {/* ── FOLLOW-UP CONTEXT (only when this review is itself a follow-up) ── */}
         {isFollowup && (
@@ -860,86 +904,6 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
           </div>
         </div>
 
-        {actionErr && (
-          <p className="text-red-700 text-sm bg-red-50 border border-red-300 rounded-lg px-4 py-3">{actionErr}</p>
-        )}
-        {actionMsg && (
-          <p className="text-forest text-sm bg-green-50 border border-green-300 rounded-lg px-4 py-3">{actionMsg}</p>
-        )}
-
-        <p className="text-xs text-prose-faint">
-          ⌨ <kbd className="px-1 py-0.5 bg-surface-raised rounded">⌘S</kbd> save · <kbd className="px-1 py-0.5 bg-surface-raised rounded">⌘↵</kbd> publish · <kbd className="px-1 py-0.5 bg-surface-raised rounded">⌘Z</kbd> undo · <kbd className="px-1 py-0.5 bg-surface-raised rounded">⌘⇧Z</kbd> redo
-        </p>
-
-      </div>{/* end editor column */}
-
-      {/* ── Live preview column (xl only) ─────────────────────────────── */}
-      {previewOpen && (
-        <div className="hidden xl:block w-[420px] shrink-0 sticky top-6 self-start">
-          <ReviewDraftPreview
-            title={title}
-            productName={productName}
-            rating={computedRating ?? 0}
-            category={category}
-            excerpt={excerpt}
-            content={content}
-            imageUrl={imageUrl}
-            pros={pros.filter(p => p.trim())}
-            cons={cons.filter(c => c.trim())}
-            tldr={tldr}
-            keyTakeaways={keyTakeaways}
-            bestFor={bestFor}
-            notFor={notFor}
-            faqs={faqs}
-            author="Boss Daddy"
-            pricePaidCents={pricePaidCents.trim() && !isNaN(parseInt(pricePaidCents, 10)) ? parseInt(pricePaidCents, 10) : null}
-            testingDuration={testingDuration || null}
-            scoreQuality={scoreQuality}
-            scoreValue={scoreValue}
-            scoreEase={scoreEase}
-            scoreDailyUse={scoreDailyUse}
-            wouldRebuy={wouldRebuy}
-          />
-        </div>
-      )}
-
-      </div>{/* end preview+edit flex wrapper */}
-
-      <WorkspaceToolbar
-        isSaving={autoSave.state === 'saving' || busy}
-        isPublishing={busy}
-        isDeleting={deleting}
-        isPublished={isPublished}
-        onSave={manualSave}
-        onPublish={() => publishOrUnpublish('approve')}
-        onUnpublish={() => publishOrUnpublish('unpublish')}
-        onDelete={handleDelete}
-        onDuplicate={handleDuplicate}
-        previewUrl={previewUrl}
-        canPublish={canPublish}
-        publishBlockedReason={publishBlockedReason}
-        readinessChecks={readinessChecks}
-        previewOpen={previewOpen}
-        onTogglePreview={() => setPreviewOpen(p => !p)}
-      />
-
-      {/* Refine diff modal — shows before/after before applying changes */}
-      {pendingRefine && (
-        <RefinePreviewModal
-          before={content}
-          after={pendingRefine.content}
-          onAccept={applyPendingRefine}
-          onDiscard={() => setPendingRefine(null)}
-        />
-      )}
-
-      {/* Schedule follow-up modal — opens from the Distribution section button */}
-      {scheduleOpen && (
-        <ScheduleFollowupModal
-          reviewId={review.id}
-          onClose={() => setScheduleOpen(false)}
-        />
-      )}
-    </div>
+    </WorkspaceShell>
   )
 }

@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { CATEGORIES } from '@/lib/categories'
 import { preserveImagesAcrossRefine } from '@/lib/inlineImages'
-import { StatusBadge } from '@/components/workspace/StatusBadge'
 import { TiptapEditor } from '@/components/workspace/TiptapEditor'
 import { HeroImagePanel } from '@/components/workspace/HeroImagePanel'
 import { AIRefinePanel } from '@/components/workspace/AIRefinePanel'
@@ -15,9 +14,8 @@ import { VersionHistoryPanel } from '@/components/workspace/VersionHistoryPanel'
 import { InternalLinkPanel } from '@/components/workspace/InternalLinkPanel'
 import { SocialPostsPanel } from '@/components/workspace/SocialPostsPanel'
 import { ProductLinkPanel } from '@/components/workspace/ProductLinkPanel'
-import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader'
 import { WorkspaceToolbar } from '@/components/workspace/WorkspaceToolbar'
-import { AutoSaveIndicator } from '@/components/workspace/AutoSaveIndicator'
+import { WorkspaceShell } from '@/components/workspace/WorkspaceShell'
 import { ListEditor } from '@/components/workspace/ListEditor'
 import { TagPicker } from '@/components/workspace/TagPicker'
 import { RefinePreviewModal } from '@/components/workspace/RefinePreviewModal'
@@ -136,316 +134,293 @@ export function GuideWorkspace({ guide: article }: Props) {
   const createdAt  = new Date(article.created_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 
   return (
-    <div className="p-4 sm:p-8 max-w-4xl">
+    <WorkspaceShell
+      backHref="/dashboard/guides"
+      backLabel="All guides"
+      title={title}
+      subtitle={`Created ${createdAt}${article.reading_time_minutes ? ` · ${article.reading_time_minutes} min read` : ''}`}
+      status={status}
+      autoSave={autoSave}
+      rejectionReason={article.rejection_reason}
+      actionErr={actionErr}
+      actionMsg={actionMsg}
+      toolbar={
+        <WorkspaceToolbar
+          isSaving={autoSave.state === 'saving' || busy}
+          isPublishing={busy}
+          isDeleting={deleting}
+          isPublished={isPublished}
+          onSave={manualSave}
+          onPublish={() => publishOrUnpublish('approve')}
+          onUnpublish={() => publishOrUnpublish('unpublish')}
+          onDelete={handleDelete}
+          onDuplicate={handleDuplicate}
+          previewUrl={previewUrl}
+          readinessChecks={readinessChecks}
+        />
+      }
+      modals={
+        pendingRefine && (
+          <RefinePreviewModal
+            before={content}
+            after={pendingRefine.content}
+            onAccept={applyPendingRefine}
+            onDiscard={() => setPendingRefine(null)}
+          />
+        )
+      }
+    >
 
-      <WorkspaceHeader
-        backHref="/dashboard/guides"
-        backLabel="All guides"
-        title={title || 'Untitled'}
-        subtitle={`Created ${createdAt}${article.reading_time_minutes ? ` · ${article.reading_time_minutes} min read` : ''}`}
-        rightSlot={
-          <div className="flex items-center gap-3 flex-wrap justify-end">
-            <AutoSaveIndicator state={autoSave.state} error={autoSave.error} />
-            <StatusBadge status={status} />
-          </div>
-        }
+      {/* ── STORY ────────────────────────────────────────────────────── */}
+      <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Story</p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="sm:col-span-2">
+          <label className="block text-sm text-prose-muted mb-1.5">Title</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          />
+        </div>
+        <div>
+          <label className="block text-sm text-prose-muted mb-1.5">Category</label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          >
+            {CATEGORIES.map(c => (
+              <option key={c.slug} value={c.slug}>{c.icon} {c.label}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm text-prose-muted mb-1.5">Excerpt <span className="text-prose-faint">(shown on listing pages)</span></label>
+        <textarea
+          value={excerpt}
+          onChange={(e) => setExcerpt(e.target.value)}
+          rows={2}
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
+        />
+      </div>
+
+      {/* Tags */}
+      <div className="pt-4 border-t border-soft">
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Tags</p>
+        <TagPicker selected={tags} onChange={setTags} />
+      </div>
+
+      <AIRefinePanel
+        title={title}
+        category={category}
+        content={content}
+        contentType="guide"
+        externalInstruction={refineInstruction}
+        onExternalInstructionUsed={() => setRefineInstruction('')}
+        onRefined={(draft) => {
+          const d = draft as Record<string, unknown>
+          const refinedContent = [
+            draft.introduction,
+            ...(draft.sections ?? []).map((s) => {
+              const bodyHtml = s.body.split(/\n\n+/).map((p) => `<p>${p.trim()}</p>`).join('\n')
+              return `<h2>${s.heading}</h2>\n${bodyHtml}`
+            }),
+            draft.conclusion ? `<h2>Wrapping Up</h2>\n<p>${draft.conclusion}</p>` : '',
+          ].filter(Boolean).join('\n\n')
+          const { content: merged } = preserveImagesAcrossRefine(content, refinedContent)
+          setPendingRefine({
+            content: merged,
+            title:        draft.title,
+            excerpt:      draft.excerpt,
+            tldr:         d.tldr as string | undefined,
+            keyTakeaways: d.keyTakeaways as string[] | undefined,
+            faqs:         d.faqs as FAQ[] | undefined,
+          })
+        }}
       />
 
-      {article.rejection_reason && ['draft', 'rejected'].includes(status) && (
-        <div className="mb-4 px-4 py-3 rounded-xl bg-amber-50 border border-amber-300">
-          <p className="text-sm text-amber-700">
-            <strong>Edits requested:</strong> {article.rejection_reason}
-          </p>
-        </div>
-      )}
+      <div>
+        <label className="block text-sm text-prose-muted mb-1.5">Content</label>
+        <TiptapEditor
+          value={content}
+          onChange={setContent}
+          targetWords={CATEGORIES.find(c => c.slug === category)?.targetWords}
+          enableCollectionEmbed
+        />
+        <p className="mt-1.5 text-xs text-prose-faint">
+          Use <code className="text-accent-text-soft">[[BUY:product-slug]]</code> inline for product mentions — resolves to a link on save.
+        </p>
+      </div>
 
-      <div className="space-y-6">
+      {/* ── CONTENT BLOCKS ───────────────────────────────────────────── */}
+      <div className="pt-6 border-t border-soft">
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Content Blocks</p>
+        <p className="text-xs text-prose-faint mb-4">Render as structured UI elements on the public page — not prose. Generated by AI drafts; edit freely.</p>
+        <div className="space-y-6">
 
-        {/* ── STORY ────────────────────────────────────────────────────── */}
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Story</p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="sm:col-span-2">
-            <label className="block text-sm text-prose-muted mb-1.5">Title</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          {/* TL;DR */}
+          <div>
+            <label className="block text-sm text-prose-muted mb-1.5">TL;DR <span className="text-prose-faint font-normal">— 2–3 sentence skimmer summary</span></label>
+            <textarea
+              value={tldr}
+              onChange={(e) => setTldr(e.target.value)}
+              rows={3}
+              placeholder="e.g. Choosing the right formula comes down to three things: your baby's digestive needs, your budget, and how they respond in the first week. Most healthy full-term babies do fine on any standard formula. If you see gassiness or fussiness, a gentle or sensitive version is worth trying before going straight to specialty."
+              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-y text-sm"
             />
           </div>
+
+          {/* Key Takeaways */}
           <div>
-            <label className="block text-sm text-prose-muted mb-1.5">Category</label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
-            >
-              {CATEGORIES.map(c => (
-                <option key={c.slug} value={c.slug}>{c.icon} {c.label}</option>
-              ))}
-            </select>
+            <ListEditor
+              label="Key Takeaways"
+              items={keyTakeaways}
+              onChange={setKeyTakeaways}
+              placeholder="e.g. Most babies don't need specialty formula — start with standard"
+              accent="text-accent-text-soft"
+            />
           </div>
-        </div>
 
-        <div>
-          <label className="block text-sm text-prose-muted mb-1.5">Excerpt <span className="text-prose-faint">(shown on listing pages)</span></label>
-          <textarea
-            value={excerpt}
-            onChange={(e) => setExcerpt(e.target.value)}
-            rows={2}
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
-          />
-        </div>
-
-        {/* Tags */}
-        <div className="pt-4 border-t border-soft">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Tags</p>
-          <TagPicker selected={tags} onChange={setTags} />
-        </div>
-
-        <AIRefinePanel
-          title={title}
-          category={category}
-          content={content}
-          contentType="guide"
-          externalInstruction={refineInstruction}
-          onExternalInstructionUsed={() => setRefineInstruction('')}
-          onRefined={(draft) => {
-            const d = draft as Record<string, unknown>
-            const refinedContent = [
-              draft.introduction,
-              ...(draft.sections ?? []).map((s) => {
-                const bodyHtml = s.body.split(/\n\n+/).map((p) => `<p>${p.trim()}</p>`).join('\n')
-                return `<h2>${s.heading}</h2>\n${bodyHtml}`
-              }),
-              draft.conclusion ? `<h2>Wrapping Up</h2>\n<p>${draft.conclusion}</p>` : '',
-            ].filter(Boolean).join('\n\n')
-            const { content: merged } = preserveImagesAcrossRefine(content, refinedContent)
-            setPendingRefine({
-              content: merged,
-              title:        draft.title,
-              excerpt:      draft.excerpt,
-              tldr:         d.tldr as string | undefined,
-              keyTakeaways: d.keyTakeaways as string[] | undefined,
-              faqs:         d.faqs as FAQ[] | undefined,
-            })
-          }}
-        />
-
-        <div>
-          <label className="block text-sm text-prose-muted mb-1.5">Content</label>
-          <TiptapEditor
-            value={content}
-            onChange={setContent}
-            targetWords={CATEGORIES.find(c => c.slug === category)?.targetWords}
-            enableCollectionEmbed
-          />
-          <p className="mt-1.5 text-xs text-prose-faint">
-            Use <code className="text-accent-text-soft">[[BUY:product-slug]]</code> inline for product mentions — resolves to a link on save.
-          </p>
-        </div>
-
-        {/* ── CONTENT BLOCKS ───────────────────────────────────────────── */}
-        <div className="pt-6 border-t border-soft">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Content Blocks</p>
-          <p className="text-xs text-prose-faint mb-4">Render as structured UI elements on the public page — not prose. Generated by AI drafts; edit freely.</p>
-          <div className="space-y-6">
-
-            {/* TL;DR */}
-            <div>
-              <label className="block text-sm text-prose-muted mb-1.5">TL;DR <span className="text-prose-faint font-normal">— 2–3 sentence skimmer summary</span></label>
-              <textarea
-                value={tldr}
-                onChange={(e) => setTldr(e.target.value)}
-                rows={3}
-                placeholder="e.g. Choosing the right formula comes down to three things: your baby's digestive needs, your budget, and how they respond in the first week. Most healthy full-term babies do fine on any standard formula. If you see gassiness or fussiness, a gentle or sensitive version is worth trying before going straight to specialty."
-                className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-y text-sm"
-              />
+          {/* FAQs */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm text-prose-muted">FAQs</label>
+              <button
+                type="button"
+                onClick={() => setFaqs([...faqs, { question: '', answer: '' }])}
+                className="text-xs text-accent-text-soft hover:text-accent transition-colors"
+              >
+                + Add question
+              </button>
             </div>
-
-            {/* Key Takeaways */}
-            <div>
-              <ListEditor
-                label="Key Takeaways"
-                items={keyTakeaways}
-                onChange={setKeyTakeaways}
-                placeholder="e.g. Most babies don't need specialty formula — start with standard"
-                accent="text-accent-text-soft"
-              />
-            </div>
-
-            {/* FAQs */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-sm text-prose-muted">FAQs</label>
-                <button
-                  type="button"
-                  onClick={() => setFaqs([...faqs, { question: '', answer: '' }])}
-                  className="text-xs text-accent-text-soft hover:text-accent transition-colors"
-                >
-                  + Add question
-                </button>
-              </div>
-              <div className="space-y-3">
-                {faqs.map((faq, i) => (
-                  <div key={i} className="bg-surface border border-soft rounded-xl p-3 space-y-2">
-                    <div className="flex items-start gap-2">
-                      <span className="text-xs text-prose-faint mt-2 shrink-0">Q</span>
-                      <input
-                        type="text"
-                        value={faq.question}
-                        onChange={(e) => setFaqs(faqs.map((f, j) => j === i ? { ...f, question: e.target.value } : f))}
-                        placeholder="e.g. How do I know if my baby needs a different formula?"
-                        className="flex-1 px-3 py-1.5 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setFaqs(faqs.filter((_, j) => j !== i))}
-                        className="text-prose-faint hover:text-red-700 transition-colors text-xs mt-2"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-xs text-prose-faint mt-2 shrink-0">A</span>
-                      <textarea
-                        value={faq.answer}
-                        onChange={(e) => setFaqs(faqs.map((f, j) => j === i ? { ...f, answer: e.target.value } : f))}
-                        placeholder="2–3 sentences. Direct and practical."
-                        rows={2}
-                        className="flex-1 px-3 py-1.5 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none"
-                      />
-                    </div>
+            <div className="space-y-3">
+              {faqs.map((faq, i) => (
+                <div key={i} className="bg-surface border border-soft rounded-xl p-3 space-y-2">
+                  <div className="flex items-start gap-2">
+                    <span className="text-xs text-prose-faint mt-2 shrink-0">Q</span>
+                    <input
+                      type="text"
+                      value={faq.question}
+                      onChange={(e) => setFaqs(faqs.map((f, j) => j === i ? { ...f, question: e.target.value } : f))}
+                      placeholder="e.g. How do I know if my baby needs a different formula?"
+                      className="flex-1 px-3 py-1.5 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFaqs(faqs.filter((_, j) => j !== i))}
+                      className="text-prose-faint hover:text-red-700 transition-colors text-xs mt-2"
+                    >
+                      ✕
+                    </button>
                   </div>
-                ))}
-                {faqs.length === 0 && (
-                  <p className="text-xs text-prose-faint italic">No FAQs yet. Add questions readers commonly search for — great for SEO.</p>
-                )}
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        {/* ── MEDIA ────────────────────────────────────────────────────── */}
-        <div className="pt-6 border-t border-soft">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Media</p>
-          <div className="space-y-4">
-            <div className="bg-surface/50 border border-soft rounded-xl p-4 space-y-1.5">
-              <p className="text-xs text-prose-faint font-medium uppercase tracking-widest mb-3">Hero image</p>
-              <HeroImagePanel
-                imageUrl={imageUrl}
-                onChange={setImageUrl}
-                contentType="guide"
-                title={title}
-                category={category}
-                excerpt={excerpt}
-                initialPrompt={heroPromptSuggestion}
-              />
-            </div>
-            <div className="bg-surface/50 border border-soft rounded-xl p-4">
-              <p className="text-xs text-prose-faint font-medium uppercase tracking-widest mb-3">Inline images</p>
-              <InlineMediaPanel
-                content={content}
-                onChangeContent={setContent}
-                category={category}
-              />
+                  <div className="flex items-start gap-2">
+                    <span className="text-xs text-prose-faint mt-2 shrink-0">A</span>
+                    <textarea
+                      value={faq.answer}
+                      onChange={(e) => setFaqs(faqs.map((f, j) => j === i ? { ...f, answer: e.target.value } : f))}
+                      placeholder="2–3 sentences. Direct and practical."
+                      rows={2}
+                      className="flex-1 px-3 py-1.5 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none"
+                    />
+                  </div>
+                </div>
+              ))}
+              {faqs.length === 0 && (
+                <p className="text-xs text-prose-faint italic">No FAQs yet. Add questions readers commonly search for — great for SEO.</p>
+              )}
             </div>
           </div>
-        </div>
 
-        {/* ── PRODUCT & MONETIZATION ───────────────────────────────────── */}
-        <div className="pt-6 border-t border-soft">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Product &amp; Monetization</p>
-          <ProductLinkPanel
+        </div>
+      </div>
+
+      {/* ── MEDIA ────────────────────────────────────────────────────── */}
+      <div className="pt-6 border-t border-soft">
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Media</p>
+        <div className="space-y-4">
+          <div className="bg-surface/50 border border-soft rounded-xl p-4 space-y-1.5">
+            <p className="text-xs text-prose-faint font-medium uppercase tracking-widest mb-3">Hero image</p>
+            <HeroImagePanel
+              imageUrl={imageUrl}
+              onChange={setImageUrl}
+              contentType="guide"
+              title={title}
+              category={category}
+              excerpt={excerpt}
+              initialPrompt={heroPromptSuggestion}
+            />
+          </div>
+          <div className="bg-surface/50 border border-soft rounded-xl p-4">
+            <p className="text-xs text-prose-faint font-medium uppercase tracking-widest mb-3">Inline images</p>
+            <InlineMediaPanel
+              content={content}
+              onChangeContent={setContent}
+              category={category}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ── PRODUCT & MONETIZATION ───────────────────────────────────── */}
+      <div className="pt-6 border-t border-soft">
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Product &amp; Monetization</p>
+        <ProductLinkPanel
+          content={content}
+          onChangeContent={setContent}
+        />
+      </div>
+
+      {/* ── DISTRIBUTION ─────────────────────────────────────────────── */}
+      <div className="pt-6 border-t border-soft">
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Distribution</p>
+        <div className="space-y-6">
+          <SEOPanel
+            metaTitle={metaTitle}
+            metaDescription={metaDesc}
+            fallbackTitle={title}
+            fallbackDescription={excerpt}
+            slug={article.slug}
+            contentType="guide"
+            onChangeTitle={setMetaTitle}
+            onChangeDescription={setMetaDesc}
+          />
+          {!isPublished && (
+            <SchedulePanel scheduledAt={scheduledAt} onChange={setScheduled} />
+          )}
+          <InternalLinkPanel
+            title={title}
+            excerpt={excerpt}
+            category={category}
+            currentId={article.id}
+            contentType="guide"
             content={content}
             onChangeContent={setContent}
           />
+          <SocialPostsPanel contentType="guide" contentId={article.id} />
         </div>
-
-        {/* ── DISTRIBUTION ─────────────────────────────────────────────── */}
-        <div className="pt-6 border-t border-soft">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Distribution</p>
-          <div className="space-y-6">
-            <SEOPanel
-              metaTitle={metaTitle}
-              metaDescription={metaDesc}
-              fallbackTitle={title}
-              fallbackDescription={excerpt}
-              slug={article.slug}
-              contentType="guide"
-              onChangeTitle={setMetaTitle}
-              onChangeDescription={setMetaDesc}
-            />
-            {!isPublished && (
-              <SchedulePanel scheduledAt={scheduledAt} onChange={setScheduled} />
-            )}
-            <InternalLinkPanel
-              title={title}
-              excerpt={excerpt}
-              category={category}
-              currentId={article.id}
-              contentType="guide"
-              content={content}
-              onChangeContent={setContent}
-            />
-            <SocialPostsPanel contentType="guide" contentId={article.id} />
-          </div>
-        </div>
-
-        {/* ── ADMIN ────────────────────────────────────────────────────── */}
-        <div className="pt-6 border-t border-soft">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Admin</p>
-          <div className="space-y-6">
-            <VersionHistoryPanel contentType="guide" contentId={article.id} />
-            <ModerationInfo
-              score={article.moderation_score}
-              flags={article.moderation_flags ?? []}
-              onAddressFlag={(flag) => {
-                setRefineInstruction(`Address this moderation flag: ${flag}`)
-                document.getElementById('ai-refine-instruction')?.focus()
-                window.scrollTo({ top: 0, behavior: 'smooth' })
-              }}
-            />
-          </div>
-        </div>
-
-        {actionErr && (
-          <p className="text-red-700 text-sm bg-red-50 border border-red-300 rounded-lg px-4 py-3">{actionErr}</p>
-        )}
-        {actionMsg && (
-          <p className="text-forest text-sm bg-green-50 border border-green-300 rounded-lg px-4 py-3">{actionMsg}</p>
-        )}
-
-        <p className="text-xs text-prose-faint">
-          ⌨ <kbd className="px-1 py-0.5 bg-surface-raised rounded">⌘S</kbd> save · <kbd className="px-1 py-0.5 bg-surface-raised rounded">⌘↵</kbd> publish · <kbd className="px-1 py-0.5 bg-surface-raised rounded">⌘Z</kbd> undo · <kbd className="px-1 py-0.5 bg-surface-raised rounded">⌘⇧Z</kbd> redo
-        </p>
-
       </div>
 
-      <WorkspaceToolbar
-        isSaving={autoSave.state === 'saving' || busy}
-        isPublishing={busy}
-        isDeleting={deleting}
-        isPublished={isPublished}
-        onSave={manualSave}
-        onPublish={() => publishOrUnpublish('approve')}
-        onUnpublish={() => publishOrUnpublish('unpublish')}
-        onDelete={handleDelete}
-        onDuplicate={handleDuplicate}
-        previewUrl={previewUrl}
-        readinessChecks={readinessChecks}
-      />
+      {/* ── ADMIN ────────────────────────────────────────────────────── */}
+      <div className="pt-6 border-t border-soft">
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Admin</p>
+        <div className="space-y-6">
+          <VersionHistoryPanel contentType="guide" contentId={article.id} />
+          <ModerationInfo
+            score={article.moderation_score}
+            flags={article.moderation_flags ?? []}
+            onAddressFlag={(flag) => {
+              setRefineInstruction(`Address this moderation flag: ${flag}`)
+              document.getElementById('ai-refine-instruction')?.focus()
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+            }}
+          />
+        </div>
+      </div>
 
-      {pendingRefine && (
-        <RefinePreviewModal
-          before={content}
-          after={pendingRefine.content}
-          onAccept={applyPendingRefine}
-          onDiscard={() => setPendingRefine(null)}
-        />
-      )}
-    </div>
+    </WorkspaceShell>
   )
 }
