@@ -360,7 +360,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                   ['Improved',          'improved',           '↑'],
                   ['Unchanged',         'unchanged',          '→'],
                   ['Declined',          'declined',           '↓'],
-                  ['Complete reversal', 'complete_reversal',  '⚡'],
+                  ['Complete reversal', 'complete_reversal',  '↺'],
                 ] as const).map(([label, val, icon]) => {
                   const active = verdictChange === val
                   return (

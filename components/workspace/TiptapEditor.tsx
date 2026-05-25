@@ -452,7 +452,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
   }
 
   const btn = (active: boolean) =>
-    `px-2 py-1 rounded-lg text-xs font-semibold transition-colors ${active ? 'bg-zinc-800 text-prose' : 'text-prose-muted hover:text-prose hover:bg-zinc-700'}`
+    `inline-flex items-center justify-center min-h-[44px] px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${active ? 'bg-zinc-800 text-prose' : 'text-prose-muted hover:text-prose hover:bg-zinc-700'}`
 
   return (
     <div className="space-y-2">

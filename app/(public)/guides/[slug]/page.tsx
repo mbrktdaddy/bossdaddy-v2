@@ -138,11 +138,36 @@ export default async function GuidePage({ params }: Props) {
     })),
   } : null
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+
+  const articleLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: guide.title,
+    author: { '@type': 'Person', name: author },
+    datePublished: guide.published_at,
+    publisher: { '@type': 'Organization', name: 'Boss Daddy Life', url: siteUrl },
+    url: `${siteUrl}/guides/${slug}`,
+  }
+
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
+      { '@type': 'ListItem', position: 2, name: 'Guides', item: `${siteUrl}/guides` },
+      ...(category ? [{ '@type': 'ListItem', position: 3, name: category.label, item: `${siteUrl}/category/${category.slug}` }] : []),
+      { '@type': 'ListItem', position: category ? 4 : 3, name: guide.title, item: `${siteUrl}/guides/${slug}` },
+    ],
+  }
+
   return (
     <>
       <ReadingProgressBar />
       <ViewTracker id={guide.id} type="guide" />
       <EngagementTracker contentType="guide" contentId={guide.id} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {faqJsonLd && (
         <script
           type="application/ld+json"
@@ -156,8 +181,8 @@ export default async function GuidePage({ params }: Props) {
           <Link href="/guides" className="py-2 inline-block hover:text-prose transition-colors">← Guides</Link>
           {category && (
             <>
-              <span className="text-gray-700">/</span>
-              <Link href={`/category/${category.slug}`} className={`flex items-center gap-1.5 py-2 inline-block hover:text-prose transition-colors ${category.accent}`}>
+              <span className="text-prose-faint">/</span>
+              <Link href={`/category/${category.slug}`} className="flex items-center gap-1.5 py-2 inline-block hover:text-prose transition-colors text-prose-muted">
                 <CategoryIcon slug={category.slug} className="w-4 h-4 text-accent-text" /> {category.label}
               </Link>
             </>

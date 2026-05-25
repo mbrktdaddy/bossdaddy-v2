@@ -57,7 +57,7 @@ const getReview = cache(async (slug: string) => {
   const supabase = await createClient()
   const { data } = await supabase
     .from('reviews')
-    .select('id, title, product_name, category, content, rating, excerpt, image_url, has_affiliate_links, product_slug, published_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, parent_review_id, milestone_label, milestone_days, previous_rating, verdict_change, profiles(username)')
+    .select('id, title, product_name, category, content, rating, excerpt, image_url, has_affiliate_links, product_slug, published_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, parent_review_id, milestone_label, milestone_days, previous_rating, verdict_change, reading_time_minutes, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -184,6 +184,17 @@ export default async function ReviewPage({ params }: Props) {
     }
   }
 
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
+      { '@type': 'ListItem', position: 2, name: 'Reviews', item: `${siteUrl}/reviews` },
+      ...(category ? [{ '@type': 'ListItem', position: 3, name: category.label, item: `${siteUrl}/category/${category.slug}` }] : []),
+      { '@type': 'ListItem', position: category ? 4 : 3, name: review.title, item: `${siteUrl}/reviews/${slug}` },
+    ],
+  }
+
   const faqJsonLd = faqs.length > 0 ? {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -197,6 +208,7 @@ export default async function ReviewPage({ params }: Props) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {faqJsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />}
       <ReadingProgressBar />
       <ViewTracker id={review.id} type="review" />
@@ -291,6 +303,9 @@ export default async function ReviewPage({ params }: Props) {
                   month: 'long', day: 'numeric', year: 'numeric',
                 })}
               </span>
+            )}
+            {review.reading_time_minutes && (
+              <span>{review.reading_time_minutes} min read</span>
             )}
           </div>
 
