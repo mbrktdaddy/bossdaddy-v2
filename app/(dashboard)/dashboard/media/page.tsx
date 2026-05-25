@@ -47,6 +47,8 @@ function AssetCard({
   onAltSave,
   copiedId,
   onCopy,
+  selected,
+  onToggleSelect,
 }: {
   asset: MediaAsset
   productName: string | null
@@ -54,6 +56,8 @@ function AssetCard({
   onAltSave: (id: string, alt: string) => void
   copiedId: string | null
   onCopy: (id: string, url: string) => void
+  selected: boolean
+  onToggleSelect: (id: string) => void
 }) {
   const [editingAlt, setEditingAlt] = useState(false)
   const [altDraft, setAltDraft] = useState(asset.alt_text ?? '')
@@ -101,7 +105,19 @@ function AssetCard({
   }
 
   return (
-    <div className="group relative bg-surface border border-soft rounded-xl overflow-hidden flex flex-col">
+    <div className={`group relative bg-surface border rounded-xl overflow-hidden flex flex-col transition-colors ${selected ? 'border-accent ring-2 ring-accent/40' : 'border-soft'}`}>
+      {/* Multi-select checkbox — always visible top-left; selecting an item
+          enables bulk operations via the page header's action strip. */}
+      <label className="absolute top-2 left-2 z-10 inline-flex items-center justify-center w-6 h-6 bg-surface/95 backdrop-blur border border-strong rounded cursor-pointer hover:bg-surface transition-colors">
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={() => onToggleSelect(asset.id)}
+          className="w-3.5 h-3.5 accent-orange-600 cursor-pointer"
+          aria-label={`Select ${asset.filename}`}
+        />
+      </label>
+
       {/* Thumbnail */}
       <div className="relative aspect-[4/3] bg-surface-sunken overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -223,6 +239,11 @@ export default function MediaLibraryPage() {
   const [usageData, setUsageData] = useState<UsageData | null>(null)
   const [cascadeDeleting, setCascadeDeleting] = useState(false)
 
+  // Multi-select bulk delete. Set of asset IDs the user has checked. A bulk
+  // delete is destructive — confirm via the action strip's red button.
+  const [multiSelected, setMultiSelected] = useState<Set<string>>(new Set())
+  const [bulkDeleting, setBulkDeleting] = useState(false)
+
   // Product filter
   const [products, setProducts] = useState<Product[]>([])
   const [filterProductId, setFilterProductId] = useState<string>('')
@@ -255,6 +276,7 @@ export default function MediaLibraryPage() {
   function handleFilterChange(productId: string) {
     setFilterProductId(productId)
     setPage(1)
+    setMultiSelected(new Set())
   }
 
   async function uploadFiles(files: FileList | File[]) {
@@ -336,6 +358,40 @@ export default function MediaLibraryPage() {
     setUsageData(null)
   }
 
+  function toggleMultiSelect(id: string) {
+    setMultiSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }
+
+  function clearMultiSelect() {
+    setMultiSelected(new Set())
+  }
+
+  // Bulk delete with usage-aware cascade. Each call uses ?confirm=true so
+  // hero references on guides/reviews/products auto-clear (body mentions
+  // can't be auto-fixed, same caveat as the single-delete cascade modal).
+  async function handleBulkDelete() {
+    const ids = Array.from(multiSelected)
+    if (ids.length === 0) return
+    const ok = confirm(
+      `Delete ${ids.length} image${ids.length === 1 ? '' : 's'}?\n\n` +
+      `Hero references will be auto-cleared. Body mentions in articles ` +
+      `or reviews can't be auto-fixed and will become broken image refs.`,
+    )
+    if (!ok) return
+    setBulkDeleting(true)
+    await Promise.allSettled(
+      ids.map((id) => fetch(`/api/media/${id}?confirm=true`, { method: 'DELETE' })),
+    )
+    setAssets((prev) => prev.filter((a) => !multiSelected.has(a.id)))
+    setTotal((t) => Math.max(0, t - ids.length))
+    setMultiSelected(new Set())
+    setBulkDeleting(false)
+  }
+
   const totalPages = Math.ceil(total / LIMIT)
 
   return (
@@ -407,6 +463,32 @@ export default function MediaLibraryPage() {
         </p>
       )}
 
+      {/* Bulk-action strip — appears when one or more cards are checked */}
+      {multiSelected.size > 0 && (
+        <div className="flex items-center justify-between gap-3 mb-4 px-4 py-2.5 bg-accent-tint border border-accent/40 rounded-xl">
+          <p className="text-sm font-semibold text-prose">
+            {multiSelected.size} selected
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={clearMultiSelect}
+              className="text-xs px-3 py-1.5 bg-surface hover:bg-surface-raised border border-soft text-prose-muted hover:text-prose font-semibold rounded-lg transition-colors"
+            >
+              Clear
+            </button>
+            <button
+              type="button"
+              onClick={handleBulkDelete}
+              disabled={bulkDeleting}
+              className="text-xs px-3 py-1.5 bg-red-700 hover:bg-red-600 disabled:opacity-50 text-white font-semibold rounded-lg transition-colors"
+            >
+              {bulkDeleting ? 'Deleting…' : `Delete ${multiSelected.size}`}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Drop zone */}
       <div
         onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
@@ -443,6 +525,8 @@ export default function MediaLibraryPage() {
                 onAltSave={handleAltSave}
                 copiedId={copiedId}
                 onCopy={handleCopy}
+                selected={multiSelected.has(asset.id)}
+                onToggleSelect={toggleMultiSelect}
               />
             ))}
           </div>

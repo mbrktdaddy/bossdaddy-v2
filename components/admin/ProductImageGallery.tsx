@@ -170,6 +170,37 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
     if (isPrimary) onPrimaryChange(url)
   }
 
+  // Multi-pick variant — assigns each selected library asset to this product.
+  // The first incoming image becomes primary only when the gallery is empty;
+  // subsequent images go in as secondary.
+  async function handleMultiPickFromLibrary(items: { assetId?: string; url: string }[]) {
+    setShowPicker(false)
+    setError(null)
+    const valid = items.filter((i): i is { assetId: string; url: string } => !!i.assetId)
+    if (valid.length === 0) {
+      setError('Could not identify selected assets — try uploading directly.')
+      return
+    }
+    const startedEmpty = images.length === 0
+    let firstUrl: string | null = null
+    for (let i = 0; i < valid.length; i++) {
+      const isPrimary = startedEmpty && i === 0
+      if (isPrimary) firstUrl = valid[i].url
+      const res = await fetch(`/api/media/${valid[i].assetId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: productId, is_primary: isPrimary }),
+      })
+      if (!res.ok) {
+        const j = await res.json()
+        setError(j.error ?? `Failed to assign image ${i + 1} of ${valid.length}`)
+        // Don't bail — keep going so partial assignment isn't lost
+      }
+    }
+    await load()
+    if (firstUrl) onPrimaryChange(firstUrl)
+  }
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -209,6 +240,8 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
         <MediaPicker
           onSelect={handlePickFromLibrary}
           onClose={() => setShowPicker(false)}
+          multi
+          onMultiSelect={(items) => handleMultiPickFromLibrary(items)}
         />
       )}
 
