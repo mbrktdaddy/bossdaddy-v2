@@ -237,7 +237,7 @@ export function MerchForm({ item }: Props) {
               onChange={(e) => setFeatured(e.target.checked)}
               className="sr-only"
             />
-            <div className={`w-10 h-6 rounded-full transition-colors ${featured ? 'bg-accent' : 'bg-zinc-300'}`} />
+            <div className={`w-10 h-6 rounded-full transition-colors ${featured ? 'bg-accent' : 'bg-zinc-600'}`} />
             <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${featured ? 'translate-x-4' : 'translate-x-0'}`} />
           </div>
           <div>

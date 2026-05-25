@@ -82,7 +82,7 @@ export default async function AdminMerchListPage() {
                   <p className="text-xs text-prose-faint mt-0.5">
                     <code className="text-accent-text-soft">{p.slug}</code>
                     <span className="ml-3">{formatPrice(p.price_cents) || 'no price'}</span>
-                    <span className="ml-3 text-gray-700">pos {p.position}</span>
+                    <span className="ml-3 text-prose-faint">pos {p.position}</span>
                   </p>
                 </div>
 

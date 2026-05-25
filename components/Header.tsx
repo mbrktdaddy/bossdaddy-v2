@@ -320,7 +320,7 @@ export default function Header({ username }: HeaderProps) {
               {userMenuOpen && (
                 <div className="absolute right-0 top-full mt-2 w-56 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl shadow-zinc-950/60 p-1.5 z-50">
                   <div className="px-3 py-2 border-b border-zinc-800 mb-1">
-                    <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">Signed in as</p>
+                    <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Signed in as</p>
                     <p className="text-sm font-bold text-zinc-100 truncate">@{username}</p>
                   </div>
                   <Link
@@ -497,7 +497,7 @@ export default function Header({ username }: HeaderProps) {
                     {username[0].toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">Signed in as</p>
+                    <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Signed in as</p>
                     <p className="text-sm font-bold text-zinc-100 truncate">@{username}</p>
                   </div>
                 </div>

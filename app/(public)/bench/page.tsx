@@ -102,7 +102,7 @@ export default async function BenchPage() {
 
       {!hasContent ? (
         <div className="bg-surface/40 rounded-xl p-12 text-center">
-          <p className="text-prose-faint font-semibold">Loading up the bench. Check back soon.</p>
+          <p className="text-prose-faint font-semibold">Nothing on the bench yet. Check back soon.</p>
         </div>
       ) : (
         <div className="space-y-12">

@@ -366,7 +366,7 @@ export function ReviewCreateWizard() {
               D{previewDraft.subScores.dailyUse ?? '—'}
               {previewDraft.wouldRebuy != null && (
                 <>
-                  <span className="mx-2 text-gray-700">|</span>
+                  <span className="mx-2 text-prose-faint">|</span>
                   <span className="text-accent-text-soft font-semibold">Re-buy:</span>{' '}
                   {previewDraft.wouldRebuy ? 'Yes' : 'No'}
                 </>

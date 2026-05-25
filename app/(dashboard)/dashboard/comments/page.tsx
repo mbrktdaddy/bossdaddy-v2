@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAdmin } from '@/lib/auth-cache'
 import { CommentActions } from './_components/CommentActions'
 
 interface Props {
@@ -13,6 +14,7 @@ const STATUS_TABS = [
 ]
 
 export default async function CommentsPage({ searchParams }: Props) {
+  await requireAdmin()
   const { status = 'pending' } = await searchParams
   const admin = createAdminClient()
 

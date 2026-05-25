@@ -574,6 +574,7 @@ function GearCard({
             src={r.image_url}
             alt={r.product_name}
             fill
+            priority={isHero}
             className="object-cover group-hover:scale-105 transition-transform duration-300"
             sizes={
               isHero

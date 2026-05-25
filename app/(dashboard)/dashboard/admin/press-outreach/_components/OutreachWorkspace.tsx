@@ -38,7 +38,7 @@ const METHOD_LABELS: Record<ContactMethod, string> = {
 const STATUS_CONFIG: Record<OutreachStatus, { label: string; classes: string }> = {
   draft:       { label: 'Draft',       classes: 'bg-surface-raised text-prose-muted border-strong' },
   sent:        { label: 'Sent',        classes: 'bg-blue-950/40 text-blue-300 border-blue-700/40' },
-  responded:   { label: 'Responded',   classes: 'bg-green-950/40 text-forest border-green-700/40/50' },
+  responded:   { label: 'Responded',   classes: 'bg-green-950/40 text-forest border-green-700/40' },
   no_response: { label: 'No Response', classes: 'bg-amber-950/50 text-amber-400 border-amber-800/50' },
   follow_up:   { label: 'Follow Up',   classes: 'bg-accent-tint text-accent-text-soft border-accent-border/50' },
 }
@@ -425,7 +425,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs text-prose-faint mb-1.5">Contact name <span className="text-gray-700">(optional)</span></label>
+                <label className="block text-xs text-prose-faint mb-1.5">Contact name <span className="text-prose-faint">(optional)</span></label>
                 <input
                   value={contactName}
                   onChange={e => setContactName(e.target.value)}
@@ -454,7 +454,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                 <div>
                   <label className="block text-xs text-prose-faint mb-1.5">
                     {method === 'web_form' ? 'Form URL' : 'Amazon seller URL'}
-                    <span className="text-gray-700 ml-1">(optional)</span>
+                    <span className="text-prose-faint ml-1">(optional)</span>
                   </label>
                   <input
                     type="url"
@@ -471,7 +471,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
 
               {method === 'phone' && (
                 <div>
-                  <label className="block text-xs text-prose-faint mb-1.5">Phone number <span className="text-gray-700">(optional)</span></label>
+                  <label className="block text-xs text-prose-faint mb-1.5">Phone number <span className="text-prose-faint">(optional)</span></label>
                   <input
                     type="tel"
                     inputMode="tel"
@@ -529,7 +529,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
 
           {/* Action row — stack on mobile, row on desktop */}
           <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <p className="text-xs text-gray-700 order-2 sm:order-1">
+            <p className="text-xs text-prose-faint order-2 sm:order-1">
               Sending from <span className="text-prose-faint">boss@bossdaddylife.com</span>
             </p>
             <div className="order-1 sm:order-2">
@@ -621,7 +621,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                       </span>
                     </div>
                     <p className="text-xs text-prose-faint truncate">{record.product_name}</p>
-                    <p className="text-xs text-gray-700 mt-0.5 truncate">
+                    <p className="text-xs text-prose-faint mt-0.5 truncate">
                       {record.contact_email ?? record.contact_url ?? '—'}
                       {record.sent_at && <span className="ml-2">· {formatDate(record.sent_at)}</span>}
                     </p>

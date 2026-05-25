@@ -76,8 +76,8 @@ export default async function SearchPage({ searchParams }: Props) {
  <div>
  <p className="text-sm text-prose-faint mb-6">
  {total > 0
- ? `${total} result${total === 1 ? '' : 's'} for"${query}"`
- : `No results for"${query}"`}
+ ? `${total} result${total === 1 ? '' : 's'} for "${query}"`
+ : `No results for "${query}"`}
  </p>
 
  {total === 0 && (

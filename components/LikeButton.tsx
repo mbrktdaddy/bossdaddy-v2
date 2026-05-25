@@ -48,6 +48,8 @@ export default function LikeButton({ contentType, contentId, size = 'md' }: Prop
       <button
         onClick={toggle}
         disabled={loading}
+        aria-pressed={liked}
+        aria-label={liked ? 'Unlike' : 'Like'}
         className={`flex items-center gap-1.5 text-xs transition-colors disabled:opacity-50 ${
           liked ? 'text-red-300' : 'text-prose-faint hover:text-prose-muted'
         }`}
@@ -70,6 +72,8 @@ export default function LikeButton({ contentType, contentId, size = 'md' }: Prop
     <button
       onClick={toggle}
       disabled={loading}
+      aria-pressed={liked}
+      aria-label={liked ? 'Unlike' : 'Like'}
       className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all disabled:opacity-50 ${
         liked
           ? 'bg-red-950/40 border-red-700/40 text-red-300 hover:bg-red-950/40'

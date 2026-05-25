@@ -9,13 +9,13 @@ export const metadata: Metadata = { title: 'Orders — Admin' }
 type OrderStatus = 'pending_payment' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded'
 
 const STATUS_STYLES: Record<OrderStatus, { label: string; cls: string }> = {
-  pending_payment: { label: 'Pending',    cls: 'bg-surface-raised text-prose-muted' },
-  paid:            { label: 'Paid',       cls: 'bg-amber-950/60 text-amber-400' },
-  processing:      { label: 'Processing', cls: 'bg-blue-950/40 text-blue-300' },
-  shipped:         { label: 'Shipped',    cls: 'bg-green-950/40 text-forest' },
-  delivered:       { label: 'Delivered',  cls: 'bg-green-950/40 text-forest' },
-  cancelled:       { label: 'Cancelled',  cls: 'bg-red-950/40 text-red-300' },
-  refunded:        { label: 'Refunded',   cls: 'bg-accent-tint text-accent-text-soft' },
+  pending_payment: { label: 'Pending',    cls: 'bg-surface-raised border-strong text-prose-muted' },
+  paid:            { label: 'Paid',       cls: 'bg-amber-950/60 border-amber-700/40 text-amber-400' },
+  processing:      { label: 'Processing', cls: 'bg-blue-950/40 border-blue-700/40 text-blue-300' },
+  shipped:         { label: 'Shipped',    cls: 'bg-green-950/40 border-green-700/40 text-forest' },
+  delivered:       { label: 'Delivered',  cls: 'bg-green-950/40 border-green-700/40 text-forest' },
+  cancelled:       { label: 'Cancelled',  cls: 'bg-red-950/40 border-red-700/40 text-red-300' },
+  refunded:        { label: 'Refunded',   cls: 'bg-accent-tint border-accent-border/50 text-accent-text-soft' },
 }
 
 export default async function AdminOrdersPage() {
@@ -67,7 +67,8 @@ export default async function AdminOrdersPage() {
           <p className="text-prose-faint text-sm">Orders will appear here after your first Stripe checkout.</p>
         </div>
       ) : (
-        <div className="bg-surface border border-soft rounded-xl overflow-hidden">
+        <div className="bg-surface border border-soft rounded-xl overflow-x-auto">
+          <div className="min-w-[640px]">
 
           {/* Table header */}
           <div className="grid grid-cols-[1fr_1fr_auto_auto_auto] gap-4 px-5 py-3 border-b border-soft text-xs text-prose-faint uppercase tracking-widest font-semibold">
@@ -103,7 +104,7 @@ export default async function AdminOrdersPage() {
                   <p className="text-prose-faint text-xs mt-0.5">{date}</p>
                 </div>
                 <p className="text-prose-muted text-sm truncate">{order.email}</p>
-                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${badge.cls}`}>
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${badge.cls}`}>
                   {badge.label}
                 </span>
                 <p className="text-accent-text-soft font-bold text-sm text-right">
@@ -115,6 +116,7 @@ export default async function AdminOrdersPage() {
               </div>
             )
           })}
+          </div>
         </div>
       )}
     </div>

@@ -31,6 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const occ = getOccasion(slug)
   if (!occ) return { title: 'Not Found' }
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+  const ogImage = `${siteUrl}/api/og?title=${encodeURIComponent(occ.metaTitle)}&type=guide`
   return {
     title: occ.metaTitle,
     description: occ.metaDesc,
@@ -39,7 +40,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: occ.metaTitle,
       description: occ.metaDesc,
       url: `${siteUrl}/gifts/${occ.slug}`,
+      images: [{ url: ogImage, width: 1200, height: 630 }],
     },
+    twitter: { card: 'summary_large_image', title: occ.metaTitle, description: occ.metaDesc, images: [ogImage] },
   }
 }
 
