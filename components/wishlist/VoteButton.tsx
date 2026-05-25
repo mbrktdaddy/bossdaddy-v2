@@ -21,14 +21,20 @@ export function VoteButton({ itemId, initialVoted, initialCount, isAuthenticated
 
   async function handleClick() {
     if (!isAuthenticated) { setShowModal(true); return }
-    setLoading(true)
     setError(null)
+    const prevVoted = voted
+    const prevCount = count
+    setVoted(!voted)
+    setCount((c) => c + (voted ? -1 : 1))
+    setLoading(true)
     const res = await fetch(`/api/wishlist/${itemId}/vote`, { method: 'POST' })
     if (res.ok) {
       const json = await res.json()
       setVoted(json.voted)
       setCount(json.vote_count)
     } else {
+      setVoted(prevVoted)
+      setCount(prevCount)
       setError('Could not save your vote. Try again.')
     }
     setLoading(false)

@@ -40,7 +40,7 @@ export async function notifyWishlistSubscribers({ itemId, status, reviewSlug }: 
   // Fetch subscribers — for 'reviewed' status, only those not yet notified
   let subsQuery = admin
     .from('wishlist_subscriptions')
-    .select('id, user_id')
+    .select('id, user_id, unsubscribe_token')
     .eq('wishlist_item_id', itemId)
   if (status === 'reviewed') {
     subsQuery = subsQuery.eq('notified', false)
@@ -68,6 +68,7 @@ export async function notifyWishlistSubscribers({ itemId, status, reviewSlug }: 
         itemImageUrl: item.image_url as string | null,
         reviewSlug: reviewSlug ?? null,
         siteUrl,
+        unsubscribeToken: (sub as { unsubscribe_token?: string | null }).unsubscribe_token ?? null,
       }),
     })
 

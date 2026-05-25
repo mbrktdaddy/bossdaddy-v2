@@ -1629,6 +1629,7 @@ export type Database = {
           id: string
           notified: boolean
           notified_at: string | null
+          unsubscribe_token: string
           user_id: string
           wishlist_item_id: string
         }
@@ -1637,6 +1638,7 @@ export type Database = {
           id?: string
           notified?: boolean
           notified_at?: string | null
+          unsubscribe_token?: string
           user_id: string
           wishlist_item_id: string
         }
@@ -1645,6 +1647,7 @@ export type Database = {
           id?: string
           notified?: boolean
           notified_at?: string | null
+          unsubscribe_token?: string
           user_id?: string
           wishlist_item_id?: string
         }

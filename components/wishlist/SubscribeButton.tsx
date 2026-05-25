@@ -19,13 +19,16 @@ export function SubscribeButton({ itemId, initialSubscribed, isAuthenticated }: 
 
   async function handleClick() {
     if (!isAuthenticated) { setShowModal(true); return }
-    setLoading(true)
     setError(null)
+    const prevSubscribed = subscribed
+    setSubscribed(!subscribed)
+    setLoading(true)
     const res = await fetch(`/api/wishlist/${itemId}/subscribe`, { method: 'POST' })
     if (res.ok) {
       const json = await res.json()
       setSubscribed(json.subscribed)
     } else {
+      setSubscribed(prevSubscribed)
       setError('Could not update subscription. Try again.')
     }
     setLoading(false)

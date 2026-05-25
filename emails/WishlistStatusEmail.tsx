@@ -9,6 +9,7 @@ interface Props {
   itemImageUrl?: string | null
   reviewSlug?: string | null  // only present for 'reviewed' status
   siteUrl: string
+  unsubscribeToken?: string | null
 }
 
 const CONFIG: Record<WishlistStatus, {
@@ -49,10 +50,11 @@ const CONFIG: Record<WishlistStatus, {
   },
 }
 
-export function WishlistStatusEmail({ status, itemTitle, itemSlug, itemImageUrl, reviewSlug, siteUrl }: Props) {
+export function WishlistStatusEmail({ status, itemTitle, itemSlug, itemImageUrl, reviewSlug, siteUrl, unsubscribeToken }: Props) {
   const cfg = CONFIG[status]
   const ctaUrl = `${siteUrl}${cfg.ctaPath({ slug: itemSlug, reviewSlug })}`
   const benchUrl = `${siteUrl}/bench/${itemSlug}`
+  const unsubscribeUrl = unsubscribeToken ? `${siteUrl}/api/wishlist/unsubscribe?token=${unsubscribeToken}` : null
 
   return (
     <html>
@@ -170,6 +172,12 @@ export function WishlistStatusEmail({ status, itemTitle, itemSlug, itemImageUrl,
                     </p>
                     <p style={{ margin: 0, fontSize: '11px', color: '#6b6b6b' }}>
                       <a href={`${siteUrl}/dashboard/profile`} style={{ color: '#9ca3af', textDecoration: 'underline' }}>Manage notifications</a>
+                      {unsubscribeUrl && (
+                        <>
+                          {' · '}
+                          <a href={unsubscribeUrl} style={{ color: '#9ca3af', textDecoration: 'underline' }}>Unsubscribe</a>
+                        </>
+                      )}
                       {' · '}
                       <a href={siteUrl} style={{ color: '#9ca3af', textDecoration: 'none' }}>BossDaddyLife.com</a>
                     </p>
