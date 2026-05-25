@@ -48,12 +48,13 @@ export default async function AccountSettingsPage() {
         .toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     : null
 
-  // Fetch activity stats
+  // Fetch activity stats + bench subscriptions in parallel
   const [
     { count: commentCount },
     { count: likesGiven },
     { data: likedReviewLinks },
     { data: likedArticleLinks },
+    { data: benchSubs },
   ] = await Promise.all([
     supabase.from('comments').select('id', { count: 'exact', head: true }).eq('author_id', user.id),
     supabase.from('likes').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
@@ -61,6 +62,11 @@ export default async function AccountSettingsPage() {
       .order('created_at', { ascending: false }).limit(10),
     supabase.from('likes').select('content_id').eq('user_id', user.id).eq('content_type', 'guide')
       .order('created_at', { ascending: false }).limit(10),
+    supabase.from('wishlist_subscriptions')
+      .select('wishlist_item_id, wishlist_items(id, slug, title, status)')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(20),
   ])
 
   const likedReviewIds  = likedReviewLinks?.map(l => l.content_id) ?? []
@@ -82,6 +88,18 @@ export default async function AccountSettingsPage() {
   const orderedLikedReviews  = likedReviewIds.map(id => reviewMap.get(id)).filter(Boolean)
   const orderedLikedArticles = likedArticleIds.map(id => articleMap.get(id)).filter(Boolean)
   const hasLikedContent = orderedLikedReviews.length > 0 || orderedLikedArticles.length > 0
+
+  type BenchItem = { id: string; slug: string; title: string; status: string }
+  const subscribedItems: BenchItem[] = (benchSubs ?? [])
+    .map(s => s.wishlist_items as BenchItem | null)
+    .filter((item): item is BenchItem => item !== null)
+
+  const BENCH_STATUS_LABEL: Record<string, string> = {
+    queued:      'Up next',
+    testing:     'Testing',
+    considering: 'Considering',
+    reviewed:    'Reviewed',
+  }
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
@@ -163,6 +181,31 @@ export default async function AccountSettingsPage() {
                 <div className="min-w-0">
                   <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate">{a.title}</p>
                 </div>
+                <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 ml-auto transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Following on the Bench */}
+      <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Following on the Bench</p>
+        {subscribedItems.length === 0 ? (
+          <p className="text-sm text-prose-faint text-center py-4">
+            Not following anything yet —{' '}
+            <Link href="/bench" className="text-accent-text-soft hover:underline">visit the Bench</Link>
+            {' '}to subscribe for review updates.
+          </p>
+        ) : (
+          <div className="space-y-1">
+            {subscribedItems.map((item) => (
+              <Link key={item.id} href={`/bench/${item.slug}`}
+                className="flex items-center gap-3 p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-surface-raised text-prose-muted border border-strong shrink-0">
+                  {BENCH_STATUS_LABEL[item.status] ?? item.status}
+                </span>
+                <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate min-w-0">{item.title}</p>
                 <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 ml-auto transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </Link>
             ))}
