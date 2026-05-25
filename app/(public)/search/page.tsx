@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getCategoryBySlug } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
+import BenchStrip from '@/components/BenchStrip'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -155,6 +156,10 @@ export default async function SearchPage({ searchParams }: Props) {
  <p className="text-prose-faint">Type something above to search reviews and guides.</p>
  </div>
  )}
+
+ <div className="mt-16">
+   <BenchStrip ctaText="See what's coming up" />
+ </div>
  </div>
  )
 }

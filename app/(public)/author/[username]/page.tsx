@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getCategoryBySlug } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
+import BenchStrip from '@/components/BenchStrip'
 import type { Metadata } from 'next'
 
 export const revalidate = 3600
@@ -197,6 +198,10 @@ export default async function AuthorPage({ params }: Props) {
  <p className="text-prose-faint">No published content yet.</p>
  </div>
  )}
+
+ <div className="mt-16">
+   <BenchStrip ctaText="See what's on the bench" />
+ </div>
 
  </div>
  )

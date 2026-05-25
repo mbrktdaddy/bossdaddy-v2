@@ -5,6 +5,7 @@ import { CATEGORIES, getCategoryBySlug } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
 import GuidesGrid from './_components/GuidesGrid'
 import FeaturedGuideCard from '@/components/FeaturedGuideCard'
+import BenchStrip from '@/components/BenchStrip'
 const PER_PAGE = 12
 import type { GuideRow } from './actions'
 import type { Metadata } from 'next'
@@ -218,6 +219,10 @@ export default async function GuidesPage({ searchParams }: Props) {
       ) : (
         <GuidesGrid initialItems={guides} total={count ?? 0} category={category} />
       )}
+
+      <div className="mt-16">
+        <BenchStrip ctaText="See what's coming up" />
+      </div>
     </div>
   )
 }
