@@ -98,7 +98,7 @@ export default async function GuidesPage({ searchParams }: Props) {
         {/* Category filter — horizontal scroll strip */}
         <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
           <Link href="/guides"
-            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-prose text-background border border-prose shadow-sm shadow-zinc-950/40 transition-colors">
+            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-prose text-background border border-prose shadow-sm shadow-black/10 transition-colors">
             All Guides
           </Link>
           {CATEGORIES.map((c) => (
@@ -202,7 +202,7 @@ export default async function GuidesPage({ searchParams }: Props) {
           <Link key={c.slug} href={`/guides/category/${c.slug}`}
             className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
               category === c.slug
-                ? 'bg-prose text-background border border-prose shadow-sm shadow-zinc-950/40'
+                ? 'bg-prose text-background border border-prose shadow-sm shadow-black/10'
                 : 'bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose'
             }`}>
             <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
@@ -246,7 +246,7 @@ function GuideRowItem({ guide: a }: { guide: GuideRow }) {
             sizes="(max-width: 640px) 80px, 96px"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-surface-raised/50 to-surface/40 flex items-center justify-center">
+          <div className="w-full h-full bg-surface-raised flex items-center justify-center">
             <CategoryIcon slug={a.category} className="w-6 h-6 text-accent-text/40" />
           </div>
         )}

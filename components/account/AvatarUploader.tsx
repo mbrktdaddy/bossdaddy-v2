@@ -95,13 +95,13 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
               type="button"
               onClick={handleRemove}
               disabled={busy}
-              className="px-3 py-1.5 bg-transparent hover:bg-red-950/40 border border-soft hover:border-red-700/40 disabled:opacity-50 text-xs font-semibold text-prose-muted hover:text-red-300 rounded-lg transition-colors"
+              className="px-3 py-1.5 bg-transparent hover:bg-red-50 border border-soft hover:border-red-300 disabled:opacity-50 text-xs font-semibold text-prose-muted hover:text-red-700 rounded-lg transition-colors"
             >
               Remove
             </button>
           )}
         </div>
-        {error && <p className="text-xs text-red-300 mt-1">{error}</p>}
+        {error && <p className="text-xs text-red-700 mt-1">{error}</p>}
       </div>
 
       <input

@@ -30,8 +30,8 @@ function countLabel(value: string, recommended: number) {
   const color = {
     empty: 'text-prose-faint',
     ok:    'text-prose-faint',
-    close: 'text-amber-300',
-    over:  'text-red-300',
+    close: 'text-amber-700',
+    over:  'text-red-700',
   }[state]
   return <span className={`text-xs font-mono ${color}`}>{len}/{recommended}</span>
 }
@@ -77,9 +77,9 @@ export function SEOPanel({
     <details className="bg-surface border border-soft rounded-xl" open={defaultOpen}>
       <summary className="cursor-pointer px-4 py-3 text-sm font-semibold flex items-center justify-between">
         <span className="flex items-center gap-2">
-          <span className="text-blue-300">🔍</span> SEO
+          <span className="text-blue-700">🔍</span> SEO
           {(!metaTitle && !metaDescription) && (
-            <span className="text-xs text-amber-300/80 font-normal">· not filled in</span>
+            <span className="text-xs text-amber-700/80 font-normal">· not filled in</span>
           )}
         </span>
         <span className="text-xs text-prose-faint">meta_title + meta_description</span>
@@ -97,7 +97,7 @@ export function SEOPanel({
           >
             {generating ? 'Generating…' : '✨ Generate with AI'}
           </button>
-          {genError && <span className="text-xs text-red-300">{genError}</span>}
+          {genError && <span className="text-xs text-red-700">{genError}</span>}
         </div>
 
         {/* Meta title */}
@@ -159,7 +159,7 @@ export function SEOPanel({
           <p className="text-xs text-prose-faint uppercase tracking-wider font-semibold mb-2">Search preview</p>
           <div className="bg-surface-sunken border border-soft rounded-lg p-4 space-y-1">
             <p className="text-xs text-prose-faint font-mono truncate">{previewUrl}</p>
-            <p className="text-base text-blue-300 leading-tight line-clamp-1">{displayTitle}</p>
+            <p className="text-base text-blue-700 leading-tight line-clamp-1">{displayTitle}</p>
             <p className="text-xs text-prose-muted leading-snug line-clamp-2">{displayDescription || <span className="italic text-prose-faint">Add a description to see the full preview</span>}</p>
           </div>
         </div>

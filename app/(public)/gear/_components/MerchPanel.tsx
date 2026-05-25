@@ -42,7 +42,7 @@ export async function MerchPanel() {
 
         {isEmpty ? (
           /* Empty state — tight callout + email capture */
-          <div className="bg-surface rounded-xl shadow-lg shadow-black/30 px-6 py-8 sm:px-8 sm:py-10">
+          <div className="bg-surface rounded-xl shadow-lg shadow-black/5 px-6 py-8 sm:px-8 sm:py-10">
             <div className="flex flex-col sm:flex-row sm:items-center gap-6">
               <div className="flex-1">
                 <p className="text-base text-prose-muted leading-relaxed">
@@ -87,7 +87,7 @@ export async function MerchPanel() {
                       </div>
                     )}
                     {!isAvailable && (
-                      <div className="absolute top-3 left-3 bg-accent-tint/90 backdrop-blur-sm px-2.5 py-1 rounded-full shadow-md shadow-black/30">
+                      <div className="absolute top-3 left-3 bg-accent-tint/90 backdrop-blur-sm px-2.5 py-1 rounded-full shadow-md shadow-black/5">
                         <p className="text-[10px] font-bold text-accent-text-soft uppercase tracking-widest">Coming soon</p>
                       </div>
                     )}
@@ -111,7 +111,7 @@ export async function MerchPanel() {
                 </>
               )
 
-              const className = 'group flex flex-col bg-surface rounded-xl overflow-hidden shadow-lg shadow-black/30 hover:shadow-xl hover:shadow-black/50 transition-all duration-200'
+              const className = 'group flex flex-col bg-surface rounded-xl overflow-hidden shadow-lg shadow-black/5 hover:shadow-xl hover:shadow-black/50 transition-all duration-200'
 
               // Printful products → internal detail page
               if (isPrintful) {

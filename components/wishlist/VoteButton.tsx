@@ -57,7 +57,7 @@ export function VoteButton({ itemId, initialVoted, initialCount, isAuthenticated
         <span>{count > 0 ? count : ''} {voted ? 'Voted' : 'Vote'}</span>
       </button>
 
-      {error && <p className="mt-1.5 text-xs text-red-300">{error}</p>}
+      {error && <p className="mt-1.5 text-xs text-red-700">{error}</p>}
 
       {showModal && (
         <LoginPromptModal

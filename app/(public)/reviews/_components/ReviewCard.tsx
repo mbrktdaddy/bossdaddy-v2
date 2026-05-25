@@ -23,7 +23,7 @@ export default function ReviewCard({
   const resolvedEyebrow = eyebrow === null ? null : eyebrow ?? cat?.label ?? null
   const showCategoryIcon = eyebrow === undefined && Boolean(cat)
   return (
-    <article className="group relative flex flex-col bg-surface rounded-xl overflow-hidden border border-soft shadow-lg shadow-black/30 hover:border-copper hover:shadow-xl hover:shadow-black/50 hover:-translate-y-1 transition-all duration-200">
+    <article className="group relative flex flex-col bg-surface rounded-xl overflow-hidden border border-soft shadow-lg shadow-black/5 hover:border-copper hover:shadow-xl hover:shadow-black/50 hover:-translate-y-1 transition-all duration-200">
       {r.image_url ? (
         <div className="relative w-full h-44 bg-surface-raised shrink-0">
           <Image

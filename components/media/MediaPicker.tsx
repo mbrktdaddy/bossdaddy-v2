@@ -345,7 +345,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
           </p>
         )}
         {uploadError && tab === 'library' && (
-          <p className="text-red-300 text-xs bg-red-950/40 border-b border-red-700/40 px-5 py-2.5 shrink-0">{uploadError}</p>
+          <p className="text-red-700 text-xs bg-red-50 border-b border-red-300 px-5 py-2.5 shrink-0">{uploadError}</p>
         )}
 
         {/* Content */}
@@ -473,7 +473,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 {genLoading ? 'Generating…' : 'Generate & Use'}
               </button>
               {genError && (
-                <p className="text-red-300 text-sm bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-3">{genError}</p>
+                <p className="text-red-700 text-sm bg-red-50 border border-red-300 rounded-lg px-4 py-3">{genError}</p>
               )}
               <p className="text-xs text-prose-faint">Generated image will be added to the library and auto-selected.</p>
             </div>

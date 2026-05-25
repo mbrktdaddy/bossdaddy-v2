@@ -40,7 +40,7 @@ export default function MethodologyCallout({
     <section
       id={id}
       aria-label={eyebrowLabel}
-      className="mb-12 rounded-xl border border-accent-border/30 bg-accent-tint shadow-md shadow-black/30"
+      className="mb-12 rounded-xl border border-accent-border/30 bg-accent-tint shadow-md shadow-black/5"
     >
       <div className="flex items-start gap-4 p-5 sm:p-6">
         {/* Editorial seal icon */}

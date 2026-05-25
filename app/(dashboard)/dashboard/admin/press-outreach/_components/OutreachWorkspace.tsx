@@ -37,9 +37,9 @@ const METHOD_LABELS: Record<ContactMethod, string> = {
 
 const STATUS_CONFIG: Record<OutreachStatus, { label: string; classes: string }> = {
   draft:       { label: 'Draft',       classes: 'bg-surface-raised text-prose-muted border-strong' },
-  sent:        { label: 'Sent',        classes: 'bg-blue-950/40 text-blue-300 border-blue-700/40' },
-  responded:   { label: 'Responded',   classes: 'bg-green-950/40 text-forest border-green-700/40' },
-  no_response: { label: 'No Response', classes: 'bg-amber-950/50 text-amber-400 border-amber-800/50' },
+  sent:        { label: 'Sent',        classes: 'bg-blue-50 text-blue-700 border-blue-300' },
+  responded:   { label: 'Responded',   classes: 'bg-green-50 text-forest border-green-300' },
+  no_response: { label: 'No Response', classes: 'bg-amber-50 text-amber-700 border-amber-800/50' },
   follow_up:   { label: 'Follow Up',   classes: 'bg-accent-tint text-accent-text-soft border-accent-border/50' },
 }
 
@@ -79,9 +79,9 @@ function formatDate(iso: string) {
 
 function MethodBadge({ method }: { method: ContactMethod }) {
   const colors: Record<ContactMethod, string> = {
-    email:    'bg-blue-950/40 text-blue-300 border-blue-700/40',
-    web_form: 'bg-purple-950/40 text-purple-400 border-purple-800/40',
-    amazon:   'bg-amber-950/40 text-amber-400 border-amber-800/40',
+    email:    'bg-blue-50 text-blue-700 border-blue-300',
+    web_form: 'bg-purple-50 text-purple-400 border-purple-800/40',
+    amazon:   'bg-amber-50 text-amber-700 border-amber-800/40',
     phone:    'bg-surface-raised text-prose-muted border-strong',
   }
   return (
@@ -325,8 +325,8 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
           role="status"
           className={`fixed top-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-md z-50 flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium shadow-xl ${
             toast.type === 'success'
-              ? 'bg-green-950/40 border-green-700/40 text-forest'
-              : 'bg-red-950/40 border-red-700/40 text-red-300'
+              ? 'bg-green-50 border-green-300 text-forest'
+              : 'bg-red-50 border-red-300 text-red-700'
           }`}
         >
           {toast.type === 'success' ? (
@@ -732,7 +732,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                       <button
                         onClick={() => handleDelete(record.id, record.brand_name)}
                         disabled={updatingId === record.id}
-                        className="text-xs text-red-500/80 hover:text-red-300 transition-colors disabled:opacity-50"
+                        className="text-xs text-red-500/80 hover:text-red-700 transition-colors disabled:opacity-50"
                       >
                         Delete record
                       </button>

@@ -50,7 +50,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
   const effectiveLength = content.length + (linkUrl ? LINK_CHAR_COST : 0)
   const overLimit = charLimit ? effectiveLength > charLimit : false
   const nearLimit = charLimit ? effectiveLength > charLimit * 0.88 : false
-  const charColor = overLimit ? 'text-red-300' : nearLimit ? 'text-amber-300' : 'text-prose-faint'
+  const charColor = overLimit ? 'text-red-700' : nearLimit ? 'text-amber-700' : 'text-prose-faint'
 
   async function save() {
     if (overLimit) return
@@ -125,8 +125,8 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
   }
 
   const statusBadge =
-    post.status === 'posted' ? 'bg-blue-950/40 text-blue-300 border border-blue-700/40'
-    : post.status === 'ready' ? 'bg-green-950/40 text-forest border border-green-700/40'
+    post.status === 'posted' ? 'bg-blue-50 text-blue-700 border border-blue-300'
+    : post.status === 'ready' ? 'bg-green-50 text-forest border border-green-300'
     : 'bg-surface-raised text-prose-muted border border-strong/40'
 
   return (
@@ -229,7 +229,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                {saveError && <span className="text-xs text-red-300">{saveError}</span>}
+                {saveError && <span className="text-xs text-red-700">{saveError}</span>}
                 <button
                   onClick={cancelEdit}
                   className="text-xs text-prose-faint hover:text-prose px-3 py-1.5 rounded-lg transition-colors"
@@ -310,7 +310,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
               <>
                 <button
                   onClick={() => setStatus('posted')}
-                  className="flex items-center gap-1.5 text-xs text-blue-300 hover:text-prose px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-blue-700 hover:text-prose px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" /></svg>
                   Mark Posted
@@ -336,7 +336,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
             <button
               onClick={remove}
               disabled={deleting}
-              className="ml-auto flex items-center gap-1.5 text-xs text-prose-faint hover:text-red-300 px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
+              className="ml-auto flex items-center gap-1.5 text-xs text-prose-faint hover:text-red-700 px-3 py-1.5 rounded-lg hover:bg-surface-raised transition-colors"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
               Delete

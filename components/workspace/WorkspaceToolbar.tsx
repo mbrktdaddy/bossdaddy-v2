@@ -89,7 +89,7 @@ export function WorkspaceToolbar({
             type="button"
             onClick={onDelete}
             disabled={isDeleting}
-            className="px-3 py-3 text-red-300 hover:bg-red-950/40 disabled:opacity-50 text-sm rounded-lg transition-colors"
+            className="px-3 py-3 text-red-700 hover:bg-red-50 disabled:opacity-50 text-sm rounded-lg transition-colors"
           >
             {isDeleting ? 'Deleting…' : (
               <span className="inline-flex items-center gap-1.5">
@@ -109,8 +109,8 @@ export function WorkspaceToolbar({
               title={readyTooltip}
               className={`sm:hidden text-xs px-2.5 py-1 rounded-full font-medium border ${
                 readyCount === readyTotal
-                  ? 'bg-green-950/40 text-green-500 border-green-700/40'
-                  : 'bg-amber-950/40 text-amber-300 border-amber-700/40'
+                  ? 'bg-green-50 text-green-500 border-green-300'
+                  : 'bg-amber-50 text-amber-700 border-amber-300'
               }`}
             >
               {readyCount === readyTotal
@@ -124,8 +124,8 @@ export function WorkspaceToolbar({
                   title={check.label}
                   className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                     check.done
-                      ? 'bg-green-950/40 text-green-500 border border-green-700/40'
-                      : 'bg-red-950/40 text-red-300 border border-red-700/40'
+                      ? 'bg-green-50 text-green-500 border border-green-300'
+                      : 'bg-red-50 text-red-700 border border-red-300'
                   }`}
                 >
                   {check.done ? '✓' : '✗'} {check.label}
@@ -139,7 +139,7 @@ export function WorkspaceToolbar({
             type="button"
             onClick={onUnpublish}
             disabled={isPublishing}
-            className="px-4 py-3 bg-amber-950/40 hover:bg-amber-950/40 disabled:opacity-50 text-amber-300 text-sm font-semibold rounded-lg transition-colors border border-amber-700/40"
+            className="px-4 py-3 bg-amber-50 hover:bg-amber-50 disabled:opacity-50 text-amber-700 text-sm font-semibold rounded-lg transition-colors border border-amber-300"
           >
             {isPublishing ? '…' : 'Unpublish'}
           </button>

@@ -88,7 +88,7 @@ export default async function CollectionEmbed({ slug }: Props) {
 
   return (
     <aside
-      className="not-prose my-8 bg-accent-tint border border-accent-border/40 rounded-xl p-5 sm:p-6 shadow-lg shadow-black/30"
+      className="not-prose my-8 bg-accent-tint border border-accent-border/40 rounded-xl p-5 sm:p-6 shadow-lg shadow-black/5"
       aria-label={`Featured ${meta.eyebrow}: ${c.title}`}
     >
       <div className="mb-4">
@@ -123,7 +123,7 @@ export default async function CollectionEmbed({ slug }: Props) {
                     ) : null}
                     {badge && (
                       <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-zinc-900/85 to-transparent px-1.5 py-1">
-                        <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-orange-300 leading-tight line-clamp-1">
+                        <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-orange-700 leading-tight line-clamp-1">
                           {badge}
                         </p>
                       </div>

@@ -1,8 +1,8 @@
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   draft:    { label: 'Draft',     className: 'bg-surface-raised text-prose-muted border-strong' },
-  pending:  { label: 'Pending',   className: 'bg-amber-950/40 text-amber-300 border-amber-700/40' },
-  approved: { label: 'Live',      className: 'bg-green-950/40 text-forest border-green-700/40' },
-  rejected: { label: 'Rejected',  className: 'bg-red-950/40 text-red-300 border-red-700/40' },
+  pending:  { label: 'Pending',   className: 'bg-amber-50 text-amber-700 border-amber-300' },
+  approved: { label: 'Live',      className: 'bg-green-50 text-forest border-green-300' },
+  rejected: { label: 'Rejected',  className: 'bg-red-50 text-red-700 border-red-300' },
 }
 
 export function StatusBadge({ status, size = 'md' }: { status: string; size?: 'sm' | 'md' }) {

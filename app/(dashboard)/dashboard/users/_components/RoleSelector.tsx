@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 const ROLE_CONFIG: Record<string, { label: string; color: string }> = {
-  admin:  { label: 'Admin',  color: 'text-red-300' },
+  admin:  { label: 'Admin',  color: 'text-red-700' },
   author: { label: 'Author', color: 'text-accent-text-soft' },
   member: { label: 'Member', color: 'text-prose-muted' },
 }

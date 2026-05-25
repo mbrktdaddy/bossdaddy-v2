@@ -67,7 +67,7 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
   if (submitted === 'approved') {
     return (
       <div className="space-y-3">
-        <div className="bg-surface border border-green-700/40 rounded-xl p-5">
+        <div className="bg-surface border border-green-300 rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center text-xs font-bold text-white shrink-0">
               ✓
@@ -140,7 +140,7 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
       />
       <div className="flex items-center justify-between gap-3">
         <span className="text-xs text-prose-faint shrink-0">{body.length}/2000</span>
-        {error && <p className="text-red-300 text-xs flex-1">{error}</p>}
+        {error && <p className="text-red-700 text-xs flex-1">{error}</p>}
         <button
           type="submit"
           disabled={submitting || body.trim().length < 5}

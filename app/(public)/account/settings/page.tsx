@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
   admin:  { label: 'Admin',  className: 'bg-accent-tint text-accent-text-soft border border-accent-border/60' },
-  author: { label: 'Author', className: 'bg-blue-950/40 text-blue-300 border border-blue-700/40' },
+  author: { label: 'Author', className: 'bg-blue-50 text-blue-700 border border-blue-300' },
   member: { label: 'Member', className: 'bg-surface-raised text-prose-muted border border-strong' },
 }
 
@@ -177,7 +177,7 @@ export default async function AccountSettingsPage() {
             {orderedLikedArticles.map((a) => a && (
               <Link key={a.id} href={`/guides/${a.slug}`}
                 className="flex items-center gap-3 p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group">
-                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-950/40 text-blue-300 border border-blue-700/40 shrink-0">Article</span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-300 shrink-0">Article</span>
                 <div className="min-w-0">
                   <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate">{a.title}</p>
                 </div>

@@ -8,10 +8,10 @@ export const dynamic = 'force-dynamic'
 // as Picks / Gifts / Comparisons / Stacks; this is the admin umbrella view.
 const TYPE_META: Record<string, { label: string; chip: string }> = {
   general:    { label: 'Pick',       chip: 'bg-accent-tint text-accent-text border-accent-border/40' },
-  best_of:    { label: 'Best Of',    chip: 'bg-amber-950/50 text-amber-300 border-amber-900/40' },
-  gift_guide: { label: 'Gift Guide', chip: 'bg-rose-950/50 text-rose-300 border-rose-900/40' },
+  best_of:    { label: 'Best Of',    chip: 'bg-amber-50 text-amber-700 border-amber-900/40' },
+  gift_guide: { label: 'Gift Guide', chip: 'bg-rose-50 text-rose-700 border-rose-900/40' },
   comparison: { label: 'Comparison', chip: 'bg-sky-950/50 text-sky-300 border-sky-900/40' },
-  stack:      { label: 'Stack',      chip: 'bg-emerald-950/50 text-emerald-300 border-emerald-900/40' },
+  stack:      { label: 'Stack',      chip: 'bg-emerald-50 text-emerald-700 border-emerald-900/40' },
 }
 
 export default async function PicksListPage() {
@@ -69,7 +69,7 @@ export default async function PicksListPage() {
                 </div>
                 <span className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full ${
                   p.is_visible
-                    ? 'bg-green-950/40 text-forest'
+                    ? 'bg-green-50 text-forest'
                     : 'bg-surface-raised text-prose-faint'
                 }`}>
                   {p.is_visible ? 'Live' : 'Draft'}

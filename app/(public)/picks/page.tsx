@@ -63,7 +63,7 @@ export default async function PicksIndexPage({ searchParams }: Props) {
             <Link
               key={pick.id}
               href={`/picks/${pick.slug}`}
-              className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft rounded-xl overflow-hidden shadow-lg shadow-black/30 hover:shadow-xl hover:shadow-black/50 hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
+              className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden shadow-lg shadow-black/5 hover:shadow-xl hover:shadow-black/50 hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
             >
               <div className="relative w-full aspect-video bg-surface-raised shrink-0">
                 {pick.hero_image_url ? (
@@ -75,7 +75,7 @@ export default async function PicksIndexPage({ searchParams }: Props) {
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-surface-raised/40 to-surface/60">
+                  <div className="w-full h-full flex items-center justify-center bg-surface-raised">
                     <svg className="w-10 h-10 text-accent-text/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18M3 12h18M3 18h12" />
                     </svg>

@@ -213,7 +213,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
       )}
 
       {error && (
-        <p className="text-xs text-red-300 bg-red-950/40 border border-red-700/40 rounded px-3 py-2">{error}</p>
+        <p className="text-xs text-red-700 bg-red-50 border border-red-300 rounded px-3 py-2">{error}</p>
       )}
 
       {loading ? (
@@ -255,7 +255,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
               <button
                 type="button"
                 onClick={() => handleDelete(img)}
-                className="absolute top-1.5 right-1.5 p-1 bg-surface/80 hover:bg-red-950/40 text-prose-faint hover:text-red-300 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                className="absolute top-1.5 right-1.5 p-1 bg-surface/80 hover:bg-red-50 text-prose-faint hover:text-red-700 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                 title="Remove image"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -310,10 +310,10 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
             ))}
 
             {(usageModal.usage.articles_body.length > 0 || usageModal.usage.reviews_body.length > 0) && (
-              <div className="bg-amber-950/40 border border-amber-700/40 rounded-xl px-4 py-3">
-                <p className="text-xs font-semibold text-amber-300 mb-1">Body mentions — not auto-fixed</p>
+              <div className="bg-amber-50 border border-amber-300 rounded-xl px-4 py-3">
+                <p className="text-xs font-semibold text-amber-700 mb-1">Body mentions — not auto-fixed</p>
                 {[...usageModal.usage.articles_body, ...usageModal.usage.reviews_body].map((item) => (
-                  <p key={item.id} className="text-xs text-amber-300/70 truncate">{item.title ?? item.slug}</p>
+                  <p key={item.id} className="text-xs text-amber-700/70 truncate">{item.title ?? item.slug}</p>
                 ))}
               </div>
             )}

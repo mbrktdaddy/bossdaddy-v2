@@ -107,7 +107,7 @@ export default async function CategoryPage({ params }: Props) {
               <Link
                 key={r.id}
                 href={`/reviews/${r.slug}`}
-                className="group bg-gradient-to-br from-surface to-surface/60 border border-soft rounded-xl overflow-hidden shadow-lg shadow-black/30 hover:shadow-xl hover:shadow-black/50 hover:border-accent-border/40 hover:-translate-y-1 transition-all"
+                className="group bg-surface border border-soft rounded-xl overflow-hidden shadow-lg shadow-black/5 hover:shadow-xl hover:shadow-black/50 hover:border-accent-border/40 hover:-translate-y-1 transition-all"
               >
                 {r.image_url ? (
                   <div className="relative w-full h-48">

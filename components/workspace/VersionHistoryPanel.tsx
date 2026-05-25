@@ -113,7 +113,7 @@ export function VersionHistoryPanel({ contentType, contentId }: Props) {
           </div>
         )}
         {error && (
-          <p className="text-xs text-red-300 bg-red-950/40 border border-red-700/40 rounded px-3 py-2 mt-2">{error}</p>
+          <p className="text-xs text-red-700 bg-red-50 border border-red-300 rounded px-3 py-2 mt-2">{error}</p>
         )}
       </div>
     </details>

@@ -33,7 +33,7 @@ export function ListEditor({ label, items, onChange, placeholder, accent }: Prop
             <button
               type="button"
               onClick={() => remove(i)}
-              className="px-3 py-2 text-prose-faint hover:text-red-300 transition-colors text-lg leading-none"
+              className="px-3 py-2 text-prose-faint hover:text-red-700 transition-colors text-lg leading-none"
             >×</button>
           </div>
         ))}

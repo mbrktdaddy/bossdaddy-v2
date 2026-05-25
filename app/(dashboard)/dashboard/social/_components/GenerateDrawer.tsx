@@ -200,7 +200,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                 {loading ? 'Generating 3 variants…' : 'Generate 3 Variants'}
               </button>
 
-              {error && <p className="text-sm text-red-300">{error}</p>}
+              {error && <p className="text-sm text-red-700">{error}</p>}
 
               {/* Variants */}
               {variants.length > 0 && (
@@ -213,7 +213,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                       <div key={i} className="bg-surface border border-strong rounded-xl p-4 space-y-3">
                         <p className="text-sm text-prose whitespace-pre-wrap leading-relaxed">{v.content}</p>
                         <div className="flex items-center justify-between">
-                          <span className={`text-xs tabular-nums ${over ? 'text-red-300' : 'text-prose-faint'}`}>
+                          <span className={`text-xs tabular-nums ${over ? 'text-red-700' : 'text-prose-faint'}`}>
                             {len}{platformConfig.charLimit ? ` / ${platformConfig.charLimit}` : ''}
                           </span>
                           <button

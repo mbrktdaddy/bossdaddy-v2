@@ -4,7 +4,7 @@
 // Dark editorial: active pill uses prose-on-background (auto-flips
 // per scope — light chip on dark canvas, dark chip on .bd-on-paper
 // cream sections). Idle pill is a ghosted outline with hover→copper.
-export const PILL_ACTIVE   = 'bg-prose text-background border border-prose shadow-sm shadow-zinc-950/40'
+export const PILL_ACTIVE   = 'bg-prose text-background border border-prose shadow-sm shadow-black/10'
 export const PILL_INACTIVE = 'bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose'
 export const PILL_BASE     = 'shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold transition-colors'
 

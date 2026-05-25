@@ -16,9 +16,9 @@ interface Props {
 }
 
 const STATUS_BADGE: Record<Status, { label: string; classes: string }> = {
-  active:            { label: 'Active',     classes: 'bg-green-950/40 text-forest border-green-700/40' },
-  suspended:         { label: 'Suspended',  classes: 'bg-amber-950/40 text-amber-300 border-amber-700/40' },
-  banned:            { label: 'Banned',     classes: 'bg-red-950/40 text-red-300 border-red-700/40' },
+  active:            { label: 'Active',     classes: 'bg-green-50 text-forest border-green-300' },
+  suspended:         { label: 'Suspended',  classes: 'bg-amber-50 text-amber-700 border-amber-300' },
+  banned:            { label: 'Banned',     classes: 'bg-red-50 text-red-700 border-red-300' },
   pending_deletion:  { label: 'Pending delete', classes: 'bg-zinc-950/60 text-zinc-400 border-zinc-800' },
 }
 
@@ -131,8 +131,8 @@ export default function ModerationActions({ userId, username, status, suspendedU
                   role="menuitem"
                   onClick={() => setPendingAction(key)}
                   className={`block w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                    tone === 'danger' ? 'text-red-300 hover:bg-red-950/40'
-                    : tone === 'warn' ? 'text-amber-300 hover:bg-amber-950/40'
+                    tone === 'danger' ? 'text-red-700 hover:bg-red-50'
+                    : tone === 'warn' ? 'text-amber-700 hover:bg-amber-50'
                     : 'text-prose-muted hover:bg-surface hover:text-prose'
                   }`}
                 >
@@ -193,7 +193,7 @@ export default function ModerationActions({ userId, username, status, suspendedU
                 </div>
               )}
 
-              {error && <p className="text-xs text-red-300">{error}</p>}
+              {error && <p className="text-xs text-red-700">{error}</p>}
 
               <div className="flex gap-2">
                 <button

@@ -188,7 +188,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       {contentType === 'reviews' && item.rating !== undefined && item.rating !== null
-                        ? <span className="text-sm font-bold text-amber-300">{item.rating}</span>
+                        ? <span className="text-sm font-bold text-amber-700">{item.rating}</span>
                         : (category ? <CategoryIcon slug={category.slug} className="w-5 h-5 text-accent-text" /> : (
                           contentType === 'guides' ? (
                             <svg className="w-5 h-5 text-accent-text" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
@@ -218,7 +218,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
                     </span>
                   </div>
                   {item.rejection_reason && ['draft', 'rejected'].includes(item.status) && (
-                    <p className="text-xs text-amber-300/80 mt-1.5">↩ Edits requested: {item.rejection_reason}</p>
+                    <p className="text-xs text-amber-700/80 mt-1.5">↩ Edits requested: {item.rejection_reason}</p>
                   )}
                   {item.status === 'pending' && (
                     <p className="text-xs text-prose-faint mt-1.5">
@@ -266,14 +266,14 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
               <button
                 onClick={() => runAction('unpublish')}
                 disabled={!!busy}
-                className="px-3 py-1.5 text-xs font-semibold bg-amber-950/40 hover:bg-amber-950/40 disabled:opacity-50 text-amber-300 rounded-lg transition-colors border border-amber-700/40"
+                className="px-3 py-1.5 text-xs font-semibold bg-amber-50 hover:bg-amber-50 disabled:opacity-50 text-amber-700 rounded-lg transition-colors border border-amber-300"
               >
                 {busy === 'unpublish' ? '…' : 'Unpublish'}
               </button>
               <button
                 onClick={() => runAction('delete')}
                 disabled={!!busy}
-                className="px-3 py-1.5 text-xs font-semibold bg-red-950/40 hover:bg-red-950/40 disabled:opacity-50 text-red-300 rounded-lg transition-colors border border-red-700/40"
+                className="px-3 py-1.5 text-xs font-semibold bg-red-50 hover:bg-red-50 disabled:opacity-50 text-red-700 rounded-lg transition-colors border border-red-300"
               >
                 {busy === 'delete' ? '…' : 'Delete'}
               </button>
@@ -286,7 +286,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
             </button>
           </div>
           {error && (
-            <p className="mt-2 mx-auto max-w-2xl text-xs text-red-300 bg-red-950/40 border border-red-700/40 rounded-lg px-3 py-2">
+            <p className="mt-2 mx-auto max-w-2xl text-xs text-red-700 bg-red-50 border border-red-300 rounded-lg px-3 py-2">
               {error}
             </p>
           )}

@@ -41,8 +41,8 @@ export function SubscribeButton({ itemId, initialSubscribed, isAuthenticated }: 
         disabled={loading}
         className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all disabled:opacity-50 ${
           subscribed
-            ? 'bg-blue-950/40 border-blue-700 text-blue-300'
-            : 'bg-surface border-strong text-prose-muted hover:border-blue-700 hover:text-blue-300'
+            ? 'bg-blue-50 border-blue-700 text-blue-700'
+            : 'bg-surface border-strong text-prose-muted hover:border-blue-700 hover:text-blue-700'
         }`}
       >
         <svg className="w-4 h-4" fill={subscribed ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -51,7 +51,7 @@ export function SubscribeButton({ itemId, initialSubscribed, isAuthenticated }: 
         <span>{subscribed ? 'Notifying me' : 'Notify me'}</span>
       </button>
 
-      {error && <p className="mt-1.5 text-xs text-red-300">{error}</p>}
+      {error && <p className="mt-1.5 text-xs text-red-700">{error}</p>}
 
       {showModal && (
         <LoginPromptModal

@@ -52,7 +52,7 @@ export function NewsletterDigestTrigger() {
         </button>
       </div>
       {result && <p className="text-xs text-forest max-w-xs text-right">{result}</p>}
-      {error  && <p className="text-xs text-red-300  max-w-xs text-right">{error}</p>}
+      {error  && <p className="text-xs text-red-700  max-w-xs text-right">{error}</p>}
     </div>
   )
 }

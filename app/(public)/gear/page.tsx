@@ -188,7 +188,7 @@ export default async function GearPage({ searchParams }: Props) {
           href="/gear"
           className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold transition-colors ${
             !category
-              ? 'bg-prose text-background border border-prose shadow-sm shadow-zinc-950/40'
+              ? 'bg-prose text-background border border-prose shadow-sm shadow-black/10'
               : 'bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose'
           }`}
         >
@@ -200,7 +200,7 @@ export default async function GearPage({ searchParams }: Props) {
             href={`/gear?category=${c.slug}`}
             className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
               category === c.slug
-                ? 'bg-prose text-background border border-prose shadow-sm shadow-zinc-950/40'
+                ? 'bg-prose text-background border border-prose shadow-sm shadow-black/10'
                 : 'bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose'
             }`}
           >
@@ -244,7 +244,7 @@ export default async function GearPage({ searchParams }: Props) {
                   <Link
                     key={occ.slug}
                     href={`/gifts/${occ.slug}`}
-                    className="shrink-0 w-40 rounded-xl overflow-hidden bg-gradient-to-br from-surface to-surface/60 border border-soft shadow-lg shadow-black/30 hover:border-accent-border/40 hover:shadow-xl hover:shadow-black/50 hover:-translate-y-1 transition-all"
+                    className="shrink-0 w-40 rounded-xl overflow-hidden bg-surface border border-soft shadow-lg shadow-black/5 hover:border-accent-border/40 hover:shadow-xl hover:shadow-black/50 hover:-translate-y-1 transition-all"
                   >
                     <div className="relative w-full h-24 bg-surface-raised">
                       {pick?.hero_image_url ? (
@@ -269,7 +269,7 @@ export default async function GearPage({ searchParams }: Props) {
                   <Link
                     key={occ.slug}
                     href={`/gifts/${occ.slug}`}
-                    className="group relative rounded-xl overflow-hidden border border-soft shadow-lg shadow-black/30 hover:border-accent-border/40 hover:shadow-xl hover:shadow-black/50 hover:-translate-y-1 transition-all"
+                    className="group relative rounded-xl overflow-hidden border border-soft shadow-lg shadow-black/5 hover:border-accent-border/40 hover:shadow-xl hover:shadow-black/50 hover:-translate-y-1 transition-all"
                   >
                     <div className="relative w-full h-36 bg-surface-raised">
                       {pick?.hero_image_url ? (
@@ -314,7 +314,7 @@ export default async function GearPage({ searchParams }: Props) {
 
               <Link
                 href={`/picks/${featuredPick.slug}`}
-                className="group block bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft shadow-xl shadow-black/50 hover:border-accent-border/40 hover:shadow-black/50 hover:-translate-y-1 transition-all"
+                className="group block bg-surface rounded-xl overflow-hidden border border-soft shadow-xl shadow-black/50 hover:border-accent-border/40 hover:shadow-black/50 hover:-translate-y-1 transition-all"
               >
                 <div className="flex flex-col sm:flex-row">
                   <div className="relative w-full sm:w-72 h-48 sm:h-auto sm:min-h-[220px] shrink-0 bg-surface-raised">
@@ -327,7 +327,7 @@ export default async function GearPage({ searchParams }: Props) {
                         sizes="(max-width: 640px) 100vw, 288px"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-surface-raised/40 to-surface/60">
+                      <div className="w-full h-full flex items-center justify-center bg-surface-raised">
                         <svg className="w-12 h-12 text-accent-text/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
                         </svg>
@@ -399,7 +399,7 @@ export default async function GearPage({ searchParams }: Props) {
                     <Link
                       key={c.slug}
                       href={`/category/${c.slug}`}
-                      className="group flex flex-col items-center justify-center text-center gap-2 bg-gradient-to-br from-surface to-surface/60 hover:bg-surface-raised rounded-xl p-4 min-h-[120px] border border-soft shadow-md shadow-black/30 hover:border-accent-border/40 hover:shadow-lg hover:shadow-black/30 hover:-translate-y-1 transition-all"
+                      className="group flex flex-col items-center justify-center text-center gap-2 bg-surface hover:bg-surface-raised rounded-xl p-4 min-h-[120px] border border-soft shadow-md shadow-black/5 hover:border-accent-border/40 hover:shadow-lg hover:shadow-black/5 hover:-translate-y-1 transition-all"
                     >
                       <CategoryIcon slug={c.slug} className="w-7 h-7 text-accent-text" />
                       <span className="text-sm font-bold text-prose leading-tight group-hover:text-accent-text-soft transition-colors">
@@ -576,7 +576,7 @@ function GearCard({
   // Avoids invalid <a>-inside-<a> HTML that nested cards had previously.
   return (
     <article
-      className={`group relative flex flex-col bg-gradient-to-br from-surface to-surface/60 rounded-xl overflow-hidden border border-soft shadow-lg shadow-black/30 hover:border-accent-border/40 hover:shadow-xl hover:shadow-black/50 hover:-translate-y-1 transition-all duration-200 ${
+      className={`group relative flex flex-col bg-surface rounded-xl overflow-hidden border border-soft shadow-lg shadow-black/5 hover:border-accent-border/40 hover:shadow-xl hover:shadow-black/50 hover:-translate-y-1 transition-all duration-200 ${
         isHero ? 'lg:col-span-2 lg:row-span-2' : ''
       }`}
     >
@@ -598,7 +598,7 @@ function GearCard({
           />
         </div>
       ) : (
-        <div className={`w-full bg-gradient-to-br from-surface-raised/40 to-surface/40 flex items-center justify-center shrink-0 ${
+        <div className={`w-full bg-surface-raised flex items-center justify-center shrink-0 ${
           isHero ? 'h-64 sm:h-80 lg:h-[420px]' : 'h-44'
         }`}>
           {cat && <CategoryIcon slug={cat.slug} className={isHero ? 'w-12 h-12 text-accent-text/40' : 'w-8 h-8 text-accent-text/40'} />}
@@ -670,7 +670,7 @@ function GearRow({ review: r }: { review: GearReview }) {
             sizes="(max-width: 640px) 80px, 96px"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-surface-raised/50 to-surface/40 flex items-center justify-center">
+          <div className="w-full h-full bg-surface-raised flex items-center justify-center">
             {cat && <CategoryIcon slug={cat.slug} className="w-6 h-6 text-accent-text/40" />}
           </div>
         )}

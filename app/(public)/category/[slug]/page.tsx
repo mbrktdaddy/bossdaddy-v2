@@ -136,7 +136,7 @@ export default async function CategoryHubPage({ params }: Props) {
                 <Link
                   key={r.id}
                   href={`/reviews/${r.slug}`}
-                  className="group flex flex-col bg-gradient-to-br from-surface to-surface/60 border border-soft rounded-xl overflow-hidden shadow-lg shadow-black/30 hover:shadow-xl hover:shadow-black/50 hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
+                  className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden shadow-lg shadow-black/5 hover:shadow-xl hover:shadow-black/50 hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
                 >
                   {r.image_url ? (
                     <div className="relative w-full h-48 bg-surface-raised shrink-0">
@@ -279,7 +279,7 @@ export default async function CategoryHubPage({ params }: Props) {
             </div>
             <div className="space-y-2">
               {catFaqs.map((faq, i) => (
-                <details key={i} className="group bg-gradient-to-br from-surface to-surface/60 border border-soft hover:border-accent-border/40 transition-colors rounded-xl overflow-hidden">
+                <details key={i} className="group bg-surface border border-soft hover:border-accent-border/40 transition-colors rounded-xl overflow-hidden">
                   <summary className="flex items-center justify-between gap-3 px-4 py-3.5 cursor-pointer list-none min-h-[44px]">
                     <span className="text-sm font-semibold text-prose leading-snug">{faq.question}</span>
                     <svg className="w-4 h-4 shrink-0 text-accent-text transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

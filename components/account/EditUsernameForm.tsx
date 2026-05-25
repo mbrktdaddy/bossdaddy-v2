@@ -52,7 +52,7 @@ export default function EditUsernameForm({ current }: { current: string }) {
         <p className="text-xs text-prose-faint mt-1.5">3–20 characters, letters, numbers, and underscores only.</p>
       </div>
       {success && <p className="text-forest text-xs">Username updated successfully.</p>}
-      {error && <p className="text-red-300 text-xs">{error}</p>}
+      {error && <p className="text-red-700 text-xs">{error}</p>}
     </form>
   )
 }

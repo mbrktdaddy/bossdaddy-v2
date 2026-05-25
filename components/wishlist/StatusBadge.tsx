@@ -3,8 +3,8 @@ import { getStatusLabel } from '@/lib/wishlist'
 
 const STATUS_STYLES: Record<WishlistStatus, string> = {
   considering: 'bg-surface-raised border-strong text-prose-muted',
-  queued:      'bg-blue-950/40 border-blue-700/40 text-blue-300',
-  testing:     'bg-green-950/40 border-green-700/40 text-forest',
+  queued:      'bg-blue-50 border-blue-300 text-blue-700',
+  testing:     'bg-green-50 border-green-300 text-forest',
   reviewed:    'bg-accent-tint border-accent-border/50 text-accent-text-soft',
   skipped:     'bg-surface border-soft text-prose-faint',
 }

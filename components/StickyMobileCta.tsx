@@ -53,7 +53,7 @@ export default function StickyMobileCta({ product }: Props) {
 
   return (
     <div
-      className={`md:hidden fixed bottom-0 left-0 right-0 z-40 bg-drama/95 backdrop-blur-md border-t border-zinc-800 shadow-2xl shadow-zinc-950/40 px-4 pt-3 transition-transform duration-300 ${show ? 'translate-y-0' : 'translate-y-full'}`}
+      className={`md:hidden fixed bottom-0 left-0 right-0 z-40 bg-drama/95 backdrop-blur-md border-t border-zinc-800 shadow-2xl shadow-black/10 px-4 pt-3 transition-transform duration-300 ${show ? 'translate-y-0' : 'translate-y-full'}`}
       style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 0.75rem)' }}
       aria-hidden={!show}
     >

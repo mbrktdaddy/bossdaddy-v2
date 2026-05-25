@@ -7,7 +7,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
   useEffect(() => { Sentry.captureException(error) }, [error])
   return (
     <div className="py-24 flex flex-col items-center justify-center px-6 text-center">
-      <p className="text-red-400 text-xs uppercase tracking-widest font-semibold mb-3">Something went wrong</p>
+      <p className="text-red-700 text-xs uppercase tracking-widest font-semibold mb-3">Something went wrong</p>
       <p className="text-prose-muted text-sm mb-8 max-w-sm">This page hit an error. Try refreshing or head back.</p>
       <div className="flex items-center gap-3 flex-wrap justify-center">
         <button onClick={reset} className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition-colors text-sm">Try Again</button>

@@ -51,7 +51,7 @@ export default function LikeButton({ contentType, contentId, size = 'md' }: Prop
         aria-pressed={liked}
         aria-label={liked ? 'Unlike' : 'Like'}
         className={`flex items-center gap-1.5 text-xs transition-colors disabled:opacity-50 ${
-          liked ? 'text-red-300' : 'text-prose-faint hover:text-prose-muted'
+          liked ? 'text-red-700' : 'text-prose-faint hover:text-prose-muted'
         }`}
       >
         <svg
@@ -76,7 +76,7 @@ export default function LikeButton({ contentType, contentId, size = 'md' }: Prop
       aria-label={liked ? 'Unlike' : 'Like'}
       className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all disabled:opacity-50 ${
         liked
-          ? 'bg-red-950/40 border-red-700/40 text-red-300 hover:bg-red-950/40'
+          ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-50'
           : 'bg-surface border-soft text-prose-muted hover:border-strong hover:text-prose'
       }`}
     >

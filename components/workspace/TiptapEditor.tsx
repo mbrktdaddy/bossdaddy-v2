@@ -462,7 +462,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
         {targetWords ? (
           <span className={
             wordCount >= targetWords         ? 'text-green-500' :
-            wordCount >= targetWords * 0.8   ? 'text-amber-300' :
+            wordCount >= targetWords * 0.8   ? 'text-amber-700' :
             'text-prose-faint'
           }>
             {wordCount.toLocaleString()} / {targetWords.toLocaleString()} words
@@ -506,7 +506,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
           className={btn(editor.isActive('link'))}>🔗</button>
         {editor.isActive('link') && (
           <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetLink().run() }}
-            className="px-2 py-1 rounded-lg text-xs font-semibold text-red-300 hover:bg-zinc-700 transition-colors">✕ link</button>
+            className="px-2 py-1 rounded-lg text-xs font-semibold text-red-700 hover:bg-zinc-700 transition-colors">✕ link</button>
         )}
 
         {enableCollectionEmbed && (
@@ -563,7 +563,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
               ✕
             </button>
           </div>
-          {aiError && <p className="text-xs text-red-300">{aiError}</p>}
+          {aiError && <p className="text-xs text-red-700">{aiError}</p>}
         </div>
       )}
 

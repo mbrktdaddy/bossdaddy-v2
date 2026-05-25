@@ -46,7 +46,7 @@ export default async function OrderPage({ params }: Props) {
     return (
       <div className="max-w-2xl mx-auto px-6 py-16 text-center">
         <div className="bg-surface rounded-xl p-10">
-          <div className="w-16 h-16 rounded-full bg-green-950/40 flex items-center justify-center mx-auto mb-6 text-3xl">
+          <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-6 text-3xl">
             ✓
           </div>
           <h1 className="text-2xl font-black text-prose mb-3">Payment confirmed!</h1>
@@ -69,7 +69,7 @@ export default async function OrderPage({ params }: Props) {
 
       {/* Header */}
       <div className="mb-10 text-center">
-        <div className="w-16 h-16 rounded-full bg-green-950/40 flex items-center justify-center mx-auto mb-4 text-3xl">
+        <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4 text-3xl">
           ✓
         </div>
         <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-2">— Order Confirmed</p>

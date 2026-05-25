@@ -100,7 +100,7 @@ export default async function SearchPage({ searchParams }: Props) {
  <Link
  key={r.id}
  href={`/reviews/${r.slug}`}
- className="flex items-start justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft hover:border-accent-border/40 rounded-xl transition-colors group"
+ className="flex items-start justify-between p-4 bg-surface border border-soft hover:border-accent-border/40 rounded-xl transition-colors group"
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -129,7 +129,7 @@ export default async function SearchPage({ searchParams }: Props) {
  <Link
  key={a.id}
  href={`/guides/${a.slug}`}
- className="flex items-start justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft hover:border-accent-border/40 rounded-xl transition-colors group"
+ className="flex items-start justify-between p-4 bg-surface border border-soft hover:border-accent-border/40 rounded-xl transition-colors group"
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1 flex-wrap">

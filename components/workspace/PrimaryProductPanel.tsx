@@ -61,7 +61,7 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
         {selected && (
           <button
             onClick={() => onChange(null)}
-            className="text-xs text-prose-faint hover:text-red-300 transition-colors"
+            className="text-xs text-prose-faint hover:text-red-700 transition-colors"
           >
             Clear
           </button>
@@ -76,7 +76,7 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
       )}
 
       {error && (
-        <p className="text-xs text-red-300 bg-red-950/40 border border-red-700/40 rounded px-3 py-2">{error}</p>
+        <p className="text-xs text-red-700 bg-red-50 border border-red-300 rounded px-3 py-2">{error}</p>
       )}
 
       {!loading && !error && products.length === 0 && (
@@ -150,7 +150,7 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
                   <p className="text-xs text-prose-faint truncate">{p.slug}</p>
                 </div>
                 {!p.affiliate_url && !p.non_affiliate_url && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-950/40 border border-red-700/40 text-red-300 shrink-0">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-50 border border-red-300 text-red-700 shrink-0">
                     No URL
                   </span>
                 )}

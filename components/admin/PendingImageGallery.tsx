@@ -171,7 +171,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
       </div>
 
       {error && (
-        <p className="text-xs text-red-300 bg-red-950/40 border border-red-700/40 rounded-lg px-3 py-2">{error}</p>
+        <p className="text-xs text-red-700 bg-red-50 border border-red-300 rounded-lg px-3 py-2">{error}</p>
       )}
 
       {images.length === 0 ? (
@@ -248,7 +248,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
                       type="button"
                       onClick={() => handleRemove(idx)}
                       disabled={disabled}
-                      className="w-6 h-6 flex items-center justify-center text-prose-muted hover:text-red-300 disabled:opacity-40 transition-colors"
+                      className="w-6 h-6 flex items-center justify-center text-prose-muted hover:text-red-700 disabled:opacity-40 transition-colors"
                       title="Remove from staging"
                     >
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>

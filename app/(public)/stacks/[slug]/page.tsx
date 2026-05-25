@@ -312,7 +312,7 @@ export default async function StackDetailPage({ params }: Props) {
                   return (
                     <article
                       key={review.id}
-                      className="relative flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-black/30 hover:-translate-y-0.5 transition-all duration-200"
+                      className="relative flex flex-col sm:flex-row gap-5 bg-surface border border-soft hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-black/5 hover:-translate-y-0.5 transition-all duration-200"
                     >
                       {/* Position number — subtle ordering signal */}
                       <span aria-hidden className="absolute top-3 left-3 text-[10px] font-black text-accent-text/30 tabular-nums tracking-widest">
@@ -381,7 +381,7 @@ export default async function StackDetailPage({ params }: Props) {
               <section
                 id="cost"
                 aria-label="Build cost"
-                className="mb-12 rounded-xl border border-accent-border/40 bg-accent-tint p-6 sm:p-8 shadow-lg shadow-black/30 text-center"
+                className="mb-12 rounded-xl border border-accent-border/40 bg-accent-tint p-6 sm:p-8 shadow-lg shadow-black/5 text-center"
               >
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Build Cost</p>
                 <p className="text-4xl sm:text-5xl font-black text-prose tabular-nums mb-2">${(total / 100).toFixed(2)}</p>

@@ -162,7 +162,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
                 </div>
                 <button
                   onClick={() => removeItem(item.id)}
-                  className="text-xs text-prose-faint hover:text-red-300 transition-colors mt-2"
+                  className="text-xs text-prose-faint hover:text-red-700 transition-colors mt-2"
                 >
                   Remove
                 </button>
@@ -192,7 +192,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
         </div>
 
         {checkoutError && (
-          <p className="text-red-300 text-xs text-center">{checkoutError}</p>
+          <p className="text-red-700 text-xs text-center">{checkoutError}</p>
         )}
         <button
           onClick={handleCheckout}
@@ -212,7 +212,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
           type="button"
           onClick={emptyCart}
           disabled={busy === '__all__'}
-          className="text-prose-faint hover:text-red-300 disabled:opacity-50 transition-colors text-xs"
+          className="text-prose-faint hover:text-red-700 disabled:opacity-50 transition-colors text-xs"
         >
           {busy === '__all__' ? 'Emptying…' : 'Empty cart'}
         </button>

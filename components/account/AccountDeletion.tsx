@@ -33,16 +33,16 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
       router.refresh()
     }
     return (
-      <div className="bg-red-950/40 border border-red-700/40 rounded-xl p-6 mb-6">
-        <p className="text-xs text-red-300 uppercase tracking-widest font-semibold mb-2">Account scheduled for deletion</p>
+      <div className="bg-red-50 border border-red-300 rounded-xl p-6 mb-6">
+        <p className="text-xs text-red-700 uppercase tracking-widest font-semibold mb-2">Account scheduled for deletion</p>
         <p className="text-sm text-prose-muted leading-relaxed mb-4">
           {deletionDate ? (
-            <>Your account will be permanently deleted on <strong className="text-red-300">{deletionDate}</strong>. After that, all comments, votes, and subscriptions are wiped and the account can&apos;t be recovered.</>
+            <>Your account will be permanently deleted on <strong className="text-red-700">{deletionDate}</strong>. After that, all comments, votes, and subscriptions are wiped and the account can&apos;t be recovered.</>
           ) : (
             <>Your account is scheduled for deletion.</>
           )}
         </p>
-        {error && <p className="text-sm text-red-300 mb-3">{error}</p>}
+        {error && <p className="text-sm text-red-700 mb-3">{error}</p>}
         <button onClick={cancel} disabled={loading}
           className="px-5 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors">
           {loading ? 'Canceling…' : 'Cancel deletion — keep my account'}
@@ -66,7 +66,7 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
 
   return (
     <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
-      <p className="text-xs text-red-300 uppercase tracking-widest font-semibold mb-1">Danger zone</p>
+      <p className="text-xs text-red-700 uppercase tracking-widest font-semibold mb-1">Danger zone</p>
       <p className="text-xs text-prose-faint mb-4">Permanent actions. Use with care.</p>
 
       {hasPublishedContent ? (
@@ -78,11 +78,11 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
         </div>
       ) : !confirming ? (
         <button onClick={() => setConfirming(true)}
-          className="px-5 py-2.5 border border-red-700/40 hover:bg-red-950/40 hover:border-red-700 text-red-300 text-sm font-semibold rounded-xl transition-colors">
+          className="px-5 py-2.5 border border-red-300 hover:bg-red-50 hover:border-red-700 text-red-700 text-sm font-semibold rounded-xl transition-colors">
           Delete my account
         </button>
       ) : (
-        <div className="border border-red-700/40 bg-red-950/40 rounded-xl p-4 space-y-3">
+        <div className="border border-red-300 bg-red-50 rounded-xl p-4 space-y-3">
           <p className="text-sm text-prose leading-relaxed">
             This schedules your account for permanent deletion in <strong>{COOLDOWN_DAYS} days</strong>. You can cancel any time before then by signing back in. After {COOLDOWN_DAYS} days, comments, votes, and subscriptions are wiped and the account can&apos;t be recovered.
           </p>
@@ -104,12 +104,12 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
             </label>
           )}
           <label className="block text-xs text-prose-muted">
-            Type <code className="text-red-300">DELETE</code> to confirm:
+            Type <code className="text-red-700">DELETE</code> to confirm:
             <input type="text" value={confirmText} onChange={(e) => setConfirmText(e.target.value)} autoComplete="off"
-              className="w-full mt-1 px-3 py-2 bg-surface border border-red-700/40 rounded text-prose text-sm focus:outline-none focus:border-red-500"
+              className="w-full mt-1 px-3 py-2 bg-surface border border-red-300 rounded text-prose text-sm focus:outline-none focus:border-red-500"
             />
           </label>
-          {error && <p className="text-sm text-red-300">{error}</p>}
+          {error && <p className="text-sm text-red-700">{error}</p>}
           <div className="flex gap-2">
             <button onClick={requestDelete} disabled={loading || confirmText !== 'DELETE'}
               className="px-4 py-2 bg-red-700 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors">

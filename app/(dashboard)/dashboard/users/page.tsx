@@ -34,7 +34,7 @@ export default async function UsersPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
         {[
           { label: 'Total',   value: counts.total,  color: 'text-prose' },
-          { label: 'Admins',  value: counts.admin,  color: 'text-red-300' },
+          { label: 'Admins',  value: counts.admin,  color: 'text-red-700' },
           { label: 'Authors', value: counts.author, color: 'text-accent-text-soft' },
           { label: 'Members', value: counts.member, color: 'text-prose-muted' },
         ].map((s) => (
@@ -48,7 +48,7 @@ export default async function UsersPage() {
       {/* Role legend */}
       <div className="grid grid-cols-3 gap-3 mb-8 text-xs">
         {[
-          { role: 'admin',  color: 'text-red-300',    bg: 'bg-red-950/40 border-red-700/40',       desc: 'Full access. Moderate content, manage users.' },
+          { role: 'admin',  color: 'text-red-700',    bg: 'bg-red-50 border-red-300',       desc: 'Full access. Moderate content, manage users.' },
           { role: 'author', color: 'text-accent-text-soft', bg: 'bg-accent-tint border-accent-border/40', desc: 'Create reviews and articles. Comment and like.' },
           { role: 'member', color: 'text-prose-muted',   bg: 'bg-surface border-soft',           desc: 'Comment and like. Cannot create content.' },
         ].map(r => (

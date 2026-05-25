@@ -32,7 +32,7 @@ export function SchedulePanel({ scheduledAt, onChange, disabled }: Props) {
           <span className="text-purple-400">📅</span> Schedule
         </span>
         {isScheduled ? (
-          <span className={`text-xs font-mono ${isPast ? 'text-amber-300' : 'text-purple-400'}`}>
+          <span className={`text-xs font-mono ${isPast ? 'text-amber-700' : 'text-purple-400'}`}>
             {isPast ? 'overdue' : scheduledDate!.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'UTC' })}
           </span>
         ) : (

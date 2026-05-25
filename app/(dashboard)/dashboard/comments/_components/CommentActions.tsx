@@ -30,18 +30,18 @@ export function CommentActions({ id }: { id: string }) {
       <button
         onClick={() => act('approve')}
         disabled={!!loading}
-        className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-green-950/40 hover:bg-green-950/40 disabled:opacity-50 text-forest border border-green-700/40 transition-colors"
+        className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-green-50 hover:bg-green-50 disabled:opacity-50 text-forest border border-green-300 transition-colors"
       >
         {loading === 'approve' ? '…' : '✓ Approve'}
       </button>
       <button
         onClick={() => act('reject')}
         disabled={!!loading}
-        className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-950/40 hover:bg-red-950/40 disabled:opacity-50 text-red-300 border border-red-700/40 transition-colors"
+        className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-50 hover:bg-red-50 disabled:opacity-50 text-red-700 border border-red-300 transition-colors"
       >
         {loading === 'reject' ? '…' : '✗ Reject'}
       </button>
-      {error && <span className="text-xs text-red-300">{error}</span>}
+      {error && <span className="text-xs text-red-700">{error}</span>}
     </div>
   )
 }

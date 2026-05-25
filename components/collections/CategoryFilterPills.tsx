@@ -74,7 +74,7 @@ function FilterPill({
       scroll={false}
       className={`shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-colors min-h-[44px] ${
         active
-          ? 'bg-prose text-background border-prose shadow-sm shadow-zinc-950/40'
+          ? 'bg-prose text-background border-prose shadow-sm shadow-black/10'
           : 'bg-transparent text-prose-muted border-strong hover:border-copper hover:text-prose'
       }`}
     >

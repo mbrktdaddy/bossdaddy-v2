@@ -35,7 +35,7 @@ export default async function BenchStrip({
   if (items.length === 0) return null
 
   return (
-    <div className="rounded-xl bg-surface border border-soft shadow-md shadow-black/30 p-5 sm:p-6">
+    <div className="rounded-xl bg-surface border border-soft shadow-md shadow-black/5 p-5 sm:p-6">
       {/* Header — eyebrow + invitation tagline + CTA. The pulsing dot
           uses the action orange (vibrant) for "live testing signal"
           while the eyebrow text stays in the orange-700 brand voice. */}

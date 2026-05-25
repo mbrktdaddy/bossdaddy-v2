@@ -29,7 +29,7 @@ export default async function GuideWorkspacePage({
           </svg>
           All articles
         </Link>
-        <p className="text-red-300">Guide not found. It may have been deleted.</p>
+        <p className="text-red-700">Guide not found. It may have been deleted.</p>
       </div>
     )
   }

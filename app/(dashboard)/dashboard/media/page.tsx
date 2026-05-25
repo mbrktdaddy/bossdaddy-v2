@@ -115,7 +115,7 @@ function AssetCard({
         {productName && (
           <div className="absolute bottom-0 left-0 right-0 px-2 py-1 bg-zinc-900/70">
             <p className="text-[10px] text-accent-text-soft font-semibold truncate">
-              {asset.is_primary && <span className="text-orange-300">★ </span>}
+              {asset.is_primary && <span className="text-orange-700">★ </span>}
               {asset.label ? `${asset.label} · ${productName}` : productName}
             </p>
           </div>
@@ -171,7 +171,7 @@ function AssetCard({
               onClick={handleAIGenerate}
               disabled={generatingAlt}
               title="Generate alt text with AI"
-              className="shrink-0 text-xs px-1.5 py-0.5 bg-blue-950/40 hover:bg-blue-950/40 text-blue-300 rounded transition-colors disabled:opacity-50"
+              className="shrink-0 text-xs px-1.5 py-0.5 bg-blue-50 hover:bg-blue-50 text-blue-700 rounded transition-colors disabled:opacity-50"
             >
               {generatingAlt ? '…' : '✨ AI'}
             </button>
@@ -193,8 +193,8 @@ function AssetCard({
             disabled={deleting}
             className={`text-xs px-2 py-1 rounded transition-colors ${
               confirmDelete
-                ? 'bg-red-950/40 text-red-300 hover:bg-red-100'
-                : 'text-prose-faint hover:text-red-300'
+                ? 'bg-red-50 text-red-700 hover:bg-red-100'
+                : 'text-prose-faint hover:text-red-700'
             }`}
           >
             {deleting ? '…' : confirmDelete ? 'Confirm delete' : 'Delete'}
@@ -392,7 +392,7 @@ export default function MediaLibraryPage() {
       </div>
 
       {uploadError && (
-        <p className="text-red-300 text-sm bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-3 mb-4">
+        <p className="text-red-700 text-sm bg-red-50 border border-red-300 rounded-lg px-4 py-3 mb-4">
           {uploadError}
         </p>
       )}
@@ -500,12 +500,12 @@ export default function MediaLibraryPage() {
               />
             )}
             {(usageData.articles_body.length > 0 || usageData.reviews_body.length > 0) && (
-              <div className="bg-amber-950/40 border border-amber-700/40 rounded-xl px-4 py-3 space-y-1">
-                <p className="text-xs font-semibold text-amber-300">Body mentions — not auto-fixed</p>
+              <div className="bg-amber-50 border border-amber-300 rounded-xl px-4 py-3 space-y-1">
+                <p className="text-xs font-semibold text-amber-700">Body mentions — not auto-fixed</p>
                 {[...usageData.articles_body, ...usageData.reviews_body].map((item) => (
-                  <p key={item.id} className="text-xs text-amber-300/70 truncate">{item.title ?? item.slug}</p>
+                  <p key={item.id} className="text-xs text-amber-700/70 truncate">{item.title ?? item.slug}</p>
                 ))}
-                <p className="text-xs text-amber-300 mt-1">These inline images will be broken after deletion. Edit those pages to remove them.</p>
+                <p className="text-xs text-amber-700 mt-1">These inline images will be broken after deletion. Edit those pages to remove them.</p>
               </div>
             )}
 

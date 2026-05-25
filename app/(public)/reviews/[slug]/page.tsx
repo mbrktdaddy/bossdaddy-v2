@@ -244,7 +244,7 @@ export default async function ReviewPage({ params }: Props) {
         {/* FTC Disclosure */}
         {review.has_affiliate_links && (
           <div
-            className="mb-8 text-xs text-prose-faint bg-surface rounded-xl px-4 py-3 shadow-md shadow-black/30"
+            className="mb-8 text-xs text-prose-faint bg-surface-raised border border-soft rounded-xl px-4 py-3"
             dangerouslySetInnerHTML={{ __html: FTC_DISCLOSURE_HTML }}
           />
         )}
@@ -260,7 +260,7 @@ export default async function ReviewPage({ params }: Props) {
             {category && (
               <Link
                 href={`/category/${category.slug}`}
-                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-surface-raised text-prose-muted hover:bg-zinc-700 hover:text-prose transition-colors"
+                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-surface border border-soft text-prose-muted hover:border-strong hover:text-prose transition-colors"
               >
                 <CategoryIcon slug={category.slug} className="w-4 h-4 text-accent-text" /> {category.label}
               </Link>
@@ -327,7 +327,7 @@ export default async function ReviewPage({ params }: Props) {
         {review.image_url && (
           <div className="relative mb-8">
             <LightboxImage src={review.image_url} alt={review.product_name}>
-              <div className="relative w-full h-64 md:h-80 rounded-xl overflow-hidden bg-surface">
+              <div className="relative w-full h-64 md:h-80 rounded-xl overflow-hidden bg-surface-raised border border-soft">
                 <Image
                   src={review.image_url}
                   alt={review.product_name}
@@ -387,12 +387,12 @@ export default async function ReviewPage({ params }: Props) {
         <div className="min-w-0 w-full">
           <ImageLightbox className="bd-content">
             <div
-              className="bd-editorial prose prose-lg prose-invert prose-orange mx-auto max-w-[68ch]
-                prose-headings:font-black prose-headings:tracking-tight prose-headings:font-sans prose-headings:leading-[1.15]
+              className="bd-editorial prose prose-lg prose-zinc prose-orange mx-auto max-w-[68ch]
+                prose-headings:font-black prose-headings:tracking-tight prose-headings:font-sans prose-headings:leading-[1.15] prose-headings:text-prose
                 prose-h2:text-2xl prose-h2:mt-14 prose-h2:mb-5
                 prose-h3:mt-10 prose-h3:mb-3
                 prose-p:text-prose-muted prose-p:leading-[1.85]
-                prose-a:text-accent-text-soft prose-a:no-underline hover:prose-a:text-accent
+                prose-a:text-accent prose-a:no-underline hover:prose-a:text-accent-hover
                 prose-strong:text-prose
                 prose-li:text-prose-muted prose-li:leading-[1.85]"
               dangerouslySetInnerHTML={{ __html: renderedBodyHtml }}
@@ -417,9 +417,9 @@ export default async function ReviewPage({ params }: Props) {
               {faqs.map((faq, i) => (
                 <details
                   key={i}
-                  className="group bg-gradient-to-br from-surface to-surface/60 border border-soft hover:border-accent-border/40 rounded-xl shadow-md shadow-black/30 overflow-hidden transition-colors"
+                  className="group bg-surface border border-soft hover:border-accent rounded-xl overflow-hidden transition-colors"
                 >
-                  <summary className="flex items-center justify-between gap-4 cursor-pointer list-none px-5 py-4 hover:bg-surface-raised/60 transition-colors min-h-[44px]">
+                  <summary className="flex items-center justify-between gap-4 cursor-pointer list-none px-5 py-4 hover:bg-surface-raised transition-colors min-h-[44px]">
                     <p className="font-bold text-sm text-prose leading-snug">{faq.question}</p>
                     <svg
                       className="w-4 h-4 text-accent-text shrink-0 transition-transform duration-200 group-open:rotate-180"
@@ -443,15 +443,15 @@ export default async function ReviewPage({ params }: Props) {
 
         {/* Bottom CTA — email signup */}
         <div className="mt-12 pt-8">
-          <div className="bg-gradient-to-br from-surface to-surface-sunken border border-soft rounded-xl p-6 sm:p-8 text-center shadow-xl shadow-black/30">
-            <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3 mx-auto" />
-            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Liked this review?</p>
-            <h3 className="text-xl font-black mb-4">Get the next one in your inbox</h3>
+          <div className="bg-surface-raised border-t-[3px] border-accent rounded-xl p-6 sm:p-8 text-center">
+            <p className="text-[11px] font-black text-accent uppercase tracking-[0.22em] mb-3">Liked this review?</p>
+            <h3 className="text-2xl font-black mb-2 text-prose tracking-tight">Get the next one in your inbox</h3>
+            <p className="text-sm text-prose-muted mb-5 max-w-md mx-auto">Sunday morning. One email. No PR-speak.</p>
             <div className="max-w-md mx-auto">
               <EmailSignup
                 heading={null}
                 description={null}
-                buttonLabel="Sign me up"
+                buttonLabel="Subscribe"
                 successMessage="You're in. Welcome to the crew."
                 interests={['newsletter', 'review_alerts']}
               />
@@ -501,19 +501,21 @@ export default async function ReviewPage({ params }: Props) {
         {/* Related reviews — mobile only */}
         {related && related.length > 0 && (
           <div className="mt-12 xl:hidden">
-            <div className="mb-4">
-              <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">More Reviews</p>
-              <h2 className="text-lg font-black">Keep reading</h2>
+            <div className="mb-4 flex items-stretch gap-3">
+              <div className="w-[3px] bg-accent rounded-full shrink-0" />
+              <div>
+                <p className="text-[13px] uppercase tracking-[0.18em] font-black text-prose">More Reviews</p>
+                <h2 className="mt-1 text-lg font-black text-prose">Keep reading</h2>
+              </div>
             </div>
             <div className="space-y-2">
               {related.map((r) => (
                 <Link
                   key={r.id}
                   href={`/reviews/${r.slug}`}
-                  className="flex items-center justify-between p-4 bg-gradient-to-br from-surface to-surface/60 border border-soft rounded-xl shadow-md shadow-black/30 hover:shadow-lg hover:shadow-black/30 hover:border-accent-border/40 hover:-translate-y-1 transition-all group"
+                  className="flex items-center justify-between p-4 bg-surface border border-soft rounded-xl hover:border-accent hover:-translate-y-0.5 transition-all group"
                 >
-                  <p className="text-sm font-semibold group-hover:text-accent-text-soft transition-colors truncate min-w-0 mr-4">{r.title}</p>
+                  <p className="text-sm font-semibold text-prose group-hover:text-accent transition-colors truncate min-w-0 mr-4">{r.title}</p>
                   <RatingScore rating={r.rating ?? 0} size="sm" />
                 </Link>
               ))}
@@ -549,9 +551,11 @@ export default async function ReviewPage({ params }: Props) {
 
           {/* Related Reviews */}
           {related && related.length > 0 && (
-            <div className="bg-gradient-to-br from-surface to-surface/60 border border-soft rounded-xl p-5 shadow-lg shadow-black/30">
-              <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">More Reviews</p>
+            <div className="bg-surface border border-soft rounded-xl p-5">
+              <div className="flex items-stretch gap-3 mb-4">
+                <div className="w-[3px] bg-accent rounded-full shrink-0" />
+                <p className="text-[12px] uppercase tracking-[0.18em] font-black text-prose self-center">More Reviews</p>
+              </div>
               <div className="space-y-4">
                 {related.map((r) => (
                   <Link
@@ -559,7 +563,7 @@ export default async function ReviewPage({ params }: Props) {
                     href={`/reviews/${r.slug}`}
                     className="block group"
                   >
-                    <p className="text-sm font-semibold group-hover:text-accent-text-soft transition-colors leading-snug">{r.title}</p>
+                    <p className="text-sm font-semibold text-prose group-hover:text-accent transition-colors leading-snug">{r.title}</p>
                     <RatingScore rating={r.rating ?? 0} />
                   </Link>
                 ))}

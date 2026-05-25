@@ -359,7 +359,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
         <span className="flex items-center gap-2 flex-wrap">
           <span className="text-accent-text-soft">🎨</span> Inline images
           {filledCount > 0 && (
-            <span className="px-2 py-0.5 bg-green-950/40 border border-green-700/40 text-forest rounded-full text-xs">
+            <span className="px-2 py-0.5 bg-green-50 border border-green-300 text-forest rounded-full text-xs">
               {filledCount} filled
             </span>
           )}
@@ -466,7 +466,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
             {(addMode === 'generate' || addMode === 'placeholder') && (
               <div>
                 <label className="block text-xs text-prose-muted mb-1">
-                  Image prompt {addMode === 'generate' && <span className="text-red-300">*</span>}
+                  Image prompt {addMode === 'generate' && <span className="text-red-700">*</span>}
                 </label>
                 <textarea
                   value={addPrompt}
@@ -576,7 +576,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
         )}
 
         {error && (
-          <p className="text-xs text-red-300 bg-red-950/40 border border-red-700/40 rounded px-3 py-2">{error}</p>
+          <p className="text-xs text-red-700 bg-red-50 border border-red-300 rounded px-3 py-2">{error}</p>
         )}
       </div>
 
@@ -653,18 +653,18 @@ function GalleryCard(p: GalleryCardProps) {
   const [expanded, setExpanded] = useState(true)
 
   return (
-    <div className="bg-surface-sunken border border-blue-700/40 rounded-lg overflow-hidden">
+    <div className="bg-surface-sunken border border-blue-300 rounded-lg overflow-hidden">
       {/* Gallery header */}
-      <div className="flex items-center justify-between gap-2 flex-wrap px-3 py-2.5 bg-blue-950/40 border-b border-blue-700/40">
+      <div className="flex items-center justify-between gap-2 flex-wrap px-3 py-2.5 bg-blue-50 border-b border-blue-300">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setExpanded(e => !e)}
-            className="text-blue-300 text-xs font-semibold flex items-center gap-1.5 hover:text-blue-300 transition-colors"
+            className="text-blue-700 text-xs font-semibold flex items-center gap-1.5 hover:text-blue-700 transition-colors"
           >
             <span>{expanded ? '▾' : '▸'}</span>
             <span>🖼 Gallery</span>
-            <span className="px-1.5 py-0.5 bg-blue-950/40 text-blue-300 rounded-full text-[10px]">
+            <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded-full text-[10px]">
               {item.children.length} image{item.children.length === 1 ? '' : 's'}
             </span>
           </button>
@@ -704,7 +704,7 @@ function GalleryCard(p: GalleryCardProps) {
           <button
             type="button"
             onClick={p.onRemoveGallery}
-            className="px-2.5 py-1.5 bg-transparent hover:bg-red-950/40 text-prose-faint hover:text-red-300 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
+            className="px-2.5 py-1.5 bg-transparent hover:bg-red-50 text-prose-faint hover:text-red-700 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
             title="Remove entire gallery"
           ><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg></button>
         </div>
@@ -714,7 +714,7 @@ function GalleryCard(p: GalleryCardProps) {
       {expanded && (
         <div className="p-2 space-y-2">
           {item.children.map((child, childIdx) => (
-            <div key={child.slotId} className={`p-3 rounded-lg space-y-2.5 ${child.filled ? 'bg-surface border border-green-700/40' : 'bg-surface border border-accent-border/20'}`}>
+            <div key={child.slotId} className={`p-3 rounded-lg space-y-2.5 ${child.filled ? 'bg-surface border border-green-300' : 'bg-surface border border-accent-border/20'}`}>
               {/* Child header */}
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <span className={`text-xs font-semibold ${child.filled ? 'text-forest' : 'text-accent-text-soft'}`}>
@@ -746,7 +746,7 @@ function GalleryCard(p: GalleryCardProps) {
                     type="button"
                     onClick={() => p.onRemoveChild(child.slotId)}
                     disabled={busySlotId === child.slotId}
-                    className="px-2 py-1 bg-transparent hover:bg-red-950/40 text-prose-faint hover:text-red-300 text-xs rounded-lg min-h-[32px] min-w-[32px] transition-colors"
+                    className="px-2 py-1 bg-transparent hover:bg-red-50 text-prose-faint hover:text-red-700 text-xs rounded-lg min-h-[32px] min-w-[32px] transition-colors"
                     title="Remove image"
                   ><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg></button>
                 </div>
@@ -800,7 +800,7 @@ function GalleryCard(p: GalleryCardProps) {
                     type="button"
                     onClick={() => p.onRevertChild(child.slotId)}
                     disabled={busySlotId === child.slotId}
-                    className="px-3 py-1.5 bg-transparent hover:bg-amber-950/40 text-prose-faint hover:text-amber-300 text-xs rounded-lg min-h-[36px] transition-colors"
+                    className="px-3 py-1.5 bg-transparent hover:bg-amber-50 text-prose-faint hover:text-amber-700 text-xs rounded-lg min-h-[36px] transition-colors"
                   >↩ Revert</button>
                 )}
               </div>
@@ -861,7 +861,7 @@ function SlotCard(p: SlotCardProps) {
   return (
     <div className={`p-3 rounded-lg space-y-3 ${
       filled
-        ? 'bg-surface-sunken border border-green-700/40'
+        ? 'bg-surface-sunken border border-green-300'
         : 'bg-surface-sunken border border-accent-border/30'
     }`}>
 
@@ -905,7 +905,7 @@ function SlotCard(p: SlotCardProps) {
           <button type="button" onClick={() => p.onMove(position + 1)} disabled={busy || position === total}
             className="px-2.5 py-1.5 bg-surface-raised hover:bg-zinc-700 disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors" title="Move down">↓</button>
           <button type="button" onClick={p.onRemove} disabled={busy}
-            className="px-2.5 py-1.5 bg-transparent hover:bg-red-950/40 text-prose-faint hover:text-red-300 text-xs rounded-lg min-h-[36px] min-w-[36px] inline-flex items-center justify-center transition-colors" title="Remove image"><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg></button>
+            className="px-2.5 py-1.5 bg-transparent hover:bg-red-50 text-prose-faint hover:text-red-700 text-xs rounded-lg min-h-[36px] min-w-[36px] inline-flex items-center justify-center transition-colors" title="Remove image"><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg></button>
         </div>
       </div>
 
@@ -944,7 +944,7 @@ function SlotCard(p: SlotCardProps) {
         </button>
         {filled && (
           <button type="button" onClick={p.onRevert} disabled={busy}
-            className="px-3 py-2 bg-transparent hover:bg-amber-950/40 text-prose-faint hover:text-amber-300 text-xs rounded-lg min-h-[36px] transition-colors"
+            className="px-3 py-2 bg-transparent hover:bg-amber-50 text-prose-faint hover:text-amber-700 text-xs rounded-lg min-h-[36px] transition-colors"
             title="Convert back to empty slot (keeps prompt + caption)">↩ Revert</button>
         )}
       </div>

@@ -83,14 +83,14 @@ function RebuyChip({ rebuy, size = 'md' }: { rebuy: boolean; size?: 'sm' | 'md' 
   const padding = size === 'sm' ? 'px-2.5 py-1 text-[11px]' : 'px-3 py-1.5 text-xs'
   if (rebuy) {
     return (
-      <span className={`inline-flex items-center gap-1.5 rounded-full border border-emerald-700/40 bg-emerald-950/40 font-semibold text-emerald-300 ${padding}`}>
+      <span className={`inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 font-semibold text-emerald-700 ${padding}`}>
         <span aria-hidden>✓</span>
         I&apos;d buy it again
       </span>
     )
   }
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border border-red-700/40 bg-red-950/40 font-semibold text-red-300 ${padding}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full border border-red-300 bg-red-50 font-semibold text-red-700 ${padding}`}>
       <span aria-hidden>✗</span>
       Wouldn&apos;t buy again
     </span>
@@ -196,7 +196,7 @@ export default function VerdictCard({
   if (variant === 'sidebar') {
     return (
       <section
-        className="rounded-xl border border-soft bg-surface p-5 shadow-lg shadow-black/30"
+        className="rounded-xl border border-soft bg-surface p-5"
         aria-label="Quick verdict"
       >
         <p className="text-xs font-semibold uppercase tracking-widest text-eyebrow">Quick Verdict</p>
@@ -259,7 +259,7 @@ export default function VerdictCard({
   // ── In-body variant — primary mobile/desktop placement on the public page ──
   return (
     <section
-      className="mb-8 rounded-xl border border-soft bg-surface p-5 shadow-md shadow-black/30 sm:p-6"
+      className="mb-8 rounded-xl border border-soft bg-surface p-5 sm:p-6"
       aria-label="The verdict"
     >
       {/* Header — section label + product name */}

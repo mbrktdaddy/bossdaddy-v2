@@ -69,7 +69,7 @@ export function TopPerformers({ items }: { items: TopItem[] }) {
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className={`text-xs px-1.5 py-0.5 rounded border ${
                       item.type === 'guide'
-                        ? 'bg-blue-950/40 text-blue-300 border-blue-700/40'
+                        ? 'bg-blue-50 text-blue-700 border-blue-300'
                         : 'bg-accent-tint text-accent-text-soft border-accent-border/40'
                     }`}>
                       {item.type}
