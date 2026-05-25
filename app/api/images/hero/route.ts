@@ -36,23 +36,26 @@ export async function POST(request: NextRequest) {
     'NO product packaging or labels visible, NO text, NO watermarks, NO trademarks, ' +
     'NO recognizable real-world products. Generate a generic editorial scene only.'
 
-  const prompt = custom_prompt?.trim()
-    ? `${custom_prompt.trim()}\n\n${SAFETY_RULES}`
+  // basePrompt is the user-facing text (shown back in the UI so admins can tweak it).
+  // The full prompt appends SAFETY_RULES which are implementation detail, not shown.
+  const basePrompt = custom_prompt?.trim()
+    ? custom_prompt.trim()
     : content_type === 'review'
     ? `Editorial lifestyle scene representing the ${category} category. ` +
       `${excerpt ? `Context: ${excerpt}. ` : ''}` +
       `Generic real-world setting suggesting use of items in this category — ` +
       `wooden surface or natural environment, warm natural lighting, soft focus on background props, ` +
-      `clean editorial composition, no people. Style: documentary lifestyle photography. ${SAFETY_RULES}`
+      `clean editorial composition, no people. Style: documentary lifestyle photography.`
     : `Editorial scene representing the topic "${title}". ${excerpt ? `Context: ${excerpt}. ` : ''}` +
       `Category: ${category}. Real-world setting with warm natural lighting, clean composition, ` +
-      `sharp focus, no people. Style: professional editorial lifestyle photography. ${SAFETY_RULES}`
+      `sharp focus, no people. Style: professional editorial lifestyle photography.`
 
+  const prompt = `${basePrompt}\n\n${SAFETY_RULES}`
   const bucket = content_type === 'review' ? 'review-images' : 'guide-images'
 
   try {
     const imageUrl = await generateAndUploadImage(prompt, bucket, '1536x1024', premium)
-    return NextResponse.json({ imageUrl })
+    return NextResponse.json({ imageUrl, promptUsed: basePrompt })
   } catch (err) {
     console.error('Hero image generation error:', err)
     const msg = err instanceof Error ? err.message : String(err)

@@ -94,8 +94,12 @@ export function HeroImagePanel({
           premium,
         }),
       })
-      const json = await readJsonResponse<{ imageUrl?: string }>(res, 'Image generation failed')
+      const json = await readJsonResponse<{ imageUrl?: string; promptUsed?: string }>(res, 'Image generation failed')
       if (json.imageUrl) onChange(json.imageUrl)
+      // Populate the prompt field with the auto-generated prompt so the user can
+      // inspect and tweak it before regenerating. Only overwrite if they hadn't
+      // typed a custom prompt themselves (i.e. the field was empty when they hit Generate).
+      if (json.promptUsed && !imagePrompt.trim()) setImagePrompt(json.promptUsed)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Image generation failed')
     }
@@ -163,7 +167,7 @@ export function HeroImagePanel({
           type="text"
           value={imagePrompt}
           onChange={(e) => setImagePrompt(e.target.value)}
-          placeholder="Custom prompt for editorial scene (optional). Use 📷 for the actual product."
+          placeholder="Auto-filled after first generation — tweak and regenerate to refine the scene."
           className="flex-1 px-3 py-2 bg-surface border border-strong rounded-lg text-xs text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover"
         />
         <button
