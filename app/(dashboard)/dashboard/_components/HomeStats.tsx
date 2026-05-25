@@ -17,7 +17,7 @@ export function HomeStats({ counts }: { counts: Counts }) {
     { label: 'Pending Review',   value: counts.articles.pending + counts.reviews.pending, href: '/dashboard/guides?filter=pending', color: 'text-amber-700' },
     { label: 'Flagged Content',  value: counts.flagged,          href: '/dashboard/guides?filter=pending', color: 'text-red-700' },
     { label: 'Pending Comments', value: counts.comments.pending, href: '/dashboard/comments',                color: 'text-blue-700' },
-    { label: 'Media Assets',     value: counts.media.total,      href: '/dashboard/images',                  color: 'text-prose' },
+    { label: 'Media Assets',     value: counts.media.total,      href: '/dashboard/media',                   color: 'text-prose' },
   ]
 
   return (

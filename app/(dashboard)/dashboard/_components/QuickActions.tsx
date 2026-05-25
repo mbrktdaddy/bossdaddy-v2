@@ -24,7 +24,7 @@ const ACTIONS = [
     accent: 'text-accent-text-soft bg-accent-tint border-accent-border/40',
   },
   {
-    href: '/dashboard/images/generate',
+    href: '/dashboard/media/generate',
     label: 'Generate Image',
     description: 'Standalone DALL·E studio',
     icon: (
@@ -35,8 +35,8 @@ const ACTIONS = [
     accent: 'text-blue-700 bg-blue-50 border-blue-300',
   },
   {
-    href: '/dashboard/images',
-    label: 'Image Library',
+    href: '/dashboard/media',
+    label: 'Media Library',
     description: 'Browse and manage assets',
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
