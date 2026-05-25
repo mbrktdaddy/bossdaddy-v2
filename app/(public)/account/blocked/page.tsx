@@ -13,7 +13,7 @@ export default function AccountBlockedPage() {
         Account access restricted
       </p>
       <h1 className="text-3xl sm:text-4xl font-black mb-4">Your account is on hold.</h1>
-      <p className="text-[var(--bd-text-muted)] leading-relaxed mb-8">
+      <p className="text-prose-muted leading-relaxed mb-8">
         This account can&apos;t sign in right now. This usually means it has been
         suspended, banned, or scheduled for deletion. If you think this is a
         mistake, reach out and we&apos;ll take a look.

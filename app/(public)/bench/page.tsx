@@ -100,7 +100,7 @@ export default async function BenchPage() {
         <h1 className="text-3xl sm:text-4xl font-black mb-3">
           On the Bench
         </h1>
-        <p className="text-[var(--bd-text-muted)] max-w-xl">
+        <p className="text-prose-muted max-w-xl">
           Everything I&apos;m currently testing, planning to review, or decided to skip — with the reasons.
           Vote on what gets reviewed next.
         </p>
@@ -128,7 +128,7 @@ export default async function BenchPage() {
                   </summary>
                   <div className="space-y-3">
                     {sectionItems.map((item) => (
-                      <div key={item.id} className="p-4 bg-[var(--bd-surface)] rounded-xl shadow-md shadow-black/30">
+                      <div key={item.id} className="p-4 bg-surface rounded-xl shadow-md shadow-black/30">
                         <p className="text-sm font-semibold text-zinc-400">{item.title}</p>
                         {item.skip_reason && (
                           <p className="text-xs text-prose-faint mt-1">{item.skip_reason}</p>
@@ -148,7 +148,7 @@ export default async function BenchPage() {
                     {icon && <span className="text-accent-text-soft">{icon}</span>}
                     {heading}
                   </h2>
-                  <p className="text-xs text-[var(--bd-text-muted)] mt-0.5">{sub}</p>
+                  <p className="text-xs text-prose-muted mt-0.5">{sub}</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {sectionItems.map((item) => (

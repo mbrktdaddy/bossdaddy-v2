@@ -16,7 +16,7 @@ export function WishlistCard({ item }: Props) {
   const detailHref = `/bench/${item.slug}`
 
   return (
-    <div className="bg-[var(--bd-surface)] rounded-xl overflow-hidden flex flex-col shadow-lg shadow-black/30 hover:shadow-xl hover:shadow-black/50 transition-all duration-200">
+    <div className="bg-surface rounded-xl overflow-hidden flex flex-col shadow-lg shadow-black/30 hover:shadow-xl hover:shadow-black/50 transition-all duration-200">
       {/* Image */}
       <Link href={detailHref} className="block relative aspect-[4/3] bg-zinc-900">
         {item.image_url ? (
@@ -46,7 +46,7 @@ export function WishlistCard({ item }: Props) {
         </div>
 
         {item.description && (
-          <p className="text-xs text-[var(--bd-text-muted)] line-clamp-2">{item.description}</p>
+          <p className="text-xs text-prose-muted line-clamp-2">{item.description}</p>
         )}
 
         <div className="mt-auto flex items-center justify-between gap-2 pt-1">

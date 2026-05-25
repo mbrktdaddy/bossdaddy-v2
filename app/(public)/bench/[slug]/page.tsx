@@ -120,7 +120,7 @@ export default async function BenchDetailPage({ params }: Props) {
           <h1 className="text-2xl sm:text-3xl font-black leading-tight mb-3">{wishlistItem.title}</h1>
 
           {wishlistItem.description && (
-            <p className="text-[var(--bd-text-muted)] text-sm leading-relaxed mb-4">{wishlistItem.description}</p>
+            <p className="text-prose-muted text-sm leading-relaxed mb-4">{wishlistItem.description}</p>
           )}
 
           {isSkipped && wishlistItem.skip_reason && (
