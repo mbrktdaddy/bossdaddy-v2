@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { getCollectionsWithCategory } from '@/lib/collection-listings'
 import CategoryFilterPills from '@/components/collections/CategoryFilterPills'
+import BenchStrip from '@/components/BenchStrip'
 
 export const revalidate = 60
 
@@ -99,6 +100,10 @@ export default async function StacksIndexPage({ searchParams }: Props) {
           ))}
         </div>
       )}
+
+      <div className="mt-16">
+        <BenchStrip ctaText="See all on the bench" />
+      </div>
     </div>
   )
 }

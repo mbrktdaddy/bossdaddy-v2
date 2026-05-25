@@ -14,6 +14,7 @@ import MethodologyCallout from '@/components/collections/MethodologyCallout'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { faqPageLd } from '@/lib/seo/faq-ld'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
+import BenchStrip from '@/components/BenchStrip'
 
 export const revalidate = 60
 
@@ -311,7 +312,7 @@ export default async function StackDetailPage({ params }: Props) {
                   return (
                     <article
                       key={review.id}
-                      className="relative flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-black/30 transition-colors"
+                      className="relative flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-black/30 hover:-translate-y-0.5 transition-all duration-200"
                     >
                       {/* Position number — subtle ordering signal */}
                       <span aria-hidden className="absolute top-3 left-3 text-[10px] font-black text-accent-text/30 tabular-nums tracking-widest">
@@ -402,6 +403,11 @@ export default async function StackDetailPage({ params }: Props) {
               <Link href="/stacks" className="text-sm text-prose-faint hover:text-accent-text-soft transition-colors">
                 Browse all Stacks →
               </Link>
+            </div>
+
+            {/* On the Bench */}
+            <div className="mt-16">
+              <BenchStrip ctaText="See all on the bench" />
             </div>
           </main>
 

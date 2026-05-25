@@ -14,6 +14,7 @@ import MethodologyCallout from '@/components/collections/MethodologyCallout'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { faqPageLd } from '@/lib/seo/faq-ld'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
+import BenchStrip from '@/components/BenchStrip'
 
 export const revalidate = 60
 
@@ -290,7 +291,7 @@ export default async function PickDetailPage({ params }: Props) {
                   const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                   const rank = idx + 1
                   return (
-                    <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-black/30 transition-colors">
+                    <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-gradient-to-br from-surface to-surface/60 border border-soft hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-black/30 hover:-translate-y-0.5 transition-all duration-200">
                       {/* Rank — medal for top 3, number for the rest */}
                       <div className="flex sm:flex-col items-center gap-3 sm:gap-1 shrink-0">
                         <RankMedal rank={rank} />
@@ -375,6 +376,11 @@ export default async function PickDetailPage({ params }: Props) {
               <Link href="/picks" className="text-sm text-prose-faint hover:text-accent-text-soft transition-colors">
                 Browse all Boss Daddy Picks →
               </Link>
+            </div>
+
+            {/* On the Bench */}
+            <div className="mt-16">
+              <BenchStrip ctaText="See all on the bench" />
             </div>
           </main>
 
