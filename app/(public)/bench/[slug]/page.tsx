@@ -95,14 +95,14 @@ export default async function BenchDetailPage({ params }: Props) {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
       {/* Breadcrumb */}
       <div className="mb-8 text-xs text-prose-faint">
-        <Link href="/bench" className="hover:text-zinc-400 transition-colors">On the Bench</Link>
+        <Link href="/bench" className="hover:text-prose-muted transition-colors">On the Bench</Link>
         <span className="mx-2">→</span>
-        <span className="text-zinc-400">{wishlistItem.title}</span>
+        <span className="text-prose-muted">{wishlistItem.title}</span>
       </div>
 
       {wishlistItem.image_url && (
         <LightboxImage src={wishlistItem.image_url} alt={wishlistItem.title}>
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-zinc-900 shadow-md shadow-black/5 mb-8">
+          <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-surface-raised shadow-md shadow-black/5 mb-8">
             <Image
               src={wishlistItem.image_url}
               alt={wishlistItem.title}
@@ -125,10 +125,10 @@ export default async function BenchDetailPage({ params }: Props) {
           )}
 
           {isSkipped && wishlistItem.skip_reason && (
-            <div className="p-4 bg-zinc-900 border border-soft rounded-xl mb-4 shadow-md shadow-black/5">
+            <div className="p-4 bg-surface-raised border border-soft rounded-xl mb-4 shadow-md shadow-black/5">
               <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
               <p className="text-xs font-black uppercase tracking-widest text-prose-muted mb-1">Why I&apos;m not testing this</p>
-              <p className="text-sm text-zinc-400">{wishlistItem.skip_reason}</p>
+              <p className="text-sm text-prose-muted">{wishlistItem.skip_reason}</p>
             </div>
           )}
 

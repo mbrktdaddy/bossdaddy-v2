@@ -16,9 +16,9 @@ export function WishlistCard({ item }: Props) {
   const detailHref = `/bench/${item.slug}`
 
   return (
-    <div className="bg-surface rounded-xl overflow-hidden flex flex-col shadow-lg shadow-black/5 hover:shadow-xl hover:shadow-black/10 transition-all duration-200">
+    <div className="bg-surface border border-soft rounded-xl overflow-hidden flex flex-col shadow-md shadow-black/5 hover:shadow-lg hover:shadow-black/10 hover:border-strong/60 hover:-translate-y-0.5 transition-all duration-200">
       {/* Image */}
-      <Link href={detailHref} className="block relative aspect-[4/3] bg-zinc-900">
+      <Link href={detailHref} className="block relative aspect-[4/3] bg-surface-raised">
         {item.image_url ? (
           <Image
             src={item.image_url}
@@ -29,7 +29,7 @@ export function WishlistCard({ item }: Props) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <svg className="w-12 h-12 text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-12 h-12 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
@@ -56,8 +56,8 @@ export function WishlistCard({ item }: Props) {
           <span
             className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold tabular-nums ${
               voteCount > 0
-                ? 'bg-accent-tint border border-accent-border/40 text-accent-text'
-                : 'bg-zinc-900 border border-soft text-prose-faint'
+                ? 'bg-accent-tint border border-accent/40 text-accent'
+                : 'bg-surface-raised border border-soft text-prose-faint'
             }`}
             title={voteCount > 0 ? `${voteCount} ${voteCount === 1 ? 'reader has' : 'readers have'} voted for this` : 'No votes yet — be the first'}
           >
