@@ -114,6 +114,18 @@ export default function Header({ username }: HeaderProps) {
     return () => { document.removeEventListener('keydown', onKey); document.removeEventListener('mousedown', onMouse) }
   }, [userMenuOpen])
 
+  // Cmd/Ctrl+K opens desktop search
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        openSearch()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [openSearch])
+
   // Close menus on route change
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMobileOpen(false); setCatOpen(false); setSearchOpen(false); setUserMenuOpen(false) }, [pathname])
@@ -281,15 +293,30 @@ export default function Header({ username }: HeaderProps) {
                 </div>
               </form>
             ) : (
-              <button
-                onClick={openSearch}
-                aria-label="Search"
-                className="p-2 rounded-lg text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/60 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </button>
+              <>
+                <button
+                  onClick={openSearch}
+                  aria-label="Search"
+                  aria-keyshortcuts="Meta+K Ctrl+K"
+                  className="hidden lg:flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-400 hover:text-zinc-50 hover:border-zinc-600 transition-colors text-sm"
+                >
+                  <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <span className="text-xs text-zinc-500">Search</span>
+                  <kbd className="text-[10px] font-mono bg-zinc-800 border border-zinc-700 rounded px-1.5 py-0.5 leading-none">⌘K</kbd>
+                </button>
+                <button
+                  onClick={openSearch}
+                  aria-label="Search"
+                  aria-keyshortcuts="Meta+K Ctrl+K"
+                  className="lg:hidden p-2 rounded-lg text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/60 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
+              </>
             )}
           </div>
 

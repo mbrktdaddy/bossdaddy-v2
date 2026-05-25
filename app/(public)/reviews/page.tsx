@@ -93,14 +93,14 @@ export default async function ReviewsPage({ searchParams }: Props) {
         {reviews.length > 0 && (
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 pb-4 border-b border-soft/40 text-sm text-prose-faint">
             <span><span className="text-prose font-bold tabular-nums">{reviews.length}</span> dad-tested {reviews.length === 1 ? 'review' : 'reviews'}</span>
-            <span className="text-gray-700 hidden sm:block">·</span>
+            <span className="text-prose-faint hidden sm:block">·</span>
             <span><span className="text-prose font-bold tabular-nums">{categoryCount}</span> {categoryCount === 1 ? 'category' : 'categories'}</span>
             {avgRating && <>
-              <span className="text-gray-700 hidden sm:block">·</span>
+              <span className="text-prose-faint hidden sm:block">·</span>
               <span>Avg rating <span className="text-accent-text-soft font-bold tabular-nums">{avgRating}/10</span></span>
             </>}
             {lastAdded && <>
-              <span className="text-gray-700 hidden sm:block">·</span>
+              <span className="text-prose-faint hidden sm:block">·</span>
               <span>Last added <span className="text-prose font-medium">{lastAdded}</span></span>
             </>}
           </div>

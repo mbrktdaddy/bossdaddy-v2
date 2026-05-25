@@ -80,14 +80,14 @@ export default async function GuidesPage({ searchParams }: Props) {
         {guides.length > 0 && (
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 pb-4 border-b border-soft/40 text-sm text-prose-faint">
             <span><span className="text-prose font-bold tabular-nums">{guides.length}</span> {guides.length === 1 ? 'guide' : 'guides'}</span>
-            <span className="text-gray-700 hidden sm:block">·</span>
+            <span className="text-prose-faint hidden sm:block">·</span>
             <span><span className="text-prose font-bold tabular-nums">{categoryCount}</span> {categoryCount === 1 ? 'category' : 'categories'}</span>
             {avgReadTime && <>
-              <span className="text-gray-700 hidden sm:block">·</span>
+              <span className="text-prose-faint hidden sm:block">·</span>
               <span>Avg <span className="text-prose font-bold tabular-nums">{avgReadTime} min</span> read</span>
             </>}
             {lastAdded && <>
-              <span className="text-gray-700 hidden sm:block">·</span>
+              <span className="text-prose-faint hidden sm:block">·</span>
               <span>Last added <span className="text-prose font-medium">{lastAdded}</span></span>
             </>}
           </div>
@@ -100,7 +100,7 @@ export default async function GuidesPage({ searchParams }: Props) {
             All Guides
           </Link>
           {CATEGORIES.map((c) => (
-            <Link key={c.slug} href={`/guides?category=${c.slug}`}
+            <Link key={c.slug} href={`/guides/category/${c.slug}`}
               className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose transition-colors">
               <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
               <span>{c.label}</span>
@@ -139,7 +139,7 @@ export default async function GuidesPage({ searchParams }: Props) {
                 </div>
                 {total > items.length && (
                   <Link
-                    href={`/guides?category=${cat.slug}`}
+                    href={`/guides/category/${cat.slug}`}
                     className="self-end shrink-0 text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold"
                   >
                     View all {total}
@@ -197,7 +197,7 @@ export default async function GuidesPage({ searchParams }: Props) {
           All Guides
         </Link>
         {CATEGORIES.map((c) => (
-          <Link key={c.slug} href={`/guides?category=${c.slug}`}
+          <Link key={c.slug} href={`/guides/category/${c.slug}`}
             className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
               category === c.slug
                 ? 'bg-prose text-background border border-prose shadow-sm shadow-zinc-950/40'

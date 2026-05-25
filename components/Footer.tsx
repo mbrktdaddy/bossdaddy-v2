@@ -119,7 +119,7 @@ export default function Footer() {
                 role="img"
                 aria-label={`${label} — coming soon`}
                 title={`${label} — coming soon`}
-                className="text-zinc-600 cursor-not-allowed"
+                className="text-prose-faint cursor-not-allowed"
               >
                 {icon}
               </span>

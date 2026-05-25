@@ -36,7 +36,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${cat.label} Guides | Boss Daddy`,
       description: cat.description,
       url: `${siteUrl}/guides/category/${slug}`,
+      images: [{ url: `/api/og?title=${encodeURIComponent(cat.label + ' Guides')}&type=guide`, width: 1200, height: 630 }],
     },
+    twitter: { card: 'summary_large_image' },
     robots: (count ?? 0) === 0 ? { index: false, follow: true } : undefined,
   }
 }

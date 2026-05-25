@@ -90,11 +90,14 @@ export default function GlobalSearch() {
   return (
     <div className="fixed inset-0 z-50 bg-zinc-900/70 flex items-start justify-center pt-20 px-4" onClick={() => setOpen(false)}>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Site search"
         className="bg-surface-sunken border border-soft rounded-xl w-full max-w-2xl max-h-[70vh] flex flex-col shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 px-4 py-3 border-b border-soft shrink-0">
-          <svg className="w-4 h-4 text-prose-faint shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-4 h-4 text-prose-faint shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
@@ -104,6 +107,7 @@ export default function GlobalSearch() {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Search articles, reviews, media…"
+            aria-label="Search"
             className="flex-1 bg-transparent text-prose placeholder:text-prose-faint focus:outline-none text-sm"
           />
           {loading && <span className="w-3 h-3 border-2 border-strong border-t-orange-500 rounded-full animate-spin shrink-0" />}

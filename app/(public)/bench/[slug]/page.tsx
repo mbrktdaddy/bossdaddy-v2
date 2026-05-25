@@ -93,7 +93,7 @@ export default async function BenchDetailPage({ params }: Props) {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
       {/* Breadcrumb */}
-      <div className="mb-8 text-xs text-zinc-600">
+      <div className="mb-8 text-xs text-prose-faint">
         <Link href="/bench" className="hover:text-zinc-400 transition-colors">On the Bench</Link>
         <span className="mx-2">→</span>
         <span className="text-zinc-400">{wishlistItem.title}</span>

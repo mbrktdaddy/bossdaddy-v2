@@ -94,7 +94,7 @@ export default async function AuthorPage({ params }: Props) {
  <h1 className="text-3xl font-black mb-1">{profile.display_name ?? `@${username}`}</h1>
  <p className="text-sm text-prose-faint">
  <span className="text-accent-text">@{username}</span>
- <span className="mx-2 text-gray-700">·</span>
+ <span className="mx-2 text-prose-faint">·</span>
  {profile.role === 'admin' ? 'Editor' : 'Contributor'}
  </p>
  {profile.tagline && (

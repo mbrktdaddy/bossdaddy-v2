@@ -83,7 +83,7 @@ export default async function SearchPage({ searchParams }: Props) {
  {total === 0 && (
  <div className="text-center py-24 bg-surface/40 rounded-xl">
  <p className="text-prose-faint mb-2">Nothing matched that search.</p>
- <p className="text-gray-700 text-sm">Try a product name, category, or topic.</p>
+ <p className="text-prose-faint text-sm">Try a product name, category, or topic.</p>
  </div>
  )}
 
