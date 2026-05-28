@@ -453,9 +453,21 @@ export default function Header({ username, role, avatarUrl }: HeaderProps) {
         </form>
       </div>
 
-      {/* Mobile drawer — dark to match nav */}
+      {/* Mobile drawer — dark to match nav.
+          max-h subtracts the 4rem sticky header AND the iOS safe-area
+          inset (home indicator on iPhone, address bar on some browsers)
+          so the last items aren't hidden behind browser chrome.
+          The trailing pb-[env(safe-area-inset-bottom)] pads the inner
+          content for the same reason on devices where the safe area is
+          a real cutout. */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-zinc-800 bg-drama overflow-y-auto max-h-[calc(100dvh-4rem)]">
+        <div
+          className="md:hidden border-t border-zinc-800 bg-drama overflow-y-auto"
+          style={{
+            maxHeight: 'calc(100dvh - 4rem - env(safe-area-inset-bottom))',
+            paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
+          }}
+        >
           {/* Main nav links */}
           <nav aria-label="Mobile navigation" className="flex flex-col px-4 pt-3 gap-1">
             {NAV_LINKS.map(({ href, label }) => (
