@@ -120,7 +120,7 @@ export function MerchForm({ item }: Props) {
 
       <div>
         <label htmlFor="mf-slug" className="block text-sm text-prose-muted mb-1.5">
-          Slug <span className="text-red-700">*</span>
+          Slug <span className="text-danger-ink">*</span>
         </label>
         <input
           id="mf-slug"
@@ -139,7 +139,7 @@ export function MerchForm({ item }: Props) {
 
       <div>
         <label htmlFor="mf-name" className="block text-sm text-prose-muted mb-1.5">
-          Name <span className="text-red-700">*</span>
+          Name <span className="text-danger-ink">*</span>
         </label>
         <input
           id="mf-name"
@@ -272,7 +272,7 @@ export function MerchForm({ item }: Props) {
                   <button
                     type="button"
                     onClick={() => setImageUrl('')}
-                    className="absolute top-1 right-1 p-1 bg-surface/80 hover:bg-red-50 text-prose-muted hover:text-red-700 rounded transition-colors"
+                    className="absolute top-1 right-1 p-1 bg-surface/80 hover:bg-danger-bg text-prose-muted hover:text-danger-ink rounded transition-colors"
                     title="Clear override image"
                   >
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -384,7 +384,7 @@ export function MerchForm({ item }: Props) {
       )}
 
       {error && (
-        <p className="text-red-700 text-sm bg-red-50 border border-red-300 rounded-lg px-4 py-3">{error}</p>
+        <p className="text-danger-ink text-sm bg-danger-bg border border-danger-line rounded-lg px-4 py-3">{error}</p>
       )}
 
       <div className="flex items-center gap-3 pt-2">
@@ -400,7 +400,7 @@ export function MerchForm({ item }: Props) {
             type="button"
             onClick={handleDelete}
             disabled={deleting}
-            className="px-5 py-2.5 text-red-700 hover:text-red-700 text-sm transition-colors disabled:opacity-40"
+            className="px-5 py-2.5 text-danger-ink hover:text-danger-ink text-sm transition-colors disabled:opacity-40"
           >
             {deleting ? 'Deleting…' : 'Delete'}
           </button>

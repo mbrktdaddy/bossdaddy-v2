@@ -132,7 +132,7 @@ export function WishlistForm({ item }: Props) {
   return (
     <form onSubmit={handleSave} className="space-y-6 max-w-2xl">
       {error && (
-        <div className="px-4 py-3 bg-red-50 border border-red-300 rounded-xl text-sm text-red-700">
+        <div className="px-4 py-3 bg-danger-bg border border-danger-line rounded-xl text-sm text-danger-ink">
           {error}
         </div>
       )}
@@ -278,7 +278,7 @@ export function WishlistForm({ item }: Props) {
             type="button"
             onClick={handleDelete}
             disabled={deleting}
-            className="ml-auto px-4 py-2.5 text-sm text-red-700 hover:text-red-700 disabled:opacity-50 transition-colors"
+            className="ml-auto px-4 py-2.5 text-sm text-danger-ink hover:text-danger-ink disabled:opacity-50 transition-colors"
           >
             {deleting ? 'Deleting…' : 'Delete'}
           </button>

@@ -33,7 +33,7 @@ export default async function MyReviewsPage({ searchParams }: Props) {
   const statCards = [
     { label: 'Total',   value: counts.total,   color: 'text-prose',      filterKey: null },
     { label: 'Live',    value: counts.live,    color: 'text-forest',  filterKey: 'live' },
-    { label: 'Pending', value: counts.pending, color: 'text-amber-700', filterKey: 'pending' },
+    { label: 'Pending', value: counts.pending, color: 'text-warn-ink', filterKey: 'pending' },
     { label: 'Drafts',  value: counts.draft,   color: 'text-prose-muted',   filterKey: 'drafts' },
   ]
 

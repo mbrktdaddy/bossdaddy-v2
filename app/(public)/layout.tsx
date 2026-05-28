@@ -12,10 +12,12 @@ export default async function PublicLayout({ children }: { children: React.React
 
   let username: string | null = null
   let role: string | null = null
+  let avatarUrl: string | null = null
   if (user) {
-    const { data } = await supabase.from('profiles').select('username, role').eq('id', user.id).single()
+    const { data } = await supabase.from('profiles').select('username, role, avatar_url').eq('id', user.id).single()
     username = data?.username ?? user.email?.split('@')[0] ?? 'Account'
     role = data?.role ?? 'member'
+    avatarUrl = data?.avatar_url ?? null
   }
 
   return (
@@ -26,7 +28,7 @@ export default async function PublicLayout({ children }: { children: React.React
       >
         Skip to content
       </a>
-      <Header username={username} role={role} />
+      <Header username={username} role={role} avatarUrl={avatarUrl} />
       <main id="main-content" className="flex-1 w-full overflow-x-clip pb-14 md:pb-0">
         {children}
       </main>

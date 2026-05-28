@@ -101,8 +101,8 @@ export default function KidCard({ kid, initialMoments, momentCount, isAuthentica
               disabled={pending}
               className={`text-xs px-2 py-1.5 rounded-md transition-colors ${
                 confirmingDelete
-                  ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                  : 'text-prose-faint hover:text-red-700'
+                  ? 'bg-danger-bg text-danger-ink hover:bg-danger-line'
+                  : 'text-prose-faint hover:text-danger-ink'
               }`}
             >
               {pending ? '…' : confirmingDelete ? 'Confirm' : 'Remove'}

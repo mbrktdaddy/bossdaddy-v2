@@ -489,7 +489,7 @@ export function PickForm({ pick, initialItems }: Props) {
       {/* Metadata */}
       <div className="space-y-4">
         <div>
-          <label htmlFor="pf-slug" className="block text-sm text-prose-muted mb-1.5">Slug <span className="text-red-700">*</span></label>
+          <label htmlFor="pf-slug" className="block text-sm text-prose-muted mb-1.5">Slug <span className="text-danger-ink">*</span></label>
           <input
             id="pf-slug"
             type="text" required value={slug} onChange={(e) => setSlug(e.target.value.toLowerCase())}
@@ -506,14 +506,14 @@ export function PickForm({ pick, initialItems }: Props) {
               : `/picks/${slug || 'your-slug'}`}
           </p>
           {slugTaken && (
-            <p className="mt-1 text-xs text-amber-700">
+            <p className="mt-1 text-xs text-warn-ink">
               ⚠ Slug already in use by an existing <strong className="font-semibold">{slugTaken.type === 'gift_guide' ? 'gift guide' : slugTaken.type === 'best_of' ? 'best-of list' : slugTaken.type}</strong>. Saving will fail until you pick a different one.
             </p>
           )}
         </div>
 
         <div>
-          <label htmlFor="pf-title" className="block text-sm text-prose-muted mb-1.5">Title <span className="text-red-700">*</span></label>
+          <label htmlFor="pf-title" className="block text-sm text-prose-muted mb-1.5">Title <span className="text-danger-ink">*</span></label>
           <input
             id="pf-title"
             type="text" required value={title} onChange={(e) => setTitle(e.target.value)}
@@ -521,7 +521,7 @@ export function PickForm({ pick, initialItems }: Props) {
             className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
           />
           {titleLint(title) && (
-            <p className="mt-1 text-xs text-amber-700">⚠ {titleLint(title)}</p>
+            <p className="mt-1 text-xs text-warn-ink">⚠ {titleLint(title)}</p>
           )}
         </div>
 
@@ -578,7 +578,7 @@ export function PickForm({ pick, initialItems }: Props) {
           )}
 
           {aiError && (
-            <p className="mt-2 text-xs text-red-700 bg-red-50 border border-red-300 rounded-lg px-3 py-2">{aiError}</p>
+            <p className="mt-2 text-xs text-danger-ink bg-danger-bg border border-danger-line rounded-lg px-3 py-2">{aiError}</p>
           )}
 
           {/* Inline images — manages bd-image-placeholder figures inside the intro */}
@@ -661,7 +661,7 @@ export function PickForm({ pick, initialItems }: Props) {
 
         {pickType === 'gift_guide' && (
           <div>
-            <label htmlFor="pf-occasion" className="block text-sm text-prose-muted mb-1.5">Occasion <span className="text-red-700">*</span></label>
+            <label htmlFor="pf-occasion" className="block text-sm text-prose-muted mb-1.5">Occasion <span className="text-danger-ink">*</span></label>
             <select
               id="pf-occasion"
               value={occasion} onChange={(e) => setOccasion(e.target.value)}
@@ -689,7 +689,7 @@ export function PickForm({ pick, initialItems }: Props) {
           disabled={visible}
         />
         {visible && scheduledAt && (
-          <p className="-mt-3 text-xs text-amber-700">
+          <p className="-mt-3 text-xs text-warn-ink">
             ⚠ This collection is already live. Clear the schedule, or unpublish first to schedule a future drop.
           </p>
         )}
@@ -800,7 +800,7 @@ export function PickForm({ pick, initialItems }: Props) {
                   <button
                     type="button"
                     onClick={() => setFaqs((f) => f.filter((_, i) => i !== idx))}
-                    className="text-xs text-prose-faint hover:text-red-700 transition-colors"
+                    className="text-xs text-prose-faint hover:text-danger-ink transition-colors"
                     title="Remove this Q&A"
                   >
                     Remove
@@ -846,7 +846,7 @@ export function PickForm({ pick, initialItems }: Props) {
         <div className="bg-surface-sunken/60 border border-soft rounded-xl p-4">
           <div className="flex items-baseline justify-between mb-3">
             <p className="text-xs text-prose-muted font-semibold uppercase tracking-widest">Ready to publish?</p>
-            <p className={`text-xs font-bold tabular-nums ${requiredMissing > 0 ? 'text-amber-700' : 'text-forest'}`}>
+            <p className={`text-xs font-bold tabular-nums ${requiredMissing > 0 ? 'text-warn-ink' : 'text-forest'}`}>
               {requiredMissing > 0 ? `${requiredMissing} required missing` : 'All required ✓'}
             </p>
           </div>
@@ -857,15 +857,15 @@ export function PickForm({ pick, initialItems }: Props) {
                   aria-hidden
                   className={`w-3.5 h-3.5 rounded-full shrink-0 flex items-center justify-center text-[10px] font-black ${
                     c.done
-                      ? 'bg-green-500/20 text-forest'
+                      ? 'bg-success-bg0/20 text-forest'
                       : c.required
-                      ? 'bg-amber-500/20 text-amber-700'
+                      ? 'bg-warn-bg0/20 text-warn-ink'
                       : 'bg-surface-raised text-prose-faint'
                   }`}
                 >
                   {c.done ? '✓' : c.required ? '!' : '·'}
                 </span>
-                <span className={c.done ? 'text-prose-muted' : c.required ? 'text-amber-700' : 'text-prose-faint'}>
+                <span className={c.done ? 'text-prose-muted' : c.required ? 'text-warn-ink' : 'text-prose-faint'}>
                   {c.label}{c.required && !c.done ? ' (required)' : ''}
                 </span>
               </li>
@@ -901,12 +901,12 @@ export function PickForm({ pick, initialItems }: Props) {
                   <p className="text-xs text-prose-faint mt-0.5 tabular-nums">
                     Price range: <span className="text-accent-text-soft font-semibold">{label}</span>
                     {range.priced < range.total && (
-                      <span className="text-amber-700/80 ml-2">({range.total - range.priced} unpriced)</span>
+                      <span className="text-warn-ink/80 ml-2">({range.total - range.priced} unpriced)</span>
                     )}
                   </p>
                 )
               }
-              return <p className="text-xs text-amber-700/80 mt-0.5">No items have a product price — readers won&apos;t see a price.</p>
+              return <p className="text-xs text-warn-ink/80 mt-0.5">No items have a product price — readers won&apos;t see a price.</p>
             })()}
           </div>
           {items.length > 0 && (
@@ -922,10 +922,10 @@ export function PickForm({ pick, initialItems }: Props) {
           )}
         </div>
         {fillError && (
-          <p className="mb-3 text-xs text-red-700 bg-red-50 border border-red-300 rounded-lg px-3 py-2">{fillError}</p>
+          <p className="mb-3 text-xs text-danger-ink bg-danger-bg border border-danger-line rounded-lg px-3 py-2">{fillError}</p>
         )}
         {fillNote && !fillError && (
-          <p className="mb-3 text-xs text-forest bg-green-50 border border-green-300 rounded-lg px-3 py-2">{fillNote}</p>
+          <p className="mb-3 text-xs text-forest bg-success-bg border border-success-line rounded-lg px-3 py-2">{fillNote}</p>
         )}
 
         {/* Search to add */}
@@ -986,7 +986,7 @@ export function PickForm({ pick, initialItems }: Props) {
                       <button type="button" onClick={() => moveItem(idx, 1)} disabled={idx === items.length - 1}
                         className="min-h-[44px] min-w-[44px] flex items-center justify-center text-base text-prose-faint hover:text-prose disabled:opacity-30 transition-colors rounded-lg hover:bg-surface-raised" title="Move down" aria-label="Move down">↓</button>
                       <button type="button" onClick={() => removeItem(item.review_id)}
-                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-lg text-prose-faint hover:text-red-700 hover:bg-red-50 transition-colors rounded-lg" title="Remove" aria-label="Remove">×</button>
+                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-lg text-prose-faint hover:text-danger-ink hover:bg-danger-bg transition-colors rounded-lg" title="Remove" aria-label="Remove">×</button>
                     </div>
                   </div>
                   <textarea
@@ -1049,7 +1049,7 @@ export function PickForm({ pick, initialItems }: Props) {
         )}
       </div>
 
-      {error && <p className="text-red-700 text-sm bg-red-50 border border-red-300 rounded-lg px-4 py-3">{error}</p>}
+      {error && <p className="text-danger-ink text-sm bg-danger-bg border border-danger-line rounded-lg px-4 py-3">{error}</p>}
 
       {/* Sticky action bar — pins to the bottom of the viewport so Save /
           Publish / View Live / Delete are reachable from anywhere in this
@@ -1067,7 +1067,7 @@ export function PickForm({ pick, initialItems }: Props) {
               onClick={() => handleSave(null, { visible: !visible })}
               disabled={busy || !slug.trim() || !title.trim()}
               className={visible
-                ? 'px-4 sm:px-5 py-2.5 bg-amber-50 hover:bg-amber-50 border border-amber-300 text-amber-700 text-sm font-semibold rounded-xl transition-colors min-h-[44px] disabled:opacity-40'
+                ? 'px-4 sm:px-5 py-2.5 bg-warn-bg hover:bg-warn-bg border border-warn-line text-warn-ink text-sm font-semibold rounded-xl transition-colors min-h-[44px] disabled:opacity-40'
                 : 'px-4 sm:px-5 py-2.5 bg-green-700 hover:bg-green-600 text-white text-sm font-semibold rounded-xl transition-colors min-h-[44px] disabled:opacity-40'}>
               {busy ? '…' : visible ? 'Unpublish' : 'Publish Live'}
             </button>
@@ -1082,7 +1082,7 @@ export function PickForm({ pick, initialItems }: Props) {
 
           {!isNew && (
             <button type="button" onClick={handleDelete} disabled={deleting}
-              className="ml-auto px-4 sm:px-5 py-2.5 text-red-700 hover:text-red-700 text-sm transition-colors disabled:opacity-40 min-h-[44px]">
+              className="ml-auto px-4 sm:px-5 py-2.5 text-danger-ink hover:text-danger-ink text-sm transition-colors disabled:opacity-40 min-h-[44px]">
               {deleting ? 'Deleting…' : 'Delete'}
             </button>
           )}

@@ -123,7 +123,7 @@ Tips:
         </button>
 
         {error && (
-          <p className="text-red-700 text-sm bg-red-50 border border-red-300 rounded-lg px-4 py-3">
+          <p className="text-danger-ink text-sm bg-danger-bg border border-danger-line rounded-lg px-4 py-3">
             {error}
           </p>
         )}

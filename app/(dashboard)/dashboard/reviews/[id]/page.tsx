@@ -71,7 +71,7 @@ export default async function ReviewWorkspacePage({
           </svg>
           All reviews
         </Link>
-        <p className="text-red-700">Review not found. It may have been deleted.</p>
+        <p className="text-danger-ink">Review not found. It may have been deleted.</p>
       </div>
     )
   }

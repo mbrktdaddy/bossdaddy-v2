@@ -188,7 +188,7 @@ function AssetCard({
               onClick={handleAIGenerate}
               disabled={generatingAlt}
               title="Generate alt text with AI"
-              className="shrink-0 text-xs px-1.5 py-0.5 bg-blue-50 hover:bg-blue-50 text-blue-700 rounded transition-colors disabled:opacity-50"
+              className="shrink-0 text-xs px-1.5 py-0.5 bg-info-bg hover:bg-info-bg text-info-ink rounded transition-colors disabled:opacity-50"
             >
               {generatingAlt ? '…' : '✨ AI'}
             </button>
@@ -210,8 +210,8 @@ function AssetCard({
             disabled={deleting}
             className={`text-xs px-2 py-1 rounded transition-colors ${
               confirmDelete
-                ? 'bg-red-50 text-red-700 hover:bg-red-100'
-                : 'text-prose-faint hover:text-red-700'
+                ? 'bg-danger-bg text-danger-ink hover:bg-danger-bg'
+                : 'text-prose-faint hover:text-danger-ink'
             }`}
           >
             {deleting ? '…' : confirmDelete ? 'Confirm delete' : 'Delete'}
@@ -458,7 +458,7 @@ export default function MediaLibraryPage() {
       </div>
 
       {uploadError && (
-        <p className="text-red-700 text-sm bg-red-50 border border-red-300 rounded-lg px-4 py-3 mb-4">
+        <p className="text-danger-ink text-sm bg-danger-bg border border-danger-line rounded-lg px-4 py-3 mb-4">
           {uploadError}
         </p>
       )}
@@ -594,12 +594,12 @@ export default function MediaLibraryPage() {
               />
             )}
             {(usageData.articles_body.length > 0 || usageData.reviews_body.length > 0) && (
-              <div className="bg-amber-50 border border-amber-300 rounded-xl px-4 py-3 space-y-1">
-                <p className="text-xs font-semibold text-amber-700">Body mentions — not auto-fixed</p>
+              <div className="bg-warn-bg border border-warn-line rounded-xl px-4 py-3 space-y-1">
+                <p className="text-xs font-semibold text-warn-ink">Body mentions — not auto-fixed</p>
                 {[...usageData.articles_body, ...usageData.reviews_body].map((item) => (
-                  <p key={item.id} className="text-xs text-amber-700/70 truncate">{item.title ?? item.slug}</p>
+                  <p key={item.id} className="text-xs text-warn-ink/70 truncate">{item.title ?? item.slug}</p>
                 ))}
-                <p className="text-xs text-amber-700 mt-1">These inline images will be broken after deletion. Edit those pages to remove them.</p>
+                <p className="text-xs text-warn-ink mt-1">These inline images will be broken after deletion. Edit those pages to remove them.</p>
               </div>
             )}
 

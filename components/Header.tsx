@@ -17,6 +17,10 @@ interface HeaderProps {
   /** The current user's role, or null if not signed in. Used to route account
    *  links — members go to /account/settings, authors/admins to /dashboard/profile. */
   role?: string | null
+  /** Avatar URL from profiles.avatar_url, or null. When present, replaces the
+   *  initial-fallback circle in both the desktop user menu trigger and the
+   *  mobile drawer. */
+  avatarUrl?: string | null
 }
 
 const NAV_LINKS = [
@@ -78,7 +82,7 @@ function isActive(pathname: string, href: string) {
   return pathname.startsWith(href)
 }
 
-export default function Header({ username, role }: HeaderProps) {
+export default function Header({ username, role, avatarUrl }: HeaderProps) {
   // Members go to /account/settings; authors and admins go to /dashboard/profile.
   const profileHref = (role === 'author' || role === 'admin') ? '/dashboard/profile' : '/account/settings'
   const hasDashboard = role === 'author' || role === 'admin'
@@ -340,8 +344,12 @@ export default function Header({ username, role }: HeaderProps) {
                 aria-label="Account menu"
                 aria-expanded={userMenuOpen}
               >
-                <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center text-xs font-bold text-white shrink-0">
-                  {username[0].toUpperCase()}
+                <div className="w-7 h-7 rounded-full overflow-hidden bg-accent flex items-center justify-center text-xs font-bold text-white shrink-0">
+                  {avatarUrl ? (
+                    <Image src={avatarUrl} alt="" width={28} height={28} className="object-cover w-full h-full" unoptimized />
+                  ) : (
+                    username[0].toUpperCase()
+                  )}
                 </div>
                 <span className="text-sm text-zinc-300 max-w-[120px] truncate">@{username}</span>
                 <svg
@@ -530,8 +538,12 @@ export default function Header({ username, role }: HeaderProps) {
             {username ? (
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-3 px-4 py-3">
-                  <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-base font-bold text-white shrink-0">
-                    {username[0].toUpperCase()}
+                  <div className="w-10 h-10 rounded-full overflow-hidden bg-accent flex items-center justify-center text-base font-bold text-white shrink-0">
+                    {avatarUrl ? (
+                      <Image src={avatarUrl} alt="" width={40} height={40} className="object-cover w-full h-full" unoptimized />
+                    ) : (
+                      username[0].toUpperCase()
+                    )}
                   </div>
                   <div className="min-w-0">
                     <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Signed in as</p>

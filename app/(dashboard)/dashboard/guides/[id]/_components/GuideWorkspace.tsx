@@ -312,7 +312,7 @@ export function GuideWorkspace({ guide: article }: Props) {
                     <button
                       type="button"
                       onClick={() => setFaqs(faqs.filter((_, j) => j !== i))}
-                      className="text-prose-faint hover:text-red-700 transition-colors text-xs mt-2"
+                      className="text-prose-faint hover:text-danger-ink transition-colors text-xs mt-2"
                     >
                       ✕
                     </button>

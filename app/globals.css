@@ -25,7 +25,8 @@
   --bd-surface:        #ffffff;   /* white card */
   --bd-surface-raised: #e4e4e7;   /* zinc-200 — alt section bg, hover lift */
   --bd-surface-sunken: #e4e4e7;   /* zinc-200 — wells, code blocks */
-  --bd-border:         #e4e4e7;   /* zinc-200 — hairline */
+  --bd-border-faint:   #f4f4f5;   /* zinc-100 — barely-there hairline (softer than soft) */
+  --bd-border:         #e4e4e7;   /* zinc-200 — standard hairline */
   --bd-border-strong:  #a1a1aa;   /* zinc-400 — confident edges, secondary CTAs */
 
   /* ── Text — dark on light */
@@ -38,9 +39,76 @@
   --bd-error:   #dc2626;          /* red-600 — destructive on light */
   --bd-warn:    #d97706;          /* amber-600 — caution on light */
 
+  /* ── Status chip palette — three layers per state so chips render
+        consistently across light AND dark canvases. Components consume
+        bg-{state}-bg / border-{state}-line / text-{state}-ink. The dark
+        zone overrides these in the [data-theme="dark"] scope below. */
+  --bd-danger-bg:    #fef2f2;     /* red-50 */
+  --bd-danger-line:  #fca5a5;     /* red-300 */
+  --bd-danger-ink:   #b91c1c;     /* red-700 */
+  --bd-success-bg:   #f0fdf4;     /* green-50 */
+  --bd-success-line: #86efac;     /* green-300 */
+  --bd-success-ink:  #15803d;     /* green-700 */
+  --bd-warn-bg:      #fefce8;     /* yellow-50 */
+  --bd-warn-line:    #fcd34d;     /* amber-300 */
+  --bd-warn-ink:     #a16207;     /* yellow-700 */
+  --bd-info-bg:      #eff6ff;     /* blue-50 */
+  --bd-info-line:    #93c5fd;     /* blue-300 */
+  --bd-info-ink:     #1d4ed8;     /* blue-700 */
+
   /* ── Accent tint — secondary surface for brand-territory elements
         (TL;DR boxes, product chips on light canvas). */
   --bd-accent-tint: #fff4eb;      /* very pale orange wash on light */
+}
+
+/* ── Dark zone — applied via [data-theme="dark"] on a layout root div.
+   Used for "work" surfaces (dashboard, account, tools) while editorial
+   pages stay light. The @theme inline semantic tokens var() to these
+   --bd-* values, so flipping them here rotates the entire component
+   palette without touching component code. Per the feedback memory on
+   the scrapped .bd-light experiment, this is STRUCTURAL inversion via
+   tokens — NOT per-scope class painting. */
+[data-theme="dark"] {
+  --background: #09090b;          /* zinc-950 */
+  --foreground: #f4f4f5;          /* zinc-100 */
+
+  --bd-bg:             #09090b;   /* zinc-950 — page canvas */
+  --bd-surface:        #18181b;   /* zinc-900 — cards, same as --color-drama */
+  --bd-surface-raised: #27272a;   /* zinc-800 — alt section, hover lift */
+  --bd-surface-sunken: #09090b;   /* zinc-950 — wells, MORE recessed than canvas */
+  --bd-border-faint:   #1f1f23;   /* between zinc-900 and zinc-800 — barely visible on zinc-900 cards */
+  --bd-border:         #27272a;   /* zinc-800 — standard hairline */
+  --bd-border-strong:  #3f3f46;   /* zinc-700 — confident edge */
+
+  --bd-text:       #f4f4f5;       /* zinc-100 — body */
+  --bd-text-muted: #d4d4d8;       /* zinc-300 — captions */
+  --bd-text-faint: #71717a;       /* zinc-500 — same gray, reads on both */
+
+  --bd-success: #22c55e;          /* green-500 — pops on dark */
+  --bd-error:   #ef4444;          /* red-500 */
+  --bd-warn:    #f59e0b;          /* amber-500 */
+
+  --bd-orange-text: #e87030;      /* orange-400 — per CLAUDE.md design rule for dark bg */
+  /* On dark, accent-tint cannot use a deep orange — orange-950 reads as
+     brown, which violates the brand discipline. Match surface-raised
+     instead; the elevated neutral surface IS the "brand territory" signal
+     on dark. Brand warmth lives in accents (buttons, focus, links). */
+  --bd-accent-tint: #27272a;      /* zinc-800 — same as surface-raised */
+
+  /* Status chip palette — inverted for dark canvas. bg goes very dark,
+     line stays medium-dark, ink shifts to a light-readable hue. */
+  --bd-danger-bg:    #450a0a;     /* red-950 */
+  --bd-danger-line:  #991b1b;     /* red-800 */
+  --bd-danger-ink:   #fca5a5;     /* red-300 */
+  --bd-success-bg:   #052e16;     /* green-950 */
+  --bd-success-line: #166534;     /* green-800 */
+  --bd-success-ink:  #86efac;     /* green-300 */
+  --bd-warn-bg:      #422006;     /* amber-950 */
+  --bd-warn-line:    #92400e;     /* amber-800 */
+  --bd-warn-ink:     #fcd34d;     /* amber-300 */
+  --bd-info-bg:      #172554;     /* blue-950 */
+  --bd-info-line:    #1e40af;     /* blue-800 */
+  --bd-info-ink:     #93c5fd;     /* blue-300 */
 }
 
 @theme inline {
@@ -106,9 +174,28 @@
   --color-prose-muted:      var(--bd-text-muted);
   --color-prose-faint:      var(--bd-text-faint);
 
-  /* Edge roles */
+  /* Edge roles — three tiers in lightness order:
+       faint  → barely-there hairline (subtle separators, inner dividers)
+       soft   → standard hairline (most card outlines + chrome)
+       strong → confident edge (secondary CTAs, emphasized borders) */
+  --color-faint:            var(--bd-border-faint);
   --color-soft:             var(--bd-border);
   --color-strong:           var(--bd-border-strong);
+
+  /* Status chip palette — bg / line / ink layers per state. Use as a
+     three-piece recipe: bg-danger-bg + border-danger-line + text-danger-ink. */
+  --color-danger-bg:    var(--bd-danger-bg);
+  --color-danger-line:  var(--bd-danger-line);
+  --color-danger-ink:   var(--bd-danger-ink);
+  --color-success-bg:   var(--bd-success-bg);
+  --color-success-line: var(--bd-success-line);
+  --color-success-ink:  var(--bd-success-ink);
+  --color-warn-bg:      var(--bd-warn-bg);
+  --color-warn-line:    var(--bd-warn-line);
+  --color-warn-ink:     var(--bd-warn-ink);
+  --color-info-bg:      var(--bd-info-bg);
+  --color-info-line:    var(--bd-info-line);
+  --color-info-ink:     var(--bd-info-ink);
 }
 
 html {

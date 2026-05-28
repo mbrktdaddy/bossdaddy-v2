@@ -17,7 +17,7 @@ export default async function ToolsLayout({
   const isAuthed = !!user
 
   return (
-    <div className="min-h-screen bg-background text-prose flex flex-col">
+    <div data-theme="dark" className="min-h-screen bg-background text-prose flex flex-col">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:bg-surface focus:text-prose focus:px-4 focus:py-2 focus:rounded-lg focus:border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent"

@@ -102,7 +102,7 @@ export default async function AdminNewsletterPage() {
                 <div className="text-xs text-prose-faint shrink-0 text-right">
                   <p>{new Date(s.created_at).toLocaleDateString()}</p>
                   {!s.confirmed && (
-                    <p className="text-amber-700 mt-0.5">unconfirmed</p>
+                    <p className="text-warn-ink mt-0.5">unconfirmed</p>
                   )}
                 </div>
               </div>

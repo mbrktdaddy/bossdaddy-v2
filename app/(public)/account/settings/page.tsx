@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
   admin:  { label: 'Admin',  className: 'bg-accent-tint text-accent-text-soft border border-accent-border/60' },
-  author: { label: 'Author', className: 'bg-blue-50 text-blue-700 border border-blue-300' },
+  author: { label: 'Author', className: 'bg-info-bg text-info-ink border border-info-line' },
   member: { label: 'Member', className: 'bg-surface-raised text-prose-muted border border-strong' },
 }
 
@@ -103,7 +103,8 @@ export default async function AccountSettingsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
+    <div data-theme="dark" className="bg-background text-prose min-h-[calc(100vh-4rem)]">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
 
       <div className="mb-8">
         <h1 className="text-2xl font-black">Account Settings</h1>
@@ -115,19 +116,21 @@ export default async function AccountSettingsPage() {
         <AccountDeletion accountStatus={accountStatus} deletionDate={deletionDate} hasPublishedContent={false} />
       )}
 
-      {/* Identity */}
-      <div className="bg-accent-tint border border-soft rounded-xl p-6 mb-6">
+      {/* Identity — centered on mobile, left-aligned from sm+ */}
+      <div className="bg-accent-tint border border-soft rounded-xl p-5 sm:p-6 mb-6">
         <AvatarUploader
           initialAvatarUrl={(profile as { avatar_url?: string | null } | null)?.avatar_url ?? null}
           initial={profile?.username?.[0]?.toUpperCase() ?? '?'}
         />
-        <div className="mt-6 flex items-center gap-2 flex-wrap">
-          <p className="font-black text-xl text-prose">@{profile?.username}</p>
-          <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${roleCfg.className}`}>
-            {roleCfg.label}
-          </span>
+        <div className="mt-5 flex flex-col items-center sm:items-start gap-1">
+          <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
+            <p className="font-black text-xl text-prose">@{profile?.username}</p>
+            <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${roleCfg.className}`}>
+              {roleCfg.label}
+            </span>
+          </div>
+          {memberSince && <p className="text-sm text-prose-faint">Member since {memberSince}</p>}
         </div>
-        {memberSince && <p className="text-sm text-prose-faint mt-1">Member since {memberSince}</p>}
       </div>
 
       {/* Your Family — kid profiles + the Log */}
@@ -183,7 +186,7 @@ export default async function AccountSettingsPage() {
             {orderedLikedArticles.map((a) => a && (
               <Link key={a.id} href={`/guides/${a.slug}`}
                 className="flex items-center gap-3 p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group">
-                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-300 shrink-0">Article</span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-info-bg text-info-ink border border-info-line shrink-0">Article</span>
                 <div className="min-w-0">
                   <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate">{a.title}</p>
                 </div>
@@ -224,6 +227,7 @@ export default async function AccountSettingsPage() {
         <AccountDeletion accountStatus={accountStatus} deletionDate={deletionDate} hasPublishedContent={false} />
       )}
 
+      </div>
     </div>
   )
 }

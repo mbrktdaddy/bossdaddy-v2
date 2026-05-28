@@ -57,8 +57,8 @@ function MomentItem({ moment }: { moment: KidMoment }) {
           disabled={pending}
           className={`shrink-0 text-xs px-2 py-1 rounded-md transition-colors ${
             confirming
-              ? 'bg-red-100 text-red-700 hover:bg-red-200'
-              : 'text-prose-faint hover:text-red-700 opacity-0 group-hover:opacity-100 focus:opacity-100'
+              ? 'bg-danger-bg text-danger-ink hover:bg-danger-line'
+              : 'text-prose-faint hover:text-danger-ink opacity-0 group-hover:opacity-100 focus:opacity-100'
           }`}
           aria-label={confirming ? 'Confirm remove' : 'Remove moment'}
         >

@@ -51,8 +51,8 @@ export default function KidHeaderActions({ kid }: Props) {
           disabled={pending}
           className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${
             confirmingDelete
-              ? 'bg-red-100 text-red-700 border-red-300 hover:bg-red-200'
-              : 'text-prose-faint border-soft hover:text-red-700 hover:border-red-300'
+              ? 'bg-danger-bg text-danger-ink border-danger-line hover:bg-danger-line'
+              : 'text-prose-faint border-soft hover:text-danger-ink hover:border-danger-line'
           }`}
         >
           {pending ? '…' : confirmingDelete ? 'Confirm remove' : 'Remove'}

@@ -91,7 +91,7 @@ export default function KidProfileForm(props: Props) {
         />
       </div>
 
-      {error && <p className="text-sm text-red-700">{error}</p>}
+      {error && <p className="text-sm text-danger-ink">{error}</p>}
 
       <div className="flex items-center gap-2 pt-1">
         <button

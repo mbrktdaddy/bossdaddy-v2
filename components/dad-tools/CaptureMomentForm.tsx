@@ -103,7 +103,7 @@ export default function CaptureMomentForm({
         </button>
       </div>
 
-      {error && <p className="text-sm text-red-700">{error}</p>}
+      {error && <p className="text-sm text-danger-ink">{error}</p>}
     </form>
   )
 }

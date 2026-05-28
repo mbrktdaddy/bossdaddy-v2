@@ -56,13 +56,14 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
   }
 
   return (
-    <div className="flex flex-col items-center sm:items-start sm:flex-row gap-5">
+    <div className="flex flex-col items-center sm:items-start sm:flex-row gap-4">
       <button
         type="button"
         onClick={() => fileRef.current?.click()}
         disabled={busy}
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) handleFile(f) }}
+        title="Click or drop a JPG, PNG, or WebP"
         className="group relative w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-orange-700 to-orange-950 flex items-center justify-center text-4xl font-black text-white shrink-0 hover:ring-orange-700 transition-all disabled:opacity-50 disabled:cursor-wait"
         aria-label={avatarUrl ? 'Change avatar' : 'Upload avatar'}
       >
@@ -76,33 +77,27 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
         </span>
       </button>
 
-      <div className="flex flex-col gap-2 items-center sm:items-start min-w-0">
-        <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold">Avatar</p>
-        <p className="text-xs text-prose-faint max-w-xs text-center sm:text-left">
-          JPG, PNG, or WebP — any size. Click the circle or drag a file onto it.
-        </p>
-        <div className="flex gap-2 mt-1">
+      <div className="flex gap-2 sm:self-center">
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={busy}
+          className="px-3 py-1.5 bg-surface-raised hover:bg-surface disabled:opacity-50 text-xs font-semibold text-prose rounded-lg transition-colors"
+        >
+          {busy ? 'Uploading…' : avatarUrl ? 'Replace' : 'Upload'}
+        </button>
+        {avatarUrl && (
           <button
             type="button"
-            onClick={() => fileRef.current?.click()}
+            onClick={handleRemove}
             disabled={busy}
-            className="px-3 py-1.5 bg-surface-raised hover:bg-surface disabled:opacity-50 text-xs font-semibold text-prose rounded-lg transition-colors"
+            className="px-3 py-1.5 bg-transparent hover:bg-danger-bg border border-soft hover:border-danger-line disabled:opacity-50 text-xs font-semibold text-prose-muted hover:text-danger-ink rounded-lg transition-colors"
           >
-            {busy ? 'Uploading…' : avatarUrl ? 'Replace' : 'Upload'}
+            Remove
           </button>
-          {avatarUrl && (
-            <button
-              type="button"
-              onClick={handleRemove}
-              disabled={busy}
-              className="px-3 py-1.5 bg-transparent hover:bg-red-50 border border-soft hover:border-red-300 disabled:opacity-50 text-xs font-semibold text-prose-muted hover:text-red-700 rounded-lg transition-colors"
-            >
-              Remove
-            </button>
-          )}
-        </div>
-        {error && <p className="text-xs text-red-700 mt-1">{error}</p>}
+        )}
       </div>
+      {error && <p className="text-xs text-danger-ink w-full text-center sm:text-left">{error}</p>}
 
       <input
         ref={fileRef}

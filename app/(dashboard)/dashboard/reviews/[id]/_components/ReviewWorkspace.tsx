@@ -651,7 +651,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <ListEditor label="The Good (Pros)" items={pros} onChange={setPros} placeholder="e.g. Long battery life" accent="text-forest" />
-          <ListEditor label="The Not-So-Good (Cons)" items={cons} onChange={setCons} placeholder="e.g. Runs hot under load" accent="text-red-700" />
+          <ListEditor label="The Not-So-Good (Cons)" items={cons} onChange={setCons} placeholder="e.g. Runs hot under load" accent="text-danger-ink" />
         </div>
 
         <div>
@@ -705,7 +705,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                 items={notFor}
                 onChange={setNotFor}
                 placeholder="e.g. Families on a tight formula budget"
-                accent="text-red-700"
+                accent="text-danger-ink"
               />
             </div>
 
@@ -736,7 +736,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                       <button
                         type="button"
                         onClick={() => setFaqs(faqs.filter((_, j) => j !== i))}
-                        className="text-prose-faint hover:text-red-700 transition-colors text-xs mt-2"
+                        className="text-prose-faint hover:text-danger-ink transition-colors text-xs mt-2"
                       >
                         ✕
                       </button>

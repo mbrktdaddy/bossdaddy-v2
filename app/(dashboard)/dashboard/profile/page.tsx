@@ -10,7 +10,7 @@ import MyKidsSection from '@/components/dad-tools/MyKidsSection'
 
 const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
   admin:  { label: 'Admin',  className: 'bg-accent-tint text-accent-text-soft border border-accent-border/60' },
-  author: { label: 'Author', className: 'bg-blue-50 text-blue-700 border border-blue-300' },
+  author: { label: 'Author', className: 'bg-info-bg text-info-ink border border-info-line' },
   member: { label: 'Member', className: 'bg-surface-raised text-prose-muted border border-strong' },
 }
 
@@ -140,22 +140,24 @@ export default async function ProfilePage() {
         />
       )}
 
-      {/* Identity hero — avatar + name + role pill + joined date */}
-      <div className="bg-accent-tint border border-soft rounded-xl p-6 mb-6">
+      {/* Identity hero — centered on mobile, left-aligned from sm+ */}
+      <div className="bg-accent-tint border border-soft rounded-xl p-5 sm:p-6 mb-6">
         <AvatarUploader
           initialAvatarUrl={(profile as { avatar_url?: string | null } | null)?.avatar_url ?? null}
           initial={profile?.username?.[0]?.toUpperCase() ?? '?'}
         />
 
-        <div className="mt-6 flex items-center gap-2 flex-wrap">
-          <p className="font-black text-xl text-prose">@{profile?.username}</p>
-          <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${roleCfg.className}`}>
-            {roleCfg.label}
-          </span>
+        <div className="mt-5 flex flex-col items-center sm:items-start gap-1">
+          <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
+            <p className="font-black text-xl text-prose">@{profile?.username}</p>
+            <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${roleCfg.className}`}>
+              {roleCfg.label}
+            </span>
+          </div>
+          {memberSince && (
+            <p className="text-sm text-prose-faint">Member since {memberSince}</p>
+          )}
         </div>
-        {memberSince && (
-          <p className="text-sm text-prose-faint mt-1">Member since {memberSince}</p>
-        )}
       </div>
 
       {/* Your Family — kid profiles + the Log */}
@@ -235,7 +237,7 @@ export default async function ProfilePage() {
             <p className="text-xs text-prose-faint mt-1">Likes Given</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-black text-red-700">{commentLikesReceived ?? 0}</p>
+            <p className="text-2xl font-black text-danger-ink">{commentLikesReceived ?? 0}</p>
             <p className="text-xs text-prose-faint mt-1">Comment Likes</p>
           </div>
           <div className="text-center">
@@ -262,7 +264,7 @@ export default async function ProfilePage() {
               {(awaitingCount ?? 0) > 0 && (
                 <Link
                   href="/dashboard/reviews"
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-300 hover:border-amber-300 rounded-lg text-xs font-medium text-amber-700 hover:text-amber-700 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-warn-bg border border-warn-line hover:border-warn-line rounded-lg text-xs font-medium text-warn-ink hover:text-warn-ink transition-colors"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 shrink-0" />
                   {awaitingCount} Pending Approval →
@@ -312,7 +314,7 @@ export default async function ProfilePage() {
                 href={`/guides/${a.slug}`}
                 className="flex items-center gap-3 p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group"
               >
-                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-300 shrink-0">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-info-bg text-info-ink border border-info-line shrink-0">
                   Article
                 </span>
                 <div className="min-w-0">

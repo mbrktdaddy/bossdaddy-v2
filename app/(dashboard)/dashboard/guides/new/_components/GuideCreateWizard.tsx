@@ -252,7 +252,7 @@ export function GuideCreateWizard() {
           <p className="text-sm text-prose-muted leading-relaxed">{preview}</p>
         </div>
         {error && (
-          <p className="text-red-700 text-sm bg-red-50 border border-red-300 rounded-lg px-4 py-3">{error}</p>
+          <p className="text-danger-ink text-sm bg-danger-bg border border-danger-line rounded-lg px-4 py-3">{error}</p>
         )}
         <div className="flex items-center gap-3 flex-wrap">
           <button
@@ -463,7 +463,7 @@ export function GuideCreateWizard() {
       </div>
 
       {error && (
-        <p className="text-red-700 text-sm bg-red-50 border border-red-300 rounded-lg px-4 py-3">{error}</p>
+        <p className="text-danger-ink text-sm bg-danger-bg border border-danger-line rounded-lg px-4 py-3">{error}</p>
       )}
 
       <div className="flex items-center gap-3 pt-2">

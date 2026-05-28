@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import GlobalSearch from './GlobalSearch'
@@ -10,6 +11,7 @@ interface Props {
   username: string
   isAdmin: boolean
   role: string
+  avatarUrl?: string | null
 }
 
 interface NavItem {
@@ -111,7 +113,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
 
 const ROLE_LABEL: Record<string, string> = { admin: 'Admin', author: 'Author', member: 'Member' }
 
-export default function DashboardNav({ username, isAdmin, role }: Props) {
+export default function DashboardNav({ username, isAdmin, role, avatarUrl }: Props) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -162,8 +164,12 @@ export default function DashboardNav({ username, isAdmin, role }: Props) {
           </span>
         </Link>
         <Link href="/dashboard/profile" onClick={onNav} className="flex items-center gap-2 group">
-          <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center text-xs font-bold text-white shrink-0">
-            {username[0]?.toUpperCase() ?? 'B'}
+          <div className="w-6 h-6 rounded-full overflow-hidden bg-accent flex items-center justify-center text-xs font-bold text-white shrink-0">
+            {avatarUrl ? (
+              <Image src={avatarUrl} alt="" width={24} height={24} className="object-cover w-full h-full" unoptimized />
+            ) : (
+              username[0]?.toUpperCase() ?? 'B'
+            )}
           </div>
           <div className="min-w-0">
             <p className="text-xs text-prose group-hover:text-prose truncate font-medium transition-colors">@{username}</p>

@@ -48,7 +48,7 @@ export default function ContentActions({ id, status, contentType }: Props) {
         <button
           onClick={handleRecall}
           disabled={loading}
-          className="text-xs px-3 py-1.5 bg-amber-50 hover:bg-amber-50 text-amber-700 hover:text-amber-700 rounded-lg transition-colors border border-amber-300 disabled:opacity-40"
+          className="text-xs px-3 py-1.5 bg-warn-bg hover:bg-warn-bg text-warn-ink hover:text-warn-ink rounded-lg transition-colors border border-warn-line disabled:opacity-40"
         >
           {loading ? '…' : 'Recall to draft'}
         </button>
@@ -57,13 +57,13 @@ export default function ContentActions({ id, status, contentType }: Props) {
         <button
           onClick={handleDelete}
           disabled={loading}
-          className="text-xs px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 hover:text-red-700 rounded-lg transition-colors border border-red-300 disabled:opacity-40"
+          className="text-xs px-3 py-1.5 bg-danger-bg hover:bg-danger-bg text-danger-ink hover:text-danger-ink rounded-lg transition-colors border border-danger-line disabled:opacity-40"
         >
           {loading ? '…' : 'Delete'}
         </button>
       )}
       {error && (
-        <span className="text-xs text-red-700">{error}</span>
+        <span className="text-xs text-danger-ink">{error}</span>
       )}
     </div>
   )

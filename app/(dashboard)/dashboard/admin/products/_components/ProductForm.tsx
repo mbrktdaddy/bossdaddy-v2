@@ -178,7 +178,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
     <form onSubmit={handleSave} className="space-y-5">
       <div>
         <label className="block text-sm text-prose-muted mb-1.5">
-          Slug <span className="text-red-700">*</span>
+          Slug <span className="text-danger-ink">*</span>
         </label>
         <input
           type="text"
@@ -196,7 +196,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
 
       <div>
         <label className="block text-sm text-prose-muted mb-1.5">
-          Product name <span className="text-red-700">*</span>
+          Product name <span className="text-danger-ink">*</span>
         </label>
         <input
           type="text"
@@ -323,7 +323,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
                 type="button"
                 onClick={handleImportImages}
                 disabled={importing}
-                className="text-xs px-3 py-1.5 bg-amber-700/60 hover:bg-amber-600/60 disabled:opacity-40 text-amber-700 font-semibold rounded-lg transition-colors shrink-0"
+                className="text-xs px-3 py-1.5 bg-amber-700/60 hover:bg-amber-600/60 disabled:opacity-40 text-warn-ink font-semibold rounded-lg transition-colors shrink-0"
               >
                 {importing ? 'Importing…' : 'Import images from Amazon'}
               </button>
@@ -471,13 +471,13 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
       </div>
 
       {error && (
-        <p className="text-red-700 text-sm bg-red-50 border border-red-300 rounded-lg px-4 py-3">{error}</p>
+        <p className="text-danger-ink text-sm bg-danger-bg border border-danger-line rounded-lg px-4 py-3">{error}</p>
       )}
 
       {uploadStatus && (
         <p className={`text-sm rounded-lg px-4 py-3 ${
           createdProductId
-            ? 'text-amber-700 bg-amber-50 border border-amber-900/40'
+            ? 'text-warn-ink bg-warn-bg border border-amber-900/40'
             : 'text-prose-muted bg-surface border border-soft'
         }`}>
           {uploadStatus}
@@ -503,7 +503,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
             type="button"
             onClick={handleDelete}
             disabled={deleting}
-            className="px-5 py-2.5 text-red-700 hover:text-red-700 text-sm transition-colors disabled:opacity-40"
+            className="px-5 py-2.5 text-danger-ink hover:text-danger-ink text-sm transition-colors disabled:opacity-40"
           >
             {deleting ? 'Deleting…' : 'Delete'}
           </button>

@@ -14,9 +14,9 @@ export function HomeStats({ counts }: { counts: Counts }) {
     { label: 'Live Reviews',     value: counts.reviews.live,     href: '/dashboard/reviews?filter=live',     color: 'text-forest' },
     { label: 'Guide Drafts',     value: counts.articles.draft,   href: '/dashboard/guides?filter=drafts',    color: 'text-prose' },
     { label: 'Review Drafts',    value: counts.reviews.draft,    href: '/dashboard/reviews?filter=drafts',   color: 'text-prose' },
-    { label: 'Pending Review',   value: counts.articles.pending + counts.reviews.pending, href: '/dashboard/guides?filter=pending', color: 'text-amber-700' },
-    { label: 'Flagged Content',  value: counts.flagged,          href: '/dashboard/guides?filter=pending', color: 'text-red-700' },
-    { label: 'Pending Comments', value: counts.comments.pending, href: '/dashboard/comments',                color: 'text-blue-700' },
+    { label: 'Pending Review',   value: counts.articles.pending + counts.reviews.pending, href: '/dashboard/guides?filter=pending', color: 'text-warn-ink' },
+    { label: 'Flagged Content',  value: counts.flagged,          href: '/dashboard/guides?filter=pending', color: 'text-danger-ink' },
+    { label: 'Pending Comments', value: counts.comments.pending, href: '/dashboard/comments',                color: 'text-info-ink' },
     { label: 'Media Assets',     value: counts.media.total,      href: '/dashboard/media',                   color: 'text-prose' },
   ]
 

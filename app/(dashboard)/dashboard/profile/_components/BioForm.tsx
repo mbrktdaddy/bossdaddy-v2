@@ -86,7 +86,7 @@ export default function BioForm({
 
       <div className="flex items-center justify-between gap-3 pt-2">
         <div className="text-sm">
-          {error   && <p className="text-red-700">{error}</p>}
+          {error   && <p className="text-danger-ink">{error}</p>}
           {success && <p className="text-forest">✓ Saved</p>}
         </div>
         <button

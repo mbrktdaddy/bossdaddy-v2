@@ -273,7 +273,7 @@ export default function DadMathTool({ isAuthenticated, initialKids, initialKidId
             <p className="text-sm text-accent font-semibold">{savedMessage}</p>
           )}
           {saveError && (
-            <p className="text-sm text-red-700">{saveError}</p>
+            <p className="text-sm text-danger-ink">{saveError}</p>
           )}
         </section>
       )}

@@ -72,7 +72,7 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
                 <div className="flex items-center gap-2 mb-1">
                   <span className={`text-xs px-2 py-0.5 rounded-full border ${
                     item.type === 'guide'
-                      ? 'bg-blue-50 text-blue-700 border-blue-300'
+                      ? 'bg-info-bg text-info-ink border-info-line'
                       : 'bg-accent-tint text-accent-text-soft border-accent-border/40'
                   }`}>
                     {item.type === 'guide' ? 'Guide' : 'Review'}
@@ -82,7 +82,7 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
                 </div>
                 <p className="text-sm font-semibold truncate">{item.title}</p>
                 {item.moderation_flags && item.moderation_flags.length > 0 && (
-                  <p className="text-xs text-red-700/80 mt-1 truncate">
+                  <p className="text-xs text-danger-ink/80 mt-1 truncate">
                     ⚑ {item.moderation_flags.slice(0, 2).join(' · ')}
                   </p>
                 )}
@@ -92,7 +92,7 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
                   <span className="text-xs text-prose-faint font-mono">—</span>
                 ) : (
                   <span className={`text-sm font-mono font-bold ${
-                    isHighRisk ? 'text-red-700' : score >= 0.4 ? 'text-amber-700' : 'text-forest'
+                    isHighRisk ? 'text-danger-ink' : score >= 0.4 ? 'text-warn-ink' : 'text-forest'
                   }`}>
                     {score.toFixed(2)}
                   </span>
@@ -117,7 +117,7 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
                 Latest from @{pendingComments[0]?.profiles?.username ?? 'anonymous'} — {pendingComments[0]?.body?.slice(0, 80)}…
               </p>
             </div>
-            <span className="text-sm font-bold text-blue-700">→</span>
+            <span className="text-sm font-bold text-info-ink">→</span>
           </div>
         </Link>
       )}
