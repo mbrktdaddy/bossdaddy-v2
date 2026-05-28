@@ -1,7 +1,7 @@
 'use client'
 
 import { Suspense, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { claimAnonymousData } from '@/lib/dad-tools/kid-actions'
@@ -15,7 +15,6 @@ export default function RegisterPage() {
 }
 
 function RegisterForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const nextParam = searchParams.get('next')
   // Only allow relative paths to prevent open-redirect.
@@ -68,14 +67,20 @@ function RegisterForm() {
     // when email confirmation is required (session not yet established) —
     // in that case the next successful login will run the claim instead.
     if (data.session) {
-      const claim = await claimAnonymousData()
-      if (!claim.ok) {
-        console.warn('claim-on-signup (register) returned not-ok:', claim.error)
+      try {
+        const claim = await claimAnonymousData()
+        if (!claim.ok) {
+          console.warn('claim-on-signup (register) returned not-ok:', claim.error)
+        }
+      } catch (err) {
+        console.warn('claim-on-signup (register) threw:', err)
       }
     }
 
-    router.push(redirectTo)
-    router.refresh()
+    // Hard navigation — same reasoning as login: forces a fresh server
+    // render with the new auth cookie. router.push() is fragile on mobile
+    // and PWA standalone mode.
+    window.location.assign(redirectTo)
   }
 
   return (

@@ -1,13 +1,12 @@
 'use client'
 
 import { Suspense, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { claimAnonymousData } from '@/lib/dad-tools/kid-actions'
 
 function LoginForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const rawNext = searchParams.get('next') ?? ''
   const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/'
@@ -38,19 +37,32 @@ function LoginForm() {
       .single()
 
     const username = profile?.username ?? email.split('@')[0]
-    sessionStorage.setItem('just_signed_in', username)
+    try {
+      sessionStorage.setItem('just_signed_in', username)
+    } catch {
+      // sessionStorage can throw in PWA / private-mode contexts. Non-fatal.
+    }
 
     // Migrate any anonymous Dad Tools data tied to the bd_anon_id cookie
     // into this user. Idempotent + cheap when no cookie/no rows. Covers the
     // case where the user registered earlier with email confirmation and is
     // now logging in for the first time (register-time claim was skipped).
-    const claim = await claimAnonymousData()
-    if (!claim.ok) {
-      console.warn('claim-on-login returned not-ok:', claim.error)
+    // Wrap in try/catch so a server-action hang or thrown error never
+    // blocks the post-login redirect — the claim is best-effort.
+    try {
+      const claim = await claimAnonymousData()
+      if (!claim.ok) {
+        console.warn('claim-on-login returned not-ok:', claim.error)
+      }
+    } catch (err) {
+      console.warn('claim-on-login threw:', err)
     }
 
-    router.push(next)
-    router.refresh()
+    // Hard navigation — forces a fresh server render with the new auth
+    // cookie. router.push() is fragile on mobile and inside PWA standalone
+    // mode (service worker + client router state can prevent the redirect
+    // from settling). This is the conventional pattern for post-auth nav.
+    window.location.assign(next)
   }
 
   return (
