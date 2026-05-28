@@ -370,6 +370,34 @@ export default async function HomePage() {
         </section>
       )}
 
+      {/* ── FREE TOOLS — Weekends Until invitation strip ─────────────────── */}
+      <section className="bg-surface-raised border-b border-soft">
+        <div className="max-w-6xl mx-auto px-6 py-14">
+          <SectionHeader
+            label="Free Tools"
+            right={{ label: 'See all tools', href: '/tools' }}
+          />
+          <Link
+            href="/tools/weekends-until"
+            className="block bg-surface border border-soft hover:border-accent rounded-2xl p-6 sm:p-10 transition-colors group"
+          >
+            <p className="text-xs text-eyebrow uppercase tracking-widest font-medium">
+              Weekends Until
+            </p>
+            <h3 className="text-2xl sm:text-3xl font-black mt-2 text-prose group-hover:text-accent transition-colors leading-tight">
+              How many weekends do you have left with your kid?
+            </h3>
+            <p className="text-prose-faint mt-3 text-base max-w-prose">
+              Pick a birthdate. Pick a milestone. Get the number. Then make them count.
+            </p>
+            <p className="text-sm text-accent font-semibold mt-5 inline-flex items-center gap-1 group-hover:underline">
+              Try it
+              <span aria-hidden>→</span>
+            </p>
+          </Link>
+        </div>
+      </section>
+
       {/* ── EMAIL CAPTURE — primary newsletter conversion ────────────────── */}
       <EmailCaptureSection />
     </>

@@ -152,10 +152,11 @@ Key rules:
 ## Brand Assets
 
 Logo and placeholder images live in `public/images/`:
-- `bd-logo-final.png` — primary logo (full)
-- `bd-logo-nav.png` — compact nav logo
-- `bd-logo-final-favicon.png` — favicon source
-- `bd-placeholder.png` / `bd-placeholder.svg` — article image placeholder
+- `bd-logo-icon.png` — **the only runtime logo.** Used by Header, Footer, every layout, the not-found page, and all email templates. Pick this when you need a logo anywhere in the app — never use a different filename, never re-introduce a "badge" or "nav" variant.
+- `bd-logo-final.png` — full primary mark. Source asset used only by `scripts/generate-brand-kit-pdf.py`. Don't render in app code.
+- `bd-placeholder.png` / `bd-placeholder.svg` — article image placeholder.
+
+Favicons are served via Next.js's App Router file convention from `app/icon.png` and `app/apple-icon.png` — not from `public/images/`. Update those two files directly if the favicon ever changes.
 
 ---
 

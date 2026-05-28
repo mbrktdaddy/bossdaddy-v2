@@ -15,6 +15,7 @@ const BROWSE: BrowseLink[] = [
   { href: '/stacks',               label: LABELS.stacks.short },
   { href: '/gifts',                label: LABELS.gifts.short },
   { href: '/bench',                label: LABELS.bench.full,  hint: LABELS.bench.tagline },
+  { href: '/tools',                label: LABELS.tools.short, hint: LABELS.tools.hub.metaDescription },
 ]
 
 const TRUST: BrowseLink[] = [
@@ -102,7 +103,7 @@ export default function Footer() {
           <div>
             <Link href="/" className="inline-flex items-center gap-2.5 mb-4">
               <Image
-                src="/images/bd-logo-badge.png"
+                src="/images/bd-logo-icon.png"
                 alt=""
                 width={32}
                 height={32}

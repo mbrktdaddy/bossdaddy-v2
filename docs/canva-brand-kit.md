@@ -14,9 +14,8 @@ Upload these PNGs from `public/images/` (in your project folder):
 | File | Purpose | Canva label |
 |---|---|---|
 | `bd-logo-final.png` | Primary logo (full mark) | **Primary Logo** |
-| `bd-logo-nav.png` | Compact mark for tight spaces | **Compact / Square Logo** |
-| `bd-logo-final-favicon.png` | Favicon-tier mark | **Icon / Favicon** |
-| `bd-favicon.png` | Backup favicon | (optional, skip if redundant) |
+| `bd-logo-icon.png` | Runtime icon — used in every nav, footer, and email | **Icon / App Mark** |
+| `bd-favicon.png` | Favicon-tier mark | **Favicon** |
 
 **Local path:** `C:\Users\msb1c\bossdaddy-v2\public\images\`
 

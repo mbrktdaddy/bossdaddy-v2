@@ -6,7 +6,7 @@ export default function NotFound() {
     <main className="min-h-screen bg-surface-sunken flex flex-col items-center justify-center px-6 text-center">
       <Link href="/" aria-label="Boss Daddy — Home" className="mb-6">
         <Image
-          src="/images/bd-logo-badge.png"
+          src="/images/bd-logo-icon.png"
           alt=""
           width={64}
           height={64}

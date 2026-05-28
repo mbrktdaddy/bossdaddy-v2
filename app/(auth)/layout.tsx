@@ -15,7 +15,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         className="fixed top-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2"
       >
         <Image
-          src="/images/bd-logo-badge.png"
+          src="/images/bd-logo-icon.png"
           alt=""
           width={40}
           height={40}

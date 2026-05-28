@@ -75,7 +75,7 @@ export function WishlistStatusEmail({ status, itemTitle, itemSlug, itemImageUrl,
                         <td style={{ paddingRight: '12px', verticalAlign: 'middle' }}>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
-                            src={`${siteUrl}/images/bd-logo-badge.png`}
+                            src={`${siteUrl}/images/bd-logo-icon.png`}
                             alt="Boss Daddy"
                             width={36}
                             height={36}

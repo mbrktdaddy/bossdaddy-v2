@@ -547,6 +547,113 @@ export type Database = {
         }
         Relationships: []
       }
+      kid_moments: {
+        Row: {
+          created_at: string
+          id: string
+          kid_profile_id: string
+          moment_kind: string
+          occurred_on: string | null
+          photo_url: string | null
+          response: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kid_profile_id: string
+          moment_kind?: string
+          occurred_on?: string | null
+          photo_url?: string | null
+          response: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kid_profile_id?: string
+          moment_kind?: string
+          occurred_on?: string | null
+          photo_url?: string | null
+          response?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kid_moments_kid_profile_id_fkey"
+            columns: ["kid_profile_id"]
+            isOneToOne: false
+            referencedRelation: "kid_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kid_moments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kid_profiles: {
+        Row: {
+          anonymous_id: string | null
+          birthdate: string
+          created_at: string
+          id: string
+          money_balance: number
+          money_monthly: number
+          money_return_rate: number
+          money_target: number
+          name: string | null
+          photo_url: string | null
+          schema_version: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          anonymous_id?: string | null
+          birthdate: string
+          created_at?: string
+          id?: string
+          money_balance?: number
+          money_monthly?: number
+          money_return_rate?: number
+          money_target?: number
+          name?: string | null
+          photo_url?: string | null
+          schema_version?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          anonymous_id?: string | null
+          birthdate?: string
+          created_at?: string
+          id?: string
+          money_balance?: number
+          money_monthly?: number
+          money_return_rate?: number
+          money_target?: number
+          name?: string | null
+          photo_url?: string | null
+          schema_version?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kid_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       likes: {
         Row: {
           content_id: string
@@ -1474,6 +1581,102 @@ export type Database = {
           tag_group?: string
         }
         Relationships: []
+      }
+      tool_email_subscriptions: {
+        Row: {
+          anchor_date: string | null
+          anonymous_id: string | null
+          created_at: string
+          email: string
+          id: string
+          kid_profile_id: string | null
+          kind: string
+          unsubscribe_token: string
+          user_id: string | null
+        }
+        Insert: {
+          anchor_date?: string | null
+          anonymous_id?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          kid_profile_id?: string | null
+          kind: string
+          unsubscribe_token?: string
+          user_id?: string | null
+        }
+        Update: {
+          anchor_date?: string | null
+          anonymous_id?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          kid_profile_id?: string | null
+          kind?: string
+          unsubscribe_token?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_email_subscriptions_kid_profile_id_fkey"
+            columns: ["kid_profile_id"]
+            isOneToOne: false
+            referencedRelation: "kid_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tool_email_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tool_intent_events: {
+        Row: {
+          anonymous_id: string | null
+          created_at: string
+          id: string
+          kid_profile_id: string | null
+          payload: Json
+          tool: string
+          user_id: string | null
+        }
+        Insert: {
+          anonymous_id?: string | null
+          created_at?: string
+          id?: string
+          kid_profile_id?: string | null
+          payload: Json
+          tool: string
+          user_id?: string | null
+        }
+        Update: {
+          anonymous_id?: string | null
+          created_at?: string
+          id?: string
+          kid_profile_id?: string | null
+          payload?: Json
+          tool?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_intent_events_kid_profile_id_fkey"
+            columns: ["kid_profile_id"]
+            isOneToOne: false
+            referencedRelation: "kid_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tool_intent_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_ratings: {
         Row: {

@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { claimAnonymousData } from '@/lib/dad-tools/kid-actions'
 
 export default function RegisterPage() {
   return (
@@ -59,6 +60,18 @@ function RegisterForm() {
       setError('already_exists')
       setLoading(false)
       return
+    }
+
+    // Migrate any anonymous Dad Tools data (kids, intent events, email subs)
+    // that was created against the bd_anon_id cookie into this new user.
+    // Best-effort: non-fatal if it fails. No-op when there's no cookie or
+    // when email confirmation is required (session not yet established) —
+    // in that case the next successful login will run the claim instead.
+    if (data.session) {
+      const claim = await claimAnonymousData()
+      if (!claim.ok) {
+        console.warn('claim-on-signup (register) returned not-ok:', claim.error)
+      }
     }
 
     router.push(redirectTo)

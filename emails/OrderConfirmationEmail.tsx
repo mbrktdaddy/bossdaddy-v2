@@ -59,7 +59,7 @@ export function OrderConfirmationEmail({
                       <tr>
                         <td style={{ paddingRight: '12px', verticalAlign: 'middle' }}>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={`${siteUrl}/images/bd-logo-badge.png`} alt="Boss Daddy" width={36} height={36} style={{ display: 'block' }} />
+                          <img src={`${siteUrl}/images/bd-logo-icon.png`} alt="Boss Daddy" width={36} height={36} style={{ display: 'block' }} />
                         </td>
                         <td style={{ verticalAlign: 'middle' }}>
                           <p style={{ margin: 0, color: '#CC5500', fontWeight: 900, fontSize: '20px', letterSpacing: '-0.5px' }}>

@@ -6,6 +6,7 @@ import EditEmailForm from './_components/EditEmailForm'
 import BioForm from './_components/BioForm'
 import AccountDeletion from './_components/AccountDeletion'
 import AvatarUploader from './_components/AvatarUploader'
+import MyKidsSection from '@/components/dad-tools/MyKidsSection'
 
 const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
   admin:  { label: 'Admin',  className: 'bg-accent-tint text-accent-text-soft border border-accent-border/60' },
@@ -155,6 +156,11 @@ export default async function ProfilePage() {
         {memberSince && (
           <p className="text-sm text-prose-faint mt-1">Member since {memberSince}</p>
         )}
+      </div>
+
+      {/* Your Family — kid profiles + the Log */}
+      <div className="mb-6">
+        <MyKidsSection />
       </div>
 
       {/* Account — username + email */}

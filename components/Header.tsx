@@ -25,6 +25,7 @@ const NAV_LINKS = [
   { href: '/guides',  label: LABELS.guides.plural },
   { href: '/vault',   label: LABELS.vault.full },
   { href: '/gear',    label: LABELS.stuff.short },
+  { href: '/tools',   label: LABELS.tools.short },
 ]
 
 // Sub-links surfaced in the "Browse" mega-menu footer + mobile drawer.
@@ -146,7 +147,7 @@ export default function Header({ username, role }: HeaderProps) {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 font-black text-xl tracking-tight shrink-0">
           <Image
-            src="/images/bd-logo-badge.png"
+            src="/images/bd-logo-icon.png"
             alt="Boss Daddy"
             width={36}
             height={36}

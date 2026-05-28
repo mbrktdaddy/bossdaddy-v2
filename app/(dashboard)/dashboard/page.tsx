@@ -5,6 +5,7 @@ import { AttentionFeed } from './_components/AttentionFeed'
 import { ExportButton } from './_components/ExportButton'
 import { TopPerformers } from './_components/TopPerformers'
 import { FollowupsDueCard } from '@/components/dashboard/FollowupsDueCard'
+import MyKidsSection from '@/components/dad-tools/MyKidsSection'
 
 export default async function DashboardHome() {
   const admin = createAdminClient()
@@ -92,6 +93,9 @@ export default async function DashboardHome() {
         </div>
         <ExportButton />
       </div>
+
+      {/* Your Family — kid profiles + the Log */}
+      <MyKidsSection />
 
       {/* Stats */}
       <section className="space-y-3">

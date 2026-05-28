@@ -49,7 +49,7 @@ export function WeeklyDigestEmail({ email, items, weekLabel, siteUrl = 'https://
                         <td style={{ paddingRight: '12px', verticalAlign: 'middle' }}>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
-                            src={`${siteUrl}/images/bd-logo-badge.png`}
+                            src={`${siteUrl}/images/bd-logo-icon.png`}
                             alt="Boss Daddy"
                             width={40}
                             height={40}

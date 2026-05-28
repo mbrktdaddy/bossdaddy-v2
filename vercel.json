@@ -19,6 +19,14 @@
     {
       "path": "/api/cron/retry-order-emails",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/yearly-weekends-checkin",
+      "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/cron/sunday-moments",
+      "schedule": "0 1 * * 1"
     }
   ]
 }

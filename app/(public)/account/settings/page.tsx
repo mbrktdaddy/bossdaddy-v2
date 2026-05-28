@@ -5,6 +5,7 @@ import AvatarUploader from '@/components/account/AvatarUploader'
 import EditUsernameForm from '@/components/account/EditUsernameForm'
 import EditEmailForm from '@/components/account/EditEmailForm'
 import AccountDeletion from '@/components/account/AccountDeletion'
+import MyKidsSection from '@/components/dad-tools/MyKidsSection'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -127,6 +128,11 @@ export default async function AccountSettingsPage() {
           </span>
         </div>
         {memberSince && <p className="text-sm text-prose-faint mt-1">Member since {memberSince}</p>}
+      </div>
+
+      {/* Your Family — kid profiles + the Log */}
+      <div className="mb-6">
+        <MyKidsSection />
       </div>
 
       {/* Account */}

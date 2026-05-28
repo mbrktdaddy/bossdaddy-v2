@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { claimAnonymousData } from '@/lib/dad-tools/kid-actions'
 
 function LoginForm() {
   const router = useRouter()
@@ -38,6 +39,15 @@ function LoginForm() {
 
     const username = profile?.username ?? email.split('@')[0]
     sessionStorage.setItem('just_signed_in', username)
+
+    // Migrate any anonymous Dad Tools data tied to the bd_anon_id cookie
+    // into this user. Idempotent + cheap when no cookie/no rows. Covers the
+    // case where the user registered earlier with email confirmation and is
+    // now logging in for the first time (register-time claim was skipped).
+    const claim = await claimAnonymousData()
+    if (!claim.ok) {
+      console.warn('claim-on-login returned not-ok:', claim.error)
+    }
 
     router.push(next)
     router.refresh()
