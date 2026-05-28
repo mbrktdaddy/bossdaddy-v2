@@ -9,6 +9,7 @@ import { LABELS } from '@/lib/labels'
 import { getGoals } from '@/lib/dad-tools/savings-actions'
 import { getKids } from '@/lib/dad-tools/kid-actions'
 import GoalCard from './_components/GoalCard'
+import InstallPWA from '@/components/InstallPWA'
 
 export const metadata: Metadata = {
   title:       `${LABELS.tools.savings.pageTitle} (Beta)`,
@@ -98,6 +99,8 @@ export default async function SavingsIndexPage() {
           {LABELS.tools.savings.tagline}
         </p>
       </header>
+
+      <InstallPWA />
 
       {goalsWithStats.length === 0 ? (
         <section className="bg-surface border border-soft rounded-xl p-6 sm:p-8 text-center space-y-4">
