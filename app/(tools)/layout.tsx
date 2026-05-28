@@ -16,6 +16,24 @@ export default async function ToolsLayout({
   const { user } = await getUserSafe(supabase)
   const isAuthed = !!user
 
+  // Role-aware account link — members live on /account/settings, authors and
+  // admins live on /dashboard. The header label matches the destination so the
+  // user isn't told "Dashboard" then bounced to "Account Settings."
+  let accountHref = '/account/settings'
+  let accountLabel = 'Account'
+  if (isAuthed) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    const role = profile?.role
+    if (role === 'author' || role === 'admin') {
+      accountHref = '/dashboard'
+      accountLabel = 'Dashboard'
+    }
+  }
+
   return (
     <div data-theme="dark" className="min-h-screen bg-background text-prose flex flex-col">
       <a
@@ -27,23 +45,28 @@ export default async function ToolsLayout({
 
       <header className="border-b border-faint bg-surface">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
-          <Link href="/" className="flex items-center gap-2.5 min-w-0">
-            <Image
-              src="/images/bd-logo-icon.png"
-              alt="Boss Daddy"
-              width={36}
-              height={36}
-              priority
-              className="h-8 w-8 object-contain shrink-0"
-            />
-            <span className="font-black text-lg sm:text-xl tracking-tight shrink-0">
-              <span className="text-accent">BOSS</span>
-              <span className="text-prose"> DADDY</span>
-            </span>
-            <span className="text-[10px] sm:text-xs font-medium uppercase tracking-widest text-accent-text border border-accent/30 rounded-full px-2 py-0.5 shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Link href="/" className="flex items-center gap-2.5 min-w-0">
+              <Image
+                src="/images/bd-logo-icon.png"
+                alt="Boss Daddy"
+                width={36}
+                height={36}
+                priority
+                className="h-8 w-8 object-contain shrink-0"
+              />
+              <span className="font-black text-lg sm:text-xl tracking-tight shrink-0">
+                <span className="text-accent">BOSS</span>
+                <span className="text-prose"> DADDY</span>
+              </span>
+            </Link>
+            <Link
+              href="/tools"
+              className="text-[10px] sm:text-xs font-medium uppercase tracking-widest text-accent-text border border-accent/30 hover:border-accent rounded-full px-2 py-0.5 shrink-0 transition-colors"
+            >
               Tools · Beta
-            </span>
-          </Link>
+            </Link>
+          </div>
           <nav className="flex items-center gap-3 shrink-0">
             <Link
               href="/"
@@ -53,10 +76,10 @@ export default async function ToolsLayout({
             </Link>
             {isAuthed ? (
               <Link
-                href="/dashboard"
+                href={accountHref}
                 className="text-sm font-medium text-accent hover:underline"
               >
-                Dashboard
+                {accountLabel}
               </Link>
             ) : (
               <Link

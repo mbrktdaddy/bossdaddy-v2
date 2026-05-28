@@ -13,13 +13,7 @@
 import Link from 'next/link'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { LABELS } from '@/lib/labels'
-import {
-  weeksUntil,
-  milestoneDate,
-  percentElapsed,
-  momentDayKey,
-  daysSinceDayKey,
-} from '@/lib/dad-tools/calc'
+import { weeksUntil, milestoneDate } from '@/lib/dad-tools/calc'
 import type { Kid } from '@/lib/dad-tools/kid-actions'
 import type { Metadata } from 'next'
 
@@ -37,7 +31,10 @@ type SpokeCard = {
   badge?: string
 }
 
-const SPOKES: SpokeCard[] = [
+// Main spokes — the three concepts the tools area is built around. Order
+// matters: Time anchors the gut-punch, Savings is the daily ritual, Presence
+// closes the loop with the moment counter.
+const MAIN_SPOKES: SpokeCard[] = [
   {
     role:  LABELS.tools.weekendsUntil.spokeRole,
     title: LABELS.tools.weekendsUntil.full,
@@ -45,16 +42,28 @@ const SPOKES: SpokeCard[] = [
     href:  '/tools/weekends-until',
   },
   {
-    role:  LABELS.tools.dadMath.spokeRole,
-    title: LABELS.tools.dadMath.full,
-    blurb: LABELS.tools.dadMath.spokeBlurb,
-    href:  '/tools/dad-math',
+    role:  LABELS.tools.savings.spokeRole,
+    title: LABELS.tools.savings.full,
+    blurb: LABELS.tools.savings.spokeBlurb,
+    href:  '/tools/savings',
   },
   {
     role:  LABELS.tools.presence.spokeRole,
     title: LABELS.tools.presence.full,
     blurb: 'Not a separate calculator — it lives on each kid’s page. Days since your last moment. Quiet, no shame, just visible.',
     href:  null,
+  },
+]
+
+// Strategic reference tools — sit below the main spokes. Useful but not a
+// daily-loop anchor. Dad Math is a stateless college-projection calculator
+// you reach for during planning, not part of the weekly rhythm.
+const REFERENCE_TOOLS: SpokeCard[] = [
+  {
+    role:  LABELS.tools.dadMath.spokeRole,
+    title: LABELS.tools.dadMath.full,
+    blurb: LABELS.tools.dadMath.spokeBlurb,
+    href:  '/tools/dad-math',
   },
 ]
 
@@ -66,11 +75,6 @@ export default async function ToolsHubPage() {
   // Hub's "Manage kids" link routes the user to wherever their MyKidsSection lives.
   let manageKidsHref = '/account/settings'
   let kids: Kid[] = []
-  // "Last moment" per kid = the most recent calendar day among that kid's
-  // moments, preferring occurred_on (the dad's stated date) and falling back
-  // to created_at. Stored as a YYYY-MM-DD key so daysSinceDayKey can use
-  // calendar-day semantics.
-  const lastMomentKeyByKid = new Map<string, string>()
 
   if (user) {
     const [{ data: profile }, { data: rawKids }] = await Promise.all([
@@ -86,24 +90,6 @@ export default async function ToolsHubPage() {
     }
 
     kids = (rawKids ?? []) as Kid[]
-
-    if (kids.length > 0) {
-      const { data: moments } = await supabase.from('kid_moments')
-        .select('kid_profile_id, occurred_on, created_at')
-        .in('kid_profile_id', kids.map((k) => k.id))
-
-      for (const m of (moments ?? []) as {
-        kid_profile_id: string
-        occurred_on:    string | null
-        created_at:     string
-      }[]) {
-        const key = momentDayKey(m.occurred_on, m.created_at)
-        const current = lastMomentKeyByKid.get(m.kid_profile_id)
-        if (!current || key > current) {
-          lastMomentKeyByKid.set(m.kid_profile_id, key)
-        }
-      }
-    }
   }
 
   const isLoggedInWithKids = !!user && kids.length > 0
@@ -138,42 +124,61 @@ export default async function ToolsHubPage() {
       </section>
 
       {/* ── PERSONALIZED STATE — only when logged in with kids ──────────── */}
+      {/* Compact-row pattern matches /account/settings + /dashboard/profile.
+          The headline number (weekends-until) is the entire reason this
+          page exists — preserve it as the right-aligned stat. Tap → kid
+          hub where % elapsed, last moment, savings, and Dad Math live. */}
       {isLoggedInWithKids && (
         <section className="mb-10 sm:mb-14">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="space-y-1.5">
             {kids.map((kid) => {
               const target = milestoneDate('until_18', kid.birthdate)
               const weekends = target ? weeksUntil(target) : 0
-              const pctBurned = target ? percentElapsed(kid.birthdate, target) : 100
-              const lastKey = lastMomentKeyByKid.get(kid.id)
-              const daysSinceLast = lastKey ? daysSinceDayKey(lastKey) : null
+              const past18 = weekends === 0
               const name = kid.name?.trim() || LABELS.tools.kids.noNameFallback
+              const initial = (kid.name?.trim()?.[0] ?? '?').toUpperCase()
 
               return (
                 <Link
                   key={kid.id}
                   href={`/tools/kids/${kid.id}`}
-                  className="block bg-surface border border-soft hover:border-accent rounded-2xl p-5 transition-colors group"
+                  className="flex items-center gap-3 px-3 py-3 bg-surface border border-soft hover:border-accent-border/60 rounded-xl transition-colors group min-h-[44px]"
                 >
-                  <p className="text-xs uppercase tracking-widest font-semibold text-eyebrow">
+                  {kid.photo_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={kid.photo_url}
+                      alt=""
+                      className="h-10 w-10 rounded-full object-cover bg-surface-sunken shrink-0"
+                    />
+                  ) : (
+                    <div
+                      className="h-10 w-10 rounded-full bg-accent/15 text-accent flex items-center justify-center text-base font-black shrink-0"
+                      aria-hidden="true"
+                    >
+                      {initial}
+                    </div>
+                  )}
+                  <p className="text-sm sm:text-base font-semibold text-prose group-hover:text-accent-text-soft transition-colors truncate min-w-0 flex-1">
                     {name}
                   </p>
-                  <p className="mt-3 text-4xl font-black text-prose leading-none group-hover:text-accent transition-colors">
-                    {weekends}
-                  </p>
-                  <p className="text-sm text-prose-muted mt-1.5">
-                    weekends until 18
-                  </p>
-                  <div className="mt-4 pt-4 border-t border-soft flex items-baseline justify-between gap-2 text-xs text-prose-faint">
-                    <span>{pctBurned}% elapsed</span>
-                    {daysSinceLast === null ? (
-                      <span>No moments yet</span>
-                    ) : daysSinceLast === 0 ? (
-                      <span className="text-accent font-semibold">Moment today</span>
+                  <div className="text-right shrink-0">
+                    {past18 ? (
+                      <p className="text-sm font-semibold text-prose-muted">Past 18</p>
                     ) : (
-                      <span>{daysSinceLast}d since last moment</span>
+                      <>
+                        <p className="text-base sm:text-lg font-black text-prose tabular-nums group-hover:text-accent transition-colors">
+                          {weekends}
+                        </p>
+                        <p className="text-[10px] sm:text-xs text-prose-faint leading-tight">
+                          weekends until 18
+                        </p>
+                      </>
                     )}
                   </div>
+                  <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </Link>
               )
             })}
@@ -212,8 +217,8 @@ export default async function ToolsHubPage() {
         </section>
       )}
 
-      {/* ── SPOKES — the three tools ─────────────────────────────────────── */}
-      <section>
+      {/* ── MAIN SPOKES — the three core tools ───────────────────────────── */}
+      <section className="mb-10 sm:mb-14">
         <div className="flex items-baseline justify-between mb-5">
           <h2 className="text-xl sm:text-2xl font-black text-prose tracking-tight">
             The tools
@@ -222,63 +227,88 @@ export default async function ToolsHubPage() {
             Hub &amp; spoke
           </p>
         </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {SPOKES.map((spoke) => {
-            const inner = (
-              <>
-                <div className="flex items-baseline justify-between gap-2 mb-2">
-                  <p className="text-xs uppercase tracking-widest font-semibold text-eyebrow">
-                    {spoke.role}
-                  </p>
-                  {spoke.badge && (
-                    <span className="text-[10px] uppercase tracking-widest font-semibold text-accent-text border border-accent/30 rounded-full px-2 py-0.5">
-                      {spoke.badge}
-                    </span>
-                  )}
-                </div>
-                <p className="text-xl sm:text-2xl font-black text-prose group-hover:text-accent transition-colors leading-tight mb-2">
-                  {spoke.title}
-                </p>
-                <p className="text-sm text-prose-muted leading-relaxed">
-                  {spoke.blurb}
-                </p>
-                {spoke.href && (
-                  <p className="mt-4 text-xs font-semibold text-accent uppercase tracking-widest inline-flex items-center gap-1">
-                    Open <span aria-hidden>→</span>
-                  </p>
-                )}
-              </>
-            )
-
-            // Link card if there's a destination; otherwise an informational
-            // card. Coming-soon cards (have a badge) get dimmed; descriptive
-            // cards (no badge, no link) read as normal informational content.
-            if (spoke.href) {
-              return (
-                <Link
-                  key={spoke.title}
-                  href={spoke.href}
-                  className="block bg-surface border border-soft hover:border-accent rounded-2xl p-6 transition-colors group"
-                >
-                  {inner}
-                </Link>
-              )
-            }
-            const dimmed = !!spoke.badge
-            return (
-              <div
-                key={spoke.title}
-                className={`block bg-surface-raised border border-soft rounded-2xl p-6 ${
-                  dimmed ? 'opacity-70 cursor-not-allowed' : ''
-                }`}
-              >
-                {inner}
-              </div>
-            )
-          })}
+          {MAIN_SPOKES.map((spoke) => renderSpoke(spoke, 'main'))}
         </div>
       </section>
+
+      {/* ── REFERENCE CALCULATORS — strategic, not part of the daily loop ── */}
+      <section>
+        <div className="flex items-baseline justify-between mb-5">
+          <h2 className="text-base sm:text-lg font-black text-prose tracking-tight">
+            Reference calculators
+          </h2>
+          <p className="text-xs text-prose-faint uppercase tracking-widest">
+            Planning
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {REFERENCE_TOOLS.map((spoke) => renderSpoke(spoke, 'reference'))}
+        </div>
+      </section>
+    </div>
+  )
+}
+
+// Renders a spoke card in two visual weights:
+//   main      — full-sized headline title, same accent treatment as before
+//   reference — slightly smaller title + muted background so the section
+//               reads as secondary to the main spokes above
+function renderSpoke(spoke: SpokeCard, weight: 'main' | 'reference') {
+  const isReference = weight === 'reference'
+  const titleSize = isReference
+    ? 'text-lg sm:text-xl'
+    : 'text-xl sm:text-2xl'
+  const cardBase = isReference
+    ? 'bg-surface-sunken border border-soft hover:border-accent-border/60'
+    : 'bg-surface border border-soft hover:border-accent'
+
+  const inner = (
+    <>
+      <div className="flex items-baseline justify-between gap-2 mb-2">
+        <p className="text-xs uppercase tracking-widest font-semibold text-eyebrow">
+          {spoke.role}
+        </p>
+        {spoke.badge && (
+          <span className="text-[10px] uppercase tracking-widest font-semibold text-accent-text border border-accent/30 rounded-full px-2 py-0.5">
+            {spoke.badge}
+          </span>
+        )}
+      </div>
+      <p className={`${titleSize} font-black text-prose group-hover:text-accent transition-colors leading-tight mb-2`}>
+        {spoke.title}
+      </p>
+      <p className="text-sm text-prose-muted leading-relaxed">
+        {spoke.blurb}
+      </p>
+      {spoke.href && (
+        <p className="mt-4 text-xs font-semibold text-accent uppercase tracking-widest inline-flex items-center gap-1">
+          Open <span aria-hidden>→</span>
+        </p>
+      )}
+    </>
+  )
+
+  if (spoke.href) {
+    return (
+      <Link
+        key={spoke.title}
+        href={spoke.href}
+        className={`block ${cardBase} rounded-2xl p-6 transition-colors group`}
+      >
+        {inner}
+      </Link>
+    )
+  }
+  const dimmed = !!spoke.badge
+  return (
+    <div
+      key={spoke.title}
+      className={`block bg-surface-raised border border-soft rounded-2xl p-6 ${
+        dimmed ? 'opacity-70 cursor-not-allowed' : ''
+      }`}
+    >
+      {inner}
     </div>
   )
 }

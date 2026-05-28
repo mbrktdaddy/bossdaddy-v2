@@ -161,6 +161,64 @@ export const LABELS = {
       spokeBlurb:      'Last moment captured. Catch yourself before you drift.',
     },
 
+    // Savings — micro-savings habit tracker (Dad Tools v1.2). Commitment
+    // tracker, not a money mover: tapping "Yes" deep-links into the user's
+    // own PayPal/Venmo/Cash App. Internal name is locked as `savings`; the
+    // display label is centralized here so a rename is one edit.
+    savings: {
+      short:           'Savings',
+      full:            'Savings',
+      pageTitle:       'Savings — Boss Daddy',
+      metaDescription: 'Daily and weekly micro-savings habits with one-tap commitment. Real reminders, real accountability.',
+      spokeRole:       'Money',
+      spokeBlurb:      'Small commitments, daily. Tap "yes," send the dollars, watch them stack.',
+      // Page-level copy
+      hubEyebrow:      'Your goals',
+      indexEmptyTitle: 'No savings goals yet.',
+      indexEmptyBody:  '$2 a day is easier than $94k all at once. Start a goal.',
+      newCta:          'Start a goal',
+      newCtaArrow:     'Start a goal →',
+      // Hero/section copy
+      h1:              'Small habits, real progress.',
+      tagline:         'Set a tiny daily commitment. Tap "yes" each day. Watch the dollars stack.',
+      // Cadence + destination labels
+      cadences: {
+        daily:   'Daily',
+        weekly:  'Weekly',
+        monthly: 'Monthly',
+      },
+      // Detail-page stat labels
+      result: {
+        savedLabel:         'Saved',
+        contributedLabel:   'Contributed',
+        withdrawnLabel:     'Withdrawn',
+        streakLabel:        'Streak',
+        bankedLabel:        'Banked',
+        aheadByLabel:       'Ahead by',
+        behindByLabel:      'Behind by',
+        targetLabel:        'Target',
+        projectedLabel:     'Projected at target',
+        lastContribLabel:   'Last activity',
+      },
+      // Contribution action labels
+      action: {
+        yes:                'Yes — log',
+        custom:             'Custom amount',
+        skip:               'Skip today',
+        catchUp:            'Catch up',
+        adjust:             'Edit balance',
+        contributionAdded:  'Logged.',
+      },
+      // Catch-up panel
+      catchUp: {
+        eyebrow:       'Catch-up plan',
+        title:         'Get back on track',
+        descTemplate:  'Add an extra {extra} per {cadenceUnit} for {units} {cadenceUnits} to catch up by {date}.',
+      },
+      // Required note on the page footer
+      disclosure: 'You move the money. We track the commitment.',
+    },
+
     // Milestone enum — internal keys stable; display labels free to change.
     // Order here is the default tab order in the milestone selector.
     milestones: {

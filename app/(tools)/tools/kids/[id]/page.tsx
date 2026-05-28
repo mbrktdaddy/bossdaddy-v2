@@ -22,6 +22,11 @@ import {
 } from '@/lib/dad-tools/calc'
 import { runDadMath, fmtUsdCompact } from '@/lib/dad-tools/dad-math'
 import { dadMathTagline } from '@/lib/dad-tools/dad-math-copy'
+import { fmtUsdWhole, computeStats } from '@/lib/dad-tools/savings'
+import type {
+  SavingsGoal as SavingsGoalType,
+  SavingsEntry as SavingsEntryType,
+} from '@/lib/dad-tools/savings'
 import type { Kid } from '@/lib/dad-tools/kid-actions'
 import type { KidMoment } from '@/lib/dad-tools/moment-actions'
 import { LABELS, logTitle } from '@/lib/labels'
@@ -76,6 +81,24 @@ export default async function KidProfilePage({ params }: PageProps) {
     .order('created_at', { ascending: false })
 
   const moments: KidMoment[] = (rawMoments ?? []) as KidMoment[]
+
+  // Savings goals tied to this kid (active + completed; archived hidden).
+  // RLS already scopes to goals the user owns or participates in.
+  const { data: kidGoalRows } = await supabase.from('savings_goals')
+    .select('id, owner_id, kid_profile_id, name, description, cadence, amount_per_cadence, start_date, target_amount, target_date, destination_mode, destination_url, destination_type, destination_label, reminder_enabled, reminder_cadence, reminder_hour_utc, status, completed_at, archived_at, created_at, updated_at')
+    .eq('kid_profile_id', kidRow.id)
+    .neq('status', 'archived')
+    .order('created_at', { ascending: false })
+
+  const kidGoals = ((kidGoalRows ?? []) as unknown as SavingsGoalType[])
+
+  let kidGoalEntries: SavingsEntryType[] = []
+  if (kidGoals.length > 0) {
+    const { data: entriesRaw } = await supabase.from('savings_entries')
+      .select('id, goal_id, contributor_id, contributed_on, amount, kind, note, created_at')
+      .in('goal_id', kidGoals.map((g) => g.id))
+    kidGoalEntries = ((entriesRaw ?? []) as unknown as SavingsEntryType[])
+  }
   const momentCount = moments.length
   // Most-recent calendar day across all moments. Prefer occurred_on (what
   // the dad said happened) over created_at (when he logged it) so backfilled
@@ -261,6 +284,58 @@ export default async function KidProfilePage({ params }: PageProps) {
           )}
         </section>
       )}
+
+      {/* Savings card — goals tied to this kid */}
+      <section className="bg-surface border border-soft rounded-2xl p-5 sm:p-6">
+        <div className="flex items-baseline justify-between gap-3">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+            {LABELS.tools.savings.full}
+          </p>
+          <Link
+            href={`/tools/savings/new?kid=${kidRow.id}${kidRow.name ? `&name=${encodeURIComponent(`Savings for ${kidRow.name}`)}` : ''}`}
+            className="text-xs font-semibold text-accent hover:underline"
+          >
+            New goal for {displayName} →
+          </Link>
+        </div>
+        {kidGoals.length === 0 ? (
+          <p className="mt-3 text-sm text-prose-muted leading-relaxed">
+            No savings goals tied to {displayName} yet. Tap above to start one — a tiny daily commitment compounds fast.
+          </p>
+        ) : (
+          <div className="mt-4 space-y-1.5">
+            {kidGoals.map((g) => {
+              const entries = kidGoalEntries.filter((e) => e.goal_id === g.id)
+              const stats = computeStats(g, entries)
+              return (
+                <Link
+                  key={g.id}
+                  href={`/tools/savings/${g.id}`}
+                  className="flex items-center gap-3 px-3 py-2.5 bg-surface-sunken border border-soft hover:border-accent-border/60 rounded-lg transition-colors group min-h-[44px]"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-prose group-hover:text-accent-text-soft transition-colors truncate">
+                      {g.name}
+                    </p>
+                    <p className="text-[11px] text-prose-faint truncate">
+                      {g.cadence
+                        ? `${fmtUsdWhole(Number(g.amount_per_cadence) || 0)}/${g.cadence}`
+                        : 'Free-form'}
+                      {g.target_amount != null && ` · target ${fmtUsdWhole(g.target_amount)}`}
+                    </p>
+                  </div>
+                  <p className="text-sm font-black text-prose tabular-nums shrink-0">
+                    {fmtUsdWhole(stats.runningTotal)}
+                  </p>
+                  <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              )
+            })}
+          </div>
+        )}
+      </section>
 
       {/* Presence card */}
       <section className="bg-surface border border-soft rounded-2xl p-5 sm:p-6">

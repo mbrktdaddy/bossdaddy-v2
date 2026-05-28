@@ -1486,6 +1486,250 @@ export type Database = {
           },
         ]
       }
+      savings_entries: {
+        Row: {
+          amount: number
+          contributed_on: string
+          contributor_id: string
+          created_at: string
+          goal_id: string
+          id: string
+          kind: string
+          note: string | null
+        }
+        Insert: {
+          amount?: number
+          contributed_on: string
+          contributor_id: string
+          created_at?: string
+          goal_id: string
+          id?: string
+          kind?: string
+          note?: string | null
+        }
+        Update: {
+          amount?: number
+          contributed_on?: string
+          contributor_id?: string
+          created_at?: string
+          goal_id?: string
+          id?: string
+          kind?: string
+          note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_entries_contributor_id_fkey"
+            columns: ["contributor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_entries_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "savings_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      savings_goal_invitations: {
+        Row: {
+          created_at: string
+          email: string | null
+          expires_at: string
+          goal_id: string
+          id: string
+          inviter_id: string
+          token: string
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          expires_at: string
+          goal_id: string
+          id?: string
+          inviter_id: string
+          token: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          expires_at?: string
+          goal_id?: string
+          id?: string
+          inviter_id?: string
+          token?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_goal_invitations_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "savings_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_goal_invitations_inviter_id_fkey"
+            columns: ["inviter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_goal_invitations_used_by_fkey"
+            columns: ["used_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      savings_goal_participants: {
+        Row: {
+          destination_label: string | null
+          destination_type: string | null
+          destination_url: string | null
+          goal_id: string
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          destination_label?: string | null
+          destination_type?: string | null
+          destination_url?: string | null
+          goal_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          destination_label?: string | null
+          destination_type?: string | null
+          destination_url?: string | null
+          goal_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_goal_participants_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "savings_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_goal_participants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      savings_goals: {
+        Row: {
+          amount_per_cadence: number | null
+          archived_at: string | null
+          cadence: string | null
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          destination_label: string | null
+          destination_mode: string
+          destination_type: string | null
+          destination_url: string | null
+          id: string
+          kid_profile_id: string | null
+          name: string
+          owner_id: string
+          reminder_cadence: string | null
+          reminder_enabled: boolean
+          reminder_hour_utc: number | null
+          start_date: string
+          status: string
+          target_amount: number | null
+          target_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_per_cadence?: number | null
+          archived_at?: string | null
+          cadence?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          destination_label?: string | null
+          destination_mode?: string
+          destination_type?: string | null
+          destination_url?: string | null
+          id?: string
+          kid_profile_id?: string | null
+          name: string
+          owner_id: string
+          reminder_cadence?: string | null
+          reminder_enabled?: boolean
+          reminder_hour_utc?: number | null
+          start_date?: string
+          status?: string
+          target_amount?: number | null
+          target_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_per_cadence?: number | null
+          archived_at?: string | null
+          cadence?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          destination_label?: string | null
+          destination_mode?: string
+          destination_type?: string | null
+          destination_url?: string | null
+          id?: string
+          kid_profile_id?: string | null
+          name?: string
+          owner_id?: string
+          reminder_cadence?: string | null
+          reminder_enabled?: boolean
+          reminder_hour_utc?: number | null
+          start_date?: string
+          status?: string
+          target_amount?: number | null
+          target_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_goals_kid_profile_id_fkey"
+            columns: ["kid_profile_id"]
+            isOneToOne: false
+            referencedRelation: "kid_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_goals_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_settings: {
         Row: {
           homepage_hero_id: string | null

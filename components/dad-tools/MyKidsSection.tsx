@@ -1,48 +1,34 @@
-import { createClient, getUserSafe } from '@/lib/supabase/server'
-import KidCard from './KidCard'
-import AddKidAffordance from './AddKidAffordance'
-import type { Kid } from '@/lib/dad-tools/kid-actions'
-import type { KidMoment } from '@/lib/dad-tools/moment-actions'
+// Compact avatar strip of the user's kids on the account/profile page.
+// Each chip → /tools/kids/[id] where the full per-kid hub (weekends, dad math,
+// savings, the Log) lives. Heavy state stays on the detail page; this section
+// stays scannable.
 
-const KID_COLUMNS    = 'id, name, birthdate, photo_url, created_at, updated_at'
-const MOMENT_COLUMNS = 'id, kid_profile_id, moment_kind, occurred_on, response, photo_url, created_at, updated_at'
-const RECENT_LIMIT   = 3
+import Link from 'next/link'
+import { createClient, getUserSafe } from '@/lib/supabase/server'
+import { ageInYearsMonths } from '@/lib/dad-tools/calc'
+import type { Kid } from '@/lib/dad-tools/kid-actions'
+import AddKidAffordance from './AddKidAffordance'
+
+const KID_COLUMNS = 'id, name, birthdate, photo_url, money_balance, money_monthly, money_target, money_return_rate, created_at, updated_at'
+
+function ageBadge(birthdate: string): string {
+  const { years, months } = ageInYearsMonths(birthdate)
+  if (years === 0) return `${months}mo`
+  if (months === 0) return `${years}y`
+  return `${years}y ${months}m`
+}
 
 export default async function MyKidsSection() {
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
   if (!user) return null
 
-  // 1) All kids for this user
   const { data: rawKids } = await supabase.from('kid_profiles')
     .select(KID_COLUMNS)
     .eq('user_id', user.id)
     .order('created_at', { ascending: true })
 
   const kids: Kid[] = (rawKids ?? []) as Kid[]
-
-  // 2) All moments for these kids — one query, group in JS
-  const kidIds = kids.map((k) => k.id)
-  const momentsByKid = new Map<string, KidMoment[]>()
-  const countByKid   = new Map<string, number>()
-
-  if (kidIds.length > 0) {
-    const { data: rawMoments } = await supabase.from('kid_moments')
-      .select(MOMENT_COLUMNS)
-      .in('kid_profile_id', kidIds)
-      .order('occurred_on', { ascending: false, nullsFirst: false })
-      .order('created_at',  { ascending: false })
-
-    const moments: KidMoment[] = (rawMoments ?? []) as KidMoment[]
-
-    for (const m of moments) {
-      const arr = momentsByKid.get(m.kid_profile_id) ?? []
-      arr.push(m)
-      momentsByKid.set(m.kid_profile_id, arr)
-      countByKid.set(m.kid_profile_id, (countByKid.get(m.kid_profile_id) ?? 0) + 1)
-    }
-  }
-
   const hasKids = kids.length > 0
 
   return (
@@ -57,16 +43,40 @@ export default async function MyKidsSection() {
       {!hasKids ? (
         <AddKidAffordance variant="empty" isAuthenticated />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {kids.map((kid) => (
-            <KidCard
-              key={kid.id}
-              kid={kid}
-              initialMoments={(momentsByKid.get(kid.id) ?? []).slice(0, RECENT_LIMIT)}
-              momentCount={countByKid.get(kid.id) ?? 0}
-              isAuthenticated={true}
-            />
-          ))}
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide sm:flex-wrap sm:overflow-visible">
+          {kids.map((kid) => {
+            const name = kid.name?.trim() || 'Your kid'
+            const initial = (kid.name?.trim()?.[0] ?? '?').toUpperCase()
+            return (
+              <Link
+                key={kid.id}
+                href={`/tools/kids/${kid.id}`}
+                className="group shrink-0 flex flex-col items-center gap-1.5 w-20 sm:w-24 p-2 rounded-xl hover:bg-surface-raised transition-colors"
+              >
+                {kid.photo_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={kid.photo_url}
+                    alt=""
+                    className="h-14 w-14 sm:h-16 sm:w-16 rounded-full object-cover bg-surface-sunken ring-2 ring-transparent group-hover:ring-accent transition-all"
+                  />
+                ) : (
+                  <div
+                    className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-accent/15 text-accent flex items-center justify-center text-2xl font-black ring-2 ring-transparent group-hover:ring-accent transition-all"
+                    aria-hidden="true"
+                  >
+                    {initial}
+                  </div>
+                )}
+                <div className="min-w-0 text-center">
+                  <p className="text-xs font-semibold text-prose truncate w-full group-hover:text-accent-text-soft transition-colors">
+                    {name}
+                  </p>
+                  <p className="text-[10px] text-prose-faint">{ageBadge(kid.birthdate)}</p>
+                </div>
+              </Link>
+            )
+          })}
         </div>
       )}
     </section>

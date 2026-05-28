@@ -7,6 +7,7 @@ import BioForm from './_components/BioForm'
 import AccountDeletion from './_components/AccountDeletion'
 import AvatarUploader from './_components/AvatarUploader'
 import MyKidsSection from '@/components/dad-tools/MyKidsSection'
+import SavingsGoalsSection from '@/components/dad-tools/SavingsGoalsSection'
 
 const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
   admin:  { label: 'Admin',  className: 'bg-accent-tint text-accent-text-soft border border-accent-border/60' },
@@ -165,6 +166,11 @@ export default async function ProfilePage() {
         <MyKidsSection />
       </div>
 
+      {/* Savings goals — Dad Tools v1.2 */}
+      <div className="mb-6">
+        <SavingsGoalsSection />
+      </div>
+
       {/* Account — username + email */}
       <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Account</p>
@@ -286,47 +292,48 @@ export default async function ProfilePage() {
             Nothing liked yet — heart a review or article and it will appear here.
           </p>
         ) : (
-          <div className="space-y-1">
-            {orderedLikedReviews.map((r) => r && (
+          <div className="space-y-1.5">
+            {orderedLikedReviews.slice(0, 5).map((r) => r && (
               <Link
                 key={r.id}
                 href={`/reviews/${r.slug}`}
-                className="flex items-center gap-3 p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group"
+                className="flex items-center gap-3 px-3 py-2.5 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-lg transition-colors group min-h-[44px]"
               >
-                <span className="text-xs px-2 py-0.5 rounded-full bg-accent-tint text-accent-text-soft border border-accent-border/60 shrink-0">
+                <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-accent-tint text-accent-text-soft border border-accent-border/60 shrink-0 font-medium">
                   Review
                 </span>
-                <div className="min-w-0">
-                  <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate">
-                    {r.title}
-                  </p>
-                  <p className="text-xs text-prose-faint truncate">{r.product_name}</p>
-                </div>
-                <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 ml-auto transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate min-w-0 flex-1">
+                  {r.title}
+                </p>
+                <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </Link>
             ))}
 
-            {orderedLikedArticles.map((a) => a && (
+            {orderedLikedArticles.slice(0, 5).map((a) => a && (
               <Link
                 key={a.id}
                 href={`/guides/${a.slug}`}
-                className="flex items-center gap-3 p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group"
+                className="flex items-center gap-3 px-3 py-2.5 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-lg transition-colors group min-h-[44px]"
               >
-                <span className="text-xs px-2 py-0.5 rounded-full bg-info-bg text-info-ink border border-info-line shrink-0">
-                  Article
+                <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-info-bg text-info-ink border border-info-line shrink-0 font-medium">
+                  Guide
                 </span>
-                <div className="min-w-0">
-                  <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate">
-                    {a.title}
-                  </p>
-                </div>
-                <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 ml-auto transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate min-w-0 flex-1">
+                  {a.title}
+                </p>
+                <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </Link>
             ))}
+
+            {(orderedLikedReviews.length > 5 || orderedLikedArticles.length > 5) && (
+              <p className="text-center text-xs text-prose-faint pt-2">
+                Showing 5 of each · {orderedLikedReviews.length + orderedLikedArticles.length} total liked
+              </p>
+            )}
           </div>
         )}
       </div>
