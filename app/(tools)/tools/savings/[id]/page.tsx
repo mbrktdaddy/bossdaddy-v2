@@ -13,6 +13,8 @@ import CatchUpPanel from '../_components/CatchUpPanel'
 import ContributionLog, { type ContributorProfile } from '../_components/ContributionLog'
 import ContributionButton from '../_components/ContributionButton'
 import ParticipantsStrip, { type ParticipantDisplay } from '../_components/ParticipantsStrip'
+import LeaveGoalButton from '../_components/LeaveGoalButton'
+import MyDestinationPanel from '../_components/MyDestinationPanel'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -85,6 +87,26 @@ export default async function SavingsGoalPage({ params }: PageProps) {
   })
   const showAttribution = participants.length > 1
 
+  // The viewer's own participant row — drives the per-participant
+  // destination editor and the "Leave goal" affordance.
+  const myParticipant = participants.find((p) => p.user_id === user.id) ?? null
+
+  // Effective destination for the Yes button: in per_participant mode,
+  // prefer the viewer's own destination if they've configured one;
+  // otherwise fall back to the goal-level destination. In shared mode,
+  // always use the goal-level destination.
+  const usePerParticipant =
+    goal.destination_mode === 'per_participant' && !!myParticipant?.destination_url
+  const effectiveDestinationType  = usePerParticipant
+    ? (myParticipant!.destination_type as typeof goal.destination_type)
+    : goal.destination_type
+  const effectiveDestinationUrl   = usePerParticipant
+    ? myParticipant!.destination_url
+    : goal.destination_url
+  const effectiveDestinationLabel = usePerParticipant
+    ? (myParticipant!.destination_label ?? null)
+    : goal.destination_label
+
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6">
 
@@ -149,13 +171,49 @@ export default async function SavingsGoalPage({ params }: PageProps) {
         <CatchUpPanel cadence={goal.cadence} suggestion={stats.catchUpSuggestion} />
       )}
 
-      <ContributionButton goal={goal} />
+      <ContributionButton
+        goal={goal}
+        effectiveDestinationType={effectiveDestinationType}
+        effectiveDestinationUrl={effectiveDestinationUrl}
+        effectiveDestinationLabel={effectiveDestinationLabel}
+      />
+
+      {/* Per-participant destination editor — visible only when (a) viewer
+          is a non-owner participant AND (b) goal is in per_participant
+          mode. Lets each spouse route their own contributions to their
+          own destination instead of the owner's. */}
+      {!isOwner && myParticipant && goal.destination_mode === 'per_participant' && (
+        <MyDestinationPanel
+          goalId={goal.id}
+          initialLabel={myParticipant.destination_label ?? ''}
+          initialUrl={myParticipant.destination_url ?? ''}
+          initialType={myParticipant.destination_type}
+        />
+      )}
 
       <ContributionLog
         entries={entries}
         profileById={profileById}
         showAttribution={showAttribution}
       />
+
+      {/* Leave-goal affordance — only for non-owner participants. Owner
+          has to archive or delete instead (handled in /edit page). */}
+      {!isOwner && myParticipant && (
+        <section className="bg-surface-sunken border border-soft rounded-xl p-5 space-y-3">
+          <div>
+            <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold mb-1">
+              Your role: Contributor
+            </p>
+            <p className="text-xs text-prose-faint leading-snug">
+              You can log contributions, adjust the balance, skip days, and
+              undo your own entries. Goal settings + invites are managed by
+              the owner.
+            </p>
+          </div>
+          <LeaveGoalButton goalId={goal.id} userId={user.id} goalName={goal.name} />
+        </section>
+      )}
 
       <footer className="pt-4 border-t border-soft">
         <p className="text-xs text-prose-faint leading-relaxed">

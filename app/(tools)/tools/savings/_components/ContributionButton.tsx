@@ -32,9 +32,21 @@ type Drawer = null | 'custom' | 'adjust' | 'skip'
 
 interface Props {
   goal: SavingsGoal
+  // Effective destination override — when the goal is in per_participant
+  // mode and the viewer has set their own destination, the page passes
+  // these so the Yes button deep-links to the viewer's destination rather
+  // than the goal owner's. Null fields fall back to the goal-level values.
+  effectiveDestinationType?:   SavingsGoal['destination_type'] | null
+  effectiveDestinationUrl?:    string | null
+  effectiveDestinationLabel?:  string | null
 }
 
-export default function ContributionButton({ goal }: Props) {
+export default function ContributionButton({
+  goal,
+  effectiveDestinationType,
+  effectiveDestinationUrl,
+  effectiveDestinationLabel,
+}: Props) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -54,8 +66,13 @@ export default function ContributionButton({ goal }: Props) {
   const labels = LABELS.tools.savings.action
   const hasCadence = goal.cadence != null && goal.amount_per_cadence != null
   const defaultAmount = Number(goal.amount_per_cadence) || 0
-  const hasUrl = !!goal.destination_url
-  const destLabel = goal.destination_label?.trim() || null
+
+  // Effective destination — fall back to the goal-level fields when the
+  // page didn't pass overrides (single-user goals + shared-mode goals).
+  const destType  = effectiveDestinationType  ?? goal.destination_type
+  const destUrl   = effectiveDestinationUrl   ?? goal.destination_url
+  const destLabel = (effectiveDestinationLabel ?? goal.destination_label)?.trim() || null
+  const hasUrl    = !!destUrl
 
   // Use the user's LOCAL today, not the server's UTC today. Server runs in
   // UTC on Vercel; without this override, late-evening contributions for
@@ -74,8 +91,8 @@ export default function ContributionButton({ goal }: Props) {
     if (typeof window === 'undefined') return false
 
     const prefillUrl = buildPaymentDeeplink({
-      type: goal.destination_type,
-      handleOrUrl: goal.destination_url,
+      type: destType,
+      handleOrUrl: destUrl,
       amount,
       note: goal.name,
     })
@@ -93,8 +110,8 @@ export default function ContributionButton({ goal }: Props) {
     // Generic URL fallback — anything https:// the user pasted (Chase login,
     // 529 portal, a Pool URL we don't recognize as paypal.me, etc.). Open
     // in a new tab; the user types the amount in the destination app.
-    if (goal.destination_url && /^https?:\/\//i.test(goal.destination_url)) {
-      window.open(goal.destination_url, '_blank', 'noopener,noreferrer')
+    if (destUrl && /^https?:\/\//i.test(destUrl)) {
+      window.open(destUrl, '_blank', 'noopener,noreferrer')
       return true
     }
 
