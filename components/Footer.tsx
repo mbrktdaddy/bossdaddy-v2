@@ -8,7 +8,7 @@ interface BrowseLink { href: string; label: string; hint?: string }
 const BROWSE: BrowseLink[] = [
   { href: '/reviews',              label: LABELS.reviews.plural },
   { href: '/guides',               label: LABELS.guides.plural },
-  { href: '/gear',                 label: LABELS.stuff.short },
+  { href: '/gear',                 label: LABELS.gear.short },
   { href: '/vault',                label: LABELS.vault.full,  hint: LABELS.vault.tagline },
   { href: '/comparisons',          label: LABELS.comparisons.short },
   { href: '/picks',                label: LABELS.picks.short },

@@ -51,11 +51,11 @@ export default async function MyKidsSection() {
         <p className="text-xs text-prose-faint font-medium uppercase tracking-widest">
           Your Family
         </p>
-        {hasKids && <AddKidAffordance />}
+        {hasKids && <AddKidAffordance isAuthenticated />}
       </div>
 
       {!hasKids ? (
-        <AddKidAffordance variant="empty" />
+        <AddKidAffordance variant="empty" isAuthenticated />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {kids.map((kid) => (

@@ -86,6 +86,7 @@ export default function KidHeaderActions({ kid }: Props) {
             <KidProfileForm
               mode="edit"
               kid={kid}
+              isAuthenticated
               onSuccess={() => setEditing(false)}
               onCancel={() => setEditing(false)}
             />

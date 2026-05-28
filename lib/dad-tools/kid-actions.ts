@@ -43,6 +43,33 @@ export type Kid = {
 const KID_COLUMNS =
   'id, name, birthdate, photo_url, money_balance, money_monthly, money_target, money_return_rate, created_at, updated_at'
 
+// Tier-based kid count limits. Photo upload is a separate gate — anonymous
+// can never upload (no stable identity to scope storage by), authenticated
+// users at any tier can upload. See `/api/kids/[id]/photo`.
+const KID_LIMITS: Record<string, number> = {
+  admin:  Number.MAX_SAFE_INTEGER,
+  author: 10,
+  member: 5,
+}
+const ANONYMOUS_KID_LIMIT = 1
+
+async function fetchRole(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+): Promise<string> {
+  const { data } = await supabase.from('profiles').select('role').eq('id', userId).single()
+  return (data?.role as string | undefined) ?? 'member'
+}
+
+export async function getKidLimitFor(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string | null,
+): Promise<number> {
+  if (!userId) return ANONYMOUS_KID_LIMIT
+  const role = await fetchRole(supabase, userId)
+  return KID_LIMITS[role] ?? KID_LIMITS.member
+}
+
 export async function getKids(): Promise<Kid[]> {
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
@@ -84,6 +111,18 @@ export async function addKid(
   const { user } = await getUserSafe(supabase)
 
   if (user) {
+    // Enforce tier limit before insert. Members: 5. Authors: 10. Admins: ∞.
+    const limit = await getKidLimitFor(supabase, user.id)
+    const { count } = await supabase.from('kid_profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+    if ((count ?? 0) >= limit) {
+      return {
+        ok: false,
+        error: `You've reached the ${limit}-kid limit for your account. Remove a kid to add another.`,
+      }
+    }
+
     const { data, error } = await supabase.from('kid_profiles')
       .insert({ ...payload, user_id: user.id })
       .select('id')
@@ -94,10 +133,21 @@ export async function addKid(
     return { ok: true, data: { id: data.id as string } }
   }
 
+  // Anonymous path — 1 kid max, no photo (the cookie is the only auth).
   const anonId = await getOrCreateAnonymousId()
   const admin = createAdminClient()
+  const { count } = await admin.from('kid_profiles')
+    .select('id', { count: 'exact', head: true })
+    .eq('anonymous_id', anonId)
+  if ((count ?? 0) >= ANONYMOUS_KID_LIMIT) {
+    return {
+      ok: false,
+      error: 'Sign up to track more than one kid. Your existing kid will carry over.',
+    }
+  }
+
   const { data, error } = await admin.from('kid_profiles')
-    .insert({ ...payload, anonymous_id: anonId })
+    .insert({ ...payload, anonymous_id: anonId, photo_url: null })
     .select('id')
     .single()
   if (error) return { ok: false, error: error.message }
@@ -171,6 +221,17 @@ export async function deleteKid(id: string): Promise<KidActionResult> {
       .eq('id', parsed.data)
       .eq('user_id', user.id)
     if (error) return { ok: false, error: error.message }
+
+    // Storage cleanup — remove any uploaded kid photos so we don't leak
+    // orphan files. Best-effort: a storage failure here doesn't roll back
+    // the DB delete (the kid is already gone).
+    const admin = createAdminClient()
+    const folder = `kids/${parsed.data}`
+    const { data: files } = await admin.storage.from('avatars').list(folder)
+    if (files && files.length > 0) {
+      await admin.storage.from('avatars')
+        .remove(files.map((f) => `${folder}/${f.name}`))
+    }
 
     revalidateKidSurfaces()
     return { ok: true }

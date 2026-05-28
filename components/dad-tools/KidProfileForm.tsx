@@ -3,9 +3,11 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { addKid, updateKid, type Kid } from '@/lib/dad-tools/kid-actions'
+import KidPhotoUploader from './KidPhotoUploader'
 
 type AddProps = {
   mode: 'add'
+  isAuthenticated?: boolean
   onSuccess?: (kidId: string) => void
   onCancel?: () => void
 }
@@ -13,6 +15,7 @@ type AddProps = {
 type EditProps = {
   mode: 'edit'
   kid: Kid
+  isAuthenticated?: boolean
   onSuccess?: () => void
   onCancel?: () => void
 }
@@ -60,8 +63,26 @@ export default function KidProfileForm(props: Props) {
     })
   }
 
+  // Edit-mode photo uploader. Anonymous viewers can't upload (no durable
+  // identity on the server) — the uploader renders a soft "sign up" hint.
+  // Add mode has no kidId yet; show a hint instead so the dad knows where
+  // photo upload lives.
+  const photoInitial = (isEdit && initialKid?.name?.trim()?.[0] ? initialKid.name.trim()[0] : '?').toUpperCase()
+  const isAuthenticated = !!props.isAuthenticated
+
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
+      {isEdit && initialKid && (
+        <div className="pb-3 border-b border-soft mb-1">
+          <KidPhotoUploader
+            kidId={initialKid.id}
+            initialPhotoUrl={initialKid.photo_url}
+            initial={photoInitial}
+            canUpload={isAuthenticated}
+          />
+        </div>
+      )}
+
       <div>
         <label className="block text-xs text-prose-faint uppercase tracking-widest mb-1.5">
           Name <span className="lowercase text-prose-faint normal-case font-normal tracking-normal">(optional)</span>

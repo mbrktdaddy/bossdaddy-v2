@@ -117,6 +117,7 @@ export default function KidCard({ kid, initialMoments, momentCount, isAuthentica
           <KidProfileForm
             mode="edit"
             kid={kid}
+            isAuthenticated={isAuthenticated}
             onSuccess={() => setMode('view')}
             onCancel={() => setMode('view')}
           />

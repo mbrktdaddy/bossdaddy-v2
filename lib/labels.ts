@@ -29,8 +29,9 @@ export const LABELS = {
     shortTagline: 'Check out the upcoming items on our bench list',
   },
 
-  // products table → /gear public route
-  stuff: {
+  // products table → /gear public route. Key was historically `stuff` (an
+  // earlier display name); renamed for code clarity. DB table stays `products`.
+  gear: {
     short: 'Gear',
     full: 'Boss Daddy Approved Gear',
   },

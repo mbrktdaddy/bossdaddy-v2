@@ -6,11 +6,13 @@ import KidProfileForm from './KidProfileForm'
 interface Props {
   ctaLabel?: string
   variant?: 'inline' | 'empty'
+  isAuthenticated?: boolean
 }
 
 export default function AddKidAffordance({
   ctaLabel = 'Add a kid',
   variant = 'inline',
+  isAuthenticated = false,
 }: Props) {
   const [adding, setAdding] = useState(false)
 
@@ -19,6 +21,7 @@ export default function AddKidAffordance({
       <div className="bg-surface border border-faint rounded-2xl p-4 sm:p-5">
         <KidProfileForm
           mode="add"
+          isAuthenticated={isAuthenticated}
           onSuccess={() => setAdding(false)}
           onCancel={() => setAdding(false)}
         />

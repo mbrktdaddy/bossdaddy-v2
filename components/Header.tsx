@@ -23,12 +23,15 @@ interface HeaderProps {
   avatarUrl?: string | null
 }
 
+// Vault is intentionally NOT a top-level anchor — its contents
+// (Comparisons / Best Of / Stacks / Gift Guides) live inside the Browse
+// mega-menu's "From The Vault" section, and that menu's "See all →" link
+// is the canonical path to /vault itself.
 const NAV_LINKS = [
   { href: '/',        label: 'Home' },
   { href: '/reviews', label: LABELS.reviews.plural },
   { href: '/guides',  label: LABELS.guides.plural },
-  { href: '/vault',   label: LABELS.vault.full },
-  { href: '/gear',    label: LABELS.stuff.short },
+  { href: '/gear',    label: LABELS.gear.short },
   { href: '/tools',   label: LABELS.tools.short },
 ]
 
@@ -269,7 +272,7 @@ export default function Header({ username, role, avatarUrl }: HeaderProps) {
                       onClick={() => setCatOpen(false)}
                       className="text-xs text-zinc-400 hover:text-zinc-50 font-semibold transition-colors"
                     >
-                      All {LABELS.stuff.short.toLowerCase()} →
+                      All {LABELS.gear.short.toLowerCase()} →
                     </Link>
                   </div>
                 </div>
