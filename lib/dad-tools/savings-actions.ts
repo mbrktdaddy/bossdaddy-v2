@@ -802,6 +802,48 @@ export async function createInvite(
   const siteUrl = host ? `${proto}://${host}` : (process.env.NEXT_PUBLIC_SITE_URL ?? '')
   const url = `${siteUrl}/tools/savings/invite/${token}`
 
+  // If the inviter provided a recipient email, fire-and-forget send the
+  // invite email. Best-effort: a Resend failure here doesn't break the
+  // invite link generation — the owner can still share the URL by hand.
+  if (parsed.data.email) {
+    const { data: goalRow } = await admin.from('savings_goals')
+      .select('name')
+      .eq('id', parsed.data.goalId)
+      .maybeSingle()
+    const goalName = (goalRow as { name: string } | null)?.name ?? 'their goal'
+
+    const { data: inviterProfile } = await admin.from('profiles')
+      .select('username, display_name')
+      .eq('id', user.id)
+      .maybeSingle()
+    type ProfileRow = { username: string | null; display_name: string | null }
+    const inviterRow = inviterProfile as ProfileRow | null
+    const inviterName =
+      inviterRow?.display_name?.trim()
+      || (inviterRow?.username ? `@${inviterRow.username}` : 'A Boss Daddy user')
+
+    // Lazy-load the email helper + template so the bundle stays lean and
+    // tests don't pull React Email into the test runtime.
+    const [{ sendEmail }, { SavingsInviteEmail }, React] = await Promise.all([
+      import('@/lib/email'),
+      import('@/emails/SavingsInviteEmail'),
+      import('react'),
+    ])
+    void sendEmail({
+      to: parsed.data.email,
+      subject: `${inviterName} invited you to a Boss Daddy savings goal`,
+      tag: 'savings_invite',
+      react: React.createElement(SavingsInviteEmail, {
+        inviterName,
+        goalName,
+        acceptUrl: url,
+        siteUrl,
+      }),
+    }).catch((err) => {
+      console.error('savings invite email send failed', err)
+    })
+  }
+
   revalidatePath(`/tools/savings/${parsed.data.goalId}/invite`)
   revalidatePath(`/tools/savings/${parsed.data.goalId}`)
   return { ok: true, data: { token, url, id: (data as { id: string }).id } }

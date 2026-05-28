@@ -41,7 +41,28 @@ export interface GoalFormInitial {
   destination_type?:    DestinationType | null
   destination_url?:     string | null
   destination_label?:   string | null
+  reminder_enabled?:    boolean
+  reminder_cadence?:    'daily' | 'weekly' | 'monthly' | 'off' | null
+  reminder_hour_utc?:   number | null
 }
+
+// UTC reminder-hour options. Labels include the corresponding US Eastern
+// equivalent so users picking a time can sanity-check it against their day.
+// We do NOT do per-user timezones — that's user-profile scope, not goal scope.
+const REMINDER_HOUR_OPTIONS: { value: number; label: string }[] = [
+  { value: 12, label: '12:00 UTC (7am ET)' },
+  { value: 13, label: '13:00 UTC (8am ET)' },
+  { value: 14, label: '14:00 UTC (9am ET)' },
+  { value: 15, label: '15:00 UTC (10am ET)' },
+  { value: 16, label: '16:00 UTC (11am ET)' },
+  { value: 17, label: '17:00 UTC (noon ET)' },
+  { value: 18, label: '18:00 UTC (1pm ET)' },
+  { value: 22, label: '22:00 UTC (5pm ET)' },
+  { value: 23, label: '23:00 UTC (6pm ET)' },
+  { value: 0,  label: '00:00 UTC (7pm ET)' },
+  { value: 1,  label: '01:00 UTC (8pm ET)' },
+  { value: 2,  label: '02:00 UTC (9pm ET)' },
+]
 
 interface Props {
   mode:        'create' | 'edit'
@@ -88,6 +109,15 @@ export default function GoalForm({ mode, initial, kids }: Props) {
 
   const [destUrl, setDestUrl] = useState<string>(initial?.destination_url ?? '')
   const [destLabel, setDestLabel] = useState<string>(initial?.destination_label ?? '')
+
+  // Reminders — default ON for new goals so the daily-loop habit kicks in.
+  const [reminderEnabled, setReminderEnabled] = useState<boolean>(initial?.reminder_enabled ?? true)
+  const [reminderCadence, setReminderCadence] = useState<'daily' | 'weekly' | 'monthly' | 'off'>(
+    (initial?.reminder_cadence ?? (initial?.cadence ?? 'daily')) as 'daily' | 'weekly' | 'monthly' | 'off'
+  )
+  const [reminderHourUtc, setReminderHourUtc] = useState<number>(
+    initial?.reminder_hour_utc ?? 13   // 8am ET default
+  )
 
   // Two-step picker — category, then specific preset. When a preset is picked
   // we auto-fill label + URL; the user can still tweak both fields below.
@@ -164,6 +194,9 @@ export default function GoalForm({ mode, initial, kids }: Props) {
       destination_type: destBehavior.type,
       destination_url: destUrl.trim() || null,
       destination_label: destLabel.trim() || null,
+      reminder_enabled: reminderEnabled,
+      reminder_cadence: reminderEnabled ? reminderCadence : 'off' as const,
+      reminder_hour_utc: reminderHourUtc,
     }
 
     startTransition(async () => {
@@ -498,6 +531,64 @@ export default function GoalForm({ mode, initial, kids }: Props) {
             {destBehavior.message}
           </div>
         </div>
+      </section>
+
+      {/* ── Reminders ────────────────────────────────────────────────────── */}
+      <section className="bg-surface border border-soft rounded-xl p-6 space-y-5">
+        <div>
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">
+            Reminders
+          </p>
+          <p className="text-xs text-prose-faint">
+            We&apos;ll email you (and any spouse you invite) at the cadence you pick.
+            Times are in UTC — pick whichever lands in your morning.
+          </p>
+        </div>
+
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={reminderEnabled}
+            onChange={(e) => setReminderEnabled(e.target.checked)}
+            className="h-4 w-4 accent-accent"
+          />
+          <span className="text-sm text-prose">Send me reminders</span>
+        </label>
+
+        {reminderEnabled && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="reminder-cadence" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
+                Cadence
+              </label>
+              <select
+                id="reminder-cadence"
+                value={reminderCadence}
+                onChange={(e) => setReminderCadence(e.target.value as 'daily' | 'weekly' | 'monthly' | 'off')}
+                className="w-full px-3 py-2.5 bg-surface-sunken border border-soft focus:border-accent rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent/30"
+              >
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="reminder-hour" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
+                Time
+              </label>
+              <select
+                id="reminder-hour"
+                value={reminderHourUtc}
+                onChange={(e) => setReminderHourUtc(Number(e.target.value))}
+                className="w-full px-3 py-2.5 bg-surface-sunken border border-soft focus:border-accent rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent/30"
+              >
+                {REMINDER_HOUR_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* ── Submit ──────────────────────────────────────────────────────── */}

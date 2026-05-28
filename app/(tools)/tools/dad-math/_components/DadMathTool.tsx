@@ -284,6 +284,8 @@ export default function DadMathTool({ isAuthenticated, initialKids, initialKidId
           result={result}
           name={name}
           targetBy18={targetBy18}
+          kidId={selectedKidId}
+          monthlyContrib={monthlyContrib}
         />
       )}
 

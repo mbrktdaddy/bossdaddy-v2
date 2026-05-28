@@ -48,6 +48,9 @@ export default async function EditSavingsGoalPage({ params }: PageProps) {
     destination_type:   data.goal.destination_type,
     destination_url:    data.goal.destination_url,
     destination_label:  data.goal.destination_label,
+    reminder_enabled:   data.goal.reminder_enabled,
+    reminder_cadence:   data.goal.reminder_cadence,
+    reminder_hour_utc:  data.goal.reminder_hour_utc,
   }
 
   return (

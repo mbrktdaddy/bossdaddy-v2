@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { LABELS } from '@/lib/labels'
 import {
   fmtUsd,
@@ -16,6 +17,12 @@ interface Props {
   result:     DadMathResult
   name:       string | null
   targetBy18: number
+  // Optional kid context — when present, the "Make this a habit" CTA
+  // pre-fills the new Savings goal with this kid attached.
+  kidId?:           string | null
+  monthlyContrib?:  number     // The user's current monthly input — passed
+                               // through so the savings handoff can suggest
+                               // their existing pace as the starting amount.
 }
 
 // Verdict → background + border accent. Keeps the visual signal aligned
@@ -48,7 +55,22 @@ function verdictTone(verdict: DadMathResult['verdict']): {
   }
 }
 
-export default function Result({ result, name, targetBy18 }: Props) {
+export default function Result({ result, name, targetBy18, kidId, monthlyContrib }: Props) {
+  // Build the Savings handoff URL — pre-fills /tools/savings/new with the
+  // pace the user just dialed in here. If they're behind, suggest the
+  // catch-up monthly; if on track, just keep their current monthly. The
+  // user can edit either on arrival.
+  const habitAmount = result.monthlyToCatchUp > 0
+    ? Math.ceil(result.monthlyToCatchUp)
+    : (monthlyContrib && monthlyContrib > 0 ? Math.round(monthlyContrib) : 0)
+  const habitName = name ? `College savings for ${name}` : 'College savings'
+  const habitParams = new URLSearchParams({
+    cadence: 'monthly',
+    name:    habitName,
+  })
+  if (habitAmount > 0) habitParams.set('amount', String(habitAmount))
+  if (kidId)            habitParams.set('kid', kidId)
+  const habitHref = `/tools/savings/new?${habitParams.toString()}`
   const ctx = {
     verdict:          result.verdict,
     projectedValue:   result.projectedValue,
@@ -137,6 +159,24 @@ export default function Result({ result, name, targetBy18 }: Props) {
         <p className="text-sm text-prose-muted leading-relaxed border-t border-soft pt-4">
           {reasoning}
         </p>
+      )}
+
+      {/* Savings handoff — subtle secondary action. Suppress on past_18
+          (no future-tense math) since there's nothing to start. */}
+      {result.verdict !== 'past_18' && (
+        <div className="border-t border-soft pt-4">
+          <Link
+            href={habitHref}
+            className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:text-accent-hover transition-colors"
+          >
+            Make this a habit
+            <span aria-hidden>→</span>
+          </Link>
+          <p className="text-xs text-prose-faint mt-1 leading-snug">
+            Set up a {habitAmount > 0 ? `${fmtUsd(habitAmount)}/month` : 'monthly'}{' '}
+            savings goal{name ? ` for ${name}` : ''} and tap Yes when you contribute.
+          </p>
+        </div>
       )}
     </section>
   )

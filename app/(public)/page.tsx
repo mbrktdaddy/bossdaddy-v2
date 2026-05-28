@@ -377,24 +377,46 @@ export default async function HomePage() {
             label="Free Tools"
             right={{ label: 'See all tools', href: '/tools' }}
           />
-          <Link
-            href="/tools/weekends-until"
-            className="block bg-surface border border-soft hover:border-accent rounded-2xl p-6 sm:p-10 transition-colors group"
-          >
-            <p className="text-xs text-eyebrow uppercase tracking-widest font-medium">
-              Weekends Until
-            </p>
-            <h3 className="text-2xl sm:text-3xl font-black mt-2 text-prose group-hover:text-accent transition-colors leading-tight">
-              How many weekends do you have left with your kid?
-            </h3>
-            <p className="text-prose-faint mt-3 text-base max-w-prose">
-              Pick a birthdate. Pick a milestone. Get the number. Then make them count.
-            </p>
-            <p className="text-sm text-accent font-semibold mt-5 inline-flex items-center gap-1 group-hover:underline">
-              Try it
-              <span aria-hidden>→</span>
-            </p>
-          </Link>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Link
+              href="/tools/weekends-until"
+              className="block bg-surface border border-soft hover:border-accent rounded-2xl p-6 sm:p-8 transition-colors group"
+            >
+              <p className="text-xs text-eyebrow uppercase tracking-widest font-medium">
+                Time · Weekends Until
+              </p>
+              <h3 className="text-xl sm:text-2xl font-black mt-2 text-prose group-hover:text-accent transition-colors leading-tight">
+                How many weekends do you have left with your kid?
+              </h3>
+              <p className="text-prose-faint mt-3 text-sm sm:text-base max-w-prose">
+                Pick a birthdate. Pick a milestone. Get the number. Then make them count.
+              </p>
+              <p className="text-sm text-accent font-semibold mt-5 inline-flex items-center gap-1 group-hover:underline">
+                Try it
+                <span aria-hidden>→</span>
+              </p>
+            </Link>
+
+            <Link
+              href="/tools/savings"
+              className="block bg-surface border border-soft hover:border-accent rounded-2xl p-6 sm:p-8 transition-colors group"
+            >
+              <p className="text-xs text-eyebrow uppercase tracking-widest font-medium">
+                Money · Savings
+              </p>
+              <h3 className="text-xl sm:text-2xl font-black mt-2 text-prose group-hover:text-accent transition-colors leading-tight">
+                Small commitments, daily. Tap &quot;yes,&quot; watch the dollars stack.
+              </h3>
+              <p className="text-prose-faint mt-3 text-sm sm:text-base max-w-prose">
+                $2 a day for a camping trip. $50 a month into a 529 or Trump Account.
+                Tiny habits, real progress. Invite your spouse so the streak counts as a team.
+              </p>
+              <p className="text-sm text-accent font-semibold mt-5 inline-flex items-center gap-1 group-hover:underline">
+                Try it
+                <span aria-hidden>→</span>
+              </p>
+            </Link>
+          </div>
         </div>
       </section>
 

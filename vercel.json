@@ -27,6 +27,14 @@
     {
       "path": "/api/cron/sunday-moments",
       "schedule": "0 1 * * 1"
+    },
+    {
+      "path": "/api/cron/savings-reminders",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/savings-spouse-nudge",
+      "schedule": "0 22 * * *"
     }
   ]
 }
