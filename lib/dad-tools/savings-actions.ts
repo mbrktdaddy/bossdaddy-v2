@@ -16,6 +16,7 @@ import { randomBytes } from 'crypto'
 import { z } from 'zod'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createNotification } from '@/lib/notifications'
 import type {
   SavingsGoal,
   SavingsEntry,
@@ -717,6 +718,9 @@ const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000   // 7 days
 const CreateInviteSchema = z.object({
   goalId: z.string().uuid(),
   email:  z.string().trim().email().max(200).optional().nullable(),
+  // When inviting an existing member, the picker passes their user id so we
+  // relay the invite to their in-app notifications (accept/decline in-profile).
+  inviteeUserId: z.string().uuid().optional().nullable(),
 })
 
 function newInviteToken(): string {
@@ -802,6 +806,25 @@ export async function createInvite(
   const siteUrl = host ? `${proto}://${host}` : (process.env.NEXT_PUBLIC_SITE_URL ?? '')
   const url = `${siteUrl}/tools/savings/invite/${token}`
 
+  // Relay to an existing member's in-app notifications so they can accept or
+  // decline from their profile without needing the link.
+  if (parsed.data.inviteeUserId) {
+    const { data: goalRow } = await admin.from('savings_goals').select('name').eq('id', parsed.data.goalId).maybeSingle()
+    const goalName = (goalRow as { name: string } | null)?.name ?? 'a savings goal'
+    const { data: ip } = await admin.from('profiles').select('username, display_name').eq('id', user.id).maybeSingle()
+    const inviter = ip as { username: string | null; display_name: string | null } | null
+    const inviterName = inviter?.display_name?.trim() || (inviter?.username ? `@${inviter.username}` : 'A Boss Daddy dad')
+    await createNotification({
+      userId:         parsed.data.inviteeUserId,
+      type:           'savings_invite',
+      title:          'Savings goal invite',
+      body:           `${inviterName} invited you to join "${goalName}".`,
+      link:           '/account/notifications',
+      payload:        { goal_id: parsed.data.goalId, invitation_token: token },
+      actionRequired: true,
+    })
+  }
+
   // If the inviter provided a recipient email, fire-and-forget send the
   // invite email. Best-effort: a Resend failure here doesn't break the
   // invite link generation — the owner can still share the URL by hand.
@@ -847,6 +870,66 @@ export async function createInvite(
   revalidatePath(`/tools/savings/${parsed.data.goalId}/invite`)
   revalidatePath(`/tools/savings/${parsed.data.goalId}`)
   return { ok: true, data: { token, url, id: (data as { id: string }).id } }
+}
+
+// Module-private: surface any unused token invites addressed to `email` as
+// in-app savings_invite notifications for `userId`. Idempotent — skips invites
+// the user already joined or already has a notification for. NOT exported as an
+// action (it takes an arbitrary email/userId); callers use claimMyPendingInvites.
+async function claimSavingsInvitesForEmail(userId: string, email: string): Promise<void> {
+  if (!email) return
+  const admin = createAdminClient()
+  const nowIso = new Date().toISOString()
+  const { data: invites } = await admin.from('savings_goal_invitations')
+    .select('id, goal_id, token, inviter_id')
+    .eq('email', email)
+    .is('used_at', null)
+    .gt('expires_at', nowIso)
+  if (!invites || invites.length === 0) return
+
+  for (const inv of invites as { id: string; goal_id: string; token: string; inviter_id: string }[]) {
+    const { count: already } = await admin.from('savings_goal_participants')
+      .select('id', { count: 'exact', head: true })
+      .eq('goal_id', inv.goal_id).eq('user_id', userId)
+    if ((already ?? 0) > 0) continue
+
+    const { count: existing } = await admin.from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId).eq('type', 'savings_invite')
+      .eq('payload->>invitation_token', inv.token)
+    if ((existing ?? 0) > 0) continue
+
+    const { data: goalRow } = await admin.from('savings_goals').select('name').eq('id', inv.goal_id).maybeSingle()
+    const goalName = (goalRow as { name: string } | null)?.name ?? 'a savings goal'
+    const { data: ip } = await admin.from('profiles').select('username, display_name').eq('id', inv.inviter_id).maybeSingle()
+    const inviter = ip as { username: string | null; display_name: string | null } | null
+    const inviterName = inviter?.display_name?.trim() || (inviter?.username ? `@${inviter.username}` : 'A Boss Daddy dad')
+
+    await createNotification({
+      userId,
+      type:           'savings_invite',
+      title:          'Savings goal invite',
+      body:           `${inviterName} invited you to join "${goalName}".`,
+      link:           '/account/notifications',
+      payload:        { goal_id: inv.goal_id, invitation_token: inv.token },
+      actionRequired: true,
+    })
+  }
+}
+
+// Called post-signup / post-login: relay any pending email invites to the
+// signed-in user's notifications. Session-derived — safe to call from clients.
+export async function claimMyPendingInvites(): Promise<SavingsActionResult> {
+  const supabase = await createClient()
+  const { user } = await getUserSafe(supabase)
+  if (!user?.email) return { ok: false, error: 'No session' }
+  try {
+    await claimSavingsInvitesForEmail(user.id, user.email)
+    return { ok: true }
+  } catch (err) {
+    console.error('claimMyPendingInvites failed:', err)
+    return { ok: false, error: 'claim failed' }
+  }
 }
 
 // Owner revokes a pending invite — deletes the row outright. Used + expired

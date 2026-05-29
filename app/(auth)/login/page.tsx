@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { claimAnonymousData } from '@/lib/dad-tools/kid-actions'
+import { claimMyPendingInvites } from '@/lib/dad-tools/savings-actions'
 
 function LoginForm() {
   const searchParams = useSearchParams()
@@ -57,6 +58,9 @@ function LoginForm() {
     } catch (err) {
       console.warn('claim-on-login threw:', err)
     }
+
+    // Relay any pending savings-goal email invites to in-app notifications.
+    try { await claimMyPendingInvites() } catch (err) { console.warn('invite claim (login) threw:', err) }
 
     // Hard navigation — forces a fresh server render with the new auth
     // cookie. router.push() is fragile on mobile and inside PWA standalone

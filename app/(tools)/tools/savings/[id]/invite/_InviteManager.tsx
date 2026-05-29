@@ -4,9 +4,11 @@
 // generates new ones, copies them to the clipboard, and revokes them.
 // Server Actions handle the writes; this just orchestrates UI state.
 
-import { useState, useTransition } from 'react'
+import { useState, useRef, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createInvite, revokeInvite } from '@/lib/dad-tools/savings-actions'
+
+interface MemberHit { id: string; username: string; displayName: string | null }
 
 interface PendingInvite {
   id:         string
@@ -38,6 +40,38 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
   const [error, setError] = useState<string | null>(null)
   const [freshLink, setFreshLink] = useState<string | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
+  // Existing-member invite (relays to their in-app notifications).
+  const [memberQ, setMemberQ] = useState('')
+  const [memberHits, setMemberHits] = useState<MemberHit[]>([])
+  const [invitingId, setInvitingId] = useState<string | null>(null)
+  const [sentTo, setSentTo] = useState<string | null>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function onMemberSearch(value: string) {
+    setMemberQ(value)
+    setSentTo(null)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (value.trim().length < 2) { setMemberHits([]); return }
+    debounceRef.current = setTimeout(async () => {
+      const res = await fetch(`/api/members/search?q=${encodeURIComponent(value.trim())}`)
+      if (!res.ok) return
+      const json = await res.json()
+      setMemberHits(json.members ?? [])
+    }, 250)
+  }
+
+  function inviteMember(m: MemberHit) {
+    setError(null)
+    setInvitingId(m.id)
+    startTransition(async () => {
+      const result = await createInvite({ goalId, inviteeUserId: m.id })
+      setInvitingId(null)
+      if (!result.ok) { setError(result.error); return }
+      setSentTo(m.displayName || `@${m.username}`)
+      setMemberQ(''); setMemberHits([])
+      router.refresh()
+    })
+  }
 
   function onGenerate() {
     setError(null)
@@ -91,7 +125,44 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
 
       {!isFull && (
         <>
-          <div>
+          {/* Invite an existing member — relays straight to their notifications. */}
+          <div className="relative">
+            <label htmlFor="member-search" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
+              Invite a member <span className="normal-case text-prose-faint">(they accept in their notifications)</span>
+            </label>
+            <input
+              id="member-search"
+              type="text"
+              value={memberQ}
+              onChange={(e) => onMemberSearch(e.target.value)}
+              placeholder="Search by username or name…"
+              className="w-full px-3 py-2.5 bg-surface-sunken border border-soft focus:border-accent rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent/30"
+            />
+            {memberHits.length > 0 && (
+              <div className="mt-2 border border-soft rounded-lg overflow-hidden divide-y divide-soft">
+                {memberHits.map((m) => (
+                  <div key={m.id} className="flex items-center justify-between gap-2 px-3 py-2 bg-surface-sunken">
+                    <span className="min-w-0 text-sm text-prose truncate">
+                      {m.displayName || `@${m.username}`} <span className="text-prose-faint text-xs">@{m.username}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => inviteMember(m)}
+                      disabled={pending || invitingId === m.id}
+                      className="shrink-0 px-3 py-1.5 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-semibold rounded-lg text-xs transition-colors"
+                    >
+                      {invitingId === m.id ? 'Inviting…' : 'Invite'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {sentTo && (
+              <p className="text-xs text-success-ink mt-1.5">Invite sent to {sentTo} — they&apos;ll see it in their notifications.</p>
+            )}
+          </div>
+
+          <div className="border-t border-soft pt-4">
             <label htmlFor="invite-email" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
               Recipient email <span className="normal-case text-prose-faint">(optional — for your records)</span>
             </label>

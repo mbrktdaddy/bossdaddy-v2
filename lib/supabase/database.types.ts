@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      abuse_reports: {
+        Row: {
+          conversation_id: string | null
+          created_at: string
+          id: string
+          message_id: string | null
+          note: string | null
+          reason: string
+          reported_user_id: string | null
+          reporter_id: string
+          status: string
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          note?: string | null
+          reason: string
+          reported_user_id?: string | null
+          reporter_id: string
+          status?: string
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          note?: string | null
+          reason?: string
+          reported_user_id?: string | null
+          reporter_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "abuse_reports_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "abuse_reports_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       affiliate_clicks: {
         Row: {
           clicked_at: string
@@ -376,6 +427,59 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      conversation_participants: {
+        Row: {
+          conversation_id: string
+          joined_at: string
+          last_activity_at: string
+          last_read_at: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          joined_at?: string
+          last_activity_at?: string
+          last_read_at?: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          joined_at?: string
+          last_activity_at?: string
+          last_read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          created_at: string
+          dm_key: string | null
+          id: string
+          last_message_at: string
+        }
+        Insert: {
+          created_at?: string
+          dm_key?: string | null
+          id?: string
+          last_message_at?: string
+        }
+        Update: {
+          created_at?: string
+          dm_key?: string | null
+          id?: string
+          last_message_at?: string
+        }
+        Relationships: []
       }
       guide_tags: {
         Row: {
@@ -877,6 +981,38 @@ export type Database = {
           },
         ]
       }
+      messages: {
+        Row: {
+          body: string
+          conversation_id: string
+          created_at: string
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       moderation_actions: {
         Row: {
           action_type: string
@@ -943,6 +1079,48 @@ export type Database = {
           email?: string
           id?: string
           interests?: string[]
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          action_required: boolean
+          action_state: string | null
+          body: string | null
+          created_at: string
+          id: string
+          link: string | null
+          payload: Json
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          action_required?: boolean
+          action_state?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          payload?: Json
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          action_required?: boolean
+          action_state?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          payload?: Json
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1922,6 +2100,24 @@ export type Database = {
           },
         ]
       }
+      user_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       user_ratings: {
         Row: {
           created_at: string
@@ -2156,6 +2352,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_or_create_dm: { Args: { _other_user: string }; Returns: string }
       get_review_rating_summary: {
         Args: { p_review_id: string }
         Returns: {
@@ -2182,8 +2379,17 @@ export type Database = {
         }
         Returns: undefined
       }
+      is_account_active: { Args: { _uid: string }; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
       is_author_or_admin: { Args: never; Returns: boolean }
+      is_conversation_participant: {
+        Args: { _conversation_id: string }
+        Returns: boolean
+      }
+      is_savings_goal_participant: {
+        Args: { _goal_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

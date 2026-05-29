@@ -10,6 +10,7 @@ import { computeReadingTime } from '@/lib/reading-time'
 import { getResend, FROM_EMAIL } from '@/lib/resend'
 import { ModerationResultEmail } from '@/emails/ModerationResultEmail'
 import { notifyWishlistSubscribers } from '@/lib/wishlist-emails'
+import { createNotification } from '@/lib/notifications'
 import { CATEGORY_SLUGS } from '@/lib/categories'
 import * as React from 'react'
 import { z } from 'zod'
@@ -173,6 +174,20 @@ export async function PUT(
           } catch (err) { console.error('Review notification failed:', err) }
         })
       } catch (err) { console.error('after() registration failed (review):', err) }
+    }
+
+    // In-app notification — independent of email (fires even without RESEND).
+    if (notifyActions.includes(modParsed.data.action as typeof notifyActions[number]) && data?.author_id) {
+      const action = modParsed.data.action as 'approve' | 'reject' | 'request_edits'
+      const reviewTitle = (data.title as string) ?? 'your review'
+      const reason = modParsed.data.rejection_reason ? `: ${modParsed.data.rejection_reason}` : ''
+      const map = {
+        approve:       { type: 'review_approved'      as const, title: 'Review approved',     body: `"${reviewTitle}" is now live.` },
+        reject:        { type: 'review_rejected'      as const, title: 'Review needs changes', body: `"${reviewTitle}" was returned${reason}.` },
+        request_edits: { type: 'review_request_edits' as const, title: 'Edits requested',      body: `Edits requested on "${reviewTitle}"${reason}.` },
+      }[action]
+      const link = action === 'approve' && data.slug ? `/reviews/${data.slug}` : `/dashboard/reviews/${id}`
+      await createNotification({ userId: data.author_id as string, type: map.type, title: map.title, body: map.body, link })
     }
 
     // Flip linked product status to 'reviewed' when a review is approved

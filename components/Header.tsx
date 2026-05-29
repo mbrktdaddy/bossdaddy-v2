@@ -8,6 +8,8 @@ import { CATEGORIES } from '@/lib/categories'
 import { LABELS } from '@/lib/labels'
 import CartIcon from '@/components/CartIcon'
 import CategoryIcon from '@/components/CategoryIcon'
+import NotificationBell from '@/components/notifications/NotificationBell'
+import MessagesMenu from '@/components/messages/MessagesMenu'
 
 interface HeaderProps {
   /** The current user's username, or null if not signed in. Resolved server-side
@@ -336,6 +338,9 @@ export default function Header({ username, role, avatarUrl }: HeaderProps) {
           </div>
 
           <CartIcon />
+
+          {username && <NotificationBell />}
+          {username && <MessagesMenu />}
 
           {username ? (
             <div ref={userMenuRef} className="hidden md:block relative">

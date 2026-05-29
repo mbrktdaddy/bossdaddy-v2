@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { claimAnonymousData } from '@/lib/dad-tools/kid-actions'
+import { claimMyPendingInvites } from '@/lib/dad-tools/savings-actions'
 
 export default function RegisterPage() {
   return (
@@ -75,6 +76,8 @@ function RegisterForm() {
       } catch (err) {
         console.warn('claim-on-signup (register) threw:', err)
       }
+      // Relay any pending savings-goal email invites to in-app notifications.
+      try { await claimMyPendingInvites() } catch (err) { console.warn('invite claim (register) threw:', err) }
     }
 
     // Hard navigation — same reasoning as login: forces a fresh server

@@ -5,6 +5,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import GlobalSearch from './GlobalSearch'
+import NotificationBell from '@/components/notifications/NotificationBell'
+import MessagesMenu from '@/components/messages/MessagesMenu'
 import { LABELS } from '@/lib/labels'
 
 interface Props {
@@ -163,19 +165,25 @@ export default function DashboardNav({ username, isAdmin, role, avatarUrl }: Pro
             <span className="text-prose"> DADDY</span>
           </span>
         </Link>
-        <Link href="/dashboard/profile" onClick={onNav} className="flex items-center gap-2 group">
-          <div className="w-6 h-6 rounded-full overflow-hidden bg-accent flex items-center justify-center text-xs font-bold text-white shrink-0">
-            {avatarUrl ? (
-              <Image src={avatarUrl} alt="" width={24} height={24} className="object-cover w-full h-full" unoptimized />
-            ) : (
-              username[0]?.toUpperCase() ?? 'B'
-            )}
+        <div className="flex items-center justify-between gap-2">
+          <Link href="/dashboard/profile" onClick={onNav} className="flex items-center gap-2 group min-w-0">
+            <div className="w-6 h-6 rounded-full overflow-hidden bg-accent flex items-center justify-center text-xs font-bold text-white shrink-0">
+              {avatarUrl ? (
+                <Image src={avatarUrl} alt="" width={24} height={24} className="object-cover w-full h-full" unoptimized />
+              ) : (
+                username[0]?.toUpperCase() ?? 'B'
+              )}
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-prose group-hover:text-prose truncate font-medium transition-colors">@{username}</p>
+              <p className="text-xs text-prose-faint">{ROLE_LABEL[role] ?? 'Member'}</p>
+            </div>
+          </Link>
+          <div className="flex items-center shrink-0">
+            <NotificationBell />
+            <MessagesMenu />
           </div>
-          <div className="min-w-0">
-            <p className="text-xs text-prose group-hover:text-prose truncate font-medium transition-colors">@{username}</p>
-            <p className="text-xs text-prose-faint">{ROLE_LABEL[role] ?? 'Member'}</p>
-          </div>
-        </Link>
+        </div>
         {isAdmin && <GlobalSearch />}
       </div>
 

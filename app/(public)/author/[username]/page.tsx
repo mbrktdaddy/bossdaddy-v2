@@ -6,6 +6,7 @@ import { getCategoryBySlug } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
 import BenchStrip from '@/components/BenchStrip'
+import MessageUserButton from '@/components/messages/MessageUserButton'
 import type { Metadata } from 'next'
 
 export const revalidate = 3600
@@ -113,6 +114,9 @@ export default async function AuthorPage({ params }: Props) {
  <div className="flex items-center gap-4 mt-3 text-sm text-prose-faint">
  <span><span className="text-prose font-semibold">{totalReviews}</span> {totalReviews === 1 ? 'review' : 'reviews'}</span>
  <span><span className="text-prose font-semibold">{totalGuides}</span> {totalGuides === 1 ? 'guide' : 'guides'}</span>
+ </div>
+ <div className="mt-4">
+ <MessageUserButton targetUserId={profile.id} />
  </div>
  </div>
  </div>

@@ -4,6 +4,7 @@ import { stripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createOrder } from '@/lib/printful'
 import { sendOrderConfirmationEmail } from '@/lib/order-emails'
+import { createNotification } from '@/lib/notifications'
 
 export async function POST(request: Request) {
   const body = await request.text()
@@ -138,6 +139,18 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     .single()
 
   if (orderErr || !order) throw new Error(`Insert order failed: ${orderErr?.message}`)
+
+  // In-app notification for logged-in buyers (guest checkouts have no user_id).
+  if (cartRow?.user_id) {
+    await createNotification({
+      userId: cartRow.user_id,
+      type:   'order_complete',
+      title:  'Order confirmed',
+      body:   `Order #${order.order_number} is confirmed — we'll email tracking when it ships.`,
+      link:   `/order/${order.id}`,
+      payload: { order_id: order.id, order_number: order.order_number },
+    })
+  }
 
   // Insert order_items with snapshot of product name/image at purchase time
   const orderItemRows = cartItems.map((item) => {

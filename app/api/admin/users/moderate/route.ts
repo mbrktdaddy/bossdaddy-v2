@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendAccountStatusEmail } from '@/lib/account-emails'
+import { createNotification } from '@/lib/notifications'
 import type { AccountStatusEvent } from '@/emails/AccountStatusEmail'
 import type { Database } from '@/lib/supabase/database.types'
 import { z } from 'zod'
@@ -138,6 +139,17 @@ export async function POST(request: NextRequest) {
     } catch (err) {
       console.error('moderation email send failed:', err)
     }
+  }
+
+  // In-app notification mirroring the email (so the user sees it on-site too).
+  if (emailEvent) {
+    const map = {
+      suspended:               { title: 'Account suspended',           body: reason ? `Your account was suspended: ${reason}` : 'Your account was suspended.' },
+      banned:                  { title: 'Account banned',              body: reason ? `Your account was banned: ${reason}` : 'Your account was banned.' },
+      admin_delete_scheduled:  { title: 'Account deletion scheduled',  body: 'Your account is scheduled for deletion in 30 days.' },
+      restored:                { title: 'Account restored',            body: 'Your account access has been restored.' },
+    }[emailEvent]
+    await createNotification({ userId, type: 'account_action', title: map.title, body: map.body, link: '/account/settings' })
   }
 
   return NextResponse.json({ success: true })
