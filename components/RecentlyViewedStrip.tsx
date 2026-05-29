@@ -37,8 +37,11 @@ export default function RecentlyViewedStrip({ exclude, max = 5, className = '' }
         </div>
       </div>
 
-      {/* Desktop: inline row */}
-      <div className="hidden sm:flex flex-wrap gap-2">
+      {/* Desktop: centered row of fixed-width cards that wraps. Centering keeps
+          a partial last row balanced (3+2 reads intentional, not lopsided) and
+          fixed width avoids both ragged uneven pills and lone cards stretching
+          full-width — works for any count (1–5). */}
+      <div className="hidden sm:flex sm:flex-wrap sm:justify-center gap-3">
         {items.map((item) => <RecentCard key={`${item.type}:${item.slug}`} item={item} />)}
       </div>
     </section>
@@ -53,7 +56,7 @@ function RecentCard({ item, compact = false }: { item: ViewedItem; compact?: boo
     <Link
       href={href}
       className={`group flex items-center gap-2.5 bg-surface border border-soft hover:border-accent-border/40 rounded-xl transition-colors ${
-        compact ? 'shrink-0 w-56 px-3 py-2.5' : 'px-3 py-2.5'
+        compact ? 'shrink-0 w-56 px-3 py-2.5' : 'w-56 px-3 py-2.5'
       }`}
     >
       {item.image_url && (

@@ -56,9 +56,12 @@
   --bd-info-line:    #93c5fd;     /* blue-300 */
   --bd-info-ink:     #1d4ed8;     /* blue-700 */
 
-  /* ── Accent tint — secondary surface for brand-territory elements
-        (TL;DR boxes, product chips on light canvas). */
-  --bd-accent-tint: #fff4eb;      /* very pale orange wash on light */
+  /* ── Accent tint — soft neutral panel for brand-territory elements
+        (TL;DR/callout boxes, info chips). Mirrors the dark-zone decision
+        below: a pale-orange fill reads as peach on light (as it reads brown
+        on dark), so the surface stays neutral and brand warmth lives in the
+        accent border/icon, not the fill. */
+  --bd-accent-tint: #e4e4e7;      /* zinc-200 — neutral elevated surface */
 }
 
 /* ── Dark zone — applied via [data-theme="dark"] on a layout root div.

@@ -238,12 +238,15 @@ export default async function HomePage() {
       <section className="bg-background border-b border-soft">
         <div className="max-w-5xl mx-auto px-6 pt-14 md:pt-20">
           <div className="text-center max-w-3xl mx-auto">
-            {/* Desktop forces a 2-line break (Real Dads. Smart Tools. /
-                Better Decisions.) for symmetry; mobile wraps naturally. */}
+            {/* Each phrase is nowrap so it never breaks mid-phrase. Desktop
+                (md+) forces 2 lines (Real Dads. Smart Tools. / Better
+                Decisions.); narrow mobile wraps between phrases → 3 clean
+                intact lines. */}
             <h1 className="text-3xl md:text-5xl font-black text-prose leading-[1.05] tracking-tight mb-5">
-              Real Dads. Smart Tools.{' '}
+              <span className="whitespace-nowrap">Real Dads.</span>{' '}
+              <span className="whitespace-nowrap">Smart Tools.</span>{' '}
               <br className="hidden md:block" aria-hidden />
-              <span className="text-accent">Better Decisions.</span>
+              <span className="whitespace-nowrap text-accent">Better Decisions.</span>
             </h1>
             <p className="text-base md:text-lg text-prose-muted leading-[1.7] max-w-2xl mx-auto">
               Built for real dads by a real dad in the trenches — Boss Daddy is where you&apos;ll find honest reviews, practical guides, and boss tools.

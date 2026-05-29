@@ -492,12 +492,6 @@ export default async function ReviewPage({ params }: Props) {
           <MerchCallout />
         </Suspense>
 
-        {/* Recently viewed — client-side localStorage, excludes current page */}
-        <RecentlyViewedStrip
-          exclude={{ slug: review.slug, type: 'review' }}
-          className="mt-12"
-        />
-
         {/* Related reviews — mobile only */}
         {related && related.length > 0 && (
           <div className="mt-12 xl:hidden">
@@ -522,6 +516,13 @@ export default async function ReviewPage({ params }: Props) {
             </div>
           </div>
         )}
+
+        {/* Recently viewed — last (lowest priority; you've already seen these).
+            Comes after "More Reviews" on mobile so editorial content leads. */}
+        <RecentlyViewedStrip
+          exclude={{ slug: review.slug, type: 'review' }}
+          className="mt-12"
+        />
 
         </main>
 

@@ -43,8 +43,9 @@ export default function FeaturedGuideCard({ guide: g }: { guide: GuideRow }) {
       <div className="flex flex-col justify-between p-6 sm:p-8 flex-1 min-w-0">
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent-text bg-accent-tint border border-accent-border/50 px-2.5 py-1 rounded-full">
-              Featured Guide
+            <span className="inline-flex items-center gap-1.5">
+              <span className="w-4 h-0.5 bg-accent" aria-hidden />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">Featured Guide</span>
             </span>
             {cat && (
               <span className="flex items-center gap-1 text-[10px] text-prose-faint uppercase tracking-widest"><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-prose-faint" /> {cat.label}</span>
