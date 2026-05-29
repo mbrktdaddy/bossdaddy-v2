@@ -6,7 +6,6 @@ import { getCategoryBySlug } from '@/lib/categories'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import SectionHeader from '@/components/SectionHeader'
 import ScoreBlock from '@/components/ScoreBlock'
-import ScoreCard from '@/components/ScoreCard'
 import DroppedCard from '@/components/DroppedCard'
 import VaultCard from '@/components/VaultCard'
 import GuideRow from '@/components/GuideRow'
@@ -117,11 +116,11 @@ function PillarCard({
   return (
     <Link
       href={pillar.href}
-      className={`group flex flex-col items-center text-center p-6 sm:p-8 hover:bg-surface transition-colors ${className}`}
+      className={`group flex flex-col items-center text-center p-4 sm:p-8 hover:bg-surface transition-colors ${className}`}
     >
-      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-drama flex items-center justify-center text-accent mb-4">
+      <div className="w-11 h-11 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-drama flex items-center justify-center text-accent mb-2.5 sm:mb-4">
         <svg
-          className="w-7 h-7 sm:w-8 sm:h-8"
+          className="w-5 h-5 sm:w-8 sm:h-8"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -133,11 +132,13 @@ function PillarCard({
           {pillar.icon}
         </svg>
       </div>
-      <h2 className="text-lg font-black text-prose group-hover:text-accent transition-colors leading-tight">
+      <h2 className="text-sm sm:text-lg font-black text-prose group-hover:text-accent transition-colors leading-tight">
         {pillar.title}
       </h2>
-      <p className="text-sm text-prose-faint mt-2 leading-relaxed max-w-[32ch]">{pillar.blurb}</p>
-      <span className="text-sm text-accent font-semibold mt-3 inline-flex items-center gap-1">
+      <p className="hidden sm:block text-sm text-prose-faint mt-2 leading-relaxed max-w-[32ch]">
+        {pillar.blurb}
+      </p>
+      <span className="hidden sm:inline-flex text-sm text-accent font-semibold mt-3 items-center gap-1">
         {pillar.cta}
         <span aria-hidden className="transition-transform group-hover:translate-x-0.5">→</span>
       </span>
@@ -235,7 +236,7 @@ export default async function HomePage() {
             that mirror the subhead 1:1. The trust band + /about carry the
             proof; the hero carries the positioning. */}
       <section className="bg-background border-b border-soft">
-        <div className="max-w-5xl mx-auto px-6 py-14 md:py-20">
+        <div className="max-w-5xl mx-auto px-6 pt-14 md:pt-20">
           <div className="text-center max-w-3xl mx-auto">
             {/* Desktop forces a 2-line break (Real Dads. Smart Tools. /
                 Better Decisions.) for symmetry; mobile wraps naturally. */}
@@ -247,32 +248,29 @@ export default async function HomePage() {
             <p className="text-base md:text-lg text-prose-muted leading-[1.7] max-w-2xl mx-auto">
               Built for real dads by a real dad in the trenches — Boss Daddy is where you&apos;ll find honest reviews, practical guides, and boss tools.
             </p>
-          </div>
-
-          {/* Three doors — one bounded shelf, anchored as a unit. Mobile: a
-              swipeable slider (a peek of the next cell signals more). Desktop:
-              3-up grid. Vertical hairline dividers between cells. No community
-              door yet — account-gated. */}
-          <div className="mt-10 md:mt-12 flex snap-x snap-mandatory divide-x divide-strong/50 overflow-x-auto scrollbar-hide rounded-2xl border border-strong/40 bg-surface-raised shadow-sm sm:grid sm:grid-cols-3 sm:overflow-hidden">
-            {PILLARS.map((p) => (
-              <PillarCard
-                key={p.href}
-                pillar={p}
-                className="w-[80%] shrink-0 snap-start sm:w-auto"
-              />
-            ))}
-          </div>
-
-          <div className="text-center mt-8">
             <Link
               href="/about"
-              className="inline-flex items-center gap-1.5 text-sm font-bold text-accent hover:text-accent-hover transition-colors"
+              className="inline-flex items-center gap-1.5 mt-6 text-sm font-bold text-accent hover:text-accent-hover transition-colors"
             >
               Who is Boss Daddy?
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </Link>
+          </div>
+
+          {/* The Index — three doors as an editorial band, not a boxy shelf.
+              Bounded by a 2px orange top rule (brand section-border device,
+              echoes the orange payoff line) and the section's bottom border;
+              columns split by hairlines, no card frame. Always 3-up and fully
+              visible (primary nav — never hidden in a slider); compact on
+              mobile. No community door — account-gated. */}
+          <div className="mt-12 md:mt-16 border-t-2 border-accent">
+            <div className="grid grid-cols-3 divide-x divide-soft">
+              {PILLARS.map((p) => (
+                <PillarCard key={p.href} pillar={p} />
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -418,58 +416,9 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ── TOP SCORES ───────────────────────────────────────────────────── */}
-      {scoreCards.length > 0 && (
-        <section className="border-b border-soft">
-          <div className="max-w-6xl mx-auto px-6 py-14">
-            <SectionHeader
-              label="Top Scores"
-              right={{ label: `All ${reviewCount} reviews`, href: '/reviews' }}
-            />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {scoreCards.map((r) => <ScoreCard key={r.id} review={r} />)}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── TRUST BAND — single dark moment per page ─────────────────────── */}
-      <TrustBand />
-
-      {/* ── FROM THE VAULT ───────────────────────────────────────────────── */}
-      {vaultTrio.length > 0 && (
-        <section className="bg-surface-raised border-b border-soft">
-          <div className="max-w-6xl mx-auto px-6 py-14">
-            <SectionHeader
-              label="From the Vault"
-              right={{ label: 'Browse all', href: '/vault' }}
-            />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {vaultTrio.map((col) => <VaultCard key={`${col.collection_type}:${col.slug}`} col={col} />)}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── FROM THE LIBRARY — guides row list ───────────────────────────── */}
-      {guides.length > 0 && (
-        <section className="border-b border-soft">
-          <div className="max-w-6xl mx-auto px-6 py-14">
-            <SectionHeader
-              label="From the Library"
-              right={{ label: 'All guides', href: '/guides' }}
-            />
-            <div>
-              {guides.map((g, i) => (
-                <GuideRow key={g.id} guide={g} isLast={i === guides.length - 1} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── FREE TOOLS — Weekends Until invitation strip ─────────────────── */}
-      <section className="bg-surface-raised border-b border-soft">
+      {/* ── FREE TOOLS — promoted high to pay off "Smart Tools" in the H1.
+            Two-up feature format breaks the review-card-grid rhythm. ──────── */}
+      <section className="border-b border-soft">
         <div className="max-w-6xl mx-auto px-6 py-14">
           <SectionHeader
             label="Free Tools"
@@ -517,6 +466,101 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── TOP PICKS — highest-rated, as a ranked editorial list (not a card
+            grid) so it reads distinctly from the "Just Dropped" cards above. */}
+      {scoreCards.length > 0 && (
+        <section className="bg-surface-raised border-b border-soft">
+          <div className="max-w-4xl mx-auto px-6 py-14">
+            <SectionHeader
+              label="Top Picks"
+              right={{ label: `All ${reviewCount} reviews`, href: '/reviews' }}
+            />
+            <ol className="mt-2 border-t border-strong/30">
+              {scoreCards.map((r, i) => {
+                const cat = getCategoryBySlug(r.category)
+                return (
+                  <li key={r.id} className="border-b border-strong/30">
+                    <Link
+                      href={`/reviews/${r.slug}`}
+                      className="group flex items-center gap-4 sm:gap-5 py-4"
+                    >
+                      <span className="w-7 sm:w-10 shrink-0 text-center text-2xl sm:text-3xl font-black text-prose-faint/50 tabular-nums">
+                        {i + 1}
+                      </span>
+                      <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-surface border border-soft shrink-0">
+                        {r.image_url && (
+                          <Image
+                            src={r.image_url}
+                            alt={r.product_name}
+                            fill
+                            className="object-cover"
+                            sizes="64px"
+                          />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[11px] text-eyebrow uppercase tracking-wider font-bold">
+                          {cat?.label ?? r.category}
+                        </div>
+                        <div className="font-black text-prose group-hover:text-accent transition-colors leading-tight truncate">
+                          {r.product_name}
+                        </div>
+                      </div>
+                      <div className="shrink-0 text-right leading-none">
+                        <span className="text-xl sm:text-2xl font-black text-accent tabular-nums">
+                          {r.rating != null ? r.rating.toFixed(1) : '—'}
+                        </span>
+                        <span className="block mt-0.5 text-[9px] font-bold uppercase tracking-wider text-prose-muted">
+                          / 10
+                        </span>
+                      </div>
+                      <svg className="w-4 h-4 text-prose-faint shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  </li>
+                )
+              })}
+            </ol>
+          </div>
+        </section>
+      )}
+
+      {/* ── TRUST BAND — single dark moment per page ─────────────────────── */}
+      <TrustBand />
+
+      {/* ── FROM THE VAULT ───────────────────────────────────────────────── */}
+      {vaultTrio.length > 0 && (
+        <section className="bg-surface-raised border-b border-soft">
+          <div className="max-w-6xl mx-auto px-6 py-14">
+            <SectionHeader
+              label="From the Vault"
+              right={{ label: 'Browse all', href: '/vault' }}
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {vaultTrio.map((col) => <VaultCard key={`${col.collection_type}:${col.slug}`} col={col} />)}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── FROM THE LIBRARY — guides row list ───────────────────────────── */}
+      {guides.length > 0 && (
+        <section className="border-b border-soft">
+          <div className="max-w-6xl mx-auto px-6 py-14">
+            <SectionHeader
+              label="From the Library"
+              right={{ label: 'All guides', href: '/guides' }}
+            />
+            <div>
+              {guides.map((g, i) => (
+                <GuideRow key={g.id} guide={g} isLast={i === guides.length - 1} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── EMAIL CAPTURE — primary newsletter conversion ────────────────── */}
       <EmailCaptureSection />
