@@ -221,26 +221,6 @@ h1, h2, h3, h4 {
   display: none;
 }
 
-/* ── Hero entrance — staggered fade-up.
-   Motion is intentionally isolated to the homepage hero so it stays a
-   special moment. Transform + opacity only (GPU-safe, no layout thrash).
-   Stagger is applied per-element via inline animation-delay. */
-@keyframes bd-fade-up {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: none; }
-}
-.bd-fade-up {
-  opacity: 0;
-  animation: bd-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-/* Respect users who ask for less motion — show content instantly. */
-@media (prefers-reduced-motion: reduce) {
-  .bd-fade-up {
-    opacity: 1;
-    animation: none;
-  }
-}
-
 /* ── Editorial serif — article/review body prose only ─────────────────── */
 .bd-editorial p,
 .bd-editorial li,

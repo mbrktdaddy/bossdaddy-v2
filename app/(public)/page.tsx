@@ -69,6 +69,82 @@ const BENCH_STATUSES: Record<string, { label: string; color: string }> = {
   considering: { label: 'Considering',  color: 'text-amber-600' },
 }
 
+const PILLARS = [
+  {
+    href: '/reviews',
+    title: 'Honest Reviews',
+    blurb: 'Field-tested gear, bought with my own money.',
+    cta: 'Browse',
+    icon: (
+      <>
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        <path d="M9 12l2 2 4-4" />
+      </>
+    ),
+  },
+  {
+    href: '/guides',
+    title: 'Practical Guides',
+    blurb: 'No-fluff how-tos for real situations.',
+    cta: 'Read',
+    icon: (
+      <>
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+      </>
+    ),
+  },
+  {
+    href: '/tools',
+    title: 'Boss Tools',
+    blurb: 'Weekends Until, Savings & more — free.',
+    cta: 'Try',
+    icon: (
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+    ),
+  },
+]
+
+// Centered, transparent pillar door. Icon scales up on desktop where it has
+// room to anchor the column; tighter on mobile where the cards stack.
+function PillarCard({
+  pillar,
+  className = '',
+}: {
+  pillar: (typeof PILLARS)[number]
+  className?: string
+}) {
+  return (
+    <Link
+      href={pillar.href}
+      className={`group flex flex-col items-center text-center p-6 sm:p-8 hover:bg-surface transition-colors ${className}`}
+    >
+      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-drama flex items-center justify-center text-accent mb-4">
+        <svg
+          className="w-7 h-7 sm:w-8 sm:h-8"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          {pillar.icon}
+        </svg>
+      </div>
+      <h2 className="text-lg font-black text-prose group-hover:text-accent transition-colors leading-tight">
+        {pillar.title}
+      </h2>
+      <p className="text-sm text-prose-faint mt-2 leading-relaxed max-w-[32ch]">{pillar.blurb}</p>
+      <span className="text-sm text-accent font-semibold mt-3 inline-flex items-center gap-1">
+        {pillar.cta}
+        <span aria-hidden className="transition-transform group-hover:translate-x-0.5">→</span>
+      </span>
+    </Link>
+  )
+}
+
 export default async function HomePage() {
   const supabase = await createClient()
 
@@ -156,100 +232,38 @@ export default async function HomePage() {
 
       {/* ── BRAND HERO — the page's sole H1. States who Boss Daddy is for and
             what's here, then offers three doors (reviews / guides / tools)
-            that mirror the subhead 1:1. Staggered fade-up entrance is scoped
-            to this section only. The trust band + /about carry the proof; the
-            hero carries the positioning. */}
+            that mirror the subhead 1:1. The trust band + /about carry the
+            proof; the hero carries the positioning. */}
       <section className="bg-background border-b border-soft">
         <div className="max-w-5xl mx-auto px-6 py-14 md:py-20">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="bd-fade-up text-3xl md:text-5xl font-black text-prose leading-[1.05] tracking-tight mb-5">
-              Real Dads. Smart Tools. Better Decisions.
+            {/* Desktop forces a 2-line break (Real Dads. Smart Tools. /
+                Better Decisions.) for symmetry; mobile wraps naturally. */}
+            <h1 className="text-3xl md:text-5xl font-black text-prose leading-[1.05] tracking-tight mb-5">
+              Real Dads. Smart Tools.{' '}
+              <br className="hidden md:block" aria-hidden />
+              <span className="text-accent">Better Decisions.</span>
             </h1>
-            <p
-              className="bd-fade-up text-base md:text-lg text-prose-muted leading-[1.7] max-w-2xl mx-auto"
-              style={{ animationDelay: '70ms' }}
-            >
+            <p className="text-base md:text-lg text-prose-muted leading-[1.7] max-w-2xl mx-auto">
               Built for real dads by a real dad in the trenches — Boss Daddy is where you&apos;ll find honest reviews, practical guides, and boss tools.
             </p>
           </div>
 
-          {/* Three doors — pay off the H1 promise above the fold. Each maps to
-              a surface a logged-out visitor can actually use (no community
-              door yet — it's account-gated, see homepage notes). */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-10 md:mt-12">
-            {[
-              {
-                href: '/reviews',
-                title: 'Honest Reviews',
-                blurb: 'Field-tested gear, bought with my own money.',
-                cta: 'Browse',
-                delay: '140ms',
-                icon: (
-                  <>
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                    <path d="M9 12l2 2 4-4" />
-                  </>
-                ),
-              },
-              {
-                href: '/guides',
-                title: 'Practical Guides',
-                blurb: 'No-fluff how-tos for real situations.',
-                cta: 'Read',
-                delay: '200ms',
-                icon: (
-                  <>
-                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-                  </>
-                ),
-              },
-              {
-                href: '/tools',
-                title: 'Boss Tools',
-                blurb: 'Weekends Until, Savings & more — free.',
-                cta: 'Try',
-                delay: '260ms',
-                icon: (
-                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-                ),
-              },
-            ].map((card) => (
-              <Link
-                key={card.href}
-                href={card.href}
-                className="group bd-fade-up bg-surface border border-soft hover:border-accent rounded-2xl p-5 sm:p-6 text-left transition-colors"
-                style={{ animationDelay: card.delay }}
-              >
-                <div className="w-10 h-10 rounded-xl bg-accent-tint flex items-center justify-center text-accent mb-4">
-                  <svg
-                    className="w-5 h-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden
-                  >
-                    {card.icon}
-                  </svg>
-                </div>
-                <h2 className="text-base font-black text-card-title leading-tight">
-                  {card.title}
-                </h2>
-                <p className="text-sm text-prose-faint mt-1.5 leading-relaxed">
-                  {card.blurb}
-                </p>
-                <span className="text-sm text-accent font-semibold mt-4 inline-flex items-center gap-1">
-                  {card.cta}
-                  <span aria-hidden className="transition-transform group-hover:translate-x-0.5">→</span>
-                </span>
-              </Link>
+          {/* Three doors — one bounded shelf, anchored as a unit. Mobile: a
+              swipeable slider (a peek of the next cell signals more). Desktop:
+              3-up grid. Vertical hairline dividers between cells. No community
+              door yet — account-gated. */}
+          <div className="mt-10 md:mt-12 flex snap-x snap-mandatory divide-x divide-strong/50 overflow-x-auto scrollbar-hide rounded-2xl border border-strong/40 bg-surface-raised shadow-sm sm:grid sm:grid-cols-3 sm:overflow-hidden">
+            {PILLARS.map((p) => (
+              <PillarCard
+                key={p.href}
+                pillar={p}
+                className="w-[80%] shrink-0 snap-start sm:w-auto"
+              />
             ))}
           </div>
 
-          <div className="text-center mt-8 bd-fade-up" style={{ animationDelay: '320ms' }}>
+          <div className="text-center mt-8">
             <Link
               href="/about"
               className="inline-flex items-center gap-1.5 text-sm font-bold text-accent hover:text-accent-hover transition-colors"
