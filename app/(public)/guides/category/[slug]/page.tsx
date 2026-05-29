@@ -11,6 +11,8 @@ import BenchStrip from '@/components/BenchStrip'
 
 interface Props { params: Promise<{ slug: string }> }
 
+export const revalidate = 3600
+
 export async function generateStaticParams() {
   return CATEGORIES.map((c) => ({ slug: c.slug }))
 }

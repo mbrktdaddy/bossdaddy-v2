@@ -15,9 +15,8 @@ interface Props {
 
 /**
  * Recently published review card — recency-focused, no rating visible.
- * Pairs with [ScoreCard] (rating-focused). The visual contrast between
- * "Just Dropped" (NEW badge, no score) and "Top Scores" (score bubble,
- * progress bar) tells the visitor at a glance which axis they're seeing.
+ * Used in the homepage "Just Dropped" grid (NEW badge, no score), in
+ * contrast to the ranked "Top Picks" list which leads with the score.
  */
 export default function DroppedCard({ review }: Props) {
   const cat = getCategoryBySlug(review.category)

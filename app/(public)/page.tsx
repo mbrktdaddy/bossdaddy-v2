@@ -194,7 +194,7 @@ export default async function HomePage() {
       .limit(3),
     supabase
       .from('reviews')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true })
       .eq('status', 'approved').eq('is_visible', true),
   ])
 

@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, startTransition } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { getRecent } from '@/lib/recently-viewed'
 import type { ViewedItem } from '@/lib/recently-viewed'
 import { getCategoryBySlug } from '@/lib/categories'
@@ -60,11 +61,12 @@ function RecentCard({ item, compact = false }: { item: ViewedItem; compact?: boo
       }`}
     >
       {item.image_url && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image
           src={item.image_url}
           alt=""
           aria-hidden
+          width={32}
+          height={32}
           className="w-8 h-8 rounded-lg object-cover shrink-0"
         />
       )}
