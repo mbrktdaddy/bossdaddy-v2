@@ -42,11 +42,17 @@ export default function ReviewCard({
         </div>
       ) : (
         <div className={`w-full h-44 shrink-0 bg-gradient-to-br ${
-          getCategoryBySlug(r.category)?.color ?? 'from-surface-raised to-surface'
+          cat?.color ?? 'from-surface-raised to-surface'
         } flex items-center justify-center`}>
-          <span className="text-4xl opacity-40">
-            {getCategoryBySlug(r.category)?.icon ?? '📦'}
-          </span>
+          {cat ? (
+            <CategoryIcon slug={cat.slug} className="w-10 h-10 text-accent-text opacity-40" />
+          ) : (
+            <svg className="w-10 h-10 text-prose-faint opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <path d="M21 15l-5-5L5 21" />
+            </svg>
+          )}
         </div>
       )}
       <div className="p-5 flex flex-col flex-1">

@@ -88,7 +88,13 @@ export default async function OrderPage({ params }: Props) {
               {item.image_snapshot_url ? (
                 <Image src={item.image_snapshot_url} alt={item.name_snapshot} fill className="object-cover" sizes="64px" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-xl opacity-20">📦</div>
+                <div className="w-full h-full flex items-center justify-center text-prose-faint opacity-40">
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <path d="M21 15l-5-5L5 21" />
+                  </svg>
+                </div>
               )}
             </div>
             <div className="flex-1 min-w-0">
