@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { compressImage } from '@/lib/compress-image'
+import ImageCropper from '@/components/ui/ImageCropper'
 
 interface Props {
   initialAvatarUrl: string | null
@@ -16,6 +17,15 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Square-crop the picked file before upload. Lets mobile users reframe a
+  // tall phone photo instead of getting a blind center-crop into the circle.
+  const [cropPending, setCropPending] = useState<File | null>(null)
+
+  function handleCropDone(blob: Blob) {
+    const name = (cropPending?.name ?? 'avatar').replace(/\.[^.]+$/, '.webp')
+    setCropPending(null)
+    handleFile(new File([blob], name, { type: 'image/webp' }))
+  }
 
   async function handleFile(raw: File) {
     setError(null)
@@ -62,7 +72,7 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
         onClick={() => fileRef.current?.click()}
         disabled={busy}
         onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) handleFile(f) }}
+        onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) setCropPending(f) }}
         title="Click or drop a JPG, PNG, or WebP"
         className="group relative w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-orange-700 to-orange-950 flex items-center justify-center text-4xl font-black text-white shrink-0 hover:ring-orange-700 transition-all disabled:opacity-50 disabled:cursor-wait"
         aria-label={avatarUrl ? 'Change avatar' : 'Upload avatar'}
@@ -104,8 +114,17 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
         type="file"
         accept="image/jpeg,image/png,image/webp"
         className="hidden"
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = '' }}
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) setCropPending(f); e.target.value = '' }}
       />
+
+      {cropPending && (
+        <ImageCropper
+          file={cropPending}
+          aspect={1}
+          onCrop={handleCropDone}
+          onCancel={() => setCropPending(null)}
+        />
+      )}
     </div>
   )
 }
