@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { OCCASIONS } from '@/lib/gift-occasions'
+import { sanitizeHtml } from '@/lib/sanitize'
 import { z } from 'zod'
 
 const FaqSchema = z.array(
@@ -108,6 +109,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   if (Object.keys(meta).length > 0) {
     const payload: Record<string, unknown> = { ...meta }
+    // User-authored HTML — sanitize before it's ever rendered raw on public pages.
+    if (typeof payload.intro_html === 'string') payload.intro_html = sanitizeHtml(payload.intro_html)
+    if (typeof payload.methodology_html === 'string') payload.methodology_html = sanitizeHtml(payload.methodology_html)
     if (meta.is_visible && !meta.published_at) {
       const { data: existing } = await admin.from('collections').select('published_at').eq('id', id).single()
       if (!existing?.published_at) payload.published_at = new Date().toISOString()

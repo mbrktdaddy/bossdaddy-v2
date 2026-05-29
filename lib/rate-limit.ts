@@ -29,6 +29,14 @@ function getLimiter(type: string): Ratelimit | null {
     // Higher token spend than intro because it returns multiple structured pieces,
     // but still a tight prompt so 15/hr is plenty for editing flow.
     'collection-fill':  new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(15, '1 h'), prefix: 'bd_collection_fill' }),
+    // Auxiliary Claude endpoints (seo-meta, social-copy, suggest-*, alt-text) —
+    // cheap prompts, but they all hit the Anthropic API, so cap per author.
+    'claude-aux':       new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, '1 h'), prefix: 'bd_claude_aux' }),
+    // Anonymous analytics writes — keyed by IP. Generous for real users,
+    // throttles flood/pollution of the affiliate-click + scroll-depth tables.
+    'track':            new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, '1 m'), prefix: 'bd_track' }),
+    // OpenAI image generation — the most expensive call in the stack.
+    'image-gen':        new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, '1 h'), prefix: 'bd_image_gen' }),
   }
 
   limiters[type] = configs[type] ?? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1 h'), prefix: `bd_${type}` })
@@ -37,7 +45,7 @@ function getLimiter(type: string): Ratelimit | null {
 
 export async function checkRateLimit(
   identifier: string,
-  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' = 'draft'
+  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' = 'draft'
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
   const limiter = getLimiter(type)
   if (!limiter) return { success: true, remaining: 999, reset: 0 }

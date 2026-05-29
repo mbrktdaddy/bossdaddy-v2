@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getClaudeClient, MODEL } from '@/lib/claude/client'
+import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 export const maxDuration = 45
@@ -53,6 +54,9 @@ export async function POST(request: NextRequest) {
   if (!profile || !['admin', 'author'].includes(profile.role)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
+
+  const { success } = await checkRateLimit(`social-copy:${user.id}`, 'claude-aux')
+  if (!success) return NextResponse.json({ error: 'Rate limit exceeded — try again shortly.' }, { status: 429 })
 
   const body = await request.json().catch(() => null)
   const parsed = Schema.safeParse(body)

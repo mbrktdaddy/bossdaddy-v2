@@ -21,7 +21,10 @@ export const maxDuration = 60
 
 export async function POST(request: NextRequest) {
   const secret = request.headers.get('x-internal-secret')
-  if (secret !== process.env.INTERNAL_API_SECRET) {
+  const expected = process.env.INTERNAL_API_SECRET
+  // Fail closed: if the secret is unset, both sides are undefined and a plain
+  // `secret !== expected` would PASS, opening the endpoint to anyone.
+  if (!expected || secret !== expected) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

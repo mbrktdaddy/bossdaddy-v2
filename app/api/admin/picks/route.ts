@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { sanitizeHtml } from '@/lib/sanitize'
 import { z } from 'zod'
 
 const FaqSchema = z.array(
@@ -65,7 +66,13 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
 
   const admin = createAdminClient()
-  const insertPayload = { ...parsed.data, published_at: parsed.data.is_visible ? (parsed.data.published_at ?? new Date().toISOString()) : null }
+  const insertPayload = {
+    ...parsed.data,
+    // User-authored HTML — sanitize before it's ever rendered raw on public pages.
+    intro_html:       parsed.data.intro_html ? sanitizeHtml(parsed.data.intro_html) : parsed.data.intro_html,
+    methodology_html: parsed.data.methodology_html ? sanitizeHtml(parsed.data.methodology_html) : parsed.data.methodology_html,
+    published_at:     parsed.data.is_visible ? (parsed.data.published_at ?? new Date().toISOString()) : null,
+  }
   const { data, error } = await admin
     .from('collections')
     .insert(insertPayload)

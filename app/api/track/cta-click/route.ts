@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 const Schema = z.object({
@@ -10,10 +11,20 @@ const Schema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || request.headers.get('x-real-ip') || 'unknown'
+  const { success } = await checkRateLimit(`cta:${ip}`, 'track')
+  if (!success) return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+
   const body = await request.json().catch(() => null)
   const parsed = Schema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
+  }
+
+  // zod .url() can admit non-http schemes; only persist real https destinations.
+  if (!parsed.data.destination_url.startsWith('https://')) {
+    return NextResponse.json({ error: 'Invalid destination' }, { status: 400 })
   }
 
   const admin = createAdminClient()

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { getClaudeClient, MODEL } from '@/lib/claude/client'
+import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 export const maxDuration = 30
@@ -17,6 +18,14 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (!profile || !['admin', 'author'].includes(profile.role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const { success } = await checkRateLimit(`suggest-prompt:${user.id}`, 'claude-aux')
+  if (!success) return NextResponse.json({ error: 'Rate limit exceeded — try again shortly.' }, { status: 429 })
 
   const body = await request.json().catch(() => null)
   const parsed = Input.safeParse(body)
