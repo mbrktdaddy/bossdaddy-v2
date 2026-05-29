@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
+import { fetchAssetAsFile } from '@/lib/images/derive-crop'
 const MediaPicker   = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 const ImageCropper  = dynamic(() => import('@/components/ui/ImageCropper'),   { ssr: false })
 
@@ -76,6 +77,20 @@ export function HeroImagePanel({
     setUploading(false)
   }
 
+  // Reframe the current hero (AI-generated, library, or uploaded) at 16:10.
+  // Reuses handleCropConfirm, which uploads a NEW asset — the source URL is
+  // never mutated.
+  async function handleCropExisting() {
+    if (!imageUrl) return
+    setError(null)
+    try {
+      const file = await fetchAssetAsFile(imageUrl)
+      setPendingCrop(file)
+    } catch {
+      setError('Could not load image for cropping — try again')
+    }
+  }
+
   async function handleGenerate() {
     if (!title && !productName) { setError('Need a title first to generate an image.'); return }
     setGenerating(true)
@@ -141,6 +156,15 @@ export function HeroImagePanel({
         <div className="relative group">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={imageUrl} alt="Hero" className="w-full h-56 object-cover rounded-xl border border-strong" />
+          <button
+            type="button"
+            onClick={handleCropExisting}
+            disabled={uploading}
+            className="absolute top-2 left-2 px-2.5 py-1.5 bg-surface/80 hover:bg-surface text-prose-muted hover:text-prose text-xs font-semibold rounded-lg transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-40"
+            title="Crop this image"
+          >
+            Crop
+          </button>
           <button
             type="button"
             onClick={() => onChange(null)}

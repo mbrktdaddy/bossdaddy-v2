@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { compressImage } from '@/lib/compress-image'
+import { fetchAssetAsFile } from '@/lib/images/derive-crop'
+import ImageCropper from '@/components/ui/ImageCropper'
 import MediaPicker, { type MultiSelectItem } from '@/components/media/MediaPicker'
 import {
   type H2Heading,
@@ -72,6 +74,10 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
   const [pickerForGallery, setPickerForGallery] = useState(false)                   // create new gallery (multi)
   const [addToGalleryId, setAddToGalleryId]   = useState<string | null>(null)       // add 1 image to existing gallery
   const [uploadSlotId, setUploadSlotId]       = useState<string | null>(null)
+  const [cropPending, setCropPending]         = useState<File | null>(null)
+  // Apply-time crop for a filled slot/child (incl. AI-generated inline images).
+  const [cropSlotFile, setCropSlotFile]       = useState<File | null>(null)
+  const [cropSlotTarget, setCropSlotTarget]   = useState<InlineSlot | null>(null)
   const [uploadingForNew, setUploadingForNew] = useState(false)
   const [busySlotId, setBusySlotId]           = useState<string | null>(null)
   const [bulkBusy, setBulkBusy]               = useState<{ done: number; total: number } | null>(null)
@@ -193,6 +199,44 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
       setError(err instanceof Error ? err.message : 'Image generation failed')
     }
     setBusySlotId(null)
+  }
+
+  // Reframe a filled slot's current image (AI-generated, library, or uploaded).
+  // Loads the image into the free cropper; the result is saved as a NEW asset
+  // and written back into the same slot — the source asset is never mutated.
+  async function handleCropSlot(slot: InlineSlot) {
+    if (!slot.imageUrl) return
+    setError(null)
+    try {
+      const file = await fetchAssetAsFile(slot.imageUrl)
+      setCropSlotTarget(slot)
+      setCropSlotFile(file)
+    } catch {
+      setError('Could not load image for cropping — try again')
+    }
+  }
+
+  async function handleCropSlotDone(blob: Blob) {
+    const slot = cropSlotTarget
+    setCropSlotFile(null); setCropSlotTarget(null)
+    if (!slot) return
+    setBusySlotId(slot.slotId); setError(null)
+    try {
+      const file = new File([blob], 'crop.webp', { type: 'image/webp' })
+      const fd = new FormData()
+      fd.append('file', file)
+      if (slot.alt || slot.caption) fd.append('alt_text', slot.alt || slot.caption)
+      if (productId) fd.append('product_id', productId)
+      if (category)  fd.append('category', category)
+      const res = await fetch('/api/media', { method: 'POST', body: fd })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Crop save failed')
+      onChangeContent(fillSlot(content, slot.slotId, json.asset.url, slot.alt || json.asset.alt_text || ''))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Crop save failed')
+    } finally {
+      setBusySlotId(null)
+    }
   }
 
   async function uploadFileForSlot(file: File, slot: InlineSlot) {
@@ -333,13 +377,31 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const raw = e.target.files?.[0]
+    e.target.value = ''
     if (!raw) return
+    // Free crop (skippable) before upload — article body has no fixed ratio.
+    // The destination (uploadingForNew / uploadSlotId) stays in state while
+    // the cropper is open, so dispatchUpload routes correctly on confirm/skip.
     const file = await compressImage(raw).catch(() => raw)
+    setCropPending(file)
+  }
+
+  function dispatchUpload(file: File) {
     if (uploadingForNew) { handleNewUploadFile(file); return }
     if (uploadSlotId) {
       const slot = allSlots.find(s => s.slotId === uploadSlotId)
       if (slot) uploadFileForSlot(file, slot)
     }
+  }
+
+  function handleCropDone(blob: Blob) {
+    setCropPending(null)
+    dispatchUpload(new File([blob], 'crop.webp', { type: 'image/webp' }))
+  }
+  function handleCropSkip() {
+    const f = cropPending
+    setCropPending(null)
+    if (f) dispatchUpload(f)
   }
 
   // ── Position-picker options ───────────────────────────────────────────────
@@ -552,6 +614,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
               onRegenerate={() => handleRegenerate(item.slot)}
               onPickReplace={() => setPickerSlot(item.slot)}
               onUpload={() => { setUploadSlotId(item.slot.slotId); fileInputRef.current?.click() }}
+              onCrop={() => handleCropSlot(item.slot)}
             />
           ) : (
             <GalleryCard
@@ -570,6 +633,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
               onPickReplaceChild={setPickerSlot}
               onUploadChild={(slotId) => { setUploadSlotId(slotId); fileInputRef.current?.click() }}
               onRevertChild={handleRevert}
+              onCropChild={handleCropSlot}
               onAddChild={() => setAddToGalleryId(item.slotId)}
             />
           )
@@ -623,6 +687,25 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
           defaultCategory={category}
         />
       )}
+
+      {cropPending && (
+        <ImageCropper
+          file={cropPending}
+          allowRatioChange
+          onCrop={handleCropDone}
+          onCancel={() => setCropPending(null)}
+          onSkip={handleCropSkip}
+        />
+      )}
+
+      {cropSlotFile && (
+        <ImageCropper
+          file={cropSlotFile}
+          allowRatioChange
+          onCrop={handleCropSlotDone}
+          onCancel={() => { setCropSlotFile(null); setCropSlotTarget(null) }}
+        />
+      )}
     </details>
   )
 }
@@ -645,6 +728,7 @@ interface GalleryCardProps {
   onPickReplaceChild: (slot: InlineSlot) => void
   onUploadChild: (slotId: string) => void
   onRevertChild: (slotId: string) => void
+  onCropChild: (slot: InlineSlot) => void
   onAddChild: () => void
 }
 
@@ -798,6 +882,15 @@ function GalleryCard(p: GalleryCardProps) {
                 {child.filled && (
                   <button
                     type="button"
+                    onClick={() => p.onCropChild(child)}
+                    disabled={busySlotId === child.slotId}
+                    className="px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose text-xs font-semibold rounded-lg min-h-[36px] transition-colors"
+                    title="Crop / reframe this image"
+                  >✂ Crop</button>
+                )}
+                {child.filled && (
+                  <button
+                    type="button"
                     onClick={() => p.onRevertChild(child.slotId)}
                     disabled={busySlotId === child.slotId}
                     className="px-3 py-1.5 bg-transparent hover:bg-amber-50 text-prose-faint hover:text-amber-700 text-xs rounded-lg min-h-[36px] transition-colors"
@@ -833,6 +926,7 @@ interface SlotCardProps {
   onRegenerate: () => void
   onPickReplace: () => void
   onUpload: () => void
+  onCrop: () => void
 }
 
 function SlotCard(p: SlotCardProps) {
@@ -942,6 +1036,11 @@ function SlotCard(p: SlotCardProps) {
           className="px-3 py-2 bg-surface-raised hover:bg-surface text-prose text-xs font-semibold rounded-lg min-h-[36px] transition-colors">
           ⬆ Upload {filled ? 'new' : ''}
         </button>
+        {filled && (
+          <button type="button" onClick={p.onCrop} disabled={busy}
+            className="px-3 py-2 bg-surface-raised hover:bg-surface text-prose text-xs font-semibold rounded-lg min-h-[36px] transition-colors"
+            title="Crop / reframe this image">✂ Crop</button>
+        )}
         {filled && (
           <button type="button" onClick={p.onRevert} disabled={busy}
             className="px-3 py-2 bg-transparent hover:bg-amber-50 text-prose-faint hover:text-amber-700 text-xs rounded-lg min-h-[36px] transition-colors"

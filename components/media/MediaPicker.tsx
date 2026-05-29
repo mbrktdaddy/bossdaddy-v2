@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { compressImage } from '@/lib/compress-image'
+import { fetchAssetAsFile } from '@/lib/images/derive-crop'
 import { CATEGORIES } from '@/lib/categories'
 import ImageCropper from '@/components/ui/ImageCropper'
 
@@ -77,6 +78,9 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
   // uploadFiles flow can await user interaction with the cropper.
   const [cropPending, setCropPending] = useState<File | null>(null)
   const cropResolveRef = useRef<((file: File | null) => void) | null>(null)
+  // Apply-time crop: a selected library/AI asset fetched back as a File so the
+  // user can reframe it. The result is uploaded as a NEW asset (derived copy).
+  const [applyCropFile, setApplyCropFile] = useState<File | null>(null)
 
   function awaitCrop(file: File): Promise<File | null> {
     return new Promise((resolve) => {
@@ -97,10 +101,53 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
     setCropPending(null)
   }
 
+  // "Use full image" — skip cropping, upload the original (compressed) file.
+  function handleCropSkip() {
+    cropResolveRef.current?.(cropPending)
+    cropResolveRef.current = null
+    setCropPending(null)
+  }
+
   function handleCropCancel() {
     cropResolveRef.current?.(null)
     cropResolveRef.current = null
     setCropPending(null)
+  }
+
+  // Apply-time crop: load the selected asset as a File and open the cropper.
+  async function handleCropSelected() {
+    if (!selected) return
+    setUploadError(null)
+    try {
+      const file = await fetchAssetAsFile(selected)
+      setApplyCropFile(file)
+    } catch {
+      setUploadError('Could not load image for cropping — try again')
+    }
+  }
+
+  // Cropped derived image → upload as a new asset, then apply it immediately.
+  async function handleApplyCropDone(blob: Blob) {
+    setApplyCropFile(null)
+    setUploading(true); setUploadError(null)
+    try {
+      const file = new File([blob], 'crop.webp', { type: 'image/webp' })
+      const fd = new FormData()
+      fd.append('file', file)
+      if (filterCategory  && filterCategory  !== '__none__') fd.append('category',   filterCategory)
+      if (filterProductId && filterProductId !== '__none__') fd.append('product_id', filterProductId)
+      const res = await fetch('/api/media', { method: 'POST', body: fd })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Crop save failed')
+      const asset = json.asset as MediaAsset
+      setAssets((prev) => [asset, ...prev])
+      setTotal((t) => t + 1)
+      onSelect(asset.url, asset.alt_text ?? '', asset.id)
+    } catch (err) {
+      setUploadError(`Crop failed: ${err instanceof Error ? err.message : 'Unknown error'}`)
+    } finally {
+      setUploading(false)
+    }
   }
 
   // Search
@@ -183,12 +230,13 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
     if (!list.length) return
     setUploading(true); setUploadError(null)
 
-    // Crop-on-upload: when uploadAspect is set AND there's exactly one file,
-    // present the cropper after compression so we store a uniformly-cropped
-    // asset. Multi-file uploads skip the cropper (would require a per-file
-    // queue UI we haven't built yet) — drop them in and crop later if needed.
+    // Crop-on-upload: every single-file upload is routed through the cropper
+    // after compression. With uploadAspect the ratio is locked; without it the
+    // cropper offers a ratio selector + "Use full image" skip. Multi-file
+    // uploads skip the cropper (would need a per-file queue UI) — drop them in
+    // and crop later from the picker if needed.
     let prepared: File[]
-    if (uploadAspect && list.length === 1) {
+    if (list.length === 1) {
       const compressed = await compressImage(list[0])
       const cropped = await awaitCrop(compressed)
       if (!cropped) {
@@ -579,6 +627,14 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
               onClick={onClose}
               className="px-4 py-2 bg-surface-raised hover:bg-surface text-prose-muted text-sm rounded-lg transition-colors"
             >Cancel</button>
+            {!multi && selected && (
+              <button
+                type="button"
+                onClick={handleCropSelected}
+                disabled={uploading}
+                className="px-4 py-2 bg-surface-raised hover:bg-surface disabled:opacity-40 text-prose text-sm font-semibold rounded-lg transition-colors"
+              >Crop</button>
+            )}
             <button
               type="button"
               onClick={handleConfirm}
@@ -598,15 +654,30 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
         </div>
       </div>
 
-      {/* Crop-on-upload overlay — fixed inset-0 z-50, rendered above the
-          picker dialog. Only appears when uploadAspect is set, the upload
-          is single-file, and compression has finished. */}
-      {cropPending && uploadAspect && (
+      {/* Crop-on-upload overlay — fixed inset-0 z-50, above the picker dialog.
+          Appears for every single-file upload once compression finishes. With
+          uploadAspect the ratio is locked; without it the user gets a ratio
+          selector + "Use full image" skip. */}
+      {cropPending && (
         <ImageCropper
           file={cropPending}
           aspect={uploadAspect}
+          allowRatioChange={!uploadAspect}
           onCrop={handleCropDone}
           onCancel={handleCropCancel}
+          onSkip={uploadAspect ? undefined : handleCropSkip}
+        />
+      )}
+
+      {/* Apply-time crop overlay — reframes an existing/AI asset into a new
+          derived asset, then applies it. */}
+      {applyCropFile && (
+        <ImageCropper
+          file={applyCropFile}
+          aspect={uploadAspect}
+          allowRatioChange={!uploadAspect}
+          onCrop={handleApplyCropDone}
+          onCancel={() => setApplyCropFile(null)}
         />
       )}
     </div>

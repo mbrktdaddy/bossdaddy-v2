@@ -2,14 +2,36 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Cropper from 'react-easy-crop'
-import type { Area } from 'react-easy-crop'
+import type { Area, MediaSize } from 'react-easy-crop'
 
 interface Props {
   file: File
-  aspect: number
+  /**
+   * Locked crop ratio (width / height). When omitted the cropper runs in
+   * free mode: it defaults to the image's natural ratio and (when
+   * allowRatioChange is set) exposes a ratio selector.
+   */
+  aspect?: number
   onCrop: (blob: Blob) => void
   onCancel: () => void
+  /**
+   * When provided, a "Use full image" button is shown that skips cropping
+   * entirely — the caller uploads the original (already-compressed) file.
+   * Only wire this up for free-shape contexts.
+   */
+  onSkip?: () => void
+  /** Show the Original / 1:1 / 4:3 / 16:9 ratio selector (free contexts). */
+  allowRatioChange?: boolean
 }
+
+type RatioChoice = number | 'original'
+
+const RATIOS: { label: string; value: RatioChoice }[] = [
+  { label: 'Original', value: 'original' },
+  { label: '1:1',      value: 1 },
+  { label: '4:3',      value: 4 / 3 },
+  { label: '16:9',     value: 16 / 9 },
+]
 
 async function cropToBlob(imageSrc: string, crop: Area): Promise<Blob> {
   return new Promise((resolve, reject) => {
@@ -33,7 +55,7 @@ async function cropToBlob(imageSrc: string, crop: Area): Promise<Blob> {
   })
 }
 
-export default function ImageCropper({ file, aspect, onCrop, onCancel }: Props) {
+export default function ImageCropper({ file, aspect, onCrop, onCancel, onSkip, allowRatioChange }: Props) {
   // Create the object URL once per file — useState initializer avoids the
   // setState-in-effect pattern; the separate cleanup effect revokes it.
   const [imageSrc] = useState(() => URL.createObjectURL(file))
@@ -41,12 +63,26 @@ export default function ImageCropper({ file, aspect, onCrop, onCancel }: Props) 
   const [zoom, setZoom] = useState(1)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
   const [busy, setBusy] = useState(false)
+  // Natural ratio of the loaded image — used for the "Original" choice and as
+  // the free-mode default before the user picks a ratio.
+  const [naturalAspect, setNaturalAspect] = useState<number | null>(null)
+  const [ratioChoice, setRatioChoice] = useState<RatioChoice>('original')
 
   useEffect(() => () => URL.revokeObjectURL(imageSrc), [imageSrc])
+
+  const onMediaLoaded = useCallback((mediaSize: MediaSize) => {
+    setNaturalAspect(mediaSize.naturalWidth / mediaSize.naturalHeight)
+  }, [])
 
   const onCropComplete = useCallback((_: Area, pixels: Area) => {
     setCroppedAreaPixels(pixels)
   }, [])
+
+  // react-easy-crop requires a numeric aspect. Locked callers pass `aspect`;
+  // free callers fall back to the chosen ratio (Original = natural).
+  const effectiveAspect =
+    aspect ??
+    (ratioChoice === 'original' ? (naturalAspect ?? 1) : ratioChoice)
 
   async function handleConfirm() {
     if (!croppedAreaPixels || !imageSrc) return
@@ -69,15 +105,40 @@ export default function ImageCropper({ file, aspect, onCrop, onCancel }: Props) 
           image={imageSrc}
           crop={crop}
           zoom={zoom}
-          aspect={aspect}
+          aspect={effectiveAspect}
           onCropChange={setCrop}
           onZoomChange={setZoom}
           onCropComplete={onCropComplete}
+          onMediaLoaded={onMediaLoaded}
         />
       </div>
 
+      {/* Ratio selector — free contexts only */}
+      {allowRatioChange && !aspect && (
+        <div className="flex items-center gap-2 px-4 pt-3 bg-surface border-t border-strong shrink-0 overflow-x-auto scrollbar-hide">
+          <span className="text-xs text-prose-faint shrink-0">Ratio</span>
+          {RATIOS.map((r) => {
+            const active = ratioChoice === r.value
+            return (
+              <button
+                key={r.label}
+                type="button"
+                onClick={() => setRatioChoice(r.value)}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors shrink-0 ${
+                  active
+                    ? 'bg-accent text-white border-accent'
+                    : 'bg-surface-raised text-prose-muted border-soft hover:border-strong'
+                }`}
+              >
+                {r.label}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
       {/* Controls */}
-      <div className="flex items-center gap-4 px-4 py-4 bg-surface border-t border-strong shrink-0">
+      <div className={`flex items-center gap-4 px-4 py-4 bg-surface ${allowRatioChange && !aspect ? '' : 'border-t border-strong'} shrink-0`}>
         <button
           type="button"
           onClick={onCancel}
@@ -97,6 +158,15 @@ export default function ImageCropper({ file, aspect, onCrop, onCancel }: Props) 
             className="flex-1 accent-orange-600"
           />
         </div>
+        {onSkip && (
+          <button
+            type="button"
+            onClick={onSkip}
+            className="px-4 py-2.5 text-sm text-prose-muted hover:text-prose rounded-lg border border-soft hover:border-strong transition-colors whitespace-nowrap"
+          >
+            Use full image
+          </button>
+        )}
         <button
           type="button"
           onClick={handleConfirm}

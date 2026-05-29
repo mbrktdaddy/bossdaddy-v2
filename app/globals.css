@@ -258,12 +258,11 @@ h1, h2, h3, h4 {
 /* ── Inline image grid ──────────────────────────────────────────────── */
 .bd-image-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  /* Always at least 2 columns — even on mobile — so a multi-image gallery
+     reads as a gallery instead of stacking like standalone images. */
+  grid-template-columns: repeat(2, 1fr);
   gap: 0.75rem;
   margin: 1.5rem 0;
-}
-@media (min-width: 640px) {
-  .bd-image-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (min-width: 1024px) {
   .bd-image-grid { grid-template-columns: repeat(3, 1fr); }

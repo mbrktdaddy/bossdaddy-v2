@@ -3,6 +3,8 @@
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
+import { compressImage } from '@/lib/compress-image'
+import ImageCropper from '@/components/ui/ImageCropper'
 import { MERCH_CATEGORIES, MERCH_STATUSES, getMerchDisplayImage, type Merch, type MerchCategory, type MerchStatus } from '@/lib/merch'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
@@ -36,6 +38,7 @@ export function MerchForm({ item }: Props) {
   const [error, setError]             = useState<string | null>(null)
   const [showPicker, setShowPicker]   = useState(false)
   const [uploading, setUploading]     = useState(false)
+  const [cropPending, setCropPending] = useState<File | null>(null)
   const fileInputRef                  = useRef<HTMLInputElement>(null)
 
   async function handleSave(e: React.FormEvent) {
@@ -85,7 +88,15 @@ export function MerchForm({ item }: Props) {
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
+    if (fileInputRef.current) fileInputRef.current.value = ''
     if (!file) return
+    setError(null)
+    // Compress, then crop to square before upload.
+    const compressed = await compressImage(file).catch(() => file)
+    setCropPending(compressed)
+  }
+
+  async function doUpload(file: File) {
     setUploading(true); setError(null)
     const fd = new FormData()
     fd.append('file', file)
@@ -94,7 +105,11 @@ export function MerchForm({ item }: Props) {
     if (!res.ok) { setError(json.error ?? 'Upload failed'); setUploading(false); return }
     setImageUrl(json.asset.url)
     setUploading(false)
-    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  function handleCropDone(blob: Blob) {
+    setCropPending(null)
+    doUpload(new File([blob], 'crop.webp', { type: 'image/webp' }))
   }
 
   async function handleDelete() {
@@ -323,6 +338,15 @@ export function MerchForm({ item }: Props) {
           <MediaPicker
             onSelect={(url) => { setImageUrl(url); setShowPicker(false) }}
             onClose={() => setShowPicker(false)}
+            uploadAspect={1}
+          />
+        )}
+        {cropPending && (
+          <ImageCropper
+            file={cropPending}
+            aspect={1}
+            onCrop={handleCropDone}
+            onCancel={() => setCropPending(null)}
           />
         )}
       </div>

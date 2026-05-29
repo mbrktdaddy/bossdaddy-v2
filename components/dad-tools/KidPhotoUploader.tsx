@@ -29,9 +29,22 @@ export default function KidPhotoUploader({
   const [photoUrl, setPhotoUrl] = useState<string | null>(initialPhotoUrl)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [saved, setSaved] = useState(false)
   // Square-crop the picked file before upload. Lets mobile users reframe a
   // tall phone photo instead of getting a blind center-crop into the circle.
   const [cropPending, setCropPending] = useState<File | null>(null)
+
+  // Normalize before cropping: a raw multi-MP photo can exceed the browser's
+  // canvas/texture limit and render blank in react-easy-crop. compressImage
+  // resizes to ≤1600px + fixes EXIF orientation, matching MediaPicker's flow.
+  async function pickForCrop(raw: File) {
+    setError(null)
+    setSaved(false)
+    setBusy(true)
+    const prepared = await compressImage(raw).catch(() => raw)
+    setBusy(false)
+    setCropPending(prepared)
+  }
 
   function handleCropDone(blob: Blob) {
     const name = (cropPending?.name ?? 'kid-photo').replace(/\.[^.]+$/, '.webp')
@@ -50,6 +63,7 @@ export default function KidPhotoUploader({
       const json = await res.json()
       if (!res.ok) { setError(json.error ?? 'Upload failed'); return }
       setPhotoUrl(json.photo_url)
+      setSaved(true)
       router.refresh()
     } catch {
       setError('Upload failed — try again')
@@ -101,7 +115,7 @@ export default function KidPhotoUploader({
         onClick={() => fileRef.current?.click()}
         disabled={busy}
         onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) setCropPending(f) }}
+        onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) pickForCrop(f) }}
         title="Click or drop a JPG, PNG, or WebP"
         className="group relative w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-orange-700 to-orange-950 flex items-center justify-center text-3xl font-black text-white shrink-0 hover:ring-orange-700 transition-all disabled:opacity-50 disabled:cursor-wait"
         aria-label={photoUrl ? 'Change kid photo' : 'Upload kid photo'}
@@ -137,13 +151,16 @@ export default function KidPhotoUploader({
         )}
       </div>
       {error && <p className="text-xs text-danger-ink w-full text-center sm:text-left">{error}</p>}
+      {saved && !error && (
+        <p className="text-xs text-green-600 font-semibold w-full text-center sm:text-left">Photo updated ✓</p>
+      )}
 
       <input
         ref={fileRef}
         type="file"
         accept="image/jpeg,image/png,image/webp"
         className="hidden"
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) setCropPending(f); e.target.value = '' }}
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) pickForCrop(f); e.target.value = '' }}
       />
 
       {cropPending && (

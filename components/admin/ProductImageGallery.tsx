@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { compressImage } from '@/lib/compress-image'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
+import ImageCropper from '@/components/ui/ImageCropper'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
@@ -39,6 +40,24 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
   const [usageModal, setUsageModal]   = useState<{ img: ProductImage; usage: UsageData } | null>(null)
   const [cascadeDeleting, setCascadeDeleting] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  // Single-file uploads route through the square cropper; multi-file uploads
+  // skip it (drop them in, crop later from the library if needed).
+  const [cropPending, setCropPending] = useState<File | null>(null)
+  const cropResolveRef = useRef<((file: File | null) => void) | null>(null)
+
+  function awaitCrop(file: File): Promise<File | null> {
+    return new Promise((resolve) => { cropResolveRef.current = resolve; setCropPending(file) })
+  }
+  function handleCropDone(blob: Blob) {
+    cropResolveRef.current?.(new File([blob], 'crop.webp', { type: 'image/webp' }))
+    cropResolveRef.current = null
+    setCropPending(null)
+  }
+  function handleCropCancel() {
+    cropResolveRef.current?.(null)
+    cropResolveRef.current = null
+    setCropPending(null)
+  }
 
   // useCallback so `load` is referentially stable across renders for a given
   // productId — lets us put it in the useEffect deps array cleanly without
@@ -70,14 +89,25 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
+    if (fileRef.current) fileRef.current.value = ''
     if (!files.length) return
+
+    // Single-file: crop to square before upload. Multi-file: skip the cropper.
+    let queue = files
+    if (files.length === 1) {
+      const compressed = await compressImage(files[0])
+      const cropped = await awaitCrop(compressed)
+      if (!cropped) return            // cancelled — nothing to upload
+      queue = [cropped]
+    }
+
     setUploading(true); setError(null)
 
     // Auto-primary on the first uploaded file IF the gallery was empty
     const startedEmpty = images.length === 0
 
     const results = await Promise.allSettled(
-      files.map(async (raw, i) => {
+      queue.map(async (raw, i) => {
         const file = await compressImage(raw)
         const fd = new FormData()
         fd.append('file', file)
@@ -370,6 +400,15 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
             </div>
           </div>
         </div>
+      )}
+
+      {cropPending && (
+        <ImageCropper
+          file={cropPending}
+          aspect={1}
+          onCrop={handleCropDone}
+          onCancel={handleCropCancel}
+        />
       )}
     </div>
   )

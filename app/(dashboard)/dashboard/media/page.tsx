@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
+import { compressImage } from '@/lib/compress-image'
+import ImageCropper from '@/components/ui/ImageCropper'
 
 interface MediaAsset {
   id: string
@@ -234,6 +236,30 @@ export default function MediaLibraryPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const LIMIT = 40
 
+  // Single-file uploads route through a free, skippable cropper; multi-file
+  // uploads skip it. The ref holds the awaiting resolver for the crop promise.
+  const [cropPending, setCropPending] = useState<File | null>(null)
+  const cropResolveRef = useRef<((file: File | null) => void) | null>(null)
+
+  function awaitCrop(file: File): Promise<File | null> {
+    return new Promise((resolve) => { cropResolveRef.current = resolve; setCropPending(file) })
+  }
+  function handleCropDone(blob: Blob) {
+    cropResolveRef.current?.(new File([blob], 'crop.webp', { type: 'image/webp' }))
+    cropResolveRef.current = null
+    setCropPending(null)
+  }
+  function handleCropSkip() {
+    cropResolveRef.current?.(cropPending)
+    cropResolveRef.current = null
+    setCropPending(null)
+  }
+  function handleCropCancel() {
+    cropResolveRef.current?.(null)
+    cropResolveRef.current = null
+    setCropPending(null)
+  }
+
   // Usage-aware delete state
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
   const [usageData, setUsageData] = useState<UsageData | null>(null)
@@ -282,11 +308,21 @@ export default function MediaLibraryPage() {
   async function uploadFiles(files: FileList | File[]) {
     const list = Array.from(files)
     if (!list.length) return
+
+    // Single-file: free crop (skippable) before upload. Multi-file: skip.
+    let queue = list
+    if (list.length === 1) {
+      const compressed = await compressImage(list[0]).catch(() => list[0])
+      const cropped = await awaitCrop(compressed)
+      if (!cropped) return            // cancelled
+      queue = [cropped]
+    }
+
     setUploading(true)
     setUploadError(null)
 
     const results = await Promise.allSettled(
-      list.map(async (file) => {
+      queue.map(async (file) => {
         const fd = new FormData()
         fd.append('file', file)
         const res = await fetch('/api/media', { method: 'POST', body: fd })
@@ -453,9 +489,19 @@ export default function MediaLibraryPage() {
           accept="image/jpeg,image/png,image/webp,image/gif"
           multiple
           className="hidden"
-          onChange={(e) => e.target.files && uploadFiles(e.target.files)}
+          onChange={(e) => { if (e.target.files) uploadFiles(e.target.files); e.target.value = '' }}
         />
       </div>
+
+      {cropPending && (
+        <ImageCropper
+          file={cropPending}
+          allowRatioChange
+          onCrop={handleCropDone}
+          onCancel={handleCropCancel}
+          onSkip={handleCropSkip}
+        />
+      )}
 
       {uploadError && (
         <p className="text-danger-ink text-sm bg-danger-bg border border-danger-line rounded-lg px-4 py-3 mb-4">

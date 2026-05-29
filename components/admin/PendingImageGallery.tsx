@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { compressImage } from '@/lib/compress-image'
+import ImageCropper from '@/components/ui/ImageCropper'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
@@ -49,6 +50,23 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
   const [showPicker, setShowPicker] = useState(false)
   const [error,      setError]      = useState<string | null>(null)
   const [processing, setProcessing] = useState(false)
+  // Single-file pick routes through the square cropper; multi-file picks skip it.
+  const [cropPending, setCropPending] = useState<File | null>(null)
+  const cropResolveRef = useRef<((file: File | null) => void) | null>(null)
+
+  function awaitCrop(file: File): Promise<File | null> {
+    return new Promise((resolve) => { cropResolveRef.current = resolve; setCropPending(file) })
+  }
+  function handleCropDone(blob: Blob) {
+    cropResolveRef.current?.(new File([blob], 'crop.webp', { type: 'image/webp' }))
+    cropResolveRef.current = null
+    setCropPending(null)
+  }
+  function handleCropCancel() {
+    cropResolveRef.current?.(null)
+    cropResolveRef.current = null
+    setCropPending(null)
+  }
 
   // Revoke object URLs when the component unmounts to free memory. We can't
   // safely revoke on remove (the parent might still be reading the URL in
@@ -62,15 +80,24 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function handleFilesPicked(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFilesPicked(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
+    if (fileRef.current) fileRef.current.value = ''
     if (!files.length) return
     setProcessing(true); setError(null)
 
-    // Note: we DON'T compress here — that happens at flush time, right
-    // before upload. Pre-compression in state would mean re-compressing if
-    // the user removes-and-re-adds. Keep raw Files in state.
-    const additions: PendingImage[] = files.map((file) => ({
+    // Single-file pick: crop to square before staging. Multi-file picks skip
+    // the cropper. Multi-file keeps raw Files in state (compressed at flush);
+    // a cropped single file is already a compact WebP.
+    let staged = files
+    if (files.length === 1) {
+      const compressed = await compressImage(files[0])
+      const cropped = await awaitCrop(compressed)
+      if (!cropped) { setProcessing(false); return }
+      staged = [cropped]
+    }
+
+    const additions: PendingImage[] = staged.map((file) => ({
       kind:       'upload',
       file,
       previewUrl: URL.createObjectURL(file),
@@ -85,7 +112,6 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
     }
     onChange(next)
     setProcessing(false)
-    if (fileRef.current) fileRef.current.value = ''
   }
 
   function handleLibraryPicks(items: { url: string; altText: string; assetId?: string }[]) {
@@ -277,6 +303,15 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
           onMultiSelect={handleLibraryPicks}
           onClose={() => setShowPicker(false)}
           defaultCategory={category}
+        />
+      )}
+
+      {cropPending && (
+        <ImageCropper
+          file={cropPending}
+          aspect={1}
+          onCrop={handleCropDone}
+          onCancel={handleCropCancel}
         />
       )}
     </div>
