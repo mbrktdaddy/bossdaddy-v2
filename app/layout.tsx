@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Montserrat, Source_Serif_4 } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import PwaInstallProvider from "@/components/pwa/PwaInstallProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -73,7 +74,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${montserrat.variable} ${sourceSerif4.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {children}
+        <PwaInstallProvider>
+          {children}
+        </PwaInstallProvider>
         <Analytics />
         <SpeedInsights />
       </body>

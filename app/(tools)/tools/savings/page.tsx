@@ -100,7 +100,7 @@ export default async function SavingsIndexPage() {
         </p>
       </header>
 
-      <InstallPWA />
+      <InstallPWA body="Add the Savings tool to your home screen. One-tap return from your bank app." />
 
       {goalsWithStats.length === 0 ? (
         <section className="bg-surface border border-soft rounded-xl p-6 sm:p-8 text-center space-y-4">
