@@ -5,8 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import GlobalSearch from './GlobalSearch'
-import NotificationBell from '@/components/notifications/NotificationBell'
-import MessagesMenu from '@/components/messages/MessagesMenu'
+import ActivityMenu from '@/components/ActivityMenu'
 import InstallAppButton from '@/components/pwa/InstallAppButton'
 import { LABELS } from '@/lib/labels'
 
@@ -184,8 +183,7 @@ export default function DashboardNav({ username, isAdmin, role, avatarUrl, userI
             </div>
           </Link>
           <div className="flex items-center shrink-0">
-            <NotificationBell userId={userId} />
-            <MessagesMenu userId={userId} />
+            <ActivityMenu userId={userId} />
           </div>
         </div>
         {isAdmin && <GlobalSearch />}

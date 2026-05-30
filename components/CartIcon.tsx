@@ -25,6 +25,10 @@ export default function CartIcon() {
     return () => window.removeEventListener(CART_UPDATED_EVENT, fetchCount)
   }, [fetchCount])
 
+  // Secondary commerce — don't carry a cart icon for the majority who never
+  // shop merch. It appears only once there's something in the cart.
+  if (count === 0) return null
+
   return (
     <Link
       href="/cart"

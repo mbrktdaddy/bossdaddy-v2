@@ -8,8 +8,7 @@ import { CATEGORIES } from '@/lib/categories'
 import { LABELS } from '@/lib/labels'
 import CartIcon from '@/components/CartIcon'
 import CategoryIcon from '@/components/CategoryIcon'
-import NotificationBell from '@/components/notifications/NotificationBell'
-import MessagesMenu from '@/components/messages/MessagesMenu'
+import ActivityMenu from '@/components/ActivityMenu'
 import InstallAppButton from '@/components/pwa/InstallAppButton'
 
 interface HeaderProps {
@@ -322,8 +321,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
 
           <CartIcon />
 
-          {username && userId && <NotificationBell userId={userId} />}
-          {username && userId && <MessagesMenu userId={userId} />}
+          {username && userId && <ActivityMenu userId={userId} />}
 
           {username ? (
             <div ref={userMenuRef} className="hidden md:block relative">
@@ -379,16 +377,6 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                       Dashboard
                     </Link>
                   )}
-                  <Link
-                    href="/account/messages"
-                    onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-zinc-300 hover:bg-zinc-700 hover:text-zinc-50 transition-colors"
-                  >
-                    <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    Messages
-                  </Link>
                   <InstallAppButton variant="menu" className="px-3 py-2 rounded-xl" />
                   <div className="border-t border-zinc-800 mt-1 pt-1">
                     <form action="/api/auth/signout" method="POST">
@@ -586,16 +574,6 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                     Dashboard
                   </Link>
                 )}
-                <Link
-                  href="/account/messages"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-zinc-300 hover:text-zinc-50 hover:bg-zinc-800 transition-colors"
-                >
-                  <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  Messages
-                </Link>
                 <InstallAppButton variant="menu" className="px-4 py-3 rounded-xl" />
                 <form action="/api/auth/signout" method="POST" className="mt-1">
                   <button
