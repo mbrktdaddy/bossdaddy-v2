@@ -117,6 +117,15 @@ export default function Footer() {
             <p className="text-sm text-zinc-400 leading-relaxed mb-5 max-w-sm">
               Real-world reviews. No PR samples. No paid placements. Just an honest verdict from a dad who bought the thing and used it.
             </p>
+            <Link
+              href="/install"
+              className="inline-flex items-center gap-2 mb-5 px-4 py-2.5 rounded-xl border border-zinc-700 hover:border-accent text-sm font-semibold text-zinc-200 hover:text-white transition-colors"
+            >
+              <svg className="w-4 h-4 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0-4-4m4 4 4-4M4 20h16" />
+              </svg>
+              {LABELS.app.short}
+            </Link>
             <div className="flex items-center gap-1 -ml-1.5">
               {SOCIAL_ICONS.map((i) => <SocialIcon key={i.key} icon={i} />)}
             </div>

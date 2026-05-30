@@ -12,6 +12,7 @@ import GuideRow from '@/components/GuideRow'
 import TrustBand from '@/components/TrustBand'
 import EmailCaptureSection from '@/components/EmailCaptureSection'
 import CodeRedirect from './_components/CodeRedirect'
+import { LABELS } from '@/lib/labels'
 import type { Metadata } from 'next'
 
 interface Review {
@@ -418,6 +419,45 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* ── GET THE APP — always-visible install band. The opportunistic
+            banner only renders once the browser offers a native prompt; this
+            band is the reliable, ever-present door to /install so the PWA is
+            discoverable to every visitor, logged in or out. */}
+      <section className="border-b border-soft">
+        <div className="max-w-6xl mx-auto px-6 py-10">
+          <div className="bg-surface border border-soft rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-8">
+            <div className="w-14 h-14 rounded-2xl bg-drama flex items-center justify-center shrink-0">
+              <Image
+                src="/images/bd-logo-icon.png"
+                alt=""
+                width={36}
+                height={36}
+                className="w-9 h-9 object-contain"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-eyebrow uppercase tracking-widest font-medium">Boss Daddy App</p>
+              <h2 className="text-xl sm:text-2xl font-black text-prose leading-tight mt-1">
+                Keep Boss Daddy one tap away.
+              </h2>
+              <p className="text-prose-faint mt-2 text-sm sm:text-base max-w-prose">
+                Add us to your home screen — reviews, gear, and tools, right where you keep everything
+                else. No app store, no bloat.
+              </p>
+            </div>
+            <Link
+              href="/install"
+              className="inline-flex items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-white font-extrabold text-sm px-7 py-3.5 rounded-xl transition-colors shrink-0 min-h-[44px]"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0-4-4m4 4 4-4M4 20h16" />
+              </svg>
+              {LABELS.app.short}
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* ── FREE TOOLS — promoted high to pay off "Smart Tools" in the H1.
             Two-up feature format breaks the review-card-grid rhythm. ──────── */}

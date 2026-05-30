@@ -9,7 +9,6 @@ import { LABELS } from '@/lib/labels'
 import CartIcon from '@/components/CartIcon'
 import CategoryIcon from '@/components/CategoryIcon'
 import ActivityMenu from '@/components/ActivityMenu'
-import InstallAppButton from '@/components/pwa/InstallAppButton'
 
 interface HeaderProps {
   /** The current user's username, or null if not signed in. Resolved server-side
@@ -379,7 +378,16 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                       Dashboard
                     </Link>
                   )}
-                  <InstallAppButton variant="menu" className="px-3 py-2 rounded-xl" />
+                  <Link
+                    href="/install"
+                    onClick={() => setUserMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-zinc-300 hover:bg-zinc-700 hover:text-zinc-50 transition-colors"
+                  >
+                    <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0-4-4m4 4 4-4M4 20h16" />
+                    </svg>
+                    {LABELS.app.short}
+                  </Link>
                   <div className="border-t border-zinc-800 mt-1 pt-1">
                     <form action="/api/auth/signout" method="POST">
                       <button
@@ -473,6 +481,23 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                 {label}
               </Link>
             ))}
+            {/* Get the App — shown to everyone (logged in or out) so the PWA
+                install is discoverable from the primary nav, not buried in the
+                account menu. */}
+            <Link
+              href="/install"
+              onClick={() => setMobileOpen(false)}
+              className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                isActive(pathname, '/install')
+                  ? 'bg-accent text-white'
+                  : 'text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800'
+              }`}
+            >
+              <svg className="w-4 h-4 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0-4-4m4 4 4-4M4 20h16" />
+              </svg>
+              {LABELS.app.short}
+            </Link>
           </nav>
 
           {/* Browse by Category — mobile primary discovery */}
@@ -576,7 +601,6 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                     Dashboard
                   </Link>
                 )}
-                <InstallAppButton variant="menu" className="px-4 py-3 rounded-xl" />
                 <form action="/api/auth/signout" method="POST" className="mt-1">
                   <button
                     type="submit"

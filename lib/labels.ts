@@ -84,6 +84,16 @@ export const LABELS = {
     tagline: 'Curated picks, comparisons, and stacks — beyond a single review.',
   },
 
+  // PWA install — the "add to home screen" badge surfaced sitewide
+  // (footer, header, homepage band) and the dedicated /install landing.
+  // Display label is centralized so "Get the App" can change in one edit;
+  // the internal concept (PWA install) stays stable.
+  app: {
+    short:   'Get the App',
+    full:    'Get the Boss Daddy App',
+    tagline: 'Add Boss Daddy to your home screen — one tap back to reviews, gear, and tools. No app store, no bloat.',
+  },
+
   // Dad Tools v1 — Beta surface at /tools/*. See docs/dad-tools-plan.md.
   //
   // Internal vocab is locked: container = "[Kid]'s Log", unit = "moment",

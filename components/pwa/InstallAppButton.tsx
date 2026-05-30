@@ -8,6 +8,7 @@
 
 import { useState } from 'react'
 import { usePwaInstall } from '@/components/pwa/PwaInstallProvider'
+import { LABELS } from '@/lib/labels'
 
 interface Props {
   /** 'card' = self-contained settings card; 'menu' = dropdown/drawer row. */
@@ -50,7 +51,7 @@ export default function InstallAppButton({ variant = 'card', className = '' }: P
           <svg className="w-4 h-4 text-zinc-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" />
           </svg>
-          Install app
+          {LABELS.app.short}
         </button>
         {showIosHint && (
           <p className="px-3 pb-2 text-xs text-zinc-400 leading-snug">
@@ -74,7 +75,7 @@ export default function InstallAppButton({ variant = 'card', className = '' }: P
         onClick={handleClick}
         className="bg-accent hover:bg-accent-hover text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition-colors min-h-[44px]"
       >
-        {canPrompt ? 'Install app' : 'How to install'}
+        {canPrompt ? LABELS.app.short : 'How to install'}
       </button>
       {showIosHint && <div className="mt-3">{iosHint}</div>}
     </div>
