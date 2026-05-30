@@ -1063,7 +1063,6 @@ export async function acceptInvite(
   revalidatePath(`/tools/savings/${goalId}/invite`)
   revalidatePath('/tools/savings')
   revalidatePath('/account/settings')
-  revalidatePath('/dashboard/profile')
   return { ok: true, data: { goalId } }
 }
 

@@ -297,7 +297,6 @@ export async function updateKidMoneyState(
 // gains a new home.
 function revalidateKidSurfaces() {
   revalidatePath('/dashboard')
-  revalidatePath('/dashboard/profile')
   revalidatePath('/account/settings')
   revalidatePath('/tools')
   revalidatePath('/tools/kids/[id]', 'page')

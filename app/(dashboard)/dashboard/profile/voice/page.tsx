@@ -17,10 +17,10 @@ export default async function VoiceProfilePage() {
     <div className="p-8 max-w-3xl">
       <div className="mb-6">
         <Link
-          href="/dashboard/profile"
+          href="/dashboard"
           className="text-sm text-prose-faint hover:text-prose transition-colors"
         >
-          ← Profile
+          ← Dashboard
         </Link>
       </div>
 

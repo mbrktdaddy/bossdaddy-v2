@@ -169,7 +169,7 @@ export default function DashboardNav({ username, isAdmin, role, avatarUrl, userI
           </span>
         </Link>
         <div className="flex items-center justify-between gap-2">
-          <Link href="/dashboard/profile" onClick={onNav} className="flex items-center gap-2 group min-w-0">
+          <Link href="/account/settings" onClick={onNav} className="flex items-center gap-2 group min-w-0">
             <div className="w-6 h-6 rounded-full overflow-hidden bg-accent flex items-center justify-center text-xs font-bold text-white shrink-0">
               {avatarUrl ? (
                 <Image src={avatarUrl} alt="" width={24} height={24} className="object-cover w-full h-full" unoptimized />

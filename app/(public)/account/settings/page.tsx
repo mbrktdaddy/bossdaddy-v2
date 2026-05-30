@@ -8,6 +8,7 @@ import AccountDeletion from '@/components/account/AccountDeletion'
 import MyKidsSection from '@/components/dad-tools/MyKidsSection'
 import SavingsGoalsSection from '@/components/dad-tools/SavingsGoalsSection'
 import InstallAppButton from '@/components/pwa/InstallAppButton'
+import BioForm from '@/components/account/BioForm'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -29,14 +30,14 @@ export default async function AccountSettingsPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('username, role, account_status, created_at, deletion_requested_at, avatar_url')
+    .select('username, role, account_status, created_at, deletion_requested_at, avatar_url, display_name, tagline, bio')
     .eq('id', user.id)
     .single()
 
   const role = profile?.role ?? 'member'
-
-  // Authors and admins have a richer dashboard profile page — send them there.
-  if (role === 'author' || role === 'admin') redirect('/dashboard/profile')
+  // Personal/account profile is the SAME for every role — admins/authors live
+  // here too (no redirect to the dashboard). The dashboard is workspace-only.
+  const isAuthor = role === 'author' || role === 'admin'
 
   const roleCfg = ROLE_CONFIG[role] ?? ROLE_CONFIG.member
 
@@ -154,6 +155,22 @@ export default async function AccountSettingsPage() {
           <EditEmailForm current={user.email ?? ''} />
         </div>
       </div>
+
+      {/* Public author identity — authors + admins only (members have no /author page) */}
+      {isAuthor && (
+        <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Public Author Profile</p>
+          <p className="text-xs text-prose-faint mb-4">
+            Shown under everything you publish, on your{' '}
+            <Link href={`/author/${profile?.username}`} target="_blank" rel="noopener noreferrer" className="text-accent-text hover:text-accent-text-soft">public author page</Link>.
+          </p>
+          <BioForm
+            initialDisplayName={(profile as { display_name?: string | null } | null)?.display_name ?? null}
+            initialTagline={(profile as { tagline?: string | null } | null)?.tagline ?? null}
+            initialBio={(profile as { bio?: string | null } | null)?.bio ?? null}
+          />
+        </div>
+      )}
 
       {/* Install the app — renders only when installable + not already installed */}
       <InstallAppButton variant="card" />

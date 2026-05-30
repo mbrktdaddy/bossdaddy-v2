@@ -91,8 +91,10 @@ function isActive(pathname: string, href: string) {
 }
 
 export default function Header({ username, role, avatarUrl, userId }: HeaderProps) {
-  // Members go to /account/settings; authors and admins go to /dashboard/profile.
-  const profileHref = (role === 'author' || role === 'admin') ? '/dashboard/profile' : '/account/settings'
+  // Personal profile/account is /account/settings for EVERY role — the
+  // dashboard is workspace-only. Authors/admins still get a separate Dashboard
+  // link below.
+  const profileHref = '/account/settings'
   const hasDashboard = role === 'author' || role === 'admin'
 
   const [mobileOpen, setMobileOpen]   = useState(false)
@@ -363,7 +365,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                     <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    {hasDashboard ? 'Profile' : 'Account Settings'}
+                    Account Settings
                   </Link>
                   {hasDashboard && (
                     <Link
@@ -560,7 +562,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                   <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
-                  {hasDashboard ? 'Profile' : 'Account Settings'}
+                  Account Settings
                 </Link>
                 {hasDashboard && (
                   <Link

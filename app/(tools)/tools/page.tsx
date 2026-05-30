@@ -72,24 +72,16 @@ export default async function ToolsHubPage() {
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
 
-  // Per role-architecture: members → /account/settings, authors/admins → /dashboard/profile.
-  // Hub's "Manage kids" link routes the user to wherever their MyKidsSection lives.
-  let manageKidsHref = '/account/settings'
+  // "Manage kids" routes everyone to /account/settings, where MyKidsSection
+  // now lives for all roles.
+  const manageKidsHref = '/account/settings'
   let kids: Kid[] = []
 
   if (user) {
-    const [{ data: profile }, { data: rawKids }] = await Promise.all([
-      supabase.from('profiles').select('role').eq('id', user.id).single(),
-      supabase.from('kid_profiles')
-        .select('id, name, birthdate, photo_url, money_balance, money_monthly, money_target, money_return_rate, created_at, updated_at')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: true }),
-    ])
-
-    if (profile?.role === 'author' || profile?.role === 'admin') {
-      manageKidsHref = '/dashboard/profile'
-    }
-
+    const { data: rawKids } = await supabase.from('kid_profiles')
+      .select('id, name, birthdate, photo_url, money_balance, money_monthly, money_target, money_return_rate, created_at, updated_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: true })
     kids = (rawKids ?? []) as Kid[]
   }
 

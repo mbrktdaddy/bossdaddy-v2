@@ -72,7 +72,6 @@ export async function addMoment(
 
   // Every surface that reads from kid_moments. Keep in sync with deleteMoment.
   revalidatePath('/dashboard')
-  revalidatePath('/dashboard/profile')
   revalidatePath('/account/settings')
   revalidatePath('/tools')
   revalidatePath('/tools/kids/[id]', 'page')
@@ -133,7 +132,6 @@ export async function deleteMoment(id: string): Promise<MomentActionResult> {
 
   // Every surface that reads from kid_moments. Keep in sync with addMoment.
   revalidatePath('/dashboard')
-  revalidatePath('/dashboard/profile')
   revalidatePath('/account/settings')
   revalidatePath('/tools')
   revalidatePath('/tools/kids/[id]', 'page')

@@ -46,6 +46,5 @@ export async function updateProfile(input: z.input<typeof UpdateSchema>): Promis
   }
 
   revalidatePath('/account/settings')
-  revalidatePath('/dashboard/profile')
   return { ok: true }
 }

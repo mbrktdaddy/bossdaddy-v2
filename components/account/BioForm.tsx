@@ -1,8 +1,12 @@
 'use client'
 
+// Public author identity editor (display name / tagline / bio) — feeds the
+// /author/[username] page. Shown on /account/settings for authors + admins;
+// members don't have a public author page so they never see it.
+
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { updateProfile } from '../actions'
+import { updateProfile } from '@/lib/profile-actions'
 
 interface Props {
   initialDisplayName: string | null
