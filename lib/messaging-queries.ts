@@ -18,12 +18,13 @@ export async function listConversationsFor(
 ): Promise<ConversationSummary[]> {
   const { data: myParts } = await supabase
     .from('conversation_participants')
-    .select('conversation_id, last_read_at')
+    .select('conversation_id, last_read_at, deleted_at')
     .eq('user_id', userId)
   const ids = (myParts ?? []).map((p) => p.conversation_id)
   if (ids.length === 0) return []
 
   const lastReadByConv = new Map((myParts ?? []).map((p) => [p.conversation_id, p.last_read_at]))
+  const deletedByConv = new Map((myParts ?? []).map((p) => [p.conversation_id, p.deleted_at]))
 
   const { data: peerParts } = await supabase
     .from('conversation_participants')
@@ -69,10 +70,18 @@ export async function listConversationsFor(
     }
   })
 
-  summaries.sort((a, b) => {
+  // Hide conversations the user deleted — unless a newer message has arrived
+  // since (delete-for-me; the thread reappears on fresh activity).
+  const visible = summaries.filter((s) => {
+    const del = deletedByConv.get(s.id)
+    if (!del) return true
+    return !!s.lastMessage && new Date(s.lastMessage.createdAt) > new Date(del)
+  })
+
+  visible.sort((a, b) => {
     const ta = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : 0
     const tb = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : 0
     return tb - ta
   })
-  return summaries
+  return visible
 }

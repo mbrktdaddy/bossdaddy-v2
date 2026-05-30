@@ -97,6 +97,26 @@ export async function markConversationRead(conversationId: string): Promise<Resu
   return { ok: true }
 }
 
+/**
+ * Delete-for-me: hide a conversation from the caller's list without touching
+ * the other participant's copy. Reappears for the caller if a newer message
+ * arrives (see listConversationsFor). Owner-update is allowed by the
+ * conv_participants_self_update RLS policy.
+ */
+export async function deleteConversation(conversationId: string): Promise<Result> {
+  const supabase = await createClient()
+  const { user } = await getUserSafe(supabase)
+  if (!user) return { ok: false, error: 'Unauthorized' }
+  const { error } = await supabase
+    .from('conversation_participants')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('conversation_id', conversationId)
+    .eq('user_id', user.id)
+  if (error) return { ok: false, error: error.message }
+  revalidatePath('/account/messages')
+  return { ok: true }
+}
+
 export async function blockUser(targetId: string): Promise<Result> {
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)

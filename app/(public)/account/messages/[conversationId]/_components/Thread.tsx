@@ -7,7 +7,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { sendMessage, markConversationRead, blockUser, unblockUser, reportContent } from '@/lib/messaging'
+import { sendMessage, markConversationRead, blockUser, unblockUser, reportContent, deleteConversation } from '@/lib/messaging'
 
 interface Message { id: string; sender_id: string; body: string; created_at: string }
 interface Peer { id: string; username: string; displayName: string | null; avatarUrl: string | null }
@@ -31,6 +31,7 @@ export default function Thread({
   const [menuOpen, setMenuOpen] = useState(false)
   const [reportOpen, setReportOpen] = useState(false)
   const [reported, setReported] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const peerName = peer?.displayName || peer?.username || 'Member'
@@ -84,6 +85,15 @@ export default function Thread({
     setReportOpen(false); setReported(true)
   }
 
+  // Two-tap confirm (no native dialog). Delete-for-me: removes the thread from
+  // my list; the other person keeps theirs. Hard-nav back to the list.
+  async function removeConversation() {
+    if (!confirmDelete) { setConfirmDelete(true); return }
+    setMenuOpen(false)
+    const res = await deleteConversation(conversationId)
+    if (res.ok) window.location.assign('/account/messages')
+  }
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 flex flex-col h-[calc(100dvh-8rem)]">
       {/* Header */}
@@ -98,7 +108,7 @@ export default function Thread({
         </div>
         {peer && (
           <div className="relative">
-            <button type="button" onClick={() => setMenuOpen((o) => !o)} aria-label="Conversation options"
+            <button type="button" onClick={() => { setMenuOpen((o) => !o); setConfirmDelete(false) }} aria-label="Conversation options"
               className="p-1.5 text-prose-faint hover:text-prose rounded-lg hover:bg-surface-raised">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
             </button>
@@ -109,6 +119,9 @@ export default function Thread({
                 </button>
                 <button type="button" onClick={() => { setMenuOpen(false); setReportOpen(true) }} className="block w-full text-left px-4 py-2.5 text-sm text-danger-ink hover:bg-danger-bg">
                   Report
+                </button>
+                <button type="button" onClick={removeConversation} className="block w-full text-left px-4 py-2.5 text-sm text-danger-ink hover:bg-danger-bg border-t border-soft">
+                  {confirmDelete ? 'Tap again to delete' : 'Delete conversation'}
                 </button>
               </div>
             )}
