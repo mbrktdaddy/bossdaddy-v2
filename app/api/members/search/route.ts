@@ -9,7 +9,9 @@ export async function GET(request: Request) {
   const { user } = await getUserSafe(supabase)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const q = new URL(request.url).searchParams.get('q')?.trim() ?? ''
+  // Forgiving of a leading @ — usernames render as @name across the UI, so
+  // people instinctively type it; strip it before matching.
+  const q = (new URL(request.url).searchParams.get('q')?.trim() ?? '').replace(/^@+/, '')
   if (q.length < 2) return NextResponse.json({ members: [] })
 
   const { data, error } = await supabase
