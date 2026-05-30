@@ -2,9 +2,9 @@
  * Smoke test for transformFollowupContent — the pure HTML transform that wraps
  * the 4 required follow-up headings in <details> blocks and emits a TOC list.
  *
- * Run: npx tsx scripts/test-followup-transform.ts
+ * Run: npx tsx scripts/_archive/test-followup-transform.ts
  */
-import { transformFollowupContent } from '../lib/reviews'
+import { transformFollowupContent } from '../../lib/reviews'
 
 interface Case {
   name: string
