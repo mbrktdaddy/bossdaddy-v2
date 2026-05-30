@@ -50,6 +50,20 @@ export default function NotificationFeed({ initial }: { initial: NotificationRow
     return () => { cancelled = true; if (channel) supabase.removeChannel(channel) }
   }, [load])
 
+  // Reconcile on return-to-page — mobile/PWA suspends the realtime socket when
+  // backgrounded or navigating, so refetch on visibility/focus/bfcache restore.
+  useEffect(() => {
+    function refresh() { if (document.visibilityState !== 'hidden') load() }
+    document.addEventListener('visibilitychange', refresh)
+    window.addEventListener('focus', refresh)
+    window.addEventListener('pageshow', refresh)
+    return () => {
+      document.removeEventListener('visibilitychange', refresh)
+      window.removeEventListener('focus', refresh)
+      window.removeEventListener('pageshow', refresh)
+    }
+  }, [load])
+
   const unread = items.filter((n) => !n.read_at).length
 
   async function markRead(id: string) {

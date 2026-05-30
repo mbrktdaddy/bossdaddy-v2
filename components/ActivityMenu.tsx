@@ -89,6 +89,25 @@ export default function ActivityMenu({ userId }: { userId: string }) {
     return () => { supabase.removeChannel(channel) }
   }, [userId, loadMsgs])
 
+  // Reconcile on return-to-page. Mobile browsers (and the PWA in standalone)
+  // suspend the realtime websocket when the page is backgrounded or during
+  // navigation, so the live badge-clear never arrives and already-read items
+  // "reappear" until a hard reload. Refetch from the DB whenever the page
+  // becomes visible/focused again — including bfcache restores (pageshow).
+  useEffect(() => {
+    function refresh() {
+      if (document.visibilityState !== 'hidden') { loadNotifs(); loadMsgs() }
+    }
+    document.addEventListener('visibilitychange', refresh)
+    window.addEventListener('focus', refresh)
+    window.addEventListener('pageshow', refresh)
+    return () => {
+      document.removeEventListener('visibilitychange', refresh)
+      window.removeEventListener('focus', refresh)
+      window.removeEventListener('pageshow', refresh)
+    }
+  }, [loadNotifs, loadMsgs])
+
   // Close on outside click.
   useEffect(() => {
     function onClick(e: MouseEvent) {

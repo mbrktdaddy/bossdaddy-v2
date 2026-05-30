@@ -32,12 +32,16 @@ export default function Thread({
   const [reportOpen, setReportOpen] = useState(false)
   const [reported, setReported] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const bottomRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
 
   const peerName = peer?.displayName || peer?.username || 'Member'
 
+  // Scroll only the message list's own scroll container — NOT scrollIntoView,
+  // which bubbles to the window and yanks the whole page (hiding the top of
+  // the thread and the composer below the fold).
   const scrollToBottom = useCallback(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const el = listRef.current
+    if (el) el.scrollTop = el.scrollHeight
   }, [])
 
   // Mark read on mount + whenever messages change.
@@ -130,7 +134,7 @@ export default function Thread({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto py-4 space-y-2">
+      <div ref={listRef} className="flex-1 overflow-y-auto py-4 space-y-2">
         {messages.length === 0 ? (
           <p className="text-center text-sm text-prose-faint py-8">Say hello 👋</p>
         ) : (
@@ -147,7 +151,6 @@ export default function Thread({
             )
           })
         )}
-        <div ref={bottomRef} />
       </div>
 
       {/* Composer */}
