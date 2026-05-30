@@ -17,7 +17,6 @@ export type NotificationType =
   | 'review_rejected'
   | 'review_request_edits'
   | 'account_action'
-  | 'new_message'
   | 'goal_completed'
 
 type NotificationInsert = Database['public']['Tables']['notifications']['Insert']

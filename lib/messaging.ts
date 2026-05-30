@@ -9,7 +9,6 @@
 
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { createNotification } from '@/lib/notifications'
 import { revalidatePath } from 'next/cache'
 
 type Result<T = undefined> = { ok: true; data?: T } | { ok: false; error: string }
@@ -66,21 +65,10 @@ export async function sendMessage(conversationId: string, body: string): Promise
     .single()
   if (error || !msg) return { ok: false, error: 'Could not send message' }
 
-  // In-app notification to each peer (best-effort).
-  const { data: me } = await admin.from('profiles').select('username, display_name').eq('id', user.id).single()
-  const senderName = me?.display_name || me?.username || 'Someone'
-  const preview = text.length > 80 ? `${text.slice(0, 80)}…` : text
-  for (const uid of others) {
-    await createNotification({
-      userId: uid,
-      type:   'new_message',
-      title:  `New message from ${senderName}`,
-      body:   preview,
-      link:   `/account/messages/${conversationId}`,
-      payload: { conversation_id: conversationId },
-    })
-  }
-
+  // No in-app notification per message. Message-unread lives in the Messages
+  // surface (conversation_participants.last_read_at) + the combined bell badge.
+  // Out-of-network awareness is the debounced digest email (cron) and, later,
+  // web push (Phase 2). See migration 085.
   revalidatePath(`/account/messages/${conversationId}`)
   return { ok: true, data: { id: msg.id } }
 }

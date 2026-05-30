@@ -434,6 +434,7 @@ export type Database = {
           deleted_at: string | null
           joined_at: string
           last_activity_at: string
+          last_notified_at: string | null
           last_read_at: string
           user_id: string
         }
@@ -442,6 +443,7 @@ export type Database = {
           deleted_at?: string | null
           joined_at?: string
           last_activity_at?: string
+          last_notified_at?: string | null
           last_read_at?: string
           user_id: string
         }
@@ -450,6 +452,7 @@ export type Database = {
           deleted_at?: string | null
           joined_at?: string
           last_activity_at?: string
+          last_notified_at?: string | null
           last_read_at?: string
           user_id?: string
         }
@@ -1391,6 +1394,7 @@ export type Database = {
           created_at: string | null
           deletion_requested_at: string | null
           display_name: string | null
+          email_new_message: boolean
           id: string
           moderation_action_at: string | null
           moderation_action_by: string | null
@@ -1409,6 +1413,7 @@ export type Database = {
           created_at?: string | null
           deletion_requested_at?: string | null
           display_name?: string | null
+          email_new_message?: boolean
           id: string
           moderation_action_at?: string | null
           moderation_action_by?: string | null
@@ -1427,6 +1432,7 @@ export type Database = {
           created_at?: string | null
           deletion_requested_at?: string | null
           display_name?: string | null
+          email_new_message?: boolean
           id?: string
           moderation_action_at?: string | null
           moderation_action_by?: string | null

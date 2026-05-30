@@ -8,6 +8,7 @@ import AccountDeletion from '@/components/account/AccountDeletion'
 import MyKidsSection from '@/components/dad-tools/MyKidsSection'
 import SavingsGoalsSection from '@/components/dad-tools/SavingsGoalsSection'
 import InstallAppButton from '@/components/pwa/InstallAppButton'
+import MessageEmailToggle from '@/components/account/MessageEmailToggle'
 import BioForm from '@/components/account/BioForm'
 import type { Metadata } from 'next'
 
@@ -30,7 +31,7 @@ export default async function AccountSettingsPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('username, role, account_status, created_at, deletion_requested_at, avatar_url, display_name, tagline, bio')
+    .select('username, role, account_status, created_at, deletion_requested_at, avatar_url, display_name, tagline, bio, email_new_message')
     .eq('id', user.id)
     .single()
 
@@ -165,6 +166,9 @@ export default async function AccountSettingsPage() {
           <EditEmailForm current={user.email ?? ''} />
         </div>
       </div>
+
+      {/* Notification preferences */}
+      <MessageEmailToggle initialEnabled={(profile as { email_new_message?: boolean } | null)?.email_new_message ?? true} />
 
       {/* ── YOUR STUFF — family, savings, activity ─────────────────────── */}
       <h2 className="text-base font-black text-prose mb-3 mt-10">Your Stuff</h2>
