@@ -150,7 +150,7 @@ export default async function GearPage({ searchParams }: Props) {
       {topPicks.length > 0 && (
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 pb-4 border-b border-soft/40 text-sm text-prose-faint">
           <Link href="/reviews" className="hover:text-prose transition-colors">
-            <span className="text-prose font-bold tabular-nums">{topPicks.length}</span> {topPicks.length === 1 ? 'pick' : 'picks'} rated 8+
+            <span className="text-prose font-bold tabular-nums">{topPicks.length}</span> {topPicks.length === 1 ? 'pick' : 'picks'}
           </Link>
           {!category && (
             <>
@@ -164,7 +164,7 @@ export default async function GearPage({ searchParams }: Props) {
             <>
               <span className="text-prose-faint hidden sm:block">·</span>
               <a href="#boss-picks" className="hover:text-prose transition-colors">
-                <span className="text-accent-text-soft font-bold tabular-nums">{bossPicks}</span> Boss {bossPicks === 1 ? 'Pick' : 'Picks'} (9+)
+                <span className="text-accent-text-soft font-bold tabular-nums">{bossPicks}</span> Boss {bossPicks === 1 ? 'Pick' : 'Picks'}
               </a>
             </>
           )}
@@ -172,7 +172,7 @@ export default async function GearPage({ searchParams }: Props) {
             <>
               <span className="text-prose-faint hidden sm:block">·</span>
               <a href="#perfect-score" className="hover:text-prose transition-colors">
-                <span className="text-prose font-bold tabular-nums">{tens.length}</span> perfect {tens.length === 1 ? 'score' : 'scores'} (10/10)
+                <span className="text-prose font-bold tabular-nums">{tens.length}</span> perfect {tens.length === 1 ? 'score' : 'scores'}
               </a>
             </>
           )}
@@ -382,24 +382,12 @@ export default async function GearPage({ searchParams }: Props) {
           <p className="text-prose-faint text-sm mt-2">Reviews are being added.</p>
         </div>
       ) : category ? (
-        // Filtered view: simple 3-col grid (no tier separation when filtered)
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {topPicks.map((r) => <GearCard key={r.id} review={r} />)}
-          </div>
-          <div className="mt-16">
-            <p className="text-xs text-prose-faint mb-3">More gear is on the way. Vote on what gets tested next.</p>
-            <BenchStrip ctaText="See everything on the bench" />
-          </div>
-          <div className="mt-12 text-center">
-            <Link
-              href="/reviews"
-              className="inline-flex items-center gap-2 text-sm text-prose-faint hover:text-accent-text-soft transition-colors font-medium"
-            >
-              Browse the full review archive →
-            </Link>
-          </div>
-        </>
+        // Filtered view: simple 3-col grid (no tier separation when filtered).
+        // The Bench strip + archive CTA come from the shared page-level footer
+        // below — don't duplicate them here.
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {topPicks.map((r) => <GearCard key={r.id} review={r} />)}
+        </div>
       ) : (
         <div>
           {/* ── Perfect Score — asymmetric magazine grid + radial glow ──── */}
