@@ -6,13 +6,13 @@ import { NewMessageEmail } from '@/emails/NewMessageEmail'
 
 export const maxDuration = 60
 
-// Debounced "you have unread messages" digest — the out-of-network awareness
-// channel for DMs (push is Phase 2). A message must sit unread for WINDOW_MIN
-// before it triggers an email, so a burst coalesces into one digest and an
-// in-app read inside the window cancels the email entirely. Paired with a
-// 5-min cron (vercel.json) → ~7–12 min latency. When web push ships, lengthen
-// this window (push then carries immediacy; email becomes the slow fallback).
-const WINDOW_MIN = 7
+// Debounced "you have unread messages" digest — the SLOW FALLBACK for DMs.
+// Web push (lib/push.ts) now carries immediacy, so this window is long: a
+// message must sit unread for WINDOW_MIN before it emails, so a push-notified
+// user who reads within the window gets no email at all, and bursts coalesce
+// into one digest. Email still reaches everyone without a live push
+// subscription. Paired with a 5-min cron (vercel.json).
+const WINDOW_MIN = 20
 const MAX_AGE_HOURS = 24 // ignore stale backlog — and avoid a blast on first deploy
 
 export async function GET(request: NextRequest) {

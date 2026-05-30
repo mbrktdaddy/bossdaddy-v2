@@ -9,6 +9,7 @@
 
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { sendPushToUser } from '@/lib/push'
 import { revalidatePath } from 'next/cache'
 
 type Result<T = undefined> = { ok: true; data?: T } | { ok: false; error: string }
@@ -65,10 +66,23 @@ export async function sendMessage(conversationId: string, body: string): Promise
     .single()
   if (error || !msg) return { ok: false, error: 'Could not send message' }
 
-  // No in-app notification per message. Message-unread lives in the Messages
-  // surface (conversation_participants.last_read_at) + the combined bell badge.
-  // Out-of-network awareness is the debounced digest email (cron) and, later,
-  // web push (Phase 2). See migration 085.
+  // Out-of-network awareness. No in-app notification row per message — DMs live
+  // in the Messages surface (see migration 085). Web push is the immediacy
+  // layer; the debounced digest email (cron) is the slow fallback. Both are
+  // privacy-first: sender name only, never message content. Best-effort —
+  // sendPushToUser never throws and no-ops if VAPID keys aren't configured.
+  const { data: me } = await admin.from('profiles').select('username, display_name').eq('id', user.id).single()
+  const senderName = me?.display_name?.trim() || me?.username || 'Someone'
+  await Promise.all(
+    others.map((uid) =>
+      sendPushToUser(uid, {
+        title: `New message from ${senderName}`,
+        url: `/account/messages/${conversationId}`,
+        tag: `dm:${conversationId}`,
+      }),
+    ),
+  )
+
   revalidatePath(`/account/messages/${conversationId}`)
   return { ok: true, data: { id: msg.id } }
 }

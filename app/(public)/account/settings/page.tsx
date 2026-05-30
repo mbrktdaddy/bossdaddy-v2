@@ -9,6 +9,7 @@ import MyKidsSection from '@/components/dad-tools/MyKidsSection'
 import SavingsGoalsSection from '@/components/dad-tools/SavingsGoalsSection'
 import InstallAppButton from '@/components/pwa/InstallAppButton'
 import MessageEmailToggle from '@/components/account/MessageEmailToggle'
+import PushNotificationSetting from '@/components/account/PushNotificationSetting'
 import BioForm from '@/components/account/BioForm'
 import type { Metadata } from 'next'
 
@@ -168,6 +169,7 @@ export default async function AccountSettingsPage() {
       </div>
 
       {/* Notification preferences */}
+      <PushNotificationSetting />
       <MessageEmailToggle initialEnabled={(profile as { email_new_message?: boolean } | null)?.email_new_message ?? true} />
 
       {/* ── YOUR STUFF — family, savings, activity ─────────────────────── */}
