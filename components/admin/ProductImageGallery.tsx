@@ -39,6 +39,11 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
   const [showPicker, setShowPicker]   = useState(false)
   const [usageModal, setUsageModal]   = useState<{ img: ProductImage; usage: UsageData } | null>(null)
   const [cascadeDeleting, setCascadeDeleting] = useState(false)
+  // Multi-select bulk delete
+  const [selectMode, setSelectMode]   = useState(false)
+  const [selected, setSelected]       = useState<Set<string>>(new Set())
+  const [bulkDeleting, setBulkDeleting] = useState(false)
+  const [bulkUsage, setBulkUsage]     = useState<{ imgs: ProductImage[]; usage: UsageData } | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   // Single-file uploads route through the square cropper; multi-file uploads
   // skip it (drop them in, crop later from the library if needed).
@@ -231,27 +236,162 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
     if (firstUrl) onPrimaryChange(firstUrl)
   }
 
+  // Reload from server and sync the parent's primary URL — used after bulk ops
+  // where the server may have promoted a new primary during cascade deletes.
+  async function refresh() {
+    const res = await fetch(`/api/media?product_id=${productId}&limit=40&page=1`)
+    const json = await res.json()
+    if (!res.ok) return
+    const sorted = (json.assets ?? []).sort(
+      (a: ProductImage, b: ProductImage) => (a.position ?? 999) - (b.position ?? 999),
+    )
+    setImages(sorted)
+    onPrimaryChange(sorted.find((i: ProductImage) => i.is_primary)?.url ?? null)
+  }
+
+  function toggleSelect(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function exitSelectMode() {
+    setSelectMode(false)
+    setSelected(new Set())
+  }
+
+  // Merge a per-asset usage payload into an aggregate, de-duping by id so the
+  // combined modal lists each affected piece of content once.
+  function mergeUsage(into: UsageData, from: UsageData) {
+    const push = <T extends { id: string }>(dest: T[], src: T[]) => {
+      for (const item of src) if (!dest.some((d) => d.id === item.id)) dest.push(item)
+    }
+    push(into.products, from.products)
+    push(into.guides_hero, from.guides_hero)
+    push(into.reviews_hero, from.reviews_hero)
+    push(into.articles_body, from.articles_body)
+    push(into.reviews_body, from.reviews_body)
+  }
+
+  // First pass: try a plain delete on each selected image. Cleanly-deletable
+  // images go immediately; any that 409 (referenced as a hero elsewhere) are
+  // collected into ONE combined confirmation instead of a modal per image.
+  async function handleBulkDelete() {
+    const ids = [...selected]
+    if (!ids.length) return
+    if (!confirm(`Remove ${ids.length} image${ids.length > 1 ? 's' : ''}?`)) return
+
+    setBulkDeleting(true)
+    setError(null)
+
+    const inUse: ProductImage[] = []
+    const merged: UsageData = { products: [], guides_hero: [], reviews_hero: [], articles_body: [], reviews_body: [] }
+    let failed = 0
+
+    // Sequential — each delete may promote a new gallery primary server-side;
+    // running in parallel would race on products.image_url.
+    for (const id of ids) {
+      const res = await fetch(`/api/media/${id}`, { method: 'DELETE' })
+      if (res.status === 409) {
+        const j = await res.json()
+        const img = images.find((i) => i.id === id)
+        if (img && j.usage) { inUse.push(img); mergeUsage(merged, j.usage) }
+        continue
+      }
+      if (!res.ok) failed++
+    }
+
+    await refresh()
+    setSelected(new Set())
+    setBulkDeleting(false)
+
+    if (failed) setError(`${failed} image${failed > 1 ? 's' : ''} could not be deleted.`)
+    if (inUse.length) {
+      // Hand the still-referenced images to the combined cascade modal
+      setBulkUsage({ imgs: inUse, usage: merged })
+    } else {
+      exitSelectMode()
+    }
+  }
+
+  // Confirmed cascade for the in-use images surfaced by handleBulkDelete.
+  async function handleBulkCascadeDelete() {
+    if (!bulkUsage) return
+    setCascadeDeleting(true)
+    let failed = 0
+    for (const img of bulkUsage.imgs) {
+      const res = await fetch(`/api/media/${img.id}?confirm=true`, { method: 'DELETE' })
+      if (!res.ok) failed++
+    }
+    await refresh()
+    setCascadeDeleting(false)
+    setBulkUsage(null)
+    exitSelectMode()
+    if (failed) setError(`${failed} image${failed > 1 ? 's' : ''} could not be deleted.`)
+  }
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <p className="text-sm font-semibold text-prose">Image Gallery</p>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowPicker(true)}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted font-semibold rounded-lg transition-colors"
-          >
-            Pick from library
-          </button>
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-            className="text-xs px-3 py-1.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-semibold rounded-lg transition-colors"
-          >
-            {uploading ? 'Uploading…' : '+ Upload'}
-          </button>
-        </div>
+        {selectMode ? (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-prose-muted">{selected.size} selected</span>
+            <button
+              type="button"
+              onClick={() => setSelected(new Set(images.map((i) => i.id)))}
+              className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted font-semibold rounded-lg transition-colors"
+            >
+              Select all
+            </button>
+            <button
+              type="button"
+              onClick={handleBulkDelete}
+              disabled={selected.size === 0 || bulkDeleting}
+              className="text-xs px-3 py-1.5 bg-red-700 hover:bg-red-600 disabled:opacity-40 text-white font-semibold rounded-lg transition-colors"
+            >
+              {bulkDeleting ? 'Deleting…' : `Delete${selected.size ? ` (${selected.size})` : ''}`}
+            </button>
+            <button
+              type="button"
+              onClick={exitSelectMode}
+              disabled={bulkDeleting}
+              className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted font-semibold rounded-lg transition-colors"
+            >
+              Done
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            {images.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setSelectMode(true)}
+                className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted font-semibold rounded-lg transition-colors"
+              >
+                Select
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setShowPicker(true)}
+              className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted font-semibold rounded-lg transition-colors"
+            >
+              Pick from library
+            </button>
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="text-xs px-3 py-1.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-semibold rounded-lg transition-colors"
+            >
+              {uploading ? 'Uploading…' : '+ Upload'}
+            </button>
+          </div>
+        )}
         <input
           ref={fileRef}
           type="file"
@@ -290,13 +430,20 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {images.map((img) => (
+          {images.map((img) => {
+            const isSelected = selected.has(img.id)
+            return (
             <div
               key={img.id}
+              onClick={selectMode ? () => toggleSelect(img.id) : undefined}
               className={`relative rounded-xl border overflow-hidden bg-surface-sunken group ${
-                img.is_primary
-                  ? 'border-accent/60 ring-1 ring-accent-hover/30'
-                  : 'border-soft'
+                selectMode ? 'cursor-pointer' : ''
+              } ${
+                selectMode && isSelected
+                  ? 'border-accent ring-2 ring-accent'
+                  : img.is_primary
+                    ? 'border-accent/60 ring-1 ring-accent-hover/30'
+                    : 'border-soft'
               }`}
             >
               <div className="relative w-full h-28">
@@ -304,50 +451,71 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
                   src={img.url}
                   alt={img.alt_text ?? img.label ?? 'Product image'}
                   fill
-                  className="object-contain p-2"
+                  className={`object-contain p-2 transition-opacity ${
+                    selectMode && !isSelected ? 'opacity-60' : ''
+                  }`}
                   sizes="(max-width: 640px) 50vw, 33vw"
                 />
               </div>
 
-              {img.is_primary && (
-                <div className="absolute top-1.5 left-1.5 text-[10px] px-1.5 py-0.5 bg-accent text-white rounded font-semibold">
-                  Primary
+              {selectMode ? (
+                <div
+                  className={`absolute top-1.5 left-1.5 w-5 h-5 rounded border-2 flex items-center justify-center ${
+                    isSelected ? 'bg-accent border-accent text-white' : 'bg-surface/90 border-strong'
+                  }`}
+                >
+                  {isSelected && (
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
                 </div>
+              ) : (
+                img.is_primary && (
+                  <div className="absolute top-1.5 left-1.5 text-[10px] px-1.5 py-0.5 bg-accent text-white rounded font-semibold">
+                    Primary
+                  </div>
+                )
               )}
 
-              <button
-                type="button"
-                onClick={() => handleDelete(img)}
-                className="absolute top-1.5 right-1.5 p-1 bg-surface/80 hover:bg-red-50 text-prose-faint hover:text-red-700 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                title="Remove image"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              {!selectMode && (
+                <button
+                  type="button"
+                  onClick={() => handleDelete(img)}
+                  className="absolute top-1.5 right-1.5 p-1 bg-surface/80 hover:bg-red-50 text-prose-faint hover:text-red-700 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                  title="Remove image"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
 
-              <div className="p-2 space-y-1.5">
-                <input
-                  type="text"
-                  defaultValue={img.label ?? ''}
-                  onBlur={(e) => {
-                    if (e.target.value !== (img.label ?? '')) handleLabelChange(img, e.target.value)
-                  }}
-                  placeholder="Label (e.g. front)"
-                  className="w-full px-2 py-1 text-xs bg-surface border border-soft rounded text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover"
-                />
-                {!img.is_primary && (
-                  <button
-                    type="button"
-                    onClick={() => handleSetPrimary(img)}
-                    className="w-full text-[10px] py-1 bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose rounded transition-colors"
-                  >
-                    Set primary
-                  </button>
-                )}
-              </div>
+              {!selectMode && (
+                <div className="p-2 space-y-1.5">
+                  <input
+                    type="text"
+                    defaultValue={img.label ?? ''}
+                    onBlur={(e) => {
+                      if (e.target.value !== (img.label ?? '')) handleLabelChange(img, e.target.value)
+                    }}
+                    placeholder="Label (e.g. front)"
+                    className="w-full px-2 py-1 text-xs bg-surface border border-soft rounded text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover"
+                  />
+                  {!img.is_primary && (
+                    <button
+                      type="button"
+                      onClick={() => handleSetPrimary(img)}
+                      className="w-full text-[10px] py-1 bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose rounded transition-colors"
+                    >
+                      Set primary
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
@@ -396,6 +564,61 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
                 className="flex-1 px-4 py-2.5 bg-red-700 hover:bg-red-600 disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors"
               >
                 {cascadeDeleting ? 'Deleting…' : 'Delete + clear'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Combined bulk-delete usage modal — images still referenced elsewhere */}
+      {bulkUsage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/70">
+          <div className="bg-surface-sunken border border-soft rounded-xl w-full max-w-md shadow-2xl p-6 space-y-4">
+            <div>
+              <p className="text-base font-black text-prose">
+                {bulkUsage.imgs.length} image{bulkUsage.imgs.length > 1 ? 's are' : ' is'} still in use
+              </p>
+              <p className="text-sm text-prose-muted mt-1">
+                Deleting will auto-clear hero references. Body mentions can&apos;t be auto-fixed.
+              </p>
+            </div>
+
+            <div className="max-h-48 overflow-y-auto space-y-2">
+              {[
+                ...bulkUsage.usage.products.map((p) => `Product: ${p.name}`),
+                ...bulkUsage.usage.guides_hero.map((a) => `Guide hero: ${a.title ?? a.slug}`),
+                ...bulkUsage.usage.reviews_hero.map((r) => `Review hero: ${r.title ?? r.slug}`),
+              ].map((label, i) => (
+                <p key={i} className="text-sm text-prose-muted bg-surface border border-soft rounded-lg px-3 py-2">
+                  {label} <span className="text-prose-faint text-xs">— will be cleared</span>
+                </p>
+              ))}
+
+              {(bulkUsage.usage.articles_body.length > 0 || bulkUsage.usage.reviews_body.length > 0) && (
+                <div className="bg-amber-50 border border-amber-300 rounded-xl px-4 py-3">
+                  <p className="text-xs font-semibold text-amber-700 mb-1">Body mentions — not auto-fixed</p>
+                  {[...bulkUsage.usage.articles_body, ...bulkUsage.usage.reviews_body].map((item) => (
+                    <p key={item.id} className="text-xs text-amber-700/70 truncate">{item.title ?? item.slug}</p>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => { setBulkUsage(null); exitSelectMode() }}
+                className="flex-1 px-4 py-2.5 bg-surface-raised hover:bg-surface text-prose-muted text-sm rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleBulkCascadeDelete}
+                disabled={cascadeDeleting}
+                className="flex-1 px-4 py-2.5 bg-red-700 hover:bg-red-600 disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors"
+              >
+                {cascadeDeleting ? 'Deleting…' : `Delete ${bulkUsage.imgs.length} + clear`}
               </button>
             </div>
           </div>
