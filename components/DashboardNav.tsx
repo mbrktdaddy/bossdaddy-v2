@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation'
 import GlobalSearch from './GlobalSearch'
 import NotificationBell from '@/components/notifications/NotificationBell'
 import MessagesMenu from '@/components/messages/MessagesMenu'
+import InstallAppButton from '@/components/pwa/InstallAppButton'
 import { LABELS } from '@/lib/labels'
 
 interface Props {
@@ -209,6 +210,7 @@ export default function DashboardNav({ username, isAdmin, role, avatarUrl, userI
           </svg>
           View Site
         </Link>
+        <InstallAppButton variant="menu" className="px-3 py-2.5 rounded-xl" />
         <form action="/api/auth/signout" method="POST">
           <button
             type="submit"

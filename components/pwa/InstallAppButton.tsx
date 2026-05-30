@@ -12,9 +12,12 @@ import { usePwaInstall } from '@/components/pwa/PwaInstallProvider'
 interface Props {
   /** 'card' = self-contained settings card; 'menu' = dropdown/drawer row. */
   variant?: 'card' | 'menu'
+  /** Layout classes (padding/radius) for the 'menu' row, to match each host
+   *  surface (header dropdown vs mobile drawer vs dashboard nav). */
+  className?: string
 }
 
-export default function InstallAppButton({ variant = 'card' }: Props) {
+export default function InstallAppButton({ variant = 'card', className = '' }: Props) {
   const { canPrompt, isIOSSafari, isStandalone, promptInstall } = usePwaInstall()
   const [showIosHint, setShowIosHint] = useState(false)
 
@@ -33,20 +36,28 @@ export default function InstallAppButton({ variant = 'card' }: Props) {
     </p>
   )
 
+  // Menu variant lives on dark surfaces (header dropdown, mobile drawer,
+  // dashboard nav) styled with explicit zinc classes — NOT role tokens, which
+  // would resolve to light values on the header's non-data-theme dark bg.
   if (variant === 'menu') {
     return (
       <div>
         <button
           type="button"
           onClick={handleClick}
-          className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-prose-muted hover:text-prose hover:bg-surface-raised transition-colors min-h-[44px]"
+          className={`w-full flex items-center gap-2 text-sm font-medium text-zinc-300 hover:text-zinc-50 hover:bg-zinc-700 transition-colors min-h-[44px] ${className || 'px-3 py-2.5 rounded-lg'}`}
         >
-          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden>
+          <svg className="w-4 h-4 text-zinc-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" />
           </svg>
           Install app
         </button>
-        {showIosHint && <div className="px-3 pb-2">{iosHint}</div>}
+        {showIosHint && (
+          <p className="px-3 pb-2 text-xs text-zinc-400 leading-snug">
+            Tap <span className="font-semibold text-zinc-200">Share</span> in Safari, then{' '}
+            <span className="font-semibold text-zinc-200">Add to Home Screen</span>.
+          </p>
+        )}
       </div>
     )
   }
