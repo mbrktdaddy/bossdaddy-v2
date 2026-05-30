@@ -110,14 +110,17 @@ export default async function AccountSettingsPage() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
 
       <div className="mb-8">
-        <h1 className="text-2xl font-black">Account Settings</h1>
-        <p className="text-prose-faint text-sm mt-1">Manage your account and view your activity</p>
+        <h1 className="text-2xl font-black">Account</h1>
+        <p className="text-prose-faint text-sm mt-1">Your profile, account, and activity.</p>
       </div>
 
       {/* Pending-deletion banner */}
       {accountStatus === 'pending_deletion' && (
         <AccountDeletion accountStatus={accountStatus} deletionDate={deletionDate} hasPublishedContent={false} />
       )}
+
+      {/* ── PROFILE — public identity ──────────────────────────────────── */}
+      <h2 className="text-base font-black text-prose mb-3">Profile</h2>
 
       {/* Identity — centered on mobile, left-aligned from sm+ */}
       <div className="bg-accent-tint border border-soft rounded-xl p-5 sm:p-6 mb-6">
@@ -133,26 +136,6 @@ export default async function AccountSettingsPage() {
             </span>
           </div>
           {memberSince && <p className="text-sm text-prose-faint">Member since {memberSince}</p>}
-        </div>
-      </div>
-
-      {/* Your Family — kid profiles + the Log */}
-      <div className="mb-6">
-        <MyKidsSection />
-      </div>
-
-      {/* Savings goals — Dad Tools v1.2 */}
-      <div className="mb-6">
-        <SavingsGoalsSection />
-      </div>
-
-      {/* Account */}
-      <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Account</p>
-        <EditUsernameForm current={profile?.username ?? ''} />
-        <div className="mt-5 pt-5 border-t border-soft">
-          <label className="block text-xs text-prose-faint uppercase tracking-widest mb-2">Email</label>
-          <EditEmailForm current={user.email ?? ''} />
         </div>
       </div>
 
@@ -172,8 +155,29 @@ export default async function AccountSettingsPage() {
         </div>
       )}
 
-      {/* Install the app — renders only when installable + not already installed */}
-      <InstallAppButton variant="card" />
+      {/* ── ACCOUNT — sign-in + email ──────────────────────────────────── */}
+      <h2 className="text-base font-black text-prose mb-3 mt-10">Account</h2>
+
+      <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+        <EditUsernameForm current={profile?.username ?? ''} />
+        <div className="mt-5 pt-5 border-t border-soft">
+          <label className="block text-xs text-prose-faint uppercase tracking-widest mb-2">Email</label>
+          <EditEmailForm current={user.email ?? ''} />
+        </div>
+      </div>
+
+      {/* ── YOUR STUFF — family, savings, activity ─────────────────────── */}
+      <h2 className="text-base font-black text-prose mb-3 mt-10">Your Stuff</h2>
+
+      {/* Your Family — kid profiles + the Log */}
+      <div className="mb-6">
+        <MyKidsSection />
+      </div>
+
+      {/* Savings goals — Dad Tools v1.2 */}
+      <div className="mb-6">
+        <SavingsGoalsSection />
+      </div>
 
       {/* Activity */}
       <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
@@ -248,6 +252,9 @@ export default async function AccountSettingsPage() {
           </div>
         )}
       </div>
+
+      {/* Install the app — renders only when installable + not already installed */}
+      <InstallAppButton variant="card" />
 
       {/* Danger zone */}
       {accountStatus === 'active' && (
