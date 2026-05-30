@@ -60,7 +60,11 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0a0a0c', // dark editorial canvas — matches body bg
+  // Status-bar / browser-chrome tint. Dark to match the dark header that sits
+  // at the top of every page (the body canvas is light zinc-100, but the header
+  // is what borders the status bar). Kept identical to the manifest's
+  // theme_color + background_color (#0a0a0a) so launch shows no color flash.
+  themeColor: '#0a0a0a',
 }
 
 export default function RootLayout({
