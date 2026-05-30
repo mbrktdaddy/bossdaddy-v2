@@ -109,14 +109,25 @@ export default function ActivityMenu({ userId }: { userId: string }) {
   async function markRead(id: string) {
     setNotifs((prev) => prev.map((n) => n.id === id ? { ...n, read_at: new Date().toISOString() } : n))
     setNotifUnread((u) => Math.max(0, u - 1))
-    await fetch(`/api/notifications/${id}/read`, { method: 'POST' })
+    // keepalive: openNotif fires this then hard-navigates — without keepalive
+    // the unload cancels the POST and the notification never persists as read.
+    await fetch(`/api/notifications/${id}/read`, { method: 'POST', keepalive: true })
   }
 
   async function markAll() {
     const ts = new Date().toISOString()
     setNotifs((prev) => prev.map((n) => ({ ...n, read_at: n.read_at ?? ts })))
     setNotifUnread(0)
-    await fetch('/api/notifications/read-all', { method: 'POST' })
+    await fetch('/api/notifications/read-all', { method: 'POST', keepalive: true })
+  }
+
+  // Optimistically clear a conversation's unread the moment it's opened, so the
+  // badge updates instantly — the realtime conversation_participants UPDATE
+  // (from markConversationRead on the thread page) reconciles it afterwards.
+  function openConversation(c: ConversationSummary) {
+    if (!c.unread) return
+    setConvs((prev) => prev.map((x) => x.id === c.id ? { ...x, unread: false } : x))
+    setMsgUnread((u) => Math.max(0, u - 1))
   }
 
   async function act(id: string, action: 'accept' | 'decline') {
@@ -248,6 +259,7 @@ export default function ActivityMenu({ userId }: { userId: string }) {
                 ) : (
                   convs.slice(0, 8).map((c) => (
                     <Link key={c.id} href={`/account/messages/${c.id}`}
+                      onClick={() => openConversation(c)}
                       className={`flex items-center gap-3 px-4 py-3 border-b border-zinc-700/60 last:border-0 hover:bg-zinc-700/50 transition-colors ${c.unread ? 'bg-zinc-700/40' : ''}`}>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold text-zinc-100 truncate">{peerName(c)}</p>
