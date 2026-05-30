@@ -51,7 +51,7 @@ export default function ActivityMenu({ userId }: { userId: string }) {
   const menuRef = useRef<HTMLDivElement>(null)
 
   const loadNotifs = useCallback(async () => {
-    const res = await fetch('/api/notifications')
+    const res = await fetch('/api/notifications', { cache: 'no-store' })
     if (!res.ok) return
     const j = await res.json()
     setNotifs(j.notifications ?? [])
@@ -59,7 +59,7 @@ export default function ActivityMenu({ userId }: { userId: string }) {
   }, [])
 
   const loadMsgs = useCallback(async () => {
-    const res = await fetch('/api/messages/conversations')
+    const res = await fetch('/api/messages/conversations', { cache: 'no-store' })
     if (!res.ok) return
     const j = await res.json()
     setConvs(j.conversations ?? [])
@@ -217,16 +217,27 @@ export default function ActivityMenu({ userId }: { userId: string }) {
                     const actionable = n.action_required && (!n.action_state || n.action_state === 'pending')
                     return (
                       <div key={n.id} className={`px-4 py-3 border-b border-zinc-700/60 last:border-0 ${n.read_at ? '' : 'bg-zinc-700/40'}`}>
-                        <button type="button" onClick={() => openNotif(n)} className="block w-full text-left">
-                          <div className="flex items-start gap-2">
-                            {!n.read_at && <span className="mt-1.5 w-2 h-2 rounded-full bg-accent shrink-0" />}
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-semibold text-zinc-100 leading-snug">{n.title}</p>
-                              {n.body && <p className="text-xs text-zinc-400 mt-0.5 leading-snug">{n.body}</p>}
-                              <p className="text-[11px] text-zinc-500 mt-1">{shortDate(n.created_at)}</p>
-                            </div>
-                          </div>
-                        </button>
+                        <div className="flex items-start gap-2">
+                          {!n.read_at && <span className="mt-1.5 w-2 h-2 rounded-full bg-accent shrink-0" />}
+                          <button type="button" onClick={() => openNotif(n)} className="block flex-1 min-w-0 text-left">
+                            <p className="text-sm font-semibold text-zinc-100 leading-snug">{n.title}</p>
+                            {n.body && <p className="text-xs text-zinc-400 mt-0.5 leading-snug">{n.body}</p>}
+                            <p className="text-[11px] text-zinc-500 mt-1">{shortDate(n.created_at)}</p>
+                          </button>
+                          {!n.read_at && (
+                            <button
+                              type="button"
+                              onClick={() => markRead(n.id)}
+                              aria-label="Mark as read"
+                              title="Mark as read"
+                              className="shrink-0 p-1 -mr-1 text-zinc-500 hover:text-accent transition-colors"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
                         {actionable && (
                           <div className="flex gap-2 mt-2 pl-4">
                             <button type="button" onClick={() => act(n.id, 'accept')} disabled={busyId === n.id}

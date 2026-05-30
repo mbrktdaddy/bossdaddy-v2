@@ -11,7 +11,8 @@ export async function POST() {
   const { error } = await supabase
     .from('notifications')
     .update({ read_at: new Date().toISOString() })
-    .is('read_at', null)            // RLS already scopes to this user's rows
+    .eq('user_id', user.id)         // explicit scope (+ RLS) — not just RLS
+    .is('read_at', null)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }
