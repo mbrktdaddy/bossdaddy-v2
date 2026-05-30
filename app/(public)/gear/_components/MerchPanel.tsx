@@ -26,7 +26,7 @@ export async function MerchPanel() {
   const isEmpty = products.length === 0
 
   return (
-    <section className="relative my-14">
+    <section id="merch" className="relative my-14 scroll-mt-20">
       {/* Architectural top-rule — fades at edges, branded */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-600/50 to-transparent" />
 

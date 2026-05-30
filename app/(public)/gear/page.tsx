@@ -7,6 +7,7 @@ import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
 import BadgesForProduct from '@/components/collections/BadgesForProduct'
 import { MerchPanel } from './_components/MerchPanel'
+import { MerchStrip } from './_components/MerchStrip'
 import FeaturedReviewCard from '@/components/FeaturedReviewCard'
 import BenchStrip from '@/components/BenchStrip'
 import SectionHeader from '@/components/SectionHeader'
@@ -125,11 +126,6 @@ export default async function GearPage({ searchParams }: Props) {
        ?? null)
     : null
 
-  const countByCategory = new Map<string, number>()
-  for (const r of topPicks) {
-    countByCategory.set(r.category, (countByCategory.get(r.category) ?? 0) + 1)
-  }
-
   const tens   = topPicks.filter((r) => (r.rating ?? 0) === 10)
   const nines  = topPicks.filter((r) => (r.rating ?? 0) >= 9 && (r.rating ?? 0) < 10)
   const eights = topPicks.filter((r) => (r.rating ?? 0) >= 8 && (r.rating ?? 0) < 9)
@@ -146,7 +142,7 @@ export default async function GearPage({ searchParams }: Props) {
           <span>{cat ? `${cat.label} Gear` : "Boss Daddy's Gear"}</span>
         </h1>
         <p className="text-prose-muted text-base md:text-lg leading-relaxed max-w-2xl">
-          I know we shouldn&apos;t pray for stuff, but here&apos;s a list of some really cool stuff.
+          Every pick here I bought with my own money, used hard, and rated 8 or higher. Earned, not sponsored.
         </p>
       </div>
 
@@ -217,6 +213,10 @@ export default async function GearPage({ searchParams }: Props) {
           <FeaturedReviewCard review={{ ...topPick, rating: topPick.rating ?? 0 }} label="Boss's #1 Pick" />
         </div>
       )}
+
+      {/* ── Boss Daddy Merch — slim branded strip woven right after the #1 pick,
+            so our own gear rides alongside the top picks. "Explore" → #merch. */}
+      {!category && <MerchStrip />}
 
       {/* ── Unfiltered-only discovery sections ──────────────────────────────── */}
       {!category && (
@@ -365,41 +365,7 @@ export default async function GearPage({ searchParams }: Props) {
             </section>
           )}
 
-          {/* ── Shop by Category — warm-tint surface + unified opener ──────── */}
-          <section className="relative mb-16">
-            <div
-              aria-hidden
-              className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-accent/[0.04] to-transparent"
-            />
-            <div className="relative">
-              <SectionHeader
-                label="Browse"
-                heading="Shop by Category"
-              />
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {CATEGORIES.map((c) => {
-                  const count = countByCategory.get(c.slug) ?? 0
-                  return (
-                    <Link
-                      key={c.slug}
-                      href={`/category/${c.slug}`}
-                      className="group flex flex-col items-center justify-center text-center gap-2 bg-surface hover:bg-surface-raised rounded-xl p-4 min-h-[120px] border border-soft shadow-md shadow-black/5 hover:border-accent-border/40 hover:shadow-lg hover:shadow-black/5 hover:-translate-y-1 transition-all"
-                    >
-                      <CategoryIcon slug={c.slug} className="w-7 h-7 text-accent-text" />
-                      <span className="text-sm font-bold text-prose leading-tight group-hover:text-accent-text-soft transition-colors">
-                        {c.shortLabel}
-                      </span>
-                      <span className="text-xs text-prose-faint">
-                        {count > 0 ? `${count} pick${count !== 1 ? 's' : ''}` : 'Coming soon'}
-                      </span>
-                    </Link>
-                  )
-                })}
-              </div>
-            </div>
-          </section>
-
-          {/* ── Boss Daddy Merch ──────────────────────────────────────────── */}
+          {/* ── Boss Daddy Merch — full section; the #merch target the strip links to ── */}
           <MerchPanel />
         </>
       )}
