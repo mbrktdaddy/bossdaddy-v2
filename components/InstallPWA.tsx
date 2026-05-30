@@ -16,6 +16,9 @@ interface Props {
   headline?: string
   /** Supporting line — short + benefit-focused. */
   body?: string
+  /** Wrapper classes (e.g. margin). Applied to the rendered root only, so the
+   *  banner leaves no phantom gap when it self-hides. */
+  className?: string
 }
 
 function alreadyDismissed(): boolean {
@@ -26,6 +29,7 @@ function alreadyDismissed(): boolean {
 export default function InstallPWA({
   headline = 'Install Boss Daddy',
   body = 'Add Boss Daddy to your home screen — your tools and gear, one tap away.',
+  className = '',
 }: Props) {
   const { canPrompt, isIOSSafari, isStandalone, promptInstall } = usePwaInstall()
   const [dismissed, setDismissed] = useState(false)
@@ -56,7 +60,7 @@ export default function InstallPWA({
   // Chrome / Edge / Android — native prompt available.
   if (canPrompt) {
     return (
-      <div className="bg-accent-tint border border-accent-border/60 rounded-xl p-4 sm:p-5 flex items-start gap-3 sm:gap-4">
+      <div className={`bg-accent-tint border border-accent-border/60 rounded-xl p-4 sm:p-5 flex items-start gap-3 sm:gap-4 ${className}`}>
         <div className="min-w-0 flex-1">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">{headline}</p>
           <p className="text-sm text-prose-muted leading-snug">{body}</p>
@@ -84,7 +88,7 @@ export default function InstallPWA({
   // iOS Safari — manual Share → Add to Home Screen instructions.
   if (iosVisible) {
     return (
-      <div className="bg-accent-tint border border-accent-border/60 rounded-xl p-4 sm:p-5 flex items-start gap-3 sm:gap-4">
+      <div className={`bg-accent-tint border border-accent-border/60 rounded-xl p-4 sm:p-5 flex items-start gap-3 sm:gap-4 ${className}`}>
         <div className="min-w-0 flex-1">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">{headline}</p>
           <p className="text-sm text-prose-muted leading-snug">

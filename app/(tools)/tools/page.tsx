@@ -12,6 +12,7 @@
 
 import Link from 'next/link'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
+import InstallPWA from '@/components/InstallPWA'
 import { LABELS } from '@/lib/labels'
 import { weeksUntil, milestoneDate } from '@/lib/dad-tools/calc'
 import type { Kid } from '@/lib/dad-tools/kid-actions'
@@ -122,6 +123,8 @@ export default async function ToolsHubPage() {
           </>
         )}
       </section>
+
+      <InstallPWA className="mb-10 sm:mb-14" body="Install Boss Daddy — your dad tools, one tap from the home screen." />
 
       {/* ── PERSONALIZED STATE — only when logged in with kids ──────────── */}
       {/* Compact-row pattern matches /account/settings + /dashboard/profile.

@@ -7,6 +7,7 @@ import EditEmailForm from '@/components/account/EditEmailForm'
 import AccountDeletion from '@/components/account/AccountDeletion'
 import MyKidsSection from '@/components/dad-tools/MyKidsSection'
 import SavingsGoalsSection from '@/components/dad-tools/SavingsGoalsSection'
+import InstallAppButton from '@/components/pwa/InstallAppButton'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -153,6 +154,9 @@ export default async function AccountSettingsPage() {
           <EditEmailForm current={user.email ?? ''} />
         </div>
       </div>
+
+      {/* Install the app — renders only when installable + not already installed */}
+      <InstallAppButton variant="card" />
 
       {/* Activity */}
       <div className="bg-surface border border-soft rounded-xl p-6 mb-6">

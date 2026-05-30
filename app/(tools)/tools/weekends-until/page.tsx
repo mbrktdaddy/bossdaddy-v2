@@ -9,6 +9,7 @@ import {
   type Unit,
 } from '@/lib/dad-tools/calc'
 import WeekendsTool from './_components/WeekendsTool'
+import InstallPWA from '@/components/InstallPWA'
 
 const MILESTONE_KEYS: Milestone[] = [
   'until_18', 'next_birthday', 'starts_school', 'gets_license', 'summer', 'custom',
@@ -122,6 +123,8 @@ export default async function WeekendsUntilPage({ searchParams }: PageProps) {
           Pick a milestone. Get a number. Then make them count.
         </p>
       </header>
+
+      <InstallPWA body="Install Boss Daddy — keep this number one tap away on your home screen." />
 
       <WeekendsTool
         isAuthenticated={!!user}
