@@ -14,7 +14,7 @@ interface Props {
 export default async function SocialPage({ searchParams }: Props) {
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
-  if (!user) redirect('/login')
+  if (!user) redirect('/login?next=/dashboard/social')
 
   const { platform = 'x', status = 'all' } = await searchParams
 

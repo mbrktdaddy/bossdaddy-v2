@@ -5,6 +5,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import Footer from '@/components/Footer'
+import { LoginLink } from '@/components/LoginLink'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 
 export default async function ToolsLayout({
@@ -82,12 +83,9 @@ export default async function ToolsLayout({
                 {accountLabel}
               </Link>
             ) : (
-              <Link
-                href="/login"
-                className="text-sm font-medium text-accent hover:underline"
-              >
+              <LoginLink className="text-sm font-medium text-accent hover:underline">
                 Sign in
-              </Link>
+              </LoginLink>
             )}
           </nav>
         </div>

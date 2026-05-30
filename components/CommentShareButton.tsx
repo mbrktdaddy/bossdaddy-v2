@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useLoginHref } from '@/lib/use-login-href'
 
 interface Props {
   commentId: string
@@ -12,6 +13,7 @@ export default function CommentShareButton({ commentId, shareCount }: Props) {
   const [count, setCount]     = useState(shareCount)
   const [copied, setCopied]   = useState(false)
   const [needsAuth, setNeedsAuth] = useState(false)
+  const loginHref = useLoginHref()
 
   async function handleShare() {
     const res = await fetch(`/api/comments/${commentId}/share`, { method: 'POST' })
@@ -33,7 +35,7 @@ export default function CommentShareButton({ commentId, shareCount }: Props) {
   if (needsAuth) {
     return (
       <span className="flex items-center gap-1.5 text-xs text-prose-faint">
-        <Link href="/login" className="text-accent-text-soft hover:text-accent transition-colors">
+        <Link href={loginHref} className="text-accent-text-soft hover:text-accent transition-colors">
           Sign in
         </Link>
         <span>to share</span>

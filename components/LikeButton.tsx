@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useLoginHref } from '@/lib/use-login-href'
 
 interface Props {
   contentType: 'review' | 'guide' | 'comment'
@@ -11,6 +12,7 @@ interface Props {
 
 export default function LikeButton({ contentType, contentId, size = 'md' }: Props) {
   const router = useRouter()
+  const loginHref = useLoginHref()
   const [count, setCount]     = useState(0)
   const [liked, setLiked]     = useState(false)
   const [loading, setLoading] = useState(false)
@@ -32,7 +34,7 @@ export default function LikeButton({ contentType, contentId, size = 'md' }: Prop
     })
 
     if (res.status === 401) {
-      router.push('/login')
+      router.push(loginHref)
       return
     }
 

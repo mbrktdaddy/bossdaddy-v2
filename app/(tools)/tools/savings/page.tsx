@@ -10,6 +10,7 @@ import { getGoals } from '@/lib/dad-tools/savings-actions'
 import { getKids } from '@/lib/dad-tools/kid-actions'
 import GoalCard from './_components/GoalCard'
 import InstallPWA from '@/components/InstallPWA'
+import { LoginLink } from '@/components/LoginLink'
 
 export const metadata: Metadata = {
   title:       `${LABELS.tools.savings.pageTitle} (Beta)`,
@@ -58,12 +59,9 @@ export default async function SavingsIndexPage() {
           </p>
         </section>
 
-        <Link
-          href="/login"
-          className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl transition-colors"
-        >
+        <LoginLink className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl transition-colors">
           Sign in to start →
-        </Link>
+        </LoginLink>
       </div>
     )
   }

@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { LoginLink } from '@/components/LoginLink'
 import { deleteKid, type Kid } from '@/lib/dad-tools/kid-actions'
 import { logTitle } from '@/lib/labels'
 import {
@@ -167,7 +168,7 @@ export default function KidCard({ kid, initialMoments, momentCount, isAuthentica
 
           {!isAuthenticated ? (
             <p className="text-sm text-prose-faint">
-              <a href="/login" className="text-accent hover:underline">Sign in</a> to capture moments.
+              <LoginLink className="text-accent hover:underline">Sign in</LoginLink> to capture moments.
             </p>
           ) : capturing ? (
             <CaptureMomentForm
