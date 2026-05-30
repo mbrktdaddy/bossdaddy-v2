@@ -13,7 +13,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  await requireUser()
+  const user = await requireUser()
   const profile = await getCurrentProfile()
 
   const isAdmin = profile?.role === 'admin'
@@ -34,6 +34,7 @@ export default async function DashboardLayout({
         isAdmin={isAdmin}
         role={profile?.role ?? 'member'}
         avatarUrl={(profile as { avatar_url?: string | null } | null)?.avatar_url ?? null}
+        userId={user.id}
       />
 
       {/* pt-14 on mobile clears the fixed top bar; desktop uses normal flow */}

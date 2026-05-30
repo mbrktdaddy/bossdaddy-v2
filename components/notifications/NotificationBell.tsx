@@ -27,7 +27,7 @@ function shortDate(iso: string): string {
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 }
 
-export default function NotificationBell() {
+export default function NotificationBell({ userId }: { userId: string }) {
   const [open, setOpen]     = useState(false)
   const [items, setItems]   = useState<NotificationRow[]>([])
   const [unread, setUnread] = useState(0)
@@ -45,25 +45,22 @@ export default function NotificationBell() {
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load() }, [load])
 
-  // Realtime — re-pull on any change to this user's notifications.
+  // Realtime — re-pull on any change to this user's notifications. Created
+  // synchronously (uid comes from props, no async getUser race) with a unique
+  // topic per mount, so a strict-mode remount can't re-attach handlers to an
+  // already-subscribed channel (the "callbacks after subscribe()" crash).
   useEffect(() => {
     const supabase = createClient()
-    let cancelled = false
-    let channel: ReturnType<typeof supabase.channel> | null = null
-    supabase.auth.getUser().then(({ data }) => {
-      const uid = data.user?.id
-      if (!uid || cancelled) return
-      channel = supabase
-        .channel(`notifications:${uid}`)
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${uid}` },
-          () => { load() },
-        )
-        .subscribe()
-    })
-    return () => { cancelled = true; if (channel) supabase.removeChannel(channel) }
-  }, [load])
+    const channel = supabase
+      .channel(`notifications:${userId}:${crypto.randomUUID()}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
+        () => { load() },
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [userId, load])
 
   // Close on outside click.
   useEffect(() => {

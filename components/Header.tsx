@@ -23,6 +23,9 @@ interface HeaderProps {
    *  initial-fallback circle in both the desktop user menu trigger and the
    *  mobile drawer. */
   avatarUrl?: string | null
+  /** The current user's id, or null. Forwarded to the realtime header menus so
+   *  they subscribe synchronously without an async getUser() round-trip. */
+  userId?: string | null
 }
 
 // Vault is intentionally NOT a top-level anchor — its contents
@@ -87,7 +90,7 @@ function isActive(pathname: string, href: string) {
   return pathname.startsWith(href)
 }
 
-export default function Header({ username, role, avatarUrl }: HeaderProps) {
+export default function Header({ username, role, avatarUrl, userId }: HeaderProps) {
   // Members go to /account/settings; authors and admins go to /dashboard/profile.
   const profileHref = (role === 'author' || role === 'admin') ? '/dashboard/profile' : '/account/settings'
   const hasDashboard = role === 'author' || role === 'admin'
@@ -339,8 +342,8 @@ export default function Header({ username, role, avatarUrl }: HeaderProps) {
 
           <CartIcon />
 
-          {username && <NotificationBell />}
-          {username && <MessagesMenu />}
+          {username && userId && <NotificationBell userId={userId} />}
+          {username && userId && <MessagesMenu userId={userId} />}
 
           {username ? (
             <div ref={userMenuRef} className="hidden md:block relative">

@@ -28,7 +28,7 @@ export default async function PublicLayout({ children }: { children: React.React
       >
         Skip to content
       </a>
-      <Header username={username} role={role} avatarUrl={avatarUrl} />
+      <Header username={username} role={role} avatarUrl={avatarUrl} userId={user?.id ?? null} />
       <main id="main-content" className="flex-1 w-full overflow-x-clip pb-14 md:pb-0">
         {children}
       </main>

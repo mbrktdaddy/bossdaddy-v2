@@ -16,7 +16,7 @@ interface ConversationSummary {
   unread:      boolean
 }
 
-export default function MessagesMenu() {
+export default function MessagesMenu({ userId }: { userId: string }) {
   const [open, setOpen]   = useState(false)
   const [convs, setConvs] = useState<ConversationSummary[]>([])
   const [unread, setUnread] = useState(0)
@@ -33,20 +33,17 @@ export default function MessagesMenu() {
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load() }, [load])
 
+  // Realtime — re-pull on any change to my conversation rows. Synchronous
+  // (uid from props) + unique topic per mount; avoids the async-getUser race
+  // that re-attached handlers after subscribe().
   useEffect(() => {
     const supabase = createClient()
-    let cancelled = false
-    let channel: ReturnType<typeof supabase.channel> | null = null
-    supabase.auth.getUser().then(({ data }) => {
-      const uid = data.user?.id
-      if (!uid || cancelled) return
-      channel = supabase
-        .channel(`messages-menu:${uid}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'conversation_participants', filter: `user_id=eq.${uid}` }, () => load())
-        .subscribe()
-    })
-    return () => { cancelled = true; if (channel) supabase.removeChannel(channel) }
-  }, [load])
+    const channel = supabase
+      .channel(`messages-menu:${userId}:${crypto.randomUUID()}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'conversation_participants', filter: `user_id=eq.${userId}` }, () => load())
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [userId, load])
 
   useEffect(() => {
     function onClick(e: MouseEvent) {

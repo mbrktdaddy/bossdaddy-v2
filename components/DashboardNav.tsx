@@ -14,6 +14,9 @@ interface Props {
   isAdmin: boolean
   role: string
   avatarUrl?: string | null
+  /** Current user's id — forwarded to the realtime menus for synchronous,
+   *  race-free channel setup. */
+  userId: string
 }
 
 interface NavItem {
@@ -115,7 +118,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
 
 const ROLE_LABEL: Record<string, string> = { admin: 'Admin', author: 'Author', member: 'Member' }
 
-export default function DashboardNav({ username, isAdmin, role, avatarUrl }: Props) {
+export default function DashboardNav({ username, isAdmin, role, avatarUrl, userId }: Props) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -180,8 +183,8 @@ export default function DashboardNav({ username, isAdmin, role, avatarUrl }: Pro
             </div>
           </Link>
           <div className="flex items-center shrink-0">
-            <NotificationBell />
-            <MessagesMenu />
+            <NotificationBell userId={userId} />
+            <MessagesMenu userId={userId} />
           </div>
         </div>
         {isAdmin && <GlobalSearch />}
