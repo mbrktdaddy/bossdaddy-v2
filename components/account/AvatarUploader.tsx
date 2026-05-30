@@ -92,7 +92,7 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
         aria-label={avatarUrl ? 'Change avatar' : 'Upload avatar'}
       >
         {avatarUrl ? (
-          <Image src={avatarUrl} alt="Avatar" fill sizes="96px" className="object-cover" unoptimized />
+          <Image src={avatarUrl} alt="Avatar" fill priority sizes="96px" className="object-cover" unoptimized />
         ) : (
           <span>{initial}</span>
         )}

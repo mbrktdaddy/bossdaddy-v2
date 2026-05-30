@@ -83,8 +83,14 @@ export async function checkAuthGuard(args: {
     }
   }
 
-  // 4. Already signed in? Bounce away from /login and /register.
-  if ((pathname === '/login' || pathname === '/register') && user) {
+  // 4. Already signed in? Bounce away from /login and /register — but ONLY on
+  // GET navigations. The post-login claim flows (claimAnonymousData /
+  // claimMyPendingInvites) fire Server Actions, which POST to the current
+  // route (/login). Redirecting those POSTs hands React a redirect instead of
+  // an action response → "An unexpected response was received from the server"
+  // and the claim silently never runs. Only browser navigations (GET) should
+  // be bounced; server actions must pass through.
+  if ((pathname === '/login' || pathname === '/register') && user && request.method === 'GET') {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)
