@@ -21,12 +21,16 @@ export default async function MessagesPage() {
     <div className="max-w-2xl mx-auto px-4 py-10">
       <h1 className="text-2xl font-black text-prose mb-4">Messages</h1>
 
-      <MemberSearch />
+      {/* Compose — the obvious "start a conversation" entry point. */}
+      <div className="bg-surface border border-soft rounded-xl p-4 sm:p-5">
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">New message</p>
+        <MemberSearch />
+      </div>
 
       <div className="mt-6 divide-y divide-soft border border-soft rounded-xl overflow-hidden">
         {conversations.length === 0 ? (
           <p className="px-4 py-10 text-center text-sm text-prose-faint">
-            No conversations yet. Search for a member above to start one.
+            No conversations yet — use <span className="font-semibold text-prose">New message</span> above to start one.
           </p>
         ) : (
           conversations.map((c) => {

@@ -197,6 +197,16 @@ export default function DashboardNav({ username, isAdmin, role, avatarUrl, userI
       {/* Footer */}
       <div className="px-3 py-4 border-t border-soft space-y-0.5">
         <Link
+          href="/account/messages"
+          onClick={onNav}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-prose-faint hover:text-prose hover:bg-surface-raised transition-colors"
+        >
+          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          Messages
+        </Link>
+        <Link
           href="/"
           target="_blank"
           rel="noopener noreferrer"
