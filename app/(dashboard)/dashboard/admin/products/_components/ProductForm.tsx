@@ -15,6 +15,9 @@ interface Props {
   amazonAssociateTag: string
 }
 
+// Mirror of the `z.array().max(30)` cap in the product create/update API.
+const MAX_SPECS = 30
+
 export function ProductForm({ product, amazonAssociateTag }: Props) {
   const router = useRouter()
   const isNew = !product
@@ -56,14 +59,25 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
   const [autofilling,  setAutofilling]  = useState(false)
   const [autofillNote, setAutofillNote] = useState<string | null>(null)
 
+  const atSpecCap = specs.length >= MAX_SPECS
+
   function addSpec() {
-    setSpecs((prev) => [...prev, { label: '', value: '' }])
+    setSpecs((prev) => (prev.length >= MAX_SPECS ? prev : [...prev, { label: '', value: '' }]))
   }
   function updateSpec(i: number, field: keyof ProductSpec, val: string) {
     setSpecs((prev) => prev.map((s, idx) => (idx === i ? { ...s, [field]: val } : s)))
   }
   function removeSpec(i: number) {
     setSpecs((prev) => prev.filter((_, idx) => idx !== i))
+  }
+
+  // Snap a label to the category template's canonical casing when it matches
+  // case-insensitively, so the same fact reads identically across products and
+  // comparison-table rows line up. Non-template labels pass through trimmed.
+  function canonicalLabel(label: string): string {
+    const trimmed = label.trim()
+    const t = getSpecTemplate(category).find((f) => f.label.toLowerCase() === trimmed.toLowerCase())
+    return t ? t.label : trimmed
   }
 
   // Placeholder hint for a spec value input, drawn from the category template.
@@ -73,11 +87,15 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
   }
 
   // Seed the panel with the category's canonical spec labels (empty values),
-  // skipping any label already present. Keeps comparison rows aligned.
+  // skipping any label already present. Keeps comparison rows aligned. Respects
+  // the MAX_SPECS cap.
   function applyTemplate() {
+    const room = MAX_SPECS - specs.length
+    if (room <= 0) return
     const have = new Set(specs.map((s) => s.label.trim().toLowerCase()))
     const additions = getSpecTemplate(category)
       .filter((f) => !have.has(f.label.toLowerCase()))
+      .slice(0, room)
       .map((f) => ({ label: f.label, value: '' }))
     if (additions.length === 0) return
     setSpecs((prev) => [...prev, ...additions])
@@ -96,23 +114,33 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
       if (!res.ok) throw new Error(json.error ?? 'Autofill failed')
 
       const incoming: ProductSpec[] = Array.isArray(json.specs) ? json.specs : []
-      // Merge: fill empty existing values + append new labels; never clobber a
-      // value the user already typed.
-      setSpecs((prev) => {
-        const byKey = new Map(prev.map((s) => [s.label.trim().toLowerCase(), { ...s }]))
-        for (const s of incoming) {
-          const key = s.label?.trim().toLowerCase()
-          if (!key || !s.value?.trim()) continue
-          const existing = byKey.get(key)
-          if (existing) { if (!existing.value.trim()) existing.value = s.value }
-          else byKey.set(key, { label: s.label, value: s.value })
+      // Merge into current specs: fill empty existing values, append new labels
+      // (snapped to canonical casing), never clobber a typed value, respect the
+      // cap. Computed synchronously so the reported counts are accurate.
+      const byKey = new Map(specs.map((s) => [s.label.trim().toLowerCase(), { ...s }]))
+      let added = 0, filled = 0, capped = 0
+      for (const s of incoming) {
+        const key = s.label?.trim().toLowerCase()
+        if (!key || !s.value?.trim()) continue
+        const existing = byKey.get(key)
+        if (existing) {
+          if (!existing.value.trim()) { existing.value = s.value.trim(); filled++ }
+        } else if (byKey.size < MAX_SPECS) {
+          byKey.set(key, { label: canonicalLabel(s.label), value: s.value.trim() }); added++
+        } else {
+          capped++
         }
-        return Array.from(byKey.values())
-      })
+      }
+      setSpecs(Array.from(byKey.values()))
 
       let brandNote = ''
       if (json.brand && !brand.trim()) { setBrand(json.brand); brandNote = ` Brand set to "${json.brand}".` }
-      setAutofillNote(`Added ${incoming.length} spec${incoming.length === 1 ? '' : 's'}.${brandNote} Review and edit before saving.`)
+      const cappedNote = capped ? ` ${capped} skipped (${MAX_SPECS}-spec limit).` : ''
+      setAutofillNote(
+        added + filled === 0 && !brandNote
+          ? `No new facts found in that text.${cappedNote}`
+          : `Added ${added}, filled ${filled}.${brandNote}${cappedNote} Review before saving.`,
+      )
     } catch (err) {
       setAutofillNote(err instanceof Error ? err.message : 'Autofill failed')
     } finally {
@@ -135,9 +163,10 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
 
     const parsedPrice = priceCents.trim() ? parseInt(priceCents.trim(), 10) : null
 
-    // Drop blank spec rows; trim the rest.
+    // Drop blank spec rows; trim values and snap labels to canonical template
+    // casing so the same fact reads identically across products (table rows).
     const cleanSpecs = specs
-      .map((s) => ({ label: s.label.trim(), value: s.value.trim() }))
+      .map((s) => ({ label: canonicalLabel(s.label), value: s.value.trim() }))
       .filter((s) => s.label && s.value)
 
     const payload = {
@@ -530,20 +559,26 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
             <button
               type="button"
               onClick={applyTemplate}
+              disabled={atSpecCap}
               title={`Add the suggested ${category ? getCategoryLabel(category) : 'general'} spec labels`}
-              className="text-xs px-3 py-2 bg-surface border border-strong hover:border-accent/60 text-prose-muted hover:text-prose font-semibold rounded-lg transition-colors min-h-[36px]"
+              className="text-xs px-3 py-2 bg-surface border border-strong hover:border-accent/60 text-prose-muted hover:text-prose font-semibold rounded-lg transition-colors min-h-[36px] disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Apply {category ? getCategoryLabel(category) : 'general'} template
             </button>
             <button
               type="button"
               onClick={addSpec}
-              className="text-xs px-3 py-2 bg-surface border border-strong hover:border-accent/60 text-prose-muted hover:text-prose font-semibold rounded-lg transition-colors min-h-[36px]"
+              disabled={atSpecCap}
+              className="text-xs px-3 py-2 bg-surface border border-strong hover:border-accent/60 text-prose-muted hover:text-prose font-semibold rounded-lg transition-colors min-h-[36px] disabled:opacity-40 disabled:cursor-not-allowed"
             >
               + Add spec
             </button>
           </div>
         </div>
+
+        {atSpecCap && (
+          <p className="text-xs text-warn-ink">Spec limit reached ({MAX_SPECS}). Remove a row to add more.</p>
+        )}
 
         {specs.length === 0 ? (
           <p className="text-xs text-prose-faint italic">No specs yet. Add facts like dimensions, weight, capacity, material, warranty.</p>

@@ -145,11 +145,13 @@ export function ReviewCreateWizard() {
 
     const parsedPricePaid = pricePaid.trim() ? parseInt(pricePaid.trim(), 10) : null
 
-    // If a catalog product is linked, pull its brand + specs to ground the draft.
-    const linked = productSlug.trim() ? products.find((p) => p.slug === productSlug.trim()) : undefined
-    const linkedSpecs = (linked?.specs ?? []).filter((s) => s.label?.trim() && s.value?.trim())
-
     try {
+      // If a catalog product is linked, pull its brand + specs to ground the
+      // draft. Inside try so a malformed specs value can't strand the spinner.
+      const linked = productSlug.trim() ? products.find((p) => p.slug === productSlug.trim()) : undefined
+      const rawSpecs = linked?.specs
+      const linkedSpecs = (Array.isArray(rawSpecs) ? rawSpecs : []).filter((s) => s.label?.trim() && s.value?.trim())
+
       const genRes = await fetch('/api/claude/draft', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
