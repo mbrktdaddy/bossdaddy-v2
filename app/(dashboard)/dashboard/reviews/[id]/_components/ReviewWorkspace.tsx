@@ -18,6 +18,8 @@ import { SocialPostsPanel } from '@/components/workspace/SocialPostsPanel'
 import { ProductLinkPanel } from '@/components/workspace/ProductLinkPanel'
 import { PrimaryProductPanel } from '@/components/workspace/PrimaryProductPanel'
 import { ComparisonProductsPanel } from '@/components/workspace/ComparisonProductsPanel'
+import { SpecsGradePanel } from '@/components/workspace/SpecsGradePanel'
+import { parseSpecsGradeData, type SpecsGradeData } from '@/lib/reviews'
 
 const InlineMediaPanel = dynamic(
   () => import('@/components/workspace/InlineMediaPanel').then((m) => ({ default: m.InlineMediaPanel })),
@@ -78,6 +80,9 @@ interface ReviewData {
   score_value: number | null
   score_ease: number | null
   score_daily_use: number | null
+  score_specs: number | null
+  specs_grade_rationale: string | null
+  specs_grade_data: unknown
   would_rebuy: boolean | null
   is_visible: boolean | null
   published_at: string | null
@@ -132,6 +137,9 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
   const [scoreValue, setScoreValue]       = useState<number | null>(review.score_value ?? null)
   const [scoreEase, setScoreEase]         = useState<number | null>(review.score_ease ?? null)
   const [scoreDailyUse, setScoreDailyUse] = useState<number | null>(review.score_daily_use ?? null)
+  const [scoreSpecs, setScoreSpecs]       = useState<number | null>(review.score_specs ?? null)
+  const [specsRationale, setSpecsRationale] = useState(review.specs_grade_rationale ?? '')
+  const [specsData, setSpecsData]         = useState<SpecsGradeData>(parseSpecsGradeData(review.specs_grade_data))
   const [wouldRebuy, setWouldRebuy]       = useState<boolean | null>(review.would_rebuy ?? null)
   const [verdictChange, setVerdictChange] = useState<VerdictChange | null>(
     (review.verdict_change as VerdictChange | null) ?? null
@@ -149,10 +157,13 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
 
   // Computed overall — average of the four sub-scores. Null until all four are
   // populated. This is the source of truth; the DB stores the same generated value.
+  // Present-only average, mirroring the DB generated column: requires the 4
+  // experiential scores; folds in the specs axis only when it's graded.
   const computedRating = useMemo<number | null>(() => {
     if (scoreQuality == null || scoreValue == null || scoreEase == null || scoreDailyUse == null) return null
-    return (scoreQuality + scoreValue + scoreEase + scoreDailyUse) / 4
-  }, [scoreQuality, scoreValue, scoreEase, scoreDailyUse])
+    const base = scoreQuality + scoreValue + scoreEase + scoreDailyUse
+    return scoreSpecs != null ? (base + scoreSpecs) / 5 : base / 4
+  }, [scoreQuality, scoreValue, scoreEase, scoreDailyUse, scoreSpecs])
 
   const [tags, setTags]                   = useState<string[]>(review.tags ?? [])
   const [tldr, setTldr]                   = useState(review.tldr ?? '')
@@ -227,9 +238,12 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
     score_value:          scoreValue,
     score_ease:           scoreEase,
     score_daily_use:      scoreDailyUse,
+    score_specs:          scoreSpecs,
+    specs_grade_rationale: specsRationale.trim() || null,
+    specs_grade_data:     specsData,
     would_rebuy:          wouldRebuy,
     verdict_change:       isFollowup ? verdictChange : undefined,
-  }), [title, productName, category, excerpt, content, imageUrl, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, productSlug, comparisonSlugs, tldr, keyTakeaways, bestFor, notFor, faqs, testingDuration, howYouUsedIt, standoutMoment, pricePaidCents, scoreQuality, scoreValue, scoreEase, scoreDailyUse, wouldRebuy, verdictChange, isFollowup])
+  }), [title, productName, category, excerpt, content, imageUrl, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, productSlug, comparisonSlugs, tldr, keyTakeaways, bestFor, notFor, faqs, testingDuration, howYouUsedIt, standoutMoment, pricePaidCents, scoreQuality, scoreValue, scoreEase, scoreDailyUse, scoreSpecs, specsRationale, specsData, wouldRebuy, verdictChange, isFollowup])
 
   const canPublish = !hasAffiliate || disclosureAck
   const publishBlockedReason = !canPublish
@@ -806,6 +820,18 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
               onChange={setComparisonSlugs}
               category={category}
               primarySlug={productSlug}
+            />
+            <SpecsGradePanel
+              productName={productName}
+              category={category}
+              productSlug={productSlug}
+              competitorSlugs={comparisonSlugs}
+              score={scoreSpecs}
+              rationale={specsRationale}
+              data={specsData}
+              onScore={setScoreSpecs}
+              onRationale={setSpecsRationale}
+              onData={setSpecsData}
             />
             <ProductLinkPanel
               content={content}

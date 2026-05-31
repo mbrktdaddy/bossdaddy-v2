@@ -8,6 +8,51 @@ const ONE_DAY_MS = 1000 * 60 * 60 * 24
 
 export type VerdictChange = 'improved' | 'unchanged' | 'declined' | 'complete_reversal'
 
+// ── AI Specs Grade ───────────────────────────────────────────────────────────
+// Shape of reviews.specs_grade_data — the reusable comparison artifact behind
+// the Specs sub-score. Produced by /api/claude/specs-grade, author-reviewed,
+// rendered in the public "how the specs stack up" disclosure.
+export interface SpecsCompareEntry {
+  name: string
+  brand: string | null
+  keySpecs: { label: string; value: string }[]
+  sourceUrl: string | null
+}
+export interface SpecsGradeSource { title: string; url: string }
+export interface SpecsGradeData {
+  comparedAgainst: SpecsCompareEntry[]
+  sources: SpecsGradeSource[]
+  gradedAt?: string
+}
+
+/** Coerce an unknown (jsonb) value into a safe SpecsGradeData. */
+export function parseSpecsGradeData(raw: unknown): SpecsGradeData {
+  const obj = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>
+  const comparedAgainst = Array.isArray(obj.comparedAgainst)
+    ? (obj.comparedAgainst as unknown[])
+        .filter((c): c is Record<string, unknown> => !!c && typeof c === 'object')
+        .map((c) => ({
+          name:  typeof c.name === 'string' ? c.name : '',
+          brand: typeof c.brand === 'string' && c.brand.trim() ? c.brand : null,
+          keySpecs: Array.isArray(c.keySpecs)
+            ? (c.keySpecs as unknown[])
+                .filter((s): s is Record<string, unknown> => !!s && typeof s === 'object'
+                  && typeof (s as Record<string, unknown>).label === 'string'
+                  && typeof (s as Record<string, unknown>).value === 'string')
+                .map((s) => ({ label: s.label as string, value: s.value as string }))
+            : [],
+          sourceUrl: typeof c.sourceUrl === 'string' && c.sourceUrl.trim() ? c.sourceUrl : null,
+        }))
+        .filter((c) => c.name)
+    : []
+  const sources = Array.isArray(obj.sources)
+    ? (obj.sources as unknown[])
+        .filter((s): s is Record<string, unknown> => !!s && typeof s === 'object' && typeof (s as Record<string, unknown>).url === 'string')
+        .map((s) => ({ title: typeof s.title === 'string' && s.title.trim() ? s.title : (s.url as string), url: s.url as string }))
+    : []
+  return { comparedAgainst, sources, gradedAt: typeof obj.gradedAt === 'string' ? obj.gradedAt : undefined }
+}
+
 // The 4 headings every follow-up review is expected to contain (the 4th is
 // optional but encouraged). Kept in lowercase for matching; we display the
 // stored capitalization from the article on the page.

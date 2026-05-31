@@ -1562,6 +1562,7 @@ export type Database = {
           score_daily_use: number | null
           score_ease: number | null
           score_quality: number | null
+          score_specs: number | null
           score_value: number | null
           scroll_100_count: number
           scroll_25_count: number
@@ -1569,6 +1570,8 @@ export type Database = {
           scroll_75_count: number
           search_vector: unknown
           slug: string
+          specs_grade_data: Json
+          specs_grade_rationale: string | null
           standout_moment: string | null
           status: string
           testing_duration: string | null
@@ -1620,6 +1623,7 @@ export type Database = {
           score_daily_use?: number | null
           score_ease?: number | null
           score_quality?: number | null
+          score_specs?: number | null
           score_value?: number | null
           scroll_100_count?: number
           scroll_25_count?: number
@@ -1627,6 +1631,8 @@ export type Database = {
           scroll_75_count?: number
           search_vector?: unknown
           slug: string
+          specs_grade_data?: Json
+          specs_grade_rationale?: string | null
           standout_moment?: string | null
           status?: string
           testing_duration?: string | null
@@ -1678,6 +1684,7 @@ export type Database = {
           score_daily_use?: number | null
           score_ease?: number | null
           score_quality?: number | null
+          score_specs?: number | null
           score_value?: number | null
           scroll_100_count?: number
           scroll_25_count?: number
@@ -1685,6 +1692,8 @@ export type Database = {
           scroll_75_count?: number
           search_vector?: unknown
           slug?: string
+          specs_grade_data?: Json
+          specs_grade_rationale?: string | null
           standout_moment?: string | null
           status?: string
           testing_duration?: string | null

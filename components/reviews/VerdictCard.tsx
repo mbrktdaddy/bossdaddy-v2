@@ -8,6 +8,8 @@ interface SubScores {
   value: number | null
   ease: number | null
   dailyUse: number | null
+  /** Optional comparative axis — only rendered when graded. */
+  specs?: number | null
 }
 
 interface Props {
@@ -103,6 +105,9 @@ function SubScoreBars({ scores, size = 'md' }: { scores: SubScores; size?: 'sm' 
     { label: 'Value',       value: scores.value },
     { label: 'Ease of Use', value: scores.ease },
     { label: 'Daily Use',   value: scores.dailyUse },
+    // Specs is the comparative axis — only show the row when it's actually graded
+    // (legacy reviews keep the familiar 4 bars).
+    ...(scores.specs != null ? [{ label: 'Specs', value: scores.specs }] : []),
   ]
   const populated = entries.filter((e) => e.value != null)
   if (populated.length === 0) return null
@@ -189,7 +194,8 @@ export default function VerdictCard({
     subScores.quality != null ||
     subScores.value != null ||
     subScores.ease != null ||
-    subScores.dailyUse != null
+    subScores.dailyUse != null ||
+    subScores.specs != null
   )
 
   // ── Sidebar variant — sticky on XL, narrow column ──────────────────────────

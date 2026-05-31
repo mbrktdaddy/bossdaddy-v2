@@ -47,6 +47,18 @@ const UpdateSchema = z.object({
   score_value:              z.number().int().min(1).max(10).optional().nullable(),
   score_ease:               z.number().int().min(1).max(10).optional().nullable(),
   score_daily_use:          z.number().int().min(1).max(10).optional().nullable(),
+  score_specs:              z.number().int().min(1).max(10).optional().nullable(),
+  specs_grade_rationale:    z.string().max(2000).optional().nullable(),
+  specs_grade_data:         z.object({
+    comparedAgainst: z.array(z.object({
+      name:     z.string().max(120),
+      brand:    z.string().max(120).nullable().optional(),
+      keySpecs: z.array(z.object({ label: z.string().max(60), value: z.string().max(200) })).max(12).default([]),
+      sourceUrl: z.string().max(500).nullable().optional(),
+    })).max(8).default([]),
+    sources:  z.array(z.object({ title: z.string().max(200), url: z.string().max(500) })).max(12).default([]),
+    gradedAt: z.string().max(40).optional(),
+  }).optional().nullable(),
   would_rebuy:              z.boolean().optional().nullable(),
   verdict_change:           z.enum(['improved', 'unchanged', 'declined', 'complete_reversal']).optional().nullable(),
 })
@@ -270,6 +282,9 @@ export async function PUT(
   if (parsed.data.score_value !== undefined) updates.score_value = parsed.data.score_value
   if (parsed.data.score_ease !== undefined) updates.score_ease = parsed.data.score_ease
   if (parsed.data.score_daily_use !== undefined) updates.score_daily_use = parsed.data.score_daily_use
+  if (parsed.data.score_specs !== undefined) updates.score_specs = parsed.data.score_specs
+  if (parsed.data.specs_grade_rationale !== undefined) updates.specs_grade_rationale = parsed.data.specs_grade_rationale
+  if (parsed.data.specs_grade_data !== undefined) updates.specs_grade_data = parsed.data.specs_grade_data ?? {}
   if (parsed.data.would_rebuy !== undefined) updates.would_rebuy = parsed.data.would_rebuy
   if (parsed.data.verdict_change !== undefined) updates.verdict_change = parsed.data.verdict_change
   if (parsed.data.content) {

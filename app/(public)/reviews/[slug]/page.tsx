@@ -34,7 +34,7 @@ import BenchStrip from '@/components/BenchStrip'
 import CategoryIcon from '@/components/CategoryIcon'
 import { ReviewTimelineStrip } from '@/components/reviews/ReviewTimelineStrip'
 import { VerdictChangeBadge } from '@/components/reviews/VerdictChangeBadge'
-import { getReviewTimeline, transformFollowupContent, type VerdictChange } from '@/lib/reviews'
+import { getReviewTimeline, transformFollowupContent, parseSpecsGradeData, type VerdictChange } from '@/lib/reviews'
 import TrackView from '@/components/TrackView'
 import RecentlyViewedStrip from '@/components/RecentlyViewedStrip'
 
@@ -60,7 +60,7 @@ const getReview = cache(async (slug: string) => {
   const supabase = await createClient()
   const { data } = await supabase
     .from('reviews')
-    .select('id, slug, title, product_name, category, content, rating, excerpt, image_url, has_affiliate_links, product_slug, comparison_product_slugs, published_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, parent_review_id, milestone_label, milestone_days, previous_rating, verdict_change, reading_time_minutes, profiles(username)')
+    .select('id, slug, title, product_name, category, content, rating, excerpt, image_url, has_affiliate_links, product_slug, comparison_product_slugs, published_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, score_specs, specs_grade_rationale, specs_grade_data, would_rebuy, parent_review_id, milestone_label, milestone_days, previous_rating, verdict_change, reading_time_minutes, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -184,7 +184,11 @@ export default async function ReviewPage({ params }: Props) {
     value:    review.score_value     ?? null,
     ease:     review.score_ease      ?? null,
     dailyUse: review.score_daily_use ?? null,
+    specs:    review.score_specs     ?? null,
   }
+
+  const specsData = parseSpecsGradeData(review.specs_grade_data)
+  const hasSpecsGrade = review.score_specs != null && !!review.specs_grade_rationale?.trim()
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
 
@@ -441,6 +445,58 @@ export default async function ReviewPage({ params }: Props) {
             />
           </ImageLightbox>
         </div>
+
+        {/* Specs grade — how the measurable specs rank vs comparable models.
+            The comparison happens under the hood; readers see the grade + the
+            sources/models it was based on. Independent of the opt-in table below. */}
+        {hasSpecsGrade && (
+          <section className="mt-12 pt-8 border-t border-soft" aria-label="Specs grade">
+            <div className="mb-4">
+              <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
+              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Specs Grade</p>
+              <h2 className="text-2xl font-black text-prose leading-tight">How the specs stack up</h2>
+            </div>
+            <div className="rounded-xl border border-soft bg-surface p-5 sm:p-6">
+              <div className="flex items-baseline gap-3 mb-3">
+                <span className="text-3xl font-black text-prose tabular-nums leading-none">
+                  {review.score_specs}<span className="text-base text-prose-faint font-bold">/10</span>
+                </span>
+                <span className="text-xs text-prose-faint uppercase tracking-widest font-semibold">vs comparable models</span>
+              </div>
+              <p className="text-sm sm:text-base text-prose-muted leading-relaxed whitespace-pre-line">{review.specs_grade_rationale}</p>
+
+              {(specsData.comparedAgainst.length > 0 || specsData.sources.length > 0) && (
+                <details className="mt-4 text-sm">
+                  <summary className="cursor-pointer text-prose-muted hover:text-accent-text-soft font-medium">
+                    What this was compared against
+                  </summary>
+                  <div className="mt-3 space-y-2">
+                    {specsData.comparedAgainst.map((c, i) => (
+                      <div key={i} className="rounded-lg border border-soft bg-surface-sunken p-3">
+                        <p className="font-semibold text-prose">{c.brand ? `${c.brand} · ` : ''}{c.name}</p>
+                        {c.keySpecs.length > 0 && (
+                          <p className="text-xs text-prose-faint mt-1">{c.keySpecs.map((s) => `${s.label}: ${s.value}`).join(' · ')}</p>
+                        )}
+                      </div>
+                    ))}
+                    {specsData.sources.length > 0 && (
+                      <div className="pt-1">
+                        <p className="text-xs font-semibold text-prose-faint uppercase tracking-widest mb-1">Sources</p>
+                        <ul className="space-y-1">
+                          {specsData.sources.map((s, i) => (
+                            <li key={i} className="truncate">
+                              <a href={s.url} target="_blank" rel="noopener noreferrer nofollow" className="text-accent-text-soft hover:text-accent">{s.title}</a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </details>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Spec comparison — this product vs. the author's chosen rivals. */}
         {hasSpecComparison && (
