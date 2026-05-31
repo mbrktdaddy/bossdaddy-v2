@@ -16,6 +16,13 @@ const DraftInput = z.object({
   // Catalog facts (optional) — ground the draft when a product is linked.
   brand:           z.string().max(120).optional(),
   specs:           z.array(z.object({ label: z.string().max(60), value: z.string().max(200) })).max(30).default([]),
+  // Competitor products (optional) — author-selected, same category, other
+  // brands. Their verified specs let the draft draw honest head-to-head contrasts.
+  competitors:     z.array(z.object({
+                     name:  z.string().max(120),
+                     brand: z.string().max(120).optional(),
+                     specs: z.array(z.object({ label: z.string().max(60), value: z.string().max(200) })).max(30).default([]),
+                   })).max(4).default([]),
   // 'auto' lets Claude pick (2–3 images); a number forces exactly that many.
   imageSlots:      z.union([z.literal('auto'), z.number().int().min(0).max(6)]).default('auto'),
   // Experience fields — author-provided; drive tone/verdict alignment.
@@ -73,11 +80,25 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { productName, category, keyFeatures, targetAudience, productSlug, brand, specs, imageSlots, ratingHint, testingDuration, howYouUsedIt, standoutMoment, pricePaid } = parsed.data
+  const { productName, category, keyFeatures, targetAudience, productSlug, brand, specs, competitors, imageSlots, ratingHint, testingDuration, howYouUsedIt, standoutMoment, pricePaid } = parsed.data
 
   const cleanSpecs = specs.filter((s) => s.label.trim() && s.value.trim())
   const specsBlock = cleanSpecs.length
     ? `\n\nPRODUCT SPECS (verified facts — weave the relevant ones in naturally; never invent or contradict these, and don't dump them all as a list):\n${cleanSpecs.map((s) => `- ${s.label}: ${s.value}`).join('\n')}`
+    : ''
+
+  // Competitor context — author-picked rivals in the same category. Their specs
+  // let Claude draw real contrasts ("lighter than the X, but pricier"). Strict
+  // rule: only contrast on the facts given; never fabricate a competitor claim.
+  const cleanCompetitors = competitors
+    .map((c) => ({ ...c, specs: c.specs.filter((s) => s.label.trim() && s.value.trim()) }))
+    .filter((c) => c.name.trim())
+  const competitorsBlock = cleanCompetitors.length
+    ? `\n\nCOMPETITORS (the author is comparing against these — same category, other brands. Draw honest, specific head-to-head contrasts where it helps the reader decide; ONLY use the facts listed here, never invent a competitor's spec or claim):\n${cleanCompetitors.map((c) => {
+        const head = c.brand ? `${c.brand} ${c.name}` : c.name
+        const lines = c.specs.length ? c.specs.map((s) => `    • ${s.label}: ${s.value}`).join('\n') : '    • (no specs provided)'
+        return `- ${head}:\n${lines}`
+      }).join('\n')}`
     : ''
 
   const durationLabel: Record<string, string> = {
@@ -95,7 +116,7 @@ export async function POST(request: NextRequest) {
   const prompt = `Write a product review:
 
 Product: ${productName}${brand ? `\nBrand: ${brand}` : ''}
-Category: ${category}${keyFeatures.length ? `\nKey Features: ${keyFeatures.join(', ')}` : ''}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}${productSlug ? `\nProduct slug: ${productSlug}` : ''}${specsBlock}
+Category: ${category}${keyFeatures.length ? `\nKey Features: ${keyFeatures.join(', ')}` : ''}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}${productSlug ? `\nProduct slug: ${productSlug}` : ''}${specsBlock}${competitorsBlock}
 
 AUTHOR EXPERIENCE (ground truth — write the review as if you lived this):
 ${experienceLines}

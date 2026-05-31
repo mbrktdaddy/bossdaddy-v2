@@ -6,7 +6,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import RatingScore from '@/components/RatingScore'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
-import { getProductBySlug } from '@/lib/products'
+import { getProductsBySlugs, buildSpecComparison, type ProductSpec, type SpecComparisonColumn } from '@/lib/products'
+import SpecComparisonTable from '@/components/products/SpecComparisonTable'
 import { getCategoryBySlug } from '@/lib/categories'
 import ArticleTOC from '@/components/collections/ArticleTOC'
 import EditorialMeta from '@/components/collections/EditorialMeta'
@@ -118,11 +119,27 @@ export default async function ComparisonDetailPage({ params }: Props) {
 
   // Affiliate CTAs + per-item price lookup
   const productSlugs = [...new Set(items.map((i) => i.review?.product_slug).filter(Boolean) as string[])]
-  const productMap = new Map<string, { slug: string; affiliate_url: string | null; non_affiliate_url: string | null; price_cents: number | null }>()
-  await Promise.all(productSlugs.map(async (ps) => {
-    const product = await getProductBySlug(supabase, ps)
-    if (product) productMap.set(ps, { slug: product.slug, affiliate_url: product.affiliate_url, non_affiliate_url: product.non_affiliate_url, price_cents: product.price_cents })
-  }))
+  const productMap = new Map<string, { slug: string; affiliate_url: string | null; non_affiliate_url: string | null; price_cents: number | null; brand: string | null; specs: ProductSpec[] }>()
+  for (const product of await getProductsBySlugs(supabase, productSlugs)) {
+    productMap.set(product.slug, { slug: product.slug, affiliate_url: product.affiliate_url, non_affiliate_url: product.non_affiliate_url, price_cents: product.price_cents, brand: product.brand, specs: product.specs ?? [] })
+  }
+
+  // Spec-comparison columns from the linked products, in scorecard order. Header
+  // links jump to each contender's deep dive. Self-suppresses when < 2 products
+  // carry specs.
+  const specColumns: SpecComparisonColumn[] = items.flatMap(({ review }) => {
+    const p = review?.product_slug ? productMap.get(review.product_slug) : null
+    if (!review || !p) return []
+    return [{
+      slug: review.slug,
+      name: review.product_name,
+      brand: p.brand,
+      imageUrl: review.image_url,
+      href: `#dive-${review.slug}`,
+      specs: p.specs,
+    }]
+  })
+  const hasSpecSheet = specColumns.length >= 2 && buildSpecComparison(specColumns).length > 0
 
   // Dominant category among the items — drives methodology + FAQ + related selection
   const categoryCounts = new Map<string, number>()
@@ -180,6 +197,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
     ...(comparison.intro_html ? [{ id: 'overview', label: 'The Take' }] : []),
     ...(categoryDef       ? [{ id: 'how-i-tested', label: 'How I Tested' }] : []),
     ...(items.length >= 2 ? [{ id: 'scorecard',    label: 'The Scorecard' }] : []),
+    ...(hasSpecSheet       ? [{ id: 'spec-sheet',   label: 'The Spec Sheet' }] : []),
     ...items.map((it) => ({
       id:    `dive-${it.review!.slug}`,
       label: it.review!.product_name,
@@ -219,24 +237,30 @@ export default async function ComparisonDetailPage({ params }: Props) {
     name:        comparison.title,
     description: comparison.description ?? undefined,
     numberOfItems: items.length,
-    itemListElement: items.map((entry, idx) => ({
-      '@type':   'ListItem',
-      position:  idx + 1,
-      url:       `${siteUrl}/reviews/${entry.review!.slug}`,
-      name:      entry.review!.product_name,
-      item: {
-        '@type':         'Product',
-        name:            entry.review!.product_name,
-        image:           entry.review!.image_url ?? undefined,
-        aggregateRating: entry.review!.rating != null ? {
-          '@type':       'AggregateRating',
-          ratingValue:   entry.review!.rating,
-          bestRating:    10,
-          worstRating:   1,
-          ratingCount:   1,
-        } : undefined,
-      },
-    })),
+    itemListElement: items.map((entry, idx) => {
+      const p = entry.review!.product_slug ? productMap.get(entry.review!.product_slug) : null
+      const props = (p?.specs ?? []).filter((s) => s.label?.trim() && s.value?.trim())
+      return {
+        '@type':   'ListItem',
+        position:  idx + 1,
+        url:       `${siteUrl}/reviews/${entry.review!.slug}`,
+        name:      entry.review!.product_name,
+        item: {
+          '@type':         'Product',
+          name:            entry.review!.product_name,
+          image:           entry.review!.image_url ?? undefined,
+          ...(p?.brand ? { brand: { '@type': 'Brand', name: p.brand } } : {}),
+          ...(props.length ? { additionalProperty: props.map((s) => ({ '@type': 'PropertyValue', name: s.label, value: s.value })) } : {}),
+          aggregateRating: entry.review!.rating != null ? {
+            '@type':       'AggregateRating',
+            ratingValue:   entry.review!.rating,
+            bestRating:    10,
+            worstRating:   1,
+            ratingCount:   1,
+          } : undefined,
+        },
+      }
+    }),
   } : null
 
   const faqLd = faqPageLd(faqs)
@@ -451,6 +475,18 @@ export default async function ComparisonDetailPage({ params }: Props) {
                   </table>
                 </div>
               </section>
+            )}
+
+            {/* Spec sheet — physical specs side by side, complementing the
+                sub-score scorecard above. Self-suppresses when < 2 products
+                carry specs. */}
+            {hasSpecSheet && (
+              <SpecComparisonTable
+                columns={specColumns}
+                id="spec-sheet"
+                eyebrow="The Spec Sheet"
+                heading="Specs, side by side"
+              />
             )}
 
             {/* Per-product deep dives — alternating image position */}

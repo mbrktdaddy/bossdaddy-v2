@@ -28,7 +28,8 @@ import StickyMobileCta from '@/components/StickyMobileCta'
 import ReadingProgressBar from '@/components/ReadingProgressBar'
 import { EmailSignup } from '@/components/EmailSignup'
 import AuthorBio from '@/components/AuthorBio'
-import { getProductBySlug } from '@/lib/products'
+import { getProductBySlug, getProductsBySlugs, buildSpecComparison, type SpecComparisonColumn } from '@/lib/products'
+import SpecComparisonTable from '@/components/products/SpecComparisonTable'
 import BenchStrip from '@/components/BenchStrip'
 import CategoryIcon from '@/components/CategoryIcon'
 import { ReviewTimelineStrip } from '@/components/reviews/ReviewTimelineStrip'
@@ -59,7 +60,7 @@ const getReview = cache(async (slug: string) => {
   const supabase = await createClient()
   const { data } = await supabase
     .from('reviews')
-    .select('id, slug, title, product_name, category, content, rating, excerpt, image_url, has_affiliate_links, product_slug, published_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, parent_review_id, milestone_label, milestone_days, previous_rating, verdict_change, reading_time_minutes, profiles(username)')
+    .select('id, slug, title, product_name, category, content, rating, excerpt, image_url, has_affiliate_links, product_slug, comparison_product_slugs, published_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, parent_review_id, milestone_label, milestone_days, previous_rating, verdict_change, reading_time_minutes, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -103,7 +104,9 @@ export default async function ReviewPage({ params }: Props) {
   // in parallel — they don't depend on each other. Bench back-link closes the
   // first lifecycle loop (wishlist → review); timeline closes the second
   // (review → follow-up → re-verdict).
-  const [{ data: related }, product, { data: benchItem }, timeline] = await Promise.all([
+  const comparisonSlugs = (review.comparison_product_slugs as string[] | null) ?? []
+
+  const [{ data: related }, product, { data: benchItem }, timeline, competitorProducts] = await Promise.all([
     supabase
       .from('reviews')
       .select('id, slug, title, product_name, rating, excerpt')
@@ -122,7 +125,32 @@ export default async function ReviewPage({ params }: Props) {
       .eq('review_id', review.id)
       .maybeSingle(),
     getReviewTimeline(supabase, review.id, review.parent_review_id),
+    comparisonSlugs.length ? getProductsBySlugs(supabase, comparisonSlugs) : Promise.resolve([]),
   ])
+
+  // Spec-comparison columns: the review's own product first (highlighted), then
+  // each chosen competitor in saved order. The table self-suppresses when there
+  // are < 2 columns or no shared/known specs, so this is safe to always build.
+  // A "how it compares" table only makes sense with the reviewed product as the
+  // subject — so competitor columns are built only when this review links a
+  // catalog product. Without that primary, we render nothing (a head-to-head of
+  // rivals with no subject would be misleading).
+  const specColumns: SpecComparisonColumn[] = []
+  if (product) {
+    specColumns.push({
+      slug: product.slug,
+      name: review.product_name,
+      brand: product.brand,
+      imageUrl: product.image_url,
+      isPrimary: true,
+      specs: product.specs ?? [],
+    })
+    for (const cs of comparisonSlugs) {
+      const cp = competitorProducts.find((p) => p.slug === cs)
+      if (cp) specColumns.push({ slug: cp.slug, name: cp.name, brand: cp.brand, imageUrl: cp.image_url, specs: cp.specs ?? [] })
+    }
+  }
+  const hasSpecComparison = specColumns.length >= 2 && buildSpecComparison(specColumns).length > 0
 
   const isFollowup = review.parent_review_id !== null
   const parentNode = timeline.find((n) => n.is_parent) ?? null
@@ -164,6 +192,14 @@ export default async function ReviewPage({ params }: Props) {
     itemReviewed: {
       '@type': 'Product',
       name: review.product_name,
+      ...(product?.brand ? { brand: { '@type': 'Brand', name: product.brand } } : {}),
+      ...(product?.specs?.length
+        ? {
+            additionalProperty: product.specs
+              .filter((s) => s.label?.trim() && s.value?.trim())
+              .map((s) => ({ '@type': 'PropertyValue', name: s.label, value: s.value })),
+          }
+        : {}),
       aggregateRating: {
         '@type': 'AggregateRating',
         ratingValue: review.rating,
@@ -399,6 +435,17 @@ export default async function ReviewPage({ params }: Props) {
             />
           </ImageLightbox>
         </div>
+
+        {/* Spec comparison — this product vs. the author's chosen rivals. */}
+        {hasSpecComparison && (
+          <div className="mt-12 pt-8 border-t border-soft">
+            <SpecComparisonTable
+              columns={specColumns}
+              eyebrow="Head-to-Head"
+              heading="How it compares"
+            />
+          </div>
+        )}
 
         {/* Final product CTA — last chance to convert, before the newsletter box */}
         {product && (

@@ -1525,6 +1525,7 @@ export type Database = {
           author_id: string
           best_for: Json
           category: string
+          comparison_product_slugs: string[]
           cons: Json | null
           content: string
           created_at: string | null
@@ -1582,6 +1583,7 @@ export type Database = {
           author_id: string
           best_for?: Json
           category: string
+          comparison_product_slugs?: string[]
           cons?: Json | null
           content: string
           created_at?: string | null
@@ -1639,6 +1641,7 @@ export type Database = {
           author_id?: string
           best_for?: Json
           category?: string
+          comparison_product_slugs?: string[]
           cons?: Json | null
           content?: string
           created_at?: string | null

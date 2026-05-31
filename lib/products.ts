@@ -110,6 +110,85 @@ export async function getProductBySlug(
   return (data as Product | null) ?? null
 }
 
+/** Fetch multiple products by slug in one round-trip. Order is not guaranteed. */
+export async function getProductsBySlugs(
+  supabase: SupabaseClient,
+  slugs: string[],
+): Promise<Product[]> {
+  const unique = [...new Set(slugs.filter(Boolean))]
+  if (unique.length === 0) return []
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .in('slug', unique)
+  if (error) {
+    console.error('getProductsBySlugs failed:', error)
+    return []
+  }
+  return ((data ?? []) as unknown as Product[])
+}
+
+/** One column of a spec-comparison table — a product plus presentation hints. */
+export interface SpecComparisonColumn {
+  slug: string
+  name: string
+  brand: string | null
+  imageUrl?: string | null
+  /** Link target for the column header (review or product page). */
+  href?: string | null
+  /** Highlight this column — the review's own product among its competitors. */
+  isPrimary?: boolean
+  specs: ProductSpec[]
+}
+
+/** One row of the matrix: a label and its value per column (null = missing). */
+export interface SpecComparisonRow {
+  label: string
+  values: (string | null)[]
+}
+
+/**
+ * Build a ragged-safe comparison matrix from N product spec lists.
+ *
+ * - Rows are the UNION of all spec labels across columns, matched
+ *   case-insensitively (label 'Weight' and 'weight' collapse to one row);
+ *   the first-seen casing wins as the display label.
+ * - Row order follows first appearance across the columns in order.
+ * - Missing cells are `null` so the renderer can show a placeholder — older
+ *   products with `specs: []` simply contribute no rows and read as "—".
+ * - Values are returned verbatim. Specs are free text with no unit
+ *   normalization, so magnitudes are NOT assumed comparable — display as-is.
+ * - No HTML escaping here: callers render values as React text children, which
+ *   React escapes. (If a caller ever builds raw HTML, it must escape like
+ *   `resolveProductTokens` does.)
+ */
+export function buildSpecComparison(columns: SpecComparisonColumn[]): SpecComparisonRow[] {
+  const order: string[] = []                            // lowercased keys, first-seen order
+  const display = new Map<string, string>()             // key → display label
+  const byKey = new Map<string, Map<number, string>>()  // key → (colIdx → value)
+
+  columns.forEach((col, idx) => {
+    for (const spec of col.specs ?? []) {
+      const label = spec?.label?.trim()
+      const value = spec?.value?.trim()
+      if (!label || !value) continue
+      const key = label.toLowerCase()
+      if (!display.has(key)) {
+        display.set(key, label)
+        order.push(key)
+        byKey.set(key, new Map())
+      }
+      const cell = byKey.get(key)!
+      if (!cell.has(idx)) cell.set(idx, value)  // first non-empty value per cell wins
+    }
+  })
+
+  return order.map((key) => ({
+    label: display.get(key)!,
+    values: columns.map((_, idx) => byKey.get(key)!.get(idx) ?? null),
+  }))
+}
+
 /**
  * Replace every `[[BUY:slug]]` token in the input HTML with an affiliate anchor.
  *

@@ -17,6 +17,7 @@ interface ProductOption {
   name: string
   brand: string | null
   specs: ProductSpec[]
+  category: string | null
   store: string
   affiliate_url: string | null
   non_affiliate_url: string | null
@@ -33,6 +34,7 @@ export function ReviewCreateWizard() {
   const [productSlug, setProductSlug]   = useState('')
   const [keyFeatures, setKeyFeatures]   = useState('')
   const [category, setCategory]         = useState('')
+  const [comparisonSlugs, setComparisonSlugs] = useState<string[]>([])
   const [imageSlots, setImageSlots]     = useState<number | 'auto'>('auto')
   const [suggesting, setSuggesting]     = useState(false)
   const [suggestions, setSuggestions]   = useState<{ productName: string; angle: string; keyFeatures: string[] }[]>([])
@@ -57,6 +59,7 @@ export function ReviewCreateWizard() {
       if (saved.productSlug)            setProductSlug(saved.productSlug)
       if (saved.keyFeatures)            setKeyFeatures(saved.keyFeatures)
       if (saved.category)               setCategory(saved.category)
+      if (Array.isArray(saved.comparisonSlugs)) setComparisonSlugs(saved.comparisonSlugs)
       if (saved.imageSlots !== undefined) setImageSlots(saved.imageSlots)
       if (saved.inputRating != null)    setInputRating(saved.inputRating)
       if (saved.testingDuration)        setTestingDuration(saved.testingDuration)
@@ -68,9 +71,9 @@ export function ReviewCreateWizard() {
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, productName, productSlug, keyFeatures, category, imageSlots, inputRating, testingDuration, howYouUsedIt, standoutMoment, pricePaid }))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, productName, productSlug, keyFeatures, category, comparisonSlugs, imageSlots, inputRating, testingDuration, howYouUsedIt, standoutMoment, pricePaid }))
     } catch { /* ignore */ }
-  }, [description, productName, productSlug, keyFeatures, category, imageSlots, inputRating, testingDuration, howYouUsedIt, standoutMoment, pricePaid])
+  }, [description, productName, productSlug, keyFeatures, category, comparisonSlugs, imageSlots, inputRating, testingDuration, howYouUsedIt, standoutMoment, pricePaid])
 
   const [previewDraft, setPreviewDraft] = useState<{
     title: string; excerpt: string; content: string
@@ -105,7 +108,40 @@ export function ReviewCreateWizard() {
       if (!pricePaid.trim() && match.price_cents != null) {
         setPricePaid(String(match.price_cents))
       }
+      // Seed the category from the catalog product (only if unset) — this also
+      // unlocks the competitor picker, which is gated on a chosen category.
+      if (!category && match.category) {
+        setCategory(match.category)
+      }
     }
+  }
+
+  // Competitor picker — same category, different brand than the linked product.
+  // Requires a category; brand exclusion only kicks in once a catalog product is
+  // linked (we need its brand to know what "different brand" means).
+  const linkedProduct = productSlug.trim() ? products.find((p) => p.slug === productSlug.trim()) : undefined
+  const competitorOptions = category
+    ? products.filter((p) =>
+        p.category === category &&
+        p.slug !== productSlug.trim() &&
+        (linkedProduct?.brand
+          ? (p.brand ?? '').trim().toLowerCase() !== linkedProduct.brand.trim().toLowerCase()
+          : true),
+      )
+    : []
+  const selectedCompetitors = competitorOptions.filter((p) => comparisonSlugs.includes(p.slug))
+  const MAX_COMPETITORS = 4
+
+  function toggleCompetitor(slug: string) {
+    setComparisonSlugs((prev) =>
+      prev.includes(slug)
+        ? prev.filter((s) => s !== slug)
+        : prev.length >= MAX_COMPETITORS ? prev : [...prev, slug],
+    )
+  }
+
+  function specCount(p: ProductOption): number {
+    return (Array.isArray(p.specs) ? p.specs : []).filter((s) => s.label?.trim() && s.value?.trim()).length
   }
 
   async function handleSuggest() {
@@ -152,6 +188,13 @@ export function ReviewCreateWizard() {
       const rawSpecs = linked?.specs
       const linkedSpecs = (Array.isArray(rawSpecs) ? rawSpecs : []).filter((s) => s.label?.trim() && s.value?.trim())
 
+      // Selected competitors → name/brand/specs for honest head-to-head prose.
+      const competitorPayload = selectedCompetitors.map((c) => ({
+        name: c.name,
+        ...(c.brand?.trim() ? { brand: c.brand.trim() } : {}),
+        specs: (Array.isArray(c.specs) ? c.specs : []).filter((s) => s.label?.trim() && s.value?.trim()),
+      }))
+
       const genRes = await fetch('/api/claude/draft', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -164,6 +207,7 @@ export function ReviewCreateWizard() {
           ...(productSlug.trim() ? { productSlug: productSlug.trim() } : {}),
           ...(linked?.brand?.trim() ? { brand: linked.brand.trim() } : {}),
           ...(linkedSpecs.length ? { specs: linkedSpecs } : {}),
+          ...(competitorPayload.length ? { competitors: competitorPayload } : {}),
           ...(testingDuration ? { testingDuration } : {}),
           ...(howYouUsedIt.trim() ? { howYouUsedIt: howYouUsedIt.trim() } : {}),
           ...(standoutMoment.trim() ? { standoutMoment: standoutMoment.trim() } : {}),
@@ -261,6 +305,7 @@ export function ReviewCreateWizard() {
           best_for: previewDraft.bestFor,
           not_for: previewDraft.notFor,
           faqs: previewDraft.faqs,
+          comparison_product_slugs: selectedCompetitors.map((c) => c.slug),
           testing_duration: testingDuration || null,
           how_you_used_it: howYouUsedIt.trim() || null,
           standout_moment: standoutMoment.trim() || null,
@@ -308,6 +353,7 @@ export function ReviewCreateWizard() {
           pros: [],
           cons: [],
           product_slug: productSlug.trim() || null,
+          comparison_product_slugs: selectedCompetitors.map((c) => c.slug),
           disclosure_acknowledged: false,
           testing_duration: testingDuration || null,
           how_you_used_it: howYouUsedIt.trim() || null,
@@ -538,6 +584,58 @@ export function ReviewCreateWizard() {
             <option value="" disabled>Select a category…</option>
             {CATEGORIES.map(c => <option key={c.slug} value={c.slug}>{c.icon} {c.label}</option>)}
           </select>
+        </div>
+
+        {/* ── Compare against ──────────────────────────────────────────────
+            Same category, different brand. Selected rivals feed honest
+            head-to-head contrasts into the AI draft and render a spec table on
+            the published review (when this review links a catalog product). */}
+        <div>
+          <label className="block text-sm text-prose-muted mb-1.5">
+            Compare against <span className="text-prose-faint">(optional — up to {MAX_COMPETITORS})</span>
+          </label>
+          {!category ? (
+            <p className="text-xs text-prose-faint">Pick a category to see comparable products.</p>
+          ) : competitorOptions.length === 0 ? (
+            <p className="text-xs text-prose-faint">
+              No other {CATEGORIES.find((c) => c.slug === category)?.label ?? 'category'} products in the catalog yet
+              {linkedProduct?.brand ? ` from a different brand than ${linkedProduct.brand}` : ''}.
+            </p>
+          ) : (
+            <>
+              <div className="flex flex-wrap gap-2">
+                {competitorOptions.map((p) => {
+                  const active = comparisonSlugs.includes(p.slug)
+                  const n = specCount(p)
+                  const atCap = !active && comparisonSlugs.length >= MAX_COMPETITORS
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => toggleCompetitor(p.slug)}
+                      disabled={atCap}
+                      className={`px-3 py-2.5 text-xs font-semibold rounded-lg border transition-colors text-left min-h-[44px] ${
+                        active
+                          ? 'bg-accent text-white border-accent'
+                          : atCap
+                          ? 'bg-surface-sunken border-soft text-prose-faint opacity-50 cursor-not-allowed'
+                          : 'bg-surface-sunken border-strong text-prose-muted hover:border-accent-border/60 hover:text-prose'
+                      }`}
+                    >
+                      {p.brand && <span className={active ? 'text-white/80' : 'text-prose-faint'}>{p.brand} · </span>}
+                      {p.name}
+                      <span className={active ? 'text-white/70' : 'text-prose-faint'}> · {n} spec{n === 1 ? '' : 's'}</span>
+                    </button>
+                  )
+                })}
+              </div>
+              <p className="mt-1 text-xs text-prose-faint">
+                {selectedCompetitors.length > 0
+                  ? `${selectedCompetitors.length} selected. Products with no specs still inform the prose but add no table rows.`
+                  : 'The spec table needs at least one rival with specs and this review linked to a catalog product.'}
+              </p>
+            </>
+          )}
         </div>
 
       {/* ── Your Experience ─────────────────────────────────────────────── */}

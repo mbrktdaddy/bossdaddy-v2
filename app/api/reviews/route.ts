@@ -21,6 +21,7 @@ const CreateReviewSchema = z.object({
   disclosure_acknowledged: z.boolean(),
   image_url: z.string().url().optional().nullable(),
   product_slug: z.string().max(80).optional().nullable(),
+  comparison_product_slugs: z.array(z.string().regex(/^[a-z0-9-]+$/).max(80)).max(4).default([]),
   tldr: z.string().max(600).optional().nullable(),
   key_takeaways: z.array(z.string()).default([]),
   best_for: z.array(z.string()).default([]),
@@ -55,7 +56,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { title, product_name, category, excerpt, content, pros, cons, disclosure_acknowledged, image_url, product_slug, tldr, key_takeaways, best_for, not_for, faqs, testing_duration, how_you_used_it, standout_moment, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, suggested_tags } = parsed.data
+    const { title, product_name, category, excerpt, content, pros, cons, disclosure_acknowledged, image_url, product_slug, comparison_product_slugs, tldr, key_takeaways, best_for, not_for, faqs, testing_duration, how_you_used_it, standout_moment, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, suggested_tags } = parsed.data
+
+    // Don't let a product compare against itself; keep slugs distinct.
+    const comparisonSlugs = [...new Set(comparison_product_slugs.filter((s) => s && s !== product_slug))]
 
     let sanitizedContent: string
     try {
@@ -93,6 +97,7 @@ export async function POST(request: NextRequest) {
         content: sanitizedContent,
         image_url: image_url ?? null,
         product_slug: product_slug ?? null,
+        comparison_product_slugs: comparisonSlugs,
         pros,
         cons,
         tldr: tldr ?? null,

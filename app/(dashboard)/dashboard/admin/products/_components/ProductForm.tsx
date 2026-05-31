@@ -617,8 +617,11 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
 
         {/* AI autofill — paste a manufacturer/retailer spec sheet, extract facts */}
         <details className="text-xs text-prose-faint border-t border-soft pt-3">
-          <summary className="cursor-pointer hover:text-prose-muted transition-colors font-semibold">
-            ✨ Autofill from a spec sheet (AI)
+          <summary className="cursor-pointer hover:text-prose-muted transition-colors font-semibold inline-flex items-center gap-1.5">
+            <svg className="w-3.5 h-3.5 text-accent-text-soft shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg>
+            Autofill from a spec sheet (AI)
           </summary>
           <div className="mt-2 space-y-2">
             <p className="text-prose-faint">
