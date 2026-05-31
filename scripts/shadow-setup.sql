@@ -76,3 +76,15 @@ create or replace function storage.foldername(name text)
 returns text[] language sql immutable as $$
   select (string_to_array(name, '/'))[1 : greatest(array_length(string_to_array(name, '/'), 1) - 1, 0)]
 $$;
+
+-- ── Realtime publication ─────────────────────────────────────────────────────
+-- Supabase ships a logical-replication publication named `supabase_realtime`
+-- that Realtime-enabled tables are added to (migrations 082, 083 do
+-- `alter publication supabase_realtime add table ...`). Vanilla Postgres has
+-- none, so create an empty one for those statements to parse.
+do $$
+begin
+  if not exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    create publication supabase_realtime;
+  end if;
+end $$;
