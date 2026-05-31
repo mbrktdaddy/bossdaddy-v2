@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Product, ProductSpec } from '@/lib/products'
 import { STORE_OPTIONS, PRODUCT_STATUS_OPTIONS } from '@/lib/products'
-import { CATEGORIES } from '@/lib/categories'
+import { CATEGORIES, getCategoryLabel } from '@/lib/categories'
+import { getSpecTemplate } from '@/lib/spec-templates'
 import { ProductImageGallery } from '@/components/admin/ProductImageGallery'
 import { PendingImageGallery, flushPendingImages, type PendingImage } from '@/components/admin/PendingImageGallery'
 import { buildAmazonAffiliateUrl, extractAsin, isValidAsin } from '@/lib/amazon-tag'
@@ -50,6 +51,11 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
   const [createdProductId, setCreatedProductId] = useState<string | null>(null)
   const [uploadStatus,     setUploadStatus]     = useState<string | null>(null)
 
+  // AI autofill (paste a spec sheet → structured brand + specs)
+  const [factsText,    setFactsText]    = useState('')
+  const [autofilling,  setAutofilling]  = useState(false)
+  const [autofillNote, setAutofillNote] = useState<string | null>(null)
+
   function addSpec() {
     setSpecs((prev) => [...prev, { label: '', value: '' }])
   }
@@ -58,6 +64,60 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
   }
   function removeSpec(i: number) {
     setSpecs((prev) => prev.filter((_, idx) => idx !== i))
+  }
+
+  // Placeholder hint for a spec value input, drawn from the category template.
+  function hintFor(label: string): string {
+    const t = getSpecTemplate(category).find((f) => f.label.toLowerCase() === label.trim().toLowerCase())
+    return t?.hint ? `Value — ${t.hint}` : 'Value'
+  }
+
+  // Seed the panel with the category's canonical spec labels (empty values),
+  // skipping any label already present. Keeps comparison rows aligned.
+  function applyTemplate() {
+    const have = new Set(specs.map((s) => s.label.trim().toLowerCase()))
+    const additions = getSpecTemplate(category)
+      .filter((f) => !have.has(f.label.toLowerCase()))
+      .map((f) => ({ label: f.label, value: '' }))
+    if (additions.length === 0) return
+    setSpecs((prev) => [...prev, ...additions])
+  }
+
+  async function handleAutofill() {
+    if (!factsText.trim()) { setAutofillNote('Paste some product copy first.'); return }
+    setAutofilling(true); setAutofillNote(null)
+    try {
+      const res = await fetch('/api/claude/product-facts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rawText: factsText.trim(), ...(category ? { category } : {}) }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Autofill failed')
+
+      const incoming: ProductSpec[] = Array.isArray(json.specs) ? json.specs : []
+      // Merge: fill empty existing values + append new labels; never clobber a
+      // value the user already typed.
+      setSpecs((prev) => {
+        const byKey = new Map(prev.map((s) => [s.label.trim().toLowerCase(), { ...s }]))
+        for (const s of incoming) {
+          const key = s.label?.trim().toLowerCase()
+          if (!key || !s.value?.trim()) continue
+          const existing = byKey.get(key)
+          if (existing) { if (!existing.value.trim()) existing.value = s.value }
+          else byKey.set(key, { label: s.label, value: s.value })
+        }
+        return Array.from(byKey.values())
+      })
+
+      let brandNote = ''
+      if (json.brand && !brand.trim()) { setBrand(json.brand); brandNote = ` Brand set to "${json.brand}".` }
+      setAutofillNote(`Added ${incoming.length} spec${incoming.length === 1 ? '' : 's'}.${brandNote} Review and edit before saving.`)
+    } catch (err) {
+      setAutofillNote(err instanceof Error ? err.message : 'Autofill failed')
+    } finally {
+      setAutofilling(false)
+    }
   }
 
   async function handleSave(e: React.FormEvent) {
@@ -466,13 +526,23 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
               Optional spec sheet — label &amp; value pairs (e.g. Weight → 2.1 lbs). Fed into the AI review draft and brand comparisons. Leave empty if specs are unreliable.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={addSpec}
-            className="shrink-0 text-xs px-3 py-2 bg-surface border border-strong hover:border-accent/60 text-prose-muted hover:text-prose font-semibold rounded-lg transition-colors min-h-[36px]"
-          >
-            + Add spec
-          </button>
+          <div className="shrink-0 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={applyTemplate}
+              title={`Add the suggested ${category ? getCategoryLabel(category) : 'general'} spec labels`}
+              className="text-xs px-3 py-2 bg-surface border border-strong hover:border-accent/60 text-prose-muted hover:text-prose font-semibold rounded-lg transition-colors min-h-[36px]"
+            >
+              Apply {category ? getCategoryLabel(category) : 'general'} template
+            </button>
+            <button
+              type="button"
+              onClick={addSpec}
+              className="text-xs px-3 py-2 bg-surface border border-strong hover:border-accent/60 text-prose-muted hover:text-prose font-semibold rounded-lg transition-colors min-h-[36px]"
+            >
+              + Add spec
+            </button>
+          </div>
         </div>
 
         {specs.length === 0 ? (
@@ -494,7 +564,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
                   value={s.value}
                   onChange={(e) => updateSpec(i, 'value', e.target.value)}
                   maxLength={200}
-                  placeholder="Value (e.g. 2.1 lbs)"
+                  placeholder={hintFor(s.label)}
                   className="flex-1 px-3 py-2 bg-surface border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
                 />
                 <button
@@ -509,6 +579,38 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
             ))}
           </div>
         )}
+
+        {/* AI autofill — paste a manufacturer/retailer spec sheet, extract facts */}
+        <details className="text-xs text-prose-faint border-t border-soft pt-3">
+          <summary className="cursor-pointer hover:text-prose-muted transition-colors font-semibold">
+            ✨ Autofill from a spec sheet (AI)
+          </summary>
+          <div className="mt-2 space-y-2">
+            <p className="text-prose-faint">
+              Paste the manufacturer or retailer product copy. Claude extracts brand + specs (aligned to the
+              {category ? ` ${getCategoryLabel(category)}` : ''} template) — only facts stated in the text, nothing invented. Existing values you typed are never overwritten.
+            </p>
+            <textarea
+              value={factsText}
+              onChange={(e) => setFactsText(e.target.value)}
+              maxLength={6000}
+              rows={5}
+              placeholder="Paste product description, spec table, or bullet points here…"
+              className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
+            />
+            <div className="flex items-center gap-3 flex-wrap">
+              <button
+                type="button"
+                onClick={handleAutofill}
+                disabled={autofilling || !factsText.trim()}
+                className="text-xs px-3 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-semibold rounded-lg transition-colors min-h-[36px]"
+              >
+                {autofilling ? 'Extracting…' : 'Extract facts'}
+              </button>
+              {autofillNote && <span className="text-prose-muted">{autofillNote}</span>}
+            </div>
+          </div>
+        </details>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
