@@ -72,6 +72,9 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  // Guards the one-time "seeded filter returned nothing → show All" fallback so
+  // it never overrides a filter the user later picks by hand.
+  const firstLoadRef = useRef(true)
 
   // Crop-on-upload state — populated when a single file is being processed
   // and uploadAspect was provided. The ref holds the Promise resolver so the
@@ -134,8 +137,8 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
       const file = new File([blob], 'crop.webp', { type: 'image/webp' })
       const fd = new FormData()
       fd.append('file', file)
-      if (filterCategory  && filterCategory  !== '__none__') fd.append('category',   filterCategory)
-      if (filterProductId && filterProductId !== '__none__') fd.append('product_id', filterProductId)
+      if (uploadCategory)  fd.append('category',   uploadCategory)
+      if (uploadProductId) fd.append('product_id', uploadProductId)
       const res = await fetch('/api/media', { method: 'POST', body: fd })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Crop save failed')
@@ -159,6 +162,13 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
   const [products, setProducts] = useState<Product[]>([])
   const [filterProductId, setFilterProductId] = useState<string>(defaultProductId ?? '')
   const [filterCategory,  setFilterCategory]  = useState<string>(defaultCategory  ?? '')
+
+  // Tags applied to NEW uploads: the active drill-down filter when the user has
+  // one, otherwise the caller's context (so an image uploaded from the "All"
+  // view — e.g. after the empty-filter fallback — still inherits the article's
+  // category/product). '__none__' is a negative filter, so it tags nothing.
+  const uploadCategory  = filterCategory  === '__none__' ? '' : (filterCategory  || defaultCategory  || '')
+  const uploadProductId = filterProductId === '__none__' ? '' : (filterProductId || defaultProductId || '')
 
   // Generate state
   const [genPrompt, setGenPrompt] = useState('')
@@ -194,12 +204,26 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
     if (productId) qs.set('product_id', productId)
     if (category)  qs.set('category',   category)
     const res = await fetch(`/api/media?${qs}`)
+    let nextTotal = 0
     if (res.ok) {
       const json = await res.json()
       setAssets(json.assets)
       setTotal(json.total)
+      nextTotal = json.total
     }
     setLoading(false)
+
+    // One-time only: if the caller pre-seeded a product/category filter and it
+    // came back empty, drop to "All" so the editor sees the library immediately
+    // instead of an empty grid they have to clear by hand. Never fires again, so
+    // a filter the user deliberately picks later is respected.
+    if (firstLoadRef.current) {
+      firstLoadRef.current = false
+      if (nextTotal === 0 && (productId || category)) {
+        setFilterProductId('')
+        setFilterCategory('')
+      }
+    }
   }, [])
 
   useEffect(() => { fetchAssets(page, filterProductId, filterCategory) }, [fetchAssets, page, filterProductId, filterCategory])
@@ -254,11 +278,10 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
       prepared.map(async (file) => {
         const fd = new FormData()
         fd.append('file', file)
-        // Tag new uploads with the active filter context so they're findable
-        // by the same filters next time. Skips __none__ since that's a
-        // negative filter, not a value.
-        if (filterCategory  && filterCategory  !== '__none__') fd.append('category',   filterCategory)
-        if (filterProductId && filterProductId !== '__none__') fd.append('product_id', filterProductId)
+        // Tag new uploads with the active filter, or the caller's context when
+        // viewing "All", so they're findable by the same filters next time.
+        if (uploadCategory)  fd.append('category',   uploadCategory)
+        if (uploadProductId) fd.append('product_id', uploadProductId)
         const res = await fetch('/api/media', { method: 'POST', body: fd })
         const json = await res.json()
         if (!res.ok) throw new Error(json.error ?? 'Upload failed')
@@ -353,7 +376,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-soft shrink-0">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-3 border-b border-soft shrink-0">
           <div className="flex items-center gap-1 bg-surface border border-soft rounded-xl p-1">
             <button
               type="button"
@@ -374,7 +397,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
               Generate
             </button>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap grow sm:grow-0 justify-end">
             {/* Search */}
             {tab === 'library' && (
               <input
@@ -382,7 +405,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search…"
-                className="w-28 sm:w-36 px-2 py-1.5 bg-surface-raised border border-strong text-xs text-prose-muted placeholder:text-prose-faint rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-hover"
+                className="grow min-w-[7rem] sm:grow-0 sm:w-36 px-2 py-1.5 bg-surface-raised border border-strong text-xs text-prose-muted placeholder:text-prose-faint rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-hover"
               />
             )}
             {/* Category filter — editorial axis. Independent of the product
@@ -610,7 +633,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
         )}
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-5 py-3 border-t border-soft shrink-0">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-3 border-t border-soft shrink-0">
           <p className="text-xs text-prose-faint">
             {multi
               ? multiSelected.size > 0
