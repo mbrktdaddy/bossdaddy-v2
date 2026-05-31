@@ -45,7 +45,15 @@ async function cropToBlob(imageSrc: string, crop: Area): Promise<Blob> {
       if (!ctx) { reject(new Error('No canvas context')); return }
       ctx.drawImage(image, crop.x, crop.y, crop.width, crop.height, 0, 0, canvas.width, canvas.height)
       canvas.toBlob(
-        (blob) => blob ? resolve(blob) : reject(new Error('toBlob failed')),
+        (blob) => {
+          if (blob) { resolve(blob); return }
+          // Some browsers (notably mobile) return null for WebP encoding —
+          // fall back to PNG. The upload route + sharp normalize to WebP anyway.
+          canvas.toBlob(
+            (png) => png ? resolve(png) : reject(new Error('image encode returned empty')),
+            'image/png',
+          )
+        },
         'image/webp',
         0.82,
       )
@@ -63,6 +71,7 @@ export default function ImageCropper({ file, aspect, onCrop, onCancel, onSkip, a
   const [zoom, setZoom] = useState(1)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
   const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   // Natural ratio of the loaded image — used for the "Original" choice and as
   // the free-mode default before the user picks a ratio.
   const [naturalAspect, setNaturalAspect] = useState<number | null>(null)
@@ -85,13 +94,26 @@ export default function ImageCropper({ file, aspect, onCrop, onCancel, onSkip, a
     (ratioChoice === 'original' ? (naturalAspect ?? 1) : ratioChoice)
 
   async function handleConfirm() {
-    if (!croppedAreaPixels || !imageSrc) return
-    setBusy(true)
+    if (busy) return
+    // croppedAreaPixels is null until react-easy-crop fires onCropComplete (after
+    // the image lays out). Clicking before that — or before any adjustment — must
+    // tell the user, not no-op silently.
+    if (!croppedAreaPixels || !imageSrc) {
+      setError('Move or zoom the crop once to set the area, then try again.')
+      return
+    }
+    setBusy(true); setError(null)
     try {
       const blob = await cropToBlob(imageSrc, croppedAreaPixels)
       onCrop(blob)
-    } catch {
+    } catch (err) {
+      console.error('ImageCropper cropToBlob failed:', err)
       setBusy(false)
+      setError(
+        err instanceof Error
+          ? `Couldn't crop this image (${err.message}). Try "Use full image" or pick another.`
+          : 'Could not crop this image. Try again or pick another.',
+      )
     }
   }
 
@@ -134,6 +156,13 @@ export default function ImageCropper({ file, aspect, onCrop, onCancel, onSkip, a
               </button>
             )
           })}
+        </div>
+      )}
+
+      {/* Error banner — crop/encode failures used to fail silently */}
+      {error && (
+        <div role="alert" className="px-4 py-2 bg-red-700 text-red-50 text-xs text-center shrink-0">
+          {error}
         </div>
       )}
 
