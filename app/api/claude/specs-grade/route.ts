@@ -118,7 +118,7 @@ ${effSpecs.length ? effSpecs.map((s) => `- ${s.label}: ${s.value}`).join('\n') :
 
 Find comparable models, gather their real specs via web search, then return the grading JSON.`
 
-  const tools = [{ type: 'web_search_20250305' as const, name: 'web_search' as const, max_uses: 10 }]
+  const tools = [{ type: 'web_search_20260209' as const, name: 'web_search' as const, max_uses: 10 }]
   const messages: Anthropic.Messages.MessageParam[] = [{ role: 'user', content: prompt }]
   // 8000 leaves room for the model's queries + a multi-model comparison matrix
   // so the final JSON isn't truncated. (max_tokens caps OUTPUT; the fetched
