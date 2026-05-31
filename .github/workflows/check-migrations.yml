@@ -19,6 +19,7 @@ on:
     paths:
       - 'supabase/migrations/**'
       - 'scripts/shadow-setup.sql'
+      - '.github/workflows/check-migrations.yml'
   workflow_dispatch:
 
 jobs:
