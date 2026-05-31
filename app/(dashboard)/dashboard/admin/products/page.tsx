@@ -15,7 +15,7 @@ export default async function ProductsListPage() {
     .select('*')
     .order('created_at', { ascending: false })
 
-  const rows = (products ?? []) as Product[]
+  const rows = (products ?? []) as unknown as Product[]
 
   return (
     <div className="p-8 max-w-4xl">

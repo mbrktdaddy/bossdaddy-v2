@@ -21,7 +21,7 @@ export default async function ProductEditPage({
     const admin = createAdminClient()
     const { data } = await admin.from('products').select('*').eq('id', id).single()
     if (!data) notFound()
-    product = data as Product
+    product = data as unknown as Product
   }
 
   return (

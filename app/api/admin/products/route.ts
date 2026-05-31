@@ -3,9 +3,16 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { z } from 'zod'
 
+const SpecSchema = z.object({
+  label: z.string().min(1).max(60),
+  value: z.string().min(1).max(200),
+})
+
 const ProductSchema = z.object({
   slug:              z.string().min(2).max(80).regex(/^[a-z0-9-]+$/, 'lowercase letters, numbers, and hyphens only'),
   name:              z.string().min(2).max(160),
+  brand:             z.string().max(120).optional().nullable(),
+  specs:             z.array(SpecSchema).max(30).optional().default([]),
   asin:              z.string().max(20).optional().nullable(),
   store:             z.string().max(40).optional().default('amazon'),
   custom_store_name: z.string().max(80).optional().nullable(),
@@ -58,6 +65,8 @@ export async function POST(request: NextRequest) {
     .insert({
       slug:              parsed.data.slug,
       name:              parsed.data.name,
+      brand:             parsed.data.brand ?? null,
+      specs:             parsed.data.specs ?? [],
       asin:              parsed.data.asin ?? null,
       store:             parsed.data.store ?? 'amazon',
       custom_store_name: parsed.data.custom_store_name ?? null,
@@ -68,7 +77,8 @@ export async function POST(request: NextRequest) {
       category:          parsed.data.category ?? null,
       price_cents:       parsed.data.price_cents ?? null,
       status:            parsed.data.status ?? 'wishlist',
-    })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
     .select()
     .single()
 

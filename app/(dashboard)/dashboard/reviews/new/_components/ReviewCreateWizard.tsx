@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { CATEGORIES } from '@/lib/categories'
 import { TESTING_DURATION_OPTIONS } from '@/lib/products'
+import type { ProductSpec } from '@/lib/products'
 
 const STORAGE_KEY = 'bd:review-wizard-draft'
 
@@ -14,6 +15,8 @@ interface ProductOption {
   id: string
   slug: string
   name: string
+  brand: string | null
+  specs: ProductSpec[]
   store: string
   affiliate_url: string | null
   non_affiliate_url: string | null
@@ -142,6 +145,10 @@ export function ReviewCreateWizard() {
 
     const parsedPricePaid = pricePaid.trim() ? parseInt(pricePaid.trim(), 10) : null
 
+    // If a catalog product is linked, pull its brand + specs to ground the draft.
+    const linked = productSlug.trim() ? products.find((p) => p.slug === productSlug.trim()) : undefined
+    const linkedSpecs = (linked?.specs ?? []).filter((s) => s.label?.trim() && s.value?.trim())
+
     try {
       const genRes = await fetch('/api/claude/draft', {
         method: 'POST',
@@ -153,6 +160,8 @@ export function ReviewCreateWizard() {
           imageSlots,
           ratingHint: inputRating,
           ...(productSlug.trim() ? { productSlug: productSlug.trim() } : {}),
+          ...(linked?.brand?.trim() ? { brand: linked.brand.trim() } : {}),
+          ...(linkedSpecs.length ? { specs: linkedSpecs } : {}),
           ...(testingDuration ? { testingDuration } : {}),
           ...(howYouUsedIt.trim() ? { howYouUsedIt: howYouUsedIt.trim() } : {}),
           ...(standoutMoment.trim() ? { standoutMoment: standoutMoment.trim() } : {}),

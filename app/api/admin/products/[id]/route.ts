@@ -4,9 +4,16 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { z } from 'zod'
 
+const SpecSchema = z.object({
+  label: z.string().min(1).max(60),
+  value: z.string().min(1).max(200),
+})
+
 const UpdateSchema = z.object({
   slug:              z.string().min(2).max(80).regex(/^[a-z0-9-]+$/).optional(),
   name:              z.string().min(2).max(160).optional(),
+  brand:             z.string().max(120).optional().nullable(),
+  specs:             z.array(SpecSchema).max(30).optional(),
   asin:              z.string().max(20).optional().nullable(),
   store:             z.string().max(40).optional(),
   custom_store_name: z.string().max(80).optional().nullable(),

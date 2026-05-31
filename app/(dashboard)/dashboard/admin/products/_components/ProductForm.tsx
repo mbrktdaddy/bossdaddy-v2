@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import type { Product } from '@/lib/products'
+import type { Product, ProductSpec } from '@/lib/products'
 import { STORE_OPTIONS, PRODUCT_STATUS_OPTIONS } from '@/lib/products'
 import { CATEGORIES } from '@/lib/categories'
 import { ProductImageGallery } from '@/components/admin/ProductImageGallery'
@@ -20,6 +20,8 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
 
   const [slug, setSlug]                         = useState(product?.slug ?? '')
   const [name, setName]                         = useState(product?.name ?? '')
+  const [brand, setBrand]                       = useState(product?.brand ?? '')
+  const [specs, setSpecs]                       = useState<ProductSpec[]>(product?.specs ?? [])
   const [asin, setAsin]                         = useState(product?.asin ?? '')
   const [store, setStore]                       = useState<string>(product?.store ?? 'amazon')
   const [customStoreName, setCustomStoreName]   = useState(product?.custom_store_name ?? '')
@@ -48,6 +50,16 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
   const [createdProductId, setCreatedProductId] = useState<string | null>(null)
   const [uploadStatus,     setUploadStatus]     = useState<string | null>(null)
 
+  function addSpec() {
+    setSpecs((prev) => [...prev, { label: '', value: '' }])
+  }
+  function updateSpec(i: number, field: keyof ProductSpec, val: string) {
+    setSpecs((prev) => prev.map((s, idx) => (idx === i ? { ...s, [field]: val } : s)))
+  }
+  function removeSpec(i: number) {
+    setSpecs((prev) => prev.filter((_, idx) => idx !== i))
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
 
@@ -63,9 +75,16 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
 
     const parsedPrice = priceCents.trim() ? parseInt(priceCents.trim(), 10) : null
 
+    // Drop blank spec rows; trim the rest.
+    const cleanSpecs = specs
+      .map((s) => ({ label: s.label.trim(), value: s.value.trim() }))
+      .filter((s) => s.label && s.value)
+
     const payload = {
       slug:              slug.trim().toLowerCase(),
       name:              name.trim(),
+      brand:             brand.trim() || null,
+      specs:             cleanSpecs,
       asin:              asin.trim() || null,
       store,
       custom_store_name: store === 'other' ? (customStoreName.trim() || null) : null,
@@ -206,6 +225,20 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
           placeholder="Enfamil Enspire"
           className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
         />
+      </div>
+
+      <div>
+        <label className="block text-sm text-prose-muted mb-1.5">Brand</label>
+        <input
+          type="text"
+          value={brand}
+          onChange={(e) => setBrand(e.target.value)}
+          placeholder="e.g. Enfamil, DeWalt, Graco"
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
+        />
+        <p className="mt-1 text-xs text-prose-faint">
+          Manufacturer / brand, separate from the product name. Used to ground reviews and compare against other brands.
+        </p>
       </div>
 
       <div>
@@ -422,6 +455,60 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
           className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
         />
         <p className="mt-1 text-xs text-prose-faint">{description.length}/400 characters</p>
+      </div>
+
+      {/* ── Product Facts (specs) ──────────────────────────────────────── */}
+      <div className="rounded-xl border border-soft bg-surface-sunken p-4 space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Product Facts</p>
+            <p className="mt-0.5 text-xs text-prose-faint">
+              Optional spec sheet — label &amp; value pairs (e.g. Weight → 2.1 lbs). Fed into the AI review draft and brand comparisons. Leave empty if specs are unreliable.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={addSpec}
+            className="shrink-0 text-xs px-3 py-2 bg-surface border border-strong hover:border-accent/60 text-prose-muted hover:text-prose font-semibold rounded-lg transition-colors min-h-[36px]"
+          >
+            + Add spec
+          </button>
+        </div>
+
+        {specs.length === 0 ? (
+          <p className="text-xs text-prose-faint italic">No specs yet. Add facts like dimensions, weight, capacity, material, warranty.</p>
+        ) : (
+          <div className="space-y-2">
+            {specs.map((s, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={s.label}
+                  onChange={(e) => updateSpec(i, 'label', e.target.value)}
+                  maxLength={60}
+                  placeholder="Label (e.g. Weight)"
+                  className="w-1/3 px-3 py-2 bg-surface border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
+                />
+                <input
+                  type="text"
+                  value={s.value}
+                  onChange={(e) => updateSpec(i, 'value', e.target.value)}
+                  maxLength={200}
+                  placeholder="Value (e.g. 2.1 lbs)"
+                  className="flex-1 px-3 py-2 bg-surface border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeSpec(i)}
+                  aria-label="Remove spec"
+                  className="shrink-0 px-2.5 py-2 text-danger-ink hover:bg-danger-bg rounded-lg transition-colors min-h-[36px]"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

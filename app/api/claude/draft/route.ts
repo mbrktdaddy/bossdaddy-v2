@@ -13,6 +13,9 @@ const DraftInput = z.object({
   keyFeatures:     z.array(z.string()).max(15).default([]),
   targetAudience:  z.string().max(200).optional(),
   productSlug:     z.string().regex(/^[a-z0-9-]+$/).max(80).optional(),
+  // Catalog facts (optional) — ground the draft when a product is linked.
+  brand:           z.string().max(120).optional(),
+  specs:           z.array(z.object({ label: z.string().max(60), value: z.string().max(200) })).max(30).default([]),
   // 'auto' lets Claude pick (2–3 images); a number forces exactly that many.
   imageSlots:      z.union([z.literal('auto'), z.number().int().min(0).max(6)]).default('auto'),
   // Experience fields — author-provided; drive tone/verdict alignment.
@@ -70,7 +73,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { productName, category, keyFeatures, targetAudience, productSlug, imageSlots, ratingHint, testingDuration, howYouUsedIt, standoutMoment, pricePaid } = parsed.data
+  const { productName, category, keyFeatures, targetAudience, productSlug, brand, specs, imageSlots, ratingHint, testingDuration, howYouUsedIt, standoutMoment, pricePaid } = parsed.data
+
+  const cleanSpecs = specs.filter((s) => s.label.trim() && s.value.trim())
+  const specsBlock = cleanSpecs.length
+    ? `\n\nPRODUCT SPECS (verified facts — weave the relevant ones in naturally; never invent or contradict these, and don't dump them all as a list):\n${cleanSpecs.map((s) => `- ${s.label}: ${s.value}`).join('\n')}`
+    : ''
 
   const durationLabel: Record<string, string> = {
     '<1wk': 'less than 1 week', '1-4wks': '1–4 weeks', '1-3mo': '1–3 months', '3+mo': '3+ months',
@@ -86,8 +94,8 @@ export async function POST(request: NextRequest) {
 
   const prompt = `Write a product review:
 
-Product: ${productName}
-Category: ${category}${keyFeatures.length ? `\nKey Features: ${keyFeatures.join(', ')}` : ''}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}${productSlug ? `\nProduct slug: ${productSlug}` : ''}
+Product: ${productName}${brand ? `\nBrand: ${brand}` : ''}
+Category: ${category}${keyFeatures.length ? `\nKey Features: ${keyFeatures.join(', ')}` : ''}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}${productSlug ? `\nProduct slug: ${productSlug}` : ''}${specsBlock}
 
 AUTHOR EXPERIENCE (ground truth — write the review as if you lived this):
 ${experienceLines}

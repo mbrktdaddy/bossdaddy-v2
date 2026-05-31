@@ -54,10 +54,18 @@ export const TESTING_DURATION_OPTIONS: { value: TestingDuration; label: string }
   { value: '3+mo',   label: '3+ months' },
 ]
 
+/** A single spec fact: a human label and its value (e.g. { label: 'Weight', value: '2.1 lbs' }). */
+export interface ProductSpec {
+  label: string
+  value: string
+}
+
 export interface Product {
   id: string
   slug: string
   name: string
+  brand: string | null
+  specs: ProductSpec[]
   asin: string | null
   affiliate_url: string | null
   non_affiliate_url: string | null

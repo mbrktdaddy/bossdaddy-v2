@@ -1336,6 +1336,7 @@ export type Database = {
         Row: {
           affiliate_url: string | null
           asin: string | null
+          brand: string | null
           category: string | null
           created_at: string
           custom_store_name: string | null
@@ -1346,6 +1347,7 @@ export type Database = {
           non_affiliate_url: string | null
           price_cents: number | null
           slug: string
+          specs: Json
           status: string
           store: string
           updated_at: string
@@ -1353,6 +1355,7 @@ export type Database = {
         Insert: {
           affiliate_url?: string | null
           asin?: string | null
+          brand?: string | null
           category?: string | null
           created_at?: string
           custom_store_name?: string | null
@@ -1363,6 +1366,7 @@ export type Database = {
           non_affiliate_url?: string | null
           price_cents?: number | null
           slug: string
+          specs?: Json
           status?: string
           store?: string
           updated_at?: string
@@ -1370,6 +1374,7 @@ export type Database = {
         Update: {
           affiliate_url?: string | null
           asin?: string | null
+          brand?: string | null
           category?: string | null
           created_at?: string
           custom_store_name?: string | null
@@ -1380,6 +1385,7 @@ export type Database = {
           non_affiliate_url?: string | null
           price_cents?: number | null
           slug?: string
+          specs?: Json
           status?: string
           store?: string
           updated_at?: string
