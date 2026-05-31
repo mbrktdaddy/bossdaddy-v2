@@ -548,14 +548,14 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
 
       {/* ── Product Facts (specs) ──────────────────────────────────────── */}
       <div className="rounded-xl border border-soft bg-surface-sunken p-4 space-y-3">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Product Facts</p>
             <p className="mt-0.5 text-xs text-prose-faint">
               Optional spec sheet — label &amp; value pairs (e.g. Weight → 2.1 lbs). Fed into the AI review draft and brand comparisons. Leave empty if specs are unreliable.
             </p>
           </div>
-          <div className="shrink-0 flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
             <button
               type="button"
               onClick={applyTemplate}
