@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import RatingScore from '@/components/RatingScore'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
-import { getProductsBySlugs, buildSpecComparison, type ProductSpec, type SpecComparisonColumn } from '@/lib/products'
+import { getProductsBySlugs, specComparisonRenderable, type ProductSpec, type SpecComparisonColumn } from '@/lib/products'
 import SpecComparisonTable from '@/components/products/SpecComparisonTable'
 import { getCategoryBySlug } from '@/lib/categories'
 import ArticleTOC from '@/components/collections/ArticleTOC'
@@ -139,7 +139,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
       specs: p.specs,
     }]
   })
-  const hasSpecSheet = specColumns.length >= 2 && buildSpecComparison(specColumns).length > 0
+  const hasSpecSheet = specComparisonRenderable(specColumns)
 
   // Dominant category among the items — drives methodology + FAQ + related selection
   const categoryCounts = new Map<string, number>()

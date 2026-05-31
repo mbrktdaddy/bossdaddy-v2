@@ -116,18 +116,11 @@ export function ReviewCreateWizard() {
     }
   }
 
-  // Competitor picker — same category, different brand than the linked product.
-  // Requires a category; brand exclusion only kicks in once a catalog product is
-  // linked (we need its brand to know what "different brand" means).
-  const linkedProduct = productSlug.trim() ? products.find((p) => p.slug === productSlug.trim()) : undefined
+  // Competitor picker — any other product in the same category (different brand
+  // OR a different model of the same brand, e.g. a 20V vs 60V tool). Requires a
+  // category; excludes only the product being reviewed.
   const competitorOptions = category
-    ? products.filter((p) =>
-        p.category === category &&
-        p.slug !== productSlug.trim() &&
-        (linkedProduct?.brand
-          ? (p.brand ?? '').trim().toLowerCase() !== linkedProduct.brand.trim().toLowerCase()
-          : true),
-      )
+    ? products.filter((p) => p.category === category && p.slug !== productSlug.trim())
     : []
   const selectedCompetitors = competitorOptions.filter((p) => comparisonSlugs.includes(p.slug))
   const MAX_COMPETITORS = 4
@@ -598,8 +591,7 @@ export function ReviewCreateWizard() {
             <p className="text-xs text-prose-faint">Pick a category to see comparable products.</p>
           ) : competitorOptions.length === 0 ? (
             <p className="text-xs text-prose-faint">
-              No other {CATEGORIES.find((c) => c.slug === category)?.label ?? 'category'} products in the catalog yet
-              {linkedProduct?.brand ? ` from a different brand than ${linkedProduct.brand}` : ''}.
+              No other {CATEGORIES.find((c) => c.slug === category)?.label ?? 'category'} products in the catalog yet.
             </p>
           ) : (
             <>

@@ -33,6 +33,7 @@ const UpdateSchema = z.object({
   meta_description:         z.string().max(200).optional().nullable(),
   scheduled_publish_at:     z.string().datetime().optional().nullable(),
   product_slug:             z.string().regex(/^[a-z0-9-]+$/).max(120).optional().nullable(),
+  comparison_product_slugs: z.array(z.string().regex(/^[a-z0-9-]+$/).max(80)).max(4).optional(),
   tldr:                     z.string().max(600).optional().nullable(),
   key_takeaways:            z.array(z.string()).optional(),
   best_for:                 z.array(z.string()).optional(),
@@ -252,6 +253,10 @@ export async function PUT(
   if (parsed.data.meta_description !== undefined) updates.meta_description = parsed.data.meta_description
   if (parsed.data.scheduled_publish_at !== undefined) updates.scheduled_publish_at = parsed.data.scheduled_publish_at
   if (parsed.data.product_slug !== undefined) updates.product_slug = parsed.data.product_slug
+  if (parsed.data.comparison_product_slugs !== undefined) {
+    const self = parsed.data.product_slug ?? null
+    updates.comparison_product_slugs = [...new Set(parsed.data.comparison_product_slugs.filter((s) => s && s !== self))]
+  }
   if (parsed.data.tldr !== undefined) updates.tldr = parsed.data.tldr
   if (parsed.data.key_takeaways !== undefined) updates.key_takeaways = parsed.data.key_takeaways
   if (parsed.data.best_for !== undefined) updates.best_for = parsed.data.best_for

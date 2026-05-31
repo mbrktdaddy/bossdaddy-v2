@@ -28,7 +28,7 @@ import StickyMobileCta from '@/components/StickyMobileCta'
 import ReadingProgressBar from '@/components/ReadingProgressBar'
 import { EmailSignup } from '@/components/EmailSignup'
 import AuthorBio from '@/components/AuthorBio'
-import { getProductBySlug, getProductsBySlugs, buildSpecComparison, type SpecComparisonColumn } from '@/lib/products'
+import { getProductBySlug, getProductsBySlugs, columnHasSpecs, specComparisonRenderable, type SpecComparisonColumn } from '@/lib/products'
 import SpecComparisonTable from '@/components/products/SpecComparisonTable'
 import BenchStrip from '@/components/BenchStrip'
 import CategoryIcon from '@/components/CategoryIcon'
@@ -150,7 +150,13 @@ export default async function ReviewPage({ params }: Props) {
       if (cp) specColumns.push({ slug: cp.slug, name: cp.name, brand: cp.brand, imageUrl: cp.image_url, specs: cp.specs ?? [] })
     }
   }
-  const hasSpecComparison = specColumns.length >= 2 && buildSpecComparison(specColumns).length > 0
+  // Show the review's comparison table only when the reviewed product itself
+  // carries specs AND ≥2 columns have real specs. A specs-only review (no
+  // competitors, or sparse competitor data) shows no table here — its specs
+  // still power the draft prose + structured data. Full comparisons are the
+  // Vault's job; this surface stays opt-in.
+  const hasSpecComparison =
+    specColumns.length > 0 && columnHasSpecs(specColumns[0]) && specComparisonRenderable(specColumns)
 
   const isFollowup = review.parent_review_id !== null
   const parentNode = timeline.find((n) => n.is_parent) ?? null

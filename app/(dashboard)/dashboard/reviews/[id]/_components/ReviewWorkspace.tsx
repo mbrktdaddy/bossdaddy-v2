@@ -17,6 +17,7 @@ import { InternalLinkPanel } from '@/components/workspace/InternalLinkPanel'
 import { SocialPostsPanel } from '@/components/workspace/SocialPostsPanel'
 import { ProductLinkPanel } from '@/components/workspace/ProductLinkPanel'
 import { PrimaryProductPanel } from '@/components/workspace/PrimaryProductPanel'
+import { ComparisonProductsPanel } from '@/components/workspace/ComparisonProductsPanel'
 
 const InlineMediaPanel = dynamic(
   () => import('@/components/workspace/InlineMediaPanel').then((m) => ({ default: m.InlineMediaPanel })),
@@ -61,6 +62,7 @@ interface ReviewData {
   meta_description: string | null
   scheduled_publish_at: string | null
   product_slug: string | null
+  comparison_product_slugs: string[] | null
   product_id: string | null
   tldr: string | null
   key_takeaways: string[] | null
@@ -117,6 +119,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
   const [metaDesc, setMetaDesc]       = useState(review.meta_description ?? '')
   const [scheduledAt, setScheduled]   = useState<string | null>(review.scheduled_publish_at)
   const [productSlug, setProductSlug] = useState<string | null>(review.product_slug)
+  const [comparisonSlugs, setComparisonSlugs] = useState<string[]>(review.comparison_product_slugs ?? [])
 
   const [testingDuration, setTestingDuration] = useState(review.testing_duration ?? '')
   const [howYouUsedIt, setHowYouUsedIt]       = useState(review.how_you_used_it ?? '')
@@ -209,6 +212,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
     meta_description:     metaDesc  || null,
     scheduled_publish_at: scheduledAt,
     product_slug:         productSlug,
+    comparison_product_slugs: comparisonSlugs,
     tldr:                 tldr || null,
     key_takeaways:        keyTakeaways,
     best_for:             bestFor,
@@ -225,7 +229,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
     score_daily_use:      scoreDailyUse,
     would_rebuy:          wouldRebuy,
     verdict_change:       isFollowup ? verdictChange : undefined,
-  }), [title, productName, category, excerpt, content, imageUrl, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, productSlug, tldr, keyTakeaways, bestFor, notFor, faqs, testingDuration, howYouUsedIt, standoutMoment, pricePaidCents, scoreQuality, scoreValue, scoreEase, scoreDailyUse, wouldRebuy, verdictChange, isFollowup])
+  }), [title, productName, category, excerpt, content, imageUrl, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, productSlug, comparisonSlugs, tldr, keyTakeaways, bestFor, notFor, faqs, testingDuration, howYouUsedIt, standoutMoment, pricePaidCents, scoreQuality, scoreValue, scoreEase, scoreDailyUse, wouldRebuy, verdictChange, isFollowup])
 
   const canPublish = !hasAffiliate || disclosureAck
   const publishBlockedReason = !canPublish
@@ -797,6 +801,12 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Commerce</p>
           <div className="space-y-6">
             <PrimaryProductPanel value={productSlug} onChange={setProductSlug} />
+            <ComparisonProductsPanel
+              value={comparisonSlugs}
+              onChange={setComparisonSlugs}
+              category={category}
+              primarySlug={productSlug}
+            />
             <ProductLinkPanel
               content={content}
               onChangeContent={setContent}

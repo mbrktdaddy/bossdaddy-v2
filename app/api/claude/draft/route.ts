@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
     .map((c) => ({ ...c, specs: c.specs.filter((s) => s.label.trim() && s.value.trim()) }))
     .filter((c) => c.name.trim())
   const competitorsBlock = cleanCompetitors.length
-    ? `\n\nCOMPETITORS (the author is comparing against these — same category, other brands. Draw honest, specific head-to-head contrasts where it helps the reader decide; ONLY use the facts listed here, never invent a competitor's spec or claim):\n${cleanCompetitors.map((c) => {
+    ? `\n\nCOMPETITORS (the author is comparing against these — same category; could be rival brands or other models. Draw honest, specific head-to-head contrasts where it helps the reader decide; ONLY use the facts listed here, never invent a competitor's spec or claim):\n${cleanCompetitors.map((c) => {
         const head = c.brand ? `${c.brand} ${c.name}` : c.name
         const lines = c.specs.length ? c.specs.map((s) => `    • ${s.label}: ${s.value}`).join('\n') : '    • (no specs provided)'
         return `- ${head}:\n${lines}`

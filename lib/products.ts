@@ -151,8 +151,9 @@ export interface SpecComparisonRow {
  * Build a ragged-safe comparison matrix from N product spec lists.
  *
  * - Rows are the UNION of all spec labels across columns, matched
- *   case-insensitively (label 'Weight' and 'weight' collapse to one row);
- *   the first-seen casing wins as the display label.
+ *   case-insensitively AND whitespace-insensitively (label 'Weight', 'weight',
+ *   and 'Weight ' / 'Battery  life' all collapse to one row); the first-seen
+ *   casing wins as the display label.
  * - Row order follows first appearance across the columns in order.
  * - Missing cells are `null` so the renderer can show a placeholder — older
  *   products with `specs: []` simply contribute no rows and read as "—".
@@ -168,11 +169,11 @@ export function buildSpecComparison(columns: SpecComparisonColumn[]): SpecCompar
   const byKey = new Map<string, Map<number, string>>()  // key → (colIdx → value)
 
   columns.forEach((col, idx) => {
-    for (const spec of col.specs ?? []) {
+    for (const spec of Array.isArray(col.specs) ? col.specs : []) {
       const label = spec?.label?.trim()
       const value = spec?.value?.trim()
       if (!label || !value) continue
-      const key = label.toLowerCase()
+      const key = label.toLowerCase().replace(/\s+/g, ' ')
       if (!display.has(key)) {
         display.set(key, label)
         order.push(key)
@@ -187,6 +188,22 @@ export function buildSpecComparison(columns: SpecComparisonColumn[]): SpecCompar
     label: display.get(key)!,
     values: columns.map((_, idx) => byKey.get(key)!.get(idx) ?? null),
   }))
+}
+
+/** Does a column carry at least one non-empty spec? */
+export function columnHasSpecs(col: SpecComparisonColumn): boolean {
+  return (Array.isArray(col.specs) ? col.specs : []).some((s) => s?.label?.trim() && s?.value?.trim())
+}
+
+/**
+ * A spec table is only worth rendering when at least TWO columns each carry
+ * real specs — otherwise it's a single product (nothing to compare) or a lone
+ * spec'd product next to all-"—" columns (reads worse than no table). Specs are
+ * optional everywhere; this keeps sparse/absent data from producing an
+ * embarrassing table. Callers gate both the section and any TOC entry on this.
+ */
+export function specComparisonRenderable(columns: SpecComparisonColumn[]): boolean {
+  return columns.filter(columnHasSpecs).length >= 2
 }
 
 /**

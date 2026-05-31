@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { buildSpecComparison, type SpecComparisonColumn } from '@/lib/products'
+import { buildSpecComparison, specComparisonRenderable, type SpecComparisonColumn } from '@/lib/products'
 
 interface Props {
   columns: SpecComparisonColumn[]
@@ -22,7 +22,7 @@ interface Props {
  * a single product or a set with no specs has nothing to compare.
  */
 export default function SpecComparisonTable({ columns, eyebrow, heading, id, className }: Props) {
-  if (columns.length < 2) return null
+  if (!specComparisonRenderable(columns)) return null
   const rows = buildSpecComparison(columns)
   if (rows.length === 0) return null
 
