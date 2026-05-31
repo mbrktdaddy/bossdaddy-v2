@@ -5,7 +5,8 @@ import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
-export const maxDuration = 90
+// 8000-token reviews can take 1-2 min under load; 90s was cutting it close.
+export const maxDuration = 180
 
 const DraftInput = z.object({
   productName:     z.string().min(2).max(120),
@@ -181,7 +182,10 @@ Return JSON with this exact shape:
   const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
   const claudeResult = await getClaudeClient().messages.create({
     model: MODEL,
-    max_tokens: 3800,
+    // A full review (intro + 3-5 sections + verdict + pros/cons + FAQs +
+    // takeaways + sub-scores + image prompts + tags) is large; 3800 truncated
+    // the JSON mid-object → parse failure. claude-sonnet-4-6 handles 8k easily.
+    max_tokens: 8000,
     system: systemBlocks,
     messages: [{ role: 'user', content: prompt }],
   }).catch((err: unknown) => {
@@ -202,6 +206,15 @@ Return JSON with this exact shape:
     }, { status: 502 })
   }
 
+  // Truncation guard: if the model hit the token ceiling the JSON is cut off
+  // mid-object and won't parse — say so plainly instead of "malformed content".
+  if (claudeResult.stop_reason === 'max_tokens') {
+    console.error('review-draft hit max_tokens — output truncated')
+    return NextResponse.json({
+      error: 'The draft ran long and got cut off. Try again, or drop the inline image slots to 0–2 and regenerate.',
+    }, { status: 502 })
+  }
+
   const text = claudeResult.content.find((b) => b.type === 'text')?.text ?? ''
   const jsonMatch = text.match(/\{[\s\S]*\}/)
   if (!jsonMatch) {
@@ -211,7 +224,8 @@ Return JSON with this exact shape:
   let draft: Record<string, unknown>
   try {
     draft = JSON.parse(jsonMatch[0])
-  } catch {
+  } catch (err) {
+    console.error('review-draft JSON parse failed:', err, '| length:', text.length, '| stop_reason:', claudeResult.stop_reason)
     return NextResponse.json({ error: 'AI returned malformed content — please try again.' }, { status: 502 })
   }
 

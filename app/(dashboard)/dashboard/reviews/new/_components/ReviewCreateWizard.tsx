@@ -370,7 +370,7 @@ export function ReviewCreateWizard() {
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <div className="w-8 h-8 border-4 border-soft border-t-orange-500 rounded-full animate-spin" />
         <p className="text-prose-muted font-medium">{label}</p>
-        <p className="text-xs text-prose-faint">This can take 30–60 seconds</p>
+        <p className="text-xs text-prose-faint">This can take up to 2 minutes</p>
       </div>
     )
   }
