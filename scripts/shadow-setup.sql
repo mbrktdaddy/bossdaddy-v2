@@ -66,3 +66,13 @@ create table if not exists storage.objects (
 );
 
 alter table storage.objects enable row level security;
+
+-- storage.foldername(name) — Supabase helper that splits an object path on '/'
+-- and returns every segment except the final filename
+-- (e.g. 'user-123/avatar.png' → {'user-123'}). Migration 061's avatar RLS
+-- policies call (storage.foldername(name))[1], so the function must exist for
+-- that policy DDL to create. Faithful enough for structural validation.
+create or replace function storage.foldername(name text)
+returns text[] language sql immutable as $$
+  select (string_to_array(name, '/'))[1 : greatest(array_length(string_to_array(name, '/'), 1) - 1, 0)]
+$$;
