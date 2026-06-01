@@ -8,8 +8,11 @@ import { getProductBySlug, getProductsBySlugs } from '@/lib/products'
 import { z } from 'zod'
 
 // Web search can run several rounds + read sources, so this is the slowest
-// Claude call in the stack. Generous ceiling; the manual button gates frequency.
-export const maxDuration = 200
+// Claude call in the stack. Niche products with no provided specs/competitors
+// make the model search hardest — keep headroom under the Pro 300s cap.
+// (The system prompt also tells it to abstain promptly rather than burn the
+// whole search budget chasing an obscure product into a timeout.)
+export const maxDuration = 300
 
 const SpecSchema = z.object({ label: z.string().max(60), value: z.string().max(200) })
 
@@ -47,6 +50,7 @@ HARD RULES:
 - Use ONLY specs you actually found via search or that were provided. NEVER invent, infer, or estimate a competitor's spec. If you couldn't verify it, leave it out.
 - Every competitor you cite must include at least one real source URL you actually retrieved.
 - If you cannot find enough reliable comparison data to grade fairly, ABSTAIN: set "grade": null and "abstained": true and explain why in "rationale". A null grade is correct and expected for obscure products — never force a number.
+- BE EFFICIENT — roughly one search per competitor. If your first 2-3 searches don't surface reliable specs (common for niche/small-brand products), ABSTAIN promptly. Do NOT exhaust your search budget chasing an obscure product — a fast, honest abstain is far better than a slow run that times out.
 - Compare like with like (drills to drills, not the whole tool aisle).
 
 OUTPUT: valid JSON only — no markdown, no code fences, no commentary — as your final message:
