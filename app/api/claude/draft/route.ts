@@ -31,7 +31,9 @@ const DraftInput = z.object({
   // uses it to shape the four sub-scores so they average near this target.
   // The hint is NOT persisted — the saved rating is generated from the sub-scores.
   ratingHint:      z.number().int().min(1).max(10),
-  testingDuration: z.enum(['<1wk', '1-4wks', '1-3mo', '3+mo']).optional(),
+  testingDuration: z.enum(['<1wk', '1-4wks', '1-3mo', '3+mo', '6mo', '1yr', '2yr', '3yr', '5yr', 'custom']).optional(),
+  testingSince:    z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  testingNote:     z.string().max(120).optional(),
   howYouUsedIt:    z.string().max(300).optional(),
   standoutMoment:  z.string().max(300).optional(),
   pricePaid:       z.number().int().min(0).optional(),
@@ -81,7 +83,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { productName, category, keyFeatures, targetAudience, productSlug, brand, specs, competitors, imageSlots, ratingHint, testingDuration, howYouUsedIt, standoutMoment, pricePaid } = parsed.data
+  const { productName, category, keyFeatures, targetAudience, productSlug, brand, specs, competitors, imageSlots, ratingHint, testingDuration, testingSince, testingNote, howYouUsedIt, standoutMoment, pricePaid } = parsed.data
 
   const cleanSpecs = specs.filter((s) => s.label.trim() && s.value.trim())
   const specsBlock = cleanSpecs.length
@@ -104,11 +106,17 @@ export async function POST(request: NextRequest) {
 
   const durationLabel: Record<string, string> = {
     '<1wk': 'less than 1 week', '1-4wks': '1–4 weeks', '1-3mo': '1–3 months', '3+mo': '3+ months',
+    '6mo': '6+ months', '1yr': 'over a year', '2yr': 'over two years', '3yr': 'over three years', '5yr': 'over five years',
   }
+
+  // For a 'custom' duration, prefer the explicit start date, then the free-text note.
+  const durationText = testingDuration === 'custom'
+    ? (testingSince ? `since ${testingSince}` : testingNote ?? null)
+    : (testingDuration ? durationLabel[testingDuration] ?? testingDuration : null)
 
   const experienceLines = [
     `Author target rating: ${ratingHint}/10 — the four sub-scores you produce must average to roughly this value. Tone, verdict, pros/cons balance must all reflect this target.`,
-    testingDuration ? `Testing duration: ${durationLabel[testingDuration] ?? testingDuration}` : null,
+    durationText ? `Testing duration: ${durationText}` : null,
     howYouUsedIt ? `How I used it: ${howYouUsedIt}` : null,
     standoutMoment ? `Standout moment: ${standoutMoment}` : null,
     pricePaid != null ? `Price paid: $${(pricePaid / 100).toFixed(2)}` : null,

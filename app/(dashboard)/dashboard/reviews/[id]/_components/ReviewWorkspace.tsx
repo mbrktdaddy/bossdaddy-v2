@@ -73,6 +73,8 @@ interface ReviewData {
   faqs: FAQ[] | null
   tags?: string[]
   testing_duration: string | null
+  testing_since: string | null
+  testing_note: string | null
   how_you_used_it: string | null
   standout_moment: string | null
   price_paid_cents: number | null
@@ -127,6 +129,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
   const [comparisonSlugs, setComparisonSlugs] = useState<string[]>(review.comparison_product_slugs ?? [])
 
   const [testingDuration, setTestingDuration] = useState(review.testing_duration ?? '')
+  const [testingSince, setTestingSince]       = useState(review.testing_since ?? '')
+  const [testingNote, setTestingNote]         = useState(review.testing_note ?? '')
   const [howYouUsedIt, setHowYouUsedIt]       = useState(review.how_you_used_it ?? '')
   const [standoutMoment, setStandoutMoment]   = useState(review.standout_moment ?? '')
   const [pricePaidCents, setPricePaidCents]   = useState(
@@ -230,6 +234,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
     not_for:              notFor,
     faqs,
     testing_duration:     testingDuration || null,
+    testing_since:        testingDuration === 'custom' && testingSince ? testingSince : null,
+    testing_note:         testingDuration === 'custom' && testingNote.trim() ? testingNote.trim() : null,
     how_you_used_it:      howYouUsedIt.trim() || null,
     standout_moment:      standoutMoment.trim() || null,
     price_paid_cents:     pricePaidCents.trim() && !isNaN(parseInt(pricePaidCents, 10))
@@ -243,7 +249,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
     specs_grade_data:     specsData,
     would_rebuy:          wouldRebuy,
     verdict_change:       isFollowup ? verdictChange : undefined,
-  }), [title, productName, category, excerpt, content, imageUrl, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, productSlug, comparisonSlugs, tldr, keyTakeaways, bestFor, notFor, faqs, testingDuration, howYouUsedIt, standoutMoment, pricePaidCents, scoreQuality, scoreValue, scoreEase, scoreDailyUse, scoreSpecs, specsRationale, specsData, wouldRebuy, verdictChange, isFollowup])
+  }), [title, productName, category, excerpt, content, imageUrl, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, productSlug, comparisonSlugs, tldr, keyTakeaways, bestFor, notFor, faqs, testingDuration, testingSince, testingNote, howYouUsedIt, standoutMoment, pricePaidCents, scoreQuality, scoreValue, scoreEase, scoreDailyUse, scoreSpecs, specsRationale, specsData, wouldRebuy, verdictChange, isFollowup])
 
   const canPublish = !hasAffiliate || disclosureAck
   const publishBlockedReason = !canPublish
@@ -344,6 +350,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
           author="Boss Daddy"
           pricePaidCents={pricePaidCents.trim() && !isNaN(parseInt(pricePaidCents, 10)) ? parseInt(pricePaidCents, 10) : null}
           testingDuration={testingDuration || null}
+          testingSince={testingDuration === 'custom' && testingSince ? testingSince : null}
+          testingNote={testingDuration === 'custom' && testingNote.trim() ? testingNote.trim() : null}
           scoreQuality={scoreQuality}
           scoreValue={scoreValue}
           scoreEase={scoreEase}
@@ -567,6 +575,30 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                 )}
               </div>
             </div>
+            {testingDuration === 'custom' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm text-prose-muted mb-1.5">Testing since (date)</label>
+                  <input
+                    type="date"
+                    value={testingSince}
+                    onChange={(e) => setTestingSince(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-prose-muted mb-1.5">Or describe it</label>
+                  <input
+                    type="text"
+                    value={testingNote}
+                    onChange={(e) => setTestingNote(e.target.value)}
+                    maxLength={120}
+                    placeholder="e.g. 2 summers of camping"
+                    className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
+                  />
+                </div>
+              </div>
+            )}
             <div>
               <label className="block text-sm text-prose-muted mb-1.5">How did you use it?</label>
               <textarea

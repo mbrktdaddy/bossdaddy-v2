@@ -60,7 +60,7 @@ const getReview = cache(async (slug: string) => {
   const supabase = await createClient()
   const { data } = await supabase
     .from('reviews')
-    .select('id, slug, title, product_name, category, content, rating, excerpt, image_url, has_affiliate_links, product_slug, comparison_product_slugs, published_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, score_specs, specs_grade_rationale, specs_grade_data, would_rebuy, parent_review_id, milestone_label, milestone_days, previous_rating, verdict_change, reading_time_minutes, profiles(username)')
+    .select('id, slug, title, product_name, category, content, rating, excerpt, image_url, has_affiliate_links, product_slug, comparison_product_slugs, published_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, testing_since, testing_note, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, score_specs, specs_grade_rationale, specs_grade_data, would_rebuy, parent_review_id, milestone_label, milestone_days, previous_rating, verdict_change, reading_time_minutes, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -363,6 +363,8 @@ export default async function ReviewPage({ params }: Props) {
           <TrustReceipt
             pricePaidCents={review.price_paid_cents}
             testingDuration={review.testing_duration}
+            testingSince={review.testing_since}
+            testingNote={review.testing_note}
             className="mt-2 pb-6"
           />
         </div>

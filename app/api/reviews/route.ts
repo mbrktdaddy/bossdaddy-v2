@@ -27,7 +27,9 @@ const CreateReviewSchema = z.object({
   best_for: z.array(z.string()).default([]),
   not_for: z.array(z.string()).default([]),
   faqs: z.array(FAQSchema).default([]),
-  testing_duration: z.enum(['<1wk', '1-4wks', '1-3mo', '3+mo']).optional().nullable(),
+  testing_duration: z.enum(['<1wk', '1-4wks', '1-3mo', '3+mo', '6mo', '1yr', '2yr', '3yr', '5yr', 'custom']).optional().nullable(),
+  testing_since: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  testing_note: z.string().max(120).optional().nullable(),
   how_you_used_it: z.string().max(300).optional().nullable(),
   standout_moment: z.string().max(300).optional().nullable(),
   price_paid_cents: z.number().int().min(0).optional().nullable(),
@@ -56,7 +58,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { title, product_name, category, excerpt, content, pros, cons, disclosure_acknowledged, image_url, product_slug, comparison_product_slugs, tldr, key_takeaways, best_for, not_for, faqs, testing_duration, how_you_used_it, standout_moment, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, suggested_tags } = parsed.data
+    const { title, product_name, category, excerpt, content, pros, cons, disclosure_acknowledged, image_url, product_slug, comparison_product_slugs, tldr, key_takeaways, best_for, not_for, faqs, testing_duration, testing_since, testing_note, how_you_used_it, standout_moment, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, suggested_tags } = parsed.data
 
     // Don't let a product compare against itself; keep slugs distinct.
     const comparisonSlugs = [...new Set(comparison_product_slugs.filter((s) => s && s !== product_slug))]
@@ -109,6 +111,8 @@ export async function POST(request: NextRequest) {
         disclosure_acknowledged,
         reading_time_minutes: computeReadingTime(sanitizedContent),
         testing_duration: testing_duration ?? null,
+        testing_since: testing_since ?? null,
+        testing_note: testing_note ?? null,
         how_you_used_it: how_you_used_it ?? null,
         standout_moment: standout_moment ?? null,
         price_paid_cents: price_paid_cents ?? null,

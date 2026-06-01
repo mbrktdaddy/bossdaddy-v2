@@ -1575,6 +1575,8 @@ export type Database = {
           standout_moment: string | null
           status: string
           testing_duration: string | null
+          testing_note: string | null
+          testing_since: string | null
           title: string
           tldr: string | null
           updated_at: string | null
@@ -1636,6 +1638,8 @@ export type Database = {
           standout_moment?: string | null
           status?: string
           testing_duration?: string | null
+          testing_note?: string | null
+          testing_since?: string | null
           title: string
           tldr?: string | null
           updated_at?: string | null
@@ -1697,6 +1701,8 @@ export type Database = {
           standout_moment?: string | null
           status?: string
           testing_duration?: string | null
+          testing_note?: string | null
+          testing_since?: string | null
           title?: string
           tldr?: string | null
           updated_at?: string | null

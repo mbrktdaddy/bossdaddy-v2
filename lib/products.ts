@@ -45,13 +45,22 @@ export const PRODUCT_STATUS_OPTIONS: { value: ProductStatus; label: string }[] =
   { value: 'archived', label: 'Archived' },
 ]
 
-export type TestingDuration = '<1wk' | '1-4wks' | '1-3mo' | '3+mo'
+export type TestingDuration =
+  | '<1wk' | '1-4wks' | '1-3mo' | '3+mo'
+  | '6mo' | '1yr' | '2yr' | '3yr' | '5yr'
+  | 'custom'
 
 export const TESTING_DURATION_OPTIONS: { value: TestingDuration; label: string }[] = [
   { value: '<1wk',   label: 'Less than 1 week' },
   { value: '1-4wks', label: '1–4 weeks' },
   { value: '1-3mo',  label: '1–3 months' },
   { value: '3+mo',   label: '3+ months' },
+  { value: '6mo',    label: '6+ months' },
+  { value: '1yr',    label: '1 year or more' },
+  { value: '2yr',    label: '2 years or more' },
+  { value: '3yr',    label: '3 years or more' },
+  { value: '5yr',    label: '5+ years' },
+  { value: 'custom', label: 'Specific date / note…' },
 ]
 
 /** A single spec fact: a human label and its value (e.g. { label: 'Weight', value: '2.1 lbs' }). */

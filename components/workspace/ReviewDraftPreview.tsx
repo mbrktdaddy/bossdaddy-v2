@@ -27,6 +27,8 @@ interface Props {
   author: string
   pricePaidCents?: number | null
   testingDuration?: string | null
+  testingSince?: string | null
+  testingNote?: string | null
   scoreQuality?: number | null
   scoreValue?: number | null
   scoreEase?: number | null
@@ -37,7 +39,7 @@ interface Props {
 export function ReviewDraftPreview({
   title, productName, rating, category, excerpt, content,
   imageUrl, pros, cons, tldr, keyTakeaways, bestFor, notFor, faqs, author,
-  pricePaidCents = null, testingDuration = null,
+  pricePaidCents = null, testingDuration = null, testingSince = null, testingNote = null,
   scoreQuality = null, scoreValue = null, scoreEase = null, scoreDailyUse = null,
   wouldRebuy = null,
 }: Props) {
@@ -82,6 +84,8 @@ export function ReviewDraftPreview({
           <TrustReceipt
             pricePaidCents={pricePaidCents}
             testingDuration={testingDuration}
+            testingSince={testingSince}
+            testingNote={testingNote}
             className="mt-1 text-[11px]"
           />
         </div>

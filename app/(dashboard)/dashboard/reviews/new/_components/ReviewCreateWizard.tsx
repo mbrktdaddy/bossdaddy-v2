@@ -42,6 +42,8 @@ export function ReviewCreateWizard() {
   // Your Experience fields — drive Claude's tone and persist to the review row
   const [inputRating, setInputRating]       = useState<number | null>(null)
   const [testingDuration, setTestingDuration] = useState('')
+  const [testingSince, setTestingSince]     = useState('')
+  const [testingNote, setTestingNote]       = useState('')
   const [howYouUsedIt, setHowYouUsedIt]     = useState('')
   const [standoutMoment, setStandoutMoment] = useState('')
   const [pricePaid, setPricePaid]           = useState('')
@@ -63,6 +65,8 @@ export function ReviewCreateWizard() {
       if (saved.imageSlots !== undefined) setImageSlots(saved.imageSlots)
       if (saved.inputRating != null)    setInputRating(saved.inputRating)
       if (saved.testingDuration)        setTestingDuration(saved.testingDuration)
+      if (saved.testingSince)           setTestingSince(saved.testingSince)
+      if (saved.testingNote)            setTestingNote(saved.testingNote)
       if (saved.howYouUsedIt)           setHowYouUsedIt(saved.howYouUsedIt)
       if (saved.standoutMoment)         setStandoutMoment(saved.standoutMoment)
       if (saved.pricePaid)              setPricePaid(saved.pricePaid)
@@ -71,9 +75,9 @@ export function ReviewCreateWizard() {
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, productName, productSlug, keyFeatures, category, comparisonSlugs, imageSlots, inputRating, testingDuration, howYouUsedIt, standoutMoment, pricePaid }))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, productName, productSlug, keyFeatures, category, comparisonSlugs, imageSlots, inputRating, testingDuration, testingSince, testingNote, howYouUsedIt, standoutMoment, pricePaid }))
     } catch { /* ignore */ }
-  }, [description, productName, productSlug, keyFeatures, category, comparisonSlugs, imageSlots, inputRating, testingDuration, howYouUsedIt, standoutMoment, pricePaid])
+  }, [description, productName, productSlug, keyFeatures, category, comparisonSlugs, imageSlots, inputRating, testingDuration, testingSince, testingNote, howYouUsedIt, standoutMoment, pricePaid])
 
   const [previewDraft, setPreviewDraft] = useState<{
     title: string; excerpt: string; content: string
@@ -202,6 +206,8 @@ export function ReviewCreateWizard() {
           ...(linkedSpecs.length ? { specs: linkedSpecs } : {}),
           ...(competitorPayload.length ? { competitors: competitorPayload } : {}),
           ...(testingDuration ? { testingDuration } : {}),
+          ...(testingDuration === 'custom' && testingSince ? { testingSince } : {}),
+          ...(testingDuration === 'custom' && testingNote.trim() ? { testingNote: testingNote.trim() } : {}),
           ...(howYouUsedIt.trim() ? { howYouUsedIt: howYouUsedIt.trim() } : {}),
           ...(standoutMoment.trim() ? { standoutMoment: standoutMoment.trim() } : {}),
           ...(!isNaN(parsedPricePaid!) && parsedPricePaid !== null ? { pricePaid: parsedPricePaid } : {}),
@@ -300,6 +306,8 @@ export function ReviewCreateWizard() {
           faqs: previewDraft.faqs,
           comparison_product_slugs: selectedCompetitors.map((c) => c.slug),
           testing_duration: testingDuration || null,
+          testing_since: testingDuration === 'custom' && testingSince ? testingSince : null,
+          testing_note: testingDuration === 'custom' && testingNote.trim() ? testingNote.trim() : null,
           how_you_used_it: howYouUsedIt.trim() || null,
           standout_moment: standoutMoment.trim() || null,
           price_paid_cents: pricePaid.trim() && !isNaN(parseInt(pricePaid, 10)) ? parseInt(pricePaid, 10) : null,
@@ -349,6 +357,8 @@ export function ReviewCreateWizard() {
           comparison_product_slugs: selectedCompetitors.map((c) => c.slug),
           disclosure_acknowledged: false,
           testing_duration: testingDuration || null,
+          testing_since: testingDuration === 'custom' && testingSince ? testingSince : null,
+          testing_note: testingDuration === 'custom' && testingNote.trim() ? testingNote.trim() : null,
           how_you_used_it: howYouUsedIt.trim() || null,
           standout_moment: standoutMoment.trim() || null,
           price_paid_cents: pricePaid.trim() && !isNaN(parseInt(pricePaid, 10)) ? parseInt(pricePaid, 10) : null,
@@ -697,6 +707,32 @@ export function ReviewCreateWizard() {
             )}
           </div>
         </div>
+
+        {/* Custom testing window — a specific start date and/or a free-text note */}
+        {testingDuration === 'custom' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-prose-muted mb-1.5">Testing since (date)</label>
+              <input
+                type="date"
+                value={testingSince}
+                onChange={(e) => setTestingSince(e.target.value)}
+                className="w-full px-4 py-2.5 bg-surface-sunken border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-prose-muted mb-1.5">Or describe it</label>
+              <input
+                type="text"
+                value={testingNote}
+                onChange={(e) => setTestingNote(e.target.value)}
+                maxLength={120}
+                placeholder="e.g. 2 summers of camping"
+                className="w-full px-4 py-2.5 bg-surface-sunken border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
+              />
+            </div>
+          </div>
+        )}
 
         <div>
           <label className="block text-sm text-prose-muted mb-1.5">How did you use it? <span className="text-prose-faint">(optional)</span></label>

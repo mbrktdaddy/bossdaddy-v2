@@ -39,7 +39,9 @@ const UpdateSchema = z.object({
   best_for:                 z.array(z.string()).optional(),
   not_for:                  z.array(z.string()).optional(),
   faqs:                     z.array(FAQItemSchema).optional(),
-  testing_duration:         z.enum(['<1wk', '1-4wks', '1-3mo', '3+mo']).optional().nullable(),
+  testing_duration:         z.enum(['<1wk', '1-4wks', '1-3mo', '3+mo', '6mo', '1yr', '2yr', '3yr', '5yr', 'custom']).optional().nullable(),
+  testing_since:            z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  testing_note:             z.string().max(120).optional().nullable(),
   how_you_used_it:          z.string().max(300).optional().nullable(),
   standout_moment:          z.string().max(300).optional().nullable(),
   price_paid_cents:         z.number().int().min(0).optional().nullable(),
@@ -275,6 +277,8 @@ export async function PUT(
   if (parsed.data.not_for !== undefined) updates.not_for = parsed.data.not_for
   if (parsed.data.faqs !== undefined) updates.faqs = parsed.data.faqs
   if (parsed.data.testing_duration !== undefined) updates.testing_duration = parsed.data.testing_duration
+  if (parsed.data.testing_since !== undefined) updates.testing_since = parsed.data.testing_since
+  if (parsed.data.testing_note !== undefined) updates.testing_note = parsed.data.testing_note
   if (parsed.data.how_you_used_it !== undefined) updates.how_you_used_it = parsed.data.how_you_used_it
   if (parsed.data.standout_moment !== undefined) updates.standout_moment = parsed.data.standout_moment
   if (parsed.data.price_paid_cents !== undefined) updates.price_paid_cents = parsed.data.price_paid_cents
