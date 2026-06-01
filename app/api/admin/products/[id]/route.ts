@@ -108,6 +108,39 @@ export async function DELETE(
   if ('error' in gate) return gate.error
 
   const admin = createAdminClient()
+
+  // Full cleanup of the product's images. media_assets.product_id is ON DELETE
+  // SET NULL, and a primary row may not go null (CHECK media_primary_requires_
+  // product, mig 022) — so the cascade would 500 on any product with a primary
+  // image. Instead we delete the product's media rows AND their storage objects
+  // up front, so nothing is orphaned in the table or the bucket.
+  const { data: media } = await admin
+    .from('media_assets')
+    .select('bucket, filename')
+    .eq('product_id', id)
+
+  if (media && media.length > 0) {
+    // Remove storage objects, grouped by bucket. Best-effort: an orphaned file
+    // is far less bad than a product that can't be deleted, so a storage hiccup
+    // is logged, not fatal.
+    const byBucket = new Map<string, string[]>()
+    for (const m of media) {
+      if (!m.bucket || !m.filename) continue
+      const paths = byBucket.get(m.bucket) ?? []
+      paths.push(m.filename)
+      byBucket.set(m.bucket, paths)
+    }
+    for (const [bucket, paths] of byBucket) {
+      const { error: storageErr } = await admin.storage.from(bucket).remove(paths)
+      if (storageErr) console.warn(`Product ${id} delete — storage cleanup failed for bucket "${bucket}":`, storageErr.message)
+    }
+
+    const { error: mediaErr } = await admin.from('media_assets').delete().eq('product_id', id)
+    if (mediaErr) {
+      return NextResponse.json({ error: `Delete failed (media cleanup): ${mediaErr.message}` }, { status: 500 })
+    }
+  }
+
   const { error } = await admin.from('products').delete().eq('id', id)
   if (error) return NextResponse.json({ error: `Delete failed: ${error.message}` }, { status: 500 })
   return NextResponse.json({ success: true })
