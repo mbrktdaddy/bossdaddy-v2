@@ -35,18 +35,41 @@ export function useContentWorkspace({
 
   const route = contentType === 'review' ? 'reviews' : 'guides'
 
+  // PUT with a single retry on TRANSIENT failures — network resets
+  // (ECONNRESET / "fetch failed") and 5xx. A 4xx is a real validation error, so
+  // it's returned without retrying. This recovers the autosave from the kind of
+  // transient Supabase connection drop seen under load (e.g. right after a long
+  // specs-grade run) instead of surfacing a scary "Save failed".
+  const putJson = async (url: string, body: unknown): Promise<Response> => {
+    let lastErr: unknown
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await fetch(url, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+        if (res.status >= 500 && attempt === 0) {
+          await new Promise((r) => setTimeout(r, 700))
+          continue
+        }
+        return res
+      } catch (err) {
+        lastErr = err
+        if (attempt === 0) {
+          await new Promise((r) => setTimeout(r, 700))
+          continue
+        }
+        throw err
+      }
+    }
+    throw lastErr
+  }
+
   const save = async (p: Record<string, unknown>) => {
     const [contentRes, tagsRes] = await Promise.all([
-      fetch(`/api/${route}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(p),
-      }),
-      fetch(`/api/${route}/${id}/tags`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tags }),
-      }),
+      putJson(`/api/${route}/${id}`, p),
+      putJson(`/api/${route}/${id}/tags`, { tags }),
     ])
     if (!contentRes.ok) {
       const json = await contentRes.json().catch(() => ({})) as Record<string, string>
