@@ -276,6 +276,29 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
     setTimeout(() => setMsg(null), 3000)
   }
 
+  // "Weave into review" — compose a refine instruction from the specs grade
+  // (score + rationale + the models it compared against) and drop it into the
+  // AI Refine box, then jump there. The author clicks Apply and reviews the
+  // staged diff before anything changes — same accept/discard path as any refine.
+  function handleWeaveSpecs() {
+    if (scoreSpecs == null) return
+    const rivals = specsData.comparedAgainst
+      .map((c) => (c.brand ? `${c.brand} ${c.name}` : c.name).trim())
+      .filter(Boolean)
+      .slice(0, 5)
+    const rivalText = rivals.length ? ` versus ${rivals.join(', ')}` : ''
+    const basis = specsRationale.trim().slice(0, 550)
+    const instruction = (
+      `In my voice, work the spec comparison into the review${rivalText}: it scored ${scoreSpecs}/10 on specs. ` +
+      (basis ? `Basis: ${basis} ` : '') +
+      `Add a sentence or two in the most relevant section drawing the key contrasts — no spec dump, no invented numbers, keep it natural.`
+    ).slice(0, 1000)
+    setRefineInstruction(instruction)
+    const el = document.getElementById('ai-refine-instruction')
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    el?.focus()
+  }
+
   const readinessChecks = [
     { label: 'Title',      done: title.trim().length >= 10 },
     { label: 'Hero image', done: !!imageUrl },
@@ -832,6 +855,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
               onScore={setScoreSpecs}
               onRationale={setSpecsRationale}
               onData={setSpecsData}
+              onWeave={content.trim() ? handleWeaveSpecs : undefined}
             />
             <ProductLinkPanel
               content={content}

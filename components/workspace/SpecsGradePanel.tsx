@@ -16,6 +16,12 @@ interface Props {
   onScore: (n: number | null) => void
   onRationale: (s: string) => void
   onData: (d: SpecsGradeData) => void
+  /**
+   * Optional — when present, shows a "Weave into review" action that drops a
+   * ready-made refine instruction (grade + rationale + rivals) into the AI
+   * Refine box. Omitted when there's no body content to refine yet.
+   */
+  onWeave?: () => void
 }
 
 /**
@@ -28,7 +34,7 @@ interface Props {
  */
 export function SpecsGradePanel({
   productName, category, productSlug, competitorSlugs,
-  score, rationale, data, onScore, onRationale, onData,
+  score, rationale, data, onScore, onRationale, onData, onWeave,
 }: Props) {
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState<string | null>(null)
@@ -147,6 +153,19 @@ export function SpecsGradePanel({
               className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
             />
           </div>
+
+          {/* One-click: drop a ready-made refine instruction into AI Refine so
+              the prose can reference the comparison (author reviews the diff). */}
+          {onWeave && score != null && (
+            <button
+              type="button"
+              onClick={onWeave}
+              title="Pre-fills the AI Refine box with this grade's comparison — you click Apply and review the change"
+              className="w-full px-4 py-2.5 bg-surface-raised hover:bg-surface border border-accent-border/40 text-prose-muted hover:text-prose text-sm font-semibold rounded-lg transition-colors"
+            >
+              Weave into review →
+            </button>
+          )}
 
           {/* Read-only: what it compared against + sources */}
           {(data.comparedAgainst.length > 0 || data.sources.length > 0) && (
