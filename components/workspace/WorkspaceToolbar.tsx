@@ -33,7 +33,6 @@ export function WorkspaceToolbar({
 }: Props) {
   const readyCount  = readinessChecks?.filter((c) => c.done).length ?? 0
   const readyTotal  = readinessChecks?.length ?? 0
-  const firstMissing = readinessChecks?.find((c) => !c.done)?.label
   const readyTooltip = readinessChecks?.map((c) => `${c.done ? '✓' : '✗'} ${c.label}`).join('\n')
 
   return (
@@ -102,37 +101,31 @@ export function WorkspaceToolbar({
       </div>
 
       <div className="flex items-center gap-2 flex-wrap">
-        {/* Readiness checklist — full badge strip ≥sm; compact summary <sm */}
+        {/* Readiness — compact on every viewport so the sticky bar stays one
+            line: a single "Ready" pill when complete (full list on hover), or
+            only the MISSING checks when not. The old desktop strip showed all
+            8-9 badges, wrapping the bar tall and crowding the actions. */}
         {!isPublished && readinessChecks && readinessChecks.length > 0 && (
-          <>
+          readyCount === readyTotal ? (
             <span
               title={readyTooltip}
-              className={`sm:hidden text-xs px-2.5 py-1 rounded-full font-medium border ${
-                readyCount === readyTotal
-                  ? 'bg-green-50 text-green-500 border-green-300'
-                  : 'bg-amber-50 text-amber-700 border-amber-300'
-              }`}
+              className="text-xs px-2.5 py-1 rounded-full font-medium border bg-green-50 text-green-600 border-green-300 whitespace-nowrap"
             >
-              {readyCount === readyTotal
-                ? `✓ Ready (${readyCount}/${readyTotal})`
-                : `${readyCount}/${readyTotal} · ${firstMissing} missing`}
+              ✓ Ready ({readyCount}/{readyTotal})
             </span>
-            <div className="hidden sm:flex items-center gap-1.5 flex-wrap mr-2">
-              {readinessChecks.map((check) => (
+          ) : (
+            <div className="flex items-center gap-1.5 flex-wrap mr-1" title={readyTooltip}>
+              <span className="text-xs text-prose-faint whitespace-nowrap">{readyCount}/{readyTotal} ready —</span>
+              {readinessChecks.filter((c) => !c.done).map((check) => (
                 <span
                   key={check.label}
-                  title={check.label}
-                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                    check.done
-                      ? 'bg-green-50 text-green-500 border border-green-300'
-                      : 'bg-red-50 text-red-700 border border-red-300'
-                  }`}
+                  className="text-xs px-2 py-0.5 rounded-full font-medium bg-red-50 text-red-700 border border-red-300 whitespace-nowrap"
                 >
-                  {check.done ? '✓' : '✗'} {check.label}
+                  ✗ {check.label}
                 </span>
               ))}
             </div>
-          </>
+          )
         )}
         {isPublished && onUnpublish && (
           <button
