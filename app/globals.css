@@ -258,22 +258,36 @@ h1, h2, h3, h4 {
   font-size: 1.05em;
 }
 
-/* ── Inline image grid ──────────────────────────────────────────────── */
+/* ── Inline image gallery — horizontal swipe slider ───────────────────────
+   A multi-image gallery renders as a scroll-snap strip, not a stacked grid:
+   swipe on touch, scroll/trackpad on desktop, with a peek of the next image as
+   the affordance. Click any image to browse the whole gallery in the lightbox
+   (see ImageLightbox). Stays within the bounded prose column, so the overflow
+   scroll doesn't bleed to page level. */
 .bd-image-grid {
-  display: grid;
-  /* Always at least 2 columns — even on mobile — so a multi-image gallery
-     reads as a gallery instead of stacking like standalone images. */
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
   gap: 0.75rem;
   margin: 1.5rem 0;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+}
+.bd-image-grid::-webkit-scrollbar { display: none; } /* WebKit */
+.bd-image-grid figure {
+  margin: 0;
+  flex: 0 0 86%;            /* one image + a peek of the next (mobile) */
+  scroll-snap-align: center;
+}
+@media (min-width: 640px) {
+  .bd-image-grid figure { flex-basis: 48%; } /* ~2 across, peek */
 }
 @media (min-width: 1024px) {
-  .bd-image-grid { grid-template-columns: repeat(3, 1fr); }
+  .bd-image-grid figure { flex-basis: 32%; } /* ~3 across */
 }
-.bd-image-grid figure { margin: 0; }
 .bd-image-grid img {
   width: 100%;
-  height: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
   border-radius: 0.75rem;
