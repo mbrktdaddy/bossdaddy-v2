@@ -33,17 +33,22 @@ const RATIOS: { label: string; value: RatioChoice }[] = [
   { label: '16:9',     value: 16 / 9 },
 ]
 
-async function cropToBlob(imageSrc: string, crop: Area): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    const image = new Image()
-    image.onload = () => {
-      const scale = Math.min(1, 1600 / crop.width)
-      const canvas = document.createElement('canvas')
-      canvas.width  = Math.round(crop.width  * scale)
-      canvas.height = Math.round(crop.height * scale)
-      const ctx = canvas.getContext('2d')
-      if (!ctx) { reject(new Error('No canvas context')); return }
-      ctx.drawImage(image, crop.x, crop.y, crop.width, crop.height, 0, 0, canvas.width, canvas.height)
+async function cropToBlob(file: File, crop: Area): Promise<Blob> {
+  // Decode straight from the file bytes — NOT a blob: URL. React StrictMode
+  // double-invokes the cleanup effect in dev, revoking the object URL before a
+  // fresh Image() can load it ("Image load failed"). createImageBitmap reads the
+  // File directly, so it's immune. `from-image` keeps EXIF orientation matching
+  // what react-easy-crop shows, so the crop region stays aligned.
+  const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' })
+  try {
+    const scale = Math.min(1, 1600 / crop.width)
+    const canvas = document.createElement('canvas')
+    canvas.width  = Math.round(crop.width  * scale)
+    canvas.height = Math.round(crop.height * scale)
+    const ctx = canvas.getContext('2d')
+    if (!ctx) throw new Error('No canvas context')
+    ctx.drawImage(bitmap, crop.x, crop.y, crop.width, crop.height, 0, 0, canvas.width, canvas.height)
+    return await new Promise<Blob>((resolve, reject) => {
       canvas.toBlob(
         (blob) => {
           if (blob) { resolve(blob); return }
@@ -57,10 +62,10 @@ async function cropToBlob(imageSrc: string, crop: Area): Promise<Blob> {
         'image/webp',
         0.82,
       )
-    }
-    image.onerror = () => reject(new Error('Image load failed'))
-    image.src = imageSrc
-  })
+    })
+  } finally {
+    bitmap.close()
+  }
 }
 
 export default function ImageCropper({ file, aspect, onCrop, onCancel, onSkip, allowRatioChange }: Props) {
@@ -104,7 +109,7 @@ export default function ImageCropper({ file, aspect, onCrop, onCancel, onSkip, a
     }
     setBusy(true); setError(null)
     try {
-      const blob = await cropToBlob(imageSrc, croppedAreaPixels)
+      const blob = await cropToBlob(file, croppedAreaPixels)
       onCrop(blob)
     } catch (err) {
       console.error('ImageCropper cropToBlob failed:', err)
