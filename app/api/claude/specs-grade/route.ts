@@ -63,6 +63,20 @@ function isHttpUrl(s: unknown): s is string {
 }
 
 export async function POST(request: NextRequest) {
+  // Outer guard: auth, rate-limit (Redis), and the product/profile DB loads all
+  // run before the Claude try/catch below. A throw there would otherwise escape
+  // as a non-JSON platform error page ("An error occurred…") that crashes the
+  // client's JSON parse. Catch everything and always answer with JSON.
+  try {
+    return await handlePost(request)
+  } catch (err) {
+    console.error('specs-grade handler error:', err)
+    const msg = err instanceof Error ? err.message : String(err)
+    return NextResponse.json({ error: `Grading failed (server): ${msg.slice(0, 160)}` }, { status: 500 })
+  }
+}
+
+async function handlePost(request: NextRequest): Promise<NextResponse> {
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

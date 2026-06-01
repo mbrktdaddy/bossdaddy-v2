@@ -57,8 +57,24 @@ export function SpecsGradePanel({
           ...(competitorSlugs.length ? { competitorSlugs } : {}),
         }),
       })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Grading failed')
+
+      // The grade can run ~1–2 min of web search. If it times out or crashes at
+      // the platform level, Vercel returns a non-JSON error page — read as text
+      // and parse defensively so the author gets a clear message, not a raw
+      // "Unexpected token" JSON error.
+      const raw = await res.text()
+      let json: { error?: string; grade?: unknown; abstained?: boolean; rationale?: unknown; comparedAgainst?: unknown; sources?: unknown } | null = null
+      try { json = raw ? JSON.parse(raw) : null } catch { /* non-JSON platform error */ }
+
+      if (!res.ok || !json) {
+        const reason = json?.error
+          ?? (res.status === 504 || res.status === 408
+                ? 'The web search took too long and timed out — try again, it usually works on a second run.'
+                : res.status >= 500
+                ? `The grader hit a server error (${res.status}) — try again in a moment.`
+                : `Grading failed (${res.status}).`)
+        throw new Error(reason)
+      }
 
       const nextData: SpecsGradeData = {
         comparedAgainst: Array.isArray(json.comparedAgainst) ? json.comparedAgainst : [],
@@ -70,7 +86,7 @@ export function SpecsGradePanel({
 
       if (json.abstained || typeof json.grade !== 'number') {
         onScore(null)
-        setAbstainNote(json.rationale || 'Not enough reliable data to grade these specs.')
+        setAbstainNote((typeof json.rationale === 'string' && json.rationale) || 'Not enough reliable data to grade these specs.')
       } else {
         onScore(json.grade)
         if (nextData.comparedAgainst.length || nextData.sources.length) setSourcesOpen(false)
