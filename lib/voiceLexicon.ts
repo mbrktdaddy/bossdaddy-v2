@@ -85,6 +85,15 @@ export async function getAllPhrases(
 
 // ─── Prompt formatting ──────────────────────────────────────────────────────
 
+// Hard cap on how many phrases ride along in any single prompt. The whole point
+// of the palette is "use 2-3 where natural" — injecting 150 options both drowns
+// that instruction and adds real per-call token cost. We take the most-RECENT N
+// (deterministic, so the cached block stays stable) rather than a random sample,
+// because random sampling would change the block every call and defeat caching.
+// True rotation (surfacing older gems on a stable weekly seed) is a later tuning
+// pass; bounding the size is the thing that matters now.
+const MAX_VOICE_CARD_PHRASES = 40
+
 const KIND_ORDER: PhraseKind[] = ['opener', 'one_liner', 'phrase', 'slang', 'joke']
 
 const PROMPT_GROUP_HEADING: Record<PhraseKind, string> = {
@@ -104,7 +113,11 @@ const PROMPT_GROUP_HEADING: Record<PhraseKind, string> = {
  * so drafts pick up the author's flavor without sounding like a phrase salad.
  */
 export function formatVoiceLexiconForPrompt(phrases: VoicePhrase[]): string | null {
-  const approved = phrases.filter((p) => p.status === 'approved' && p.text?.trim())
+  // Keep input order (getApprovedPhrases sorts created_at desc) so the cap takes
+  // the most-recent phrases, then bound the set before grouping/formatting.
+  const approved = phrases
+    .filter((p) => p.status === 'approved' && p.text?.trim())
+    .slice(0, MAX_VOICE_CARD_PHRASES)
   if (approved.length === 0) return null
 
   const lines: string[] = [

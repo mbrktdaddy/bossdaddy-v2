@@ -54,11 +54,17 @@ export async function POST(request: NextRequest) {
 
   // De-dupe: if this exact phrase already exists (any status), bump it back to
   // approved on an explicit capture instead of creating a duplicate row.
+  // .limit(1) is defensive: there's no UNIQUE(user_id, text) constraint yet, so
+  // without it a pre-existing duplicate pair would make maybeSingle() error and
+  // silently fall through to inserting *another* dupe. limit(1) keeps it to one
+  // row so the dedupe stays correct regardless.
   const { data: existing } = await supabase
     .from('voice_phrases')
     .select('id, status')
     .eq('user_id', user.id)
     .eq('text', text)
+    .order('created_at', { ascending: true })
+    .limit(1)
     .maybeSingle()
 
   if (existing) {

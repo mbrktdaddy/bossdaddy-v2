@@ -49,11 +49,13 @@ export async function POST(request: NextRequest) {
   const refined = result.content.find((b) => b.type === 'text')?.text?.trim() ?? ''
 
   // Log the before/after for the voice-learning flywheel (Phase 3 will mine
-  // these to distill recurring edits into proposed phrases). Fire-and-forget —
-  // a logging failure must never break the refine the author asked for. Skip
-  // no-op refines where the model returned the text unchanged.
+  // these to distill recurring edits into proposed phrases). Awaited (not
+  // fire-and-forget) because on serverless the function can be reclaimed right
+  // after the response flushes, dropping a detached write — and this log IS the
+  // training signal, so a silent drop defeats the point. A logging failure must
+  // never break the refine, so errors are swallowed. Skip no-op refines.
   if (refined && refined !== text.trim()) {
-    void supabase
+    const { error: logErr } = await supabase
       .from('voice_edits')
       .insert({
         user_id: user.id,
@@ -62,9 +64,7 @@ export async function POST(request: NextRequest) {
         after: refined,
         refine_instruction: instruction,
       })
-      .then(({ error }) => {
-        if (error) console.error('voice_edits log failed:', error.message)
-      })
+    if (logErr) console.error('voice_edits log failed:', logErr.message)
   }
 
   return NextResponse.json({ refined })

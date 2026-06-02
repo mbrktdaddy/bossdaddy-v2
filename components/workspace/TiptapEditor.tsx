@@ -592,7 +592,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
           </div>
 
           {/* Capture this line into the author's voice lexicon */}
-          <div className="flex items-center gap-2 pt-1 border-t border-accent-border/30">
+          <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-accent-border/30">
             <span className="text-xs text-prose-faint">Sounds like you?</span>
             <select
               value={voiceKind}
