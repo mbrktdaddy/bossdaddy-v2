@@ -577,7 +577,6 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
               onChange={(e) => setAiInstruction(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && !aiRefining) handleAiRefine() }}
               placeholder="e.g. 'make this punchier', 'add a statistic', 'shorten'"
-              autoFocus
               className="flex-1 px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover"
             />
             <button type="button" onClick={handleAiRefine}

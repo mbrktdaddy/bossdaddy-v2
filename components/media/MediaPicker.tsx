@@ -161,7 +161,12 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
   // down "category=grilling AND product=traeger-xl" or keep either alone.
   const [products, setProducts] = useState<Product[]>([])
   const [filterProductId, setFilterProductId] = useState<string>(defaultProductId ?? '')
-  const [filterCategory,  setFilterCategory]  = useState<string>(defaultCategory  ?? '')
+  // When the caller has a product to snap to (review/product pickers), open on
+  // "All categories" and let the product filter do the narrowing. Only seed the
+  // category filter when there's no product context (guides, hero, articles) so
+  // those surfaces still open pre-filtered instead of dumping the whole library.
+  // Either way `defaultCategory` still tags new uploads via `uploadCategory`.
+  const [filterCategory,  setFilterCategory]  = useState<string>(defaultProductId ? '' : (defaultCategory ?? ''))
 
   // Tags applied to NEW uploads: the active drill-down filter when the user has
   // one, otherwise the caller's context (so an image uploaded from the "All"

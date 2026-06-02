@@ -43,11 +43,33 @@ export function SpecsGradePanel({
 
   const canGrade = productName.trim().length >= 2 && !!category
 
+  // Grading runs as a background job (web search takes 1-3 min): POST starts it
+  // and returns a jobId, then we poll until it's done/errored. This keeps the
+  // request off the client's back, so overloads/timeouts no longer fail the run
+  // — a blip just means "still working" on the next poll.
+  function applyResult(result: { grade?: unknown; abstained?: boolean; rationale?: unknown; comparedAgainst?: unknown; sources?: unknown } | null) {
+    const nextData: SpecsGradeData = {
+      comparedAgainst: Array.isArray(result?.comparedAgainst) ? result!.comparedAgainst : [],
+      sources:         Array.isArray(result?.sources) ? result!.sources : [],
+      gradedAt:        new Date().toISOString(),
+    }
+    onData(nextData)
+    onRationale(typeof result?.rationale === 'string' ? result.rationale : '')
+
+    if (result?.abstained || typeof result?.grade !== 'number') {
+      onScore(null)
+      setAbstainNote((typeof result?.rationale === 'string' && result.rationale) || 'Not enough reliable data to grade these specs.')
+    } else {
+      onScore(result.grade)
+      if (nextData.comparedAgainst.length || nextData.sources.length) setSourcesOpen(false)
+    }
+  }
+
   async function handleGrade() {
     if (!canGrade || loading) return
     setLoading(true); setError(null); setAbstainNote(null)
     try {
-      const res = await fetch('/api/claude/specs-grade', {
+      const startRes = await fetch('/api/claude/specs-grade', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -57,40 +79,26 @@ export function SpecsGradePanel({
           ...(competitorSlugs.length ? { competitorSlugs } : {}),
         }),
       })
-
-      // The grade can run ~1–2 min of web search. If it times out or crashes at
-      // the platform level, Vercel returns a non-JSON error page — read as text
-      // and parse defensively so the author gets a clear message, not a raw
-      // "Unexpected token" JSON error.
-      const raw = await res.text()
-      let json: { error?: string; grade?: unknown; abstained?: boolean; rationale?: unknown; comparedAgainst?: unknown; sources?: unknown } | null = null
-      try { json = raw ? JSON.parse(raw) : null } catch { /* non-JSON platform error */ }
-
-      if (!res.ok || !json) {
-        const reason = json?.error
-          ?? (res.status === 504 || res.status === 408
-                ? 'The web search took too long and timed out — try again, it usually works on a second run.'
-                : res.status >= 500
-                ? `The grader hit a server error (${res.status}) — try again in a moment.`
-                : `Grading failed (${res.status}).`)
-        throw new Error(reason)
+      const startJson = await startRes.json().catch(() => null)
+      if (!startRes.ok || !startJson?.jobId) {
+        throw new Error(startJson?.error ?? `Couldn't start grading (${startRes.status}).`)
       }
+      const jobId: string = startJson.jobId
 
-      const nextData: SpecsGradeData = {
-        comparedAgainst: Array.isArray(json.comparedAgainst) ? json.comparedAgainst : [],
-        sources:         Array.isArray(json.sources) ? json.sources : [],
-        gradedAt:        new Date().toISOString(),
+      // Poll every 3s, up to ~5 min. A failed poll is treated as transient and
+      // retried until the deadline rather than aborting the run.
+      const MAX_POLLS = 100
+      for (let i = 0; i < MAX_POLLS; i++) {
+        await new Promise((r) => setTimeout(r, 3000))
+        const pollRes = await fetch(`/api/claude/specs-grade?jobId=${encodeURIComponent(jobId)}`)
+        if (pollRes.status === 404) throw new Error('Grading job not found — try again.')
+        const pollJson = await pollRes.json().catch(() => null)
+        if (!pollRes.ok || !pollJson) continue // transient poll hiccup
+        if (pollJson.status === 'error') throw new Error(pollJson.error ?? 'Grading failed — try again.')
+        if (pollJson.status === 'done') { applyResult(pollJson.result); return }
+        // pending / running → keep polling
       }
-      onData(nextData)
-      onRationale(typeof json.rationale === 'string' ? json.rationale : '')
-
-      if (json.abstained || typeof json.grade !== 'number') {
-        onScore(null)
-        setAbstainNote((typeof json.rationale === 'string' && json.rationale) || 'Not enough reliable data to grade these specs.')
-      } else {
-        onScore(json.grade)
-        if (nextData.comparedAgainst.length || nextData.sources.length) setSourcesOpen(false)
-      }
+      throw new Error('Grading is taking longer than expected — check back in a moment or try again.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Grading failed')
     } finally {

@@ -604,8 +604,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
               <textarea
                 value={howYouUsedIt}
                 onChange={(e) => setHowYouUsedIt(e.target.value)}
-                maxLength={300}
-                rows={2}
+                maxLength={600}
+                rows={3}
                 placeholder="e.g. Built a backyard deck over 3 weekends — pilot holes, screws, mixing grout."
                 className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
               />
@@ -615,8 +615,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
               <textarea
                 value={standoutMoment}
                 onChange={(e) => setStandoutMoment(e.target.value)}
-                maxLength={300}
-                rows={2}
+                maxLength={600}
+                rows={3}
                 placeholder="e.g. Battery lasted the entire weekend — never had to stop and charge."
                 className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
               />

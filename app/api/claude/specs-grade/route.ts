@@ -1,17 +1,18 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest, after } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { getClaudeClient, MODEL } from '@/lib/claude/client'
+import { extractToolInput } from '@/lib/claude/structured'
+import { createJob, getJob, markRunning, markDone, markError } from '@/lib/aiJobs'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { getCategoryLabel } from '@/lib/categories'
 import { getProductBySlug, getProductsBySlugs } from '@/lib/products'
 import { z } from 'zod'
 
-// Web search can run several rounds + read sources, so this is the slowest
-// Claude call in the stack. Niche products with no provided specs/competitors
-// make the model search hardest — keep headroom under the Pro 300s cap.
-// (The system prompt also tells it to abstain promptly rather than burn the
-// whole search budget chasing an obscure product into a timeout.)
+// The grading work runs in the background via after(), NOT in the request the
+// client waits on — the client gets a jobId immediately and polls GET. The
+// function instance stays alive for the after() task up to maxDuration; web
+// search can run several rounds, so keep the full headroom under the Pro cap.
 export const maxDuration = 300
 
 const SpecSchema = z.object({ label: z.string().max(60), value: z.string().max(200) })
@@ -21,12 +22,12 @@ const Input = z.object({
   brand:           z.string().max(120).optional(),
   category:        z.string().max(80),
   specs:           z.array(SpecSchema).max(40).default([]),
-  // When given, the endpoint loads the product's brand + specs server-side (the
-  // catalog is authoritative), so the client doesn't marshal them.
+  // When given, the endpoint loads the product's brand + specs + price server-side
+  // (the catalog is authoritative), so the client doesn't marshal them.
   productSlug:     z.string().regex(/^[a-z0-9-]+$/).max(80).optional(),
   // Author-curated rivals to steer the search. competitorSlugs are resolved to
-  // "Brand Name" hints server-side; competitorHints are free-text. The operator
-  // is the domain expert, so their picks take priority over the AI's discovery.
+  // their stored specs + price server-side; competitorHints are free-text. The
+  // operator is the domain expert, so their picks take priority over discovery.
   competitorSlugs: z.array(z.string().regex(/^[a-z0-9-]+$/).max(80)).max(8).default([]),
   competitorHints: z.array(z.string().max(120)).max(8).default([]),
 })
@@ -42,7 +43,7 @@ WHAT THE GRADE MEANS (1-10) — this is ONLY about the spec sheet (measurable ca
 
 PROCESS:
 1. Identify 4-6 genuinely comparable models (same category, similar price tier / use case). Prefer the author's suggested competitors when given, then add the obvious rivals.
-2. Use web search to find each competitor's KEY specs from reputable sources — prefer manufacturer pages and major retailers, then established review outlets.
+2. Use web search to find KEY specs from reputable sources. PRIORITIZE sources that compare several models at once — established review outlets (e.g. RTINGS, Wirecutter, and category-specific review sites), independent spec-comparison databases, and retailer spec tables — because one solid comparison or "X vs Y" article often yields verified specs for multiple rivals in a single search. Use manufacturer pages mainly for the subject product's own specs. When an independent reviewer's measured figure disagrees with the manufacturer's claim, prefer the measured figure and note the discrepancy.
 3. Compare the subject product's specs (provided to you) against what you found, weighing the specs that actually matter for the category.
 4. Assign the grade and write a concise, factual rationale (3-5 sentences) a buyer would find useful, referencing concrete deltas ("lighter than the X, but lower torque than the Y").
 
@@ -50,99 +51,69 @@ HARD RULES:
 - Use ONLY specs you actually found via search or that were provided. NEVER invent, infer, or estimate a competitor's spec. If you couldn't verify it, leave it out.
 - Every competitor you cite must include at least one real source URL you actually retrieved.
 - If you cannot find enough reliable comparison data to grade fairly, ABSTAIN: set "grade": null and "abstained": true and explain why in "rationale". A null grade is correct and expected for obscure products — never force a number.
-- BE EFFICIENT — roughly one search per competitor. If your first 2-3 searches don't surface reliable specs (common for niche/small-brand products), ABSTAIN promptly. Do NOT exhaust your search budget chasing an obscure product — a fast, honest abstain is far better than a slow run that times out.
+- BE EFFICIENT — lead with a comparison/review search that covers multiple rivals at once rather than one search per competitor. If a few targeted searches (including at least one comparison or review article) still don't surface reliable data — common for niche/small-brand products — ABSTAIN promptly. Do NOT exhaust your search budget chasing an obscure product; a fast, honest abstain beats a slow run that times out.
 - Compare like with like (drills to drills, not the whole tool aisle).
+- COMPARE WITHIN THE SAME PRICE TIER. Comparable models should sit in roughly the same price class as the subject — anchor on the curated competitors and the subject's price (a rough 0.5×–2× price band is a sensible default). Do NOT grade a budget product against a flagship, or vice-versa; a cross-tier comparison skews the grade. If in-band comparables are thin, widen the band modestly and SAY SO in the rationale (e.g. "limited direct comparables in this price class"), or grade against the closest available and note the caveat — abstain only if there's no comparable field at any reasonable band.
 
-OUTPUT: valid JSON only — no markdown, no code fences, no commentary — as your final message:
-{
-  "grade": <number 1-10 or null>,
-  "abstained": <boolean>,
-  "rationale": "<string>",
-  "comparedAgainst": [ { "name": "<string>", "brand": "<string or null>", "keySpecs": [ { "label": "<string>", "value": "<string>" } ], "sourceUrl": "<string>" } ],
-  "sources": [ { "title": "<string>", "url": "<string>" } ]
-}`
+OUTPUT: When you have gathered enough comparison data (or have decided to abstain), you MUST return your result by calling the submit_specs_grade tool. Do NOT write the grading as plain text. To abstain, call the tool with grade=null and abstained=true and explain why in the rationale.`
+
+// The model returns its grading by calling this tool. It runs ALONGSIDE the
+// web_search server tool, so tool_choice can't force it (that would skip the
+// search) — the system prompt instructs the model to finish by calling it, and
+// the handler falls back to text-parsing if the model answers in prose instead.
+const GRADE_TOOL: Anthropic.Tool = {
+  name: 'submit_specs_grade',
+  description: 'Return the final specs grade after gathering comparison data (or when abstaining).',
+  input_schema: {
+    type: 'object',
+    properties: {
+      grade:     { type: ['number', 'null'], description: '1-10 specs grade, or null when abstaining' },
+      abstained: { type: 'boolean' },
+      rationale: { type: 'string', description: '3-5 factual sentences referencing concrete spec deltas' },
+      comparedAgainst: { type: 'array', items: {
+        type: 'object',
+        properties: {
+          name:  { type: 'string' },
+          brand: { type: ['string', 'null'] },
+          keySpecs: { type: 'array', items: {
+            type: 'object',
+            properties: { label: { type: 'string' }, value: { type: 'string' } },
+            required: ['label', 'value'],
+          } },
+          sourceUrl: { type: ['string', 'null'], description: 'A real source URL you actually retrieved' },
+        },
+        required: ['name', 'keySpecs'],
+      } },
+      sources: { type: 'array', items: {
+        type: 'object',
+        properties: { title: { type: 'string' }, url: { type: 'string' } },
+        required: ['url'],
+      } },
+    },
+    required: ['grade', 'abstained', 'rationale', 'comparedAgainst', 'sources'],
+  },
+}
 
 function isHttpUrl(s: unknown): s is string {
   return typeof s === 'string' && /^https?:\/\//i.test(s.trim())
 }
 
-export async function POST(request: NextRequest) {
-  // Outer guard: auth, rate-limit (Redis), and the product/profile DB loads all
-  // run before the Claude try/catch below. A throw there would otherwise escape
-  // as a non-JSON platform error page ("An error occurred…") that crashes the
-  // client's JSON parse. Catch everything and always answer with JSON.
-  try {
-    return await handlePost(request)
-  } catch (err) {
-    console.error('specs-grade handler error:', err)
-    const msg = err instanceof Error ? err.message : String(err)
-    return NextResponse.json({ error: `Grading failed (server): ${msg.slice(0, 160)}` }, { status: 500 })
-  }
+function usd(cents: number | null | undefined): string | null {
+  return cents != null && cents > 0 ? `$${Math.round(cents / 100)}` : null
 }
 
-async function handlePost(request: NextRequest): Promise<NextResponse> {
-  const supabase = await createClient()
-  const { user } = await getUserSafe(supabase)
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  // Authoring tool — authors and admins only.
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['author', 'admin'].includes(profile.role)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
-
-  const { success } = await checkRateLimit(`specs-grade:${user.id}`, 'specs-grade')
-  if (!success) {
-    return NextResponse.json({ error: 'Rate limit exceeded — specs grading is limited per hour.' }, { status: 429 })
-  }
-
-  const body = await request.json().catch(() => null)
-  const parsed = Input.safeParse(body)
-  if (!parsed.success) {
-    return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
-  }
-
-  const { productName, brand, category, specs, productSlug, competitorSlugs, competitorHints } = parsed.data
-  const categoryLabel = getCategoryLabel(category)
-
-  // Catalog is authoritative — load the subject's brand + specs from the product
-  // when linked; fall back to whatever the client passed.
-  let effBrand = brand?.trim() || null
-  let effSpecs = specs.filter((s) => s.label.trim() && s.value.trim())
-  if (productSlug) {
-    const p = await getProductBySlug(supabase, productSlug)
-    if (p) {
-      if (!effBrand && p.brand) effBrand = p.brand
-      const ps = (Array.isArray(p.specs) ? p.specs : []).filter((s) => s?.label?.trim() && s?.value?.trim())
-      if (ps.length) effSpecs = ps
-    }
-  }
-
-  // Resolve curated competitor slugs to "Brand Name" hints, merge with free-text.
-  const hints = [...competitorHints]
-  if (competitorSlugs.length) {
-    const comps = await getProductsBySlugs(supabase, competitorSlugs)
-    for (const c of comps) hints.push(c.brand ? `${c.brand} ${c.name}` : c.name)
-  }
-  const dedupedHints = [...new Set(hints.map((h) => h.trim()).filter(Boolean))].slice(0, 8)
-
-  const prompt = `Grade the specs of this product against comparable models in its category.
-
-Product: ${effBrand ? `${effBrand} ` : ''}${productName}
-Category: ${categoryLabel}${dedupedHints.length ? `\nAuthor-suggested competitors (prioritize these): ${dedupedHints.join(', ')}` : ''}
-
-Subject product specs:
-${effSpecs.length ? effSpecs.map((s) => `- ${s.label}: ${s.value}`).join('\n') : '(none provided — search for this product\'s own key specs too)'}
-
-Find comparable models, gather their real specs via web search, then return the grading JSON.`
-
+// ── Background work ──────────────────────────────────────────────────────────
+// Runs the Claude + web_search call, extracts the structured grade, normalizes
+// it, and returns the payload. Throws on API error / unusable output — the
+// caller maps that to the job's error field.
+async function runSpecsGrade(prompt: string): Promise<Record<string, unknown>> {
   // 6 searches comfortably covers 4-6 comparable models (≈1 each) while keeping
-  // the run well under the 200s ceiling — 10 drove a fragile ~115s call.
-  const tools = [{ type: 'web_search_20260209' as const, name: 'web_search' as const, max_uses: 6 }]
+  // the run well under the ceiling.
+  const tools: Anthropic.Messages.MessageCreateParams['tools'] = [
+    { type: 'web_search_20260209', name: 'web_search', max_uses: 6 },
+    GRADE_TOOL,
+  ]
   const messages: Anthropic.Messages.MessageParam[] = [{ role: 'user', content: prompt }]
-  // 8000 leaves room for the model's queries + a multi-model comparison matrix
-  // so the final JSON isn't truncated. (max_tokens caps OUTPUT; the fetched
-  // search results are server-injected and don't count against it.)
   const createArgs = (msgs: Anthropic.Messages.MessageParam[]) => ({
     model: MODEL,
     max_tokens: 8000,
@@ -150,48 +121,38 @@ Find comparable models, gather their real specs via web search, then return the 
     tools,
     messages: msgs,
   })
+  // Anthropic returns transient 529 overloaded_error under load — give the SDK
+  // extra retry headroom to ride out a brief spike.
+  const reqOpts = { maxRetries: 4 }
 
-  let message: Anthropic.Messages.Message
-  try {
-    message = await getClaudeClient().messages.create(createArgs(messages))
-    // The web_search tool can return stop_reason 'pause_turn' on long search
-    // loops — continue the turn (passing the partial content back) until it
-    // finishes, capped so a misbehaving loop can't run forever.
-    let guard = 0
-    while (message.stop_reason === 'pause_turn' && guard < 3) {
-      guard++
-      messages.push({ role: 'assistant', content: message.content })
-      message = await getClaudeClient().messages.create(createArgs(messages))
-    }
-  } catch (err) {
-    console.error('specs-grade Claude/web_search error:', err)
-    const msg = err instanceof Error ? err.message : String(err)
-    return NextResponse.json({ error: `Grading failed: ${msg.slice(0, 160)}` }, { status: 502 })
+  let message = await getClaudeClient().messages.create(createArgs(messages), reqOpts)
+  // web_search can return stop_reason 'pause_turn' on long loops — continue the
+  // turn (passing the partial content back) until it finishes, capped.
+  let guard = 0
+  while (message.stop_reason === 'pause_turn' && guard < 3) {
+    guard++
+    messages.push({ role: 'assistant', content: message.content })
+    message = await getClaudeClient().messages.create(createArgs(messages), reqOpts)
   }
 
-  // The final answer is the model's last text block (search happens via server
-  // tool_use blocks in between). Join text blocks defensively, then take the
-  // JSON object from the tail.
-  const text = message.content
-    .filter((b): b is Anthropic.TextBlock => b.type === 'text')
-    .map((b) => b.text)
-    .join('\n')
-  const jsonMatch = text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) {
-    // A truncated or still-paused response yields no closing JSON — give a hint.
+  // Preferred: the model called submit_specs_grade. Fallback: it answered in
+  // prose (web_search + a forced output tool can't coexist) — salvage JSON.
+  let out: Record<string, unknown> | null = extractToolInput(message, 'submit_specs_grade')
+  if (!out) {
+    const text = message.content
+      .filter((b): b is Anthropic.TextBlock => b.type === 'text')
+      .map((b) => b.text)
+      .join('\n')
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (jsonMatch) { try { out = JSON.parse(jsonMatch[0]) } catch { out = null } }
+  }
+  if (!out) {
     const hint = message.stop_reason === 'max_tokens'
       ? ' (the comparison ran long — try again)'
       : message.stop_reason === 'pause_turn'
       ? ' (the web search timed out — try again)'
       : ''
-    return NextResponse.json({ error: `Model returned an unexpected format${hint}.` }, { status: 502 })
-  }
-
-  let out: Record<string, unknown>
-  try {
-    out = JSON.parse(jsonMatch[0])
-  } catch {
-    return NextResponse.json({ error: 'Model returned malformed content — try again.' }, { status: 502 })
+    throw new Error(`Model returned an unexpected format${hint}.`)
   }
 
   const abstained = out.abstained === true
@@ -200,7 +161,6 @@ Find comparable models, gather their real specs via web search, then return the 
     const n = Math.round(Number(out.grade))
     if (Number.isFinite(n) && n >= 1 && n <= 10) grade = n
   }
-
   const rationale = typeof out.rationale === 'string' ? out.rationale.trim().slice(0, 1500) : ''
 
   const comparedAgainst = Array.isArray(out.comparedAgainst)
@@ -230,5 +190,136 @@ Find comparable models, gather their real specs via web search, then return the 
         .slice(0, 12)
     : []
 
-  return NextResponse.json({ grade, abstained, rationale, comparedAgainst, sources })
+  return { grade, abstained, rationale, comparedAgainst, sources }
+}
+
+// ── POST = start the job ─────────────────────────────────────────────────────
+// Resolves all catalog data, builds the prompt, creates a pending job, kicks off
+// the grading in the background, and returns the jobId immediately.
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  try {
+    const supabase = await createClient()
+    const { user } = await getUserSafe(supabase)
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+    if (!profile || !['author', 'admin'].includes(profile.role)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const { success } = await checkRateLimit(`specs-grade:${user.id}`, 'specs-grade')
+    if (!success) {
+      return NextResponse.json({ error: 'Rate limit exceeded — specs grading is limited per hour.' }, { status: 429 })
+    }
+
+    const body = await request.json().catch(() => null)
+    const parsed = Input.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
+    }
+
+    const { productName, brand, category, specs, productSlug, competitorSlugs, competitorHints } = parsed.data
+    const categoryLabel = getCategoryLabel(category)
+
+    // Catalog is authoritative — load the subject's brand + specs + price.
+    let effBrand = brand?.trim() || null
+    let effSpecs = specs.filter((s) => s.label.trim() && s.value.trim())
+    let effPrice: number | null = null
+    if (productSlug) {
+      const p = await getProductBySlug(supabase, productSlug)
+      if (p) {
+        if (!effBrand && p.brand) effBrand = p.brand
+        const ps = (Array.isArray(p.specs) ? p.specs : []).filter((s) => s?.label?.trim() && s?.value?.trim())
+        if (ps.length) effSpecs = ps
+        effPrice = p.price_cents ?? null
+      }
+    }
+
+    // Curated competitors: pull stored specs + price from the catalog so the
+    // grader grounds on operator data first and uses prices as the tier anchor.
+    const knownCompetitors: { head: string; price: number | null; specs: { label: string; value: string }[] }[] = []
+    if (competitorSlugs.length) {
+      const comps = await getProductsBySlugs(supabase, competitorSlugs)
+      for (const c of comps) {
+        const cs = (Array.isArray(c.specs) ? c.specs : []).filter((s) => s?.label?.trim() && s?.value?.trim())
+        knownCompetitors.push({ head: c.brand ? `${c.brand} ${c.name}` : c.name, price: c.price_cents ?? null, specs: cs })
+      }
+    }
+    const nameHints = [...new Set([
+      ...competitorHints.map((h) => h.trim()).filter(Boolean),
+      ...knownCompetitors.map((c) => c.head),
+    ].filter(Boolean))].slice(0, 8)
+
+    const knownCompetitorsBlock = knownCompetitors.some((c) => c.specs.length)
+      ? `\n\nKnown competitor specs (operator-curated, verified — use these directly; web-search only to fill missing fields or add rivals beyond this set; never contradict these):\n${knownCompetitors.map((c) => {
+          const priceTag = usd(c.price) ? ` (~${usd(c.price)})` : ''
+          const lines = c.specs.length
+            ? c.specs.map((s) => `    • ${s.label}: ${s.value}`).join('\n')
+            : '    • (no specs on file — search for these)'
+          return `- ${c.head}${priceTag}:\n${lines}`
+        }).join('\n')}`
+      : ''
+
+    // Price-tier anchor: prefer the subject's price; otherwise lean on the
+    // curated competitors' price range so the model still has a tier signal.
+    const compPrices = knownCompetitors.map((c) => c.price).filter((n): n is number => n != null && n > 0)
+    const tierLine = usd(effPrice)
+      ? `\nPrice tier anchor: the subject costs about ${usd(effPrice)} — only compare against models in a similar price class.`
+      : compPrices.length
+      ? `\nPrice tier anchor: the curated competitors run ${usd(Math.min(...compPrices))}–${usd(Math.max(...compPrices))} — treat that as the price class to stay within.`
+      : ''
+
+    const prompt = `Grade the specs of this product against comparable models in its category.
+
+Product: ${effBrand ? `${effBrand} ` : ''}${productName}${usd(effPrice) ? ` (~${usd(effPrice)})` : ''}
+Category: ${categoryLabel}${nameHints.length ? `\nAuthor-suggested competitors (prioritize these): ${nameHints.join(', ')}` : ''}${tierLine}
+
+Subject product specs (verified — treat as the subject's facts):
+${effSpecs.length ? effSpecs.map((s) => `- ${s.label}: ${s.value}`).join('\n') : '(none on file — search for this product\'s own key specs too)'}${knownCompetitorsBlock}
+
+Use the verified specs above as ground truth, and stay within the subject's price class. Web-search to fill gaps, to verify, and to add comparable in-tier models, then return the grading.`
+
+    const jobId = await createJob(user.id, 'specs_grade', { prompt })
+
+    // Run the long grading AFTER the response is sent. Vercel keeps the function
+    // instance alive for after() work (up to maxDuration); the client polls GET.
+    after(async () => {
+      try {
+        await markRunning(jobId)
+        const result = await runSpecsGrade(prompt)
+        await markDone(jobId, result)
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        console.error('specs-grade job failed:', msg)
+        const isOverload = /overload|529|capacity/i.test(msg)
+        const isTimeout = /timeout|timed.?out|deadline/i.test(msg)
+        await markError(jobId, isOverload
+          ? 'The AI service is busy right now (overloaded). Wait a minute and try again.'
+          : isTimeout
+          ? 'The grading search timed out — try again; it usually works on a second run.'
+          : msg)
+      }
+    })
+
+    return NextResponse.json({ jobId }, { status: 202 })
+  } catch (err) {
+    console.error('specs-grade start error:', err)
+    const msg = err instanceof Error ? err.message : String(err)
+    return NextResponse.json({ error: `Could not start grading: ${msg.slice(0, 160)}` }, { status: 500 })
+  }
+}
+
+// ── GET = poll the job ───────────────────────────────────────────────────────
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  const supabase = await createClient()
+  const { user } = await getUserSafe(supabase)
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const jobId = request.nextUrl.searchParams.get('jobId')
+  if (!jobId) return NextResponse.json({ error: 'Missing jobId' }, { status: 400 })
+
+  const job = await getJob(jobId, user.id)
+  if (!job) return NextResponse.json({ error: 'Job not found' }, { status: 404 })
+
+  return NextResponse.json({ status: job.status, result: job.result, error: job.error })
 }

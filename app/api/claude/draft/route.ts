@@ -1,12 +1,65 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { getClaudeClient, MODEL } from '@/lib/claude/client'
 import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
+import { createStructured } from '@/lib/claude/structured'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 // 8000-token reviews can take 1-2 min under load; 90s was cutting it close.
 export const maxDuration = 180
+
+// The model returns the draft by calling this tool — its input_schema is the
+// shape, so the SDK validates it instead of us regex-parsing JSON from text.
+const DRAFT_TOOL: Anthropic.Tool = {
+  name: 'submit_review',
+  description: 'Return the finished product review draft.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      title:        { type: 'string' },
+      excerpt:      { type: 'string' },
+      tldr:         { type: 'string' },
+      keyTakeaways: { type: 'array', items: { type: 'string' } },
+      bestFor:      { type: 'array', items: { type: 'string' } },
+      notFor:       { type: 'array', items: { type: 'string' } },
+      faqs:         { type: 'array', items: {
+        type: 'object',
+        properties: { question: { type: 'string' }, answer: { type: 'string' } },
+        required: ['question', 'answer'],
+      } },
+      subScores:    { type: 'object', properties: {
+        quality: { type: 'integer' }, value: { type: 'integer' },
+        ease: { type: 'integer' }, dailyUse: { type: 'integer' },
+      }, required: ['quality', 'value', 'ease', 'dailyUse'] },
+      wouldRebuy:   { type: 'boolean' },
+      introduction: { type: 'string' },
+      sections:     { type: 'array', items: {
+        type: 'object',
+        properties: { heading: { type: 'string' }, body: { type: 'string' } },
+        required: ['heading', 'body'],
+      } },
+      verdict:      { type: 'string' },
+      pros:         { type: 'array', items: { type: 'string' } },
+      cons:         { type: 'array', items: { type: 'string' } },
+      imagePrompt:  { type: 'string' },
+      inlineImages: { type: 'array', items: {
+        type: 'object',
+        properties: {
+          afterHeading: { type: 'string' }, prompt: { type: 'string' },
+          altText: { type: 'string' }, caption: { type: 'string' },
+        },
+        required: ['afterHeading', 'prompt', 'altText', 'caption'],
+      } },
+      suggestedTags: { type: 'array', items: { type: 'string' } },
+    },
+    required: [
+      'title', 'excerpt', 'tldr', 'keyTakeaways', 'bestFor', 'notFor', 'faqs',
+      'subScores', 'wouldRebuy', 'introduction', 'sections', 'verdict', 'pros',
+      'cons', 'imagePrompt', 'inlineImages', 'suggestedTags',
+    ],
+  },
+}
 
 const DraftInput = z.object({
   productName:     z.string().min(2).max(120),
@@ -34,8 +87,8 @@ const DraftInput = z.object({
   testingDuration: z.enum(['<1wk', '1-4wks', '1-3mo', '3+mo', '6mo', '1yr', '2yr', '3yr', '5yr', 'custom']).optional(),
   testingSince:    z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   testingNote:     z.string().max(120).optional(),
-  howYouUsedIt:    z.string().max(300).optional(),
-  standoutMoment:  z.string().max(300).optional(),
+  howYouUsedIt:    z.string().max(600).optional(),
+  standoutMoment:  z.string().max(600).optional(),
   pricePaid:       z.number().int().min(0).optional(),
 })
 
@@ -162,47 +215,24 @@ Price: under-25, under-50, under-100, under-250, premium
 Use Case: travel, daily, occasional, gift-idea, gear-haul
 Topic: home-improvement, workshop, automotive, yard-work, kitchen-tools, outdoor-cooking, mental-health, mindfulness, self-help, faith, formula-feeding, baby-sleep, strollers, car-seats, baby-carriers, diapering, nursery-gear, power-tools, hand-tools, storage-org, camping, hiking, fishing, hunting, water-sports, smart-home, wearables, audio-gear, edc-carry, truck-gear, detailing, cast-iron, meal-prep, fitness, home-gym, cleaning, organization
 
-Return JSON with this exact shape:
-{
-  "title": "string (SEO title including product name, max 70 chars — e.g. 'DeWalt 20V Drill Review: Built for Real Dad Projects')",
-  "excerpt": "string (one punchy sentence for the card — max 160 chars)",
-  "tldr": "string (1–2 sentences, skimmer-friendly verdict)",
-  "keyTakeaways": ["string (3–5 items, specific and useful)"],
-  "bestFor": ["string (3–4 specific buyer profiles)"],
-  "notFor": ["string (2–3 specific skip scenarios)"],
-  "faqs": [{ "question": "string", "answer": "string (2–3 sentences)" }],
-  "subScores": { "quality": number (1-10), "value": number (1-10), "ease": number (1-10), "dailyUse": number (1-10) },
-  "wouldRebuy": boolean,
-  "introduction": "string (2–3 sentences, first-person dad opening with a real use case)",
-  "sections": [
-    { "heading": "string (clear heading)", "body": "string (150–250 words, paragraphs separated by \\n\\n)" }
-  ],
-  "verdict": "string (1–2 paragraphs, clear recommendation, separated by \\n\\n if 2 paragraphs)",
-  "pros": ["string"],
-  "cons": ["string"],
-  "imagePrompt": "string (DALL-E 3 prompt: the product in a realistic setting, natural or warm lighting, clean composition, no people, no text, under 180 chars, style: editorial product photography)",
-  "inlineImages": [
-    { "afterHeading": "string (must match one of the section headings above)", "prompt": "string", "altText": "string", "caption": "string" }
-  ],
-  "suggestedTags": ["string (3–6 slugs from the controlled vocabulary above)"]
-}`
+Return your result by calling the submit_review tool. Field guidance: title is an SEO title including the product name (max 70 chars); excerpt is one punchy card sentence (max 160 chars); tldr is 1–2 skimmer sentences; section bodies are 150–250 words with paragraphs separated by \\n\\n; subScores are four 1–10 integers; imagePrompt is a product photography prompt (no people, no text, under 180 chars); each inlineImages.afterHeading MUST match one of your section headings; suggestedTags are 3–6 slugs from the controlled vocabulary above.`
 
   const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
-  const claudeResult = await getClaudeClient().messages.create({
-    model: MODEL,
-    // A full review (intro + 3-5 sections + verdict + pros/cons + FAQs +
-    // takeaways + sub-scores + image prompts + tags) is large; 3800 truncated
-    // the JSON mid-object → parse failure. claude-sonnet-4-6 handles 8k easily.
-    max_tokens: 8000,
-    system: systemBlocks,
-    messages: [{ role: 'user', content: prompt }],
-  }).catch((err: unknown) => {
-    console.error('Claude API error (review-draft):', err)
-    return { _error: err instanceof Error ? err.message : String(err) } as const
-  })
-
-  if ('_error' in claudeResult) {
-    const msg = claudeResult._error
+  let result
+  try {
+    result = await createStructured({
+      system: systemBlocks,
+      messages: [{ role: 'user', content: prompt }],
+      tool: DRAFT_TOOL,
+      // A full review (intro + 3-5 sections + verdict + pros/cons + FAQs +
+      // takeaways + sub-scores + image prompts + tags) is large; 8000 keeps the
+      // tool input from truncating. claude-sonnet-4-6 handles 8k easily.
+      maxTokens: 8000,
+      maxRetries: 4,
+    })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('Claude API error (review-draft):', msg)
     const isTimeout = /timeout|timed.?out|deadline/i.test(msg)
     const isOverload = /overload|529|capacity/i.test(msg)
     return NextResponse.json({
@@ -214,27 +244,18 @@ Return JSON with this exact shape:
     }, { status: 502 })
   }
 
-  // Truncation guard: if the model hit the token ceiling the JSON is cut off
-  // mid-object and won't parse — say so plainly instead of "malformed content".
-  if (claudeResult.stop_reason === 'max_tokens') {
+  // Truncation guard: if the model hit the token ceiling the tool input is cut
+  // off and unsafe to use — say so plainly instead of returning a partial draft.
+  if (result.stopReason === 'max_tokens') {
     console.error('review-draft hit max_tokens — output truncated')
     return NextResponse.json({
       error: 'The draft ran long and got cut off. Try again, or drop the inline image slots to 0–2 and regenerate.',
     }, { status: 502 })
   }
 
-  const text = claudeResult.content.find((b) => b.type === 'text')?.text ?? ''
-  const jsonMatch = text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) {
+  const draft = result.data
+  if (!draft) {
     return NextResponse.json({ error: 'AI returned an unexpected format — please try again.' }, { status: 502 })
-  }
-
-  let draft: Record<string, unknown>
-  try {
-    draft = JSON.parse(jsonMatch[0])
-  } catch (err) {
-    console.error('review-draft JSON parse failed:', err, '| length:', text.length, '| stop_reason:', claudeResult.stop_reason)
-    return NextResponse.json({ error: 'AI returned malformed content — please try again.' }, { status: 502 })
   }
 
   // Extract the AI-suggested image prompt — return it so the form can pre-fill

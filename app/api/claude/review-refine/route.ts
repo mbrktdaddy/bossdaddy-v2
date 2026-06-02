@@ -1,11 +1,12 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { getClaudeClient, MODEL } from '@/lib/claude/client'
 import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
+import { createStructured } from '@/lib/claude/structured'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
-export const maxDuration = 60
+export const maxDuration = 120
 
 const RefineInput = z.object({
   title:        z.string().min(1).max(120),
@@ -14,6 +15,40 @@ const RefineInput = z.object({
   content:      z.string().min(10),
   instruction:  z.string().min(4).max(1000),
 })
+
+// The shape the model must return — enforced as the refine tool's input_schema
+// so the SDK hands back a validated object instead of free-text JSON to parse.
+const REFINE_TOOL: Anthropic.Tool = {
+  name: 'submit_refined_review',
+  description: 'Return the full updated review after applying the requested changes.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      title:        { type: 'string', description: 'Updated title if instructions require it, otherwise the original' },
+      excerpt:      { type: 'string', description: 'Updated excerpt if needed, max 160 chars' },
+      tldr:         { type: 'string', description: '2–3 sentence skimmer summary; update if the verdict shifts' },
+      keyTakeaways: { type: 'array', items: { type: 'string' }, description: '3–5 specific bullets' },
+      bestFor:      { type: 'array', items: { type: 'string' }, description: '3–4 buyer profiles' },
+      notFor:       { type: 'array', items: { type: 'string' }, description: '2–3 skip scenarios' },
+      faqs:         { type: 'array', items: {
+        type: 'object',
+        properties: { question: { type: 'string' }, answer: { type: 'string' } },
+        required: ['question', 'answer'],
+      } },
+      introduction: { type: 'string' },
+      sections:     { type: 'array', items: {
+        type: 'object',
+        properties: { heading: { type: 'string' }, body: { type: 'string' } },
+        required: ['heading', 'body'],
+      } },
+      verdict:      { type: 'string' },
+      rating:       { type: 'number', description: 'Overall 1-10' },
+      pros:         { type: 'array', items: { type: 'string' } },
+      cons:         { type: 'array', items: { type: 'string' } },
+    },
+    required: ['title', 'excerpt', 'introduction', 'sections', 'verdict', 'pros', 'cons'],
+  },
+}
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -53,45 +88,39 @@ ${plainText}
 
 Refinement instructions: ${instruction}
 
-Return JSON with this exact shape:
-{
-  "title": "string — updated title if instructions require it, otherwise keep original",
-  "excerpt": "string — updated excerpt if needed, max 160 chars",
-  "tldr": "string — 2–3 sentence skimmer summary; update if instructions touch the overall verdict",
-  "keyTakeaways": ["string — 3–5 specific bullets; update if instructions change key insights"],
-  "bestFor": ["string — 3–4 buyer profiles; update if instructions change the recommendation"],
-  "notFor": ["string — 2–3 skip scenarios; update if instructions change the recommendation"],
-  "faqs": [{ "question": "string", "answer": "string" }],
-  "introduction": "string",
-  "sections": [
-    { "heading": "string", "body": "string" }
-  ],
-  "verdict": "string",
-  "rating": number (1-10),
-  "pros": ["string"],
-  "cons": ["string"]
-}
-
-Important: Only change what the instructions specify. Keep the first-person dad voice throughout.`
+Apply the changes, then return the full updated review by calling the submit_refined_review tool. Update only what the instructions specify; preserve everything else and keep the first-person dad voice throughout.`
 
   try {
-    const claude = getClaudeClient()
     const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
-    const message = await claude.messages.create({
-      model: MODEL,
-      max_tokens: 3000,
+    const { data: draft, stopReason } = await createStructured({
       system: systemBlocks,
       messages: [{ role: 'user', content: prompt }],
+      tool: REFINE_TOOL,
+      // A full-review refine regenerates every field (sections, faqs, lists);
+      // 8000 leaves room for the whole document so the tool input isn't truncated.
+      maxTokens: 8000,
+      maxRetries: 4,
     })
 
-    const text = message.content.find((b) => b.type === 'text')?.text ?? ''
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) return NextResponse.json({ error: 'Model returned unexpected format' }, { status: 502 })
-
-    const draft = JSON.parse(jsonMatch[0])
+    // Truncated tool input is incomplete and unsafe to apply — say so plainly.
+    if (stopReason === 'max_tokens') {
+      return NextResponse.json({ error: 'The refine ran long and was cut off — try a more specific instruction.' }, { status: 502 })
+    }
+    if (!draft) {
+      return NextResponse.json({ error: 'Model returned an unexpected format — try again.' }, { status: 502 })
+    }
     return NextResponse.json({ draft })
   } catch (err) {
     console.error('Review refine error:', err)
-    return NextResponse.json({ error: 'Refinement failed' }, { status: 502 })
+    const msg = err instanceof Error ? err.message : String(err)
+    const isOverload = /overload|529|capacity/i.test(msg)
+    const isTimeout = /timeout|timed.?out|deadline/i.test(msg)
+    return NextResponse.json({
+      error: isOverload
+        ? 'The AI service is busy right now (overloaded). Wait a minute and try again.'
+        : isTimeout
+        ? 'The refine timed out — try again in a moment.'
+        : 'Refinement failed',
+    }, { status: 502 })
   }
 }
