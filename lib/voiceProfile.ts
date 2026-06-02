@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { BOSS_DADDY_SYSTEM } from '@/lib/claude/client'
+import { getApprovedPhrases, formatVoiceLexiconForPrompt } from '@/lib/voiceLexicon'
 
 export interface VoiceFact {
   id: string
@@ -132,10 +133,17 @@ type SystemBlock =
 /**
  * Build the Claude `system` array for Boss Daddy content endpoints.
  *
- * Always includes the cached BOSS_DADDY_SYSTEM block. If the user has a
- * voice profile with anything in it, a second uncached block is appended
- * — uncached because it varies per user and is small enough that caching
- * it would just invalidate more often than it helps.
+ * Block order is chosen for prompt-cache efficiency (cache hits the longest
+ * matching prefix), so blocks run most-stable → most-volatile:
+ *   1. BOSS_DADDY_SYSTEM   — cached. Shared across ALL users + all calls.
+ *   2. Voice Card          — cached. Per-user but stable (changes ~weekly as
+ *                            the lexicon grows). Only approved phrases.
+ *   3. Voice profile facts — UNCACHED. Small, and edited more freely (family
+ *                            ages recompute every call), so caching it would
+ *                            invalidate more often than it helps.
+ *
+ * Each section is omitted entirely when empty — no point telling Claude the
+ * author has no profile or no signature phrases.
  */
 export async function buildBossDaddySystemBlocks(
   supabase: SupabaseClient,
@@ -144,8 +152,19 @@ export async function buildBossDaddySystemBlocks(
   const blocks: SystemBlock[] = [
     { type: 'text', text: BOSS_DADDY_SYSTEM, cache_control: { type: 'ephemeral' } },
   ]
-  const profile = await getVoiceProfile(supabase, userId)
+
+  const [profile, phrases] = await Promise.all([
+    getVoiceProfile(supabase, userId),
+    getApprovedPhrases(supabase, userId),
+  ])
+
+  const voiceCard = formatVoiceLexiconForPrompt(phrases)
+  if (voiceCard) {
+    blocks.push({ type: 'text', text: voiceCard, cache_control: { type: 'ephemeral' } })
+  }
+
   const voiceBlock = formatVoiceProfileForPrompt(profile)
   if (voiceBlock) blocks.push({ type: 'text', text: voiceBlock })
+
   return blocks
 }

@@ -7,6 +7,7 @@ import Placeholder from '@tiptap/extension-placeholder'
 import CharacterCount from '@tiptap/extension-character-count'
 import { Node, mergeAttributes } from '@tiptap/core'
 import type { NodeViewProps } from '@tiptap/react'
+import { PHRASE_KINDS, PHRASE_KIND_LABEL, type PhraseKind } from '@/lib/voiceLexicon'
 
 // ── Figure node ─────────────────────────────────────────────────────────────
 // Opaque block: preserves all data-* attributes through edit cycles.
@@ -329,6 +330,9 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
   const [aiInstruction, setAiInstruction] = useState('')
   const [aiRefining, setAiRefining] = useState(false)
   const [aiError, setAiError]       = useState<string | null>(null)
+  const [voiceKind, setVoiceKind]   = useState<PhraseKind>('phrase')
+  const [voiceSaving, setVoiceSaving] = useState(false)
+  const [voiceSaved, setVoiceSaved] = useState(false)
 
   const editor = useEditor({
     extensions: [
@@ -373,6 +377,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
       const { from, to } = editor.state.selection
       if (from !== to) {
         setSelection({ from, to, text: editor.state.doc.textBetween(from, to, ' ') })
+        setVoiceSaved(false)
       } else {
         setSelection(null)
       }
@@ -443,6 +448,28 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
       setAiError(err instanceof Error ? err.message : 'Refinement failed')
     }
     setAiRefining(false)
+  }
+
+  // Capture the highlighted line into the author's voice lexicon. The click IS
+  // the approval, so it lands `approved` and starts shaping drafts immediately.
+  // Kind can be tweaked here; fuller categorization lives in the voice profile.
+  async function saveSelectionToVoice() {
+    if (!selection?.text.trim()) return
+    setVoiceSaving(true)
+    setAiError(null)
+    try {
+      const res = await fetch('/api/voice/phrases', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: selection.text.trim(), kind: voiceKind, capture: true }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Save failed')
+      setVoiceSaved(true)
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : 'Could not save to your voice')
+    }
+    setVoiceSaving(false)
   }
 
   if (!editor) {
@@ -563,6 +590,31 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
               ✕
             </button>
           </div>
+
+          {/* Capture this line into the author's voice lexicon */}
+          <div className="flex items-center gap-2 pt-1 border-t border-accent-border/30">
+            <span className="text-xs text-prose-faint">Sounds like you?</span>
+            <select
+              value={voiceKind}
+              onChange={(e) => setVoiceKind(e.target.value as PhraseKind)}
+              disabled={voiceSaving || voiceSaved}
+              className="px-2 py-1.5 bg-surface-sunken border border-strong rounded-lg text-xs text-prose focus:outline-none focus:ring-1 focus:ring-accent-hover disabled:opacity-50"
+            >
+              {PHRASE_KINDS.map((k) => (
+                <option key={k} value={k}>{PHRASE_KIND_LABEL[k]}</option>
+              ))}
+            </select>
+            {voiceSaved ? (
+              <span className="text-xs text-forest font-semibold">★ Saved to your voice</span>
+            ) : (
+              <button type="button" onClick={saveSelectionToVoice}
+                disabled={voiceSaving}
+                className="px-3 py-1.5 bg-surface-raised hover:bg-surface text-accent-text-soft text-xs font-semibold rounded-lg transition-colors disabled:opacity-40">
+                {voiceSaving ? 'Saving…' : '★ Save to my voice'}
+              </button>
+            )}
+          </div>
+
           {aiError && <p className="text-xs text-red-700">{aiError}</p>}
         </div>
       )}

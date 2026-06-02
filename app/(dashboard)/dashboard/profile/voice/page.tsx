@@ -2,7 +2,9 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { requireAuthor } from '@/lib/auth-cache'
 import { getVoiceProfile, emptyVoiceProfile } from '@/lib/voiceProfile'
+import { getAllPhrases } from '@/lib/voiceLexicon'
 import { VoiceProfileForm } from './_components/VoiceProfileForm'
+import { SignaturePhrasesManager } from './_components/SignaturePhrasesManager'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,7 +12,10 @@ export default async function VoiceProfilePage() {
   const me = await requireAuthor()
   const supabase = await createClient()
 
-  const profile = await getVoiceProfile(supabase, me.id)
+  const [profile, phrases] = await Promise.all([
+    getVoiceProfile(supabase, me.id),
+    getAllPhrases(supabase, me.id),
+  ])
   const initial = profile ?? { user_id: me.id, ...emptyVoiceProfile() }
 
   return (
@@ -43,6 +48,10 @@ export default async function VoiceProfilePage() {
       </div>
 
       <VoiceProfileForm initial={initial} />
+
+      <div className="mt-12 pt-8 border-t border-soft">
+        <SignaturePhrasesManager initial={phrases} />
+      </div>
     </div>
   )
 }

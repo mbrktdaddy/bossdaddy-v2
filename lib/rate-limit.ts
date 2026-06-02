@@ -41,6 +41,9 @@ function getLimiter(type: string): Ratelimit | null {
     // tokens, so the priciest Claude call. Author-triggered; this is a light
     // backstop, the manual button is the real throttle.
     'specs-grade':      new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, '1 h'), prefix: 'bd_specs_grade' }),
+    // Voice-lexicon writes (capture/approve/edit a signature phrase). Cheap DB
+    // writes, no AI call — generous cap, just a flood backstop.
+    'voice':            new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, '1 h'), prefix: 'bd_voice' }),
   }
 
   limiters[type] = configs[type] ?? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1 h'), prefix: `bd_${type}` })
@@ -49,7 +52,7 @@ function getLimiter(type: string): Ratelimit | null {
 
 export async function checkRateLimit(
   identifier: string,
-  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' = 'draft'
+  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' | 'voice' = 'draft'
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
   const limiter = getLimiter(type)
   if (!limiter) return { success: true, remaining: 999, reset: 0 }

@@ -2223,6 +2223,86 @@ export type Database = {
           },
         ]
       }
+      voice_edits: {
+        Row: {
+          after: string
+          before: string
+          content_type: string
+          created_at: string
+          id: string
+          refine_instruction: string | null
+          user_id: string
+        }
+        Insert: {
+          after: string
+          before: string
+          content_type: string
+          created_at?: string
+          id?: string
+          refine_instruction?: string | null
+          user_id: string
+        }
+        Update: {
+          after?: string
+          before?: string
+          content_type?: string
+          created_at?: string
+          id?: string
+          refine_instruction?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      voice_phrases: {
+        Row: {
+          contexts_avoid: string[]
+          created_at: string
+          id: string
+          kind: string
+          source_review_id: string | null
+          status: string
+          text: string
+          times_seen: number
+          tone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contexts_avoid?: string[]
+          created_at?: string
+          id?: string
+          kind?: string
+          source_review_id?: string | null
+          status?: string
+          text: string
+          times_seen?: number
+          tone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contexts_avoid?: string[]
+          created_at?: string
+          id?: string
+          kind?: string
+          source_review_id?: string | null
+          status?: string
+          text?: string
+          times_seen?: number
+          tone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "voice_phrases_source_review_id_fkey"
+            columns: ["source_review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       voice_profiles: {
         Row: {
           facts: Json

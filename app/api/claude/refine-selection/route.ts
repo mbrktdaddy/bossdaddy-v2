@@ -47,5 +47,25 @@ export async function POST(request: NextRequest) {
   }
 
   const refined = result.content.find((b) => b.type === 'text')?.text?.trim() ?? ''
+
+  // Log the before/after for the voice-learning flywheel (Phase 3 will mine
+  // these to distill recurring edits into proposed phrases). Fire-and-forget —
+  // a logging failure must never break the refine the author asked for. Skip
+  // no-op refines where the model returned the text unchanged.
+  if (refined && refined !== text.trim()) {
+    void supabase
+      .from('voice_edits')
+      .insert({
+        user_id: user.id,
+        content_type: 'selection',
+        before: text,
+        after: refined,
+        refine_instruction: instruction,
+      })
+      .then(({ error }) => {
+        if (error) console.error('voice_edits log failed:', error.message)
+      })
+  }
+
   return NextResponse.json({ refined })
 }
