@@ -213,8 +213,8 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
                     {item.product_name && <span className="text-xs text-prose-faint">{item.product_name}</span>}
                     {category && <span className={`flex items-center gap-1 text-xs ${category.accent}`}><CategoryIcon slug={category.slug} className="w-3.5 h-3.5 text-accent-text" /> {category.label}</span>}
                     {item.reading_time_minutes && <span className="text-xs text-prose-faint">{item.reading_time_minutes} min</span>}
-                    <span className="text-xs text-prose-faint">
-                      {new Date(item.updated_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })}
+                    <span className="text-xs text-prose-faint" suppressHydrationWarning>
+                      {new Date(item.updated_at ?? '').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </span>
                   </div>
                   {item.rejection_reason && ['draft', 'rejected'].includes(item.status) && (
