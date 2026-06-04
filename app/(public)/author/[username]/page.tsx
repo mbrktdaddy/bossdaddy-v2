@@ -6,6 +6,7 @@ import { getCategoryBySlug } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
 import BenchStrip from '@/components/BenchStrip'
+import PipelineCounter from '@/components/PipelineCounter'
 import MessageUserButton from '@/components/messages/MessageUserButton'
 import type { Metadata } from 'next'
 
@@ -202,6 +203,10 @@ export default async function AuthorPage({ params }: Props) {
  <p className="text-prose-faint">No published content yet.</p>
  </div>
  )}
+
+ <div className="mt-12 pt-8 border-t border-soft">
+   <PipelineCounter />
+ </div>
 
  <div className="mt-16">
    <BenchStrip ctaText="See what's on the bench" />

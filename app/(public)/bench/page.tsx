@@ -2,6 +2,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import type { WishlistItem } from '@/lib/wishlist'
 import { groupByStatus } from '@/lib/wishlist'
 import { WishlistCard } from '@/components/wishlist/WishlistCard'
+import { VotePayoffBanner } from '@/components/VotePayoffBanner'
 import type { Metadata } from 'next'
 
 export const revalidate = 300
@@ -105,6 +106,10 @@ export default async function BenchPage() {
           Vote on what gets reviewed next.
         </p>
       </div>
+
+      {/* Personalized loop closure: if you voted for something that's now a
+          published review, this tells you (client-fetched, dismissible). */}
+      <VotePayoffBanner />
 
       {!hasContent ? (
         <div className="bg-surface/40 rounded-xl p-12 text-center">

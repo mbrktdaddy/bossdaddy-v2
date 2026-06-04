@@ -4,6 +4,9 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { OCCASIONS } from '@/lib/gift-occasions'
 import { LABELS } from '@/lib/labels'
+import PipelineCounter from '@/components/PipelineCounter'
+import OffTheBench from '@/components/OffTheBench'
+import BenchStrip from '@/components/BenchStrip'
 
 export const revalidate = 300
 
@@ -67,6 +70,7 @@ export default async function VaultLandingPage({ searchParams }: Props) {
         <p className="text-prose-muted max-w-2xl leading-relaxed text-base md:text-lg">
           Every comparison, best-of list, gift guide, and stack — in one place. Real-tested picks from a real dad, organized so you can find what you need in one click.
         </p>
+        <PipelineCounter align="left" className="mt-5" />
       </div>
 
       {/* Tab filter strip */}
@@ -112,6 +116,16 @@ export default async function VaultLandingPage({ searchParams }: Props) {
           ))}
         </div>
       )}
+
+      {/* Loop closure — the back of the funnel shows what just graduated... */}
+      <OffTheBench className="mt-16" />
+
+      {/* ...and the front of the funnel: what's coming, vote on it. The one
+          page that aggregates all finished content is the most natural place
+          to convert a reader into a voter. */}
+      <div className="mt-16">
+        <BenchStrip ctaText="See what's coming next" />
+      </div>
     </div>
   )
 }

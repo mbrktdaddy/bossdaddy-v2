@@ -11,6 +11,7 @@ import VaultCard from '@/components/VaultCard'
 import GuideRow from '@/components/GuideRow'
 import TrustBand from '@/components/TrustBand'
 import EmailCaptureSection from '@/components/EmailCaptureSection'
+import PipelineCounter from '@/components/PipelineCounter'
 import CodeRedirect from './_components/CodeRedirect'
 import { LABELS } from '@/lib/labels'
 import type { Metadata } from 'next'
@@ -229,6 +230,13 @@ export default async function HomePage() {
           <p className="text-xs font-bold text-white tracking-wide">
             Honest reviews, real tools — zero sponsored content
           </p>
+        </div>
+      </div>
+
+      {/* ── PIPELINE COUNTER — proof of a real, moving testing pipeline ───── */}
+      <div className="bg-surface-raised border-b border-soft">
+        <div className="max-w-6xl mx-auto px-6 py-3">
+          <PipelineCounter />
         </div>
       </div>
 
