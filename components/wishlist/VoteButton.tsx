@@ -1,26 +1,37 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { LoginPromptModal } from './LoginPromptModal'
 
 interface Props {
   itemId: string
-  initialVoted: boolean
+  /** Public vote count from the static render — paints instantly, then the
+   *  client fetch reconciles it with the live count. */
   initialCount: number
-  isAuthenticated: boolean
 }
 
-export function VoteButton({ itemId, initialVoted, initialCount, isAuthenticated }: Props) {
+export function VoteButton({ itemId, initialCount }: Props) {
   const pathname = usePathname()
-  const [voted, setVoted]       = useState(initialVoted)
-  const [count, setCount]       = useState(initialCount)
-  const [loading, setLoading]   = useState(false)
+  const [voted, setVoted]         = useState(false)
+  const [count, setCount]         = useState(initialCount)
+  const [loading, setLoading]     = useState(false)
   const [showModal, setShowModal] = useState(false)
-  const [error, setError]       = useState<string | null>(null)
+  const [error, setError]         = useState<string | null>(null)
+
+  // Per-user vote state lives client-side (same pattern as LikeButton + the
+  // comment widgets) so the bench page can be statically cached.
+  useEffect(() => {
+    fetch(`/api/wishlist/${itemId}/vote`)
+      .then((r) => r.json())
+      .then(({ voted, vote_count }) => {
+        setVoted(!!voted)
+        if (typeof vote_count === 'number') setCount(vote_count)
+      })
+      .catch(() => {})
+  }, [itemId])
 
   async function handleClick() {
-    if (!isAuthenticated) { setShowModal(true); return }
     setError(null)
     const prevVoted = voted
     const prevCount = count
@@ -32,6 +43,10 @@ export function VoteButton({ itemId, initialVoted, initialCount, isAuthenticated
       const json = await res.json()
       setVoted(json.voted)
       setCount(json.vote_count)
+    } else if (res.status === 401) {
+      setVoted(prevVoted)
+      setCount(prevCount)
+      setShowModal(true)
     } else {
       setVoted(prevVoted)
       setCount(prevCount)

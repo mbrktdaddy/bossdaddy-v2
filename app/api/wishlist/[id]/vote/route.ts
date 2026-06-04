@@ -3,6 +3,37 @@ import { revalidatePath } from 'next/cache'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
+// GET /api/wishlist/[id]/vote — public vote count + the current user's vote
+// status. Lets the bench page stay statically cached while VoteButton fetches
+// per-user state client-side (mirrors GET /api/likes).
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
+  const supabase = await createClient()
+  const { user } = await getUserSafe(supabase)
+
+  const admin = createAdminClient()
+  const { count } = await admin
+    .from('wishlist_votes')
+    .select('*', { count: 'exact', head: true })
+    .eq('wishlist_item_id', id)
+
+  let voted = false
+  if (user) {
+    const { data } = await admin
+      .from('wishlist_votes')
+      .select('id')
+      .eq('wishlist_item_id', id)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    voted = !!data
+  }
+
+  return NextResponse.json({ voted, vote_count: count ?? 0, authenticated: !!user })
+}
+
 // POST /api/wishlist/[id]/vote — toggle vote on/off (members only)
 export async function POST(
   _request: NextRequest,

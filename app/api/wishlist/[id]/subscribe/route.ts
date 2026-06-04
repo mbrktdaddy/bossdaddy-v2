@@ -2,6 +2,32 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
+// GET /api/wishlist/[id]/subscribe — the current user's subscription status.
+// Lets the bench page stay statically cached while SubscribeButton fetches
+// per-user state client-side (mirrors GET /api/likes).
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
+  const supabase = await createClient()
+  const { user } = await getUserSafe(supabase)
+
+  let subscribed = false
+  if (user) {
+    const admin = createAdminClient()
+    const { data } = await admin
+      .from('wishlist_subscriptions')
+      .select('id')
+      .eq('wishlist_item_id', id)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    subscribed = !!data
+  }
+
+  return NextResponse.json({ subscribed, authenticated: !!user })
+}
+
 // POST /api/wishlist/[id]/subscribe — toggle subscription on/off (members only)
 export async function POST(
   _request: NextRequest,

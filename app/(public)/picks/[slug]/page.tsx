@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import RatingScore from '@/components/RatingScore'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
@@ -22,6 +21,11 @@ interface Props { params: Promise<{ slug: string }> }
 
 const PICK_TYPES = ['general', 'best_of'] as const
 
+// Cookie-free by design: this page reads only public collection/product data
+// (via the admin client), never the request session — so it stays statically
+// prerenderable. Reintroducing an SSR cookie read (createClient) here would
+// crash the prod prerender with DYNAMIC_SERVER_USAGE. The bench detail page is
+// the per-user counterpart that is correctly force-dynamic.
 export async function generateStaticParams() {
   const admin = createAdminClient()
   const { data } = await admin
@@ -34,8 +38,8 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const supabase = await createClient()
-  const { data } = await supabase
+  const admin = createAdminClient()
+  const { data } = await admin
     .from('collections')
     .select('title, description, meta_title, meta_description')
     .eq('slug', slug)
@@ -75,9 +79,9 @@ type ReviewRow = {
 
 export default async function PickDetailPage({ params }: Props) {
   const { slug } = await params
-  const supabase = await createClient()
+  const admin = createAdminClient()
 
-  const { data: pick } = await supabase
+  const { data: pick } = await admin
     .from('collections')
     .select('id, slug, title, description, intro_html, hero_image_url, methodology_html, faqs, published_at, updated_at')
     .eq('slug', slug)
@@ -87,7 +91,6 @@ export default async function PickDetailPage({ params }: Props) {
 
   if (!pick) notFound()
 
-  const admin = createAdminClient()
   const { data: pickItems } = await admin
     .from('collection_items')
     .select('position, blurb, best_for, role_label, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, pros, cons, best_for, has_affiliate_links)')
@@ -109,7 +112,7 @@ export default async function PickDetailPage({ params }: Props) {
   const productSlugs = [...new Set(items.map((i) => i.review?.product_slug).filter(Boolean) as string[])]
   const productMap = new Map<string, { slug: string; affiliate_url: string | null; non_affiliate_url: string | null; description: string | null; price_cents: number | null }>()
   await Promise.all(productSlugs.map(async (ps) => {
-    const product = await getProductBySlug(supabase, ps)
+    const product = await getProductBySlug(admin, ps)
     if (product) productMap.set(ps, { slug: product.slug, affiliate_url: product.affiliate_url, non_affiliate_url: product.non_affiliate_url, description: product.description, price_cents: product.price_cents })
   }))
 

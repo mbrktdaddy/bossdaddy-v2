@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { createClient, getUserSafe } from '@/lib/supabase/server'
 import type { WishlistItem } from '@/lib/wishlist'
 import { getBuyLabel } from '@/lib/wishlist'
 import { StatusBadge } from '@/components/wishlist/StatusBadge'
@@ -15,6 +14,13 @@ import { LightboxImage } from '@/components/LightboxImage'
 import BenchStrip from '@/components/BenchStrip'
 import type { Metadata } from 'next'
 
+// Per-user vote/subscribe state is fetched CLIENT-side by VoteButton/
+// SubscribeButton (same pattern as LikeButton + the comment widgets), so this
+// server render does no per-user cookie read of its own. The route still
+// renders dynamically (ƒ) like reviews/guides because the shared CommentList
+// reads the session — that's expected and fine. Do NOT reintroduce a
+// server-side per-user read (getUserSafe/createClient) here: that, combined
+// with generateStaticParams, is what crashed the prerender (DYNAMIC_SERVER_USAGE).
 export const revalidate = 300
 
 interface Props {
@@ -70,21 +76,6 @@ export default async function BenchDetailPage({ params }: Props) {
       .eq('id', wishlistItem.review_id)
       .maybeSingle()
     linkedReviewSlug = linkedReview?.slug ?? null
-  }
-
-  const supabase = await createClient()
-  const { user } = await getUserSafe(supabase)
-
-  let userHasVoted = false
-  let userSubscribed = false
-
-  if (user) {
-    const [{ data: vote }, { data: sub }] = await Promise.all([
-      admin.from('wishlist_votes').select('id').eq('wishlist_item_id', item.id).eq('user_id', user.id).maybeSingle(),
-      admin.from('wishlist_subscriptions').select('id').eq('wishlist_item_id', item.id).eq('user_id', user.id).maybeSingle(),
-    ])
-    userHasVoted = !!vote
-    userSubscribed = !!sub
   }
 
   const isReviewed = wishlistItem.status === 'reviewed'
@@ -152,15 +143,9 @@ export default async function BenchDetailPage({ params }: Props) {
               <div className="flex flex-wrap gap-3 mt-4">
                 <VoteButton
                   itemId={wishlistItem.id}
-                  initialVoted={userHasVoted}
                   initialCount={wishlistItem.vote_count as number}
-                  isAuthenticated={!!user}
                 />
-                <SubscribeButton
-                  itemId={wishlistItem.id}
-                  initialSubscribed={userSubscribed}
-                  isAuthenticated={!!user}
-                />
+                <SubscribeButton itemId={wishlistItem.id} />
                 {hasBuyLink && (
                   <a
                     href={`/go/${wishlistItem.slug}`}
@@ -182,7 +167,6 @@ export default async function BenchDetailPage({ params }: Props) {
           <p className="text-sm text-accent-text/80">
             <strong className="text-accent-text-soft">{wishlistItem.vote_count as number} {wishlistItem.vote_count === 1 ? 'person has' : 'people have'} voted</strong> for this review.
             The more votes, the sooner it gets done.
-            {!user && ' Create a free account to cast your vote.'}
           </p>
         </div>
       )}

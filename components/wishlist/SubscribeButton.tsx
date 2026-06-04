@@ -1,24 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { LoginPromptModal } from './LoginPromptModal'
 
 interface Props {
   itemId: string
-  initialSubscribed: boolean
-  isAuthenticated: boolean
 }
 
-export function SubscribeButton({ itemId, initialSubscribed, isAuthenticated }: Props) {
+export function SubscribeButton({ itemId }: Props) {
   const pathname = usePathname()
-  const [subscribed, setSubscribed] = useState(initialSubscribed)
+  const [subscribed, setSubscribed] = useState(false)
   const [loading, setLoading]       = useState(false)
   const [showModal, setShowModal]   = useState(false)
   const [error, setError]           = useState<string | null>(null)
 
+  // Per-user subscription state lives client-side (same pattern as LikeButton)
+  // so the bench page can be statically cached.
+  useEffect(() => {
+    fetch(`/api/wishlist/${itemId}/subscribe`)
+      .then((r) => r.json())
+      .then(({ subscribed }) => setSubscribed(!!subscribed))
+      .catch(() => {})
+  }, [itemId])
+
   async function handleClick() {
-    if (!isAuthenticated) { setShowModal(true); return }
     setError(null)
     const prevSubscribed = subscribed
     setSubscribed(!subscribed)
@@ -27,6 +33,9 @@ export function SubscribeButton({ itemId, initialSubscribed, isAuthenticated }: 
     if (res.ok) {
       const json = await res.json()
       setSubscribed(json.subscribed)
+    } else if (res.status === 401) {
+      setSubscribed(prevSubscribed)
+      setShowModal(true)
     } else {
       setSubscribed(prevSubscribed)
       setError('Could not update subscription. Try again.')
