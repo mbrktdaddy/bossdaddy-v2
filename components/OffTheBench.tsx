@@ -18,19 +18,24 @@ interface Props {
 export default async function OffTheBench({ limit = 3, className = '' }: Props) {
   const admin = createAdminClient()
 
+  // Order newest-graduated first and keep the cap high: the reviews query
+  // below filters/orders by published_at, so every graduated item's bench
+  // metadata must be present in this map or a recent review would silently
+  // drop off the rail.
   const { data: grad } = await admin
     .from('wishlist_items')
     .select('id, title, image_url, review_id')
     .eq('status', 'reviewed')
     .not('review_id', 'is', null)
-    .limit(60)
+    .order('updated_at', { ascending: false })
+    .limit(500)
 
   if (!grad || grad.length === 0) return null
 
   const reviewIds = grad.map((g) => g.review_id as string)
   const { data: reviews } = await admin
     .from('reviews')
-    .select('id, slug, title, image_url, rating, published_at')
+    .select('id, slug, title, image_url, published_at')
     .in('id', reviewIds)
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -44,8 +49,6 @@ export default async function OffTheBench({ limit = 3, className = '' }: Props) 
     const bench = benchById.get(r.id)
     return {
       reviewSlug: r.slug,
-      reviewTitle: r.title,
-      rating: r.rating as number | null,
       image: bench?.image_url ?? r.image_url ?? null,
       benchTitle: bench?.title ?? r.title,
     }
@@ -62,7 +65,7 @@ export default async function OffTheBench({ limit = 3, className = '' }: Props) 
           Fresh off the Bench
         </h2>
         <p className="text-xs text-prose-muted mt-0.5">
-          Voted onto the bench, tested, and now fully reviewed.
+          Was on the bench. Now tested and fully reviewed.
         </p>
       </div>
 
