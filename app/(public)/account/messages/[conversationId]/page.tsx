@@ -19,11 +19,14 @@ export default async function ConversationPage({ params }: PageProps) {
   // Participant check (RLS returns only rows in conversations the user is in).
   const { data: parts } = await supabase
     .from('conversation_participants')
-    .select('user_id')
+    .select('user_id, last_read_at')
     .eq('conversation_id', conversationId)
   if (!parts || !parts.some((p) => p.user_id === user.id)) redirect('/account/messages')
 
-  const peerId = parts.find((p) => p.user_id !== user.id)?.user_id ?? null
+  const peerPart = parts.find((p) => p.user_id !== user.id) ?? null
+  const peerId = peerPart?.user_id ?? null
+  // Peer's last_read_at drives the "Seen" indicator under my latest message.
+  const peerLastReadAt = peerPart?.last_read_at ?? null
   let peer: { id: string; username: string; displayName: string | null; avatarUrl: string | null } | null = null
   if (peerId) {
     const { data } = await supabase.from('profiles').select('id, username, display_name, avatar_url').eq('id', peerId).single()
@@ -55,6 +58,7 @@ export default async function ConversationPage({ params }: PageProps) {
       peer={peer}
       initialMessages={messages ?? []}
       initiallyBlocked={blocked}
+      initialPeerLastReadAt={peerLastReadAt}
     />
   )
 }

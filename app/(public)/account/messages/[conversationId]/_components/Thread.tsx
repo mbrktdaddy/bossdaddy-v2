@@ -6,6 +6,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { sendMessage, markConversationRead, blockUser, unblockUser, reportContent, deleteConversation } from '@/lib/messaging'
 
@@ -14,14 +15,60 @@ interface Peer { id: string; username: string; displayName: string | null; avata
 
 const REPORT_REASONS = ['Spam', 'Harassment', 'Inappropriate content', 'Other']
 
+function draftKey(conversationId: string) { return `bd_dm_draft:${conversationId}` }
+
+function formatTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+}
+
+function dayLabel(iso: string): string {
+  const d = new Date(iso)
+  const today = new Date()
+  const yesterday = new Date(today)
+  yesterday.setDate(today.getDate() - 1)
+  if (d.toDateString() === today.toDateString()) return 'Today'
+  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday'
+  return d.toLocaleDateString([], {
+    month: 'short',
+    day: 'numeric',
+    ...(d.getFullYear() !== today.getFullYear() ? { year: 'numeric' } : {}),
+  })
+}
+
+function PeerAvatar({ peer, size = 28 }: { peer: Peer | null; size?: number }) {
+  const name = peer?.displayName || peer?.username || 'Member'
+  if (peer?.avatarUrl) {
+    return (
+      <Image
+        src={peer.avatarUrl}
+        alt={name}
+        width={size}
+        height={size}
+        className="rounded-full object-cover shrink-0 bg-surface-raised"
+        style={{ width: size, height: size }}
+      />
+    )
+  }
+  return (
+    <span
+      className="rounded-full bg-surface-raised text-prose-muted font-bold flex items-center justify-center shrink-0 uppercase"
+      style={{ width: size, height: size, fontSize: size * 0.42 }}
+      aria-hidden
+    >
+      {name.charAt(0)}
+    </span>
+  )
+}
+
 export default function Thread({
-  conversationId, meId, peer, initialMessages, initiallyBlocked,
+  conversationId, meId, peer, initialMessages, initiallyBlocked, initialPeerLastReadAt,
 }: {
   conversationId: string
   meId: string
   peer: Peer | null
   initialMessages: Message[]
   initiallyBlocked: boolean
+  initialPeerLastReadAt: string | null
 }) {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [draft, setDraft] = useState('')
@@ -32,9 +79,41 @@ export default function Thread({
   const [reportOpen, setReportOpen] = useState(false)
   const [reported, setReported] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [peerLastReadAt, setPeerLastReadAt] = useState<string | null>(initialPeerLastReadAt)
+  // Gate locale-formatted timestamps behind mount so SSR (server timezone) and
+  // the client's first paint match — avoids a hydration mismatch on the times.
+  const [mounted, setMounted] = useState(false)
   const listRef = useRef<HTMLDivElement>(null)
 
   const peerName = peer?.displayName || peer?.username || 'Member'
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setMounted(true) }, [])
+
+  // Restore a saved draft for this conversation so a reload or accidental
+  // navigation doesn't lose an in-progress message. Persisting happens in the
+  // change handler (below), not an effect — avoids an ordering race where the
+  // persist effect's initial empty run wipes the just-restored value.
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(draftKey(conversationId))
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (saved) setDraft(saved)
+    } catch { /* ignore */ }
+  }, [conversationId])
+
+  function updateDraft(value: string) {
+    setDraft(value)
+    try {
+      if (value) localStorage.setItem(draftKey(conversationId), value)
+      else localStorage.removeItem(draftKey(conversationId))
+    } catch { /* ignore */ }
+  }
+
+  function clearDraft() {
+    setDraft('')
+    try { localStorage.removeItem(draftKey(conversationId)) } catch { /* ignore */ }
+  }
 
   // Scroll only the message list's own scroll container — NOT scrollIntoView,
   // which bubbles to the window and yanks the whole page (hiding the top of
@@ -48,7 +127,7 @@ export default function Thread({
   useEffect(() => { markConversationRead(conversationId) }, [conversationId, messages.length])
   useEffect(() => { scrollToBottom() }, [messages.length, scrollToBottom])
 
-  // Realtime: append new messages in this conversation (dedupe by id).
+  // Realtime: append new messages + track the peer's read state (for "Seen").
   useEffect(() => {
     const supabase = createClient()
     const channel = supabase
@@ -61,9 +140,17 @@ export default function Thread({
           setMessages((prev) => prev.some((x) => x.id === m.id) ? prev : [...prev, m])
         },
       )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'conversation_participants', filter: `conversation_id=eq.${conversationId}` },
+        (payload) => {
+          const row = payload.new as { user_id: string; last_read_at: string }
+          if (row.user_id !== meId) setPeerLastReadAt(row.last_read_at)
+        },
+      )
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [conversationId])
+  }, [conversationId, meId])
 
   async function send() {
     const text = draft.trim()
@@ -72,7 +159,7 @@ export default function Thread({
     const res = await sendMessage(conversationId, text)
     setSending(false)
     if (!res.ok) { setError(res.error); return }
-    setDraft('')
+    clearDraft()
     // Realtime will append; nothing else to do.
   }
 
@@ -98,12 +185,23 @@ export default function Thread({
     if (res.ok) window.location.assign('/account/messages')
   }
 
+  // Index of my most recent message — the only one that can show "Seen".
+  let lastMineIdx = -1
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].sender_id === meId) { lastMineIdx = i; break }
+  }
+  const peerHasSeenLast =
+    lastMineIdx >= 0 &&
+    !!peerLastReadAt &&
+    new Date(peerLastReadAt).getTime() >= new Date(messages[lastMineIdx].created_at).getTime()
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 flex flex-col h-[calc(100dvh-8rem)]">
       {/* Header */}
       <div className="flex items-center justify-between gap-2 pb-3 border-b border-soft">
         <div className="flex items-center gap-2 min-w-0">
           <Link href="/account/messages" className="text-prose-faint hover:text-prose text-sm">←</Link>
+          <PeerAvatar peer={peer} size={28} />
           {peer ? (
             <Link href={`/author/${peer.username}`} className="text-sm font-bold text-prose truncate hover:text-accent">{peerName}</Link>
           ) : (
@@ -134,19 +232,49 @@ export default function Thread({
       </div>
 
       {/* Messages */}
-      <div ref={listRef} className="flex-1 overflow-y-auto py-4 space-y-2">
+      <div ref={listRef} className="flex-1 overflow-y-auto py-4 space-y-1.5">
         {messages.length === 0 ? (
           <p className="text-center text-sm text-prose-faint py-8">Say hello 👋</p>
         ) : (
-          messages.map((m) => {
+          messages.map((m, i) => {
             const fromMe = m.sender_id === meId
+            const prev = messages[i - 1]
+            // Day separator when the calendar day changes (mount-gated to keep
+            // SSR/CSR markup identical until locale formatting is safe).
+            const showDay = mounted && (!prev || new Date(prev.created_at).toDateString() !== new Date(m.created_at).toDateString())
+            // Avatar only at the start of a run of incoming messages.
+            const runStart = !prev || prev.sender_id !== m.sender_id
+            const showAvatar = !fromMe && runStart
+
             return (
-              <div key={m.id} className={`flex ${fromMe ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[75%] px-3.5 py-2 rounded-2xl text-sm whitespace-pre-wrap break-words ${
-                  fromMe ? 'bg-accent text-white rounded-br-sm' : 'bg-surface-raised text-prose rounded-bl-sm'
-                }`}>
-                  {m.body}
+              <div key={m.id}>
+                {showDay && (
+                  <div className="flex justify-center my-3">
+                    <span className="text-[11px] font-semibold text-prose-faint bg-surface-raised rounded-full px-3 py-1">
+                      {dayLabel(m.created_at)}
+                    </span>
+                  </div>
+                )}
+                <div className={`flex items-end gap-2 ${fromMe ? 'justify-end' : 'justify-start'}`}>
+                  {!fromMe && (
+                    showAvatar
+                      ? <PeerAvatar peer={peer} size={28} />
+                      : <span className="w-7 shrink-0" aria-hidden />
+                  )}
+                  <div className={`group max-w-[75%] px-3.5 py-2 rounded-2xl text-sm whitespace-pre-wrap break-words ${
+                    fromMe ? 'bg-accent text-white rounded-br-sm' : 'bg-surface-raised text-prose rounded-bl-sm'
+                  }`}>
+                    <span>{m.body}</span>
+                    {mounted && (
+                      <span className={`block text-[10px] mt-0.5 tabular-nums ${fromMe ? 'text-white/60' : 'text-prose-faint'}`}>
+                        {formatTime(m.created_at)}
+                      </span>
+                    )}
+                  </div>
                 </div>
+                {fromMe && i === lastMineIdx && peerHasSeenLast && (
+                  <p className="text-right text-[10px] text-prose-faint mt-0.5 pr-1">Seen</p>
+                )}
               </div>
             )
           })
@@ -164,7 +292,7 @@ export default function Thread({
           <div className="flex items-end gap-2">
             <textarea
               value={draft}
-              onChange={(e) => setDraft(e.target.value)}
+              onChange={(e) => updateDraft(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
               rows={1}
               placeholder="Write a message…"
