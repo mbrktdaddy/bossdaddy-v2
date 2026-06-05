@@ -13,6 +13,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 interface NotificationRow {
@@ -49,6 +50,7 @@ export default function ActivityMenu({ userId }: { userId: string }) {
   const [msgUnread, setMsgUnread]   = useState(0)
   const [busyId, setBusyId]         = useState<string | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
+  const pathname = usePathname()
 
   const loadNotifs = useCallback(async () => {
     const res = await fetch('/api/notifications', { cache: 'no-store' })
@@ -107,6 +109,12 @@ export default function ActivityMenu({ userId }: { userId: string }) {
       window.removeEventListener('pageshow', refresh)
     }
   }, [loadNotifs, loadMsgs])
+
+  // Close on client-side navigation. Opening a conversation (or any in-panel
+  // <Link>) changes the route but doesn't trigger outside-click, so the panel
+  // would otherwise linger on the destination page. No-op on mount.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setOpen(false) }, [pathname])
 
   // Close on outside click.
   useEffect(() => {
