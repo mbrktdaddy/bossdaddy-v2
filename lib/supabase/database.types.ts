@@ -124,6 +124,42 @@ export type Database = {
           },
         ]
       }
+      ai_jobs: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          input: Json
+          kind: string
+          result: Json | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          input?: Json
+          kind: string
+          result?: Json | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          input?: Json
+          kind?: string
+          result?: Json | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       cart_items: {
         Row: {
           cart_id: string
@@ -2352,6 +2388,7 @@ export type Database = {
           custom_store_name: string | null
           description: string | null
           estimated_review_date: string | null
+          gallery_images: string[]
           id: string
           image_url: string | null
           priority: number
@@ -2370,6 +2407,7 @@ export type Database = {
           custom_store_name?: string | null
           description?: string | null
           estimated_review_date?: string | null
+          gallery_images?: string[]
           id?: string
           image_url?: string | null
           priority?: number
@@ -2388,6 +2426,7 @@ export type Database = {
           custom_store_name?: string | null
           description?: string | null
           estimated_review_date?: string | null
+          gallery_images?: string[]
           id?: string
           image_url?: string | null
           priority?: number

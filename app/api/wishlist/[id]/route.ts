@@ -10,6 +10,7 @@ const UpdateSchema = z.object({
   title:                  z.string().min(2).max(160).optional(),
   description:            z.string().max(1000).optional().nullable(),
   image_url:              z.string().url().max(2048).optional().nullable(),
+  gallery_images:         z.array(z.string().url().max(2048)).max(12).optional(),
   affiliate_url:          z.string().url().max(2048).optional().nullable(),
   store:                  z.string().max(40).optional().nullable(),
   custom_store_name:      z.string().max(80).optional().nullable(),

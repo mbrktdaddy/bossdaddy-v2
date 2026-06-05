@@ -1,7 +1,6 @@
 import { cache } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { WishlistItem } from '@/lib/wishlist'
 import { getBuyLabel } from '@/lib/wishlist'
@@ -10,7 +9,7 @@ import { VoteButton } from '@/components/wishlist/VoteButton'
 import { SubscribeButton } from '@/components/wishlist/SubscribeButton'
 import CommentForm from '@/components/CommentForm'
 import CommentList from '@/components/CommentList'
-import { LightboxImage } from '@/components/LightboxImage'
+import { BenchGallery } from '@/components/BenchGallery'
 import BenchStrip from '@/components/BenchStrip'
 import type { Metadata } from 'next'
 
@@ -91,20 +90,10 @@ export default async function BenchDetailPage({ params }: Props) {
         <span className="text-prose-muted">{wishlistItem.title}</span>
       </div>
 
-      {wishlistItem.image_url && (
-        <LightboxImage src={wishlistItem.image_url} alt={wishlistItem.title}>
-          <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-white border border-soft mb-8">
-            <Image
-              src={wishlistItem.image_url}
-              alt={wishlistItem.title}
-              fill
-              className="object-contain p-3"
-              sizes="(max-width: 768px) 100vw, 768px"
-              priority
-            />
-          </div>
-        </LightboxImage>
-      )}
+      <BenchGallery
+        images={[wishlistItem.image_url, ...(wishlistItem.gallery_images ?? [])].filter(Boolean) as string[]}
+        alt={wishlistItem.title}
+      />
 
       <div className="flex flex-col gap-4">
         <div className="flex-1 min-w-0">

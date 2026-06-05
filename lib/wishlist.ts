@@ -25,6 +25,7 @@ export interface WishlistItem {
   title: string
   description: string | null
   image_url: string | null
+  gallery_images: string[]
   affiliate_url: string | null
   store: string | null
   custom_store_name: string | null

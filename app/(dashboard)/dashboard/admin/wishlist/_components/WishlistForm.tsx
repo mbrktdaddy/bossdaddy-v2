@@ -2,11 +2,10 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import dynamic from 'next/dynamic'
 import type { WishlistItem, WishlistStatus } from '@/lib/wishlist'
 import { STORE_OPTIONS, WISHLIST_STATUS_OPTIONS } from '@/lib/wishlist'
-
-const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
+import { ProductImageField } from '@/components/workspace/ProductImageField'
+import { GalleryField } from '@/components/workspace/GalleryField'
 
 interface Props {
   item: WishlistItem | null
@@ -20,6 +19,7 @@ export function WishlistForm({ item }: Props) {
   const [title, setTitle]                       = useState(item?.title ?? '')
   const [description, setDescription]           = useState(item?.description ?? '')
   const [imageUrl, setImageUrl]                 = useState(item?.image_url ?? '')
+  const [galleryImages, setGalleryImages]       = useState<string[]>(item?.gallery_images ?? [])
   const [affiliateUrl, setAffiliateUrl]         = useState(item?.affiliate_url ?? '')
   const [store, setStore]                       = useState(item?.store ?? '')
   const [customStoreName, setCustomStoreName]   = useState(item?.custom_store_name ?? '')
@@ -34,7 +34,6 @@ export function WishlistForm({ item }: Props) {
   const [busy, setBusy]             = useState(false)
   const [error, setError]           = useState<string | null>(null)
   const [deleting, setDeleting]     = useState(false)
-  const [showPicker, setShowPicker] = useState(false)
 
   // Auto-slug from title on new items (stops once user manually edits slug)
   function handleTitleChange(val: string) {
@@ -64,6 +63,7 @@ export function WishlistForm({ item }: Props) {
       title:                  title.trim(),
       description:            description.trim() || null,
       image_url:              imageUrl.trim() || null,
+      gallery_images:         galleryImages,
       affiliate_url:          affiliateUrl.trim() || null,
       store:                  store || null,
       custom_store_name:      store === 'other' ? (customStoreName.trim() || null) : null,
@@ -194,23 +194,23 @@ export function WishlistForm({ item }: Props) {
         </div>
       )}
 
-      {/* Image */}
-      <div>
-        <label htmlFor="wf-image" className={labelCls}>Image</label>
-        <div className="flex gap-2">
-          <input id="wf-image" className={`${inputCls} flex-1`} value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." />
-          <button type="button" onClick={() => setShowPicker(true)} className="shrink-0 px-3 py-2.5 bg-surface-raised hover:bg-surface border border-strong rounded-xl text-sm text-prose-muted transition-colors">
-            Library
-          </button>
-        </div>
-        {showPicker && (
-          <MediaPicker
-            onSelect={(url) => { setImageUrl(url); setShowPicker(false) }}
-            onClose={() => setShowPicker(false)}
-            uploadAspect={4 / 3}
-          />
-        )}
-      </div>
+      {/* Cover image — used by every card, strip, the homepage panel, and SEO.
+          Same tools/logic as the review & guide workspaces: Take Photo (mobile
+          camera) + Library + preview + crop + remove. */}
+      <ProductImageField
+        label="Cover Image"
+        imageUrl={imageUrl || null}
+        onChange={(url) => setImageUrl(url ?? '')}
+        helpText="The main photo shown everywhere. Snap the product or pick from your library. Cropped to 4:3."
+      />
+
+      {/* Gallery — additional photos shown only on the bench detail page. */}
+      <GalleryField
+        label="More Photos"
+        images={galleryImages}
+        onChange={setGalleryImages}
+        helpText="Optional extra angles, shown on the item's detail page below the cover."
+      />
 
       {/* Store + Affiliate URL */}
       <div>
