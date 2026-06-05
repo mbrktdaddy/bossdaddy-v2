@@ -3,6 +3,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import MobileBottomNav from '@/components/MobileBottomNav'
 import PublicMain from '@/components/PublicMain'
+import HideOnImmersive from '@/components/HideOnImmersive'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 
 const WelcomeToast = dynamic(() => import('@/components/WelcomeToast'))
@@ -31,7 +32,7 @@ export default async function PublicLayout({ children }: { children: React.React
       </a>
       <Header username={username} role={role} avatarUrl={avatarUrl} userId={user?.id ?? null} />
       <PublicMain>{children}</PublicMain>
-      <Footer />
+      <HideOnImmersive><Footer /></HideOnImmersive>
       <MobileBottomNav />
       <WelcomeToast />
     </div>

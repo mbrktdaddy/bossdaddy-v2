@@ -99,6 +99,10 @@ export default function Thread({
   const [mounted, setMounted] = useState(false)
   const listRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  // Whether the list is pinned to the bottom. We only auto-scroll (on new
+  // messages or late-loading images) while the user is already at the bottom —
+  // scrolling up to read history must never yank them back down.
+  const stickToBottom = useRef(true)
 
   const peerName = peer?.displayName || peer?.username || 'Member'
 
@@ -138,9 +142,16 @@ export default function Thread({
     if (el) el.scrollTop = el.scrollHeight
   }, [])
 
+  // Track whether we're parked at the bottom (within a small threshold).
+  const onListScroll = useCallback(() => {
+    const el = listRef.current
+    if (el) stickToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80
+  }, [])
+
   // Mark read on mount + whenever messages change.
   useEffect(() => { markConversationRead(conversationId) }, [conversationId, messages.length])
-  useEffect(() => { scrollToBottom() }, [messages.length, scrollToBottom])
+  // Auto-scroll on new messages only while pinned to the bottom.
+  useEffect(() => { if (stickToBottom.current) scrollToBottom() }, [messages.length, scrollToBottom])
 
   // Close the lightbox on Escape.
   useEffect(() => {
@@ -203,6 +214,8 @@ export default function Thread({
   async function send() {
     const text = draft.trim()
     if (sending) return
+    // Sending always re-pins to the bottom so my own message scrolls into view.
+    stickToBottom.current = true
 
     if (pendingImage) {
       setSending(true); setError(null)
@@ -267,7 +280,7 @@ export default function Thread({
   // Mobile hides the bottom nav here (immersive route) → subtract only the 4rem
   // header. Desktop keeps the original 8rem (no nav, footer below).
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 flex flex-col h-[calc(100dvh-4rem)] md:h-[calc(100dvh-8rem)]">
+    <div className="max-w-2xl mx-auto px-4 pt-6 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-6 flex flex-col h-[calc(100dvh-4rem)] md:h-[calc(100dvh-8rem)]">
       {/* Header */}
       <div className="flex items-center justify-between gap-2 pb-3 border-b border-soft">
         <div className="flex items-center gap-2 min-w-0">
@@ -303,7 +316,7 @@ export default function Thread({
       </div>
 
       {/* Messages */}
-      <div ref={listRef} className="flex-1 overflow-y-auto py-4 space-y-1.5">
+      <div ref={listRef} onScroll={onListScroll} className="flex-1 overflow-y-auto py-4 space-y-1.5">
         {messages.length === 0 ? (
           <p className="text-center text-sm text-prose-faint py-8">Say hello 👋</p>
         ) : (
@@ -346,13 +359,15 @@ export default function Thread({
                             <img
                               src={`/api/dm/attachment/${m.id}`}
                               alt={m.body || 'Photo'}
+                              // Intrinsic dims reserve the right space BEFORE the bytes
+                              // arrive, so loading images don't shift the scroll position.
+                              width={m.attachment_width ?? undefined}
+                              height={m.attachment_height ?? undefined}
                               className="block rounded-xl max-w-[15rem] sm:max-w-[18rem] max-h-[22rem] w-auto h-auto bg-surface"
-                              style={m.attachment_width && m.attachment_height ? { aspectRatio: `${m.attachment_width} / ${m.attachment_height}` } : undefined}
                               // Eager, not lazy: in a short mobile scroll container a lazy
                               // image sits outside the intersection window and never loads.
-                              // Once the newest image lays out, re-pin to the bottom so it
-                              // can't render below the fold.
-                              onLoad={() => { if (i === messages.length - 1) scrollToBottom() }}
+                              // Keep pinned to the bottom only if we're already there.
+                              onLoad={() => { if (stickToBottom.current) scrollToBottom() }}
                             />
                           </button>
                         )}
