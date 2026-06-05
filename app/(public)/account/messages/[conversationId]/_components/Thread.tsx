@@ -8,9 +8,18 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
+import { compressImage } from '@/lib/compress-image'
 import { sendMessage, markConversationRead, blockUser, unblockUser, reportContent, deleteConversation } from '@/lib/messaging'
 
-interface Message { id: string; sender_id: string; body: string; created_at: string }
+interface Message {
+  id: string
+  sender_id: string
+  body: string
+  created_at: string
+  attachment_path: string | null
+  attachment_width: number | null
+  attachment_height: number | null
+}
 interface Peer { id: string; username: string; displayName: string | null; avatarUrl: string | null }
 
 const REPORT_REASONS = ['Spam', 'Harassment', 'Inappropriate content', 'Other']
@@ -80,10 +89,16 @@ export default function Thread({
   const [reported, setReported] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [peerLastReadAt, setPeerLastReadAt] = useState<string | null>(initialPeerLastReadAt)
+  // Pending image attachment (one per message) + its object-URL preview. The
+  // draft textarea doubles as an optional caption while one is staged.
+  const [pendingImage, setPendingImage] = useState<{ file: File; previewUrl: string } | null>(null)
+  // Message id whose image is open in the lightbox (null = closed).
+  const [lightboxId, setLightboxId] = useState<string | null>(null)
   // Gate locale-formatted timestamps behind mount so SSR (server timezone) and
   // the client's first paint match — avoids a hydration mismatch on the times.
   const [mounted, setMounted] = useState(false)
   const listRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const peerName = peer?.displayName || peer?.username || 'Member'
 
@@ -127,6 +142,17 @@ export default function Thread({
   useEffect(() => { markConversationRead(conversationId) }, [conversationId, messages.length])
   useEffect(() => { scrollToBottom() }, [messages.length, scrollToBottom])
 
+  // Close the lightbox on Escape.
+  useEffect(() => {
+    if (!lightboxId) return
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setLightboxId(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [lightboxId])
+
+  // Revoke the staged preview URL if the thread unmounts mid-compose.
+  useEffect(() => () => { if (pendingImage) URL.revokeObjectURL(pendingImage.previewUrl) }, [pendingImage])
+
   // Realtime: append new messages + track the peer's read state (for "Seen").
   useEffect(() => {
     const supabase = createClient()
@@ -152,9 +178,52 @@ export default function Thread({
     return () => { supabase.removeChannel(channel) }
   }, [conversationId, meId])
 
+  // Stage an image for sending. Compress client-side first so a 12MP phone
+  // shot doesn't upload at full size; the server re-encodes again (and strips
+  // EXIF/GPS) regardless. Falls back to the raw file if compression fails.
+  async function pickImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const raw = e.target.files?.[0]
+    e.target.value = ''
+    if (!raw) return
+    setError(null)
+    const file = await compressImage(raw).catch(() => raw)
+    setPendingImage((prev) => {
+      if (prev) URL.revokeObjectURL(prev.previewUrl)
+      return { file, previewUrl: URL.createObjectURL(file) }
+    })
+  }
+
+  function removePendingImage() {
+    setPendingImage((prev) => {
+      if (prev) URL.revokeObjectURL(prev.previewUrl)
+      return null
+    })
+  }
+
   async function send() {
     const text = draft.trim()
-    if (!text || sending) return
+    if (sending) return
+
+    if (pendingImage) {
+      setSending(true); setError(null)
+      try {
+        const fd = new FormData()
+        fd.append('conversationId', conversationId)
+        fd.append('file', pendingImage.file)
+        if (text) fd.append('caption', text)
+        const res = await fetch('/api/dm/upload', { method: 'POST', body: fd })
+        const json = (await res.json().catch(() => ({}))) as { error?: string }
+        if (!res.ok) { setError(json.error || 'Could not send image'); setSending(false); return }
+        removePendingImage()
+        clearDraft()
+      } catch {
+        setError('Could not send image — please try again')
+      }
+      setSending(false)
+      return
+    }
+
+    if (!text) return
     setSending(true); setError(null)
     const res = await sendMessage(conversationId, text)
     setSending(false)
@@ -261,16 +330,37 @@ export default function Thread({
                       ? <PeerAvatar peer={peer} size={28} />
                       : <span className="w-7 shrink-0" aria-hidden />
                   )}
-                  <div className={`group max-w-[75%] px-3.5 py-2 rounded-2xl text-sm whitespace-pre-wrap break-words ${
-                    fromMe ? 'bg-accent text-white rounded-br-sm' : 'bg-surface-raised text-prose rounded-bl-sm'
-                  }`}>
-                    <span>{m.body}</span>
-                    {mounted && (
-                      <span className={`block text-[10px] mt-0.5 tabular-nums ${fromMe ? 'text-white/60' : 'text-prose-faint'}`}>
-                        {formatTime(m.created_at)}
-                      </span>
-                    )}
-                  </div>
+                  {(() => {
+                    const hasImage = !!m.attachment_path
+                    const hasText = m.body.trim().length > 0
+                    return (
+                      <div className={`group max-w-[75%] rounded-2xl text-sm break-words overflow-hidden ${
+                        fromMe ? 'bg-accent text-white rounded-br-sm' : 'bg-surface-raised text-prose rounded-bl-sm'
+                      } ${hasImage ? 'p-1' : 'px-3.5 py-2'}`}>
+                        {hasImage && (
+                          <button type="button" onClick={() => setLightboxId(m.id)} className="block cursor-zoom-in" aria-label="View image">
+                            {/* Private bucket — served via the participant-gated proxy, not a public URL. */}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={`/api/dm/attachment/${m.id}`}
+                              alt={m.body || 'Photo'}
+                              className="block rounded-xl max-w-[15rem] sm:max-w-[18rem] max-h-[22rem] w-auto h-auto bg-surface"
+                              style={m.attachment_width && m.attachment_height ? { aspectRatio: `${m.attachment_width} / ${m.attachment_height}` } : undefined}
+                              loading="lazy"
+                            />
+                          </button>
+                        )}
+                        {hasText && (
+                          <span className={`block whitespace-pre-wrap ${hasImage ? 'px-2.5 pt-1.5' : ''}`}>{m.body}</span>
+                        )}
+                        {mounted && (
+                          <span className={`block text-[10px] mt-0.5 tabular-nums ${hasImage ? 'px-2.5 pb-1' : ''} ${fromMe ? 'text-white/60' : 'text-prose-faint'}`}>
+                            {formatTime(m.created_at)}
+                          </span>
+                        )}
+                      </div>
+                    )
+                  })()}
                 </div>
                 {fromMe && i === lastMineIdx && peerHasSeenLast && (
                   <p className="text-right text-[10px] text-prose-faint mt-0.5 pr-1">Seen</p>
@@ -289,20 +379,87 @@ export default function Thread({
       ) : (
         <div className="border-t border-soft pt-3">
           {error && <p className="text-xs text-danger-ink mb-1.5">{error}</p>}
+
+          {/* Staged image preview — sits above the input until sent or removed. */}
+          {pendingImage && (
+            <div className="relative inline-block mb-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={pendingImage.previewUrl} alt="Attachment preview" className="max-h-28 w-auto rounded-lg border border-soft" />
+              <button
+                type="button"
+                onClick={removePendingImage}
+                aria-label="Remove image"
+                className="absolute -top-2 -right-2 w-6 h-6 bg-surface border border-soft text-prose-muted hover:text-prose rounded-full flex items-center justify-center shadow"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          )}
+
           <div className="flex items-end gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={pickImage}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={sending || !!pendingImage}
+              aria-label="Attach a photo"
+              className="p-2.5 text-prose-faint hover:text-accent disabled:opacity-40 rounded-xl hover:bg-surface-raised transition-colors shrink-0"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </button>
             <textarea
               value={draft}
               onChange={(e) => updateDraft(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
               rows={1}
-              placeholder="Write a message…"
+              placeholder={pendingImage ? 'Add a caption…' : 'Write a message…'}
               className="flex-1 resize-none px-4 py-2.5 bg-surface border border-strong rounded-xl text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover max-h-32"
             />
-            <button type="button" onClick={send} disabled={sending || !draft.trim()}
+            <button type="button" onClick={send} disabled={sending || (!draft.trim() && !pendingImage)}
               className="px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors shrink-0">
               {sending ? '…' : 'Send'}
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Image lightbox */}
+      {lightboxId && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/90 backdrop-blur-sm"
+          onClick={() => setLightboxId(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image preview"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`/api/dm/attachment/${lightboxId}`}
+            alt="Photo"
+            className="max-w-full max-h-[85vh] object-contain rounded-lg select-none"
+            style={{ touchAction: 'pinch-zoom' }}
+            draggable={false}
+          />
+          <button
+            type="button"
+            onClick={() => setLightboxId(null)}
+            aria-label="Close image"
+            className="absolute top-3 right-3 w-9 h-9 bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full flex items-center justify-center transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
       )}
 

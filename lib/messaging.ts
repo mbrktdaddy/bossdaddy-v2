@@ -9,7 +9,7 @@
 
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendPushToUser } from '@/lib/push'
+import { getOtherParticipants, isBlockedBetween, pushNewMessage } from '@/lib/messaging-shared'
 import { revalidatePath } from 'next/cache'
 
 type Result<T = undefined> = { ok: true; data?: T } | { ok: false; error: string }
@@ -43,18 +43,9 @@ export async function sendMessage(conversationId: string, body: string): Promise
   const admin = createAdminClient()
 
   // Other participants + block check (both directions).
-  const { data: parts } = await admin
-    .from('conversation_participants')
-    .select('user_id')
-    .eq('conversation_id', conversationId)
-  const others = (parts ?? []).map((p) => p.user_id).filter((uid) => uid !== user.id)
+  const others = await getOtherParticipants(admin, conversationId, user.id)
   if (others.length === 0) return { ok: false, error: 'Conversation not found' }
-
-  const [{ data: b1 }, { data: b2 }] = await Promise.all([
-    admin.from('user_blocks').select('blocked_id').eq('blocker_id', user.id).in('blocked_id', others),
-    admin.from('user_blocks').select('blocker_id').eq('blocked_id', user.id).in('blocker_id', others),
-  ])
-  if ((b1?.length ?? 0) + (b2?.length ?? 0) > 0) {
+  if (await isBlockedBetween(admin, user.id, others)) {
     return { ok: false, error: 'Messaging is unavailable with this user.' }
   }
 
@@ -66,22 +57,7 @@ export async function sendMessage(conversationId: string, body: string): Promise
     .single()
   if (error || !msg) return { ok: false, error: 'Could not send message' }
 
-  // Out-of-network awareness. No in-app notification row per message — DMs live
-  // in the Messages surface (see migration 085). Web push is the immediacy
-  // layer; the debounced digest email (cron) is the slow fallback. Both are
-  // privacy-first: sender name only, never message content. Best-effort —
-  // sendPushToUser never throws and no-ops if VAPID keys aren't configured.
-  const { data: me } = await admin.from('profiles').select('username, display_name').eq('id', user.id).single()
-  const senderName = me?.display_name?.trim() || me?.username || 'Someone'
-  await Promise.all(
-    others.map((uid) =>
-      sendPushToUser(uid, {
-        title: `New message from ${senderName}`,
-        url: `/account/messages/${conversationId}`,
-        tag: `dm:${conversationId}`,
-      }),
-    ),
-  )
+  await pushNewMessage(admin, others, user.id, conversationId)
 
   revalidatePath(`/account/messages/${conversationId}`)
   return { ok: true, data: { id: msg.id } }

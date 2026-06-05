@@ -12,15 +12,22 @@ export interface NormalizeResult {
 
 /**
  * Server-side image normalization: auto-rotate (EXIF), resize to fit within
- * MAX_DIMENSION, convert to WebP. Rejects if shortest edge < MIN_DIMENSION.
+ * MAX_DIMENSION, convert to WebP. Rejects if shortest edge < `minDimension`.
+ *
+ * `minDimension` defaults to 400 (editorial/product photos need print-grade
+ * resolution). Pass 0 to disable the floor — DM attachments accept small
+ * screenshots, memes, and thumbnails that would never qualify as content.
  */
-export async function normalizeImage(input: Buffer): Promise<NormalizeResult> {
+export async function normalizeImage(
+  input: Buffer,
+  { minDimension = MIN_DIMENSION }: { minDimension?: number } = {},
+): Promise<NormalizeResult> {
   const meta = await sharp(input).metadata()
   const shortEdge = Math.min(meta.width ?? 0, meta.height ?? 0)
 
-  if (shortEdge > 0 && shortEdge < MIN_DIMENSION) {
+  if (minDimension > 0 && shortEdge > 0 && shortEdge < minDimension) {
     throw Object.assign(
-      new Error(`Image too small — minimum ${MIN_DIMENSION}px on shortest side (got ${shortEdge}px)`),
+      new Error(`Image too small — minimum ${minDimension}px on shortest side (got ${shortEdge}px)`),
       { status: 400 },
     )
   }

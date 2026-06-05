@@ -44,13 +44,16 @@ export async function listConversationsFor(
   // Latest message per conversation (cap the scan; DMs are low-volume).
   const { data: msgs } = await supabase
     .from('messages')
-    .select('conversation_id, sender_id, body, created_at')
+    .select('conversation_id, sender_id, body, created_at, attachment_path')
     .in('conversation_id', ids)
     .order('created_at', { ascending: false })
     .limit(300)
   const latestByConv = new Map<string, { body: string; created_at: string; sender_id: string }>()
   for (const m of msgs ?? []) {
-    if (!latestByConv.has(m.conversation_id)) latestByConv.set(m.conversation_id, m)
+    if (latestByConv.has(m.conversation_id)) continue
+    // Image-only message → show a "Photo" stand-in in the list preview.
+    const body = m.body.trim() || (m.attachment_path ? 'Photo' : m.body)
+    latestByConv.set(m.conversation_id, { body, created_at: m.created_at, sender_id: m.sender_id })
   }
 
   const summaries: ConversationSummary[] = ids.map((id) => {

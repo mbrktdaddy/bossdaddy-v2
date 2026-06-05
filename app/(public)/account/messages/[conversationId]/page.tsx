@@ -35,7 +35,7 @@ export default async function ConversationPage({ params }: PageProps) {
 
   const { data: messages } = await supabase
     .from('messages')
-    .select('id, sender_id, body, created_at')
+    .select('id, sender_id, body, created_at, attachment_path, attachment_width, attachment_height')
     .eq('conversation_id', conversationId)
     .order('created_at', { ascending: true })
     .limit(200)
