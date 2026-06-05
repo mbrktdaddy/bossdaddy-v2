@@ -346,7 +346,11 @@ export default function Thread({
                               alt={m.body || 'Photo'}
                               className="block rounded-xl max-w-[15rem] sm:max-w-[18rem] max-h-[22rem] w-auto h-auto bg-surface"
                               style={m.attachment_width && m.attachment_height ? { aspectRatio: `${m.attachment_width} / ${m.attachment_height}` } : undefined}
-                              loading="lazy"
+                              // Eager, not lazy: in a short mobile scroll container a lazy
+                              // image sits outside the intersection window and never loads.
+                              // Once the newest image lays out, re-pin to the bottom so it
+                              // can't render below the fold.
+                              onLoad={() => { if (i === messages.length - 1) scrollToBottom() }}
                             />
                           </button>
                         )}
