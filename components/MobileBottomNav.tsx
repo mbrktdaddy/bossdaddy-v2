@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { isImmersiveRoute } from '@/lib/immersive-routes'
 
 const ICON_CLS = 'w-5 h-5'
 
@@ -71,6 +72,10 @@ const TABS = [
 
 export default function MobileBottomNav() {
   const pathname = usePathname()
+
+  // Immersive surfaces (e.g. the DM conversation view) hide the strip so the
+  // composer sits flush at the bottom. PublicMain drops its clearance in step.
+  if (isImmersiveRoute(pathname)) return null
 
   function isActive(href: string, exact: boolean) {
     return exact ? pathname === href : pathname === href || pathname.startsWith(href + '/')

@@ -2,6 +2,7 @@ import dynamic from 'next/dynamic'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import MobileBottomNav from '@/components/MobileBottomNav'
+import PublicMain from '@/components/PublicMain'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 
 const WelcomeToast = dynamic(() => import('@/components/WelcomeToast'))
@@ -29,9 +30,7 @@ export default async function PublicLayout({ children }: { children: React.React
         Skip to content
       </a>
       <Header username={username} role={role} avatarUrl={avatarUrl} userId={user?.id ?? null} />
-      <main id="main-content" className="flex-1 w-full overflow-x-clip pb-14 md:pb-0">
-        {children}
-      </main>
+      <PublicMain>{children}</PublicMain>
       <Footer />
       <MobileBottomNav />
       <WelcomeToast />

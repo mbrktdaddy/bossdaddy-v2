@@ -264,8 +264,10 @@ export default function Thread({
     !!peerLastReadAt &&
     new Date(peerLastReadAt).getTime() >= new Date(messages[lastMineIdx].created_at).getTime()
 
+  // Mobile hides the bottom nav here (immersive route) → subtract only the 4rem
+  // header. Desktop keeps the original 8rem (no nav, footer below).
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 flex flex-col h-[calc(100dvh-8rem)]">
+    <div className="max-w-2xl mx-auto px-4 py-6 flex flex-col h-[calc(100dvh-4rem)] md:h-[calc(100dvh-8rem)]">
       {/* Header */}
       <div className="flex items-center justify-between gap-2 pb-3 border-b border-soft">
         <div className="flex items-center gap-2 min-w-0">
