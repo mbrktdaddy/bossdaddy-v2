@@ -27,6 +27,7 @@ export function GuideCreateWizard() {
   const [description, setDescription] = useState('')
   const [topic, setTopic]             = useState('')
   const [keyPoints, setKeyPoints]     = useState('')
+  const [context, setContext]         = useState('')
   const [category, setCategory]       = useState('')
   const [imageSlots, setImageSlots]   = useState<number | 'auto'>('auto')
   const [suggesting, setSuggesting]   = useState(false)
@@ -43,6 +44,7 @@ export function GuideCreateWizard() {
       const saved = JSON.parse(raw)
       if (saved.topic)       setTopic(saved.topic)
       if (saved.keyPoints)   setKeyPoints(saved.keyPoints)
+      if (saved.context)     setContext(saved.context)
       if (saved.category)    setCategory(saved.category)
       if (saved.description) setDescription(saved.description)
       if (saved.imageSlots !== undefined) setImageSlots(saved.imageSlots)
@@ -52,9 +54,9 @@ export function GuideCreateWizard() {
   // Persist form state to localStorage on change
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, topic, keyPoints, category, imageSlots }))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, topic, keyPoints, context, category, imageSlots }))
     } catch { /* ignore */ }
-  }, [description, topic, keyPoints, category, imageSlots])
+  }, [description, topic, keyPoints, context, category, imageSlots])
 
   // Holds generated draft between the preview step and the save step
   const [previewDraft, setPreviewDraft] = useState<{
@@ -125,6 +127,7 @@ export function GuideCreateWizard() {
           topic,
           category,
           keyPoints: keyPoints.split('\n').map(p => p.trim()).filter(Boolean),
+          ...(context.trim() ? { context: context.trim() } : {}),
           imageSlots,
           ...(selectedSlugs.length ? { productSlugs: selectedSlugs } : {}),
         }),
@@ -365,6 +368,23 @@ export function GuideCreateWizard() {
             placeholder={"safety tips\nbudget options\nbest for beginners"}
             className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm text-prose-muted mb-1.5">
+            Context &amp; source material <span className="text-prose-faint">(optional, but recommended)</span>
+          </label>
+          <textarea
+            value={context}
+            onChange={(e) => setContext(e.target.value)}
+            rows={6}
+            maxLength={6000}
+            placeholder={"Paste your full brief here — personal story, real numbers, brand names, sources, the arc you want to tell. Claude grounds the piece in these specifics instead of inventing them."}
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-y"
+          />
+          <p className="mt-1 text-xs text-prose-faint">
+            The more real detail you give, the more accurate and personal the draft. {context.length}/6000
+          </p>
         </div>
 
         <div>

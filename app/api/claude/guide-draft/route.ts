@@ -11,6 +11,7 @@ const GuideDraftInput = z.object({
   topic: z.string().min(4).max(150),
   category: z.string().min(2).max(80),
   keyPoints: z.array(z.string()).max(15).default([]),
+  context: z.string().max(6000).optional(),
   targetAudience: z.string().max(200).optional(),
   productSlugs: z.array(z.string().regex(/^[a-z0-9-]+$/).max(80)).max(15).optional(),
   // 'auto' lets Claude pick (2–3 images); a number forces exactly that many.
@@ -55,14 +56,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { topic, category, keyPoints, targetAudience, productSlugs, imageSlots } = parsed.data
+  const { topic, category, keyPoints, context, targetAudience, productSlugs, imageSlots } = parsed.data
   const slugs = (productSlugs ?? []).filter(Boolean)
+  const brief = context?.trim()
 
   const prompt = `Write a dad-focused article on this topic:
 
 Topic: ${topic}
 Category: ${category}${keyPoints.length ? `\nKey Points: ${keyPoints.join(', ')}` : ''}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}${slugs.length ? `\nProduct slugs: ${slugs.join(', ')}` : ''}
-
+${brief ? `
+AUTHOR'S BRIEF / SOURCE MATERIAL (required — ground the piece in these specifics):
+"""
+${brief}
+"""
+- Treat the brief as the author's real, first-hand context. Use its specific facts, numbers, names, and personal details — do not invent competing ones or contradict them.
+- Write in this author's voice and from their lived experience as described. Weave the concrete specifics (figures, brand names, the personal arc) into the prose rather than restating them as a list.
+- If the brief implies a story or progression, honor that narrative arc.
+` : ''}
 STRUCTURE REQUIREMENTS:
 - Introduction: 2–3 sentences that hook the reader with a real scenario (first-person dad)
 - Sections: 3–5 sections, each 150–250 words, with a clear practical takeaway
