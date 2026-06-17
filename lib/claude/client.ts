@@ -12,6 +12,11 @@ export function getClaudeClient(): Anthropic {
 
 export const MODEL = 'claude-sonnet-4-6'
 
+// Cheap, fast model for The Boss concierge turns that don't need heavy reasoning
+// (general chit-chat, simple retrieval). The agent escalates to MODEL for ranking
+// and careful deflect-lane handling. See lib/boss/agent.ts chooseModel().
+export const HAIKU_MODEL = 'claude-haiku-4-5'
+
 // Applied as a cached system prompt on all draft generation calls.
 export const BOSS_DADDY_SYSTEM = `You are the content writer for Boss Daddy (BossDaddyLife.com), the gold standard hub for men who Dad like a Boss. Write as a confident, no-BS dad — the older, wiser brother who has seen it all, lightly roasts mediocrity, and still has your back.
 

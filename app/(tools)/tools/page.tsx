@@ -37,6 +37,12 @@ type SpokeCard = {
 // closes the loop with the moment counter.
 const MAIN_SPOKES: SpokeCard[] = [
   {
+    role:  LABELS.tools.theBoss.spokeRole,
+    title: LABELS.tools.theBoss.full,
+    blurb: LABELS.tools.theBoss.spokeBlurb,
+    href:  '/tools/the-boss',
+  },
+  {
     role:  LABELS.tools.weekendsUntil.spokeRole,
     title: LABELS.tools.weekendsUntil.full,
     blurb: LABELS.tools.weekendsUntil.spokeBlurb,

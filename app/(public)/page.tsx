@@ -475,6 +475,25 @@ export default async function HomePage() {
             label="Free Tools"
             right={{ label: 'See all tools', href: '/tools' }}
           />
+          <Link
+            href="/tools/the-boss"
+            className="block bg-surface border border-soft hover:border-accent rounded-2xl p-6 sm:p-8 mb-4 transition-colors group"
+          >
+            <p className="text-xs text-eyebrow uppercase tracking-widest font-medium">
+              New · Ask the Boss
+            </p>
+            <h3 className="text-xl sm:text-2xl font-black mt-2 text-prose group-hover:text-accent transition-colors leading-tight">
+              Tell the Boss what you need — get a tested pick, not a guess.
+            </h3>
+            <p className="text-prose-faint mt-3 text-sm sm:text-base max-w-prose">
+              Gear recommendations grounded in real, hands-on reviews — plus straight answers on how-to,
+              planning, and dad life. Picks come with scores and buy links; the takes come in plain English.
+            </p>
+            <p className="text-sm text-accent font-semibold mt-5 inline-flex items-center gap-1 group-hover:underline">
+              Ask the Boss
+              <span aria-hidden>→</span>
+            </p>
+          </Link>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Link
               href="/tools/weekends-until"

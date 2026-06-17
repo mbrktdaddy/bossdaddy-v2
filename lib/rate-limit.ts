@@ -44,6 +44,15 @@ function getLimiter(type: string): Ratelimit | null {
     // Voice-lexicon writes (capture/approve/edit a signature phrase). Cheap DB
     // writes, no AI call — generous cap, just a flood backstop.
     'voice':            new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, '1 h'), prefix: 'bd_voice' }),
+    // The Boss concierge — member turns. Each turn may fan out into 1-3 model
+    // calls (tool round-trips), so cap by turns not raw API calls.
+    'boss':             new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(40, '1 h'),  prefix: 'bd_boss' }),
+    // The Boss free-taste for logged-out visitors — keyed by IP. Tight quota so
+    // anonymous use drives signup and can't burn the Anthropic budget.
+    'boss-anon':        new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5,  '24 h'), prefix: 'bd_boss_anon' }),
+    // The Boss paid tier (Boss+). Generous cap; the subscription is the real gate.
+    // Unused until monetization ships — defined now so the entitlements seam is typed.
+    'boss-plus':        new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(200, '1 h'), prefix: 'bd_boss_plus' }),
   }
 
   limiters[type] = configs[type] ?? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1 h'), prefix: `bd_${type}` })
@@ -52,7 +61,7 @@ function getLimiter(type: string): Ratelimit | null {
 
 export async function checkRateLimit(
   identifier: string,
-  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' | 'voice' = 'draft'
+  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' | 'voice' | 'boss' | 'boss-anon' | 'boss-plus' = 'draft'
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
   const limiter = getLimiter(type)
   if (!limiter) return { success: true, remaining: 999, reset: 0 }

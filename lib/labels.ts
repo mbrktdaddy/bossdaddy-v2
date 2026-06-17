@@ -120,6 +120,17 @@ export const LABELS = {
       addFirstKidCta:   'Add your first kid →',
     },
 
+    // The Boss — member AI concierge. Grounded gear/guide answers + general
+    // dad-life help. Internal name locked as `theBoss` / route `the-boss`.
+    theBoss: {
+      short:           'The Boss',
+      full:            'The Boss',
+      pageTitle:       'Ask the Boss — Boss Daddy',
+      metaDescription: 'Ask the Boss for tested gear picks, straight answers, and dad-life help — grounded in real, hands-on reviews.',
+      spokeRole:       'Ask',
+      spokeBlurb:      'Tested gear picks, straight answers, and dad-life help — grounded in real reviews. Just ask the Boss.',
+    },
+
     weekendsUntil: {
       short:           'Weekends Until',
       full:            'Weekends Until',

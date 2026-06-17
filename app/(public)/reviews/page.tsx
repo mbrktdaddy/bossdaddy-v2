@@ -8,6 +8,7 @@ import RatingScore from '@/components/RatingScore'
 import ReviewsGrid from './_components/ReviewsGrid'
 import FeaturedReviewCard from '@/components/FeaturedReviewCard'
 import BenchStrip from '@/components/BenchStrip'
+import AskTheBoss from '@/components/AskTheBoss'
 const PER_PAGE = 12
 import type { ReviewRow } from './actions'
 import type { Metadata } from 'next'
@@ -126,6 +127,8 @@ export default async function ReviewsPage({ searchParams }: Props) {
           ))}
         </div>
 
+        <AskTheBoss context="Browsing dad-tested reviews across every category" className="mb-12" />
+
         {/* Featured review — visual hero of the directory page */}
         {featured && (
           <div className="mb-16">
@@ -243,6 +246,8 @@ export default async function ReviewsPage({ searchParams }: Props) {
           </Link>
         ))}
       </div>
+
+      <AskTheBoss context={`${getCategoryLabel(category)} reviews`} className="mb-12" />
 
       {!reviews.length ? (
         <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft">

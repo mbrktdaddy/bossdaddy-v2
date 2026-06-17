@@ -31,6 +31,7 @@ import AuthorBio from '@/components/AuthorBio'
 import { getProductBySlug, getProductsBySlugs, columnHasSpecs, specComparisonRenderable, type SpecComparisonColumn } from '@/lib/products'
 import SpecComparisonTable from '@/components/products/SpecComparisonTable'
 import BenchStrip from '@/components/BenchStrip'
+import AskTheBoss from '@/components/AskTheBoss'
 import CategoryIcon from '@/components/CategoryIcon'
 import { ReviewTimelineStrip } from '@/components/reviews/ReviewTimelineStrip'
 import { VerdictChangeBadge } from '@/components/reviews/VerdictChangeBadge'
@@ -581,6 +582,12 @@ export default async function ReviewPage({ params }: Props) {
 
         {/* Author bio */}
         <AuthorBio username={author} />
+
+        <AskTheBoss
+          context={`the ${review.product_name} review`}
+          prompt={`Comparing the ${review.product_name} to something else? Ask the Boss.`}
+          className="mt-12"
+        />
 
         {/* On the Bench */}
         <div className="mt-12">

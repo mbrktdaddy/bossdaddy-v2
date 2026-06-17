@@ -10,6 +10,7 @@ import { MerchPanel } from './_components/MerchPanel'
 import { MerchStrip } from './_components/MerchStrip'
 import FeaturedReviewCard from '@/components/FeaturedReviewCard'
 import BenchStrip from '@/components/BenchStrip'
+import AskTheBoss from '@/components/AskTheBoss'
 import SectionHeader from '@/components/SectionHeader'
 import { getSeasonalOccasions } from '@/lib/gift-occasions'
 import OccasionIcon from '@/components/OccasionIcon'
@@ -206,6 +207,11 @@ export default async function GearPage({ searchParams }: Props) {
           </Link>
         ))}
       </div>
+
+      <AskTheBoss
+        context={cat ? `${cat.label} gear picks` : "Boss Daddy's field-tested gear picks"}
+        className="mb-12"
+      />
 
       {/* ── #1 Pick hero (unfiltered only) ──────────────────────────────────── */}
       {!category && topPick && (
