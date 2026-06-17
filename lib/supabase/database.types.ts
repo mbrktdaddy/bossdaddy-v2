@@ -225,6 +225,102 @@ export type Database = {
           },
         ]
       }
+      boss_research_cache: {
+        Row: {
+          category: string | null
+          created_at: string
+          hits: number
+          id: string
+          payload: Json
+          query_key: string
+          refreshed_at: string
+          tokens: string[]
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          hits?: number
+          id?: string
+          payload: Json
+          query_key: string
+          refreshed_at?: string
+          tokens?: string[]
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          hits?: number
+          id?: string
+          payload?: Json
+          query_key?: string
+          refreshed_at?: string
+          tokens?: string[]
+        }
+        Relationships: []
+      }
+      boss_research_notify: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          notified: boolean
+          notified_at: string | null
+          product_slug: string | null
+          query: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          notified?: boolean
+          notified_at?: string | null
+          product_slug?: string | null
+          query?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          notified?: boolean
+          notified_at?: string | null
+          product_slug?: string | null
+          query?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      boss_research_requests: {
+        Row: {
+          category: string | null
+          created_at: string
+          fit: string | null
+          id: string
+          query: string
+          results_count: number
+          user_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          fit?: string | null
+          id?: string
+          query: string
+          results_count?: number
+          user_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          fit?: string | null
+          id?: string
+          query?: string
+          results_count?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       cart_items: {
         Row: {
           cart_id: string

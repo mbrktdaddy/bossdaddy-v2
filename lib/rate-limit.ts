@@ -53,6 +53,12 @@ function getLimiter(type: string): Ratelimit | null {
     // The Boss paid tier (Boss+). Generous cap; the subscription is the real gate.
     // Unused until monetization ships — defined now so the entitlements seam is typed.
     'boss-plus':        new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(200, '1 h'), prefix: 'bd_boss_plus' }),
+    // The Boss gap-fallback research tool — fires Anthropic web_search (priciest
+    // call in the stack), so a tight per-member quota on top of the turn limit.
+    'boss-research':    new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(8, '24 h'), prefix: 'bd_boss_research' }),
+    // The Boss "notify me when tested" wait-list capture — cheap DB write,
+    // flood backstop only.
+    'boss-notify':      new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, '1 h'), prefix: 'bd_boss_notify' }),
   }
 
   limiters[type] = configs[type] ?? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1 h'), prefix: `bd_${type}` })
@@ -61,7 +67,7 @@ function getLimiter(type: string): Ratelimit | null {
 
 export async function checkRateLimit(
   identifier: string,
-  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' | 'voice' | 'boss' | 'boss-anon' | 'boss-plus' = 'draft'
+  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' | 'voice' | 'boss' | 'boss-anon' | 'boss-plus' | 'boss-research' | 'boss-notify' = 'draft'
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
   const limiter = getLimiter(type)
   if (!limiter) return { success: true, remaining: 999, reset: 0 }

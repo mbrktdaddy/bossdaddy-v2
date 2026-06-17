@@ -10,9 +10,11 @@ import { runBossAgent } from '@/lib/boss/agent'
 import { BOSS_TOOLS } from '@/lib/boss/tools'
 import type { BossStreamEvent, Citation } from '@/lib/boss/types'
 
-// Streaming keeps the connection open for the turn; turns are short, so 60s is
-// ample. The Boss streams live (SSE) — it does NOT use the aiJobs poll pattern.
-export const maxDuration = 60
+// Streaming keeps the connection open for the turn. Most turns are short, but the
+// gap-fallback research_gear tool fires Anthropic web_search synchronously inside
+// the turn (the user waits with a "Researching…" indicator rather than the chat
+// breaking into a poll), so keep real headroom under the Pro cap.
+export const maxDuration = 200
 
 const HISTORY_CAP = 12
 

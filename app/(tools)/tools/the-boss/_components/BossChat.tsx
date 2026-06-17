@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import type { BossStreamEvent, Citation } from '@/lib/boss/types'
 import RecommendationCard from './RecommendationCard'
+import { ResearchedList } from './ResearchedList'
 
 type Msg = { role: 'user' | 'assistant'; content: string; citations?: Citation[]; error?: boolean }
 
@@ -52,7 +53,13 @@ export default function BossChat({ isMember, seedContext }: { isMember: boolean;
         updateLastAssistant((m) => ({ ...m, content: m.content + ev.delta }))
         break
       case 'tool_start':
-        setToolNote(ev.name === 'search_gear' ? 'Checking the vault…' : 'Pulling up guides…')
+        setToolNote(
+          ev.name === 'search_gear'
+            ? 'Checking the vault…'
+            : ev.name === 'research_gear'
+              ? 'Searching the web for current picks — give me a few seconds…'
+              : 'Pulling up guides…',
+        )
         break
       case 'citations':
         updateLastAssistant((m) => ({ ...m, citations: [...(m.citations ?? []), ...ev.items] }))
@@ -161,13 +168,21 @@ export default function BossChat({ isMember, seedContext }: { isMember: boolean;
               >
                 {m.content || (busy && i === msgs.length - 1 ? <span className="text-prose-faint">{toolNote ?? 'Thinking…'}</span> : '')}
               </div>
-              {m.citations && m.citations.length > 0 && (
-                <div className="mt-2 space-y-2">
-                  {dedupe(m.citations).map((c) => (
-                    <RecommendationCard key={`${c.kind}:${c.slug}`} c={c} />
-                  ))}
-                </div>
-              )}
+              {m.citations && m.citations.length > 0 && (() => {
+                const items = dedupe(m.citations)
+                const researched = items.filter((c) => c.researched)
+                const rest = items.filter((c) => !c.researched)
+                return (
+                  <div className="mt-2 space-y-2">
+                    {rest.map((c) => (
+                      <RecommendationCard key={`${c.kind}:${c.slug}`} c={c} />
+                    ))}
+                    {researched.length > 0 && (
+                      <ResearchedList items={researched} query={i > 0 ? msgs[i - 1]?.content : undefined} />
+                    )}
+                  </div>
+                )
+              })()}
             </div>
           </div>
         ))}

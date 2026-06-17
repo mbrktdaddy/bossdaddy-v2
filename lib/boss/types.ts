@@ -27,6 +27,15 @@ export interface Citation {
   rating?: number | null
   scores?: { quality: number | null; value: number | null; ease: number | null; dailyUse: number | null } | null
   specsGrade?: number | null
+  // Researched-pick enrichment (kind 'product', research_gear). These are the
+  // gap-fallback shortlist: NOT field-tested, so they carry NO Boss rating/scores
+  // — only what the web research surfaced. The client renders a visibly
+  // second-class ResearchedCard (sources shown, no verdict, capture CTAs).
+  researched?: boolean
+  priceTier?: 'budget' | 'mid' | 'premium' | null
+  priceText?: string | null // human price hint, e.g. "$180–220"
+  fit?: string | null // one line: why it fits the stated need
+  sources?: { title: string; url: string }[] | null
 }
 
 export interface BossTool {
