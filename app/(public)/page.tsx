@@ -120,7 +120,7 @@ function PillarCard({
       href={pillar.href}
       className={`group flex flex-col items-center text-center p-4 sm:p-8 hover:bg-surface transition-colors ${className}`}
     >
-      <div className="w-11 h-11 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-drama flex items-center justify-center text-accent mb-2.5 sm:mb-4">
+      <div className="w-11 h-11 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-accent group-hover:bg-accent-hover flex items-center justify-center text-white mb-2.5 sm:mb-4 transition-colors">
         <svg
           className="w-5 h-5 sm:w-8 sm:h-8"
           viewBox="0 0 24 24"
@@ -224,22 +224,6 @@ export default async function HomePage() {
         <CodeRedirect />
       </Suspense>
 
-      {/* ── EDITORIAL BANNER — opens the page with credibility ──────────── */}
-      <div className="bg-accent">
-        <div className="max-w-6xl mx-auto px-6 py-2.5 text-center">
-          <p className="text-xs font-bold text-white tracking-wide">
-            Honest reviews, real tools — zero sponsored content
-          </p>
-        </div>
-      </div>
-
-      {/* ── PIPELINE COUNTER — proof of a real, moving testing pipeline ───── */}
-      <div className="bg-surface-raised border-b border-soft">
-        <div className="max-w-6xl mx-auto px-6 py-3">
-          <PipelineCounter />
-        </div>
-      </div>
-
       {/* ── BRAND HERO — the page's sole H1. States who Boss Daddy is for and
             what's here, then offers three doors (reviews / guides / tools)
             that mirror the subhead 1:1. The trust band + /about carry the
@@ -258,7 +242,8 @@ export default async function HomePage() {
               <span className="whitespace-nowrap text-accent">Better Decisions.</span>
             </h1>
             <p className="text-base md:text-lg text-prose-muted leading-[1.7] max-w-2xl mx-auto">
-              Built for real dads by a real dad in the trenches — Boss Daddy is where you&apos;ll find honest reviews, practical guides, and boss tools.
+              Built for real dads by a real dad in the trenches — Boss Daddy is where you&apos;ll find honest reviews, practical guides, and boss tools.{' '}
+              <span className="text-prose font-semibold">Zero sponsors. Zero fluff.</span>
             </p>
             <Link
               href="/about"
@@ -269,6 +254,10 @@ export default async function HomePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </Link>
+
+            {/* Live proof line — a real, moving testing pipeline. Sits with the
+                positioning copy instead of as a competing pre-hero band. */}
+            <PipelineCounter className="mt-8" align="center" />
           </div>
 
           {/* The Index — three doors as an editorial band, not a boxy shelf.
@@ -428,45 +417,6 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ── GET THE APP — always-visible install band. The opportunistic
-            banner only renders once the browser offers a native prompt; this
-            band is the reliable, ever-present door to /install so the PWA is
-            discoverable to every visitor, logged in or out. */}
-      <section className="border-b border-soft">
-        <div className="max-w-6xl mx-auto px-6 py-10">
-          <div className="bg-surface border border-soft rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-8">
-            <div className="w-14 h-14 rounded-2xl bg-drama flex items-center justify-center shrink-0">
-              <Image
-                src="/images/bd-logo-icon.png"
-                alt=""
-                width={36}
-                height={36}
-                className="w-9 h-9 object-contain"
-              />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-eyebrow uppercase tracking-widest font-medium">Boss Daddy App</p>
-              <h2 className="text-xl sm:text-2xl font-black text-prose leading-tight mt-1">
-                Keep Boss Daddy one tap away.
-              </h2>
-              <p className="text-prose-faint mt-2 text-sm sm:text-base max-w-prose">
-                Add us to your home screen — reviews, gear, and tools, right where you keep everything
-                else. No app store, no bloat.
-              </p>
-            </div>
-            <Link
-              href="/install"
-              className="inline-flex items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-white font-extrabold text-sm px-7 py-3.5 rounded-xl transition-colors shrink-0 min-h-[44px]"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0-4-4m4 4 4-4M4 20h16" />
-              </svg>
-              {LABELS.app.short}
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* ── FREE TOOLS — promoted high to pay off "Smart Tools" in the H1.
             Two-up feature format breaks the review-card-grid rhythm. ──────── */}
       <section className="border-b border-soft">
@@ -477,7 +427,7 @@ export default async function HomePage() {
           />
           <Link
             href="/tools/the-boss"
-            className="block bg-surface border border-soft hover:border-accent rounded-2xl p-6 sm:p-8 mb-4 transition-colors group"
+            className="block bg-surface border border-soft hover:border-accent rounded-2xl p-6 sm:p-8 mb-4 shadow-md shadow-black/[0.04] hover:shadow-lg hover:shadow-black/[0.08] transition-all duration-200 group"
           >
             <p className="text-xs text-eyebrow uppercase tracking-widest font-medium">
               New · Ask the Boss
@@ -497,7 +447,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Link
               href="/tools/weekends-until"
-              className="block bg-surface border border-soft hover:border-accent rounded-2xl p-6 sm:p-8 transition-colors group"
+              className="block bg-surface border border-soft hover:border-accent rounded-2xl p-6 sm:p-8 shadow-md shadow-black/[0.04] hover:shadow-lg hover:shadow-black/[0.08] transition-all duration-200 group"
             >
               <p className="text-xs text-eyebrow uppercase tracking-widest font-medium">
                 Time · Weekends Until
@@ -516,7 +466,7 @@ export default async function HomePage() {
 
             <Link
               href="/tools/savings"
-              className="block bg-surface border border-soft hover:border-accent rounded-2xl p-6 sm:p-8 transition-colors group"
+              className="block bg-surface border border-soft hover:border-accent rounded-2xl p-6 sm:p-8 shadow-md shadow-black/[0.04] hover:shadow-lg hover:shadow-black/[0.08] transition-all duration-200 group"
             >
               <p className="text-xs text-eyebrow uppercase tracking-widest font-medium">
                 Money · Savings
@@ -537,10 +487,29 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── FROM THE LIBRARY — guides row list. Lifted here so the Guides
+            pillar gets a fair, high placement alongside Reviews and Tools
+            instead of being buried near the page foot. ────────────────────── */}
+      {guides.length > 0 && (
+        <section className="border-b border-soft">
+          <div className="max-w-6xl mx-auto px-6 py-14">
+            <SectionHeader
+              label="From the Library"
+              right={{ label: 'All guides', href: '/guides' }}
+            />
+            <div>
+              {guides.map((g, i) => (
+                <GuideRow key={g.id} guide={g} isLast={i === guides.length - 1} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── TOP PICKS — highest-rated, as a ranked editorial list (not a card
             grid) so it reads distinctly from the "Just Dropped" cards above. */}
       {scoreCards.length > 0 && (
-        <section className="bg-surface-raised border-b border-soft">
+        <section className="border-b border-soft">
           <div className="max-w-4xl mx-auto px-6 py-14">
             <SectionHeader
               label="Top Picks"
@@ -615,22 +584,43 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ── FROM THE LIBRARY — guides row list ───────────────────────────── */}
-      {guides.length > 0 && (
-        <section className="border-b border-soft">
-          <div className="max-w-6xl mx-auto px-6 py-14">
-            <SectionHeader
-              label="From the Library"
-              right={{ label: 'All guides', href: '/guides' }}
-            />
-            <div>
-              {guides.map((g, i) => (
-                <GuideRow key={g.id} guide={g} isLast={i === guides.length - 1} />
-              ))}
+      {/* ── GET THE APP — install band, lowered into the bottom conversion
+            cluster (with the email capture) so it asks once the visitor has
+            seen the goods, not before. Always-visible door to /install. ───── */}
+      <section className="border-b border-soft">
+        <div className="max-w-6xl mx-auto px-6 py-10">
+          <div className="bg-surface border border-soft rounded-2xl p-6 sm:p-8 shadow-md shadow-black/[0.04] flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-8">
+            <div className="w-14 h-14 rounded-2xl bg-drama flex items-center justify-center shrink-0">
+              <Image
+                src="/images/bd-logo-icon.png"
+                alt=""
+                width={36}
+                height={36}
+                className="w-9 h-9 object-contain"
+              />
             </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-eyebrow uppercase tracking-widest font-medium">Boss Daddy App</p>
+              <h2 className="text-xl sm:text-2xl font-black text-prose leading-tight mt-1">
+                Keep Boss Daddy one tap away.
+              </h2>
+              <p className="text-prose-faint mt-2 text-sm sm:text-base max-w-prose">
+                Add us to your home screen — reviews, gear, and tools, right where you keep everything
+                else. No app store, no bloat.
+              </p>
+            </div>
+            <Link
+              href="/install"
+              className="inline-flex items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-white font-extrabold text-sm px-7 py-3.5 rounded-xl transition-colors shrink-0 min-h-[44px]"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0-4-4m4 4 4-4M4 20h16" />
+              </svg>
+              {LABELS.app.short}
+            </Link>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* ── EMAIL CAPTURE — primary newsletter conversion ────────────────── */}
       <EmailCaptureSection />

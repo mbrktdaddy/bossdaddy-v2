@@ -8,7 +8,7 @@
    Status colors (green/red) reserved for chips + form validation only.
    ───────────────────────────────────────────────────────────────────────── */
 :root {
-  --background: #f4f4f5;       /* zinc-100 — page canvas */
+  --background: #ffffff;       /* white — page canvas (white-canvas editorial direction) */
   --foreground: #3f3f46;       /* zinc-700 — body text */
 
   /* ── Brand orange — THE accent color.
@@ -21,7 +21,7 @@
   /* ── Surfaces — light canvas hierarchy
         page → card (white) → raised/sunken (zinc-200, same value:
         both "recessed" and "alt-section" want slightly darker than page) */
-  --bd-bg:             #f4f4f5;   /* zinc-100 — page canvas */
+  --bd-bg:             #ffffff;   /* white — page canvas (white-canvas editorial direction) */
   --bd-surface:        #ffffff;   /* white card */
   --bd-surface-raised: #e4e4e7;   /* zinc-200 — alt section bg, hover lift */
   --bd-surface-sunken: #e4e4e7;   /* zinc-200 — wells, code blocks */
