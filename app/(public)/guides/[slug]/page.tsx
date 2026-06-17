@@ -26,6 +26,7 @@ import AuthorBio from '@/components/AuthorBio'
 import CategoryIcon from '@/components/CategoryIcon'
 import TrackView from '@/components/TrackView'
 import RecentlyViewedStrip from '@/components/RecentlyViewedStrip'
+import AskTheBoss from '@/components/AskTheBoss'
 
 const TableOfContents = dynamic(() => import('@/components/TableOfContents'))
 const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
@@ -462,6 +463,12 @@ export default async function GuidePage({ params }: Props) {
 
             {/* Author bio */}
             <AuthorBio username={author} />
+
+            <AskTheBoss
+              context={`the guide: ${guide.title}`}
+              prompt="Want tested gear that fits what this guide covers? Ask the Boss."
+              className="mt-12"
+            />
 
             {/* Like + Share */}
             <div className="mt-8 pt-6 flex items-center justify-between flex-wrap gap-4">

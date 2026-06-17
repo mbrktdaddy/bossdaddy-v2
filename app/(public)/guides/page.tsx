@@ -6,6 +6,7 @@ import CategoryIcon from '@/components/CategoryIcon'
 import GuidesGrid from './_components/GuidesGrid'
 import FeaturedGuideCard from '@/components/FeaturedGuideCard'
 import BenchStrip from '@/components/BenchStrip'
+import AskTheBoss from '@/components/AskTheBoss'
 const PER_PAGE = 12
 import type { GuideRow } from './actions'
 import type { Metadata } from 'next'
@@ -110,6 +111,8 @@ export default async function GuidesPage({ searchParams }: Props) {
           ))}
         </div>
 
+        <AskTheBoss context="Browsing dad how-to guides across every category" className="mb-12" />
+
         {/* Featured guide — visual hero of the directory */}
         {featured && (
           <div className="mb-16">
@@ -210,6 +213,8 @@ export default async function GuidesPage({ searchParams }: Props) {
           </Link>
         ))}
       </div>
+
+      <AskTheBoss context={cat ? `${cat.label} guides` : 'Dad how-to guides'} className="mb-12" />
 
       {!guides.length ? (
         <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft">
