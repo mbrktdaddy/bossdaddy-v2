@@ -38,6 +38,11 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
   const [priceCents, setPriceCents]   = useState(product?.price_cents != null ? String(product.price_cents) : '')
   const [status, setStatus]           = useState<string>(product?.status ?? 'considering')
 
+  // Bench pipeline fields (folded in from the former wishlist admin).
+  const [priority, setPriority]           = useState(String(product?.priority ?? 0))
+  const [estimatedDate, setEstimatedDate] = useState(product?.estimated_review_date ?? '')
+  const [skipReason, setSkipReason]       = useState(product?.skip_reason ?? '')
+
   const [busy, setBusy]                   = useState(false)
   const [error, setError]                 = useState<string | null>(null)
   const [deleting, setDeleting]           = useState(false)
@@ -159,6 +164,11 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
       return
     }
 
+    if (status === 'passed' && !skipReason.trim()) {
+      setError('Skip reason is required when status is "Passed".')
+      return
+    }
+
     setBusy(true); setError(null); setUploadStatus(null)
 
     const parsedPrice = priceCents.trim() ? parseInt(priceCents.trim(), 10) : null
@@ -184,6 +194,9 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
       category:          category || null,
       price_cents:       !isNaN(parsedPrice!) && parsedPrice !== null ? parsedPrice : null,
       status,
+      priority:              parseInt(priority, 10) || 0,
+      estimated_review_date: ['queued', 'testing'].includes(status) ? (estimatedDate || null) : null,
+      skip_reason:           status === 'passed' ? (skipReason.trim() || null) : null,
     }
 
     try {
@@ -279,6 +292,23 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
       setError(err instanceof Error ? err.message : 'Import failed')
     } finally {
       setImporting(false)
+    }
+  }
+
+  // Promote a bench item to a review draft (was the wishlist admin's action).
+  // Reuses the existing endpoint, which now operates on the products spine.
+  async function handlePromote() {
+    if (!product) return
+    if (!confirm(`Promote "${product.name}" to a review draft?`)) return
+    setBusy(true); setError(null)
+    try {
+      const res = await fetch(`/api/wishlist/${product.id}/promote`, { method: 'POST' })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Promote failed')
+      router.push(`/dashboard/reviews/${json.review_id}`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Promote failed')
+      setBusy(false)
     }
   }
 
@@ -694,8 +724,62 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
             <option key={s.value} value={s.value}>{s.label}</option>
           ))}
         </select>
-        <p className="mt-1 text-xs text-prose-faint">Auto-flips to &quot;Reviewed&quot; when a linked review is approved.</p>
+        <p className="mt-1 text-xs text-prose-faint">
+          Bench states (Bench / Coming Soon / Testing) show on the public bench &amp; homepage. Auto-flips to &quot;Reviewed&quot; when a linked review is approved.
+        </p>
       </div>
+
+      {/* ── Bench pipeline ─────────────────────────────────────────────── */}
+      <div className="rounded-xl border border-soft bg-surface-sunken p-4 space-y-4">
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Bench Pipeline</p>
+        <div>
+          <label className="block text-sm text-prose-muted mb-1.5">Priority</label>
+          <input
+            type="number"
+            value={priority}
+            onChange={(e) => setPriority(e.target.value)}
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          />
+          <p className="mt-1 text-xs text-prose-faint">Higher shows first on the bench &amp; homepage rail.</p>
+        </div>
+
+        {['queued', 'testing'].includes(status) && (
+          <div>
+            <label className="block text-sm text-prose-muted mb-1.5">Estimated review date</label>
+            <input
+              type="date"
+              value={estimatedDate}
+              onChange={(e) => setEstimatedDate(e.target.value)}
+              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
+            />
+          </div>
+        )}
+
+        {status === 'passed' && (
+          <div>
+            <label className="block text-sm text-prose-muted mb-1.5">
+              Skip reason <span className="text-danger-ink">*</span>{' '}
+              <span className="text-prose-faint font-normal">(shown publicly)</span>
+            </label>
+            <textarea
+              value={skipReason}
+              onChange={(e) => setSkipReason(e.target.value)}
+              rows={2}
+              required
+              placeholder="Not enough differentiation from products I've already reviewed."
+              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Linked review badge */}
+      {product?.review_id && (
+        <div className="px-4 py-3 bg-accent-tint border border-accent-border/50 rounded-xl text-sm">
+          <span className="text-accent-text-soft font-semibold">Promoted to review</span>
+          <span className="text-prose-muted ml-2">Review ID: {product.review_id}</span>
+        </div>
+      )}
 
       {error && (
         <p className="text-danger-ink text-sm bg-danger-bg border border-danger-line rounded-lg px-4 py-3">{error}</p>
@@ -725,12 +809,22 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
                 ? 'Create product'
                 : 'Save changes'}
         </button>
+        {!isNew && !product!.review_id && status !== 'reviewed' && (
+          <button
+            type="button"
+            onClick={handlePromote}
+            disabled={busy}
+            className="px-5 py-2.5 bg-surface-raised hover:bg-surface disabled:opacity-50 border border-strong text-prose text-sm font-semibold rounded-xl transition-colors"
+          >
+            Promote to Review
+          </button>
+        )}
         {!isNew && (
           <button
             type="button"
             onClick={handleDelete}
             disabled={deleting}
-            className="px-5 py-2.5 text-danger-ink hover:text-danger-ink text-sm transition-colors disabled:opacity-40"
+            className="ml-auto px-5 py-2.5 text-danger-ink hover:text-danger-ink text-sm transition-colors disabled:opacity-40"
           >
             {deleting ? 'Deleting…' : 'Delete'}
           </button>

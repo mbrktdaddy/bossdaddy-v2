@@ -1,7 +1,8 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest, after } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { notifyWishlistSubscribers } from '@/lib/wishlist-emails'
 import { z } from 'zod'
 
 const SpecSchema = z.object({
@@ -24,6 +25,10 @@ const UpdateSchema = z.object({
   category:          z.string().max(80).optional().nullable(),
   price_cents:       z.number().int().min(0).optional().nullable(),
   status:            z.enum(['considering', 'queued', 'testing', 'reviewed', 'passed', 'archived']).optional(),
+  // Bench pipeline fields (folded in from the former wishlist admin).
+  priority:              z.number().int().optional(),
+  estimated_review_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  skip_reason:           z.string().max(500).optional().nullable(),
 })
 
 async function requireAdmin(supabase: Awaited<ReturnType<typeof createClient>>) {
@@ -75,11 +80,31 @@ export async function PATCH(
   }
 
   const admin = createAdminClient()
+
+  // Capture the prior status so we can notify bench subscribers on a forward
+  // transition (was handled by the retired wishlist PATCH).
+  const { data: prev } = await admin.from('products').select('status').eq('id', id).single()
+  const oldStatus = prev?.status as string | undefined
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await admin.from('products').update(updates as any).eq('id', id).select().single()
   if (error) {
     if (error.code === '23505') return NextResponse.json({ error: 'Slug already in use' }, { status: 409 })
     return NextResponse.json({ error: `Update failed: ${error.message}` }, { status: 500 })
+  }
+
+  // Notify bench subscribers on a forward transition to 'queued' or 'testing'.
+  // The 'reviewed' transition is handled when a review is approved (it carries
+  // the review slug), so it's intentionally excluded here.
+  const newStatus = (data as { status?: string })?.status
+  if (oldStatus && newStatus && oldStatus !== newStatus && (newStatus === 'queued' || newStatus === 'testing')) {
+    after(async () => {
+      try {
+        await notifyWishlistSubscribers({ itemId: id, status: newStatus })
+      } catch (err) {
+        console.error('Bench status notification failed:', err)
+      }
+    })
   }
 
   // Flush every review that references this product so updated

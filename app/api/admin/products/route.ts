@@ -23,6 +23,10 @@ const ProductSchema = z.object({
   category:          z.string().max(80).optional().nullable(),
   price_cents:       z.number().int().min(0).optional().nullable(),
   status:            z.enum(['considering', 'queued', 'testing', 'reviewed', 'passed', 'archived']).optional().default('considering'),
+  // Bench pipeline fields (folded in from the former wishlist admin).
+  priority:              z.number().int().optional().default(0),
+  estimated_review_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  skip_reason:           z.string().max(500).optional().nullable(),
 })
 
 // GET /api/admin/products — list all products (admin only)
@@ -77,6 +81,10 @@ export async function POST(request: NextRequest) {
       category:          parsed.data.category ?? null,
       price_cents:       parsed.data.price_cents ?? null,
       status:            parsed.data.status ?? 'considering',
+      priority:              parsed.data.priority ?? 0,
+      estimated_review_date: parsed.data.estimated_review_date ?? null,
+      skip_reason:           parsed.data.skip_reason ?? null,
+      source:                'hand',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any)
     .select()
