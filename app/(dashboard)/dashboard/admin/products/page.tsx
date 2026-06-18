@@ -10,15 +10,26 @@ export const dynamic = 'force-dynamic'
 // One unified admin for the products spine. The "bench" is just products in
 // their early lifecycle states, so a status filter is all we need to manage both
 // the catalog and the testing pipeline from one place.
-const TABS: { key: string; label: string; statuses: string[] | null }[] = [
-  { key: 'all',      label: 'All',       statuses: null },
-  { key: 'bench',    label: 'Bench',     statuses: ['considering', 'queued', 'testing'] },
-  { key: 'reviewed', label: 'Reviewed',  statuses: ['reviewed'] },
-  { key: 'passed',   label: 'Passed',    statuses: ['passed'] },
-  { key: 'archived', label: 'Archived',  statuses: ['archived'] },
+const TABS: { key: string; label: string; statuses: string[] | null; active: string; idle: string }[] = [
+  { key: 'all',      label: 'All',      statuses: null,                                  active: 'bg-accent text-white',     idle: 'bg-surface-raised text-prose-muted hover:text-prose' },
+  { key: 'bench',    label: 'Bench',    statuses: ['considering', 'queued', 'testing'],  active: 'bg-blue-600 text-white',   idle: 'bg-surface-raised text-blue-700 hover:text-blue-600' },
+  { key: 'reviewed', label: 'Reviewed', statuses: ['reviewed'],                          active: 'bg-green-600 text-white',  idle: 'bg-surface-raised text-green-700 hover:text-green-600' },
+  { key: 'passed',   label: 'Passed',   statuses: ['passed'],                            active: 'bg-zinc-600 text-white',   idle: 'bg-surface-raised text-zinc-500 hover:text-zinc-400' },
+  { key: 'archived', label: 'Archived', statuses: ['archived'],                          active: 'bg-rose-700 text-white',   idle: 'bg-surface-raised text-rose-700 hover:text-rose-600' },
 ]
 
 const STATUS_LABEL = new Map(PRODUCT_STATUS_OPTIONS.map((s) => [s.value, s.label]))
+
+// Per-status badge accents (colored border + text on the neutral surface — no
+// pale fills, per the design guardrails).
+const STATUS_BADGE: Record<string, string> = {
+  considering: 'text-blue-700 border-blue-400/50',
+  queued:      'text-indigo-700 border-indigo-400/50',
+  testing:     'text-amber-700 border-amber-400/50',
+  reviewed:    'text-green-700 border-green-400/50',
+  passed:      'text-zinc-500 border-zinc-400/50',
+  archived:    'text-rose-700 border-rose-400/50',
+}
 
 type Row = Product & { vote_count?: { count: number }[] }
 
@@ -70,9 +81,7 @@ export default async function ProductsListPage({
             key={t.key}
             href={t.key === 'all' ? '/dashboard/admin/products' : `/dashboard/admin/products?tab=${t.key}`}
             className={`shrink-0 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
-              t.key === active.key
-                ? 'bg-accent text-white'
-                : 'bg-surface-raised text-prose-muted hover:text-prose'
+              t.key === active.key ? t.active : t.idle
             }`}
           >
             {t.label}
@@ -117,7 +126,7 @@ export default async function ProductsListPage({
               </div>
 
               <div className="shrink-0 flex items-center gap-2 text-xs">
-                <span className="px-2 py-1 rounded-md bg-surface-raised text-prose-muted border border-strong font-medium">
+                <span className={`px-2 py-1 rounded-md bg-surface-raised border font-medium ${STATUS_BADGE[p.status] ?? 'text-prose-muted border-strong'}`}>
                   {STATUS_LABEL.get(p.status) ?? p.status}
                 </span>
                 {!p.affiliate_url && !p.non_affiliate_url ? (
