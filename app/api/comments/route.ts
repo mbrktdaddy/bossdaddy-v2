@@ -8,7 +8,7 @@ import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 const CreateCommentSchema = z.object({
-  content_type: z.enum(['review', 'guide', 'wishlist_item']),
+  content_type: z.enum(['review', 'guide', 'product']),
   content_id:   z.string().uuid(),
   body:         z.string().min(5).max(2000),
 })
@@ -189,8 +189,8 @@ export async function POST(request: NextRequest) {
   // Flush the public page cache so router.refresh() returns the new comment
   if (status === 'approved') {
     const ct = parsed.data.content_type
-    const tableMap   = { review: 'reviews', guide: 'guides', wishlist_item: 'wishlist_items' } as const
-    const prefixMap  = { review: '/reviews', guide: '/guides', wishlist_item: '/bench' } as const
+    const tableMap   = { review: 'reviews', guide: 'guides', product: 'products' } as const
+    const prefixMap  = { review: '/reviews', guide: '/guides', product: '/bench' } as const
     const admin = createAdminClient()
     const { data: content } = await admin.from(tableMap[ct]).select('slug').eq('id', parsed.data.content_id).single()
     if (content?.slug) revalidatePath(`${prefixMap[ct]}/${content.slug}`)

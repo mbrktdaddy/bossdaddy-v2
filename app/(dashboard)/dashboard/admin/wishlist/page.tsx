@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
 import type { WishlistItem } from '@/lib/wishlist'
-import { getStatusLabel, getStatusColor } from '@/lib/wishlist'
+import { getStatusLabel, getStatusColor, BENCH_SELECT } from '@/lib/wishlist'
 import { LABELS } from '@/lib/labels'
 
 export const dynamic = 'force-dynamic'
@@ -12,13 +12,16 @@ export default async function WishlistAdminPage() {
   await requireAdmin()
 
   const admin = createAdminClient()
+  // Bench-management states only. Reviewed gear lives in the catalog / reviews
+  // admin now that products and the bench are one table.
   const { data } = await admin
-    .from('wishlist_items')
-    .select('*, vote_count:wishlist_votes(count)')
+    .from('products')
+    .select(`${BENCH_SELECT}, vote_count:wishlist_votes(count)`)
+    .in('status', ['considering', 'queued', 'testing', 'passed'])
     .order('priority', { ascending: false })
     .order('created_at', { ascending: false })
 
-  const items = ((data ?? []) as (WishlistItem & { vote_count: { count: number }[] })[]).map((i) => ({
+  const items = ((data ?? []) as unknown as (WishlistItem & { vote_count: { count: number }[] })[]).map((i) => ({
     ...i,
     vote_count: i.vote_count?.[0]?.count ?? 0,
   }))

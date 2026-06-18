@@ -68,7 +68,7 @@ export async function POST(
   } else {
     // Add vote — verify item exists first
     const { data: item } = await admin
-      .from('wishlist_items')
+      .from('products')
       .select('id, status')
       .eq('id', id)
       .maybeSingle()

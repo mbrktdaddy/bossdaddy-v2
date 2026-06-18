@@ -52,7 +52,7 @@ export async function POST(
     return NextResponse.json({ subscribed: false })
   } else {
     const { data: item } = await admin
-      .from('wishlist_items')
+      .from('products')
       .select('id')
       .eq('id', id)
       .maybeSingle()

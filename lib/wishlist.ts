@@ -4,20 +4,28 @@ import type { ProductStore } from '@/lib/products'
 export { STORE_OPTIONS, getStoreLabel }
 export type { ProductStore }
 
+// The bench is a view over the products spine in its early lifecycle states.
+// 'passed' replaces the former bench-only 'skipped' (unified in migration 100/101).
 export type WishlistStatus =
   | 'considering'
   | 'queued'
   | 'testing'
   | 'reviewed'
-  | 'skipped'
+  | 'passed'
 
 export const WISHLIST_STATUS_OPTIONS: { value: WishlistStatus; label: string; color: string }[] = [
   { value: 'considering', label: 'Considering',  color: 'text-accent' },
   { value: 'queued',      label: 'Coming Soon',  color: 'text-blue-700' },
   { value: 'testing',     label: 'Testing Now',  color: 'text-green-700' },
   { value: 'reviewed',    label: 'Reviewed',     color: 'text-accent' },
-  { value: 'skipped',     label: 'Not Testing',  color: 'text-prose-faint' },
+  { value: 'passed',      label: 'Not Testing',  color: 'text-prose-faint' },
 ]
+
+// The bench is the products spine in its early lifecycle states. This column set
+// projects a products row into the WishlistItem shape — `name` aliased to `title`
+// so existing bench consumers keep working. Use everywhere the bench is read.
+export const BENCH_SELECT =
+  'id, slug, title:name, description, image_url, gallery_images, affiliate_url, store, custom_store_name, asin, status, skip_reason, estimated_review_date, review_id, priority, created_at, updated_at'
 
 export interface WishlistItem {
   id: string
@@ -66,7 +74,7 @@ export function groupByStatus(items: WishlistItem[]): Record<WishlistStatus, Wis
     queued:      [],
     considering: [],
     reviewed:    [],
-    skipped:     [],
+    passed:      [],
   }
   for (const item of items) {
     groups[item.status].push(item)

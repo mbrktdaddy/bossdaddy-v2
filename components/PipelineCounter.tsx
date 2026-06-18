@@ -21,7 +21,7 @@ export default async function PipelineCounter({ className = '', align = 'center'
       .eq('status', 'approved')
       .eq('is_visible', true),
     admin
-      .from('wishlist_items')
+      .from('products')
       .select('id', { count: 'exact', head: true })
       .in('status', ['testing', 'queued', 'considering']),
   ])

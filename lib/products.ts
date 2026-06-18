@@ -35,14 +35,23 @@ export function getStoreLabel(store: string, customName?: string | null): string
 }
 
 // Status values are stable (DB column products.status); display labels via lib/labels.
-export type ProductStatus = 'wishlist' | 'testing' | 'reviewed' | 'passed' | 'archived'
+// Unified lifecycle: the bench is just products in the early states
+// (considering → queued → testing), then reviewed, then passed / archived.
+export type ProductStatus =
+  | 'considering'
+  | 'queued'
+  | 'testing'
+  | 'reviewed'
+  | 'passed'
+  | 'archived'
 
 export const PRODUCT_STATUS_OPTIONS: { value: ProductStatus; label: string }[] = [
-  { value: 'wishlist', label: 'Bench' },
-  { value: 'testing',  label: 'Testing' },
-  { value: 'reviewed', label: 'Reviewed' },
-  { value: 'passed',   label: 'Passed' },
-  { value: 'archived', label: 'Archived' },
+  { value: 'considering', label: 'Bench' },
+  { value: 'queued',      label: 'Coming Soon' },
+  { value: 'testing',     label: 'Testing' },
+  { value: 'reviewed',    label: 'Reviewed' },
+  { value: 'passed',      label: 'Passed' },
+  { value: 'archived',    label: 'Archived' },
 ]
 
 export type TestingDuration =
@@ -85,6 +94,14 @@ export interface Product {
   category: string | null
   price_cents: number | null
   status: ProductStatus
+  // Bench fields (folded in from the former wishlist_items table).
+  priority: number
+  review_id: string | null
+  skip_reason: string | null
+  estimated_review_date: string | null
+  gallery_images: string[]
+  // Provenance: 'hand' | 'pa_api' | 'adopted_from_research'.
+  source: string
   created_at: string
   updated_at: string
 }

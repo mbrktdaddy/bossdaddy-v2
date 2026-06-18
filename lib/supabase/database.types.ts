@@ -684,6 +684,80 @@ export type Database = {
         }
         Relationships: []
       }
+      gear_candidates: {
+        Row: {
+          adopted_at: string | null
+          adopted_product_id: string | null
+          affiliate_url: string | null
+          brand: string | null
+          category: string | null
+          created_at: string
+          first_query: string | null
+          fit: string | null
+          id: string
+          last_seen_at: string
+          name: string
+          price_text: string | null
+          price_tier: string | null
+          request_count: number
+          slug: string
+          source: string
+          sources: Json
+          store: string
+          why: string | null
+        }
+        Insert: {
+          adopted_at?: string | null
+          adopted_product_id?: string | null
+          affiliate_url?: string | null
+          brand?: string | null
+          category?: string | null
+          created_at?: string
+          first_query?: string | null
+          fit?: string | null
+          id?: string
+          last_seen_at?: string
+          name: string
+          price_text?: string | null
+          price_tier?: string | null
+          request_count?: number
+          slug: string
+          source?: string
+          sources?: Json
+          store?: string
+          why?: string | null
+        }
+        Update: {
+          adopted_at?: string | null
+          adopted_product_id?: string | null
+          affiliate_url?: string | null
+          brand?: string | null
+          category?: string | null
+          created_at?: string
+          first_query?: string | null
+          fit?: string | null
+          id?: string
+          last_seen_at?: string
+          name?: string
+          price_text?: string | null
+          price_tier?: string | null
+          request_count?: number
+          slug?: string
+          source?: string
+          sources?: Json
+          store?: string
+          why?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gear_candidates_adopted_product_id_fkey"
+            columns: ["adopted_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guide_tags: {
         Row: {
           guide_id: string
@@ -1547,12 +1621,18 @@ export type Database = {
           created_at: string
           custom_store_name: string | null
           description: string | null
+          estimated_review_date: string | null
+          gallery_images: string[]
           id: string
           image_url: string | null
           name: string
           non_affiliate_url: string | null
           price_cents: number | null
+          priority: number
+          review_id: string | null
+          skip_reason: string | null
           slug: string
+          source: string
           specs: Json
           status: string
           store: string
@@ -1566,12 +1646,18 @@ export type Database = {
           created_at?: string
           custom_store_name?: string | null
           description?: string | null
+          estimated_review_date?: string | null
+          gallery_images?: string[]
           id?: string
           image_url?: string | null
           name: string
           non_affiliate_url?: string | null
           price_cents?: number | null
+          priority?: number
+          review_id?: string | null
+          skip_reason?: string | null
           slug: string
+          source?: string
           specs?: Json
           status?: string
           store?: string
@@ -1585,18 +1671,32 @@ export type Database = {
           created_at?: string
           custom_store_name?: string | null
           description?: string | null
+          estimated_review_date?: string | null
+          gallery_images?: string[]
           id?: string
           image_url?: string | null
           name?: string
           non_affiliate_url?: string | null
           price_cents?: number | null
+          priority?: number
+          review_id?: string | null
+          skip_reason?: string | null
           slug?: string
+          source?: string
           specs?: Json
           status?: string
           store?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -2550,74 +2650,6 @@ export type Database = {
           },
         ]
       }
-      wishlist_items: {
-        Row: {
-          affiliate_url: string | null
-          asin: string | null
-          created_at: string
-          custom_store_name: string | null
-          description: string | null
-          estimated_review_date: string | null
-          gallery_images: string[]
-          id: string
-          image_url: string | null
-          priority: number
-          review_id: string | null
-          skip_reason: string | null
-          slug: string
-          status: string
-          store: string | null
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          affiliate_url?: string | null
-          asin?: string | null
-          created_at?: string
-          custom_store_name?: string | null
-          description?: string | null
-          estimated_review_date?: string | null
-          gallery_images?: string[]
-          id?: string
-          image_url?: string | null
-          priority?: number
-          review_id?: string | null
-          skip_reason?: string | null
-          slug: string
-          status?: string
-          store?: string | null
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          affiliate_url?: string | null
-          asin?: string | null
-          created_at?: string
-          custom_store_name?: string | null
-          description?: string | null
-          estimated_review_date?: string | null
-          gallery_images?: string[]
-          id?: string
-          image_url?: string | null
-          priority?: number
-          review_id?: string | null
-          skip_reason?: string | null
-          slug?: string
-          status?: string
-          store?: string | null
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "wishlist_items_review_id_fkey"
-            columns: ["review_id"]
-            isOneToOne: false
-            referencedRelation: "reviews"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       wishlist_subscriptions: {
         Row: {
           created_at: string
@@ -2658,7 +2690,7 @@ export type Database = {
             foreignKeyName: "wishlist_subscriptions_wishlist_item_id_fkey"
             columns: ["wishlist_item_id"]
             isOneToOne: false
-            referencedRelation: "wishlist_items"
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -2694,7 +2726,7 @@ export type Database = {
             foreignKeyName: "wishlist_votes_wishlist_item_id_fkey"
             columns: ["wishlist_item_id"]
             isOneToOne: false
-            referencedRelation: "wishlist_items"
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]

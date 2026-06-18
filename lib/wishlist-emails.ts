@@ -30,8 +30,8 @@ export async function notifyWishlistSubscribers({ itemId, status, reviewSlug }: 
 
   // Fetch item details for the email
   const { data: item } = await admin
-    .from('wishlist_items')
-    .select('id, slug, title, image_url')
+    .from('products')
+    .select('id, slug, title:name, image_url')
     .eq('id', itemId)
     .single()
 

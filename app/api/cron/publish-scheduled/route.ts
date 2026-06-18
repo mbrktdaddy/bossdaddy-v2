@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
     const notifyWishlist = async (reviewId: string, reviewTitle: string, reviewSlug: string) => {
       try {
         const { data: wishlistItem } = await admin
-          .from('wishlist_items').select('id').eq('review_id', reviewId).maybeSingle()
+          .from('products').select('id').eq('review_id', reviewId).maybeSingle()
         if (!wishlistItem) return
         const { data: subs } = await admin
           .from('wishlist_subscriptions').select('id, user_id')

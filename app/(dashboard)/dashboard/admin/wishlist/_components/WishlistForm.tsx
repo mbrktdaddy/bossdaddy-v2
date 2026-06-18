@@ -52,7 +52,7 @@ export function WishlistForm({ item }: Props) {
     e.preventDefault()
     setBusy(true); setError(null)
 
-    if (status === 'skipped' && !skipReason.trim()) {
+    if (status === 'passed' && !skipReason.trim()) {
       setError('Skip reason is required when status is "Not Testing".')
       setBusy(false)
       return
@@ -69,7 +69,7 @@ export function WishlistForm({ item }: Props) {
       custom_store_name:      store === 'other' ? (customStoreName.trim() || null) : null,
       asin:                   store === 'amazon' ? (asin.trim() || null) : null,
       status,
-      skip_reason:            status === 'skipped' ? (skipReason.trim() || null) : null,
+      skip_reason:            status === 'passed' ? (skipReason.trim() || null) : null,
       estimated_review_date:  ['queued','testing'].includes(status) ? (estimatedDate || null) : null,
       priority:               parseInt(priority, 10) || 0,
     }
@@ -179,7 +179,7 @@ export function WishlistForm({ item }: Props) {
       </div>
 
       {/* Skip reason — only when skipped */}
-      {status === 'skipped' && (
+      {status === 'passed' && (
         <div>
           <label htmlFor="wf-skip-reason" className={labelCls}>Skip Reason * <span className="text-prose-faint font-normal">(shown publicly)</span></label>
           <textarea id="wf-skip-reason" className={`${inputCls} resize-none`} rows={2} value={skipReason} onChange={(e) => setSkipReason(e.target.value)} required placeholder="Not enough differentiation from products I've already reviewed." />

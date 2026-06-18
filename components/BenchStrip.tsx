@@ -21,8 +21,8 @@ export default async function BenchStrip({
 }: Props) {
   const admin = createAdminClient()
   const { data } = await admin
-    .from('wishlist_items')
-    .select('id, slug, title, image_url, status')
+    .from('products')
+    .select('id, slug, title:name, image_url, status')
     .in('status', ['testing', 'queued', 'considering'])
     .order('priority', { ascending: false })
     .limit(20)

@@ -157,14 +157,16 @@ function affiliateUrlFor(pick: RawPick): string | null {
   return appendAmazonTag(`https://www.amazon.com/s?k=${q}`, tag)
 }
 
-// Auto-seed the catalog so a gap query feeds the product spine + bench loop:
-// each pick becomes a `researched` products row (with a tracked /go link) and a
-// Bench entry. Both are insert-if-new — we NEVER downgrade an existing real
-// product (e.g. one already 'reviewed') back to 'researched'. Best-effort:
-// failures here must never break the chat answer. Uses the admin client because
-// products/wishlist writes are is_admin()-gated.
-async function seedCatalog(
+// Persist each pick into the CANDIDATE ZONE (gear_candidates) — NOT the canonical
+// products catalog or the public bench. Researched gear stays private here until a
+// deliberate admin "adopt" action promotes it into the product spine, so untested
+// picks can never reach a public surface. See docs/the-boss-gear-architecture-plan.md.
+// A repeat surfacing bumps request_count (demand) + last_seen_at. Best-effort:
+// failures here must never break the chat answer. Admin client (gear_candidates is
+// is_admin()-gated); the tracked /go link resolves against this row.
+async function seedCandidates(
   picks: RawPick[],
+  firstQuery: string,
 ): Promise<Map<string, { slug: string; buyUrl: string | null }>> {
   const bySlug = new Map<string, { slug: string; buyUrl: string | null }>()
   let admin
@@ -174,45 +176,43 @@ async function seedCatalog(
     return bySlug
   }
 
+  const now = new Date().toISOString()
   for (const pick of picks) {
     const base = slugify([pick.brand, pick.name].filter(Boolean).join(' '))
     if (!base || bySlug.has(pick.name)) continue
     const affiliate = affiliateUrlFor(pick)
     try {
-      // Insert the product only if the slug is new; on conflict do nothing so we
-      // never clobber a real catalog row. ignoreDuplicates returns [] on conflict.
-      await admin
-        .from('products')
-        .upsert(
-          {
-            slug: base,
-            name: pick.name,
-            brand: pick.brand,
-            status: 'researched',
-            affiliate_url: affiliate,
-            store: 'amazon',
-          },
-          { onConflict: 'slug', ignoreDuplicates: true },
-        )
+      // Bump demand on a repeat; record first_query only on the initial insert.
+      const { data: existing } = await admin
+        .from('gear_candidates')
+        .select('request_count')
+        .eq('slug', base)
+        .maybeSingle()
 
-      // Bench entry (wishlist_items.slug is unique) — same insert-if-new rule.
-      await admin
-        .from('wishlist_items')
-        .upsert(
-          {
-            slug: base,
-            title: pick.name,
-            affiliate_url: affiliate,
-            store: 'amazon',
-            status: 'considering',
-          },
-          { onConflict: 'slug', ignoreDuplicates: true },
-        )
+      await admin.from('gear_candidates').upsert(
+        {
+          slug: base,
+          name: pick.name,
+          brand: pick.brand,
+          price_tier: pick.priceTier,
+          price_text: pick.priceText,
+          fit: pick.fit,
+          why: pick.why,
+          affiliate_url: affiliate,
+          store: 'amazon',
+          sources: pick.sources as unknown as never,
+          source: 'boss_research',
+          request_count: (existing?.request_count ?? 0) + 1,
+          last_seen_at: now,
+          ...(existing ? {} : { first_query: firstQuery.slice(0, 500) }),
+        },
+        { onConflict: 'slug' },
+      )
 
       bySlug.set(pick.name, { slug: base, buyUrl: affiliate ? `/go/${base}` : null })
     } catch {
-      // Seed failure is non-fatal — the pick still renders, just without a /go
-      // link if we couldn't persist it.
+      // Persist failure is non-fatal — the pick still renders, just without a
+      // tracked /go link.
       bySlug.set(pick.name, { slug: base, buyUrl: null })
     }
   }
@@ -467,8 +467,8 @@ Research 3-5 currently-available products that fit this, spanning price tiers, a
       }
     }
 
-    // Seed the catalog + bench (best-effort) and log demand.
-    const seeded = await seedCatalog(picks)
+    // Persist to the candidate zone (best-effort) and log demand.
+    const seeded = await seedCandidates(picks, query)
     await logRoadmap({ userId: ctx.userId, query, category, fit, resultsCount: picks.length })
 
     const citations: Citation[] = picks.map((p) => {

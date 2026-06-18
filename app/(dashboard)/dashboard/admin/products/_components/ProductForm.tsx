@@ -36,7 +36,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
   const [description, setDescription] = useState(product?.description ?? '')
   const [category, setCategory]       = useState(product?.category ?? '')
   const [priceCents, setPriceCents]   = useState(product?.price_cents != null ? String(product.price_cents) : '')
-  const [status, setStatus]           = useState<string>(product?.status ?? 'wishlist')
+  const [status, setStatus]           = useState<string>(product?.status ?? 'considering')
 
   const [busy, setBusy]                   = useState(false)
   const [error, setError]                 = useState<string | null>(null)

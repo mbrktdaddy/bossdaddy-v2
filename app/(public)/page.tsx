@@ -178,8 +178,8 @@ export default async function HomePage() {
       .order('published_at', { ascending: false })
       .limit(4),
     supabase
-      .from('wishlist_items')
-      .select('id, slug, title, status, image_url')
+      .from('products')
+      .select('id, slug, title:name, status, image_url')
       .in('status', ['testing', 'queued', 'considering'])
       .order('priority', { ascending: false }).limit(5),
     supabase

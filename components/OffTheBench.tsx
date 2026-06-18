@@ -18,25 +18,25 @@ interface Props {
 export default async function OffTheBench({ limit = 3, className = '' }: Props) {
   const admin = createAdminClient()
 
-  // Order newest-graduated first and keep the cap high: the reviews query
-  // below filters/orders by published_at, so every graduated item's bench
-  // metadata must be present in this map or a recent review would silently
-  // drop off the rail.
+  // Order newest-updated first and keep the cap high: the reviews query below
+  // filters/orders by published_at, so every reviewed product's metadata must be
+  // present in this map or a recent review would silently drop off the rail.
+  // Reviewed gear in the spine links to its published review via
+  // reviews.product_slug (catalog products don't carry products.review_id).
   const { data: grad } = await admin
-    .from('wishlist_items')
-    .select('id, title, image_url, review_id')
+    .from('products')
+    .select('slug, name, image_url')
     .eq('status', 'reviewed')
-    .not('review_id', 'is', null)
     .order('updated_at', { ascending: false })
     .limit(500)
 
   if (!grad || grad.length === 0) return null
 
-  const reviewIds = grad.map((g) => g.review_id as string)
+  const slugs = grad.map((g) => g.slug)
   const { data: reviews } = await admin
     .from('reviews')
-    .select('id, slug, title, image_url, published_at')
-    .in('id', reviewIds)
+    .select('id, slug, title, image_url, published_at, product_slug')
+    .in('product_slug', slugs)
     .eq('status', 'approved')
     .eq('is_visible', true)
     .order('published_at', { ascending: false })
@@ -44,13 +44,13 @@ export default async function OffTheBench({ limit = 3, className = '' }: Props) 
 
   if (!reviews || reviews.length === 0) return null
 
-  const benchById = new Map(grad.map((g) => [g.review_id, g]))
+  const productBySlug = new Map(grad.map((g) => [g.slug, g]))
   const items = reviews.map((r) => {
-    const bench = benchById.get(r.id)
+    const product = r.product_slug ? productBySlug.get(r.product_slug) : undefined
     return {
       reviewSlug: r.slug,
-      image: bench?.image_url ?? r.image_url ?? null,
-      benchTitle: bench?.title ?? r.title,
+      image: product?.image_url ?? r.image_url ?? null,
+      benchTitle: product?.name ?? r.title,
     }
   })
 

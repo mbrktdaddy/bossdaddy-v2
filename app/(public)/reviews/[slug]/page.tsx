@@ -121,8 +121,8 @@ export default async function ReviewPage({ params }: Props) {
       ? getProductBySlug(supabase, review.product_slug)
       : Promise.resolve(null),
     supabase
-      .from('wishlist_items')
-      .select('slug, title')
+      .from('products')
+      .select('slug, title:name')
       .eq('review_id', review.id)
       .maybeSingle(),
     getReviewTimeline(supabase, review.id, review.parent_review_id),

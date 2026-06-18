@@ -214,7 +214,7 @@ export async function PUT(
             .from('products')
             .update({ status: 'reviewed' })
             .eq('slug', productSlugToFlip)
-            .in('status', ['wishlist', 'testing'])  // advance but don't clobber 'passed'/'archived'
+            .in('status', ['considering', 'queued', 'testing'])  // advance but don't clobber 'passed'/'archived'
         } catch (err) { console.error('Product status flip failed:', err) }
       })
     }
@@ -227,7 +227,7 @@ export async function PUT(
         after(async () => {
           try {
             const { data: wishlistItem } = await admin
-              .from('wishlist_items')
+              .from('products')
               .select('id')
               .eq('review_id', reviewId)
               .maybeSingle()

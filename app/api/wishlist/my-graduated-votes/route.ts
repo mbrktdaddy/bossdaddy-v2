@@ -21,8 +21,8 @@ export async function GET() {
 
   const itemIds = votes.map((v) => v.wishlist_item_id)
   const { data: grad } = await admin
-    .from('wishlist_items')
-    .select('id, title, review_id')
+    .from('products')
+    .select('id, title:name, review_id')
     .in('id', itemIds)
     .eq('status', 'reviewed')
     .not('review_id', 'is', null)

@@ -14,21 +14,24 @@ const CreateSchema = z.object({
   store:                  z.string().max(40).optional().nullable(),
   custom_store_name:      z.string().max(80).optional().nullable(),
   asin:                   z.string().max(20).optional().nullable(),
-  status:                 z.enum(['considering','queued','testing','reviewed','skipped']).default('considering'),
+  status:                 z.enum(['considering','queued','testing','reviewed','passed']).default('considering'),
   skip_reason:            z.string().max(500).optional().nullable(),
   estimated_review_date:  z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   priority:               z.number().int().default(0),
 })
 
-// GET /api/wishlist — public list with vote counts
+// Columns of the products spine that make up a bench item (name aliased to title
+// so existing WishlistItem consumers keep working).
+const BENCH_COLS =
+  'id, slug, title:name, description, image_url, gallery_images, affiliate_url, store, custom_store_name, asin, status, skip_reason, estimated_review_date, review_id, priority, created_at, updated_at'
+
+// GET /api/wishlist — public bench list with vote counts
 export async function GET() {
   const admin = createAdminClient()
   const { data, error } = await admin
-    .from('wishlist_items')
-    .select(`
-      *,
-      vote_count:wishlist_votes(count)
-    `)
+    .from('products')
+    .select(`${BENCH_COLS}, vote_count:wishlist_votes(count)`)
+    .in('status', ['considering', 'queued', 'testing', 'reviewed'])
     .order('priority', { ascending: false })
     .order('created_at', { ascending: false })
 
@@ -59,21 +62,22 @@ export async function POST(request: NextRequest) {
 
   const admin = createAdminClient()
   const { data, error } = await admin
-    .from('wishlist_items')
+    .from('products')
     .insert({
       slug:                   parsed.data.slug,
-      title:                  parsed.data.title,
+      name:                   parsed.data.title,
       description:            parsed.data.description ?? null,
       image_url:              parsed.data.image_url ?? null,
       gallery_images:         parsed.data.gallery_images ?? [],
       affiliate_url:          parsed.data.affiliate_url ?? null,
-      store:                  parsed.data.store ?? null,
+      store:                  parsed.data.store ?? 'amazon',
       custom_store_name:      parsed.data.custom_store_name ?? null,
       asin:                   parsed.data.asin ?? null,
       status:                 parsed.data.status,
       skip_reason:            parsed.data.skip_reason ?? null,
       estimated_review_date:  parsed.data.estimated_review_date ?? null,
       priority:               parsed.data.priority,
+      source:                 'hand',
     })
     .select()
     .single()

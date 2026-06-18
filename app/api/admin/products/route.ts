@@ -22,7 +22,7 @@ const ProductSchema = z.object({
   description:       z.string().max(400).optional().nullable(),
   category:          z.string().max(80).optional().nullable(),
   price_cents:       z.number().int().min(0).optional().nullable(),
-  status:            z.enum(['wishlist', 'testing', 'reviewed', 'passed', 'archived']).optional().default('wishlist'),
+  status:            z.enum(['considering', 'queued', 'testing', 'reviewed', 'passed', 'archived']).optional().default('considering'),
 })
 
 // GET /api/admin/products — list all products (admin only)
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       description:       parsed.data.description ?? null,
       category:          parsed.data.category ?? null,
       price_cents:       parsed.data.price_cents ?? null,
-      status:            parsed.data.status ?? 'wishlist',
+      status:            parsed.data.status ?? 'considering',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any)
     .select()

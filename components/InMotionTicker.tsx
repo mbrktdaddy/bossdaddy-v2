@@ -78,8 +78,8 @@ export default async function InMotionTicker() {
   const sinceIso = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()
   const [{ data: benchData }, { data: reviewData }] = await Promise.all([
     admin
-      .from('wishlist_items')
-      .select('id, slug, title, status')
+      .from('products')
+      .select('id, slug, title:name, status')
       .in('status', ['testing', 'queued', 'considering'])
       .order('priority', { ascending: false })
       .limit(6),

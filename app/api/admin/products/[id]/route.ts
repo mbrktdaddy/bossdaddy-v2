@@ -23,7 +23,7 @@ const UpdateSchema = z.object({
   description:       z.string().max(400).optional().nullable(),
   category:          z.string().max(80).optional().nullable(),
   price_cents:       z.number().int().min(0).optional().nullable(),
-  status:            z.enum(['wishlist', 'testing', 'reviewed', 'passed', 'archived']).optional(),
+  status:            z.enum(['considering', 'queued', 'testing', 'reviewed', 'passed', 'archived']).optional(),
 })
 
 async function requireAdmin(supabase: Awaited<ReturnType<typeof createClient>>) {

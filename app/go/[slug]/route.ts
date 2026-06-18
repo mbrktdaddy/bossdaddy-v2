@@ -40,15 +40,17 @@ export async function GET(
     redirect(appendAmazonTag(raw, tag))
   }
 
-  // Fall through to wishlist items
   const admin = createAdminClient()
-  const { data: wishlistItem } = await admin
-    .from('wishlist_items')
+
+  // Fall through to a researched candidate (gear_candidates) — picks surfaced by
+  // The Boss carry a tracked link before they're ever adopted into the catalog.
+  const { data: candidate } = await admin
+    .from('gear_candidates')
     .select('affiliate_url')
     .eq('slug', slug)
     .maybeSingle()
 
-  if (!wishlistItem?.affiliate_url) notFound()
+  if (!candidate?.affiliate_url) notFound()
 
-  redirect(appendAmazonTag(wishlistItem.affiliate_url, tag))
+  redirect(appendAmazonTag(candidate.affiliate_url, tag))
 }

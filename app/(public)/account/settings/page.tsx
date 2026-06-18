@@ -69,7 +69,7 @@ export default async function AccountSettingsPage() {
     supabase.from('likes').select('content_id').eq('user_id', user.id).eq('content_type', 'guide')
       .order('created_at', { ascending: false }).limit(10),
     supabase.from('wishlist_subscriptions')
-      .select('wishlist_item_id, wishlist_items(id, slug, title, status)')
+      .select('wishlist_item_id, products(id, slug, title:name, status)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(20),
@@ -97,7 +97,7 @@ export default async function AccountSettingsPage() {
 
   type BenchItem = { id: string; slug: string; title: string; status: string }
   const subscribedItems: BenchItem[] = (benchSubs ?? [])
-    .map(s => s.wishlist_items as BenchItem | null)
+    .map(s => s.products as unknown as BenchItem | null)
     .filter((item): item is BenchItem => item !== null)
 
   const BENCH_STATUS_LABEL: Record<string, string> = {

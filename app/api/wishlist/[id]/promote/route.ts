@@ -4,7 +4,7 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 // POST /api/wishlist/[id]/promote — create a review draft from a wishlist item (admin only)
-// Sets wishlist_items.review_id and status='reviewed'.
+// Sets products.review_id and status='reviewed'.
 // Does NOT notify subscribers — that fires when the review actually publishes.
 export async function POST(
   _request: NextRequest,
@@ -21,7 +21,7 @@ export async function POST(
   const admin = createAdminClient()
 
   const { data: item } = await admin
-    .from('wishlist_items')
+    .from('products')
     .select('*')
     .eq('id', id)
     .single()
@@ -29,23 +29,19 @@ export async function POST(
   if (!item) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   if (item.review_id) return NextResponse.json({ error: 'Already promoted', review_id: item.review_id }, { status: 409 })
 
-  // Resolve product_slug if a matching products row exists
-  let product_slug: string | null = null
-  if (item.slug) {
-    const { data: product } = await admin.from('products').select('slug').eq('slug', item.slug).maybeSingle()
-    if (product) product_slug = product.slug
-  }
+  // The bench item is itself a products row now — link the review to its slug.
+  const product_slug: string | null = item.slug ?? null
 
   const { generateUniqueSlug } = await import('@/lib/slug')
-  const reviewSlug = await generateUniqueSlug(admin, 'reviews', `${item.title} Review`)
+  const reviewSlug = await generateUniqueSlug(admin, 'reviews', `${item.name} Review`)
 
   // Create review draft — category defaults to 'other' (admin can update in workspace)
   const { data: review, error: reviewError } = await admin
     .from('reviews')
     .insert({
       slug:                    reviewSlug,
-      title:                   `${item.title} — Review`,
-      product_name:            item.title,
+      title:                   `${item.name} — Review`,
+      product_name:            item.name,
       category:                'other',
       status:                  'draft',
       author_id:               user.id,
@@ -61,9 +57,9 @@ export async function POST(
 
   if (reviewError) return NextResponse.json({ error: reviewError.message }, { status: 500 })
 
-  // Link wishlist item to the new review
+  // Link the product to the new review and advance it to 'reviewed'.
   await admin
-    .from('wishlist_items')
+    .from('products')
     .update({ review_id: review.id, status: 'reviewed' })
     .eq('id', id)
 

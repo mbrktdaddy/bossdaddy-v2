@@ -3,7 +3,10 @@ import { revalidatePath } from 'next/cache'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { notifyWishlistSubscribers } from '@/lib/wishlist-emails'
+import type { Database } from '@/lib/supabase/database.types'
 import { z } from 'zod'
+
+type ProductUpdate = Database['public']['Tables']['products']['Update']
 
 const UpdateSchema = z.object({
   slug:                   z.string().min(2).max(80).regex(/^[a-z0-9-]+$/).optional(),
@@ -15,11 +18,15 @@ const UpdateSchema = z.object({
   store:                  z.string().max(40).optional().nullable(),
   custom_store_name:      z.string().max(80).optional().nullable(),
   asin:                   z.string().max(20).optional().nullable(),
-  status:                 z.enum(['considering','queued','testing','reviewed','skipped']).optional(),
+  status:                 z.enum(['considering','queued','testing','reviewed','passed']).optional(),
   skip_reason:            z.string().max(500).optional().nullable(),
   estimated_review_date:  z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   priority:               z.number().int().optional(),
 })
+
+// Products-spine columns that make up a bench item (name aliased to title).
+const BENCH_COLS =
+  'id, slug, title:name, description, image_url, gallery_images, affiliate_url, store, custom_store_name, asin, status, skip_reason, estimated_review_date, review_id, priority, created_at, updated_at'
 
 // GET /api/wishlist/[id] — single item with vote counts + user state
 export async function GET(
@@ -30,8 +37,8 @@ export async function GET(
   const admin = createAdminClient()
 
   const { data: item, error } = await admin
-    .from('wishlist_items')
-    .select(`*, vote_count:wishlist_votes(count)`)
+    .from('products')
+    .select(`${BENCH_COLS}, vote_count:wishlist_votes(count)`)
     .eq('id', id)
     .single()
 
@@ -85,15 +92,20 @@ export async function PATCH(
 
   // Capture old status before the update so we can detect transitions
   const { data: existing } = await admin
-    .from('wishlist_items')
+    .from('products')
     .select('status')
     .eq('id', id)
     .single()
   const oldStatus = existing?.status as string | undefined
 
+  // Map the bench `title` field onto the spine's `name` column.
+  const { title, ...rest } = parsed.data
+  const updatePayload = { ...rest } as ProductUpdate
+  if (title !== undefined) updatePayload.name = title
+
   const { data, error } = await admin
-    .from('wishlist_items')
-    .update(parsed.data)
+    .from('products')
+    .update(updatePayload)
     .eq('id', id)
     .select()
     .single()
@@ -140,7 +152,7 @@ export async function DELETE(
   if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const admin = createAdminClient()
-  const { error } = await admin.from('wishlist_items').delete().eq('id', id)
+  const { error } = await admin.from('products').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   revalidatePath('/bench')

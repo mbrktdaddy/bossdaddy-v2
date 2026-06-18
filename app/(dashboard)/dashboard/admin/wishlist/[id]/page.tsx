@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
 import type { WishlistItem } from '@/lib/wishlist'
+import { BENCH_SELECT } from '@/lib/wishlist'
 import { WishlistForm } from '../_components/WishlistForm'
 
 export const dynamic = 'force-dynamic'
@@ -16,7 +17,7 @@ export default async function EditWishlistItemPage({
   await requireAdmin()
 
   const admin = createAdminClient()
-  const { data: item } = await admin.from('wishlist_items').select('*').eq('id', id).single()
+  const { data: item } = await admin.from('products').select(BENCH_SELECT).eq('id', id).single()
   if (!item) notFound()
 
   return (

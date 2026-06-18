@@ -1,6 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { WishlistItem } from '@/lib/wishlist'
-import { groupByStatus } from '@/lib/wishlist'
+import { groupByStatus, BENCH_SELECT } from '@/lib/wishlist'
 import { WishlistCard } from '@/components/wishlist/WishlistCard'
 import { VotePayoffBanner } from '@/components/VotePayoffBanner'
 import type { Metadata } from 'next'
@@ -21,14 +21,17 @@ export const metadata: Metadata = {
 
 export default async function BenchPage() {
   const admin = createAdminClient()
+  // The active bench pipeline. Reviewed gear lives on /reviews now that the bench
+  // and the catalog are one table.
   const { data } = await admin
-    .from('wishlist_items')
-    .select('*, vote_count:wishlist_votes(count)')
+    .from('products')
+    .select(`${BENCH_SELECT}, vote_count:wishlist_votes(count)`)
+    .in('status', ['considering', 'queued', 'testing'])
     .order('priority', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(150)
 
-  const items = ((data ?? []) as (WishlistItem & { vote_count: { count: number }[] })[]).map((i) => ({
+  const items = ((data ?? []) as unknown as (WishlistItem & { vote_count: { count: number }[] })[]).map((i) => ({
     ...i,
     vote_count: i.vote_count?.[0]?.count ?? 0,
   }))
@@ -81,7 +84,7 @@ export default async function BenchPage() {
       ),
     },
     {
-      key: 'skipped',
+      key: 'passed',
       heading: 'Not Testing',
       sub: "Decided against these — here's why.",
       icon: null,
@@ -121,7 +124,7 @@ export default async function BenchPage() {
             const sectionItems = groups[key]
             if (sectionItems.length === 0) return null
 
-            if (key === 'skipped') {
+            if (key === 'passed') {
               return (
                 <details key={key} className="group">
                   <summary className="flex items-center gap-2 cursor-pointer list-none mb-4">

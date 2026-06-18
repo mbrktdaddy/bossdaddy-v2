@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 interface Props {
-  contentType: 'review' | 'guide' | 'wishlist_item'
+  contentType: 'review' | 'guide' | 'product'
   contentId: string
   prompt?: string
 }

@@ -28,15 +28,18 @@ interface Props {
 
 export async function generateStaticParams() {
   const admin = createAdminClient()
-  const { data } = await admin.from('wishlist_items').select('slug')
+  const { data } = await admin
+    .from('products')
+    .select('slug')
+    .in('status', ['considering', 'queued', 'testing', 'reviewed', 'passed'])
   return (data ?? []).map(({ slug }) => ({ slug }))
 }
 
 const getWishlistItem = cache(async (slug: string) => {
   const admin = createAdminClient()
   const { data } = await admin
-    .from('wishlist_items')
-    .select('*, vote_count:wishlist_votes(count)')
+    .from('products')
+    .select('*, title:name, vote_count:wishlist_votes(count)')
     .eq('slug', slug)
     .single()
   return data
@@ -78,7 +81,7 @@ export default async function BenchDetailPage({ params }: Props) {
   }
 
   const isReviewed = wishlistItem.status === 'reviewed'
-  const isSkipped  = wishlistItem.status === 'skipped'
+  const isSkipped  = wishlistItem.status === 'passed'
   const hasBuyLink = !!wishlistItem.affiliate_url && !!wishlistItem.store
 
   return (
@@ -166,12 +169,12 @@ export default async function BenchDetailPage({ params }: Props) {
           <h2 className="text-lg font-black mb-6">Are you familiar with this product?</h2>
           <div className="mb-8">
             <CommentForm
-              contentType="wishlist_item"
+              contentType="product"
               contentId={wishlistItem.id}
               prompt="Everyone seems to love this item. What should I know first?"
             />
           </div>
-          <CommentList contentType="wishlist_item" contentId={wishlistItem.id} />
+          <CommentList contentType="product" contentId={wishlistItem.id} />
         </div>
       )}
 
