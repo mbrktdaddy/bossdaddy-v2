@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
 import { CandidatesClient, type Candidate } from './_components/CandidatesClient'
@@ -24,7 +25,10 @@ export default async function CandidatesAdminPage() {
           Gear The Boss surfaced via live research when there was no tested pick.
           These are <span className="font-semibold">never public</span> — adopt one
           to put it on the bench as something to test (it becomes a real product,
-          tagged as research-sourced).
+          tagged as research-sourced).{' '}
+          <Link href="/dashboard/admin/demand" className="text-accent-text-soft hover:text-accent">
+            See gear demand →
+          </Link>
         </p>
       </div>
 
