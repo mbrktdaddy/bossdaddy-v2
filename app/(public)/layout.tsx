@@ -2,6 +2,7 @@ import dynamic from 'next/dynamic'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import MobileBottomNav from '@/components/MobileBottomNav'
+import AskBossFab from '@/components/AskBossFab'
 import PublicMain from '@/components/PublicMain'
 import HideOnImmersive from '@/components/HideOnImmersive'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
@@ -34,6 +35,7 @@ export default async function PublicLayout({ children }: { children: React.React
       <PublicMain>{children}</PublicMain>
       <HideOnImmersive><Footer /></HideOnImmersive>
       <MobileBottomNav />
+      <AskBossFab />
       <WelcomeToast />
     </div>
   )
