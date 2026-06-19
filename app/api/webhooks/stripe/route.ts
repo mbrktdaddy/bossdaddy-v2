@@ -235,7 +235,11 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     try {
       const printfulOrder = await createOrder(
         {
-          external_id: session.id,
+          // Printful caps external_id at 32 chars — a Stripe session id
+          // (cs_live_…, ~66 chars) is rejected with "Invalid External ID
+          // specified". Use our order number (e.g. BD-2026-0009): short,
+          // unique, and meaningful for reconciliation.
+          external_id: order.order_number,
           shipping: 'STANDARD',
           recipient: {
             name: sd.name ?? '',
