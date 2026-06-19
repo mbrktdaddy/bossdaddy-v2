@@ -7,10 +7,17 @@ interface Props {
   images: string[]
   alt: string
   comingSoon?: boolean
+  // Optional controlled selection — when provided (with onSelect), the parent
+  // drives which image is shown (e.g. swapping to the picked color's mockup).
+  // Omitted → the gallery manages its own thumbnail state as before.
+  selectedIndex?: number
+  onSelect?: (i: number) => void
 }
 
-export function MerchImageGallery({ images, alt, comingSoon = false }: Props) {
-  const [selected, setSelected] = useState(0)
+export function MerchImageGallery({ images, alt, comingSoon = false, selectedIndex, onSelect }: Props) {
+  const [internal, setInternal] = useState(0)
+  const selected = selectedIndex ?? internal
+  const select = (i: number) => (onSelect ? onSelect(i) : setInternal(i))
   const main = images[selected] ?? null
 
   return (
@@ -43,7 +50,7 @@ export function MerchImageGallery({ images, alt, comingSoon = false }: Props) {
             <button
               key={i}
               type="button"
-              onClick={() => setSelected(i)}
+              onClick={() => select(i)}
               className={`relative shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
                 i === selected
                   ? 'border-accent opacity-100'

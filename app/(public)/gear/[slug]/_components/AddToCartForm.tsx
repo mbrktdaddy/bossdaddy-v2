@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { formatPrice } from '@/lib/merch'
 import { dispatchCartUpdated } from '@/lib/cart-events'
@@ -11,6 +11,7 @@ interface Variant {
   color: string | null
   retail_price_cents: number
   in_stock: boolean
+  image_url?: string | null
 }
 
 // Canonical size order so XS…5XL render left-to-right regardless of DB order.
@@ -20,7 +21,13 @@ function sizeRank(s: string) {
   return i === -1 ? 500 : i
 }
 
-export default function AddToCartForm({ variants }: { variants: Variant[] }) {
+export default function AddToCartForm({
+  variants,
+  onVariantChange,
+}: {
+  variants: Variant[]
+  onVariantChange?: (v: Variant | undefined) => void
+}) {
   const router = useRouter()
 
   const colors = [...new Set(variants.map(v => v.color).filter((c): c is string => Boolean(c)))]
@@ -40,6 +47,13 @@ export default function AddToCartForm({ variants }: { variants: Variant[] }) {
   const selected = variants.find(
     v => (v.color ?? null) === (color ?? null) && (v.size ?? null) === (size ?? null),
   )
+
+  // Let the parent (e.g. the gallery) react to the active variant — used to
+  // swap the main product image to the selected color's mockup.
+  useEffect(() => {
+    onVariantChange?.(selected)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected?.id])
 
   // A size is offered if some variant in the selected color carries it in stock.
   const sizeInStock = (s: string) =>

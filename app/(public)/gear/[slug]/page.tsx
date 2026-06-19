@@ -2,8 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { formatPrice, getMerchDisplayImage } from '@/lib/merch'
-import AddToCartForm from './_components/AddToCartForm'
-import { MerchImageGallery } from '@/components/MerchImageGallery'
+import MerchProductView from './_components/MerchProductView'
 import type { Metadata } from 'next'
 
 interface Props {
@@ -85,34 +84,14 @@ export default async function MerchDetailPage({ params }: Props) {
         Back to Gear
       </Link>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        {/* Image gallery */}
-        <MerchImageGallery
-          images={galleryImages}
-          alt={merch.name}
-          comingSoon={!isAvailable}
-        />
-
-        {/* Details */}
-        <div className="flex flex-col">
-          <p className="text-xs text-accent-text uppercase tracking-[0.2em] font-bold mb-2">Boss Daddy Merch</p>
-          <h1 className="text-3xl font-black text-prose mb-3">{merch.name}</h1>
-          <p className="text-2xl font-bold text-accent-text-soft mb-1">{priceDisplay}</p>
-          <p className="text-sm text-prose-faint mb-6">Free US shipping included</p>
-
-          {merch.description && (
-            <p className="text-prose-muted leading-relaxed mb-8">{merch.description}</p>
-          )}
-
-          {isAvailable && variants.length > 0 ? (
-            <AddToCartForm variants={variants} />
-          ) : (
-            <div className="mt-auto pt-6 border-t border-soft">
-              <p className="text-prose-faint text-sm">This item is coming soon — check back for the drop.</p>
-            </div>
-          )}
-        </div>
-      </div>
+      <MerchProductView
+        galleryImages={galleryImages}
+        variants={variants}
+        name={merch.name}
+        priceDisplay={priceDisplay}
+        description={merch.description}
+        isAvailable={isAvailable}
+      />
     </div>
   )
 }
