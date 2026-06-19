@@ -155,6 +155,29 @@ async function run() {
         variantsSynced++
       }
 
+      // Reconcile removed variants — e.g. a size dropped from the product in
+      // Printful. We mark them out of stock rather than delete: order_items
+      // FK-reference merch_variants, so a hard delete of a previously-ordered
+      // variant would fail. in_stock=false makes them unbuyable (cart-add
+      // rejects out-of-stock, and the option renders disabled), which is the
+      // goal — buying a variant Printful no longer has would fail at fulfillment.
+      const liveVariantIds = variants.map((v) => v.id)
+      if (liveVariantIds.length > 0) {
+        const { data: staleVars, error: varErr } = await supabase
+          .from('merch_variants')
+          .update({ in_stock: false })
+          .eq('merch_id', merchRow.id)
+          .not('printful_sync_variant_id', 'in', `(${liveVariantIds.join(',')})`)
+          .eq('in_stock', true)
+          .select('id')
+        if (varErr) {
+          console.error(`    ✗ variant reconcile failed: ${varErr.message}`)
+          errors++
+        } else if (staleVars?.length) {
+          console.log(`    ⤵ marked ${staleVars.length} removed variant(s) out of stock`)
+        }
+      }
+
       console.log(`  ✓ "${sp.name}"  (${variants.length} variant(s))`)
       productsSynced++
     } catch (err) {
@@ -163,7 +186,44 @@ async function run() {
     }
   }
 
-  console.log(`\nDone: ${productsSynced} product(s), ${variantsSynced} variant(s) synced.`)
+  // ── Reconcile deletions ──────────────────────────────────────────────────
+  // Printful only reports what currently exists, so the upsert loop above can
+  // never remove a product that was deleted upstream. Any merch row linked to a
+  // Printful product that's no longer in the store is stale — soft-delete it by
+  // stamping archived_at (display queries already filter `archived_at is null`).
+  // A product that reappears in Printful is auto-restored: syncMerch resets
+  // status:'available' + archived_at:null on the next run.
+  let archived = 0
+  if (products.length === 0) {
+    console.warn(
+      '\n⚠ Printful returned 0 products — skipping deletion reconcile so a ' +
+      'transient empty response can\'t mass-archive the whole store. ' +
+      'Re-run if your store really is empty.'
+    )
+  } else {
+    const liveIds = products.map((p) => p.id)
+    const { data: pruned, error: pruneErr } = await supabase
+      .from('merch')
+      .update({ status: 'discontinued', archived_at: new Date().toISOString() })
+      .not('printful_sync_product_id', 'is', null)
+      .not('printful_sync_product_id', 'in', `(${liveIds.join(',')})`)
+      .is('archived_at', null)
+      .select('name')
+    if (pruneErr) {
+      console.error(`  ✗ deletion reconcile failed: ${pruneErr.message}`)
+      errors++
+    } else {
+      archived = pruned?.length ?? 0
+      for (const row of pruned ?? []) {
+        console.log(`  ⤵ archived "${row.name}" (no longer in Printful)`)
+      }
+    }
+  }
+
+  console.log(
+    `\nDone: ${productsSynced} product(s), ${variantsSynced} variant(s) synced` +
+    `${archived > 0 ? `, ${archived} stale product(s) archived` : ''}.`
+  )
 
   if (errors > 0) {
     console.error(`${errors} error(s) — check output above.`)
