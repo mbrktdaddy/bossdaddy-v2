@@ -84,7 +84,7 @@ export default function MobileBottomNav() {
   return (
     <nav
       aria-label="Primary mobile navigation"
-      className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-drama/95 backdrop-blur-sm border-t border-zinc-800"
+      className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-drama/95 backdrop-blur-sm border-t border-soft"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="grid grid-cols-5 h-14">
@@ -95,7 +95,7 @@ export default function MobileBottomNav() {
               key={href}
               href={href}
               className={`flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold uppercase tracking-wider transition-colors ${
-                active ? 'text-copper' : 'text-zinc-500 hover:text-zinc-300'
+                active ? 'text-copper' : 'text-prose-faint hover:text-prose-muted'
               }`}
               aria-current={active ? 'page' : undefined}
             >

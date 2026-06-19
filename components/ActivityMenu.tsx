@@ -188,8 +188,8 @@ export default function ActivityMenu({ userId }: { userId: string }) {
       onClick={() => setTab(key)}
       className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
         tab === key
-          ? 'border-accent text-zinc-50'
-          : 'border-transparent text-zinc-400 hover:text-zinc-200'
+          ? 'border-accent text-prose'
+          : 'border-transparent text-prose-muted hover:text-zinc-200'
       }`}
     >
       {label}
@@ -207,7 +207,7 @@ export default function ActivityMenu({ userId }: { userId: string }) {
         type="button"
         onClick={toggleOpen}
         aria-label={totalUnread > 0 ? `Activity (${totalUnread} unread)` : 'Activity'}
-        className="relative p-2 text-zinc-400 hover:text-zinc-50 rounded-lg hover:bg-zinc-800/60 transition-colors"
+        className="relative p-2 text-prose-muted hover:text-prose rounded-lg hover:bg-surface-raised/60 transition-colors"
       >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -220,7 +220,7 @@ export default function ActivityMenu({ userId }: { userId: string }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-80 max-w-[90vw] bg-zinc-800 border border-zinc-700 rounded-xl shadow-2xl z-50 overflow-hidden">
+        <div className="absolute right-0 mt-2 w-80 max-w-[90vw] bg-surface-raised border border-strong rounded-xl shadow-2xl z-50 overflow-hidden">
           {/* Tabs */}
           <div className="flex">
             {tabBtn('notifications', 'Notifications', notifUnread)}
@@ -230,7 +230,7 @@ export default function ActivityMenu({ userId }: { userId: string }) {
           {tab === 'notifications' ? (
             <>
               {notifUnread > 0 && (
-                <div className="flex justify-end px-4 py-1.5 border-b border-zinc-700">
+                <div className="flex justify-end px-4 py-1.5 border-b border-strong">
                   <button type="button" onClick={markAll} className="text-xs text-accent-text hover:text-accent font-semibold">
                     Mark all read
                   </button>
@@ -238,18 +238,18 @@ export default function ActivityMenu({ userId }: { userId: string }) {
               )}
               <div className="max-h-[60vh] overflow-y-auto">
                 {notifs.length === 0 ? (
-                  <p className="px-4 py-8 text-center text-sm text-zinc-400">You&apos;re all caught up.</p>
+                  <p className="px-4 py-8 text-center text-sm text-prose-muted">You&apos;re all caught up.</p>
                 ) : (
                   notifs.map((n) => {
                     const actionable = n.action_required && (!n.action_state || n.action_state === 'pending')
                     return (
-                      <div key={n.id} className={`px-4 py-3 border-b border-zinc-700/60 last:border-0 ${n.read_at ? '' : 'bg-zinc-700/40'}`}>
+                      <div key={n.id} className={`px-4 py-3 border-b border-strong/60 last:border-0 ${n.read_at ? '' : 'bg-surface-hover/40'}`}>
                         <div className="flex items-start gap-2">
                           {!n.read_at && <span className="mt-1.5 w-2 h-2 rounded-full bg-accent shrink-0" />}
                           <button type="button" onClick={() => openNotif(n)} className="block flex-1 min-w-0 text-left">
-                            <p className="text-sm font-semibold text-zinc-100 leading-snug">{n.title}</p>
-                            {n.body && <p className="text-xs text-zinc-400 mt-0.5 leading-snug">{n.body}</p>}
-                            <p className="text-[11px] text-zinc-500 mt-1">{shortDate(n.created_at)}</p>
+                            <p className="text-sm font-semibold text-prose leading-snug">{n.title}</p>
+                            {n.body && <p className="text-xs text-prose-muted mt-0.5 leading-snug">{n.body}</p>}
+                            <p className="text-[11px] text-prose-faint mt-1">{shortDate(n.created_at)}</p>
                           </button>
                           {!n.read_at && (
                             <button
@@ -257,7 +257,7 @@ export default function ActivityMenu({ userId }: { userId: string }) {
                               onClick={() => markRead(n.id)}
                               aria-label="Mark as read"
                               title="Mark as read"
-                              className="shrink-0 p-1 -mr-1 text-zinc-500 hover:text-accent transition-colors"
+                              className="shrink-0 p-1 -mr-1 text-prose-faint hover:text-accent transition-colors"
                             >
                               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -272,20 +272,20 @@ export default function ActivityMenu({ userId }: { userId: string }) {
                               {busyId === n.id ? '…' : 'Accept'}
                             </button>
                             <button type="button" onClick={() => act(n.id, 'decline')} disabled={busyId === n.id}
-                              className="px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-40 text-zinc-200 text-xs font-semibold rounded-lg transition-colors">
+                              className="px-3 py-1.5 bg-surface-hover hover:bg-zinc-600 disabled:opacity-40 text-zinc-200 text-xs font-semibold rounded-lg transition-colors">
                               Decline
                             </button>
                           </div>
                         )}
                         {n.action_required && n.action_state && n.action_state !== 'pending' && (
-                          <p className="text-[11px] text-zinc-500 mt-1.5 pl-4 capitalize">{n.action_state}</p>
+                          <p className="text-[11px] text-prose-faint mt-1.5 pl-4 capitalize">{n.action_state}</p>
                         )}
                       </div>
                     )
                   })
                 )}
               </div>
-              <Link href="/account/notifications" className="block px-4 py-2.5 text-center text-xs font-semibold text-accent-text hover:text-accent border-t border-zinc-700">
+              <Link href="/account/notifications" className="block px-4 py-2.5 text-center text-xs font-semibold text-accent-text hover:text-accent border-t border-strong">
                 View all notifications
               </Link>
             </>
@@ -293,16 +293,16 @@ export default function ActivityMenu({ userId }: { userId: string }) {
             <>
               <div className="max-h-[60vh] overflow-y-auto">
                 {convs.length === 0 ? (
-                  <p className="px-4 py-8 text-center text-sm text-zinc-400">No conversations yet.</p>
+                  <p className="px-4 py-8 text-center text-sm text-prose-muted">No conversations yet.</p>
                 ) : (
                   convs.slice(0, 8).map((c) => (
                     <Link key={c.id} href={`/account/messages/${c.id}`}
                       onClick={() => openConversation(c)}
-                      className={`flex items-center gap-3 px-4 py-3 border-b border-zinc-700/60 last:border-0 hover:bg-zinc-700/50 transition-colors ${c.unread ? 'bg-zinc-700/40' : ''}`}>
+                      className={`flex items-center gap-3 px-4 py-3 border-b border-strong/60 last:border-0 hover:bg-surface-hover/50 transition-colors ${c.unread ? 'bg-surface-hover/40' : ''}`}>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-zinc-100 truncate">{peerName(c)}</p>
+                        <p className="text-sm font-semibold text-prose truncate">{peerName(c)}</p>
                         {c.lastMessage && (
-                          <p className="text-xs text-zinc-400 truncate">
+                          <p className="text-xs text-prose-muted truncate">
                             {c.lastMessage.fromMe ? 'You: ' : ''}{c.lastMessage.body}
                           </p>
                         )}
@@ -312,7 +312,7 @@ export default function ActivityMenu({ userId }: { userId: string }) {
                   ))
                 )}
               </div>
-              <Link href="/account/messages" className="block px-4 py-2.5 text-center text-xs font-semibold text-accent-text hover:text-accent border-t border-zinc-700">
+              <Link href="/account/messages" className="block px-4 py-2.5 text-center text-xs font-semibold text-accent-text hover:text-accent border-t border-strong">
                 All messages
               </Link>
             </>

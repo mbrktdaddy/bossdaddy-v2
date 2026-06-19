@@ -154,7 +154,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
   const isCategoryActive = pathname.startsWith('/reviews/category') || pathname.startsWith('/guides/category') || pathname.startsWith('/category/')
 
   return (
-    <header className="sticky top-0 z-50 bg-drama/95 backdrop-blur-md border-b border-zinc-800">
+    <header className="sticky top-0 z-50 bg-drama/95 backdrop-blur-md border-b border-soft">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 
         {/* Logo */}
@@ -169,7 +169,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
           />
           <span>
             <span className="text-accent-brand">BOSS</span>
-            <span className="text-zinc-100"> DADDY</span>
+            <span className="text-prose"> DADDY</span>
           </span>
         </Link>
 
@@ -184,7 +184,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive(pathname, href)
                   ? 'bg-accent text-white'
-                  : 'text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800'
+                  : 'text-prose-muted hover:text-prose hover:bg-surface-raised'
               }`}
             >
               {label}
@@ -198,7 +198,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
               className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 catOpen || isCategoryActive
                   ? 'bg-accent text-white'
-                  : 'text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800'
+                  : 'text-prose-muted hover:text-prose hover:bg-surface-raised'
               }`}
             >
               Browse
@@ -212,7 +212,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
 
             {/* Mega-menu panel — elevated zinc-800 to lift from masthead */}
             {catOpen && (
-              <div className="absolute right-0 top-full mt-2 w-[580px] bg-zinc-800 border border-zinc-700 rounded-xl shadow-2xl shadow-black/5 p-5 z-50">
+              <div className="absolute right-0 top-full mt-2 w-[580px] bg-surface-raised border border-strong rounded-xl shadow-2xl shadow-black/5 p-5 z-50">
                 <p className="text-xs text-copper uppercase tracking-widest font-semibold mb-4">Browse by Category</p>
                 <div className="grid grid-cols-2 gap-1">
                   {CATEGORIES.map((cat) => (
@@ -220,26 +220,26 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                       key={cat.slug}
                       href={`/category/${cat.slug}`}
                       onClick={() => setCatOpen(false)}
-                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-zinc-700 transition-colors group"
+                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-surface-hover transition-colors group"
                     >
                       <CategoryIcon slug={cat.slug} className="w-6 h-6 text-copper mt-0.5 shrink-0" />
                       <div className="min-w-0">
-                        <p className="text-sm font-bold text-zinc-100 group-hover:text-zinc-50 transition-colors leading-tight">
+                        <p className="text-sm font-bold text-prose group-hover:text-prose transition-colors leading-tight">
                           {cat.label}
                         </p>
-                        <p className="text-xs text-zinc-400 mt-0.5 line-clamp-1">{cat.description}</p>
+                        <p className="text-xs text-prose-muted mt-0.5 line-clamp-1">{cat.description}</p>
                       </div>
                     </Link>
                   ))}
                 </div>
                 {/* The Vault — sibling discovery section for collection types */}
-                <div className="mt-5 pt-4 border-t border-zinc-700">
+                <div className="mt-5 pt-4 border-t border-strong">
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-xs text-copper uppercase tracking-widest font-semibold">From {LABELS.vault.full}</p>
                     <Link
                       href="/vault"
                       onClick={() => setCatOpen(false)}
-                      className="text-xs text-zinc-400 hover:text-copper font-semibold transition-colors"
+                      className="text-xs text-prose-muted hover:text-copper font-semibold transition-colors"
                     >
                       See all →
                     </Link>
@@ -250,12 +250,12 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                         key={v.href}
                         href={v.href}
                         onClick={() => setCatOpen(false)}
-                        className="flex items-start gap-2.5 p-2.5 rounded-xl hover:bg-zinc-700 transition-colors group"
+                        className="flex items-start gap-2.5 p-2.5 rounded-xl hover:bg-surface-hover transition-colors group"
                       >
                         <span className="text-copper mt-0.5 shrink-0">{v.icon}</span>
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-zinc-100 group-hover:text-zinc-50 transition-colors leading-tight">{v.label}</p>
-                          <p className="text-[11px] text-zinc-400 mt-0.5 line-clamp-1">{v.blurb}</p>
+                          <p className="text-xs font-bold text-prose group-hover:text-prose transition-colors leading-tight">{v.label}</p>
+                          <p className="text-[11px] text-prose-muted mt-0.5 line-clamp-1">{v.blurb}</p>
                         </div>
                       </Link>
                     ))}
@@ -285,9 +285,9 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                     autoComplete="off"
                     placeholder="Search..."
                     onKeyDown={(e) => { if (e.key === 'Escape') setSearchOpen(false) }}
-                    className="w-44 lg:w-56 pl-8 pr-3 py-1.5 bg-zinc-800 border border-zinc-700 focus:border-copper focus-visible:ring-1 focus-visible:ring-copper/50 rounded-lg text-sm text-zinc-50 placeholder:text-zinc-500 focus:outline-none transition-colors"
+                    className="w-44 lg:w-56 pl-8 pr-3 py-1.5 bg-surface-raised border border-strong focus:border-copper focus-visible:ring-1 focus-visible:ring-copper/50 rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none transition-colors"
                   />
-                  <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
@@ -298,19 +298,19 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                   onClick={openSearch}
                   aria-label="Search"
                   aria-keyshortcuts="Meta+K Ctrl+K"
-                  className="hidden lg:flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-zinc-50 hover:border-zinc-600 transition-colors text-sm"
+                  className="hidden lg:flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-lg bg-surface-raised border border-strong text-prose-muted hover:text-prose hover:border-zinc-600 transition-colors text-sm"
                 >
                   <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
-                  <span className="text-xs text-zinc-400">Search</span>
-                  <kbd className="text-[10px] font-mono bg-zinc-700 border border-zinc-600 rounded px-1.5 py-0.5 leading-none">⌘K</kbd>
+                  <span className="text-xs text-prose-muted">Search</span>
+                  <kbd className="text-[10px] font-mono bg-surface-hover border border-zinc-600 rounded px-1.5 py-0.5 leading-none">⌘K</kbd>
                 </button>
                 <button
                   onClick={openSearch}
                   aria-label="Search"
                   aria-keyshortcuts="Meta+K Ctrl+K"
-                  className="lg:hidden p-2 rounded-lg text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/60 transition-colors"
+                  className="lg:hidden p-2 rounded-lg text-prose-muted hover:text-prose hover:bg-surface-raised/60 transition-colors"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -329,7 +329,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className={`flex items-center gap-2 p-1 pr-3 rounded-full transition-colors ${
-                  userMenuOpen ? 'bg-zinc-700' : 'bg-zinc-800 hover:bg-zinc-700'
+                  userMenuOpen ? 'bg-surface-hover' : 'bg-surface-raised hover:bg-surface-hover'
                 }`}
                 aria-label="Account menu"
                 aria-expanded={userMenuOpen}
@@ -341,9 +341,9 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                     username[0].toUpperCase()
                   )}
                 </div>
-                <span className="text-sm text-zinc-300 max-w-[120px] truncate">@{username}</span>
+                <span className="text-sm text-prose-muted max-w-[120px] truncate">@{username}</span>
                 <svg
-                  className={`w-3 h-3 text-zinc-500 transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`}
+                  className={`w-3 h-3 text-prose-faint transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`}
                   fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -351,17 +351,17 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-zinc-800 border border-zinc-700 rounded-xl shadow-2xl shadow-black/5 p-1.5 z-50">
-                  <div className="px-3 py-2 border-b border-zinc-800 mb-1">
-                    <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Signed in as</p>
-                    <p className="text-sm font-bold text-zinc-100 truncate">@{username}</p>
+                <div className="absolute right-0 top-full mt-2 w-56 bg-surface-raised border border-strong rounded-xl shadow-2xl shadow-black/5 p-1.5 z-50">
+                  <div className="px-3 py-2 border-b border-soft mb-1">
+                    <p className="text-[10px] uppercase tracking-widest text-prose-muted font-semibold">Signed in as</p>
+                    <p className="text-sm font-bold text-prose truncate">@{username}</p>
                   </div>
                   <Link
                     href={profileHref}
                     onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-zinc-300 hover:bg-zinc-700 hover:text-zinc-50 transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-surface-hover hover:text-prose transition-colors"
                   >
-                    <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                     Account Settings
@@ -369,9 +369,9 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                   <Link
                     href="/account/messages"
                     onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-zinc-300 hover:bg-zinc-700 hover:text-zinc-50 transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-surface-hover hover:text-prose transition-colors"
                   >
-                    <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                     Messages
@@ -380,9 +380,9 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                     <Link
                       href="/dashboard"
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-zinc-300 hover:bg-zinc-700 hover:text-zinc-50 transition-colors"
+                      className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-surface-hover hover:text-prose transition-colors"
                     >
-                      <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h6v6H4zM14 6h6v4h-6zM14 14h6v4h-6zM4 16h6v2H4z" />
                       </svg>
                       Dashboard
@@ -391,18 +391,18 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                   <Link
                     href="/install"
                     onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-zinc-300 hover:bg-zinc-700 hover:text-zinc-50 transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-surface-hover hover:text-prose transition-colors"
                   >
-                    <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0-4-4m4 4 4-4M4 20h16" />
                     </svg>
                     {LABELS.app.short}
                   </Link>
-                  <div className="border-t border-zinc-800 mt-1 pt-1">
+                  <div className="border-t border-soft mt-1 pt-1">
                     <form action="/api/auth/signout" method="POST">
                       <button
                         type="submit"
-                        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-zinc-300 hover:bg-danger-bg hover:text-danger-ink transition-colors text-left"
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-danger-bg hover:text-danger-ink transition-colors text-left"
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -417,7 +417,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
           ) : (
             <Link
               href={`/login?next=${encodeURIComponent(pathname)}`}
-              className="hidden md:block text-sm px-4 py-2 rounded-lg border border-zinc-700 text-zinc-300 hover:border-copper hover:text-zinc-50 transition-colors"
+              className="hidden md:block text-sm px-4 py-2 rounded-lg border border-strong text-prose-muted hover:border-copper hover:text-prose transition-colors"
             >
               Sign In
             </Link>
@@ -426,7 +426,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
           {/* Hamburger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-3 rounded-lg text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/60 transition-colors"
+            className="md:hidden p-3 rounded-lg text-prose-muted hover:text-prose hover:bg-surface-raised/60 transition-colors"
             aria-label="Toggle menu"
           >
             {mobileOpen ? (
@@ -451,9 +451,9 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
               type="search"
               autoComplete="off"
               placeholder="Search reviews and guides..."
-              className="w-full pl-9 pr-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-base text-zinc-50 placeholder:text-zinc-500 focus:outline-none focus:border-copper focus-visible:ring-1 focus-visible:ring-copper/50 transition-colors"
+              className="w-full pl-9 pr-3 py-2.5 bg-surface-raised border border-strong rounded-xl text-base text-prose placeholder:text-prose-faint focus:outline-none focus:border-copper focus-visible:ring-1 focus-visible:ring-copper/50 transition-colors"
             />
-            <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
@@ -469,7 +469,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
           a real cutout. */}
       {mobileOpen && (
         <div
-          className="md:hidden border-t border-zinc-800 bg-drama overflow-y-auto"
+          className="md:hidden border-t border-soft bg-drama overflow-y-auto"
           style={{
             maxHeight: 'calc(100dvh - 4rem - env(safe-area-inset-bottom))',
             paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
@@ -485,7 +485,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                 className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                   isActive(pathname, href)
                     ? 'bg-accent text-white'
-                    : 'text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800'
+                    : 'text-prose-muted hover:text-prose hover:bg-surface-raised'
                 }`}
               >
                 {label}
@@ -500,7 +500,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
               className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                 isActive(pathname, '/install')
                   ? 'bg-accent text-white'
-                  : 'text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800'
+                  : 'text-prose-muted hover:text-prose hover:bg-surface-raised'
               }`}
             >
               <svg className="w-4 h-4 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -534,7 +534,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                     className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                       pathname === `/category/${cat.slug}`
                         ? 'bg-accent text-white'
-                        : 'bg-zinc-800 text-zinc-300 hover:text-zinc-50 hover:bg-zinc-700'
+                        : 'bg-surface-raised text-prose-muted hover:text-prose hover:bg-surface-hover'
                     }`}
                   >
                     <CategoryIcon slug={cat.slug} className="w-4 h-4 text-copper" />
@@ -546,13 +546,13 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
           </div>
 
           {/* From The Vault — collection types as a 2x2 grid */}
-          <div className="px-4 pb-4 border-t border-zinc-800 pt-3">
+          <div className="px-4 pb-4 border-t border-soft pt-3">
             <div className="flex items-center justify-between mb-2">
               <p className="text-[10px] font-bold text-copper uppercase tracking-widest">From {LABELS.vault.full}</p>
               <Link
                 href="/vault"
                 onClick={() => setMobileOpen(false)}
-                className="text-xs text-zinc-400 hover:text-copper font-semibold transition-colors"
+                className="text-xs text-prose-muted hover:text-copper font-semibold transition-colors"
               >
                 See all →
               </Link>
@@ -563,17 +563,17 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                   key={v.href}
                   href={v.href}
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 transition-colors min-h-[44px]"
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-raised hover:bg-surface-hover transition-colors min-h-[44px]"
                 >
                   <span className="text-copper shrink-0">{v.icon}</span>
-                  <span className="text-xs font-semibold text-zinc-300 truncate">{v.label}</span>
+                  <span className="text-xs font-semibold text-prose-muted truncate">{v.label}</span>
                 </Link>
               ))}
             </div>
           </div>
 
           {/* Auth / account */}
-          <div className="px-4 pb-4 border-t border-zinc-800 pt-3 mt-1">
+          <div className="px-4 pb-4 border-t border-soft pt-3 mt-1">
             {username ? (
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-3 px-4 py-3">
@@ -585,16 +585,16 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Signed in as</p>
-                    <p className="text-sm font-bold text-zinc-100 truncate">@{username}</p>
+                    <p className="text-[10px] uppercase tracking-widest text-prose-muted font-semibold">Signed in as</p>
+                    <p className="text-sm font-bold text-prose truncate">@{username}</p>
                   </div>
                 </div>
                 <Link
                   href={profileHref}
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-zinc-300 hover:text-zinc-50 hover:bg-zinc-800 transition-colors"
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-prose-muted hover:text-prose hover:bg-surface-raised transition-colors"
                 >
-                  <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                   Account Settings
@@ -602,9 +602,9 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                 <Link
                   href="/account/messages"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-zinc-300 hover:text-zinc-50 hover:bg-zinc-800 transition-colors"
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-prose-muted hover:text-prose hover:bg-surface-raised transition-colors"
                 >
-                  <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                   Messages
@@ -613,9 +613,9 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                   <Link
                     href="/dashboard"
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-zinc-300 hover:text-zinc-50 hover:bg-zinc-800 transition-colors"
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-prose-muted hover:text-prose hover:bg-surface-raised transition-colors"
                   >
-                    <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h6v6H4zM14 6h6v4h-6zM14 14h6v4h-6zM4 16h6v2H4z" />
                     </svg>
                     Dashboard
@@ -624,7 +624,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                 <form action="/api/auth/signout" method="POST" className="mt-1">
                   <button
                     type="submit"
-                    className="w-full flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-zinc-300 hover:bg-danger-bg hover:text-danger-ink transition-colors text-left border-t border-zinc-800 pt-3"
+                    className="w-full flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-prose-muted hover:bg-danger-bg hover:text-danger-ink transition-colors text-left border-t border-soft pt-3"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
