@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import type Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { createOrder } from '@/lib/printful'
+import { createOrder, deleteOrder } from '@/lib/printful'
 import { sendOrderConfirmationEmail } from '@/lib/order-emails'
 import { createNotification } from '@/lib/notifications'
 
@@ -34,9 +34,66 @@ export async function POST(request: Request) {
         { status: 500 },
       )
     }
+  } else if (event.type === 'charge.refunded') {
+    try {
+      await handleChargeRefunded(event.data.object as Stripe.Charge)
+    } catch (err) {
+      console.error('[stripe webhook] charge.refunded error:', err)
+      const message = err instanceof Error ? err.message : String(err)
+      return NextResponse.json({ error: 'Refund handling failed', message }, { status: 500 })
+    }
   }
 
   return NextResponse.json({ received: true })
+}
+
+// A refund must also cancel the Printful order — otherwise a refunded customer
+// still gets the product manufactured and shipped (orders auto-confirm on
+// creation). Stripe fires charge.refunded for both full and partial refunds.
+async function handleChargeRefunded(charge: Stripe.Charge) {
+  // Only a full refund cancels fulfillment. A partial refund (e.g. a goodwill
+  // discount) shouldn't pull the whole order from Printful.
+  if (charge.amount_refunded < charge.amount) {
+    console.log(`[stripe webhook] partial refund on ${charge.id} — order left in place`)
+    return
+  }
+
+  const paymentIntentId =
+    typeof charge.payment_intent === 'string'
+      ? charge.payment_intent
+      : charge.payment_intent?.id ?? null
+  if (!paymentIntentId) throw new Error('No payment_intent on refunded charge')
+
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: order } = await (admin as any)
+    .from('orders')
+    .select('id, status, printful_order_id')
+    .eq('stripe_payment_intent_id', paymentIntentId)
+    .maybeSingle()
+
+  if (!order) {
+    console.warn(`[stripe webhook] refund for unknown payment_intent ${paymentIntentId}`)
+    return
+  }
+  // Idempotent: a re-delivered refund event finds the status already terminal.
+  if (order.status === 'refunded' || order.status === 'cancelled') return
+
+  // Best-effort cancel: if Printful already started production it returns an
+  // error (can't cancel) — log it, but still mark the order refunded since the
+  // money has been returned regardless.
+  if (order.printful_order_id) {
+    try {
+      await deleteOrder(order.printful_order_id)
+    } catch (err) {
+      console.error(
+        `[stripe webhook] Printful cancel failed for order ${order.id} (printful ${order.printful_order_id}):`,
+        err,
+      )
+    }
+  }
+
+  await admin.from('orders').update({ status: 'refunded' }).eq('id', order.id)
 }
 
 async function handleCheckoutComplete(session: Stripe.Checkout.Session) {

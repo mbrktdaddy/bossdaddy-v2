@@ -1470,6 +1470,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          carrier: string | null
           confirmation_email_attempts: number
           confirmation_email_error: string | null
           confirmation_email_sent_at: string | null
@@ -1493,6 +1494,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          carrier?: string | null
           confirmation_email_attempts?: number
           confirmation_email_error?: string | null
           confirmation_email_sent_at?: string | null
@@ -1516,6 +1518,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          carrier?: string | null
           confirmation_email_attempts?: number
           confirmation_email_error?: string | null
           confirmation_email_sent_at?: string | null

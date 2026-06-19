@@ -130,3 +130,11 @@ export function confirmOrder(printfulOrderId: number | bigint): Promise<Printful
 export function getOrder(printfulOrderId: number | bigint): Promise<PrintfulOrder> {
   return request<PrintfulOrder>('GET', `/orders/${printfulOrderId}`)
 }
+
+// Cancels an order in Printful. Only succeeds while the order hasn't entered
+// fulfillment — Printful returns an error once it's been picked up for
+// production, so callers should treat failure as non-fatal (the refund still
+// stands; the product may simply already be on its way).
+export function deleteOrder(printfulOrderId: number | bigint): Promise<unknown> {
+  return request<unknown>('DELETE', `/orders/${printfulOrderId}`)
+}
