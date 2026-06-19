@@ -54,20 +54,14 @@ function BagIcon({ active }: { active: boolean }) {
   )
 }
 
-function SearchIcon({ active }: { active: boolean }) {
-  return (
-    <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={active ? 2 : 1.5} aria-hidden>
-      <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-    </svg>
-  )
-}
-
+// Home / Reviews on the left, Guides / Gear on the right — "Ask the Boss"
+// occupies the elevated center slot (search lives in the header ⌘K pill +
+// the mobile search bar, so it's dropped from the bottom nav).
 const TABS = [
   { href: '/',        label: 'Home',    exact: true,  Icon: HomeIcon },
   { href: '/reviews', label: 'Reviews', exact: false, Icon: StarIcon },
   { href: '/guides',  label: 'Guides',  exact: false, Icon: BookIcon },
   { href: '/gear',    label: 'Gear',    exact: false, Icon: BagIcon },
-  { href: '/search',  label: 'Search',  exact: false, Icon: SearchIcon },
 ]
 
 export default function MobileBottomNav() {
@@ -81,6 +75,26 @@ export default function MobileBottomNav() {
     return exact ? pathname === href : pathname === href || pathname.startsWith(href + '/')
   }
 
+  const renderTab = ({ href, label, exact, Icon }: (typeof TABS)[number]) => {
+    const active = isActive(href, exact)
+    return (
+      <Link
+        key={href}
+        href={href}
+        className={`flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold uppercase tracking-wider transition-colors ${
+          active ? 'text-copper' : 'text-prose-faint hover:text-prose-muted'
+        }`}
+        aria-current={active ? 'page' : undefined}
+      >
+        <Icon active={active} />
+        {label}
+      </Link>
+    )
+  }
+
+  // Ask the Boss — elevated center slot (the AI concierge entry on mobile).
+  const askActive = pathname.startsWith('/tools/the-boss')
+
   return (
     <nav
       aria-label="Primary mobile navigation"
@@ -88,22 +102,23 @@ export default function MobileBottomNav() {
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="grid grid-cols-5 h-14">
-        {TABS.map(({ href, label, exact, Icon }) => {
-          const active = isActive(href, exact)
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={`flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold uppercase tracking-wider transition-colors ${
-                active ? 'text-copper' : 'text-prose-faint hover:text-prose-muted'
-              }`}
-              aria-current={active ? 'page' : undefined}
-            >
-              <Icon active={active} />
-              {label}
-            </Link>
-          )
-        })}
+        {TABS.slice(0, 2).map(renderTab)}
+
+        <Link
+          href="/tools/the-boss"
+          aria-label="Ask the Boss"
+          aria-current={askActive ? 'page' : undefined}
+          className="relative flex flex-col items-center justify-end pb-1.5"
+        >
+          <span className="absolute -top-4 w-12 h-12 rounded-full bg-accent text-white flex items-center justify-center shadow-lg shadow-accent/30 ring-4 ring-background">
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+          </span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-accent">Ask</span>
+        </Link>
+
+        {TABS.slice(2).map(renderTab)}
       </div>
     </nav>
   )

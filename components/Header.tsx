@@ -268,7 +268,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
 
         {/* Right side */}
         <div className="flex items-center gap-1">
-          {/* Search — icon by default, expands on click. Dark recessed surface. */}
+          {/* Search — ⌘K pill (Clean masthead), expands to an input on click. */}
           <div className="hidden md:flex items-center">
             {searchOpen ? (
               <form
@@ -293,30 +293,18 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
                 </div>
               </form>
             ) : (
-              <>
-                <button
-                  onClick={openSearch}
-                  aria-label="Search"
-                  aria-keyshortcuts="Meta+K Ctrl+K"
-                  className="hidden lg:flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-lg bg-surface-raised border border-strong text-prose-muted hover:text-prose hover:border-zinc-600 transition-colors text-sm"
-                >
-                  <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <span className="text-xs text-prose-muted">Search</span>
-                  <kbd className="text-[10px] font-mono bg-surface-hover border border-zinc-600 rounded px-1.5 py-0.5 leading-none">⌘K</kbd>
-                </button>
-                <button
-                  onClick={openSearch}
-                  aria-label="Search"
-                  aria-keyshortcuts="Meta+K Ctrl+K"
-                  className="lg:hidden p-2 rounded-lg text-prose-muted hover:text-prose hover:bg-surface-raised/60 transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </button>
-              </>
+              <button
+                onClick={openSearch}
+                aria-label="Search"
+                aria-keyshortcuts="Meta+K Ctrl+K"
+                className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-lg bg-surface-raised border border-strong text-prose-muted hover:text-prose hover:border-zinc-600 transition-colors text-sm"
+              >
+                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <span className="hidden lg:inline text-xs text-prose-muted">Search</span>
+                <kbd className="text-[10px] font-mono bg-surface-hover border border-zinc-600 rounded px-1.5 py-0.5 leading-none">⌘K</kbd>
+              </button>
             )}
           </div>
 
