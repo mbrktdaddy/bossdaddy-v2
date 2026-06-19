@@ -84,7 +84,7 @@ export default function MobileBottomNav() {
   return (
     <nav
       aria-label="Primary mobile navigation"
-      className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-drama/95 backdrop-blur-sm border-t border-soft"
+      className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-chrome/95 backdrop-blur-sm border-t border-soft"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="grid grid-cols-5 h-14">

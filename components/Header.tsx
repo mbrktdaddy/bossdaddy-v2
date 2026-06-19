@@ -154,7 +154,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
   const isCategoryActive = pathname.startsWith('/reviews/category') || pathname.startsWith('/guides/category') || pathname.startsWith('/category/')
 
   return (
-    <header className="sticky top-0 z-50 bg-drama/95 backdrop-blur-md border-b border-soft">
+    <header className="sticky top-0 z-50 bg-chrome/95 backdrop-blur-md border-b border-soft">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 
         {/* Logo */}
@@ -469,7 +469,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
           a real cutout. */}
       {mobileOpen && (
         <div
-          className="md:hidden border-t border-soft bg-drama overflow-y-auto"
+          className="md:hidden border-t border-soft bg-chrome overflow-y-auto"
           style={{
             maxHeight: 'calc(100dvh - 4rem - env(safe-area-inset-bottom))',
             paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',

@@ -330,7 +330,7 @@ export default async function HomePage() {
 
               <Link
                 href={`/reviews/${featured.slug}`}
-                className="inline-flex items-center gap-2 bg-drama text-white font-extrabold text-sm px-7 py-3.5 rounded-xl hover:bg-zinc-800 transition-colors"
+                className="inline-flex items-center gap-2 bg-surface-raised border border-strong text-prose font-extrabold text-sm px-7 py-3.5 rounded-xl hover:bg-surface-hover hover:border-accent transition-colors"
               >
                 Read the Full Verdict
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -586,7 +586,7 @@ export default async function HomePage() {
       <section className="border-b border-soft">
         <div className="max-w-6xl mx-auto px-6 py-10">
           <div className="bg-surface border border-soft rounded-2xl p-6 sm:p-8 shadow-md shadow-black/[0.04] flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-8">
-            <div className="w-14 h-14 rounded-2xl bg-drama flex items-center justify-center shrink-0">
+            <div className="w-14 h-14 rounded-2xl bg-surface-raised flex items-center justify-center shrink-0">
               <Image
                 src="/images/bd-logo-icon.png"
                 alt=""

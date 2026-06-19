@@ -24,7 +24,8 @@
   /* ── Surfaces — light canvas hierarchy
         page → card (white) → raised/sunken (zinc-200, same value:
         both "recessed" and "alt-section" want slightly darker than page) */
-  --bd-bg:             #ffffff;   /* white — page canvas (white-canvas editorial direction) */
+  --bd-bg:             #ffffff;   /* white — page canvas */
+  --bd-chrome:         #ffffff;   /* chrome (masthead/footer) — flush with canvas */
   --bd-surface:        #ffffff;   /* white card */
   --bd-surface-raised: #e4e4e7;   /* zinc-200 — alt section bg */
   --bd-surface-hover:  #d4d4d8;   /* zinc-300 — interactive hover lift */
@@ -80,7 +81,8 @@
   --foreground: #f4f4f5;          /* zinc-100 */
 
   --bd-bg:             #09090b;   /* zinc-950 — page canvas */
-  --bd-surface:        #18181b;   /* zinc-900 — cards, same as --color-drama */
+  --bd-chrome:         #09090b;   /* chrome (masthead/footer/bottom-nav) — flush with canvas (dark-first) */
+  --bd-surface:        #18181b;   /* zinc-900 — cards */
   --bd-surface-raised: #27272a;   /* zinc-800 — alt section, elevated cards */
   --bd-surface-hover:  #3f3f46;   /* zinc-700 — interactive hover lift (lighter than raised) */
   --bd-surface-sunken: #09090b;   /* zinc-950 — wells, MORE recessed than canvas */
@@ -172,10 +174,10 @@
   --color-forest:           var(--bd-success);
   --color-copper:           var(--bd-orange);
 
-  /* Drama / dark moments — the disciplined dark island color.
-     Header, footer, trust bands, mobile bottom nav. Single value
-     so every dark surface across the site reads consistent. */
-  --color-drama:            #18181b;
+  /* Chrome — masthead / footer / bottom-nav surface. Flush with the canvas
+     on dark (dark-first makeover); one knob to make chrome more/less elevated
+     site-wide. Replaces the legacy --color-drama. */
+  --color-chrome:           var(--bd-chrome);
 
   /* Surface roles */
   --color-surface:          var(--bd-surface);

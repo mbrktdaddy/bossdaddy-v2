@@ -93,7 +93,7 @@ export default function Footer() {
   const year = new Date().getUTCFullYear()
 
   return (
-    <footer className="bg-drama border-t-[3px] border-accent text-prose-muted">
+    <footer className="bg-chrome border-t-[3px] border-accent text-prose-muted">
       <div className="max-w-6xl mx-auto px-6 py-14">
 
         {/* Top: 3-column grid */}

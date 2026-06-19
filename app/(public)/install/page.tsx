@@ -32,7 +32,7 @@ export default function InstallPage() {
     <div className="max-w-3xl mx-auto px-6 py-14 md:py-20">
       {/* Header */}
       <div className="flex flex-col items-center text-center mb-10">
-        <div className="w-20 h-20 rounded-2xl bg-drama flex items-center justify-center mb-6 shadow-xl shadow-black/10">
+        <div className="w-20 h-20 rounded-2xl bg-surface-raised flex items-center justify-center mb-6 shadow-xl shadow-black/10">
           <Image
             src="/images/bd-logo-icon.png"
             alt="Boss Daddy"
