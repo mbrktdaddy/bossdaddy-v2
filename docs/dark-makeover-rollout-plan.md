@@ -65,12 +65,12 @@ The `--color-drama` islands no longer contrast once the page is dark. Re-differe
 - [ ] Listings (reviews/guides/gear/vault/category), gifts, comparisons, about, install, search.
 
 ## Phase 6 — Already-dark surfaces + QA
-- [ ] Dashboard / workspace / tools / account / auth already render dark — re-verify after the root flip (they may have relied on the per-scope attribute; ensure no double-application or regressions). Bucket-③ status colors here are already validated — only touch if visibly wrong.
-- [ ] WCAG AA contrast pass (muted text ≥ 4.5:1; `faint` only for decorative).
-- [ ] Device test on Galaxy (OLED halation, the mobile hero, the panel reading surface).
-- [ ] Define focus ring, text selection, scrollbar on dark.
-- [ ] Delete `/brand-lab` + `/brand-lab/reading` sandbox; remove unused hero variants/images.
-- [ ] Update `docs/brand-guide.md` + `globals.css` header comment (currently says "2026-05-25 zinc-light direction").
+- [x] Dashboard / workspace / tools / account / auth already render dark — verified clean after the root flip (token-driven; no double-application).
+- [x] Text selection + native `color-scheme: dark` (scrollbars/form controls) defined in `globals.css`. (Focus rings already use `ring-copper`/`focus-visible`.)
+- [x] Delete `/brand-lab` (+ `/reading`, `/masthead`) sandbox. (Hero webp images are in use by HomeHero — kept.)
+- [x] Update `docs/brand-guide.md` §2 + `§1.8` and the project `CLAUDE.md` Design System section to dark-first + Hot accent + chrome/surface-hover tokens. `globals.css` header comment updated earlier.
+- [ ] **User**: WCAG AA contrast eyeball on the live deploy (token tiers: `prose`/`prose-muted` pass AA on dark; `faint` reserved for decorative/large only).
+- [ ] **User**: device test on Galaxy (OLED halation, mobile hero, panel reading surface, FAB + bottom-nav Ask slot).
 
 ## Risks & rollback
 - **Rollback is cheap:** the whole flip is the root `data-theme` attribute + the accent values. Reverting = remove the attribute. The `<ArticleSurface>` policy is one line.

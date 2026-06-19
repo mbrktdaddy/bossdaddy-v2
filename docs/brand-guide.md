@@ -150,7 +150,7 @@ The edge exists to call up men who are *coasting*. It is never aimed at men in t
 "Stuff" is the brotherly counterpart to formal terms (products, items, merch). Use it to keep editorial copy grounded and conversational. Use formal terms in legal, structured, or admin contexts.
 
 ### 1.8 What we never do
-- Use the default vivid Tailwind orange (`#f97316`). Our `orange-600` is `#CC5500` — earthy, not loud.
+- Use the default vivid Tailwind orange (`#f97316`). Our accent is `#E55A1A` (Hot, on dark) / `#CC5500` (core) — warm and earthy, never the loud default.
 - Per-category rainbow colors. All categories share one unified treatment (`lib/categories.ts`).
 - Sponsored content positioned as honest reviews. Affiliate is fine and disclosed; sponsored is not.
 - Preach faith — it's the foundation, not the lecture.
@@ -158,58 +158,63 @@ The edge exists to call up men who are *coasting*. It is never aimed at men in t
 
 ---
 
-## 2. Color System (Zinc Light — 2026-05-25)
+## 2. Color System (Dark-First — 2026-06)
 
-The site runs on a **light canvas with disciplined dark moments**. Page bg is zinc-100; cards are white; the dark island appears in the header, trust band, and footer. Brand orange (`#CC5500`) is the ONLY accent color — no gold, no per-type rainbow accents, no cream.
+The site is **dark-first everywhere** (`data-theme="dark"` on `<html>` in `app/layout.tsx`). Near-black canvas, elevated charcoal surfaces, off-white text. Brand orange is the ONLY accent — shifted to **Hot `#E55A1A`** on dark (the core `#CC5500` reads muddy on near-black). No gold, no per-type rainbow, no cream/peach/brown. The light values in `:root` are a vestigial opt-in base (emails/print) — app chrome never renders light.
 
-### Tokens — `app/globals.css`
+> **Elevation comes from borders + raised surfaces, NOT shadows.** Black drop-shadows are invisible on near-black; use `border-soft` (+ `hover:border-strong`/`hover:border-accent`) and the raised surface tiers.
 
-| Variable | Hex | Usage |
+### Tokens — `app/globals.css` (dark values)
+
+| Variable | Hex (dark) | Usage |
 |---|---|---|
-| `--bd-bg` / `--background` | `#f4f4f5` | Page canvas (zinc-100) |
-| `--bd-surface` / `--color-surface` | `#ffffff` | Card/panel surface |
-| `--bd-surface-raised` | `#e4e4e7` | Alt-section bg, code wells (zinc-200) |
-| `--bd-surface-sunken` | `#e4e4e7` | Same value as raised — collapsed on light |
-| `--bd-border` / `--color-soft` | `#e4e4e7` | Hairlines, card edges (zinc-200) |
-| `--bd-border-strong` / `--color-strong` | `#a1a1aa` | Secondary CTA borders (zinc-400) |
-| `--bd-text` / `--foreground` | `#3f3f46` | Body text (zinc-700) |
-| `--bd-text-muted` | `#52525b` | Eyebrows, captions (zinc-600, WCAG AA on zinc-100) |
+| `--bd-chrome` / `--color-chrome` | `#09090b` | Masthead / footer / bottom-nav — flush with canvas |
+| `--bd-bg` / `--background` | `#09090b` | Page canvas (zinc-950) |
+| `--bd-surface` / `--color-surface` | `#18181b` | Card/panel surface, reading panel (zinc-900) |
+| `--bd-surface-raised` | `#27272a` | Elevated cards, alt sections, logo tiles (zinc-800) |
+| `--bd-surface-hover` / `--color-surface-hover` | `#3f3f46` | Interactive hover lift (zinc-700) |
+| `--bd-surface-sunken` | `#09090b` | Wells, recessed (zinc-950) |
+| `--bd-border` / `--color-soft` | `#27272a` | Hairlines, card edges (zinc-800) |
+| `--bd-border-strong` / `--color-strong` | `#3f3f46` | Confident edges (zinc-700) |
+| `--bd-text` / `--foreground` | `#f4f4f5` | Body text (zinc-100) |
+| `--bd-text-muted` | `#d4d4d8` | Captions, muted nav (zinc-300) |
 | `--bd-text-faint` | `#71717a` | Timestamps, decorative (zinc-500) |
-| `--bd-orange` / `--color-accent` / `--color-orange-600` | `#CC5500` | **Primary brand accent** |
-| `--bd-orange-hover` / `--color-accent-hover` | `#B85A14` | Button hover state |
-| `--bd-orange-text` / `--color-accent-text` | `#CC5500` | Inline text on light — same as brand |
-| `--color-drama` | `#18181b` | Dark moments — header, trust band, footer (zinc-900) |
-| `--bd-accent-tint` | `#fff4eb` | Brand-territory surface (TL;DR boxes, chips) |
+| `--bd-orange` / `--color-accent` | `#E55A1A` | **Primary brand accent — Hot, on dark** |
+| `--bd-orange-hover` / `--color-accent-hover` | `#CC5500` | Button hover (core orange) |
+| `--bd-orange-text` / `--color-accent-text` / `--color-eyebrow` | `#f48a4a` | Inline links / eyebrows on dark (orange-400) |
+| `--bd-accent-tint` / `--color-accent-tint` | `#27272a` | Brand-territory surface (zinc-800) |
 
-### The four surfaces
+### The surfaces (dark)
 
-1. **Page** (`--bd-bg`, zinc-100) — primary canvas
-2. **Card** (`--bd-surface`, white) — elevated content, lifted with shadow
-3. **Alt section** (`--bd-surface-raised`, zinc-200) — alternating section bg for visual rhythm
-4. **Dark island** (`--color-drama`, zinc-900) — exactly one or two per page (header + trust band, header + footer, etc.)
+1. **Chrome** (`--color-chrome`, #09090b) — masthead/footer/bottom-nav; flush with canvas, separated by border + blur. (Replaced the legacy `--color-drama`.)
+2. **Canvas** (`--bd-bg`, #09090b) — page background.
+3. **Surface** (`--bd-surface`, #18181b) — cards; the long-form reading panel on phone/tablet.
+4. **Raised** (`--bd-surface-raised`, #27272a) — elevated cards, alt-section bands, logo tiles.
+5. **Hover** (`--bd-surface-hover`, #3f3f46) — interactive hover lift.
 
 ### Tailwind utilities (mapped via `@theme inline`)
-- `bg-background` → page bg
-- `bg-surface` → white cards
-- `bg-surface-raised` → alt-section bg
-- `bg-drama` → dark island
-- `text-prose` → body text
-- `text-prose-muted` → secondary text
-- `text-accent` → inline orange text
-- `bg-accent` / `bg-accent-hover` → CTA buttons
-- `border-soft` → card edges
-- `border-strong` → secondary CTA borders
+- `bg-chrome` → masthead / footer / bottom-nav
+- `bg-background` → page canvas
+- `bg-surface` / `bg-surface-raised` / `bg-surface-hover` → surface tiers
+- `text-prose` / `text-prose-muted` / `text-prose-faint` → text tiers
+- `text-accent` → inline orange text/links · `bg-accent` / `bg-accent-hover` → CTA buttons
+- `border-soft` → card edges · `border-strong` → confident edges
 
-### Status colors (wishlist + section indicators on LIGHT canvas)
+### Reading surface (reviews / guides)
+Long-form body sits on an elevated **panel below `lg`** (phone/tablet — no margin to frame, OLED halation worst) and **bare canvas at `lg+`** (desktop margins frame the column). Single source of truth: `ARTICLE_SURFACE_CLASS` in `lib/article-surface.ts`. Body is **sans**; the editorial serif is reserved for blockquotes/pull-quotes only. Article images get a subtle frame (`border` + rounded) so white-bg product shots don't glare.
+
+### Status colors (chips / pipeline indicators on dark)
 | Status | Color | Use |
 |---|---|---|
-| `testing` | `text-green-600` | Live testing pulse |
-| `queued` | `text-blue-600` | Coming soon |
-| `considering` | `text-amber-600` | Voting / pipeline |
+| `testing` | `text-green-400` | Live testing pulse |
+| `queued` | `text-blue-400` | Coming soon |
+| `considering` | `text-amber-400` | Voting / pipeline |
 | `reviewed` | `text-accent` | Done / shipped |
 
-### The dark island rule
-Each page gets **exactly one** dark content moment (e.g., the homepage's trust band). The header and footer are persistent dark chrome and do not count. Two dark content sections per page breaks the rhythm — light canvas with a single dark island is the deliberate structure.
+For bordered chips prefer the token recipe (`bg-{danger,success,warn,info}-bg` + `border-…-line` + `text-…-ink`) — it inverts correctly on dark.
+
+### The accent band (replaced the dark-island rule)
+Everything is dark now, so the old "one dark island per page" rule is retired. Its successor: **one elevated accent band** per page (e.g., the homepage TrustBand) — `bg-surface-raised` + a 3px orange top rule — as the single punctuating moment.
 
 ### The section header convention
 Every section heading sitewide uses the same shape: a 3px × 18px brand-orange vertical rule + uppercase tracked label, optional right-side link. Use the `SectionHeader` component — do not inline this pattern.

@@ -113,18 +113,20 @@ Forgetting the right read role on a public table silently breaks logged-out visi
 
 Tailwind v4 — no `tailwind.config.ts`. All tokens defined in `app/globals.css` via `@theme inline`.
 
-### Color Palette
+**Dark-first** (`data-theme="dark"` on `<html>`): near-black canvas, charcoal surfaces, off-white text, Hot-orange accent. Prefer the semantic role tokens (`bg-surface`, `text-prose`, `text-accent`, `border-soft`…) over raw shades. Elevation comes from **borders + raised surfaces, not shadows** (black shadows vanish on near-black). Full reference: `docs/brand-guide.md` §2.
+
+### Color Palette (accent)
 | Token | Value | Use |
 |---|---|---|
-| `orange-600` | `#CC5500` | Primary brand — CTAs, active nav, buttons |
-| `orange-500` | `#d96200` | Hover states |
-| `orange-400` | `#e87030` | Accent text on dark backgrounds |
-| `orange-700–950` | earthy scale | Borders, bg tints (`border-orange-700/60`, `bg-orange-950/40`) |
+| `--color-accent` / `bg-accent` | `#E55A1A` | **Primary brand accent — Hot, on dark** (CTAs, active nav, buttons) |
+| `--color-accent-hover` | `#CC5500` | Button hover (core orange) |
+| `--color-accent-text` / `--color-eyebrow` | `#f48a4a` | Inline links / eyebrows on dark (orange-400) |
+| `orange-600 … 950` | earthy scale | Decorative tints/gradients only — prefer tokens for UI |
 
-CSS vars also available: `--bd-orange`, `--bd-surface`, `--bd-border`, `--bd-text`, `--bd-text-muted`, `--bd-text-faint`.
+Surface/text/border tokens: `--color-chrome` (masthead/footer, `#09090b`), `--color-surface` (`#18181b`), `--color-surface-raised` (`#27272a`), `--color-surface-hover` (`#3f3f46`), `--color-soft`/`--color-strong` (borders), `--color-prose`/`-muted`/`-faint` (text).
 
 ### Rules
-- **No vivid orange.** Never use Tailwind's default `#f97316` — our `orange-600` overrides it to `#CC5500`.
+- **No vivid orange.** Never use Tailwind's default `#f97316`. The accent is `#E55A1A` (Hot, on dark) / `#CC5500` (core) — route through `text-accent`/`bg-accent`, not raw `orange-*`.
 - **No per-category rainbow colors.** All categories use one unified treatment. Source of truth: `lib/categories.ts`.
 - **Section headings:** always `font-black`.
 - **Card titles** in pillar/feature grids: `text-orange-500`.
