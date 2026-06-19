@@ -139,7 +139,7 @@ export function ScheduleFollowupModal({ reviewId, onClose }: Props) {
           <button
             type="submit"
             disabled={busy}
-            className="px-5 py-2 bg-accent hover:bg-accent-hover disabled:bg-orange-700 disabled:cursor-wait text-white text-sm font-semibold rounded-lg transition-colors"
+            className="px-5 py-2 bg-accent hover:bg-accent-hover disabled:bg-accent-hover disabled:cursor-wait text-white text-sm font-semibold rounded-lg transition-colors"
           >
             {busy ? 'Scheduling…' : 'Schedule follow-up'}
           </button>

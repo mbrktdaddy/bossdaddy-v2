@@ -464,7 +464,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
                   }
                   setAffiliateUrl(buildAmazonAffiliateUrl(asin, amazonAssociateTag))
                 }}
-                className="text-xs px-3 py-1.5 bg-orange-700/60 hover:bg-accent/60 text-orange-200 font-semibold rounded-lg transition-colors shrink-0"
+                className="text-xs px-3 py-1.5 bg-accent/40 hover:bg-accent/60 text-orange-200 font-semibold rounded-lg transition-colors shrink-0"
                 title={`https://www.amazon.com/dp/${asin.trim().toUpperCase()}?tag=${amazonAssociateTag}`}
               >
                 {affiliateUrl.trim() ? '↻ Rebuild URL from ASIN' : 'Build affiliate URL'}

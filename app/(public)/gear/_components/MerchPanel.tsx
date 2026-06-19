@@ -28,7 +28,7 @@ export async function MerchPanel() {
   return (
     <section id="merch" className="relative my-14 scroll-mt-20">
       {/* Architectural top-rule — fades at edges, branded */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-600/50 to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
 
       <div className="pt-12">
         {/* Section opener — vertical orange rule + eyebrow + h2 */}

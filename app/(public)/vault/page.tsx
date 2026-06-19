@@ -93,7 +93,7 @@ export default async function VaultLandingPage({ searchParams }: Props) {
               >
                 {t.label}
                 <span className={`text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-full ${
-                  isActive ? 'bg-orange-700 text-orange-100' : 'bg-surface-raised text-prose-faint'
+                  isActive ? 'bg-accent text-white' : 'bg-surface-raised text-prose-faint'
                 }`}>
                   {count}
                 </span>

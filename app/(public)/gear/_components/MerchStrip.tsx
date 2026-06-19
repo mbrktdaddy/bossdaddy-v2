@@ -26,7 +26,7 @@ export async function MerchStrip() {
   return (
     <section className="relative my-12">
       {/* Branded top-rule — same architectural cue as the full MerchPanel */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-600/50 to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
       <div className="pt-8">
         <div className="flex items-end justify-between gap-3 mb-4">
           <div className="flex items-stretch gap-3">

@@ -123,7 +123,7 @@ export default async function CollectionEmbed({ slug }: Props) {
                     ) : null}
                     {badge && (
                       <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-zinc-900/85 to-transparent px-1.5 py-1">
-                        <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-orange-700 leading-tight line-clamp-1">
+                        <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-accent leading-tight line-clamp-1">
                           {badge}
                         </p>
                       </div>

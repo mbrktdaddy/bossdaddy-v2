@@ -134,7 +134,7 @@ function AssetCard({
         {productName && (
           <div className="absolute bottom-0 left-0 right-0 px-2 py-1 bg-zinc-900/70">
             <p className="text-[10px] text-accent-text-soft font-semibold truncate">
-              {asset.is_primary && <span className="text-orange-700">★ </span>}
+              {asset.is_primary && <span className="text-accent">★ </span>}
               {asset.label ? `${asset.label} · ${productName}` : productName}
             </p>
           </div>

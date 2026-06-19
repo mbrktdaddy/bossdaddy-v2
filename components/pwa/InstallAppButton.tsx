@@ -46,9 +46,9 @@ export default function InstallAppButton({ variant = 'card', className = '' }: P
         <button
           type="button"
           onClick={handleClick}
-          className={`w-full flex items-center gap-2 text-sm font-medium text-zinc-300 hover:text-zinc-50 hover:bg-zinc-700 transition-colors min-h-[44px] ${className || 'px-3 py-2.5 rounded-lg'}`}
+          className={`w-full flex items-center gap-2 text-sm font-medium text-prose-muted hover:text-prose hover:bg-zinc-700 transition-colors min-h-[44px] ${className || 'px-3 py-2.5 rounded-lg'}`}
         >
-          <svg className="w-4 h-4 text-zinc-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden>
+          <svg className="w-4 h-4 text-prose-faint shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" />
           </svg>
           {LABELS.app.short}

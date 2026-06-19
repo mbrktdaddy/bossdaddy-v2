@@ -115,7 +115,7 @@ export default function AddToCartForm({ variants }: { variants: Variant[] }) {
           added
             ? 'bg-green-700 text-white cursor-default'
             : selected?.in_stock
-            ? 'bg-accent hover:bg-accent-hover active:bg-orange-700 text-white disabled:opacity-60'
+            ? 'bg-accent hover:bg-accent-hover active:bg-accent-hover text-white disabled:opacity-60'
             : 'bg-surface-raised text-prose-faint cursor-not-allowed'
         }`}
       >

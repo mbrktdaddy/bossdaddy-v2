@@ -672,7 +672,7 @@ function ContenderCard({
         )}
         {winsCategory && (
           <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-zinc-900/85 via-zinc-900/40 to-transparent px-2.5 py-2">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-orange-700 leading-tight">{winsCategory}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-accent leading-tight">{winsCategory}</p>
           </div>
         )}
       </div>

@@ -59,7 +59,7 @@ export default function StickyMobileCta({ product }: Props) {
     >
       <div className="flex items-center gap-3">
         {product.image_url && (
-          <div className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-zinc-800 border border-zinc-700">
+          <div className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-surface-raised border border-strong">
             <Image
               src={product.image_url}
               alt={product.name}
@@ -77,7 +77,7 @@ export default function StickyMobileCta({ product }: Props) {
           target="_blank"
           rel={rel}
           data-product-slug={product.slug}
-          className="shrink-0 px-4 py-2.5 bg-accent hover:bg-accent-hover active:bg-orange-700 text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
+          className="shrink-0 px-4 py-2.5 bg-accent hover:bg-accent-hover active:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
         >
           Check Price
         </a>

@@ -544,7 +544,7 @@ export function PickForm({ pick, initialItems }: Props) {
               type="button"
               onClick={() => callIntroAI(false)}
               disabled={aiBusy || items.length < 2}
-              className="text-xs px-3 py-1.5 bg-orange-700/60 hover:bg-accent/60 disabled:opacity-40 text-orange-200 font-semibold rounded-lg transition-colors min-h-[32px]"
+              className="text-xs px-3 py-1.5 bg-accent/40 hover:bg-accent/60 disabled:opacity-40 text-orange-200 font-semibold rounded-lg transition-colors min-h-[32px]"
               title={items.length < 2 ? 'Add at least 2 reviews first' : 'Generate intro with AI'}
             >
               {aiBusy && !refineInstruction ? '✨ Generating…' : introHtml.trim() ? '↻ Regenerate with AI' : '✨ Generate with AI'}
@@ -914,7 +914,7 @@ export function PickForm({ pick, initialItems }: Props) {
               type="button"
               onClick={callFillAI}
               disabled={fillBusy}
-              className="text-xs px-3 py-2 bg-orange-700/60 hover:bg-accent/60 disabled:opacity-40 text-orange-200 font-semibold rounded-lg transition-colors min-h-[36px]"
+              className="text-xs px-3 py-2 bg-accent/40 hover:bg-accent/60 disabled:opacity-40 text-orange-200 font-semibold rounded-lg transition-colors min-h-[36px]"
               title="Generate per-pick blurbs, role labels, and flavor-specific FAQs in one shot"
             >
               {fillBusy ? '✨ Filling…' : '✨ Fill blurbs, roles & FAQs'}

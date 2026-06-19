@@ -122,7 +122,7 @@ export default async function InMotionTicker() {
               <span key={`${item.kind}:${item.id}`} className="shrink-0 inline-flex items-center gap-2">
                 <Link
                   href={href}
-                  className="inline-flex items-center gap-1.5 text-zinc-300 hover:text-zinc-50 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-prose-muted hover:text-prose transition-colors"
                 >
                   <StatusIcon kind={meta.kind} className="w-3.5 h-3.5 shrink-0 text-copper" />
                   <span className="text-copper/90 font-semibold tracking-wide">{meta.label}:</span>
