@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
+import { ARTICLE_SURFACE_CLASS } from '@/lib/article-surface'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import ProductCtaCard from '@/components/ProductCtaCard'
 import CollectionEmbed from '@/components/CollectionEmbed'
@@ -260,7 +261,7 @@ export default async function GuidePage({ params }: Props) {
         <div className="lg:grid lg:grid-cols-[1fr_280px] lg:gap-10 lg:items-start">
 
           {/* Main column */}
-          <div className="min-w-0">
+          <div className={`min-w-0 ${ARTICLE_SURFACE_CLASS}`}>
 
             {/* TOC — mobile/tablet only; desktop version lives in sidebar */}
             <div className="mb-10 lg:hidden">

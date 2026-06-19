@@ -66,9 +66,9 @@ export const metadata: Metadata = {
 }
 
 const BENCH_STATUSES: Record<string, { label: string; color: string }> = {
-  testing:     { label: 'Testing now',  color: 'text-green-600' },
-  queued:      { label: 'Up next',      color: 'text-blue-600' },
-  considering: { label: 'Considering',  color: 'text-amber-600' },
+  testing:     { label: 'Testing now',  color: 'text-green-400' },
+  queued:      { label: 'Up next',      color: 'text-blue-400' },
+  considering: { label: 'Considering',  color: 'text-amber-400' },
 }
 
 const PILLARS = [

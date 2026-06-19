@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
+import { ARTICLE_SURFACE_CLASS } from '@/lib/article-surface'
 import ShareButtons from '@/components/ShareButtons'
 import RatingScore from '@/components/RatingScore'
 import VerdictCard from '@/components/reviews/VerdictCard'
@@ -269,7 +270,7 @@ export default async function ReviewPage({ params }: Props) {
         <div className="flex flex-col xl:flex-row gap-12 xl:items-start">
 
         {/* ── Main content ──────────────────────────────────────────────── */}
-        <main className="flex-1 min-w-0">
+        <main className={`flex-1 min-w-0 ${ARTICLE_SURFACE_CLASS}`}>
 
         {/* Back to original — only on follow-up pages */}
         {isFollowup && parentNode?.slug && (
