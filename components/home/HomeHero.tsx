@@ -9,7 +9,7 @@ import Link from 'next/link'
 
 const MANIFESTO = ['Real Dads.', 'Smart Tools.', 'Better Decisions.']
 const SUBHEAD =
-  'Honest reviews, practical guides, and a growing set of tools — built by a dad in the trenches, not a brand chasing clicks.'
+  'Honest reviews, practical guides, and a growing set of tools — built by a dad in the trenches.'
 const PROOF = 'Zero sponsors. Zero fluff.'
 
 function Manifesto({ className = '' }: { className?: string }) {
