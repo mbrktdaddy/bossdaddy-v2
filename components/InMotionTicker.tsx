@@ -114,7 +114,7 @@ export default async function InMotionTicker() {
       <div className="max-w-6xl mx-auto px-6 py-2">
         <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide text-xs whitespace-nowrap">
           <span className="shrink-0 text-copper font-black uppercase tracking-[0.18em]">In Motion</span>
-          <span aria-hidden className="shrink-0 text-zinc-700">·</span>
+          <span aria-hidden className="shrink-0 text-prose-faint">·</span>
           {items.map((item, i) => {
             const meta = STATUS_META[item.status] ?? STATUS_META.testing
             const href = item.kind === 'review' ? `/reviews/${item.slug}` : `/bench/${item.slug}`
@@ -129,12 +129,12 @@ export default async function InMotionTicker() {
                   <span className="font-medium">{item.title}</span>
                 </Link>
                 {i < items.length - 1 && (
-                  <span aria-hidden className="text-zinc-700">·</span>
+                  <span aria-hidden className="text-prose-faint">·</span>
                 )}
               </span>
             )
           })}
-          <span aria-hidden className="shrink-0 text-zinc-700">·</span>
+          <span aria-hidden className="shrink-0 text-prose-faint">·</span>
           <Link
             href="/bench"
             title={LABELS.bench.tagline}
