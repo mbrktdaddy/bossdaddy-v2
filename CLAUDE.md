@@ -6,6 +6,8 @@
 
 > **Brand & Design System**: see [`docs/brand-guide.md`](docs/brand-guide.md) — authoritative source for colors, typography, components, layout, and design decisions. Update that file when design changes; this file covers engineering rules.
 
+> **Project Brief (living doc)**: see [`docs/boss-daddy-claude-project.md`](docs/boss-daddy-claude-project.md) — the high-level mission, brand voice, roadmap snapshot, and strategy context. Doubles as the Claude Project knowledge file used from the phone app. Consult it for strategy/voice/positioning questions; keep its §6 roadmap snapshot current as work ships.
+
 ## Stack
 - **Framework**: Next.js 16 App Router, TypeScript strict
 - **Auth + DB**: Supabase (`@supabase/ssr`) with Row-Level Security
