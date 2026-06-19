@@ -34,15 +34,30 @@ function slugify(name) {
     .replace(/^-|-$/g, '')
 }
 
+// Printful names sync variants as "Product Name / Color / Size" (color and/or
+// size segments are optional). Split ONLY on "/" — splitting on "-" too would
+// shred the product name (e.g. "Boss Daddy- Read the directions…") and mis-read
+// the color. The size is the last segment when it matches a size token; the
+// color is whatever sits between the product name and the size.
+const SIZE_TOKEN = /^(XS|S|M|L|XL|2XL|3XL|4XL|5XL|XXL|XXXL|One Size|OS)$/i
+
+function variantSegments(variantName) {
+  return variantName.split('/').map((s) => s.trim()).filter(Boolean)
+}
+
 function parseSize(variantName) {
-  const m = variantName.match(/\b(XS|S|M|L|XL|2XL|3XL|4XL|5XL|One Size)\b/i)
-  return m ? m[1].toUpperCase() : null
+  const parts = variantSegments(variantName)
+  const last = parts[parts.length - 1]
+  return last && SIZE_TOKEN.test(last) ? last : null
 }
 
 function parseColor(variantName) {
-  const parts = variantName.split(/[\/\-]/).map((s) => s.trim())
-  const sizePattern = /^(XS|S|M|L|XL|2XL|3XL|4XL|5XL|One Size|\d+)$/i
-  return parts.find((p) => p.length > 0 && !sizePattern.test(p)) ?? null
+  const parts = variantSegments(variantName)
+  if (parts.length < 2) return null
+  const last = parts[parts.length - 1]
+  // Drop the product name (first segment) and the trailing size (if present).
+  const colorParts = parts.slice(1, SIZE_TOKEN.test(last) ? -1 : undefined)
+  return colorParts.length ? colorParts.join(' / ') : null
 }
 
 async function syncMerch(sp, images = []) {
@@ -139,11 +154,15 @@ async function run() {
       const sp = detail.sync_product
       const variants = detail.sync_variants.filter((v) => v.synced && !v.is_ignored)
 
-      // Collect all unique preview URLs from every variant's files
+      // Collect garment mockups only. Each variant's `files` mixes PRINT files
+      // (type 'front_large', 'label_outside', placement names, etc.) whose
+      // preview_url is the raw artwork, with the rendered mockup (type
+      // 'preview'). Take only 'preview' — otherwise the design source images
+      // leak into the product gallery. Dedup yields one mockup per color.
       const images = [...new Set(
         variants.flatMap((v) =>
           (v.files ?? [])
-            .filter((f) => f.preview_url && f.type !== 'default')
+            .filter((f) => f.type === 'preview' && f.preview_url)
             .map((f) => f.preview_url)
         )
       )]
