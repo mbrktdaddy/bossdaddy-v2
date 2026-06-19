@@ -53,9 +53,9 @@ export default function VaultCard({ col }: Props) {
   return (
     <Link
       href={hrefFor(col)}
-      className="group flex flex-col bg-surface border border-soft rounded-2xl overflow-hidden shadow-md shadow-black/[0.04] hover:shadow-lg hover:shadow-black/[0.08] hover:-translate-y-0.5 transition-all duration-200"
+      className="group flex flex-col bg-surface border border-soft rounded-2xl overflow-hidden hover:border-strong hover:-translate-y-0.5 transition-all duration-200"
     >
-      <div className="h-1 bg-drama" />
+      <div className="h-1 bg-strong" />
       <div className="relative h-40 bg-surface-raised">
         {col.hero_image_url && (
           <Image

@@ -12,8 +12,8 @@ const STATS: Stat[] = [
 
 export default function TrustBand() {
   return (
-    <section className="bg-drama border-t-[3px] border-accent">
-      <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-zinc-800">
+    <section className="bg-surface-raised border-t-[3px] border-t-accent border-b border-b-soft">
+      <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-strong">
         {STATS.map((s) => (
           <div key={s.label} className="px-2 md:px-8 py-5 md:py-0 text-center">
             <div

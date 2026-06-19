@@ -75,6 +75,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-theme="dark"
       className={`${geistSans.variable} ${montserrat.variable} ${sourceSerif4.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">

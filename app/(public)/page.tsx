@@ -12,6 +12,7 @@ import GuideRow from '@/components/GuideRow'
 import TrustBand from '@/components/TrustBand'
 import EmailCaptureSection from '@/components/EmailCaptureSection'
 import PipelineCounter from '@/components/PipelineCounter'
+import HomeHero from '@/components/home/HomeHero'
 import CodeRedirect from './_components/CodeRedirect'
 import { LABELS } from '@/lib/labels'
 import type { Metadata } from 'next'
@@ -98,7 +99,7 @@ const PILLARS = [
   {
     href: '/tools',
     title: 'Boss Tools',
-    blurb: 'Weekends Until, Savings & more — free.',
+    blurb: 'Weekends Until, Savings & more.',
     cta: 'Try',
     icon: (
       <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
@@ -106,13 +107,19 @@ const PILLARS = [
   },
 ]
 
+// Static tool count — tools aren't DB-backed (Weekends Until, Savings,
+// Dad Math, The Boss). Update when a tool is added/removed.
+const TOOLS_COUNT = 4
+
 // Centered, transparent pillar door. Icon scales up on desktop where it has
 // room to anchor the column; tighter on mobile where the cards stack.
 function PillarCard({
   pillar,
+  count,
   className = '',
 }: {
   pillar: (typeof PILLARS)[number]
+  count: string
   className?: string
 }) {
   return (
@@ -137,6 +144,10 @@ function PillarCard({
       <h2 className="text-sm sm:text-lg font-black text-prose group-hover:text-accent transition-colors leading-tight">
         {pillar.title}
       </h2>
+      {/* Live count — the "alive / growing" signal. Shown on mobile too. */}
+      <span className="text-[10px] sm:text-[11px] font-bold text-accent uppercase tracking-wider tabular-nums mt-1">
+        {count}
+      </span>
       <p className="hidden sm:block text-sm text-prose-faint mt-2 leading-relaxed max-w-[32ch]">
         {pillar.blurb}
       </p>
@@ -159,6 +170,7 @@ export default async function HomePage() {
     { data: collectionsRaw },
     { data: guidesRaw },
     { count: reviewCountRaw },
+    { count: guidesCountRaw },
   ] = await Promise.all([
     supabase
       .from('reviews')
@@ -198,6 +210,10 @@ export default async function HomePage() {
       .from('reviews')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'approved').eq('is_visible', true),
+    supabase
+      .from('guides')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'approved').eq('is_visible', true),
   ])
 
   const topRated: Review[] = (topRatedRaw ?? []) as Review[]
@@ -207,6 +223,14 @@ export default async function HomePage() {
   const bench: BenchItem[] = (benchRaw ?? []) as BenchItem[]
   const guides: Guide[] = (guidesRaw ?? []) as Guide[]
   const reviewCount = reviewCountRaw ?? 0
+  const guidesCount = guidesCountRaw ?? 0
+
+  // Live counts for the wayfinding doors — keyed by href.
+  const doorCounts: Record<string, string> = {
+    '/reviews': `${reviewCount} tested`,
+    '/guides': `${guidesCount} published`,
+    '/tools': `${TOOLS_COUNT} free`,
+  }
 
   // Pick a diverse Vault trio — comparison → best_of → general → stack → gift_guide
   // until we hit 3. Preserves the same selection logic as the prior homepage.
@@ -224,52 +248,24 @@ export default async function HomePage() {
         <CodeRedirect />
       </Suspense>
 
-      {/* ── BRAND HERO — the page's sole H1. States who Boss Daddy is for and
-            what's here, then offers three doors (reviews / guides / tools)
-            that mirror the subhead 1:1. The trust band + /about carry the
-            proof; the hero carries the positioning. */}
+      {/* ── HERO — full-bleed Photo hero. Carries the manifesto + positioning;
+            the wayfinding strip below carries orientation + live proof. */}
+      <HomeHero />
+
+      {/* ── WAYFINDING STRIP — the handoff from emotion (hero) to orientation.
+            A live pipeline proof line + the three pillar doors (Reviews /
+            Guides / Tools) as a stat-backed editorial band: 2px orange top
+            rule, hairline-split columns, live counts. Always 3-up, compact on
+            mobile, never hidden in a slider. */}
       <section className="bg-background border-b border-soft">
-        <div className="max-w-5xl mx-auto px-6 pt-14 md:pt-20">
-          <div className="text-center max-w-3xl mx-auto">
-            {/* Each phrase is nowrap so it never breaks mid-phrase. Desktop
-                (md+) forces 2 lines (Real Dads. Smart Tools. / Better
-                Decisions.); narrow mobile wraps between phrases → 3 clean
-                intact lines. */}
-            <h1 className="text-3xl md:text-5xl font-black text-prose leading-[1.05] tracking-tight mb-5">
-              <span className="whitespace-nowrap">Real Dads.</span>{' '}
-              <span className="whitespace-nowrap">Smart Tools.</span>{' '}
-              <br className="hidden md:block" aria-hidden />
-              <span className="whitespace-nowrap text-accent">Better Decisions.</span>
-            </h1>
-            <p className="text-base md:text-lg text-prose-muted leading-[1.7] max-w-2xl mx-auto">
-              Built for real dads by a real dad in the trenches — Boss Daddy is where you&apos;ll find honest reviews, practical guides, and boss tools.{' '}
-              <span className="text-prose font-semibold">Zero sponsors. Zero fluff.</span>
-            </p>
-            <Link
-              href="/about"
-              className="inline-flex items-center gap-1.5 mt-6 text-sm font-bold text-accent hover:text-accent-hover transition-colors"
-            >
-              Who is Boss Daddy?
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </Link>
-
-            {/* Live proof line — a real, moving testing pipeline. Sits with the
-                positioning copy instead of as a competing pre-hero band. */}
-            <PipelineCounter className="mt-8" align="center" />
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="pt-7 flex justify-center">
+            <PipelineCounter align="center" />
           </div>
-
-          {/* The Index — three doors as an editorial band, not a boxy shelf.
-              Bounded by a 2px orange top rule (brand section-border device,
-              echoes the orange payoff line) and the section's bottom border;
-              columns split by hairlines, no card frame. Always 3-up and fully
-              visible (primary nav — never hidden in a slider); compact on
-              mobile. No community door — account-gated. */}
-          <div className="mt-12 md:mt-16 border-t-2 border-accent">
+          <div className="mt-6 border-t-2 border-accent">
             <div className="grid grid-cols-3 divide-x divide-soft">
               {PILLARS.map((p) => (
-                <PillarCard key={p.href} pillar={p} />
+                <PillarCard key={p.href} pillar={p} count={doorCounts[p.href]} />
               ))}
             </div>
           </div>

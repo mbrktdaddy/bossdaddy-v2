@@ -436,7 +436,7 @@ export default async function ReviewPage({ params }: Props) {
         <div className="min-w-0 w-full">
           <ImageLightbox className="bd-content">
             <div
-              className="bd-editorial prose prose-lg prose-zinc prose-orange mx-auto max-w-[68ch]
+              className="bd-editorial prose prose-lg prose-invert prose-orange mx-auto max-w-[68ch]
                 prose-headings:font-black prose-headings:tracking-tight prose-headings:font-sans prose-headings:leading-[1.15] prose-headings:text-prose
                 prose-h2:text-2xl prose-h2:mt-14 prose-h2:mb-5
                 prose-h3:mt-10 prose-h3:mb-3

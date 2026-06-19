@@ -24,7 +24,7 @@ export default function DroppedCard({ review }: Props) {
   return (
     <Link
       href={`/reviews/${review.slug}`}
-      className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden shadow-md shadow-black/[0.04] hover:shadow-lg hover:shadow-black/[0.08] hover:-translate-y-0.5 transition-all duration-200"
+      className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden hover:border-strong hover:-translate-y-0.5 transition-all duration-200"
     >
       <div className="relative h-32 bg-surface-raised shrink-0">
         {review.image_url && (

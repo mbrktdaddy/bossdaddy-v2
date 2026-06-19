@@ -2,10 +2,13 @@
 @plugin "@tailwindcss/typography";
 
 /* ─────────────────────────────────────────────────────────────────────────
-   BOSS DADDY DESIGN SYSTEM — 2026-05-25 zinc-light direction
-   Locked palette: orange + zinc neutrals. Light canvas with disciplined
-   dark moments (header, trust bands, footer). Orange is the ONLY accent.
-   Status colors (green/red) reserved for chips + form validation only.
+   BOSS DADDY DESIGN SYSTEM — 2026-06 DARK-FIRST direction
+   Dark-first everywhere via data-theme="dark" on <html> (see app/layout.tsx).
+   The :root values below are the LIGHT opt-in base (kept for emails/print);
+   the [data-theme="dark"] block is the shipping palette. Accent = HOT orange
+   (#E55A1A) on dark. Orange is the ONLY accent. Status colors (green/red)
+   reserved for chips + form validation only.
+   See docs/dark-makeover-rollout-plan.md.
    ───────────────────────────────────────────────────────────────────────── */
 :root {
   --background: #ffffff;       /* white — page canvas (white-canvas editorial direction) */
@@ -91,7 +94,12 @@
   --bd-error:   #ef4444;          /* red-500 */
   --bd-warn:    #f59e0b;          /* amber-500 */
 
-  --bd-orange-text: #e87030;      /* orange-400 — per CLAUDE.md design rule for dark bg */
+  /* Dark-first makeover (2026-06): accent shifts to HOT (orange-500) — pops
+     harder on near-black than the core #CC5500, which can read muddy on black.
+     Core #CC5500 remains the light-canvas brand value. */
+  --bd-orange:       #E55A1A;     /* orange-500 — buttons, CTAs, active states */
+  --bd-orange-hover: #CC5500;     /* core orange — darker hover */
+  --bd-orange-text:  #f48a4a;     /* orange-400 — inline links / eyebrows on dark */
   /* On dark, accent-tint cannot use a deep orange — orange-950 reads as
      brown, which violates the brand discipline. Match surface-raised
      instead; the elevated neutral surface IS the "brand territory" signal
@@ -224,9 +232,10 @@ h1, h2, h3, h4 {
   display: none;
 }
 
-/* ── Editorial serif — article/review body prose only ─────────────────── */
-.bd-editorial p,
-.bd-editorial li,
+/* ── Editorial serif — kept for blockquotes / pull-quotes ONLY.
+   Dark-first makeover: body copy is SANS for legibility on dark; the serif
+   stays as an editorial-warmth accent in pull-quotes. Inline-link styling
+   below is independent of font, so sans body keeps orange links. ───────── */
 .bd-editorial blockquote {
   font-family: var(--font-editorial);
 }
@@ -312,9 +321,13 @@ h1, h2, h3, h4 {
   text-align: center;
 }
 
-/* ── Lightbox-capable inline image cursor hint ───────────────────────── */
+/* ── Inline article images — framed + rounded so white-background product
+   shots don't glare as bright rectangles on the dark canvas (dark-first
+   makeover). Lightbox-capable images also get the zoom cursor. ─────────── */
 .bd-content figure:not(.bd-image-placeholder) img {
   cursor: zoom-in;
+  border-radius: 0.75rem;
+  border: 1px solid var(--bd-border);
 }
 
 /* ── Code blocks in review/article body ──────────────────────────────── */
