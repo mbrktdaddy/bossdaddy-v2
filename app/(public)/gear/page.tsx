@@ -69,7 +69,7 @@ export default async function GearPage({ searchParams }: Props) {
       .eq('is_visible', true),
     supabase
       .from('collections')
-      .select('id, slug, title, hero_image_url, occasion')
+      .select('id, slug, title, hero_image_url, occasion, collection_items(count)')
       .eq('collection_type', 'gift_guide')
       .eq('is_visible', true)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -115,6 +115,20 @@ export default async function GearPage({ searchParams }: Props) {
   const giftPickMap = new Map(
     (giftPickLists ?? []).map((p) => [p.occasion, p])
   )
+  // Only surface gift guides that actually have picks — an empty collection
+  // routes to a "Coming Soon" dead-end, which we don't want in this prime slot.
+  // The section auto-collapses to a slim link when nothing is live yet.
+  const populatedOccasions = new Set(
+    (giftPickLists ?? [])
+      .filter((p) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const ci = (p as any).collection_items
+        const count = Array.isArray(ci) ? (ci[0]?.count ?? 0) : 0
+        return count > 0
+      })
+      .map((p) => p.occasion)
+  )
+  const liveSeasonalOccasions = seasonalOccasions.filter((o) => populatedOccasions.has(o.value))
 
   const categoryCount = new Set((allApproved ?? []).map((r) => r.category)).size
   const bossPicks     = topPicks.filter((r) => (r.rating ?? 0) >= 9).length
@@ -228,6 +242,7 @@ export default async function GearPage({ searchParams }: Props) {
       {!category && (
         <>
           {/* ── Shop by Occasion ─────────────────────────────────────────── */}
+          {liveSeasonalOccasions.length > 0 ? (
           <section className="mb-16">
             <SectionHeader
               label="Gift Guides"
@@ -237,7 +252,7 @@ export default async function GearPage({ searchParams }: Props) {
 
             {/* Mobile: horizontal scroll */}
             <div className="sm:hidden flex gap-3 overflow-x-auto scrollbar-hide -mx-6 px-6 pb-1">
-              {seasonalOccasions.map((occ) => {
+              {liveSeasonalOccasions.map((occ) => {
                 const pick = giftPickMap.get(occ.value)
                 return (
                   <Link
@@ -262,7 +277,7 @@ export default async function GearPage({ searchParams }: Props) {
 
             {/* Desktop: 3-col grid */}
             <div className="hidden sm:grid grid-cols-3 gap-4">
-              {seasonalOccasions.map((occ) => {
+              {liveSeasonalOccasions.map((occ) => {
                 const pick = giftPickMap.get(occ.value)
                 return (
                   <Link
@@ -293,6 +308,21 @@ export default async function GearPage({ searchParams }: Props) {
               </Link>
             </div>
           </section>
+          ) : (
+            /* No live gift guides yet — collapse to a single slim entry point
+               instead of a grid of "Coming Soon" dead-ends. Self-heals into the
+               full grid above once any seasonal guide gets its first pick. */
+            <Link
+              href="/gifts"
+              className="group mb-16 flex items-center justify-between gap-4 rounded-xl border border-soft bg-surface px-5 py-4 hover:border-accent-border/40 hover:bg-surface-raised transition-colors"
+            >
+              <div>
+                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Gift Guides</p>
+                <p className="text-sm font-bold text-prose">Dad-tested gift guides for every occasion</p>
+              </div>
+              <span className="shrink-0 text-sm font-semibold text-accent-text-soft group-hover:text-accent transition-colors">Explore →</span>
+            </Link>
+          )}
 
           {/* ── Featured Collection ──────────────────────────────────────── */}
           {featuredPick && (

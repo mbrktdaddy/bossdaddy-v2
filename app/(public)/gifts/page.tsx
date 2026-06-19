@@ -20,21 +20,28 @@ export const metadata: Metadata = {
 export default async function GiftsIndexPage() {
   const supabase = await createClient()
 
-  // Find which occasions have published gift guides so we can show "live" indicators
+  // Find which occasions have published gift guides so we can show status
+  // indicators. A guide only counts as "live" once it has at least one pick —
+  // an empty collection still reads as "Coming Soon", matching the detail page
+  // empty state. We pull the item count inline to avoid an N+1 per occasion.
   const { data: liveGifts } = await supabase
     .from('collections')
-    .select('occasion, slug, title, hero_image_url, published_at')
+    .select('occasion, slug, title, hero_image_url, published_at, collection_items(count)')
     .eq('collection_type', 'gift_guide')
     .eq('is_visible', true)
     .order('published_at', { ascending: false })
 
-  const liveByOccasion = new Map<string, { slug: string; title: string; hero_image_url: string | null }>()
+  const liveByOccasion = new Map<string, { slug: string; title: string; hero_image_url: string | null; populated: boolean }>()
   for (const g of (liveGifts ?? [])) {
+    // Keep the latest published collection per occasion (rows arrive newest
+    // first), mirroring the detail page's single-collection selection.
     if (g.occasion && !liveByOccasion.has(g.occasion)) {
+      const count = Array.isArray(g.collection_items) ? (g.collection_items[0]?.count ?? 0) : 0
       liveByOccasion.set(g.occasion, {
         slug: g.slug,
         title: g.title,
         hero_image_url: g.hero_image_url ?? null,
+        populated: count > 0,
       })
     }
   }
@@ -62,7 +69,8 @@ export default async function GiftsIndexPage() {
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {OCCASIONS.filter((o) => o.group === group.id).map((occ) => {
-              const live = liveByOccasion.get(occ.value)
+              const guide = liveByOccasion.get(occ.value)
+              const populated = guide?.populated ?? false
               return (
                 <Link
                   key={occ.value}
@@ -70,9 +78,9 @@ export default async function GiftsIndexPage() {
                   className="group flex flex-col bg-surface border border-soft hover:bg-surface-raised/90 hover:border-accent-border/40 hover:-translate-y-1 rounded-xl overflow-hidden shadow-md shadow-black/5 hover:shadow-lg hover:shadow-black/10 transition-all"
                 >
                   <div className="relative aspect-[4/3] bg-surface-sunken flex items-center justify-center">
-                    {live?.hero_image_url ? (
+                    {guide?.hero_image_url ? (
                       <Image
-                        src={live.hero_image_url}
+                        src={guide.hero_image_url}
                         alt={occ.label}
                         fill
                         className="object-cover"
@@ -81,13 +89,17 @@ export default async function GiftsIndexPage() {
                     ) : (
                       <OccasionIcon value={occ.value} className="w-12 h-12 text-accent-text/70" />
                     )}
-                    {live && (
-                      <div className="absolute top-2 right-2">
+                    <div className="absolute top-2 right-2">
+                      {populated ? (
                         <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-accent text-white">
                           Live
                         </span>
-                      </div>
-                    )}
+                      ) : (
+                        <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-chrome/80 text-prose-faint border border-soft backdrop-blur-sm">
+                          Coming Soon
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className="p-4 flex-1 flex flex-col">
                     <p className="text-sm font-bold text-prose group-hover:text-accent-text-soft transition-colors leading-snug mb-1">
