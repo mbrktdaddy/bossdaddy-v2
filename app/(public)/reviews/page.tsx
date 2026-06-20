@@ -9,7 +9,7 @@ import ReviewsGrid from './_components/ReviewsGrid'
 import FeaturedReviewCard from '@/components/FeaturedReviewCard'
 import BenchStrip from '@/components/BenchStrip'
 import AskTheBoss from '@/components/AskTheBoss'
-import { ogImageUrl } from '@/lib/og'
+import { ogImageUrl, OG_SITE } from '@/lib/og'
 const PER_PAGE = 12
 import type { ReviewRow } from './actions'
 import type { Metadata } from 'next'
@@ -20,6 +20,7 @@ export const metadata: Metadata = {
   title: 'Dad-Tested Product Reviews',
   description: 'Every product on Boss Daddy Life is bought with our own money, used in real life, and rated honestly. Browse our reviews across tools, grills, outdoor, tech, and more.',
   openGraph: {
+    ...OG_SITE,
     title: 'Dad-Tested Product Reviews — Boss Daddy Life',
     description: 'Every product bought with our own money, used in real life, and rated honestly. No sponsored posts. No fluff.',
     images: [{ url: ogImageUrl({ title: 'Dad-Tested Product Reviews', type: 'review' }), width: 1200, height: 630 }],

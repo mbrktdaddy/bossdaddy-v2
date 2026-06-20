@@ -9,6 +9,7 @@
 // Boss Daddy headline. No Plaid. No scenarios. No AI. No spouse send.
 
 import type { Metadata } from 'next'
+import { OG_SITE } from '@/lib/og'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { getKids } from '@/lib/dad-tools/kid-actions'
 import { LABELS } from '@/lib/labels'
@@ -40,6 +41,7 @@ export const metadata: Metadata = {
   description: LABELS.tools.dadMath.metaDescription,
   alternates:  { canonical: '/tools/dad-math' },
   openGraph: {
+    ...OG_SITE,
     title:       LABELS.tools.dadMath.pageTitle,
     description: LABELS.tools.dadMath.metaDescription,
   },

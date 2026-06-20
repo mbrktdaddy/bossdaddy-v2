@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import { OG_SITE } from '@/lib/og'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
@@ -37,6 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: cat.description,
     alternates: { canonical: `${siteUrl}/reviews/category/${slug}` },
     openGraph: {
+      ...OG_SITE,
       title: `${cat.label} Reviews | Boss Daddy`,
       description: cat.description,
       url: `${siteUrl}/reviews/category/${slug}`,

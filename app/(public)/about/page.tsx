@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CATEGORIES } from '@/lib/categories'
-import { ogImageUrl } from '@/lib/og'
+import { ogImageUrl, OG_SITE } from '@/lib/og'
 import CategoryIcon from '@/components/CategoryIcon'
 import { createClient } from '@/lib/supabase/server'
 import { EmailSignup } from '@/components/EmailSignup'
@@ -13,6 +13,7 @@ export const metadata: Metadata = {
  description: 'The real story behind Boss Daddy Life. A first-time dad on a mission to be the best version of himself — and help other dads do the same.',
  alternates: { canonical: '/about' },
  openGraph: {
+   ...OG_SITE,
    title: 'About Boss Daddy Life',
    description: 'The real story behind Boss Daddy Life. A first-time dad on a mission to be the best version of himself — and help other dads do the same.',
    images: [{ url: ogImageUrl({ title: 'About Boss Daddy Life', type: 'guide' }), width: 1200, height: 630 }],

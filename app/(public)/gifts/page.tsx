@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
+import { OG_SITE } from '@/lib/og'
 import { createClient } from '@/lib/supabase/server'
 import { OCCASIONS, OCCASION_GROUPS } from '@/lib/gift-occasions'
 import OccasionIcon from '@/components/OccasionIcon'
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
   description: 'Honest gift guides for every holiday and occasion — Father\'s Day, Christmas, birthdays, weddings, and more. Every pick personally tested by a real dad.',
   alternates: { canonical: '/gifts' },
   openGraph: {
+    ...OG_SITE,
     title: 'Gift Guides — Boss Daddy Life',
     description: 'Honest gift guides for every occasion. Every pick dad-tested.',
   },

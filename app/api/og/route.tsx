@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
   const title = searchParams.get('title') ?? 'Boss Daddy Life'
   const type = searchParams.get('type') ?? 'review'
   const category = searchParams.get('category') ?? ''
+  const cta = searchParams.get('cta') ?? ''
 
   const typeLabel = type === 'guide' ? 'ARTICLE' : 'REVIEW'
   const categoryLabel = category
@@ -109,9 +110,26 @@ export async function GET(request: NextRequest) {
           }}
         >
           <span style={{ color: '#6b7280', fontSize: '16px' }}>bossdaddylife.com</span>
-          <span style={{ color: '#CC5500', fontSize: '15px', fontWeight: 700 }}>
-            Dad-Tested · Honestly Rated
-          </span>
+          {cta ? (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                backgroundColor: '#CC5500',
+                color: '#ffffff',
+                fontSize: '18px',
+                fontWeight: 700,
+                padding: '12px 24px',
+                borderRadius: '100px',
+              }}
+            >
+              {cta} →
+            </div>
+          ) : (
+            <span style={{ color: '#CC5500', fontSize: '15px', fontWeight: 700 }}>
+              Dad-Tested · Honestly Rated
+            </span>
+          )}
         </div>
       </div>
     ),

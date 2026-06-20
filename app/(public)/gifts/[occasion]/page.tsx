@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const occ = getOccasion(slug)
   if (!occ) return { title: 'Not Found' }
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
-  const ogImage = ogImageMeta({ title: occ.metaTitle, type: 'guide', base: siteUrl })
+  const ogImage = ogImageMeta({ title: occ.metaTitle, type: 'guide', base: siteUrl, cta: 'See the Gift Picks' })
   return {
     // `absolute` bypasses the root '%s | Boss Daddy' template — occ.metaTitle
     // already ends in "| Boss Daddy", so the template would double the brand

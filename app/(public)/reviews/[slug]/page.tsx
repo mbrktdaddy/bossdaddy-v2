@@ -83,7 +83,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   const canonicalUrl = `${siteUrl}/reviews/${slug}`
-  const ogImage = ogImageMeta({ title: data.title, type: 'review', updatedAt: data.updated_at, base: siteUrl })
+  const ogImage = ogImageMeta({ title: data.title, type: 'review', updatedAt: data.updated_at, base: siteUrl, cta: 'Read the Review' })
   const profile = Array.isArray(data.profiles) ? data.profiles[0] : (data.profiles as unknown as { username: string } | null)
   const authorName = profile?.username ?? 'Boss Daddy'
   const sectionLabel = getCategoryBySlug(data.category ?? '')?.label

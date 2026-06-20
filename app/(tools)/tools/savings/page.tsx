@@ -4,6 +4,7 @@
 
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { OG_SITE } from '@/lib/og'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { LABELS } from '@/lib/labels'
 import { getGoals } from '@/lib/dad-tools/savings-actions'
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
   description: LABELS.tools.savings.metaDescription,
   alternates:  { canonical: '/tools/savings' },
   openGraph: {
+    ...OG_SITE,
     title:       LABELS.tools.savings.pageTitle,
     description: LABELS.tools.savings.metaDescription,
   },

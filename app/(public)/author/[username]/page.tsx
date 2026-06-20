@@ -9,6 +9,7 @@ import BenchStrip from '@/components/BenchStrip'
 import PipelineCounter from '@/components/PipelineCounter'
 import MessageUserButton from '@/components/messages/MessageUserButton'
 import type { Metadata } from 'next'
+import { OG_SITE } from '@/lib/og'
 
 export const revalidate = 3600
 
@@ -41,6 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
    description: `Reviews and articles by @${username} on Boss Daddy Life.`,
    alternates: { canonical: `${siteUrl}/author/${username}` },
    openGraph: {
+     ...OG_SITE,
      title: `@${username} | Boss Daddy Life`,
      description: `Reviews and articles by @${username} on Boss Daddy Life.`,
      url: `${siteUrl}/author/${username}`,

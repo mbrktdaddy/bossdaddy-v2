@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { formatPrice, getMerchDisplayImage } from '@/lib/merch'
 import MerchProductView from './_components/MerchProductView'
-import { ogImageUrl } from '@/lib/og'
+import { ogImageUrl, OG_SITE } from '@/lib/og'
 import type { Metadata } from 'next'
 
 interface Props {
@@ -27,6 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: data.description ?? undefined,
     alternates: { canonical: `${siteUrl}/gear/${slug}` },
     openGraph: {
+      ...OG_SITE,
       title: `${data.name} | Boss Daddy`,
       description: data.description ?? undefined,
       url: `${siteUrl}/gear/${slug}`,

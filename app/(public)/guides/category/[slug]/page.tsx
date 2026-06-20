@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCategoryBySlug, CATEGORIES } from '@/lib/categories'
-import { ogImageUrl } from '@/lib/og'
+import { ogImageUrl, OG_SITE } from '@/lib/og'
 import CategoryIcon from '@/components/CategoryIcon'
 import { PillFilterStrip, PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 import BenchStrip from '@/components/BenchStrip'
@@ -37,6 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: cat.description,
     alternates: { canonical: `${siteUrl}/guides/category/${slug}` },
     openGraph: {
+      ...OG_SITE,
       title: `${cat.label} Guides | Boss Daddy`,
       description: cat.description,
       url: `${siteUrl}/guides/category/${slug}`,

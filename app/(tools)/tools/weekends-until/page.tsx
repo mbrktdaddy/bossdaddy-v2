@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { OG_SITE } from '@/lib/og'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { getKids } from '@/lib/dad-tools/kid-actions'
 import { LABELS } from '@/lib/labels'
@@ -88,6 +89,7 @@ export async function generateMetadata(
     title,
     description,
     openGraph: {
+      ...OG_SITE,
       title:       LABELS.tools.weekendsUntil.pageTitle,
       description,
       images: [{ url: ogImageUrl, width: 1200, height: 630 }],

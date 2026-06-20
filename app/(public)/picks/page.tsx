@@ -3,7 +3,7 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { getCollectionsWithCategory } from '@/lib/collection-listings'
-import { ogImageUrl } from '@/lib/og'
+import { ogImageUrl, OG_SITE } from '@/lib/og'
 import CategoryFilterPills from '@/components/collections/CategoryFilterPills'
 import BenchStrip from '@/components/BenchStrip'
 
@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   description: 'Dad-tested gift guides and curated gear lists. Every pick is personally bought, tested, and recommended by Boss Daddy.',
   alternates: { canonical: '/picks' },
   openGraph: {
+    ...OG_SITE,
     title: 'Boss Daddy Picks — Curated Gear Lists',
     description: 'Dad-tested gift guides and curated gear lists. Every pick is personally bought, tested, and recommended by Boss Daddy.',
     images: [{ url: ogImageUrl({ title: 'Boss Daddy Picks', type: 'guide' }), width: 1200, height: 630 }],

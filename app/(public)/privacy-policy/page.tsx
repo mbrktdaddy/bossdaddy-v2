@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ogImageUrl } from '@/lib/og'
+import { ogImageUrl, OG_SITE } from '@/lib/og'
 
 export const metadata: Metadata = {
  title: 'Privacy Policy — Boss Daddy Life',
  description: 'What data Boss Daddy Life collects, how we use it, and what rights you have over your information. Written in plain English, not legalese.',
- openGraph: { title: 'Privacy Policy — Boss Daddy Life', images: [{ url: ogImageUrl({ title: 'Privacy Policy', type: 'article' }), width: 1200, height: 630 }] },
+ openGraph: { ...OG_SITE, title: 'Privacy Policy — Boss Daddy Life', images: [{ url: ogImageUrl({ title: 'Privacy Policy', type: 'article' }), width: 1200, height: 630 }] },
  twitter: { card: 'summary_large_image' },
  alternates: { canonical: '/privacy-policy' },
 }

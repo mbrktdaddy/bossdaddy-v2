@@ -3,7 +3,7 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { getCollectionsWithCategory } from '@/lib/collection-listings'
-import { ogImageUrl } from '@/lib/og'
+import { ogImageUrl, OG_SITE } from '@/lib/og'
 import CategoryFilterPills from '@/components/collections/CategoryFilterPills'
 import BenchStrip from '@/components/BenchStrip'
 
@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   description: 'Dad-tested head-to-head matchups. Real products, real scores, one clear winner per dimension.',
   alternates: { canonical: '/comparisons' },
   openGraph: {
+    ...OG_SITE,
     title: 'Comparisons | Boss Daddy',
     description: 'Dad-tested head-to-head matchups. Real products, real scores, one clear winner per dimension.',
     images: [{ url: ogImageUrl({ title: 'Head-to-Head Comparisons', type: 'guide' }), width: 1200, height: 630 }],

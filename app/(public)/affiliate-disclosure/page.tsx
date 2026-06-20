@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ogImageUrl } from '@/lib/og'
+import { ogImageUrl, OG_SITE } from '@/lib/og'
 
 export const metadata: Metadata = {
  title: 'Affiliate Disclosure — Boss Daddy Life',
  description: 'How Boss Daddy Life makes money, how affiliate links work, and why commissions never influence our recommendations. We buy everything ourselves first.',
- openGraph: { title: 'Affiliate Disclosure — Boss Daddy Life', images: [{ url: ogImageUrl({ title: 'Affiliate Disclosure', type: 'article' }), width: 1200, height: 630 }] },
+ openGraph: { ...OG_SITE, title: 'Affiliate Disclosure — Boss Daddy Life', images: [{ url: ogImageUrl({ title: 'Affiliate Disclosure', type: 'article' }), width: 1200, height: 630 }] },
  twitter: { card: 'summary_large_image' },
  alternates: { canonical: '/affiliate-disclosure' },
 }

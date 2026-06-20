@@ -55,10 +55,13 @@ export function ogImageUrl(opts: {
   updatedAt?: string | null
   /** Absolute origin to prefix (e.g. siteUrl). Omit for a relative URL resolved via metadataBase. */
   base?: string
+  /** Call-to-action label rendered as a pill on the card (e.g. "Read the Review"). Omit → tagline. */
+  cta?: string
 }): string {
-  const { title, type = 'guide', category, updatedAt, base = '' } = opts
+  const { title, type = 'guide', category, updatedAt, base = '', cta } = opts
   const params = new URLSearchParams({ title, type })
   if (category) params.set('category', category)
+  if (cta) params.set('cta', cta)
   const contentVersion = updatedAt ? Date.parse(updatedAt) || 0 : 0
   params.set('v', `${OG_TEMPLATE_VERSION}-${contentVersion}`)
   return `${base}/api/og?${params.toString()}`
@@ -76,6 +79,8 @@ export function ogImageMeta(opts: {
   category?: string
   updatedAt?: string | null
   base?: string
+  /** Call-to-action label rendered as a pill on the card (e.g. "Read the Review"). */
+  cta?: string
   /** Override the default "<title> — Boss Daddy Life" alt text. */
   alt?: string
 }): { url: string; width: number; height: number; alt: string } {
