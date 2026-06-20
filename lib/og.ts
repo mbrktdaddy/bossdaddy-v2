@@ -21,6 +21,32 @@ export const OG_TEMPLATE_VERSION = 2
 
 export type OgType = 'review' | 'guide' | 'article'
 
+/**
+ * Shared OpenGraph defaults. Next.js does NOT deep-merge `openGraph`: when a
+ * page defines its own openGraph object, the root layout's `siteName`/`locale`
+ * are dropped (Discord/Slack show site name above the title; without it the
+ * card looks anonymous). Spread `...OG_SITE` into every page's openGraph so
+ * these survive. Brand name is intentionally hardcoded (not via labels.ts).
+ */
+export const OG_SITE = { siteName: 'Boss Daddy Life', locale: 'en_US' } as const
+
+/**
+ * Trim a description for SOCIAL cards (X/Discord show ~125 chars and truncate
+ * on mobile). Keep the full text for the page's search `description` — only
+ * clamp what goes into `og:description`/`twitter:description`. Prefers ending
+ * on a complete sentence; otherwise cuts at a word boundary with an ellipsis.
+ */
+export function clampSocialDescription(text: string | null | undefined, max = 125): string | undefined {
+  if (!text) return undefined
+  const t = text.trim()
+  if (t.length <= max) return t
+  const slice = t.slice(0, max)
+  const sentenceEnd = Math.max(slice.lastIndexOf('. '), slice.lastIndexOf('! '), slice.lastIndexOf('? '))
+  if (sentenceEnd >= max * 0.5) return t.slice(0, sentenceEnd + 1)
+  const wordEnd = slice.lastIndexOf(' ')
+  return `${t.slice(0, wordEnd > 0 ? wordEnd : max - 1).trimEnd()}…`
+}
+
 export function ogImageUrl(opts: {
   title: string
   type?: OgType

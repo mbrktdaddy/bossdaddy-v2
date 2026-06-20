@@ -12,7 +12,7 @@ import EditorialMeta from '@/components/collections/EditorialMeta'
 import MethodologyCallout from '@/components/collections/MethodologyCallout'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { faqPageLd } from '@/lib/seo/faq-ld'
-import { ogImageUrl, ogImageMeta, toAbsoluteUrl } from '@/lib/og'
+import { ogImageUrl, ogImageMeta, toAbsoluteUrl, OG_SITE, clampSocialDescription } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
 
@@ -57,13 +57,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: metaDescription,
     alternates:  { canonical: `${siteUrl}/picks/${slug}` },
     openGraph:   {
-      title: metaTitle, description: metaDescription, type: 'article', url: `${siteUrl}/picks/${slug}`, images: [ogImage],
+      ...OG_SITE,
+      title: metaTitle, description: clampSocialDescription(metaDescription), type: 'article', url: `${siteUrl}/picks/${slug}`, images: [ogImage],
       publishedTime: data.published_at ?? undefined,
       modifiedTime: data.updated_at ?? data.published_at ?? undefined,
       authors: ['Boss Daddy'],
       section: 'Buying Guides',
     },
-    twitter:     { card: 'summary_large_image', title: metaTitle, description: metaDescription, images: [ogImage] },
+    twitter:     { card: 'summary_large_image', title: metaTitle, description: clampSocialDescription(metaDescription), images: [ogImage] },
   }
 }
 

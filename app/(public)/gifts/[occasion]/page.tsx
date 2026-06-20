@@ -16,7 +16,7 @@ import EditorialMeta from '@/components/collections/EditorialMeta'
 import MethodologyCallout from '@/components/collections/MethodologyCallout'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { faqPageLd } from '@/lib/seo/faq-ld'
-import { ogImageUrl, ogImageMeta, toAbsoluteUrl } from '@/lib/og'
+import { ogImageUrl, ogImageMeta, toAbsoluteUrl, OG_SITE, clampSocialDescription } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
 
@@ -35,19 +35,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   const ogImage = ogImageMeta({ title: occ.metaTitle, type: 'guide', base: siteUrl })
   return {
-    title: occ.metaTitle,
+    // `absolute` bypasses the root '%s | Boss Daddy' template — occ.metaTitle
+    // already ends in "| Boss Daddy", so the template would double the brand
+    // (73 chars). Absolute keeps it at the intended 55.
+    title: { absolute: occ.metaTitle },
     description: occ.metaDesc,
     alternates: { canonical: `${siteUrl}/gifts/${occ.slug}` },
     openGraph: {
+      ...OG_SITE,
       title: occ.metaTitle,
-      description: occ.metaDesc,
+      description: clampSocialDescription(occ.metaDesc),
       type: 'article',
       url: `${siteUrl}/gifts/${occ.slug}`,
       images: [ogImage],
       authors: ['Boss Daddy'],
       section: 'Gift Guides',
     },
-    twitter: { card: 'summary_large_image', title: occ.metaTitle, description: occ.metaDesc, images: [ogImage] },
+    twitter: { card: 'summary_large_image', title: occ.metaTitle, description: clampSocialDescription(occ.metaDesc), images: [ogImage] },
   }
 }
 

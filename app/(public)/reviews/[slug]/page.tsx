@@ -9,7 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
 import { ARTICLE_SURFACE_CLASS } from '@/lib/article-surface'
-import { ogImageUrl, ogImageMeta, toAbsoluteUrl } from '@/lib/og'
+import { ogImageUrl, ogImageMeta, toAbsoluteUrl, OG_SITE, clampSocialDescription } from '@/lib/og'
 import ShareButtons from '@/components/ShareButtons'
 import RatingScore from '@/components/RatingScore'
 import VerdictCard from '@/components/reviews/VerdictCard'
@@ -93,13 +93,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: pageDescription,
     alternates: { canonical: canonicalUrl },
     openGraph: {
-      title: pageTitle, description: pageDescription, type: 'article', url: canonicalUrl, images: [ogImage],
+      ...OG_SITE,
+      title: pageTitle, description: clampSocialDescription(pageDescription), type: 'article', url: canonicalUrl, images: [ogImage],
       publishedTime: data.published_at ?? undefined,
       modifiedTime: data.updated_at ?? data.published_at ?? undefined,
       authors: [authorName],
       ...(sectionLabel ? { section: sectionLabel } : {}),
     },
-    twitter: { card: 'summary_large_image', title: pageTitle, description: pageDescription, images: [ogImage] },
+    twitter: { card: 'summary_large_image', title: pageTitle, description: clampSocialDescription(pageDescription), images: [ogImage] },
   }
 }
 
