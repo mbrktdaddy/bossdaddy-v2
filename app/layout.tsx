@@ -27,6 +27,14 @@ const sourceSerif4 = Source_Serif_4({
   display: "swap",
 });
 
+// Social/search domain-verification meta tags. Env-gated — each is a no-op
+// until you claim the domain and set its code:
+//   NEXT_PUBLIC_FB_DOMAIN_VERIFY  → Meta Business Suite domain verification
+//   NEXT_PUBLIC_PINTEREST_VERIFY  → Pinterest "claim website" + Rich Pins
+const socialVerification: Record<string, string> = {}
+if (process.env.NEXT_PUBLIC_FB_DOMAIN_VERIFY) socialVerification['facebook-domain-verification'] = process.env.NEXT_PUBLIC_FB_DOMAIN_VERIFY
+if (process.env.NEXT_PUBLIC_PINTEREST_VERIFY) socialVerification['p:domain_verify'] = process.env.NEXT_PUBLIC_PINTEREST_VERIFY
+
 export const metadata: Metadata = {
   title: {
     default: 'Boss Daddy — Dad like a BOSS',
@@ -48,12 +56,7 @@ export const metadata: Metadata = {
     site: '@bossdaddylife',
     creator: '@bossdaddylife',
   },
-  // Pinterest domain claim: once you claim bossdaddylife.com in a Pinterest
-  // business account, set NEXT_PUBLIC_PINTEREST_VERIFY to the code it gives you.
-  // No-op until then. Claiming the domain + the article OG tags = Rich Pins.
-  ...(process.env.NEXT_PUBLIC_PINTEREST_VERIFY
-    ? { verification: { other: { 'p:domain_verify': process.env.NEXT_PUBLIC_PINTEREST_VERIFY } } }
-    : {}),
+  ...(Object.keys(socialVerification).length ? { verification: { other: socialVerification } } : {}),
   alternates: {
     types: {
       'application/rss+xml': [

@@ -6,7 +6,11 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: '/',
+        // Allow the OG image endpoint explicitly — it lives under /api/ but must
+        // be crawlable so facebookexternalhit / Twitterbot (which respect
+        // robots.txt) can fetch link-preview images. Longer match wins over the
+        // broad /api/ disallow below for compliant parsers.
+        allow: ['/', '/api/og'],
         disallow: [
           '/dashboard/',
           '/api/',
