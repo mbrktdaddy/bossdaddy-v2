@@ -3,6 +3,7 @@ import { Geist, Montserrat, Source_Serif_4 } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import PwaInstallProvider from "@/components/pwa/PwaInstallProvider";
+import { ogImageUrl } from "@/lib/og";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -39,7 +40,7 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: 'Boss Daddy Life',
     type: 'website',
-    images: [{ url: '/api/og?title=Boss+Daddy+Life&type=review', width: 1200, height: 630 }],
+    images: [{ url: ogImageUrl({ title: 'Boss Daddy Life', type: 'review' }), width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',

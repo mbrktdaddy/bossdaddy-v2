@@ -9,6 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
 import { ARTICLE_SURFACE_CLASS } from '@/lib/article-surface'
+import { ogImageUrl } from '@/lib/og'
 import ShareButtons from '@/components/ShareButtons'
 import RatingScore from '@/components/RatingScore'
 import VerdictCard from '@/components/reviews/VerdictCard'
@@ -62,7 +63,7 @@ const getReview = cache(async (slug: string) => {
   const supabase = await createClient()
   const { data } = await supabase
     .from('reviews')
-    .select('id, slug, title, product_name, category, content, rating, excerpt, image_url, has_affiliate_links, product_slug, comparison_product_slugs, published_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, testing_since, testing_note, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, score_specs, specs_grade_rationale, specs_grade_data, would_rebuy, parent_review_id, milestone_label, milestone_days, previous_rating, verdict_change, reading_time_minutes, profiles(username)')
+    .select('id, slug, title, product_name, category, content, rating, excerpt, image_url, has_affiliate_links, product_slug, comparison_product_slugs, published_at, updated_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, testing_since, testing_note, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, score_specs, specs_grade_rationale, specs_grade_data, would_rebuy, parent_review_id, milestone_label, milestone_days, previous_rating, verdict_change, reading_time_minutes, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -82,7 +83,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   const canonicalUrl = `${siteUrl}/reviews/${slug}`
-  const ogImage = `${siteUrl}/api/og?title=${encodeURIComponent(data.title)}&type=review`
+  const ogImage = ogImageUrl({ title: data.title, type: 'review', updatedAt: data.updated_at, base: siteUrl })
 
   return {
     title: pageTitle,

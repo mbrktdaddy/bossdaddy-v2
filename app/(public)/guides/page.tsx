@@ -7,6 +7,7 @@ import GuidesGrid from './_components/GuidesGrid'
 import FeaturedGuideCard from '@/components/FeaturedGuideCard'
 import BenchStrip from '@/components/BenchStrip'
 import AskTheBoss from '@/components/AskTheBoss'
+import { ogImageUrl } from '@/lib/og'
 const PER_PAGE = 12
 import type { GuideRow } from './actions'
 import type { Metadata } from 'next'
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Dad Guides — Boss Daddy Life',
     description: 'Real guides for real dads. Stuff how-tos, backyard projects, grilling tips, and practical advice. No fluff.',
-    images: [{ url: '/api/og?title=Dad+Guides+%26+Advice&type=guide', width: 1200, height: 630 }],
+    images: [{ url: ogImageUrl({ title: 'Dad Guides & Advice', type: 'guide' }), width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',

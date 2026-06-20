@@ -9,6 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
 import { ARTICLE_SURFACE_CLASS } from '@/lib/article-surface'
+import { ogImageUrl } from '@/lib/og'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import ProductCtaCard from '@/components/ProductCtaCard'
 import CollectionEmbed from '@/components/CollectionEmbed'
@@ -52,7 +53,7 @@ const getGuide = cache(async (slug: string) => {
   const supabase = await createClient()
   const { data } = await supabase
     .from('guides')
-    .select('id, title, slug, category, content, excerpt, image_url, has_affiliate_links, published_at, reading_time_minutes, meta_title, meta_description, tldr, key_takeaways, faqs, profiles(username)')
+    .select('id, title, slug, category, content, excerpt, image_url, has_affiliate_links, published_at, updated_at, reading_time_minutes, meta_title, meta_description, tldr, key_takeaways, faqs, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -71,7 +72,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   const canonicalUrl = `${siteUrl}/guides/${slug}`
-  const ogImage = `${siteUrl}/api/og?title=${encodeURIComponent(data.title)}&type=guide`
+  const ogImage = ogImageUrl({ title: data.title, type: 'guide', updatedAt: data.updated_at, base: siteUrl })
 
   return {
     title: pageTitle,

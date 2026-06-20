@@ -1,0 +1,39 @@
+/**
+ * Open Graph / Twitter preview-image URL builder.
+ *
+ * Social platforms (Facebook, X, LinkedIn, iMessage, WhatsApp, Slack…) and the
+ * CDN cache a link's preview image keyed on the EXACT image URL. If the URL never
+ * changes, an edited page keeps serving its old preview forever. So every OG image
+ * URL carries a `v` cache-buster with two parts:
+ *
+ *   v = <OG_TEMPLATE_VERSION>-<contentVersion>
+ *
+ * - OG_TEMPLATE_VERSION — bump this by one whenever the `/api/og` card design
+ *   changes. That flushes EVERY cached preview site-wide in one edit (covers the
+ *   static pages that have no per-row timestamp).
+ * - contentVersion — `Date.parse(updatedAt)` for dynamic pages, so editing a
+ *   review/guide/collection automatically busts just that page's preview.
+ *
+ * After a template bump, still re-scrape already-shared links in each platform's
+ * debugger (e.g. Facebook Sharing Debugger) — they won't re-fetch on their own.
+ */
+export const OG_TEMPLATE_VERSION = 2
+
+export type OgType = 'review' | 'guide' | 'article'
+
+export function ogImageUrl(opts: {
+  title: string
+  type?: OgType
+  category?: string
+  /** Row `updated_at` (or any ISO timestamp) for dynamic pages. Omit for static pages. */
+  updatedAt?: string | null
+  /** Absolute origin to prefix (e.g. siteUrl). Omit for a relative URL resolved via metadataBase. */
+  base?: string
+}): string {
+  const { title, type = 'guide', category, updatedAt, base = '' } = opts
+  const params = new URLSearchParams({ title, type })
+  if (category) params.set('category', category)
+  const contentVersion = updatedAt ? Date.parse(updatedAt) || 0 : 0
+  params.set('v', `${OG_TEMPLATE_VERSION}-${contentVersion}`)
+  return `${base}/api/og?${params.toString()}`
+}

@@ -14,6 +14,7 @@ import EditorialMeta from '@/components/collections/EditorialMeta'
 import MethodologyCallout from '@/components/collections/MethodologyCallout'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { faqPageLd } from '@/lib/seo/faq-ld'
+import { ogImageUrl } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
 
@@ -36,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = await createClient()
   const { data } = await supabase
     .from('collections')
-    .select('title, description, meta_title, meta_description')
+    .select('title, description, meta_title, meta_description, updated_at')
     .eq('slug', slug)
     .eq('collection_type', 'comparison')
     .eq('is_visible', true)
@@ -45,7 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   const metaTitle       = data.meta_title       ?? `${data.title} — Comparison`
   const metaDescription = data.meta_description ?? data.description ?? 'Head-to-head comparison from Boss Daddy.'
-  const ogImage = `${siteUrl}/api/og?title=${encodeURIComponent(metaTitle)}&type=guide`
+  const ogImage = ogImageUrl({ title: metaTitle, type: 'guide', updatedAt: data.updated_at, base: siteUrl })
   return {
     title:       metaTitle,
     description: metaDescription,

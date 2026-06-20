@@ -16,6 +16,7 @@ import EditorialMeta from '@/components/collections/EditorialMeta'
 import MethodologyCallout from '@/components/collections/MethodologyCallout'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { faqPageLd } from '@/lib/seo/faq-ld'
+import { ogImageUrl } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
 
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const occ = getOccasion(slug)
   if (!occ) return { title: 'Not Found' }
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
-  const ogImage = `${siteUrl}/api/og?title=${encodeURIComponent(occ.metaTitle)}&type=guide`
+  const ogImage = ogImageUrl({ title: occ.metaTitle, type: 'guide', base: siteUrl })
   return {
     title: occ.metaTitle,
     description: occ.metaDesc,

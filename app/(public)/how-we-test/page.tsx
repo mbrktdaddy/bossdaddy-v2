@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { ogImageUrl } from '@/lib/og'
 
 export const metadata: Metadata = {
  title: 'How We Test — Boss Daddy Life',
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
  openGraph: {
    title: 'How We Test | Boss Daddy Life',
    description: 'Real products, real testing, real dads. How Boss Daddy Life earns the Boss Daddy Approved designation.',
-   images: [{ url: '/api/og?title=How+We+Test&type=guide', width: 1200, height: 630 }],
+   images: [{ url: ogImageUrl({ title: 'How We Test', type: 'guide' }), width: 1200, height: 630 }],
  },
  twitter: { card: 'summary_large_image' },
 }

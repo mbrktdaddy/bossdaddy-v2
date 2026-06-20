@@ -3,6 +3,7 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { getCollectionsWithCategory } from '@/lib/collection-listings'
+import { ogImageUrl } from '@/lib/og'
 import CategoryFilterPills from '@/components/collections/CategoryFilterPills'
 import BenchStrip from '@/components/BenchStrip'
 
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Stacks — Dad-Tested Kits | Boss Daddy',
     description: 'Curated kits for a goal. The full setup for newborn nights, weekend cookouts, garage builds, and more.',
-    images: [{ url: '/api/og?title=Dad-Tested+Stacks+%26+Kits&type=guide', width: 1200, height: 630 }],
+    images: [{ url: ogImageUrl({ title: 'Dad-Tested Stacks & Kits', type: 'guide' }), width: 1200, height: 630 }],
   },
   twitter: { card: 'summary_large_image' },
 }

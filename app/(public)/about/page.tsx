@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CATEGORIES } from '@/lib/categories'
+import { ogImageUrl } from '@/lib/og'
 import CategoryIcon from '@/components/CategoryIcon'
 import { createClient } from '@/lib/supabase/server'
 import { EmailSignup } from '@/components/EmailSignup'
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
  openGraph: {
    title: 'About Boss Daddy Life',
    description: 'The real story behind Boss Daddy Life. A first-time dad on a mission to be the best version of himself — and help other dads do the same.',
-   images: [{ url: '/api/og?title=About+Boss+Daddy+Life&type=guide', width: 1200, height: 630 }],
+   images: [{ url: ogImageUrl({ title: 'About Boss Daddy Life', type: 'guide' }), width: 1200, height: 630 }],
  },
  twitter: { card: 'summary_large_image' },
 }

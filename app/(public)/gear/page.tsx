@@ -14,6 +14,7 @@ import AskTheBoss from '@/components/AskTheBoss'
 import SectionHeader from '@/components/SectionHeader'
 import { getSeasonalOccasions } from '@/lib/gift-occasions'
 import OccasionIcon from '@/components/OccasionIcon'
+import { ogImageUrl } from '@/lib/og'
 import type { Metadata } from 'next'
 
 export const revalidate = 3600
@@ -24,7 +25,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Boss Daddy's Gear — Boss Daddy Life",
     description: 'Every product personally bought, tested, and rated. Field-tested by a real dad. And, soon, made by one.',
-    images: [{ url: '/api/og?title=Boss+Daddy+Gear&type=review', width: 1200, height: 630 }],
+    images: [{ url: ogImageUrl({ title: 'Boss Daddy Gear', type: 'review' }), width: 1200, height: 630 }],
   },
   twitter: { card: 'summary_large_image', title: "Boss Daddy's Gear — Boss Daddy Life" },
   alternates: { canonical: '/gear' },

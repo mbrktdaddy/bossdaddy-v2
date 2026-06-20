@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { formatPrice, getMerchDisplayImage } from '@/lib/merch'
 import MerchProductView from './_components/MerchProductView'
+import { ogImageUrl } from '@/lib/og'
 import type { Metadata } from 'next'
 
 interface Props {
@@ -20,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   const ogImage = (data.image_url ?? data.default_image_url)
     ? `${siteUrl}${data.image_url ?? data.default_image_url}`
-    : `${siteUrl}/api/og?title=${encodeURIComponent(data.name)}&type=guide`
+    : ogImageUrl({ title: data.name, type: 'guide', base: siteUrl })
   return {
     title: `${data.name} — Boss Daddy Life`,
     description: data.description ?? undefined,

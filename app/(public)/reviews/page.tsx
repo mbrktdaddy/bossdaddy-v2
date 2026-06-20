@@ -9,6 +9,7 @@ import ReviewsGrid from './_components/ReviewsGrid'
 import FeaturedReviewCard from '@/components/FeaturedReviewCard'
 import BenchStrip from '@/components/BenchStrip'
 import AskTheBoss from '@/components/AskTheBoss'
+import { ogImageUrl } from '@/lib/og'
 const PER_PAGE = 12
 import type { ReviewRow } from './actions'
 import type { Metadata } from 'next'
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Dad-Tested Product Reviews — Boss Daddy Life',
     description: 'Every product bought with our own money, used in real life, and rated honestly. No sponsored posts. No fluff.',
-    images: [{ url: '/api/og?title=Dad-Tested+Product+Reviews&type=review', width: 1200, height: 630 }],
+    images: [{ url: ogImageUrl({ title: 'Dad-Tested Product Reviews', type: 'review' }), width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',

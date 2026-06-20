@@ -3,6 +3,7 @@ import type { WishlistItem } from '@/lib/wishlist'
 import { groupByStatus, BENCH_SELECT } from '@/lib/wishlist'
 import { WishlistCard } from '@/components/wishlist/WishlistCard'
 import { VotePayoffBanner } from '@/components/VotePayoffBanner'
+import { ogImageUrl } from '@/lib/og'
 import type { Metadata } from 'next'
 
 export const revalidate = 300
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'On the Bench | Boss Daddy',
     description: "Vote on what Boss Daddy tests next. See what's in progress, coming soon, and already reviewed.",
-    images: [{ url: '/api/og?title=On+the+Bench&type=guide', width: 1200, height: 630 }],
+    images: [{ url: ogImageUrl({ title: 'On the Bench', type: 'guide' }), width: 1200, height: 630 }],
   },
   twitter: { card: 'summary_large_image' },
 }
