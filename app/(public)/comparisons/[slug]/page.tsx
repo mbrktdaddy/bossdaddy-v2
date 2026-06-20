@@ -14,7 +14,7 @@ import EditorialMeta from '@/components/collections/EditorialMeta'
 import MethodologyCallout from '@/components/collections/MethodologyCallout'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { faqPageLd } from '@/lib/seo/faq-ld'
-import { ogImageUrl } from '@/lib/og'
+import { ogImageUrl, toAbsoluteUrl } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
 
@@ -224,6 +224,8 @@ export default async function ComparisonDetailPage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: comparison.title,
+    image: toAbsoluteUrl(comparison.hero_image_url, siteUrl)
+      ?? ogImageUrl({ title: comparison.title, type: 'guide', updatedAt: comparison.updated_at, base: siteUrl }),
     description: comparison.description,
     datePublished: comparison.published_at,
     dateModified:  comparison.updated_at ?? comparison.published_at,
@@ -249,7 +251,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
         item: {
           '@type':         'Product',
           name:            entry.review!.product_name,
-          image:           entry.review!.image_url ?? undefined,
+          image:           toAbsoluteUrl(entry.review!.image_url, siteUrl),
           ...(p?.brand ? { brand: { '@type': 'Brand', name: p.brand } } : {}),
           ...(props.length ? { additionalProperty: props.map((s) => ({ '@type': 'PropertyValue', name: s.label, value: s.value })) } : {}),
           aggregateRating: entry.review!.rating != null ? {

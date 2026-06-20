@@ -37,3 +37,15 @@ export function ogImageUrl(opts: {
   params.set('v', `${OG_TEMPLATE_VERSION}-${contentVersion}`)
   return `${base}/api/og?${params.toString()}`
 }
+
+/**
+ * Absolutize a stored image path for use in JSON-LD / structured data, which
+ * requires fully-qualified URLs. Storage URLs are already absolute (http…) and
+ * pass through; relative paths get the site origin prepended. Returns undefined
+ * for empty input so callers can fall back (e.g. to the generated OG card).
+ */
+export function toAbsoluteUrl(url: string | null | undefined, base: string): string | undefined {
+  if (!url) return undefined
+  if (/^https?:\/\//.test(url)) return url
+  return `${base}${url.startsWith('/') ? '' : '/'}${url}`
+}

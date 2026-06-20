@@ -13,7 +13,7 @@ import EditorialMeta from '@/components/collections/EditorialMeta'
 import MethodologyCallout from '@/components/collections/MethodologyCallout'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { faqPageLd } from '@/lib/seo/faq-ld'
-import { ogImageUrl } from '@/lib/og'
+import { ogImageUrl, toAbsoluteUrl } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
 
@@ -185,6 +185,8 @@ export default async function StackDetailPage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: stack.title,
+    image: toAbsoluteUrl(stack.hero_image_url, siteUrl)
+      ?? ogImageUrl({ title: stack.title, type: 'guide', updatedAt: stack.updated_at, base: siteUrl }),
     description: stack.description,
     datePublished: stack.published_at,
     dateModified:  stack.updated_at ?? stack.published_at,
@@ -207,7 +209,7 @@ export default async function StackDetailPage({ params }: Props) {
       item: {
         '@type': 'Product',
         name:    entry.review!.product_name,
-        image:   entry.review!.image_url ?? undefined,
+        image:   toAbsoluteUrl(entry.review!.image_url, siteUrl),
         aggregateRating: entry.review!.rating != null ? {
           '@type':       'AggregateRating',
           ratingValue:   entry.review!.rating,

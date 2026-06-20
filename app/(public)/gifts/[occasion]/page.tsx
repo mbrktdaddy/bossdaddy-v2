@@ -16,7 +16,7 @@ import EditorialMeta from '@/components/collections/EditorialMeta'
 import MethodologyCallout from '@/components/collections/MethodologyCallout'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { faqPageLd } from '@/lib/seo/faq-ld'
-import { ogImageUrl } from '@/lib/og'
+import { ogImageUrl, toAbsoluteUrl } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
 
@@ -191,6 +191,8 @@ export default async function GiftOccasionPage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: occ.metaTitle,
+    image: toAbsoluteUrl(pick?.hero_image_url, siteUrl)
+      ?? ogImageUrl({ title: occ.metaTitle, type: 'guide', base: siteUrl }),
     description: occ.metaDesc,
     datePublished: pick?.published_at ?? undefined,
     dateModified:  pick?.updated_at ?? pick?.published_at ?? undefined,
@@ -213,7 +215,7 @@ export default async function GiftOccasionPage({ params }: Props) {
       item: {
         '@type': 'Product',
         name:    entry.review.product_name,
-        image:   entry.review.image_url ?? undefined,
+        image:   toAbsoluteUrl(entry.review.image_url, siteUrl),
         aggregateRating: entry.review.rating ? {
           '@type': 'AggregateRating',
           ratingValue: entry.review.rating,

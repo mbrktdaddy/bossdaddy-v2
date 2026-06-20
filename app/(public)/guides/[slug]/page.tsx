@@ -9,7 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
 import { ARTICLE_SURFACE_CLASS } from '@/lib/article-surface'
-import { ogImageUrl } from '@/lib/og'
+import { ogImageUrl, toAbsoluteUrl } from '@/lib/og'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import ProductCtaCard from '@/components/ProductCtaCard'
 import CollectionEmbed from '@/components/CollectionEmbed'
@@ -145,12 +145,18 @@ export default async function GuidePage({ params }: Props) {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
 
+  // Structured-data image must be absolute; fall back to the generated OG card.
+  const articleImage = toAbsoluteUrl(guide.image_url, siteUrl)
+    ?? ogImageUrl({ title: guide.title, type: 'guide', updatedAt: guide.updated_at, base: siteUrl })
+
   const articleLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: guide.title,
+    image: articleImage,
     author: { '@type': 'Person', name: author },
     datePublished: guide.published_at,
+    dateModified: guide.updated_at ?? guide.published_at,
     publisher: { '@type': 'Organization', name: 'Boss Daddy Life', url: siteUrl },
     url: `${siteUrl}/guides/${slug}`,
   }
