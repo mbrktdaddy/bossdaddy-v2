@@ -31,12 +31,14 @@ export type OgType = 'review' | 'guide' | 'article'
 export const OG_SITE = { siteName: 'Boss Daddy Life', locale: 'en_US' } as const
 
 /**
- * Trim a description for SOCIAL cards (X/Discord show ~125 chars and truncate
- * on mobile). Keep the full text for the page's search `description` — only
- * clamp what goes into `og:description`/`twitter:description`. Prefers ending
- * on a complete sentence; otherwise cuts at a word boundary with an ellipsis.
+ * Trim a description for SOCIAL cards. X/Discord show roughly this much before
+ * truncating on mobile; the default (155) lets normal one-to-two-sentence copy
+ * through (X allows up to 200) and only trims genuinely long text. Keep the
+ * full text for the page's search `description` — only clamp what goes into
+ * `og:description`/`twitter:description`. Prefers ending on a complete
+ * sentence; otherwise cuts at a word boundary with an ellipsis.
  */
-export function clampSocialDescription(text: string | null | undefined, max = 125): string | undefined {
+export function clampSocialDescription(text: string | null | undefined, max = 155): string | undefined {
   if (!text) return undefined
   const t = text.trim()
   if (t.length <= max) return t
