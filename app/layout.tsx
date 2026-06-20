@@ -40,13 +40,20 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: 'Boss Daddy Life',
     type: 'website',
-    images: [{ url: ogImageUrl({ title: 'Boss Daddy Life', type: 'review' }), width: 1200, height: 630 }],
+    locale: 'en_US',
+    images: [{ url: ogImageUrl({ title: 'Boss Daddy Life', type: 'review' }), width: 1200, height: 630, alt: 'Boss Daddy Life — Dad like a BOSS' }],
   },
   twitter: {
     card: 'summary_large_image',
     site: '@bossdaddylife',
     creator: '@bossdaddylife',
   },
+  // Pinterest domain claim: once you claim bossdaddylife.com in a Pinterest
+  // business account, set NEXT_PUBLIC_PINTEREST_VERIFY to the code it gives you.
+  // No-op until then. Claiming the domain + the article OG tags = Rich Pins.
+  ...(process.env.NEXT_PUBLIC_PINTEREST_VERIFY
+    ? { verification: { other: { 'p:domain_verify': process.env.NEXT_PUBLIC_PINTEREST_VERIFY } } }
+    : {}),
   alternates: {
     types: {
       'application/rss+xml': [

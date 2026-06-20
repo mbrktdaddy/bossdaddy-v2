@@ -9,7 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
 import { ARTICLE_SURFACE_CLASS } from '@/lib/article-surface'
-import { ogImageUrl, toAbsoluteUrl } from '@/lib/og'
+import { ogImageUrl, ogImageMeta, toAbsoluteUrl } from '@/lib/og'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import ProductCtaCard from '@/components/ProductCtaCard'
 import CollectionEmbed from '@/components/CollectionEmbed'
@@ -72,13 +72,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   const canonicalUrl = `${siteUrl}/guides/${slug}`
-  const ogImage = ogImageUrl({ title: data.title, type: 'guide', updatedAt: data.updated_at, base: siteUrl })
+  const ogImage = ogImageMeta({ title: data.title, type: 'guide', updatedAt: data.updated_at, base: siteUrl })
+  const profile = Array.isArray(data.profiles) ? data.profiles[0] : (data.profiles as unknown as { username: string } | null)
+  const authorName = profile?.username ?? 'Boss Daddy'
+  const sectionLabel = getCategoryBySlug(data.category ?? '')?.label
 
   return {
     title: pageTitle,
     description: pageDescription,
     alternates: { canonical: canonicalUrl },
-    openGraph: { title: pageTitle, description: pageDescription, type: 'article', url: canonicalUrl, images: [{ url: ogImage, width: 1200, height: 630 }] },
+    openGraph: {
+      title: pageTitle, description: pageDescription, type: 'article', url: canonicalUrl, images: [ogImage],
+      publishedTime: data.published_at ?? undefined,
+      modifiedTime: data.updated_at ?? data.published_at ?? undefined,
+      authors: [authorName],
+      ...(sectionLabel ? { section: sectionLabel } : {}),
+    },
     twitter: { card: 'summary_large_image', title: pageTitle, description: pageDescription, images: [ogImage] },
   }
 }

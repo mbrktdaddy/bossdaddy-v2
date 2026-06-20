@@ -39,6 +39,30 @@ export function ogImageUrl(opts: {
 }
 
 /**
+ * Full OG/Twitter image descriptor (URL + dimensions + alt). Use for BOTH
+ * `openGraph.images` and `twitter.images` so the card carries `og:image:alt`
+ * and `twitter:image:alt` (accessibility + a card-quality signal X/FB read).
+ * Declaring width/height lets platforms render the card without a re-fetch.
+ */
+export function ogImageMeta(opts: {
+  title: string
+  type?: OgType
+  category?: string
+  updatedAt?: string | null
+  base?: string
+  /** Override the default "<title> — Boss Daddy Life" alt text. */
+  alt?: string
+}): { url: string; width: number; height: number; alt: string } {
+  const { alt, ...urlOpts } = opts
+  return {
+    url: ogImageUrl(urlOpts),
+    width: 1200,
+    height: 630,
+    alt: alt ?? `${opts.title} — Boss Daddy Life`,
+  }
+}
+
+/**
  * Absolutize a stored image path for use in JSON-LD / structured data, which
  * requires fully-qualified URLs. Storage URLs are already absolute (http…) and
  * pass through; relative paths get the site origin prepended. Returns undefined

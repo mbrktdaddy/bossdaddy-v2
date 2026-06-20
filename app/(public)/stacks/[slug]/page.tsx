@@ -13,7 +13,7 @@ import EditorialMeta from '@/components/collections/EditorialMeta'
 import MethodologyCallout from '@/components/collections/MethodologyCallout'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { faqPageLd } from '@/lib/seo/faq-ld'
-import { ogImageUrl, toAbsoluteUrl } from '@/lib/og'
+import { ogImageUrl, ogImageMeta, toAbsoluteUrl } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
 
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = await createClient()
   const { data } = await supabase
     .from('collections')
-    .select('title, description, meta_title, meta_description, updated_at')
+    .select('title, description, meta_title, meta_description, published_at, updated_at')
     .eq('slug', slug)
     .eq('collection_type', 'stack')
     .eq('is_visible', true)
@@ -45,12 +45,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   const metaTitle       = data.meta_title       ?? `The ${data.title} Stack — Dad-Tested Kit`
   const metaDescription = data.meta_description ?? data.description ?? 'A curated kit-for-purpose from Boss Daddy.'
-  const ogImage = ogImageUrl({ title: metaTitle, type: 'guide', updatedAt: data.updated_at, base: siteUrl })
+  const ogImage = ogImageMeta({ title: metaTitle, type: 'guide', updatedAt: data.updated_at, base: siteUrl })
   return {
     title:       metaTitle,
     description: metaDescription,
     alternates:  { canonical: `${siteUrl}/stacks/${slug}` },
-    openGraph:   { title: metaTitle, description: metaDescription, url: `${siteUrl}/stacks/${slug}`, images: [{ url: ogImage, width: 1200, height: 630 }] },
+    openGraph:   {
+      title: metaTitle, description: metaDescription, type: 'article', url: `${siteUrl}/stacks/${slug}`, images: [ogImage],
+      publishedTime: data.published_at ?? undefined,
+      modifiedTime: data.updated_at ?? data.published_at ?? undefined,
+      authors: ['Boss Daddy'],
+      section: 'Stacks',
+    },
     twitter:     { card: 'summary_large_image', title: metaTitle, description: metaDescription, images: [ogImage] },
   }
 }
