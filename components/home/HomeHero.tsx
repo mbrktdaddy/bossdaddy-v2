@@ -33,16 +33,20 @@ const Arrow = () => (
 export default function HomeHero() {
   return (
     <section className="relative min-h-[88vh] overflow-hidden border-b border-soft">
-      {/* Desktop image — subject right, dark left for the text */}
+      {/* Desktop image — subject right, dark left for the text.
+          No `priority`: on mobile this is display:none (`hidden`), so a priority
+          preload would only contend with the real mobile LCP image for bandwidth.
+          Lazy ⇒ never downloaded on mobile; on desktop it's in-viewport so the
+          browser fetches it eagerly regardless. Mobile is the measured/primary target. */}
       <Image
         src="/images/hero-workshop.webp"
         alt=""
         fill
-        priority
         sizes="100vw"
         className="hidden sm:block object-cover object-right"
       />
-      {/* Mobile image — subject low, dark top for the title */}
+      {/* Mobile image — subject low, dark top for the title. Keeps `priority`
+          (preload + fetchpriority=high) since it's the mobile LCP element. */}
       <Image
         src="/images/hero-workshop-mobile.webp"
         alt=""
