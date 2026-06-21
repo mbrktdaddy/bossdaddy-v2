@@ -325,7 +325,7 @@ function revalidateKidSurfaces() {
   revalidatePath('/dashboard')
   revalidatePath('/account/settings')
   revalidatePath('/tools')
-  revalidatePath('/tools/kids/[id]', 'page')
+  revalidatePath('/tools/family/[id]', 'page')
   revalidatePath('/tools/weekends-until')
 }
 

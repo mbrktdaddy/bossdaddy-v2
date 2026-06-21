@@ -74,7 +74,7 @@ export async function addMoment(
   revalidatePath('/dashboard')
   revalidatePath('/account/settings')
   revalidatePath('/tools')
-  revalidatePath('/tools/kids/[id]', 'page')
+  revalidatePath('/tools/family/[id]', 'page')
   revalidatePath('/tools/weekends-until')
   return { ok: true, data: { id: data.id as string } }
 }
@@ -134,7 +134,7 @@ export async function deleteMoment(id: string): Promise<MomentActionResult> {
   revalidatePath('/dashboard')
   revalidatePath('/account/settings')
   revalidatePath('/tools')
-  revalidatePath('/tools/kids/[id]', 'page')
+  revalidatePath('/tools/family/[id]', 'page')
   revalidatePath('/tools/weekends-until')
   return { ok: true }
 }

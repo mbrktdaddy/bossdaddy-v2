@@ -79,7 +79,7 @@ export default function KidCard({ kid, initialMoments, momentCount, isAuthentica
         <div className="min-w-0 flex-1">
           <h3 className="text-base font-bold text-prose truncate">
             <Link
-              href={`/tools/kids/${kid.id}`}
+              href={`/tools/family/${kid.id}`}
               className="hover:text-accent transition-colors"
             >
               {displayName}

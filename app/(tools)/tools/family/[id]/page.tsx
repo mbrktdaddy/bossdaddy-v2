@@ -61,7 +61,7 @@ export default async function KidProfilePage({ params }: PageProps) {
 
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
-  if (!user) redirect(`/login?next=/tools/kids/${id}`)
+  if (!user) redirect(`/login?next=/tools/family/${id}`)
 
   // RLS will already scope to the owning user, but eq(user_id) is explicit
   // and defends against any future RLS regression.

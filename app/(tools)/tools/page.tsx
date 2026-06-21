@@ -191,7 +191,7 @@ export default async function ToolsHubPage() {
               return (
                 <Link
                   key={kid.id}
-                  href={`/tools/kids/${kid.id}`}
+                  href={`/tools/family/${kid.id}`}
                   className="flex items-center gap-3 px-3 py-3 bg-surface border border-soft hover:border-accent-border/60 rounded-xl transition-colors group min-h-[44px]"
                 >
                   {kid.photo_url ? (

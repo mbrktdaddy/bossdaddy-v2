@@ -124,7 +124,7 @@ export default async function SavingsGoalPage({ params }: PageProps) {
             <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">
               {goal.kid_profile_id && kidName ? (
                 <Link
-                  href={`/tools/kids/${goal.kid_profile_id}`}
+                  href={`/tools/family/${goal.kid_profile_id}`}
                   className="hover:text-accent transition-colors"
                 >
                   For {kidName} →

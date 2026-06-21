@@ -19,6 +19,13 @@ export function rewritePublicLegacy(pathname: string): string | null {
   const wishlistSlug = pathname.match(/^\/wishlist\/([^/]+)\/?$/)
   if (wishlistSlug) return `/bench/${wishlistSlug[1]}`
 
+  // /tools/kids/* → /tools/family/* (the per-member hub now holds partners
+  // and others too, so "kids" in the URL was user-facing-wrong). The route
+  // segment moved to app/(tools)/tools/family; this 301s the old links.
+  if (pathname === '/tools/kids' || pathname === '/tools/kids/') return '/tools/family'
+  const kidsMember = pathname.match(/^\/tools\/kids\/([^/]+)\/?$/)
+  if (kidsMember) return `/tools/family/${kidsMember[1]}`
+
   return null
 }
 

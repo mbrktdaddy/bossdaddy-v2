@@ -1,5 +1,5 @@
 // Compact avatar strip of the user's kids on the account/profile page.
-// Each chip → /tools/kids/[id] where the full per-kid hub (weekends, dad math,
+// Each chip → /tools/family/[id] where the full per-member hub (weekends, dad math,
 // savings, the Log) lives. Heavy state stays on the detail page; this section
 // stays scannable.
 
@@ -56,7 +56,7 @@ export default async function MyKidsSection() {
             return (
               <Link
                 key={kid.id}
-                href={`/tools/kids/${kid.id}`}
+                href={`/tools/family/${kid.id}`}
                 className="group shrink-0 flex flex-col items-center gap-1.5 w-20 sm:w-24 p-2 rounded-xl hover:bg-surface-raised transition-colors"
               >
                 {kid.photo_url ? (
