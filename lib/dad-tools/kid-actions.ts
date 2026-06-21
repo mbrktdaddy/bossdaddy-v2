@@ -15,9 +15,14 @@ import { getOrCreateAnonymousId, getAnonymousId } from './cookies'
 
 const MemberTypeSchema = z.enum(['child', 'partner', 'other'])
 
+// Birthdate is optional at the schema level — adult members (partner/other)
+// don't need one. The "a child requires a birthdate" rule is enforced in the
+// action (not a Zod .refine) to keep KidInputSchema refine-free, so
+// UpdateKidInputSchema can safely call .partial() on it (Zod v4 rejects
+// .partial() on a refined schema).
 const KidInputSchema = z.object({
   name: z.string().trim().min(1).max(80).optional().nullable(),
-  birthdate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Birthdate required (YYYY-MM-DD)'),
+  birthdate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Birthdate must be YYYY-MM-DD').optional().nullable(),
   member_type: MemberTypeSchema.optional(),
   photo_url: z.string().url().optional().nullable(),
 })
@@ -35,11 +40,10 @@ export type MemberType = 'child' | 'partner' | 'other'
 export type Kid = {
   id: string
   name: string | null
-  // Nullable in the DB as of migration 105 (adults need no "age until 18"),
-  // but the app still requires it for every member until the form is made
-  // type-aware in Phase 3 — so no null rows exist yet and the type stays
-  // string. Flip to `string | null` when the form allows skipping it.
-  birthdate: string
+  // Nullable as of migration 105: children require a birthdate (enforced in
+  // the action), partner/other members may have none. Age/weekends tools gate
+  // on member_type and treat a null birthdate as "no age-based numbers."
+  birthdate: string | null
   member_type: MemberType
   photo_url: string | null
   money_balance: number
@@ -111,10 +115,15 @@ export async function addKid(
     return { ok: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
   }
 
+  const memberType = parsed.data.member_type ?? 'child'
+  if (memberType === 'child' && !parsed.data.birthdate) {
+    return { ok: false, error: 'A birthdate is required for a child.' }
+  }
+
   const payload = {
     name: parsed.data.name ?? null,
-    birthdate: parsed.data.birthdate,
-    member_type: parsed.data.member_type ?? 'child',
+    birthdate: parsed.data.birthdate ?? null,
+    member_type: memberType,
     photo_url: parsed.data.photo_url ?? null,
   }
 
@@ -177,9 +186,13 @@ export async function updateKid(
   }
 
   const { id, name, birthdate, member_type, photo_url } = parsed.data
+  // Guard the one invalid combo: a child cleared of its birthdate.
+  if (member_type === 'child' && birthdate === null) {
+    return { ok: false, error: 'A birthdate is required for a child.' }
+  }
   const updates: {
     name?: string | null
-    birthdate?: string
+    birthdate?: string | null
     member_type?: MemberType
     photo_url?: string | null
   } = {}

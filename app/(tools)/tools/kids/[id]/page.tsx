@@ -39,7 +39,7 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
-const KID_COLUMNS    = 'id, name, birthdate, photo_url, money_balance, money_monthly, money_target, money_return_rate, created_at, updated_at'
+const KID_COLUMNS    = 'id, name, birthdate, member_type, photo_url, money_balance, money_monthly, money_target, money_return_rate, created_at, updated_at'
 const MOMENT_COLUMNS = 'id, kid_profile_id, moment_kind, occurred_on, response, photo_url, created_at, updated_at'
 
 export const metadata: Metadata = {
@@ -110,6 +110,10 @@ export default async function KidProfilePage({ params }: PageProps) {
   }
   const daysSinceLast = lastKey ? daysSinceDayKey(lastKey) : null
 
+  // Child-only tools (Weekends-Until-18, Dad Math) gate on member_type. Adults
+  // (partner/other) get Presence + Savings + a custom Weekends launcher.
+  const isChild = kidRow.member_type === 'child'
+
   const { years, months } = ageInYearsMonths(kidRow.birthdate)
   const until18 = milestoneDate('until_18', kidRow.birthdate)
   const weekendsUntil18 = until18 ? weeksUntil(until18) : 0
@@ -119,35 +123,40 @@ export default async function KidProfilePage({ params }: PageProps) {
   // Run Dad Math using the kid's persisted state (migration 077). Defaults
   // baked into the DB: $0 balance, $0 monthly, $94k target, 6% return — so
   // a brand-new kid reads "Just getting started" until the dad opens the
-  // tool and saves real numbers.
-  const dadMath = runDadMath({
-    birthdate:      kidRow.birthdate,
-    currentBalance: kidRow.money_balance,
-    monthlyContrib: kidRow.money_monthly,
-    targetBy18:     kidRow.money_target,
-    annualReturn:   kidRow.money_return_rate,
-  })
+  // tool and saves real numbers. Child-only — skipped for adult members.
+  const dadMath = (isChild && kidRow.birthdate)
+    ? runDadMath({
+        birthdate:      kidRow.birthdate,
+        currentBalance: kidRow.money_balance,
+        monthlyContrib: kidRow.money_monthly,
+        targetBy18:     kidRow.money_target,
+        annualReturn:   kidRow.money_return_rate,
+      })
+    : null
 
-  const displayName = kidRow.name?.trim() || 'Your kid'
+  const displayName = kidRow.name?.trim() || LABELS.tools.kids.noNameFallback
+  const relationshipLabel = LABELS.tools.kids.memberType[kidRow.member_type]
   const ageLabel = years === 0
     ? `${months} ${months === 1 ? 'month' : 'months'} old`
     : months === 0
       ? `${years} ${years === 1 ? 'year' : 'years'} old`
       : `${years}y ${months}m`
+  // Sub-label under the name: children show age, adults show their relationship.
+  const subLabel = isChild ? ageLabel : relationshipLabel
 
   const firstInitial = (kidRow.name?.trim()?.[0] ?? '').toUpperCase()
 
   const weekendsHref = buildShareUrl('/tools/weekends-until', {
     kid:       kidRow.id,
-    birthdate: kidRow.birthdate,
-    milestone: 'until_18',
+    birthdate: kidRow.birthdate ?? undefined,
+    milestone: isChild ? 'until_18' : 'custom',
     unit:      'weekends',
     for:       firstInitial || undefined,
   })
 
   const dadMathHref = buildShareUrl('/tools/dad-math', {
     kid:       kidRow.id,
-    birthdate: kidRow.birthdate,
+    birthdate: kidRow.birthdate ?? undefined,
     for:       firstInitial || undefined,
   })
 
@@ -185,47 +194,70 @@ export default async function KidProfilePage({ params }: PageProps) {
           <h1 className="text-2xl sm:text-3xl font-black text-prose leading-tight tracking-tight mt-1">
             {displayName}
           </h1>
-          <p className="text-sm text-prose-faint mt-0.5">{ageLabel}</p>
+          <p className="text-sm text-prose-faint mt-0.5">{subLabel}</p>
         </div>
         <KidHeaderActions kid={kidRow} />
       </header>
 
-      {/* Time card */}
-      <section className="bg-surface border border-soft rounded-2xl p-5 sm:p-6">
-        <div className="flex items-baseline justify-between gap-3">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
-            {LABELS.tools.weekendsUntil.spokeRole}
-          </p>
-          {!past18 && (
+      {/* Time card — child-only (Weekends Until 18) */}
+      {isChild && (
+        <section className="bg-surface border border-soft rounded-2xl p-5 sm:p-6">
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+              {LABELS.tools.weekendsUntil.spokeRole}
+            </p>
+            {!past18 && (
+              <Link
+                href={weekendsHref}
+                className="text-xs font-semibold text-accent hover:underline"
+              >
+                Open Weekends Until →
+              </Link>
+            )}
+          </div>
+          {past18 ? (
+            <p className="mt-3 text-2xl font-black text-prose-muted leading-tight">
+              {displayName} is past 18.
+            </p>
+          ) : (
+            <>
+              <p className="mt-3 text-4xl sm:text-5xl font-black text-prose leading-none">
+                {weekendsUntil18}
+              </p>
+              <p className="text-sm text-prose-muted mt-1.5">
+                weekends until 18 · {pctBurned}% elapsed
+              </p>
+            </>
+          )}
+        </section>
+      )}
+
+      {/* Time card — adults: a custom-milestone Weekends launcher (no age math) */}
+      {!isChild && (
+        <section className="bg-surface border border-soft rounded-2xl p-5 sm:p-6">
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+              {LABELS.tools.weekendsUntil.spokeRole}
+            </p>
             <Link
               href={weekendsHref}
               className="text-xs font-semibold text-accent hover:underline"
             >
               Open Weekends Until →
             </Link>
-          )}
-        </div>
-        {past18 ? (
-          <p className="mt-3 text-2xl font-black text-prose-muted leading-tight">
-            {displayName} is past 18.
+          </div>
+          <p className="mt-3 text-sm text-prose-muted leading-relaxed">
+            Pick a milestone that matters with {displayName} — an anniversary, a
+            trip, a season — and see how many weekends are left.
           </p>
-        ) : (
-          <>
-            <p className="mt-3 text-4xl sm:text-5xl font-black text-prose leading-none">
-              {weekendsUntil18}
-            </p>
-            <p className="text-sm text-prose-muted mt-1.5">
-              weekends until 18 · {pctBurned}% elapsed
-            </p>
-          </>
-        )}
-      </section>
+        </section>
+      )}
 
-      {/* Money card — suppress entirely for past-18 kids. Otherwise render
-          the verdict using the kid's persisted Dad Math inputs (migration
-          077). A brand-new kid with default 0/0/$94k/6% reads as "Just
-          getting started" until the dad saves real numbers. */}
-      {!past18 && (
+      {/* Money card — child-only (Dad Math is a college projection). Suppressed
+          for adult members and for past-18 kids. Otherwise render the verdict
+          using the kid's persisted Dad Math inputs (migration 077). A brand-new
+          kid with default 0/0/$94k/6% reads as "Just getting started". */}
+      {isChild && dadMath && !past18 && (
         <section className="bg-surface border border-soft rounded-2xl p-5 sm:p-6">
           <div className="flex items-baseline justify-between gap-3">
             <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">

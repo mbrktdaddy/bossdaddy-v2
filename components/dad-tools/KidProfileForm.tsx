@@ -45,8 +45,8 @@ export default function KidProfileForm(props: Props) {
     e.preventDefault()
     setError(null)
 
-    if (!birthdate) {
-      setError('Birthdate required')
+    if (memberType === 'child' && !birthdate) {
+      setError('A birthdate is required for a child')
       return
     }
 
@@ -55,7 +55,7 @@ export default function KidProfileForm(props: Props) {
         const result = await updateKid({
           id: initialKid!.id,
           name: name.trim() || null,
-          birthdate,
+          birthdate: birthdate || null,
           member_type: memberType,
         })
         if (!result.ok) { setError(result.error); return }
@@ -64,7 +64,7 @@ export default function KidProfileForm(props: Props) {
       } else {
         const result = await addKid({
           name: name.trim() || null,
-          birthdate,
+          birthdate: birthdate || null,
           member_type: memberType,
         })
         if (!result.ok) { setError(result.error); return }
@@ -134,15 +134,23 @@ export default function KidProfileForm(props: Props) {
       <div>
         <label className="block text-xs text-prose-faint uppercase tracking-widest mb-1.5">
           Birthdate
+          {memberType !== 'child' && (
+            <span className="lowercase text-prose-faint normal-case font-normal tracking-normal"> (optional)</span>
+          )}
         </label>
         <input
           type="date"
           value={birthdate}
-          required
+          required={memberType === 'child'}
           onChange={(e) => { setBirthdate(e.target.value); setError(null) }}
           max={new Date().toISOString().slice(0, 10)}
           className="w-full px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm placeholder:text-prose-faint focus:outline-none transition-colors"
         />
+        {memberType !== 'child' && (
+          <p className="mt-1.5 text-[11px] text-prose-faint leading-snug">
+            Optional for a {LABELS.tools.kids.memberType[memberType].toLowerCase()} — add one only if you want birthday reminders.
+          </p>
+        )}
       </div>
 
       {error && <p className="text-sm text-danger-ink">{error}</p>}
@@ -150,7 +158,7 @@ export default function KidProfileForm(props: Props) {
       <div className="flex items-center gap-2 pt-1">
         <button
           type="submit"
-          disabled={pending || !birthdate}
+          disabled={pending || (memberType === 'child' && !birthdate)}
           className="px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
         >
           {pending ? 'Saving…' : isEdit ? 'Save' : 'Add to family'}

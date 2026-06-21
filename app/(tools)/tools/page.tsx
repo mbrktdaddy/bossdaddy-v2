@@ -14,7 +14,9 @@ import Link from 'next/link'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import InstallPWA from '@/components/InstallPWA'
 import { LABELS } from '@/lib/labels'
-import { weeksUntil, milestoneDate } from '@/lib/dad-tools/calc'
+import { weeksUntil, milestoneDate, momentDayKey, daysSinceDayKey } from '@/lib/dad-tools/calc'
+import { getGoals } from '@/lib/dad-tools/savings-actions'
+import { fmtUsdWhole } from '@/lib/dad-tools/savings'
 import type { Kid } from '@/lib/dad-tools/kid-actions'
 import type { Metadata } from 'next'
 
@@ -54,12 +56,9 @@ const MAIN_SPOKES: SpokeCard[] = [
     blurb: LABELS.tools.savings.spokeBlurb,
     href:  '/tools/savings',
   },
-  {
-    role:  LABELS.tools.presence.spokeRole,
-    title: LABELS.tools.presence.full,
-    blurb: 'Not a separate calculator — it lives on each kid’s page. Days since your last moment. Quiet, no shame, just visible.',
-    href:  null,
-  },
+  // Presence is intentionally NOT a card here — it lives on each family
+  // member's page, and "days since last moment" now surfaces directly in the
+  // per-member rows above the tool grid.
 ]
 
 // Strategic reference tools — sit below the main spokes. Useful but not a
@@ -85,13 +84,43 @@ export default async function ToolsHubPage() {
 
   if (user) {
     const { data: rawKids } = await supabase.from('kid_profiles')
-      .select('id, name, birthdate, photo_url, money_balance, money_monthly, money_target, money_return_rate, created_at, updated_at')
+      .select('id, name, birthdate, member_type, photo_url, money_balance, money_monthly, money_target, money_return_rate, created_at, updated_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: true })
     kids = (rawKids ?? []) as Kid[]
   }
 
   const isLoggedInWithKids = !!user && kids.length > 0
+
+  // Per-member tool state for the family rows: days-since-last-moment + total
+  // saved across that member's goals. Batched so the hub stays a fixed number
+  // of round-trips regardless of family size.
+  const daysSinceByKid = new Map<string, number | null>()
+  const savedByKid = new Map<string, number>()
+  if (isLoggedInWithKids) {
+    const kidIds = kids.map((k) => k.id)
+    const { data: moments } = await supabase.from('kid_moments')
+      .select('kid_profile_id, occurred_on, created_at')
+      .in('kid_profile_id', kidIds)
+    const lastKeyByKid = new Map<string, string>()
+    for (const m of (moments ?? []) as { kid_profile_id: string; occurred_on: string | null; created_at: string }[]) {
+      const key = momentDayKey(m.occurred_on, m.created_at)
+      const prev = lastKeyByKid.get(m.kid_profile_id)
+      if (!prev || key > prev) lastKeyByKid.set(m.kid_profile_id, key)
+    }
+    for (const id of kidIds) {
+      const k = lastKeyByKid.get(id)
+      daysSinceByKid.set(id, k ? daysSinceDayKey(k) : null)
+    }
+
+    // Savings tied to each member (goal.kid_profile_id). getGoals() already
+    // scopes to the current user's owned + joined goals, archived excluded.
+    const goals = await getGoals()
+    for (const g of goals) {
+      const kpid = g.goal.kid_profile_id
+      if (kpid) savedByKid.set(kpid, (savedByKid.get(kpid) ?? 0) + g.stats.runningTotal)
+    }
+  }
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
@@ -133,11 +162,31 @@ export default async function ToolsHubPage() {
         <section className="mb-10 sm:mb-14">
           <div className="space-y-1.5">
             {kids.map((kid) => {
-              const target = milestoneDate('until_18', kid.birthdate)
-              const weekends = target ? weeksUntil(target) : 0
-              const past18 = weekends === 0
+              const isChild = kid.member_type === 'child'
               const name = kid.name?.trim() || LABELS.tools.kids.noNameFallback
               const initial = (kid.name?.trim()?.[0] ?? '?').toUpperCase()
+
+              // Weekends-until-18 — children only.
+              const target = isChild ? milestoneDate('until_18', kid.birthdate) : null
+              const weekends = target ? weeksUntil(target) : 0
+              const past18 = isChild && weekends === 0
+              const leadLabel = isChild
+                ? (past18 ? 'Past 18' : `${weekends} weekends`)
+                : LABELS.tools.kids.memberType[kid.member_type]
+
+              // Days since last moment (Presence) — everyone.
+              const daysSince = daysSinceByKid.get(kid.id) ?? null
+              const momentLabel = daysSince === null
+                ? 'no moments yet'
+                : daysSince === 0
+                  ? 'moment today'
+                  : `${daysSince}d since moment`
+
+              // Total saved across this member's goals — everyone, omit when $0.
+              const saved = savedByKid.get(kid.id) ?? 0
+              const savedLabel = saved > 0 ? `${fmtUsdWhole(saved)} saved` : null
+
+              const metrics = [leadLabel, momentLabel, savedLabel].filter(Boolean).join(' · ')
 
               return (
                 <Link
@@ -160,22 +209,13 @@ export default async function ToolsHubPage() {
                       {initial}
                     </div>
                   )}
-                  <p className="text-sm sm:text-base font-semibold text-prose group-hover:text-accent-text-soft transition-colors truncate min-w-0 flex-1">
-                    {name}
-                  </p>
-                  <div className="text-right shrink-0">
-                    {past18 ? (
-                      <p className="text-sm font-semibold text-prose-muted">Past 18</p>
-                    ) : (
-                      <>
-                        <p className="text-base sm:text-lg font-black text-prose tabular-nums group-hover:text-accent transition-colors">
-                          {weekends}
-                        </p>
-                        <p className="text-[10px] sm:text-xs text-prose-faint leading-tight">
-                          weekends until 18
-                        </p>
-                      </>
-                    )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm sm:text-base font-semibold text-prose group-hover:text-accent-text-soft transition-colors truncate">
+                      {name}
+                    </p>
+                    <p className="text-xs text-prose-faint truncate">
+                      {metrics}
+                    </p>
                   </div>
                   <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

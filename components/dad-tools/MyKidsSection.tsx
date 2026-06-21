@@ -12,7 +12,8 @@ import AddKidAffordance from './AddKidAffordance'
 
 const KID_COLUMNS = 'id, name, birthdate, member_type, photo_url, money_balance, money_monthly, money_target, money_return_rate, created_at, updated_at'
 
-function ageBadge(birthdate: string): string {
+function ageBadge(birthdate: string | null): string {
+  if (!birthdate) return ''
   const { years, months } = ageInYearsMonths(birthdate)
   if (years === 0) return `${months}mo`
   if (months === 0) return `${years}y`

@@ -17,7 +17,8 @@ export type Milestone =
 
 export type Unit = 'weekends' | 'bedtimes'
 
-export function ageInYearsMonths(birthdate: string): { years: number; months: number } {
+export function ageInYearsMonths(birthdate: string | null | undefined): { years: number; months: number } {
+  if (!birthdate) return { years: 0, months: 0 }
   const birth = new Date(birthdate)
   const now = new Date()
   let years  = now.getFullYear() - birth.getFullYear()
@@ -39,9 +40,15 @@ export function isBrandNew(birthdate: string): boolean {
 // Returns the target Date for a given milestone, or null for 'custom' without a date.
 export function milestoneDate(
   milestone: Milestone,
-  birthdate: string,
+  birthdate: string | null | undefined,
   customDate?: string | null,
 ): Date | null {
+  // Custom milestones are anchored to their own date, not a birthdate — so an
+  // adult family member with no birthdate can still use one. Every other
+  // milestone is birth-relative and returns null without a birthdate.
+  if (milestone === 'custom') return customDate ? new Date(customDate) : null
+  if (!birthdate) return null
+
   const birth = new Date(birthdate)
   const now = new Date()
 
@@ -70,15 +77,12 @@ export function milestoneDate(
       const thisYear = new Date(now.getFullYear(), 5, 1)
       return thisYear > now ? thisYear : new Date(now.getFullYear() + 1, 5, 1)
     }
-
-    case 'custom':
-      return customDate ? new Date(customDate) : null
   }
 }
 
 export function isMilestonePassed(
   milestone: Milestone,
-  birthdate: string,
+  birthdate: string | null | undefined,
   customDate?: string | null,
 ): boolean {
   // next_birthday + summer roll forward, so they can never be in the past.
@@ -139,7 +143,8 @@ export function daysSinceDayKey(key: string): number {
 
 // % elapsed since birth toward a milestone (0–100). Used for the "you've
 // already burned X%" framing on Until-18 results.
-export function percentElapsed(birthdate: string, target: Date): number {
+export function percentElapsed(birthdate: string | null | undefined, target: Date): number {
+  if (!birthdate) return 100
   const birth = new Date(birthdate).getTime()
   const t = target.getTime()
   if (t <= birth) return 100
