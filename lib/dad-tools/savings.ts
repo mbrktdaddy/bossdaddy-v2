@@ -77,6 +77,7 @@ export interface SavingsParticipant {
   destination_url:   string | null
   destination_type:  DestinationType | null
   destination_label: string | null
+  muted:             boolean
   joined_at:         string
 }
 

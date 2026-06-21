@@ -124,6 +124,7 @@ export default async function SavingsIndexPage() {
               key={g.goal.id}
               data={g}
               kidName={g.goal.kid_profile_id ? kidNameById.get(g.goal.kid_profile_id) ?? null : null}
+              isOwner={g.goal.owner_id === user.id}
             />
           ))}
         </div>

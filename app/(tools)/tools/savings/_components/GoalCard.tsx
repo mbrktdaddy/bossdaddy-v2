@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { LABELS } from '@/lib/labels'
 import type { GoalWithStats } from '@/lib/dad-tools/savings-actions'
 import { fmtUsdWhole, cadenceUnitLabel } from '@/lib/dad-tools/savings'
+import GoalCardMenu from './GoalCardMenu'
 
 const STATUS_PILL: Record<string, string> = {
   active:    'bg-accent-tint text-accent-text-soft border-accent-border/60',
@@ -17,30 +18,37 @@ const STATUS_PILL: Record<string, string> = {
 interface Props {
   data: GoalWithStats
   kidName?: string | null
+  isOwner?: boolean
 }
 
-export default function GoalCard({ data, kidName }: Props) {
+export default function GoalCard({ data, kidName, isOwner = false }: Props) {
   const { goal, stats } = data
   const statusClass = STATUS_PILL[goal.status] ?? STATUS_PILL.active
 
   return (
-    <Link
-      href={`/tools/savings/${goal.id}`}
-      className="block bg-surface border border-soft hover:border-accent-border/60 rounded-xl p-5 transition-colors group"
-    >
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="min-w-0 flex-1">
+    <div className="relative">
+      {isOwner && (
+        <div className="absolute top-3 right-3 z-10">
+          <GoalCardMenu goalId={goal.id} goalName={goal.name} status={goal.status} />
+        </div>
+      )}
+      <Link
+        href={`/tools/savings/${goal.id}`}
+        className="block bg-surface border border-soft hover:border-accent-border/60 rounded-xl p-5 transition-colors group"
+      >
+        <div className={`mb-3 ${isOwner ? 'pr-10' : ''}`}>
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">
             {kidName ? `For ${kidName}` : (goal.cadence ?? 'Free-form')}
           </p>
-          <p className="text-base font-black text-prose group-hover:text-accent-text-soft transition-colors truncate">
-            {goal.name}
-          </p>
+          <div className="flex items-center gap-2 min-w-0">
+            <p className="text-base font-black text-prose group-hover:text-accent-text-soft transition-colors truncate min-w-0">
+              {goal.name}
+            </p>
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium border shrink-0 capitalize ${statusClass}`}>
+              {goal.status}
+            </span>
+          </div>
         </div>
-        <span className={`text-xs px-2 py-0.5 rounded-full font-medium border shrink-0 capitalize ${statusClass}`}>
-          {goal.status}
-        </span>
-      </div>
 
       <div className="flex items-baseline gap-3 mb-3">
         <p className="text-3xl font-black text-prose">
@@ -85,6 +93,7 @@ export default function GoalCard({ data, kidName }: Props) {
           </span>
         )}
       </div>
-    </Link>
+      </Link>
+    </div>
   )
 }

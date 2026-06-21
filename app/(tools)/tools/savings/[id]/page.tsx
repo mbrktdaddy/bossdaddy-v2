@@ -12,7 +12,9 @@ import ProgressBlock from '../_components/ProgressBlock'
 import CatchUpPanel from '../_components/CatchUpPanel'
 import ContributionLog, { type ContributorProfile } from '../_components/ContributionLog'
 import ContributionButton from '../_components/ContributionButton'
-import ParticipantsStrip, { type ParticipantDisplay } from '../_components/ParticipantsStrip'
+import MembersPanel, { type MemberDisplay } from '../_components/MembersPanel'
+import NotificationsPanel from '../_components/NotificationsPanel'
+import GoalDangerZone from '../_components/GoalDangerZone'
 import LeaveGoalButton from '../_components/LeaveGoalButton'
 import MyDestinationPanel from '../_components/MyDestinationPanel'
 
@@ -75,7 +77,7 @@ export default async function SavingsGoalPage({ params }: PageProps) {
 
   // Participants for the header strip — include avatars, role, and a flag
   // for the current viewer so they see "You" instead of their own name.
-  const participantDisplay: ParticipantDisplay[] = participants.map((p) => {
+  const participantDisplay: MemberDisplay[] = participants.map((p) => {
     const profile = profileRowsTyped.find((row) => row.id === p.user_id)
     return {
       userId:      p.user_id,
@@ -159,10 +161,11 @@ export default async function SavingsGoalPage({ params }: PageProps) {
         </div>
       </header>
 
-      <ParticipantsStrip
+      <MembersPanel
         goalId={goal.id}
-        participants={participantDisplay}
+        members={participantDisplay}
         isOwner={isOwner}
+        seatsRemaining={Math.max(0, 5 - participants.length)}
       />
 
       <ProgressBlock goal={goal} stats={stats} />
@@ -197,6 +200,15 @@ export default async function SavingsGoalPage({ params }: PageProps) {
         showAttribution={showAttribution}
       />
 
+      {myParticipant && (
+        <NotificationsPanel
+          goalId={goal.id}
+          isOwner={isOwner}
+          initialReminderEnabled={goal.reminder_enabled}
+          initialMuted={myParticipant.muted}
+        />
+      )}
+
       {/* Leave-goal affordance — only for non-owner participants. Owner
           has to archive or delete instead (handled in /edit page). */}
       {!isOwner && myParticipant && (
@@ -213,6 +225,14 @@ export default async function SavingsGoalPage({ params }: PageProps) {
           </div>
           <LeaveGoalButton goalId={goal.id} userId={user.id} goalName={goal.name} />
         </section>
+      )}
+
+      {isOwner && (
+        <GoalDangerZone
+          goalId={goal.id}
+          status={goal.status}
+          goalName={goal.name}
+        />
       )}
 
       <footer className="pt-4 border-t border-soft">

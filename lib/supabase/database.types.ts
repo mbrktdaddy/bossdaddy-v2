@@ -2150,6 +2150,7 @@ export type Database = {
           goal_id: string
           id: string
           joined_at: string
+          muted: boolean
           role: string
           user_id: string
         }
@@ -2160,6 +2161,7 @@ export type Database = {
           goal_id: string
           id?: string
           joined_at?: string
+          muted?: boolean
           role?: string
           user_id: string
         }
@@ -2170,6 +2172,7 @@ export type Database = {
           goal_id?: string
           id?: string
           joined_at?: string
+          muted?: boolean
           role?: string
           user_id?: string
         }

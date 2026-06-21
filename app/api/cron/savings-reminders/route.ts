@@ -64,11 +64,11 @@ export async function GET(request: NextRequest) {
   const [{ data: entryRows }, { data: participantRows }] = await Promise.all([
     admin.from('savings_entries').select(ENTRY_COLUMNS).in('goal_id', goalIds),
     admin.from('savings_goal_participants')
-      .select('goal_id, user_id')
+      .select('goal_id, user_id, muted')
       .in('goal_id', goalIds),
   ])
   const entries = ((entryRows ?? []) as unknown as SavingsEntry[])
-  type ParticipantRow = { goal_id: string; user_id: string }
+  type ParticipantRow = { goal_id: string; user_id: string; muted: boolean }
   const participants = ((participantRows ?? []) as unknown as ParticipantRow[])
 
   const allUserIds = Array.from(new Set(participants.map((p) => p.user_id)))
@@ -100,6 +100,7 @@ export async function GET(request: NextRequest) {
     // For each participant: send unless they've already logged a
     // contribution/catchup in the current cadence period.
     for (const p of goalParticipants) {
+      if (p.muted) { skipped++; continue }   // participant silenced this goal
       const email = emailById.get(p.user_id)
       if (!email) { skipped++; continue }
 

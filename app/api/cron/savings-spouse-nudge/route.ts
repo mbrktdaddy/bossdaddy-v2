@@ -57,11 +57,11 @@ export async function GET(request: NextRequest) {
       .in('goal_id', goalIds)
       .eq('contributed_on', today),
     admin.from('savings_goal_participants')
-      .select('goal_id, user_id')
+      .select('goal_id, user_id, muted')
       .in('goal_id', goalIds),
   ])
   type EntryRow = SavingsEntry
-  type ParticipantRow = { goal_id: string; user_id: string }
+  type ParticipantRow = { goal_id: string; user_id: string; muted: boolean }
   const todayEntries = ((entryRows ?? []) as unknown as EntryRow[])
   const participants = ((participantRows ?? []) as unknown as ParticipantRow[])
 
@@ -117,6 +117,7 @@ export async function GET(request: NextRequest) {
     // Send to every participant — each one frames the OTHER participant(s)
     // as the "partner who hasn't logged."
     for (const p of goalParticipants) {
+      if (p.muted) { skipped++; continue }   // participant silenced this goal
       const email = emailById.get(p.user_id)
       if (!email) { skipped++; continue }
       const otherIds = goalParticipants

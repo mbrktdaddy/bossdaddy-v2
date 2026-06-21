@@ -158,7 +158,7 @@ const GOAL_COLUMNS = [
 ].join(', ')
 
 const ENTRY_COLUMNS = 'id, goal_id, contributor_id, contributed_on, amount, kind, note, created_at'
-const PARTICIPANT_COLUMNS = 'id, goal_id, user_id, role, destination_url, destination_type, destination_label, joined_at'
+const PARTICIPANT_COLUMNS = 'id, goal_id, user_id, role, destination_url, destination_type, destination_label, muted, joined_at'
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -1146,6 +1146,36 @@ export async function updateParticipantDestination(
 
   const { error } = await supabase.from('savings_goal_participants')
     .update(updates as never)
+    .eq('goal_id', parsed.data.goalId)
+    .eq('user_id', user.id)
+  if (error) return { ok: false, error: error.message }
+
+  revalidateSavingsSurfaces(parsed.data.goalId)
+  return { ok: true }
+}
+
+// Mute/unmute reminder emails (and any future goal-scoped notifications) for
+// the CURRENT user on a goal they participate in. Per-participant and
+// self-service: any member can silence a goal's emails without leaving it.
+// The owner muting a goal only silences the owner's own emails — to control
+// the whole goal's reminders the owner uses reminder_enabled on the goal.
+const SetParticipantMuteSchema = z.object({
+  goalId: z.string().uuid(),
+  muted:  z.boolean(),
+})
+
+export async function setParticipantMute(
+  input: z.input<typeof SetParticipantMuteSchema>,
+): Promise<SavingsActionResult> {
+  const parsed = SetParticipantMuteSchema.safeParse(input)
+  if (!parsed.success) return { ok: false, error: 'Invalid input' }
+
+  const supabase = await createClient()
+  const { user } = await getUserSafe(supabase)
+  if (!user) return { ok: false, error: 'Unauthorized' }
+
+  const { error } = await supabase.from('savings_goal_participants')
+    .update({ muted: parsed.data.muted } as never)
     .eq('goal_id', parsed.data.goalId)
     .eq('user_id', user.id)
   if (error) return { ok: false, error: error.message }
