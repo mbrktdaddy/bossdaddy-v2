@@ -35,12 +35,18 @@ export async function PUT(
 
   if (error) return NextResponse.json({ error: 'Action failed' }, { status: 500 })
 
-  // Revalidate the parent content page so the approved comment appears immediately
-  if (parsed.data.action === 'approve' && data) {
+  // Revalidate the parent content page so the change is reflected immediately —
+  // on BOTH approve (comment appears) and reject (comment is removed).
+  if (data) {
     const { content_type, content_id } = data as { content_type: string; content_id: string }
-    const table = content_type === 'review' ? 'reviews' : 'guides'
-    const { data: content } = await admin.from(table).select('slug').eq('id', content_id).single()
-    if (content?.slug) revalidatePath(`/${content_type}s/${content.slug}`)
+    const tableMap  = { review: 'reviews', guide: 'guides', product: 'products' } as const
+    const prefixMap = { review: '/reviews', guide: '/guides', product: '/bench' } as const
+    const table  = tableMap[content_type as keyof typeof tableMap]
+    const prefix = prefixMap[content_type as keyof typeof prefixMap]
+    if (table && prefix) {
+      const { data: content } = await admin.from(table).select('slug').eq('id', content_id).single()
+      if (content?.slug) revalidatePath(`${prefix}/${content.slug}`)
+    }
   }
 
   return NextResponse.json({ comment: data })

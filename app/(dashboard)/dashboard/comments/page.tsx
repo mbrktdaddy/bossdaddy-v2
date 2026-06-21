@@ -37,18 +37,23 @@ export default async function CommentsPage({ searchParams }: Props) {
     rejected: rejectedCount.count ?? 0,
   }
 
-  // Lookup article/review titles for the comments in view
+  // Lookup review/guide/product titles for the comments in view
   const reviewIds  = Array.from(new Set((comments ?? []).filter(c => c.content_type === 'review').map(c => c.content_id)))
   const articleIds = Array.from(new Set((comments ?? []).filter(c => c.content_type === 'guide').map(c => c.content_id)))
+  const productIds = Array.from(new Set((comments ?? []).filter(c => c.content_type === 'product').map(c => c.content_id)))
 
-  const [{ data: reviewTitles }, { data: articleTitles }] = await Promise.all([
-    reviewIds.length  ? admin.from('reviews').select('id, title, slug').in('id', reviewIds)    : Promise.resolve({ data: [] as { id: string; title: string; slug: string }[] }),
-    articleIds.length ? admin.from('guides').select('id, title, slug').in('id', articleIds) : Promise.resolve({ data: [] as { id: string; title: string; slug: string }[] }),
+  type TitleRow = { id: string; title: string; slug: string }
+  const [{ data: reviewTitles }, { data: articleTitles }, { data: productTitles }] = await Promise.all([
+    reviewIds.length  ? admin.from('reviews').select('id, title, slug').in('id', reviewIds)       : Promise.resolve({ data: [] as TitleRow[] }),
+    articleIds.length ? admin.from('guides').select('id, title, slug').in('id', articleIds)       : Promise.resolve({ data: [] as TitleRow[] }),
+    productIds.length ? admin.from('products').select('id, title:name, slug').in('id', productIds) : Promise.resolve({ data: [] as TitleRow[] }),
   ])
 
-  const contentMap = new Map<string, { title: string; slug: string; type: string }>([
-    ...(reviewTitles  ?? []).map(r => [r.id, { title: r.title, slug: r.slug, type: 'review' }]  as [string, { title: string; slug: string; type: string }]),
-    ...(articleTitles ?? []).map(a => [a.id, { title: a.title, slug: a.slug, type: 'guide' }] as [string, { title: string; slug: string; type: string }]),
+  type ContentEntry = { title: string; slug: string; type: string; href: string }
+  const contentMap = new Map<string, ContentEntry>([
+    ...(reviewTitles  ?? []).map(r => [r.id, { title: r.title, slug: r.slug, type: 'review',  href: `/reviews/${r.slug}` }] as [string, ContentEntry]),
+    ...(articleTitles ?? []).map(a => [a.id, { title: a.title, slug: a.slug, type: 'guide',   href: `/guides/${a.slug}` }]  as [string, ContentEntry]),
+    ...(productTitles ?? []).map(p => [p.id, { title: p.title, slug: p.slug, type: 'product', href: `/bench/${p.slug}` }]   as [string, ContentEntry]),
   ])
 
   return (
@@ -95,7 +100,7 @@ export default async function CommentsPage({ searchParams }: Props) {
           {comments.map((c) => {
             const author  = (Array.isArray(c.profiles) ? c.profiles[0] : c.profiles as unknown as { username: string } | null)?.username ?? 'unknown'
             const content = contentMap.get(c.content_id)
-            const href    = content ? `/${content.type}s/${content.slug}` : null
+            const href    = content?.href ?? null
             const score   = c.moderation_score as number | null
             const flags   = (c.moderation_flags ?? []) as string[]
 
@@ -107,7 +112,7 @@ export default async function CommentsPage({ searchParams }: Props) {
                       ? 'bg-accent-tint text-accent-text-soft border-accent-border/30'
                       : 'bg-info-bg text-info-ink border-info-line'
                   }`}>
-                    {c.content_type === 'review' ? 'Review' : 'Guide'}
+                    {c.content_type === 'review' ? 'Review' : c.content_type === 'product' ? 'Bench' : 'Guide'}
                   </span>
                   <span className="text-xs text-prose-faint">by @{author}</span>
                   <span className="text-xs text-prose-faint">
@@ -141,7 +146,10 @@ export default async function CommentsPage({ searchParams }: Props) {
                   </p>
                 )}
 
-                {status === 'pending' && <CommentActions id={c.id} />}
+                <CommentActions id={c.id} status={status as 'pending' | 'approved' | 'rejected'} />
+                {status === 'approved' && flags.length > 0 && (
+                  <p className="text-xs text-prose-faint mt-2">Auto-published — flagged for your review.</p>
+                )}
               </div>
             )
           })}

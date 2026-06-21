@@ -3,10 +3,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-export function CommentActions({ id }: { id: string }) {
+export function CommentActions({ id, status }: { id: string; status: 'pending' | 'approved' | 'rejected' }) {
   const router = useRouter()
   const [loading, setLoading] = useState<'approve' | 'reject' | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  const showApprove = status !== 'approved' // pending or rejected → can (re)approve
+  const showReject  = status !== 'rejected' // pending or approved → can remove/reject
 
   async function act(action: 'approve' | 'reject') {
     setLoading(action); setError(null)
@@ -27,20 +30,24 @@ export function CommentActions({ id }: { id: string }) {
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      <button
-        onClick={() => act('approve')}
-        disabled={!!loading}
-        className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-success-bg hover:bg-success-bg disabled:opacity-50 text-forest border border-success-line transition-colors"
-      >
-        {loading === 'approve' ? '…' : '✓ Approve'}
-      </button>
-      <button
-        onClick={() => act('reject')}
-        disabled={!!loading}
-        className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-danger-bg hover:bg-danger-bg disabled:opacity-50 text-danger-ink border border-danger-line transition-colors"
-      >
-        {loading === 'reject' ? '…' : '✗ Reject'}
-      </button>
+      {showApprove && (
+        <button
+          onClick={() => act('approve')}
+          disabled={!!loading}
+          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-success-bg hover:bg-success-bg disabled:opacity-50 text-forest border border-success-line transition-colors"
+        >
+          {loading === 'approve' ? '…' : status === 'rejected' ? '✓ Restore' : '✓ Approve'}
+        </button>
+      )}
+      {showReject && (
+        <button
+          onClick={() => act('reject')}
+          disabled={!!loading}
+          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-danger-bg hover:bg-danger-bg disabled:opacity-50 text-danger-ink border border-danger-line transition-colors"
+        >
+          {loading === 'reject' ? '…' : status === 'approved' ? '✗ Remove' : '✗ Reject'}
+        </button>
+      )}
       {error && <span className="text-xs text-danger-ink">{error}</span>}
     </div>
   )

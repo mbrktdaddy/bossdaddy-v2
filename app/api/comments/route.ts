@@ -132,36 +132,47 @@ export async function POST(request: NextRequest) {
 
   const isTrusted = profile?.trusted_commenter === true
 
-  let status: 'pending' | 'approved' | 'rejected' = 'pending'
+  // ── Publish-first policy ────────────────────────────────────────────────
+  // Commenting should feel free and immediate. Everything publishes on submit
+  // EXCEPT content the spam net flags as clearly malicious, which is silently
+  // rejected. Borderline comments still post, but keep their flags/score so an
+  // admin can spot-check and remove them after the fact (post-moderation).
+  const HARD_REJECT_SCORE = 0.85
+
+  let status: 'pending' | 'approved' | 'rejected' = 'approved'
   let moderationScore: number | null = null
-  let moderationFlags: string[] = []
+
+  // Cheap regex scan runs for everyone — it's the baseline net and the
+  // fallback when Claude is unavailable.
+  const scan = lightweightScan(sanitized)
+  let moderationFlags: string[] = scan.flags
 
   if (isTrusted) {
-    // Fast path: lightweight scan only
-    const scan = lightweightScan(sanitized)
-    moderationFlags = scan.flags
-    status = scan.suspicious ? 'pending' : 'approved'
+    // Trusted commenters publish immediately; flags are kept for visibility only.
+    status = 'approved'
   } else {
-    // Full Claude moderation
     try {
       const result = await moderateWithClaude(sanitized)
       moderationScore = result.score
-      moderationFlags = result.flags ?? []
+      moderationFlags = Array.from(new Set([...moderationFlags, ...(result.flags ?? [])]))
 
-      if (result.score <= 0.30 || result.recommendation === 'approve') {
-        status = 'approved'
-      } else if (result.score >= 0.75 || result.recommendation === 'reject') {
-        // Silent reject — spammer sees a generic "submitted" message, never knows
-        return NextResponse.json(
-          { comment: { status: 'pending' } },
-          { status: 201 }
-        )
-      } else {
-        status = 'pending'
+      if (result.score >= HARD_REJECT_SCORE || result.recommendation === 'reject') {
+        // Clear spam/malicious only — silent reject (spammer sees a generic
+        // "pending" message and never knows it was blocked).
+        return NextResponse.json({ comment: { status: 'pending' } }, { status: 201 })
       }
+
+      // Everything else publishes immediately.
+      status = 'approved'
     } catch {
-      // Claude unavailable — fall back to manual review
-      status = 'pending'
+      // Claude unavailable — fall back to the lightweight scan. Only strong
+      // spam signals hold for review; otherwise still publish.
+      if (scan.suspicious) {
+        moderationFlags = Array.from(new Set([...moderationFlags, 'moderation_unavailable']))
+        status = 'pending'
+      } else {
+        status = 'approved'
+      }
     }
   }
 
