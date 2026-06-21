@@ -34,13 +34,13 @@ export async function GET(request: NextRequest) {
 
   // Pull active daily-cadence goals with reminders on
   const { data: goalRows } = await admin.from('savings_goals')
-    .select('id, name, cadence, amount_per_cadence, reminder_enabled, status, owner_id, start_date')
+    .select('id, name, cadence, amount_per_cadence, reminder_enabled, reminder_cadence, status, owner_id, start_date')
     .eq('status', 'active')
     .eq('reminder_enabled', true)
     .eq('cadence', 'daily')
 
   type GoalMini = Pick<SavingsGoal,
-    'id' | 'name' | 'cadence' | 'amount_per_cadence' | 'reminder_enabled' | 'status' | 'owner_id' | 'start_date'
+    'id' | 'name' | 'cadence' | 'amount_per_cadence' | 'reminder_enabled' | 'reminder_cadence' | 'status' | 'owner_id' | 'start_date'
   >
   const goals = ((goalRows ?? []) as unknown as GoalMini[])
   if (goals.length === 0) {
@@ -96,6 +96,11 @@ export async function GET(request: NextRequest) {
   let goalsConsidered = 0
 
   for (const goal of goals) {
+    // Honor an explicit "off" reminder cadence — matches savings-reminders,
+    // where reminderDueToday() returns false for 'off'. (NULL means "use the
+    // goal cadence" and is left alone, which is why this is an app-side check
+    // and not a SQL .neq — Postgres `<> 'off'` is NULL for NULL rows.)
+    if (goal.reminder_cadence === 'off') { skipped++; continue }
     const goalParticipants = participants.filter((p) => p.goal_id === goal.id)
     if (goalParticipants.length < 2) { skipped++; continue }   // solo — skip
     goalsConsidered++
