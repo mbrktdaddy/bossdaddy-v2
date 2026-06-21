@@ -982,9 +982,10 @@ export type Database = {
       kid_profiles: {
         Row: {
           anonymous_id: string | null
-          birthdate: string
+          birthdate: string | null
           created_at: string
           id: string
+          member_type: string
           money_balance: number
           money_monthly: number
           money_return_rate: number
@@ -997,9 +998,10 @@ export type Database = {
         }
         Insert: {
           anonymous_id?: string | null
-          birthdate: string
+          birthdate?: string | null
           created_at?: string
           id?: string
+          member_type?: string
           money_balance?: number
           money_monthly?: number
           money_return_rate?: number
@@ -1012,9 +1014,10 @@ export type Database = {
         }
         Update: {
           anonymous_id?: string | null
-          birthdate?: string
+          birthdate?: string | null
           created_at?: string
           id?: string
+          member_type?: string
           money_balance?: number
           money_monthly?: number
           money_return_rate?: number

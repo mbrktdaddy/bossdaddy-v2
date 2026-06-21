@@ -13,9 +13,12 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getOrCreateAnonymousId, getAnonymousId } from './cookies'
 
+const MemberTypeSchema = z.enum(['child', 'partner', 'other'])
+
 const KidInputSchema = z.object({
   name: z.string().trim().min(1).max(80).optional().nullable(),
   birthdate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Birthdate required (YYYY-MM-DD)'),
+  member_type: MemberTypeSchema.optional(),
   photo_url: z.string().url().optional().nullable(),
 })
 
@@ -27,10 +30,17 @@ export type KidActionResult<T = void> =
   | { ok: true; data?: T }
   | { ok: false; error: string }
 
+export type MemberType = 'child' | 'partner' | 'other'
+
 export type Kid = {
   id: string
   name: string | null
+  // Nullable in the DB as of migration 105 (adults need no "age until 18"),
+  // but the app still requires it for every member until the form is made
+  // type-aware in Phase 3 — so no null rows exist yet and the type stays
+  // string. Flip to `string | null` when the form allows skipping it.
   birthdate: string
+  member_type: MemberType
   photo_url: string | null
   money_balance: number
   money_monthly: number
@@ -41,7 +51,7 @@ export type Kid = {
 }
 
 const KID_COLUMNS =
-  'id, name, birthdate, photo_url, money_balance, money_monthly, money_target, money_return_rate, created_at, updated_at'
+  'id, name, birthdate, member_type, photo_url, money_balance, money_monthly, money_target, money_return_rate, created_at, updated_at'
 
 // Tier-based kid count limits. Photo upload is a separate gate — anonymous
 // can never upload (no stable identity to scope storage by), authenticated
@@ -79,7 +89,7 @@ export async function getKids(): Promise<Kid[]> {
       .select(KID_COLUMNS)
       .eq('user_id', user.id)
       .order('created_at', { ascending: true })
-    return (data ?? []) as Kid[]
+    return (data ?? []) as unknown as Kid[]
   }
 
   const anonId = await getAnonymousId()
@@ -90,7 +100,7 @@ export async function getKids(): Promise<Kid[]> {
     .select(KID_COLUMNS)
     .eq('anonymous_id', anonId)
     .order('created_at', { ascending: true })
-  return (data ?? []) as Kid[]
+  return (data ?? []) as unknown as Kid[]
 }
 
 export async function addKid(
@@ -104,6 +114,7 @@ export async function addKid(
   const payload = {
     name: parsed.data.name ?? null,
     birthdate: parsed.data.birthdate,
+    member_type: parsed.data.member_type ?? 'child',
     photo_url: parsed.data.photo_url ?? null,
   }
 
@@ -119,12 +130,12 @@ export async function addKid(
     if ((count ?? 0) >= limit) {
       return {
         ok: false,
-        error: `You've reached the ${limit}-kid limit for your account. Remove a kid to add another.`,
+        error: `You've reached the ${limit}-member limit for your account. Remove a family member to add another.`,
       }
     }
 
     const { data, error } = await supabase.from('kid_profiles')
-      .insert({ ...payload, user_id: user.id })
+      .insert({ ...payload, user_id: user.id } as never)
       .select('id')
       .single()
     if (error) return { ok: false, error: error.message }
@@ -142,12 +153,12 @@ export async function addKid(
   if ((count ?? 0) >= ANONYMOUS_KID_LIMIT) {
     return {
       ok: false,
-      error: 'Sign up to track more than one kid. Your existing kid will carry over.',
+      error: 'Sign up to add more than one family member. Your existing one will carry over.',
     }
   }
 
   const { data, error } = await admin.from('kid_profiles')
-    .insert({ ...payload, anonymous_id: anonId, photo_url: null })
+    .insert({ ...payload, anonymous_id: anonId, photo_url: null } as never)
     .select('id')
     .single()
   if (error) return { ok: false, error: error.message }
@@ -165,15 +176,17 @@ export async function updateKid(
     return { ok: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
   }
 
-  const { id, name, birthdate, photo_url } = parsed.data
+  const { id, name, birthdate, member_type, photo_url } = parsed.data
   const updates: {
     name?: string | null
     birthdate?: string
+    member_type?: MemberType
     photo_url?: string | null
   } = {}
-  if (name      !== undefined) updates.name      = name
-  if (birthdate !== undefined) updates.birthdate = birthdate
-  if (photo_url !== undefined) updates.photo_url = photo_url
+  if (name        !== undefined) updates.name        = name
+  if (birthdate   !== undefined) updates.birthdate   = birthdate
+  if (member_type !== undefined) updates.member_type = member_type
+  if (photo_url   !== undefined) updates.photo_url   = photo_url
 
   if (Object.keys(updates).length === 0) {
     return { ok: false, error: 'No fields to update' }
@@ -184,7 +197,7 @@ export async function updateKid(
 
   if (user) {
     const { error } = await supabase.from('kid_profiles')
-      .update(updates)
+      .update(updates as never)
       .eq('id', id)
       .eq('user_id', user.id)
     if (error) return { ok: false, error: error.message }
@@ -198,7 +211,7 @@ export async function updateKid(
 
   const admin = createAdminClient()
   const { error } = await admin.from('kid_profiles')
-    .update(updates)
+    .update(updates as never)
     .eq('id', id)
     .eq('anonymous_id', anonId)
   if (error) return { ok: false, error: error.message }

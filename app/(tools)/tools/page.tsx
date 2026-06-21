@@ -203,10 +203,10 @@ export default async function ToolsHubPage() {
             Get started
           </p>
           <p className="text-lg sm:text-xl font-black text-prose leading-snug mb-2">
-            Add a kid to unlock personalized numbers.
+            Add a family member to unlock personalized numbers.
           </p>
           <p className="text-sm text-prose-muted mb-5 max-w-xl">
-            Tools work without an account — but adding a kid lets you save
+            Tools work without an account — but adding your family lets you save
             moments, get yearly check-ins, and watch the number compound.
           </p>
           <Link

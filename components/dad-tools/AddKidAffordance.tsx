@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { LABELS } from '@/lib/labels'
 import KidProfileForm from './KidProfileForm'
 
 interface Props {
@@ -10,7 +11,7 @@ interface Props {
 }
 
 export default function AddKidAffordance({
-  ctaLabel = 'Add a kid',
+  ctaLabel = LABELS.tools.kids.addCta,
   variant = 'inline',
   isAuthenticated = false,
 }: Props) {
@@ -33,7 +34,7 @@ export default function AddKidAffordance({
     return (
       <div className="bg-surface border border-faint rounded-2xl p-6 text-center space-y-3">
         <p className="text-sm text-prose-faint">
-          No kids yet. Add one to start tracking weekends and moments.
+          {LABELS.tools.kids.empty}
         </p>
         <div className="flex items-center justify-center gap-3 flex-wrap">
           <button

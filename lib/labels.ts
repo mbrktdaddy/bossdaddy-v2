@@ -115,9 +115,9 @@ export const LABELS = {
       heroTitleSecond:  'You can use them too.',
       heroBody:         'No PR samples. No app downloads. No sign-up walls. Plug in a birthdate, get a number that means something. Capture the ones that count.',
       loggedInGreeting: 'Welcome back, Boss.',
-      loggedInBody:     'Where you are right now, with each kid.',
-      manageKidsCta:    'Manage your kids →',
-      addFirstKidCta:   'Add your first kid →',
+      loggedInBody:     'Where you are right now, with your family.',
+      manageKidsCta:    'Manage your family →',
+      addFirstKidCta:   'Add your first family member →',
     },
 
     // The Boss — member AI concierge. Grounded gear/guide answers + general
@@ -271,14 +271,16 @@ export const LABELS = {
       confirmation:      'Captured.',
     },
 
-    // My Kids dashboard section
+    // Family dashboard section (internally kid_profiles; "Family" in the UI)
     kids: {
-      section:      'My Kids',
-      addCta:       'Add a kid',
+      section:      'Family',
+      addCta:       'Add a family member',
       editCta:      'Edit',
       deleteCta:    'Remove',
-      noNameFallback: 'your kid',
-      empty:        'No kids yet. Add one to start tracking weekends and moments.',
+      noNameFallback: 'your family member',
+      empty:        'No family yet. Add someone to start tracking moments and milestones.',
+      // child/partner/other → display labels. Source of truth for relationship copy.
+      memberType:   { child: 'Child', partner: 'Partner', other: 'Other' } as Record<'child' | 'partner' | 'other', string>,
     },
 
     // Email opt-ins. Two cadences:

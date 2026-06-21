@@ -6,10 +6,11 @@
 import Link from 'next/link'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { ageInYearsMonths } from '@/lib/dad-tools/calc'
+import { LABELS } from '@/lib/labels'
 import type { Kid } from '@/lib/dad-tools/kid-actions'
 import AddKidAffordance from './AddKidAffordance'
 
-const KID_COLUMNS = 'id, name, birthdate, photo_url, money_balance, money_monthly, money_target, money_return_rate, created_at, updated_at'
+const KID_COLUMNS = 'id, name, birthdate, member_type, photo_url, money_balance, money_monthly, money_target, money_return_rate, created_at, updated_at'
 
 function ageBadge(birthdate: string): string {
   const { years, months } = ageInYearsMonths(birthdate)
@@ -45,8 +46,12 @@ export default async function MyKidsSection() {
       ) : (
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide sm:flex-wrap sm:overflow-visible">
           {kids.map((kid) => {
-            const name = kid.name?.trim() || 'Your kid'
+            const name = kid.name?.trim() || LABELS.tools.kids.noNameFallback
             const initial = (kid.name?.trim()?.[0] ?? '?').toUpperCase()
+            // Children show age; partner/other show their relationship label.
+            const meta = kid.member_type === 'child'
+              ? ageBadge(kid.birthdate)
+              : LABELS.tools.kids.memberType[kid.member_type]
             return (
               <Link
                 key={kid.id}
@@ -72,7 +77,7 @@ export default async function MyKidsSection() {
                   <p className="text-xs font-semibold text-prose truncate w-full group-hover:text-accent-text-soft transition-colors">
                     {name}
                   </p>
-                  <p className="text-[10px] text-prose-faint">{ageBadge(kid.birthdate)}</p>
+                  <p className="text-[10px] text-prose-faint">{meta}</p>
                 </div>
               </Link>
             )
