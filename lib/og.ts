@@ -17,7 +17,7 @@
  * After a template bump, still re-scrape already-shared links in each platform's
  * debugger (e.g. Facebook Sharing Debugger) — they won't re-fetch on their own.
  */
-export const OG_TEMPLATE_VERSION = 2
+export const OG_TEMPLATE_VERSION = 3
 
 export type OgType = 'review' | 'guide' | 'article'
 

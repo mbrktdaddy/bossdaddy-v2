@@ -3,7 +3,7 @@ import { Geist, Montserrat, Source_Serif_4 } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import PwaInstallProvider from "@/components/pwa/PwaInstallProvider";
-import { ogImageUrl } from "@/lib/og";
+import { ogImageMeta } from "@/lib/og";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -35,6 +35,10 @@ const socialVerification: Record<string, string> = {}
 if (process.env.NEXT_PUBLIC_FB_DOMAIN_VERIFY) socialVerification['facebook-domain-verification'] = process.env.NEXT_PUBLIC_FB_DOMAIN_VERIFY
 if (process.env.NEXT_PUBLIC_PINTEREST_VERIFY) socialVerification['p:domain_verify'] = process.env.NEXT_PUBLIC_PINTEREST_VERIFY
 
+// Shared default preview image for the homepage and any page that inherits the
+// root metadata. Used by BOTH openGraph.images and twitter.images.
+const defaultOgImage = ogImageMeta({ title: 'Boss Daddy Life', type: 'review', alt: 'Boss Daddy Life — Dad like a BOSS' })
+
 export const metadata: Metadata = {
   title: {
     default: 'Boss Daddy — Dad like a BOSS',
@@ -49,12 +53,16 @@ export const metadata: Metadata = {
     siteName: 'Boss Daddy Life',
     type: 'website',
     locale: 'en_US',
-    images: [{ url: ogImageUrl({ title: 'Boss Daddy Life', type: 'review' }), width: 1200, height: 630, alt: 'Boss Daddy Life — Dad like a BOSS' }],
+    images: [defaultOgImage],
   },
   twitter: {
     card: 'summary_large_image',
     site: '@bossdaddylife',
     creator: '@bossdaddylife',
+    // Next.js does NOT copy openGraph.images into twitter — without this, the
+    // homepage (and any root-inheriting page) emits no twitter:image and X
+    // renders no card. Per-page metadata sets its own twitter.images.
+    images: [defaultOgImage],
   },
   ...(Object.keys(socialVerification).length ? { verification: { other: socialVerification } } : {}),
   alternates: {
