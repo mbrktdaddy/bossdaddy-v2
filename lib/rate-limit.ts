@@ -61,8 +61,10 @@ function getLimiter(type: string): Ratelimit | null {
     'boss-notify':      new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, '1 h'), prefix: 'bd_boss_notify' }),
     // X Studio radar cron — fires Anthropic web_search (priciest call in the
     // stack) autonomously. HARD daily run cap = the budget guard. Cron runs 1×/day;
-    // the 2nd slot absorbs an occasional manual ?secret= trigger.
-    'radar':            new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(2, '24 h'), prefix: 'bd_radar' }),
+    // the spare slots absorb manual ?secret= triggers.
+    // TODO(x-studio): revert to slidingWindow(2, '24 h') once the hardened
+    // web_search radar is confirmed inserting rows — temporarily 10 for testing.
+    'radar':            new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '24 h'), prefix: 'bd_radar' }),
   }
 
   limiters[type] = configs[type] ?? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1 h'), prefix: `bd_${type}` })

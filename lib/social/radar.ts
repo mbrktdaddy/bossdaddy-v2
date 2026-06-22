@@ -150,23 +150,33 @@ Search recent sources, then return 10-20 timely signals by calling the submit_si
     toolChoice?: Anthropic.Messages.MessageCreateParams['tool_choice'],
   ) => ({
     model: MODEL,
-    max_tokens: 4000,
+    max_tokens: 3000,
     system: [{ type: 'text' as const, text: RADAR_SYSTEM, cache_control: { type: 'ephemeral' as const } }],
     tools: searchTools,
     ...(toolChoice ? { tool_choice: toolChoice } : {}),
     messages: msgs,
   })
 
+  // Hard time budget. The cron caps at 300s; bound EVERY Anthropic call so no
+  // single slow web_search loop eats the whole function, and skip the phase-2
+  // extraction if we're already low on time (salvage from phase-1 content
+  // instead). maxRetries 1 — a retry on a near-timeout call would blow the cap.
+  const startedAt = Date.now()
+  const elapsed = () => Date.now() - startedAt
+  const PHASE1_TIMEOUT = 200_000
+  const PHASE2_DEADLINE = 230_000
+
   try {
     // Phase 1 — let the model search (auto tool choice).
-    let message = await getClaudeClient().messages.create(createArgs(messages), { maxRetries: 3 })
+    let message = await getClaudeClient().messages.create(createArgs(messages), { maxRetries: 1, timeout: PHASE1_TIMEOUT })
     // web_search can yield stop_reason 'pause_turn' on long loops — continue the
-    // turn (passing partial content back) until it finishes, capped.
+    // turn (passing partial content back) until it finishes, capped, and only
+    // while time remains.
     let guard = 0
-    while (message.stop_reason === 'pause_turn' && guard < 3) {
+    while (message.stop_reason === 'pause_turn' && guard < 2 && elapsed() < PHASE2_DEADLINE) {
       guard++
       messages.push({ role: 'assistant', content: message.content })
-      message = await getClaudeClient().messages.create(createArgs(messages), { maxRetries: 3 })
+      message = await getClaudeClient().messages.create(createArgs(messages), { maxRetries: 1, timeout: PHASE1_TIMEOUT })
     }
 
     let out = extractToolInput(message, 'submit_signals')
@@ -175,13 +185,14 @@ Search recent sources, then return 10-20 timely signals by calling the submit_si
     // it answers in prose). Force the tool call from the accumulated context, so
     // a run can't silently yield zero. web_search stays in `tools` (its results
     // are in history); forcing submit_signals just makes it emit, no new search.
-    if (!out) {
+    // Skipped if we're out of time budget — the salvage parse below covers it.
+    if (!out && elapsed() < PHASE2_DEADLINE) {
       messages.push({ role: 'assistant', content: message.content })
       messages.push({ role: 'user', content: 'Now return everything you found by calling submit_signals. Do not search further.' })
       try {
         const forced = await getClaudeClient().messages.create(
           createArgs(messages, { type: 'tool', name: 'submit_signals' }),
-          { maxRetries: 3 },
+          { maxRetries: 1, timeout: 50_000 },
         )
         out = extractToolInput(forced, 'submit_signals')
       } catch (err) {

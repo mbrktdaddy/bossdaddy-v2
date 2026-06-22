@@ -25,9 +25,10 @@ export const SUBREDDITS: string[] = ['daddit', 'Parenting', 'NewParents', 'preda
 // Reddit OAuth app) — left as graceful-degradation until that polish lands.
 
 export const RADAR_CAPS = {
-  // Anthropic web_search uses per run — the single biggest spend lever. Bounds
-  // the autonomous cost so the daily cron can't blow the $200 Anthropic cap.
-  maxWebSearches: 5,
+  // Anthropic web_search uses per run — both the biggest spend lever AND the
+  // biggest latency lever. Kept low (3) so the run finishes well under the cron's
+  // 300s hard cap; web_search rounds are slow and variable.
+  maxWebSearches: 3,
   // Hard ceiling on rows inserted per run across all sources.
   maxSignalsPerRun: 60,
   // Reddit: top posts per subreddit, over this window.
