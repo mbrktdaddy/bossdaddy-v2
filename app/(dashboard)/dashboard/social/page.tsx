@@ -1,6 +1,7 @@
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
+import { requireAdmin } from '@/lib/auth-cache'
 import { PLATFORMS } from '@/lib/social-platforms'
 import SocialPostList from './_components/SocialPostList'
 import GenerateDrawer from './_components/GenerateDrawer'
@@ -15,6 +16,9 @@ export default async function SocialPage({ searchParams }: Props) {
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
   if (!user) redirect('/login?next=/dashboard/social')
+
+  // X Studio is admin-only as a FEATURE (RLS stays owner-scoped as defense-in-depth).
+  await requireAdmin()
 
   const { platform = 'x', status = 'all' } = await searchParams
 

@@ -2307,52 +2307,337 @@ export type Database = {
         }
         Relationships: []
       }
+      social_articles: {
+        Row: {
+          body_html: string | null
+          cover_image_url: string | null
+          created_at: string
+          dropped_tags: Json | null
+          external_id: string | null
+          external_url: string | null
+          id: string
+          posted_at: string | null
+          posted_via: string
+          source_id: string | null
+          source_title: string | null
+          source_type: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body_html?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          dropped_tags?: Json | null
+          external_id?: string | null
+          external_url?: string | null
+          id?: string
+          posted_at?: string | null
+          posted_via?: string
+          source_id?: string | null
+          source_title?: string | null
+          source_type?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body_html?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          dropped_tags?: Json | null
+          external_id?: string | null
+          external_url?: string | null
+          id?: string
+          posted_at?: string | null
+          posted_via?: string
+          source_id?: string | null
+          source_title?: string | null
+          source_type?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      social_metrics: {
+        Row: {
+          article_id: string | null
+          captured_at: string
+          created_at: string
+          id: string
+          impressions: number
+          likes: number
+          link_clicks: number
+          post_id: string | null
+          replies: number
+          reposts: number
+          user_id: string
+        }
+        Insert: {
+          article_id?: string | null
+          captured_at?: string
+          created_at?: string
+          id?: string
+          impressions?: number
+          likes?: number
+          link_clicks?: number
+          post_id?: string | null
+          replies?: number
+          reposts?: number
+          user_id: string
+        }
+        Update: {
+          article_id?: string | null
+          captured_at?: string
+          created_at?: string
+          id?: string
+          impressions?: number
+          likes?: number
+          link_clicks?: number
+          post_id?: string | null
+          replies?: number
+          reposts?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_metrics_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "social_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_metrics_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "social_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_opportunities: {
+        Row: {
+          created_at: string
+          generated_article_id: string | null
+          generated_post_id: string | null
+          generated_thread_group_id: string | null
+          id: string
+          rationale: string | null
+          score: number | null
+          status: string
+          suggested_format: string | null
+          suggested_source_id: string | null
+          suggested_source_type: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          generated_article_id?: string | null
+          generated_post_id?: string | null
+          generated_thread_group_id?: string | null
+          id?: string
+          rationale?: string | null
+          score?: number | null
+          status?: string
+          suggested_format?: string | null
+          suggested_source_id?: string | null
+          suggested_source_type?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          generated_article_id?: string | null
+          generated_post_id?: string | null
+          generated_thread_group_id?: string | null
+          id?: string
+          rationale?: string | null
+          score?: number | null
+          status?: string
+          suggested_format?: string | null
+          suggested_source_id?: string | null
+          suggested_source_type?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_opportunities_generated_article_id_fkey"
+            columns: ["generated_article_id"]
+            isOneToOne: false
+            referencedRelation: "social_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_opportunities_generated_post_id_fkey"
+            columns: ["generated_post_id"]
+            isOneToOne: false
+            referencedRelation: "social_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_opportunities_generated_thread_group_id_fkey"
+            columns: ["generated_thread_group_id"]
+            isOneToOne: false
+            referencedRelation: "social_thread_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_posts: {
         Row: {
           content: string
           created_at: string
+          external_id: string | null
+          external_url: string | null
           id: string
           image_url: string | null
           link_url: string | null
           notes: string | null
           platform: string
           posted_at: string | null
+          posted_via: string
           source_id: string | null
           source_title: string | null
           source_type: string | null
           status: string
+          thread_group_id: string | null
+          thread_position: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
           content: string
           created_at?: string
+          external_id?: string | null
+          external_url?: string | null
           id?: string
           image_url?: string | null
           link_url?: string | null
           notes?: string | null
           platform?: string
           posted_at?: string | null
+          posted_via?: string
           source_id?: string | null
           source_title?: string | null
           source_type?: string | null
           status?: string
+          thread_group_id?: string | null
+          thread_position?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
           content?: string
           created_at?: string
+          external_id?: string | null
+          external_url?: string | null
           id?: string
           image_url?: string | null
           link_url?: string | null
           notes?: string | null
           platform?: string
           posted_at?: string | null
+          posted_via?: string
           source_id?: string | null
           source_title?: string | null
           source_type?: string | null
           status?: string
+          thread_group_id?: string | null
+          thread_position?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_posts_thread_group_id_fkey"
+            columns: ["thread_group_id"]
+            isOneToOne: false
+            referencedRelation: "social_thread_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_signals: {
+        Row: {
+          captured_at: string
+          created_at: string
+          id: string
+          payload: Json | null
+          raw_score: number | null
+          source: string
+          topic: string | null
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          captured_at?: string
+          created_at?: string
+          id?: string
+          payload?: Json | null
+          raw_score?: number | null
+          source: string
+          topic?: string | null
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          captured_at?: string
+          created_at?: string
+          id?: string
+          payload?: Json | null
+          raw_score?: number | null
+          source?: string
+          topic?: string | null
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      social_thread_groups: {
+        Row: {
+          created_at: string
+          id: string
+          posted_at: string | null
+          source_id: string | null
+          source_title: string | null
+          source_type: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          posted_at?: string | null
+          source_id?: string | null
+          source_title?: string | null
+          source_type?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          posted_at?: string | null
+          source_id?: string | null
+          source_title?: string | null
+          source_type?: string | null
+          status?: string
+          title?: string
           updated_at?: string
           user_id?: string
         }

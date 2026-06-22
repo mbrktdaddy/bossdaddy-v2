@@ -20,6 +20,10 @@ export async function POST(request: NextRequest) {
   const { user } = await getUserSafe(supabase)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  // X Studio is admin-only as a FEATURE (RLS stays owner-scoped as defense-in-depth).
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   const body = await request.json().catch(() => null)
   const parsed = GenerateSchema.safeParse(body)
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
