@@ -7,7 +7,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { archiveGoal, resumeGoal, deleteGoal } from '@/lib/dad-tools/savings-actions'
+import { archiveGoal, pauseGoal, resumeGoal, deleteGoal } from '@/lib/dad-tools/savings-actions'
 
 interface Props {
   goalId:   string
@@ -22,6 +22,7 @@ export default function GoalCardMenu({ goalId, goalName, status }: Props) {
   const [error, setError] = useState<string | null>(null)
 
   const isArchived = status === 'archived'
+  const isPaused = status === 'paused'
 
   function stop(e: React.MouseEvent) {
     e.preventDefault()
@@ -31,6 +32,17 @@ export default function GoalCardMenu({ goalId, goalName, status }: Props) {
   function onEdit(e: React.MouseEvent) {
     stop(e)
     router.push(`/tools/savings/${goalId}/edit`)
+  }
+
+  function onPauseToggle(e: React.MouseEvent) {
+    stop(e)
+    setError(null)
+    startTransition(async () => {
+      const result = isPaused ? await resumeGoal(goalId) : await pauseGoal(goalId)
+      if (!result.ok) { setError(result.error); return }
+      setOpen(false)
+      router.refresh()
+    })
   }
 
   function onArchiveToggle(e: React.MouseEvent) {
@@ -67,7 +79,7 @@ export default function GoalCardMenu({ goalId, goalName, status }: Props) {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={(e) => { stop(e); setOpen((v) => !v) }}
-        className="flex items-center justify-center h-9 w-9 rounded-lg bg-surface/80 backdrop-blur border border-soft text-prose-muted hover:text-prose hover:border-strong transition-colors"
+        className="flex items-center justify-center h-11 w-11 rounded-lg bg-surface/90 backdrop-blur border border-soft text-prose-muted hover:text-prose hover:border-strong transition-colors"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <circle cx="12" cy="5" r="1.8" />
@@ -91,6 +103,11 @@ export default function GoalCardMenu({ goalId, goalName, status }: Props) {
             className="absolute right-0 top-10 z-20 w-44 bg-surface border border-strong rounded-xl p-1 shadow-lg shadow-black/30"
           >
             <MenuItem onClick={onEdit} disabled={pending}>Edit</MenuItem>
+            {!isArchived && (
+              <MenuItem onClick={onPauseToggle} disabled={pending}>
+                {isPaused ? 'Resume goal' : 'Pause goal'}
+              </MenuItem>
+            )}
             <MenuItem onClick={onArchiveToggle} disabled={pending}>
               {isArchived ? 'Restore from archive' : 'Archive'}
             </MenuItem>

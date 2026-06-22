@@ -15,6 +15,7 @@ import ContributionButton from '../_components/ContributionButton'
 import MembersPanel, { type MemberDisplay } from '../_components/MembersPanel'
 import NotificationsPanel from '../_components/NotificationsPanel'
 import GoalDangerZone from '../_components/GoalDangerZone'
+import GoalStatusButton from '../_components/GoalStatusButton'
 import LeaveGoalButton from '../_components/LeaveGoalButton'
 import MyDestinationPanel from '../_components/MyDestinationPanel'
 
@@ -146,13 +147,14 @@ export default async function SavingsGoalPage({ params }: PageProps) {
             <div className="flex items-center gap-2 shrink-0">
               <Link
                 href={`/tools/savings/${goal.id}/invite`}
-                className="text-sm font-medium text-accent hover:text-accent-hover transition-colors px-3 py-1.5 border border-accent/40 hover:border-accent rounded-lg"
+                className="text-sm font-medium text-accent hover:text-accent-hover transition-colors px-3 py-1.5 border border-accent/40 hover:border-accent rounded-lg min-h-[44px] flex items-center"
               >
                 Invite
               </Link>
+              <GoalStatusButton goalId={goal.id} status={goal.status} />
               <Link
                 href={`/tools/savings/${goal.id}/edit`}
-                className="text-sm text-prose-faint hover:text-prose-muted transition-colors px-3 py-1.5 border border-soft rounded-lg"
+                className="text-sm text-prose-faint hover:text-prose-muted transition-colors px-3 py-1.5 border border-soft rounded-lg min-h-[44px] flex items-center"
               >
                 Edit
               </Link>
