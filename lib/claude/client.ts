@@ -12,6 +12,11 @@ export function getClaudeClient(): Anthropic {
 
 export const MODEL = 'claude-sonnet-4-6'
 
+// Opt-in upgrade for generation that wants maximum reasoning quality (e.g. an
+// X Studio repurpose run the operator chooses to run on Opus). Pricier + slower
+// than MODEL — only used when explicitly selected, never the default.
+export const OPUS_MODEL = 'claude-opus-4-8'
+
 // Cheap, fast model for The Boss concierge turns that don't need heavy reasoning
 // (general chit-chat, simple retrieval). The agent escalates to MODEL for ranking
 // and careful deflect-lane handling. See lib/boss/agent.ts chooseModel().

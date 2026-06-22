@@ -40,6 +40,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
 
   // Repurpose-to-X state
   const [repInstruction, setRepInstruction] = useState('')
+  const [repModel, setRepModel]             = useState<'sonnet' | 'opus'>('sonnet')
   const [repLoading, setRepLoading]         = useState(false)
   const [repResult, setRepResult]           = useState<RepurposeResult | null>(null)
   const [repSaving, setRepSaving]           = useState<number | null>(null)
@@ -100,6 +101,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
         source_type: sourceType === 'guide' ? 'guide' : 'review',
         source_id: sourceId,
         instruction: repInstruction.trim() || undefined,
+        model: repModel,
       }),
     })
     const json = await res.json()
@@ -365,6 +367,24 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                       placeholder="e.g. lead with the budget angle"
                       className="w-full bg-surface border border-strong text-prose text-sm rounded-lg px-3 py-2.5 focus:border-accent focus:outline-none"
                     />
+                  </div>
+
+                  {/* Model */}
+                  <div>
+                    <label className="text-xs text-prose-muted uppercase tracking-widest font-medium block mb-2">Model</label>
+                    <div className="flex gap-2">
+                      {([['sonnet', 'Sonnet', 'fast'], ['opus', 'Opus', 'best']] as const).map(([m, label, hint]) => (
+                        <button
+                          key={m}
+                          onClick={() => setRepModel(m)}
+                          className={`flex-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                            m === repModel ? 'bg-zinc-800 text-prose' : 'bg-surface-raised text-prose-muted hover:text-prose'
+                          }`}
+                        >
+                          {label} <span className="text-xs opacity-50">{hint}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   <button

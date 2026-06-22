@@ -3,6 +3,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
+import { MODEL, OPUS_MODEL } from '@/lib/claude/client'
 import { createStructured } from '@/lib/claude/structured'
 import { serializeForX } from '@/lib/x/serialize'
 import { getPlatform } from '@/lib/social-platforms'
@@ -54,6 +55,9 @@ const RepurposeInput = z.object({
   source_id:   z.string().uuid(),
   // Optional angle nudge (e.g. "lead with the budget angle").
   instruction: z.string().max(500).optional().nullable(),
+  // Generation model — sonnet (fast, default) or opus (best, opt-in). Both run
+  // under the same 10/hr draft cap.
+  model:       z.enum(['sonnet', 'opus']).optional().default('sonnet'),
 })
 
 export async function POST(request: NextRequest) {
@@ -78,7 +82,7 @@ export async function POST(request: NextRequest) {
   const parsed = RepurposeInput.safeParse(body)
   if (!parsed.success) return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
 
-  const { source_type, source_id, instruction } = parsed.data
+  const { source_type, source_id, instruction, model } = parsed.data
 
   // Fetch the source via the service-role client (admin support path).
   const admin = createAdminClient()
@@ -143,6 +147,7 @@ Never use "game-changer", "must-have", "revolutionary", or "life-changing". No c
       system: systemBlocks,
       messages: [{ role: 'user', content: prompt }],
       tool: REPURPOSE_TOOL,
+      model: model === 'opus' ? OPUS_MODEL : MODEL,
       // Article (400–700 words) + thread + 3 posts is a large tool input.
       maxTokens: 6000,
       maxRetries: 3,

@@ -23,12 +23,14 @@ export async function createStructured(opts: {
   messages: Anthropic.Messages.MessageParam[]
   tool: Anthropic.Tool
   maxTokens: number
+  // Override the model (defaults to MODEL — sonnet). Use for opt-in Opus runs.
+  model?: string
   // Extra SDK retry headroom (default 2) to ride out transient 529 overloads on
   // long, expensive calls. The SDK honors x-should-retry + Retry-After.
   maxRetries?: number
 }): Promise<StructuredResult> {
   const message = await getClaudeClient().messages.create({
-    model: MODEL,
+    model: opts.model ?? MODEL,
     max_tokens: opts.maxTokens,
     system: opts.system,
     tools: [opts.tool],
