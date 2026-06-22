@@ -18,17 +18,11 @@ export const RADAR_TOPICS: string[] = [
 // Free Reddit JSON endpoints (no auth needed for public listings).
 export const SUBREDDITS: string[] = ['daddit', 'Parenting', 'NewParents', 'predaddit']
 
-// Seeds for Google autocomplete (a free proxy for trending search interest;
-// the real Trends API is paid/unofficial — the `trends` source enum is reserved
-// for a future integration).
-export const TREND_SEEDS: string[] = [
-  'best stroller for',
-  'dad gear',
-  'father son',
-  'baby must haves',
-  'best gift for dad',
-  'toddler activities',
-]
+// NOTE: Google autocomplete / Trends are DROPPED for now — Google serves
+// datacenter IPs (Vercel) a non-suggestion page, so it yielded nothing. The
+// `trends` / `autocomplete` source enums stay reserved for a future real
+// integration. Reddit is kept but currently 403s from Vercel IPs (needs a
+// Reddit OAuth app) — left as graceful-degradation until that polish lands.
 
 export const RADAR_CAPS = {
   // Anthropic web_search uses per run — the single biggest spend lever. Bounds
@@ -39,8 +33,6 @@ export const RADAR_CAPS = {
   // Reddit: top posts per subreddit, over this window.
   redditPerSub: 8,
   redditWindow: 'day' as const,
-  // Autocomplete: suggestions kept per seed.
-  trendsPerSeed: 6,
 }
 
 // Reddit blocks requests without a descriptive User-Agent; identify ourselves.

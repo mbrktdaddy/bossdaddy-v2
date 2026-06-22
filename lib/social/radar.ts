@@ -5,7 +5,6 @@ import { extractToolInput } from '@/lib/claude/structured'
 import {
   RADAR_TOPICS,
   SUBREDDITS,
-  TREND_SEEDS,
   RADAR_CAPS,
   RADAR_USER_AGENT,
 } from '@/lib/social/radar-config'
@@ -71,46 +70,17 @@ async function runRedditRadar(errors: string[]): Promise<SignalInput[]> {
   return out
 }
 
-// ── Source: Google autocomplete (free proxy for trending interest) ───────────
-async function runTrendsRadar(errors: string[]): Promise<SignalInput[]> {
-  const out: SignalInput[] = []
-  await Promise.all(TREND_SEEDS.map(async (seed) => {
-    try {
-      const res = await fetch(
-        `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(seed)}`,
-        { headers: { 'User-Agent': RADAR_USER_AGENT }, signal: AbortSignal.timeout(10_000) },
-      )
-      if (!res.ok) { errors.push(`autocomplete/${seed}: HTTP ${res.status}`); return }
-      const json = await res.json()
-      // Firefox client shape: [query, [suggestion, suggestion, ...]]
-      const suggestions: unknown = Array.isArray(json) ? json[1] : null
-      if (!Array.isArray(suggestions)) return
-      suggestions.slice(0, RADAR_CAPS.trendsPerSeed).forEach((s, i) => {
-        if (typeof s !== 'string' || !s.trim()) return
-        out.push({
-          source:    'autocomplete',
-          topic:     s.trim().slice(0, 500),
-          url:       null,
-          // Rank-based strength: earlier suggestions rank higher.
-          raw_score: RADAR_CAPS.trendsPerSeed - i,
-          payload:   { seed, rank: i },
-        })
-      })
-    } catch (err) {
-      errors.push(`autocomplete/${seed}: ${err instanceof Error ? err.message : String(err)}`)
-    }
-  }))
-  return out
-}
-
 // ── Source: Claude web_search (the core radar) ───────────────────────────────
 const RADAR_SYSTEM = `You are the trend radar for Boss Daddy (BossDaddyLife.com), a dad-life product-review and advice brand. Your job: use web search to surface FRESH, currently-discussed topics and angles that Boss Daddy could post about on X this week.
 
 Hunt for: trending dad/parenting gear, new product launches and recalls, viral father-son moments, seasonal buying interest, and dad-life conversations gaining traction right now. Favor timely, specific, postable angles over evergreen generalities.
 
-For each signal return: a short topic/angle (what Boss Daddy would post about), a real source URL you actually retrieved, a relevance score 0-100 (how on-brand and timely it is), and a one-line "why" (the hook).
+For each signal: a short topic/angle (what Boss Daddy would post about), a real source URL you actually retrieved, a relevance score 0-100 (how on-brand and timely it is), and a one-line "why" (the hook).
 
-Be efficient with searches. When you have gathered signals, return them by calling the submit_signals tool. Only include signals backed by a real URL you retrieved.`
+WORKFLOW (follow exactly):
+1. Run a few web searches across the themes you're given. Be efficient — a few broad searches beat many narrow ones.
+2. As soon as you have ~10-20 candidate signals, STOP searching and call the submit_signals tool with them.
+You MUST finish by calling submit_signals. Do NOT answer in prose, and do NOT end your turn without calling it. Only include a signal if you have a real source URL you actually retrieved.`
 
 const SIGNALS_TOOL: Anthropic.Tool = {
   name: 'submit_signals',
@@ -140,26 +110,55 @@ function isHttpUrl(s: unknown): s is string {
   return typeof s === 'string' && /^https?:\/\//i.test(s.trim())
 }
 
+// Pull a { signals: [...] } object out of free-text as a last resort. Scans for
+// the substring `"signals"` and brace-matches outward, so it survives extra
+// prose/search-result blocks around the JSON (a naive first-{-to-last-} grab
+// would swallow unrelated braces).
+function salvageSignalsJson(text: string): Record<string, unknown> | null {
+  const key = text.indexOf('"signals"')
+  if (key === -1) return null
+  let start = text.lastIndexOf('{', key)
+  while (start !== -1) {
+    let depth = 0
+    for (let i = start; i < text.length; i++) {
+      if (text[i] === '{') depth++
+      else if (text[i] === '}') {
+        depth--
+        if (depth === 0) {
+          try { return JSON.parse(text.slice(start, i + 1)) } catch { break }
+        }
+      }
+    }
+    start = text.lastIndexOf('{', start - 1)
+  }
+  return null
+}
+
 async function runWebSearchRadar(errors: string[]): Promise<SignalInput[]> {
   const prompt = `Find this week's most postable dad-life topics for Boss Daddy on X. Hunt across these themes:
 ${RADAR_TOPICS.map((t) => `- ${t}`).join('\n')}
 
-Search recent sources, then return 10-20 timely signals via the submit_signals tool. Each needs a real source URL you retrieved, a 0-100 relevance score, and a one-line hook.`
+Search recent sources, then return 10-20 timely signals by calling the submit_signals tool. Each needs a real source URL you retrieved, a 0-100 relevance score, and a one-line hook.`
 
-  const tools: Anthropic.Messages.MessageCreateParams['tools'] = [
+  const searchTools: Anthropic.Messages.MessageCreateParams['tools'] = [
     { type: 'web_search_20260209', name: 'web_search', max_uses: RADAR_CAPS.maxWebSearches },
     SIGNALS_TOOL,
   ]
   const messages: Anthropic.Messages.MessageParam[] = [{ role: 'user', content: prompt }]
-  const createArgs = (msgs: Anthropic.Messages.MessageParam[]) => ({
+  const createArgs = (
+    msgs: Anthropic.Messages.MessageParam[],
+    toolChoice?: Anthropic.Messages.MessageCreateParams['tool_choice'],
+  ) => ({
     model: MODEL,
     max_tokens: 4000,
     system: [{ type: 'text' as const, text: RADAR_SYSTEM, cache_control: { type: 'ephemeral' as const } }],
-    tools,
+    tools: searchTools,
+    ...(toolChoice ? { tool_choice: toolChoice } : {}),
     messages: msgs,
   })
 
   try {
+    // Phase 1 — let the model search (auto tool choice).
     let message = await getClaudeClient().messages.create(createArgs(messages), { maxRetries: 3 })
     // web_search can yield stop_reason 'pause_turn' on long loops — continue the
     // turn (passing partial content back) until it finishes, capped.
@@ -170,17 +169,36 @@ Search recent sources, then return 10-20 timely signals via the submit_signals t
       message = await getClaudeClient().messages.create(createArgs(messages), { maxRetries: 3 })
     }
 
-    // web_search + a forced output tool can't coexist, so fall back to prose JSON.
     let out = extractToolInput(message, 'submit_signals')
+
+    // Phase 2 — the model searched but ended without calling the tool (common:
+    // it answers in prose). Force the tool call from the accumulated context, so
+    // a run can't silently yield zero. web_search stays in `tools` (its results
+    // are in history); forcing submit_signals just makes it emit, no new search.
+    if (!out) {
+      messages.push({ role: 'assistant', content: message.content })
+      messages.push({ role: 'user', content: 'Now return everything you found by calling submit_signals. Do not search further.' })
+      try {
+        const forced = await getClaudeClient().messages.create(
+          createArgs(messages, { type: 'tool', name: 'submit_signals' }),
+          { maxRetries: 3 },
+        )
+        out = extractToolInput(forced, 'submit_signals')
+      } catch (err) {
+        errors.push(`web_search/force: ${err instanceof Error ? err.message : String(err)}`)
+      }
+    }
+
+    // Last resort — salvage a signals object from any prose.
     if (!out) {
       const text = message.content
         .filter((b): b is Anthropic.TextBlock => b.type === 'text')
         .map((b) => b.text).join('\n')
-      const m = text.match(/\{[\s\S]*\}/)
-      if (m) { try { out = JSON.parse(m[0]) } catch { out = null } }
+      out = salvageSignalsJson(text)
     }
+
     const signals = Array.isArray(out?.signals) ? out!.signals : []
-    return signals
+    const mapped = signals
       .filter((s): s is Record<string, unknown> => !!s && typeof s === 'object' && typeof s.topic === 'string' && isHttpUrl(s.url))
       .map((s) => {
         const rel = Number(s.relevance)
@@ -192,6 +210,10 @@ Search recent sources, then return 10-20 timely signals via the submit_signals t
           payload:   { why: typeof s.why === 'string' ? s.why.trim().slice(0, 300) : null },
         }
       })
+
+    // Surface a zero-yield run instead of failing silently.
+    if (mapped.length === 0) errors.push('web_search: 0 signals returned')
+    return mapped
   } catch (err) {
     errors.push(`web_search: ${err instanceof Error ? err.message : String(err)}`)
     return []
@@ -214,13 +236,12 @@ export async function pickRadarUserId(admin: SupabaseClient): Promise<string | n
 export async function runRadar(admin: SupabaseClient, userId: string): Promise<RadarResult> {
   const errors: string[] = []
 
-  const [web, reddit, trends] = await Promise.all([
+  const [web, reddit] = await Promise.all([
     runWebSearchRadar(errors),
     runRedditRadar(errors),
-    runTrendsRadar(errors),
   ])
 
-  const all = [...web, ...reddit, ...trends].slice(0, RADAR_CAPS.maxSignalsPerRun)
+  const all = [...web, ...reddit].slice(0, RADAR_CAPS.maxSignalsPerRun)
   const capturedAt = new Date().toISOString()
 
   const bySource: Record<string, number> = {}
