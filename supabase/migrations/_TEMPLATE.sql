@@ -13,8 +13,10 @@
 --
 --   3. Default RLS roles by table type:
 --        Public content (visible to logged-out visitors)  → `to anon, authenticated`
---        User-owned data (per-user dashboards, drafts)    → `to authenticated`
+--        Private user-owned data (dashboards, drafts)      → `to authenticated`, owner-only
 --        Admin-only data                                   → `to authenticated` + admin gate
+--      Admin is MODERATION-ONLY: never put `is_admin()` in a policy on private
+--      user data (Pattern B). Admins reach it via the service-role client.
 --
 --      Forgetting `to anon, authenticated` on public tables silently breaks
 --      logged-out visitors but works fine for admins. See migrations 042
@@ -69,8 +71,14 @@ create policy "example_public_admin_write"
   with check (is_admin());
 
 
--- ─── PATTERN B — User-owned data ─────────────────────────────────────────────
--- Use for: per-user data (wishlists, comments-as-author, draft reviews/guides).
+-- ─── PATTERN B — Private user-owned data ─────────────────────────────────────
+-- Use for: per-user PRIVATE data (savings, DMs, family/kids, AI chat,
+-- notifications, voice, drafts). Owner-only — NO `is_admin()`. Admin is
+-- moderation-only; any legitimate admin/cron/support access to private data
+-- goes through the service-role client (createAdminClient), which bypasses RLS
+-- and is auditable. Baking `is_admin()` here gives the admin silent read/write
+-- of every user's private data and leaks other users' rows into the admin's own
+-- UI — see migs 106 (savings) + 107 (everything else) for the cleanup.
 
 create table if not exists example_user_owned (
   id         uuid        primary key default gen_random_uuid(),
@@ -84,18 +92,24 @@ create index if not exists idx_example_user_owned_user
 
 alter table example_user_owned enable row level security;
 
--- Owner can read their own rows; admins can read all.
+-- Owner reads ONLY their own rows. No admin override.
 create policy "example_user_owned_read"
   on example_user_owned for select
   to authenticated
-  using (user_id = auth.uid() or is_admin());
+  using (user_id = auth.uid());
 
--- Owner can insert/update/delete their own rows; admins can do all.
+-- Owner writes ONLY their own rows. No admin override.
 create policy "example_user_owned_write"
   on example_user_owned for all
   to authenticated
-  using (user_id = auth.uid() or is_admin())
-  with check (user_id = auth.uid() or is_admin());
+  using (user_id = auth.uid())
+  with check (user_id = auth.uid());
+
+-- NOTE: if the table is MODERATED user content meant to be public once approved
+-- (e.g. comments), that's a different pattern: read `to anon, authenticated`
+-- (approved rows) and a write gate of `user_id = auth.uid() or is_admin()`.
+-- `is_admin()` is acceptable there because the content is public + moderated —
+-- NOT for private data.
 
 
 -- ─── PATTERN C — Admin-only data ─────────────────────────────────────────────

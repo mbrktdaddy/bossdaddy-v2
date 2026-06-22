@@ -102,9 +102,11 @@ Forgetting the right read role on a public table silently breaks logged-out visi
 | Table type | Read role | Write gate |
 |---|---|---|
 | Public content (reviews, guides, products, collections, etc.) | `to anon, authenticated` | `is_admin()` |
-| User-owned data (wishlists, drafts, comments) | `to authenticated` + `using (user_id = auth.uid() or is_admin())` | same |
+| Private user data (savings, DMs, family/kids, AI chat, notifications, voice, drafts) | `to authenticated` + `using (user_id = auth.uid())` — **NO `is_admin()`** | same (owner only) |
+| Moderated user content (comments) | `to anon, authenticated` (approved) | `user_id = auth.uid() or is_admin()` |
 | Admin-only (moderation, audit logs) | `to authenticated` + `using (is_admin())` | `is_admin()` |
 
+- **Admin is moderation-only — `is_admin()` must NEVER appear in a policy on PRIVATE user data.** It belongs only on public-content tables, moderated-content tables, and admin-only tables. Admins reach private data (support/cron) via the service-role client (`createAdminClient`), which bypasses RLS and is auditable. Baking `is_admin()` into private tables gives the admin silent read/write of every user's data and leaks other users' rows into the admin's own UI — fixed in migs 106 (savings) + 107 (all other private tables). See [[project_admin_moderation_only_rls]] in memory.
 - **Always** use the `is_admin()` helper (migration 002) — never inline the `EXISTS (SELECT 1 FROM profiles ...)` check.
 - **Always** `enable row level security` on new tables.
 - `UNIQUE` constraints already index — don't add a redundant B-tree on the same column.
