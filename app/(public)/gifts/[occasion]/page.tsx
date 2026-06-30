@@ -70,6 +70,21 @@ type ReviewRow = {
   has_affiliate_links: boolean
 }
 
+// Product-only collection item (mig 110) — owned-but-unreviewed gifts that
+// still belong on the list. Joined alongside reviews; collection_items has
+// exactly one of review_id / product_slug set per row.
+type ProductRow = {
+  slug: string
+  name: string
+  brand: string | null
+  image_url: string | null
+  category: string | null
+  price_cents: number | null
+  affiliate_url: string | null
+  non_affiliate_url: string | null
+  description: string | null
+}
+
 export default async function GiftOccasionPage({ params }: Props) {
   const { occasion: slug } = await params
   const occ = getOccasion(slug)
@@ -88,26 +103,29 @@ export default async function GiftOccasionPage({ params }: Props) {
     .maybeSingle()
 
   const admin = createAdminClient()
-  let items: Array<{ position: number; blurb: string | null; best_for: string | null; role_label: string | null; review: ReviewRow }> = []
+  let items: Array<{ position: number; blurb: string | null; best_for: string | null; role_label: string | null; review: ReviewRow | null; product: ProductRow | null }> = []
 
   if (pick) {
     const { data: pickItems } = await admin
       .from('collection_items')
-      .select('position, blurb, best_for, role_label, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, best_for, has_affiliate_links)')
+      .select('position, blurb, best_for, role_label, product_slug, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, best_for, has_affiliate_links), products(slug, name, brand, image_url, category, price_cents, affiliate_url, non_affiliate_url, description)')
       .eq('collection_id', pick.id)
       .order('position')
 
     items = (pickItems ?? []).map((pi) => {
       const reviews = pi.reviews
       const review = Array.isArray(reviews) ? reviews[0] : reviews
+      const products = pi.products
+      const product = Array.isArray(products) ? products[0] : products
       return {
         position:   pi.position,
         blurb:      pi.blurb,
         best_for:   (pi as { best_for?: string | null }).best_for ?? null,
         role_label: (pi as { role_label?: string | null }).role_label ?? null,
-        review:     review as ReviewRow,
+        review:     (review as ReviewRow) ?? null,
+        product:    (product as ProductRow) ?? null,
       }
-    }).filter((i) => i.review != null)
+    }).filter((i) => i.review != null || i.product != null)
   }
 
   // Related occasions strip — same group, different occasion. Kept distinct
@@ -140,7 +158,7 @@ export default async function GiftOccasionPage({ params }: Props) {
   // Dominant category from items — drives methodology + FAQ when there's content.
   const categoryCounts = new Map<string, number>()
   for (const it of items) {
-    const c = it.review?.category
+    const c = it.review?.category ?? (it.review == null ? it.product?.category : null)
     if (c) categoryCounts.set(c, (categoryCounts.get(c) ?? 0) + 1)
   }
   const dominantCategory = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
@@ -188,7 +206,7 @@ export default async function GiftOccasionPage({ params }: Props) {
   const wordsource = [
     pick?.intro_html ?? '',
     pick?.description ?? occ.longBlurb,
-    ...items.map((i) => i.blurb ?? i.review?.excerpt ?? ''),
+    ...items.map((i) => i.blurb ?? i.review?.excerpt ?? i.product?.description ?? ''),
   ].join(' ').replace(/<[^>]*>/g, ' ')
   const readingMinutes = Math.max(1, Math.round(wordsource.split(/\s+/).filter(Boolean).length / 235))
 
@@ -214,24 +232,42 @@ export default async function GiftOccasionPage({ params }: Props) {
     name: pick?.title ?? occ.label,
     description: occ.metaDesc,
     numberOfItems: items.length,
-    itemListElement: items.map((entry, idx) => ({
-      '@type': 'ListItem',
-      position: idx + 1,
-      url: `${siteUrl}/reviews/${entry.review.slug}`,
-      name: entry.review.product_name,
-      item: {
-        '@type': 'Product',
-        name:    entry.review.product_name,
-        image:   toAbsoluteUrl(entry.review.image_url, siteUrl),
-        aggregateRating: entry.review.rating ? {
-          '@type': 'AggregateRating',
-          ratingValue: entry.review.rating,
-          bestRating: 10,
-          worstRating: 1,
-          ratingCount: 1,
-        } : undefined,
-      },
-    })),
+    itemListElement: items.map((entry, idx) => {
+      if (entry.review) {
+        return {
+          '@type': 'ListItem',
+          position: idx + 1,
+          url: `${siteUrl}/reviews/${entry.review.slug}`,
+          name: entry.review.product_name,
+          item: {
+            '@type': 'Product',
+            name:    entry.review.product_name,
+            image:   toAbsoluteUrl(entry.review.image_url, siteUrl),
+            aggregateRating: entry.review.rating ? {
+              '@type': 'AggregateRating',
+              ratingValue: entry.review.rating,
+              bestRating: 10,
+              worstRating: 1,
+              ratingCount: 1,
+            } : undefined,
+          },
+        }
+      }
+      // Product-only item (mig 110) — owner pick, not yet reviewed. No url
+      // (no review page exists) and no aggregateRating (nothing to rate).
+      const product = entry.product!
+      return {
+        '@type': 'ListItem',
+        position: idx + 1,
+        name: product.name,
+        item: {
+          '@type': 'Product',
+          name:  product.name,
+          image: toAbsoluteUrl(product.image_url, siteUrl),
+          ...(product.brand ? { brand: { '@type': 'Brand', name: product.brand } } : {}),
+        },
+      }
+    }),
   } : null
 
   const faqLd = pick ? faqPageLd(faqs) : null
@@ -332,7 +368,72 @@ export default async function GiftOccasionPage({ params }: Props) {
                 </div>
 
                 <div className="space-y-5">
-                  {items.map(({ review, blurb, best_for: itemBestFor, role_label: itemRoleLabel }, idx) => {
+                  {items.map(({ review, product: joinedProduct, blurb, best_for: itemBestFor, role_label: itemRoleLabel }, idx) => {
+                    if (!review) {
+                      // Product-only item (mig 110) — owned-but-unreviewed gift.
+                      // Resolved directly from the joined product, not productMap.
+                      const product = joinedProduct!
+                      const href = product.affiliate_url ? `/go/${product.slug}` : product.non_affiliate_url
+                      return (
+                        <article key={`product-${product.slug}`} className="flex flex-col sm:flex-row gap-5 bg-surface border border-soft hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-black/5 transition-colors">
+                          <div className="flex sm:flex-col items-center gap-3 sm:gap-0 shrink-0">
+                            <span className="w-10 h-10 rounded-full bg-accent-tint border border-accent-border/40 flex items-center justify-center text-accent-text-soft font-black text-sm tabular-nums">
+                              {idx + 1}
+                            </span>
+                          </div>
+
+                          {product.image_url && (
+                            <div className="relative w-full sm:w-40 h-40 sm:h-32 shrink-0 rounded-xl overflow-hidden bg-surface-raised">
+                              <Image src={product.image_url} alt={product.name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 160px" />
+                            </div>
+                          )}
+
+                          <div className="flex-1 min-w-0 flex flex-col">
+                            <div className="flex items-start justify-between gap-3 mb-2">
+                              <div className="min-w-0">
+                                {itemRoleLabel && (
+                                  <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-accent/15 border border-accent-border/40 text-[10px] font-black uppercase tracking-widest text-accent-text">
+                                    {itemRoleLabel}
+                                  </span>
+                                )}
+                                <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-surface-raised border border-soft text-[10px] font-black uppercase tracking-widest text-prose-faint">
+                                  Owner pick · not yet reviewed
+                                </span>
+                                <span className="text-base font-bold text-prose leading-snug block">
+                                  {product.name}
+                                </span>
+                              </div>
+                            </div>
+
+                            {itemBestFor && (
+                              <p className="text-sm italic text-accent-text/90 mb-2">Best for {itemBestFor}</p>
+                            )}
+
+                            <p className="text-sm text-prose-muted leading-relaxed mb-3">
+                              {blurb ?? product.description ?? ''}
+                            </p>
+
+                            <div className="flex flex-wrap items-center gap-3 mt-auto pt-1">
+                              {product.price_cents != null && (
+                                <span className="text-xs text-prose-muted font-bold tabular-nums">${(product.price_cents / 100).toFixed(0)}</span>
+                              )}
+                              {href && (
+                                <a
+                                  href={href}
+                                  target="_blank"
+                                  rel={product.affiliate_url ? 'sponsored nofollow noopener' : 'noopener'}
+                                  data-product-slug={product.slug}
+                                  className="ml-auto px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
+                                >
+                                  Check Price
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </article>
+                      )
+                    }
+
                     const product = review.product_slug ? productMap.get(review.product_slug) : null
                     const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                     return (

@@ -83,6 +83,20 @@ type ProductRow = {
   price_cents: number | null
 }
 
+// Joined shape for product-only collection items (migration 110) — distinct
+// from ProductRow (the getProductBySlug shape used for review-backed items).
+type JoinedProduct = {
+  slug: string
+  name: string
+  brand: string | null
+  image_url: string | null
+  category: string | null
+  price_cents: number | null
+  affiliate_url: string | null
+  non_affiliate_url: string | null
+  description: string | null
+}
+
 export default async function StackDetailPage({ params }: Props) {
   const { slug } = await params
   const supabase = await createClient()
@@ -100,20 +114,23 @@ export default async function StackDetailPage({ params }: Props) {
   const admin = createAdminClient()
   const { data: rawItems } = await admin
     .from('collection_items')
-    .select('position, blurb, role_label, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, best_for)')
+    .select('position, blurb, role_label, product_slug, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, best_for), products(slug, name, brand, image_url, category, price_cents, affiliate_url, non_affiliate_url, description)')
     .eq('collection_id', stack.id)
     .order('position')
 
   const items = (rawItems ?? []).map((it) => {
     const r = it.reviews
     const review = Array.isArray(r) ? r[0] : r
+    const p = it.products
+    const product = Array.isArray(p) ? p[0] : p
     return {
       position: it.position,
       blurb: it.blurb,
       role_label: it.role_label,
       review: review as ReviewRow | null,
+      product: product as JoinedProduct | null,
     }
-  }).filter((i) => i.review != null)
+  }).filter((i) => i.review != null || i.product != null)
 
   const productSlugs = [...new Set(items.map((i) => i.review?.product_slug).filter(Boolean) as string[])]
   const productMap = new Map<string, ProductRow>()
@@ -124,10 +141,11 @@ export default async function StackDetailPage({ params }: Props) {
 
   // Build-cost computation — prefer stored total, else sum known prices.
   const { computedTotal, pricedCount } = items.reduce<{ computedTotal: number; pricedCount: number }>(
-    (acc, { review }) => {
-      const product = review?.product_slug ? productMap.get(review.product_slug) : null
-      if (product?.price_cents != null) {
-        return { computedTotal: acc.computedTotal + product.price_cents, pricedCount: acc.pricedCount + 1 }
+    (acc, { review, product: joinedProduct }) => {
+      const reviewProduct = review?.product_slug ? productMap.get(review.product_slug) : null
+      const priceCents = reviewProduct?.price_cents ?? (!review ? joinedProduct?.price_cents : null) ?? null
+      if (priceCents != null) {
+        return { computedTotal: acc.computedTotal + priceCents, pricedCount: acc.pricedCount + 1 }
       }
       return acc
     },
@@ -139,7 +157,7 @@ export default async function StackDetailPage({ params }: Props) {
   // Dominant category
   const categoryCounts = new Map<string, number>()
   for (const it of items) {
-    const c = it.review?.category
+    const c = it.review?.category ?? (!it.review ? it.product?.category : null)
     if (c) categoryCounts.set(c, (categoryCounts.get(c) ?? 0) + 1)
   }
   const dominantCategory = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
@@ -182,7 +200,7 @@ export default async function StackDetailPage({ params }: Props) {
   const wordsource = [
     stack.intro_html ?? '',
     stack.description ?? '',
-    ...items.map((i) => i.blurb ?? i.review?.excerpt ?? ''),
+    ...items.map((i) => i.blurb ?? i.review?.excerpt ?? i.product?.description ?? ''),
   ].join(' ').replace(/<[^>]*>/g, ' ')
   const readingMinutes = Math.max(1, Math.round(wordsource.split(/\s+/).filter(Boolean).length / 235))
 
@@ -208,24 +226,40 @@ export default async function StackDetailPage({ params }: Props) {
     name:        stack.title,
     description: stack.description ?? undefined,
     numberOfItems: items.length,
-    itemListElement: items.map((entry, idx) => ({
-      '@type':  'ListItem',
-      position: idx + 1,
-      url:      `${siteUrl}/reviews/${entry.review!.slug}`,
-      name:     entry.review!.product_name,
-      item: {
-        '@type': 'Product',
-        name:    entry.review!.product_name,
-        image:   toAbsoluteUrl(entry.review!.image_url, siteUrl),
-        aggregateRating: entry.review!.rating != null ? {
-          '@type':       'AggregateRating',
-          ratingValue:   entry.review!.rating,
-          bestRating:    10,
-          worstRating:   1,
-          ratingCount:   1,
-        } : undefined,
-      },
-    })),
+    itemListElement: items.map((entry, idx) => {
+      if (!entry.review && entry.product) {
+        const p = entry.product
+        return {
+          '@type':  'ListItem',
+          position: idx + 1,
+          name:     p.name,
+          item: {
+            '@type': 'Product',
+            name:    p.name,
+            image:   toAbsoluteUrl(p.image_url, siteUrl),
+            brand:   p.brand ? { '@type': 'Brand', name: p.brand } : undefined,
+          },
+        }
+      }
+      return {
+        '@type':  'ListItem',
+        position: idx + 1,
+        url:      `${siteUrl}/reviews/${entry.review!.slug}`,
+        name:     entry.review!.product_name,
+        item: {
+          '@type': 'Product',
+          name:    entry.review!.product_name,
+          image:   toAbsoluteUrl(entry.review!.image_url, siteUrl),
+          aggregateRating: entry.review!.rating != null ? {
+            '@type':       'AggregateRating',
+            ratingValue:   entry.review!.rating,
+            bestRating:    10,
+            worstRating:   1,
+            ratingCount:   1,
+          } : undefined,
+        },
+      }
+    }),
   } : null
 
   const faqLd = faqPageLd(faqs)
@@ -314,14 +348,74 @@ export default async function StackDetailPage({ params }: Props) {
               </div>
 
               <div className="space-y-5">
-                {items.map(({ review, blurb, role_label }, idx) => {
-                  if (!review) return null
-                  const product = review.product_slug ? productMap.get(review.product_slug) : null
+                {items.map(({ review, product: joinedProduct, blurb, role_label }, idx) => {
+                  if (!review && !joinedProduct) return null
+
+                  if (!review && joinedProduct) {
+                    const product = joinedProduct
+                    const href = product.affiliate_url ? `/go/${product.slug}` : product.non_affiliate_url ?? null
+                    return (
+                      <article
+                        key={`product-${product.slug}`}
+                        className="relative flex flex-col sm:flex-row gap-5 bg-surface border border-soft hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-black/5 hover:-translate-y-0.5 transition-all duration-200"
+                      >
+                        {/* Position number — subtle ordering signal */}
+                        <span aria-hidden className="absolute top-3 left-3 text-[10px] font-black text-accent-text/30 tabular-nums tracking-widest">
+                          {String(idx + 1).padStart(2, '0')}
+                        </span>
+
+                        {product.image_url && (
+                          <div className="relative w-full sm:w-44 h-44 sm:h-36 shrink-0 rounded-xl overflow-hidden bg-surface-raised">
+                            <Image src={product.image_url} alt={product.name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 176px" />
+                          </div>
+                        )}
+
+                        <div className="flex-1 min-w-0 flex flex-col">
+                          {role_label && (
+                            <span className="self-start text-[10px] font-black uppercase tracking-[0.2em] text-accent-text bg-accent-tint border border-accent-border/40 px-3 py-1 rounded-full mb-2">
+                              {role_label}
+                            </span>
+                          )}
+                          <span className="self-start text-[10px] font-black uppercase tracking-widest text-prose-faint bg-surface-raised border border-soft px-3 py-1 rounded-full mb-2">
+                            Owner pick · not yet reviewed
+                          </span>
+                          <div className="flex items-start justify-between gap-3 mb-2">
+                            <div>
+                              <span className="text-lg font-bold text-prose leading-snug block">
+                                {product.name}
+                              </span>
+                            </div>
+                          </div>
+                          {(blurb || product.description) && (
+                            <p className="text-sm text-prose-muted leading-relaxed flex-1 mb-3">{blurb ?? product.description}</p>
+                          )}
+                          <div className="flex flex-wrap items-center gap-3 mt-auto pt-1">
+                            {product.price_cents != null && (
+                              <span className="text-base font-black text-prose tabular-nums">${(product.price_cents / 100).toFixed(0)}</span>
+                            )}
+                            {href && (
+                              <a
+                                href={href}
+                                target="_blank"
+                                rel={product.affiliate_url ? 'sponsored nofollow noopener' : 'noopener'}
+                                data-product-slug={product.slug}
+                                className="ml-auto px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
+                              >
+                                Check Price
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </article>
+                    )
+                  }
+
+                  const product = review!.product_slug ? productMap.get(review!.product_slug) : null
                   const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                   const priceCents = product?.price_cents ?? null
                   return (
                     <article
-                      key={review.id}
+                      key={review!.id}
                       className="relative flex flex-col sm:flex-row gap-5 bg-surface border border-soft hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-black/5 hover:-translate-y-0.5 transition-all duration-200"
                     >
                       {/* Position number — subtle ordering signal */}
@@ -329,10 +423,10 @@ export default async function StackDetailPage({ params }: Props) {
                         {String(idx + 1).padStart(2, '0')}
                       </span>
 
-                      {review.image_url && (
+                      {review!.image_url && (
                         <div className="relative w-full sm:w-44 h-44 sm:h-36 shrink-0 rounded-xl overflow-hidden bg-surface-raised">
-                          <Image src={review.image_url} alt={review.product_name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 176px" />
-                          {(review.rating ?? 0) >= 8 && (
+                          <Image src={review!.image_url} alt={review!.product_name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 176px" />
+                          {(review!.rating ?? 0) >= 8 && (
                             <div className="absolute top-2 right-2"><BossApprovedBadge size="sm" variant="card" /></div>
                           )}
                         </div>
@@ -346,25 +440,25 @@ export default async function StackDetailPage({ params }: Props) {
                         )}
                         <div className="flex items-start justify-between gap-3 mb-2">
                           <div>
-                            <Link href={`/reviews/${review.slug}`} className="text-lg font-bold text-prose hover:text-accent-text-soft transition-colors leading-snug block">
-                              {review.title}
+                            <Link href={`/reviews/${review!.slug}`} className="text-lg font-bold text-prose hover:text-accent-text-soft transition-colors leading-snug block">
+                              {review!.title}
                             </Link>
                           </div>
-                          <RatingScore rating={review.rating ?? 0} size="sm" />
+                          <RatingScore rating={review!.rating ?? 0} size="sm" />
                         </div>
-                        {(blurb || review.tldr) && (
-                          <p className="text-sm text-prose-muted leading-relaxed flex-1 mb-3">{blurb ?? review.tldr}</p>
+                        {(blurb || review!.tldr) && (
+                          <p className="text-sm text-prose-muted leading-relaxed flex-1 mb-3">{blurb ?? review!.tldr}</p>
                         )}
-                        {(review.best_for?.length ?? 0) > 0 && (
+                        {(review!.best_for?.length ?? 0) > 0 && (
                           <p className="text-xs text-prose-faint mb-3">
-                            <span className="text-accent-text-soft font-bold uppercase tracking-widest">Best for:</span> {review.best_for!.slice(0, 3).join(' · ')}
+                            <span className="text-accent-text-soft font-bold uppercase tracking-widest">Best for:</span> {review!.best_for!.slice(0, 3).join(' · ')}
                           </p>
                         )}
                         <div className="flex flex-wrap items-center gap-3 mt-auto pt-1">
                           {priceCents != null && (
                             <span className="text-base font-black text-prose tabular-nums">${(priceCents / 100).toFixed(0)}</span>
                           )}
-                          <Link href={`/reviews/${review.slug}`} className="text-xs text-prose-muted hover:text-accent-text-soft transition-colors font-semibold uppercase tracking-widest">
+                          <Link href={`/reviews/${review!.slug}`} className="text-xs text-prose-muted hover:text-accent-text-soft transition-colors font-semibold uppercase tracking-widest">
                             Read review →
                           </Link>
                           {href && (
@@ -372,7 +466,7 @@ export default async function StackDetailPage({ params }: Props) {
                               href={href}
                               target="_blank"
                               rel={product?.affiliate_url ? 'sponsored nofollow noopener' : 'noopener'}
-                              data-product-slug={review.product_slug ?? undefined}
+                              data-product-slug={review!.product_slug ?? undefined}
                               className="ml-auto px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
                             >
                               Check Price

@@ -85,6 +85,18 @@ type ReviewRow = {
   has_affiliate_links: boolean
 }
 
+type ProductRow = {
+  slug: string
+  name: string
+  brand: string | null
+  image_url: string | null
+  category: string | null
+  price_cents: number | null
+  affiliate_url: string | null
+  non_affiliate_url: string | null
+  description: string | null
+}
+
 export default async function PickDetailPage({ params }: Props) {
   const { slug } = await params
   const admin = createAdminClient()
@@ -101,21 +113,24 @@ export default async function PickDetailPage({ params }: Props) {
 
   const { data: pickItems } = await admin
     .from('collection_items')
-    .select('position, blurb, best_for, role_label, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, pros, cons, best_for, has_affiliate_links)')
+    .select('position, blurb, best_for, role_label, product_slug, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, pros, cons, best_for, has_affiliate_links), products(slug, name, brand, image_url, category, price_cents, affiliate_url, non_affiliate_url, description)')
     .eq('collection_id', pick.id)
     .order('position')
 
   const items = (pickItems ?? []).map((pi) => {
     const r = pi.reviews
     const review = Array.isArray(r) ? r[0] : r
+    const p = (pi as { products?: ProductRow | ProductRow[] | null }).products
+    const product = Array.isArray(p) ? p[0] : p
     return {
       position:   pi.position,
       blurb:      pi.blurb,
       best_for:   (pi as { best_for?: string | null }).best_for ?? null,
       role_label: (pi as { role_label?: string | null }).role_label ?? null,
       review:     review as ReviewRow | null,
+      product:    (product as ProductRow | null) ?? null,
     }
-  }).filter((i) => i.review != null)
+  }).filter((i) => i.review != null || i.product != null)
 
   const productSlugs = [...new Set(items.map((i) => i.review?.product_slug).filter(Boolean) as string[])]
   const productMap = new Map<string, { slug: string; affiliate_url: string | null; non_affiliate_url: string | null; description: string | null; price_cents: number | null }>()
@@ -127,7 +142,7 @@ export default async function PickDetailPage({ params }: Props) {
   // Dominant category drives methodology + FAQ
   const categoryCounts = new Map<string, number>()
   for (const it of items) {
-    const c = it.review?.category
+    const c = it.review ? it.review.category : it.product?.category
     if (c) categoryCounts.set(c, (categoryCounts.get(c) ?? 0) + 1)
   }
   const dominantCategory = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
@@ -171,7 +186,7 @@ export default async function PickDetailPage({ params }: Props) {
   const wordsource = [
     pick.intro_html ?? '',
     pick.description ?? '',
-    ...items.map((i) => i.blurb ?? i.review?.excerpt ?? ''),
+    ...items.map((i) => i.blurb ?? i.review?.excerpt ?? i.product?.description ?? ''),
   ].join(' ').replace(/<[^>]*>/g, ' ')
   const readingMinutes = Math.max(1, Math.round(wordsource.split(/\s+/).filter(Boolean).length / 235))
 
@@ -200,23 +215,37 @@ export default async function PickDetailPage({ params }: Props) {
     description: pick.description,
     numberOfItems: items.length,
     itemListElement: items.map((entry, idx) => {
-      const r = entry.review!
+      if (entry.review) {
+        const r = entry.review
+        return {
+          '@type': 'ListItem',
+          position: idx + 1,
+          url:      `${siteUrl}/reviews/${r.slug}`,
+          name:     r.product_name,
+          item: {
+            '@type': 'Product',
+            name:    r.product_name,
+            image:   toAbsoluteUrl(r.image_url, siteUrl),
+            aggregateRating: r.rating ? {
+              '@type':       'AggregateRating',
+              ratingValue:   r.rating,
+              bestRating:    10,
+              worstRating:   1,
+              ratingCount:   1,
+            } : undefined,
+          },
+        }
+      }
+      const p = entry.product!
       return {
         '@type': 'ListItem',
         position: idx + 1,
-        url:      `${siteUrl}/reviews/${r.slug}`,
-        name:     r.product_name,
+        name:     p.name,
         item: {
           '@type': 'Product',
-          name:    r.product_name,
-          image:   toAbsoluteUrl(r.image_url, siteUrl),
-          aggregateRating: r.rating ? {
-            '@type':       'AggregateRating',
-            ratingValue:   r.rating,
-            bestRating:    10,
-            worstRating:   1,
-            ratingCount:   1,
-          } : undefined,
+          name:    p.name,
+          image:   toAbsoluteUrl(p.image_url, siteUrl),
+          brand:   p.brand ? { '@type': 'Brand', name: p.brand } : undefined,
         },
       }
     }),
@@ -298,11 +327,79 @@ export default async function PickDetailPage({ params }: Props) {
               </div>
 
               <div className="space-y-5">
-                {items.map(({ review, blurb, best_for: itemBestFor, role_label: itemRoleLabel }, idx) => {
-                  if (!review) return null
+                {items.map(({ review, product: standaloneProduct, blurb, best_for: itemBestFor, role_label: itemRoleLabel }, idx) => {
+                  const rank = idx + 1
+
+                  // Product-only pick (mig 110): no review backs this item —
+                  // render a lighter card with no rating/badge and a direct
+                  // price/CTA resolved straight off the joined product row.
+                  if (!review) {
+                    if (!standaloneProduct) return null
+                    const product = standaloneProduct
+                    const href = product.affiliate_url ? `/go/${product.slug}` : product.non_affiliate_url
+                    return (
+                      <article key={`product-${product.slug}`} className="flex flex-col sm:flex-row gap-5 bg-surface border border-soft hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-black/5 hover:-translate-y-0.5 transition-all duration-200">
+                        {/* Rank — medal for top 3, number for the rest */}
+                        <div className="flex sm:flex-col items-center gap-3 sm:gap-1 shrink-0">
+                          <RankMedal rank={rank} />
+                        </div>
+
+                        {product.image_url && (
+                          <div className="relative w-full sm:w-40 h-40 sm:h-32 shrink-0 rounded-xl overflow-hidden bg-surface-raised">
+                            <Image src={product.image_url} alt={product.name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 160px" />
+                          </div>
+                        )}
+
+                        <div className="flex-1 min-w-0 flex flex-col">
+                          <div className="flex items-start justify-between gap-3 mb-2">
+                            <div className="min-w-0">
+                              {/* Role chip — editorial tag from the workspace. */}
+                              {itemRoleLabel && (
+                                <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-accent/15 border border-accent-border/40 text-[10px] font-black uppercase tracking-widest text-accent-text">
+                                  {itemRoleLabel}
+                                </span>
+                              )}
+                              <span className="text-lg font-bold text-prose leading-snug block">
+                                {product.name}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Provenance chip — owner pick, not yet reviewed (no rating/badge) */}
+                          <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-surface-raised border border-soft text-[10px] font-black uppercase tracking-widest text-prose-faint">Owner pick · not yet reviewed</span>
+
+                          {/* Editor's per-collection "best for" tagline — italic, prominent */}
+                          {itemBestFor && (
+                            <p className="text-sm italic text-accent-text/90 mb-2">Best for {itemBestFor}</p>
+                          )}
+
+                          <p className="text-sm text-prose-muted leading-relaxed mb-3">
+                            {blurb ?? product.description ?? ''}
+                          </p>
+
+                          <div className="flex flex-wrap items-center gap-3 mt-auto pt-1">
+                            {product.price_cents != null && (
+                              <span className="text-xs text-prose-muted font-bold tabular-nums">${(product.price_cents / 100).toFixed(0)}</span>
+                            )}
+                            {href && (
+                              <a
+                                href={href}
+                                target="_blank"
+                                rel={product.affiliate_url ? 'sponsored nofollow noopener' : 'noopener'}
+                                data-product-slug={product.slug}
+                                className="ml-auto px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
+                              >
+                                Check Price
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </article>
+                    )
+                  }
+
                   const product = review.product_slug ? productMap.get(review.product_slug) : null
                   const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
-                  const rank = idx + 1
                   return (
                     <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-surface border border-soft hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-black/5 hover:-translate-y-0.5 transition-all duration-200">
                       {/* Rank — medal for top 3, number for the rest */}
