@@ -17,7 +17,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const [{ data: pick }, { data: items }] = await Promise.all([
     admin.from('collections').select('*').eq('id', id).single(),
     admin.from('collection_items')
-      .select('id, review_id, position, blurb, wins_category, role_label, best_for, reviews(id, slug, title, product_name, category, rating, image_url)')
+      .select('id, review_id, product_slug, position, blurb, wins_category, role_label, best_for, reviews(id, slug, title, product_name, category, rating, image_url), products(slug, name, brand, image_url, category, status)')
       .eq('collection_id', id)
       .order('position'),
   ])
@@ -80,6 +80,16 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   }
 
   if (items !== undefined) {
+    // Polymorphic guard (mig 110): each item is backed by EXACTLY ONE of
+    // review_id / product_slug. Catch it here for a friendly 400 before the DB
+    // CHECK (collection_items_one_source) would reject the whole insert.
+    const bad = items.find((i) => (i.review_id ? 1 : 0) + (i.product_slug ? 1 : 0) !== 1)
+    if (bad) {
+      return NextResponse.json(
+        { error: 'Each pick must reference exactly one of a review or a product.' },
+        { status: 400 }
+      )
+    }
     await admin.from('collection_items').delete().eq('collection_id', id)
     if (items.length > 0) {
       const rows = items.map((item) => ({ collection_id: id, ...item }))

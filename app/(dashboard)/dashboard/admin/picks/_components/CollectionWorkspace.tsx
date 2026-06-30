@@ -29,19 +29,53 @@ interface ReviewSummary {
   product_slug?: string | null
 }
 
+interface ProductSummary {
+  slug: string
+  name: string
+  brand?: string | null
+  image_url: string | null
+  category?: string | null
+  status?: string | null
+  price_cents?: number | null
+}
+
+// Polymorphic (mig 110): an item is backed by EXACTLY ONE of review_id (a
+// published review) or product_slug (an owned-but-unreviewed product).
 export interface PickItem {
   id?: string
-  review_id: string
+  review_id?: string | null
+  product_slug?: string | null
   position: number
   blurb: string | null
   wins_category?: string | null
   role_label?: string | null
   best_for?: string | null
-  // Resolved server-side from products.price_cents via the review's product_slug.
-  // Only used in the workspace for the price-range readout — not persisted.
+  // Resolved server-side from products.price_cents. Only used in the workspace
+  // for the price-range readout — not persisted.
   price_cents?: number | null
   reviews?: ReviewSummary | ReviewSummary[] | null
+  products?: ProductSummary | ProductSummary[] | null
 }
+
+// Stable identity for an item regardless of source — used as the React key and
+// as the handle for update/remove operations.
+function itemKey(i: PickItem): string {
+  return i.review_id ?? i.product_slug ?? ''
+}
+
+// Search dropdown can surface either a review or an un-reviewed product.
+type ReviewResult = ReviewSummary & { kind: 'review' }
+interface ProductResult {
+  kind: 'product'
+  slug: string
+  name: string
+  brand: string | null
+  image_url: string | null
+  category: string | null
+  status: string | null
+  already_reviewed: boolean
+}
+type SearchResult = ReviewResult | ProductResult
 
 export interface CollectionFAQ {
   question: string
@@ -166,7 +200,7 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
   const [faqs, setFaqs]                       = useState<CollectionFAQ[]>(pick.faqs ?? [])
 
   const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<ReviewSummary[]>([])
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [searching, setSearching] = useState(false)
   const [slugTaken, setSlugTaken] = useState<{ type: string } | null>(null)
 
@@ -212,8 +246,7 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
   function deriveCategory(): string {
     const counts: Record<string, number> = {}
     for (const item of items) {
-      const review = getReview(item)
-      const cat = review?.category
+      const cat = getReview(item)?.category ?? getProduct(item)?.category
       if (cat) counts[cat] = (counts[cat] ?? 0) + 1
     }
     let best: string | null = null
@@ -249,7 +282,8 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
   const [refineInstruction, setRefineInstruction] = useState('')
 
   async function callIntroAI(refine: boolean) {
-    if (items.length < 2) { setAiError('Add at least 2 reviews before generating'); return }
+    const reviewIds = items.map((i) => i.review_id).filter((x): x is string => !!x)
+    if (reviewIds.length < 2) { setAiError('Add at least 2 reviewed picks before generating'); return }
     setAiBusy(true); setAiError(null)
     try {
       const res = await fetch('/api/claude/collection-intro', {
@@ -259,7 +293,7 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
           collectionType: pickType,
           title:          title || 'Untitled collection',
           description:    description || null,
-          itemReviewIds:  items.map((i) => i.review_id),
+          itemReviewIds:  reviewIds,
           currentHtml:    refine ? introHtml : undefined,
           instruction:    refine ? refineInstruction.trim() : undefined,
         }),
@@ -281,7 +315,8 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
   const [fillNote, setFillNote]   = useState<string | null>(null)
 
   async function callFillAI() {
-    if (items.length < 1) { setFillError('Add at least one pick first'); return }
+    const reviewIds = items.map((i) => i.review_id).filter((x): x is string => !!x)
+    if (reviewIds.length < 1) { setFillError('Add at least one reviewed pick to fill'); return }
     setFillBusy(true); setFillError(null); setFillNote(null)
     try {
       const res = await fetch('/api/claude/collection-fill', {
@@ -291,7 +326,7 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
           collectionType: pickType,
           title:          title || 'Untitled collection',
           description:    description || null,
-          itemReviewIds:  items.map((i) => i.review_id),
+          itemReviewIds:  reviewIds,
         }),
       })
       const json = await res.json()
@@ -305,6 +340,9 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
       let blurbsFilled = 0
       let rolesFilled  = 0
       setItems((prev) => prev.map((i) => {
+        // Product-only items aren't keyed by review id — the review-keyed AI fill
+        // skips them.
+        if (!i.review_id) return i
         let next = i
         const aiBlurb = blurbsById.get(i.review_id)
         if (aiBlurb && !(i.blurb ?? '').trim()) { next = { ...next, blurb: aiBlurb }; blurbsFilled++ }
@@ -337,21 +375,30 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
     return Array.isArray(item.reviews) ? item.reviews[0] ?? null : item.reviews
   }
 
-  async function searchReviews(q: string) {
+  function getProduct(item: PickItem): ProductSummary | null {
+    if (!item.products) return null
+    return Array.isArray(item.products) ? item.products[0] ?? null : item.products
+  }
+
+  async function searchItems(q: string) {
     if (!q.trim()) { setSearchResults([]); return }
     setSearching(true)
-    const res = await fetch(`/api/admin/search?q=${encodeURIComponent(q)}&type=review&limit=8`)
+    const res = await fetch(`/api/admin/search?q=${encodeURIComponent(q)}&limit=8`)
     if (res.ok) {
       const json = await res.json()
-      // API returns { articles, reviews, media }; only show approved reviews so
-      // drafts/pending/rejected entries can't be added to public collections.
-      const reviews = (json.reviews ?? []) as Array<ReviewSummary & { status?: string }>
-      setSearchResults(reviews.filter((r) => r.status === 'approved'))
+      // Only approved reviews can be added so drafts/pending entries can't slip
+      // onto a public collection. Products (mig 110) are addable as bare picks.
+      const reviews = ((json.reviews ?? []) as Array<ReviewSummary & { status?: string }>)
+        .filter((r) => r.status === 'approved')
+        .map((r): ReviewResult => ({ ...r, kind: 'review' }))
+      const products = ((json.products ?? []) as Array<Omit<ProductResult, 'kind'>>)
+        .map((p): ProductResult => ({ ...p, kind: 'product' }))
+      setSearchResults([...reviews, ...products])
     }
     setSearching(false)
   }
 
-  function addItem(review: ReviewSummary) {
+  function addReviewItem(review: ReviewSummary) {
     if (items.some((i) => i.review_id === review.id)) return
     setItems((prev) => [
       ...prev,
@@ -361,8 +408,23 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
     setSearchResults([])
   }
 
-  function removeItem(review_id: string) {
-    setItems((prev) => prev.filter((i) => i.review_id !== review_id).map((i, idx) => ({ ...i, position: idx })))
+  function addProductItem(product: ProductResult) {
+    if (items.some((i) => i.product_slug === product.slug)) return
+    setItems((prev) => [
+      ...prev,
+      {
+        product_slug: product.slug,
+        position: prev.length,
+        blurb: null,
+        products: { slug: product.slug, name: product.name, brand: product.brand, image_url: product.image_url, category: product.category, status: product.status },
+      },
+    ])
+    setSearchQuery('')
+    setSearchResults([])
+  }
+
+  function removeItem(key: string) {
+    setItems((prev) => prev.filter((i) => itemKey(i) !== key).map((i, idx) => ({ ...i, position: idx })))
   }
 
   function moveItem(idx: number, dir: -1 | 1) {
@@ -375,20 +437,11 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
     })
   }
 
-  function updateBlurb(review_id: string, blurb: string) {
-    setItems((prev) => prev.map((i) => i.review_id === review_id ? { ...i, blurb: blurb || null } : i))
-  }
-
-  function updateWinsCategory(review_id: string, wins_category: string) {
-    setItems((prev) => prev.map((i) => i.review_id === review_id ? { ...i, wins_category: wins_category || null } : i))
-  }
-
-  function updateRoleLabel(review_id: string, role_label: string) {
-    setItems((prev) => prev.map((i) => i.review_id === review_id ? { ...i, role_label: role_label || null } : i))
-  }
-
-  function updateBestFor(review_id: string, best_for: string) {
-    setItems((prev) => prev.map((i) => i.review_id === review_id ? { ...i, best_for: best_for || null } : i))
+  // One handler for every per-item editable field (collapses the former
+  // updateBlurb/updateWinsCategory/updateRoleLabel/updateBestFor), keyed off the
+  // polymorphic itemKey so it works for both review- and product-backed items.
+  function updateItemField(key: string, field: 'blurb' | 'wins_category' | 'role_label' | 'best_for', value: string) {
+    setItems((prev) => prev.map((i) => itemKey(i) === key ? { ...i, [field]: value || null } : i))
   }
 
   // Where this collection lives on the public site once visible. Falls back
@@ -405,6 +458,10 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
     return `/picks/${s}` // general, best_of
   }
   const publicPath = getPublicPath()
+  // The collection-intro/fill AI is keyed on review ids, so its affordances gate
+  // on the number of review-backed picks, not the total (which may include
+  // un-reviewed products).
+  const reviewBackedCount = items.filter((i) => i.review_id).length
 
   // ── Autosaved payload (everything EXCEPT is_visible) ──────────────────────
   // Visibility is changed only via the publish/unpublish action so autosave
@@ -427,7 +484,9 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
       methodology_html:     methodologyHtml.trim() || null,
       faqs:                 faqs.length > 0 ? faqs : null,
       items: items.map((i) => ({
-        review_id:     i.review_id,
+        // Polymorphic (mig 110): exactly one of these is set per item.
+        review_id:     i.review_id ?? null,
+        product_slug:  i.product_slug ?? null,
         position:      i.position,
         blurb:         i.blurb,
         // Comparison alone uses wins_category (winner-per-criterion). Every
@@ -530,9 +589,9 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
             <button
               type="button"
               onClick={() => callIntroAI(false)}
-              disabled={aiBusy || items.length < 2}
+              disabled={aiBusy || reviewBackedCount < 2}
               className="text-xs px-3 py-1.5 bg-accent/40 hover:bg-accent/60 disabled:opacity-40 text-orange-200 font-semibold rounded-lg transition-colors min-h-[32px]"
-              title={items.length < 2 ? 'Add at least 2 reviews first' : 'Generate intro with AI'}
+              title={reviewBackedCount < 2 ? 'Add at least 2 reviewed picks first' : 'Generate intro with AI'}
             >
               {aiBusy && !refineInstruction ? '✨ Generating…' : introHtml.trim() ? '↻ Regenerate with AI' : '✨ Generate with AI'}
             </button>
@@ -556,7 +615,7 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
               <button
                 type="button"
                 onClick={() => callIntroAI(true)}
-                disabled={aiBusy || !refineInstruction.trim() || items.length < 2}
+                disabled={aiBusy || !refineInstruction.trim() || reviewBackedCount < 2}
                 className="shrink-0 text-xs px-3 py-2 bg-surface-raised hover:bg-surface disabled:opacity-40 text-prose font-semibold rounded-lg transition-colors min-h-[36px]"
               >
                 {aiBusy && refineInstruction ? 'Refining…' : 'Refine →'}
@@ -878,31 +937,57 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
         <div className="relative mb-4">
           <input
             type="text" value={searchQuery}
-            onChange={(e) => { setSearchQuery(e.target.value); searchReviews(e.target.value) }}
-            placeholder="Search approved reviews to add..."
+            onChange={(e) => { setSearchQuery(e.target.value); searchItems(e.target.value) }}
+            placeholder="Search reviews or products to add..."
             className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
           />
           {(searchResults.length > 0 || searching) && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-surface-sunken border border-soft rounded-xl shadow-2xl z-10 overflow-hidden">
               {searching && <p className="text-xs text-prose-faint px-4 py-3">Searching...</p>}
-              {searchResults.map((r) => (
-                <button
-                  key={r.id} type="button" onClick={() => addItem(r)}
-                  disabled={items.some((i) => i.review_id === r.id)}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-surface transition-colors text-left disabled:opacity-40"
-                >
-                  {r.image_url && (
-                    <div className="relative w-8 h-8 rounded shrink-0 bg-surface-raised overflow-hidden">
-                      <Image src={r.image_url} alt={r.product_name} fill className="object-cover" sizes="32px" />
+              {searchResults.map((r) => {
+                if (r.kind === 'review') {
+                  const added = items.some((i) => i.review_id === r.id)
+                  return (
+                    <button
+                      key={`review-${r.id}`} type="button" onClick={() => addReviewItem(r)}
+                      disabled={added}
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-surface transition-colors text-left disabled:opacity-40"
+                    >
+                      {r.image_url && (
+                        <div className="relative w-8 h-8 rounded shrink-0 bg-surface-raised overflow-hidden">
+                          <Image src={r.image_url} alt={r.product_name} fill className="object-cover" sizes="32px" />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-sm text-prose truncate">{r.title}</p>
+                        <p className="text-xs text-prose-faint">Review · {r.product_name} · {r.rating}/10</p>
+                      </div>
+                      {added && <span className="text-xs text-forest ml-auto shrink-0">Added</span>}
+                    </button>
+                  )
+                }
+                const added = items.some((i) => i.product_slug === r.slug)
+                return (
+                  <button
+                    key={`product-${r.slug}`} type="button" onClick={() => addProductItem(r)}
+                    disabled={added}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-surface transition-colors text-left disabled:opacity-40"
+                  >
+                    {r.image_url && (
+                      <div className="relative w-8 h-8 rounded shrink-0 bg-surface-raised overflow-hidden">
+                        <Image src={r.image_url} alt={r.name} fill className="object-cover" sizes="32px" />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-sm text-prose truncate">{r.name}</p>
+                      <p className="text-xs text-prose-faint truncate">
+                        {r.brand ? `${r.brand} · ` : ''}Product{r.already_reviewed ? ' · has a review — add that instead' : ' · not yet reviewed'}
+                      </p>
                     </div>
-                  )}
-                  <div className="min-w-0">
-                    <p className="text-sm text-prose truncate">{r.title}</p>
-                    <p className="text-xs text-prose-faint">{r.product_name} · {r.rating}/10</p>
-                  </div>
-                  {items.some((i) => i.review_id === r.id) && <span className="text-xs text-forest ml-auto shrink-0">Added</span>}
-                </button>
-              ))}
+                    {added && <span className="text-xs text-forest ml-auto shrink-0">Added</span>}
+                  </button>
+                )
+              })}
             </div>
           )}
         </div>
@@ -913,31 +998,44 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
         ) : (
           <div className="space-y-2">
             {items.map((item, idx) => {
+              const key = itemKey(item)
               const review = getReview(item)
+              const product = getProduct(item)
+              const isProduct = !item.review_id
+              const displayName = isProduct ? (product?.name ?? item.product_slug ?? 'Product') : (review?.title ?? item.review_id)
+              const displayImage = isProduct ? product?.image_url : review?.image_url
+              const displaySub = isProduct
+                ? (product?.brand ?? 'Product')
+                : `${review?.product_name} · ${review?.rating}/10`
               return (
-                <div key={item.review_id} className="bg-surface border border-soft rounded-xl p-3">
+                <div key={key} className="bg-surface border border-soft rounded-xl p-3">
                   <div className="flex items-start gap-3">
-                    {review?.image_url && (
+                    {displayImage && (
                       <div className="relative w-12 h-12 shrink-0 rounded-lg bg-surface-raised overflow-hidden">
-                        <Image src={review.image_url} alt={review.product_name} fill className="object-contain p-1" sizes="48px" />
+                        <Image src={displayImage} alt={displayName ?? ''} fill className="object-contain p-1" sizes="48px" />
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-prose leading-tight">{review?.title ?? item.review_id}</p>
-                      <p className="text-xs text-prose-faint mt-0.5">{review?.product_name} · {review?.rating}/10</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-semibold text-prose leading-tight">{displayName}</p>
+                        {isProduct && (
+                          <span className="px-1.5 py-0.5 rounded bg-warn-bg/60 border border-warn-line text-[10px] font-bold uppercase tracking-wider text-warn-ink shrink-0">Not yet reviewed</span>
+                        )}
+                      </div>
+                      <p className="text-xs text-prose-faint mt-0.5">{displaySub}</p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <button type="button" onClick={() => moveItem(idx, -1)} disabled={idx === 0}
                         className="min-h-[44px] min-w-[44px] flex items-center justify-center text-base text-prose-faint hover:text-prose disabled:opacity-30 transition-colors rounded-lg hover:bg-surface-raised" title="Move up" aria-label="Move up">↑</button>
                       <button type="button" onClick={() => moveItem(idx, 1)} disabled={idx === items.length - 1}
                         className="min-h-[44px] min-w-[44px] flex items-center justify-center text-base text-prose-faint hover:text-prose disabled:opacity-30 transition-colors rounded-lg hover:bg-surface-raised" title="Move down" aria-label="Move down">↓</button>
-                      <button type="button" onClick={() => removeItem(item.review_id)}
+                      <button type="button" onClick={() => removeItem(key)}
                         className="min-h-[44px] min-w-[44px] flex items-center justify-center text-lg text-prose-faint hover:text-danger-ink hover:bg-danger-bg transition-colors rounded-lg" title="Remove" aria-label="Remove">×</button>
                     </div>
                   </div>
                   <textarea
                     value={item.blurb ?? ''}
-                    onChange={(e) => updateBlurb(item.review_id, e.target.value)}
+                    onChange={(e) => updateItemField(key, 'blurb', e.target.value)}
                     placeholder="Optional editorial blurb for this pick (2-3 sentences)..."
                     rows={2}
                     className="mt-2 w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none text-base sm:text-sm"
@@ -946,7 +1044,7 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
                     <input
                       type="text"
                       value={item.wins_category ?? ''}
-                      onChange={(e) => updateWinsCategory(item.review_id, e.target.value)}
+                      onChange={(e) => updateItemField(key, 'wins_category', e.target.value)}
                       placeholder="Winner badge (e.g. 'Best Overall', 'Best Budget', 'Best for Solo Use')"
                       maxLength={80}
                       className="mt-2 w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover text-base sm:text-sm"
@@ -962,7 +1060,7 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
                         <input
                           type="text"
                           value={item.role_label ?? ''}
-                          onChange={(e) => updateRoleLabel(item.review_id, e.target.value)}
+                          onChange={(e) => updateItemField(key, 'role_label', e.target.value)}
                           placeholder={cfg.placeholder}
                           maxLength={80}
                           aria-label={cfg.label}
@@ -977,7 +1075,7 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
                     <input
                       type="text"
                       value={item.best_for ?? ''}
-                      onChange={(e) => updateBestFor(item.review_id, e.target.value)}
+                      onChange={(e) => updateItemField(key, 'best_for', e.target.value)}
                       placeholder="Best for… (e.g. 'the grill master', 'weekend warriors')"
                       maxLength={120}
                       className="mt-2 w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover text-base sm:text-sm"

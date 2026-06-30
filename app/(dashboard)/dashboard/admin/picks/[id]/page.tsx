@@ -12,23 +12,25 @@ export default async function EditPickPage({ params }: { params: Promise<{ id: s
   const admin = createAdminClient()
   const [{ data: pick }, { data: items }] = await Promise.all([
     admin.from('collections').select('*').eq('id', id).single(),
-    // Bug fix: the prior select dropped wins_category / role_label / best_for,
-    // so saved labels never rehydrated into the form. Always fetch every
-    // editable column the form can write back.
+    // Fetch every editable column the workspace can write back, plus BOTH item
+    // sources (mig 110): review-backed items join `reviews`, product-only items
+    // join `products`.
     admin.from('collection_items')
-      .select('id, review_id, position, blurb, wins_category, role_label, best_for, reviews(id, slug, title, product_name, category, rating, image_url, product_slug)')
+      .select('id, review_id, product_slug, position, blurb, wins_category, role_label, best_for, reviews(id, slug, title, product_name, category, rating, image_url, product_slug), products(slug, name, brand, image_url, category, status, price_cents)')
       .eq('collection_id', id)
       .order('position'),
   ])
 
   if (!pick) notFound()
 
-  // Resolve product prices for the items so the workspace can render a price-
-  // range readout above the picks list — same shape used by public pages.
-  const productSlugs = [
+  // Resolve product prices so the workspace can render a price-range readout.
+  // Review-backed items price via the review's linked product slug; product-only
+  // items carry price_cents on their own joined product row.
+  const reviewProductSlugs = [
     ...new Set(
       (items ?? [])
         .map((i) => {
+          if (!i.review_id) return null
           const r = i.reviews
           const row = Array.isArray(r) ? r[0] : r
           return (row as { product_slug?: string | null } | null)?.product_slug ?? null
@@ -37,24 +39,28 @@ export default async function EditPickPage({ params }: { params: Promise<{ id: s
     ),
   ]
   const priceMap = new Map<string, number | null>()
-  if (productSlugs.length > 0) {
+  if (reviewProductSlugs.length > 0) {
     const { data: products } = await admin
       .from('products')
       .select('slug, price_cents')
-      .in('slug', productSlugs)
+      .in('slug', reviewProductSlugs)
     for (const p of products ?? []) priceMap.set(p.slug, p.price_cents ?? null)
   }
-  const itemsWithPrice = (items ?? [])
-    // Product-only items (review_id null, mig 110) aren't editable in PickForm
-    // yet — that's the next builder phase. Render review-backed items for now.
-    .filter((i): i is typeof i & { review_id: string } => i.review_id !== null)
-    .map((i) => {
+
+  const itemsWithPrice = (items ?? []).map((i) => {
+    let price_cents: number | null = null
+    if (i.review_id) {
       const r = i.reviews
       const row = Array.isArray(r) ? r[0] : r
       const slug = (row as { product_slug?: string | null } | null)?.product_slug ?? null
-      const price_cents = slug ? priceMap.get(slug) ?? null : null
-      return { ...i, price_cents }
-    })
+      price_cents = slug ? priceMap.get(slug) ?? null : null
+    } else {
+      const p = i.products
+      const row = Array.isArray(p) ? p[0] : p
+      price_cents = (row as { price_cents?: number | null } | null)?.price_cents ?? null
+    }
+    return { ...i, price_cents }
+  })
 
   // Cast: collections.faqs is generated as `Json` (any-shape jsonb) but the
   // workspace uses the structured CollectionFAQ[] shape we enforce at the
@@ -63,7 +69,7 @@ export default async function EditPickPage({ params }: { params: Promise<{ id: s
   return (
     <CollectionWorkspace
       pick={pick as unknown as Parameters<typeof CollectionWorkspace>[0]['pick']}
-      initialItems={itemsWithPrice}
+      initialItems={itemsWithPrice as unknown as Parameters<typeof CollectionWorkspace>[0]['initialItems']}
     />
   )
 }

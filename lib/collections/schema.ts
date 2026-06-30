@@ -46,7 +46,13 @@ export const PickListSchema = z.object({
 })
 
 export const CollectionItemSchema = z.object({
-  review_id:     z.string().uuid(),
+  // Polymorphic (mig 110): an item is backed by EXACTLY ONE of review_id or
+  // product_slug. Kept refine-free here per the Zod v4 partial+refine rule
+  // ([[feedback_zod_v4_partial_with_refine]]); the "exactly one" invariant is
+  // enforced by the DB CHECK (collection_items_one_source) and re-checked in
+  // the PATCH handler for a friendly 400.
+  review_id:     z.string().uuid().optional().nullable(),
+  product_slug:  z.string().regex(/^[a-z0-9-]+$/).max(80).optional().nullable(),
   position:      z.number().int(),
   blurb:         z.string().max(500).optional().nullable(),
   wins_category: z.string().max(80).optional().nullable(),
