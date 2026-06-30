@@ -1,11 +1,41 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { getClaudeClient, MODEL } from '@/lib/claude/client'
 import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
+import { createStructured } from '@/lib/claude/structured'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 export const maxDuration = 90
+
+// The model returns the refined draft by calling this tool — its input_schema
+// is the shape, so the SDK validates it instead of us regex-parsing JSON.
+const GUIDE_REFINE_TOOL: Anthropic.Tool = {
+  name: 'submit_guide_refinement',
+  description: 'Return the refined article draft.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      title:        { type: 'string' },
+      excerpt:      { type: 'string' },
+      tldr:         { type: 'string' },
+      keyTakeaways: { type: 'array', items: { type: 'string' } },
+      faqs:         { type: 'array', items: {
+        type: 'object',
+        properties: { question: { type: 'string' }, answer: { type: 'string' } },
+        required: ['question', 'answer'],
+      } },
+      introduction: { type: 'string' },
+      sections:     { type: 'array', items: {
+        type: 'object',
+        properties: { heading: { type: 'string' }, body: { type: 'string' } },
+        required: ['heading', 'body'],
+      } },
+      conclusion:   { type: 'string' },
+    },
+    required: ['title', 'excerpt', 'introduction', 'sections', 'conclusion'],
+  },
+}
 
 const FAQSchema = z.object({ question: z.string(), answer: z.string() })
 
@@ -58,38 +88,26 @@ ${plainText}
 ${contentBlocksContext ? `\n${contentBlocksContext}\n` : ''}
 Refinement instructions: ${instruction}
 
-Return JSON with this exact shape:
-{
-  "title": "string — updated title if the instructions require it, otherwise keep the original",
-  "excerpt": "string — updated excerpt if needed, otherwise keep original (max 160 chars)",
-  "tldr": "string — updated TL;DR if the instructions require it, otherwise keep the original",
-  "keyTakeaways": ["string — updated key takeaways if the instructions require it, otherwise keep the originals"],
-  "faqs": [{ "question": "string", "answer": "string" }],
-  "introduction": "string — the opening paragraph(s)",
-  "sections": [
-    { "heading": "string", "body": "string" }
-  ],
-  "conclusion": "string"
-}
+Return your result by calling the submit_guide_refinement tool. Field guidance: title is the updated title if the instructions require it, otherwise the original; excerpt is the updated card sentence if needed, otherwise the original (max 160 chars); tldr is the updated TL;DR if required, otherwise the original; keyTakeaways are the updated takeaways if required, otherwise the originals; faqs are question/answer pairs; introduction is the opening paragraph(s); each section has a heading and body; conclusion is the closing.
 
 Important: Only change what the instructions specify. Keep the first-person dad voice throughout.`
 
   try {
-    const claude = getClaudeClient()
     const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
-    const message = await claude.messages.create({
-      model: MODEL,
-      max_tokens: 3800,
+    const result = await createStructured({
       system: systemBlocks,
       messages: [{ role: 'user', content: prompt }],
+      tool: GUIDE_REFINE_TOOL,
+      maxTokens: 3800,
     })
 
-    const text = message.content.find((b) => b.type === 'text')?.text ?? ''
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) return NextResponse.json({ error: 'Model returned unexpected format' }, { status: 502 })
+    if (result.stopReason === 'max_tokens') {
+      console.error('guide-refine hit max_tokens — output truncated')
+      return NextResponse.json({ error: 'The refinement ran long and got cut off. Try again with a narrower instruction.' }, { status: 502 })
+    }
+    if (!result.data) return NextResponse.json({ error: 'Model returned unexpected format' }, { status: 502 })
 
-    const draft = JSON.parse(jsonMatch[0])
-    return NextResponse.json({ draft })
+    return NextResponse.json({ draft: result.data })
   } catch (err) {
     console.error('Guide refine error:', err)
     return NextResponse.json({ error: 'Refinement failed' }, { status: 502 })

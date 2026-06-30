@@ -1,12 +1,41 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getClaudeClient, MODEL } from '@/lib/claude/client'
 import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
+import { createStructured } from '@/lib/claude/structured'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 export const maxDuration = 60
+
+// The model returns the per-pick layer by calling this tool — its input_schema
+// is the shape, so the SDK validates it instead of us regex-parsing JSON.
+const FILL_TOOL: Anthropic.Tool = {
+  name: 'submit_fill',
+  description: 'Return the per-pick blurbs, role labels, and FAQs for the collection.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      blurbs: { type: 'array', items: {
+        type: 'object',
+        properties: { id: { type: 'string' }, blurb: { type: 'string' } },
+        required: ['id', 'blurb'],
+      } },
+      roleLabels: { type: 'array', items: {
+        type: 'object',
+        properties: { id: { type: 'string' }, label: { type: 'string' } },
+        required: ['id', 'label'],
+      } },
+      faqs: { type: 'array', items: {
+        type: 'object',
+        properties: { question: { type: 'string' }, answer: { type: 'string' } },
+        required: ['question', 'answer'],
+      } },
+    },
+    required: ['blurbs', 'faqs'],
+  },
+}
 
 const Input = z.object({
   collectionType: z.enum(['general', 'best_of', 'gift_guide', 'comparison', 'stack']),
@@ -119,12 +148,7 @@ export async function POST(request: NextRequest) {
 
   const faqGuide = guidance.faqTopics.map((t, i) => `${i + 1}. ${t}`).join('\n')
 
-  const prompt = `You're filling out the per-pick layer of a "${collectionType}" collection. Return STRICT JSON only — no commentary, no markdown fences, no preamble. The JSON shape:
-
-{
-  "blurbs": [{ "id": "<review-id>", "blurb": "<2-3 sentence editorial blurb in Boss Daddy voice>" }, ...],
-${wantsRoleLabels ? '  "roleLabels": [{ "id": "<review-id>", "label": "<short role tag, 2-4 words>" }, ...],\n' : ''}  "faqs": [{ "question": "<short question>", "answer": "<concise answer, 1-3 sentences>" }, ...]
-}
+  const prompt = `You're filling out the per-pick layer of a "${collectionType}" collection. Return your result by calling the submit_fill tool. Fields: blurbs (one 2-3 sentence editorial blurb per pick in Boss Daddy voice, each keyed by its review id)${wantsRoleLabels ? ', roleLabels (one short 2-4 word role tag per pick, keyed by its review id)' : ''}, and faqs (short question + concise 1-3 sentence answer pairs).
 
 Collection title: ${title}
 ${description ? `Tagline: ${description}\n` : ''}Flavor: ${collectionType}
@@ -149,25 +173,26 @@ ${faqGuide}
 - Answers stay concise and direct. No hedging. No corporate speak.
 - Questions are plain-English, the kind a real reader would type into Google.
 
-Return ONLY the JSON. No code fences. No leading text.`
+Return your result by calling the submit_fill tool.`
 
   const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
-  const claudeResult = await getClaudeClient().messages.create({
-    model: MODEL,
-    max_tokens: 2500,
-    system: systemBlocks,
-    messages: [{ role: 'user', content: prompt }],
-  }).catch((err: unknown) => {
-    console.error('Claude API error (collection-fill):', err)
-    return { _error: err instanceof Error ? err.message : String(err) } as const
-  })
-
-  if ('_error' in claudeResult) {
-    return NextResponse.json({ error: `AI service error: ${claudeResult._error.slice(0, 120)}` }, { status: 502 })
+  let result
+  try {
+    result = await createStructured({
+      system: systemBlocks,
+      messages: [{ role: 'user', content: prompt }],
+      tool: FILL_TOOL,
+      maxTokens: 2500,
+    })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('Claude API error (collection-fill):', msg)
+    return NextResponse.json({ error: `AI service error: ${msg.slice(0, 120)}` }, { status: 502 })
   }
 
-  let text = claudeResult.content.find((b) => b.type === 'text')?.text ?? ''
-  text = text.trim().replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim()
+  if (result.stopReason === 'max_tokens') {
+    return NextResponse.json({ error: 'The fill ran long and got cut off. Please try again.' }, { status: 502 })
+  }
 
   type Payload = {
     blurbs?: Array<{ id?: unknown; blurb?: unknown }>
@@ -175,12 +200,7 @@ Return ONLY the JSON. No code fences. No leading text.`
     faqs?: Array<{ question?: unknown; answer?: unknown }>
   }
 
-  let payload: Payload
-  try {
-    payload = JSON.parse(text) as Payload
-  } catch {
-    return NextResponse.json({ error: 'AI returned non-JSON content.' }, { status: 502 })
-  }
+  const payload = (result.data ?? {}) as Payload
 
   const idSet = new Set(itemReviewIds)
 

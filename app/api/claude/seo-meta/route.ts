@@ -1,10 +1,26 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { getClaudeClient, MODEL } from '@/lib/claude/client'
+import { createStructured } from '@/lib/claude/structured'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 export const maxDuration = 30
+
+// The model returns the meta by calling this tool — its input_schema is the
+// shape, so the SDK validates it instead of us regex-parsing JSON.
+const SEO_TOOL: Anthropic.Tool = {
+  name: 'submit_seo_meta',
+  description: 'Return the SEO meta title and description.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      metaTitle:       { type: 'string' },
+      metaDescription: { type: 'string' },
+    },
+    required: ['metaTitle', 'metaDescription'],
+  },
+}
 
 const Input = z.object({
   title:        z.string().min(1).max(120),
@@ -49,20 +65,23 @@ Rules:
 - Meta description: 140–160 chars. Summarize the value. Include 1-2 natural keywords. End with a subtle call to action.
 - Write in the Boss Daddy voice — confident, direct, dad-tested credibility.
 
-Return JSON only: { "metaTitle": "string", "metaDescription": "string" }`
+Return your result by calling the submit_seo_meta tool.`
 
   try {
-    const text = await getClaudeClient().messages.create({
-      model: MODEL,
-      max_tokens: 200,
+    // No voice system block — meta tags are short SEO snippets, not brand prose.
+    const result = await createStructured({
+      system: undefined,
       messages: [{ role: 'user', content: prompt }],
-    }).then((m) => m.content.find((b) => b.type === 'text')?.text ?? '')
+      tool: SEO_TOOL,
+      maxTokens: 400,
+    })
 
-    const match = text.match(/\{[\s\S]*\}/)
-    if (!match) return NextResponse.json({ error: 'Unexpected model response' }, { status: 502 })
+    if (!result.data) return NextResponse.json({ error: 'Unexpected model response' }, { status: 502 })
 
-    const result = JSON.parse(match[0])
-    return NextResponse.json(result)
+    return NextResponse.json({
+      metaTitle:       result.data.metaTitle,
+      metaDescription: result.data.metaDescription,
+    })
   } catch (err) {
     console.error('seo-meta generation error:', err)
     return NextResponse.json({ error: 'Generation failed' }, { status: 502 })

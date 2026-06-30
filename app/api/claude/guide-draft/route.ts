@@ -1,11 +1,54 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { getClaudeClient, MODEL } from '@/lib/claude/client'
 import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
+import { createStructured } from '@/lib/claude/structured'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 export const maxDuration = 90
+
+// The model returns the draft by calling this tool — its input_schema is the
+// shape, so the SDK validates it instead of us regex-parsing JSON from text.
+const GUIDE_DRAFT_TOOL: Anthropic.Tool = {
+  name: 'submit_guide',
+  description: 'Return the finished dad-focused article draft.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      title:           { type: 'string' },
+      excerpt:         { type: 'string' },
+      tldr:            { type: 'string' },
+      keyTakeaways:    { type: 'array', items: { type: 'string' } },
+      faqs:            { type: 'array', items: {
+        type: 'object',
+        properties: { question: { type: 'string' }, answer: { type: 'string' } },
+        required: ['question', 'answer'],
+      } },
+      introduction:    { type: 'string' },
+      sections:        { type: 'array', items: {
+        type: 'object',
+        properties: { heading: { type: 'string' }, body: { type: 'string' } },
+        required: ['heading', 'body'],
+      } },
+      conclusion:      { type: 'string' },
+      heroImagePrompt: { type: 'string' },
+      inlineImages:    { type: 'array', items: {
+        type: 'object',
+        properties: {
+          afterHeading: { type: 'string' }, prompt: { type: 'string' },
+          altText: { type: 'string' }, caption: { type: 'string' },
+        },
+        required: ['afterHeading', 'prompt', 'altText', 'caption'],
+      } },
+      suggestedTags:   { type: 'array', items: { type: 'string' } },
+    },
+    required: [
+      'title', 'excerpt', 'tldr', 'keyTakeaways', 'faqs', 'introduction',
+      'sections', 'conclusion', 'heroImagePrompt', 'inlineImages', 'suggestedTags',
+    ],
+  },
+}
 
 const GuideDraftInput = z.object({
   topic: z.string().min(4).max(150),
@@ -94,38 +137,20 @@ Life Stage: pregnancy, newborn, infant, toddler, preschool, school-age, teen
 Use Case: travel, daily, occasional, gift-idea, gear-haul
 Topic: home-improvement, workshop, automotive, yard-work, kitchen-tools, outdoor-cooking, mental-health, mindfulness, self-help, faith, formula-feeding, baby-sleep, strollers, car-seats, baby-carriers, diapering, nursery-gear, power-tools, hand-tools, storage-org, camping, hiking, fishing, hunting, water-sports, smart-home, wearables, audio-gear, edc-carry, truck-gear, detailing, cast-iron, meal-prep, fitness, home-gym, cleaning, organization
 
-Return JSON with this exact shape:
-{
-  "title": "string (specific, useful title — max 80 chars, include the topic keyword)",
-  "excerpt": "string (one punchy sentence for the article card — max 160 chars)",
-  "tldr": "string (2–3 sentences, plain-English summary for skimmers)",
-  "keyTakeaways": ["string (3–5 specific, actionable items)"],
-  "faqs": [{ "question": "string", "answer": "string (2–3 sentences)" }],
-  "introduction": "string (2–3 sentences, first-person dad opening a real situation)",
-  "sections": [
-    { "heading": "string (clear, action-oriented heading)", "body": "string (150–250 words, paragraphs separated by \\n\\n)" }
-  ],
-  "conclusion": "string (1–2 paragraphs with a clear next step, separated by \\n\\n if 2 paragraphs)",
-  "heroImagePrompt": "string (DALL-E 3 prompt for the hero image: specific real-world objects, natural daylight or warm indoor light, no people, no text, under 180 chars, style: editorial photography)",
-  "inlineImages": [
-    { "afterHeading": "string (must match one of the section headings above)", "prompt": "string", "altText": "string", "caption": "string" }
-  ],
-  "suggestedTags": ["string (3–6 slugs from the controlled vocabulary above)"]
-}`
+Return your result by calling the submit_guide tool. Field guidance: title is a specific, useful title (max 80 chars, include the topic keyword); excerpt is one punchy card sentence (max 160 chars); tldr is 2–3 plain-English skimmer sentences; keyTakeaways are 3–5 specific, actionable items; faqs are 3–5 question/answer pairs (answers 2–3 sentences); introduction is 2–3 sentences (first-person dad opening a real situation); each section has a clear, action-oriented heading and a 150–250 word body with paragraphs separated by \\n\\n; conclusion is 1–2 paragraphs with a clear next step (separated by \\n\\n if 2 paragraphs); heroImagePrompt is an editorial-photography hero prompt (specific real-world objects, natural daylight or warm indoor light, no people, no text, under 180 chars); each inlineImages.afterHeading MUST match one of your section headings; suggestedTags are 3–6 slugs from the controlled vocabulary above.`
 
   const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
-  const claudeResult = await getClaudeClient().messages.create({
-    model: MODEL,
-    max_tokens: 3800,
-    system: systemBlocks,
-    messages: [{ role: 'user', content: prompt }],
-  }).catch((err: unknown) => {
-    console.error('Claude API error (guide-draft):', err)
-    return { _error: err instanceof Error ? err.message : String(err) } as const
-  })
-
-  if ('_error' in claudeResult) {
-    const msg = claudeResult._error
+  let result
+  try {
+    result = await createStructured({
+      system: systemBlocks,
+      messages: [{ role: 'user', content: prompt }],
+      tool: GUIDE_DRAFT_TOOL,
+      maxTokens: 3800,
+    })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('Claude API error (guide-draft):', msg)
     const isTimeout = /timeout|timed.?out|deadline/i.test(msg)
     const isOverload = /overload|529|capacity/i.test(msg)
     return NextResponse.json({
@@ -137,17 +162,15 @@ Return JSON with this exact shape:
     }, { status: 502 })
   }
 
-  const text = claudeResult.content.find((b) => b.type === 'text')?.text ?? ''
-  const jsonMatch = text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) {
-    return NextResponse.json({ error: 'AI returned an unexpected format — please try again.' }, { status: 502 })
+  // Truncation guard: a cut-off tool input is unsafe to use — say so plainly.
+  if (result.stopReason === 'max_tokens') {
+    console.error('guide-draft hit max_tokens — output truncated')
+    return NextResponse.json({ error: 'The draft ran long and got cut off. Try again, or trim the brief and regenerate.' }, { status: 502 })
   }
 
-  let draft: Record<string, unknown>
-  try {
-    draft = JSON.parse(jsonMatch[0])
-  } catch {
-    return NextResponse.json({ error: 'AI returned malformed content — please try again.' }, { status: 502 })
+  const draft = result.data
+  if (!draft) {
+    return NextResponse.json({ error: 'AI returned an unexpected format — please try again.' }, { status: 502 })
   }
 
   // Extract the hero image prompt — return it so the form can pre-fill the

@@ -1,11 +1,35 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getClaudeClient, MODEL } from '@/lib/claude/client'
+import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
+import { createStructured } from '@/lib/claude/structured'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 export const maxDuration = 45
+
+// The model returns the posts by calling this tool — its input_schema is the
+// shape, so the SDK validates it instead of us regex-parsing JSON.
+const POSTS_TOOL: Anthropic.Tool = {
+  name: 'submit_social_posts',
+  description: 'Return one native social post per requested platform.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      posts: { type: 'array', items: {
+        type: 'object',
+        properties: {
+          platform: { type: 'string' },
+          body:     { type: 'string' },
+          hashtags: { type: 'array', items: { type: 'string' } },
+        },
+        required: ['platform', 'body', 'hashtags'],
+      } },
+    },
+    required: ['posts'],
+  },
+}
 
 const Schema = z.object({
   content_type: z.enum(['guide', 'review']),
@@ -118,49 +142,29 @@ Generate native social media copy for the following platforms.${userInstruction}
 
 ${platformBlocks}
 
-Voice: Boss Daddy — first-person dad, direct, no corporate fluff, no "game-changer" / "must-have" cliches. Each platform's post should feel native to that platform, not a copy-paste.
+Each platform's post should feel native to that platform, not a copy-paste. Return your result by calling the submit_social_posts tool, with one entry per requested platform in the same order. Each entry: platform (e.g. "twitter"), body (the post text, may span lines), and hashtags (relevant tags for that platform — Instagram needs more, Twitter needs fewer, LinkedIn often none).
 
-Return JSON exactly matching this shape, with one entry per requested platform in the same order:
-{
-  "posts": [
-    {
-      "platform": "twitter",
-      "body": "Post text here. May span lines.",
-      "hashtags": ["BossDaddy", "DadLife"]
-    }
-  ]
-}
+Body should NOT include the hashtags themselves; we list them separately. Always include the URL exactly once at the end of the body.`
 
-Hashtags should be the relevant tags for that platform (Instagram needs more, Twitter needs fewer, LinkedIn often none). Body should NOT include the hashtags themselves; we list them separately. Always include the URL exactly once at the end of the body.
-
-Return ONLY the JSON. No markdown, no preamble.`
-
-  const claude = getClaudeClient()
-
-  let json: { posts?: SocialDraft[] } = {}
+  let result
   try {
-    const res = await claude.messages.create({
-      model: MODEL,
-      max_tokens: 1500,
-      system: [{
-        type: 'text' as const,
-        text: 'You are a social media copywriter for Boss Daddy. You produce platform-native posts that match the writer\'s direct, no-fluff dad voice.',
-        cache_control: { type: 'ephemeral' as const },
-      }],
+    const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
+    result = await createStructured({
+      system: systemBlocks,
       messages: [{ role: 'user', content: prompt }],
+      tool: POSTS_TOOL,
+      maxTokens: 1500,
     })
-
-    const text = (res.content.find((b) => b.type === 'text')?.text ?? '')
-      .replace(/^```(?:json)?\s*/i, '')
-      .replace(/\s*```\s*$/, '')
-      .trim()
-
-    json = JSON.parse(text)
   } catch (err) {
     console.error('social-copy generation error:', err)
     return NextResponse.json({ error: 'Generation failed — try again' }, { status: 502 })
   }
 
+  if (result.stopReason === 'max_tokens') {
+    return NextResponse.json({ error: 'The copy ran long and got cut off. Try fewer platforms and regenerate.' }, { status: 502 })
+  }
+
+  const json = (result.data ?? {}) as { posts?: SocialDraft[] }
   const drafts = Array.isArray(json.posts) ? json.posts : []
   if (drafts.length === 0) {
     return NextResponse.json({ error: 'No posts returned' }, { status: 502 })

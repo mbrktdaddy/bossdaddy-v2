@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { getClaudeClient, MODEL } from '@/lib/claude/client'
+import { createStructured } from '@/lib/claude/structured'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
@@ -11,8 +12,48 @@ const Input = z.object({
   type: z.enum(['guide', 'review']),
 })
 
-const SUGGEST_SYSTEM = `You help Boss Daddy content creators turn rough ideas into structured generation prompts.
-Return valid JSON only — no markdown, no code fences.`
+const SUGGEST_SYSTEM = `You help Boss Daddy content creators turn rough ideas into structured generation prompts.`
+
+// One tool per content type — the suggestion shape differs (review vs guide).
+const REVIEW_SUGGEST_TOOL: Anthropic.Tool = {
+  name: 'submit_suggestions',
+  description: 'Return 3 distinct review angles.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      suggestions: { type: 'array', items: {
+        type: 'object',
+        properties: {
+          productName: { type: 'string' },
+          angle:       { type: 'string' },
+          keyFeatures: { type: 'array', items: { type: 'string' } },
+        },
+        required: ['productName', 'angle', 'keyFeatures'],
+      } },
+    },
+    required: ['suggestions'],
+  },
+}
+
+const GUIDE_SUGGEST_TOOL: Anthropic.Tool = {
+  name: 'submit_suggestions',
+  description: 'Return 3 distinct article angles.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      suggestions: { type: 'array', items: {
+        type: 'object',
+        properties: {
+          topic:     { type: 'string' },
+          angle:     { type: 'string' },
+          keyPoints: { type: 'array', items: { type: 'string' } },
+        },
+        required: ['topic', 'angle', 'keyPoints'],
+      } },
+    },
+    required: ['suggestions'],
+  },
+}
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -38,42 +79,22 @@ export async function POST(request: NextRequest) {
   const prompt = type === 'review'
     ? `A Boss Daddy content creator wants to write a product review. Their rough idea: "${description}"
 
-Give 3 distinct angles they could take on this review. Each angle should have a different emphasis (e.g. hands-on dad use, value for money, safety focus, long-term durability, comparison with alternatives). Return JSON:
-{
-  "suggestions": [
-    {
-      "productName": "string (full proper product name, brand + model if you can infer it)",
-      "angle": "string (one phrase describing the editorial angle — max 60 chars)",
-      "keyFeatures": ["string"] (4–6 specific testable features a dad would care about)
-    }
-  ]
-}`
+Give 3 distinct angles they could take on this review. Each angle should have a different emphasis (e.g. hands-on dad use, value for money, safety focus, long-term durability, comparison with alternatives). Return your result by calling the submit_suggestions tool. Each suggestion: productName (full proper product name, brand + model if you can infer it), angle (one phrase describing the editorial angle — max 60 chars), and keyFeatures (4–6 specific testable features a dad would care about).`
     : `A Boss Daddy content creator wants to write a dad-focused article. Their rough idea: "${description}"
 
-Give 3 distinct angles they could take on this article — different in scope, audience level, or approach (e.g. beginner guide vs. expert tips vs. personal story). Return JSON:
-{
-  "suggestions": [
-    {
-      "topic": "string (a clear, specific article title or topic — max 80 chars)",
-      "angle": "string (one phrase describing the editorial angle — max 60 chars)",
-      "keyPoints": ["string"] (4–6 concrete points the article should cover)
-    }
-  ]
-}`
+Give 3 distinct angles they could take on this article — different in scope, audience level, or approach (e.g. beginner guide vs. expert tips vs. personal story). Return your result by calling the submit_suggestions tool. Each suggestion: topic (a clear, specific article title or topic — max 80 chars), angle (one phrase describing the editorial angle — max 60 chars), and keyPoints (4–6 concrete points the article should cover).`
 
   try {
-    const message = await getClaudeClient().messages.create({
-      model: MODEL,
-      max_tokens: 900,
+    const result = await createStructured({
       system: [{ type: 'text', text: SUGGEST_SYSTEM, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: prompt }],
+      tool: type === 'review' ? REVIEW_SUGGEST_TOOL : GUIDE_SUGGEST_TOOL,
+      maxTokens: 900,
     })
 
-    const text = message.content.find((b) => b.type === 'text')?.text ?? ''
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) return NextResponse.json({ error: 'Model returned unexpected format' }, { status: 502 })
+    if (!result.data) return NextResponse.json({ error: 'Model returned unexpected format' }, { status: 502 })
 
-    return NextResponse.json(JSON.parse(jsonMatch[0]))
+    return NextResponse.json(result.data)
   } catch (err) {
     console.error('Suggest prompt error:', err)
     return NextResponse.json({ error: 'Suggestion failed' }, { status: 502 })

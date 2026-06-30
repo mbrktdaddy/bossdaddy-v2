@@ -1,12 +1,27 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getClaudeClient, MODEL } from '@/lib/claude/client'
 import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
+import { createStructured } from '@/lib/claude/structured'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 export const maxDuration = 60
+
+// The model returns the intro by calling this tool — the `html` field carries
+// the markup, so the SDK delivers it cleanly instead of us stripping fences.
+const INTRO_TOOL: Anthropic.Tool = {
+  name: 'submit_intro',
+  description: 'Return the editorial collection intro as HTML.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      html: { type: 'string', description: '1–3 short paragraphs wrapped in <p> tags. No headings, no lists.' },
+    },
+    required: ['html'],
+  },
+}
 
 const Input = z.object({
   collectionType: z.enum(['general', 'best_of', 'gift_guide', 'comparison', 'stack']),
@@ -76,7 +91,7 @@ ${description ? `Description: ${description}\n` : ''}Type: ${collectionType} —
 Products:
 ${reviewLines}
 
-Return ONLY the refined HTML (1-3 short paragraphs in <p> tags). No commentary, no JSON wrapping, no preamble.`
+Return the refined intro by calling the submit_intro tool — the refined HTML (1-3 short paragraphs in <p> tags) goes in the \`html\` field.`
     : `Write a 1-3 paragraph editorial intro for the following collection. Use the established Boss Daddy voice — first-person dad, no corporate speak, real testing language.
 
 Type: ${collectionType} — ${flavorBrief}
@@ -93,31 +108,31 @@ REQUIREMENTS:
 - Avoid restating the title or the product names in the first sentence.
 - 80-180 words total. Tight.
 
-Return ONLY the HTML. No JSON wrapping, no commentary, no preamble.`
+Return the intro by calling the submit_intro tool — the HTML goes in the \`html\` field.`
 
   const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
-  const claudeResult = await getClaudeClient().messages.create({
-    model: MODEL,
-    max_tokens: 800,
-    system: systemBlocks,
-    messages: [{ role: 'user', content: prompt }],
-  }).catch((err: unknown) => {
-    console.error('Claude API error (collection-intro):', err)
-    return { _error: err instanceof Error ? err.message : String(err) } as const
-  })
-
-  if ('_error' in claudeResult) {
-    return NextResponse.json({ error: `AI service error: ${claudeResult._error.slice(0, 120)}` }, { status: 502 })
+  let result
+  try {
+    result = await createStructured({
+      system: systemBlocks,
+      messages: [{ role: 'user', content: prompt }],
+      tool: INTRO_TOOL,
+      maxTokens: 800,
+    })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('Claude API error (collection-intro):', msg)
+    return NextResponse.json({ error: `AI service error: ${msg.slice(0, 120)}` }, { status: 502 })
   }
 
-  let text = claudeResult.content.find((b) => b.type === 'text')?.text ?? ''
-  text = text.trim()
-  // Strip any accidental code fences
-  text = text.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim()
+  if (result.stopReason === 'max_tokens') {
+    return NextResponse.json({ error: 'The intro ran long and got cut off. Please try again.' }, { status: 502 })
+  }
 
-  if (!text) {
+  const html = typeof result.data?.html === 'string' ? result.data.html.trim() : ''
+  if (!html) {
     return NextResponse.json({ error: 'AI returned empty content. Please try again.' }, { status: 502 })
   }
 
-  return NextResponse.json({ html: text, remaining })
+  return NextResponse.json({ html, remaining })
 }

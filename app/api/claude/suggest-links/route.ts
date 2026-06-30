@@ -1,11 +1,26 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getClaudeClient, MODEL } from '@/lib/claude/client'
+import { createStructured } from '@/lib/claude/structured'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 export const maxDuration = 30
+
+// The model returns the chosen candidate indices by calling this tool — the SDK
+// validates the shape instead of us regex-parsing a bare array from text.
+const LINKS_TOOL: Anthropic.Tool = {
+  name: 'submit_links',
+  description: 'Return the chosen candidate indices (1-based), most relevant first.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      indices: { type: 'array', items: { type: 'integer' } },
+    },
+    required: ['indices'],
+  },
+}
 
 const SuggestSchema = z.object({
   title:        z.string().min(3).max(200),
@@ -125,19 +140,18 @@ Below is a pool of published content. Choose 3–5 items that would be most rele
 Candidates:
 ${candidates.map((c, i) => `${i + 1}. [${c.type}] "${c.title}" — ${c.excerpt.slice(0, 120)}`).join('\n')}
 
-Return ONLY a JSON array of the chosen indices (1-based), in order of relevance. Example: [3, 7, 1]. No commentary.`
+Return your result by calling the submit_links tool with the chosen 1-based indices (in order of relevance) in the \`indices\` field.`
 
   try {
-    const message = await getClaudeClient().messages.create({
-      model: MODEL,
-      max_tokens: 80,
+    const result = await createStructured({
+      system: undefined,
       messages: [{ role: 'user', content: prompt }],
+      tool: LINKS_TOOL,
+      maxTokens: 256,
     })
-    const text = message.content.find((b) => b.type === 'text')?.text ?? ''
-    const match = text.match(/\[[\d,\s]+\]/)
-    if (!match) return NextResponse.json({ suggestions: candidates.slice(0, 5) })
 
-    const indices = JSON.parse(match[0]) as number[]
+    const raw = result.data?.indices
+    const indices = Array.isArray(raw) ? raw.filter((n): n is number => typeof n === 'number') : []
     const suggestions = indices
       .map((i) => candidates[i - 1])
       .filter(Boolean)
