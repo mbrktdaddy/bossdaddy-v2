@@ -28,7 +28,7 @@ const Input = z.object({
   category:     z.string().max(80).optional(),
   excerpt:      z.string().max(500).optional(),
   content:      z.string().max(3000).optional(),
-  content_type: z.enum(['review', 'guide']).default('review'),
+  content_type: z.enum(['review', 'guide', 'collection']).default('review'),
 })
 
 export async function POST(request: NextRequest) {

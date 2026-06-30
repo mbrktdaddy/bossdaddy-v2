@@ -1,13 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
 import { OCCASIONS, OCCASION_GROUPS } from '@/lib/gift-occasions'
+import { WorkspaceShell } from '@/components/workspace/WorkspaceShell'
+import { WorkspaceToolbar } from '@/components/workspace/WorkspaceToolbar'
 import { HeroImagePanel } from '@/components/workspace/HeroImagePanel'
 import { TiptapEditor } from '@/components/workspace/TiptapEditor'
 import { SchedulePanel } from '@/components/workspace/SchedulePanel'
+import { SEOPanel } from '@/components/workspace/SEOPanel'
+import { useCollectionWorkspace } from '@/components/workspace/useCollectionWorkspace'
 
 // InlineMediaPanel is heavy + drags in image upload UI — load lazy.
 const InlineMediaPanel = dynamic(
@@ -26,7 +29,7 @@ interface ReviewSummary {
   product_slug?: string | null
 }
 
-interface PickItem {
+export interface PickItem {
   id?: string
   review_id: string
   position: number
@@ -45,7 +48,7 @@ export interface CollectionFAQ {
   answer:   string
 }
 
-interface PickList {
+export interface PickList {
   id: string
   slug: string
   title: string
@@ -68,8 +71,16 @@ interface PickList {
 }
 
 interface Props {
-  pick: PickList | null
+  pick: PickList
   initialItems: PickItem[]
+}
+
+const TYPE_LABELS: Record<string, string> = {
+  general:    'Pick',
+  best_of:    'Best Of',
+  gift_guide: 'Gift Guide',
+  comparison: 'Comparison',
+  stack:      'Stack',
 }
 
 // Per-flavor copy for the role_label field. Comparison uses wins_category
@@ -131,45 +142,37 @@ function priceRangeSummary(items: PickItem[]): {
   }
 }
 
-export function PickForm({ pick, initialItems }: Props) {
-  const router = useRouter()
-  const isNew = !pick
-
-  const [slug, setSlug]         = useState(pick?.slug ?? '')
-  const [title, setTitle]       = useState(pick?.title ?? '')
-  const [description, setDesc]  = useState(pick?.description ?? '')
-  const [introHtml, setIntro]   = useState(pick?.intro_html ?? '')
-  const [heroUrl, setHeroUrl]   = useState(pick?.hero_image_url ?? '')
-  const [visible, setVisible]   = useState(pick?.is_visible ?? false)
-  const [pickType, setPickType]           = useState<string>(pick?.collection_type ?? 'general')
-  const [occasion, setOccasion]           = useState<string>(pick?.occasion ?? '')
-  const [winnerSummary, setWinnerSummary] = useState<string>(pick?.winner_summary ?? '')
-  const [bundleTotalCents, setBundleTotal] = useState<string>(pick?.bundle_total_cents != null ? String(pick.bundle_total_cents) : '')
-  const [metaTitle, setMetaTitle]         = useState<string>(pick?.meta_title ?? '')
-  const [metaDescription, setMetaDesc]    = useState<string>(pick?.meta_description ?? '')
-  const [scheduledAt, setScheduledAt]     = useState<string | null>(pick?.scheduled_publish_at ?? null)
+export function CollectionWorkspace({ pick, initialItems }: Props) {
+  const [slug, setSlug]         = useState(pick.slug ?? '')
+  const [title, setTitle]       = useState(pick.title ?? '')
+  const [description, setDesc]  = useState(pick.description ?? '')
+  const [introHtml, setIntro]   = useState(pick.intro_html ?? '')
+  const [heroUrl, setHeroUrl]   = useState(pick.hero_image_url ?? '')
+  const [visible, setVisible]   = useState(pick.is_visible ?? false)
+  const [pickType, setPickType]           = useState<string>(pick.collection_type ?? 'general')
+  const [occasion, setOccasion]           = useState<string>(pick.occasion ?? '')
+  const [winnerSummary, setWinnerSummary] = useState<string>(pick.winner_summary ?? '')
+  const [bundleTotalCents, setBundleTotal] = useState<string>(pick.bundle_total_cents != null ? String(pick.bundle_total_cents) : '')
+  const [metaTitle, setMetaTitle]         = useState<string>(pick.meta_title ?? '')
+  const [metaDescription, setMetaDesc]    = useState<string>(pick.meta_description ?? '')
+  const [scheduledAt, setScheduledAt]     = useState<string | null>(pick.scheduled_publish_at ?? null)
   const [items, setItems]       = useState<PickItem[]>(
     initialItems.map((i, idx) => ({ ...i, position: i.position ?? idx }))
   )
 
   // Editorial overrides (migration 068). When blank, public pages pull the
   // dominant category's pov + faqs from lib/categories.ts as fallback.
-  const [methodologyHtml, setMethodologyHtml] = useState<string>(pick?.methodology_html ?? '')
-  const [faqs, setFaqs]                       = useState<CollectionFAQ[]>(pick?.faqs ?? [])
+  const [methodologyHtml, setMethodologyHtml] = useState<string>(pick.methodology_html ?? '')
+  const [faqs, setFaqs]                       = useState<CollectionFAQ[]>(pick.faqs ?? [])
 
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<ReviewSummary[]>([])
   const [searching, setSearching] = useState(false)
-  const [busy, setBusy]     = useState(false)
-  const [savedAt, setSavedAt] = useState<string | null>(null)
-  const [deleting, setDeleting] = useState(false)
-  const [error, setError]   = useState<string | null>(null)
   const [slugTaken, setSlugTaken] = useState<{ type: string } | null>(null)
 
   // ── Readiness checklist ───────────────────────────────────────────────────
-  // Mirrors the pattern in ReviewWorkspace/GuideWorkspace. The list of checks
-  // depends on collection_type because each flavor needs different ingredients
-  // to render well.
+  // The list of checks depends on collection_type because each flavor needs
+  // different ingredients to render well.
   function buildReadiness(): { label: string; done: boolean; required: boolean }[] {
     const checks: { label: string; done: boolean; required: boolean }[] = [
       { label: 'Title',  done: title.trim().length >= 2, required: true },
@@ -198,13 +201,14 @@ export function PickForm({ pick, initialItems }: Props) {
     return checks
   }
   const readiness = buildReadiness()
-  const requiredMissing = readiness.filter((c) => c.required && !c.done).length
+  const requiredChecks = readiness.filter((c) => c.required)
+  const requiredMissing = requiredChecks.filter((c) => !c.done).length
+  const missingLabels = requiredChecks.filter((c) => !c.done).map((c) => c.label)
 
   // ── Derived hero-image category ───────────────────────────────────────────
   // Collections don't have their own category column. Derive one from the most
   // common category across linked review items so the AI image generator gets
-  // a thematic prompt (e.g. "baby-gear" → editorial nursery scene) instead of
-  // the generic "other" fallback.
+  // a thematic prompt instead of the generic "other" fallback.
   function deriveCategory(): string {
     const counts: Record<string, number> = {}
     for (const item of items) {
@@ -222,16 +226,14 @@ export function PickForm({ pick, initialItems }: Props) {
   const heroCategory = deriveCategory()
 
   // ── Slug uniqueness pre-check (debounced) ─────────────────────────────────
-  // Friendly warning before the editor saves and hits a 409. Skips its own id
-  // when editing so the editor's existing slug doesn't flag itself.
+  // Friendly warning before autosave hits a 409. Skips its own id.
   useEffect(() => {
     const s = slug.trim().toLowerCase()
     if (s.length < 2) { setSlugTaken(null); return }
-    // Editing an existing collection with its original slug? No need to check.
-    if (pick && pick.slug === s) { setSlugTaken(null); return }
+    if (pick.slug === s) { setSlugTaken(null); return }
     const handle = setTimeout(async () => {
       try {
-        const url = `/api/admin/picks/slug-check?slug=${encodeURIComponent(s)}${pick ? `&exclude=${pick.id}` : ''}`
+        const url = `/api/admin/picks/slug-check?slug=${encodeURIComponent(s)}&exclude=${pick.id}`
         const res = await fetch(url)
         if (!res.ok) return
         const json = await res.json()
@@ -239,7 +241,7 @@ export function PickForm({ pick, initialItems }: Props) {
       } catch { /* network blip — silently skip */ }
     }, 350)
     return () => clearTimeout(handle)
-  }, [slug, pick])
+  }, [slug, pick.slug, pick.id])
 
   // ── AI intro generation + refine ──────────────────────────────────────────
   const [aiBusy, setAiBusy] = useState(false)
@@ -273,9 +275,7 @@ export function PickForm({ pick, initialItems }: Props) {
   }
 
   // ── AI: fill per-pick blurbs + role labels + flavor-aware FAQs ───────────
-  // Single shot. Updates the items state and (when no FAQs are already
-  // customized) the FAQ override panel. We never clobber edits the user has
-  // already typed — existing blurb/role_label values stay untouched.
+  // Single shot. Never clobbers edits the user has already typed.
   const [fillBusy, setFillBusy]   = useState(false)
   const [fillError, setFillError] = useState<string | null>(null)
   const [fillNote, setFillNote]   = useState<string | null>(null)
@@ -392,8 +392,7 @@ export function PickForm({ pick, initialItems }: Props) {
   }
 
   // Where this collection lives on the public site once visible. Falls back
-  // to null when the slug is empty (new draft) or when a gift guide has no
-  // occasion picked yet — without that piece the URL doesn't resolve.
+  // to null when the slug is empty or when a gift guide has no occasion yet.
   function getPublicPath(): string | null {
     const s = slug.trim().toLowerCase()
     if (!s) return null
@@ -407,20 +406,17 @@ export function PickForm({ pick, initialItems }: Props) {
   }
   const publicPath = getPublicPath()
 
-  async function handleSave(e: React.FormEvent | null, opts?: { visible?: boolean }) {
-    if (e) e.preventDefault()
-    setBusy(true); setError(null); setSavedAt(null)
-    const visibleValue = opts?.visible ?? visible
-
+  // ── Autosaved payload (everything EXCEPT is_visible) ──────────────────────
+  // Visibility is changed only via the publish/unpublish action so autosave
+  // can't accidentally flip a collection live or dark.
+  const payload = useMemo(() => {
     const parsedBundleTotal = bundleTotalCents.trim() ? parseInt(bundleTotalCents.trim(), 10) : null
-
-    const payload = {
+    return {
       slug: slug.trim().toLowerCase(),
       title: title.trim(),
       description: description.trim() || null,
       intro_html: introHtml.trim() || null,
       hero_image_url: heroUrl.trim() || null,
-      is_visible: visibleValue,
       collection_type: pickType,
       occasion: pickType === 'gift_guide' ? (occasion || null) : null,
       winner_summary: pickType === 'comparison' ? (winnerSummary.trim() || null) : null,
@@ -428,7 +424,6 @@ export function PickForm({ pick, initialItems }: Props) {
       meta_title:           metaTitle.trim() || null,
       meta_description:     metaDescription.trim() || null,
       scheduled_publish_at: scheduledAt,
-      // Editorial overrides (migration 068)
       methodology_html:     methodologyHtml.trim() || null,
       faqs:                 faqs.length > 0 ? faqs : null,
       items: items.map((i) => ({
@@ -436,74 +431,66 @@ export function PickForm({ pick, initialItems }: Props) {
         position:      i.position,
         blurb:         i.blurb,
         // Comparison alone uses wins_category (winner-per-criterion). Every
-        // other flavor uses role_label as the per-item chip — gift-guides
-        // ("Splurge Pick"), best-of ("Best Overall"), picks ("Top Pick"),
-        // stacks ("The Anchor").
+        // other flavor uses role_label as the per-item chip.
         wins_category: pickType === 'comparison' ? (i.wins_category ?? null) : null,
         role_label:    pickType === 'comparison' ? null : ((i.role_label ?? '').trim() || null),
-        // best_for is an optional secondary "best for X" line. Allow on every
-        // flavor — gift-guide cards benefit from it too.
+        // best_for is an optional secondary "best for X" line, allowed on every flavor.
         best_for:      ((i.best_for ?? '').trim() || null),
       })),
     }
+  }, [slug, title, description, introHtml, heroUrl, pickType, occasion, winnerSummary, bundleTotalCents, metaTitle, metaDescription, scheduledAt, methodologyHtml, faqs, items])
 
-    try {
-      const res = await fetch(
-        isNew ? '/api/admin/picks' : `/api/admin/picks/${pick!.id}`,
-        { method: isNew ? 'POST' : 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
-      )
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Save failed')
+  const { busy, actionErr, actionMsg, deleting, autoSave, manualSave, setVisibility, handleDelete } =
+    useCollectionWorkspace({
+      id: pick.id,
+      payload,
+      isVisible: visible,
+      canPublish: requiredMissing === 0,
+      publishBlockedReason: requiredMissing > 0 ? `Finish required items first: ${missingLabels.join(', ')}` : null,
+      onVisibilityChange: setVisible,
+    })
 
-      if (isNew) {
-        router.push(`/dashboard/admin/picks/${json.pick.id}`)
-        // Stay busy through the navigation — the destination remounts the form.
-      } else {
-        if (opts?.visible !== undefined) setVisible(opts.visible)
-        router.refresh()
-        setSavedAt(new Date().toLocaleTimeString())
-        setBusy(false)
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed')
-      setBusy(false)
-    }
-  }
-
-  async function handleDelete() {
-    if (!pick) return
-    if (!confirm(`Delete "${pick.title}"? This cannot be undone.`)) return
-    setDeleting(true)
-    const res = await fetch(`/api/admin/picks/${pick.id}`, { method: 'DELETE' })
-    if (res.ok) {
-      router.push('/dashboard/admin/picks')
-    } else {
-      const json = await res.json().catch(() => ({}))
-      setError(json.error ?? 'Delete failed')
-      setDeleting(false)
-    }
-  }
+  const typeLabel = TYPE_LABELS[pickType] ?? 'Collection'
 
   return (
-    <form onSubmit={handleSave} className="space-y-6">
+    <WorkspaceShell
+      backHref="/dashboard/admin/picks"
+      backLabel="All collections"
+      title={title || 'Untitled collection'}
+      subtitle={`${typeLabel} · ${items.length} pick${items.length === 1 ? '' : 's'}${publicPath ? ` · ${publicPath}` : ''}`}
+      status={visible ? 'approved' : 'draft'}
+      autoSave={autoSave}
+      actionErr={actionErr}
+      actionMsg={actionMsg}
+      toolbar={
+        <WorkspaceToolbar
+          isSaving={autoSave.state === 'saving'}
+          isPublishing={busy}
+          isDeleting={deleting}
+          isPublished={visible}
+          onSave={manualSave}
+          onPublish={() => setVisibility(true)}
+          onUnpublish={() => setVisibility(false)}
+          onDelete={handleDelete}
+          previewUrl={visible ? publicPath : null}
+          canPublish={requiredMissing === 0}
+          publishBlockedReason={requiredMissing > 0 ? `Finish required items first: ${missingLabels.join(', ')}` : null}
+          readinessChecks={requiredChecks.map((c) => ({ label: c.label, done: c.done }))}
+        />
+      }
+    >
       {/* Metadata */}
       <div className="space-y-4">
         <div>
           <label htmlFor="pf-slug" className="block text-sm text-prose-muted mb-1.5">Slug <span className="text-danger-ink">*</span></label>
           <input
             id="pf-slug"
-            type="text" required value={slug} onChange={(e) => setSlug(e.target.value.toLowerCase())}
+            type="text" value={slug} onChange={(e) => setSlug(e.target.value.toLowerCase())}
             pattern="[a-z0-9-]+" placeholder="fathers-day-gift-guide"
             className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
           />
           <p className="mt-1 text-xs text-prose-faint">
-            Public URL: {pickType === 'comparison'
-              ? `/comparisons/${slug || 'your-slug'}`
-              : pickType === 'stack'
-              ? `/stacks/${slug || 'your-slug'}`
-              : pickType === 'gift_guide'
-              ? `/gifts/${slug || 'your-slug'}`
-              : `/picks/${slug || 'your-slug'}`}
+            Public URL: {publicPath ?? `/picks/${slug || 'your-slug'}`}
           </p>
           {slugTaken && (
             <p className="mt-1 text-xs text-warn-ink">
@@ -516,7 +503,7 @@ export function PickForm({ pick, initialItems }: Props) {
           <label htmlFor="pf-title" className="block text-sm text-prose-muted mb-1.5">Title <span className="text-danger-ink">*</span></label>
           <input
             id="pf-title"
-            type="text" required value={title} onChange={(e) => setTitle(e.target.value)}
+            type="text" value={title} onChange={(e) => setTitle(e.target.value)}
             placeholder="Father's Day Gift Guide 2026"
             className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover text-base"
           />
@@ -694,55 +681,24 @@ export function PickForm({ pick, initialItems }: Props) {
           </p>
         )}
 
-        {/* SEO overrides — collapsible since they're optional */}
-        <details className="group rounded-xl bg-surface-sunken/60 border border-soft">
-          <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between gap-3 min-h-[44px]">
-            <div>
-              <p className="text-sm font-semibold text-prose">SEO overrides</p>
-              <p className="text-xs text-prose-faint">Optional. Fall back to title + description if left empty.</p>
-            </div>
-            <svg className="w-4 h-4 text-prose-faint group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-          </summary>
-          <div className="px-4 pb-4 pt-1 space-y-3 border-t border-soft">
-            <div>
-              <label htmlFor="pf-meta-title" className="block text-xs text-prose-muted mb-1.5">
-                Meta title <span className="text-prose-faint">(HTML &lt;title&gt; tag; ~70 char limit)</span>
-              </label>
-              <input
-                id="pf-meta-title"
-                type="text"
-                value={metaTitle}
-                onChange={(e) => setMetaTitle(e.target.value)}
-                maxLength={120}
-                placeholder={title ? `${title.slice(0, 60)}${title.length > 60 ? '…' : ''}` : 'Defaults to title'}
-                className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm"
-              />
-              <p className="mt-1 text-xs text-prose-faint tabular-nums">{metaTitle.length}/120</p>
-            </div>
-            <div>
-              <label htmlFor="pf-meta-desc" className="block text-xs text-prose-muted mb-1.5">
-                Meta description <span className="text-prose-faint">(search snippet; ~155 char limit)</span>
-              </label>
-              <textarea
-                id="pf-meta-desc"
-                value={metaDescription}
-                onChange={(e) => setMetaDesc(e.target.value)}
-                maxLength={300}
-                rows={3}
-                placeholder={description || 'Defaults to short description'}
-                className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover text-sm resize-none"
-              />
-              <p className="mt-1 text-xs text-prose-faint tabular-nums">{metaDescription.length}/300</p>
-            </div>
-          </div>
-        </details>
+        {/* SEO — shared workspace panel (AI-assisted meta title/description) */}
+        <SEOPanel
+          metaTitle={metaTitle}
+          metaDescription={metaDescription}
+          fallbackTitle={title}
+          fallbackDescription={description}
+          slug={slug}
+          contentType="collection"
+          category={heroCategory}
+          excerpt={description}
+          onChangeTitle={setMetaTitle}
+          onChangeDescription={setMetaDesc}
+          defaultOpen={false}
+        />
 
         {/* Methodology override — collapsible. Falls back to the dominant
             item-category's pov from lib/categories.ts on public pages when
-            left empty (the normal case). Use this to write a per-collection
-            "How I Tested" when the standard category voice doesn't fit. */}
+            left empty (the normal case). */}
         <details className="group rounded-xl bg-surface-sunken/60 border border-soft">
           <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between gap-3 min-h-[44px]">
             <div>
@@ -872,16 +828,6 @@ export function PickForm({ pick, initialItems }: Props) {
             ))}
           </ul>
         </div>
-
-        {isNew && (
-          <label className="flex items-center gap-3 cursor-pointer py-1">
-            <input
-              type="checkbox" checked={visible} onChange={(e) => setVisible(e.target.checked)}
-              className="w-4 h-4 rounded accent-orange-500"
-            />
-            <span className="text-sm text-prose-muted">Publish (make visible on site)</span>
-          </label>
-        )}
       </div>
 
       {/* Items */}
@@ -1007,8 +953,7 @@ export function PickForm({ pick, initialItems }: Props) {
                     />
                   )}
                   {/* Role label — every non-comparison flavor renders this as
-                      the chip above the product name on public pages. Comparison
-                      uses wins_category instead (winner-per-criterion). */}
+                      the chip above the product name on public pages. */}
                   {(() => {
                     const cfg = ROLE_LABEL_CONFIG[pickType]
                     if (!cfg) return null
@@ -1026,12 +971,8 @@ export function PickForm({ pick, initialItems }: Props) {
                       </div>
                     )
                   })()}
-                  {/* "Best for" tagline — optional italic line shown beneath the
-                      title on every flavor. Comparison + best-of/general lean
-                      on it the most, but it can sharpen a gift-guide pick
-                      ("Best for the dad on shift work") so we surface it
-                      everywhere except stack (where role_label already plays
-                      this part). */}
+                  {/* "Best for" tagline — optional line shown on every flavor
+                      except stack (where role_label already plays this part). */}
                   {pickType !== 'stack' && (
                     <input
                       type="text"
@@ -1048,61 +989,6 @@ export function PickForm({ pick, initialItems }: Props) {
           </div>
         )}
       </div>
-
-      {error && <p className="text-danger-ink text-sm bg-danger-bg border border-danger-line rounded-lg px-4 py-3">{error}</p>}
-
-      {/* Sticky action bar — pins to the bottom of the viewport so Save /
-          Publish / View Live / Delete are reachable from anywhere in this
-          long form, especially on mobile. Matches the VoiceProfileForm
-          pattern. */}
-      <div className="sticky bottom-2 sm:bottom-4 z-20 mt-4 -mx-3 sm:mx-0 px-3 sm:px-4 py-3 bg-surface-sunken/85 backdrop-blur border border-soft rounded-xl shadow-lg shadow-black/5">
-        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-          <button type="submit" disabled={busy || !slug.trim() || !title.trim()}
-            className="px-4 sm:px-5 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors min-h-[44px]">
-            {busy ? 'Saving…' : isNew ? 'Create List' : 'Save Changes'}
-          </button>
-
-          {!isNew && (
-            <button type="button"
-              onClick={() => handleSave(null, { visible: !visible })}
-              disabled={busy || !slug.trim() || !title.trim()}
-              className={visible
-                ? 'px-4 sm:px-5 py-2.5 bg-warn-bg hover:bg-warn-bg border border-warn-line text-warn-ink text-sm font-semibold rounded-xl transition-colors min-h-[44px] disabled:opacity-40'
-                : 'px-4 sm:px-5 py-2.5 bg-green-700 hover:bg-green-600 text-white text-sm font-semibold rounded-xl transition-colors min-h-[44px] disabled:opacity-40'}>
-              {busy ? '…' : visible ? 'Unpublish' : 'Publish Live'}
-            </button>
-          )}
-
-          {!isNew && visible && publicPath && (
-            <a href={publicPath} target="_blank" rel="noopener noreferrer"
-               className="px-4 sm:px-5 py-2.5 bg-accent-tint hover:bg-accent-tint border border-accent-border/40 text-accent-text-soft hover:text-accent text-sm font-semibold rounded-xl transition-colors min-h-[44px] inline-flex items-center gap-1.5">
-              View Live →
-            </a>
-          )}
-
-          {!isNew && (
-            <button type="button" onClick={handleDelete} disabled={deleting}
-              className="ml-auto px-4 sm:px-5 py-2.5 text-danger-ink hover:text-danger-ink text-sm transition-colors disabled:opacity-40 min-h-[44px]">
-              {deleting ? 'Deleting…' : 'Delete'}
-            </button>
-          )}
-        </div>
-
-        {/* Status line under the buttons — keeps the bar compact on mobile
-            and avoids the long URL pushing buttons off the row. */}
-        {(savedAt || (!isNew && !visible && publicPath)) && !busy && !error && (
-          <div className="mt-2 text-xs flex flex-wrap items-center gap-x-3 gap-y-1">
-            {savedAt && (
-              <span className="text-forest font-semibold">Saved at {savedAt}</span>
-            )}
-            {!isNew && !visible && publicPath && (
-              <span className="text-prose-faint">
-                Hidden — will live at <code className="text-accent-text-soft/70">{publicPath}</code>
-              </span>
-            )}
-          </div>
-        )}
-      </div>
-    </form>
+    </WorkspaceShell>
   )
 }

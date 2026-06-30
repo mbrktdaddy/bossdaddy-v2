@@ -1,8 +1,7 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { requireAdmin } from '@/lib/auth-cache'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { PickForm } from '../_components/PickForm'
+import { CollectionWorkspace } from '../_components/CollectionWorkspace'
 
 export const dynamic = 'force-dynamic'
 
@@ -57,31 +56,14 @@ export default async function EditPickPage({ params }: { params: Promise<{ id: s
       return { ...i, price_cents }
     })
 
+  // Cast: collections.faqs is generated as `Json` (any-shape jsonb) but the
+  // workspace uses the structured CollectionFAQ[] shape we enforce at the
+  // API/zod layer. The cast is safe because every write path validates against
+  // FaqSchema before insert. WorkspaceShell supplies its own header/back-link.
   return (
-    <div className="p-4 sm:p-8 max-w-3xl">
-      <div className="mb-6">
-        <Link href="/dashboard/admin/picks" className="text-xs text-prose-faint hover:text-prose transition-colors">
-          ← All Lists
-        </Link>
-        <div className="flex items-center justify-between mt-2">
-          <h1 className="text-2xl font-black">{pick.title}</h1>
-          {pick.is_visible && (
-            <Link
-              href={`/picks/${pick.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-accent-text-soft hover:text-accent transition-colors"
-            >
-              View live →
-            </Link>
-          )}
-        </div>
-      </div>
-      {/* Cast: collections.faqs is generated as `Json` (any-shape jsonb) but
-          PickForm uses the structured CollectionFAQ[] shape we enforce at the
-          API/zod layer. The cast is safe because every write path validates
-          against FaqSchema before insert. */}
-      <PickForm pick={pick as unknown as Parameters<typeof PickForm>[0]['pick']} initialItems={itemsWithPrice} />
-    </div>
+    <CollectionWorkspace
+      pick={pick as unknown as Parameters<typeof CollectionWorkspace>[0]['pick']}
+      initialItems={itemsWithPrice}
+    />
   )
 }

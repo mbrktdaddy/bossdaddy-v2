@@ -8,7 +8,7 @@ interface Props {
   fallbackTitle: string
   fallbackDescription: string
   slug: string | null
-  contentType: 'guide' | 'review'
+  contentType: 'guide' | 'review' | 'collection'
   productName?: string
   category?: string
   excerpt?: string
