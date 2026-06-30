@@ -3,43 +3,7 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { detectAffiliateLinks } from '@/lib/affiliate'
 import { resolveProductTokens } from '@/lib/products'
 import { computeReadingTime } from '@/lib/reading-time'
-import { CATEGORY_SLUGS } from '@/lib/categories'
-import { z } from 'zod'
-
-const CategorySchema = z.enum(CATEGORY_SLUGS as [string, ...string[]])
-
-const FAQSchema = z.object({ question: z.string(), answer: z.string() })
-
-const CreateReviewSchema = z.object({
-  title: z.string().min(10).max(120),
-  product_name: z.string().min(2).max(120),
-  category: CategorySchema,
-  excerpt: z.string().max(200).optional(),
-  content: z.string().min(100),
-  pros: z.array(z.string()).default([]),
-  cons: z.array(z.string()).default([]),
-  disclosure_acknowledged: z.boolean(),
-  image_url: z.string().url().optional().nullable(),
-  product_slug: z.string().max(80).optional().nullable(),
-  comparison_product_slugs: z.array(z.string().regex(/^[a-z0-9-]+$/).max(80)).max(4).default([]),
-  tldr: z.string().max(600).optional().nullable(),
-  key_takeaways: z.array(z.string()).default([]),
-  best_for: z.array(z.string()).default([]),
-  not_for: z.array(z.string()).default([]),
-  faqs: z.array(FAQSchema).default([]),
-  testing_duration: z.enum(['<1wk', '1-4wks', '1-3mo', '3+mo', '6mo', '1yr', '2yr', '3yr', '5yr', 'custom']).optional().nullable(),
-  testing_since: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
-  testing_note: z.string().max(120).optional().nullable(),
-  how_you_used_it: z.string().max(600).optional().nullable(),
-  standout_moment: z.string().max(600).optional().nullable(),
-  price_paid_cents: z.number().int().min(0).optional().nullable(),
-  score_quality:    z.number().int().min(1).max(10).optional().nullable(),
-  score_value:      z.number().int().min(1).max(10).optional().nullable(),
-  score_ease:       z.number().int().min(1).max(10).optional().nullable(),
-  score_daily_use:  z.number().int().min(1).max(10).optional().nullable(),
-  would_rebuy:      z.boolean().optional().nullable(),
-  suggested_tags: z.array(z.string().max(80)).max(10).default([]),
-})
+import { CreateReviewSchema } from '@/lib/reviews/schema'
 
 export async function POST(request: NextRequest) {
   try {

@@ -1,49 +1,14 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { createClient, getUserSafe } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAdminApi } from '@/lib/auth-cache'
 import { sanitizeHtml } from '@/lib/sanitize'
-import { z } from 'zod'
-
-const FaqSchema = z.array(
-  z.object({
-    question: z.string().min(3).max(200),
-    answer:   z.string().min(3).max(1000),
-  }),
-).max(12)
-
-const PickListSchema = z.object({
-  slug:                 z.string().min(2).max(80).regex(/^[a-z0-9-]+$/),
-  title:                z.string().min(2).max(160),
-  description:          z.string().max(500).optional().nullable(),
-  intro_html:           z.string().max(10000).optional().nullable(),
-  hero_image_url:       z.string().url().max(2048).optional().nullable(),
-  is_visible:           z.boolean().optional().default(false),
-  published_at:         z.string().optional().nullable(),
-  collection_type:      z.enum(['general', 'gift_guide', 'best_of', 'comparison', 'stack']).optional().default('general'),
-  occasion:             z.string().max(40).optional().nullable(),
-  winner_summary:       z.string().max(500).optional().nullable(),
-  bundle_total_cents:   z.number().int().min(0).optional().nullable(),
-  meta_title:           z.string().max(120).optional().nullable(),
-  meta_description:     z.string().max(300).optional().nullable(),
-  scheduled_publish_at: z.string().datetime().optional().nullable(),
-  // Editorial overrides — migration 068. Null/empty falls back to the
-  // dominant category's pov/faqs from lib/categories.ts on public pages.
-  methodology_html:     z.string().max(10000).optional().nullable(),
-  faqs:                 FaqSchema.optional().nullable(),
-})
-
-async function requireAdmin(supabase: Awaited<ReturnType<typeof createClient>>) {
-  const { user } = await getUserSafe(supabase)
-  if (!user) return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return { error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
-  return { user }
-}
+import { PickListSchema } from '@/lib/collections/schema'
 
 export async function GET() {
   const supabase = await createClient()
-  const gate = await requireAdmin(supabase)
+  const gate = await requireAdminApi(supabase)
   if ('error' in gate) return gate.error
 
   const admin = createAdminClient()
@@ -58,7 +23,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
-  const gate = await requireAdmin(supabase)
+  const gate = await requireAdminApi(supabase)
   if ('error' in gate) return gate.error
 
   const body = await request.json().catch(() => null)

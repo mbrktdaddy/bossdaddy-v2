@@ -1,5 +1,6 @@
 import { cache } from 'react'
 import { redirect } from 'next/navigation'
+import { NextResponse } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 
 // Per-request cached auth helpers. React `cache()` deduplicates calls within
@@ -44,4 +45,16 @@ export async function requireAuthor() {
   const profile = await getCurrentProfile()
   if (!profile || (profile.role !== 'author' && profile.role !== 'admin')) redirect('/dashboard')
   return profile
+}
+
+// API-route admin gate. Unlike requireAdmin() (which redirects, for Server
+// Components), this returns a structured error response for route handlers.
+// Pass the request-scoped Supabase client; on success returns { user }, on
+// failure returns { error } with a 401/403 NextResponse to return directly.
+export async function requireAdminApi(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const { user } = await getUserSafe(supabase)
+  if (!user) return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (profile?.role !== 'admin') return { error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
+  return { user }
 }

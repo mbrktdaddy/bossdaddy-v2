@@ -1,42 +1,14 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { createClient, getUserSafe } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { z } from 'zod'
-
-const SpecSchema = z.object({
-  label: z.string().min(1).max(60),
-  value: z.string().min(1).max(200),
-})
-
-const ProductSchema = z.object({
-  slug:              z.string().min(2).max(80).regex(/^[a-z0-9-]+$/, 'lowercase letters, numbers, and hyphens only'),
-  name:              z.string().min(2).max(160),
-  brand:             z.string().max(120).optional().nullable(),
-  specs:             z.array(SpecSchema).max(30).optional().default([]),
-  asin:              z.string().max(20).optional().nullable(),
-  store:             z.string().max(40).optional().default('amazon'),
-  custom_store_name: z.string().max(80).optional().nullable(),
-  affiliate_url:     z.string().url().max(2048).optional().nullable(),
-  non_affiliate_url: z.string().url().max(2048).optional().nullable(),
-  image_url:         z.string().url().max(2048).optional().nullable(),
-  description:       z.string().max(400).optional().nullable(),
-  category:          z.string().max(80).optional().nullable(),
-  price_cents:       z.number().int().min(0).optional().nullable(),
-  status:            z.enum(['considering', 'queued', 'testing', 'reviewed', 'passed', 'archived']).optional().default('considering'),
-  // Bench pipeline fields (folded in from the former wishlist admin).
-  priority:              z.number().int().optional().default(0),
-  estimated_review_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
-  skip_reason:           z.string().max(500).optional().nullable(),
-})
+import { requireAdminApi } from '@/lib/auth-cache'
+import { ProductCreateSchema } from '@/lib/products/schema'
 
 // GET /api/admin/products — list all products (admin only)
 export async function GET() {
   const supabase = await createClient()
-  const { user } = await getUserSafe(supabase)
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const gate = await requireAdminApi(supabase)
+  if ('error' in gate) return gate.error
 
   const admin = createAdminClient()
   const { data, error } = await admin
@@ -51,14 +23,11 @@ export async function GET() {
 // POST /api/admin/products — create a product (admin only)
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
-  const { user } = await getUserSafe(supabase)
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const gate = await requireAdminApi(supabase)
+  if ('error' in gate) return gate.error
 
   const body = await request.json().catch(() => null)
-  const parsed = ProductSchema.safeParse(body)
+  const parsed = ProductCreateSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
