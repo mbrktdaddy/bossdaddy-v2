@@ -152,7 +152,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     .from('collection_items')
     .select('review_id')
     .eq('collection_id', id)
-  const reviewIds = (linkedReviewIds ?? []).map((r) => r.review_id)
+  // Product-only items (mig 110) have a null review_id — drop them; only
+  // review-backed cross-links need their /reviews/[slug] page revalidated.
+  const reviewIds = (linkedReviewIds ?? [])
+    .map((r) => r.review_id)
+    .filter((x): x is string => x !== null)
   if (reviewIds.length > 0) {
     const { data: reviewRows } = await admin
       .from('reviews')

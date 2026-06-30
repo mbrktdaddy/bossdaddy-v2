@@ -405,7 +405,8 @@ export type Database = {
           created_at: string
           id: string
           position: number
-          review_id: string
+          product_slug: string | null
+          review_id: string | null
           role_label: string | null
           wins_category: string | null
         }
@@ -416,7 +417,8 @@ export type Database = {
           created_at?: string
           id?: string
           position?: number
-          review_id: string
+          product_slug?: string | null
+          review_id?: string | null
           role_label?: string | null
           wins_category?: string | null
         }
@@ -427,11 +429,19 @@ export type Database = {
           created_at?: string
           id?: string
           position?: number
-          review_id?: string
+          product_slug?: string | null
+          review_id?: string | null
           role_label?: string | null
           wins_category?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "collection_items_product_slug_fkey"
+            columns: ["product_slug"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["slug"]
+          },
           {
             foreignKeyName: "pick_list_items_pick_list_id_fkey"
             columns: ["collection_id"]

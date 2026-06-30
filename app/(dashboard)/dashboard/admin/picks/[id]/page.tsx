@@ -45,13 +45,17 @@ export default async function EditPickPage({ params }: { params: Promise<{ id: s
       .in('slug', productSlugs)
     for (const p of products ?? []) priceMap.set(p.slug, p.price_cents ?? null)
   }
-  const itemsWithPrice = (items ?? []).map((i) => {
-    const r = i.reviews
-    const row = Array.isArray(r) ? r[0] : r
-    const slug = (row as { product_slug?: string | null } | null)?.product_slug ?? null
-    const price_cents = slug ? priceMap.get(slug) ?? null : null
-    return { ...i, price_cents }
-  })
+  const itemsWithPrice = (items ?? [])
+    // Product-only items (review_id null, mig 110) aren't editable in PickForm
+    // yet — that's the next builder phase. Render review-backed items for now.
+    .filter((i): i is typeof i & { review_id: string } => i.review_id !== null)
+    .map((i) => {
+      const r = i.reviews
+      const row = Array.isArray(r) ? r[0] : r
+      const slug = (row as { product_slug?: string | null } | null)?.product_slug ?? null
+      const price_cents = slug ? priceMap.get(slug) ?? null : null
+      return { ...i, price_cents }
+    })
 
   return (
     <div className="p-4 sm:p-8 max-w-3xl">
