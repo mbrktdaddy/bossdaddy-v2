@@ -4,16 +4,17 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface SearchResults {
-  articles: { id: string; title: string; slug: string; status: string; category: string }[]
-  reviews:  { id: string; title: string; slug: string; status: string; category: string; product_name: string }[]
-  media:    { id: string; url: string; filename: string; alt_text: string | null }[]
+  articles:    { id: string; title: string; slug: string; status: string; category: string }[]
+  reviews:     { id: string; title: string; slug: string; status: string; category: string; product_name: string }[]
+  media:       { id: string; url: string; filename: string; alt_text: string | null }[]
+  collections: { id: string; title: string; slug: string; collection_type: string; is_visible: boolean }[]
 }
 
 export default function GlobalSearch() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState<SearchResults>({ articles: [], reviews: [], media: [] })
+  const [results, setResults] = useState<SearchResults>({ articles: [], reviews: [], media: [], collections: [] })
   const [loading, setLoading] = useState(false)
   const [cursor, setCursor] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -23,6 +24,7 @@ export default function GlobalSearch() {
     ...results.articles.map((a) => ({ kind: 'guide' as const, id: a.id, title: a.title, href: `/dashboard/guides/${a.id}`, meta: a.category })),
     ...results.reviews.map((r)  => ({ kind: 'review'  as const, id: r.id, title: r.title, href: `/dashboard/reviews/${r.id}`,  meta: r.product_name })),
     ...results.media.map((m)    => ({ kind: 'media'   as const, id: m.id, title: m.alt_text ?? m.filename, href: `/dashboard/media`, meta: m.filename })),
+    ...results.collections.map((c) => ({ kind: 'collection' as const, id: c.id, title: c.title, href: `/dashboard/admin/picks/${c.id}`, meta: c.collection_type })),
   ]
 
   // Keyboard shortcut: Cmd/Ctrl+K opens
@@ -43,7 +45,7 @@ export default function GlobalSearch() {
   }, [open])
 
   const runSearch = useCallback(async (q: string) => {
-    if (q.trim().length < 2) { setResults({ articles: [], reviews: [], media: [] }); return }
+    if (q.trim().length < 2) { setResults({ articles: [], reviews: [], media: [], collections: [] }); return }
     setLoading(true)
     const res = await fetch(`/api/admin/search?q=${encodeURIComponent(q)}`)
     if (res.ok) setResults(await res.json())
@@ -106,7 +108,7 @@ export default function GlobalSearch() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Search articles, reviews, media…"
+            placeholder="Search guides, reviews, collections, media…"
             aria-label="Search"
             className="flex-1 bg-transparent text-prose placeholder:text-prose-faint focus:outline-none focus-visible:ring-1 focus-visible:ring-accent-hover rounded text-sm"
           />
@@ -182,6 +184,27 @@ export default function GlobalSearch() {
                           <p className="text-sm text-prose truncate">{m.alt_text ?? m.filename}</p>
                           <p className="text-xs text-prose-faint truncate">{m.filename}</p>
                         </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+
+              {results.collections.length > 0 && (
+                <div className="px-2 pt-3 pb-3">
+                  <p className="px-2 text-xs text-prose-faint uppercase tracking-wider font-semibold mb-1">Collections</p>
+                  {results.collections.map((c, i) => {
+                    const flatIdx = results.articles.length + results.reviews.length + results.media.length + i
+                    return (
+                      <button
+                        key={c.id}
+                        onClick={() => navigate(`/dashboard/admin/picks/${c.id}`)}
+                        className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                          cursor === flatIdx ? 'bg-surface-raised' : 'hover:bg-surface'
+                        }`}
+                      >
+                        <p className="text-sm text-prose truncate">{c.title}</p>
+                        <p className="text-xs text-prose-faint">{c.collection_type} · {c.is_visible ? 'live' : 'draft'}</p>
                       </button>
                     )
                   })}

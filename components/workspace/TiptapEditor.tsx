@@ -230,7 +230,7 @@ function CollectionDialog({ onConfirm, onCancel }: {
     const handle = setTimeout(async () => {
       setSearching(true)
       try {
-        const res = await fetch(`/api/admin/collections/search?q=${encodeURIComponent(q)}`)
+        const res = await fetch(`/api/admin/search?scope=collections&q=${encodeURIComponent(q)}`)
         if (!res.ok) return
         const json = await res.json()
         if (!cancelled) setResults((json.collections ?? []) as CollectionHit[])

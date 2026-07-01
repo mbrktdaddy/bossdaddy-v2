@@ -11,13 +11,36 @@ export async function GET(request: NextRequest) {
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const q = (new URL(request.url).searchParams.get('q') ?? '').trim()
-  if (q.length < 2) return NextResponse.json({ articles: [], reviews: [], media: [] })
+  const url = new URL(request.url)
+  const q = (url.searchParams.get('q') ?? '').trim()
+  const scope = url.searchParams.get('scope')
 
   const admin = createAdminClient()
+
+  // Scoped mode — collections-only picker for the TiptapEditor "Insert
+  // Collection" embed dialog. Visible-only (never embed a draft into published
+  // prose), empty query → 12 most-recently-published collections. Returns the
+  // same shape the old bespoke /api/admin/collections/search route did.
+  if (scope === 'collections') {
+    let query = admin
+      .from('collections')
+      .select('id, slug, title, collection_type')
+      .eq('is_visible', true)
+      .order('published_at', { ascending: false, nullsFirst: false })
+      .limit(12)
+    if (q.length >= 2) {
+      const like = `%${q}%`
+      query = query.or(`title.ilike.${like},slug.ilike.${like},description.ilike.${like}`)
+    }
+    const { data } = await query
+    return NextResponse.json({ collections: data ?? [] })
+  }
+
+  if (q.length < 2) return NextResponse.json({ articles: [], reviews: [], media: [], products: [], collections: [] })
+
   const like = `%${q}%`
 
-  const [{ data: articles }, { data: reviews }, { data: media }, { data: products }] = await Promise.all([
+  const [{ data: articles }, { data: reviews }, { data: media }, { data: products }, { data: collections }] = await Promise.all([
     admin
       .from('guides')
       .select('id, title, slug, status, category')
@@ -43,6 +66,14 @@ export async function GET(request: NextRequest) {
       .select('slug, name, brand, image_url, affiliate_url, status, category, review_id')
       .or(`name.ilike.${like},slug.ilike.${like},brand.ilike.${like}`)
       .neq('status', 'archived')
+      .order('updated_at', { ascending: false })
+      .limit(8),
+    // Collections channel — cross-content nav (jump to the editor). Includes
+    // drafts (admin is editing), unlike the visible-only embed-picker scope.
+    admin
+      .from('collections')
+      .select('id, slug, title, collection_type, is_visible')
+      .or(`title.ilike.${like},slug.ilike.${like},description.ilike.${like}`)
       .order('updated_at', { ascending: false })
       .limit(8),
   ])
@@ -76,9 +107,10 @@ export async function GET(request: NextRequest) {
   }))
 
   return NextResponse.json({
-    articles: articles ?? [],
-    reviews:  reviews  ?? [],
-    media:    media    ?? [],
-    products: productResults,
+    articles:    articles    ?? [],
+    reviews:     reviews     ?? [],
+    media:       media       ?? [],
+    products:    productResults,
+    collections: collections ?? [],
   })
 }
