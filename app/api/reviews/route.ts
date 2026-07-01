@@ -92,7 +92,12 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Review insert failed:', error)
-      if (error.code === '23505') return NextResponse.json({ error: 'A review with this title already exists. Try a slightly different title.' }, { status: 409 })
+      if (error.code === '23505') {
+        if (error.message?.includes('reviews_one_toplevel_per_product')) {
+          return NextResponse.json({ error: 'This product already has a review. To publish an update, schedule a follow-up from the existing review instead.' }, { status: 409 })
+        }
+        return NextResponse.json({ error: 'A review with this title already exists. Try a slightly different title.' }, { status: 409 })
+      }
       return NextResponse.json({
         error: `Failed to create review: ${error.message}`,
         code: error.code,

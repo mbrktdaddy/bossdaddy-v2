@@ -265,6 +265,9 @@ export async function PUT(
   const { data, error } = await adminForUpdate.from('reviews').update(updates as any).eq('id', id).select().single()
   if (error) {
     console.error('Review author/admin update failed:', error)
+    if (error.code === '23505' && error.message?.includes('reviews_one_toplevel_per_product')) {
+      return NextResponse.json({ error: 'Another review is already linked to this product. Each product can have only one review — publish an update as a follow-up instead.' }, { status: 409 })
+    }
     return NextResponse.json({ error: `Update failed: ${error.message}` }, { status: 500 })
   }
 
