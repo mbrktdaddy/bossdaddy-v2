@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getCategoryBySlug } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
@@ -15,12 +16,26 @@ interface Props {
  searchParams: Promise<{ q?: string }>
 }
 
+// Bench-status → reader-facing label for product search hits (mirrors /bench).
+const BENCH_STATUS_LABEL: Record<string, string> = {
+ considering: 'Under consideration',
+ queued: 'Coming soon',
+ testing: 'Testing now',
+}
+
 export default async function SearchPage({ searchParams }: Props) {
  const { q } = await searchParams
  const query = q?.trim() ?? ''
  const supabase = await createClient()
+ const admin = createAdminClient()
 
- const [{ data: reviews }, { data: articles }] = query.length >= 2
+ // Products are matched with ilike (they have no search_vector), so the raw
+ // query is interpolated into a PostgREST .or() filter. Strip the characters
+ // PostgREST treats as filter delimiters / LIKE wildcards so an arbitrary
+ // visitor query can't break the filter or inject a wildcard.
+ const productLike = `%${query.replace(/[%,()\\]/g, ' ').trim()}%`
+
+ const [{ data: reviews }, { data: articles }, { data: products }] = query.length >= 2
  ? await Promise.all([
  supabase
  .from('reviews')
@@ -36,10 +51,21 @@ export default async function SearchPage({ searchParams }: Props) {
  .eq('is_visible', true)
  .textSearch('search_vector', query, { type: 'websearch', config: 'english' })
  .limit(10),
+ // Bench pipeline products (considering/queued/testing) — the items with no
+ // review yet, so nothing else in search surfaces them. Reviewed products
+ // already appear via their review; archived/passed stay hidden. Admin client
+ // mirrors the /bench page (avoids the products-RLS-for-anon trap).
+ admin
+ .from('products')
+ .select('slug, name, brand, category, image_url, description, status')
+ .in('status', ['considering', 'queued', 'testing'])
+ .or(`name.ilike.${productLike},slug.ilike.${productLike},brand.ilike.${productLike}`)
+ .order('priority', { ascending: false })
+ .limit(10),
  ])
- : [{ data: null }, { data: null }]
+ : [{ data: null }, { data: null }, { data: null }]
 
- const total = (reviews?.length ?? 0) + (articles?.length ?? 0)
+ const total = (reviews?.length ?? 0) + (articles?.length ?? 0) + (products?.length ?? 0)
 
  return (
  <div className="max-w-4xl mx-auto px-6 py-12">
@@ -110,6 +136,35 @@ export default async function SearchPage({ searchParams }: Props) {
  {r.excerpt && <p className="text-prose-faint text-xs mt-1 line-clamp-1">{r.excerpt}</p>}
  </div>
  <RatingScore rating={r.rating ?? 0} />
+ </Link>
+ )
+ })}
+ </div>
+ </div>
+ )}
+
+ {/* Product results — bench pipeline items */}
+ {(products?.length ?? 0) > 0 && (
+ <div className="mb-10">
+ <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
+ <p className="text-xs text-eyebrow font-semibold uppercase tracking-widest mb-3">On the Bench</p>
+ <div className="space-y-2">
+ {products!.map((p) => {
+ const cat = getCategoryBySlug(p.category ?? '')
+ return (
+ <Link
+ key={p.slug}
+ href={`/bench/${p.slug}`}
+ className="flex items-start justify-between p-4 bg-surface border border-soft hover:border-accent-border/40 rounded-xl transition-colors group"
+ >
+ <div className="min-w-0">
+ <div className="flex items-center gap-2 mb-1 flex-wrap">
+ {cat && <span className="flex items-center gap-1.5 text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-semibold"><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text shrink-0" /> {cat.label}</span>}
+ </div>
+ <p className="font-semibold text-sm group-hover:text-accent-text-soft transition-colors">{p.name}</p>
+ {p.description && <p className="text-prose-faint text-xs mt-1 line-clamp-1">{p.description}</p>}
+ </div>
+ <span className="text-xs text-accent-text font-medium ml-4 shrink-0 whitespace-nowrap">{BENCH_STATUS_LABEL[p.status] ?? 'On the bench'}</span>
  </Link>
  )
  })}
