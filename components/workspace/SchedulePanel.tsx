@@ -4,6 +4,13 @@ interface Props {
   scheduledAt: string | null
   onChange: (iso: string | null) => void
   disabled?: boolean
+  /** Summary hint shown when nothing is scheduled. Defaults to auto-publish copy. */
+  hint?: string
+  /** Footer explanation. Override for surfaces with no auto-publish cron
+   *  (e.g. X Studio, where posting is manual). */
+  note?: string
+  /** Label above the datetime input. */
+  label?: string
 }
 
 function toDateTimeLocal(iso: string): string {
@@ -18,7 +25,7 @@ function fromDateTimeLocal(local: string): string {
   return new Date(local).toISOString()
 }
 
-export function SchedulePanel({ scheduledAt, onChange, disabled }: Props) {
+export function SchedulePanel({ scheduledAt, onChange, disabled, hint, note, label }: Props) {
   const localValue = scheduledAt ? toDateTimeLocal(scheduledAt) : ''
   const isScheduled = !!scheduledAt
   const scheduledDate = scheduledAt ? new Date(scheduledAt) : null
@@ -36,13 +43,13 @@ export function SchedulePanel({ scheduledAt, onChange, disabled }: Props) {
             {isPast ? 'overdue' : scheduledDate!.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
           </span>
         ) : (
-          <span className="text-xs text-prose-faint">Publish at a specific time</span>
+          <span className="text-xs text-prose-faint">{hint ?? 'Publish at a specific time'}</span>
         )}
       </summary>
 
       <div className="px-4 pb-4 space-y-3">
         <div>
-          <label className="block text-xs text-prose-muted mb-1.5">Publish date & time (local)</label>
+          <label className="block text-xs text-prose-muted mb-1.5">{label ?? 'Publish date & time (local)'}</label>
           <input
             type="datetime-local"
             value={localValue}
@@ -64,9 +71,7 @@ export function SchedulePanel({ scheduledAt, onChange, disabled }: Props) {
           </button>
         )}
         <p className="text-xs text-prose-faint">
-          Content will publish automatically at the scheduled time. The cron runs once daily at
-          noon UTC — your scheduled item will go live on the next daily run after the scheduled
-          time passes. (Vercel Hobby plan limitation; upgrade to Pro for more frequent checks.)
+          {note ?? 'Content will publish automatically at the scheduled time. The cron runs once daily at noon UTC — your scheduled item will go live on the next daily run after the scheduled time passes. (Vercel Hobby plan limitation; upgrade to Pro for more frequent checks.)'}
         </p>
       </div>
     </details>

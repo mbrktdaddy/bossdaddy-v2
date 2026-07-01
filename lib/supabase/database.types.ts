@@ -2335,6 +2335,7 @@ export type Database = {
           id: string
           posted_at: string | null
           posted_via: string
+          scheduled_at: string | null
           source_id: string | null
           source_title: string | null
           source_type: string | null
@@ -2353,6 +2354,7 @@ export type Database = {
           id?: string
           posted_at?: string | null
           posted_via?: string
+          scheduled_at?: string | null
           source_id?: string | null
           source_title?: string | null
           source_type?: string | null
@@ -2371,6 +2373,7 @@ export type Database = {
           id?: string
           posted_at?: string | null
           posted_via?: string
+          scheduled_at?: string | null
           source_id?: string | null
           source_title?: string | null
           source_type?: string | null
@@ -2524,6 +2527,7 @@ export type Database = {
           platform: string
           posted_at: string | null
           posted_via: string
+          scheduled_at: string | null
           source_id: string | null
           source_title: string | null
           source_type: string | null
@@ -2545,6 +2549,7 @@ export type Database = {
           platform?: string
           posted_at?: string | null
           posted_via?: string
+          scheduled_at?: string | null
           source_id?: string | null
           source_title?: string | null
           source_type?: string | null
@@ -2566,6 +2571,7 @@ export type Database = {
           platform?: string
           posted_at?: string | null
           posted_via?: string
+          scheduled_at?: string | null
           source_id?: string | null
           source_title?: string | null
           source_type?: string | null

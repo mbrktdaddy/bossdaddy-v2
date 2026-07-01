@@ -5,6 +5,7 @@ import { requireAdmin } from '@/lib/auth-cache'
 import { PLATFORMS } from '@/lib/social-platforms'
 import SocialPostList from './_components/SocialPostList'
 import GenerateDrawer from './_components/GenerateDrawer'
+import ArticlesPanel from './_components/ArticlesPanel'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,12 +29,20 @@ export default async function SocialPage({ searchParams }: Props) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let postsQuery = (admin as any)
     .from('social_posts')
-    .select('id, platform, content, status, source_type, source_title, link_url, image_url, notes, posted_at, created_at, updated_at')
+    .select('id, platform, content, status, source_type, source_title, link_url, image_url, notes, scheduled_at, posted_at, created_at, updated_at')
     .eq('user_id', user.id)
     .eq('platform', platform)
     .order('created_at', { ascending: false })
   if (status !== 'all') postsQuery = postsQuery.eq('status', status)
   const { data: posts } = await postsQuery
+
+  // X Articles (long-form) — summary list for the hub.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: articles } = await (admin as any)
+    .from('social_articles')
+    .select('id, title, status, scheduled_at, source_title, updated_at')
+    .eq('user_id', user.id)
+    .order('updated_at', { ascending: false })
 
   // Hashtag presets for this platform
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -73,6 +82,12 @@ export default async function SocialPage({ searchParams }: Props) {
           currentPlatform={platform}
         />
       </div>
+
+      {/* X Articles (long-form) */}
+      <ArticlesPanel articles={articles ?? []} />
+
+      {/* Posts */}
+      <h2 className="text-lg font-black text-prose mb-3">Posts</h2>
 
       {/* Platform tabs */}
       <div className="flex gap-1 mb-4 overflow-x-auto scrollbar-hide">

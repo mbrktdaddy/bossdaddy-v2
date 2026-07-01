@@ -1,14 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-
-type Platform = 'twitter' | 'instagram' | 'facebook' | 'linkedin' | 'threads'
+import { PLATFORMS, type SocialPlatform } from '@/lib/social-platforms'
 
 interface SocialPost {
-  platform: Platform
-  body: string
-  hashtags: string[]
-  generated_at?: string
+  id: string
+  platform: SocialPlatform
+  content: string
+  status: 'draft' | 'ready' | 'posted'
 }
 
 interface Props {
@@ -16,30 +15,37 @@ interface Props {
   contentId: string
 }
 
-const PLATFORM_META: Record<Platform, { label: string; icon: string; charLimit: number | null }> = {
-  twitter:   { label: 'Twitter / X',  icon: '𝕏',  charLimit: 280  },
-  threads:   { label: 'Threads',      icon: '@',  charLimit: 500  },
-  instagram: { label: 'Instagram',    icon: '📸', charLimit: 2200 },
-  facebook:  { label: 'Facebook',     icon: 'f',  charLimit: null },
-  linkedin:  { label: 'LinkedIn',     icon: 'in', charLimit: null },
+// Single-glyph marks for each platform (lib/social-platforms carries the label +
+// char limit; the panel just adds an icon).
+const ICONS: Record<SocialPlatform, string> = {
+  x:         '𝕏',
+  threads:   '@',
+  instagram: '📸',
+  facebook:  'f',
 }
 
-const DEFAULT_PLATFORMS: Platform[] = ['twitter', 'instagram', 'facebook']
+const PLATFORM_META: Record<SocialPlatform, { label: string; icon: string; charLimit: number | null }> =
+  Object.fromEntries(
+    PLATFORMS.map((p) => [p.id, { label: p.label, icon: ICONS[p.id], charLimit: p.charLimit }]),
+  ) as Record<SocialPlatform, { label: string; icon: string; charLimit: number | null }>
+
+const PLATFORM_ORDER = PLATFORMS.map((p) => p.id)
+const DEFAULT_PLATFORMS: SocialPlatform[] = ['x', 'instagram', 'facebook']
 
 export function SocialPostsPanel({ contentType, contentId }: Props) {
   const [posts,    setPosts]    = useState<SocialPost[]>([])
-  const [selected, setSelected] = useState<Platform[]>(DEFAULT_PLATFORMS)
+  const [selected, setSelected] = useState<SocialPlatform[]>(DEFAULT_PLATFORMS)
   const [loading,  setLoading]  = useState(true)
   const [busy,     setBusy]     = useState(false)
-  const [busyPlatform, setBusyPlatform] = useState<Platform | null>(null)
+  const [busyPlatform, setBusyPlatform] = useState<SocialPlatform | null>(null)
   const [error,    setError]    = useState<string | null>(null)
   const [instr,    setInstr]    = useState('')
-  const [copied,   setCopied]   = useState<Platform | null>(null)
+  const [copied,   setCopied]   = useState<string | null>(null)
 
   useEffect(() => {
     let active = true
     setLoading(true)
-    fetch(`/api/social-posts?content_type=${contentType}&content_id=${contentId}`)
+    fetch(`/api/social-posts?source_type=${contentType}&source_id=${contentId}`)
       .then((r) => r.ok ? r.json() : { posts: [] })
       .then((j) => { if (active) setPosts(j.posts ?? []) })
       .catch(() => {})
@@ -47,11 +53,20 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
     return () => { active = false }
   }, [contentType, contentId])
 
-  function togglePlatform(p: Platform) {
+  function togglePlatform(p: SocialPlatform) {
     setSelected((s) => s.includes(p) ? s.filter((x) => x !== p) : [...s, p])
   }
 
-  async function handleGenerate(platforms: Platform[], regen: boolean) {
+  // Merge freshly generated rows into state, replacing any existing row for the
+  // same platform (social-copy overwrites in the DB per platform).
+  function mergePosts(incoming: SocialPost[]) {
+    setPosts((prev) => {
+      const platforms = new Set(incoming.map((p) => p.platform))
+      return [...prev.filter((p) => !platforms.has(p.platform)), ...incoming]
+    })
+  }
+
+  async function handleGenerate(platforms: SocialPlatform[], regen: boolean) {
     if (platforms.length === 0) { setError('Select at least one platform.'); return }
     setBusy(true); setError(null)
     if (platforms.length === 1) setBusyPlatform(platforms[0])
@@ -68,11 +83,7 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Generation failed')
-      setPosts((prev) => {
-        const map = new Map(prev.map((p) => [p.platform, p]))
-        for (const p of (json.posts ?? []) as SocialPost[]) map.set(p.platform, p)
-        return Array.from(map.values())
-      })
+      mergePosts((json.posts ?? []) as SocialPost[])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Generation failed')
     }
@@ -81,36 +92,32 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
     if (!regen) setInstr('')
   }
 
-  async function patchPost(platform: Platform, patch: Partial<Pick<SocialPost, 'body' | 'hashtags'>>) {
+  async function patchPost(id: string, patch: { content?: string }) {
     setError(null)
     try {
-      const res = await fetch('/api/social-posts', {
+      const res = await fetch(`/api/social-posts/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content_type: contentType, content_id: contentId, platform, ...patch }),
+        body: JSON.stringify(patch),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Update failed')
-      setPosts((prev) => prev.map((p) => p.platform === platform ? json.post : p))
+      setPosts((prev) => prev.map((p) => p.id === id ? json.post : p))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Update failed')
     }
   }
 
-  async function deletePost(platform: Platform) {
-    if (!confirm(`Delete the ${PLATFORM_META[platform].label} post?`)) return
-    setError(null); setBusyPlatform(platform)
+  async function deletePost(post: SocialPost) {
+    if (!confirm(`Delete the ${PLATFORM_META[post.platform].label} post?`)) return
+    setError(null); setBusyPlatform(post.platform)
     try {
-      const res = await fetch('/api/social-posts', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content_type: contentType, content_id: contentId, platform }),
-      })
+      const res = await fetch(`/api/social-posts/${post.id}`, { method: 'DELETE' })
       if (!res.ok) {
         const json = await res.json().catch(() => ({}))
         throw new Error(json.error ?? 'Delete failed')
       }
-      setPosts((prev) => prev.filter((p) => p.platform !== platform))
+      setPosts((prev) => prev.filter((p) => p.id !== post.id))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Delete failed')
     }
@@ -118,13 +125,9 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
   }
 
   async function handleCopy(post: SocialPost) {
-    const hashtags = post.hashtags ?? []
-    const text = hashtags.length > 0
-      ? `${post.body ?? ''}\n\n${hashtags.map((t) => `#${t}`).join(' ')}`
-      : (post.body ?? '')
     try {
-      await navigator.clipboard.writeText(text)
-      setCopied(post.platform)
+      await navigator.clipboard.writeText(post.content ?? '')
+      setCopied(post.id)
       setTimeout(() => setCopied(null), 2000)
     } catch {
       setError('Clipboard not available — select and copy manually.')
@@ -153,7 +156,7 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
         <div className="bg-surface-sunken border border-soft rounded-xl p-4 space-y-3">
           <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold">Generate for</p>
           <div className="flex flex-wrap gap-2">
-            {(Object.keys(PLATFORM_META) as Platform[]).map((p) => {
+            {PLATFORM_ORDER.map((p) => {
               const m = PLATFORM_META[p]
               const isOn = selected.includes(p)
               return (
@@ -208,22 +211,20 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
         ) : (
           <div className="space-y-3">
             {posts
-              // Skip posts whose platform isn't in PLATFORM_META (legacy/unsupported
-              // values). PostCard depends on PLATFORM_META[post.platform] and crashes
-              // if it's undefined.
+              // Skip posts whose platform isn't a known one (legacy/unsupported
+              // values). PostCard depends on PLATFORM_META[post.platform].
               .filter((p) => PLATFORM_META[p.platform] != null)
-              .sort((a, b) => Object.keys(PLATFORM_META).indexOf(a.platform) - Object.keys(PLATFORM_META).indexOf(b.platform))
+              .sort((a, b) => PLATFORM_ORDER.indexOf(a.platform) - PLATFORM_ORDER.indexOf(b.platform))
               .map((post) => (
                 <PostCard
-                  key={post.platform}
+                  key={post.id}
                   post={post}
                   busy={busyPlatform === post.platform}
-                  copied={copied === post.platform}
+                  copied={copied === post.id}
                   onCopy={() => handleCopy(post)}
-                  onBodyCommit={(next) => patchPost(post.platform, { body: next })}
-                  onHashtagsCommit={(next) => patchPost(post.platform, { hashtags: next })}
+                  onCommit={(next) => patchPost(post.id, { content: next })}
                   onRegenerate={() => handleGenerate([post.platform], true)}
-                  onDelete={() => deletePost(post.platform)}
+                  onDelete={() => deletePost(post)}
                 />
               ))}
           </div>
@@ -239,40 +240,24 @@ interface PostCardProps {
   busy: boolean
   copied: boolean
   onCopy: () => void
-  onBodyCommit: (next: string) => void
-  onHashtagsCommit: (next: string[]) => void
+  onCommit: (next: string) => void
   onRegenerate: () => void
   onDelete: () => void
 }
 
-function PostCard({ post, busy, copied, onCopy, onBodyCommit, onHashtagsCommit, onRegenerate, onDelete }: PostCardProps) {
+function PostCard({ post, busy, copied, onCopy, onCommit, onRegenerate, onDelete }: PostCardProps) {
   const m = PLATFORM_META[post.platform]
-  // Defend against post.body / hashtags being null/undefined — caused a
-  // workspace-wide hydration crash on review/guide pages until 2026-05-12.
-  const [body, setBody]       = useState(post.body ?? '')
-  const [tagInput, setTagInput] = useState('')
-  const hashtags = post.hashtags ?? []
+  const [content, setContent] = useState(post.content ?? '')
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { setBody(post.body ?? '') }, [post.body])
+  useEffect(() => { setContent(post.content ?? '') }, [post.content])
 
-  const total = body.length + (hashtags.length > 0
-    ? hashtags.join(' ').length + hashtags.length + 2  // " #" prefixes + leading "\n\n"
-    : 0)
+  const total = content.length
   const overLimit = m.charLimit != null && total > m.charLimit
 
-  function commitBody() {
-    if (body.trim() && body !== post.body) onBodyCommit(body)
-    else if (!body.trim()) setBody(post.body ?? '')
-  }
-  function addTag() {
-    const t = tagInput.trim().replace(/^#/, '')
-    if (!t || hashtags.includes(t)) { setTagInput(''); return }
-    onHashtagsCommit([...hashtags, t])
-    setTagInput('')
-  }
-  function removeTag(t: string) {
-    onHashtagsCommit(hashtags.filter((x) => x !== t))
+  function commit() {
+    if (content.trim() && content !== post.content) onCommit(content)
+    else if (!content.trim()) setContent(post.content ?? '')
   }
 
   return (
@@ -293,7 +278,7 @@ function PostCard({ post, busy, copied, onCopy, onBodyCommit, onHashtagsCommit, 
             onClick={onCopy}
             disabled={busy}
             className="px-2.5 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose text-xs rounded-lg min-h-[36px] transition-colors"
-            title="Copy body + hashtags to clipboard"
+            title="Copy to clipboard"
           >{copied ? '✓ Copied' : 'Copy'}</button>
           <button
             type="button"
@@ -313,49 +298,13 @@ function PostCard({ post, busy, copied, onCopy, onBodyCommit, onHashtagsCommit, 
       </div>
 
       <textarea
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        onBlur={commitBody}
-        rows={Math.max(3, Math.min(10, body.split('\n').length))}
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        onBlur={commit}
+        rows={Math.max(3, Math.min(12, content.split('\n').length))}
         disabled={busy}
         className="w-full px-3 py-2 bg-surface border border-soft rounded-lg text-sm text-prose leading-relaxed focus:outline-none focus:ring-1 focus:ring-accent-hover resize-y"
       />
-
-      <div>
-        <p className="text-[10px] uppercase tracking-widest text-prose-faint mb-1">Hashtags</p>
-        <div className="flex flex-wrap items-center gap-1.5">
-          {hashtags.map((t) => (
-            <span
-              key={t}
-              className="inline-flex items-center gap-1 px-2 py-1 bg-accent-tint border border-accent-border/40 text-accent-text-soft text-xs rounded-full"
-            >
-              <span className="font-mono">#{t}</span>
-              <button
-                type="button"
-                onClick={() => removeTag(t)}
-                disabled={busy}
-                className="text-accent-text hover:text-red-700 -mr-0.5 px-1"
-                title={`Remove #${t}`}
-              >×</button>
-            </span>
-          ))}
-          <input
-            type="text"
-            value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ',' || e.key === ' ') {
-                e.preventDefault()
-                addTag()
-              }
-            }}
-            onBlur={() => { if (tagInput.trim()) addTag() }}
-            placeholder="+ tag"
-            disabled={busy}
-            className="px-2 py-1 bg-surface border border-soft rounded-full text-xs text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover w-20"
-          />
-        </div>
-      </div>
     </div>
   )
 }

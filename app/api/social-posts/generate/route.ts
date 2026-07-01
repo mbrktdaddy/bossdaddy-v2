@@ -1,10 +1,35 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { getClaudeClient, MODEL, BOSS_DADDY_SYSTEM } from '@/lib/claude/client'
+import Anthropic from '@anthropic-ai/sdk'
+import { createClient } from '@/lib/supabase/server'
+import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
+import { createStructured } from '@/lib/claude/structured'
 import { getPlatform, PLATFORM_IDS } from '@/lib/social-platforms'
+import { checkRateLimit } from '@/lib/rate-limit'
+import { requireSocialActor, fetchGenSource, type GenSourceType } from '@/lib/social/generate'
 import { z } from 'zod'
 
 export const maxDuration = 60
+
+// The model returns the variants by calling this tool — its input_schema is the
+// shape, so the SDK validates it instead of us regex-parsing "JSON only" prose.
+const VARIANTS_TOOL: Anthropic.Tool = {
+  name: 'submit_variants',
+  description: 'Return 3 distinct social post variants for the requested platform.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      variants: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: { content: { type: 'string' } },
+          required: ['content'],
+        },
+      },
+    },
+    required: ['variants'],
+  },
+}
 
 const GenerateSchema = z.object({
   platform:     z.enum(PLATFORM_IDS as [string, ...string[]]),
@@ -17,12 +42,18 @@ const GenerateSchema = z.object({
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
-  const { user } = await getUserSafe(supabase)
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const actor = await requireSocialActor(supabase) // admin-only feature gate
+  if (actor.error) return actor.error
+  const user = actor.user
 
-  // X Studio is admin-only as a FEATURE (RLS stays owner-scoped as defense-in-depth).
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  // Operator-approved 10/hr draft cap — same class as a draft generation.
+  const { success, remaining, reset } = await checkRateLimit(`draft:${user.id}`)
+  if (!success) {
+    return NextResponse.json(
+      { error: 'Rate limit exceeded. You can generate 10 drafts per hour.' },
+      { status: 429, headers: { 'X-RateLimit-Remaining': String(remaining), 'X-RateLimit-Reset': String(reset) } },
+    )
+  }
 
   const body = await request.json().catch(() => null)
   const parsed = GenerateSchema.safeParse(body)
@@ -31,29 +62,12 @@ export async function POST(request: NextRequest) {
   const { platform, source_type, source_id, source_title, topic, format } = parsed.data
   const platformConfig = getPlatform(platform)
 
-  // Pull source content summary if review or guide
+  // Pull a source summary for review / guide / collection; fall back to a raw topic.
   let sourceContext = ''
   if (source_type !== 'original' && source_id) {
-    if (source_type === 'review') {
-      const { data: sourceItem } = await supabase
-        .from('reviews')
-        .select('title, excerpt, content')
-        .eq('id', source_id)
-        .single()
-      if (sourceItem) {
-        const preview = (sourceItem.content as string | null)?.slice(0, 800) ?? ''
-        sourceContext = `\n\nSOURCE CONTENT (review):\nTitle: ${sourceItem.title}\nExcerpt: ${sourceItem.excerpt ?? ''}\nContent preview: ${preview}`
-      }
-    } else {
-      const { data: sourceItem } = await supabase
-        .from('guides')
-        .select('title, excerpt, content')
-        .eq('id', source_id)
-        .single()
-      if (sourceItem) {
-        const preview = (sourceItem.content as string | null)?.slice(0, 800) ?? ''
-        sourceContext = `\n\nSOURCE CONTENT (guide):\nTitle: ${sourceItem.title}\nExcerpt: ${sourceItem.excerpt ?? ''}\nContent preview: ${preview}`
-      }
+    const src = await fetchGenSource(source_type as GenSourceType, source_id)
+    if (src) {
+      sourceContext = `\n\nSOURCE CONTENT (${src.type}):\nTitle: ${src.title}\nExcerpt: ${src.excerpt ?? ''}\nContent preview: ${src.bodyText.slice(0, 800)}`
     }
   } else if (topic) {
     sourceContext = `\n\nTOPIC: ${topic}`
@@ -68,7 +82,7 @@ export async function POST(request: NextRequest) {
     : 'Write a single standalone post.'
 
   const platformNote = platform === 'x'
-    ? 'This is for X (Twitter). Hook-first. No em-dashes. No hashtag spam — one or two max, only if natural.'
+    ? 'This is for X. Hook-first. No em-dashes. No hashtag spam — one or two max, only if natural.'
     : platform === 'instagram'
     ? 'This is for Instagram. Can be longer. End with 5–10 relevant hashtags on a new line.'
     : platform === 'threads'
@@ -84,39 +98,36 @@ ${formatNote}
 ${sourceContext}
 
 Rules:
-- Boss Daddy voice (confident dad, older brother energy, no corporate speak)
 - Start each variant with a strong hook — question, bold claim, or punchy statement
 - Real-dad specificity — mention actual scenarios, not vague platitudes
 - No "game-changer", "must-have", "revolutionary", or "life-changing"
 - Each variant must take a different angle or tone (e.g., humor / practical tip / challenge)
 
-Return ONLY a JSON object — no markdown fences, no commentary:
-{
-  "variants": [
-    { "content": "post text here" },
-    { "content": "post text here" },
-    { "content": "post text here" }
-  ]
-}`
+Return the 3 variants via the submit_variants tool.`
 
-  const claude = getClaudeClient()
-  const response = await claude.messages.create({
-    model: MODEL,
-    max_tokens: 1500,
-    system: [{ type: 'text', text: BOSS_DADDY_SYSTEM, cache_control: { type: 'ephemeral' } }],
-    messages: [{ role: 'user', content: userPrompt }],
-  })
-
-  const raw = response.content[0].type === 'text' ? response.content[0].text : ''
-  const cleaned = raw.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim()
-
-  let variants: { content: string }[]
+  let result
   try {
-    const parsed = JSON.parse(cleaned)
-    variants = parsed.variants
-  } catch {
-    console.error('[social generate] parse error:', cleaned)
-    return NextResponse.json({ error: 'Generation failed — bad response format' }, { status: 500 })
+    const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
+    result = await createStructured({
+      system: systemBlocks,
+      messages: [{ role: 'user', content: userPrompt }],
+      tool: VARIANTS_TOOL,
+      maxTokens: 1500,
+    })
+  } catch (err) {
+    console.error('[social generate] Claude error:', err)
+    return NextResponse.json({ error: 'Generation failed — try again' }, { status: 502 })
+  }
+
+  if (result.stopReason === 'max_tokens') {
+    return NextResponse.json({ error: 'The output ran long and got cut off. Try again.' }, { status: 502 })
+  }
+
+  const variants = Array.isArray((result.data as { variants?: { content: string }[] } | null)?.variants)
+    ? (result.data as { variants: { content: string }[] }).variants
+    : []
+  if (variants.length === 0) {
+    return NextResponse.json({ error: 'AI returned an unexpected format — please try again.' }, { status: 502 })
   }
 
   return NextResponse.json({

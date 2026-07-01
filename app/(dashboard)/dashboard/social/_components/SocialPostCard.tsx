@@ -17,9 +17,17 @@ export interface Post {
   link_url: string | null
   image_url: string | null
   notes: string | null
+  scheduled_at: string | null
   posted_at: string | null
   created_at: string
   updated_at: string
+}
+
+// datetime-local expects "YYYY-MM-DDTHH:mm" in local time
+function toDateTimeLocal(iso: string): string {
+  const d = new Date(iso)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
 interface Props {
@@ -39,6 +47,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
   const [content, setContent]       = useState(post.content)
   const [linkUrl, setLinkUrl]       = useState<string | null>(post.link_url)
   const [imageUrl, setImageUrl]     = useState<string | null>(post.image_url)
+  const [scheduled, setScheduled]   = useState<string | null>(post.scheduled_at)
   const [saving, setSaving]         = useState(false)
   const [saveError, setSaveError]   = useState<string | null>(null)
   const [copied, setCopied]         = useState(false)
@@ -58,7 +67,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
     const res = await fetch(`/api/social-posts/${post.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content, link_url: linkUrl, image_url: imageUrl }),
+      body: JSON.stringify({ content, link_url: linkUrl, image_url: imageUrl, scheduled_at: scheduled }),
     })
     const json = await res.json().catch(() => ({}))
     setSaving(false)
@@ -70,6 +79,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
     setContent(post.content)
     setLinkUrl(post.link_url)
     setImageUrl(post.image_url)
+    setScheduled(post.scheduled_at)
     setEditing(false)
   }
 
@@ -143,6 +153,11 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
             )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            {post.scheduled_at && !post.posted_at && (
+              <span className="text-xs text-purple-400 font-mono" suppressHydrationWarning>
+                📅 {new Date(post.scheduled_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+              </span>
+            )}
             {post.posted_at && (
               <span className="text-xs text-prose-faint">
                 Posted {new Date(post.posted_at).toLocaleDateString('en-US', { timeZone: 'UTC' })}
@@ -217,6 +232,26 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
 
             {/* Link picker */}
             <LinkPicker value={linkUrl} onChange={setLinkUrl} sourceLinks={sourceLinks} />
+
+            {/* Planned post time (reminder only — posting is manual) */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <label className="text-xs text-prose-muted">📅 Planned</label>
+              <input
+                type="datetime-local"
+                value={scheduled ? toDateTimeLocal(scheduled) : ''}
+                onChange={(e) => setScheduled(e.target.value ? new Date(e.target.value).toISOString() : null)}
+                className="px-2 py-1 bg-surface-raised border border-strong rounded-lg text-xs text-prose focus:outline-none focus:ring-1 focus:ring-accent-hover"
+              />
+              {scheduled && (
+                <button
+                  type="button"
+                  onClick={() => setScheduled(null)}
+                  className="text-xs text-prose-faint hover:text-prose"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
 
             {/* Char counter + actions */}
             <div className="flex items-center justify-between">

@@ -18,7 +18,7 @@ interface Variant { content: string }
 
 interface RepurposeResult {
   article: { title: string; body_html: string; x_html: string; dropped: DroppedTag[] }
-  thread:  { title: string; tweets: string[] }
+  thread:  { title: string; posts: string[] }
   posts:   string[]
 }
 
@@ -44,6 +44,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
   const [repLoading, setRepLoading]         = useState(false)
   const [repResult, setRepResult]           = useState<RepurposeResult | null>(null)
   const [repSaving, setRepSaving]           = useState<number | null>(null)
+  const [savingArticle, setSavingArticle]   = useState(false)
   const [copied, setCopied]                 = useState('')
 
   const sourceItems = sourceType === 'review' ? reviews : sourceType === 'guide' ? guides : []
@@ -108,6 +109,27 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
     setRepLoading(false)
     if (!res.ok) { setError(json.error ?? 'Repurpose failed'); return }
     setRepResult(json.repurpose ?? null)
+  }
+
+  async function saveArticle() {
+    if (!repResult) return
+    setSavingArticle(true)
+    setError('')
+    const res = await fetch('/api/social-articles', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title:        repResult.article.title || 'Untitled article',
+        body_html:    repResult.article.body_html,
+        source_type:  repSourceType,
+        source_id:    sourceId || undefined,
+        source_title: selectedItem?.title || undefined,
+      }),
+    })
+    const json = await res.json().catch(() => ({}))
+    setSavingArticle(false)
+    if (!res.ok || !json.article?.id) { setError(json.error ?? 'Save failed'); return }
+    router.push(`/dashboard/social/articles/${json.article.id}`)
   }
 
   async function savePost(index: number, content: string, sourceTitle: string) {
@@ -403,12 +425,21 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                       <section className="space-y-2">
                         <div className="flex items-center justify-between">
                           <p className="text-xs text-prose-muted uppercase tracking-widest font-medium">X Article</p>
-                          <button
-                            onClick={() => copyText('article', repResult.article.x_html)}
-                            className="text-xs bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose px-3 py-1 rounded-lg font-medium transition-colors"
-                          >
-                            {copied === 'article' ? 'Copied!' : 'Copy X-ready HTML'}
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={saveArticle}
+                              disabled={savingArticle}
+                              className="text-xs bg-accent hover:bg-accent-hover disabled:opacity-50 text-white px-3 py-1 rounded-lg font-medium transition-colors"
+                            >
+                              {savingArticle ? 'Saving…' : 'Save as article'}
+                            </button>
+                            <button
+                              onClick={() => copyText('article', repResult.article.x_html)}
+                              className="text-xs bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose px-3 py-1 rounded-lg font-medium transition-colors"
+                            >
+                              {copied === 'article' ? 'Copied!' : 'Copy X-ready HTML'}
+                            </button>
+                          </div>
                         </div>
                         <XArticlePreview
                           html={repResult.article.x_html}
@@ -420,21 +451,21 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                       {/* Thread */}
                       <section className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <p className="text-xs text-prose-muted uppercase tracking-widest font-medium">Thread ({repResult.thread.tweets.length})</p>
+                          <p className="text-xs text-prose-muted uppercase tracking-widest font-medium">Thread ({repResult.thread.posts.length})</p>
                           <button
-                            onClick={() => copyText('thread', repResult.thread.tweets.map((t, i) => `${i + 1}/${repResult.thread.tweets.length} ${t}`).join('\n\n'))}
+                            onClick={() => copyText('thread', repResult.thread.posts.map((t, i) => `${i + 1}/${repResult.thread.posts.length} ${t}`).join('\n\n'))}
                             className="text-xs bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose px-3 py-1 rounded-lg font-medium transition-colors"
                           >
                             {copied === 'thread' ? 'Copied!' : 'Copy thread'}
                           </button>
                         </div>
                         <div className="space-y-2">
-                          {repResult.thread.tweets.map((t, i) => {
+                          {repResult.thread.posts.map((t, i) => {
                             const over = t.length > X_LIMIT
                             return (
                               <div key={i} className="bg-surface border border-strong rounded-lg p-3">
                                 <p className="text-sm text-prose whitespace-pre-wrap leading-relaxed">
-                                  <span className="text-prose-faint tabular-nums">{i + 1}/{repResult.thread.tweets.length}</span> {t}
+                                  <span className="text-prose-faint tabular-nums">{i + 1}/{repResult.thread.posts.length}</span> {t}
                                 </p>
                                 <span className={`text-[11px] tabular-nums ${over ? 'text-danger-ink' : 'text-prose-faint'}`}>{t.length} / {X_LIMIT}</span>
                               </div>

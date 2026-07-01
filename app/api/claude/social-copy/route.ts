@@ -1,11 +1,12 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { createClient, getUserSafe } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
 import { createStructured } from '@/lib/claude/structured'
 import { checkRateLimit } from '@/lib/rate-limit'
-import { OCCASIONS } from '@/lib/gift-occasions'
+import { PLATFORM_IDS, type SocialPlatform } from '@/lib/social-platforms'
+import { requireSocialActor, fetchGenSource } from '@/lib/social/generate'
 import { z } from 'zod'
 
 export const maxDuration = 45
@@ -35,15 +36,15 @@ const POSTS_TOOL: Anthropic.Tool = {
 const Schema = z.object({
   content_type: z.enum(['guide', 'review', 'collection']),
   content_id:   z.string().uuid(),
-  // Platforms to generate for
-  platforms:    z.array(z.enum(['twitter', 'instagram', 'facebook', 'linkedin', 'threads'])).min(1).max(5),
+  // Platforms to generate for — the canonical X-Studio vocabulary ('x', not 'twitter').
+  platforms:    z.array(z.enum(PLATFORM_IDS as [SocialPlatform, ...SocialPlatform[]])).min(1).max(4),
   // Optional: if user wants to nudge the angle
   instruction:  z.string().max(500).optional().nullable(),
 })
 
-const PLATFORM_SPEC: Record<string, { label: string; rules: string }> = {
-  twitter: {
-    label: 'Twitter/X',
+const PLATFORM_SPEC: Record<SocialPlatform, { label: string; rules: string }> = {
+  x: {
+    label: 'X',
     rules: '280 char hard limit including hashtags. Open with a hook in the first line. End with a one-line CTA.',
   },
   instagram: {
@@ -52,15 +53,11 @@ const PLATFORM_SPEC: Record<string, { label: string; rules: string }> = {
   },
   facebook: {
     label: 'Facebook',
-    rules: 'Conversational, 2–4 sentences. Slightly longer than Twitter. End with a question to drive engagement.',
-  },
-  linkedin: {
-    label: 'LinkedIn',
-    rules: 'More professional but still personal. 3–5 short paragraphs. Lead with a takeaway insight, not the product.',
+    rules: 'Conversational, 2–4 sentences. Slightly longer than an X post. End with a question to drive engagement.',
   },
   threads: {
     label: 'Threads',
-    rules: '1–2 short paragraphs. Conversational, like Twitter but with more breathing room. 500 char comfortable max.',
+    rules: '1–2 short paragraphs. Conversational, like X but with more breathing room. 500 char comfortable max.',
   },
 }
 
@@ -70,27 +67,12 @@ interface SocialDraft {
   hashtags: string[]
 }
 
-// Public URL segment per collection type — mirrors getPublicPath() in
-// CollectionWorkspace.tsx and the revalidate mapping in the picks PATCH route.
-function collectionPublicPath(type: string | null, slug: string, occasion: string | null): string {
-  if (type === 'gift_guide') {
-    const occ = OCCASIONS.find((o) => o.value === occasion)
-    return occ ? `/gifts/${occ.slug}` : `/picks/${slug}`
-  }
-  if (type === 'comparison') return `/comparisons/${slug}`
-  if (type === 'stack')      return `/stacks/${slug}`
-  return `/picks/${slug}` // general, best_of
-}
-
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
-  const { user } = await getUserSafe(supabase)
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['admin', 'author'].includes(profile.role)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  // Embedded in the review/guide/collection workspaces → admins AND authors.
+  const actor = await requireSocialActor(supabase, { authorsAllowed: true })
+  if (actor.error) return actor.error
+  const user = actor.user
 
   const { success } = await checkRateLimit(`social-copy:${user.id}`, 'claude-aux')
   if (!success) return NextResponse.json({ error: 'Rate limit exceeded — try again shortly.' }, { status: 429 })
@@ -103,30 +85,8 @@ export async function POST(request: NextRequest) {
 
   const { content_type, content_id, platforms, instruction } = parsed.data
 
-  // Fetch the source content. Collections alias description→excerpt and
-  // intro_html→content so the downstream prompt code stays content-type-agnostic.
-  const admin = createAdminClient()
-  const table = content_type === 'review' ? 'reviews' : content_type === 'collection' ? 'collections' : 'guides'
-  const fields =
-    content_type === 'review'
-      ? 'title, product_name, category, excerpt, content, rating, slug'
-      : content_type === 'collection'
-      ? 'title, excerpt:description, content:intro_html, slug, collection_type, occasion'
-      : 'title, category, excerpt, content, slug'
-
-  const { data: source } = await admin.from(table).select(fields).eq('id', content_id).single()
-  if (!source) return NextResponse.json({ error: 'Content not found' }, { status: 404 })
-
-  const src = source as unknown as Record<string, string | number | null>
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
-  const url = content_type === 'collection'
-    ? `${siteUrl}${collectionPublicPath(src.collection_type as string | null, String(src.slug ?? ''), src.occasion as string | null)}`
-    : `${siteUrl}/${content_type}s/${src.slug}`
-
-  // Strip HTML for the prompt
-  const plainContent = typeof src.content === 'string'
-    ? src.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
-    : ''
+  const src = await fetchGenSource(content_type, content_id)
+  if (!src) return NextResponse.json({ error: 'Content not found' }, { status: 404 })
 
   const platformBlocks = platforms.map((p) => {
     const spec = PLATFORM_SPEC[p]
@@ -137,27 +97,27 @@ export async function POST(request: NextRequest) {
     content_type === 'review'
       ? `Source review:
 Title: ${src.title}
-Product: ${src.product_name}
-Category: ${src.category}
-Rating: ${src.rating}/10
-URL: ${url}
+Product: ${src.productName ?? ''}
+Category: ${src.category ?? ''}
+Rating: ${src.rating ?? ''}/10
+URL: ${src.url}
 Excerpt: ${src.excerpt ?? '(none)'}
 
-Body (truncated): ${plainContent.slice(0, 1500)}`
+Body (truncated): ${src.bodyText.slice(0, 1500)}`
       : content_type === 'collection'
       ? `Source collection (a curated roundup of gear):
 Title: ${src.title}
-URL: ${url}
+URL: ${src.url}
 Summary: ${src.excerpt ?? '(none)'}
 
-Intro (truncated): ${plainContent.slice(0, 1500)}`
+Intro (truncated): ${src.bodyText.slice(0, 1500)}`
       : `Source article:
 Title: ${src.title}
-Category: ${src.category}
-URL: ${url}
+Category: ${src.category ?? ''}
+URL: ${src.url}
 Excerpt: ${src.excerpt ?? '(none)'}
 
-Body (truncated): ${plainContent.slice(0, 1500)}`
+Body (truncated): ${src.bodyText.slice(0, 1500)}`
 
   const userInstruction = instruction?.trim()
     ? `\n\nUser nudge: ${instruction}`
@@ -169,7 +129,7 @@ Generate native social media copy for the following platforms.${userInstruction}
 
 ${platformBlocks}
 
-Each platform's post should feel native to that platform, not a copy-paste. Return your result by calling the submit_social_posts tool, with one entry per requested platform in the same order. Each entry: platform (e.g. "twitter"), body (the post text, may span lines), and hashtags (relevant tags for that platform — Instagram needs more, Twitter needs fewer, LinkedIn often none).
+Each platform's post should feel native to that platform, not a copy-paste. Return your result by calling the submit_social_posts tool, with one entry per requested platform in the same order. Each entry: platform (e.g. "x"), body (the post text, may span lines), and hashtags (relevant tags for that platform — Instagram needs more, X needs fewer).
 
 Body should NOT include the hashtags themselves; we list them separately. Always include the URL exactly once at the end of the body.`
 
@@ -197,28 +157,39 @@ Body should NOT include the hashtags themselves; we list them separately. Always
     return NextResponse.json({ error: 'No posts returned' }, { status: 502 })
   }
 
-  // platform check uses 'x' internally; route accepts 'twitter' for backwards compat
-  const PLATFORM_MAP: Record<string, string> = { twitter: 'x' }
-  const DB_PLATFORMS = ['x', 'instagram', 'threads', 'facebook']
-
   const rows = drafts
-    .filter((d) => d.platform && d.body && platforms.includes(d.platform as typeof platforms[number]))
+    .filter((d) => d.platform && d.body && (PLATFORM_IDS as string[]).includes(d.platform) && platforms.includes(d.platform as SocialPlatform))
     .map((d) => {
-      const platform = PLATFORM_MAP[d.platform] ?? d.platform
       const tags: string[] = Array.isArray(d.hashtags) ? d.hashtags.slice(0, 30).map(String) : []
       const content = tags.length > 0 ? `${d.body}\n\n${tags.join(' ')}` : d.body
-      return { platform, content, source_type: content_type, source_id: content_id, user_id: user.id, status: 'draft' as const }
+      return { platform: d.platform, content, source_type: content_type, source_id: content_id, user_id: user.id, status: 'draft' as const }
     })
-    .filter((r) => DB_PLATFORMS.includes(r.platform))
 
   if (rows.length === 0) {
     return NextResponse.json({ error: 'No valid posts returned' }, { status: 502 })
   }
 
-  const { data: saved, error: dbError } = await admin
+  const admin = createAdminClient()
+
+  // Overwrite semantics: the embedded panel promises "regenerating replaces the
+  // selected platforms". social_posts is insert-only, so we clear this content's
+  // existing posts for the platforms we just regenerated before inserting the
+  // fresh ones — keeps one row per (content, platform) and avoids duplicate pileup.
+  const regenPlatforms = [...new Set(rows.map((r) => r.platform))]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (admin as any)
+    .from('social_posts')
+    .delete()
+    .eq('user_id', user.id)
+    .eq('source_type', content_type)
+    .eq('source_id', content_id)
+    .in('platform', regenPlatforms)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: saved, error: dbError } = await (admin as any)
     .from('social_posts')
     .insert(rows)
-    .select('platform, content, status')
+    .select('id, platform, content, status, source_type, source_id')
 
   if (dbError) {
     console.error('social-copy save error:', dbError)

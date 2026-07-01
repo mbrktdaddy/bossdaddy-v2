@@ -1,57 +1,51 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { PLATFORM_IDS } from '@/lib/social-platforms'
+import { serializeForX } from '@/lib/x/serialize'
 import { requireSocialActor } from '@/lib/social/generate'
 import { z } from 'zod'
 
-const SELECT = 'id, platform, content, status, source_type, source_id, source_title, link_url, image_url, notes, scheduled_at, posted_at, created_at, updated_at'
+// X Studio Phase 5 — persistence for long-form X Articles (social_articles).
+// Owner-scoped (Pattern B) tables; admin-only FEATURE gate via requireSocialActor.
+// body_html is generic HTML; the X-specific serializer runs on every write so the
+// stored dropped_tags report and the returned x_html preview stay in sync.
 
-// GET /api/social-posts?platform=x&status=draft&source_type=review&source_id=…
+const LIST_SELECT = 'id, title, cover_image_url, source_type, source_id, source_title, status, scheduled_at, external_url, posted_at, created_at, updated_at'
+const FULL_SELECT = 'id, title, body_html, cover_image_url, source_type, source_id, source_title, status, dropped_tags, scheduled_at, external_id, external_url, posted_via, posted_at, created_at, updated_at'
+
+// GET /api/social-articles?status=draft — list the user's articles (summary).
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
   const actor = await requireSocialActor(supabase)
   if (actor.error) return actor.error
   const user = actor.user
 
-  const { searchParams } = new URL(request.url)
-  const platform    = searchParams.get('platform')
-  const status      = searchParams.get('status')
-  const source_type = searchParams.get('source_type')
-  const source_id   = searchParams.get('source_id')
+  const status = new URL(request.url).searchParams.get('status')
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query = (admin as any)
-    .from('social_posts')
-    .select(SELECT)
+    .from('social_articles')
+    .select(LIST_SELECT)
     .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
-
-  if (platform)    query = query.eq('platform', platform)
-  if (status)      query = query.eq('status', status)
-  if (source_type) query = query.eq('source_type', source_type)
-  if (source_id)   query = query.eq('source_id', source_id)
+    .order('updated_at', { ascending: false })
+  if (status) query = query.eq('status', status)
 
   const { data, error: dbErr } = await query
   if (dbErr) return NextResponse.json({ error: dbErr.message }, { status: 500 })
-  return NextResponse.json({ posts: data ?? [] })
+  return NextResponse.json({ articles: data ?? [] })
 }
 
 const CreateSchema = z.object({
-  platform:     z.enum(PLATFORM_IDS as [string, ...string[]]),
-  content:      z.string().min(1).max(5000),
-  status:       z.enum(['draft', 'ready', 'posted']).optional().default('draft'),
+  title:        z.string().min(1).max(300),
+  body_html:    z.string().max(100_000).optional().default(''),
+  cover_image_url: z.string().url().optional().nullable(),
   source_type:  z.enum(['review', 'guide', 'original', 'collection']).optional(),
   source_id:    z.string().uuid().optional(),
   source_title: z.string().max(300).optional(),
-  link_url:     z.string().url().optional().nullable(),
-  image_url:    z.string().url().optional().nullable(),
-  notes:        z.string().max(500).optional(),
-  scheduled_at: z.string().datetime({ offset: true }).optional().nullable(),
 })
 
-// POST /api/social-posts — save a generated post
+// POST /api/social-articles — create a draft article.
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const actor = await requireSocialActor(supabase)
@@ -62,14 +56,16 @@ export async function POST(request: NextRequest) {
   const parsed = CreateSchema.safeParse(body)
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
+  const { html: x_html, dropped } = serializeForX(parsed.data.body_html)
+
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error: dbErr } = await (admin as any)
-    .from('social_posts')
-    .insert({ ...parsed.data, user_id: user.id })
-    .select(SELECT)
+    .from('social_articles')
+    .insert({ ...parsed.data, user_id: user.id, status: 'draft', dropped_tags: dropped })
+    .select(FULL_SELECT)
     .single()
 
   if (dbErr) return NextResponse.json({ error: dbErr.message }, { status: 500 })
-  return NextResponse.json({ post: data }, { status: 201 })
+  return NextResponse.json({ article: data, x_html, dropped }, { status: 201 })
 }

@@ -1,13 +1,13 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
 import { MODEL, OPUS_MODEL } from '@/lib/claude/client'
 import { createStructured } from '@/lib/claude/structured'
 import { serializeForX } from '@/lib/x/serialize'
 import { getPlatform } from '@/lib/social-platforms'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { requireSocialActor, fetchGenSource } from '@/lib/social/generate'
 import { z } from 'zod'
 
 // X Studio Phase 3 — repurpose a published review/guide into X content.
@@ -39,10 +39,10 @@ const REPURPOSE_TOOL: Anthropic.Tool = {
       thread: {
         type: 'object',
         properties: {
-          title:  { type: 'string' },
-          tweets: { type: 'array', items: { type: 'string' } },
+          title: { type: 'string' },
+          posts: { type: 'array', items: { type: 'string' } },
         },
-        required: ['title', 'tweets'],
+        required: ['title', 'posts'],
       },
       posts: { type: 'array', items: { type: 'string' } },
     },
@@ -62,12 +62,9 @@ const RepurposeInput = z.object({
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
-  const { user } = await getUserSafe(supabase)
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  // X Studio is admin-only as a FEATURE (RLS stays owner-scoped as defense-in-depth).
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const actor = await requireSocialActor(supabase) // admin-only feature gate
+  if (actor.error) return actor.error
+  const user = actor.user
 
   // Operator-approved 10/hr draft cap — do not raise without approval.
   const { success, remaining, reset } = await checkRateLimit(`draft:${user.id}`)
@@ -84,39 +81,25 @@ export async function POST(request: NextRequest) {
 
   const { source_type, source_id, instruction, model } = parsed.data
 
-  // Fetch the source via the service-role client (admin support path).
-  const admin = createAdminClient()
-  const table  = source_type === 'review' ? 'reviews' : 'guides'
-  const fields = source_type === 'review'
-    ? 'title, product_name, category, excerpt, content, rating, slug'
-    : 'title, category, excerpt, content, slug'
+  const src = await fetchGenSource(source_type, source_id)
+  if (!src) return NextResponse.json({ error: 'Source content not found' }, { status: 404 })
 
-  const { data: source } = await admin.from(table).select(fields).eq('id', source_id).single()
-  if (!source) return NextResponse.json({ error: 'Source content not found' }, { status: 404 })
-
-  const src = source as unknown as Record<string, string | number | null>
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
-  const url = `${siteUrl}/${source_type}s/${src.slug}`
-
-  // Strip HTML to plain text for the prompt; cap so a long article doesn't blow
-  // the input budget.
-  const plainContent = typeof src.content === 'string'
-    ? src.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 4000)
-    : ''
+  // Cap so a long article doesn't blow the input budget.
+  const plainContent = src.bodyText.slice(0, 4000)
 
   const sourceBlock = source_type === 'review'
     ? `Source review:
 Title: ${src.title}
-Product: ${src.product_name ?? ''}
+Product: ${src.productName ?? ''}
 Category: ${src.category ?? ''}
 Rating: ${src.rating ?? ''}/10
-URL: ${url}
+URL: ${src.url}
 Excerpt: ${src.excerpt ?? ''}
 Content: ${plainContent}`
     : `Source guide:
 Title: ${src.title}
 Category: ${src.category ?? ''}
-URL: ${url}
+URL: ${src.url}
 Excerpt: ${src.excerpt ?? ''}
 Content: ${plainContent}`
 
@@ -128,11 +111,11 @@ Return all three via the submit_repurpose tool:
 
 1) article — a long-form X Article.
    - title: punchy, no clickbait, ≤ 80 chars.
-   - body_html: 400–700 words of SIMPLE HTML. Allowed tags ONLY: <p>, <h2>, <ul>/<ol>/<li>, <blockquote>, <strong>, <em>, <a href="...">. NO tables, images, <div>, classes, or inline styles (X strips them). First-person dad voice. Link back to the source once with a single <a href="${url}">. Do NOT use [[BUY:...]] tokens or raw product URLs.
+   - body_html: 400–700 words of SIMPLE HTML. Allowed tags ONLY: <p>, <h2>, <ul>/<ol>/<li>, <blockquote>, <strong>, <em>, <a href="...">. NO tables, images, <div>, classes, or inline styles (X strips them). First-person dad voice. Link back to the source once with a single <a href="${src.url}">. Do NOT use [[BUY:...]] tokens or raw product URLs.
 
 2) thread — an X thread.
    - title: a short internal label (not posted).
-   - tweets: 4–7 tweets, each ≤ ${X_CHAR_LIMIT} characters. Tweet 1 is a scroll-stopping hook. Do NOT number the tweets — the UI adds 1/n. At most one hashtag total, only if natural. No em-dashes.
+   - posts: 4–7 posts, each ≤ ${X_CHAR_LIMIT} characters. Post 1 is a scroll-stopping hook. Do NOT number the posts — the UI adds 1/n. At most one hashtag total, only if natural. No em-dashes.
 
 3) posts — 3 standalone X posts, each ≤ ${X_CHAR_LIMIT} characters, each a DIFFERENT angle (practical tip / bold take / honest question). Hook-first. No em-dashes, no hashtag spam.
 
@@ -175,7 +158,7 @@ Never use "game-changer", "must-have", "revolutionary", or "life-changing". No c
   if (!data) return NextResponse.json({ error: 'AI returned an unexpected format — please try again.' }, { status: 502 })
 
   const article = data.article as { title?: string; body_html?: string } | undefined
-  const thread  = data.thread  as { title?: string; tweets?: string[] } | undefined
+  const thread  = data.thread  as { title?: string; posts?: string[] } | undefined
   const posts   = Array.isArray(data.posts) ? (data.posts as string[]) : []
 
   // Run the article through the X-safe serializer (Phase 2) so the workspace can
@@ -191,12 +174,12 @@ Never use "game-changer", "must-have", "revolutionary", or "life-changing". No c
         dropped,
       },
       thread: {
-        title:  thread?.title ?? '',
-        tweets: Array.isArray(thread?.tweets) ? thread!.tweets : [],
+        title: thread?.title ?? '',
+        posts: Array.isArray(thread?.posts) ? thread!.posts : [],
       },
       posts,
     },
-    source_title: (src.title as string) ?? '',
+    source_title: src.title,
     remaining,
   })
 }

@@ -23,13 +23,17 @@ interface Props {
   readinessChecks?: ReadinessCheck[]
   previewOpen?: boolean
   onTogglePreview?: () => void
+  /** Override the publish/unpublish button labels (e.g. X Studio articles, which
+   *  don't "go live" on our site — they get marked ready to post to X). */
+  publishLabel?: string
+  unpublishLabel?: string
 }
 
 export function WorkspaceToolbar({
   isSaving, isPublishing, isDeleting, isPublished,
   onSave, onPublish, onUnpublish, onDelete, onDuplicate,
   previewUrl, canPublish = true, publishBlockedReason, readinessChecks,
-  previewOpen, onTogglePreview,
+  previewOpen, onTogglePreview, publishLabel, unpublishLabel,
 }: Props) {
   const readyCount  = readinessChecks?.filter((c) => c.done).length ?? 0
   const readyTotal  = readinessChecks?.length ?? 0
@@ -134,7 +138,7 @@ export function WorkspaceToolbar({
             disabled={isPublishing}
             className="px-4 py-3 bg-amber-50 hover:bg-amber-50 disabled:opacity-50 text-amber-700 text-sm font-semibold rounded-lg transition-colors border border-amber-300"
           >
-            {isPublishing ? '…' : 'Unpublish'}
+            {isPublishing ? '…' : (unpublishLabel ?? 'Unpublish')}
           </button>
         )}
         {!isPublished && (
@@ -145,7 +149,7 @@ export function WorkspaceToolbar({
             title={!canPublish ? (publishBlockedReason ?? undefined) : undefined}
             className="px-5 py-3 bg-green-700 hover:bg-green-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors"
           >
-            {isPublishing ? 'Publishing…' : '✓ Publish Live'}
+            {isPublishing ? 'Publishing…' : (publishLabel ?? '✓ Publish Live')}
           </button>
         )}
       </div>
