@@ -1,7 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { Json } from '@/lib/supabase/database.types'
 
-type ContentType = 'guide' | 'review'
+type ContentType = 'guide' | 'review' | 'collection'
 
 const MAX_REVISIONS_PER_ITEM = 50
 

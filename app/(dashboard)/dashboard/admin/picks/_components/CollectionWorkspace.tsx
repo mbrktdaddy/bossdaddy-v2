@@ -10,6 +10,8 @@ import { HeroImagePanel } from '@/components/workspace/HeroImagePanel'
 import { TiptapEditor } from '@/components/workspace/TiptapEditor'
 import { SchedulePanel } from '@/components/workspace/SchedulePanel'
 import { SEOPanel } from '@/components/workspace/SEOPanel'
+import { SocialPostsPanel } from '@/components/workspace/SocialPostsPanel'
+import { VersionHistoryPanel } from '@/components/workspace/VersionHistoryPanel'
 import { useCollectionWorkspace } from '@/components/workspace/useCollectionWorkspace'
 
 // InlineMediaPanel is heavy + drags in image upload UI — load lazy.
@@ -1086,6 +1088,17 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
             })}
           </div>
         )}
+      </div>
+
+      {/* Social posts — generate native X/social copy from this collection. */}
+      <div className="pt-6 border-t border-soft">
+        <SocialPostsPanel contentType="collection" contentId={pick.id} />
+      </div>
+
+      {/* ── ADMIN ────────────────────────────────────────────────────── */}
+      <div className="pt-6 border-t border-soft">
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Admin</p>
+        <VersionHistoryPanel contentType="collection" contentId={pick.id} />
       </div>
     </WorkspaceShell>
   )

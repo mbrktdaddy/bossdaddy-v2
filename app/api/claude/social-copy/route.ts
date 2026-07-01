@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
 import { createStructured } from '@/lib/claude/structured'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { OCCASIONS } from '@/lib/gift-occasions'
 import { z } from 'zod'
 
 export const maxDuration = 45
@@ -32,7 +33,7 @@ const POSTS_TOOL: Anthropic.Tool = {
 }
 
 const Schema = z.object({
-  content_type: z.enum(['guide', 'review']),
+  content_type: z.enum(['guide', 'review', 'collection']),
   content_id:   z.string().uuid(),
   // Platforms to generate for
   platforms:    z.array(z.enum(['twitter', 'instagram', 'facebook', 'linkedin', 'threads'])).min(1).max(5),
@@ -69,6 +70,18 @@ interface SocialDraft {
   hashtags: string[]
 }
 
+// Public URL segment per collection type — mirrors getPublicPath() in
+// CollectionWorkspace.tsx and the revalidate mapping in the picks PATCH route.
+function collectionPublicPath(type: string | null, slug: string, occasion: string | null): string {
+  if (type === 'gift_guide') {
+    const occ = OCCASIONS.find((o) => o.value === occasion)
+    return occ ? `/gifts/${occ.slug}` : `/picks/${slug}`
+  }
+  if (type === 'comparison') return `/comparisons/${slug}`
+  if (type === 'stack')      return `/stacks/${slug}`
+  return `/picks/${slug}` // general, best_of
+}
+
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
@@ -90,19 +103,25 @@ export async function POST(request: NextRequest) {
 
   const { content_type, content_id, platforms, instruction } = parsed.data
 
-  // Fetch the source content
+  // Fetch the source content. Collections alias description→excerpt and
+  // intro_html→content so the downstream prompt code stays content-type-agnostic.
   const admin = createAdminClient()
-  const table = content_type === 'review' ? 'reviews' : 'guides'
-  const fields = content_type === 'review'
-    ? 'title, product_name, category, excerpt, content, rating, slug'
-    : 'title, category, excerpt, content, slug'
+  const table = content_type === 'review' ? 'reviews' : content_type === 'collection' ? 'collections' : 'guides'
+  const fields =
+    content_type === 'review'
+      ? 'title, product_name, category, excerpt, content, rating, slug'
+      : content_type === 'collection'
+      ? 'title, excerpt:description, content:intro_html, slug, collection_type, occasion'
+      : 'title, category, excerpt, content, slug'
 
   const { data: source } = await admin.from(table).select(fields).eq('id', content_id).single()
   if (!source) return NextResponse.json({ error: 'Content not found' }, { status: 404 })
 
   const src = source as unknown as Record<string, string | number | null>
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
-  const url = `${siteUrl}/${content_type}s/${src.slug}`
+  const url = content_type === 'collection'
+    ? `${siteUrl}${collectionPublicPath(src.collection_type as string | null, String(src.slug ?? ''), src.occasion as string | null)}`
+    : `${siteUrl}/${content_type}s/${src.slug}`
 
   // Strip HTML for the prompt
   const plainContent = typeof src.content === 'string'
@@ -114,8 +133,9 @@ export async function POST(request: NextRequest) {
     return `### ${spec.label} (${p})\nRules: ${spec.rules}`
   }).join('\n\n')
 
-  const sourceBlock = content_type === 'review'
-    ? `Source review:
+  const sourceBlock =
+    content_type === 'review'
+      ? `Source review:
 Title: ${src.title}
 Product: ${src.product_name}
 Category: ${src.category}
@@ -124,7 +144,14 @@ URL: ${url}
 Excerpt: ${src.excerpt ?? '(none)'}
 
 Body (truncated): ${plainContent.slice(0, 1500)}`
-    : `Source article:
+      : content_type === 'collection'
+      ? `Source collection (a curated roundup of gear):
+Title: ${src.title}
+URL: ${url}
+Summary: ${src.excerpt ?? '(none)'}
+
+Intro (truncated): ${plainContent.slice(0, 1500)}`
+      : `Source article:
 Title: ${src.title}
 Category: ${src.category}
 URL: ${url}

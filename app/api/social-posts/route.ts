@@ -44,7 +44,7 @@ const CreateSchema = z.object({
   platform:     z.enum(PLATFORM_IDS as [string, ...string[]]),
   content:      z.string().min(1).max(5000),
   status:       z.enum(['draft', 'ready', 'posted']).optional().default('draft'),
-  source_type:  z.enum(['review', 'guide', 'original']).optional(),
+  source_type:  z.enum(['review', 'guide', 'original', 'collection']).optional(),
   source_id:    z.string().uuid().optional(),
   source_title: z.string().max(300).optional(),
   link_url:     z.string().url().optional().nullable(),

@@ -8,7 +8,7 @@ export const maxDuration = 60
 
 const GenerateSchema = z.object({
   platform:     z.enum(PLATFORM_IDS as [string, ...string[]]),
-  source_type:  z.enum(['review', 'guide', 'original']),
+  source_type:  z.enum(['review', 'guide', 'original', 'collection']),
   source_id:    z.string().uuid().optional(),
   source_title: z.string().max(300).optional(),
   topic:        z.string().max(500).optional(),

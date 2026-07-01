@@ -12,7 +12,7 @@ interface SocialPost {
 }
 
 interface Props {
-  contentType: 'guide' | 'review'
+  contentType: 'guide' | 'review' | 'collection'
   contentId: string
 }
 

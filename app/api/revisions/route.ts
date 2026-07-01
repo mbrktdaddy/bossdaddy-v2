@@ -5,12 +5,12 @@ import { snapshotRevision } from '@/lib/revisions'
 import { z } from 'zod'
 
 const ListSchema = z.object({
-  content_type: z.enum(['guide', 'review']),
+  content_type: z.enum(['guide', 'review', 'collection']),
   content_id:   z.string().uuid(),
 })
 
 const RevertSchema = z.object({
-  content_type: z.enum(['guide', 'review']),
+  content_type: z.enum(['guide', 'review', 'collection']),
   content_id:   z.string().uuid(),
   revision_id:  z.string().uuid(),
 })
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
   if (!revision) return NextResponse.json({ error: 'Revision not found' }, { status: 404 })
 
-  const table = content_type === 'guide' ? 'guides' : 'reviews'
+  const table = content_type === 'guide' ? 'guides' : content_type === 'collection' ? 'collections' : 'reviews'
 
   // Snapshot current state FIRST so revert itself creates a restore point
   const { data: currentState } = await admin.from(table).select('*').eq('id', content_id).single()
@@ -78,10 +78,17 @@ export async function POST(request: NextRequest) {
     await snapshotRevision(content_type, content_id, currentState as Record<string, unknown>, user.id)
   }
 
-  // Build update payload from snapshot — only fields the user would edit
+  // Build update payload from snapshot — only fields the user would edit.
+  // Collections: metadata only — collection_items live in a separate table and
+  // are NOT part of the snapshot, so reverting restores the collection row's
+  // editorial fields but leaves the current item list untouched. slug/is_visible/
+  // collection_type are deliberately excluded (structural / publish state).
   const snap = revision.snapshot as Record<string, unknown>
   const editableFields = content_type === 'guide'
     ? ['title', 'category', 'excerpt', 'content', 'image_url', 'meta_title', 'meta_description']
+    : content_type === 'collection'
+    ? ['title', 'description', 'intro_html', 'hero_image_url', 'occasion', 'winner_summary',
+       'bundle_total_cents', 'methodology_html', 'faqs', 'meta_title', 'meta_description']
     : ['title', 'product_name', 'category', 'excerpt', 'content', 'image_url', 'rating', 'pros', 'cons',
        'disclosure_acknowledged', 'meta_title', 'meta_description']
 

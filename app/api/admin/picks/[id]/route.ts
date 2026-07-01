@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/auth-cache'
 import { OCCASIONS } from '@/lib/gift-occasions'
 import { sanitizeHtml } from '@/lib/sanitize'
+import { snapshotRevision } from '@/lib/revisions'
 import { CollectionUpdateSchema } from '@/lib/collections/schema'
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -66,17 +67,27 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   }
 
   if (Object.keys(meta).length > 0) {
+    // Snapshot the PREVIOUS row for version history (mirrors reviews/guides).
+    // collection_items are NOT captured — revert restores metadata only.
+    const { data: currentCollection } = await admin.from('collections').select('*').eq('id', id).single()
+
     const payload: Record<string, unknown> = { ...meta }
     // User-authored HTML — sanitize before it's ever rendered raw on public pages.
     if (typeof payload.intro_html === 'string') payload.intro_html = sanitizeHtml(payload.intro_html)
     if (typeof payload.methodology_html === 'string') payload.methodology_html = sanitizeHtml(payload.methodology_html)
-    if (meta.is_visible && !meta.published_at) {
-      const { data: existing } = await admin.from('collections').select('published_at').eq('id', id).single()
-      if (!existing?.published_at) payload.published_at = new Date().toISOString()
+    if (meta.is_visible && !meta.published_at && !currentCollection?.published_at) {
+      payload.published_at = new Date().toISOString()
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await admin.from('collections').update(payload as any).eq('id', id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // Fire-and-forget; don't block the response on the snapshot write.
+    if (currentCollection) {
+      snapshotRevision('collection', id, currentCollection as Record<string, unknown>, gate.user.id).catch((err) =>
+        console.error('Collection revision snapshot failed:', err)
+      )
+    }
   }
 
   if (items !== undefined) {
