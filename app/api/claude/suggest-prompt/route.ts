@@ -8,7 +8,9 @@ import { z } from 'zod'
 export const maxDuration = 30
 
 const Input = z.object({
-  description: z.string().min(2).max(300),
+  // Rough idea seed. Kept generous so creators can paste a short paragraph
+  // (a memory, an anecdote) — not just a one-line topic — without a cryptic 400.
+  description: z.string().min(2).max(1500),
   type: z.enum(['guide', 'review']),
 })
 
@@ -71,7 +73,13 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null)
   const parsed = Input.safeParse(body)
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
+    const tooLong = parsed.error.issues.some(
+      (i) => i.path[0] === 'description' && i.code === 'too_big',
+    )
+    const error = tooLong
+      ? 'That idea is too long for the angle suggester — keep it under 1500 characters, or paste the full story into the brief below and skip Suggest.'
+      : 'Invalid input'
+    return NextResponse.json({ error }, { status: 400 })
   }
 
   const { description, type } = parsed.data
