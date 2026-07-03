@@ -64,6 +64,16 @@ export const metadata: Metadata = {
     // renders no card. Per-page metadata sets its own twitter.images.
     images: [defaultOgImage],
   },
+  // Opt into large image thumbnails + untruncated snippets in Google results
+  // (Search + Discover). Pages that need to stay out of the index (bench, search,
+  // empty tag pages) override `robots` themselves.
+  robots: {
+    index: true,
+    follow: true,
+    'max-image-preview': 'large',
+    'max-snippet': -1,
+    'max-video-preview': -1,
+  },
   ...(Object.keys(socialVerification).length ? { verification: { other: socialVerification } } : {}),
   alternates: {
     types: {
