@@ -43,11 +43,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .single()
   if (!data) return { title: 'Not Found' }
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
-  const metaTitle       = data.meta_title       ?? `The ${data.title} Stack — Dad-Tested Kit`
+  const metaTitle       = data.meta_title       ?? `The ${data.title} Stack — Dad-Tested Kit | Boss Daddy`
   const metaDescription = data.meta_description ?? data.description ?? 'A curated kit-for-purpose from Boss Daddy.'
   const ogImage = ogImageMeta({ title: metaTitle, type: 'guide', updatedAt: data.updated_at, base: siteUrl, cta: 'See the Stack', image: toAbsoluteUrl(data.hero_image_url, siteUrl) })
   return {
-    title:       metaTitle,
+    // Absolute — metaTitle is the complete title; the root '%s | Boss Daddy'
+    // template would otherwise double the brand.
+    title:       { absolute: metaTitle },
     description: metaDescription,
     alternates:  { canonical: `${siteUrl}/stacks/${slug}` },
     openGraph:   {

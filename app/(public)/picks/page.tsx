@@ -10,7 +10,8 @@ import BenchStrip from '@/components/BenchStrip'
 export const revalidate = 60
 
 export const metadata: Metadata = {
-  title: 'Boss Daddy Picks — Curated Gear Lists',
+  // Absolute — brand already in the title; avoids the template double-branding.
+  title: { absolute: 'Boss Daddy Picks — Curated Gear Lists' },
   description: 'Dad-tested gift guides and curated gear lists. Every pick is personally bought, tested, and recommended by Boss Daddy.',
   alternates: { canonical: '/picks' },
   openGraph: {

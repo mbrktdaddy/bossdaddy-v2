@@ -23,7 +23,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? `${siteUrl}${data.image_url ?? data.default_image_url}`
     : ogImageUrl({ title: data.name, type: 'guide', base: siteUrl })
   return {
-    title: `${data.name} — Boss Daddy Life`,
+    // Absolute — the name-based title already carries the brand; avoids the
+    // template double-branding ("… — Boss Daddy Life | Boss Daddy").
+    title: { absolute: `${data.name} — Boss Daddy Life` },
     description: data.description ?? undefined,
     alternates: { canonical: `${siteUrl}/gear/${slug}` },
     openGraph: {

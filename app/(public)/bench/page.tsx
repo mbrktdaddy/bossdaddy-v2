@@ -9,7 +9,8 @@ import type { Metadata } from 'next'
 export const revalidate = 300
 
 export const metadata: Metadata = {
-  title: "On the Bench — Vote on What Boss Daddy Tests Next",
+  // Absolute — brand already in the title; avoids the template double-branding.
+  title: { absolute: "On the Bench — Vote on What Boss Daddy Tests Next" },
   description: "See what Boss Daddy is currently testing, what's coming next, and vote on what you want reviewed. Get notified when it goes live.",
   alternates: { canonical: '/bench' },
   openGraph: {

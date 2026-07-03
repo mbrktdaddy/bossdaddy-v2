@@ -20,7 +20,8 @@ import type { Metadata } from 'next'
 export const revalidate = 3600
 
 export const metadata: Metadata = {
-  title: "Boss Daddy's Gear — Field-Tested Picks",
+  // Absolute — brand already in the title; avoids the template double-branding.
+  title: { absolute: "Boss Daddy's Gear — Field-Tested Picks" },
   description: 'Every product Boss Daddy has personally bought, tested, and stands behind — sorted by rating. The only list where every pick is earned, not sponsored. Plus branded goods, made by a real dad.',
   openGraph: {
     ...OG_SITE,

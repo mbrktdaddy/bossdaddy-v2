@@ -10,7 +10,8 @@ import BenchStrip from '@/components/BenchStrip'
 export const revalidate = 60
 
 export const metadata: Metadata = {
-  title: 'Stacks — Dad-Tested Kits | Boss Daddy',
+  // Absolute — brand already in the title; avoids the template double-branding.
+  title: { absolute: 'Stacks — Dad-Tested Kits | Boss Daddy' },
   description: 'Curated kits for a goal. The full setup for newborn nights, weekend cookouts, garage builds, and more.',
   alternates: { canonical: '/stacks' },
   openGraph: {

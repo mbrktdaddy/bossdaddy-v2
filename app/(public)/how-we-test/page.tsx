@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { ogImageUrl, OG_SITE } from '@/lib/og'
 
 export const metadata: Metadata = {
- title: 'How We Test — Boss Daddy Life',
+ // Absolute — brand already in the title; avoids the template double-branding.
+ title: { absolute: 'How We Test — Boss Daddy Life' },
  description: 'Real products, real testing, real dads. Here\'s exactly how Boss Daddy Life reviews stuff and earns the Boss Daddy Approved designation.',
  alternates: { canonical: '/how-we-test' },
  openGraph: {

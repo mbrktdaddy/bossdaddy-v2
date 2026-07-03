@@ -9,7 +9,9 @@ import { EmailSignup } from '@/components/EmailSignup'
 export const revalidate = 3600
 
 export const metadata: Metadata = {
- title: 'About — Boss Daddy Life',
+ // Absolute — this title already carries the brand; the root '%s | Boss Daddy'
+ // template would otherwise double it.
+ title: { absolute: 'About — Boss Daddy Life' },
  description: 'The real story behind Boss Daddy Life. A first-time dad on a mission to be the best version of himself — and help other dads do the same.',
  alternates: { canonical: '/about' },
  openGraph: {

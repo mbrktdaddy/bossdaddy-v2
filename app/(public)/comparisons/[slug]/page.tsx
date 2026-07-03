@@ -44,11 +44,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .single()
   if (!data) return { title: 'Not Found' }
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
-  const metaTitle       = data.meta_title       ?? `${data.title} — Comparison`
+  const metaTitle       = data.meta_title       ?? `${data.title} — Comparison | Boss Daddy`
   const metaDescription = data.meta_description ?? data.description ?? 'Head-to-head comparison from Boss Daddy.'
   const ogImage = ogImageMeta({ title: metaTitle, type: 'guide', updatedAt: data.updated_at, base: siteUrl, cta: 'See the Comparison', image: toAbsoluteUrl(data.hero_image_url, siteUrl) })
   return {
-    title:       metaTitle,
+    // Absolute — metaTitle is the complete title; the root '%s | Boss Daddy'
+    // template would otherwise double the brand.
+    title:       { absolute: metaTitle },
     description: metaDescription,
     alternates:  { canonical: `${siteUrl}/comparisons/${slug}` },
     openGraph:   {

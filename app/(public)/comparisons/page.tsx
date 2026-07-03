@@ -10,7 +10,8 @@ import BenchStrip from '@/components/BenchStrip'
 export const revalidate = 60
 
 export const metadata: Metadata = {
-  title: 'Comparisons — Head-to-Head Reviews | Boss Daddy',
+  // Absolute — brand already in the title; avoids the template double-branding.
+  title: { absolute: 'Comparisons — Head-to-Head Reviews | Boss Daddy' },
   description: 'Dad-tested head-to-head matchups. Real products, real scores, one clear winner per dimension.',
   alternates: { canonical: '/comparisons' },
   openGraph: {

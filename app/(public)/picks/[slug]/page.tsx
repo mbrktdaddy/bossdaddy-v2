@@ -53,7 +53,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const metaDescription = data.meta_description ?? data.description ?? 'Dad-tested picks curated by Boss Daddy.'
   const ogImage = ogImageMeta({ title: metaTitle, type: 'guide', updatedAt: data.updated_at, base: siteUrl, cta: 'See the Picks', image: toAbsoluteUrl(data.hero_image_url, siteUrl) })
   return {
-    title:       metaTitle,
+    // Absolute — metaTitle is the complete title; the root '%s | Boss Daddy'
+    // template would otherwise double the brand ("… Boss Daddy Picks | Boss Daddy").
+    title:       { absolute: metaTitle },
     description: metaDescription,
     alternates:  { canonical: `${siteUrl}/picks/${slug}` },
     openGraph:   {
