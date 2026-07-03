@@ -1,10 +1,17 @@
 import type { Metadata } from 'next'
+import { buildSocialMetadata } from '@/lib/og'
 import Link from 'next/link'
 
-export const metadata: Metadata = {
- title: 'Editorial Standards — Boss Daddy Life',
- description: 'How reviews earn"Boss Daddy Approved," how we use AI, and the rules every contributor follows. No paid placements, no sponsored ratings.',
- alternates: { canonical: '/editorial-standards' },
+export function generateMetadata(): Metadata {
+ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+ return buildSocialMetadata({
+   title: 'Editorial Standards — Boss Daddy Life',
+   description: 'How reviews earn "Boss Daddy Approved," how we use AI, and the rules every contributor follows. No paid placements, no sponsored ratings.',
+   path: '/editorial-standards',
+   siteUrl,
+   type: 'site',
+   ogType: 'website',
+ })
 }
 
 const LAST_UPDATED = 'April 17, 2026'

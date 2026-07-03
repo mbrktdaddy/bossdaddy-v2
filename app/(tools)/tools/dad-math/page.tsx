@@ -9,7 +9,7 @@
 // Boss Daddy headline. No Plaid. No scenarios. No AI. No spouse send.
 
 import type { Metadata } from 'next'
-import { OG_SITE } from '@/lib/og'
+import { buildSocialMetadata } from '@/lib/og'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { getKids } from '@/lib/dad-tools/kid-actions'
 import { LABELS } from '@/lib/labels'
@@ -36,15 +36,17 @@ function parseKid(v: string | undefined): string | undefined {
   return v && UUID_RE.test(v) ? v : undefined
 }
 
-export const metadata: Metadata = {
-  title:       `${LABELS.tools.dadMath.pageTitle} (Beta)`,
-  description: LABELS.tools.dadMath.metaDescription,
-  alternates:  { canonical: '/tools/dad-math' },
-  openGraph: {
-    ...OG_SITE,
-    title:       LABELS.tools.dadMath.pageTitle,
+export function generateMetadata(): Metadata {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+  return buildSocialMetadata({
+    title:       `${LABELS.tools.dadMath.pageTitle} (Beta)`,
     description: LABELS.tools.dadMath.metaDescription,
-  },
+    path:        '/tools/dad-math',
+    siteUrl,
+    ogTitle:     LABELS.tools.dadMath.pageTitle,
+    type:        'site',
+    ogType:      'website',
+  })
 }
 
 export default async function DadMathPage({ searchParams }: PageProps) {

@@ -8,6 +8,7 @@
 // NextResponse (early exit) or null (pass through). Order matters — see
 // individual modules for the rationale on each step's position.
 import { type NextRequest } from 'next/server'
+import { checkCanonicalHost } from '@/lib/proxy/canonical-host'
 import { refreshSession } from '@/lib/proxy/session'
 import { checkModerationGate } from '@/lib/proxy/moderation'
 import { checkPublicLegacyRewrite } from '@/lib/proxy/rewrites'
@@ -16,6 +17,10 @@ import { checkAuthGuard } from '@/lib/proxy/auth-guard'
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  // 0. Canonical host (apex → www) — short-circuit before any DB/session work.
+  const canonical = checkCanonicalHost(request)
+  if (canonical) return canonical
 
   // 1. Refresh session — must run first so subsequent steps see the user.
   const { supabase, user, response } = await refreshSession(request)
