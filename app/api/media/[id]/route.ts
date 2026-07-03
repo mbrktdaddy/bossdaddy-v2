@@ -111,13 +111,16 @@ export async function DELETE(
 
   if (!confirm) {
     // Fast hero-ref check (exact match only — body refs can't be auto-fixed so don't block)
-    const [productRefs, articleRefs, reviewRefs] = await Promise.all([
+    const [productRefs, articleRefs, reviewRefs, socialPostRefs, socialArticleRefs] = await Promise.all([
       admin.from('products').select('id, name, slug', { count: 'exact' }).eq('image_url', asset.url),
       admin.from('guides').select('id, title, slug, status', { count: 'exact' }).eq('image_url', asset.url),
       admin.from('reviews').select('id, title, slug, status', { count: 'exact' }).eq('image_url', asset.url),
+      admin.from('social_posts').select('id', { count: 'exact' }).eq('image_url', asset.url),
+      admin.from('social_articles').select('id, title, slug', { count: 'exact' }).eq('cover_image_url', asset.url),
     ])
     const totalHeroRefs =
-      (productRefs.count ?? 0) + (articleRefs.count ?? 0) + (reviewRefs.count ?? 0)
+      (productRefs.count ?? 0) + (articleRefs.count ?? 0) + (reviewRefs.count ?? 0) +
+      (socialPostRefs.count ?? 0) + (socialArticleRefs.count ?? 0)
 
     if (totalHeroRefs > 0) {
       // Fetch body refs too so the UI can display a full picture
@@ -130,11 +133,13 @@ export async function DELETE(
       return NextResponse.json({
         error: 'Asset is referenced elsewhere. Re-send with ?confirm=true to cascade-clear and delete.',
         usage: {
-          products:       productRefs.data    ?? [],
-          guides_hero:  articleRefs.data    ?? [],
-          reviews_hero:   reviewRefs.data     ?? [],
-          articles_body:  articleBodyRefs.data ?? [],
-          reviews_body:   reviewBodyRefs.data  ?? [],
+          products:        productRefs.data       ?? [],
+          guides_hero:     articleRefs.data       ?? [],
+          reviews_hero:    reviewRefs.data         ?? [],
+          articles_body:   articleBodyRefs.data    ?? [],
+          reviews_body:    reviewBodyRefs.data     ?? [],
+          social_posts:    socialPostRefs.count    ?? 0,
+          social_articles: socialArticleRefs.data  ?? [],
         },
       }, { status: 409 })
     }
@@ -145,6 +150,8 @@ export async function DELETE(
     await Promise.all([
       admin.from('guides').update({ image_url: null }).eq('image_url', asset.url),
       admin.from('reviews').update({ image_url: null }).eq('image_url', asset.url),
+      admin.from('social_posts').update({ image_url: null }).eq('image_url', asset.url),
+      admin.from('social_articles').update({ cover_image_url: null }).eq('cover_image_url', asset.url),
       // products.image_url handled below via primary-promotion logic
     ])
   }

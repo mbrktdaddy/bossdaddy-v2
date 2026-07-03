@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { compressImage } from '@/lib/compress-image'
+import { downloadImage } from '@/lib/images/download'
 
 const MediaPicker  = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 const ImageCropper = dynamic(() => import('@/components/ui/ImageCropper'),   { ssr: false })
@@ -167,12 +168,20 @@ export function GalleryField({
                     title="Move later"
                   >→</button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => removeAt(idx)}
-                  className="px-1.5 py-0.5 bg-surface-raised hover:bg-red-50 text-prose-muted hover:text-red-700 text-xs rounded transition-colors"
-                  title="Remove"
-                >✕</button>
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => downloadImage(url, `gallery-${idx + 1}`)}
+                    className="px-1.5 py-0.5 bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose text-xs rounded transition-colors"
+                    title="Download"
+                  >↓</button>
+                  <button
+                    type="button"
+                    onClick={() => removeAt(idx)}
+                    className="px-1.5 py-0.5 bg-surface-raised hover:bg-red-50 text-prose-muted hover:text-red-700 text-xs rounded transition-colors"
+                    title="Remove"
+                  >✕</button>
+                </div>
               </div>
             </div>
           ))}

@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { compressImage } from '@/lib/compress-image'
 import { fetchAssetAsFile } from '@/lib/images/derive-crop'
+import { downloadImage } from '@/lib/images/download'
 
 const MediaPicker  = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 const ImageCropper = dynamic(() => import('@/components/ui/ImageCropper'),   { ssr: false })
@@ -140,6 +141,14 @@ export function ProductImageField({
             title="Crop this image"
           >
             Crop
+          </button>
+          <button
+            type="button"
+            onClick={() => downloadImage(imageUrl)}
+            className="absolute bottom-2 left-2 px-2.5 py-1.5 bg-surface/80 hover:bg-surface text-prose-muted hover:text-prose text-xs font-semibold rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+            title="Download this image"
+          >
+            Download
           </button>
           <button
             type="button"

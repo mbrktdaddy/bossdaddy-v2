@@ -31,6 +31,9 @@ export async function GET(request: NextRequest) {
   const page = Math.max(1, parseInt(searchParams.get('page') ?? '1'))
   const productId = searchParams.get('product_id') ?? null
   const category  = searchParams.get('category')   ?? null
+  // Filter to images belonging to a specific guide/review (see migration 114).
+  const sourceType = searchParams.get('source_type') ?? null
+  const sourceId   = searchParams.get('source_id')   ?? null
   const limit = 40
   const offset = (page - 1) * limit
 
@@ -55,6 +58,10 @@ export async function GET(request: NextRequest) {
     query = query.is('category', null)
   } else if (category) {
     query = query.eq('category', category)
+  }
+
+  if (sourceType && sourceId) {
+    query = query.eq('source_type', sourceType).eq('source_id', sourceId)
   }
 
   const { data, error, count } = await query

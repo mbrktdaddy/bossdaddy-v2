@@ -1094,6 +1094,8 @@ export type Database = {
           mime_type: string | null
           position: number | null
           product_id: string | null
+          source_id: string | null
+          source_type: string | null
           tags: string[]
           uploaded_by: string | null
           url: string
@@ -1111,6 +1113,8 @@ export type Database = {
           mime_type?: string | null
           position?: number | null
           product_id?: string | null
+          source_id?: string | null
+          source_type?: string | null
           tags?: string[]
           uploaded_by?: string | null
           url: string
@@ -1128,6 +1132,8 @@ export type Database = {
           mime_type?: string | null
           position?: number | null
           product_id?: string | null
+          source_id?: string | null
+          source_type?: string | null
           tags?: string[]
           uploaded_by?: string | null
           url?: string

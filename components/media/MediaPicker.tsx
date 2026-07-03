@@ -44,6 +44,14 @@ interface MediaPickerProps {
   multi?: boolean
   onMultiSelect?: (items: MultiSelectItem[]) => void
   /**
+   * When set, the Library tab opens pre-filtered to images belonging to this
+   * guide/review (media_assets.source_type/source_id — migration 114), with a
+   * toggle to view the whole library. Lets you reuse a source's own hero/inline
+   * images (e.g. when attaching one to an X post).
+   */
+  sourceType?: 'guide' | 'review'
+  sourceId?: string
+  /**
    * If set, single-file uploads route through ImageCropper before save with
    * this aspect ratio (width / height, e.g. 4/3 for 1.333). Multi-file
    * uploads skip the cropper. Pass undefined to upload-without-cropping.
@@ -59,7 +67,7 @@ interface MediaPickerProps {
 
 type Tab = 'library' | 'generate'
 
-export default function MediaPicker({ onSelect, onClose, defaultProductId, defaultCategory, multi, onMultiSelect, uploadAspect }: MediaPickerProps) {
+export default function MediaPicker({ onSelect, onClose, defaultProductId, defaultCategory, multi, onMultiSelect, uploadAspect, sourceType, sourceId }: MediaPickerProps) {
   const [tab, setTab] = useState<Tab>('library')
 
   // Library state
@@ -180,6 +188,10 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
   const [genSize, setGenSize] = useState<'1024x1024' | '1536x1024' | '1024x1536'>('1536x1024')
   const [genLoading, setGenLoading] = useState(false)
   const [genError, setGenError] = useState<string | null>(null)
+  // Safety-rule toggles. Brands are always blocked server-side; these relax the
+  // two situational clauses. Default OFF = text + people allowed (SOCIAL_FLEXIBLE).
+  const [genNoText, setGenNoText] = useState(false)
+  const [genNoPeople, setGenNoPeople] = useState(false)
 
   const LIMIT = 40
 
@@ -203,11 +215,18 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
       .catch(() => {})
   }, [])
 
-  const fetchAssets = useCallback(async (p: number, productId: string, category: string) => {
+  // Default to the source's own images when a source context was passed.
+  const [sourceOnly, setSourceOnly] = useState<boolean>(!!sourceId)
+
+  const fetchAssets = useCallback(async (p: number, productId: string, category: string, bySource: boolean) => {
     setLoading(true)
     const qs = new URLSearchParams({ page: String(p) })
     if (productId) qs.set('product_id', productId)
     if (category)  qs.set('category',   category)
+    if (bySource && sourceType && sourceId) {
+      qs.set('source_type', sourceType)
+      qs.set('source_id',   sourceId)
+    }
     const res = await fetch(`/api/media?${qs}`)
     let nextTotal = 0
     if (res.ok) {
@@ -218,20 +237,21 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
     }
     setLoading(false)
 
-    // One-time only: if the caller pre-seeded a product/category filter and it
-    // came back empty, drop to "All" so the editor sees the library immediately
+    // One-time only: if the caller pre-seeded a product/category/source filter and
+    // it came back empty, drop to "All" so the editor sees the library immediately
     // instead of an empty grid they have to clear by hand. Never fires again, so
     // a filter the user deliberately picks later is respected.
     if (firstLoadRef.current) {
       firstLoadRef.current = false
-      if (nextTotal === 0 && (productId || category)) {
+      if (nextTotal === 0 && (productId || category || bySource)) {
         setFilterProductId('')
         setFilterCategory('')
+        setSourceOnly(false)
       }
     }
-  }, [])
+  }, [sourceType, sourceId])
 
-  useEffect(() => { fetchAssets(page, filterProductId, filterCategory) }, [fetchAssets, page, filterProductId, filterCategory])
+  useEffect(() => { fetchAssets(page, filterProductId, filterCategory, sourceOnly) }, [fetchAssets, page, filterProductId, filterCategory, sourceOnly])
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose() }
@@ -318,7 +338,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
       const res = await fetch('/api/images/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: genPrompt.trim(), size: genSize }),
+        body: JSON.stringify({ prompt: genPrompt.trim(), size: genSize, no_text: genNoText, no_people: genNoPeople }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Generation failed')
@@ -403,6 +423,19 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
             </button>
           </div>
           <div className="flex items-center gap-2 flex-wrap grow sm:grow-0 justify-end">
+            {/* Source toggle — only when the caller passed a guide/review context. */}
+            {tab === 'library' && sourceId && (
+              <button
+                type="button"
+                onClick={() => { setSourceOnly((v) => !v); setPage(1); setSearchQuery('') }}
+                title={`Show only images from this ${sourceType}`}
+                className={`px-2.5 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
+                  sourceOnly ? 'bg-accent text-white border-accent' : 'bg-surface-raised text-prose-muted border-strong hover:text-prose'
+                }`}
+              >
+                From this {sourceType}
+              </button>
+            )}
             {/* Search */}
             {tab === 'library' && (
               <input
@@ -600,6 +633,30 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                       <span className="text-xs opacity-70 font-mono">{opt.ratio}</span>
                     </button>
                   ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-prose-muted mb-2">Restrictions</label>
+                <div className="flex flex-col gap-2">
+                  <label className="flex items-center gap-2 text-sm text-prose cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={genNoText}
+                      onChange={(e) => setGenNoText(e.target.checked)}
+                      className="w-4 h-4 accent-[var(--color-accent)]"
+                    />
+                    No text or watermarks
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-prose cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={genNoPeople}
+                      onChange={(e) => setGenNoPeople(e.target.checked)}
+                      className="w-4 h-4 accent-[var(--color-accent)]"
+                    />
+                    No people
+                  </label>
+                  <p className="text-xs text-prose-faint">Brand names, logos, and real-world products are always blocked.</p>
                 </div>
               </div>
               <button

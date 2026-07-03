@@ -2,9 +2,13 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import { PLATFORMS } from '@/lib/social-platforms'
 import { XArticlePreview } from '@/lib/x/preview'
 import type { DroppedTag } from '@/lib/x/serialize'
+import { downloadImage } from '@/lib/images/download'
+
+const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
 interface SourceItem { id: string; title: string }
 
@@ -47,6 +51,12 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
   const [savingArticle, setSavingArticle]   = useState(false)
   const [copied, setCopied]                 = useState('')
 
+  // Shared image attachment (applies to saved posts + article). Defaults to the
+  // source's hero on repurpose; author can swap via the library/generator or clear.
+  const [imageUrl, setImageUrl]             = useState<string | null>(null)
+  const [imageAlt, setImageAlt]             = useState('')
+  const [showImagePicker, setShowImagePicker] = useState(false)
+
   const sourceItems = sourceType === 'review' ? reviews : sourceType === 'guide' ? guides : []
   const selectedItem = sourceItems.find((s) => s.id === sourceId)
 
@@ -55,6 +65,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
     setError('')
     setVariants([])
     setRepResult(null)
+    setImageUrl(null); setImageAlt('')
     // Repurpose needs a real source — bump off 'original'.
     if (next === 'repurpose' && sourceType === 'original') { setSourceType('review'); setSourceId('') }
   }
@@ -109,6 +120,9 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
     setRepLoading(false)
     if (!res.ok) { setError(json.error ?? 'Repurpose failed'); return }
     setRepResult(json.repurpose ?? null)
+    // Default the attached image to the source's hero (reference, not copy).
+    setImageUrl(json.source_image_url ?? null)
+    setImageAlt(json.source_title ?? '')
   }
 
   async function saveArticle() {
@@ -121,6 +135,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
       body: JSON.stringify({
         title:        repResult.article.title || 'Untitled article',
         body_html:    repResult.article.body_html,
+        cover_image_url: imageUrl || undefined,
         source_type:  repSourceType,
         source_id:    sourceId || undefined,
         source_title: selectedItem?.title || undefined,
@@ -141,6 +156,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
         platform: 'x',
         content,
         status: 'draft',
+        image_url: imageUrl || undefined,
         source_type: sourceType === 'guide' ? 'guide' : 'review',
         source_id: sourceId || undefined,
         source_title: sourceTitle || undefined,
@@ -161,6 +177,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
         platform,
         content,
         status: 'draft',
+        image_url: imageUrl || undefined,
         source_type: sourceType,
         source_id: sourceId || undefined,
         source_title: selectedItem?.title || topic || undefined,
@@ -178,6 +195,32 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
 
   // In repurpose mode the source picker is review/guide only.
   const repSourceType = sourceType === 'guide' ? 'guide' : 'review'
+
+  // Shared image attachment control — reused in both quick + repurpose result
+  // areas. Applies to whatever gets saved (posts, and the article cover).
+  const imageControl = (
+    <div>
+      <label className="text-xs text-prose-muted uppercase tracking-widest font-medium block mb-2">Image <span className="text-prose-faint normal-case tracking-normal">(optional — applies to saved posts &amp; article)</span></label>
+      {imageUrl ? (
+        <div className="flex items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={imageUrl} alt={imageAlt} className="w-20 h-20 object-cover rounded-lg border border-soft shrink-0" />
+          <div className="flex flex-col gap-1.5">
+            <button onClick={() => setShowImagePicker(true)} className="text-xs bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose px-3 py-1.5 rounded-lg font-medium transition-colors text-left">Change / generate</button>
+            <button onClick={() => downloadImage(imageUrl, imageAlt)} className="text-xs bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose px-3 py-1.5 rounded-lg font-medium transition-colors text-left">Download</button>
+            <button onClick={() => { setImageUrl(null); setImageAlt('') }} className="text-xs text-prose-faint hover:text-danger-ink px-3 py-1.5 rounded-lg transition-colors text-left">Remove</button>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowImagePicker(true)}
+          className="w-full border border-dashed border-strong text-prose-muted hover:text-prose hover:border-accent text-sm rounded-lg py-3 transition-colors"
+        >
+          + Add image (library or generate)
+        </button>
+      )}
+    </div>
+  )
 
   return (
     <>
@@ -318,6 +361,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                   {/* Variants */}
                   {variants.length > 0 && (
                     <div className="space-y-4 pt-2">
+                      {imageControl}
                       <p className="text-xs text-prose-muted uppercase tracking-widest font-medium">Pick a variant to save</p>
                       {variants.map((v, i) => {
                         const len = v.content.length
@@ -421,6 +465,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
 
                   {repResult && (
                     <div className="space-y-6 pt-2">
+                      {imageControl}
                       {/* Article */}
                       <section className="space-y-2">
                         <div className="flex items-center justify-between">
@@ -503,6 +548,16 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
             </div>
           </div>
         </div>
+      )}
+
+      {showImagePicker && (
+        <MediaPicker
+          uploadAspect={16 / 10}
+          sourceType={sourceId ? repSourceType : undefined}
+          sourceId={sourceId || undefined}
+          onSelect={(url, alt) => { setImageUrl(url); setImageAlt(alt); setShowImagePicker(false) }}
+          onClose={() => setShowImagePicker(false)}
+        />
       )}
     </>
   )

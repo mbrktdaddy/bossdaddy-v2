@@ -845,6 +845,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                 imageUrl={imageUrl}
                 onChange={setImageUrl}
                 contentType="review"
+                sourceId={review.id}
                 title={title}
                 category={category}
                 excerpt={excerpt}

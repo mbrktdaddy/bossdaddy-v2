@@ -56,6 +56,8 @@ export interface GenSource {
   bodyText: string
   /** Absolute public URL of the source. */
   url: string
+  /** Source hero image URL, if any — carried over as the default social image. */
+  imageUrl: string | null
 }
 
 // Public URL segment per collection type — mirrors getPublicPath() in
@@ -91,10 +93,10 @@ export async function fetchGenSource(
   // normalized shape stays content-type-agnostic.
   const fields =
     sourceType === 'review'
-      ? 'title, product_name, category, excerpt, content, rating, slug'
+      ? 'title, product_name, category, excerpt, content, rating, slug, image_url'
       : sourceType === 'collection'
       ? 'title, excerpt:description, content:intro_html, slug, collection_type, occasion'
-      : 'title, category, excerpt, content, slug'
+      : 'title, category, excerpt, content, slug, image_url'
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (admin as any).from(table).select(fields).eq('id', sourceId).single()
@@ -116,5 +118,7 @@ export async function fetchGenSource(
     excerpt: (src.excerpt as string | null) ?? null,
     bodyText: stripHtml(src.content),
     url,
+    // Collections don't carry a single hero column in this select — null there.
+    imageUrl: (src.image_url as string | null) ?? null,
   }
 }

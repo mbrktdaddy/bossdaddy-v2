@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { generateAndUploadImage } from '@/lib/images/openai'
+import { buildSafetyRules, resolveToggles, SOCIAL_FLEXIBLE } from '@/lib/images/safety'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
@@ -12,6 +13,11 @@ const GenerateSchema = z.object({
   size:     z.enum(['1024x1024', '1536x1024', '1024x1536']).default('1024x1024'),
   alt_text: z.string().max(200).optional().nullable(),
   premium:  z.boolean().optional().default(false),
+  // Safety-rule toggles (see lib/images/safety.ts). Omitted → SOCIAL_FLEXIBLE
+  // baseline (brands always blocked; text + people allowed). noBrands is pinned
+  // on server-side regardless of what the client sends.
+  no_text:   z.boolean().optional(),
+  no_people: z.boolean().optional(),
 })
 
 // POST /api/images/generate — generate an image and store it in the media library
@@ -34,11 +40,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { prompt, size, alt_text, premium } = parsed.data
+  const { prompt, size, alt_text, premium, no_text, no_people } = parsed.data
+
+  const safetyRules = buildSafetyRules(
+    resolveToggles(SOCIAL_FLEXIBLE, { noText: no_text, noPeople: no_people })
+  )
 
   let publicUrl: string
   try {
-    publicUrl = await generateAndUploadImage(prompt, 'media', size, premium)
+    publicUrl = await generateAndUploadImage(prompt, 'media', size, premium, safetyRules)
   } catch (err) {
     console.error('Image generate failed:', err)
     const msg = err instanceof Error ? err.message : String(err)

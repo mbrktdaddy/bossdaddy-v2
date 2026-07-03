@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { downloadImage } from '@/lib/images/download'
 
 interface SessionImage {
   id?: string
@@ -13,6 +14,8 @@ export function ImageGeneratorStudio() {
   const [prompt, setPrompt] = useState('')
   const [size, setSize] = useState<'1024x1024' | '1536x1024' | '1024x1536'>('1536x1024')
   const [premium, setPremium] = useState(false)
+  const [noText, setNoText] = useState(false)
+  const [noPeople, setNoPeople] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [session, setSession] = useState<SessionImage[]>([])
@@ -25,7 +28,7 @@ export function ImageGeneratorStudio() {
       const res = await fetch('/api/images/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: prompt.trim(), size, premium }),
+        body: JSON.stringify({ prompt: prompt.trim(), size, premium, no_text: noText, no_people: noPeople }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Generation failed')
@@ -113,6 +116,31 @@ Tips:
           </div>
         </div>
 
+        <div>
+          <label className="block text-sm text-prose-muted mb-2">Restrictions</label>
+          <div className="flex flex-col gap-2">
+            <label className="flex items-center gap-2 text-sm text-prose cursor-pointer">
+              <input
+                type="checkbox"
+                checked={noText}
+                onChange={(e) => setNoText(e.target.checked)}
+                className="w-4 h-4 accent-[var(--color-accent)]"
+              />
+              No text or watermarks
+            </label>
+            <label className="flex items-center gap-2 text-sm text-prose cursor-pointer">
+              <input
+                type="checkbox"
+                checked={noPeople}
+                onChange={(e) => setNoPeople(e.target.checked)}
+                className="w-4 h-4 accent-[var(--color-accent)]"
+              />
+              No people
+            </label>
+            <p className="text-xs text-prose-faint">Brand names, logos, and real-world products are always blocked.</p>
+          </div>
+        </div>
+
         <button
           type="button"
           onClick={handleGenerate}
@@ -164,6 +192,13 @@ Tips:
                       className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted rounded-lg transition-colors"
                     >
                       {copiedUrl === img.url ? '✓ Copied' : 'Copy URL'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => downloadImage(img.url, img.prompt)}
+                      className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted rounded-lg transition-colors"
+                    >
+                      Download
                     </button>
                     <button
                       type="button"

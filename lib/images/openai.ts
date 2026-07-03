@@ -62,13 +62,19 @@ export async function generateAndUploadImage(
   prompt: string,
   bucket: Bucket,
   size: ImageSize = '1024x1024',
-  premium: boolean = false
+  premium: boolean = false,
+  safetyRules: string = ''
 ): Promise<string> {
   const client = getClient()
 
+  // Callers pass the resolved safety-rule block (see lib/images/safety.ts). The
+  // hero route always sends the strict editorial set; the media/social generator
+  // sends a caller-toggled set. Empty string = no extra rules (raw prompt).
+  const fullPrompt = safetyRules ? `${prompt}\n\n${safetyRules}` : prompt
+
   let b64: string
   try {
-    b64 = await callImageModel(prompt, size, client, premium)
+    b64 = await callImageModel(fullPrompt, size, client, premium)
   } catch (err) {
     if (isContentPolicyError(err)) {
       // Retry with a safe generic prompt rather than failing the whole draft

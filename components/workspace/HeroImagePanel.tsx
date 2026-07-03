@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { fetchAssetAsFile } from '@/lib/images/derive-crop'
+import { downloadImage } from '@/lib/images/download'
 const MediaPicker   = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 const ImageCropper  = dynamic(() => import('@/components/ui/ImageCropper'),   { ssr: false })
 
@@ -11,6 +12,8 @@ interface Props {
   onChange: (url: string | null) => void
   label?: string
   contentType: 'guide' | 'review'
+  /** The guide/review draft id — links a generated hero to its source in the media library. */
+  sourceId?: string
   title?: string
   category?: string
   excerpt?: string
@@ -20,7 +23,7 @@ interface Props {
 
 export function HeroImagePanel({
   imageUrl, onChange, label = 'Hero Image',
-  contentType, title, category, excerpt, productName, initialPrompt,
+  contentType, sourceId, title, category, excerpt, productName, initialPrompt,
 }: Props) {
   const [showPicker, setShowPicker] = useState(false)
   const [pendingCrop, setPendingCrop] = useState<File | null>(null)
@@ -107,6 +110,7 @@ export function HeroImagePanel({
           product_name: productName ?? null,
           custom_prompt: imagePrompt.trim() || null,
           premium,
+          source_id: sourceId ?? null,
         }),
       })
       const json = await readJsonResponse<{ imageUrl?: string; promptUsed?: string }>(res, 'Image generation failed')
@@ -164,6 +168,14 @@ export function HeroImagePanel({
             title="Crop this image"
           >
             Crop
+          </button>
+          <button
+            type="button"
+            onClick={() => downloadImage(imageUrl, title ?? productName)}
+            className="absolute bottom-2 left-2 px-2.5 py-1.5 bg-surface/80 hover:bg-surface text-prose-muted hover:text-prose text-xs font-semibold rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+            title="Download this image"
+          >
+            Download
           </button>
           <button
             type="button"

@@ -180,6 +180,9 @@ Never use "game-changer", "must-have", "revolutionary", or "life-changing". No c
       posts,
     },
     source_title: src.title,
+    // Carried over so the workspace can default the post/article image to the
+    // source's existing hero (reference — no copy). Author can swap or clear it.
+    source_image_url: src.imageUrl,
     remaining,
   })
 }

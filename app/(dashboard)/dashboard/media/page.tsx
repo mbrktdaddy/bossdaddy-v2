@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { compressImage } from '@/lib/compress-image'
+import { downloadImage } from '@/lib/images/download'
 import ImageCropper from '@/components/ui/ImageCropper'
 
 interface MediaAsset {
@@ -33,6 +34,8 @@ interface UsageData {
   reviews_hero:  UsageItem[]
   articles_body: UsageItem[]
   reviews_body:  UsageItem[]
+  social_posts?:    number
+  social_articles?: UsageItem[]
 }
 
 function formatBytes(bytes: number | null) {
@@ -140,13 +143,19 @@ function AssetCard({
           </div>
         )}
 
-        {/* Hover overlay — copy URL */}
+        {/* Hover overlay — copy URL + download */}
         <div className="absolute inset-0 bg-zinc-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
           <button
             onClick={() => onCopy(asset.id, asset.url)}
             className="px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-xs font-semibold rounded-lg transition-colors"
           >
             {copiedId === asset.id ? '✓ Copied' : 'Copy URL'}
+          </button>
+          <button
+            onClick={() => downloadImage(asset.url, asset.alt_text ?? asset.filename)}
+            className="px-3 py-1.5 bg-surface/95 hover:bg-surface text-prose text-xs font-semibold rounded-lg transition-colors"
+          >
+            Download
           </button>
         </div>
       </div>
@@ -638,6 +647,20 @@ export default function MediaLibraryPage() {
                 items={usageData.reviews_hero.map((r) => ({ id: r.id, label: r.title ?? r.slug, href: `/dashboard/reviews/${r.id}`, status: r.status }))}
                 note="hero image will be cleared"
               />
+            )}
+            {(usageData.social_articles?.length ?? 0) > 0 && (
+              <UsageSection
+                label="X Article cover"
+                items={(usageData.social_articles ?? []).map((s) => ({ id: s.id, label: s.title ?? s.slug, href: `/dashboard/social/articles/${s.id}`, status: s.status }))}
+                note="cover image will be cleared"
+              />
+            )}
+            {(usageData.social_posts ?? 0) > 0 && (
+              <div className="bg-surface-raised border border-soft rounded-xl px-4 py-3">
+                <p className="text-xs text-prose-muted">
+                  Attached to {usageData.social_posts} social post{usageData.social_posts === 1 ? '' : 's'} — image will be cleared.
+                </p>
+              </div>
             )}
             {(usageData.articles_body.length > 0 || usageData.reviews_body.length > 0) && (
               <div className="bg-warn-bg border border-warn-line rounded-xl px-4 py-3 space-y-1">

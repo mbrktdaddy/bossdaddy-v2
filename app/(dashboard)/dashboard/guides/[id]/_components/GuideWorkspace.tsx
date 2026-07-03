@@ -348,6 +348,7 @@ export function GuideWorkspace({ guide: article }: Props) {
               imageUrl={imageUrl}
               onChange={setImageUrl}
               contentType="guide"
+              sourceId={article.id}
               title={title}
               category={category}
               excerpt={excerpt}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { WorkspaceShell } from '@/components/workspace/WorkspaceShell'
 import { WorkspaceToolbar } from '@/components/workspace/WorkspaceToolbar'
 import { SchedulePanel } from '@/components/workspace/SchedulePanel'
@@ -8,6 +9,8 @@ import { TiptapEditor } from '@/components/workspace/TiptapEditor'
 import { XArticlePreview } from '@/lib/x/preview'
 import type { DroppedTag } from '@/lib/x/serialize'
 import { useSocialArticleWorkspace } from '@/components/workspace/useSocialArticleWorkspace'
+
+const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
 export interface ArticleRow {
   id: string
@@ -37,6 +40,7 @@ export function ArticleWorkspace({ article, initialXHtml, initialDropped }: Prop
   const [title, setTitle]           = useState(article.title)
   const [bodyHtml, setBodyHtml]     = useState(article.body_html ?? '')
   const [coverUrl, setCoverUrl]     = useState(article.cover_image_url ?? '')
+  const [showCoverPicker, setShowCoverPicker] = useState(false)
   const [scheduledAt, setScheduled] = useState<string | null>(article.scheduled_at)
   const [externalUrl, setExternalUrl] = useState(article.external_url ?? '')
   const [status, setStatus]         = useState<'draft' | 'ready' | 'posted'>(article.status)
@@ -129,14 +133,36 @@ export function ArticleWorkspace({ article, initialXHtml, initialDropped }: Prop
 
       {/* Cover image */}
       <div>
-        <label className="block text-xs text-prose-muted uppercase tracking-widest font-medium mb-1.5">Cover image URL <span className="normal-case tracking-normal text-prose-faint">(optional)</span></label>
-        <input
-          value={coverUrl}
-          onChange={(e) => setCoverUrl(e.target.value)}
-          placeholder="https://…"
-          className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-sm text-prose focus:outline-none focus:ring-1 focus:ring-accent-hover"
-        />
+        <label className="block text-xs text-prose-muted uppercase tracking-widest font-medium mb-1.5">Cover image <span className="normal-case tracking-normal text-prose-faint">(optional)</span></label>
+        {coverUrl.trim() ? (
+          <div className="flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={coverUrl} alt="Cover" className="w-28 h-16 object-cover rounded-lg border border-soft shrink-0" />
+            <div className="flex flex-col gap-1.5">
+              <button type="button" onClick={() => setShowCoverPicker(true)} className="text-xs bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose px-3 py-1.5 rounded-lg font-medium transition-colors text-left">Change / generate</button>
+              <button type="button" onClick={() => setCoverUrl('')} className="text-xs text-prose-faint hover:text-danger-ink px-3 py-1.5 rounded-lg transition-colors text-left">Remove</button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowCoverPicker(true)}
+            className="w-full border border-dashed border-strong text-prose-muted hover:text-prose hover:border-accent text-sm rounded-lg py-3 transition-colors"
+          >
+            + Add cover image (library or generate)
+          </button>
+        )}
       </div>
+
+      {showCoverPicker && (
+        <MediaPicker
+          uploadAspect={16 / 10}
+          sourceType={article.source_type === 'guide' || article.source_type === 'review' ? article.source_type : undefined}
+          sourceId={article.source_id ?? undefined}
+          onSelect={(url) => { setCoverUrl(url); setShowCoverPicker(false) }}
+          onClose={() => setShowCoverPicker(false)}
+        />
+      )}
 
       {/* Schedule (reminder only) */}
       <SchedulePanel
