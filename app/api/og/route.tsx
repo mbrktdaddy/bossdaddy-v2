@@ -122,14 +122,34 @@ export async function GET(request: NextRequest) {
     </div>
   ) : (
     // Text card — the branded fallback when there's no hero (or the fetch failed).
-    <div style={{ width: `${OG_W}px`, height: `${OG_H}px`, display: 'flex', flexDirection: 'column', backgroundColor: '#0a0a0a', padding: '60px', fontFamily: 'Arial, sans-serif', position: 'relative' }}>
+    // Mirrors the photo card's structure (Satori requires every multi-child node
+    // to be display:flex; the flat layout used before tripped that).
+    <div style={{ width: `${OG_W}px`, height: `${OG_H}px`, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', backgroundColor: '#0a0a0a', padding: '56px', position: 'relative', fontFamily: 'Arial, sans-serif' }}>
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(ellipse at top left, rgba(204, 85, 0, 0.15) 0%, transparent 60%)' }} />
-      <div style={{ display: 'flex', marginBottom: '40px' }}>{Brand}</div>
-      {Badges}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start' }}>{Title}</div>
-      <div style={{ borderTop: '1px solid #1f1f1f' }}>{BottomBar}</div>
+      {Brand}
+      <div style={{ position: 'relative', display: 'flex', flexDirection: 'column' }}>
+        {Badges}
+        {Title}
+        {BottomBar}
+      </div>
     </div>
   )
 
-  return new ImageResponse(element, { width: OG_W, height: OG_H, headers: cacheHeaders })
+  const image = new ImageResponse(element, { width: OG_W, height: OG_H })
+
+  // Text cards are small PNGs and keep text crisp — return as-is. Photo cards
+  // come out ~0.8–1.3 MB as PNG (ImageResponse only emits PNG), which trips the
+  // "image too heavy" preview warning, so recompress those to JPEG (~150–250 KB).
+  if (!bg) {
+    return new Response(await image.arrayBuffer(), {
+      headers: { 'Content-Type': 'image/png', ...cacheHeaders },
+    })
+  }
+
+  const jpeg = await sharp(Buffer.from(await image.arrayBuffer()))
+    .jpeg({ quality: 82, mozjpeg: true })
+    .toBuffer()
+  return new Response(new Uint8Array(jpeg), {
+    headers: { 'Content-Type': 'image/jpeg', ...cacheHeaders },
+  })
 }
