@@ -17,9 +17,15 @@
  * After a template bump, still re-scrape already-shared links in each platform's
  * debugger (e.g. Facebook Sharing Debugger) — they won't re-fetch on their own.
  */
-export const OG_TEMPLATE_VERSION = 3
+export const OG_TEMPLATE_VERSION = 4
 
-export type OgType = 'review' | 'guide' | 'article'
+// 'site' = a section/home card with no content-type badge.
+export type OgType = 'review' | 'guide' | 'article' | 'site'
+
+// Brand X/Twitter handle — matches app/layout.tsx. Included in every social card
+// so per-page metadata (which fully REPLACES the layout's twitter object) keeps
+// the site/creator attribution.
+export const TWITTER_HANDLE = '@bossdaddylife'
 
 /**
  * Shared OpenGraph defaults. Next.js does NOT deep-merge `openGraph`: when a
@@ -59,11 +65,19 @@ export function ogImageUrl(opts: {
   base?: string
   /** Call-to-action label rendered as a pill on the card (e.g. "Read the Review"). Omit → tagline. */
   cta?: string
+  /**
+   * Absolute URL of the page's hero image. When present, the card renders that
+   * photo as a full-bleed background (with a brand/title overlay) instead of the
+   * plain text card. Must be one of our own Supabase storage URLs — /api/og
+   * validates the host and falls back to the text card otherwise.
+   */
+  image?: string | null
 }): string {
-  const { title, type = 'guide', category, updatedAt, base = '', cta } = opts
+  const { title, type = 'guide', category, updatedAt, base = '', cta, image } = opts
   const params = new URLSearchParams({ title, type })
   if (category) params.set('category', category)
   if (cta) params.set('cta', cta)
+  if (image) params.set('img', image)
   const contentVersion = updatedAt ? Date.parse(updatedAt) || 0 : 0
   params.set('v', `${OG_TEMPLATE_VERSION}-${contentVersion}`)
   return `${base}/api/og?${params.toString()}`
@@ -83,6 +97,8 @@ export function ogImageMeta(opts: {
   base?: string
   /** Call-to-action label rendered as a pill on the card (e.g. "Read the Review"). */
   cta?: string
+  /** Absolute hero image URL — renders a photo card (see ogImageUrl). */
+  image?: string | null
   /** Override the default "<title> — Boss Daddy Life" alt text. */
   alt?: string
 }): { url: string; width: number; height: number; alt: string } {
@@ -105,4 +121,70 @@ export function toAbsoluteUrl(url: string | null | undefined, base: string): str
   if (!url) return undefined
   if (/^https?:\/\//.test(url)) return url
   return `${base}${url.startsWith('/') ? '' : '/'}${url}`
+}
+
+/**
+ * One place every public page builds its social metadata. Resolves the preview
+ * image (page hero → photo card; no hero → branded text card) and emits a
+ * complete, consistent openGraph + twitter + canonical block.
+ *
+ * Next.js REPLACES (does not deep-merge) the layout's `openGraph`/`twitter` when
+ * a page defines its own, so this helper re-declares siteName/locale/card/handle
+ * every time — that's why it exists.
+ */
+export function buildSocialMetadata(opts: {
+  /** Page <title> used for search + as the social title unless ogTitle is set. */
+  title: string
+  description?: string | null
+  /** Canonical path, e.g. "/reviews/foo". Joined onto siteUrl. */
+  path: string
+  siteUrl: string
+  /** Social-card title override (defaults to `title`). */
+  ogTitle?: string
+  /** Card badge/style. */
+  type?: OgType
+  /** OpenGraph object type. */
+  ogType?: 'website' | 'article'
+  category?: string
+  cta?: string
+  /** Absolute hero URL → photo card. Falsy → text card. */
+  heroUrl?: string | null
+  updatedAt?: string | null
+  /** Override the card alt text. */
+  imageAlt?: string
+}): import('next').Metadata {
+  const {
+    title, description, path, siteUrl, ogTitle, type = 'guide',
+    ogType = 'article', category, cta, heroUrl, updatedAt, imageAlt,
+  } = opts
+
+  const canonicalUrl = `${siteUrl}${path}`
+  const socialTitle = ogTitle ?? title
+  const image = ogImageMeta({
+    title: socialTitle, type, category, updatedAt, base: siteUrl, cta,
+    image: heroUrl || undefined, alt: imageAlt,
+  })
+  const socialDescription = clampSocialDescription(description)
+
+  return {
+    title,
+    ...(description ? { description } : {}),
+    alternates: { canonical: canonicalUrl },
+    openGraph: {
+      ...OG_SITE,
+      type: ogType,
+      url: canonicalUrl,
+      title: socialTitle,
+      ...(socialDescription ? { description: socialDescription } : {}),
+      images: [image],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      site: TWITTER_HANDLE,
+      creator: TWITTER_HANDLE,
+      title: socialTitle,
+      ...(socialDescription ? { description: socialDescription } : {}),
+      images: [image],
+    },
+  }
 }

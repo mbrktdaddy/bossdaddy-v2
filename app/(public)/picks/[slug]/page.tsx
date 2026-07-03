@@ -12,7 +12,7 @@ import EditorialMeta from '@/components/collections/EditorialMeta'
 import MethodologyCallout from '@/components/collections/MethodologyCallout'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { faqPageLd } from '@/lib/seo/faq-ld'
-import { ogImageUrl, ogImageMeta, toAbsoluteUrl, OG_SITE, clampSocialDescription } from '@/lib/og'
+import { ogImageUrl, ogImageMeta, toAbsoluteUrl, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
 
@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const admin = createAdminClient()
   const { data } = await admin
     .from('collections')
-    .select('title, description, meta_title, meta_description, published_at, updated_at')
+    .select('title, description, meta_title, meta_description, hero_image_url, published_at, updated_at')
     .eq('slug', slug)
     .eq('is_visible', true)
     .in('collection_type', PICK_TYPES)
@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   const metaTitle       = data.meta_title       ?? `${data.title} — Boss Daddy Picks`
   const metaDescription = data.meta_description ?? data.description ?? 'Dad-tested picks curated by Boss Daddy.'
-  const ogImage = ogImageMeta({ title: metaTitle, type: 'guide', updatedAt: data.updated_at, base: siteUrl, cta: 'See the Picks' })
+  const ogImage = ogImageMeta({ title: metaTitle, type: 'guide', updatedAt: data.updated_at, base: siteUrl, cta: 'See the Picks', image: toAbsoluteUrl(data.hero_image_url, siteUrl) })
   return {
     title:       metaTitle,
     description: metaDescription,
@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       authors: ['Boss Daddy'],
       section: 'Buying Guides',
     },
-    twitter:     { card: 'summary_large_image', title: metaTitle, description: clampSocialDescription(metaDescription), images: [ogImage] },
+    twitter:     { card: 'summary_large_image', site: TWITTER_HANDLE, creator: TWITTER_HANDLE, title: metaTitle, description: clampSocialDescription(metaDescription), images: [ogImage] },
   }
 }
 

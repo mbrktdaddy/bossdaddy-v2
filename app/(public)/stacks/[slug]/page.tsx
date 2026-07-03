@@ -13,7 +13,7 @@ import EditorialMeta from '@/components/collections/EditorialMeta'
 import MethodologyCallout from '@/components/collections/MethodologyCallout'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { faqPageLd } from '@/lib/seo/faq-ld'
-import { ogImageUrl, ogImageMeta, toAbsoluteUrl, OG_SITE, clampSocialDescription } from '@/lib/og'
+import { ogImageUrl, ogImageMeta, toAbsoluteUrl, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
 
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = await createClient()
   const { data } = await supabase
     .from('collections')
-    .select('title, description, meta_title, meta_description, published_at, updated_at')
+    .select('title, description, meta_title, meta_description, hero_image_url, published_at, updated_at')
     .eq('slug', slug)
     .eq('collection_type', 'stack')
     .eq('is_visible', true)
@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   const metaTitle       = data.meta_title       ?? `The ${data.title} Stack — Dad-Tested Kit`
   const metaDescription = data.meta_description ?? data.description ?? 'A curated kit-for-purpose from Boss Daddy.'
-  const ogImage = ogImageMeta({ title: metaTitle, type: 'guide', updatedAt: data.updated_at, base: siteUrl, cta: 'See the Stack' })
+  const ogImage = ogImageMeta({ title: metaTitle, type: 'guide', updatedAt: data.updated_at, base: siteUrl, cta: 'See the Stack', image: toAbsoluteUrl(data.hero_image_url, siteUrl) })
   return {
     title:       metaTitle,
     description: metaDescription,
@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       authors: ['Boss Daddy'],
       section: 'Stacks',
     },
-    twitter:     { card: 'summary_large_image', title: metaTitle, description: clampSocialDescription(metaDescription), images: [ogImage] },
+    twitter:     { card: 'summary_large_image', site: TWITTER_HANDLE, creator: TWITTER_HANDLE, title: metaTitle, description: clampSocialDescription(metaDescription), images: [ogImage] },
   }
 }
 

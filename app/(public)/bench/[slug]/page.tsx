@@ -11,6 +11,7 @@ import CommentForm from '@/components/CommentForm'
 import CommentList from '@/components/CommentList'
 import { BenchGallery } from '@/components/BenchGallery'
 import BenchStrip from '@/components/BenchStrip'
+import { buildSocialMetadata, toAbsoluteUrl } from '@/lib/og'
 import type { Metadata } from 'next'
 
 // Per-user vote/subscribe state is fetched CLIENT-side by VoteButton/
@@ -49,12 +50,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const data = await getWishlistItem(slug)
   if (!data) return { robots: { index: false, follow: true } }
-  return {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+  const meta = buildSocialMetadata({
     title: `${data.title} — On the Bench`,
     description: data.description ?? `Boss Daddy is considering reviewing ${data.title}. Vote to move it up the queue.`,
-    alternates: { canonical: `/bench/${slug}` },
-    robots: { index: false, follow: true },
-  }
+    path: `/bench/${slug}`,
+    siteUrl,
+    type: 'site',
+    cta: 'Vote on the Bench',
+    heroUrl: toAbsoluteUrl(data.image_url as string | null, siteUrl),
+  })
+  // Bench items stay out of search (noindex) but still get a rich share preview.
+  return { ...meta, robots: { index: false, follow: true } }
 }
 
 export default async function BenchDetailPage({ params }: Props) {

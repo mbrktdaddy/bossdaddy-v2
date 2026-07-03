@@ -15,6 +15,7 @@ import PipelineCounter from '@/components/PipelineCounter'
 import HomeHero from '@/components/home/HomeHero'
 import CodeRedirect from './_components/CodeRedirect'
 import { LABELS } from '@/lib/labels'
+import { buildSocialMetadata } from '@/lib/og'
 import type { Metadata } from 'next'
 
 interface Review {
@@ -59,10 +60,21 @@ interface Guide {
 
 export const revalidate = 3600
 
-export const metadata: Metadata = {
-  title: 'Boss Daddy Life — Reviews, Guides, and Gear for Boss Dads',
-  description: 'Honest product reviews, real-dad guides, and smart-tech advice for men who show up every day. Zero sponsors. Zero fluff. Real dads + smart tech.',
-  alternates: { canonical: '/' },
+export function generateMetadata(): Metadata {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+  return buildSocialMetadata({
+    title: 'Boss Daddy Life — Reviews, Guides, and Gear for Boss Dads',
+    description: 'Honest product reviews, real-dad guides, and smart-tech advice for men who show up every day. Zero sponsors. Zero fluff. Real dads + smart tech.',
+    path: '/',
+    siteUrl,
+    ogTitle: 'Real Dads. Smart Tools. Better Decisions.',
+    ogType: 'website',
+    type: 'site',
+    cta: 'Explore Boss Daddy',
+    // The live homepage hero (HomeHero) — the workshop photo visitors actually see.
+    heroUrl: `${siteUrl}/images/hero-workshop.webp`,
+    imageAlt: 'Boss Daddy Life — Dad like a BOSS',
+  })
 }
 
 const BENCH_STATUSES: Record<string, { label: string; color: string }> = {

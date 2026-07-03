@@ -9,7 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
 import { ARTICLE_SURFACE_CLASS } from '@/lib/article-surface'
-import { ogImageUrl, ogImageMeta, toAbsoluteUrl, OG_SITE, clampSocialDescription } from '@/lib/og'
+import { ogImageUrl, ogImageMeta, toAbsoluteUrl, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
 import ShareButtons from '@/components/ShareButtons'
 import RatingScore from '@/components/RatingScore'
 import VerdictCard from '@/components/reviews/VerdictCard'
@@ -83,7 +83,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   const canonicalUrl = `${siteUrl}/reviews/${slug}`
-  const ogImage = ogImageMeta({ title: data.title, type: 'review', updatedAt: data.updated_at, base: siteUrl, cta: 'Read the Review' })
+  const ogImage = ogImageMeta({ title: data.title, type: 'review', updatedAt: data.updated_at, base: siteUrl, cta: 'Read the Review', image: toAbsoluteUrl(data.image_url, siteUrl) })
   const profile = Array.isArray(data.profiles) ? data.profiles[0] : (data.profiles as unknown as { username: string } | null)
   const authorName = profile?.username ?? 'Boss Daddy'
   const sectionLabel = getCategoryBySlug(data.category ?? '')?.label
@@ -100,7 +100,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       authors: [authorName],
       ...(sectionLabel ? { section: sectionLabel } : {}),
     },
-    twitter: { card: 'summary_large_image', title: pageTitle, description: clampSocialDescription(pageDescription), images: [ogImage] },
+    twitter: { card: 'summary_large_image', site: TWITTER_HANDLE, creator: TWITTER_HANDLE, title: pageTitle, description: clampSocialDescription(pageDescription), images: [ogImage] },
   }
 }
 
