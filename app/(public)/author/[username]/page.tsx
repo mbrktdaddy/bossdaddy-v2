@@ -9,7 +9,7 @@ import BenchStrip from '@/components/BenchStrip'
 import PipelineCounter from '@/components/PipelineCounter'
 import MessageUserButton from '@/components/messages/MessageUserButton'
 import type { Metadata } from 'next'
-import { OG_SITE } from '@/lib/og'
+import { buildSocialMetadata } from '@/lib/og'
 
 export const revalidate = 3600
 
@@ -37,17 +37,15 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
  const { username } = await params
  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
- return {
+ return buildSocialMetadata({
    title: `@${username} — Boss Daddy Life`,
    description: `Reviews and articles by @${username} on Boss Daddy Life.`,
-   alternates: { canonical: `${siteUrl}/author/${username}` },
-   openGraph: {
-     ...OG_SITE,
-     title: `@${username} | Boss Daddy Life`,
-     description: `Reviews and articles by @${username} on Boss Daddy Life.`,
-     url: `${siteUrl}/author/${username}`,
-   },
- }
+   path: `/author/${username}`,
+   siteUrl,
+   ogTitle: `@${username} | Boss Daddy Life`,
+   type: 'site',
+   ogType: 'website',
+ })
 }
 
 export default async function AuthorPage({ params }: Props) {

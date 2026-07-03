@@ -14,16 +14,23 @@ import Link from 'next/link'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import InstallPWA from '@/components/InstallPWA'
 import { LABELS } from '@/lib/labels'
+import { buildSocialMetadata } from '@/lib/og'
 import { weeksUntil, milestoneDate, momentDayKey, daysSinceDayKey } from '@/lib/dad-tools/calc'
 import { getGoals } from '@/lib/dad-tools/savings-actions'
 import { fmtUsdWhole } from '@/lib/dad-tools/savings'
 import type { Kid } from '@/lib/dad-tools/kid-actions'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title: LABELS.tools.hub.pageTitle,
-  description: LABELS.tools.hub.metaDescription,
-  alternates: { canonical: '/tools' },
+export function generateMetadata(): Metadata {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+  return buildSocialMetadata({
+    title: LABELS.tools.hub.pageTitle,
+    description: LABELS.tools.hub.metaDescription,
+    path: '/tools',
+    siteUrl,
+    type: 'site',
+    ogType: 'website',
+  })
 }
 
 type SpokeCard = {

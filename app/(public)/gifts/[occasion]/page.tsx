@@ -16,7 +16,7 @@ import EditorialMeta from '@/components/collections/EditorialMeta'
 import MethodologyCallout from '@/components/collections/MethodologyCallout'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { faqPageLd } from '@/lib/seo/faq-ld'
-import { ogImageUrl, ogImageMeta, toAbsoluteUrl, OG_SITE, clampSocialDescription } from '@/lib/og'
+import { ogImageUrl, ogImageMeta, toAbsoluteUrl, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
 
@@ -33,7 +33,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const occ = getOccasion(slug)
   if (!occ) return { title: 'Not Found' }
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
-  const ogImage = ogImageMeta({ title: occ.metaTitle, type: 'guide', base: siteUrl, cta: 'See the Gift Picks' })
+  // Pull the gift guide's cover so the share card shows the real hero.
+  const { data: coll } = await createAdminClient()
+    .from('collections')
+    .select('hero_image_url')
+    .eq('collection_type', 'gift_guide')
+    .eq('occasion', occ.value)
+    .eq('is_visible', true)
+    .maybeSingle()
+  const ogImage = ogImageMeta({ title: occ.metaTitle, type: 'guide', base: siteUrl, cta: 'See the Gift Picks', image: toAbsoluteUrl(coll?.hero_image_url, siteUrl) })
   return {
     // `absolute` bypasses the root '%s | Boss Daddy' template — occ.metaTitle
     // already ends in "| Boss Daddy", so the template would double the brand
@@ -51,7 +59,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       authors: ['Boss Daddy'],
       section: 'Gift Guides',
     },
-    twitter: { card: 'summary_large_image', title: occ.metaTitle, description: clampSocialDescription(occ.metaDesc), images: [ogImage] },
+    twitter: { card: 'summary_large_image', site: TWITTER_HANDLE, creator: TWITTER_HANDLE, title: occ.metaTitle, description: clampSocialDescription(occ.metaDesc), images: [ogImage] },
   }
 }
 

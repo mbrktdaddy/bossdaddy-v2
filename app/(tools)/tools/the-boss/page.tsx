@@ -1,12 +1,19 @@
 import type { Metadata } from 'next'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { LABELS } from '@/lib/labels'
+import { buildSocialMetadata } from '@/lib/og'
 import BossChat from './_components/BossChat'
 
-export const metadata: Metadata = {
-  title: LABELS.tools.theBoss.pageTitle,
-  description: LABELS.tools.theBoss.metaDescription,
-  alternates: { canonical: '/tools/the-boss' },
+export function generateMetadata(): Metadata {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+  return buildSocialMetadata({
+    title: LABELS.tools.theBoss.pageTitle,
+    description: LABELS.tools.theBoss.metaDescription,
+    path: '/tools/the-boss',
+    siteUrl,
+    type: 'site',
+    ogType: 'website',
+  })
 }
 
 // Soft wall (pattern B1): the chat renders for everyone. Visitors get a small

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { OG_SITE } from '@/lib/og'
+import { buildSocialMetadata } from '@/lib/og'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
@@ -22,17 +22,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cat = getCategoryBySlug(slug)
   if (!cat) return { title: 'Not Found' }
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
-  return {
+  return buildSocialMetadata({
     title: `${cat.label} — Dad-Tested Reviews & Guides | Boss Daddy`,
     description: cat.description,
-    alternates: { canonical: `${siteUrl}/category/${slug}` },
-    openGraph: {
-      ...OG_SITE,
-      title: `${cat.label} | Boss Daddy`,
-      description: cat.description,
-      url: `${siteUrl}/category/${slug}`,
-    },
-  }
+    path: `/category/${slug}`,
+    siteUrl,
+    ogTitle: `${cat.label} | Boss Daddy`,
+    type: 'site',
+    ogType: 'website',
+  })
 }
 
 export default async function CategoryHubPage({ params }: Props) {

@@ -5,11 +5,20 @@ import { getCategoryBySlug } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
 import BenchStrip from '@/components/BenchStrip'
+import { buildSocialMetadata } from '@/lib/og'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = {
- title: 'Search — Boss Daddy Life',
- robots: { index: false },
+export function generateMetadata(): Metadata {
+ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+ const meta = buildSocialMetadata({
+   title: 'Search — Boss Daddy Life',
+   description: 'Search Boss Daddy Life — reviews, guides, and gear for boss dads.',
+   path: '/search',
+   siteUrl,
+   type: 'site',
+   ogType: 'website',
+ })
+ return { ...meta, robots: { index: false } }
 }
 
 interface Props {

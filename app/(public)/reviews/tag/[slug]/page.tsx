@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import { buildSocialMetadata } from '@/lib/og'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -34,12 +35,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .eq('reviews.status', 'approved')
     .eq('reviews.is_visible', true)
 
-  return {
+  const meta = buildSocialMetadata({
     title: `${tag.label} Reviews — Dad-Tested | Boss Daddy`,
     description: `Dad-tested reviews tagged "${tag.label}" — hands-on, no-BS gear reviews from a real dad.`,
-    alternates: { canonical: `${siteUrl}/reviews/tag/${slug}` },
-    robots: (count ?? 0) === 0 ? { index: false, follow: true } : undefined,
-  }
+    path: `/reviews/tag/${slug}`,
+    siteUrl,
+    type: 'site',
+    ogType: 'website',
+  })
+  return { ...meta, robots: (count ?? 0) === 0 ? { index: false, follow: true } : undefined }
 }
 
 export default async function TagPage({ params }: Props) {

@@ -4,16 +4,24 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { OCCASIONS } from '@/lib/gift-occasions'
 import { LABELS } from '@/lib/labels'
+import { buildSocialMetadata } from '@/lib/og'
 import PipelineCounter from '@/components/PipelineCounter'
 import OffTheBench from '@/components/OffTheBench'
 import BenchStrip from '@/components/BenchStrip'
 
 export const revalidate = 300
 
-export const metadata: Metadata = {
-  title: `${LABELS.vault.full} — Comparisons, Best-Of Lists, Gift Guides & Stacks | Boss Daddy`,
-  description: 'The Vault — every Boss Daddy comparison, best-of list, gift guide, and stack in one place. Real-tested picks, head-to-head scorecards, and curated kits for boss dads.',
-  alternates: { canonical: '/vault' },
+export function generateMetadata(): Metadata {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+  return buildSocialMetadata({
+    title: `${LABELS.vault.full} — Comparisons, Best-Of Lists, Gift Guides & Stacks | Boss Daddy`,
+    description: 'The Vault — every Boss Daddy comparison, best-of list, gift guide, and stack in one place. Real-tested picks, head-to-head scorecards, and curated kits for boss dads.',
+    path: '/vault',
+    siteUrl,
+    ogTitle: `${LABELS.vault.full} — Boss Daddy`,
+    type: 'site',
+    ogType: 'website',
+  })
 }
 
 interface VaultCard {

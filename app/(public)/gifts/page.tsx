@@ -1,22 +1,24 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
-import { OG_SITE } from '@/lib/og'
+import { buildSocialMetadata } from '@/lib/og'
 import { createClient } from '@/lib/supabase/server'
 import { OCCASIONS, OCCASION_GROUPS } from '@/lib/gift-occasions'
 import OccasionIcon from '@/components/OccasionIcon'
 
 export const revalidate = 60
 
-export const metadata: Metadata = {
-  title: 'Gift Guides — Dad-Tested Picks for Every Occasion',
-  description: 'Honest gift guides for every holiday and occasion — Father\'s Day, Christmas, birthdays, weddings, and more. Every pick personally tested by a real dad.',
-  alternates: { canonical: '/gifts' },
-  openGraph: {
-    ...OG_SITE,
-    title: 'Gift Guides — Boss Daddy Life',
-    description: 'Honest gift guides for every occasion. Every pick dad-tested.',
-  },
+export function generateMetadata(): Metadata {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+  return buildSocialMetadata({
+    title: 'Gift Guides — Dad-Tested Picks for Every Occasion',
+    description: 'Honest gift guides for every holiday and occasion — Father\'s Day, Christmas, birthdays, weddings, and more. Every pick personally tested by a real dad.',
+    path: '/gifts',
+    siteUrl,
+    ogTitle: 'Gift Guides — Boss Daddy Life',
+    type: 'site',
+    ogType: 'website',
+  })
 }
 
 export default async function GiftsIndexPage() {

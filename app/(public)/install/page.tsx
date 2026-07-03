@@ -1,12 +1,19 @@
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import { LABELS } from '@/lib/labels'
+import { buildSocialMetadata } from '@/lib/og'
 import InstallCta from './_components/InstallCta'
 
-export const metadata: Metadata = {
-  title: `${LABELS.app.full} — Boss Daddy`,
-  description: LABELS.app.tagline,
-  alternates: { canonical: '/install' },
+export function generateMetadata(): Metadata {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+  return buildSocialMetadata({
+    title: `${LABELS.app.full} — Boss Daddy`,
+    description: LABELS.app.tagline,
+    path: '/install',
+    siteUrl,
+    type: 'site',
+    ogType: 'website',
+  })
 }
 
 const PERKS: { title: string; body: string; icon: React.ReactNode }[] = [

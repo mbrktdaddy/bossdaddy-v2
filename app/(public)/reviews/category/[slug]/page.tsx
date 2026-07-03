@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { OG_SITE } from '@/lib/og'
+import { buildSocialMetadata } from '@/lib/og'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
@@ -33,18 +33,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .eq('status', 'approved')
     .eq('is_visible', true)
 
-  return {
+  const meta = buildSocialMetadata({
     title: `${cat.label} Reviews — Dad-Tested | Boss Daddy`,
     description: cat.description,
-    alternates: { canonical: `${siteUrl}/reviews/category/${slug}` },
-    openGraph: {
-      ...OG_SITE,
-      title: `${cat.label} Reviews | Boss Daddy`,
-      description: cat.description,
-      url: `${siteUrl}/reviews/category/${slug}`,
-    },
-    robots: (count ?? 0) === 0 ? { index: false, follow: true } : undefined,
-  }
+    path: `/reviews/category/${slug}`,
+    siteUrl,
+    ogTitle: `${cat.label} Reviews | Boss Daddy`,
+    type: 'site',
+    ogType: 'website',
+  })
+  return { ...meta, robots: (count ?? 0) === 0 ? { index: false, follow: true } : undefined }
 }
 
 export default async function CategoryPage({ params }: Props) {

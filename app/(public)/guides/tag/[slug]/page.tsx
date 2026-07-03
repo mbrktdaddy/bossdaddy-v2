@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import { buildSocialMetadata } from '@/lib/og'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -35,12 +36,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .eq('guides.status', 'approved')
     .eq('guides.is_visible', true)
 
-  return {
+  const meta = buildSocialMetadata({
     title: `${tag.label} Guides — Dad-Written | Boss Daddy`,
     description: `Dad-written guides tagged "${tag.label}" — practical, first-person advice from a real dad.`,
-    alternates: { canonical: `${siteUrl}/guides/tag/${slug}` },
-    robots: (count ?? 0) === 0 ? { index: false, follow: true } : undefined,
-  }
+    path: `/guides/tag/${slug}`,
+    siteUrl,
+    type: 'site',
+    ogType: 'website',
+  })
+  return { ...meta, robots: (count ?? 0) === 0 ? { index: false, follow: true } : undefined }
 }
 
 export default async function GuideTagPage({ params }: Props) {
