@@ -1,6 +1,7 @@
 import { ImageResponse } from 'next/og'
 import { type NextRequest } from 'next/server'
 import sharp from 'sharp'
+import { isOwnImageUrl } from '@/lib/images/og-host'
 
 // Node runtime (not edge) so `sharp` can run — it converts the hero from WebP
 // (which Satori/ImageResponse can't read) to PNG and crops it to exactly
@@ -9,17 +10,6 @@ export const runtime = 'nodejs'
 
 const OG_W = 1200
 const OG_H = 630
-
-// Only our own images may be composited — never an arbitrary URL (no open proxy).
-// Allowed: Supabase storage public objects (hero/product images) and our own
-// site-origin static assets under /images (e.g. the homepage workshop hero).
-function isOwnImageUrl(url: string): boolean {
-  const storage = process.env.NEXT_PUBLIC_SUPABASE_URL
-  if (storage && url.startsWith(`${storage}/storage/v1/object/public/`)) return true
-  const site = process.env.NEXT_PUBLIC_SITE_URL
-  if (site && url.startsWith(`${site}/images/`)) return true
-  return false
-}
 
 // Fetch the hero and return a 1200×630 PNG data URI, or null on any failure
 // (missing/invalid url, fetch error, decode error) so the caller falls back to

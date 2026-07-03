@@ -14,7 +14,7 @@ import EditorialMeta from '@/components/collections/EditorialMeta'
 import MethodologyCallout from '@/components/collections/MethodologyCallout'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { faqPageLd } from '@/lib/seo/faq-ld'
-import { ogImageUrl, ogImageMeta, toAbsoluteUrl, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
+import { ogImageUrl, ogImageMeta, toAbsoluteUrl, aspectVariants, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
 
@@ -233,7 +233,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: comparison.title,
-    image: toAbsoluteUrl(comparison.hero_image_url, siteUrl)
+    image: aspectVariants(toAbsoluteUrl(comparison.hero_image_url, siteUrl), siteUrl)
       ?? ogImageUrl({ title: comparison.title, type: 'guide', updatedAt: comparison.updated_at, base: siteUrl }),
     description: comparison.description,
     datePublished: comparison.published_at,

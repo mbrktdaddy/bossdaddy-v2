@@ -12,7 +12,7 @@ import EditorialMeta from '@/components/collections/EditorialMeta'
 import MethodologyCallout from '@/components/collections/MethodologyCallout'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { faqPageLd } from '@/lib/seo/faq-ld'
-import { ogImageUrl, ogImageMeta, toAbsoluteUrl, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
+import { ogImageUrl, ogImageMeta, toAbsoluteUrl, aspectVariants, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
 
@@ -198,7 +198,7 @@ export default async function PickDetailPage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: pick.title,
-    image: toAbsoluteUrl(pick.hero_image_url, siteUrl)
+    image: aspectVariants(toAbsoluteUrl(pick.hero_image_url, siteUrl), siteUrl)
       ?? ogImageUrl({ title: pick.title, type: 'guide', updatedAt: pick.updated_at, base: siteUrl }),
     description: pick.description,
     datePublished: pick.published_at,

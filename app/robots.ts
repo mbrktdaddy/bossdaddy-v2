@@ -6,11 +6,12 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        // Allow the OG image endpoint explicitly — it lives under /api/ but must
-        // be crawlable so facebookexternalhit / Twitterbot (which respect
-        // robots.txt) can fetch link-preview images. Longer match wins over the
-        // broad /api/ disallow below for compliant parsers.
-        allow: ['/', '/api/og'],
+        // Allow the image endpoints explicitly — they live under /api/ but must
+        // be crawlable: /api/og for link-preview scrapers (facebookexternalhit /
+        // Twitterbot) and /api/img for the JSON-LD structured-data image crops
+        // Googlebot fetches. Longer match wins over the broad /api/ disallow
+        // below for compliant parsers.
+        allow: ['/', '/api/og', '/api/img'],
         disallow: [
           '/dashboard/',
           '/api/',

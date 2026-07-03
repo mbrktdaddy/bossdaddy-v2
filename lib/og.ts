@@ -124,6 +124,22 @@ export function toAbsoluteUrl(url: string | null | undefined, base: string): str
 }
 
 /**
+ * JSON-LD structured-data image set. Google recommends providing the
+ * representative image in 16:9, 4:3, AND 1:1 for the richest results, so this
+ * returns three aspect-cropped variants (via the /api/img crop endpoint) of one
+ * of OUR hero images. `heroUrl` MUST be an absolute Boss-Daddy image URL
+ * (storage or /images) — /api/img rejects anything else. Pass the already-
+ * absolutized hero (e.g. via toAbsoluteUrl); returns undefined for empty input
+ * so callers can fall back to a single generated-card URL.
+ */
+export function aspectVariants(heroUrl: string | null | undefined, base: string): string[] | undefined {
+  if (!heroUrl) return undefined
+  return ['16x9', '4x3', '1x1'].map(
+    (ar) => `${base}/api/img?ar=${ar}&url=${encodeURIComponent(heroUrl)}`,
+  )
+}
+
+/**
  * One place every public page builds its social metadata. Resolves the preview
  * image (page hero → photo card; no hero → branded text card) and emits a
  * complete, consistent openGraph + twitter + canonical block.

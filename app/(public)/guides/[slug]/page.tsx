@@ -9,7 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
 import { ARTICLE_SURFACE_CLASS } from '@/lib/article-surface'
-import { ogImageUrl, ogImageMeta, toAbsoluteUrl, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
+import { ogImageUrl, ogImageMeta, toAbsoluteUrl, aspectVariants, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import ProductCtaCard from '@/components/ProductCtaCard'
 import CollectionEmbed from '@/components/CollectionEmbed'
@@ -155,8 +155,9 @@ export default async function GuidePage({ params }: Props) {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
 
-  // Structured-data image must be absolute; fall back to the generated OG card.
-  const articleImage = toAbsoluteUrl(guide.image_url, siteUrl)
+  // Structured-data image must be absolute; a real hero is emitted as a
+  // 16:9/4:3/1:1 set (Google's recommended variants), else the generated OG card.
+  const articleImage = aspectVariants(toAbsoluteUrl(guide.image_url, siteUrl), siteUrl)
     ?? ogImageUrl({ title: guide.title, type: 'guide', updatedAt: guide.updated_at, base: siteUrl })
 
   const articleLd = {

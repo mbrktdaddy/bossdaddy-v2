@@ -9,7 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
 import { ARTICLE_SURFACE_CLASS } from '@/lib/article-surface'
-import { ogImageUrl, ogImageMeta, toAbsoluteUrl, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
+import { ogImageUrl, ogImageMeta, toAbsoluteUrl, aspectVariants, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
 import ShareButtons from '@/components/ShareButtons'
 import RatingScore from '@/components/RatingScore'
 import VerdictCard from '@/components/reviews/VerdictCard'
@@ -207,9 +207,10 @@ export default async function ReviewPage({ params }: Props) {
 
   // Structured-data images must be absolute. Prefer the review hero, then the
   // product photo; fall back to the generated OG card so the node is never bare.
+  // Real photos are emitted as a 16:9/4:3/1:1 set (Google's recommended variants).
   const ogCard = ogImageUrl({ title: review.title, type: 'review', updatedAt: review.updated_at, base: siteUrl })
-  const heroImage = toAbsoluteUrl(review.image_url, siteUrl) ?? ogCard
-  const productImage = toAbsoluteUrl(product?.image_url, siteUrl) ?? heroImage
+  const heroImage = aspectVariants(toAbsoluteUrl(review.image_url, siteUrl), siteUrl) ?? ogCard
+  const productImage = aspectVariants(toAbsoluteUrl(product?.image_url, siteUrl), siteUrl) ?? heroImage
 
   const jsonLd: Record<string, unknown> = {
     '@context': 'https://schema.org',
