@@ -63,8 +63,8 @@ export const revalidate = 3600
 export function generateMetadata(): Metadata {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   return buildSocialMetadata({
-    title: 'Boss Daddy Life — Reviews, Guides, and Gear for Boss Dads',
-    description: 'Honest product reviews, real-dad guides, and smart-tech advice for men who show up every day. Zero sponsors. Zero fluff. Real dads + smart tech.',
+    title: 'Boss Daddy Life — Reviews, Guides & Gear for Dads',
+    description: 'Honest product reviews, real-dad guides, and smart-tech advice for men who show up every day. Zero sponsors, zero fluff.',
     path: '/',
     siteUrl,
     ogTitle: 'Real Dads. Smart Tools. Better Decisions.',

@@ -167,7 +167,10 @@ export function buildSocialMetadata(opts: {
   const socialDescription = clampSocialDescription(description)
 
   return {
-    title,
+    // `absolute` bypasses the root '%s | Boss Daddy' title template. Callers pass
+    // a COMPLETE title (brand already included), so templating would double the
+    // brand ("… | Boss Daddy | Boss Daddy") and push past Google's ~60-char cap.
+    title: { absolute: title },
     ...(description ? { description } : {}),
     alternates: { canonical: canonicalUrl },
     openGraph: {
