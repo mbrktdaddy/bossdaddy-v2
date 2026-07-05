@@ -803,6 +803,7 @@ export type Database = {
           author_id: string
           category: string
           content: string
+          content_type: string
           created_at: string | null
           excerpt: string | null
           faqs: Json
@@ -837,6 +838,7 @@ export type Database = {
           author_id: string
           category: string
           content: string
+          content_type?: string
           created_at?: string | null
           excerpt?: string | null
           faqs?: Json
@@ -871,6 +873,7 @@ export type Database = {
           author_id?: string
           category?: string
           content?: string
+          content_type?: string
           created_at?: string | null
           excerpt?: string | null
           faqs?: Json

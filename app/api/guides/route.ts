@@ -14,6 +14,7 @@ const FAQSchema = z.object({ question: z.string(), answer: z.string() })
 const CreateGuideSchema = z.object({
   title:         z.string().min(10).max(120),
   category:      CategorySchema,
+  content_type:  z.enum(['essay', 'howto', 'guide']).default('guide'),
   excerpt:       z.string().max(200).optional(),
   content:       z.string().min(100),
   image_url:     z.string().url().optional().nullable(),
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { title, category, excerpt, content, image_url, tldr, key_takeaways, faqs, suggested_tags } = parsed.data
+    const { title, category, content_type, excerpt, content, image_url, tldr, key_takeaways, faqs, suggested_tags } = parsed.data
 
     let sanitizedContent: string
     try {
@@ -66,6 +67,7 @@ export async function POST(request: NextRequest) {
         slug,
         title,
         category,
+        content_type,
         excerpt:              excerpt ?? null,
         content:              sanitizedContent,
         image_url:            image_url ?? null,

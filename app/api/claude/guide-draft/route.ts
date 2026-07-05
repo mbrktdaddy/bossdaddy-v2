@@ -6,53 +6,78 @@ import { createStructured } from '@/lib/claude/structured'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
-export const maxDuration = 90
+// Deep guides generate up to 8000 tokens (5–8 long sections + blocks), which can
+// take 1–2 min under load; 90s was cutting it close for the comprehensive tier.
+export const maxDuration = 180
+
+// Piece-type depth toggle (Decision A, 2026-07-05). Drives the generated
+// structure, which structured content blocks are forced, AND the token budget:
+//   essay → free-form narrative, no forced TL;DR/takeaways/FAQ, tight budget
+//   howto → tight + scannable, TL;DR + key takeaways, no forced FAQ
+//   guide → comprehensive (all blocks), long-form budget
+type PieceType = 'essay' | 'howto' | 'guide'
 
 // The model returns the draft by calling this tool — its input_schema is the
 // shape, so the SDK validates it instead of us regex-parsing JSON from text.
-const GUIDE_DRAFT_TOOL: Anthropic.Tool = {
-  name: 'submit_guide',
-  description: 'Return the finished dad-focused article draft.',
-  input_schema: {
+// Built per piece type so essays/how-tos aren't forced to emit blocks that
+// would break their voice (and burn tokens the wizard then discards).
+function buildGuideTool(pieceType: PieceType): Anthropic.Tool {
+  const base: Record<string, unknown> = {
+    title:           { type: 'string' },
+    excerpt:         { type: 'string' },
+    introduction:    { type: 'string' },
+    sections:        { type: 'array', items: {
+      type: 'object',
+      properties: { heading: { type: 'string' }, body: { type: 'string' } },
+      required: ['heading', 'body'],
+    } },
+    conclusion:      { type: 'string' },
+    heroImagePrompt: { type: 'string' },
+    inlineImages:    { type: 'array', items: {
+      type: 'object',
+      properties: {
+        afterHeading: { type: 'string' }, prompt: { type: 'string' },
+        altText: { type: 'string' }, caption: { type: 'string' },
+      },
+      required: ['afterHeading', 'prompt', 'altText', 'caption'],
+    } },
+    suggestedTags:   { type: 'array', items: { type: 'string' } },
+  }
+
+  const tldr = { type: 'string' }
+  const keyTakeaways = { type: 'array', items: { type: 'string' } }
+  const faqs = { type: 'array', items: {
     type: 'object',
-    properties: {
-      title:           { type: 'string' },
-      excerpt:         { type: 'string' },
-      tldr:            { type: 'string' },
-      keyTakeaways:    { type: 'array', items: { type: 'string' } },
-      faqs:            { type: 'array', items: {
-        type: 'object',
-        properties: { question: { type: 'string' }, answer: { type: 'string' } },
-        required: ['question', 'answer'],
-      } },
-      introduction:    { type: 'string' },
-      sections:        { type: 'array', items: {
-        type: 'object',
-        properties: { heading: { type: 'string' }, body: { type: 'string' } },
-        required: ['heading', 'body'],
-      } },
-      conclusion:      { type: 'string' },
-      heroImagePrompt: { type: 'string' },
-      inlineImages:    { type: 'array', items: {
-        type: 'object',
-        properties: {
-          afterHeading: { type: 'string' }, prompt: { type: 'string' },
-          altText: { type: 'string' }, caption: { type: 'string' },
-        },
-        required: ['afterHeading', 'prompt', 'altText', 'caption'],
-      } },
-      suggestedTags:   { type: 'array', items: { type: 'string' } },
+    properties: { question: { type: 'string' }, answer: { type: 'string' } },
+    required: ['question', 'answer'],
+  } }
+
+  // Which structured content blocks this piece type includes (and forces).
+  const blocks: Record<string, unknown> =
+    pieceType === 'essay' ? {} :
+    pieceType === 'howto' ? { tldr, keyTakeaways } :
+    { tldr, keyTakeaways, faqs }
+
+  const commonRequired = [
+    'title', 'excerpt', 'introduction', 'sections',
+    'conclusion', 'heroImagePrompt', 'inlineImages', 'suggestedTags',
+  ]
+
+  return {
+    name: 'submit_guide',
+    description: 'Return the finished dad-focused article draft.',
+    input_schema: {
+      type: 'object',
+      properties: { ...base, ...blocks },
+      required: [...commonRequired, ...Object.keys(blocks)],
     },
-    required: [
-      'title', 'excerpt', 'tldr', 'keyTakeaways', 'faqs', 'introduction',
-      'sections', 'conclusion', 'heroImagePrompt', 'inlineImages', 'suggestedTags',
-    ],
-  },
+  }
 }
 
 const GuideDraftInput = z.object({
   topic: z.string().min(4).max(150),
   category: z.string().min(2).max(80),
+  pieceType: z.enum(['essay', 'howto', 'guide']).default('guide'),
   keyPoints: z.array(z.string()).max(15).default([]),
   context: z.string().max(6000).optional(),
   targetAudience: z.string().max(200).optional(),
@@ -60,6 +85,55 @@ const GuideDraftInput = z.object({
   // 'auto' lets Claude pick (2–3 images); a number forces exactly that many.
   imageSlots: z.union([z.literal('auto'), z.number().int().min(0).max(6)]).default('auto'),
 })
+
+// Per-type prompt fragments + token budget. Deep guides get the long budget;
+// essays/how-tos stay tight (which is also the point — scannable, not padded).
+const PIECE_CONFIG: Record<PieceType, {
+  label: string
+  maxTokens: number
+  structure: string
+  contentBlocks: string
+  fieldGuidanceBlocks: string
+}> = {
+  essay: {
+    label: 'personal essay',
+    maxTokens: 3800,
+    structure: `STRUCTURE (personal essay — narrative, first-person, voice-forward):
+- Introduction: open inside a real moment or memory that pulls the reader in — no throat-clearing, no "in this article".
+- Sections: 4–7 flowing sections that move the story or argument forward. Each has a heading and 150–300 words of prose. Let paragraphs breathe — this is not a listicle.
+- Conclusion: 1–2 paragraphs that land the reflection honestly, without a bow on top.
+- Separate paragraphs within each section with \\n\\n`,
+    contentBlocks: '',
+    fieldGuidanceBlocks: '',
+  },
+  howto: {
+    label: 'how-to guide',
+    maxTokens: 3800,
+    structure: `STRUCTURE (how-to — tight and scannable):
+- Introduction: 2–3 sentences naming the problem and what the reader will be able to do.
+- Sections: 3–5 sections, each 120–200 words, each a clear step or decision with a concrete takeaway. Keep paragraphs short — a time-poor dad should be able to skim it on a phone.
+- Conclusion: 1–2 sentences with the single most important next step.
+- Separate paragraphs within each section with \\n\\n`,
+    contentBlocks: `CONTENT BLOCKS (required — these render as structured UI elements, not prose):
+- tldr: 2–3 sentence plain-English summary for skimmers. Lead with the main takeaway.
+- keyTakeaways: 3–5 specific, actionable bullet points readers can act on immediately.`,
+    fieldGuidanceBlocks: ' tldr is 2–3 plain-English skimmer sentences; keyTakeaways are 3–5 specific, actionable items;',
+  },
+  guide: {
+    label: 'guide',
+    maxTokens: 8000,
+    structure: `STRUCTURE (comprehensive guide):
+- Introduction: 2–3 sentences that hook the reader with a real scenario (first-person dad).
+- Sections: 5–8 sections, each 200–350 words, each with a clear practical takeaway. Cover the topic thoroughly — the reader shouldn't need to open another article.
+- Conclusion: 1–2 paragraphs with a specific next step or recommendation.
+- Separate paragraphs within each section with \\n\\n`,
+    contentBlocks: `CONTENT BLOCKS (required — these render as structured UI elements, not prose):
+- tldr: 2–3 sentence plain-English summary for skimmers. Lead with the main takeaway.
+- keyTakeaways: 3–5 specific, actionable bullet points. Not a rehash of the intro — highlight the most useful or surprising insights.
+- faqs: 3–5 Q&A pairs covering the most common questions on this topic. Write questions the way a real dad searching Google would phrase them. Answers 2–3 sentences each.`,
+    fieldGuidanceBlocks: ' tldr is 2–3 plain-English skimmer sentences; keyTakeaways are 3–5 specific, actionable items; faqs are 3–5 question/answer pairs (answers 2–3 sentences);',
+  },
+}
 
 function inlineImagesInstruction(slots: number | 'auto'): string {
   if (slots === 0) {
@@ -99,11 +173,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { topic, category, keyPoints, context, targetAudience, productSlugs, imageSlots } = parsed.data
+  const { topic, category, pieceType, keyPoints, context, targetAudience, productSlugs, imageSlots } = parsed.data
   const slugs = (productSlugs ?? []).filter(Boolean)
   const brief = context?.trim()
+  const cfg = PIECE_CONFIG[pieceType]
 
-  const prompt = `Write a dad-focused article on this topic:
+  const prompt = `Write a dad-focused ${cfg.label} on this topic:
 
 Topic: ${topic}
 Category: ${category}${keyPoints.length ? `\nKey Points: ${keyPoints.join(', ')}` : ''}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}${slugs.length ? `\nProduct slugs: ${slugs.join(', ')}` : ''}
@@ -116,28 +191,19 @@ ${brief}
 - Write in this author's voice and from their lived experience as described. Weave the concrete specifics (figures, brand names, the personal arc) into the prose rather than restating them as a list.
 - If the brief implies a story or progression, honor that narrative arc.
 ` : ''}
-STRUCTURE REQUIREMENTS:
-- Introduction: 2–3 sentences that hook the reader with a real scenario (first-person dad)
-- Sections: 3–5 sections, each 150–250 words, with a clear practical takeaway
-- Conclusion: 1–2 paragraphs with a specific next step or recommendation
-- Separate paragraphs within each section with \\n\\n
+${cfg.structure}
 
-CONTENT BLOCKS (required — these render as structured UI elements, not prose):
-- tldr: 2–3 sentence plain-English summary for skimmers. Lead with the main takeaway.
-- keyTakeaways: 3–5 specific, actionable bullet points. Not a rehash of the intro — highlight the most useful or surprising insights.
-- faqs: 3–5 Q&A pairs covering the most common questions on this topic. Write questions the way a real dad searching Google would phrase them. Answers 2–3 sentences each.
-
-SEO: Include the main topic phrase naturally in the intro and at least one section heading.
+${cfg.contentBlocks ? `${cfg.contentBlocks}\n\n` : ''}SEO: Include the main topic phrase naturally in the intro and at least one section heading.
 
 ${inlineImagesInstruction(imageSlots)}
 
-TAGS: Pick 3–6 slugs from this controlled vocabulary that best describe this guide. Be selective — only tag what genuinely applies.
+TAGS: Pick 3–6 slugs from this controlled vocabulary that best describe this piece. Be selective — only tag what genuinely applies.
 Editorial (pick at most 1): top-pick, best-value, hidden-gem
 Life Stage: pregnancy, newborn, infant, toddler, preschool, school-age, teen
 Use Case: travel, daily, occasional, gift-idea, gear-haul
 Topic: home-improvement, workshop, automotive, yard-work, kitchen-tools, outdoor-cooking, mental-health, mindfulness, self-help, faith, formula-feeding, baby-sleep, strollers, car-seats, baby-carriers, diapering, nursery-gear, power-tools, hand-tools, storage-org, camping, hiking, fishing, hunting, water-sports, smart-home, wearables, audio-gear, edc-carry, truck-gear, detailing, cast-iron, meal-prep, fitness, home-gym, cleaning, organization
 
-Return your result by calling the submit_guide tool. Field guidance: title is a specific, useful title (max 80 chars, include the topic keyword); excerpt is one punchy card sentence (max 160 chars); tldr is 2–3 plain-English skimmer sentences; keyTakeaways are 3–5 specific, actionable items; faqs are 3–5 question/answer pairs (answers 2–3 sentences); introduction is 2–3 sentences (first-person dad opening a real situation); each section has a clear, action-oriented heading and a 150–250 word body with paragraphs separated by \\n\\n; conclusion is 1–2 paragraphs with a clear next step (separated by \\n\\n if 2 paragraphs); heroImagePrompt is an editorial-photography hero prompt (specific real-world objects, natural daylight or warm indoor light, no people, no text, under 180 chars); each inlineImages.afterHeading MUST match one of your section headings; suggestedTags are 3–6 slugs from the controlled vocabulary above.`
+Return your result by calling the submit_guide tool. Field guidance: title is a specific, useful title (max 80 chars, include the topic keyword); excerpt is one punchy card sentence (max 160 chars);${cfg.fieldGuidanceBlocks} introduction opens the piece per the structure above; each section has a clear heading and a body with paragraphs separated by \\n\\n; conclusion follows the structure above (separate paragraphs with \\n\\n); heroImagePrompt is an editorial-photography hero prompt (specific real-world objects, natural daylight or warm indoor light, no people, no text, under 180 chars); each inlineImages.afterHeading MUST match one of your section headings; suggestedTags are 3–6 slugs from the controlled vocabulary above.`
 
   const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
   let result
@@ -145,8 +211,8 @@ Return your result by calling the submit_guide tool. Field guidance: title is a 
     result = await createStructured({
       system: systemBlocks,
       messages: [{ role: 'user', content: prompt }],
-      tool: GUIDE_DRAFT_TOOL,
-      maxTokens: 3800,
+      tool: buildGuideTool(pieceType),
+      maxTokens: cfg.maxTokens,
       temperature: 0.8,
     })
   } catch (err: unknown) {

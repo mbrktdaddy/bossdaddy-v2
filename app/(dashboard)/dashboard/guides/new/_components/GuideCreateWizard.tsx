@@ -8,6 +8,13 @@ import { CATEGORIES } from '@/lib/categories'
 const STORAGE_KEY = 'bd:guide-wizard-draft'
 
 type Step = 'idea' | 'generating' | 'preview' | 'saving'
+type PieceType = 'essay' | 'howto' | 'guide'
+
+const PIECE_TYPES: { v: PieceType; label: string; hint: string }[] = [
+  { v: 'guide', label: 'Deep guide', hint: 'Comprehensive — TL;DR, takeaways & FAQ, long-form' },
+  { v: 'howto', label: 'How-to',     hint: 'Tight & scannable — TL;DR + key takeaways' },
+  { v: 'essay', label: 'Essay',      hint: 'Free-form narrative — no forced blocks' },
+]
 
 interface ProductOption {
   id: string
@@ -29,6 +36,7 @@ export function GuideCreateWizard() {
   const [keyPoints, setKeyPoints]     = useState('')
   const [context, setContext]         = useState('')
   const [category, setCategory]       = useState('')
+  const [pieceType, setPieceType]     = useState<PieceType>('guide')
   const [imageSlots, setImageSlots]   = useState<number | 'auto'>('auto')
   const [suggesting, setSuggesting]   = useState(false)
   const [suggestions, setSuggestions] = useState<{ topic: string; angle: string; keyPoints: string[] }[]>([])
@@ -47,6 +55,7 @@ export function GuideCreateWizard() {
       if (saved.context)     setContext(saved.context)
       if (saved.category)    setCategory(saved.category)
       if (saved.description) setDescription(saved.description)
+      if (saved.pieceType)   setPieceType(saved.pieceType)
       if (saved.imageSlots !== undefined) setImageSlots(saved.imageSlots)
     } catch { /* ignore */ }
   }, [])
@@ -54,13 +63,16 @@ export function GuideCreateWizard() {
   // Persist form state to localStorage on change
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, topic, keyPoints, context, category, imageSlots }))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, topic, keyPoints, context, category, pieceType, imageSlots }))
     } catch { /* ignore */ }
-  }, [description, topic, keyPoints, context, category, imageSlots])
+  }, [description, topic, keyPoints, context, category, pieceType, imageSlots])
 
-  // Holds generated draft between the preview step and the save step
+  // Holds generated draft between the preview step and the save step. The
+  // structured blocks travel too — for how-tos/deep guides they persist; essays
+  // leave them empty so the public page renders nothing extra.
   const [previewDraft, setPreviewDraft] = useState<{
     title: string; excerpt: string; content: string; imagePrompt: string
+    tldr: string; keyTakeaways: string[]; faqs: { question: string; answer: string }[]
   } | null>(null)
 
   // Products for multi-select picker (roundups, gift guides, etc.)
@@ -126,6 +138,7 @@ export function GuideCreateWizard() {
         body: JSON.stringify({
           topic,
           category,
+          pieceType,
           keyPoints: keyPoints.split('\n').map(p => p.trim()).filter(Boolean),
           ...(context.trim() ? { context: context.trim() } : {}),
           imageSlots,
@@ -146,6 +159,9 @@ export function GuideCreateWizard() {
         title: string; excerpt: string; introduction: string
         sections: { heading: string; body: string }[]
         conclusion: string
+        tldr?: string
+        keyTakeaways?: string[]
+        faqs?: { question: string; answer: string }[]
         inlineImages?: { afterHeading: string; prompt: string; altText: string; caption: string }[]
       }
 
@@ -170,7 +186,15 @@ export function GuideCreateWizard() {
       ].filter(Boolean).join('\n\n')
 
       // 2. Show preview before committing to DB
-      setPreviewDraft({ title: draft.title, excerpt: draft.excerpt, content, imagePrompt: genJson.imagePrompt ?? '' })
+      setPreviewDraft({
+        title: draft.title,
+        excerpt: draft.excerpt,
+        content,
+        imagePrompt: genJson.imagePrompt ?? '',
+        tldr: draft.tldr ?? '',
+        keyTakeaways: draft.keyTakeaways ?? [],
+        faqs: draft.faqs ?? [],
+      })
       setStep('preview')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Generation failed')
@@ -188,9 +212,13 @@ export function GuideCreateWizard() {
         body: JSON.stringify({
           title: previewDraft.title,
           category,
+          content_type: pieceType,
           excerpt: previewDraft.excerpt,
           content: previewDraft.content,
           image_url: null,
+          tldr: previewDraft.tldr || null,
+          key_takeaways: previewDraft.keyTakeaways,
+          faqs: previewDraft.faqs,
         }),
       })
       const saveJson = await saveRes.json()
@@ -215,6 +243,7 @@ export function GuideCreateWizard() {
         body: JSON.stringify({
           title: topic || 'Untitled draft',
           category,
+          content_type: pieceType,
           excerpt: '',
           content: '<p>Start writing here…</p>',
           image_url: null,
@@ -385,6 +414,28 @@ export function GuideCreateWizard() {
           <p className="mt-1 text-xs text-prose-faint">
             The more real detail you give, the more accurate and personal the draft. {context.length}/6000
           </p>
+        </div>
+
+        <div>
+          <label className="block text-sm text-prose-muted mb-1.5">Piece type</label>
+          <div className="grid gap-1.5 sm:grid-cols-3">
+            {PIECE_TYPES.map((pt) => (
+              <button
+                key={pt.v}
+                type="button"
+                onClick={() => setPieceType(pt.v)}
+                className={`text-left p-3 rounded-xl border transition-colors ${
+                  pieceType === pt.v
+                    ? 'bg-accent-tint border-accent text-prose'
+                    : 'bg-surface border-soft text-prose-muted hover:border-accent-border/60'
+                }`}
+              >
+                <p className="text-sm font-semibold">{pt.label}</p>
+                <p className="text-xs text-prose-faint mt-0.5 leading-snug">{pt.hint}</p>
+              </button>
+            ))}
+          </div>
+          <p className="mt-1 text-xs text-prose-faint">Drives structure &amp; length: essays skip the forced TL;DR/takeaways/FAQ; deep guides go long.</p>
         </div>
 
         <div>
