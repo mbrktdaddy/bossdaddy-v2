@@ -30,12 +30,20 @@ export default async function AdminMerchListPage() {
             Boss Daddy branded merch. {rows.length} item{rows.length === 1 ? '' : 's'} total · {visibleCount} publicly visible.
           </p>
         </div>
-        <Link
-          href="/dashboard/admin/merch/new"
-          className="shrink-0 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
-        >
-          + New item
-        </Link>
+        <div className="shrink-0 flex items-center gap-2">
+          <Link
+            href="/dashboard/admin/merch/studio"
+            className="px-4 py-2.5 bg-surface-raised hover:bg-surface-hover border border-soft text-prose text-sm font-semibold rounded-xl transition-colors"
+          >
+            Studio
+          </Link>
+          <Link
+            href="/dashboard/admin/merch/new"
+            className="px-4 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
+          >
+            + New item
+          </Link>
+        </div>
       </div>
 
       {rows.length === 0 ? (

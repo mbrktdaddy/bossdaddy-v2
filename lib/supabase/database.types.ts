@@ -1224,6 +1224,77 @@ export type Database = {
         }
         Relationships: []
       }
+      merch_designs: {
+        Row: {
+          content: Json
+          created_at: string
+          design_type: string
+          id: string
+          ip_flag: string
+          ip_note: string | null
+          merch_id: string | null
+          notes: string | null
+          preview_url: string | null
+          print_file_url: string | null
+          printful_sync_product_id: number | null
+          product_types: string[]
+          status: string
+          template_config: Json
+          template_key: string | null
+          theme: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          design_type?: string
+          id?: string
+          ip_flag?: string
+          ip_note?: string | null
+          merch_id?: string | null
+          notes?: string | null
+          preview_url?: string | null
+          print_file_url?: string | null
+          printful_sync_product_id?: number | null
+          product_types?: string[]
+          status?: string
+          template_config?: Json
+          template_key?: string | null
+          theme?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          design_type?: string
+          id?: string
+          ip_flag?: string
+          ip_note?: string | null
+          merch_id?: string | null
+          notes?: string | null
+          preview_url?: string | null
+          print_file_url?: string | null
+          printful_sync_product_id?: number | null
+          product_types?: string[]
+          status?: string
+          template_config?: Json
+          template_key?: string | null
+          theme?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merch_designs_merch_id_fkey"
+            columns: ["merch_id"]
+            isOneToOne: false
+            referencedRelation: "merch"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merch_variants: {
         Row: {
           color: string | null

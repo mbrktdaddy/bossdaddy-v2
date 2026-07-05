@@ -65,6 +65,10 @@ function getLimiter(type: string): Ratelimit | null {
     // TODO(x-studio): revert to slidingWindow(2, '24 h') once the hardened
     // web_search radar is confirmed inserting rows — temporarily 10 for testing.
     'radar':            new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '24 h'), prefix: 'bd_radar' }),
+    // Merch Studio saying generation — one short Claude call per run returning a
+    // batch of candidate sayings. Cheap prompt, admin-only, but hits the Anthropic
+    // API so cap the batches per hour.
+    'merch-sayings':    new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, '1 h'), prefix: 'bd_merch_sayings' }),
   }
 
   limiters[type] = configs[type] ?? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1 h'), prefix: `bd_${type}` })
@@ -73,7 +77,7 @@ function getLimiter(type: string): Ratelimit | null {
 
 export async function checkRateLimit(
   identifier: string,
-  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' | 'voice' | 'boss' | 'boss-anon' | 'boss-plus' | 'boss-research' | 'boss-notify' | 'radar' = 'draft'
+  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' | 'voice' | 'boss' | 'boss-anon' | 'boss-plus' | 'boss-research' | 'boss-notify' | 'radar' | 'merch-sayings' = 'draft'
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
   const limiter = getLimiter(type)
   if (!limiter) return { success: true, remaining: 999, reset: 0 }
