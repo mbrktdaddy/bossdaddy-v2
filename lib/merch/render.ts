@@ -1,7 +1,8 @@
 import { ImageResponse } from 'next/og'
 import { loadMerchFonts, loadMerchLogo } from './fonts'
 import { renderTemplate, COLORWAYS, type MerchTemplate, type MerchColorway } from './templates'
-import { MERCH_CATALOG, type MerchBlank } from './printful-catalog'
+import { type MerchBlank } from './printful-catalog'
+import { resolvePrintfileDims } from './printfile-dims'
 
 // Shared render core for the Merch Studio design engine. Used by both the
 // preview route (app/api/merch/render) and the publish flow (which persists the
@@ -28,9 +29,11 @@ export interface RenderOpts {
 export async function renderMerchPng(
   opts: RenderOpts,
 ): Promise<{ buffer: Buffer; width: number; height: number }> {
-  const spec = MERCH_CATALOG[opts.blank]
-  let W = spec.printWidthPx
-  let H = spec.printHeightPx
+  // Real print-area dimensions from Printful (cached, falls back to the pinned
+  // catalog values). Keeps the print file + mockup position consistent per product.
+  const dims = await resolvePrintfileDims(opts.blank)
+  let W = dims.width
+  let H = dims.height
   if (opts.mode === 'preview' && W > PREVIEW_MAX_W) {
     const scale = PREVIEW_MAX_W / W
     W = Math.round(W * scale)

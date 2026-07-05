@@ -33,6 +33,7 @@ if (detailId) {
     const pf = await get(`/mockup-generator/printfiles/${detailId}`)
     console.log('PLACEMENTS', JSON.stringify(pf.available_placements))
     console.log('PRINTFILES', JSON.stringify(pf.printfiles?.map((p) => ({ id: p.printfile_id, w: p.width, h: p.height, dpi: p.dpi }))))
+    console.log('VARIANT_PRINTFILES[0].placements', JSON.stringify(pf.variant_printfiles?.[0]?.placements))
   } catch (e) { console.log('printfile info error:', e.message) }
   process.exit(0)
 }

@@ -7,6 +7,7 @@ import { getMerchDesign, updateMerchDesign } from '@/lib/merch/designs-store'
 import { MERCH_CATALOG } from '@/lib/merch/printful-catalog'
 import { getCatalogProduct } from '@/lib/printful'
 import { generateAndStoreMockup } from '@/lib/merch/mockups'
+import { resolvePrintfileDims } from '@/lib/merch/printfile-dims'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -53,6 +54,8 @@ export async function POST(request: NextRequest) {
       .map((v) => v.id)
     if (variantIds.length === 0) return NextResponse.json({ error: 'No variants to render.' }, { status: 502 })
 
+    // Same real print-area dims the print file was rendered at → position matches.
+    const dims = await resolvePrintfileDims(blank)
     const { mockupUrl } = await generateAndStoreMockup({
       designId,
       blank,
@@ -60,8 +63,8 @@ export async function POST(request: NextRequest) {
       variantIds,
       placement: spec.placement,
       printFileUrl: entry.print_file_url,
-      areaWidth: spec.printWidthPx,
-      areaHeight: spec.printHeightPx,
+      areaWidth: dims.width,
+      areaHeight: dims.height,
     })
 
     // Persist the mockup on the design's published entry.
