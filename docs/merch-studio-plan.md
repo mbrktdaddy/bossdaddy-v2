@@ -1,6 +1,6 @@
 # Merch Studio — AI-Assisted Merch Creation Plan
 
-> **Status:** Phase 0–2 SHIPPED (pushed through `edd0929`). Phase 3 (Printful write layer) BUILT 2026-07-05 — needs migration 117 applied + one real E2E publish test. See §9 build log. Tee + mug publishable; hat (embroidery) deferred.
+> **Status:** Phase 0–2 SHIPPED (pushed through `edd0929`). Phase 3 (Printful write layer) BUILT + HARDENED 2026-07-05 — needs migrations 117 + 118 applied + one real E2E publish test. See §9. Tee + mug publishable; hat (embroidery) deferred.
 > **Goal:** An admin workspace that takes a merch idea from Claude-generated copy → brand-locked print-ready design → published Printful product → live in the shop, with the operator as editor at every gate.
 > **Scope decisions (locked 2026-07-05):**
 > - **Automation depth:** Full push to Printful (generate print files + create Printful product via API as a draft; existing `merch:sync` brings it live). Not fully autonomous — a human "confirm publish" gate stays.
@@ -176,8 +176,20 @@ Files added/changed:
 2. Deploy (push) so the publish route + bucket-writing run in prod (or test locally).
 3. E2E: in Studio, approve a saying → pick template/tee/colorway → set price → **Publish to Printful** → confirm a draft product appears in the Printful dashboard → `npm run merch:sync` → it lands in Merch admin → set `available`.
 
-**Follow-ups / deferred:**
-- **Hat publishing** — embroidery needs a digitized file + thread colors, not a flat PNG. Separate phase.
-- Mockup Generator API for real shop imagery (currently the print file is the thumbnail until `merch:sync` pulls mockups).
-- Per-design color/size selection UI (currently uses the catalog defaults: Black/White, S–2XL).
+### Phase 3 hardening — 2026-07-05 (pre-E2E gap audit)
+
+Fixed the gaps a pre-flight review surfaced:
+- **Blockers:** (a) `outputFileTracingIncludes` now covers `/api/merch/publish` too (it renders via `render.ts`; was render-only → would ENOENT in prod). (b) `createSyncProduct` was typed as the GET detail shape; the POST returns the product summary at top level → now typed `CreatedSyncProduct` and the route reads `created.id` (was `created.sync_product.id` → TypeError after the product was already made).
+- **Multi-product per design** (mig 118 `merch_designs.published jsonb`): one saying → tee AND mug AND …; publish guards per-blank (re-publish same blank = `force`), records each product, Studio shows "tee live / mug live" chips.
+- **Aspect-aware templates:** sizing now off `R = min(W,H)` so the landscape mug (2700×1050) no longer clips/oversizes. Verified full-res renders (tee 1800×2400 ~45KB/150ms, mug 2700×1050 ~25KB/30ms, mug-logo ~42KB/330ms).
+- **Color/size selectors:** `GET /api/merch/catalog/[blank]` lists in-stock colors/sizes; Studio has multi-select chips (defaults preselected per colorway). Publish honors the selection.
+- **Verbatim input:** "Use my exact words" field saves a typed saying straight to approved designs (no AI), with an IP-responsibility note.
+- **Hardening:** in-stock variant filter, publish rate limit (`merch-publish` 30/hr), partial-failure handling (returns the Printful id if the DB write fails so nothing is a silent orphan), mug forced to light colorway + persisted so preview matches.
+
+**Still deferred (known):**
+- **Hat publishing** — embroidery needs a digitized file + thread colors, not a flat PNG.
+- **Mockup Generator API** — biggest remaining gap: API-created products have no `preview` file, so `merch:sync` finds no mockup and the shop shows no image until one is added (workaround: set image in Merch admin). Own phase.
 - Auto-trigger `merch:sync` after publish (currently manual).
+- Flat price across sizes (no 2XL+ upcharge).
+
+**Manual steps (updated):** apply migrations **117 + 118**, push/deploy, then E2E publish test.

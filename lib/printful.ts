@@ -186,13 +186,23 @@ export interface CreateSyncProductPayload {
   sync_variants: CreateSyncVariant[]
 }
 
+// POST /store/products returns the created sync product SUMMARY at the top level
+// of `result` (i.e. { id, external_id, ... }) — NOT the { sync_product,
+// sync_variants } detail shape that the GET endpoint returns. Type it accordingly
+// so callers read `.id` directly.
+export interface CreatedSyncProduct {
+  id: number
+  external_id: string
+  name: string
+}
+
 // Creates a store sync product from our print file(s). It lands as a draft in the
 // Printful store; `merch:sync` then pulls it into the merch/merch_variants tables
-// and the operator flips it live. Returns the new sync product detail.
+// and the operator flips it live.
 export function createSyncProduct(
   payload: CreateSyncProductPayload,
-): Promise<PrintfulSyncProductDetail> {
-  return request<PrintfulSyncProductDetail>('POST', '/store/products', payload)
+): Promise<CreatedSyncProduct> {
+  return request<CreatedSyncProduct>('POST', '/store/products', payload)
 }
 
 // ─── API calls ───────────────────────────────────────────────────────────────

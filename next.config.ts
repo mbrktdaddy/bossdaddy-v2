@@ -6,6 +6,13 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 })
 
+// Font + logo files the Merch Studio render core reads from disk at runtime.
+const merchRenderAssets = [
+  './lib/merch/fonts/*.ttf',
+  './lib/merch/assets/*.png',
+  './public/images/bd-logo-icon.png', // fallback logo
+]
+
 const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
   : 'fsxbertkzcigvkdyqgep.supabase.co'
@@ -19,11 +26,11 @@ const nextConfig: NextConfig = {
   // runtime (Satori needs raw TTFs). Vercel's file tracer won't detect the
   // fs.readFile paths, so include them explicitly in that function's bundle.
   outputFileTracingIncludes: {
-    '/api/merch/render': [
-      './lib/merch/fonts/*.ttf',
-      './lib/merch/assets/*.png',
-      './public/images/bd-logo-icon.png', // fallback logo
-    ],
+    // Both routes render via lib/merch/render.ts, which reads these font/logo
+    // files from disk at runtime — Vercel's tracer can't detect the paths, so
+    // include them explicitly for every function that renders.
+    '/api/merch/render': merchRenderAssets,
+    '/api/merch/publish': merchRenderAssets,
   },
 
   images: {

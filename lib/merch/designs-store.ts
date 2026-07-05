@@ -32,8 +32,21 @@ export interface MerchDesignRow {
   printful_sync_product_id: number | null
   merch_id: string | null
   notes: string | null
+  published: PublishedEntry[]
   created_at: string
   updated_at: string
+}
+
+export interface PublishedEntry {
+  blank: string
+  template: string
+  colorway: string
+  sync_product_id: number
+  print_file_url: string
+  colors: string[]
+  sizes: string[]
+  price_cents: number
+  published_at: string
 }
 
 export interface NewMerchDesign {
@@ -86,7 +99,7 @@ export async function insertMerchDesign(input: NewMerchDesign): Promise<MerchDes
 export async function updateMerchDesign(
   id: string,
   patch: Partial<Pick<MerchDesignRow,
-    'title' | 'content' | 'status' | 'ip_flag' | 'ip_note' | 'product_types' | 'notes' | 'template_key' | 'template_config' | 'print_file_url' | 'printful_sync_product_id'
+    'title' | 'content' | 'status' | 'ip_flag' | 'ip_note' | 'product_types' | 'notes' | 'template_key' | 'template_config' | 'print_file_url' | 'printful_sync_product_id' | 'published'
   >>,
 ): Promise<MerchDesignRow> {
   const { data, error } = await db()
