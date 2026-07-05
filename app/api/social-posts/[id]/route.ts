@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireSocialActor } from '@/lib/social/generate'
+import { overCharLimit } from '@/lib/social-platforms'
 import { z } from 'zod'
 
 const SELECT = 'id, platform, content, status, source_type, source_id, source_title, link_url, image_url, notes, scheduled_at, posted_at, created_at, updated_at'
@@ -31,6 +32,25 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (parsed.data.status === 'posted') update.posted_at = new Date().toISOString()
 
   const admin = createAdminClient()
+
+  // Enforce the platform char limit whenever the content changes. PatchSchema
+  // has no `platform` (it isn't editable), so read it from the row; use the
+  // payload's link_url if the client sent one, else the stored value.
+  if (parsed.data.content !== undefined) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: existing } = await (admin as any)
+      .from('social_posts')
+      .select('platform, link_url')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single()
+    if (existing) {
+      const hasLink = 'link_url' in parsed.data ? !!parsed.data.link_url : !!existing.link_url
+      const tooLong = overCharLimit(existing.platform, parsed.data.content, hasLink)
+      if (tooLong) return NextResponse.json({ error: tooLong }, { status: 400 })
+    }
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error: dbErr } = await (admin as any)
     .from('social_posts')

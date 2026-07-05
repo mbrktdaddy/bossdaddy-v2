@@ -25,6 +25,10 @@ export async function createStructured(opts: {
   maxTokens: number
   // Override the model (defaults to MODEL — sonnet). Use for opt-in Opus runs.
   model?: string
+  // Sampling temperature. Left undefined the API runs at its 1.0 default (max
+  // variability). We pass 0.8 on long-form drafts to cut claim-slip/hallucination
+  // risk against a strict banlist while keeping the voice alive.
+  temperature?: number
   // Extra SDK retry headroom (default 2) to ride out transient 529 overloads on
   // long, expensive calls. The SDK honors x-should-retry + Retry-After.
   maxRetries?: number
@@ -32,6 +36,7 @@ export async function createStructured(opts: {
   const message = await getClaudeClient().messages.create({
     model: opts.model ?? MODEL,
     max_tokens: opts.maxTokens,
+    ...(opts.temperature != null ? { temperature: opts.temperature } : {}),
     system: opts.system,
     tools: [opts.tool],
     tool_choice: { type: 'tool', name: opts.tool.name },

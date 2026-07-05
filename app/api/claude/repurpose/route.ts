@@ -119,6 +119,11 @@ Return all three via the submit_repurpose tool:
 
 3) posts — 3 standalone X posts, each ≤ ${X_CHAR_LIMIT} characters, each a DIFFERENT angle (practical tip / bold take / honest question). Hook-first. No em-dashes, no hashtag spam.
 
+X FORMATTING & READABILITY (applies to every thread post and standalone post):
+- Break within the post. Use line breaks (\\n) and blank lines to separate ideas — a hook line, a blank line, then the payoff. Never a dense wall of text. Short lines read better on a phone.
+- Emoji: 0–1 per post, and only when it earns its place (warmth or a single clear signal). NEVER 🚀 🔥 💯 or hype-cluster emoji. Most posts should use zero.
+- CAPS: allowed for ONE word of emphasis at most, sparingly (it echoes the wordmark). Never a full sentence or phrase in caps — it reads as shouting.
+
 EDGE OFF: if the source covers loss, mental health, marriage strain, or safety-critical topics (car seats, infant sleep, water safety, firearms), drop the roast and smirk — write in warm Protector mode per the voice rules.
 Never use "game-changer", "must-have", "revolutionary", or "life-changing". No corporate speak.`
 
@@ -133,6 +138,7 @@ Never use "game-changer", "must-have", "revolutionary", or "life-changing". No c
       model: model === 'opus' ? OPUS_MODEL : MODEL,
       // Article (400–700 words) + thread + 3 posts is a large tool input.
       maxTokens: 6000,
+      temperature: 0.8,
       maxRetries: 3,
     })
   } catch (err: unknown) {

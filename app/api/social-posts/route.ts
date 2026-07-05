@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { PLATFORM_IDS } from '@/lib/social-platforms'
+import { PLATFORM_IDS, overCharLimit } from '@/lib/social-platforms'
 import { requireSocialActor } from '@/lib/social/generate'
 import { z } from 'zod'
 
@@ -61,6 +61,9 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null)
   const parsed = CreateSchema.safeParse(body)
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
+
+  const tooLong = overCharLimit(parsed.data.platform, parsed.data.content, !!parsed.data.link_url)
+  if (tooLong) return NextResponse.json({ error: tooLong }, { status: 400 })
 
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

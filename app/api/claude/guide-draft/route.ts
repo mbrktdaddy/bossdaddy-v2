@@ -147,6 +147,7 @@ Return your result by calling the submit_guide tool. Field guidance: title is a 
       messages: [{ role: 'user', content: prompt }],
       tool: GUIDE_DRAFT_TOOL,
       maxTokens: 3800,
+      temperature: 0.8,
     })
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err)
