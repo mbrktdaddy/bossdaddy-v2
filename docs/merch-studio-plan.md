@@ -152,8 +152,9 @@ Files added/changed:
 
 **Verified:** standalone Satori render with the brand fonts → valid PNG, `channels=4 hasAlpha=true` (transparent). `tsc` + `eslint` clean.
 
+**Logo art (updated 2026-07-05):** the `logo` template now uses purpose-designed art in `lib/merch/assets/` — `bd-logo-on-dark.png` (Hot orange `#E55A1A`) and `bd-logo-on-light.png` (core orange `#CC5500`), picked by colorway via `loadMerchLogo()`. Operator-supplied Canva exports, recolored to exact brand oranges (originals were off-brand `#F46314` / `#D45B12`). Merch-only assets — NOT wired into app UI (brand-asset rule intact). Fallback recolors `bd-logo-icon.png` if a file is missing. Bundled via `outputFileTracingIncludes`.
+
 **Known limits / follow-ups:**
 - Template `catalogProductId`s + exact print dimensions in `printful-catalog.ts` are still placeholders — **VERIFY against live Printful catalog in Phase 3.**
-- Logo PNG is single-color; on the `light` colorway it may not contrast perfectly. Fine for v1; revisit if needed.
 - Print files are generated on-demand (download); Phase 3 will persist the chosen one to a `merch-designs` bucket + `print_file_url` before uploading to Printful.
 - No Mockup Generator yet (optional).

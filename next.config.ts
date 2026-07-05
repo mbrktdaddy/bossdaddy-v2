@@ -19,7 +19,11 @@ const nextConfig: NextConfig = {
   // runtime (Satori needs raw TTFs). Vercel's file tracer won't detect the
   // fs.readFile paths, so include them explicitly in that function's bundle.
   outputFileTracingIncludes: {
-    '/api/merch/render': ['./lib/merch/fonts/*.ttf', './public/images/bd-logo-icon.png'],
+    '/api/merch/render': [
+      './lib/merch/fonts/*.ttf',
+      './lib/merch/assets/*.png',
+      './public/images/bd-logo-icon.png', // fallback logo
+    ],
   },
 
   images: {

@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { loadMerchFonts, loadLogoDataUri } from '@/lib/merch/fonts'
+import { loadMerchFonts, loadMerchLogo } from '@/lib/merch/fonts'
 import {
   renderTemplate,
   COLORWAYS,
@@ -72,7 +72,9 @@ export async function GET(request: NextRequest) {
 
   const [fonts, logo] = await Promise.all([
     loadMerchFonts(),
-    template === 'logo' ? loadLogoDataUri() : Promise.resolve(undefined),
+    // Purpose-designed logo art per garment colorway (Hot orange on dark, core
+    // orange on light).
+    template === 'logo' ? loadMerchLogo(colorway) : Promise.resolve(undefined),
   ])
 
   const element = renderTemplate(template, {
