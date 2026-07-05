@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { compressImage } from '@/lib/compress-image'
 import ImageCropper from '@/components/ui/ImageCropper'
-import { MERCH_CATEGORIES, MERCH_STATUSES, getMerchDisplayImage, type Merch, type MerchCategory, type MerchStatus } from '@/lib/merch'
+import { MERCH_CATEGORIES, MERCH_STATUSES, type Merch, type MerchCategory, type MerchStatus } from '@/lib/merch'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
@@ -32,6 +32,7 @@ export function MerchForm({ item }: Props) {
   const [position, setPosition]       = useState<number>(item?.position ?? 0)
   const [featured, setFeatured]       = useState(item?.featured ?? false)
   const [enabledImages, setEnabledImages] = useState<string[]>(item?.enabled_images ?? [])
+  const [images, setImages]           = useState<string[]>(item?.images ?? [])
 
   const [busy, setBusy]               = useState(false)
   const [deleting, setDeleting]       = useState(false)
@@ -65,6 +66,7 @@ export function MerchForm({ item }: Props) {
       position:     Number.isFinite(position) ? position : 0,
       featured,
       enabled_images: enabledImages,
+      images,
     }
 
     try {
@@ -103,8 +105,29 @@ export function MerchForm({ item }: Props) {
     const res = await fetch('/api/media', { method: 'POST', body: fd })
     const json = await res.json()
     if (!res.ok) { setError(json.error ?? 'Upload failed'); setUploading(false); return }
-    setImageUrl(json.asset.url)
+    addImage(json.asset.url, true)
     setUploading(false)
+  }
+
+  // Add an image to the gallery (dedup); optionally make it the primary/thumbnail.
+  function addImage(url: string, makePrimary = false) {
+    setImages((prev) => (prev.includes(url) ? prev : [...prev, url]))
+    if (makePrimary) setImageUrl(url)
+  }
+
+  function removeImage(url: string) {
+    setImages((prev) => prev.filter((u) => u !== url))
+    setEnabledImages((prev) => prev.filter((u) => u !== url))
+    if (imageUrl === url) setImageUrl('')
+  }
+
+  function toggleEnabled(url: string) {
+    // enabledImages empty = "all shown"; first hide seeds the explicit set.
+    if (enabledImages.length === 0) {
+      setEnabledImages(images.filter((u) => u !== url))
+    } else {
+      setEnabledImages((prev) => (prev.includes(url) ? prev.filter((u) => u !== url) : [...prev, url]))
+    }
   }
 
   function handleCropDone(blob: Blob) {
@@ -270,45 +293,58 @@ export function MerchForm({ item }: Props) {
         </label>
       </div>
 
-      {/* Image */}
+      {/* Product images — set primary (thumbnail), show/hide on the page, remove */}
       <div className="space-y-3">
-        <p className="text-sm font-semibold text-prose">Product Image</p>
+        <div>
+          <p className="text-sm font-semibold text-prose">Product Images</p>
+          <p className="text-xs text-prose-faint mt-0.5">
+            The <span className="text-accent-text-soft font-semibold">primary</span> image is the card thumbnail. Hide any you don&apos;t want on the product page, or remove them entirely. Mockups generated in Merch Studio land here.
+          </p>
+        </div>
 
-        {/* Show effective image — manual override takes priority over Printful default */}
-        {(() => {
-          const displayImg = imageUrl || (item ? getMerchDisplayImage(item) : null)
-          const isPrintfulDefault = !imageUrl && !!item?.default_image_url
-          return displayImg ? (
-            <div className="space-y-1.5">
-              <div className="relative w-32 h-32 rounded-xl overflow-hidden border border-soft bg-surface-sunken">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={displayImg} alt={name} className="w-full h-full object-cover" />
-                {imageUrl && (
-                  <button
-                    type="button"
-                    onClick={() => setImageUrl('')}
-                    className="absolute top-1 right-1 p-1 bg-surface/80 hover:bg-danger-bg text-prose-muted hover:text-danger-ink rounded transition-colors"
-                    title="Clear override image"
-                  >
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-              {isPrintfulDefault && (
-                <p className="text-xs text-prose-faint">
-                  Printful default — upload or pick from library to override.
-                </p>
-              )}
-              {imageUrl && (
-                <p className="text-xs text-accent-text-soft">
-                  Manual override active. Clear it to revert to Printful image.
-                </p>
-              )}
-            </div>
-          ) : null
-        })()}
+        {images.length > 0 ? (
+          <div className="flex flex-wrap gap-3">
+            {images.map((url, i) => {
+              const isPrimary = imageUrl === url || (!imageUrl && i === 0 && !item?.default_image_url)
+              const isEnabled = enabledImages.length === 0 || enabledImages.includes(url)
+              return (
+                <div key={url} className="w-28">
+                  <div className={`relative w-28 h-28 rounded-xl overflow-hidden border-2 ${isPrimary ? 'border-accent' : 'border-soft'} ${isEnabled ? 'opacity-100' : 'opacity-40'} bg-surface-sunken`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={url} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
+                    {isPrimary && (
+                      <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-accent text-white text-[10px] font-bold uppercase tracking-wide">Primary</span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeImage(url)}
+                      className="absolute top-1 right-1 p-1 bg-surface/80 hover:bg-danger-bg text-prose-muted hover:text-danger-ink rounded transition-colors"
+                      title="Remove image"
+                    >
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    {!isPrimary && (
+                      <button type="button" onClick={() => setImageUrl(url)} className="text-[11px] text-accent-text-soft hover:underline">
+                        Set primary
+                      </button>
+                    )}
+                    <button type="button" onClick={() => toggleEnabled(url)} className="text-[11px] text-prose-faint hover:text-prose-muted">
+                      {isEnabled ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <p className="text-xs text-prose-faint">
+            No images yet{item?.default_image_url ? ' beyond the Printful thumbnail' : ''}. Generate a mockup in Merch Studio, or add one below.
+          </p>
+        )}
 
         <div className="flex items-center gap-2 flex-wrap">
           <button
@@ -316,7 +352,7 @@ export function MerchForm({ item }: Props) {
             onClick={() => setShowPicker(true)}
             className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted font-semibold rounded-lg transition-colors"
           >
-            📁 Pick from library
+            Pick from library
           </button>
           <button
             type="button"
@@ -324,8 +360,17 @@ export function MerchForm({ item }: Props) {
             disabled={uploading}
             className="text-xs px-3 py-1.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-semibold rounded-lg transition-colors"
           >
-            {uploading ? 'Uploading…' : '+ Upload'}
+            {uploading ? 'Uploading…' : '+ Add image'}
           </button>
+          {imageUrl && (
+            <button
+              type="button"
+              onClick={() => setImageUrl('')}
+              className="text-xs text-prose-faint hover:text-accent-text-soft transition-colors"
+            >
+              Clear primary (use Printful thumbnail)
+            </button>
+          )}
         </div>
         <input
           ref={fileInputRef}
@@ -336,7 +381,7 @@ export function MerchForm({ item }: Props) {
         />
         {showPicker && (
           <MediaPicker
-            onSelect={(url) => { setImageUrl(url); setShowPicker(false) }}
+            onSelect={(url) => { addImage(url, true); setShowPicker(false) }}
             onClose={() => setShowPicker(false)}
             uploadAspect={1}
           />
@@ -350,62 +395,6 @@ export function MerchForm({ item }: Props) {
           />
         )}
       </div>
-
-      {/* Synced image moderation — only shown when Printful has provided images */}
-      {item?.images && item.images.length > 0 && (
-        <div className="space-y-3">
-          <div>
-            <p className="text-sm font-semibold text-prose">Synced Images</p>
-            <p className="text-xs text-prose-faint mt-0.5">
-              Click to toggle which images show on the product page. All images are from Printful — re-syncing won&apos;t remove your choices.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            {item.images.map((url, i) => {
-              const isEnabled = enabledImages.length === 0 || enabledImages.includes(url)
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => {
-                    if (enabledImages.length === 0) {
-                      // First toggle: start from all-enabled minus this one
-                      setEnabledImages(item.images!.filter((u) => u !== url))
-                    } else {
-                      setEnabledImages((prev) =>
-                        prev.includes(url) ? prev.filter((u) => u !== url) : [...prev, url]
-                      )
-                    }
-                  }}
-                  className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${
-                    isEnabled ? 'border-accent opacity-100' : 'border-strong opacity-30'
-                  }`}
-                  title={isEnabled ? 'Click to hide' : 'Click to show'}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
-                  {!isEnabled && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                      <svg className="w-5 h-5 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 4.411m0 0L21 21" />
-                      </svg>
-                    </div>
-                  )}
-                </button>
-              )
-            })}
-          </div>
-          {enabledImages.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setEnabledImages([])}
-              className="text-xs text-prose-faint hover:text-accent-text-soft transition-colors"
-            >
-              Reset — show all images
-            </button>
-          )}
-        </div>
-      )}
 
       {error && (
         <p className="text-danger-ink text-sm bg-danger-bg border border-danger-line rounded-lg px-4 py-3">{error}</p>

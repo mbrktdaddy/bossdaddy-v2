@@ -15,6 +15,7 @@ const MerchPatchSchema = z.object({
   position:     z.number().int().nonnegative().optional(),
   featured:        z.boolean().optional(),
   enabled_images:  z.array(z.string().url()).optional(),
+  images:          z.array(z.string().url()).optional(),
 })
 
 async function requireAdmin() {

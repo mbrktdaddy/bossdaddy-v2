@@ -15,6 +15,7 @@ const MerchSchema = z.object({
   position:     z.number().int().nonnegative().optional(),
   featured:        z.boolean().optional(),
   enabled_images:  z.array(z.string().url()).optional(),
+  images:          z.array(z.string().url()).optional(),
 })
 
 async function requireAdmin() {
@@ -66,6 +67,7 @@ export async function POST(request: NextRequest) {
       position:     parsed.data.position ?? 0,
       featured:        parsed.data.featured ?? false,
       enabled_images:  parsed.data.enabled_images ?? [],
+      images:          parsed.data.images ?? [],
     })
     .select()
     .single()
