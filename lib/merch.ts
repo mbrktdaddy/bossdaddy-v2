@@ -163,5 +163,8 @@ export function getMerchCategoryBySlug(slug: string) {
 }
 
 export function getMerchDisplayImage(merch: Pick<Merch, 'image_url' | 'default_image_url'>): string | null {
-  return merch.default_image_url ?? merch.image_url ?? null
+  // image_url is the intentional override (a generated mockup or a manual pick)
+  // and is never touched by merch:sync; default_image_url is the Printful
+  // thumbnail that sync overwrites. Prefer the override so mockups win on cards.
+  return merch.image_url ?? merch.default_image_url ?? null
 }

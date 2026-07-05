@@ -60,26 +60,37 @@ function parseColor(variantName) {
   return colorParts.length ? colorParts.join(' / ') : null
 }
 
-async function syncMerch(sp, images = []) {
+async function syncMerch(sp, images = [], priceCents = null) {
   // Check if row already exists by Printful product ID
   const { data: existing } = await supabase
     .from('merch')
-    .select('id, slug')
+    .select('id, slug, price_cents')
     .eq('printful_sync_product_id', sp.id)
     .maybeSingle()
 
   const slug = existing?.slug ?? slugify(sp.name)
-  const payload = {
+
+  // Fields that are always safe to refresh from Printful.
+  const base = {
     name: sp.name,
     printful_sync_product_id: sp.id,
     default_image_url: sp.thumbnail_url,
-    images,
-    status: 'available',
     currency: 'USD',
     archived_at: null,
   }
 
   if (existing) {
+    // Preserve operator decisions on re-sync:
+    //  - do NOT touch `status` (else hiding/curating a product is undone, and
+    //    freshly-published items would be forced public before approval)
+    //  - only set `price_cents` if the operator hasn't (Printful is the source,
+    //    but don't clobber a manual override)
+    //  - only refresh `images` when Printful actually returned mockups, so a
+    //    generated mockup gallery isn't wiped by an API product's empty set
+    const payload = { ...base }
+    if (existing.price_cents == null && priceCents != null) payload.price_cents = priceCents
+    if (images.length) payload.images = images
+
     const { data, error } = await supabase
       .from('merch')
       .update(payload)
@@ -89,9 +100,11 @@ async function syncMerch(sp, images = []) {
     if (error) throw error
     return data
   } else {
+    // New products land HIDDEN (concept) — the operator sets them available in
+    // Merch admin after reviewing. Never auto-publish a fresh sync.
     const { data, error } = await supabase
       .from('merch')
-      .insert({ slug, ...payload })
+      .insert({ slug, ...base, images, price_cents: priceCents, status: 'concept' })
       .select('id')
       .single()
     if (error) throw error
@@ -167,7 +180,14 @@ async function run() {
         )
       )]
 
-      const merchRow = await syncMerch(sp, images)
+      // Denormalized "from" price for list cards (detail computes the full range
+      // from variants). Min retail across synced variants.
+      const variantCents = variants
+        .map((v) => Math.round(parseFloat(v.retail_price) * 100))
+        .filter((n) => Number.isFinite(n) && n > 0)
+      const minPriceCents = variantCents.length ? Math.min(...variantCents) : null
+
+      const merchRow = await syncMerch(sp, images, minPriceCents)
 
       for (const v of variants) {
         await syncVariant(v, merchRow.id)
@@ -210,8 +230,9 @@ async function run() {
   // never remove a product that was deleted upstream. Any merch row linked to a
   // Printful product that's no longer in the store is stale — soft-delete it by
   // stamping archived_at (display queries already filter `archived_at is null`).
-  // A product that reappears in Printful is auto-restored: syncMerch resets
-  // status:'available' + archived_at:null on the next run.
+  // A product that reappears in Printful is un-archived on the next run
+  // (syncMerch resets archived_at:null); its status is left as-is for the
+  // operator to re-set, so nothing is silently re-published.
   let archived = 0
   if (products.length === 0) {
     console.warn(
