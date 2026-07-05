@@ -1238,6 +1238,7 @@ export type Database = {
           print_file_url: string | null
           printful_sync_product_id: number | null
           product_types: string[]
+          published: Json
           status: string
           template_config: Json
           template_key: string | null
@@ -1258,6 +1259,7 @@ export type Database = {
           print_file_url?: string | null
           printful_sync_product_id?: number | null
           product_types?: string[]
+          published?: Json
           status?: string
           template_config?: Json
           template_key?: string | null
@@ -1278,6 +1280,7 @@ export type Database = {
           print_file_url?: string | null
           printful_sync_product_id?: number | null
           product_types?: string[]
+          published?: Json
           status?: string
           template_config?: Json
           template_key?: string | null
