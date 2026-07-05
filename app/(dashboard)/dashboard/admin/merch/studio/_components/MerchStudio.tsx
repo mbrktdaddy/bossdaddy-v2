@@ -372,6 +372,25 @@ function ApprovedDesignCard({ design, onDelete }: { design: ApprovedDesign; onDe
     }
   }
 
+  async function deleteMockup() {
+    setMockupBusy(true); setMockupMsg(null); setPublishErr(null)
+    try {
+      const res = await fetch('/api/merch/mockups', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ designId: design.id, blank }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Delete failed')
+      setMockups((prev) => { const next = { ...prev }; delete next[blank]; return next })
+      setMockupMsg('Mockup deleted — the shop reverted to the bare design. Regenerate for a fresh one.')
+    } catch (e) {
+      setPublishErr((e as Error).message)
+    } finally {
+      setMockupBusy(false)
+    }
+  }
+
   // Catalog color/size options for the current blank.
   const [options, setOptions] = useState<CatalogOptions | null>(null)
   const [selectedColors, setSelectedColors] = useState<string[]>([])
@@ -607,8 +626,17 @@ function ApprovedDesignCard({ design, onDelete }: { design: ApprovedDesign; onDe
                   disabled={mockupBusy}
                   className="px-3 py-2 bg-surface-raised hover:bg-surface-hover border border-soft text-prose text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
                 >
-                  {mockupBusy ? 'Rendering mockup…' : mockups[blank] ? `Regenerate ${blank} mockup` : `Generate ${blank} mockup`}
+                  {mockupBusy ? 'Working…' : mockups[blank] ? `Regenerate ${blank} mockup` : `Generate ${blank} mockup`}
                 </button>
+                {mockups[blank] && (
+                  <button
+                    onClick={deleteMockup}
+                    disabled={mockupBusy}
+                    className="px-3 py-2 text-xs font-semibold text-prose-faint hover:text-danger-ink transition-colors disabled:opacity-50"
+                  >
+                    Delete mockup
+                  </button>
+                )}
                 <span className="text-[11px] text-prose-faint">real shop image · run after merch:sync to auto-apply</span>
               </div>
             )}

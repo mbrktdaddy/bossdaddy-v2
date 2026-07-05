@@ -93,3 +93,46 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: `Mockup failed: ${(err as Error).message}` }, { status: 502 })
   }
 }
+
+const BUCKET = 'merch-designs'
+
+export async function DELETE(request: NextRequest) {
+  const auth = await requireAdmin()
+  if ('error' in auth) return auth.error
+
+  const body = await request.json().catch(() => null)
+  const parsed = BodySchema.safeParse(body)
+  if (!parsed.success) return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
+  const { designId, blank } = parsed.data
+
+  const design = await getMerchDesign(designId)
+  if (!design) return NextResponse.json({ error: 'Design not found' }, { status: 404 })
+  const entry = (design.published ?? []).find((e) => e.blank === blank)
+
+  const admin = createAdminClient()
+
+  // Remove the stored mockup file(s) for this blank.
+  await admin.storage.from(BUCKET).remove([`${designId}/mockup-${blank}.jpg`]).catch(() => {})
+
+  // Clear the mockup off the design's published entry.
+  const nextPublished = (design.published ?? []).map((e) =>
+    e.blank === blank ? { ...e, mockups: [] } : e,
+  )
+  await updateMerchDesign(designId, { published: nextPublished })
+
+  // Revert the shop row image back to the bare print file (the mockup had
+  // overwritten image_url / default_image_url / images / enabled_images).
+  if (entry) {
+    await admin
+      .from('merch')
+      .update({
+        image_url: null,
+        default_image_url: entry.print_file_url,
+        images: [],
+        enabled_images: [],
+      })
+      .eq('printful_sync_product_id', entry.sync_product_id)
+  }
+
+  return NextResponse.json({ ok: true })
+}
