@@ -8,7 +8,7 @@ import { createMockupTask, getMockupTask } from '@/lib/printful'
 const BUCKET = 'merch-designs'
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
-export async function generateAndStoreMockup(opts: {
+export async function generateAndStoreMockups(opts: {
   designId: string
   blank: string
   catalogProductId: number
@@ -17,7 +17,7 @@ export async function generateAndStoreMockup(opts: {
   printFileUrl: string
   areaWidth: number
   areaHeight: number
-}): Promise<{ mockupUrl: string; sourceUrl: string }> {
+}): Promise<{ mockupUrls: string[] }> {
   // Our print file is rendered at exactly the placement's printfile size, so it
   // fills the whole print area (top/left 0, full width/height).
   const position = {
@@ -44,22 +44,34 @@ export async function generateAndStoreMockup(opts: {
   }
   if (res.status !== 'completed') throw new Error('Mockup generation timed out — try again in a minute.')
 
-  const sourceUrl = res.mockups?.[0]?.mockup_url
-  if (!sourceUrl) throw new Error('Printful returned no mockup image.')
+  // Collect every rendered view: the main mockup per garment-color group plus
+  // each group's extra angles/lifestyle shots. Dedup + cap so the gallery stays
+  // reasonable.
+  const sourceUrls: string[] = []
+  for (const m of res.mockups ?? []) {
+    if (m.mockup_url) sourceUrls.push(m.mockup_url)
+    for (const e of m.extra ?? []) if (e.url) sourceUrls.push(e.url)
+  }
+  const unique = [...new Set(sourceUrls)].slice(0, 10)
+  if (unique.length === 0) throw new Error('Printful returned no mockup image.')
 
-  // Re-host the temporary Printful CDN image so the shop link is permanent.
-  const imgRes = await fetch(sourceUrl)
-  if (!imgRes.ok) throw new Error(`Mockup download failed (${imgRes.status})`)
-  const buf = Buffer.from(await imgRes.arrayBuffer())
-
+  // Re-host each temporary Printful CDN image so the shop links are permanent.
   const admin = createAdminClient()
-  const path = `${opts.designId}/mockup-${opts.blank}.jpg`
-  const { error } = await admin.storage
-    .from(BUCKET)
-    .upload(path, buf, { contentType: 'image/jpeg', upsert: true })
-  if (error) throw new Error(`Mockup upload failed: ${error.message}`)
+  const stamp = Math.floor(Date.now() / 1000)
+  const stored: string[] = []
+  for (let i = 0; i < unique.length; i++) {
+    const imgRes = await fetch(unique[i])
+    if (!imgRes.ok) continue
+    const buf = Buffer.from(await imgRes.arrayBuffer())
+    const path = `${opts.designId}/mockup-${opts.blank}-${i}.jpg`
+    const { error } = await admin.storage
+      .from(BUCKET)
+      .upload(path, buf, { contentType: 'image/jpeg', upsert: true })
+    if (error) throw new Error(`Mockup upload failed: ${error.message}`)
+    const { data } = admin.storage.from(BUCKET).getPublicUrl(path)
+    stored.push(`${data.publicUrl}?v=${stamp}`)
+  }
+  if (stored.length === 0) throw new Error('Failed to store any mockup images.')
 
-  const { data } = admin.storage.from(BUCKET).getPublicUrl(path)
-  // Cache-bust so a regenerated mockup at the same path refreshes in the shop.
-  return { mockupUrl: `${data.publicUrl}?v=${Math.floor(Date.now() / 1000)}`, sourceUrl }
+  return { mockupUrls: stored }
 }

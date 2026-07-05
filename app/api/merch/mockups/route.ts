@@ -6,7 +6,7 @@ import { checkRateLimit } from '@/lib/rate-limit'
 import { getMerchDesign, updateMerchDesign } from '@/lib/merch/designs-store'
 import { MERCH_CATALOG } from '@/lib/merch/printful-catalog'
 import { getCatalogProduct } from '@/lib/printful'
-import { generateAndStoreMockup } from '@/lib/merch/mockups'
+import { generateAndStoreMockups } from '@/lib/merch/mockups'
 import { resolvePrintfileDims } from '@/lib/merch/printfile-dims'
 
 export const runtime = 'nodejs'
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     // Same real print-area dims the print file was rendered at → position matches.
     const dims = await resolvePrintfileDims(blank)
-    const { mockupUrl } = await generateAndStoreMockup({
+    const { mockupUrls } = await generateAndStoreMockups({
       designId,
       blank,
       catalogProductId: spec.catalogProductId,
@@ -67,27 +67,27 @@ export async function POST(request: NextRequest) {
       areaHeight: dims.height,
     })
 
-    // Persist the mockup on the design's published entry.
+    // Persist the mockups on the design's published entry.
     const nextPublished = (design.published ?? []).map((e) =>
-      e.blank === blank ? { ...e, mockups: [mockupUrl] } : e,
+      e.blank === blank ? { ...e, mockups: mockupUrls } : e,
     )
     await updateMerchDesign(designId, { published: nextPublished })
 
-    // If merch:sync has already created the shop row, apply the mockup as its
-    // image so the shop shows a real product (API products have no Printful
-    // preview file, so this is the only good image). image_url is the override
-    // that survives future syncs.
+    // If merch:sync has already created the shop row, apply the mockups as its
+    // gallery (API products have no Printful preview file, so this is the only
+    // good imagery). image_url is the primary/override that survives future syncs.
     const admin = createAdminClient()
     const { data: rows } = await admin
       .from('merch')
-      .update({ image_url: mockupUrl, default_image_url: mockupUrl, images: [mockupUrl], enabled_images: [mockupUrl] })
+      .update({ image_url: mockupUrls[0], default_image_url: mockupUrls[0], images: mockupUrls, enabled_images: mockupUrls })
       .eq('printful_sync_product_id', entry.sync_product_id)
       .select('id')
     const appliedToShop = !!rows?.length
 
     return NextResponse.json({
       ok: true,
-      mockupUrl,
+      mockupUrl: mockupUrls[0],
+      mockupCount: mockupUrls.length,
       appliedToShop,
       next: appliedToShop
         ? 'Mockup applied to the shop product.'
@@ -116,8 +116,12 @@ export async function DELETE(request: NextRequest) {
 
   const admin = createAdminClient()
 
-  // Remove the stored mockup file(s) for this blank.
-  await admin.storage.from(BUCKET).remove([`${designId}/mockup-${blank}.jpg`]).catch(() => {})
+  // Remove all stored mockup file(s) for this blank (mockup-<blank>-N.jpg).
+  const { data: files } = await admin.storage.from(BUCKET).list(designId)
+  const toRemove = (files ?? [])
+    .filter((f) => f.name.startsWith(`mockup-${blank}`))
+    .map((f) => `${designId}/${f.name}`)
+  if (toRemove.length) await admin.storage.from(BUCKET).remove(toRemove).catch(() => {})
 
   // Clear the mockup off the design's published entry.
   const nextPublished = (design.published ?? []).map((e) =>
