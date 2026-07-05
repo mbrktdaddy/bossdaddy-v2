@@ -101,6 +101,100 @@ export interface PrintfulOrder {
   }
 }
 
+// ─── Catalog (blank products we design onto) ─────────────────────────────────
+
+export interface PrintfulCatalogProduct {
+  id: number
+  type: string
+  brand: string | null
+  model: string
+  title: string
+  description: string
+  variant_count: number
+}
+
+export interface PrintfulCatalogVariant {
+  id: number          // this is the variant_id used when creating sync variants
+  product_id: number
+  name: string
+  size: string
+  color: string
+  color_code: string | null
+  in_stock?: boolean
+}
+
+// Print placement / print-area info for a catalog product, used to size print
+// files correctly. Shape varies by product; we read what we need defensively.
+export interface PrintfulPrintfileInfo {
+  product_id: number
+  available_placements: Record<string, string>
+  printfiles: Array<{ printfile_id: number; width: number; height: number; dpi: number }>
+  variant_printfiles: Array<{ variant_id: number; placements: Record<string, number> }>
+}
+
+// Full catalog list (large — ~300+ blanks). Prefer getCatalogProduct once IDs
+// are pinned in lib/merch/printful-catalog.ts.
+export function getCatalogProducts(): Promise<PrintfulCatalogProduct[]> {
+  return request<PrintfulCatalogProduct[]>('GET', '/products')
+}
+
+// A catalog product plus all its variants. Result shape: { product, variants }.
+export function getCatalogProduct(
+  productId: number,
+): Promise<{ product: PrintfulCatalogProduct; variants: PrintfulCatalogVariant[] }> {
+  return request<{ product: PrintfulCatalogProduct; variants: PrintfulCatalogVariant[] }>(
+    'GET',
+    `/products/${productId}`,
+  )
+}
+
+export function getPrintfileInfo(productId: number): Promise<PrintfulPrintfileInfo> {
+  return request<PrintfulPrintfileInfo>('GET', `/mockup-generator/printfiles/${productId}`)
+}
+
+// ─── File library ────────────────────────────────────────────────────────────
+
+export interface PrintfulFile {
+  id: number
+  type: string
+  url: string
+  status: string      // 'ok' | 'waiting' | 'failed'
+  preview_url: string
+}
+
+// Upload a print file to the store's file library by URL. Printful fetches the
+// URL server-side, so it MUST be publicly reachable (hence the merch-designs
+// bucket, not the admin-gated /api/merch/render endpoint).
+export function uploadFile(url: string, filename?: string): Promise<PrintfulFile> {
+  return request<PrintfulFile>('POST', '/files', { url, ...(filename ? { filename } : {}) })
+}
+
+// ─── Sync product creation ───────────────────────────────────────────────────
+
+export interface CreateSyncVariant {
+  variant_id: number        // catalog variant id (from getCatalogProduct)
+  retail_price: string      // e.g. "28.00"
+  files: Array<{ type?: string; url: string }>  // type defaults to 'default' placement
+}
+
+export interface CreateSyncProductPayload {
+  sync_product: {
+    name: string
+    thumbnail?: string
+    external_id?: string
+  }
+  sync_variants: CreateSyncVariant[]
+}
+
+// Creates a store sync product from our print file(s). It lands as a draft in the
+// Printful store; `merch:sync` then pulls it into the merch/merch_variants tables
+// and the operator flips it live. Returns the new sync product detail.
+export function createSyncProduct(
+  payload: CreateSyncProductPayload,
+): Promise<PrintfulSyncProductDetail> {
+  return request<PrintfulSyncProductDetail>('POST', '/store/products', payload)
+}
+
 // ─── API calls ───────────────────────────────────────────────────────────────
 
 export function getSyncProducts(): Promise<PrintfulSyncProduct[]> {

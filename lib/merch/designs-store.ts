@@ -57,6 +57,12 @@ export async function listMerchDesigns(): Promise<MerchDesignRow[]> {
   return (data ?? []) as MerchDesignRow[]
 }
 
+export async function getMerchDesign(id: string): Promise<MerchDesignRow | null> {
+  const { data, error } = await db().from('merch_designs').select('*').eq('id', id).maybeSingle()
+  if (error) throw new Error(error.message)
+  return (data as MerchDesignRow) ?? null
+}
+
 export async function insertMerchDesign(input: NewMerchDesign): Promise<MerchDesignRow> {
   const { data, error } = await db()
     .from('merch_designs')
@@ -80,7 +86,7 @@ export async function insertMerchDesign(input: NewMerchDesign): Promise<MerchDes
 export async function updateMerchDesign(
   id: string,
   patch: Partial<Pick<MerchDesignRow,
-    'title' | 'content' | 'status' | 'ip_flag' | 'ip_note' | 'product_types' | 'notes' | 'template_key' | 'template_config'
+    'title' | 'content' | 'status' | 'ip_flag' | 'ip_note' | 'product_types' | 'notes' | 'template_key' | 'template_config' | 'print_file_url' | 'printful_sync_product_id'
   >>,
 ): Promise<MerchDesignRow> {
   const { data, error } = await db()

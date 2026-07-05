@@ -1,6 +1,6 @@
 # Merch Studio — AI-Assisted Merch Creation Plan
 
-> **Status:** Phase 0 + 1 SHIPPED (committed `bc4537e`, pushed). Phase 2 (render engine) BUILT 2026-07-05. Next up: Phase 3 (Printful write layer). See §9 build log.
+> **Status:** Phase 0–2 SHIPPED (pushed through `edd0929`). Phase 3 (Printful write layer) BUILT 2026-07-05 — needs migration 117 applied + one real E2E publish test. See §9 build log. Tee + mug publishable; hat (embroidery) deferred.
 > **Goal:** An admin workspace that takes a merch idea from Claude-generated copy → brand-locked print-ready design → published Printful product → live in the shop, with the operator as editor at every gate.
 > **Scope decisions (locked 2026-07-05):**
 > - **Automation depth:** Full push to Printful (generate print files + create Printful product via API as a draft; existing `merch:sync` brings it live). Not fully autonomous — a human "confirm publish" gate stays.
@@ -154,7 +154,30 @@ Files added/changed:
 
 **Logo art (updated 2026-07-05):** the `logo` template now uses purpose-designed art in `lib/merch/assets/` — `bd-logo-on-dark.png` (Hot orange `#E55A1A`) and `bd-logo-on-light.png` (core orange `#CC5500`), picked by colorway via `loadMerchLogo()`. Operator-supplied Canva exports, recolored to exact brand oranges (originals were off-brand `#F46314` / `#D45B12`). Merch-only assets — NOT wired into app UI (brand-asset rule intact). Fallback recolors `bd-logo-icon.png` if a file is missing. Bundled via `outputFileTracingIncludes`.
 
-**Known limits / follow-ups:**
-- Template `catalogProductId`s + exact print dimensions in `printful-catalog.ts` are still placeholders — **VERIFY against live Printful catalog in Phase 3.**
-- Print files are generated on-demand (download); Phase 3 will persist the chosen one to a `merch-designs` bucket + `print_file_url` before uploading to Printful.
-- No Mockup Generator yet (optional).
+### Phase 3 — BUILT 2026-07-05
+
+An approved design now publishes to Printful as a draft product from the Studio.
+
+Files added/changed:
+- `lib/printful.ts` — added catalog lookup (`getCatalogProducts`, `getCatalogProduct`, `getPrintfileInfo`), `uploadFile` (POST /files), `createSyncProduct` (POST /store/products) + types.
+- `scripts/discover-merch-blanks.mjs` + `merch:discover` npm script — read-only catalog discovery (used to verify IDs).
+- `lib/merch/printful-catalog.ts` — **VERIFIED live** (2026-07-05): tee = Bella+Canvas 3001 **id 71** (`front`, 1800×2400@150), mug = White Glossy Mug **id 19** (`default`, 2700×1050@300). Hat = **not publishable** (embroidery pipeline deferred). Variant ids resolved dynamically by color/size (Black/White × S–2XL for tee; White × 11oz for mug — all confirmed present).
+- `supabase/migrations/117_merch_designs_bucket.sql` — public `merch-designs` storage bucket (Printful fetches print files by URL).
+- `lib/merch/render.ts` — shared render core (extracted from the route so the publish flow reuses it).
+- `lib/merch/print-file.ts` — renders the print PNG + uploads to the bucket → public `print_file_url`.
+- `app/api/merch/publish/route.ts` — the publish flow: render+store print file → resolve variants → `createSyncProduct` (draft) → persist `printful_sync_product_id` + `status='published'`. Admin-gated; guards double-publish (409 unless `force`); mug forced to light colorway; `external_id` = uuid-sans-dashes (32-char cap).
+- `MerchStudio.tsx` — approved cards get a price input + "Publish to Printful" button + status/result; hat shows a "coming later" note.
+- `lib/merch/designs-store.ts` — added `getMerchDesign`; `updateMerchDesign` now persists `print_file_url` + `printful_sync_product_id`.
+
+**Verified:** `tsc` + `eslint` clean; catalog IDs + variant color/size strings confirmed against live API. **NOT yet run E2E** (would create a real Printful draft) — do that once migration 117 is applied.
+
+**Manual steps before publish works:**
+1. Apply migration 117 (`npm run db:push` or SQL editor) — creates the `merch-designs` bucket.
+2. Deploy (push) so the publish route + bucket-writing run in prod (or test locally).
+3. E2E: in Studio, approve a saying → pick template/tee/colorway → set price → **Publish to Printful** → confirm a draft product appears in the Printful dashboard → `npm run merch:sync` → it lands in Merch admin → set `available`.
+
+**Follow-ups / deferred:**
+- **Hat publishing** — embroidery needs a digitized file + thread colors, not a flat PNG. Separate phase.
+- Mockup Generator API for real shop imagery (currently the print file is the thumbnail until `merch:sync` pulls mockups).
+- Per-design color/size selection UI (currently uses the catalog defaults: Black/White, S–2XL).
+- Auto-trigger `merch:sync` after publish (currently manual).

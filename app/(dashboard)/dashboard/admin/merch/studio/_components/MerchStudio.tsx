@@ -256,10 +256,39 @@ export function MerchStudio({ initialApproved }: { initialApproved: ApprovedDesi
   )
 }
 
+const PUBLISHABLE: Record<Blank, boolean> = { tee: true, mug: true, hat: false }
+const DEFAULT_PRICE: Record<Blank, string> = { tee: '28', mug: '15', hat: '25' }
+
 function ApprovedDesignCard({ design, onDelete }: { design: ApprovedDesign; onDelete: () => void }) {
   const [template, setTemplate] = useState<Template>(design.template_key ?? 'statement')
   const [colorway, setColorway] = useState<Colorway>(design.template_config?.colorway ?? 'dark')
   const [blank, setBlank] = useState<Blank>(design.template_config?.blank ?? 'tee')
+  const [price, setPrice] = useState<string>(DEFAULT_PRICE[design.template_config?.blank ?? 'tee'])
+  const [status, setStatus] = useState<ApprovedDesign['status']>(design.status)
+  const [publishing, setPublishing] = useState(false)
+  const [publishMsg, setPublishMsg] = useState<string | null>(null)
+  const [publishErr, setPublishErr] = useState<string | null>(null)
+
+  async function publish() {
+    const priceCents = Math.round(parseFloat(price) * 100)
+    if (!Number.isFinite(priceCents) || priceCents < 100) { setPublishErr('Enter a valid price ($1+).'); return }
+    setPublishing(true); setPublishMsg(null); setPublishErr(null)
+    try {
+      const res = await fetch('/api/merch/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ designId: design.id, blank, template, colorway, priceCents }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Publish failed')
+      setStatus('published')
+      setPublishMsg(`Published to Printful (#${json.syncProductId}, ${json.variantCount} variants). ${json.next}`)
+    } catch (e) {
+      setPublishErr((e as Error).message)
+    } finally {
+      setPublishing(false)
+    }
+  }
 
   // Persist the chosen template + config so Phase 3 can generate the real print
   // file from the operator's selection. Fire-and-forget.
@@ -332,11 +361,11 @@ function ApprovedDesignCard({ design, onDelete }: { design: ApprovedDesign; onDe
             <a
               href={printUrl}
               download
-              className="px-3 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-semibold rounded-lg transition-colors"
+              className="px-3 py-2 bg-surface-raised hover:bg-surface-hover border border-soft text-prose text-xs font-semibold rounded-lg transition-colors"
             >
               Download print file
             </a>
-            <span className="text-[11px] text-prose-faint uppercase">{design.status}</span>
+            <span className={`text-[11px] uppercase ${status === 'published' ? 'text-forest font-semibold' : 'text-prose-faint'}`}>{status}</span>
             <button
               onClick={onDelete}
               className="ml-auto text-xs text-prose-faint hover:text-danger-ink px-2 py-1"
@@ -344,6 +373,38 @@ function ApprovedDesignCard({ design, onDelete }: { design: ApprovedDesign; onDe
             >
               Delete
             </button>
+          </div>
+
+          {/* Publish to Printful */}
+          <div className="mt-3 pt-3 border-t border-soft">
+            {PUBLISHABLE[blank] ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-prose-faint">$</span>
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    className="w-16 bg-surface-raised border border-soft rounded-lg px-2 py-1.5 text-xs text-prose"
+                    aria-label="Retail price (USD)"
+                  />
+                </div>
+                <button
+                  onClick={publish}
+                  disabled={publishing || status === 'published'}
+                  className="px-3 py-2 bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg transition-colors"
+                >
+                  {publishing ? 'Publishing…' : status === 'published' ? 'Published' : 'Publish to Printful'}
+                </button>
+                <span className="text-[11px] text-prose-faint">creates a Printful draft → run merch:sync</span>
+              </div>
+            ) : (
+              <p className="text-[11px] text-prose-faint">Hats are embroidery — publishing comes in a later phase. Preview + download still work.</p>
+            )}
+            {publishMsg && <p className="text-xs text-forest mt-2">{publishMsg}</p>}
+            {publishErr && <p className="text-xs text-danger-ink mt-2">{publishErr}</p>}
           </div>
         </div>
       </div>
