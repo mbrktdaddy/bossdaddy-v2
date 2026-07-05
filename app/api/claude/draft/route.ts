@@ -228,6 +228,9 @@ Return your result by calling the submit_review tool. Field guidance: title is a
       // takeaways + sub-scores + image prompts + tags) is large; 8000 keeps the
       // tool input from truncating. claude-sonnet-4-6 handles 8k easily.
       maxTokens: 8000,
+      // Below the 1.0 default: a fact-heavy review against a strict banlist
+      // ("every claim has specifics") is where slip/hallucination hurts most.
+      temperature: 0.8,
       maxRetries: 4,
     })
   } catch (err: unknown) {
