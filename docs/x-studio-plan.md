@@ -101,6 +101,15 @@ Mig 107 already stripped `is_admin()` from `social_posts` + `hashtag_presets` �
 - `captured_at, created_at`
 - Index: `(user_id, captured_at desc)`
 
+### Success metric — NORTH STAR (decided 2026-07-05)
+**Primary metric = `link_clicks`.** X exists to feed the affiliate/content funnel, so "what won" is judged first by clicks to the site — not by vanity reach. When Phases 5 + 8 compute an engagement/performance score, weight it:
+
+- `link_clicks` — **★★★ north star** (the score's dominant term)
+- `replies` — ★ secondary (community signal, tiebreaker)
+- `likes` / `reposts` / `impressions` — · minor (context only, not optimized for)
+
+Concretely: `perf_score` is primarily a function of `link_clicks` (optionally per-impression to normalize for reach), with `replies` as a small additive bonus. Do **not** average all five equally — that was the gap the params review flagged (no north star). Revisit only if strategy shifts from funnel to pure audience-building.
+
 ### Access gate (app code, not migration)
 - `is_admin()` check on `/dashboard/social/*` routes + `/api/social-*` + `/api/claude/repurpose`. RLS stays as defense-in-depth.
 
@@ -114,10 +123,10 @@ Mig 107 already stripped `is_admin()` from `social_posts` + `hashtag_presets` �
 - **Phase 2 — Gen:** X-safe HTML serializer `lib/x/serialize.ts` (whitelist X's tag subset, return `dropped[]`) + `lib/x/preview.tsx`. Critical: X strips unsupported tags silently.
 - **Phase 3 — Gen:** Repurpose pipeline `/api/claude/repurpose` — source → `{article, thread, posts}` structured output, voice-injected, respects 10/hr rate limit + edge-off rules. UI: "Repurpose to X" on published reviews/guides (extend `GenerateDrawer.tsx`).
 - **Phase 4 — SENSE:** Radar cron (Vercel cron, daily) → web_search + Reddit + Trends/autocomplete → `social_signals`. **Budget guard** (daily run cap + `lib/rate-limit.ts`, respects Anthropic $200 cap) — non-negotiable. Source config in `lib/social/radar-config.ts` (constants, not a table yet).
-- **Phase 5 — DECIDE:** Scoring engine (signals × Boss Daddy pillars × existing catalog × recency) → ranked Opportunity Queue UI. "Surface + draft on approve" wires queue → Phase 3.
+- **Phase 5 — DECIDE:** Scoring engine (signals × Boss Daddy pillars × existing catalog × recency) → ranked Opportunity Queue UI. "Surface + draft on approve" wires queue → Phase 3. **Bias the score toward `link_clicks`** (the north star above) once LEARN metrics exist — proven click-driving topics/hooks rank higher.
 - **Phase 6 — Gen:** X Article workspace `/dashboard/social/articles/[id]` — Tiptap + reuse AIRefine/SEO/VersionHistory panels + new `XSerializerPanel` + "Copy X-ready HTML" + "Paste live URL" (ManualPublisher).
 - **Phase 7 — Gen:** Thread builder (group via `thread_group_id`, auto-split at 280, `1/n`) + AI hook generator (`HAIKU_MODEL`, 5 first-line variants) + CTA endings.
-- **Phase 8 — LEARN:** Metric entry → "what's working" → feed winning hooks/topics into Phase 5 scoring + Phase 3 few-shot. Closes the loop.
+- **Phase 8 — LEARN:** Metric entry → "what's working" (ranked by the `link_clicks` north star, not equal-weighted vanity metrics) → feed winning hooks/topics into Phase 5 scoring + Phase 3 few-shot. Closes the loop.
 
 ## Budget posture
 
