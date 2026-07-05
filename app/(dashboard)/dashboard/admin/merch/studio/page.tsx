@@ -38,7 +38,7 @@ export default async function MerchStudioPage() {
         status: d.status,
         template_key: (d.template_key as 'statement' | 'stacked' | 'wordmark' | 'logo' | null) ?? null,
         template_config: (d.template_config as { colorway?: 'dark' | 'light'; blank?: 'tee' | 'hat' | 'mug' }) ?? {},
-        published: (d.published ?? []) as { blank: string; sync_product_id: number }[],
+        published: (d.published ?? []) as { blank: string; sync_product_id: number; mockups?: string[] }[],
       }))} />
     </div>
   )

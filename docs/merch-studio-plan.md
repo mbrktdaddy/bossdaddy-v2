@@ -186,10 +186,20 @@ Fixed the gaps a pre-flight review surfaced:
 - **Verbatim input:** "Use my exact words" field saves a typed saying straight to approved designs (no AI), with an IP-responsibility note.
 - **Hardening:** in-stock variant filter, publish rate limit (`merch-publish` 30/hr), partial-failure handling (returns the Printful id if the DB write fails so nothing is a silent orphan), mug forced to light colorway + persisted so preview matches.
 
+### Mockup Generator — BUILT 2026-07-05
+
+Closes the "published product has no shop image" gap.
+- `lib/printful.ts`: `createMockupTask` (POST /mockup-generator/create-task/{id}) + `getMockupTask` (poll) + types.
+- `lib/merch/mockups.ts`: creates the task, bounded-polls (~18×2.5s, within maxDuration 60), then **downloads the mockup and re-hosts it in the bucket** — Printful mockup URLs are temporary (~72h), so we can't link them directly. Returns a cache-busted public URL.
+- `app/api/merch/mockups/route.ts` (POST {designId, blank}): re-resolves the published variant ids, generates + stores the mockup, saves it on the design's `published[blank].mockups`, and — if `merch:sync` has already created the shop row — sets that row's `image_url`/`default_image_url`/`images` so the shop shows a real product. Returns `appliedToShop`.
+- `MerchStudio`: each published blank gets a "Generate mockup" button + thumbnail.
+
+Sequence: Publish → `merch:sync` → **Generate mockup** (auto-applies to the shop row). If run before sync, the mockup is saved on the design and applied on the next generate after the row exists.
+
 **Still deferred (known):**
 - **Hat publishing** — embroidery needs a digitized file + thread colors, not a flat PNG.
-- **Mockup Generator API** — biggest remaining gap: API-created products have no `preview` file, so `merch:sync` finds no mockup and the shop shows no image until one is added (workaround: set image in Merch admin). Own phase.
 - Auto-trigger `merch:sync` after publish (currently manual).
 - Flat price across sizes (no 2XL+ upcharge).
+- Multiple mockup angles/colors (currently stores the first/primary mockup).
 
 **Manual steps (updated):** apply migrations **117 + 118**, push/deploy, then E2E publish test.

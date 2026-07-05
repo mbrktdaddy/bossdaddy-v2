@@ -47,6 +47,7 @@ export interface PublishedEntry {
   sizes: string[]
   price_cents: number
   published_at: string
+  mockups?: string[]
 }
 
 export interface NewMerchDesign {

@@ -205,6 +205,43 @@ export function createSyncProduct(
   return request<CreatedSyncProduct>('POST', '/store/products', payload)
 }
 
+// ─── Mockup generator ────────────────────────────────────────────────────────
+
+export interface MockupTask {
+  task_key: string
+  status: 'pending' | 'completed' | 'failed'
+}
+
+export interface MockupResult extends MockupTask {
+  mockups?: Array<{
+    placement: string
+    variant_ids: number[]
+    mockup_url: string
+    extra?: Array<{ url: string; option: string; title: string }>
+  }>
+  error?: string
+}
+
+// Kick off a mockup render for a catalog product. Async — returns a task_key you
+// then poll with getMockupTask. `files[].image_url` must be publicly reachable.
+export function createMockupTask(
+  productId: number,
+  payload: {
+    variant_ids: number[]
+    format?: 'jpg' | 'png'
+    files: Array<{ placement: string; image_url: string }>
+  },
+): Promise<MockupTask> {
+  return request<MockupTask>('POST', `/mockup-generator/create-task/${productId}`, {
+    format: 'jpg',
+    ...payload,
+  })
+}
+
+export function getMockupTask(taskKey: string): Promise<MockupResult> {
+  return request<MockupResult>('GET', `/mockup-generator/task?task_key=${encodeURIComponent(taskKey)}`)
+}
+
 // ─── API calls ───────────────────────────────────────────────────────────────
 
 export function getSyncProducts(): Promise<PrintfulSyncProduct[]> {

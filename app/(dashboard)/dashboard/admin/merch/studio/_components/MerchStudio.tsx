@@ -22,6 +22,7 @@ interface PublishedEntry {
   template?: string
   colorway?: string
   sync_product_id: number
+  mockups?: string[]
 }
 
 interface ApprovedDesign {
@@ -345,6 +346,32 @@ function ApprovedDesignCard({ design, onDelete }: { design: ApprovedDesign; onDe
   const [publishMsg, setPublishMsg] = useState<string | null>(null)
   const [publishErr, setPublishErr] = useState<string | null>(null)
 
+  // Mockup images per published blank.
+  const [mockups, setMockups] = useState<Record<string, string>>(
+    Object.fromEntries((design.published ?? []).filter((e) => e.mockups?.[0]).map((e) => [e.blank, e.mockups![0]])),
+  )
+  const [mockupBusy, setMockupBusy] = useState(false)
+  const [mockupMsg, setMockupMsg] = useState<string | null>(null)
+
+  async function generateMockup() {
+    setMockupBusy(true); setMockupMsg(null); setPublishErr(null)
+    try {
+      const res = await fetch('/api/merch/mockups', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ designId: design.id, blank }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Mockup failed')
+      setMockups((prev) => ({ ...prev, [blank]: json.mockupUrl }))
+      setMockupMsg(json.next as string)
+    } catch (e) {
+      setPublishErr((e as Error).message)
+    } finally {
+      setMockupBusy(false)
+    }
+  }
+
   // Catalog color/size options for the current blank.
   const [options, setOptions] = useState<CatalogOptions | null>(null)
   const [selectedColors, setSelectedColors] = useState<string[]>([])
@@ -567,6 +594,25 @@ function ApprovedDesignCard({ design, onDelete }: { design: ApprovedDesign; onDe
             )}
             {publishMsg && <p className="text-xs text-forest mt-2">{publishMsg}</p>}
             {publishErr && <p className="text-xs text-danger-ink mt-2">{publishErr}</p>}
+
+            {/* Mockup — real product imagery for the shop (after publish) */}
+            {PUBLISHABLE[blank] && alreadyPublished && (
+              <div className="mt-3 flex items-center gap-3">
+                {mockups[blank] && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={mockups[blank]} alt="Product mockup" className="w-14 h-14 rounded-lg object-cover border border-soft" />
+                )}
+                <button
+                  onClick={generateMockup}
+                  disabled={mockupBusy}
+                  className="px-3 py-2 bg-surface-raised hover:bg-surface-hover border border-soft text-prose text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {mockupBusy ? 'Rendering mockup…' : mockups[blank] ? `Regenerate ${blank} mockup` : `Generate ${blank} mockup`}
+                </button>
+                <span className="text-[11px] text-prose-faint">real shop image · run after merch:sync to auto-apply</span>
+              </div>
+            )}
+            {mockupMsg && <p className="text-xs text-forest mt-2">{mockupMsg}</p>}
           </div>
         </div>
       </div>
