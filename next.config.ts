@@ -15,6 +15,13 @@ const nextConfig: NextConfig = {
   // HMR endpoint. Dev-only — production builds ignore this.
   allowedDevOrigins: ['192.168.1.104'],
 
+  // The Merch Studio render route reads brand font files + the logo from disk at
+  // runtime (Satori needs raw TTFs). Vercel's file tracer won't detect the
+  // fs.readFile paths, so include them explicitly in that function's bundle.
+  outputFileTracingIncludes: {
+    '/api/merch/render': ['./lib/merch/fonts/*.ttf', './public/images/bd-logo-icon.png'],
+  },
+
   images: {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 86400,

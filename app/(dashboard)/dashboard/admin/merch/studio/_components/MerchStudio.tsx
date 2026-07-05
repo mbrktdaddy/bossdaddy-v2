@@ -14,12 +14,42 @@ interface Candidate {
   saving?: boolean
 }
 
+type Template = 'statement' | 'stacked' | 'wordmark' | 'logo'
+type Colorway = 'dark' | 'light'
+type Blank = 'tee' | 'hat' | 'mug'
+
 interface ApprovedDesign {
   id: string
   title: string
   content: { text?: string; subline?: string; angle?: string }
   ip_flag: 'none' | 'low' | 'review'
   status: 'draft' | 'approved' | 'published'
+  template_key: Template | null
+  template_config: { colorway?: Colorway; blank?: Blank }
+}
+
+const TEMPLATES: { value: Template; label: string }[] = [
+  { value: 'statement', label: 'Statement' },
+  { value: 'stacked', label: 'Stacked + wordmark' },
+  { value: 'wordmark', label: 'Wordmark + saying' },
+  { value: 'logo', label: 'Logo only' },
+]
+const BLANKS: { value: Blank; label: string }[] = [
+  { value: 'tee', label: 'Tee' },
+  { value: 'hat', label: 'Hat' },
+  { value: 'mug', label: 'Mug' },
+]
+
+function buildRenderUrl(d: ApprovedDesign, template: Template, colorway: Colorway, blank: Blank, mode: 'preview' | 'print') {
+  const p = new URLSearchParams({
+    template,
+    colorway,
+    blank,
+    mode,
+    text: d.content?.text ?? d.title,
+    subline: d.content?.subline ?? '',
+  })
+  return `/api/merch/render?${p.toString()}`
 }
 
 function IpBadge({ risk }: { risk: 'none' | 'low' | 'review' }) {
@@ -211,30 +241,111 @@ export function MerchStudio({ initialApproved }: { initialApproved: ApprovedDesi
         </h2>
         {approved.length === 0 ? (
           <p className="text-sm text-prose-faint">
-            Nothing approved yet. Generate some sayings and approve the keepers — they&apos;ll wait here for the
-            template/render step (Phase 2).
+            Nothing approved yet. Generate some sayings and approve the keepers — then pick a template below to
+            preview and export a print-ready file.
           </p>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {approved.map((d) => (
-              <div key={d.id} className="flex items-center gap-3 p-3 bg-surface border border-soft rounded-xl">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-prose truncate">{d.content?.text || d.title}</p>
-                  {d.content?.subline && <p className="text-xs text-prose-faint truncate">{d.content.subline}</p>}
-                </div>
-                <IpBadge risk={d.ip_flag} />
-                <span className="text-[11px] text-prose-faint uppercase">{d.status}</span>
-                <button
-                  onClick={() => removeApproved(d.id)}
-                  className="text-xs text-prose-faint hover:text-danger-ink px-2 py-1"
-                  aria-label="Delete design"
-                >
-                  Delete
-                </button>
-              </div>
+              <ApprovedDesignCard key={d.id} design={d} onDelete={() => removeApproved(d.id)} />
             ))}
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+function ApprovedDesignCard({ design, onDelete }: { design: ApprovedDesign; onDelete: () => void }) {
+  const [template, setTemplate] = useState<Template>(design.template_key ?? 'statement')
+  const [colorway, setColorway] = useState<Colorway>(design.template_config?.colorway ?? 'dark')
+  const [blank, setBlank] = useState<Blank>(design.template_config?.blank ?? 'tee')
+
+  // Persist the chosen template + config so Phase 3 can generate the real print
+  // file from the operator's selection. Fire-and-forget.
+  function persist(next: { template?: Template; colorway?: Colorway; blank?: Blank }) {
+    const body = {
+      template_key: next.template ?? template,
+      template_config: { colorway: next.colorway ?? colorway, blank: next.blank ?? blank },
+    }
+    fetch(`/api/merch/designs/${design.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }).catch(() => {})
+  }
+
+  const previewUrl = buildRenderUrl(design, template, colorway, blank, 'preview')
+  const printUrl = buildRenderUrl(design, template, colorway, blank, 'print')
+
+  const selectCls = 'bg-surface-raised border border-soft rounded-lg px-2 py-1.5 text-xs text-prose'
+
+  return (
+    <div className="bg-surface border border-soft rounded-xl p-4">
+      <div className="flex items-start gap-4">
+        {/* Preview */}
+        <div className="shrink-0 w-40 rounded-lg overflow-hidden border border-soft bg-surface-sunken">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={previewUrl} alt={`Preview of ${design.title}`} className="w-full h-auto block" />
+        </div>
+
+        {/* Controls */}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 mb-2">
+            <p className="text-sm font-bold text-prose truncate">{design.content?.text || design.title}</p>
+            <IpBadge risk={design.ip_flag} />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <select
+              value={template}
+              onChange={(e) => { const v = e.target.value as Template; setTemplate(v); persist({ template: v }) }}
+              className={selectCls}
+              aria-label="Template"
+            >
+              {TEMPLATES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+            </select>
+            <select
+              value={blank}
+              onChange={(e) => { const v = e.target.value as Blank; setBlank(v); persist({ blank: v }) }}
+              className={selectCls}
+              aria-label="Product"
+            >
+              {BLANKS.map((b) => <option key={b.value} value={b.value}>{b.label}</option>)}
+            </select>
+            <div className="flex rounded-lg border border-soft overflow-hidden">
+              {(['dark', 'light'] as Colorway[]).map((c) => (
+                <button
+                  key={c}
+                  onClick={() => { setColorway(c); persist({ colorway: c }) }}
+                  className={`px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    colorway === c ? 'bg-accent text-white' : 'bg-surface-raised text-prose-muted hover:bg-surface-hover'
+                  }`}
+                >
+                  {c === 'dark' ? 'On dark' : 'On light'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <a
+              href={printUrl}
+              download
+              className="px-3 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-semibold rounded-lg transition-colors"
+            >
+              Download print file
+            </a>
+            <span className="text-[11px] text-prose-faint uppercase">{design.status}</span>
+            <button
+              onClick={onDelete}
+              className="ml-auto text-xs text-prose-faint hover:text-danger-ink px-2 py-1"
+              aria-label="Delete design"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   )

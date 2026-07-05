@@ -79,7 +79,9 @@ export async function insertMerchDesign(input: NewMerchDesign): Promise<MerchDes
 
 export async function updateMerchDesign(
   id: string,
-  patch: Partial<Pick<MerchDesignRow, 'title' | 'content' | 'status' | 'ip_flag' | 'ip_note' | 'product_types' | 'notes'>>,
+  patch: Partial<Pick<MerchDesignRow,
+    'title' | 'content' | 'status' | 'ip_flag' | 'ip_note' | 'product_types' | 'notes' | 'template_key' | 'template_config'
+  >>,
 ): Promise<MerchDesignRow> {
   const { data, error } = await db()
     .from('merch_designs')

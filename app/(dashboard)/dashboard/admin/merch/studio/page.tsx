@@ -36,6 +36,8 @@ export default async function MerchStudioPage() {
         content: d.content as { text?: string; subline?: string; angle?: string },
         ip_flag: d.ip_flag,
         status: d.status,
+        template_key: (d.template_key as 'statement' | 'stacked' | 'wordmark' | 'logo' | null) ?? null,
+        template_config: (d.template_config as { colorway?: 'dark' | 'light'; blank?: 'tee' | 'hat' | 'mug' }) ?? {},
       }))} />
     </div>
   )

@@ -21,6 +21,13 @@ const PatchSchema = z.object({
   ip_note: z.string().max(1000).optional().nullable(),
   notes: z.string().max(2000).optional().nullable(),
   product_types: z.array(z.string().max(40)).optional(),
+  template_key: z.enum(['statement', 'stacked', 'wordmark', 'logo']).optional(),
+  template_config: z
+    .object({
+      colorway: z.enum(['dark', 'light']).optional(),
+      blank: z.enum(['tee', 'hat', 'mug']).optional(),
+    })
+    .optional(),
   content: z
     .object({
       text: z.string().min(1).max(200),

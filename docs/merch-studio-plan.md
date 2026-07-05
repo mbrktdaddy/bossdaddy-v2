@@ -1,6 +1,6 @@
 # Merch Studio — AI-Assisted Merch Creation Plan
 
-> **Status:** Phase 0 + Phase 1 BUILT (2026-07-05), not yet committed. Migration 116 written but NOT applied. See §9 for what shipped + manual steps.
+> **Status:** Phase 0 + 1 SHIPPED (committed `bc4537e`, pushed). Phase 2 (render engine) BUILT 2026-07-05. Next up: Phase 3 (Printful write layer). See §9 build log.
 > **Goal:** An admin workspace that takes a merch idea from Claude-generated copy → brand-locked print-ready design → published Printful product → live in the shop, with the operator as editor at every gate.
 > **Scope decisions (locked 2026-07-05):**
 > - **Automation depth:** Full push to Printful (generate print files + create Printful product via API as a draft; existing `merch:sync` brings it live). Not fully autonomous — a human "confirm publish" gate stays.
@@ -133,6 +133,27 @@ Files added/changed:
 1. Apply migration 116 (`supabase db push` or paste into SQL editor).
 2. `npm run db:types` to regenerate types (the `designs-store` cast then becomes redundant but harmless).
 3. Commit.
-4. (Phase 3 prep) Verify `PRINTFUL_API_KEY` has **store-write** scope in the Printful dashboard.
+4. ~~(Phase 3 prep) Verify `PRINTFUL_API_KEY` has **store-write** scope.~~ **DONE 2026-07-05** — new scoped token "Boss Daddy Life — Production" created (single store; manage: orders, store products, store files, store webhooks; expires **May 9, 2028** — rotate before then). Updated in `.env.local` + Vercel; redeployed.
 
 **Deferred from Phase 0:** brand-font registration for the renderer — no consumer until Phase 2's render route exists, so folded into Session B rather than built blind here.
+
+### Phase 2 — BUILT 2026-07-05
+
+The design engine: approved sayings now render to brand-locked, print-ready transparent PNGs, previewable in the Studio.
+
+Files added/changed:
+- `lib/merch/fonts/Montserrat-Black.ttf` + `Montserrat-SemiBold.ttf` — brand display font (Satori needs raw TTFs; next/font woff2 cache is unusable).
+- `lib/merch/fonts.ts` — cached loaders for the fonts + `bd-logo-icon.png` as a data URI.
+- `lib/merch/templates.tsx` — 4 brand-locked templates (`statement`, `stacked`, `wordmark`, `logo`) × 2 colorways (`dark` = on dark garments / `light` = on light garments). Font-size auto-fits to line length. All Satori-legal (flex-only, Montserrat 900/600).
+- `app/api/merch/render/route.tsx` — Satori/`next-og` render route. Params `template/text/subline/colorway/blank/mode`. Print mode = transparent PNG at Printful placement dimensions; preview mode = scaled copy on a mock garment color. Admin-gated, `no-store`.
+- `next.config.ts` — `outputFileTracingIncludes` for `/api/merch/render` so the fonts + logo bundle into the Vercel function.
+- `lib/merch/designs-store.ts` + `app/api/merch/designs/[id]/route.ts` — PATCH now persists `template_key` + `template_config` (colorway/blank) so Phase 3 can regenerate the exact chosen print file.
+- `MerchStudio.tsx` — approved designs now render a live preview card: template/product/colorway pickers, live preview `<img>`, "Download print file" (print-res transparent PNG), selection persisted.
+
+**Verified:** standalone Satori render with the brand fonts → valid PNG, `channels=4 hasAlpha=true` (transparent). `tsc` + `eslint` clean.
+
+**Known limits / follow-ups:**
+- Template `catalogProductId`s + exact print dimensions in `printful-catalog.ts` are still placeholders — **VERIFY against live Printful catalog in Phase 3.**
+- Logo PNG is single-color; on the `light` colorway it may not contrast perfectly. Fine for v1; revisit if needed.
+- Print files are generated on-demand (download); Phase 3 will persist the chosen one to a `merch-designs` bucket + `print_file_url` before uploading to Printful.
+- No Mockup Generator yet (optional).
