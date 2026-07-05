@@ -15,11 +15,23 @@ export async function generateAndStoreMockup(opts: {
   variantIds: number[]
   placement: string
   printFileUrl: string
+  areaWidth: number
+  areaHeight: number
 }): Promise<{ mockupUrl: string; sourceUrl: string }> {
+  // Our print file is rendered at exactly the placement's printfile size, so it
+  // fills the whole print area (top/left 0, full width/height).
+  const position = {
+    area_width: opts.areaWidth,
+    area_height: opts.areaHeight,
+    width: opts.areaWidth,
+    height: opts.areaHeight,
+    top: 0,
+    left: 0,
+  }
   const task = await createMockupTask(opts.catalogProductId, {
     variant_ids: opts.variantIds,
     format: 'jpg',
-    files: [{ placement: opts.placement, image_url: opts.printFileUrl }],
+    files: [{ placement: opts.placement, image_url: opts.printFileUrl, position }],
   })
 
   // Poll until the render completes. Mockups typically finish in 5–20s; bound the

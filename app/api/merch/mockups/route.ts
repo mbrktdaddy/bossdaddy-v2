@@ -60,6 +60,8 @@ export async function POST(request: NextRequest) {
       variantIds,
       placement: spec.placement,
       printFileUrl: entry.print_file_url,
+      areaWidth: spec.printWidthPx,
+      areaHeight: spec.printHeightPx,
     })
 
     // Persist the mockup on the design's published entry.

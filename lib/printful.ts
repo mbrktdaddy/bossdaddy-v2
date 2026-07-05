@@ -224,12 +224,22 @@ export interface MockupResult extends MockupTask {
 
 // Kick off a mockup render for a catalog product. Async — returns a task_key you
 // then poll with getMockupTask. `files[].image_url` must be publicly reachable.
+export interface MockupFilePosition {
+  area_width: number
+  area_height: number
+  width: number
+  height: number
+  top: number
+  left: number
+}
+
 export function createMockupTask(
   productId: number,
   payload: {
     variant_ids: number[]
     format?: 'jpg' | 'png'
-    files: Array<{ placement: string; image_url: string }>
+    // `position` is REQUIRED by Printful (error MG-4 "Position field is missing").
+    files: Array<{ placement: string; image_url: string; position: MockupFilePosition }>
   },
 ): Promise<MockupTask> {
   return request<MockupTask>('POST', `/mockup-generator/create-task/${productId}`, {
