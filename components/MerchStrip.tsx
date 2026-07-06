@@ -4,13 +4,19 @@ import { createClient } from '@/lib/supabase/server'
 import { getMerchDisplayImage, type Merch } from '@/lib/merch'
 
 /**
- * MerchStrip — slim, proud "Made by Boss Daddy" strip woven high on /gear
- * (right after the #1 Pick), so branded merch rides alongside the top picks
- * instead of being buried. "Explore →" jumps to the fuller MerchPanel (#merch)
- * lower on the page. Two states: a few live/coming-soon items as a scroll
- * strip, or a tight branded teaser when nothing is loaded yet.
+ * MerchStrip — slim, proud "Made by Boss Daddy" strip. Shared component used
+ * on /gear (right after the #1 Pick, `exploreHref="#merch"`) and on the
+ * homepage (`exploreHref="/gear#merch"`), so branded merch rides alongside the
+ * content instead of being buried. "Explore →" jumps to the fuller MerchPanel.
+ * Two states: a few live/coming-soon items as a horizontal scroll strip, or a
+ * tight branded teaser when nothing is loaded yet.
  */
-export async function MerchStrip() {
+/**
+ * @param exploreHref where "Explore →", the empty state, and the no-link
+ *   fallback point. Defaults to the on-page `#merch` anchor (for /gear); pass
+ *   `/gear#merch` when rendering the strip off-page (e.g. the homepage).
+ */
+export async function MerchStrip({ exploreHref = '#merch' }: { exploreHref?: string } = {}) {
   const supabase = await createClient()
 
   const { data } = await supabase
@@ -36,14 +42,14 @@ export async function MerchStrip() {
               <h2 className="text-xl font-black text-prose leading-tight">Boss Daddy Merch</h2>
             </div>
           </div>
-          <a href="#merch" className="text-sm text-accent-text font-semibold hover:text-accent-text-soft transition-colors shrink-0">
+          <a href={exploreHref} className="text-sm text-accent-text font-semibold hover:text-accent-text-soft transition-colors shrink-0">
             Explore →
           </a>
         </div>
 
         {products.length === 0 ? (
           <a
-            href="#merch"
+            href={exploreHref}
             className="block bg-surface border border-soft rounded-xl px-5 py-4 hover:border-accent-border/40 transition-colors"
           >
             <p className="text-sm text-prose-muted leading-relaxed">
@@ -57,7 +63,7 @@ export async function MerchStrip() {
               const img = getMerchDisplayImage(p as Parameters<typeof getMerchDisplayImage>[0]) ?? p.image_url
               const href = p.printful_sync_product_id != null
                 ? `/gear/${p.slug}`
-                : (p.external_url ?? '#merch')
+                : (p.external_url ?? exploreHref)
               const isExternal = p.printful_sync_product_id == null && Boolean(p.external_url)
               const inner = (
                 <>

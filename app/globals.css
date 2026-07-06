@@ -134,6 +134,9 @@
   --font-mono: var(--font-geist-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
   --font-display: var(--font-montserrat), system-ui, sans-serif;
   --font-editorial: var(--font-serif), Georgia, 'Times New Roman', serif;
+  /* Editorial DISPLAY serif (Fraunces) — Manifesto v2. Opt-in via the
+     .font-editorial-display class below (NOT the global h* rule). */
+  --font-editorial-display: var(--font-fraunces), Georgia, 'Times New Roman', serif;
 
   /* Brand orange scale */
   --color-orange-300: #fdba74;
@@ -234,6 +237,18 @@ body {
 
 h1, h2, h3, h4 {
   font-family: var(--font-display);
+}
+
+/* ── Editorial display serif (Fraunces) — Manifesto v2 design system.
+   SCOPED OPT-IN: headings default to Montserrat (font-display) via the rule
+   above; add `font-editorial-display` to a heading to switch it to Fraunces.
+   Declared here (unlayered, class specificity 0,1,0) so it reliably beats the
+   unlayered `h1,h2,h3,h4` element rule — the Tailwind-generated `font-*`
+   utility would lose to that element rule. Use ONLY on: homepage Cover Story
+   H2/H3, editorial section headers (EditorialHeader), PageHeader H1s, guide
+   titles, and the mission Creed. Do not blanket-apply to all headings. ─────── */
+.font-editorial-display {
+  font-family: var(--font-editorial-display);
 }
 
 .scrollbar-hide {

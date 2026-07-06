@@ -117,6 +117,8 @@ Forgetting the right read role on a public table silently breaks logged-out visi
 
 Tailwind v4 — no `tailwind.config.ts`. All tokens defined in `app/globals.css` via `@theme inline`.
 
+> **Manifesto v2 (2026-07-06)** — the site-wide editorial redesign. The homepage (`app/(public)/page.tsx`) is the reference implementation; interior pages inherit its primitives (`EditorialHeader`, `PageHeader`, `ScoreBlock variant="ring"`) for uniformity. Full spec: [`docs/home-manifesto-spec.md`](docs/home-manifesto-spec.md). Rolling out on branch `design-v2`. Note: `@theme inline` does **not** emit `--color-*` as runtime CSS vars — in inline `style={{}}` use the raw `--bd-*` vars (e.g. `var(--bd-orange)`), not `var(--color-accent)`.
+
 **Dark-first** (`data-theme="dark"` on `<html>`): near-black canvas, charcoal surfaces, off-white text, Hot-orange accent. Prefer the semantic role tokens (`bg-surface`, `text-prose`, `text-accent`, `border-soft`…) over raw shades. Elevation comes from **borders + raised surfaces, not shadows** (black shadows vanish on near-black). Full reference: `docs/brand-guide.md` §2.
 
 ### Color Palette (accent)
@@ -132,8 +134,8 @@ Surface/text/border tokens: `--color-chrome` (masthead/footer, `#09090b`), `--co
 ### Rules
 - **No vivid orange.** Never use Tailwind's default `#f97316`. The accent is `#E55A1A` (Hot, on dark) / `#CC5500` (core) — route through `text-accent`/`bg-accent`, not raw `orange-*`.
 - **No per-category rainbow colors.** All categories use one unified treatment. Source of truth: `lib/categories.ts`.
-- **Section headings:** always `font-black`.
-- **Card titles** in pillar/feature grids: `text-orange-500`.
+- **Section headings:** default `font-black` (Montserrat). **Manifesto v2 exception:** editorial section titles use `font-editorial-display font-semibold` (Fraunces) via `EditorialHeader` — scoped to editorial surfaces only (Cover Story, section headers, `PageHeader` H1s, guide titles, Creed). Never blanket-apply serif to cards/nav/UI. See `docs/brand-guide.md` §3.
+- **Card titles** in pillar/feature grids: `text-orange-500` — **except** the homepage Manifesto pillars ("In this issue"), which use `text-prose` (white) editorial titles by design.
 - **Eyebrow labels:** `text-xs text-orange-500 uppercase tracking-widest`.
 - **Mobile tap targets:** minimum 44px. Use `py-2.5` on pills, `py-3` on buttons/pagination/nav links.
 - **Filter tabs** on listing pages: `overflow-x-auto scrollbar-hide` — never `flex-wrap`.

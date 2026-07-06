@@ -201,7 +201,7 @@ The site is **dark-first everywhere** (`data-theme="dark"` on `<html>` in `app/l
 - `border-soft` → card edges · `border-strong` → confident edges
 
 ### Reading surface (reviews / guides)
-Long-form body sits on an elevated **panel below `lg`** (phone/tablet — no margin to frame, OLED halation worst) and **bare canvas at `lg+`** (desktop margins frame the column). Single source of truth: `ARTICLE_SURFACE_CLASS` in `lib/article-surface.ts`. Body is **sans**; the editorial serif is reserved for blockquotes/pull-quotes only. Article images get a subtle frame (`border` + rounded) so white-bg product shots don't glare.
+Long-form body sits on an elevated **panel below `lg`** (phone/tablet — no margin to frame, OLED halation worst) and **bare canvas at `lg+`** (desktop margins frame the column). Single source of truth: `ARTICLE_SURFACE_CLASS` in `lib/article-surface.ts`. Body is **sans**; the *body* editorial serif (Source Serif 4) is reserved for blockquotes/pull-quotes only. The *display* editorial serif (Fraunces via `.font-editorial-display`) is used for editorial headings per the Manifesto v2 exception (§3). Article images get a subtle frame (`border` + rounded) so white-bg product shots don't glare.
 
 ### Status colors (chips / pipeline indicators on dark)
 | Status | Color | Use |
@@ -224,9 +224,12 @@ Every section heading sitewide uses the same shape: a 3px × 18px brand-orange v
 ## 3. Typography
 
 ### Fonts (loaded via next/font in `app/layout.tsx`)
-- **Display / Headings**: `var(--font-montserrat)` — heavy weight (`font-black` 900) for hero, `font-bold` 700 elsewhere.
+- **Display / Headings (default)**: `var(--font-montserrat)` — heavy weight (`font-black` 900) for hero, `font-bold` 700 elsewhere. Default for every `h1–h4` via the global rule in `globals.css`.
+- **Editorial display serif (Manifesto v2)**: `var(--font-editorial-display)` = **Fraunces**. **Scoped opt-in** via the `.font-editorial-display` class — see the exception below. Carries the magazine / "cover story" voice.
 - **Body / UI**: `var(--font-geist-sans)` — neutral grotesk.
-- **Editorial body** (`.bd-editorial` prose): `var(--font-serif)` — serif voice for review/article body copy only.
+- **Editorial body** (`.bd-editorial` prose): `var(--font-serif)` = Source Serif 4 — serif voice for review/article **blockquotes / pull-quotes only**.
+
+> **Editorial-serif heading exception (Manifesto v2, 2026-07-06).** The prior rule ("all headings are `font-black` Montserrat; serif is pull-quotes only") is amended. Headings still **default** to Montserrat `font-black`; specific **editorial** headings opt into Fraunces with `font-editorial-display font-semibold`. Allowed ONLY on: homepage Cover Story H2/H3, `EditorialHeader` section titles, `PageHeader` H1s, guide titles, and the mission Creed. Do **not** blanket-apply serif to card titles, eyebrows, nav, or UI labels — those stay sans. Reference impl: `app/(public)/page.tsx` + `docs/home-manifesto-spec.md`.
 
 ### Type scale
 
@@ -237,6 +240,8 @@ Every section heading sitewide uses the same shape: a 3px × 18px brand-orange v
 | Section H2 | `text-2xl font-black` | Big-Quiet rhythm — sections stay quiet so content can breathe |
 | Card H3 | `text-base font-semibold leading-snug` | Card titles |
 | Hero/Featured H3 | `text-2xl md:text-3xl font-black` | Featured-card titles |
+| Editorial section H2 (`EditorialHeader`) | `font-editorial-display font-semibold text-3xl md:text-4xl tracking-tight` | Manifesto section titles — **serif** |
+| Editorial page H1 (`PageHeader`) | `font-editorial-display font-semibold text-4xl md:text-5xl tracking-tight` | Interior "slim editorial band" — **serif** |
 | Body | `text-base leading-relaxed` | 16px, comfortable line-height |
 | Small / metadata | `text-sm text-gray-500` | |
 | Eyebrow | `text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold` | Editorial section opener |

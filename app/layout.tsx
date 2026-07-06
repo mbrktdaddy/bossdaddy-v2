@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Montserrat, Source_Serif_4 } from "next/font/google";
+import { Geist, Montserrat, Source_Serif_4, Fraunces } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import PwaInstallProvider from "@/components/pwa/PwaInstallProvider";
@@ -23,6 +23,20 @@ const sourceSerif4 = Source_Serif_4({
   variable: "--font-serif",
   subsets: ["latin"],
   weight: ["400", "600"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+// Editorial display serif — Manifesto v2 design system. Carries the
+// magazine/"cover story" voice on Cover Story, editorial section H2s, guide
+// titles, and the mission Creed. Scoped opt-in via `font-editorial-display`
+// (see docs/brand-guide.md §3 + docs/home-manifesto-spec.md) — headings stay
+// Montserrat font-black by default. Source Serif 4 remains for article
+// blockquotes.
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
   style: ["normal", "italic"],
   display: "swap",
 });
@@ -105,7 +119,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-theme="dark"
-      className={`${geistSans.variable} ${montserrat.variable} ${sourceSerif4.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${montserrat.variable} ${sourceSerif4.variable} ${fraunces.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <PwaInstallProvider>
