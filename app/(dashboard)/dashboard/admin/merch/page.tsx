@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
 import { MERCH_CATEGORIES, MERCH_STATUSES, formatPrice, getMerchDisplayImage, type Merch } from '@/lib/merch'
+import { SyncMerchButton } from '@/components/merch/SyncMerchButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,6 +32,7 @@ export default async function AdminMerchListPage() {
           </p>
         </div>
         <div className="shrink-0 flex items-center gap-2">
+          <SyncMerchButton />
           <Link
             href="/dashboard/admin/merch/studio"
             className="px-4 py-2.5 bg-surface-raised hover:bg-surface-hover border border-soft text-prose text-sm font-semibold rounded-xl transition-colors"
