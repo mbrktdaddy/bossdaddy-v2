@@ -152,17 +152,11 @@ export default function HomeHero({ reviewCount, guidesCount, toolsCount }: Props
           <p className="text-[15px] text-prose leading-[1.6] mb-6">{SUBHEAD}</p>
           <div className="flex flex-col gap-2.5">
             <Link
-              href="/reviews"
+              href="/about"
               className="w-full inline-flex items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-white font-extrabold text-sm px-6 py-3.5 rounded-xl min-h-[48px] transition-colors"
             >
-              Browse the reviews
-              <Arrow />
-            </Link>
-            <Link
-              href="/about"
-              className="w-full inline-flex items-center justify-center border border-strong text-prose hover:border-accent hover:text-accent font-bold text-sm px-6 py-3.5 rounded-xl min-h-[48px] transition-colors"
-            >
               Meet the Boss
+              <Arrow />
             </Link>
           </div>
         </div>
