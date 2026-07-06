@@ -7,6 +7,7 @@ import GuidesGrid from './_components/GuidesGrid'
 import FeaturedGuideCard from '@/components/FeaturedGuideCard'
 import BenchStrip from '@/components/BenchStrip'
 import AskTheBoss from '@/components/AskTheBoss'
+import PageHeader from '@/components/PageHeader'
 import { ogImageUrl, OG_SITE } from '@/lib/og'
 const PER_PAGE = 12
 import type { GuideRow } from './actions'
@@ -73,14 +74,13 @@ export default async function GuidesPage({ searchParams }: Props) {
       : null
 
     return (
-      <div className="max-w-6xl mx-auto px-6 py-16">
-        {/* Page header — tick-line eyebrow pattern */}
-        <div className="mb-8">
-          <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">The Field Notes</p>
-          <h1 className="text-4xl md:text-5xl font-black mb-3 text-prose tracking-tight">Guides</h1>
-        </div>
-
+      <>
+        <PageHeader
+          eyebrow="The Field Notes"
+          title="Guides"
+          deck="Real how-tos for the situations that actually come up — tested by a dad, written without the fluff."
+        />
+        <div className="max-w-6xl mx-auto px-6 py-12">
         {/* Stats bar */}
         {guides.length > 0 && (
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 pb-4 border-b border-soft/40 text-sm text-prose-faint">
@@ -159,7 +159,8 @@ export default async function GuidesPage({ searchParams }: Props) {
             </section>
           ))
         )}
-      </div>
+        </div>
+      </>
     )
   }
 
@@ -178,24 +179,16 @@ export default async function GuidesPage({ searchParams }: Props) {
   const guides = (data ?? []) as GuideRow[]
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-16">
-      {/* Page header — tick-line eyebrow + breadcrumb */}
-      <div className="mb-12">
-        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">
-          Guides{cat ? ` / ${cat.label.toUpperCase()}` : ''}
-        </p>
-        <h1 className="text-4xl md:text-5xl font-black mb-3 text-prose tracking-tight flex items-center gap-3">
-          {cat && <CategoryIcon slug={cat.slug} className="w-10 h-10 text-accent-text" />}
-          <span>{cat ? cat.label : 'Guides'}</span>
-        </h1>
-        {cat?.description && (
-          <p className="text-prose-muted mb-2 max-w-2xl">{cat.description}</p>
-        )}
-        <p className="text-prose-faint text-sm tabular-nums">
-          {count ?? 0} {(count ?? 0) === 1 ? 'guide' : 'guides'}{cat ? ` in ${cat.label}` : ''}
-        </p>
-      </div>
+    <>
+      <PageHeader
+        eyebrow={`Guides${cat ? ` / ${cat.label.toUpperCase()}` : ''}`}
+        title={cat ? cat.label : 'Guides'}
+        deck={cat?.description ?? undefined}
+      />
+      <div className="max-w-6xl mx-auto px-6 py-12">
+      <p className="text-prose-faint text-sm tabular-nums mb-8">
+        {count ?? 0} {(count ?? 0) === 1 ? 'guide' : 'guides'}{cat ? ` in ${cat.label}` : ''}
+      </p>
 
       {/* Category filter pills */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
@@ -230,7 +223,8 @@ export default async function GuidesPage({ searchParams }: Props) {
       <div className="mt-16">
         <BenchStrip ctaText="See what's coming up" />
       </div>
-    </div>
+      </div>
+    </>
   )
 }
 

@@ -9,6 +9,7 @@ import ReviewsGrid from './_components/ReviewsGrid'
 import FeaturedReviewCard from '@/components/FeaturedReviewCard'
 import BenchStrip from '@/components/BenchStrip'
 import AskTheBoss from '@/components/AskTheBoss'
+import PageHeader from '@/components/PageHeader'
 import { ogImageUrl, OG_SITE } from '@/lib/og'
 const PER_PAGE = 12
 import type { ReviewRow } from './actions'
@@ -84,14 +85,13 @@ export default async function ReviewsPage({ searchParams }: Props) {
       : null
 
     return (
-      <div className="max-w-6xl mx-auto px-6 py-16">
-        {/* Page header — tick-line eyebrow pattern */}
-        <div className="mb-8">
-          <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">The Stuff</p>
-          <h1 className="text-4xl md:text-5xl font-black mb-3 text-prose tracking-tight">All Reviews</h1>
-        </div>
-
+      <>
+        <PageHeader
+          eyebrow="The Stuff"
+          title="All Reviews"
+          deck="Every product bought with my own money, used in real life, and scored 1–10 — no sponsors, no fluff."
+        />
+        <div className="max-w-6xl mx-auto px-6 py-12">
         {/* Stats bar */}
         {reviews.length > 0 && (
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 pb-4 border-b border-soft/40 text-sm text-prose-faint">
@@ -181,7 +181,8 @@ export default async function ReviewsPage({ searchParams }: Props) {
         <div className="mt-16">
           <BenchStrip ctaText="See all on the bench" />
         </div>
-      </div>
+        </div>
+      </>
     )
   }
 
@@ -206,24 +207,16 @@ export default async function ReviewsPage({ searchParams }: Props) {
   }))
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-16">
-      {/* Page header — tick-line eyebrow + breadcrumb */}
-      <div className="mb-12">
-        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">
-          Reviews / {getCategoryLabel(category).toUpperCase()}
-        </p>
-        <h1 className="text-4xl md:text-5xl font-black mb-3 text-prose tracking-tight flex items-center gap-3">
-          {cat && <CategoryIcon slug={cat.slug} className="w-10 h-10 text-accent-text" />}
-          <span>{getCategoryLabel(category)}</span>
-        </h1>
-        {cat?.description && (
-          <p className="text-prose-muted mb-2 max-w-2xl">{cat.description}</p>
-        )}
-        <p className="text-prose-faint text-sm tabular-nums">
-          {count ?? 0} dad-tested {(count ?? 0) === 1 ? 'review' : 'reviews'}
-        </p>
-      </div>
+    <>
+      <PageHeader
+        eyebrow={`Reviews / ${getCategoryLabel(category).toUpperCase()}`}
+        title={getCategoryLabel(category)}
+        deck={cat?.description ?? undefined}
+      />
+      <div className="max-w-6xl mx-auto px-6 py-12">
+      <p className="text-prose-faint text-sm tabular-nums mb-8">
+        {count ?? 0} dad-tested {(count ?? 0) === 1 ? 'review' : 'reviews'}
+      </p>
 
       {/* Category filter pills */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
@@ -264,7 +257,8 @@ export default async function ReviewsPage({ searchParams }: Props) {
       <div className="mt-16">
         <BenchStrip ctaText="See all on the bench" />
       </div>
-    </div>
+      </div>
+    </>
   )
 }
 

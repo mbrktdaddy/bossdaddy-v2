@@ -101,6 +101,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
   const [searchOpen, setSearchOpen]   = useState(false)
   const [mobileCatOpen, setMobileCat] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const pathname    = usePathname()
   const browseRef   = useRef<HTMLDivElement>(null)
   const searchRef   = useRef<HTMLInputElement>(null)
@@ -151,10 +152,29 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMobileOpen(false); setCatOpen(false); setSearchOpen(false); setUserMenuOpen(false) }, [pathname])
 
+  // Masthead floats transparent over the homepage hero, then solidifies once
+  // the user scrolls past the top. Only the homepage has a full-bleed hero
+  // behind the nav — every other page is solid from the top.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   const isCategoryActive = pathname.startsWith('/reviews/category') || pathname.startsWith('/guides/category') || pathname.startsWith('/category/')
 
+  // Homepage masthead floats transparent over the hero until the user scrolls.
+  const transparent = pathname === '/' && !scrolled
+
   return (
-    <header className="sticky top-0 z-50 bg-chrome/95 backdrop-blur-md border-b border-soft">
+    <header
+      className={`sticky top-0 z-50 transition-colors duration-300 ${
+        transparent
+          ? 'bg-transparent border-b border-transparent'
+          : 'bg-chrome/95 backdrop-blur-md border-b border-soft'
+      }`}
+    >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 
         {/* Logo */}
@@ -431,7 +451,7 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
       </div>
 
       {/* Mobile search bar — dark recessed surface */}
-      <div className={`md:hidden px-4 pb-3 ${pathname === '/search' ? 'hidden' : ''}`}>
+      <div className={`md:hidden px-4 pb-3 ${pathname === '/search' ? 'hidden' : ''} ${transparent ? 'hidden' : ''}`}>
         <form action="/search">
           <div className="relative">
             <input
