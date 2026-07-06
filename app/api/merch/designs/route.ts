@@ -26,6 +26,7 @@ const SaveSchema = z.object({
   theme: z.string().max(500).optional().nullable(),
   ip_flag: z.enum(['none', 'low', 'review']).optional().default('none'),
   ip_note: z.string().max(1000).optional().nullable(),
+  design_type: z.enum(['saying', 'logo_lockup']).optional().default('saying'),
 })
 
 export async function GET() {
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const item = await insertMerchDesign({
-      design_type: 'saying',
+      design_type: parsed.data.design_type,
       title: parsed.data.title,
       content: parsed.data.content,
       theme: parsed.data.theme ?? null,

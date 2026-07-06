@@ -28,6 +28,7 @@ interface PublishedEntry {
 interface ApprovedDesign {
   id: string
   title: string
+  design_type: 'saying' | 'logo_lockup'
   content: { text?: string; subline?: string; angle?: string }
   ip_flag: 'none' | 'low' | 'review'
   status: 'draft' | 'approved' | 'published'
@@ -87,6 +88,10 @@ export function MerchStudio({ initialApproved }: { initialApproved: ApprovedDesi
   const [customText, setCustomText] = useState('')
   const [customSub, setCustomSub] = useState('')
   const [addingCustom, setAddingCustom] = useState(false)
+
+  // Logo-only design (no saying — just the mark + wordmark)
+  const [logoName, setLogoName] = useState('')
+  const [addingLogo, setAddingLogo] = useState(false)
 
   async function generate() {
     if (theme.trim().length < 2) return
@@ -169,6 +174,26 @@ export function MerchStudio({ initialApproved }: { initialApproved: ApprovedDesi
     }
   }
 
+  async function addLogoDesign() {
+    setAddingLogo(true); setError(null)
+    const name = logoName.trim() || 'Boss Daddy'
+    try {
+      const item = await saveDesign({
+        design_type: 'logo_lockup',
+        title: name,
+        content: { text: name, subline: '', angle: 'Logo lockup', best_for: 'any' },
+        theme: '(logo)',
+        ip_flag: 'none',
+      })
+      setApproved((prev) => [item, ...prev])
+      setLogoName('')
+    } catch (e) {
+      setError((e as Error).message)
+    } finally {
+      setAddingLogo(false)
+    }
+  }
+
   async function removeApproved(id: string) {
     const prev = approved
     setApproved((a) => a.filter((d) => d.id !== id))
@@ -240,6 +265,29 @@ export function MerchStudio({ initialApproved }: { initialApproved: ApprovedDesi
         <p className="text-[11px] text-prose-faint mt-2">
           You&apos;re responsible for the wording — don&apos;t use trademarked slogans or quotes you don&apos;t own.
         </p>
+      </div>
+
+      {/* Logo-only design — the brand mark + name, no saying (great for mugs/hats) */}
+      <div className="bg-surface border border-soft rounded-xl p-5">
+        <label className="block text-xs text-eyebrow uppercase tracking-widest mb-2">Logo + brand only</label>
+        <p className="text-xs text-prose-faint mb-3">
+          No saying — just the Boss Daddy mark and wordmark. Add it, then pick the product (mug, tee, hat) and colorway on its card.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            value={logoName}
+            onChange={(e) => setLogoName(e.target.value)}
+            placeholder="Internal name (optional) — e.g. Boss Daddy Logo Mug"
+            className="flex-1 bg-surface-raised border border-soft rounded-lg px-3 py-2.5 text-sm text-prose focus:outline-none focus:border-strong"
+          />
+          <button
+            onClick={addLogoDesign}
+            disabled={addingLogo}
+            className="px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors"
+          >
+            {addingLogo ? 'Adding…' : 'Add logo design'}
+          </button>
+        </div>
       </div>
 
       {/* Candidates */}
@@ -337,7 +385,9 @@ interface CatalogOptions {
 }
 
 function ApprovedDesignCard({ design, onDelete }: { design: ApprovedDesign; onDelete: () => void }) {
-  const [template, setTemplate] = useState<Template>(design.template_key ?? 'statement')
+  const [template, setTemplate] = useState<Template>(
+    design.template_key ?? (design.design_type === 'logo_lockup' ? 'logo' : 'statement'),
+  )
   const [colorway, setColorway] = useState<Colorway>(design.template_config?.colorway ?? 'dark')
   const [blank, setBlank] = useState<Blank>(design.template_config?.blank ?? 'tee')
   const [price, setPrice] = useState<string>(DEFAULT_PRICE[design.template_config?.blank ?? 'tee'])

@@ -33,6 +33,7 @@ export default async function MerchStudioPage() {
       <MerchStudio initialApproved={approved.map((d) => ({
         id: d.id,
         title: d.title,
+        design_type: d.design_type,
         content: d.content as { text?: string; subline?: string; angle?: string },
         ip_flag: d.ip_flag,
         status: d.status,
