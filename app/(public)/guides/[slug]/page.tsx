@@ -254,24 +254,33 @@ export default async function GuidePage({ params }: Props) {
           </LightboxImage>
         )}
 
-        {/* TL;DR box */}
-        {(guide.tldr || guideKeyTakeaways.length > 0) && (
-          <div className="mb-10 bg-accent-tint border border-accent-border/40 rounded-xl p-5 sm:p-6">
+        {/* TL;DR — the skimmer summary (guides.tldr). Renders ONLY when the
+            TL;DR field itself has content, so clearing it in the workspace
+            removes it here. */}
+        {guide.tldr && (
+          <div className="mb-6 bg-accent-tint border border-accent-border/40 rounded-xl p-5 sm:p-6">
             <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
             <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">TL;DR</p>
-            {guide.tldr && (
-              <p className="text-prose leading-relaxed text-sm sm:text-base mb-4">{guide.tldr}</p>
-            )}
-            {guideKeyTakeaways.length > 0 && (
-              <ul className="space-y-2">
-                {guideKeyTakeaways.map((item, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm text-prose-muted">
-                    <span className="text-accent-text mt-0.5 shrink-0">→</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <p className="text-prose leading-relaxed text-sm sm:text-base">{guide.tldr}</p>
+          </div>
+        )}
+
+        {/* Key Takeaways — the bullet list (guides.key_takeaways). Its own
+            box + heading so it maps 1:1 to the "Key Takeaways" workspace field
+            (previously these bullets rendered under the "TL;DR" heading, which
+            made clearing the TL;DR field look like it did nothing). */}
+        {guideKeyTakeaways.length > 0 && (
+          <div className="mb-10 bg-accent-tint border border-accent-border/40 rounded-xl p-5 sm:p-6">
+            <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
+            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Key Takeaways</p>
+            <ul className="space-y-2">
+              {guideKeyTakeaways.map((item, i) => (
+                <li key={i} className="flex items-start gap-2.5 text-sm text-prose-muted">
+                  <span className="text-accent-text mt-0.5 shrink-0">→</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
