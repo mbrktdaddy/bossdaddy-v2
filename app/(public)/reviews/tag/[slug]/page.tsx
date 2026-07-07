@@ -7,6 +7,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import RatingScore from '@/components/RatingScore'
 import { EmptyState } from '@/components/ui/EmptyState'
 import BenchStrip from '@/components/BenchStrip'
+import PageHeader from '@/components/PageHeader'
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -83,6 +84,11 @@ export default async function TagPage({ params }: Props) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <PageHeader
+        eyebrow={`Reviews / ${tag.tag_group}`}
+        title={tag.label}
+        deck={`Dad-tested reviews tagged "${tag.label}".`}
+      />
       <div className="w-full max-w-6xl mx-auto px-6 py-12">
 
         <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-prose-faint mb-8">
@@ -90,12 +96,6 @@ export default async function TagPage({ params }: Props) {
           <span>/</span>
           <span className="text-prose-muted">#{tag.label}</span>
         </nav>
-
-        <div className="mb-10">
-          <span className="text-xs text-eyebrow uppercase tracking-widest font-semibold">{tag.tag_group}</span>
-          <h1 className="text-3xl md:text-4xl font-black mt-2 mb-3">{tag.label}</h1>
-          <p className="text-prose-muted">Dad-tested reviews tagged <strong>{tag.label}</strong>.</p>
-        </div>
 
         {reviews.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

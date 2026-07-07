@@ -12,6 +12,7 @@ import FeaturedReviewCard from '@/components/FeaturedReviewCard'
 import BenchStrip from '@/components/BenchStrip'
 import AskTheBoss from '@/components/AskTheBoss'
 import SectionHeader from '@/components/SectionHeader'
+import PageHeader from '@/components/PageHeader'
 import { getSeasonalOccasions } from '@/lib/gift-occasions'
 import OccasionIcon from '@/components/OccasionIcon'
 import { ogImageUrl, OG_SITE } from '@/lib/og'
@@ -60,16 +61,10 @@ export default async function GearPage({ searchParams }: Props) {
 
   const [
     { data: reviews },
-    { data: allApproved },
     { data: giftPickLists },
     { data: featuredPickRows },
   ] = await Promise.all([
     reviewsQuery,
-    supabase
-      .from('reviews')
-      .select('category')
-      .eq('status', 'approved')
-      .eq('is_visible', true),
     supabase
       .from('collections')
       .select('id, slug, title, hero_image_url, occasion, collection_items(count)')
@@ -133,7 +128,6 @@ export default async function GearPage({ searchParams }: Props) {
   )
   const liveSeasonalOccasions = seasonalOccasions.filter((o) => populatedOccasions.has(o.value))
 
-  const categoryCount = new Set((allApproved ?? []).map((r) => r.category)).size
   const bossPicks     = topPicks.filter((r) => (r.rating ?? 0) >= 9).length
   // #1 Pick: admin-flagged all-time champion wins. Fall back to the prior
   // algorithmic pick (first high-rated review with an image) so the slot
@@ -149,51 +143,18 @@ export default async function GearPage({ searchParams }: Props) {
   const eights = topPicks.filter((r) => (r.rating ?? 0) >= 8 && (r.rating ?? 0) < 9)
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-16">
+    <>
+      <PageHeader
+        eyebrow={cat ? `Gear / ${cat.label}` : 'Daddy Tested, Boss Approved'}
+        title={cat ? `${cat.label} Gear` : "Boss Daddy's Gear"}
+        deck="Every pick here I bought with my own money, used hard, and rated 8 or higher. Earned, not sponsored."
+      />
+      <div className="max-w-6xl mx-auto px-6 py-12">
 
-      {/* ── Header — tick-line eyebrow pattern (matches homepage) ─────────── */}
-      <div className="mb-8">
-        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Daddy Tested, Boss Approved</p>
-        <h1 className="text-4xl md:text-5xl font-black mb-3 text-prose tracking-tight flex items-center gap-3">
-          {cat && <CategoryIcon slug={cat.slug} className="w-10 h-10 text-accent-text" />}
-          <span>{cat ? `${cat.label} Gear` : "Boss Daddy's Gear"}</span>
-        </h1>
-        <p className="text-prose-muted text-base md:text-lg leading-relaxed max-w-2xl">
-          Every pick here I bought with my own money, used hard, and rated 8 or higher. Earned, not sponsored.
-        </p>
-      </div>
-
-      {/* ── Stats bar ───────────────────────────────────────────────────────── */}
-      {topPicks.length > 0 && (
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 pb-4 border-b border-soft/40 text-sm text-prose-faint">
-          <Link href="/reviews" className="hover:text-prose transition-colors">
-            <span className="text-prose font-bold tabular-nums">{topPicks.length}</span> {topPicks.length === 1 ? 'pick' : 'picks'}
-          </Link>
-          {!category && (
-            <>
-              <span className="text-prose-faint hidden sm:block">·</span>
-              <Link href="/reviews" className="hover:text-prose transition-colors">
-                <span className="text-prose font-bold tabular-nums">{categoryCount}</span> {categoryCount === 1 ? 'category' : 'categories'}
-              </Link>
-            </>
-          )}
-          {!category && bossPicks > 0 && (
-            <>
-              <span className="text-prose-faint hidden sm:block">·</span>
-              <a href="#boss-picks" className="hover:text-prose transition-colors">
-                <span className="text-accent-text-soft font-bold tabular-nums">{bossPicks}</span> Boss {bossPicks === 1 ? 'Pick' : 'Picks'}
-              </a>
-            </>
-          )}
-          {!category && tens.length > 0 && (
-            <>
-              <span className="text-prose-faint hidden sm:block">·</span>
-              <a href="#perfect-score" className="hover:text-prose transition-colors">
-                <span className="text-prose font-bold tabular-nums">{tens.length}</span> perfect {tens.length === 1 ? 'score' : 'scores'}
-              </a>
-            </>
-          )}
+      {/* ── #1 Pick — the showcase leads the page (Cover Story pattern) ─────── */}
+      {!category && topPick && (
+        <div className="mb-12">
+          <FeaturedReviewCard review={{ ...topPick, rating: topPick.rating ?? 0 }} label="Boss's #1 Pick" />
         </div>
       )}
 
@@ -230,15 +191,7 @@ export default async function GearPage({ searchParams }: Props) {
         className="mb-12"
       />
 
-      {/* ── #1 Pick hero (unfiltered only) ──────────────────────────────────── */}
-      {!category && topPick && (
-        <div className="mb-16">
-          <FeaturedReviewCard review={{ ...topPick, rating: topPick.rating ?? 0 }} label="Boss's #1 Pick" />
-        </div>
-      )}
-
-      {/* ── Boss Daddy Merch — slim branded strip woven right after the #1 pick,
-            so our own gear rides alongside the top picks. "Explore" → #merch. */}
+      {/* ── Boss Daddy Merch — slim branded strip. "Explore" → #merch. ──────── */}
       {!category && <MerchStrip />}
 
       {/* ── Unfiltered-only discovery sections ──────────────────────────────── */}
@@ -429,6 +382,23 @@ export default async function GearPage({ searchParams }: Props) {
         </div>
       ) : (
         <div>
+          {/* ── Tier summary — quick jump to each rating band ─────────────── */}
+          {(tens.length > 0 || bossPicks > 0) && (
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-1 mb-8 text-sm text-prose-faint">
+              <span className="text-xs uppercase tracking-widest font-semibold text-eyebrow">Jump to</span>
+              {tens.length > 0 && (
+                <a href="#perfect-score" className="hover:text-prose transition-colors">
+                  <span className="text-prose font-bold tabular-nums">{tens.length}</span> perfect {tens.length === 1 ? 'score' : 'scores'}
+                </a>
+              )}
+              {tens.length > 0 && bossPicks > 0 && <span className="hidden sm:block">·</span>}
+              {bossPicks > 0 && (
+                <a href="#boss-picks" className="hover:text-prose transition-colors">
+                  <span className="text-accent-text-soft font-bold tabular-nums">{bossPicks}</span> Boss {bossPicks === 1 ? 'Pick' : 'Picks'}
+                </a>
+              )}
+            </div>
+          )}
           {/* ── Perfect Score — asymmetric magazine grid + radial glow ──── */}
           {tens.length > 0 && (
             <section id="perfect-score" className="relative mb-24">
@@ -513,6 +483,7 @@ export default async function GearPage({ searchParams }: Props) {
       </div>
 
     </div>
+    </>
   )
 }
 

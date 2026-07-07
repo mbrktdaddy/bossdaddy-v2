@@ -5,6 +5,7 @@ import { buildSocialMetadata } from '@/lib/og'
 import { createClient } from '@/lib/supabase/server'
 import { OCCASIONS, OCCASION_GROUPS } from '@/lib/gift-occasions'
 import OccasionIcon from '@/components/OccasionIcon'
+import PageHeader from '@/components/PageHeader'
 
 export const revalidate = 60
 
@@ -51,17 +52,13 @@ export default async function GiftsIndexPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-16">
-      {/* Header */}
-      <div className="mb-12">
-        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">The Gift Vault</p>
-        <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight">Gift Guides</h1>
-        <p className="text-prose-muted max-w-2xl leading-relaxed text-base md:text-lg">
-          Real-tested gift guides for every holiday, milestone, and occasion. Each list curated from a dad who actually buys, tests, and lives with this stuff. No corporate gift-list filler.
-        </p>
-      </div>
-
+    <>
+      <PageHeader
+        eyebrow="The Gift Vault"
+        title="Gift Guides"
+        deck="Real-tested gift guides for every holiday, milestone, and occasion. Each list curated from a dad who actually buys, tests, and lives with this stuff. No corporate gift-list filler."
+      />
+      <div className="max-w-6xl mx-auto px-6 py-12">
       {/* Grouped occasion grid */}
       {OCCASION_GROUPS.map((group) => (
         <section key={group.id} className="mb-14">
@@ -136,5 +133,6 @@ export default async function GiftsIndexPage() {
         </Link>
       </div>
     </div>
+    </>
   )
 }

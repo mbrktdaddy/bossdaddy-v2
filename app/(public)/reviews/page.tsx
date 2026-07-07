@@ -76,14 +76,6 @@ export default async function ReviewsPage({ searchParams }: Props) {
       reviews.filter((r) => r.image_url).sort((a, b) => b.rating - a.rating)[0] ??
       null
 
-    const categoryCount = new Set(reviews.map(r => r.category)).size
-    const avgRating = reviews.length > 0
-      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
-      : null
-    const lastAdded = reviews[0]?.published_at
-      ? new Date(reviews[0].published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-      : null
-
     return (
       <>
         <PageHeader
@@ -92,20 +84,10 @@ export default async function ReviewsPage({ searchParams }: Props) {
           deck="Every product bought with my own money, used in real life, and scored 1–10 — no sponsors, no fluff."
         />
         <div className="max-w-6xl mx-auto px-6 py-12">
-        {/* Stats bar */}
-        {reviews.length > 0 && (
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 pb-4 border-b border-soft/40 text-sm text-prose-faint">
-            <span><span className="text-prose font-bold tabular-nums">{reviews.length}</span> dad-tested {reviews.length === 1 ? 'review' : 'reviews'}</span>
-            <span className="text-prose-faint hidden sm:block">·</span>
-            <span><span className="text-prose font-bold tabular-nums">{categoryCount}</span> {categoryCount === 1 ? 'category' : 'categories'}</span>
-            {avgRating && <>
-              <span className="text-prose-faint hidden sm:block">·</span>
-              <span>Avg rating <span className="text-accent-text-soft font-bold tabular-nums">{avgRating}/10</span></span>
-            </>}
-            {lastAdded && <>
-              <span className="text-prose-faint hidden sm:block">·</span>
-              <span>Last added <span className="text-prose font-medium">{lastAdded}</span></span>
-            </>}
+        {/* Featured review — the showcase leads the page (Cover Story pattern) */}
+        {featured && (
+          <div className="mb-12">
+            <FeaturedReviewCard review={featured} />
           </div>
         )}
 
@@ -130,13 +112,6 @@ export default async function ReviewsPage({ searchParams }: Props) {
         </div>
 
         <AskTheBoss context="Browsing dad-tested reviews across every category" className="mb-12" />
-
-        {/* Featured review — visual hero of the directory page */}
-        {featured && (
-          <div className="mb-16">
-            <FeaturedReviewCard review={featured} />
-          </div>
-        )}
 
         {/* Per-category sections — editorial rows (newspaper directory style)
             replaces the prior 8 identical 3-col card grids with a tighter,

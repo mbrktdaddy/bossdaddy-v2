@@ -69,9 +69,9 @@ Reused as-is: `DroppedCard`, `GuideRow`, `EmailCaptureSection`, `BossApprovedBad
 ## 4. Rollout (branch `design-v2`, incremental)
 
 1. **Phase 1 (done):** Fraunces + primitives + homepage + doc/rule updates. **Phase 1b (done):** transparent-over-hero nav — `Header` floats transparent on the homepage top, solidifies on scroll (>24px); solid from top on every other page; mobile search hides while transparent.
-2. **Phase 2 (in progress):** Listing pages → swap the ad-hoc "tick-line eyebrow + H1" header to `PageHeader` (full-width band above a `py-12` content container).
-   - **Done:** `/reviews`, `/guides` (both all-view + per-category view).
-   - **Remaining:** `/gear`, `/tools`, `/vault`, `/picks`, `/stacks`, `/comparisons`, `/gifts`, plus the `category/[slug]` + `tag/[slug]` sub-routes.
+2. **Phase 2 (DONE — all public listings):** Listing pages → swap the ad-hoc "tick-line eyebrow + H1" header to `PageHeader` (full-width band above a `py-12` content container).
+   - **Done:** `/reviews`, `/guides` (all-view + per-category), `/gear`, `/gifts`, `/comparisons`, `/picks`, `/stacks`, `/vault`, `/category/[slug]`, `/reviews/tag/[slug]`, `/guides/tag/[slug]`. tsc + eslint clean.
+   - **Note:** `/tools` (the `(tools)` route group) is intentionally NOT here — it has its own minimal-chrome layout and is handled in **Phase 4**, not moved into `(public)`.
    - **Recipe (per page):** import `PageHeader`; wrap the `return` in a `<>` fragment; delete the old header `<div>` (tick-line span + eyebrow `<p>` + `<h1>`) and replace with `<PageHeader eyebrow=".." title=".." deck=".." />` placed **above** the content container; change the outer wrapper `max-w-6xl mx-auto px-6 py-16` → `py-12`; keep stats/count lines just under the header; drop inline `CategoryIcon` from the H1 (editorial titles are text-only). Close with `</div></>`. Run `npx tsc --noEmit` after each.
 3. **Phase 3:** Detail pages (review, guide, gear) → `PageHeader` + `ScoreBlock` ring on detail headers.
 4. **Phase 4:** Tools pages.

@@ -8,6 +8,7 @@ import { buildSocialMetadata } from '@/lib/og'
 import PipelineCounter from '@/components/PipelineCounter'
 import OffTheBench from '@/components/OffTheBench'
 import BenchStrip from '@/components/BenchStrip'
+import PageHeader from '@/components/PageHeader'
 
 export const revalidate = 300
 
@@ -69,17 +70,14 @@ export default async function VaultLandingPage({ searchParams }: Props) {
   )
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-16">
-      {/* Hero */}
-      <div className="mb-12">
-        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">{activeTab.eyebrow}</p>
-        <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight">{LABELS.vault.full}</h1>
-        <p className="text-prose-muted max-w-2xl leading-relaxed text-base md:text-lg">
-          Every comparison, best-of list, gift guide, and stack — in one place. Real-tested picks from a real dad, organized so you can find what you need in one click.
-        </p>
-        <PipelineCounter align="left" className="mt-5" />
-      </div>
+    <>
+      <PageHeader
+        eyebrow={activeTab.eyebrow}
+        title={LABELS.vault.full}
+        deck="Every comparison, best-of list, gift guide, and stack — in one place. Real-tested picks from a real dad, organized so you can find what you need in one click."
+      />
+      <div className="max-w-6xl mx-auto px-6 py-12">
+        <PipelineCounter align="left" className="mb-10" />
 
       {/* Tab filter strip */}
       <div className="mb-10 -mx-6 px-6">
@@ -135,6 +133,7 @@ export default async function VaultLandingPage({ searchParams }: Props) {
         <BenchStrip ctaText="See what's coming next" />
       </div>
     </div>
+    </>
   )
 }
 

@@ -6,6 +6,7 @@ import { getCollectionsWithCategory } from '@/lib/collection-listings'
 import { ogImageUrl, OG_SITE } from '@/lib/og'
 import CategoryFilterPills from '@/components/collections/CategoryFilterPills'
 import BenchStrip from '@/components/BenchStrip'
+import PageHeader from '@/components/PageHeader'
 
 export const revalidate = 60
 
@@ -39,16 +40,13 @@ export default async function StacksIndexPage({ searchParams }: Props) {
   const active = catParam ?? null
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-16">
-      <div className="mb-10">
-        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Stacks</p>
-        <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight">The Kit For The Job</h1>
-        <p className="text-prose-muted max-w-2xl leading-relaxed">
-          Curated kits for a specific goal. The newborn-night setup. The weekend cookout. The first-apartment toolbox. Each piece earned its spot, no fluff.
-        </p>
-      </div>
-
+    <>
+      <PageHeader
+        eyebrow="Stacks"
+        title="The Kit For The Job"
+        deck="Curated kits for a specific goal. The newborn-night setup. The weekend cookout. The first-apartment toolbox. Each piece earned its spot, no fluff."
+      />
+      <div className="max-w-6xl mx-auto px-6 py-12">
       <CategoryFilterPills basePath="/stacks" active={active} counts={counts} total={all.length} />
 
       {filtered.length === 0 ? (
@@ -107,6 +105,7 @@ export default async function StacksIndexPage({ searchParams }: Props) {
       <div className="mt-16">
         <BenchStrip ctaText="See all on the bench" />
       </div>
-    </div>
+      </div>
+    </>
   )
 }

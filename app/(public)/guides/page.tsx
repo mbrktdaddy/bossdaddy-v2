@@ -65,14 +65,6 @@ export default async function GuidesPage({ searchParams }: Props) {
       guides.find((g) => g.image_url) ??
       null
 
-    const categoryCount = new Set(guides.map(g => g.category)).size
-    const avgReadTime = guides.filter(g => g.reading_time_minutes).length > 0
-      ? Math.round(guides.reduce((sum, g) => sum + (g.reading_time_minutes ?? 0), 0) / guides.filter(g => g.reading_time_minutes).length)
-      : null
-    const lastAdded = guides[0]?.published_at
-      ? new Date(guides[0].published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-      : null
-
     return (
       <>
         <PageHeader
@@ -81,20 +73,10 @@ export default async function GuidesPage({ searchParams }: Props) {
           deck="Real how-tos for the situations that actually come up — tested by a dad, written without the fluff."
         />
         <div className="max-w-6xl mx-auto px-6 py-12">
-        {/* Stats bar */}
-        {guides.length > 0 && (
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 pb-4 border-b border-soft/40 text-sm text-prose-faint">
-            <span><span className="text-prose font-bold tabular-nums">{guides.length}</span> {guides.length === 1 ? 'guide' : 'guides'}</span>
-            <span className="text-prose-faint hidden sm:block">·</span>
-            <span><span className="text-prose font-bold tabular-nums">{categoryCount}</span> {categoryCount === 1 ? 'category' : 'categories'}</span>
-            {avgReadTime && <>
-              <span className="text-prose-faint hidden sm:block">·</span>
-              <span>Avg <span className="text-prose font-bold tabular-nums">{avgReadTime} min</span> read</span>
-            </>}
-            {lastAdded && <>
-              <span className="text-prose-faint hidden sm:block">·</span>
-              <span>Last added <span className="text-prose font-medium">{lastAdded}</span></span>
-            </>}
+        {/* Featured guide — the showcase leads the page (Cover Story pattern) */}
+        {featured && (
+          <div className="mb-12">
+            <FeaturedGuideCard guide={featured} />
           </div>
         )}
 
@@ -114,13 +96,6 @@ export default async function GuidesPage({ searchParams }: Props) {
         </div>
 
         <AskTheBoss context="Browsing dad how-to guides across every category" className="mb-12" />
-
-        {/* Featured guide — visual hero of the directory */}
-        {featured && (
-          <div className="mb-16">
-            <FeaturedGuideCard guide={featured} />
-          </div>
-        )}
 
         {/* Per-category sections — editorial rows (newspaper directory style)
             replaces 8 identical 3-col card grids with a tighter, scannable

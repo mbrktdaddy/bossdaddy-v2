@@ -6,6 +6,7 @@ import { getCollectionsWithCategory } from '@/lib/collection-listings'
 import { ogImageUrl, OG_SITE } from '@/lib/og'
 import CategoryFilterPills from '@/components/collections/CategoryFilterPills'
 import BenchStrip from '@/components/BenchStrip'
+import PageHeader from '@/components/PageHeader'
 
 export const revalidate = 60
 
@@ -39,16 +40,13 @@ export default async function PicksIndexPage({ searchParams }: Props) {
   const active = catParam ?? null
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-16">
-      <div className="mb-10">
-        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">The Picks</p>
-        <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight">Boss Daddy Picks</h1>
-        <p className="text-prose-muted max-w-2xl leading-relaxed">
-          Curated gear lists from a dad who actually buys, tests, and lives with this stuff. Gift guides, best-of roundups, and category deep-dives.
-        </p>
-      </div>
-
+    <>
+      <PageHeader
+        eyebrow="The Picks"
+        title="Boss Daddy Picks"
+        deck="Curated gear lists from a dad who actually buys, tests, and lives with this stuff. Gift guides, best-of roundups, and category deep-dives."
+      />
+      <div className="max-w-6xl mx-auto px-6 py-12">
       <CategoryFilterPills basePath="/picks" active={active} counts={counts} total={all.length} />
 
       {filtered.length === 0 ? (
@@ -107,6 +105,7 @@ export default async function PicksIndexPage({ searchParams }: Props) {
       <div className="mt-16">
         <BenchStrip ctaText="See all on the bench" />
       </div>
-    </div>
+      </div>
+    </>
   )
 }

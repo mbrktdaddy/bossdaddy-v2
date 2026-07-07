@@ -8,6 +8,7 @@ import { getCategoryBySlug, CATEGORIES } from '@/lib/categories'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
+import PageHeader from '@/components/PageHeader'
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -91,16 +92,11 @@ export default async function CategoryHubPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
+      <PageHeader eyebrow="Boss Daddy" title={cat.label} deck={cat.description} />
+
       <div className="w-full max-w-6xl mx-auto px-6 py-12">
 
-        {/* ── Category hero ─────────────────────────────────────────────── */}
         <div className="mb-16">
-          <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-          <p className="flex items-center gap-1.5 text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">
-            <CategoryIcon slug={cat.slug} className="w-4 h-4 text-accent-text" /> Boss Daddy
-          </p>
-          <h1 className="text-4xl md:text-5xl font-black mb-5 leading-tight">{cat.label}</h1>
-          <p className="text-prose-muted max-w-2xl leading-relaxed text-lg">{cat.description}</p>
           {cat.pov && (
             <p className="mt-5 text-prose-muted max-w-2xl leading-relaxed italic border-l-2 border-accent/50 pl-4">
               {cat.pov as string}

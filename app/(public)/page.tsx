@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getCategoryBySlug } from '@/lib/categories'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import EditorialHeader from '@/components/EditorialHeader'
@@ -56,19 +57,22 @@ export function generateMetadata(): Metadata {
   })
 }
 
-// Tools aren't DB-backed — update when a tool is added/removed.
-const TOOLS_COUNT = 4
+// Bench items are ranked testing → queued → considering (mirrors BenchStrip).
+const BENCH_RANK: Record<string, number> = { testing: 0, queued: 1, considering: 2 }
 
 export default async function HomePage() {
   const supabase = await createClient()
+  // Bench items (statuses testing/queued/considering) aren't publicly readable,
+  // so the "On the bench" motion item comes through the admin client — same as
+  // BenchStrip. It's read-only, no user data.
+  const admin = createAdminClient()
 
   const [
     { data: featuredHero },
     { data: topRatedOne },
     { data: recentRaw },
     { data: guidesRaw },
-    { count: reviewCountRaw },
-    { count: guidesCountRaw },
+    { data: benchRaw },
   ] = await Promise.all([
     supabase
       .from('reviews')
@@ -95,24 +99,32 @@ export default async function HomePage() {
       .eq('status', 'approved').eq('is_visible', true)
       .order('published_at', { ascending: false })
       .limit(6),
-    supabase
-      .from('reviews')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'approved').eq('is_visible', true),
-    supabase
-      .from('guides')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'approved').eq('is_visible', true),
+    admin
+      .from('products')
+      .select('slug, title:name, status, priority')
+      .in('status', ['testing', 'queued', 'considering'])
+      .order('priority', { ascending: false })
+      .limit(20),
   ])
 
   const featured: Review | null = (featuredHero as Review | null) ?? (topRatedOne as Review | null)
   const recent: Review[] = (recentRaw ?? []) as Review[]
   const guides: Guide[] = (guidesRaw ?? []) as Guide[]
-  const reviewCount = reviewCountRaw ?? 0
-  const guidesCount = guidesCountRaw ?? 0
 
   const leadGuide = guides[0] ?? null
   const restGuides = guides.slice(1)
+
+  // ── Hero "In Motion" band — real recent activity, not inventory counts.
+  // Shows momentum (latest tested · next on the bench · newest guide) so the
+  // band reads as alive rather than advertising small totals. Each links out.
+  const benchItem =
+    (benchRaw ?? [])
+      .slice()
+      .sort((a, b) => (BENCH_RANK[a.status] ?? 99) - (BENCH_RANK[b.status] ?? 99))[0] ?? null
+  const motion: { label: string; title: string; href: string }[] = []
+  if (recent[0]) motion.push({ label: 'Just tested', title: recent[0].product_name || recent[0].title, href: `/reviews/${recent[0].slug}` })
+  if (benchItem) motion.push({ label: 'On the bench', title: benchItem.title, href: `/bench/${benchItem.slug}` })
+  if (leadGuide) motion.push({ label: 'New guide', title: leadGuide.title, href: `/guides/${leadGuide.slug}` })
 
   // Distinct guide topics (for the browse chips) — derived from what's live,
   // deduped, linking to the guide-category listings.
@@ -132,7 +144,7 @@ export default async function HomePage() {
       </Suspense>
 
       {/* ── HERO — full-bleed photo cover + live-number ticker ─────────────── */}
-      <HomeHero reviewCount={reviewCount} guidesCount={guidesCount} toolsCount={TOOLS_COUNT} />
+      <HomeHero motion={motion} />
 
       {/* ── COVER STORY — the featured review as an editorial split ────────── */}
       {featured && (

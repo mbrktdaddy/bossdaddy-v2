@@ -4,8 +4,9 @@ import Link from 'next/link'
 /* Homepage full-bleed Photo hero — Manifesto v2 (docs/home-manifesto-spec.md).
    DESKTOP: wide workshop shot, subject right, manifesto in the dark-left column.
    MOBILE: portrait shot, subject low — copy sits over top+bottom washes.
-   A live-number ticker pins to the bottom edge (reviews/guides/tools counts +
-   the "Zero paid placements" independence line — all real, DB-backed).
+   An "In Motion" activity strip sits directly BELOW the hero (latest tested ·
+   next on the bench · newest guide — real, DB-backed; momentum, not totals) so
+   it never covers the photo, and reads as the transition into the content.
    Accent = Hot orange. Swap the placeholder art for the hero shoot later:
    only the two <Image src> values change. */
 
@@ -26,44 +27,55 @@ const Arrow = () => (
   </svg>
 )
 
-interface TickerStat {
-  n: string
+interface MotionItem {
+  /** Uppercase eyebrow — the activity verb ("Just tested", "On the bench"). */
   label: string
+  /** The subject — product / bench item / guide title. */
+  title: string
+  href: string
 }
 
-function Ticker({ stats }: { stats: TickerStat[] }) {
+/* "In Motion" band — pins to the hero's bottom edge. Shows recent ACTIVITY
+   (latest tested · next on the bench · newest guide), not inventory totals, so
+   it reads as alive/current rather than advertising small counts. Each item
+   links out. Falls back to the independence line if nothing's live yet. */
+function Ticker({ items }: { items: MotionItem[] }) {
   return (
-    <div className="relative z-10 border-t border-white/12 bg-chrome/45 backdrop-blur-sm">
+    <div className="border-b border-soft bg-chrome">
       <div className="max-w-6xl mx-auto px-6">
-        <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5 py-4 text-[13px] font-semibold text-prose-muted sm:flex sm:flex-wrap sm:gap-x-8 sm:gap-y-2">
-          {stats.map((s) => (
-            <li key={s.label} className="inline-flex items-center gap-2">
-              <span className="text-accent" aria-hidden>●</span>
-              <span className="font-black text-prose tabular-nums">{s.n}</span>
-              {s.label}
-            </li>
-          ))}
-        </ul>
+        {items.length === 0 ? (
+          <p className="py-4 text-[13px] font-semibold text-prose-muted inline-flex items-center gap-2.5">
+            <span className="text-accent" aria-hidden>●</span>
+            <span className="font-black text-prose">Zero paid placements.</span>
+            Every pick is bought, broken, and earned.
+          </p>
+        ) : (
+          // Mobile: stacked full-width rows. Desktop: one non-wrapping line of
+          // equal segments — long titles truncate rather than pushing a second row.
+          <ul className="grid grid-cols-1 gap-y-2.5 py-4 text-[13px] min-w-0 sm:flex sm:items-center sm:gap-x-6 sm:gap-y-0">
+            {items.map((it) => (
+              <li key={it.label} className="min-w-0 sm:flex-1">
+                <Link href={it.href} className="group flex items-center gap-2.5 min-w-0">
+                  <span className="text-accent shrink-0" aria-hidden>●</span>
+                  <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.18em] text-eyebrow">{it.label}</span>
+                  <span className="min-w-0 truncate font-semibold text-prose group-hover:text-accent-text-soft transition-colors">{it.title}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   )
 }
 
 interface Props {
-  reviewCount: number
-  guidesCount: number
-  toolsCount: number
+  motion: MotionItem[]
 }
 
-export default function HomeHero({ reviewCount, guidesCount, toolsCount }: Props) {
-  const stats: TickerStat[] = [
-    { n: String(reviewCount), label: 'gear tested' },
-    { n: String(guidesCount), label: 'guides published' },
-    { n: String(toolsCount), label: 'free tools' },
-    { n: '0', label: 'paid placements' },
-  ]
-
+export default function HomeHero({ motion }: Props) {
   return (
+    <>
     <section className="relative min-h-[80svh] sm:min-h-[88vh] flex flex-col overflow-hidden border-b border-soft">
       {/* Desktop image — subject right, dark left for the text. Lazy: it's
           display:none on mobile, where the portrait crop is the real LCP. */}
@@ -100,7 +112,7 @@ export default function HomeHero({ reviewCount, guidesCount, toolsCount }: Props
         className="absolute inset-0 hidden sm:block pointer-events-none"
         style={{ background: 'radial-gradient(120% 90% at 74% 16%, rgba(229,90,26,0.20), transparent 55%)' }}
       />
-      {/* Mobile washes — top (title) + bottom (subhead + CTAs + ticker) */}
+      {/* Mobile washes — top (title) + bottom (subhead + CTA) */}
       <div
         className="absolute inset-x-0 top-0 h-[42%] sm:hidden"
         style={{ background: 'linear-gradient(180deg, #09090b 0%, rgba(9,9,11,0.82) 36%, transparent 100%)' }}
@@ -162,7 +174,8 @@ export default function HomeHero({ reviewCount, guidesCount, toolsCount }: Props
         </div>
       </div>
 
-      <Ticker stats={stats} />
     </section>
+    <Ticker items={motion} />
+    </>
   )
 }

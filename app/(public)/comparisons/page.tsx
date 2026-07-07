@@ -6,6 +6,7 @@ import { getCollectionsWithCategory } from '@/lib/collection-listings'
 import { ogImageUrl, OG_SITE } from '@/lib/og'
 import CategoryFilterPills from '@/components/collections/CategoryFilterPills'
 import BenchStrip from '@/components/BenchStrip'
+import PageHeader from '@/components/PageHeader'
 
 export const revalidate = 60
 
@@ -41,16 +42,13 @@ export default async function ComparisonsIndexPage({ searchParams }: Props) {
   const active = catParam ?? null
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-16">
-      <div className="mb-10">
-        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Comparisons</p>
-        <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight">Head-to-Head</h1>
-        <p className="text-prose-muted max-w-2xl leading-relaxed">
-          When two or three products solve the same problem and you can&apos;t decide. Real testing, scorecards across the four dimensions, a winner per category, one clear bottom line.
-        </p>
-      </div>
-
+    <>
+      <PageHeader
+        eyebrow="Comparisons"
+        title="Head-to-Head"
+        deck="When two or three products solve the same problem and you can't decide. Real testing, scorecards across the four dimensions, a winner per category, one clear bottom line."
+      />
+      <div className="max-w-6xl mx-auto px-6 py-12">
       <CategoryFilterPills basePath="/comparisons" active={active} counts={counts} total={all.length} />
 
       {filtered.length === 0 ? (
@@ -110,5 +108,6 @@ export default async function ComparisonsIndexPage({ searchParams }: Props) {
         <BenchStrip ctaText="See all on the bench" />
       </div>
     </div>
+    </>
   )
 }
