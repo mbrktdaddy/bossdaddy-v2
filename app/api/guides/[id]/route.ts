@@ -227,6 +227,13 @@ export async function PUT(
     revalidatePath('/')
     revalidatePath('/guides')
     revalidatePath(`/guides/${data.slug}`)
+
+    // Editing a LIVE guide changes updated_at → a new OG image URL (the `v=`
+    // cache-buster). Pre-warm it so the first social scrape hits a warm CDN
+    // cache instead of a cold ~2s MISS (which X can time out on and cache blank
+    // for ~7 days). Gated on wasApproved so draft edits never warm. Best-effort.
+    const slug = data.slug as string
+    after(() => prewarmOgForPaths([`/guides/${slug}`]))
   }
 
   return NextResponse.json({ article: data })

@@ -8,6 +8,12 @@ import { isOwnImageUrl } from '@/lib/images/og-host'
 // 1200×630, killing both the format and aspect-ratio problems in one step.
 export const runtime = 'nodejs'
 
+// Photo cards do fetch-hero → sharp resize → Satori render → sharp-to-JPEG on a
+// cold MISS, which can exceed the platform default. Raise the ceiling so a cold
+// render finishes and gets cached rather than being killed mid-flight (a killed
+// render is what a social scraper times out on and caches blank).
+export const maxDuration = 30
+
 const OG_W = 1200
 const OG_H = 630
 
