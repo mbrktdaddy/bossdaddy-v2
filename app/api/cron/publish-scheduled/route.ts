@@ -1,6 +1,7 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest, after } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { prewarmOgForPaths } from '@/lib/og/prewarm'
 import { getResend, FROM_EMAIL } from '@/lib/resend'
 import { ModerationResultEmail } from '@/emails/ModerationResultEmail'
 import * as React from 'react'
@@ -102,17 +103,24 @@ export async function GET(request: NextRequest) {
     collectionsPublished = count ?? 0
   }
 
+  // Collect the just-published content paths so we can pre-warm their OG preview
+  // images below — the first social scrape then hits a warm CDN cache instead of
+  // a cold ~2s MISS (which X can time out on and cache as a blank card).
+  const warmPaths: string[] = []
+
   // Revalidate public pages that might have changed
   if (articlesPublished > 0) {
     revalidatePath('/')
     revalidatePath('/guides')
     ;(dueArticles ?? []).forEach((a) => a.slug && revalidatePath(`/guides/${a.slug}`))
+    warmPaths.push(...(dueArticles ?? []).filter((a) => a.slug).map((a) => `/guides/${a.slug}`))
   }
   if (reviewsPublished > 0) {
     revalidatePath('/')
     revalidatePath('/reviews')
     revalidatePath('/about')
     ;(dueReviews ?? []).forEach((r) => r.slug && revalidatePath(`/reviews/${r.slug}`))
+    warmPaths.push(...(dueReviews ?? []).filter((r) => r.slug).map((r) => `/reviews/${r.slug}`))
   }
   if (collectionsPublished > 0) {
     revalidatePath('/')
@@ -124,15 +132,23 @@ export async function GET(request: NextRequest) {
     const { OCCASIONS } = await import('@/lib/gift-occasions')
     for (const c of (dueCollections ?? [])) {
       if (!c.slug) continue
-      if (c.collection_type === 'comparison') revalidatePath(`/comparisons/${c.slug}`)
-      else if (c.collection_type === 'stack')  revalidatePath(`/stacks/${c.slug}`)
+      let path: string | null = null
+      if (c.collection_type === 'comparison') path = `/comparisons/${c.slug}`
+      else if (c.collection_type === 'stack')  path = `/stacks/${c.slug}`
       else if (c.collection_type === 'gift_guide') {
         const occ = OCCASIONS.find((o) => o.value === c.occasion)
-        if (occ) revalidatePath(`/gifts/${occ.slug}`)
+        if (occ) path = `/gifts/${occ.slug}`
       }
-      else revalidatePath(`/picks/${c.slug}`)
+      else path = `/picks/${c.slug}`
+      if (path) {
+        revalidatePath(path)
+        warmPaths.push(path)
+      }
     }
   }
+
+  // Pre-warm OG images for everything that just went live (post-response).
+  if (warmPaths.length) after(() => prewarmOgForPaths(warmPaths))
 
   // Send author notifications + wishlist alerts (fire-and-forget, don't block response)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'

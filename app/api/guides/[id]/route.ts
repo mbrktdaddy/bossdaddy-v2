@@ -11,6 +11,7 @@ import { computeReadingTime } from '@/lib/reading-time'
 import { getResend, FROM_EMAIL } from '@/lib/resend'
 import { ModerationResultEmail } from '@/emails/ModerationResultEmail'
 import { CATEGORY_SLUGS } from '@/lib/categories'
+import { prewarmOgForPaths } from '@/lib/og/prewarm'
 import * as React from 'react'
 import { z } from 'zod'
 
@@ -124,6 +125,13 @@ export async function PUT(
     revalidatePath('/guides')
     revalidatePath('/about')
     if (data?.slug) revalidatePath(`/guides/${data.slug}`)
+
+    // Pre-warm the OG preview image so the first social scrape hits a warm CDN
+    // cache instead of a cold ~2s MISS (which X can time out on and cache blank).
+    if (modParsed.data.action === 'approve' && data?.slug) {
+      const slug = data.slug as string
+      after(() => prewarmOgForPaths([`/guides/${slug}`]))
+    }
 
     // Send email notification — scheduled via after() so it doesn't block the response
     const notifyActions = ['approve', 'reject', 'request_edits'] as const

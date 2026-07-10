@@ -1,7 +1,8 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest, after } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { prewarmOgForPaths } from '@/lib/og/prewarm'
 import { z } from 'zod'
 
 const BulkSchema = z.object({
@@ -29,12 +30,17 @@ export async function POST(request: NextRequest) {
   const now = new Date().toISOString()
 
   if (action === 'publish') {
-    const { count, error } = await admin
+    const { data, count, error } = await admin
       .from('reviews')
       .update({ status: 'approved', published_at: now }, { count: 'exact' })
       .in('id', ids)
+      .select('slug')
     if (error) return NextResponse.json({ error: `Publish failed: ${error.message}` }, { status: 500 })
     affected = count ?? 0
+    // Pre-warm each newly-live review's OG image so the first social scrape hits
+    // a warm CDN cache instead of a cold ~2s MISS (X can time out + cache blank).
+    const paths = (data ?? []).map((r) => r.slug).filter(Boolean).map((s) => `/reviews/${s}`)
+    if (paths.length) after(() => prewarmOgForPaths(paths))
   } else if (action === 'unpublish') {
     const { count, error } = await admin
       .from('reviews')

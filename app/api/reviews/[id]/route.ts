@@ -12,6 +12,7 @@ import { ModerationResultEmail } from '@/emails/ModerationResultEmail'
 import { notifyWishlistSubscribers } from '@/lib/wishlist-emails'
 import { createNotification } from '@/lib/notifications'
 import { ReviewUpdateSchema, ReviewModerateSchema } from '@/lib/reviews/schema'
+import { prewarmOgForPaths } from '@/lib/og/prewarm'
 import * as React from 'react'
 
 // GET /api/reviews/[id]
@@ -104,6 +105,13 @@ export async function PUT(
     if (data?.slug)     revalidatePath(`/reviews/${data.slug}`)
     if (data?.category) revalidatePath(`/reviews/category/${data.category}`)
     if (data?.category) revalidatePath(`/category/${data.category}`)
+
+    // Pre-warm the OG preview image so the first social scrape hits a warm CDN
+    // cache instead of a cold ~2s MISS (which X can time out on and cache blank).
+    if (modParsed.data.action === 'approve' && data?.slug) {
+      const slug = data.slug as string
+      after(() => prewarmOgForPaths([`/reviews/${slug}`]))
+    }
 
     // Send email notification — scheduled via after() so it doesn't block the response
     const notifyActions = ['approve', 'reject', 'request_edits'] as const
