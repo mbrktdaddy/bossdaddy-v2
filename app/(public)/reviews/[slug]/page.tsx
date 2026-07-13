@@ -354,11 +354,11 @@ export default async function ReviewPage({ params }: Props) {
         {/* Article header */}
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-4 flex-wrap">
-            {/* Product name — primary context, orange chip */}
-            <span className="text-xs font-medium text-eyebrow uppercase tracking-widest bg-accent-tint px-3 py-1 rounded-full">
-              {review.product_name}
-            </span>
-            {/* Category — secondary context, gray chip with icon */}
+            {/* No product-name chip: review titles lead with the product name by
+                convention, and it's also in the H1 + VerdictCard — a chip would
+                just echo the title. The eyebrow names the ROLE (category), not
+                the product. */}
+            {/* Category — primary role eyebrow, gray chip with icon */}
             {category && (
               <Link
                 href={`/category/${category.slug}`}
