@@ -268,8 +268,11 @@ export default function VerdictCard({
       className="mb-8 rounded-xl border border-soft bg-surface p-5 sm:p-6"
       aria-label="The verdict"
     >
-      {/* Header — section label + product name */}
-      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-accent">The Verdict</p>
+      {/* Header — section label + product name. Label is a real <h2> so
+          search/AI overviews can extract the verdict as the summary section
+          (in-body is the primary, always-rendered placement; the sidebar
+          "Quick Verdict" stays a <p> to avoid a duplicate heading). */}
+      <h2 className="text-[11px] font-black uppercase tracking-[0.22em] text-accent">The Verdict</h2>
       <p className="mt-1 mb-5 text-sm font-black uppercase tracking-wide text-prose/90 sm:text-base">{productName}</p>
 
       {/* Conclusion cluster — arc (with approved check baked in) + rebuy chip */}

@@ -256,25 +256,26 @@ export default async function GuidePage({ params }: Props) {
           </LightboxImage>
         )}
 
-        {/* TL;DR — the skimmer summary (guides.tldr). Renders ONLY when the
-            TL;DR field itself has content, so clearing it in the workspace
-            removes it here. */}
+        {/* Quick Take — the skimmer summary (guides.tldr). Warm accent box =
+            "the answer"; label is a real <h2> so search/AI overviews can extract
+            it as the summary section. Renders ONLY when the field has content,
+            so clearing it in the workspace removes it here. Sits ABOVE the
+            .bd-content wrapper, so this h2 never leaks into the TOC. */}
         {guide.tldr && (
           <div className="mb-6 bg-accent-tint border border-accent-border/40 rounded-xl p-5 sm:p-6">
             <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">TL;DR</p>
+            <h2 className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Quick Take</h2>
             <p className="text-prose leading-relaxed text-sm sm:text-base">{guide.tldr}</p>
           </div>
         )}
 
-        {/* Key Takeaways — the bullet list (guides.key_takeaways). Its own
-            box + heading so it maps 1:1 to the "Key Takeaways" workspace field
-            (previously these bullets rendered under the "TL;DR" heading, which
-            made clearing the TL;DR field look like it did nothing). */}
+        {/* Key Takeaways — the bullet list (guides.key_takeaways). Deliberately
+            styled as a NEUTRAL surface card (not accent-tint) so it reads as a
+            distinct element from the Quick Take above rather than a second warm
+            box. Label is a real <h2> for the same SEO reason as Quick Take. */}
         {guideKeyTakeaways.length > 0 && (
-          <div className="mb-10 bg-accent-tint border border-accent-border/40 rounded-xl p-5 sm:p-6">
-            <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Key Takeaways</p>
+          <div className="mb-10 bg-surface border border-soft rounded-xl p-5 sm:p-6">
+            <h2 className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Key Takeaways</h2>
             <ul className="space-y-2">
               {guideKeyTakeaways.map((item, i) => (
                 <li key={i} className="flex items-start gap-2.5 text-sm text-prose-muted">
