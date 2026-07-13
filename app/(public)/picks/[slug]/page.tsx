@@ -87,6 +87,8 @@ type ReviewRow = {
   has_affiliate_links: boolean
 }
 
+type ResearchSource = { title: string; url: string }
+
 type ProductRow = {
   slug: string
   name: string
@@ -97,6 +99,8 @@ type ProductRow = {
   affiliate_url: string | null
   non_affiliate_url: string | null
   description: string | null
+  source: string | null
+  research_sources: ResearchSource[] | null
 }
 
 export default async function PickDetailPage({ params }: Props) {
@@ -115,7 +119,7 @@ export default async function PickDetailPage({ params }: Props) {
 
   const { data: pickItems } = await admin
     .from('collection_items')
-    .select('position, blurb, best_for, role_label, product_slug, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, pros, cons, best_for, has_affiliate_links), products(slug, name, brand, image_url, category, price_cents, affiliate_url, non_affiliate_url, description)')
+    .select('position, blurb, best_for, role_label, product_slug, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, pros, cons, best_for, has_affiliate_links), products(slug, name, brand, image_url, category, price_cents, affiliate_url, non_affiliate_url, description, source, research_sources)')
     .eq('collection_id', pick.id)
     .order('position')
 
@@ -338,6 +342,11 @@ export default async function PickDetailPage({ params }: Props) {
                   if (!review) {
                     if (!standaloneProduct) return null
                     const product = standaloneProduct
+                    // Three tiers of un-reviewed pick: a product adopted from The
+                    // Boss's research is "Researched, not tested" (with sources);
+                    // anything else is an owner pick we own but haven't reviewed.
+                    const isResearched = product.source === 'adopted_from_research'
+                    const researchSources = (product.research_sources ?? []).filter((s) => s?.url)
                     const href = product.affiliate_url ? `/go/${product.slug}` : product.non_affiliate_url
                     return (
                       <article key={`product-${product.slug}`} className="flex flex-col sm:flex-row gap-5 bg-surface border border-soft hover:border-accent-border/40 rounded-xl p-5 shadow-lg shadow-black/5 hover:-translate-y-0.5 transition-all duration-200">
@@ -367,8 +376,20 @@ export default async function PickDetailPage({ params }: Props) {
                             </div>
                           </div>
 
-                          {/* Provenance chip — owner pick, not yet reviewed (no rating/badge) */}
-                          <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-surface-raised border border-soft text-[10px] font-black uppercase tracking-widest text-prose-faint">Owner pick · not yet reviewed</span>
+                          {/* Provenance chip — distinguishes researched-not-tested
+                              (AI web research, sources below) from an owner pick
+                              we hold but haven't formally reviewed. */}
+                          {isResearched ? (
+                            <span className="inline-flex items-center gap-1.5 mb-2 px-2.5 py-1 rounded-md bg-surface-raised border border-accent-border/40 text-[10px] font-black uppercase tracking-widest text-accent-text">
+                              <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-3 h-3">
+                                <circle cx="11" cy="11" r="7" strokeLinecap="round" />
+                                <path d="M21 21l-4.3-4.3" strokeLinecap="round" />
+                              </svg>
+                              Researched · not tested
+                            </span>
+                          ) : (
+                            <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-surface-raised border border-soft text-[10px] font-black uppercase tracking-widest text-prose-faint">Owner pick · not yet reviewed</span>
+                          )}
 
                           {/* Editor's per-collection "best for" tagline — italic, prominent */}
                           {itemBestFor && (
@@ -378,6 +399,21 @@ export default async function PickDetailPage({ params }: Props) {
                           <p className="text-sm text-prose-muted leading-relaxed mb-3">
                             {blurb ?? product.description ?? ''}
                           </p>
+
+                          {isResearched && researchSources.length > 0 && (
+                            <details className="mb-3 text-xs">
+                              <summary className="cursor-pointer text-prose-faint hover:text-accent-text-soft font-semibold uppercase tracking-widest">
+                                Sources — researched via web ({researchSources.length})
+                              </summary>
+                              <ul className="mt-2 space-y-1">
+                                {researchSources.map((s, i) => (
+                                  <li key={i} className="truncate">
+                                    <a href={s.url} target="_blank" rel="noopener noreferrer nofollow" className="text-accent-text-soft hover:text-accent">{s.title || s.url}</a>
+                                  </li>
+                                ))}
+                              </ul>
+                            </details>
+                          )}
 
                           <div className="flex flex-wrap items-center gap-3 mt-auto pt-1">
                             {product.price_cents != null && (

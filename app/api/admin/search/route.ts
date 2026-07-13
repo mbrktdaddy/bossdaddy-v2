@@ -36,6 +36,39 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ collections: data ?? [] })
   }
 
+  // Scoped mode — cross-link picker for the TiptapEditor "Insert Read Next"
+  // dialog. Only approved + visible guides/reviews (matches what
+  // resolveContentTokens will actually resolve — no dead [[link missing]] stubs).
+  // Empty query → the most recent of each. Returns one unified, type-tagged list.
+  if (scope === 'crosslink') {
+    const buildQuery = (table: 'guides' | 'reviews') => {
+      let query = admin
+        .from(table)
+        .select(table === 'reviews' ? 'slug, title, product_name, category' : 'slug, title, category')
+        .eq('status', 'approved')
+        .eq('is_visible', true)
+        .order('published_at', { ascending: false, nullsFirst: false })
+        .limit(8)
+      if (q.length >= 2) {
+        const like = `%${q}%`
+        query = query.or(
+          table === 'reviews'
+            ? `title.ilike.${like},product_name.ilike.${like},slug.ilike.${like}`
+            : `title.ilike.${like},slug.ilike.${like}`,
+        )
+      }
+      return query
+    }
+    const [{ data: guides }, { data: reviews }] = await Promise.all([buildQuery('guides'), buildQuery('reviews')])
+    type ReviewRow = { slug: string; title: string; product_name: string | null; category: string | null }
+    type GuideRow = { slug: string; title: string; category: string | null }
+    const items = [
+      ...((reviews ?? []) as unknown as ReviewRow[]).map((r) => ({ type: 'review' as const, slug: r.slug, title: r.title, subtitle: r.product_name ?? null, category: r.category })),
+      ...((guides ?? []) as unknown as GuideRow[]).map((g) => ({ type: 'guide' as const, slug: g.slug, title: g.title, subtitle: null, category: g.category })),
+    ]
+    return NextResponse.json({ items })
+  }
+
   if (q.length < 2) return NextResponse.json({ articles: [], reviews: [], media: [], products: [], collections: [] })
 
   const like = `%${q}%`

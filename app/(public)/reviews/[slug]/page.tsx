@@ -25,7 +25,10 @@ import ImageLightbox from '@/components/ImageLightbox'
 import { LightboxImage } from '@/components/LightboxImage'
 import { MerchCallout } from '@/components/MerchCallout'
 import CollectionsForReview from '@/components/CollectionsForReview'
+import CollectionEmbed from '@/components/CollectionEmbed'
+import ContentLinkCard from '@/components/ContentLinkCard'
 import ProductCtaCard from '@/components/ProductCtaCard'
+import { extractProductSlugs, splitContentForInlineCards } from '@/lib/inline-content'
 import StickyMobileCta from '@/components/StickyMobileCta'
 import ReadingProgressBar from '@/components/ReadingProgressBar'
 import { EmailSignup } from '@/components/EmailSignup'
@@ -44,6 +47,17 @@ import RecentlyViewedStrip from '@/components/RecentlyViewedStrip'
 const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
 
 export const revalidate = 60
+
+// Shared prose treatment for review body segments (and the follow-up plain render).
+const REVIEW_PROSE_CLASS = `bd-editorial prose prose-lg prose-invert prose-orange mx-auto max-w-[68ch]
+  prose-headings:font-black prose-headings:tracking-tight prose-headings:font-sans prose-headings:leading-[1.15] prose-headings:text-prose
+  prose-h2:text-2xl prose-h2:mt-14 prose-h2:mb-5
+  prose-h3:mt-10 prose-h3:mb-3
+  [&>*:first-child]:mt-0
+  prose-p:text-prose-muted prose-p:leading-[1.85]
+  prose-a:text-accent prose-a:no-underline hover:prose-a:text-accent-hover
+  prose-strong:text-prose
+  prose-li:text-prose-muted prose-li:leading-[1.85]`
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -119,7 +133,11 @@ export default async function ReviewPage({ params }: Props) {
   // (review → follow-up → re-verdict).
   const comparisonSlugs = (review.comparison_product_slugs as string[] | null) ?? []
 
-  const [{ data: related }, product, { data: benchItem }, timeline, competitorProducts] = await Promise.all([
+  // Products referenced inline via [[BUY:slug]] tokens — so the review body can
+  // inflate them into ProductCtaCards, at parity with guides.
+  const mentionedSlugs = extractProductSlugs(review.content)
+
+  const [{ data: related }, { data: relatedGuides }, product, { data: benchItem }, timeline, competitorProducts, { data: mentionedProducts }] = await Promise.all([
     supabase
       .from('reviews')
       .select('id, slug, title, product_name, rating, excerpt')
@@ -127,6 +145,16 @@ export default async function ReviewPage({ params }: Props) {
       .eq('is_visible', true)
       .eq('category', review.category)
       .neq('slug', slug)
+      .order('published_at', { ascending: false })
+      .limit(3),
+    // Reciprocal flywheel link — guides in the same category feed the reader
+    // back into how-to/explainer content (mirrors the guide page's "Related Reviews").
+    supabase
+      .from('guides')
+      .select('id, slug, title, excerpt, image_url, reading_time_minutes')
+      .eq('status', 'approved')
+      .eq('is_visible', true)
+      .eq('category', review.category)
       .order('published_at', { ascending: false })
       .limit(3),
     review.product_slug
@@ -139,6 +167,12 @@ export default async function ReviewPage({ params }: Props) {
       .maybeSingle(),
     getReviewTimeline(supabase, review.id, review.parent_review_id),
     comparisonSlugs.length ? getProductsBySlugs(supabase, comparisonSlugs) : Promise.resolve([]),
+    mentionedSlugs.length > 0
+      ? supabase
+          .from('products')
+          .select('slug, name, affiliate_url, non_affiliate_url, store, custom_store_name, image_url')
+          .in('slug', mentionedSlugs)
+      : Promise.resolve({ data: [] as { slug: string; name: string; affiliate_url: string | null; non_affiliate_url: string | null; store: string; custom_store_name: string | null; image_url: string | null }[], error: null }),
   ])
 
   // Spec-comparison columns: the review's own product first (highlighted), then
@@ -453,20 +487,31 @@ export default async function ReviewPage({ params }: Props) {
           </nav>
         )}
 
-        {/* Review body — primary CTA lives in the VerdictCard above; final CTA below */}
+        {/* Review body — inline [[BUY]] cards, [[COLLECTION]] embeds, and
+            [[REVIEW]]/[[GUIDE]] cross-links injected at their token positions.
+            Follow-ups keep the plain render: their body is transformed into
+            <details> blocks, which the inline splitter would tear apart.
+            Primary CTA lives in the VerdictCard above; final CTA below. */}
         <div className="min-w-0 w-full">
           <ImageLightbox className="bd-content">
-            <div
-              className="bd-editorial prose prose-lg prose-invert prose-orange mx-auto max-w-[68ch]
-                prose-headings:font-black prose-headings:tracking-tight prose-headings:font-sans prose-headings:leading-[1.15] prose-headings:text-prose
-                prose-h2:text-2xl prose-h2:mt-14 prose-h2:mb-5
-                prose-h3:mt-10 prose-h3:mb-3
-                prose-p:text-prose-muted prose-p:leading-[1.85]
-                prose-a:text-accent prose-a:no-underline hover:prose-a:text-accent-hover
-                prose-strong:text-prose
-                prose-li:text-prose-muted prose-li:leading-[1.85]"
-              dangerouslySetInnerHTML={{ __html: renderedBodyHtml }}
-            />
+            {isFollowup ? (
+              <div className={REVIEW_PROSE_CLASS} dangerouslySetInnerHTML={{ __html: renderedBodyHtml }} />
+            ) : (
+              splitContentForInlineCards(renderedBodyHtml, mentionedProducts ?? []).map((segment, i) => {
+                if (segment.type === 'product') {
+                  return <ProductCtaCard key={`card-${i}`} product={segment.product} variant="prominent" />
+                }
+                if (segment.type === 'collection') {
+                  return <CollectionEmbed key={`embed-${i}`} slug={segment.slug} />
+                }
+                if (segment.type === 'contentlink') {
+                  return <ContentLinkCard key={`link-${i}`} contentType={segment.contentType} slug={segment.slug} />
+                }
+                return segment.content ? (
+                  <div key={`html-${i}`} className={REVIEW_PROSE_CLASS} dangerouslySetInnerHTML={{ __html: segment.content }} />
+                ) : null
+              })
+            )}
           </ImageLightbox>
         </div>
 
@@ -630,6 +675,47 @@ export default async function ReviewPage({ params }: Props) {
         <Suspense fallback={null}>
           <MerchCallout />
         </Suspense>
+
+        {/* Related guides — the reciprocal flywheel link. Reviews send readers
+            back into how-to/explainer content in the same category. */}
+        {relatedGuides && relatedGuides.length > 0 && (
+          <div className="mt-12">
+            <div className="mb-5 flex items-stretch gap-3">
+              <div className="w-[3px] bg-accent rounded-full shrink-0" />
+              <div>
+                <p className="text-[13px] uppercase tracking-[0.18em] font-black text-prose">Related Guides</p>
+                <h2 className="mt-1 text-lg font-black text-prose">
+                  {category ? `${category.label} guides` : 'Go deeper'}
+                </h2>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {relatedGuides.map((g) => (
+                <Link
+                  key={g.id}
+                  href={`/guides/${g.slug}`}
+                  className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden hover:border-accent hover:-translate-y-0.5 transition-all"
+                >
+                  {g.image_url && (
+                    <div className="relative w-full aspect-[16/9] bg-surface-sunken">
+                      <Image src={g.image_url} alt={g.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 240px" />
+                    </div>
+                  )}
+                  <div className="p-4 flex flex-col flex-1">
+                    <p className="text-[10px] text-accent-text-soft uppercase tracking-[0.2em] font-black mb-1.5">Guide</p>
+                    <h3 className="text-sm font-black text-prose leading-snug group-hover:text-accent-text-soft transition-colors line-clamp-2">{g.title}</h3>
+                    {g.excerpt && (
+                      <p className="mt-1.5 text-xs text-prose-muted leading-relaxed line-clamp-2">{g.excerpt}</p>
+                    )}
+                    {g.reading_time_minutes ? (
+                      <p className="mt-auto pt-2 text-[11px] text-prose-faint">{g.reading_time_minutes} min read</p>
+                    ) : null}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Related reviews — mobile only */}
         {related && related.length > 0 && (

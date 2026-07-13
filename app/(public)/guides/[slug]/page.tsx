@@ -13,6 +13,8 @@ import { ogImageUrl, ogImageMeta, toAbsoluteUrl, aspectVariants, OG_SITE, TWITTE
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import ProductCtaCard from '@/components/ProductCtaCard'
 import CollectionEmbed from '@/components/CollectionEmbed'
+import ContentLinkCard from '@/components/ContentLinkCard'
+import { extractProductSlugs, splitContentForInlineCards } from '@/lib/inline-content'
 import ReadingProgressBar from '@/components/ReadingProgressBar'
 import RatingScore from '@/components/RatingScore'
 import ShareButtons from '@/components/ShareButtons'
@@ -311,6 +313,9 @@ export default async function GuidePage({ params }: Props) {
                   if (segment.type === 'collection') {
                     return <CollectionEmbed key={`embed-${i}`} slug={segment.slug} />
                   }
+                  if (segment.type === 'contentlink') {
+                    return <ContentLinkCard key={`link-${i}`} contentType={segment.contentType} slug={segment.slug} />
+                  }
                   return segment.content ? (
                     <div
                       key={`html-${i}`}
@@ -588,64 +593,3 @@ export default async function GuidePage({ params }: Props) {
   )
 }
 
-function extractProductSlugs(html: string): string[] {
-  const seen = new Set<string>()
-  const regex = /data-product-slug="([^"]+)"/g
-  let match
-  while ((match = regex.exec(html)) !== null) {
-    seen.add(match[1])
-  }
-  return Array.from(seen)
-}
-
-type InlineProduct = {
-  slug: string
-  name: string
-  affiliate_url: string | null
-  non_affiliate_url: string | null
-  store: string
-  custom_store_name: string | null
-  image_url: string | null
-}
-
-type ContentSegment =
-  | { type: 'html'; content: string }
-  | { type: 'product'; product: InlineProduct }
-  | { type: 'collection'; slug: string }
-
-function splitContentForInlineCards(html: string, products: InlineProduct[]): ContentSegment[] {
-  // Standalone [[BUY:slug]] anchor (post-resolve form)
-  const productRe = /<p>\s*<a\s[^>]*data-product-slug="([^"]+)"[^>]*>[^<]*<\/a>\s*<\/p>/g
-  // Standalone [[COLLECTION:slug]] embed marker (post-resolve form)
-  const collectionRe = /<div\s+class="bd-collection-embed"\s+data-collection-slug="([a-z0-9-]+)"[^>]*>\s*<\/div>/g
-
-  // Gather both kinds of inline-replaceable matches, sort by position, then
-  // weave them into segments so the prose between them stays intact.
-  type RawMatch = { index: number; length: number; segment: ContentSegment }
-  const matches: RawMatch[] = []
-  let m: RegExpExecArray | null
-  while ((m = productRe.exec(html)) !== null) {
-    const product = products.find((p) => p.slug === m![1])
-    if (!product) continue
-    matches.push({ index: m.index, length: m[0].length, segment: { type: 'product', product } })
-  }
-  while ((m = collectionRe.exec(html)) !== null) {
-    matches.push({ index: m.index, length: m[0].length, segment: { type: 'collection', slug: m[1] } })
-  }
-  matches.sort((a, b) => a.index - b.index)
-
-  const segments: ContentSegment[] = []
-  let lastIndex = 0
-  for (const match of matches) {
-    if (match.index > lastIndex) {
-      segments.push({ type: 'html', content: html.slice(lastIndex, match.index) })
-    }
-    segments.push(match.segment)
-    lastIndex = match.index + match.length
-  }
-  if (lastIndex < html.length) {
-    segments.push({ type: 'html', content: html.slice(lastIndex) })
-  }
-
-  return segments.length > 0 ? segments : [{ type: 'html', content: html }]
-}

@@ -250,6 +250,7 @@ export function GuideWorkspace({ guide: article }: Props) {
           onChange={setContent}
           targetWords={CATEGORIES.find(c => c.slug === category)?.targetWords}
           enableCollectionEmbed
+          enableCrossLink
         />
         <p className="mt-1.5 text-xs text-prose-faint">
           Use <code className="text-accent-text-soft">[[BUY:product-slug]]</code> inline for product mentions — resolves to a link on save.

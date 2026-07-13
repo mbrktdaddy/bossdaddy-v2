@@ -304,6 +304,105 @@ function CollectionDialog({ onConfirm, onCancel }: {
   )
 }
 
+// ── Cross-link ("Read Next") dialog ─────────────────────────────────────────
+// Searches approved+visible guides and reviews, inserts a [[REVIEW:slug]] or
+// [[GUIDE:slug]] token at the cursor. Resolved at save time by
+// lib/content-tokens.ts into a marker div that the render layer swaps for a
+// <ContentLinkCard>. Only surfaces on guide/review editors (where the token
+// actually resolves), gated by the enableCrossLink prop.
+
+interface CrossLinkHit {
+  type: 'review' | 'guide'
+  slug: string
+  title: string
+  subtitle: string | null
+  category: string | null
+}
+
+function CrossLinkDialog({ onConfirm, onCancel }: {
+  onConfirm: (hit: CrossLinkHit) => void
+  onCancel: () => void
+}) {
+  const [q, setQ] = useState('')
+  const [results, setResults] = useState<CrossLinkHit[]>([])
+  const [searching, setSearching] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    const handle = setTimeout(async () => {
+      setSearching(true)
+      try {
+        const res = await fetch(`/api/admin/search?scope=crosslink&q=${encodeURIComponent(q)}`)
+        if (!res.ok) return
+        const json = await res.json()
+        if (!cancelled) setResults((json.items ?? []) as CrossLinkHit[])
+      } catch { /* ignore */ }
+      if (!cancelled) setSearching(false)
+    }, q ? 300 : 0)
+    return () => { cancelled = true; clearTimeout(handle) }
+  }, [q])
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 bg-zinc-900/60" onClick={onCancel}>
+      <div
+        className="bg-surface border border-strong rounded-xl w-full max-w-lg mx-4 shadow-2xl overflow-hidden flex flex-col max-h-[70vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="px-5 pt-5 pb-3 border-b border-soft">
+          <p className="text-sm font-semibold text-prose mb-3">Insert &ldquo;Read Next&rdquo; cross-link</p>
+          <input
+            type="text"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Escape') onCancel() }}
+            placeholder="Search reviews & guides by title or slug…"
+            autoFocus
+            className="w-full px-3 py-2 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover"
+          />
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-2 py-2">
+          {searching && results.length === 0 ? (
+            <p className="text-xs text-prose-faint px-3 py-4">Searching…</p>
+          ) : results.length === 0 ? (
+            <p className="text-xs text-prose-faint px-3 py-4">No published reviews or guides match. Try a shorter or different term.</p>
+          ) : (
+            <ul className="space-y-1">
+              {results.map((hit) => (
+                <li key={`${hit.type}-${hit.slug}`}>
+                  <button
+                    type="button"
+                    onClick={() => onConfirm(hit)}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-raised/80 text-left transition-colors"
+                  >
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-accent-text-soft bg-accent-tint border border-accent-border/40 px-2 py-0.5 rounded-full shrink-0">
+                      {hit.type === 'review' ? 'Review' : 'Guide'}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-prose truncate">{hit.title}</p>
+                      <p className="text-xs text-prose-faint truncate">/{hit.type === 'review' ? 'reviews' : 'guides'}/{hit.slug}</p>
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="px-5 py-3 border-t border-soft flex justify-end">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 bg-surface-raised hover:bg-surface text-prose-muted text-sm rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main component ──────────────────────────────────────────────────────────
 
 interface Props {
@@ -313,6 +412,7 @@ interface Props {
   rows?: number       // kept for API compat — not used directly in Tiptap
   targetWords?: number
   enableCollectionEmbed?: boolean
+  enableCrossLink?: boolean
 }
 
 interface SelectionState {
@@ -321,11 +421,12 @@ interface SelectionState {
   text: string
 }
 
-export function TiptapEditor({ value, onChange, placeholder, targetWords, enableCollectionEmbed = false }: Props) {
+export function TiptapEditor({ value, onChange, placeholder, targetWords, enableCollectionEmbed = false, enableCrossLink = false }: Props) {
   const lastEmitted     = useRef(value)
   const [linkOpen, setLinkOpen]     = useState(false)
   const [linkCurrent, setLinkCurrent] = useState('')
   const [collectionOpen, setCollectionOpen] = useState(false)
+  const [crossLinkOpen, setCrossLinkOpen] = useState(false)
   const [selection, setSelection]   = useState<SelectionState | null>(null)
   const [aiInstruction, setAiInstruction] = useState('')
   const [aiRefining, setAiRefining] = useState(false)
@@ -547,6 +648,17 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
           </button>
         )}
 
+        {enableCrossLink && (
+          <button
+            type="button"
+            onMouseDown={(e) => { e.preventDefault(); setCrossLinkOpen(true) }}
+            className="px-2 py-1 rounded-lg text-xs font-semibold text-prose-muted hover:bg-zinc-700 transition-colors"
+            title="Insert a 'Read Next' cross-link to another review or guide"
+          >
+            + Read Next
+          </button>
+        )}
+
         <div className="flex-1" />
 
         <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().undo().run() }}
@@ -639,6 +751,23 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
             }).run()
           }}
           onCancel={() => setCollectionOpen(false)}
+        />
+      )}
+
+      {crossLinkOpen && (
+        <CrossLinkDialog
+          onConfirm={(hit) => {
+            setCrossLinkOpen(false)
+            if (!editor) return
+            // Insert the token on its own line. resolveContentTokens() at save
+            // time swaps it for the bd-content-link marker div.
+            const token = `[[${hit.type === 'review' ? 'REVIEW' : 'GUIDE'}:${hit.slug}]]`
+            editor.chain().focus().insertContent({
+              type: 'paragraph',
+              content: [{ type: 'text', text: token }],
+            }).run()
+          }}
+          onCancel={() => setCrossLinkOpen(false)}
         />
       )}
     </div>

@@ -1728,6 +1728,7 @@ export type Database = {
           non_affiliate_url: string | null
           price_cents: number | null
           priority: number
+          research_sources: Json
           review_id: string | null
           skip_reason: string | null
           slug: string
@@ -1753,6 +1754,7 @@ export type Database = {
           non_affiliate_url?: string | null
           price_cents?: number | null
           priority?: number
+          research_sources?: Json
           review_id?: string | null
           skip_reason?: string | null
           slug: string
@@ -1778,6 +1780,7 @@ export type Database = {
           non_affiliate_url?: string | null
           price_cents?: number | null
           priority?: number
+          research_sources?: Json
           review_id?: string | null
           skip_reason?: string | null
           slug?: string

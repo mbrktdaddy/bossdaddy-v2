@@ -733,6 +733,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
             value={content}
             onChange={setContent}
             targetWords={CATEGORIES.find(c => c.slug === category)?.targetWords}
+            enableCollectionEmbed
+            enableCrossLink
           />
           <p className="mt-1.5 text-xs text-prose-faint">
             Primary CTA is set via Product &amp; Monetization below. Use <code className="text-accent-text-soft">[[BUY:product-slug]]</code> inline for mid-article mentions — resolves to a link on save.

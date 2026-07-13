@@ -43,7 +43,8 @@ function hrefToPath(href: string): string {
 
 function classifyHref(href: string): InternalLink['type'] {
   const pathname = hrefToPath(href)
-  if (pathname.startsWith('/articles/')) return 'guide'
+  // Live guide route is /guides/ ; /articles/ kept for any legacy anchors.
+  if (pathname.startsWith('/guides/') || pathname.startsWith('/articles/')) return 'guide'
   if (pathname.startsWith('/reviews/'))  return 'review'
   return 'other'
 }

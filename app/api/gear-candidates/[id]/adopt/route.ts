@@ -59,6 +59,11 @@ export async function POST(
         store:         candidate.store,
         status:        'considering',
         source:        'adopted_from_research',
+        // Carry the research provenance onto the public spine so a roundup can
+        // render this as "Researched, not tested" WITH citations (gear_candidates
+        // is admin-only RLS — anon can't read sources there). See mig 120.
+        description:      candidate.why ?? null,
+        research_sources: candidate.sources ?? [],
       })
       .select('id')
       .single()

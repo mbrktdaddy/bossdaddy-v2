@@ -6,6 +6,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { detectAffiliateLinks } from '@/lib/affiliate'
 import { resolveProductTokens } from '@/lib/products'
+import { resolveCollectionTokens } from '@/lib/collection-tokens'
+import { resolveContentTokens } from '@/lib/content-tokens'
 import { computeReadingTime } from '@/lib/reading-time'
 import { getResend, FROM_EMAIL } from '@/lib/resend'
 import { ModerationResultEmail } from '@/emails/ModerationResultEmail'
@@ -244,7 +246,9 @@ export async function PUT(
   if (parsed.data.would_rebuy !== undefined) updates.would_rebuy = parsed.data.would_rebuy
   if (parsed.data.verdict_change !== undefined) updates.verdict_change = parsed.data.verdict_change
   if (parsed.data.content) {
-    const resolved = await resolveProductTokens(parsed.data.content, supabase)
+    let resolved = await resolveProductTokens(parsed.data.content, supabase)
+    resolved = await resolveCollectionTokens(resolved, supabase)
+    resolved = await resolveContentTokens(resolved, supabase)
     const sanitized = sanitizeHtml(resolved)
     updates.content = sanitized
     updates.has_affiliate_links = detectAffiliateLinks(sanitized)

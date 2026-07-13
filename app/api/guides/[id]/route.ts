@@ -7,6 +7,7 @@ import { sanitizeHtml } from '@/lib/sanitize'
 import { detectAffiliateLinks } from '@/lib/affiliate'
 import { resolveProductTokens } from '@/lib/products'
 import { resolveCollectionTokens } from '@/lib/collection-tokens'
+import { resolveContentTokens } from '@/lib/content-tokens'
 import { computeReadingTime } from '@/lib/reading-time'
 import { getResend, FROM_EMAIL } from '@/lib/resend'
 import { ModerationResultEmail } from '@/emails/ModerationResultEmail'
@@ -186,6 +187,7 @@ export async function PUT(
   if (parsed.data.content) {
     let resolved = await resolveProductTokens(parsed.data.content, supabase)
     resolved = await resolveCollectionTokens(resolved, supabase)
+    resolved = await resolveContentTokens(resolved, supabase)
     const sanitized = sanitizeHtml(resolved)
     updates.content = sanitized
     updates.reading_time_minutes = computeReadingTime(sanitized)
