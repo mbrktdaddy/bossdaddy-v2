@@ -1711,6 +1711,36 @@ export type Database = {
           },
         ]
       }
+      product_tags: {
+        Row: {
+          product_id: string
+          tag_slug: string
+        }
+        Insert: {
+          product_id: string
+          tag_slug: string
+        }
+        Update: {
+          product_id?: string
+          tag_slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_tags_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_tags_tag_slug_fkey"
+            columns: ["tag_slug"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       products: {
         Row: {
           affiliate_url: string | null

@@ -3,6 +3,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
 import { createStructured } from '@/lib/claude/structured'
+import { fetchTagVocabulary, tagSlugList } from '@/lib/claude/tag-vocab'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
@@ -178,6 +179,9 @@ export async function POST(request: NextRequest) {
   const brief = context?.trim()
   const cfg = PIECE_CONFIG[pieceType]
 
+  // DB-driven tag vocabulary (killed the hardcoded slug list that used to drift).
+  const tagVocab = await fetchTagVocabulary(supabase)
+
   const prompt = `Write a dad-focused ${cfg.label} on this topic:
 
 Topic: ${topic}
@@ -199,9 +203,9 @@ ${inlineImagesInstruction(imageSlots)}
 
 TAGS: Pick 3–6 slugs from this controlled vocabulary that best describe this piece. Be selective — only tag what genuinely applies.
 Editorial (pick at most 1): top-pick, best-value, hidden-gem
-Life Stage: pregnancy, newborn, infant, toddler, preschool, school-age, teen
-Use Case: travel, daily, occasional, gift-idea, gear-haul
-Topic: home-improvement, workshop, automotive, yard-work, kitchen-tools, outdoor-cooking, mental-health, mindfulness, self-help, faith, formula-feeding, baby-sleep, strollers, car-seats, baby-carriers, diapering, nursery-gear, power-tools, hand-tools, storage-org, camping, hiking, fishing, hunting, water-sports, smart-home, wearables, audio-gear, edc-carry, truck-gear, detailing, cast-iron, meal-prep, fitness, home-gym, cleaning, organization
+Life Stage: ${tagSlugList(tagVocab, 'life-stage')}
+Use Case: ${tagSlugList(tagVocab, 'use-case')}
+Topic: ${tagSlugList(tagVocab, 'topic')}
 
 Return your result by calling the submit_guide tool. Field guidance: title is a specific, useful title (max 80 chars, include the topic keyword); excerpt is one punchy card sentence (max 160 chars);${cfg.fieldGuidanceBlocks} introduction opens the piece per the structure above; each section has a clear heading and a body with paragraphs separated by \\n\\n; conclusion follows the structure above (separate paragraphs with \\n\\n); heroImagePrompt is an editorial-photography hero prompt (specific real-world objects, natural daylight or warm indoor light, no people, no text, under 180 chars); each inlineImages.afterHeading MUST match one of your section headings; suggestedTags are 3–6 slugs from the controlled vocabulary above.`
 
@@ -246,7 +250,16 @@ Return your result by calling the submit_guide tool. Field guidance: title is a 
     ?? (draft.imagePrompts as Record<string, string> | undefined)?.hero
     ?? `Photorealistic lifestyle photo for a dad-focused article about ${topic}, no people, objects and setting only`
 
-  const suggestedTags = Array.isArray(draft.suggestedTags) ? draft.suggestedTags as string[] : []
+  // Validate AI-suggested tags against the live controlled vocabulary so a
+  // hallucinated or stale slug can't slip through to the picker / attach step.
+  // `.in()` returns only slugs that actually exist; on query error we keep the
+  // raw list (the picker only surfaces real tags anyway, so it's a soft gate).
+  const rawTags = Array.isArray(draft.suggestedTags) ? (draft.suggestedTags as string[]) : []
+  let suggestedTags = rawTags
+  if (rawTags.length) {
+    const { data: validTags } = await supabase.from('tags').select('slug').in('slug', rawTags)
+    if (validTags) suggestedTags = validTags.map((t) => t.slug)
+  }
 
   const { heroImagePrompt: _heroOmit, imagePrompts: _legacyOmit, suggestedTags: _tags, ...cleanDraft } = draft
 

@@ -73,6 +73,7 @@ export function GuideCreateWizard() {
   const [previewDraft, setPreviewDraft] = useState<{
     title: string; excerpt: string; content: string; imagePrompt: string
     tldr: string; keyTakeaways: string[]; faqs: { question: string; answer: string }[]
+    suggestedTags: string[]
   } | null>(null)
 
   // Products for multi-select picker (roundups, gift guides, etc.)
@@ -194,6 +195,7 @@ export function GuideCreateWizard() {
         tldr: draft.tldr ?? '',
         keyTakeaways: draft.keyTakeaways ?? [],
         faqs: draft.faqs ?? [],
+        suggestedTags: Array.isArray(genJson.suggestedTags) ? genJson.suggestedTags : [],
       })
       setStep('preview')
     } catch (err) {
@@ -219,6 +221,9 @@ export function GuideCreateWizard() {
           tldr: previewDraft.tldr || null,
           key_takeaways: previewDraft.keyTakeaways,
           faqs: previewDraft.faqs,
+          // Auto-attach the validated AI tag suggestions (mirrors the review
+          // wizard); the author curates them in the workspace TagPicker.
+          suggested_tags: previewDraft.suggestedTags,
         }),
       })
       const saveJson = await saveRes.json()

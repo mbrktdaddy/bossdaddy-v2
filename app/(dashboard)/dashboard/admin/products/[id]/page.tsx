@@ -17,11 +17,14 @@ export default async function ProductEditPage({
 
   const isNew = id === 'new'
   let product: Product | null = null
+  let initialTags: string[] = []
   if (!isNew) {
     const admin = createAdminClient()
     const { data } = await admin.from('products').select('*').eq('id', id).single()
     if (!data) notFound()
     product = data as unknown as Product
+    const { data: tagRows } = await admin.from('product_tags').select('tag_slug').eq('product_id', id)
+    initialTags = (tagRows ?? []).map((r) => r.tag_slug)
   }
 
   return (
@@ -43,6 +46,7 @@ export default async function ProductEditPage({
 
       <ProductForm
         product={product}
+        initialTags={initialTags}
         amazonAssociateTag={process.env.AMAZON_ASSOCIATE_TAG ?? ''}
       />
     </div>

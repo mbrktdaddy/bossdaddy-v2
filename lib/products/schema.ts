@@ -40,6 +40,9 @@ export const ProductCreateSchema = z.object({
   store:    z.string().max(40).optional().default('amazon'),
   status:   z.enum(PRODUCT_STATUSES).optional().default('considering'),
   priority: z.number().int().optional().default(0),
+  // Topic/facet tags (product_tags join, mig 122). Not a products column —
+  // the route attaches these to product_tags separately after the row exists.
+  tags:     z.array(z.string().regex(/^[a-z0-9-]+$/)).max(20).optional().default([]),
   ...sharedProductFields,
 })
 
@@ -51,5 +54,8 @@ export const ProductUpdateSchema = z.object({
   store:    z.string().max(40).optional(),
   status:   z.enum(PRODUCT_STATUSES).optional(),
   priority: z.number().int().optional(),
+  // undefined = leave tags untouched; [] = clear all. Handled separately from
+  // the products column update (product_tags join, mig 122).
+  tags:     z.array(z.string().regex(/^[a-z0-9-]+$/)).max(20).optional(),
   ...sharedProductFields,
 })

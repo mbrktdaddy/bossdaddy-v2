@@ -3,6 +3,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
 import { createStructured } from '@/lib/claude/structured'
+import { fetchTagVocabulary, tagSlugList } from '@/lib/claude/tag-vocab'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
@@ -175,6 +176,9 @@ export async function POST(request: NextRequest) {
     pricePaid != null ? `Price paid: $${(pricePaid / 100).toFixed(2)}` : null,
   ].filter(Boolean).join('\n')
 
+  // DB-driven tag vocabulary (killed the hardcoded slug list that used to drift).
+  const tagVocab = await fetchTagVocabulary(supabase)
+
   const prompt = `Write a product review:
 
 Product: ${productName}${brand ? `\nBrand: ${brand}` : ''}
@@ -209,11 +213,11 @@ SEO: Include the product name naturally in the intro and at least one section he
 ${inlineImagesInstruction(imageSlots)}
 
 TAGS: Pick 3–6 slugs from this controlled vocabulary that best describe this review. Be selective — only tag what genuinely applies.
-Editorial (pick at most 1): top-pick, best-value, splurge, hidden-gem, boss-approved, mixed-verdict, buyer-beware, better-options, overhyped
-Life Stage (pick relevant ones): pregnancy, newborn, infant, toddler, preschool, school-age, teen
-Price: under-25, under-50, under-100, under-250, premium
-Use Case: travel, daily, occasional, gift-idea, gear-haul
-Topic: home-improvement, workshop, automotive, yard-work, kitchen-tools, outdoor-cooking, mental-health, mindfulness, self-help, faith, formula-feeding, baby-sleep, strollers, car-seats, baby-carriers, diapering, nursery-gear, power-tools, hand-tools, storage-org, camping, hiking, fishing, hunting, water-sports, smart-home, wearables, audio-gear, edc-carry, truck-gear, detailing, cast-iron, meal-prep, fitness, home-gym, cleaning, organization
+Editorial (pick at most 1): ${tagSlugList(tagVocab, 'editorial')}
+Life Stage (pick relevant ones): ${tagSlugList(tagVocab, 'life-stage')}
+Price: ${tagSlugList(tagVocab, 'price')}
+Use Case: ${tagSlugList(tagVocab, 'use-case')}
+Topic: ${tagSlugList(tagVocab, 'topic')}
 
 Return your result by calling the submit_review tool. Field guidance: title is an SEO title including the product name (max 70 chars); excerpt is one punchy card sentence (max 160 chars); tldr is 1–2 skimmer sentences; section bodies are 150–250 words with paragraphs separated by \\n\\n; subScores are four 1–10 integers; imagePrompt is a product photography prompt (no people, no text, under 180 chars); each inlineImages.afterHeading MUST match one of your section headings; suggestedTags are 3–6 slugs from the controlled vocabulary above.`
 
@@ -266,7 +270,16 @@ Return your result by calling the submit_review tool. Field guidance: title is a
   const imagePrompt: string = (draft.imagePrompt as string)
     ?? `Photorealistic product photo of the ${productName} on a clean surface, natural lighting, no people`
 
-  const suggestedTags = Array.isArray(draft.suggestedTags) ? draft.suggestedTags as string[] : []
+  // Validate AI-suggested tags against the live controlled vocabulary so a
+  // hallucinated or stale slug can't slip through to the picker / attach step.
+  // `.in()` returns only slugs that actually exist; on query error we keep the
+  // raw list (the picker only surfaces real tags anyway, so it's a soft gate).
+  const rawTags = Array.isArray(draft.suggestedTags) ? (draft.suggestedTags as string[]) : []
+  let suggestedTags = rawTags
+  if (rawTags.length) {
+    const { data: validTags } = await supabase.from('tags').select('slug').in('slug', rawTags)
+    if (validTags) suggestedTags = validTags.map((t) => t.slug)
+  }
 
   // Strip imagePrompt and suggestedTags from the draft payload — they're returned
   // alongside, not inside. The rating field is no longer accepted from the AI; the

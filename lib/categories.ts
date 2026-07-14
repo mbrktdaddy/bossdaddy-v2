@@ -37,7 +37,7 @@ export const CATEGORIES = [
     slug: 'tools-diy',
     label: 'Tools & DIY',
     shortLabel: 'Tools',
-    description: 'Power tools, hand tools, home repair, yard maintenance, and projects that actually get done.',
+    description: 'Power tools, hand tools, home repair, and building projects that actually get done.',
     icon: '🔧',
     color: 'from-surface-raised/50 to-surface/40',
     border: 'border-strong/40',

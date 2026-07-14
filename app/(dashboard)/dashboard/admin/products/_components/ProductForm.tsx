@@ -9,16 +9,18 @@ import { getSpecTemplate } from '@/lib/spec-templates'
 import { ProductImageGallery } from '@/components/admin/ProductImageGallery'
 import { PendingImageGallery, flushPendingImages, type PendingImage } from '@/components/admin/PendingImageGallery'
 import { buildAmazonAffiliateUrl, extractAsin, isValidAsin } from '@/lib/amazon-tag'
+import { TagPicker } from '@/components/workspace/TagPicker'
 
 interface Props {
   product: Product | null
+  initialTags?: string[]
   amazonAssociateTag: string
 }
 
 // Mirror of the `z.array().max(30)` cap in the product create/update API.
 const MAX_SPECS = 30
 
-export function ProductForm({ product, amazonAssociateTag }: Props) {
+export function ProductForm({ product, initialTags = [], amazonAssociateTag }: Props) {
   const router = useRouter()
   const isNew = !product
 
@@ -35,6 +37,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
 
   const [description, setDescription] = useState(product?.description ?? '')
   const [category, setCategory]       = useState(product?.category ?? '')
+  const [tags, setTags]               = useState<string[]>(initialTags)
   const [priceCents, setPriceCents]   = useState(product?.price_cents != null ? String(product.price_cents) : '')
   const [status, setStatus]           = useState<string>(product?.status ?? 'considering')
 
@@ -197,6 +200,7 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
       priority:              parseInt(priority, 10) || 0,
       estimated_review_date: ['queued', 'testing'].includes(status) ? (estimatedDate || null) : null,
       skip_reason:           status === 'passed' ? (skipReason.trim() || null) : null,
+      tags,
     }
 
     try {
@@ -711,6 +715,17 @@ export function ProductForm({ product, amazonAssociateTag }: Props) {
             <p className="mt-1 text-xs text-accent-text-soft">${(parseInt(priceCents, 10) / 100).toFixed(2)}</p>
           )}
         </div>
+      </div>
+
+      {/* ── Tags ───────────────────────────────────────────────────────── */}
+      <div className="rounded-xl border border-soft bg-surface-sunken p-4 space-y-3">
+        <div>
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Tags</p>
+          <p className="mt-0.5 text-xs text-prose-faint">
+            Topic &amp; facet tags for cross-cutting discovery (a product can carry tags from other pillars). Curated vocabulary — see docs/pillar-taxonomy.md.
+          </p>
+        </div>
+        <TagPicker selected={tags} onChange={setTags} />
       </div>
 
       <div>

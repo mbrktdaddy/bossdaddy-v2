@@ -64,5 +64,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: `Create failed: ${error.message}` }, { status: 500 })
   }
 
+  // Attach topic/facet tags (product_tags, mig 122). Best-effort: a bad slug
+  // FK-fails but shouldn't undo the created product — log and continue.
+  if (parsed.data.tags.length > 0 && data?.id) {
+    const { error: tagErr } = await admin
+      .from('product_tags')
+      .insert(parsed.data.tags.map((tag_slug) => ({ product_id: data.id, tag_slug })))
+    if (tagErr) console.error('Product tag insert failed:', tagErr)
+  }
+
   return NextResponse.json({ product: data }, { status: 201 })
 }

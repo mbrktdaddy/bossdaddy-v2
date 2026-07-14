@@ -38,23 +38,44 @@ export async function PATCH(
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
+  // `tags` is not a products column — it's the product_tags join (mig 122).
+  // Pull it out so it doesn't land in the column update, and handle it as a
+  // set-replace below. undefined = leave tags untouched; [] = clear all.
+  const { tags, ...columnFields } = parsed.data
+
   const updates: Record<string, unknown> = {}
-  for (const [k, v] of Object.entries(parsed.data)) {
+  for (const [k, v] of Object.entries(columnFields)) {
     if (v !== undefined) updates[k] = v
   }
-  if (Object.keys(updates).length === 0) {
+  if (Object.keys(updates).length === 0 && tags === undefined) {
     return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
   }
 
   const admin = createAdminClient()
+
+  // Replace the tag set atomically when tags were provided.
+  if (tags !== undefined) {
+    await admin.from('product_tags').delete().eq('product_id', id)
+    if (tags.length > 0) {
+      const { error: tagErr } = await admin
+        .from('product_tags')
+        .insert(tags.map((tag_slug) => ({ product_id: id, tag_slug })))
+      if (tagErr) console.error('Product tag replace failed:', tagErr)
+    }
+  }
 
   // Capture the prior status so we can notify bench subscribers on a forward
   // transition (was handled by the retired wishlist PATCH).
   const { data: prev } = await admin.from('products').select('status').eq('id', id).single()
   const oldStatus = prev?.status as string | undefined
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await admin.from('products').update(updates as any).eq('id', id).select().single()
+  // Tags-only edit: `updates` is empty, so skip the column write (an empty
+  // .update() is invalid) and just re-read the row for the response.
+  const hasColumnUpdates = Object.keys(updates).length > 0
+  const { data, error } = hasColumnUpdates
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ? await admin.from('products').update(updates as any).eq('id', id).select().single()
+    : await admin.from('products').select('*').eq('id', id).single()
   if (error) {
     if (error.code === '23505') return NextResponse.json({ error: 'Slug already in use' }, { status: 409 })
     return NextResponse.json({ error: `Update failed: ${error.message}` }, { status: 500 })
