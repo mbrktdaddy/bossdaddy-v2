@@ -14,7 +14,7 @@
 | Theme | **Dark-first everywhere** (already live via `data-theme="dark"` on `<html>`). Zinc-light retired. |
 | Editorial serif | **Fraunces** (`--font-editorial-display`), scoped opt-in via `.font-editorial-display` |
 | Default headings | Montserrat `font-black` (unchanged) |
-| Hero H1 | **"Dad like a BOSS."** ("BOSS." in `text-accent`) |
+| Hero H1 | **"Dad Like a Boss."** ("Boss." in `text-accent`) — v3.4 title-case; do NOT all-caps `BOSS` |
 | Independence claim | **"Zero paid placements"** (never "zero sponsors" — affiliate links exist, keep FTC-safe) |
 | Hero ticker | 100% live/DB-backed: reviews count · guides count · 4 tools · zero paid placements |
 | Score rings | Tiered — ring on Cover Story / Featured / review-detail; numeric chip in grids |
@@ -23,11 +23,11 @@
 | "Meet the Boss" | → `/about` |
 | Nav | Transparent-over-hero → solid on scroll (Phase 1b — see Open items) |
 
-### Mission Creed (mid-page dark moment, signed)
-> Boss Daddy isn't just another review site. It's a standard — and a resource — for men who believe being a dad isn't a compromise of his strength, but **the ultimate expression of it.**
+### The Creed (mid-page dark moment, signed) — canonical v3.4 manifesto
+> Boss Daddy isn't just another men's fashion, fitness, or lifestyle brand. It is the gold standard and trusted hub for Boss Dads Built Different — men who believe being a proud and present father isn't a compromise of his strength, but **the ultimate expression of it.**
 > — The Boss
 
-(payoff phrase in `text-accent`; rendered in `font-editorial-display`)
+This is the **single canonical manifesto** (source: `docs/brand-guide.md` §1.7). It replaced the old "isn't just another review site" Creed — do not reintroduce that variant. Use this exact wording. (payoff phrase "the ultimate expression of it" in `text-accent`; rendered in `font-editorial-display`.)
 
 ---
 
@@ -51,7 +51,7 @@ Reused as-is: `DroppedCard`, `GuideRow`, `EmailCaptureSection`, `BossApprovedBad
 
 ## 3. Homepage section order (reference impl — `app/(public)/page.tsx`)
 
-1. **Hero** — `HomeHero` (full-bleed photo, "Dad like a BOSS.", ticker)
+1. **Hero** — `HomeHero` (full-bleed photo, "Dad Like a Boss.", ticker)
 2. **The Cover Story** — featured review as editorial split (photo + serif title + excerpt + `ScoreBlock` ring + CTA)
 3. **The Library** — enlarged guides footprint (the growth engine): topic chips + lead feature guide + reading list (`GuideRow`). Fetches 6 guides. Promoted into the slot the old wayfinding pillars used.
 4. **Just Dropped** — recent reviews grid (`DroppedCard`)

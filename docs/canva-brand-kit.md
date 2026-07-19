@@ -86,24 +86,37 @@ All three fonts are free on **Google Fonts** — they're already available in Ca
 
 ---
 
-## 4. Tagline & Wordmark Usage
+## 4. Messaging System & Wordmark Usage (v3.4 — locked 2026-07-19)
 
-### Primary tagline
-> **Dad like a BOSS**
-- Use in: hero, masthead, merch, OG cards, marketing
-- Always all-caps `BOSS`
+Full spec + usage lockups: `docs/brand-guide.md` §1.7. Five-level hierarchy — each line has its own job.
 
-### Secondary taglines
-- **Real dads, Real reviews, Smart tech** — review/tech pillar
-- **Boss Stuff for Boss Dads** — merch, shop, /stuff hub
+| Level | Line | Use in |
+|---|---|---|
+| **Positioning** | **Boss Dads. Built Different.** | Hero, logo lockup, major branding, social bios |
+| **Primary tagline** | **Dad Like a Boss.** | Campaigns, CTAs, merch, social, article sign-offs |
+| **Action line** | **Boss Up.** | Community, emails, challenges, button text |
+| **Credibility line** | **Real Dads. Smart Tools. Better Decisions.** | Reviews, guides, product pages, "How We Test", footer |
+| **Philosophy** | *(full manifesto — see brand guide §1.7)* | About page, founder story, welcome sequence |
 
-### Wordmark casing
+**Merch voice (context-specific, outside the core five):** **Boss Stuff for Boss Dads** — store/product/merch only.
+
+**Homepage hero lockup:**
+> Boss Dads.
+> Built Different.
+>
+> Dad Like a Boss.
+>
+> Real Dads. Smart Tools. Better Decisions.
+
+### Capitalization (v3.4 — Title Case wins)
+
+The five core lines and the merch line are **Title Case with periods** — never all-caps, never cap `BOSS` mid-line (retired: "Dad like a BOSS").
 
 | Form | When to use |
 |---|---|
-| **`BOSS DADDY`** (all caps) | Logo, taglines, hero H1, OG cards, merch, "announcing" the brand |
-| **Boss Daddy** (title case) | Editorial body copy, in-narrative mentions, dashboards, "referencing" the brand |
-| **`BOSS`** (caps, alone) | Direct address — *"Stay locked in, BOSS."* (sparingly) |
+| **`BOSS DADDY`** (all caps) | **Wordmark / logo lockup ONLY** |
+| **Boss Daddy** (title case) | Everywhere else — hero H1s, taglines, OG cards, merch, editorial body, dashboards |
+| **`BOSS`** (caps, alone) | Rare noun of address — *"Stay locked in, BOSS."* (sparingly, the one exception) |
 
 **Never:** lowercase, camel-case (`BossDaddy`), or "Boss daddy" with mixed casing.
 

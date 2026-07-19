@@ -10,11 +10,11 @@
 
 ## 1. What Boss Daddy Is
 
-Boss Daddy is a brand and website for fathers — a trusted hub of honest product reviews, practical guides, tools, and community for men committed to being great dads ("Boss Dads"). It's built and run by a real first-time dad, not a faceless review farm.
+Boss Daddy is a brand and website for fathers — the gold-standard hub where honest reviews, smart tools, and practical guides help men make better decisions and lead their families well. Built and run by a real first-time dad, not a faceless review farm. The value prop, in one line: **Real Dads. Smart Tools. Better Decisions.** — we're a decision-hub for Boss Dads, not just a pile of reviews. (Reviews are still the volume driver; the *frame* is helping dads decide and act.)
 
 **Mission:** Establish Boss Daddy as the gold-standard, trusted hub for men of all ages who are committed to being the ultimate dads — strong, present, proud fathers. Rooted in duty to God, Family, and Faith, standing for honesty, loyalty, and brotherhood. Leverage smart tools to deliver the most comprehensive reviews, practical guides, authentic community, and real support.
 
-**Essence (one-liner):** *Boss Daddy — the gold standard and trusted hub for men who Dad like a BOSS.*
+**Essence (one-liner):** *Boss Daddy — the gold standard and trusted hub for men who Dad Like a Boss.*
 
 **Founder context (the "why"):** A first-time dad who once thought he'd never have kids. After separating from an ex-wife he found a new partner who changed his life; now has a baby girl and is soon to be married. Practices faith daily and works on self-improvement to be the best husband and father he can be. Boss Daddy is the vehicle for sharing that journey and helping other dads who show up every day.
 
@@ -36,10 +36,15 @@ Boss Daddy is a brand and website for fathers — a trusted hub of honest produc
 
 **Archetype: The Wise Warrior / Protector King** — the older, wiser brother who's seen it all, leads by example, tells it straight, and still has your back. Authoritative yet approachable. Confident, disciplined, no-nonsense. Tough-loving humor with a playfully cynical edge aimed at *mediocrity* — never at struggling dads.
 
-**Taglines:**
-- **"Dad like a BOSS"** — primary. Hero, marketing, merch.
-- **"Real dads, Real reviews, Smart tech"** — secondary (review/tech pillar).
-- **"Boss Stuff for Boss Dads"** — merch/shop voice.
+**Messaging system (v3.4 — locked 2026-07-19).** Five-level hierarchy, each line has its own job — full spec + usage lockups live in `docs/brand-guide.md` §1.7:
+- **Positioning:** *Boss Dads. Built Different.* — who we are + status. Hero, logo lockup, major branding, social bios.
+- **Primary tagline:** *Dad Like a Boss.* — rallying cry. Campaigns, CTAs, merch, article sign-offs.
+- **Action line:** *Boss Up.* — motivational CTA. Community, emails, challenges, buttons.
+- **Credibility line:** *Real Dads. Smart Tools. Better Decisions.* — trust builder. Reviews, guides, product pages, "How We Test," footer.
+- **Philosophy/manifesto:** *"Boss Daddy isn't just another men's fashion, fitness, or lifestyle brand. It is the gold standard and trusted hub for Boss Dads Built Different — men who believe being a proud and present father isn't a compromise of his strength, but the ultimate expression of it."* — About page, founder story, welcome sequence. (The fashion/fitness/lifestyle line is contrast framing, not a scope expansion.)
+- **Merch voice (context-specific):** *Boss Stuff for Boss Dads* — store/product/merch only.
+
+**Capitalization (v3.4):** the core lines and merch line are **Title Case with periods** (no all-caps, no mid-line `BOSS`). All-caps `BOSS DADDY` is reserved strictly for the wordmark/logo; use title-case *Boss Daddy* everywhere else.
 
 **Voice mechanics (how copy should read):**
 - First-person, always: *"I used this for 3 weekends," "I built a fence with it."*
@@ -73,7 +78,7 @@ Boss Daddy is a brand and website for fathers — a trusted hub of honest produc
 
 **Brand vocabulary — "Stuff":** the casual word for things a dad wants/needs/uses. *"The good stuff"* (recommendations), *"Boss stuff"* (merch/curated picks), *"Dad stuff"* (categories). Use formal terms (products, items, merch) in legal/admin contexts.
 
-**Wordmark:** ALL-CAPS `BOSS DADDY` when *announcing* (logo, hero, taglines, merch, OG cards). Title-case `Boss Daddy` when *referencing* in editorial body. Never lowercase, never camel-case except in code.
+**Wordmark (v3.4):** ALL-CAPS `BOSS DADDY` is reserved strictly for the **wordmark/logo lockup**. Everywhere else — hero H1s, taglines, OG cards, merch, editorial body — use title-case `Boss Daddy`. Never lowercase, never camel-case except in code. (`BOSS` may still be a rare noun of address: "Stay locked in, BOSS.")
 
 ---
 
@@ -148,6 +153,7 @@ Full reference lives in `docs/brand-guide.md` (deeper than this summary, and aut
 - **Merch shop end-to-end:** Stripe checkout → Printful fulfillment validated on a real order.
 
 **Open / in flight (representative — confirm current state before acting):**
+- **v3.4 brand makeover** (started 2026-07-19): new five-level messaging system + canonical manifesto + Title-Case caps doctrine + two named voice registers. Docs (brand guide, this brief, home spec, canva kit) + homepage/OG copy updated; tracked in `docs/brand-v3.4-makeover.md`. Remaining: broader rollout of the lines across pages/emails/merch; commit + deploy.
 - Merch: refund the remaining test charges; verify the shipped-order tracking/email path; add Sentry on swallowed webhook errors.
 - Gear "provenance spine" rebuild: an `adopt` admin UI for researched candidates; reconcile admin/wishlist vs admin/products overlap.
 - The Boss: commit + E2E, Tier-3 action tools, Stripe `plus` tier; "we tested it" follow-up emails.

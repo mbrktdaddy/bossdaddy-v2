@@ -45,15 +45,15 @@ export function generateMetadata(): Metadata {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   return buildSocialMetadata({
     title: 'Boss Daddy Life — Reviews, Guides & Gear for Dads',
-    description: 'Field-tested product reviews, real-dad guides, and free tools for men who show up every day. Zero paid placements, zero fluff.',
+    description: 'Boss Dads. Built Different. Field-tested reviews, real-dad guides, and free tools for men who Dad Like a Boss. Zero paid placements, zero fluff.',
     path: '/',
     siteUrl,
-    ogTitle: 'Dad like a BOSS.',
+    ogTitle: 'Dad Like a Boss.',
     ogType: 'website',
     type: 'site',
     cta: 'Explore Boss Daddy',
     heroUrl: `${siteUrl}/images/hero-workshop.webp`,
-    imageAlt: 'Boss Daddy Life — Dad like a BOSS',
+    imageAlt: 'Boss Daddy Life — Boss Dads. Built Different.',
   })
 }
 
