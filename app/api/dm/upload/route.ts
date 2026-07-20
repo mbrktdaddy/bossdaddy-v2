@@ -14,6 +14,8 @@ import { normalizeImage } from '@/lib/images/normalize'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getOtherParticipants, isBlockedBetween, pushNewMessage } from '@/lib/messaging-shared'
+import { checkRateLimit } from '@/lib/rate-limit'
+import { sanitizePlainText } from '@/lib/sanitize'
 
 export const runtime = 'nodejs' // sharp needs the Node runtime
 export const maxDuration = 60
@@ -27,6 +29,13 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
   if (!user) return NextResponse.json({ error: 'Sign in to send messages' }, { status: 401 })
+
+  // Flood backstop (A5) — shares the DM send quota with sendMessage (30/min per
+  // user), so text + image sends can't be spammed independently.
+  const { success } = await checkRateLimit(`message:${user.id}`, 'message')
+  if (!success) {
+    return NextResponse.json({ error: "You're sending messages too fast — take a breath." }, { status: 429 })
+  }
 
   let form: FormData
   try {
@@ -49,7 +58,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Image must be under 8 MB' }, { status: 400 })
   }
 
-  const caption = ((form.get('caption') as string | null) ?? '').trim()
+  // Strip any HTML markup from the caption before persisting (A4, defense-in-depth
+  // — rendered as escaped text today, sanitized on write in case that changes).
+  const caption = sanitizePlainText((form.get('caption') as string | null) ?? '').trim()
   if (caption.length > MAX_CAPTION) {
     return NextResponse.json({ error: `Caption must be ${MAX_CAPTION} characters or fewer` }, { status: 400 })
   }

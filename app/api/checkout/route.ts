@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { resolveCart, getCartItems } from '@/lib/cart'
 import { stripe } from '@/lib/stripe'
+import { checkRateLimit } from '@/lib/rate-limit'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 
 export async function POST(request: Request) {
@@ -15,6 +16,15 @@ export async function POST(request: Request) {
   // Pre-fill customer email if signed in
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
+
+  // Flood backstop (A5): each call creates a Stripe Checkout session (API cost).
+  // Key by user id when signed in, else source IP for guest checkouts. 10/min is
+  // far above any real buyer; it throttles scripted session-spam.
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'anonymous'
+  const { success } = await checkRateLimit(`checkout:${user?.id ?? ip}`, 'checkout')
+  if (!success) {
+    return NextResponse.json({ error: 'Too many checkout attempts — try again in a minute.' }, { status: 429 })
+  }
 
   const lineItems = items.map((item) => {
     const variantLabel = [item.variant.color, item.variant.size].filter(Boolean).join(' / ')

@@ -82,6 +82,14 @@ function getLimiter(type: string): Ratelimit | null {
     // Merch publish — each call renders a print file + hits Printful twice
     // (create product). Admin-only; this is a flood/runaway backstop.
     'merch-publish':    new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, '1 h'), prefix: 'bd_merch_publish' }),
+    // Member-to-member DM sends (text via sendMessage + image via /api/dm/upload),
+    // keyed by sender user id. 30/min is a fast texter; throttles spam floods and
+    // scripted harassment. RLS + block checks are the real gate — this is a backstop.
+    'message':          new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, '1 m'), prefix: 'bd_message' }),
+    // Stripe Checkout session creation (/api/checkout), keyed by user id (or IP for
+    // guests). Each call hits the Stripe API; nobody legitimately checks out 10×/min,
+    // so this throttles scripted session-spam without touching real buyers.
+    'checkout':         new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1 m'), prefix: 'bd_checkout' }),
     // Printful shipment webhook — keyed by source IP. Legit traffic is a handful
     // of package_shipped events (plus Printful's own retries); a flood on the
     // public URL is either an attacker probing the shared token or a retry storm.
@@ -95,7 +103,7 @@ function getLimiter(type: string): Ratelimit | null {
 
 export async function checkRateLimit(
   identifier: string,
-  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' | 'voice' | 'boss' | 'boss-anon' | 'boss-plus' | 'boss-research' | 'boss-notify' | 'radar' | 'merch-sayings' | 'merch-publish' | 'printful-webhook' = 'draft'
+  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' | 'voice' | 'boss' | 'boss-anon' | 'boss-plus' | 'boss-research' | 'boss-notify' | 'radar' | 'merch-sayings' | 'merch-publish' | 'message' | 'checkout' | 'printful-webhook' = 'draft'
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
   const failClosed = FAIL_CLOSED_TYPES.has(type)
   const limiter = getLimiter(type)
