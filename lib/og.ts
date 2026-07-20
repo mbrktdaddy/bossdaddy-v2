@@ -17,7 +17,7 @@
  * After a template bump, still re-scrape already-shared links in each platform's
  * debugger (e.g. Facebook Sharing Debugger) — they won't re-fetch on their own.
  */
-export const OG_TEMPLATE_VERSION = 5
+export const OG_TEMPLATE_VERSION = 6
 
 // 'site' = a section/home card with no content-type badge.
 export type OgType = 'review' | 'guide' | 'article' | 'site'

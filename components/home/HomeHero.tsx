@@ -16,7 +16,7 @@ const SUBHEAD =
 function Headline({ className = '' }: { className?: string }) {
   return (
     <h1 className={`font-black tracking-tight leading-[0.98] text-prose ${className}`}>
-      Dad like a <br className="sm:hidden" /><span className="text-accent">BOSS.</span>
+      Dad Like a <br className="sm:hidden" /><span className="text-accent">Boss.</span>
     </h1>
   )
 }

@@ -1,7 +1,7 @@
 # Boss Daddy — Brand Guide
 
 > Single source of truth for the Boss Daddy v2 design system. Update this file when design decisions change.
-> Last revised: 2026-05-06
+> Last revised: 2026-07-19 (v3.4 messaging system — §1.7)
 
 ## 0. Naming & Vocabulary
 
@@ -45,12 +45,14 @@ These are non-obvious places that earlier regex sweeps missed during the article
 ## 1. Brand Identity
 
 ### 1.1 Mission Statement
-BOSS DADDY's mission is to establish ourselves as the gold standard brand and trusted hub for men of all ages who are committed to being the ultimate dads — strong, present, and proud fathers their families deserve.
+Boss Daddy's mission is to be the gold standard and trusted hub for men of all ages committed to being the ultimate dads — strong, present, and proud fathers their families deserve.
 
-Rooted in an uncompromising duty to God, Family, and Faith, we stand for honesty, loyalty, and brotherhood. By leveraging advanced tools and resources, we provide the most comprehensive product reviews, practical guides, authentic community, and real support — empowering dads who show up every day to lead with strength, pride, and purpose in the relentless pursuit of excellence.
+Rooted in an uncompromising duty to God, Family, and Faith, we stand for honesty, loyalty, and brotherhood. Through smart tools, honest reviews, practical guides, and real brotherhood, we help dads make better decisions and lead with strength, pride, and purpose — because being a proud and present father isn't a compromise of his strength, but the ultimate expression of it.
 
-### 1.2 Brand Essence (one-liner)
-**BOSS DADDY: The gold standard and trusted hub for men who Dad like a BOSS.**
+### 1.2 Positioning & Brand Essence
+**Positioning (who we are):** *Boss Dads. Built Different.* — the identity line. Boss Dads aren't a softer kind of man; they're men who treat present, proud fatherhood as the ultimate expression of strength.
+
+**Essence (one-liner):** *Boss Daddy — the gold standard and trusted hub for men who Dad Like a Boss.*
 
 ### 1.3 Core Values
 1. **Faith-First Leadership** — Uncompromising duty to God, family, and faith as the foundation for family leadership and meaningful purpose.
@@ -72,6 +74,12 @@ Rooted in an uncompromising duty to God, Family, and Faith, we stand for honesty
 **Core traits:** Authoritative yet approachable. Confident, competent, disciplined, no-nonsense. Inspiring. Trustworthy. Loving and warm toward family. Brings humor and playfulness with a playfully cynical, borderline-condescending edge — the experienced dad who's seen it all and lightly roasts mediocrity while still having your back.
 
 ### 1.6 Tone of Voice
+
+**Two registers — know which one you're in.** Boss Daddy speaks in two voices, and copy fails when they collide:
+- **Declarative register (brand statements)** — the elevated, confident voice of the positioning line, manifesto, hero, creed, and pull-quotes. Short, absolute, no hedging: *"Boss Dads. Built Different." "…the ultimate expression of it."* This is the brand announcing itself. Sanctioned brand phrases ("Built Different," "Boss Up") live here.
+- **Brotherly register (editorial body)** — the first-person, tough-loving older-brother voice for reviews, guides, emails, and everyday copy. Specific, warm, a little cynical toward mediocrity. This is one dad talking to another.
+
+Declarative is for **display moments only** — heroes, taglines, creed, sign-offs. Everywhere else, write brotherly. Never staple a marketing tagline into the middle of a review. The rules below govern the brotherly register (the one you write in 95% of the time).
 
 **Personality voice:**
 - Direct and clear — no corporate jargon, no fluff.
@@ -95,6 +103,13 @@ Rooted in an uncompromising duty to God, Family, and Faith, we stand for honesty
 - Corporate jargon: "leverage" (as verb), "synergy," "circle back," "stakeholder," "deep-dive," "ecosystem."
 - Sponsored-content phrasing: "in partnership with," "thanks to our friends at," "brought to you by."
 - Soft-parenting tells: "every child is unique," "no judgment," "you do you."
+
+*Sanctioned brand language (v3.4 — NOT hype, do not flag)*
+- **"Built Different"** and **"Boss Up"** are brand-owned messaging (see §1.7), not banned swagger. They read like hype-adjacent phrases but are approved positioning/CTA language. Use "Built Different" only in the positioning line ("Boss Dads. Built Different."); use "Boss Up." as the action/CTA verb. Don't spray them through body copy as filler — that's what makes hype hype.
+
+*"Boss Dads" — identity term, never an address*
+- **"Boss Dads" is a third-person identity/positioning term** (brand → world): "Boss Dads. Built Different.", "the hub for Boss Dads." ✅
+- It is **never a second-person address** (writer → reader). "Hey boss dads," / "Listen up, boss dads" ❌ — still banned alongside "fellow bosses," "gentlemen," "fellas." Address the reader one brother to another ("you," "brother"), never christen the audience with a name. See [[feedback_no_reader_nicknames]].
 
 *Specificity — always required*
 - Every claim has specifics: durations ("4 hours of continuous use"), conditions ("18°F garage, no insulation"), outcomes ("zip-tied in under a minute").
@@ -126,18 +141,50 @@ The playfully cynical / borderline-condescending edge is OFF and warmth/presence
 
 The edge exists to call up men who are *coasting*. It is never aimed at men in the trenches.
 
-### 1.7 Taglines & Wordmark Usage
+### 1.7 Messaging System & Wordmark Usage (v3.4 — locked 2026-07-19)
 
-**Approved taglines:**
-- **"Dad like a BOSS"** — primary tagline. Masthead, hero, marketing, merch.
-- **"Real dads, Real reviews, Smart tech"** — secondary. Supports the review/tech pillar.
-- **"Boss Stuff for Boss Dads"** — merch/shop voice.
+The Boss Daddy messaging system is a **five-level hierarchy**. Each line has a distinct job — don't swap jobs, don't blend them into one line. Use them together in the recommended lockups below.
 
-**Wordmark caps treatment:**
-- **All-caps `BOSS DADDY`** in display/marquee contexts: logo, taglines, mission opener, hero H1, OG/social cards, merch graphics, email subject banners. Use when the brand is being *announced*.
-- **Title-case `Boss Daddy`** in editorial body copy, in-narrative mentions, conversational voice ("Boss Daddy was built because…"), reviews, guides, dashboards. Use when the brand is being *referenced*.
+| Level | Element | Line | Purpose | Primary usage |
+|---|---|---|---|---|
+| **Positioning** | Main identity | **Boss Dads. Built Different.** | Who we are + status | Hero sections, logo lockup, major branding, video intros, social bios |
+| **Primary Tagline** | Rallying cry | **Dad Like a Boss.** | Action + emotional hook | Campaigns, CTAs, merch, social, article sign-offs |
+| **Action Line** | Motivational CTA | **Boss Up.** | Call to action & growth | Community, emails, challenges, button text |
+| **Credibility Line** | Trust builder | **Real Dads. Smart Tools. Better Decisions.** | Honesty & value proof | Reviews, guides, product pages, footer trust bar, "How We Test" |
+| **Philosophy** | Manifesto | *(full statement below)* | Core belief & differentiation | About page, founder story, welcome sequence, long-form/sales pages |
+
+**Philosophy / Manifesto (canonical wording — do not paraphrase in hero/about placements):**
+> Boss Daddy isn't just another men's fashion, fitness, or lifestyle brand. It is the gold standard and trusted hub for Boss Dads Built Different — men who believe being a proud and present father isn't a compromise of his strength, but the ultimate expression of it.
+
+> *Scope note:* the "fashion, fitness, or lifestyle" phrasing is **contrast/positioning framing only** — it elevates us above generic lifestyle brands. It is **not** a commitment to ship fashion or fitness content pillars. The content roadmap (reviews, guides, gear, community) is unchanged.
+
+**Usage guidelines — how the lines work together:**
+
+*Homepage hero lockup:*
+```
+Boss Dads.
+Built Different.
+
+Dad Like a Boss.
+
+Real Dads. Smart Tools. Better Decisions.
+```
+
+*About page structure:* Hero → **Boss Dads. Built Different.** · Sub-head → **Dad Like a Boss.** · Body → full Philosophy statement · Trust block → **Real Dads. Smart Tools. Better Decisions.**
+
+*Social / email:* Lead with **Boss Dads. Built Different.**, support with **Dad Like a Boss.**, close the CTA with **Boss Up.**
+
+*Email specifics:* the **welcome sequence** carries the full manifesto (it's the "our why" moment). Use **"Boss Up."** as an action-oriented subject-line / challenge verb. Sign off editorial and newsletter emails with **"Dad Like a Boss."** Keep the declarative register for these display moments; the body of the email is still brotherly. (Note: email templates render light, not dark — see §2.)
+
+**Merch / Shop voice (context-specific — sits outside the core five):**
+- **"Boss Stuff for Boss Dads"** — the merch/shop tagline. Use only in store, product, and merch-graphic contexts. It does a job the core system doesn't; keep it scoped to the shop so it doesn't dilute the positioning lines.
+
+**Capitalization rule (v3.4 — Title Case wins):**
+- The five core lines and the merch line are written in **Title Case with periods** — e.g. *Boss Dads. Built Different.* / *Dad Like a Boss.* / *Boss Up.* The clean title-case treatment reads cleaner and more premium; the periods give punch without shouting. **Do not** set these lines in all-caps or cap `BOSS` mid-line (retired: the old "Dad like a BOSS" emphasis).
+- **All-caps `BOSS DADDY` is reserved strictly for the wordmark/logo lockup.** Do not all-caps the brand name in hero H1s, taglines, OG cards, email banners, or body copy.
+- **Title-case `Boss Daddy`** everywhere else the name is referenced — editorial body, in-narrative mentions ("Boss Daddy was built because…"), reviews, guides, dashboards.
 - Never lowercase. Never camel-case ("BossDaddy") except in code/file/identifier contexts.
-- `BOSS` alone may be used in caps as a noun of address ("Stay locked in, BOSS.") — sparingly, never as filler.
+- `BOSS` alone may still be used in caps as a rare noun of address ("Stay locked in, BOSS.") — the one sanctioned exception, sparingly, never as filler.
 
 **Brand vocabulary — "Stuff":**
 "Stuff" is a brand-personal colloquialism — the casual word for "things a dad wants, needs, or uses." Lean into it:
@@ -148,6 +195,14 @@ The edge exists to call up men who are *coasting*. It is never aimed at men in t
 - *"Boss Stuff for Boss Dads"* — merch tagline (see above)
 
 "Stuff" is the brotherly counterpart to formal terms (products, items, merch). Use it to keep editorial copy grounded and conversational. Use formal terms in legal, structured, or admin contexts.
+
+**Brand vocabulary — "Boss Up":**
+"Boss Up." is the action/CTA verb of the messaging system (see the table above) — it means *level up, take action, show up stronger*. Use it to rally, not to describe:
+- CTAs and buttons: *"Boss Up Your Gear," "Boss Up and join the crew."*
+- Email subject lines, community prompts, and challenges.
+- Merch — standalone or paired with the logo.
+
+Keep it a display/CTA line — don't drop "boss up" into the middle of editorial prose as filler (that's what makes hype hype). Title Case with a period when it stands alone: *Boss Up.*
 
 ### 1.8 What we never do
 - Use the default vivid Tailwind orange (`#f97316`). Our accent is `#E55A1A` (Hot, on dark) / `#CC5500` (core) — warm and earthy, never the loud default.
@@ -266,6 +321,18 @@ All section eyebrows lead with an em-dash:
 — THE BOTTOM LINE
 ```
 Magazine-cover detail. Single character, big editorial signal.
+
+### Messaging lockups & the Title-Case exception (v3.4)
+
+The v3.4 messaging lines (§1.7) are the **one place headline copy is set in Title Case, not uppercase.** Everything else in the display system — section headings (`font-black`), eyebrows (uppercase, tracked) — stays as documented above. Don't uppercase the messaging lines to "match" a heading, and don't Title-Case a section heading to match a messaging line. They are different type roles.
+
+- **Positioning lockup** — *Boss Dads. Built Different.* Set as **two stacked lines**, each with its period, tight leading (`leading-[0.98]`), `font-black` Montserrat, `tracking-tight`. The hero H1 pattern (`HomeHero`) is the reference: the second half carries the `text-accent` color (e.g. "Boss." / "Built Different." in accent). Largest type on the page.
+- **Primary tagline** — *Dad Like a Boss.* One line, `font-black`, accent on the final word ("Boss.") when it sits alone as a hero/marquee line.
+- **Action line** — *Boss Up.* Button/CTA weight (`font-extrabold`/`font-bold`), never larger than the tagline it sits under.
+- **Credibility line** — *Real Dads. Smart Tools. Better Decisions.* Small-to-mid supporting type; works as a footer trust bar or a sub-deck under the hero. Not `font-black` — it's a supporting line, set in body/UI weight.
+- **Manifesto** — the one place the editorial serif is welcome: `font-editorial-display` (Fraunces), with the payoff phrase "the ultimate expression of it" in `text-accent`. See the homepage Creed in `docs/home-manifesto-spec.md`.
+
+**Never:** all-caps a messaging line, cap `BOSS` mid-line, or drop the trailing periods — the periods are the punctuation signature of the system.
 
 ---
 
