@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/anon'
 import { EmailSignup } from '@/components/EmailSignup'
 import { formatPrice, getMerchDisplayImage, type Merch } from '@/lib/merch'
 
@@ -13,7 +13,7 @@ import { formatPrice, getMerchDisplayImage, type Merch } from '@/lib/merch'
  *   - Live (>=1 product available or coming_soon): 3-up grid
  */
 export async function MerchPanel() {
-  const supabase = await createClient()
+  const supabase = createAnonClient() // cookie-free: public merch only (audit H3)
 
   const { data } = await supabase
     .from('merch')

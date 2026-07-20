@@ -1,15 +1,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
-import { CATEGORIES, getCategoryBySlug } from '@/lib/categories'
+import { createAnonClient } from '@/lib/supabase/anon'
+import { CATEGORIES } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
-import GuidesGrid from './_components/GuidesGrid'
 import FeaturedGuideCard from '@/components/FeaturedGuideCard'
-import BenchStrip from '@/components/BenchStrip'
 import AskTheBoss from '@/components/AskTheBoss'
 import PageHeader from '@/components/PageHeader'
 import { ogImageUrl, OG_SITE } from '@/lib/og'
-const PER_PAGE = 12
 import type { GuideRow } from './actions'
 import type { Metadata } from 'next'
 
@@ -31,173 +28,106 @@ export const metadata: Metadata = {
   alternates: { canonical: '/guides' },
 }
 
-interface Props {
-  searchParams: Promise<{ category?: string }>
-}
+// Static editorial index (audit H3): no searchParams, cookie-free anon reads.
+// Category filtering lives on the path-based /guides/category/[slug] routes
+// (already statically prerendered) that the pills below link to.
+export default async function GuidesPage() {
+  const supabase = createAnonClient()
 
-export default async function GuidesPage({ searchParams }: Props) {
-  const { category } = await searchParams
-  const supabase = await createClient()
-
-  // ── All view — featured card + per-category editorial row sections ──
-  if (!category) {
-    const { data } = await supabase
-      .from('guides')
-      .select('id, slug, title, category, excerpt, image_url, published_at, reading_time_minutes, featured')
-      .eq('status', 'approved')
-      .eq('is_visible', true)
-      .order('published_at', { ascending: false })
-      .limit(200)
-
-    const guides = (data ?? []) as (GuideRow & { featured?: boolean })[]
-
-    const sections = CATEGORIES
-      .map(cat => ({
-        cat,
-        items: guides.filter(a => a.category === cat.slug).slice(0, 3),
-        total: guides.filter(a => a.category === cat.slug).length,
-      }))
-      .filter(s => s.items.length > 0)
-
-    // Admin-flagged featured wins; fall back to first guide with an image.
-    const featured =
-      guides.find((g) => g.featured && g.image_url) ??
-      guides.find((g) => g.image_url) ??
-      null
-
-    return (
-      <>
-        <PageHeader
-          eyebrow="The Field Notes"
-          title="Guides"
-          deck="Real how-tos for the situations that actually come up — tested by a dad, written without the fluff."
-        />
-        <div className="max-w-6xl mx-auto px-6 py-12">
-        {/* Featured guide — the showcase leads the page (Cover Story pattern) */}
-        {featured && (
-          <div className="mb-12">
-            <FeaturedGuideCard guide={featured} />
-          </div>
-        )}
-
-        {/* Category filter — horizontal scroll strip */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
-          <Link href="/guides"
-            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-prose text-background border border-prose shadow-sm shadow-black/10 transition-colors">
-            All Guides
-          </Link>
-          {CATEGORIES.map((c) => (
-            <Link key={c.slug} href={`/guides/category/${c.slug}`}
-              className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose transition-colors">
-              <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
-              <span>{c.label}</span>
-            </Link>
-          ))}
-        </div>
-
-        <AskTheBoss context="Browsing dad how-to guides across every category" className="mb-12" />
-
-        {/* Per-category sections — editorial rows (newspaper directory style)
-            replaces 8 identical 3-col card grids with a tighter, scannable
-            list per category. Featured card above carries the visual weight. */}
-        {sections.length === 0 ? (
-          <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft">
-            <p className="text-prose-faint text-lg font-semibold">No guides here yet.</p>
-            <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
-          </div>
-        ) : (
-          sections.map(({ cat, items, total }, i) => (
-            <section key={cat.slug} className={i > 0 ? 'mt-12' : ''}>
-              <div className="flex items-end justify-between mb-5 gap-4">
-                <div className="min-w-0">
-                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                  <h2 className="text-xl md:text-2xl font-black text-prose flex items-center gap-2.5 leading-tight">
-                    <CategoryIcon slug={cat.slug} className="w-5 h-5 sm:w-6 sm:h-6 text-accent-text shrink-0" />
-                    <span className="truncate">{cat.label}</span>
-                  </h2>
-                  {cat.description && (
-                    <p className="text-sm text-prose-faint mt-1.5 line-clamp-1">{cat.description}</p>
-                  )}
-                </div>
-                {total > items.length && (
-                  <Link
-                    href={`/guides/category/${cat.slug}`}
-                    className="self-end shrink-0 text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold"
-                  >
-                    View all {total}
-                  </Link>
-                )}
-              </div>
-              <div className="divide-y divide-soft">
-                {items.map((a) => <GuideRowItem key={a.id} guide={a} />)}
-              </div>
-            </section>
-          ))
-        )}
-        </div>
-      </>
-    )
-  }
-
-  // ── Filtered view — flat card grid (deep browse surface) ──────────────
-  const cat = getCategoryBySlug(category)
-  const { data, count } = await supabase
+  const { data } = await supabase
     .from('guides')
-    .select('id, slug, title, category, excerpt, image_url, published_at, reading_time_minutes', { count: 'exact' })
+    .select('id, slug, title, category, excerpt, image_url, published_at, reading_time_minutes, featured')
     .eq('status', 'approved')
     .eq('is_visible', true)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .eq('category', category as any)
     .order('published_at', { ascending: false })
-    .range(0, PER_PAGE - 1)
+    .limit(200)
 
-  const guides = (data ?? []) as GuideRow[]
+  const guides = (data ?? []) as (GuideRow & { featured?: boolean })[]
+
+  const sections = CATEGORIES
+    .map(cat => ({
+      cat,
+      items: guides.filter(a => a.category === cat.slug).slice(0, 3),
+      total: guides.filter(a => a.category === cat.slug).length,
+    }))
+    .filter(s => s.items.length > 0)
+
+  // Admin-flagged featured wins; fall back to first guide with an image.
+  const featured =
+    guides.find((g) => g.featured && g.image_url) ??
+    guides.find((g) => g.image_url) ??
+    null
 
   return (
     <>
       <PageHeader
-        eyebrow={`Guides${cat ? ` / ${cat.label.toUpperCase()}` : ''}`}
-        title={cat ? cat.label : 'Guides'}
-        deck={cat?.description ?? undefined}
+        eyebrow="The Field Notes"
+        title="Guides"
+        deck="Real how-tos for the situations that actually come up — tested by a dad, written without the fluff."
       />
       <div className="max-w-6xl mx-auto px-6 py-12">
-      <p className="text-prose-faint text-sm tabular-nums mb-8">
-        {count ?? 0} {(count ?? 0) === 1 ? 'guide' : 'guides'}{cat ? ` in ${cat.label}` : ''}
-      </p>
+      {/* Featured guide — the showcase leads the page (Cover Story pattern) */}
+      {featured && (
+        <div className="mb-12">
+          <FeaturedGuideCard guide={featured} />
+        </div>
+      )}
 
-      {/* Category filter pills */}
+      {/* Category filter — horizontal scroll strip. Pills link to the static
+          path-based category routes (indexable, prerendered). */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
         <Link href="/guides"
-          className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose transition-colors">
+          className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-prose text-background border border-prose shadow-sm shadow-black/10 transition-colors">
           All Guides
         </Link>
         {CATEGORIES.map((c) => (
           <Link key={c.slug} href={`/guides/category/${c.slug}`}
-            className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
-              category === c.slug
-                ? 'bg-prose text-background border border-prose shadow-sm shadow-black/10'
-                : 'bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose'
-            }`}>
+            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose transition-colors">
             <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
             <span>{c.label}</span>
           </Link>
         ))}
       </div>
 
-      <AskTheBoss context={cat ? `${cat.label} guides` : 'Dad how-to guides'} className="mb-12" />
+      <AskTheBoss context="Browsing dad how-to guides across every category" className="mb-12" />
 
-      {!guides.length ? (
+      {/* Per-category sections — editorial rows (newspaper directory style)
+          replaces 8 identical 3-col card grids with a tighter, scannable
+          list per category. Featured card above carries the visual weight. */}
+      {sections.length === 0 ? (
         <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft">
           <p className="text-prose-faint text-lg font-semibold">No guides here yet.</p>
           <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
         </div>
       ) : (
-        <GuidesGrid initialItems={guides} total={count ?? 0} category={category} />
+        sections.map(({ cat, items, total }, i) => (
+          <section key={cat.slug} className={i > 0 ? 'mt-12' : ''}>
+            <div className="flex items-end justify-between mb-5 gap-4">
+              <div className="min-w-0">
+                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
+                <h2 className="text-xl md:text-2xl font-black text-prose flex items-center gap-2.5 leading-tight">
+                  <CategoryIcon slug={cat.slug} className="w-5 h-5 sm:w-6 sm:h-6 text-accent-text shrink-0" />
+                  <span className="truncate">{cat.label}</span>
+                </h2>
+                {cat.description && (
+                  <p className="text-sm text-prose-faint mt-1.5 line-clamp-1">{cat.description}</p>
+                )}
+              </div>
+              {total > items.length && (
+                <Link
+                  href={`/guides/category/${cat.slug}`}
+                  className="self-end shrink-0 text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold"
+                >
+                  View all {total}
+                </Link>
+              )}
+            </div>
+            <div className="divide-y divide-soft">
+              {items.map((a) => <GuideRowItem key={a.id} guide={a} />)}
+            </div>
+          </section>
+        ))
       )}
-
-      <div className="mt-16">
-        <BenchStrip ctaText="See what's coming up" />
-      </div>
       </div>
     </>
   )
