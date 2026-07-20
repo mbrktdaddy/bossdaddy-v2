@@ -1,0 +1,21 @@
+# Dependency version updates. Security updates are additionally driven by
+# GitHub Dependabot alerts (enable "Dependabot security updates" in repo
+# Settings → Code security) — that toggle is what auto-PRs advisory fixes like
+# the sanitize-html CVSS 9.3 that this audit caught.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      # Batch low-risk bumps into one PR to keep review load sane for a solo op.
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+    # Majors on the money path (stripe) get their own PR so they're reviewed
+    # deliberately with a checkout smoke test — never auto-batched.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

@@ -3,6 +3,7 @@
 
 import { NextResponse } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
+import { likePattern } from '@/lib/postgrest-escape'
 
 export async function GET(request: Request) {
   const supabase = await createClient()
@@ -14,10 +15,13 @@ export async function GET(request: Request) {
   const q = (new URL(request.url).searchParams.get('q')?.trim() ?? '').replace(/^@+/, '')
   if (q.length < 2) return NextResponse.json({ members: [] })
 
+  // Sanitize before interpolating into .or() — supabase-js does not
+  // parameterize it, so a raw q could inject filter conditions (CWE-943).
+  const like = likePattern(q)
   const { data, error } = await supabase
     .from('profiles')
     .select('id, username, display_name, avatar_url, account_status')
-    .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
+    .or(`username.ilike.${like},display_name.ilike.${like}`)
     .neq('id', user.id)
     .limit(10)
   if (error) return NextResponse.json({ members: [] })

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { likePattern } from '@/lib/postgrest-escape'
 import { getCategoryBySlug } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
@@ -39,10 +40,10 @@ export default async function SearchPage({ searchParams }: Props) {
  const admin = createAdminClient()
 
  // Products are matched with ilike (they have no search_vector), so the raw
- // query is interpolated into a PostgREST .or() filter. Strip the characters
- // PostgREST treats as filter delimiters / LIKE wildcards so an arbitrary
- // visitor query can't break the filter or inject a wildcard.
- const productLike = `%${query.replace(/[%,()\\]/g, ' ').trim()}%`
+ // query is interpolated into a PostgREST .or() filter. Sanitize via the shared
+ // helper so an arbitrary visitor query can't break the filter or inject a
+ // wildcard/condition (CWE-943).
+ const productLike = likePattern(query)
 
  const [{ data: reviews }, { data: articles }, { data: products }] = query.length >= 2
  ? await Promise.all([

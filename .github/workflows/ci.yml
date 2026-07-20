@@ -1,0 +1,21 @@
+# PR gate: typecheck + lint on every PR before it can merge to master.
+# `npm run check` = `tsc --noEmit && eslint`. This is the cheap guardrail the
+# audit flagged as missing — Vercel only enforced these at deploy time on
+# master (after merge), never as a pre-merge status check.
+name: CI
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm run check
