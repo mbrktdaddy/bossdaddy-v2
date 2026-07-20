@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Suspense } from 'react'
-import { createClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/anon'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCategoryBySlug } from '@/lib/categories'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
@@ -61,7 +61,7 @@ export function generateMetadata(): Metadata {
 const BENCH_RANK: Record<string, number> = { testing: 0, queued: 1, considering: 2 }
 
 export default async function HomePage() {
-  const supabase = await createClient()
+  const supabase = createAnonClient()
   // Bench items (statuses testing/queued/considering) aren't publicly readable,
   // so the "On the bench" motion item comes through the admin client — same as
   // BenchStrip. It's read-only, no user data.

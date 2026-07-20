@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/anon'
 
 interface Props {
   slug: string
@@ -50,7 +50,8 @@ const TYPE_META: Record<CollectionType, { eyebrow: string; cta: string; section:
  * three item tiles + a "See the full X →" link to the appropriate section.
  */
 export default async function CollectionEmbed({ slug }: Props) {
-  const supabase = await createClient()
+  // Cookie-free anon client — public collection data only (audit H3).
+  const supabase = createAnonClient()
 
   const { data: collection } = await supabase
     .from('collections')

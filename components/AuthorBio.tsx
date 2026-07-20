@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/anon'
 
 interface Props {
   username: string
@@ -13,7 +13,9 @@ const FALLBACK = {
 }
 
 export default async function AuthorBio({ username }: Props) {
-  const supabase = await createClient()
+  // Cookie-free anon client — public profile fields only; keeps the host page
+  // statically prerenderable (audit H3).
+  const supabase = createAnonClient()
   const { data: profile } = await supabase
     .from('profiles')
     .select('display_name, tagline, bio, avatar_url')

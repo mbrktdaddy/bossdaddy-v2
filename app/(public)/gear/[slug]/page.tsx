@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/anon'
 import { formatPrice, getMerchDisplayImage } from '@/lib/merch'
 import MerchProductView from './_components/MerchProductView'
 import { ogImageUrl, OG_SITE } from '@/lib/og'
@@ -12,9 +12,21 @@ interface Props {
 
 export const revalidate = 3600
 
+// Prerender the public merch catalog so these pages are static (audit H3).
+// Same visibility filter the page body uses; anon client keeps it cookie-free.
+export async function generateStaticParams() {
+  const supabase = createAnonClient()
+  const { data } = await supabase
+    .from('merch')
+    .select('slug')
+    .in('status', ['available', 'coming_soon'])
+    .is('archived_at', null)
+  return (data ?? []).map(({ slug }) => ({ slug }))
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const supabase = await createClient()
+  const supabase = createAnonClient()
   const { data } = await supabase
     .from('merch').select('name, description, image_url, default_image_url').eq('slug', slug).maybeSingle()
   if (!data) return {}
@@ -41,7 +53,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function MerchDetailPage({ params }: Props) {
   const { slug } = await params
-  const supabase = await createClient()
+  const supabase = createAnonClient()
 
   const { data: merch } = await supabase
     .from('merch')

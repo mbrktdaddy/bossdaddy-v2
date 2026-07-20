@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { buildSocialMetadata } from '@/lib/og'
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/anon'
 import { getCategoryBySlug, CATEGORIES } from '@/lib/categories'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import CategoryIcon from '@/components/CategoryIcon'
@@ -39,7 +39,7 @@ export default async function CategoryHubPage({ params }: Props) {
   const cat = getCategoryBySlug(slug)
   if (!cat) notFound()
 
-  const supabase = await createClient()
+  const supabase = createAnonClient()
 
   const [{ data: topReviews }, { data: latestGuides }] = await Promise.all([
     supabase
