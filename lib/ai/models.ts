@@ -2,11 +2,9 @@
 // Gateway slug in `provider/model` form. NOTE the gateway convention: versions
 // use DOTS, not hyphens — `anthropic/claude-sonnet-4.6`, never `...-4-6`.
 //
-// Verified 2026-07-20:
-//   Anthropic slugs — https://ai-gateway.vercel.sh/v1/models
-//   xAI / Grok slug — https://vercel.com/changelog/grok-4-5-now-available-on-ai-gateway
-// Before pointing a PRODUCTION surface at a new slug, confirm it live via
-// `gateway.getAvailableModels()` (needs gateway auth) — do not trust memory.
+// Verified live 2026-07-20 via `gateway.getAvailableModels()` (npm run ai:smoke)
+// — 295 models total; all slugs below present. Before pointing a PRODUCTION
+// surface at a NEW slug, re-run that check — do not trust memory.
 // (Reinforces the "verify the model against the runtime, not just a doc" rule.)
 
 export const MODELS = {
@@ -16,9 +14,9 @@ export const MODELS = {
   claudeHaiku: 'anthropic/claude-haiku-4.5',
   claudeOpus: 'anthropic/claude-opus-4.8',
   // ── xAI / Grok — opt-in second provider (per-bucket, via env). grok-4.5 is
-  //    the current general model; grok-4-fast for cheap/low-latency turns. ──
+  //    the current general model; grok-4.1-fast for cheap/low-latency turns. ──
   grok: 'xai/grok-4.5',
-  grokFast: 'xai/grok-4-fast-non-reasoning',
+  grokFast: 'xai/grok-4.1-fast-non-reasoning',
 } as const
 
 export type ModelSlug = (typeof MODELS)[keyof typeof MODELS]
