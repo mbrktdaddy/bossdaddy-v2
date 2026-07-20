@@ -10,6 +10,8 @@
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getOtherParticipants, isBlockedBetween, pushNewMessage } from '@/lib/messaging-shared'
+import { checkRateLimit } from '@/lib/rate-limit'
+import { sanitizePlainText } from '@/lib/sanitize'
 import { revalidatePath } from 'next/cache'
 
 type Result<T = undefined> = { ok: true; data?: T } | { ok: false; error: string }
@@ -36,7 +38,16 @@ export async function sendMessage(conversationId: string, body: string): Promise
   const { user } = await getUserSafe(supabase)
   if (!user) return { ok: false, error: 'Sign in to send messages' }
 
-  const text = body.trim()
+  // Flood backstop (A5): 30 sends/min per user. RLS + block checks below are the
+  // real gate; this throttles spam/harassment scripts.
+  const { success } = await checkRateLimit(`message:${user.id}`, 'message')
+  if (!success) return { ok: false, error: "You're sending messages too fast — take a breath." }
+
+  // Strip any HTML markup before persisting (A4, defense-in-depth). The body is
+  // rendered as escaped text today, but sanitizing on write keeps stored markup
+  // out if the render path ever changes. Trim after — sanitizing can leave edge
+  // whitespace.
+  const text = sanitizePlainText(body).trim()
   if (!text) return { ok: false, error: 'Message is empty' }
   if (text.length > MAX_BODY) return { ok: false, error: `Message must be ${MAX_BODY} characters or fewer` }
 
