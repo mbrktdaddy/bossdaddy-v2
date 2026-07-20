@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { getClaudeClient, MODEL } from '@/lib/claude/client'
+import { aiGenerateText } from '@/lib/ai/client'
+import { classifyClaudeError } from '@/lib/ai/errors'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
@@ -46,27 +47,28 @@ ${context ? `\nExtra context: ${context}` : ''}
 Return ONLY the alt text, nothing else.`
 
   try {
-    const message = await getClaudeClient().messages.create({
-      model: MODEL,
-      max_tokens: 120,
+    const raw = await aiGenerateText({
+      bucket: 'utility',
+      tag: 'alt-text',
+      maxOutputTokens: 120,
       messages: [{
         role: 'user',
         content: [
-          { type: 'image', source: { type: 'url', url: image_url } },
-          { type: 'text',  text: instruction },
+          { type: 'image', image: new URL(image_url) },
+          { type: 'text', text: instruction },
         ],
       }],
     })
 
-    const text = message.content.find((b) => b.type === 'text')?.text?.trim() ?? ''
-    // Strip leading/trailing quotes if Claude wraps the response
+    const text = raw.trim()
+    // Strip leading/trailing quotes if the model wraps the response
     const alt = text.replace(/^["'"""]|["'"""]$/g, '').trim()
 
     if (!alt) return NextResponse.json({ error: 'AI returned empty alt text' }, { status: 502 })
     return NextResponse.json({ alt })
   } catch (err) {
-    console.error('Alt text generation failed:', err)
-    const msg = err instanceof Error ? err.message : String(err)
-    return NextResponse.json({ error: `Alt text generation failed: ${msg.slice(0, 140)}` }, { status: 502 })
+    const c = classifyClaudeError(err)
+    console.error('alt-text error:', c.kind, '-', c.detail)
+    return NextResponse.json({ error: c.userMessage }, { status: c.status })
   }
 }
