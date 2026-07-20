@@ -1,10 +1,20 @@
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
+import * as Sentry from '@sentry/nextjs'
 
 // Falls back to no-op if Upstash env vars are missing (local dev without Redis).
 function hasUpstash() {
   return !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
 }
+
+// $-budget guards: the autonomous radar cron + the anonymous / priciest AI
+// paths. For these, a missing/unreachable limiter must FAIL CLOSED — skipping a
+// cron run or blocking one anonymous call is far cheaper than letting an
+// uncapped path burn the Anthropic/OpenAI budget (the radar cron fires
+// web_search, the priciest call in the stack, with no human waiting). Every
+// other type fails open so local dev without Redis still works. See audit
+// 2026-07-19 (rate limiter fails open on the budget cron).
+const FAIL_CLOSED_TYPES = new Set(['radar', 'boss-anon', 'boss-research'])
 
 const limiters: Record<string, Ratelimit | null> = {}
 
@@ -82,13 +92,35 @@ export async function checkRateLimit(
   identifier: string,
   type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' | 'voice' | 'boss' | 'boss-anon' | 'boss-plus' | 'boss-research' | 'boss-notify' | 'radar' | 'merch-sayings' | 'merch-publish' = 'draft'
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
+  const failClosed = FAIL_CLOSED_TYPES.has(type)
   const limiter = getLimiter(type)
-  if (!limiter) return { success: true, remaining: 999, reset: 0 }
 
-  const result = await limiter.limit(identifier)
-  return {
-    success:   result.success,
-    remaining: result.remaining,
-    reset:     result.reset,
+  if (!limiter) {
+    if (failClosed) {
+      const msg = `[rate-limit] Upstash unavailable — failing CLOSED for budget guard "${type}" to protect the AI budget`
+      console.error(msg)
+      Sentry.captureMessage(msg, 'error')
+      return { success: false, remaining: 0, reset: 0 }
+    }
+    // Non-budget type in an env without Redis (local dev) — allow.
+    return { success: true, remaining: 999, reset: 0 }
+  }
+
+  try {
+    const result = await limiter.limit(identifier)
+    return {
+      success:   result.success,
+      remaining: result.remaining,
+      reset:     result.reset,
+    }
+  } catch (err) {
+    // Redis reachable-check passed but the call failed (network blip, quota).
+    Sentry.captureException(err, { tags: { path: 'rate-limit', type, failClosed: String(failClosed) } })
+    if (failClosed) {
+      console.error(`[rate-limit] limiter error for budget guard "${type}" — failing CLOSED:`, err)
+      return { success: false, remaining: 0, reset: 0 }
+    }
+    console.error(`[rate-limit] limiter error for "${type}" — failing open:`, err)
+    return { success: true, remaining: 999, reset: 0 }
   }
 }
