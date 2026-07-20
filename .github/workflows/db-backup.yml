@@ -1,0 +1,78 @@
+name: DB backup (Free-tier self-managed)
+
+# Supabase Free tier provides NO managed backups and NO PITR (see
+# docs/dr-runbook.md §2). This is our only backup mechanism: a scheduled logical
+# dump (roles + schema + data) via the Supabase CLI's version-matched pg_dump,
+# gpg-encrypted, stored as a PRIVATE GitHub artifact. It lives in GitHub — not
+# Supabase — so it survives even a full project deletion.
+#
+# The dump contains PII (user emails, DMs), so the plaintext NEVER leaves the
+# runner: only the AES-256 encrypted .gpg is uploaded. Restore needs the same
+# passphrase (BACKUP_PASSPHRASE) — store it in a password manager; if it's lost,
+# the backups are unrecoverable.
+#
+# Required repo secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_DB_URL   — Settings → Database → Connection string (URI, incl. password)
+#   BACKUP_PASSPHRASE — a strong passphrase you generate and store safely
+#
+# Trigger it manually before any risky migration:  gh workflow run db-backup.yml
+
+on:
+  schedule:
+    - cron: '0 6 * * 0' # Sundays 06:00 UTC — weekly
+  workflow_dispatch: {} # manual: run before a risky migration
+
+# Never run two dumps at once.
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Dump roles + schema + data
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DB_URL:-}" ]; then
+            echo "::error::SUPABASE_DB_URL secret is not set — cannot back up." >&2
+            exit 1
+          fi
+          stamp="$(date -u +%Y-%m-%dT%H%M%SZ)"
+          # Canonical Supabase CLI backup split (docs: Backup & restore via CLI).
+          # The CLI bundles a pg_dump matched to the project's Postgres version.
+          supabase db dump --db-url "$DB_URL" --role-only -f "roles.sql"
+          supabase db dump --db-url "$DB_URL"             -f "schema.sql"
+          supabase db dump --db-url "$DB_URL" --data-only --use-copy -f "data.sql"
+          tar -czf "bd-backup-$stamp.tar.gz" roles.sql schema.sql data.sql
+          echo "STAMP=$stamp" >> "$GITHUB_ENV"
+
+      - name: Encrypt (AES-256, symmetric)
+        env:
+          PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PASSPHRASE:-}" ]; then
+            echo "::error::BACKUP_PASSPHRASE secret is not set — refusing to upload an unencrypted dump." >&2
+            exit 1
+          fi
+          gpg --batch --yes --symmetric --cipher-algo AES256 \
+            --passphrase "$PASSPHRASE" \
+            -o "bd-backup-$STAMP.tar.gz.gpg" "bd-backup-$STAMP.tar.gz"
+          # Belt-and-suspenders: drop the plaintext so it can't be uploaded.
+          rm -f "bd-backup-$STAMP.tar.gz" roles.sql schema.sql data.sql
+
+      - name: Upload encrypted artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ env.STAMP }}
+          path: bd-backup-${{ env.STAMP }}.tar.gz.gpg
+          retention-days: 90
+          if-no-files-found: error

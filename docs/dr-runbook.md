@@ -31,51 +31,73 @@
 
 ---
 
-## 2. Current backup posture — VERIFY, don't assume
+## 2. Current backup posture (Supabase **Free** tier, confirmed 2026-07-20)
 
-> ⚠️ These values must be confirmed in the Supabase dashboard, not trusted from this doc.
-> Fill them in and re-date §0 when you check.
+> **Free tier provides NO managed backups and NO PITR.** There is no nightly
+> backup to restore from and no point-in-time recovery — those are Pro/Team
+> features. The dashboard (**Settings → Database → Backups**) shows the feature
+> gated behind an upgrade, not a retention setting. Our **only** backup is the
+> self-managed dump in §2.1.
 
-**Verification steps (do this now, before an incident):**
+**What this means:**
+- **Money path is safe regardless** — orders/payments/refunds are rebuildable from Stripe + Printful (§4). Losing the DB does not lose revenue records.
+- **Content + user data is the real exposure** — reviews/guides (SEO equity), profiles, DMs, savings/family history exist *only* in Supabase. Without the §2.1 dump, a dropped table or deleted project = **permanent total loss**.
+- **Free-tier availability gotcha:** projects **pause after ~7 days of inactivity** (an uptime issue, not data loss — resume from the dashboard).
 
-1. Supabase dashboard → Project → **Settings → Database → Backups**.
-   - [ ] Plan tier (Free / Pro / Team): `__________`
-   - [ ] Daily backup retention (Pro = **7 days** by default): `__________`
-   - [ ] **PITR enabled?** (paid add-on) yes / no: `__________`
-   - [ ] If PITR on, recovery window (e.g. 7 days) & granularity: `__________`
-2. Storage → note which buckets exist and whether they're covered by the project backup vs. need a separate export (see §3.4).
+### 2.1 Our backup mechanism — automated CI dump
+`.github/workflows/db-backup.yml` runs a logical dump (roles + schema + data) via the Supabase CLI, gpg-encrypts it (AES-256), and stores it as a **private GitHub artifact** (90-day retention). It lives in GitHub, not Supabase, so it survives even a full project deletion.
 
-**RPO / RTO targets (state what we accept):**
+- **Schedule:** weekly (Sundays 06:00 UTC) + **manual before any risky migration**: `gh workflow run db-backup.yml`.
+- **Required repo secrets:** `SUPABASE_DB_URL` (Settings → Database → Connection string) and `BACKUP_PASSPHRASE` (strong passphrase — store in a password manager; **if lost, backups are unrecoverable**).
+- Plaintext never leaves the runner — only the `.gpg` is uploaded.
+- Egress cost: ~45 MB/run ≈ ~180 MB/mo, negligible against the 5 GB Free allowance.
 
-| | Without PITR (daily backups) | With PITR |
-|---|---|---|
-| **RPO** (max data loss) | up to ~24h (since last nightly) | seconds–minutes |
-| **RTO** (time to restore) | ~15–60 min (spin restore + reconcile) | ~15–60 min |
+**RPO / RTO under this posture:**
 
-**Accepted posture (until revisited — see §6):** daily backups, RPO ≈ 24h. The order-reconciliation step (§4) closes the money gap even at a 24h RPO because Stripe/Printful retain the records; the irrecoverable loss is up to 24h of **content and user-generated data**.
+| | Value |
+|---|---|
+| **RPO** (max data loss) | up to **7 days** of content/user data (since last weekly dump) — or less if you dump before migrations. Orders lose nothing (§4). |
+| **RTO** (time to restore) | ~15–60 min (new project + `psql` restore + reconcile) |
+
+**Accepted (see §6):** weekly self-managed dumps. The knob to shrink RPO for free is to trigger `gh workflow run db-backup.yml` before every migration — the exact moment loss is most likely.
 
 ---
 
 ## 3. Restore procedures
 
-### 3.1 Take an on-demand backup FIRST (whenever possible)
-Before restoring, snapshot the current (corrupted) state so a restore can't make things *worse* and you retain forensics:
-- Dashboard → Database → Backups → **Backup now**, or
-- `supabase db dump --db-url "$SUPABASE_DB_URL" -f pre-restore-$(date).sql` (schema+data).
+> On Free tier every restore comes from the §2.1 encrypted artifact — there is no
+> dashboard restore. Get the latest good backup first:
+> GitHub → repo → **Actions → DB backup → latest run → Artifacts → download**, then
+> ```
+> gpg -d bd-backup-<stamp>.tar.gz.gpg > backup.tar.gz && tar -xzf backup.tar.gz
+> # yields roles.sql, schema.sql, data.sql
+> ```
+
+### 3.1 Snapshot the current (corrupted) state FIRST
+Before overwriting anything, capture forensics so a restore can't make things worse:
+```
+supabase db dump --db-url "$SUPABASE_DB_URL" --data-only --use-copy -f pre-restore-data.sql
+```
 
 ### 3.2 Scenario A — bad migration / accidental mass delete/update
-Most likely incident (see the audit's note on migrations 042/043/106/107 shipping subtly wrong).
+Most likely incident (see the audit's note on migrations 042/043/106/107 shipping subtly wrong). **No PITR on Free** — you restore from the most recent artifact *before* the incident and accept loss of writes since that dump (shrink this by always dumping pre-migration).
 
-- **If PITR is enabled:** restore to the timestamp **immediately before** the bad migration/write. Dashboard → Database → Backups → Point in time → pick the second before the incident.
-- **If daily-backups only:** restore the most recent nightly *before* the incident. Accept loss of writes since that backup, then use §4 to rebuild orders.
-- After restore: `npm run db:types` (schema may have moved), redeploy if types changed.
+Restore into the **existing** project (careful — this overwrites):
+```
+psql "$SUPABASE_DB_URL" -f roles.sql      # usually a no-op on a live project; ignore "already exists"
+psql "$SUPABASE_DB_URL" -f schema.sql
+psql "$SUPABASE_DB_URL" -f data.sql
+```
+For a *partial* loss (one table), restore selectively from `data.sql` rather than clobbering the whole DB. Then `npm run db:types` if the schema moved, redeploy, and run §4.
 
-### 3.3 Scenario B — full project loss / region outage
-- Provision a new Supabase project (same region `iad1`-adjacent to keep latency with Vercel).
-- Restore the latest backup into it.
-- Update Vercel env: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, anon key, `SUPABASE_DB_URL`.
-- Re-point Supabase Auth **Site URL** (`https://www.bossdaddylife.com`) and redirect URLs (§ infra: they get wiped on a new project).
+### 3.3 Scenario B — full project loss / deletion
+- Provision a new Supabase project (region near Vercel `iad1` for latency).
+- Restore the artifact into it: `psql "$NEW_DB_URL" -f roles.sql && psql ... schema.sql && psql ... data.sql`.
+- Update Vercel env: `NEXT_PUBLIC_SUPABASE_URL`, anon key, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_DB_URL` (and the backup workflow's `SUPABASE_DB_URL` secret).
+- Re-point Supabase Auth **Site URL** (`https://www.bossdaddylife.com`) + redirect URLs — these are wiped on a new project (see infra notes).
 - Redeploy. Then §4.
+
+> **Known gap:** the CLI dump captures the `public` app data (incl. `profiles`). If the dump does not include `auth.users`, restored users may need to re-authenticate/re-signup (their content/profile survives; login credentials may not). Validate this on the first restore drill (§6) and widen the dump scope if login continuity matters.
 
 ### 3.4 Scenario C — Storage bucket loss (DM images, product photos)
 Storage is **not** always covered by the Postgres backup — confirm in §2. If buckets are lost but DB rows survive, the `attachment_path` / image URLs point at objects that no longer exist (broken images, not data corruption).
@@ -113,7 +135,8 @@ Payments kept flowing while the DB was behind. After restoring to timestamp `T`,
 
 ## 6. Decision log & open items
 
-- **PITR (paid add-on) — DEFERRED (2026-07-20).** Accepting daily-backup RPO (~24h). Rationale: the money path is reconcilable from Stripe/Printful regardless of RPO (§4); the only irrecoverable loss is <24h of content/user data, which is low at current volume. **Revisit trigger:** when daily order volume or irreplaceable user-generated data (DMs, family/savings history) grows enough that 24h of loss is unacceptable — then enable PITR for near-zero RPO.
-- **TODO — Storage backup:** DM-media + own-photo uploads have no automated export. Decide whether to schedule periodic bucket exports (§3.4).
-- **TODO — verify §2 values** in the dashboard and fill them in; re-date §0.
-- **TODO — annual fire drill:** restore the latest backup into a throwaway project once a year to confirm this runbook still works and RTO is real.
+- **Stay on Free + self-managed CI dumps — DECIDED (2026-07-20).** At 1 MAU / 45 MB DB / 0 MB storage, paying $25/mo for Pro (daily managed backups) isn't justified yet. The weekly gpg-encrypted GitHub artifact (§2.1) covers the real risk (permanent content/user loss) for free. **Revisit trigger → upgrade to Pro:** when data/traffic grows enough that a 7-day RPO or self-managed restore is too risky, or when Free-tier inactivity-pausing becomes a problem.
+- **PITR — N/A on Free**, and deferred even after a Pro upgrade (~$100/mo add-on) until order/UGC volume makes ~7-day RPO unacceptable.
+- **Storage bucket export — DEFERRED (2026-07-20), correctly.** File storage is **0 MB** — DM images + own-photo uploads are empty; imagery comes from external sources (Printful CDN / placeholders). Nothing to export. **Revisit trigger:** when File storage climbs above ~0 — then add a bucket sync to the backup job (§3.4).
+- **TODO — add the two repo secrets** (`SUPABASE_DB_URL`, `BACKUP_PASSPHRASE`) so the backup workflow can run, then trigger it once (`gh workflow run db-backup.yml`) to confirm it produces an artifact.
+- **TODO — first restore drill:** decrypt the latest artifact and restore into a throwaway project once to confirm the runbook works, RTO is real, and to resolve the `auth.users` scope question in §3.3.
