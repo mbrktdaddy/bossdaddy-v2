@@ -10,10 +10,13 @@
     "start": "next start",
     "lint": "eslint",
     "check": "tsc --noEmit && eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "check:middleware": "node scripts/check-middleware-convention.mjs",
     "check:og": "node scripts/check-og-coverage.mjs",
     "db:types": "node scripts/gen-types.mjs",
     "db:push": "supabase db push",
+    "test:rls": "supabase test db",
     "smoke": "node --env-file=.env.local scripts/smoke-test.mjs",
     "merch:sync": "node --env-file=.env.local scripts/sync-printful.mjs",
     "merch:discover": "node --env-file=.env.local scripts/discover-merch-blanks.mjs"
@@ -60,8 +63,9 @@
     "eslint-config-next": "^16.2.10",
     "supabase": "^2.98.2",
     "tailwindcss": "^4",
-    "tsx": "^4.21.0",
-    "typescript": "^5"
+    "tsx": "^4.23.1",
+    "typescript": "^5",
+    "vitest": "^3.2.7"
   },
   "browserslist": [
     "Chrome >= 100",

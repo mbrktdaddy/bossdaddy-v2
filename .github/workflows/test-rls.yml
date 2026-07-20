@@ -1,0 +1,49 @@
+name: RLS pgTAP tests
+
+# Runs the pgTAP RLS doctrine suite (supabase/tests/) against a real local
+# Supabase stack. This is the executable guard for the "admin is
+# moderation-only" doctrine (migrations 106–108): private user data must carry
+# no is_admin() override. The migration-replay workflow only checks that DDL
+# parses — it stubs auth.uid() to NULL and cannot exercise RLS behavior, so this
+# separate job stands up the genuine Supabase auth/JWT/role stack instead.
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/tests/**'
+      - 'supabase/config.toml'
+      - '.github/workflows/test-rls.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/tests/**'
+      - 'supabase/config.toml'
+      - '.github/workflows/test-rls.yml'
+  workflow_dispatch:
+
+jobs:
+  rls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # Boots the real Supabase stack so auth.uid()/is_admin()/request.jwt.claims
+      # behave exactly as in production (the whole point of this job vs. the
+      # DDL-only migration-replay). Runs on migration/test/config changes only,
+      # so the first-run image pull is an acceptable cost.
+      - name: Start local Supabase
+        run: supabase start
+
+      - name: Run pgTAP RLS suite
+        run: supabase test db
+
+      - name: Stop local Supabase
+        if: always()
+        run: supabase stop --no-backup
