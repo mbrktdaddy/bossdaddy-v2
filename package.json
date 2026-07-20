@@ -10,6 +10,8 @@
     "start": "next start",
     "lint": "eslint",
     "check": "tsc --noEmit && eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "check:middleware": "node scripts/check-middleware-convention.mjs",
     "check:og": "node scripts/check-og-coverage.mjs",
     "db:types": "node scripts/gen-types.mjs",
@@ -62,7 +64,8 @@
     "supabase": "^2.98.2",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.7"
   },
   "browserslist": [
     "Chrome >= 100",
