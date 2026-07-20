@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { requireAdmin } from '@/lib/auth-cache'
+import { createClient } from '@/lib/supabase/server'
+import { requireAdminApi } from '@/lib/auth-cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { fetchProductImages } from '@/lib/amazon-pa-api'
 import { normalizeImage } from '@/lib/images/normalize'
@@ -8,7 +9,11 @@ export async function POST(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  await requireAdmin()
+  // API-route gate: return 403 JSON, not the redirect that requireAdmin() throws
+  // (that was wrong for a route handler — a fetch() caller can't follow it).
+  const supabase = await createClient()
+  const gate = await requireAdminApi(supabase)
+  if (gate.error) return gate.error
 
   const accessKey  = process.env.AMAZON_PA_API_ACCESS_KEY
   const secretKey  = process.env.AMAZON_PA_API_SECRET_KEY

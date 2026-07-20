@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { createClient, getUserSafe } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAdminApi } from '@/lib/auth-cache'
 import { sendAccountStatusEmail } from '@/lib/account-emails'
 import { createNotification } from '@/lib/notifications'
 import type { AccountStatusEvent } from '@/emails/AccountStatusEmail'
@@ -32,11 +33,9 @@ const Schema = z.object({
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
-  const { user } = await getUserSafe(supabase)
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const gate = await requireAdminApi(supabase)
+  if ('error' in gate) return gate.error
+  const { user } = gate
 
   const body = await request.json().catch(() => null)
   const parsed = Schema.safeParse(body)

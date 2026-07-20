@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { createClient, getUserSafe } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAdminApi } from '@/lib/auth-cache'
 import { z } from 'zod'
 
 // Body shape: either explicit type+id, or both null to clear the override
@@ -17,17 +18,9 @@ const Body = z.union([
   }),
 ])
 
-async function requireAdmin(supabase: Awaited<ReturnType<typeof createClient>>) {
-  const { user } = await getUserSafe(supabase)
-  if (!user) return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return { error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
-  return { user }
-}
-
 export async function PATCH(request: NextRequest) {
   const supabase = await createClient()
-  const gate = await requireAdmin(supabase)
+  const gate = await requireAdminApi(supabase)
   if ('error' in gate) return gate.error
 
   const parsed = Body.safeParse(await request.json().catch(() => null))

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { createClient, getUserSafe } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAdminApi } from '@/lib/auth-cache'
 
 // GET /api/admin/picks/slug-check?slug=foo[&exclude=<uuid>]
 // Returns { exists: boolean, type?: string }. Used by PickForm for friendly
@@ -9,11 +10,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 // when editing without seeing a false "taken" warning.
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
-  const { user } = await getUserSafe(supabase)
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const gate = await requireAdminApi(supabase)
+  if ('error' in gate) return gate.error
 
   const url = new URL(request.url)
   const slug    = (url.searchParams.get('slug') ?? '').trim().toLowerCase()

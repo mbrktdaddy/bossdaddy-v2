@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { createClient, getUserSafe } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAdminApi } from '@/lib/auth-cache'
 import { z } from 'zod'
 
 const MerchSchema = z.object({
@@ -18,18 +19,10 @@ const MerchSchema = z.object({
   images:          z.array(z.string().url()).optional(),
 })
 
-async function requireAdmin() {
-  const supabase = await createClient()
-  const { user } = await getUserSafe(supabase)
-  if (!user) return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return { error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
-  return { user }
-}
-
 export async function GET() {
-  const auth = await requireAdmin()
-  if ('error' in auth) return auth.error
+  const supabase = await createClient()
+  const gate = await requireAdminApi(supabase)
+  if ('error' in gate) return gate.error
 
   const admin = createAdminClient()
   const { data, error } = await admin
@@ -43,8 +36,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await requireAdmin()
-  if ('error' in auth) return auth.error
+  const supabase = await createClient()
+  const gate = await requireAdminApi(supabase)
+  if ('error' in gate) return gate.error
 
   const body = await request.json().catch(() => null)
   const parsed = MerchSchema.safeParse(body)

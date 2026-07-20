@@ -93,7 +93,7 @@
 
   --bd-text:       #f4f4f5;       /* zinc-100 — body */
   --bd-text-muted: #d4d4d8;       /* zinc-300 — captions */
-  --bd-text-faint: #71717a;       /* zinc-500 — same gray, reads on both */
+  --bd-text-faint: #a1a1aa;       /* zinc-400 — timestamps/decorative; zinc-500 failed WCAG AA (3.67:1) on the dark canvas, zinc-400 clears 4.5:1 (audit A11y) */
 
   --bd-success: #22c55e;          /* green-500 — pops on dark */
   --bd-error:   #ef4444;          /* red-500 */
