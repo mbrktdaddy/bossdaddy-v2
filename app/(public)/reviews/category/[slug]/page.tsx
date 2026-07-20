@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { buildSocialMetadata } from '@/lib/og'
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/anon'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCategoryBySlug, CATEGORIES } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
@@ -50,7 +50,7 @@ export default async function CategoryPage({ params }: Props) {
   const cat = getCategoryBySlug(slug)
   if (!cat) notFound()
 
-  const supabase = await createClient()
+  const supabase = createAnonClient()
   const { data: reviews } = await supabase
     .from('reviews')
     .select('id, slug, title, product_name, rating, excerpt, image_url, published_at')

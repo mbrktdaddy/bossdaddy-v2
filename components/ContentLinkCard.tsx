@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/anon'
 import RatingScore from '@/components/RatingScore'
 
 interface Props {
@@ -25,7 +25,8 @@ interface TargetRow {
  * flywheel turning between articles and reviews.
  */
 export default async function ContentLinkCard({ contentType, slug }: Props) {
-  const supabase = await createClient()
+  // Cookie-free anon client — public review/guide lookup (audit H3).
+  const supabase = createAnonClient()
   const isReview = contentType === 'review'
 
   const { data } = await supabase

@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/anon'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
@@ -48,6 +48,7 @@ const EngagementTracker = dynamic(() => import('@/components/EngagementTracker')
 
 export const revalidate = 60
 
+
 // Shared prose treatment for review body segments (and the follow-up plain render).
 const REVIEW_PROSE_CLASS = `bd-editorial prose prose-lg prose-invert prose-orange mx-auto max-w-[68ch]
   prose-headings:font-black prose-headings:tracking-tight prose-headings:font-sans prose-headings:leading-[1.15] prose-headings:text-prose
@@ -74,7 +75,7 @@ export async function generateStaticParams() {
 }
 
 const getReview = cache(async (slug: string) => {
-  const supabase = await createClient()
+  const supabase = createAnonClient()
   const { data } = await supabase
     .from('reviews')
     .select('id, slug, title, product_name, category, content, rating, excerpt, image_url, has_affiliate_links, product_slug, comparison_product_slugs, published_at, updated_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, testing_since, testing_note, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, score_specs, specs_grade_rationale, specs_grade_data, would_rebuy, parent_review_id, milestone_label, milestone_days, previous_rating, verdict_change, reading_time_minutes, profiles(username)')
@@ -125,7 +126,7 @@ export default async function ReviewPage({ params }: Props) {
 
   if (!review) notFound()
 
-  const supabase = await createClient()
+  const supabase = createAnonClient()
 
   // Related reviews + product + bench back-link + lifecycle timeline fetched
   // in parallel — they don't depend on each other. Bench back-link closes the

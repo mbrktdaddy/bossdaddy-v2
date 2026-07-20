@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/anon'
 import { getMerchDisplayImage, type Merch } from '@/lib/merch'
 
 /**
@@ -17,7 +17,8 @@ import { getMerchDisplayImage, type Merch } from '@/lib/merch'
  *   `/gear#merch` when rendering the strip off-page (e.g. the homepage).
  */
 export async function MerchStrip({ exploreHref = '#merch' }: { exploreHref?: string } = {}) {
-  const supabase = await createClient()
+  // Cookie-free anon client — public merch only; keeps host pages static (audit H3).
+  const supabase = createAnonClient()
 
   const { data } = await supabase
     .from('merch')

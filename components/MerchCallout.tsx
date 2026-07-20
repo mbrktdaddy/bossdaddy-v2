@@ -1,10 +1,11 @@
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/anon'
 import { type Merch } from '@/lib/merch'
 import { FeaturedMerchCard } from './FeaturedMerchCard'
 
 export async function MerchCallout() {
-  const supabase = await createClient()
+  // Cookie-free anon client — public merch only (audit H3).
+  const supabase = createAnonClient()
   const { data } = await supabase
     .from('merch')
     .select('id, slug, name, image_url, default_image_url, price_cents, status, printful_sync_product_id, external_url, position')

@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/anon'
 import { createAdminClient } from '@/lib/supabase/admin'
 import RatingScore from '@/components/RatingScore'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
@@ -34,7 +34,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const supabase = await createClient()
+  const supabase = createAnonClient()
   const { data } = await supabase
     .from('collections')
     .select('title, description, meta_title, meta_description, hero_image_url, published_at, updated_at')
@@ -96,7 +96,7 @@ const SUBSCORE_ROWS: { key: 'score_quality' | 'score_value' | 'score_ease' | 'sc
 
 export default async function ComparisonDetailPage({ params }: Props) {
   const { slug } = await params
-  const supabase = await createClient()
+  const supabase = createAnonClient()
 
   const { data: comparison } = await supabase
     .from('collections')

@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/anon'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
 import { getCategoryBySlug } from '@/lib/categories'
@@ -52,7 +52,7 @@ export async function generateStaticParams() {
 }
 
 const getGuide = cache(async (slug: string) => {
-  const supabase = await createClient()
+  const supabase = createAnonClient()
   const { data } = await supabase
     .from('guides')
     .select('id, title, slug, category, content, excerpt, image_url, has_affiliate_links, published_at, updated_at, reading_time_minutes, meta_title, meta_description, tldr, key_takeaways, faqs, profiles(username)')
@@ -101,7 +101,7 @@ export default async function GuidePage({ params }: Props) {
 
   if (!guide) notFound()
 
-  const supabase = await createClient()
+  const supabase = createAnonClient()
 
   // Extract product slugs referenced inline in the guide body
   const mentionedSlugs = extractProductSlugs(guide.content)
