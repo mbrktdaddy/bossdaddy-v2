@@ -47,7 +47,7 @@ jobs:
       PGOPTIONS: --client-min-messages=warning
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install psql client
         run: |
