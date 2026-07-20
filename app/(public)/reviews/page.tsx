@@ -1,17 +1,15 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
-import { CATEGORIES, getCategoryLabel, getCategoryBySlug } from '@/lib/categories'
+import { createAnonClient } from '@/lib/supabase/anon'
+import { CATEGORIES } from '@/lib/categories'
 import { getBadgesByProductSlug } from '@/lib/collection-listings'
 import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
-import ReviewsGrid from './_components/ReviewsGrid'
 import FeaturedReviewCard from '@/components/FeaturedReviewCard'
 import BenchStrip from '@/components/BenchStrip'
 import AskTheBoss from '@/components/AskTheBoss'
 import PageHeader from '@/components/PageHeader'
 import { ogImageUrl, OG_SITE } from '@/lib/og'
-const PER_PAGE = 12
 import type { ReviewRow } from './actions'
 import type { Metadata } from 'next'
 
@@ -33,147 +31,24 @@ export const metadata: Metadata = {
   alternates: { canonical: '/reviews' },
 }
 
-interface Props {
-  searchParams: Promise<{ category?: string }>
-}
+// Static editorial index (audit H3): no searchParams, cookie-free anon reads.
+// Category filtering lives on the path-based /reviews/category/[slug] routes
+// (already statically prerendered) that the pills below link to — so this hub
+// page prerenders as static HTML for crawlers and CDN.
+export default async function ReviewsPage() {
+  const supabase = createAnonClient()
 
-export default async function ReviewsPage({ searchParams }: Props) {
-  const { category } = await searchParams
-  const supabase = await createClient()
-
-  // ── All view — featured card + per-category editorial row sections ──
-  if (!category) {
-    const { data } = await supabase
-      .from('reviews')
-      .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at, product_slug, featured')
-      .eq('status', 'approved')
-      .eq('is_visible', true)
-      .order('published_at', { ascending: false })
-      .limit(200)
-
-    const rawReviews = (data ?? []) as ReviewRow[]
-    // Batch-fetch collection badges for every visible product in one query so
-    // ReviewCard can render chips per row without N+1.
-    const slugsForBadges = rawReviews.map((r) => r.product_slug).filter((s): s is string => Boolean(s))
-    const badgeMap = await getBadgesByProductSlug(supabase, slugsForBadges)
-    const reviews: ReviewRow[] = rawReviews.map((r) => ({
-      ...r,
-      badges: r.product_slug ? badgeMap.get(r.product_slug) ?? [] : [],
-    }))
-
-    const sections = CATEGORIES
-      .map(cat => ({
-        cat,
-        items: reviews.filter(r => r.category === cat.slug).slice(0, 3),
-        total: reviews.filter(r => r.category === cat.slug).length,
-      }))
-      .filter(s => s.items.length > 0)
-
-    // Featured card preference order: admin-flagged > highest-rated (the latter
-    // preserves prior behavior when nothing has been flagged yet).
-    const featured =
-      reviews.find((r) => r.featured && r.image_url) ??
-      reviews.filter((r) => r.image_url).sort((a, b) => b.rating - a.rating)[0] ??
-      null
-
-    return (
-      <>
-        <PageHeader
-          eyebrow="The Stuff"
-          title="All Reviews"
-          deck="Every product bought with my own money, used in real life, and scored 1–10 — no sponsors, no fluff."
-        />
-        <div className="max-w-6xl mx-auto px-6 py-12">
-        {/* Featured review — the showcase leads the page (Cover Story pattern) */}
-        {featured && (
-          <div className="mb-12">
-            <FeaturedReviewCard review={featured} />
-          </div>
-        )}
-
-        {/* Category filter — horizontal scroll strip */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
-          <Link
-            href="/reviews"
-            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-accent text-white border border-accent transition-colors"
-          >
-            All Reviews
-          </Link>
-          {CATEGORIES.map((c) => (
-            <Link
-              key={c.slug}
-              href={`/reviews/category/${c.slug}`}
-              className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose transition-colors"
-            >
-              <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
-              <span>{c.label}</span>
-            </Link>
-          ))}
-        </div>
-
-        <AskTheBoss context="Browsing dad-tested reviews across every category" className="mb-12" />
-
-        {/* Per-category sections — editorial rows (newspaper directory style)
-            replaces the prior 8 identical 3-col card grids with a tighter,
-            scannable list per category. Featured card above does the visual
-            heavy-lifting; these are quick browse-and-tap entries. */}
-        {sections.length === 0 ? (
-          <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft">
-            <p className="text-prose-faint text-lg font-semibold">No reviews here yet.</p>
-            <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
-          </div>
-        ) : (
-          sections.map(({ cat, items, total }, i) => (
-            <section key={cat.slug} className={i > 0 ? 'mt-12' : ''}>
-              <div className="flex items-end justify-between mb-5 gap-4">
-                <div className="min-w-0">
-                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                  <h2 className="text-xl md:text-2xl font-black text-prose flex items-center gap-2.5 leading-tight">
-                    <CategoryIcon slug={cat.slug} className="w-5 h-5 sm:w-6 sm:h-6 text-accent-text shrink-0" />
-                    <span className="truncate">{cat.label}</span>
-                  </h2>
-                  {cat.description && (
-                    <p className="text-sm text-prose-faint mt-1.5 line-clamp-1">{cat.description}</p>
-                  )}
-                </div>
-                {total > items.length && (
-                  <Link
-                    href={`/reviews/category/${cat.slug}`}
-                    className="self-end shrink-0 text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold"
-                  >
-                    View all {total}
-                  </Link>
-                )}
-              </div>
-              <div className="divide-y divide-soft">
-                {items.map((r) => <ReviewRow key={r.id} review={r} />)}
-              </div>
-            </section>
-          ))
-        )}
-
-        {/* On the Bench — what's coming next */}
-        <div className="mt-16">
-          <BenchStrip ctaText="See all on the bench" />
-        </div>
-        </div>
-      </>
-    )
-  }
-
-  // ── Filtered view — flat card grid (deep browse surface) ──────────────
-  const cat = getCategoryBySlug(category)
-  const { data, count } = await supabase
+  const { data } = await supabase
     .from('reviews')
-    .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at, product_slug', { count: 'exact' })
+    .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at, product_slug, featured')
     .eq('status', 'approved')
     .eq('is_visible', true)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .eq('category', category as any)
     .order('published_at', { ascending: false })
-    .range(0, PER_PAGE - 1)
+    .limit(200)
 
   const rawReviews = (data ?? []) as ReviewRow[]
+  // Batch-fetch collection badges for every visible product in one query so
+  // ReviewCard can render chips per row without N+1.
   const slugsForBadges = rawReviews.map((r) => r.product_slug).filter((s): s is string => Boolean(s))
   const badgeMap = await getBadgesByProductSlug(supabase, slugsForBadges)
   const reviews: ReviewRow[] = rawReviews.map((r) => ({
@@ -181,23 +56,42 @@ export default async function ReviewsPage({ searchParams }: Props) {
     badges: r.product_slug ? badgeMap.get(r.product_slug) ?? [] : [],
   }))
 
+  const sections = CATEGORIES
+    .map(cat => ({
+      cat,
+      items: reviews.filter(r => r.category === cat.slug).slice(0, 3),
+      total: reviews.filter(r => r.category === cat.slug).length,
+    }))
+    .filter(s => s.items.length > 0)
+
+  // Featured card preference order: admin-flagged > highest-rated (the latter
+  // preserves prior behavior when nothing has been flagged yet).
+  const featured =
+    reviews.find((r) => r.featured && r.image_url) ??
+    reviews.filter((r) => r.image_url).sort((a, b) => b.rating - a.rating)[0] ??
+    null
+
   return (
     <>
       <PageHeader
-        eyebrow={`Reviews / ${getCategoryLabel(category).toUpperCase()}`}
-        title={getCategoryLabel(category)}
-        deck={cat?.description ?? undefined}
+        eyebrow="The Stuff"
+        title="All Reviews"
+        deck="Every product bought with my own money, used in real life, and scored 1–10 — no sponsors, no fluff."
       />
       <div className="max-w-6xl mx-auto px-6 py-12">
-      <p className="text-prose-faint text-sm tabular-nums mb-8">
-        {count ?? 0} dad-tested {(count ?? 0) === 1 ? 'review' : 'reviews'}
-      </p>
+      {/* Featured review — the showcase leads the page (Cover Story pattern) */}
+      {featured && (
+        <div className="mb-12">
+          <FeaturedReviewCard review={featured} />
+        </div>
+      )}
 
-      {/* Category filter pills */}
+      {/* Category filter — horizontal scroll strip. Pills link to the static
+          path-based category routes (indexable, prerendered). */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
         <Link
           href="/reviews"
-          className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose transition-colors"
+          className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-accent text-white border border-accent transition-colors"
         >
           All Reviews
         </Link>
@@ -205,11 +99,7 @@ export default async function ReviewsPage({ searchParams }: Props) {
           <Link
             key={c.slug}
             href={`/reviews/category/${c.slug}`}
-            className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
-              category === c.slug
-                ? 'bg-accent text-white border border-accent'
-                : 'bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose'
-            }`}
+            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose transition-colors"
           >
             <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
             <span>{c.label}</span>
@@ -217,18 +107,48 @@ export default async function ReviewsPage({ searchParams }: Props) {
         ))}
       </div>
 
-      <AskTheBoss context={`${getCategoryLabel(category)} reviews`} className="mb-12" />
+      <AskTheBoss context="Browsing dad-tested reviews across every category" className="mb-12" />
 
-      {!reviews.length ? (
+      {/* Per-category sections — editorial rows (newspaper directory style)
+          replaces the prior 8 identical 3-col card grids with a tighter,
+          scannable list per category. Featured card above does the visual
+          heavy-lifting; these are quick browse-and-tap entries. */}
+      {sections.length === 0 ? (
         <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft">
           <p className="text-prose-faint text-lg font-semibold">No reviews here yet.</p>
           <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
         </div>
       ) : (
-        <ReviewsGrid initialItems={reviews} total={count ?? 0} category={category} />
+        sections.map(({ cat, items, total }, i) => (
+          <section key={cat.slug} className={i > 0 ? 'mt-12' : ''}>
+            <div className="flex items-end justify-between mb-5 gap-4">
+              <div className="min-w-0">
+                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
+                <h2 className="text-xl md:text-2xl font-black text-prose flex items-center gap-2.5 leading-tight">
+                  <CategoryIcon slug={cat.slug} className="w-5 h-5 sm:w-6 sm:h-6 text-accent-text shrink-0" />
+                  <span className="truncate">{cat.label}</span>
+                </h2>
+                {cat.description && (
+                  <p className="text-sm text-prose-faint mt-1.5 line-clamp-1">{cat.description}</p>
+                )}
+              </div>
+              {total > items.length && (
+                <Link
+                  href={`/reviews/category/${cat.slug}`}
+                  className="self-end shrink-0 text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold"
+                >
+                  View all {total}
+                </Link>
+              )}
+            </div>
+            <div className="divide-y divide-soft">
+              {items.map((r) => <ReviewRow key={r.id} review={r} />)}
+            </div>
+          </section>
+        ))
       )}
 
-      {/* On the Bench */}
+      {/* On the Bench — what's coming next */}
       <div className="mt-16">
         <BenchStrip ctaText="See all on the bench" />
       </div>
