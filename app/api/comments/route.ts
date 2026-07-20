@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { getClaudeClient, MODEL, COMMENT_MODERATOR_SYSTEM } from '@/lib/claude/client'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { ModerationResultSchema, type ModerationResult } from '@/lib/claude/moderation'
 import { z } from 'zod'
 
 const CreateCommentSchema = z.object({
@@ -62,12 +63,6 @@ function lightweightScan(body: string): { suspicious: boolean; flags: string[] }
 
 // ── Claude moderation for non-trusted users ─────────────────────────────────
 
-interface ModerationResult {
-  score: number
-  flags: string[]
-  recommendation: 'approve' | 'review' | 'reject'
-}
-
 async function moderateWithClaude(body: string): Promise<ModerationResult> {
   const client = getClaudeClient()
   const response = await client.messages.create({
@@ -82,7 +77,14 @@ async function moderateWithClaude(body: string): Promise<ModerationResult> {
     .replace(/```\n?/g, '')
     .trim()
 
-  return JSON.parse(raw) as ModerationResult
+  // Validate the shape before trusting it. A malformed-but-parseable response
+  // (e.g. `{}` or a string score) would otherwise leave score/recommendation
+  // undefined, every threshold check below would be false, and the comment
+  // would silently auto-publish. Throwing here routes the caller into its catch
+  // → lightweight-scan fallback (fail safe: hold suspicious content for review).
+  const parsed = ModerationResultSchema.safeParse(JSON.parse(raw))
+  if (!parsed.success) throw new Error('Claude returned an invalid moderation shape')
+  return parsed.data
 }
 
 // ── Trust promotion ─────────────────────────────────────────────────────────
