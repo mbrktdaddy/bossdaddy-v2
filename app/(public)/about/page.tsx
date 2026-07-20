@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { CATEGORIES } from '@/lib/categories'
 import { ogImageUrl, OG_SITE } from '@/lib/og'
 import CategoryIcon from '@/components/CategoryIcon'
-import { createClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/anon'
 import { EmailSignup } from '@/components/EmailSignup'
 
 export const revalidate = 3600
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 }
 
 export default async function AboutPage() {
- const supabase = await createClient()
+ const supabase = createAnonClient()
 
  const [{ count: reviewCount }, { count: articleCount }] = await Promise.all([
  supabase.from('reviews').select('*', { count: 'exact', head: true }).eq('status', 'approved').eq('is_visible', true),

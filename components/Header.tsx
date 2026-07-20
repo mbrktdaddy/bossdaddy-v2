@@ -4,27 +4,81 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { CATEGORIES } from '@/lib/categories'
 import { LABELS } from '@/lib/labels'
 import CartIcon from '@/components/CartIcon'
 import CategoryIcon from '@/components/CategoryIcon'
 import ActivityMenu from '@/components/ActivityMenu'
 
-interface HeaderProps {
-  /** The current user's username, or null if not signed in. Resolved server-side
-   *  in the (public) layout so the Header doesn't need the Supabase client and
-   *  the auth/postgrest libs stay out of the public bundle. */
+interface AuthUser {
+  userId: string | null
   username: string | null
-  /** The current user's role, or null if not signed in. Used to route account
-   *  links — members go to /account/settings, authors/admins to /dashboard/profile. */
-  role?: string | null
-  /** Avatar URL from profiles.avatar_url, or null. When present, replaces the
-   *  initial-fallback circle in both the desktop user menu trigger and the
-   *  mobile drawer. */
-  avatarUrl?: string | null
-  /** The current user's id, or null. Forwarded to the realtime header menus so
-   *  they subscribe synchronously without an async getUser() round-trip. */
-  userId?: string | null
+  role: string | null
+  avatarUrl: string | null
+  /** false until the first client-side auth check completes. Used to render a
+   *  neutral placeholder so a signed-in user never flashes the "Sign In" state. */
+  resolved: boolean
+}
+
+/**
+ * Client-side auth resolution for the public Header.
+ *
+ * Auth used to be resolved server-side in the (public) layout, but reading the
+ * session cookie there forced the ENTIRE public surface to render dynamically
+ * (audit H3). Resolving it here instead keeps every public page statically
+ * prerenderable / ISR while the Header personalizes on the client.
+ *
+ * Flash-free by design: `onAuthStateChange` fires INITIAL_SESSION synchronously
+ * from the browser client's local storage (no network), so the signed-in/out
+ * decision is available within the first frame. We seed username/id optimistically
+ * from that session, then refine username/role/avatar from the profiles row.
+ * Until `resolved` flips true the trigger renders a neutral avatar skeleton —
+ * so a signed-in user goes skeleton→avatar, never "Sign In"→avatar.
+ */
+function useAuthUser(): AuthUser {
+  const [auth, setAuth] = useState<Omit<AuthUser, 'resolved'>>({
+    userId: null, username: null, role: null, avatarUrl: null,
+  })
+  const [resolved, setResolved] = useState(false)
+
+  useEffect(() => {
+    const supabase = createClient()
+    let active = true
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      const user = session?.user
+      if (!user) {
+        if (active) { setAuth({ userId: null, username: null, role: null, avatarUrl: null }); setResolved(true) }
+        return
+      }
+      // Optimistic: show the signed-in state immediately from the local session.
+      const fallbackName = user.email?.split('@')[0] ?? 'Account'
+      if (active) {
+        setAuth((prev) => ({ ...prev, userId: user.id, username: prev.username ?? fallbackName }))
+        setResolved(true)
+      }
+      // Refine with the profile row (exact @username, role, avatar).
+      supabase
+        .from('profiles')
+        .select('username, role, avatar_url')
+        .eq('id', user.id)
+        .single()
+        .then(({ data }) => {
+          if (!active) return
+          setAuth({
+            userId: user.id,
+            username: data?.username ?? fallbackName,
+            role: data?.role ?? 'member',
+            avatarUrl: data?.avatar_url ?? null,
+          })
+        })
+    })
+
+    return () => { active = false; sub.subscription.unsubscribe() }
+  }, [])
+
+  return { ...auth, resolved }
 }
 
 // Vault is intentionally NOT a top-level anchor — its contents
@@ -89,7 +143,8 @@ function isActive(pathname: string, href: string) {
   return pathname.startsWith(href)
 }
 
-export default function Header({ username, role, avatarUrl, userId }: HeaderProps) {
+export default function Header() {
+  const { username, role, avatarUrl, userId, resolved } = useAuthUser()
   // Personal profile/account is /account/settings for EVERY role — the
   // dashboard is workspace-only. Authors/admins still get a separate Dashboard
   // link below.
@@ -332,7 +387,12 @@ export default function Header({ username, role, avatarUrl, userId }: HeaderProp
 
           {username && userId && <ActivityMenu userId={userId} />}
 
-          {username ? (
+          {!resolved ? (
+            // Neutral placeholder during the first-frame auth check — matches the
+            // avatar-trigger footprint so a signed-in user goes skeleton→avatar,
+            // never "Sign In"→avatar, and logged-out sees no jarring text pop.
+            <div className="hidden md:block w-8 h-8 rounded-full bg-surface-raised animate-pulse" aria-hidden />
+          ) : username ? (
             <div ref={userMenuRef} className="hidden md:block relative">
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/anon'
 import CommentShareButton from './CommentShareButton'
 import LikeButton from './LikeButton'
 
@@ -8,7 +8,10 @@ interface Props {
 }
 
 export default async function CommentList({ contentType, contentId }: Props) {
-  const supabase = await createClient()
+  // Cookie-free anon client: comments/shares shown here are public (approved),
+  // so reading as the anon role keeps this component from forcing the host page
+  // into dynamic rendering (audit H3). Same rows a logged-out visitor sees.
+  const supabase = createAnonClient()
 
   const { data: comments } = await supabase
     .from('comments')

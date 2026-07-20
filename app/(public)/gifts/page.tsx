@@ -2,7 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import { buildSocialMetadata } from '@/lib/og'
-import { createClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/anon'
 import { OCCASIONS, OCCASION_GROUPS } from '@/lib/gift-occasions'
 import OccasionIcon from '@/components/OccasionIcon'
 import PageHeader from '@/components/PageHeader'
@@ -23,7 +23,7 @@ export function generateMetadata(): Metadata {
 }
 
 export default async function GiftsIndexPage() {
-  const supabase = await createClient()
+  const supabase = createAnonClient()
 
   // Find which occasions have published gift guides so we can show status
   // indicators. A guide only counts as "live" once it has at least one pick —

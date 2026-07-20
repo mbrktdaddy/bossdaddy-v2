@@ -5,24 +5,14 @@ import MobileBottomNav from '@/components/MobileBottomNav'
 import AskBossFab from '@/components/AskBossFab'
 import PublicMain from '@/components/PublicMain'
 import HideOnImmersive from '@/components/HideOnImmersive'
-import { createClient, getUserSafe } from '@/lib/supabase/server'
 
 const WelcomeToast = dynamic(() => import('@/components/WelcomeToast'))
 
-export default async function PublicLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const { user } = await getUserSafe(supabase)
-
-  let username: string | null = null
-  let role: string | null = null
-  let avatarUrl: string | null = null
-  if (user) {
-    const { data } = await supabase.from('profiles').select('username, role, avatar_url').eq('id', user.id).single()
-    username = data?.username ?? user.email?.split('@')[0] ?? 'Account'
-    role = data?.role ?? 'member'
-    avatarUrl = data?.avatar_url ?? null
-  }
-
+// No server-side auth here on purpose. Reading the session cookie in this shared
+// layout forced the ENTIRE public surface to render dynamically (audit H3). The
+// Header now resolves auth on the client (flash-free via the local session), so
+// every public page can be statically prerendered / ISR.
+export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-prose flex flex-col">
       <a
@@ -31,7 +21,7 @@ export default async function PublicLayout({ children }: { children: React.React
       >
         Skip to content
       </a>
-      <Header username={username} role={role} avatarUrl={avatarUrl} userId={user?.id ?? null} />
+      <Header />
       <PublicMain>{children}</PublicMain>
       <HideOnImmersive><Footer /></HideOnImmersive>
       <MobileBottomNav />

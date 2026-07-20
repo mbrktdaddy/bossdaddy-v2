@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/anon'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getProductBySlug } from '@/lib/products'
 import { OCCASIONS, getOccasion } from '@/lib/gift-occasions'
@@ -98,7 +98,7 @@ export default async function GiftOccasionPage({ params }: Props) {
   const occ = getOccasion(slug)
   if (!occ) notFound()
 
-  const supabase = await createClient()
+  const supabase = createAnonClient()
 
   const { data: pick } = await supabase
     .from('collections')

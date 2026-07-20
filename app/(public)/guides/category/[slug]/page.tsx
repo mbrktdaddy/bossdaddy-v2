@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/anon'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCategoryBySlug, CATEGORIES } from '@/lib/categories'
 import { ogImageUrl, OG_SITE } from '@/lib/og'
@@ -53,7 +53,7 @@ export default async function GuideCategoryPage({ params }: Props) {
   const cat = getCategoryBySlug(slug)
   if (!cat) notFound()
 
-  const supabase = await createClient()
+  const supabase = createAnonClient()
   const { data: guides } = await supabase
     .from('guides')
     .select('id, slug, title, category, excerpt, image_url, published_at, reading_time_minutes')

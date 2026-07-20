@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createAnonClient } from '@/lib/supabase/anon'
 
 interface Props {
   reviewId: string
@@ -40,7 +40,9 @@ const TYPE_META: Record<string, { label: string; section: string; icon: React.Re
  * because they live at /gifts/[occasion-slug], not /gifts/[collection-slug].
  */
 export default async function CollectionsForReview({ reviewId }: Props) {
-  const supabase = await createClient()
+  // Cookie-free anon client — reads only visible public collections; keeps the
+  // host page statically prerenderable (audit H3).
+  const supabase = createAnonClient()
 
   const { data: rawItems } = await supabase
     .from('collection_items')
