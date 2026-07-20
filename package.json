@@ -14,6 +14,7 @@
     "check:og": "node scripts/check-og-coverage.mjs",
     "db:types": "node scripts/gen-types.mjs",
     "db:push": "supabase db push",
+    "test:rls": "supabase test db",
     "smoke": "node --env-file=.env.local scripts/smoke-test.mjs",
     "merch:sync": "node --env-file=.env.local scripts/sync-printful.mjs",
     "merch:discover": "node --env-file=.env.local scripts/discover-merch-blanks.mjs"
