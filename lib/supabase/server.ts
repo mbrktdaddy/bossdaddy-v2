@@ -1,5 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
-import type { SupabaseClient } from '@supabase/supabase-js'
+import { AuthError, type SupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import type { Database } from './database.types'
 
@@ -43,7 +43,14 @@ export async function getUserSafe(
     const { data } = await supabase.auth.getUser()
     return { user: data.user }
   } catch (err) {
-    console.error('getUserSafe: auth.getUser threw, treating as logged out:', err)
-    return { user: null }
+    // Only Supabase auth failures (stale/invalid refresh token, retryable fetch)
+    // should degrade to logged-out. Anything else MUST propagate — most
+    // importantly Next.js's dynamic-rendering bail, which is thrown as a control
+    // -flow signal; swallowing it silently served cached 500s in prod before.
+    if (err instanceof AuthError) {
+      console.error('getUserSafe: auth.getUser threw AuthError, treating as logged out:', err)
+      return { user: null }
+    }
+    throw err
   }
 }

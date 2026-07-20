@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { likePattern } from '@/lib/postgrest-escape'
 
 // GET /api/admin/search?q=term — admin-only cross-content search
 export async function GET(request: NextRequest) {
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
       .order('published_at', { ascending: false, nullsFirst: false })
       .limit(12)
     if (q.length >= 2) {
-      const like = `%${q}%`
+      const like = likePattern(q)
       query = query.or(`title.ilike.${like},slug.ilike.${like},description.ilike.${like}`)
     }
     const { data } = await query
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
         .order('published_at', { ascending: false, nullsFirst: false })
         .limit(8)
       if (q.length >= 2) {
-        const like = `%${q}%`
+        const like = likePattern(q)
         query = query.or(
           table === 'reviews'
             ? `title.ilike.${like},product_name.ilike.${like},slug.ilike.${like}`
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest) {
 
   if (q.length < 2) return NextResponse.json({ articles: [], reviews: [], media: [], products: [], collections: [] })
 
-  const like = `%${q}%`
+  const like = likePattern(q)
 
   const [{ data: articles }, { data: reviews }, { data: media }, { data: products }, { data: collections }] = await Promise.all([
     admin

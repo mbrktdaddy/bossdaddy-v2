@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import * as Sentry from '@sentry/nextjs'
 import type Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -24,13 +25,14 @@ export async function POST(request: Request) {
       await handleCheckoutComplete(event.data.object as Stripe.Checkout.Session)
     } catch (err) {
       console.error('[stripe webhook] checkout.session.completed error:', err)
+      Sentry.captureException(err)
       // Return the actual error message so it's visible in Stripe's webhook
       // delivery log. Stripe still retries on any non-2xx, so this doesn't
-      // change behavior — it just makes debugging possible.
+      // change behavior — it just makes debugging possible. Stack stays in
+      // Sentry/server logs — never leaked in the HTTP response body.
       const message = err instanceof Error ? err.message : String(err)
-      const stack   = err instanceof Error ? err.stack : undefined
       return NextResponse.json(
-        { error: 'Order creation failed', message, stack },
+        { error: 'Order creation failed', message },
         { status: 500 },
       )
     }
@@ -39,6 +41,7 @@ export async function POST(request: Request) {
       await handleChargeRefunded(event.data.object as Stripe.Charge)
     } catch (err) {
       console.error('[stripe webhook] charge.refunded error:', err)
+      Sentry.captureException(err)
       const message = err instanceof Error ? err.message : String(err)
       return NextResponse.json({ error: 'Refund handling failed', message }, { status: 500 })
     }
@@ -90,6 +93,7 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
         `[stripe webhook] Printful cancel failed for order ${order.id} (printful ${order.printful_order_id}):`,
         err,
       )
+      Sentry.captureException(err, { tags: { path: 'stripe.refund.printful-cancel' }, extra: { orderId: order.id } })
     }
   }
 
@@ -266,6 +270,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     } catch (err) {
       // Log and continue — order is in DB, Printful can be retried from admin panel
       console.error('[stripe webhook] Printful order failed:', err)
+      Sentry.captureException(err, { tags: { path: 'stripe.checkout.printful-create' }, extra: { orderId: order.id } })
     }
   }
 
