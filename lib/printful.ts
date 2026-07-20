@@ -83,6 +83,21 @@ export interface PrintfulOrderPayload {
   }>
 }
 
+// A single shipment on a Printful order. `GET /orders/{id}` returns these under
+// `result.shipments`; the package_shipped webhook handler re-reads them as the
+// authoritative source of tracking data (never trusts the webhook body).
+export interface PrintfulShipment {
+  id: number
+  carrier: string
+  service: string
+  tracking_number: string
+  tracking_url: string
+  created: number
+  ship_date: string
+  shipped_at: number
+  reshipment: boolean
+}
+
 export interface PrintfulOrder {
   id: number
   status: string
@@ -92,6 +107,7 @@ export interface PrintfulOrder {
   updated: number
   recipient: PrintfulOrderRecipient
   items: Array<{ sync_variant_id: number; quantity: number }>
+  shipments?: PrintfulShipment[]
   costs: {
     currency: string
     subtotal: string
