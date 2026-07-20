@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getClaudeClient, MODEL, MODERATOR_SYSTEM } from '@/lib/claude/client'
+import { ModerationResultSchema } from '@/lib/claude/moderation'
 import { z } from 'zod'
 
 const ModerateInput = z.union([
@@ -8,12 +9,6 @@ const ModerateInput = z.union([
   z.object({ guideId: z.string().uuid() }),
   z.object({ articleId: z.string().uuid() }), // legacy alias
 ])
-
-const ModerationResult = z.object({
-  score: z.number().min(0).max(1),
-  flags: z.array(z.string()),
-  recommendation: z.enum(['approve', 'review', 'reject']),
-})
 
 // Internal endpoint — called server-side after review or article submission.
 // Requires X-Internal-Secret header matching INTERNAL_API_SECRET env var.
@@ -82,7 +77,7 @@ Return JSON: { "score": number (0-1), "flags": string[], "recommendation": "appr
     const jsonMatch = text.match(/\{[\s\S]*\}/)
     if (!jsonMatch) throw new Error('No JSON in response')
 
-    const resultParsed = ModerationResult.safeParse(JSON.parse(jsonMatch[0]))
+    const resultParsed = ModerationResultSchema.safeParse(JSON.parse(jsonMatch[0]))
     if (!resultParsed.success) throw new Error('Invalid moderation shape')
 
     const result = resultParsed.data
