@@ -15,6 +15,15 @@ updates:
         update-types: ["minor", "patch"]
     # Majors on the money path (stripe) get their own PR so they're reviewed
     # deliberately with a checkout smoke test — never auto-batched.
+    ignore:
+      # Suppress recurring major bumps that break the build and keep getting
+      # closed. typescript@7 is the Go-native compiler rewrite (huge breaking
+      # change); @types/node@26 jumps ahead of our Node runtime. Minor/patch
+      # updates for both still flow. Remove an entry to intentionally upgrade.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
