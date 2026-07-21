@@ -71,7 +71,7 @@ export function SchedulePanel({ scheduledAt, onChange, disabled, hint, note, lab
           </button>
         )}
         <p className="text-xs text-prose-faint">
-          {note ?? 'Content will publish automatically at the scheduled time. The cron runs once daily at noon UTC — your scheduled item will go live on the next daily run after the scheduled time passes. (Vercel Hobby plan limitation; upgrade to Pro for more frequent checks.)'}
+          {note ?? 'Content will publish automatically at the scheduled time. The publish cron runs every 15 minutes, so your item goes live within ~15 minutes after the scheduled time passes.'}
         </p>
       </div>
     </details>

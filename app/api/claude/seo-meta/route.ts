@@ -1,26 +1,23 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { jsonSchema } from 'ai'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { createStructured } from '@/lib/claude/structured'
+import { aiGenerateObject } from '@/lib/ai/client'
+import { classifyClaudeError } from '@/lib/ai/errors'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 export const maxDuration = 30
 
-// The model returns the meta by calling this tool — its input_schema is the
-// shape, so the SDK validates it instead of us regex-parsing JSON.
-const SEO_TOOL: Anthropic.Tool = {
-  name: 'submit_seo_meta',
-  description: 'Return the SEO meta title and description.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      metaTitle:       { type: 'string' },
-      metaDescription: { type: 'string' },
-    },
-    required: ['metaTitle', 'metaDescription'],
+// The model output is validated against this schema (reused verbatim from the
+// old tool's input_schema — the AI SDK enforces it instead of regex-parsing).
+const SEO_SCHEMA = jsonSchema<{ metaTitle: string; metaDescription: string }>({
+  type: 'object',
+  properties: {
+    metaTitle: { type: 'string' },
+    metaDescription: { type: 'string' },
   },
-}
+  required: ['metaTitle', 'metaDescription'],
+})
 
 const Input = z.object({
   title:        z.string().min(1).max(120),
@@ -63,27 +60,21 @@ Title: ${title}${product_name ? `\nProduct: ${product_name}` : ''}${category ? `
 Rules:
 - Meta title: 50–60 chars. Include product name or main topic. Action-oriented. No clickbait.
 - Meta description: 140–160 chars. Summarize the value. Include 1-2 natural keywords. End with a subtle call to action.
-- Write in the Boss Daddy voice — confident, direct, dad-tested credibility.
-
-Return your result by calling the submit_seo_meta tool.`
+- Write in the Boss Daddy voice — confident, direct, dad-tested credibility.`
 
   try {
     // No voice system block — meta tags are short SEO snippets, not brand prose.
-    const result = await createStructured({
-      system: undefined,
-      messages: [{ role: 'user', content: prompt }],
-      tool: SEO_TOOL,
-      maxTokens: 400,
+    const meta = await aiGenerateObject({
+      bucket: 'utility',
+      tag: 'seo-meta',
+      schema: SEO_SCHEMA,
+      prompt,
+      maxOutputTokens: 400,
     })
-
-    if (!result.data) return NextResponse.json({ error: 'Unexpected model response' }, { status: 502 })
-
-    return NextResponse.json({
-      metaTitle:       result.data.metaTitle,
-      metaDescription: result.data.metaDescription,
-    })
+    return NextResponse.json({ metaTitle: meta.metaTitle, metaDescription: meta.metaDescription })
   } catch (err) {
-    console.error('seo-meta generation error:', err)
-    return NextResponse.json({ error: 'Generation failed' }, { status: 502 })
+    const c = classifyClaudeError(err)
+    console.error('seo-meta generation error:', c.kind, '-', c.detail)
+    return NextResponse.json({ error: c.userMessage }, { status: c.status })
   }
 }

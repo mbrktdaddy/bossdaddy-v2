@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { jsonSchema } from 'ai'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { createStructured } from '@/lib/claude/structured'
+import { aiGenerateObject } from '@/lib/ai/client'
+import { classifyClaudeError } from '@/lib/ai/errors'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
@@ -16,46 +17,38 @@ const Input = z.object({
 
 const SUGGEST_SYSTEM = `You help Boss Daddy content creators turn rough ideas into structured generation prompts.`
 
-// One tool per content type — the suggestion shape differs (review vs guide).
-const REVIEW_SUGGEST_TOOL: Anthropic.Tool = {
-  name: 'submit_suggestions',
-  description: 'Return 3 distinct review angles.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      suggestions: { type: 'array', items: {
-        type: 'object',
-        properties: {
-          productName: { type: 'string' },
-          angle:       { type: 'string' },
-          keyFeatures: { type: 'array', items: { type: 'string' } },
-        },
-        required: ['productName', 'angle', 'keyFeatures'],
-      } },
-    },
-    required: ['suggestions'],
+// One schema per content type — the suggestion shape differs (review vs guide).
+const REVIEW_SUGGEST_SCHEMA = jsonSchema<Record<string, unknown>>({
+  type: 'object',
+  properties: {
+    suggestions: { type: 'array', items: {
+      type: 'object',
+      properties: {
+        productName: { type: 'string' },
+        angle:       { type: 'string' },
+        keyFeatures: { type: 'array', items: { type: 'string' } },
+      },
+      required: ['productName', 'angle', 'keyFeatures'],
+    } },
   },
-}
+  required: ['suggestions'],
+})
 
-const GUIDE_SUGGEST_TOOL: Anthropic.Tool = {
-  name: 'submit_suggestions',
-  description: 'Return 3 distinct article angles.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      suggestions: { type: 'array', items: {
-        type: 'object',
-        properties: {
-          topic:     { type: 'string' },
-          angle:     { type: 'string' },
-          keyPoints: { type: 'array', items: { type: 'string' } },
-        },
-        required: ['topic', 'angle', 'keyPoints'],
-      } },
-    },
-    required: ['suggestions'],
+const GUIDE_SUGGEST_SCHEMA = jsonSchema<Record<string, unknown>>({
+  type: 'object',
+  properties: {
+    suggestions: { type: 'array', items: {
+      type: 'object',
+      properties: {
+        topic:     { type: 'string' },
+        angle:     { type: 'string' },
+        keyPoints: { type: 'array', items: { type: 'string' } },
+      },
+      required: ['topic', 'angle', 'keyPoints'],
+    } },
   },
-}
+  required: ['suggestions'],
+})
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -93,18 +86,18 @@ Give 3 distinct angles they could take on this review. Each angle should have a 
 Give 3 distinct angles they could take on this article — different in scope, audience level, or approach (e.g. beginner guide vs. expert tips vs. personal story). Return your result by calling the submit_suggestions tool. Each suggestion: topic (a clear, specific article title or topic — max 80 chars), angle (one phrase describing the editorial angle — max 60 chars), and keyPoints (4–6 concrete points the article should cover).`
 
   try {
-    const result = await createStructured({
-      system: [{ type: 'text', text: SUGGEST_SYSTEM, cache_control: { type: 'ephemeral' } }],
-      messages: [{ role: 'user', content: prompt }],
-      tool: type === 'review' ? REVIEW_SUGGEST_TOOL : GUIDE_SUGGEST_TOOL,
-      maxTokens: 900,
+    const out = await aiGenerateObject<Record<string, unknown>>({
+      bucket: 'utility',
+      tag: 'suggest-prompt',
+      system: SUGGEST_SYSTEM,
+      schema: type === 'review' ? REVIEW_SUGGEST_SCHEMA : GUIDE_SUGGEST_SCHEMA,
+      prompt,
+      maxOutputTokens: 900,
     })
-
-    if (!result.data) return NextResponse.json({ error: 'Model returned unexpected format' }, { status: 502 })
-
-    return NextResponse.json(result.data)
+    return NextResponse.json(out)
   } catch (err) {
-    console.error('Suggest prompt error:', err)
-    return NextResponse.json({ error: 'Suggestion failed' }, { status: 502 })
+    const c = classifyClaudeError(err)
+    console.error('suggest-prompt error:', c.kind, '-', c.detail)
+    return NextResponse.json({ error: c.userMessage }, { status: c.status })
   }
 }

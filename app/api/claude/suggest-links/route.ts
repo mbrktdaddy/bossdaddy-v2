@@ -1,26 +1,23 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { jsonSchema } from 'ai'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { createStructured } from '@/lib/claude/structured'
+import { aiGenerateObject } from '@/lib/ai/client'
+import { classifyClaudeError } from '@/lib/ai/errors'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 export const maxDuration = 30
 
-// The model returns the chosen candidate indices by calling this tool — the SDK
-// validates the shape instead of us regex-parsing a bare array from text.
-const LINKS_TOOL: Anthropic.Tool = {
-  name: 'submit_links',
-  description: 'Return the chosen candidate indices (1-based), most relevant first.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      indices: { type: 'array', items: { type: 'integer' } },
-    },
-    required: ['indices'],
+// The model output is validated against this schema (reused from the old tool's
+// input_schema) — no regex-parsing a bare array from text.
+const LINKS_SCHEMA = jsonSchema<{ indices: number[] }>({
+  type: 'object',
+  properties: {
+    indices: { type: 'array', items: { type: 'integer' } },
   },
-}
+  required: ['indices'],
+})
 
 const SuggestSchema = z.object({
   title:        z.string().min(3).max(200),
@@ -143,14 +140,15 @@ ${candidates.map((c, i) => `${i + 1}. [${c.type}] "${c.title}" — ${c.excerpt.s
 Return your result by calling the submit_links tool with the chosen 1-based indices (in order of relevance) in the \`indices\` field.`
 
   try {
-    const result = await createStructured({
-      system: undefined,
-      messages: [{ role: 'user', content: prompt }],
-      tool: LINKS_TOOL,
-      maxTokens: 256,
+    const out = await aiGenerateObject<{ indices: number[] }>({
+      bucket: 'utility',
+      tag: 'suggest-links',
+      schema: LINKS_SCHEMA,
+      prompt,
+      maxOutputTokens: 256,
     })
 
-    const raw = result.data?.indices
+    const raw = out.indices
     const indices = Array.isArray(raw) ? raw.filter((n): n is number => typeof n === 'number') : []
     const suggestions = indices
       .map((i) => candidates[i - 1])
@@ -159,7 +157,8 @@ Return your result by calling the submit_links tool with the chosen 1-based indi
 
     return NextResponse.json({ suggestions: suggestions.length ? suggestions : candidates.slice(0, 5) })
   } catch (err) {
-    console.error('Suggest-links Claude call failed:', err)
+    const c = classifyClaudeError(err)
+    console.error('suggest-links error:', c.kind, '-', c.detail)
     // Fallback: return first 5 candidates without AI ranking
     return NextResponse.json({ suggestions: candidates.slice(0, 5) })
   }

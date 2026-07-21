@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { getClaudeClient, MODEL } from '@/lib/claude/client'
+import { aiGenerateText } from '@/lib/ai/client'
+import { classifyClaudeError } from '@/lib/ai/errors'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
@@ -32,21 +33,21 @@ export async function POST(request: NextRequest) {
 
   const { text, instruction } = parsed.data
 
-  const result = await getClaudeClient().messages.create({
-    model: MODEL,
-    max_tokens: 600,
-    system: 'You are an editor. The user provides an excerpt and an instruction. Return ONLY the revised text — no preamble, no explanation, no quotes. Preserve any HTML tags that were in the original.',
-    messages: [{
-      role: 'user',
-      content: `Instruction: ${instruction}\n\nExcerpt:\n${text}`,
-    }],
-  }).catch((err: unknown) => ({ _error: err instanceof Error ? err.message : String(err) } as const))
-
-  if ('_error' in result) {
-    return NextResponse.json({ error: `AI error: ${result._error.slice(0, 120)}` }, { status: 502 })
+  let refined: string
+  try {
+    const raw = await aiGenerateText({
+      bucket: 'utility',
+      tag: 'refine-selection',
+      system: 'You are an editor. The user provides an excerpt and an instruction. Return ONLY the revised text — no preamble, no explanation, no quotes. Preserve any HTML tags that were in the original.',
+      prompt: `Instruction: ${instruction}\n\nExcerpt:\n${text}`,
+      maxOutputTokens: 600,
+    })
+    refined = raw.trim()
+  } catch (err) {
+    const c = classifyClaudeError(err)
+    console.error('refine-selection error:', c.kind, '-', c.detail)
+    return NextResponse.json({ error: c.userMessage }, { status: c.status })
   }
-
-  const refined = result.content.find((b) => b.type === 'text')?.text?.trim() ?? ''
 
   // Log the before/after for the voice-learning flywheel (Phase 3 will mine
   // these to distill recurring edits into proposed phrases). Awaited (not
