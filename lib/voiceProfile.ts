@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import type { SystemModelMessage } from 'ai'
 import { BOSS_DADDY_SYSTEM } from '@/lib/claude/client'
 import { getApprovedPhrases, formatVoiceLexiconForPrompt } from '@/lib/voiceLexicon'
 
@@ -145,12 +146,15 @@ type SystemBlock =
  * Each section is omitted entirely when empty — no point telling Claude the
  * author has no profile or no signature phrases.
  */
-export async function buildBossDaddySystemBlocks(
+// The raw system parts in cache-optimal order (see the doc comment above), with
+// a flag for whether each should carry a cache breakpoint. Both public builders
+// project from this so the block order + cache decisions live in ONE place.
+async function buildVoiceSystemParts(
   supabase: SupabaseClient,
   userId: string,
-): Promise<SystemBlock[]> {
-  const blocks: SystemBlock[] = [
-    { type: 'text', text: BOSS_DADDY_SYSTEM, cache_control: { type: 'ephemeral' } },
+): Promise<Array<{ text: string; cache: boolean }>> {
+  const parts: Array<{ text: string; cache: boolean }> = [
+    { text: BOSS_DADDY_SYSTEM, cache: true },
   ]
 
   const [profile, phrases] = await Promise.all([
@@ -159,12 +163,45 @@ export async function buildBossDaddySystemBlocks(
   ])
 
   const voiceCard = formatVoiceLexiconForPrompt(phrases)
-  if (voiceCard) {
-    blocks.push({ type: 'text', text: voiceCard, cache_control: { type: 'ephemeral' } })
-  }
+  if (voiceCard) parts.push({ text: voiceCard, cache: true })
 
   const voiceBlock = formatVoiceProfileForPrompt(profile)
-  if (voiceBlock) blocks.push({ type: 'text', text: voiceBlock })
+  if (voiceBlock) parts.push({ text: voiceBlock, cache: false })
 
-  return blocks
+  return parts
+}
+
+/** Anthropic-SDK `system` array (used by not-yet-migrated `lib/claude` callers). */
+export async function buildBossDaddySystemBlocks(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<SystemBlock[]> {
+  const parts = await buildVoiceSystemParts(supabase, userId)
+  return parts.map((p) =>
+    p.cache
+      ? { type: 'text', text: p.text, cache_control: { type: 'ephemeral' } }
+      : { type: 'text', text: p.text },
+  )
+}
+
+/**
+ * AI-SDK `system` messages for the gateway wrappers (`lib/ai/client.ts`). Same
+ * blocks + same cache breakpoints as buildBossDaddySystemBlocks, expressed as
+ * SystemModelMessages — the Anthropic `cacheControl` is forwarded through the
+ * gateway; providers without explicit caching ignore it.
+ */
+export async function buildBossDaddySystemMessages(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<SystemModelMessage[]> {
+  const parts = await buildVoiceSystemParts(supabase, userId)
+  return parts.map((p) =>
+    p.cache
+      ? {
+          role: 'system',
+          content: p.text,
+          providerOptions: { anthropic: { cacheControl: { type: 'ephemeral' } } },
+        }
+      : { role: 'system', content: p.text },
+  )
 }
