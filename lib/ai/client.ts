@@ -12,8 +12,7 @@
 // Streaming (the Boss concierge) and the web_search research surfaces are NOT
 // covered by these one-shot helpers — they migrate in later phases.
 
-import { gateway, generateObject, generateText, type ModelMessage } from 'ai'
-import type { z } from 'zod'
+import { gateway, generateObject, generateText, type FlexibleSchema, type ModelMessage } from 'ai'
 import { resolveModel, type AiBucket } from '../flags'
 
 interface CallBase {
@@ -56,7 +55,9 @@ function gatewayOptions(tag: string, fallback: string[]) {
 export async function aiGenerateObject<T>(
   opts: CallBase & {
     system?: string
-    schema: z.ZodType<T>
+    // Zod schema OR a reused JSON schema via `jsonSchema()` — the SDK validates
+    // the model output against it and returns a typed, parsed object.
+    schema: FlexibleSchema<T>
     prompt?: string
     messages?: ModelMessage[]
   },
