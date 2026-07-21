@@ -364,14 +364,22 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                       {imageControl}
                       <p className="text-xs text-prose-muted uppercase tracking-widest font-medium">Pick a variant to save</p>
                       {variants.map((v, i) => {
-                        const len = v.content.length
-                        const over = platformConfig.charLimit ? len > platformConfig.charLimit : false
+                        // A thread variant packs several posts into one string
+                        // separated by a "---" line. Gate each post against the
+                        // platform limit — not the whole block, which would
+                        // always blow a single-post limit and wrongly disable save.
+                        const segments = v.content.split(/\n\s*-{3,}\s*\n/).map((s) => s.trim()).filter(Boolean)
+                        const isThread = segments.length > 1
+                        const measured = isThread ? Math.max(...segments.map((s) => s.length)) : v.content.length
+                        const over = platformConfig.charLimit ? measured > platformConfig.charLimit : false
                         return (
                           <div key={i} className="bg-surface border border-strong rounded-xl p-4 space-y-3">
                             <p className="text-sm text-prose whitespace-pre-wrap leading-relaxed">{v.content}</p>
                             <div className="flex items-center justify-between">
                               <span className={`text-xs tabular-nums ${over ? 'text-danger-ink' : 'text-prose-faint'}`}>
-                                {len}{platformConfig.charLimit ? ` / ${platformConfig.charLimit}` : ''}
+                                {isThread
+                                  ? `${segments.length} posts · longest ${measured}${platformConfig.charLimit ? ` / ${platformConfig.charLimit}` : ''}`
+                                  : `${measured}${platformConfig.charLimit ? ` / ${platformConfig.charLimit}` : ''}`}
                               </span>
                               <button
                                 onClick={() => saveVariant(i, v.content)}
