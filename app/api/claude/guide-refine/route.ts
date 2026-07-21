@@ -1,21 +1,20 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { jsonSchema } from 'ai'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
-import { createStructured } from '@/lib/claude/structured'
+import { buildBossDaddySystemMessages } from '@/lib/voiceProfile'
+import { aiGenerateObject } from '@/lib/ai/client'
+import { classifyClaudeError } from '@/lib/ai/errors'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 export const maxDuration = 90
 
-// The model returns the refined draft by calling this tool — its input_schema
-// is the shape, so the SDK validates it instead of us regex-parsing JSON.
-const GUIDE_REFINE_TOOL: Anthropic.Tool = {
-  name: 'submit_guide_refinement',
-  description: 'Return the refined article draft.',
-  input_schema: {
-    type: 'object',
-    properties: {
+// The model output is validated against this schema (reused from the old
+// submit_guide_refinement tool's input_schema) — the SDK enforces it instead
+// of us regex-parsing JSON from text.
+const GUIDE_REFINE_SCHEMA = jsonSchema<Record<string, unknown>>({
+  type: 'object',
+  properties: {
       title:        { type: 'string' },
       excerpt:      { type: 'string' },
       tldr:         { type: 'string' },
@@ -34,8 +33,7 @@ const GUIDE_REFINE_TOOL: Anthropic.Tool = {
       conclusion:   { type: 'string' },
     },
     required: ['title', 'excerpt', 'introduction', 'sections', 'conclusion'],
-  },
-}
+})
 
 const FAQSchema = z.object({ question: z.string(), answer: z.string() })
 
@@ -93,23 +91,24 @@ Return your result by calling the submit_guide_refinement tool. Field guidance: 
 Important: Only change what the instructions specify. Keep the first-person dad voice throughout.`
 
   try {
-    const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
-    const result = await createStructured({
-      system: systemBlocks,
+    const systemMessages = await buildBossDaddySystemMessages(supabase, user.id)
+    const draft = await aiGenerateObject<Record<string, unknown>>({
+      bucket: 'content',
+      tag: 'guide-refine',
+      schema: GUIDE_REFINE_SCHEMA,
+      system: systemMessages,
       messages: [{ role: 'user', content: prompt }],
-      tool: GUIDE_REFINE_TOOL,
-      maxTokens: 3800,
+      maxOutputTokens: 3800,
+      maxRetries: 4,
     })
-
-    if (result.stopReason === 'max_tokens') {
-      console.error('guide-refine hit max_tokens — output truncated')
+    return NextResponse.json({ draft })
+  } catch (err) {
+    const c = classifyClaudeError(err)
+    console.error('guide-refine error:', c.kind, '-', c.detail)
+    // Truncated output is incomplete and unsafe to apply — say so plainly.
+    if (c.kind === 'truncated') {
       return NextResponse.json({ error: 'The refinement ran long and got cut off. Try again with a narrower instruction.' }, { status: 502 })
     }
-    if (!result.data) return NextResponse.json({ error: 'Model returned unexpected format' }, { status: 502 })
-
-    return NextResponse.json({ draft: result.data })
-  } catch (err) {
-    console.error('Guide refine error:', err)
-    return NextResponse.json({ error: 'Refinement failed' }, { status: 502 })
+    return NextResponse.json({ error: c.userMessage }, { status: c.status })
   }
 }

@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { jsonSchema } from 'ai'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
-import { createStructured } from '@/lib/claude/structured'
+import { buildBossDaddySystemMessages } from '@/lib/voiceProfile'
+import { aiGenerateObject } from '@/lib/ai/client'
+import { classifyClaudeError } from '@/lib/ai/errors'
 import { fetchTagVocabulary, tagSlugList } from '@/lib/claude/tag-vocab'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
@@ -18,11 +19,11 @@ export const maxDuration = 180
 //   guide → comprehensive (all blocks), long-form budget
 type PieceType = 'essay' | 'howto' | 'guide'
 
-// The model returns the draft by calling this tool — its input_schema is the
-// shape, so the SDK validates it instead of us regex-parsing JSON from text.
-// Built per piece type so essays/how-tos aren't forced to emit blocks that
-// would break their voice (and burn tokens the wizard then discards).
-function buildGuideTool(pieceType: PieceType): Anthropic.Tool {
+// The model output is validated against this schema — the SDK enforces it
+// instead of us regex-parsing JSON from text. Built per piece type so
+// essays/how-tos aren't forced to emit blocks that would break their voice
+// (and burn tokens the wizard then discards).
+function buildGuideSchema(pieceType: PieceType): Record<string, unknown> {
   const base: Record<string, unknown> = {
     title:           { type: 'string' },
     excerpt:         { type: 'string' },
@@ -65,13 +66,9 @@ function buildGuideTool(pieceType: PieceType): Anthropic.Tool {
   ]
 
   return {
-    name: 'submit_guide',
-    description: 'Return the finished dad-focused article draft.',
-    input_schema: {
-      type: 'object',
-      properties: { ...base, ...blocks },
-      required: [...commonRequired, ...Object.keys(blocks)],
-    },
+    type: 'object',
+    properties: { ...base, ...blocks },
+    required: [...commonRequired, ...Object.keys(blocks)],
   }
 }
 
@@ -209,39 +206,27 @@ Topic: ${tagSlugList(tagVocab, 'topic')}
 
 Return your result by calling the submit_guide tool. Field guidance: title is a specific, useful title (max 80 chars, include the topic keyword); excerpt is one punchy card sentence (max 160 chars);${cfg.fieldGuidanceBlocks} introduction opens the piece per the structure above; each section has a clear heading and a body with paragraphs separated by \\n\\n; conclusion follows the structure above (separate paragraphs with \\n\\n); heroImagePrompt is an editorial-photography hero prompt (specific real-world objects, natural daylight or warm indoor light, no people, no text, under 180 chars); each inlineImages.afterHeading MUST match one of your section headings; suggestedTags are 3–6 slugs from the controlled vocabulary above.`
 
-  const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
-  let result
+  const systemMessages = await buildBossDaddySystemMessages(supabase, user.id)
+  let draft: Record<string, unknown>
   try {
-    result = await createStructured({
-      system: systemBlocks,
+    draft = await aiGenerateObject<Record<string, unknown>>({
+      bucket: 'content',
+      tag: 'guide-draft',
+      schema: jsonSchema<Record<string, unknown>>(buildGuideSchema(pieceType)),
+      system: systemMessages,
       messages: [{ role: 'user', content: prompt }],
-      tool: buildGuideTool(pieceType),
-      maxTokens: cfg.maxTokens,
+      maxOutputTokens: cfg.maxTokens,
       temperature: 0.8,
+      maxRetries: 4,
     })
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err)
-    console.error('Claude API error (guide-draft):', msg)
-    const isTimeout = /timeout|timed.?out|deadline/i.test(msg)
-    const isOverload = /overload|529|capacity/i.test(msg)
-    return NextResponse.json({
-      error: isTimeout
-        ? 'Generation timed out — the AI is busy. Please wait a moment and try again.'
-        : isOverload
-        ? 'The AI service is currently overloaded. Please try again in a minute.'
-        : `AI service error: ${msg.slice(0, 120)}`,
-    }, { status: 502 })
-  }
-
-  // Truncation guard: a cut-off tool input is unsafe to use — say so plainly.
-  if (result.stopReason === 'max_tokens') {
-    console.error('guide-draft hit max_tokens — output truncated')
-    return NextResponse.json({ error: 'The draft ran long and got cut off. Try again, or trim the brief and regenerate.' }, { status: 502 })
-  }
-
-  const draft = result.data
-  if (!draft) {
-    return NextResponse.json({ error: 'AI returned an unexpected format — please try again.' }, { status: 502 })
+    const c = classifyClaudeError(err)
+    console.error('guide-draft generation error:', c.kind, '-', c.detail)
+    // Truncated output is a cut-off draft — unsafe to use; steer to trim the brief.
+    if (c.kind === 'truncated') {
+      return NextResponse.json({ error: 'The draft ran long and got cut off. Try again, or trim the brief and regenerate.' }, { status: 502 })
+    }
+    return NextResponse.json({ error: c.userMessage }, { status: c.status })
   }
 
   // Extract the hero image prompt — return it so the form can pre-fill the
