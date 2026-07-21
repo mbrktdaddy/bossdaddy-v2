@@ -1,7 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getClaudeClient, MODEL, MODERATOR_SYSTEM } from '@/lib/claude/client'
-import { ModerationResultSchema } from '@/lib/claude/moderation'
+import { MODERATOR_SYSTEM } from '@/lib/claude/client'
+import { aiGenerateObject } from '@/lib/ai/client'
+import { classifyClaudeError } from '@/lib/ai/errors'
+import { ModerationResultSchema, type ModerationResult } from '@/lib/claude/moderation'
 import { z } from 'zod'
 
 const ModerateInput = z.union([
@@ -59,28 +61,17 @@ ${content.content.slice(0, 4000)}
 Return JSON: { "score": number (0-1), "flags": string[], "recommendation": "approve"|"review"|"reject" }`
 
   try {
-    const claude = getClaudeClient()
-    const message = await claude.messages.create({
-      model: MODEL,
-      max_tokens: 512,
-      system: [
-        {
-          type: 'text',
-          text: MODERATOR_SYSTEM,
-          cache_control: { type: 'ephemeral' },
-        },
-      ],
-      messages: [{ role: 'user', content: prompt }],
+    // `moderation` bucket is PINNED to Claude (compliance gate — see lib/flags.ts).
+    // The SDK validates the output against ModerationResultSchema, replacing the
+    // manual regex JSON extraction; an unparseable/invalid shape throws → catch.
+    const result: ModerationResult = await aiGenerateObject<ModerationResult>({
+      bucket: 'moderation',
+      tag: 'moderate-review',
+      schema: ModerationResultSchema,
+      system: MODERATOR_SYSTEM,
+      prompt,
+      maxOutputTokens: 512,
     })
-
-    const text = message.content.find((b) => b.type === 'text')?.text ?? ''
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) throw new Error('No JSON in response')
-
-    const resultParsed = ModerationResultSchema.safeParse(JSON.parse(jsonMatch[0]))
-    if (!resultParsed.success) throw new Error('Invalid moderation shape')
-
-    const result = resultParsed.data
 
     await supabase
       .from(table)
@@ -92,7 +83,8 @@ Return JSON: { "score": number (0-1), "flags": string[], "recommendation": "appr
 
     return NextResponse.json(result)
   } catch (err) {
-    console.error('Claude moderate error:', err)
+    const c = classifyClaudeError(err)
+    console.error('moderate error:', c.kind, '-', c.detail)
     return NextResponse.json({ error: 'Moderation failed' }, { status: 502 })
   }
 }

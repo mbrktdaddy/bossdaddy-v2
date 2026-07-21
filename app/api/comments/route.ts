@@ -3,7 +3,8 @@ import { revalidatePath } from 'next/cache'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sanitizeHtml } from '@/lib/sanitize'
-import { getClaudeClient, MODEL, COMMENT_MODERATOR_SYSTEM } from '@/lib/claude/client'
+import { COMMENT_MODERATOR_SYSTEM } from '@/lib/claude/client'
+import { aiGenerateObject } from '@/lib/ai/client'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { ModerationResultSchema, type ModerationResult } from '@/lib/claude/moderation'
 import { z } from 'zod'
@@ -64,27 +65,20 @@ function lightweightScan(body: string): { suspicious: boolean; flags: string[] }
 // ── Claude moderation for non-trusted users ─────────────────────────────────
 
 async function moderateWithClaude(body: string): Promise<ModerationResult> {
-  const client = getClaudeClient()
-  const response = await client.messages.create({
-    model: MODEL,
-    max_tokens: 256,
-    system: [{ type: 'text', text: COMMENT_MODERATOR_SYSTEM, cache_control: { type: 'ephemeral' } }],
-    messages: [{ role: 'user', content: body }],
+  // `moderation` bucket is PINNED to Claude (compliance gate — see lib/flags.ts).
+  // The SDK validates the output against ModerationResultSchema: a malformed
+  // response (e.g. `{}` or a string score) that would otherwise leave
+  // score/recommendation undefined — every threshold check below false, so the
+  // comment silently auto-publishes — instead THROWS here, routing the caller
+  // into its catch → lightweight-scan fallback (fail safe: hold for review).
+  return aiGenerateObject<ModerationResult>({
+    bucket: 'moderation',
+    tag: 'moderate-comment',
+    schema: ModerationResultSchema,
+    system: COMMENT_MODERATOR_SYSTEM,
+    prompt: body,
+    maxOutputTokens: 256,
   })
-
-  const raw = (response.content[0] as { type: 'text'; text: string }).text
-    .replace(/```json\n?/g, '')
-    .replace(/```\n?/g, '')
-    .trim()
-
-  // Validate the shape before trusting it. A malformed-but-parseable response
-  // (e.g. `{}` or a string score) would otherwise leave score/recommendation
-  // undefined, every threshold check below would be false, and the comment
-  // would silently auto-publish. Throwing here routes the caller into its catch
-  // → lightweight-scan fallback (fail safe: hold suspicious content for review).
-  const parsed = ModerationResultSchema.safeParse(JSON.parse(raw))
-  if (!parsed.success) throw new Error('Claude returned an invalid moderation shape')
-  return parsed.data
 }
 
 // ── Trust promotion ─────────────────────────────────────────────────────────
