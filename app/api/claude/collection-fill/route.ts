@@ -1,41 +1,46 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { jsonSchema } from 'ai'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
-import { createStructured } from '@/lib/claude/structured'
+import { buildBossDaddySystemMessages } from '@/lib/voiceProfile'
+import { aiGenerateObject } from '@/lib/ai/client'
+import { classifyClaudeError } from '@/lib/ai/errors'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 export const maxDuration = 60
 
-// The model returns the per-pick layer by calling this tool — its input_schema
-// is the shape, so the SDK validates it instead of us regex-parsing JSON.
-const FILL_TOOL: Anthropic.Tool = {
-  name: 'submit_fill',
-  description: 'Return the per-pick blurbs, role labels, and FAQs for the collection.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      blurbs: { type: 'array', items: {
-        type: 'object',
-        properties: { id: { type: 'string' }, blurb: { type: 'string' } },
-        required: ['id', 'blurb'],
-      } },
-      roleLabels: { type: 'array', items: {
-        type: 'object',
-        properties: { id: { type: 'string' }, label: { type: 'string' } },
-        required: ['id', 'label'],
-      } },
-      faqs: { type: 'array', items: {
-        type: 'object',
-        properties: { question: { type: 'string' }, answer: { type: 'string' } },
-        required: ['question', 'answer'],
-      } },
-    },
-    required: ['blurbs', 'faqs'],
-  },
+// Loosely-typed model output — the downstream .map/.filter defensively coerces
+// every field, so the shape only needs to be optional-everywhere.
+type Payload = {
+  blurbs?: Array<{ id?: unknown; blurb?: unknown }>
+  roleLabels?: Array<{ id?: unknown; label?: unknown }>
+  faqs?: Array<{ question?: unknown; answer?: unknown }>
 }
+
+// The model output is validated against this schema — the SDK enforces it
+// instead of us regex-parsing JSON from text.
+const FILL_SCHEMA = jsonSchema<Payload>({
+  type: 'object',
+  properties: {
+    blurbs: { type: 'array', items: {
+      type: 'object',
+      properties: { id: { type: 'string' }, blurb: { type: 'string' } },
+      required: ['id', 'blurb'],
+    } },
+    roleLabels: { type: 'array', items: {
+      type: 'object',
+      properties: { id: { type: 'string' }, label: { type: 'string' } },
+      required: ['id', 'label'],
+    } },
+    faqs: { type: 'array', items: {
+      type: 'object',
+      properties: { question: { type: 'string' }, answer: { type: 'string' } },
+      required: ['question', 'answer'],
+    } },
+  },
+  required: ['blurbs', 'faqs'],
+})
 
 const Input = z.object({
   collectionType: z.enum(['general', 'best_of', 'gift_guide', 'comparison', 'stack']),
@@ -175,32 +180,27 @@ ${faqGuide}
 
 Return your result by calling the submit_fill tool.`
 
-  const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
-  let result
+  const systemMessages = await buildBossDaddySystemMessages(supabase, user.id)
+  let payload: Payload
   try {
-    result = await createStructured({
-      system: systemBlocks,
+    payload = await aiGenerateObject<Payload>({
+      bucket: 'content',
+      tag: 'collection-fill',
+      schema: FILL_SCHEMA,
+      system: systemMessages,
       messages: [{ role: 'user', content: prompt }],
-      tool: FILL_TOOL,
-      maxTokens: 2500,
+      maxOutputTokens: 2500,
+      maxRetries: 4,
     })
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err)
-    console.error('Claude API error (collection-fill):', msg)
-    return NextResponse.json({ error: `AI service error: ${msg.slice(0, 120)}` }, { status: 502 })
+    const c = classifyClaudeError(err)
+    console.error('collection-fill generation error:', c.kind, '-', c.detail)
+    // Truncated output is incomplete — say so plainly.
+    if (c.kind === 'truncated') {
+      return NextResponse.json({ error: 'The fill ran long and got cut off. Please try again.' }, { status: 502 })
+    }
+    return NextResponse.json({ error: c.userMessage }, { status: c.status })
   }
-
-  if (result.stopReason === 'max_tokens') {
-    return NextResponse.json({ error: 'The fill ran long and got cut off. Please try again.' }, { status: 502 })
-  }
-
-  type Payload = {
-    blurbs?: Array<{ id?: unknown; blurb?: unknown }>
-    roleLabels?: Array<{ id?: unknown; label?: unknown }>
-    faqs?: Array<{ question?: unknown; answer?: unknown }>
-  }
-
-  const payload = (result.data ?? {}) as Payload
 
   const idSet = new Set(itemReviewIds)
 

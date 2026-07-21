@@ -1,27 +1,24 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { jsonSchema } from 'ai'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
-import { createStructured } from '@/lib/claude/structured'
+import { buildBossDaddySystemMessages } from '@/lib/voiceProfile'
+import { aiGenerateObject } from '@/lib/ai/client'
+import { classifyClaudeError } from '@/lib/ai/errors'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 export const maxDuration = 60
 
-// The model returns the intro by calling this tool — the `html` field carries
+// The model output is validated against this schema — the `html` field carries
 // the markup, so the SDK delivers it cleanly instead of us stripping fences.
-const INTRO_TOOL: Anthropic.Tool = {
-  name: 'submit_intro',
-  description: 'Return the editorial collection intro as HTML.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      html: { type: 'string', description: '1–3 short paragraphs wrapped in <p> tags. No headings, no lists.' },
-    },
-    required: ['html'],
+const INTRO_SCHEMA = jsonSchema<{ html?: string }>({
+  type: 'object',
+  properties: {
+    html: { type: 'string', description: '1–3 short paragraphs wrapped in <p> tags. No headings, no lists.' },
   },
-}
+  required: ['html'],
+})
 
 const Input = z.object({
   collectionType: z.enum(['general', 'best_of', 'gift_guide', 'comparison', 'stack']),
@@ -110,26 +107,29 @@ REQUIREMENTS:
 
 Return the intro by calling the submit_intro tool — the HTML goes in the \`html\` field.`
 
-  const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
-  let result
+  const systemMessages = await buildBossDaddySystemMessages(supabase, user.id)
+  let data: { html?: string }
   try {
-    result = await createStructured({
-      system: systemBlocks,
+    data = await aiGenerateObject<{ html?: string }>({
+      bucket: 'content',
+      tag: 'collection-intro',
+      schema: INTRO_SCHEMA,
+      system: systemMessages,
       messages: [{ role: 'user', content: prompt }],
-      tool: INTRO_TOOL,
-      maxTokens: 800,
+      maxOutputTokens: 800,
+      maxRetries: 4,
     })
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err)
-    console.error('Claude API error (collection-intro):', msg)
-    return NextResponse.json({ error: `AI service error: ${msg.slice(0, 120)}` }, { status: 502 })
+    const c = classifyClaudeError(err)
+    console.error('collection-intro generation error:', c.kind, '-', c.detail)
+    // Truncated output is incomplete — say so plainly.
+    if (c.kind === 'truncated') {
+      return NextResponse.json({ error: 'The intro ran long and got cut off. Please try again.' }, { status: 502 })
+    }
+    return NextResponse.json({ error: c.userMessage }, { status: c.status })
   }
 
-  if (result.stopReason === 'max_tokens') {
-    return NextResponse.json({ error: 'The intro ran long and got cut off. Please try again.' }, { status: 502 })
-  }
-
-  const html = typeof result.data?.html === 'string' ? result.data.html.trim() : ''
+  const html = typeof data.html === 'string' ? data.html.trim() : ''
   if (!html) {
     return NextResponse.json({ error: 'AI returned empty content. Please try again.' }, { status: 502 })
   }
