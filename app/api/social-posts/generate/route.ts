@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { jsonSchema } from 'ai'
 import { createClient } from '@/lib/supabase/server'
-import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
-import { createStructured } from '@/lib/claude/structured'
+import { buildBossDaddySystemMessages } from '@/lib/voiceProfile'
+import { aiGenerateObject } from '@/lib/ai/client'
+import { classifyClaudeError } from '@/lib/ai/errors'
 import { getPlatform, PLATFORM_IDS } from '@/lib/social-platforms'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { requireSocialActor, fetchGenSource, type GenSourceType } from '@/lib/social/generate'
@@ -10,26 +11,22 @@ import { z } from 'zod'
 
 export const maxDuration = 60
 
-// The model returns the variants by calling this tool — its input_schema is the
-// shape, so the SDK validates it instead of us regex-parsing "JSON only" prose.
-const VARIANTS_TOOL: Anthropic.Tool = {
-  name: 'submit_variants',
-  description: 'Return 3 distinct social post variants for the requested platform.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      variants: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: { content: { type: 'string' } },
-          required: ['content'],
-        },
+// The model output is validated against this schema — the SDK enforces it
+// instead of us regex-parsing "JSON only" prose.
+const VARIANTS_SCHEMA = jsonSchema<{ variants?: { content: string }[] }>({
+  type: 'object',
+  properties: {
+    variants: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: { content: { type: 'string' } },
+        required: ['content'],
       },
     },
-    required: ['variants'],
   },
-}
+  required: ['variants'],
+})
 
 const GenerateSchema = z.object({
   platform:     z.enum(PLATFORM_IDS as [string, ...string[]]),
@@ -105,27 +102,27 @@ Rules:
 
 Return the 3 variants via the submit_variants tool.`
 
-  let result
+  let data: { variants?: { content: string }[] }
   try {
-    const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
-    result = await createStructured({
-      system: systemBlocks,
+    const systemMessages = await buildBossDaddySystemMessages(supabase, user.id)
+    data = await aiGenerateObject<{ variants?: { content: string }[] }>({
+      bucket: 'content',
+      tag: 'social-posts-generate',
+      schema: VARIANTS_SCHEMA,
+      system: systemMessages,
       messages: [{ role: 'user', content: userPrompt }],
-      tool: VARIANTS_TOOL,
-      maxTokens: 1500,
+      maxOutputTokens: 1500,
     })
   } catch (err) {
-    console.error('[social generate] Claude error:', err)
-    return NextResponse.json({ error: 'Generation failed — try again' }, { status: 502 })
+    const c = classifyClaudeError(err)
+    console.error('[social generate] AI error:', c.kind, '-', c.detail)
+    if (c.kind === 'truncated') {
+      return NextResponse.json({ error: 'The output ran long and got cut off. Try again.' }, { status: 502 })
+    }
+    return NextResponse.json({ error: c.userMessage }, { status: c.status })
   }
 
-  if (result.stopReason === 'max_tokens') {
-    return NextResponse.json({ error: 'The output ran long and got cut off. Try again.' }, { status: 502 })
-  }
-
-  const variants = Array.isArray((result.data as { variants?: { content: string }[] } | null)?.variants)
-    ? (result.data as { variants: { content: string }[] }).variants
-    : []
+  const variants = Array.isArray(data?.variants) ? data.variants : []
   if (variants.length === 0) {
     return NextResponse.json({ error: 'AI returned an unexpected format — please try again.' }, { status: 502 })
   }

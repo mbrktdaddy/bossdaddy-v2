@@ -1,5 +1,5 @@
-import type Anthropic from '@anthropic-ai/sdk'
-import { createStructured } from '@/lib/claude/structured'
+import { jsonSchema } from 'ai'
+import { aiGenerateObject } from '@/lib/ai/client'
 
 // Merch Studio — saying generation.
 //
@@ -45,34 +45,32 @@ INTELLECTUAL PROPERTY GUARDRAIL (critical — this goes on physical product for 
 
 OUTPUT: Call the tool with your candidates. Nothing else.`
 
-const SAYINGS_TOOL: Anthropic.Tool = {
-  name: 'propose_merch_sayings',
-  description: 'Return the batch of candidate merch sayings for operator review.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      sayings: {
-        type: 'array',
-        description: 'The candidate sayings, best first.',
-        items: {
-          type: 'object',
-          properties: {
-            text:    { type: 'string', description: 'The main printed line. 2–6 words, ~40 chars max.' },
-            subline: { type: 'string', description: 'Optional smaller supporting line. Empty string if none.' },
-            angle:   { type: 'string', description: 'One line: why it works / who it is for. Editorial note for the operator.' },
-            best_for: { type: 'string', enum: ['tee', 'hat', 'mug', 'any'], description: 'Which blank this line fits best.' },
-            ip_risk: { type: 'string', enum: ['none', 'low', 'review'], description: 'Trademark/copyright resemblance risk.' },
-            ip_note: { type: 'string', description: 'Why it was flagged. Empty string when ip_risk is none.' },
-          },
-          required: ['text', 'subline', 'angle', 'best_for', 'ip_risk', 'ip_note'],
-          additionalProperties: false,
+// The model output is validated against this schema — the SDK enforces it
+// instead of us regex-parsing JSON from text.
+const SAYINGS_SCHEMA = jsonSchema<{ sayings?: unknown[] }>({
+  type: 'object',
+  properties: {
+    sayings: {
+      type: 'array',
+      description: 'The candidate sayings, best first.',
+      items: {
+        type: 'object',
+        properties: {
+          text:    { type: 'string', description: 'The main printed line. 2–6 words, ~40 chars max.' },
+          subline: { type: 'string', description: 'Optional smaller supporting line. Empty string if none.' },
+          angle:   { type: 'string', description: 'One line: why it works / who it is for. Editorial note for the operator.' },
+          best_for: { type: 'string', enum: ['tee', 'hat', 'mug', 'any'], description: 'Which blank this line fits best.' },
+          ip_risk: { type: 'string', enum: ['none', 'low', 'review'], description: 'Trademark/copyright resemblance risk.' },
+          ip_note: { type: 'string', description: 'Why it was flagged. Empty string when ip_risk is none.' },
         },
+        required: ['text', 'subline', 'angle', 'best_for', 'ip_risk', 'ip_note'],
+        additionalProperties: false,
       },
     },
-    required: ['sayings'],
-    additionalProperties: false,
   },
-}
+  required: ['sayings'],
+  additionalProperties: false,
+})
 
 export async function generateMerchSayings(opts: {
   theme: string
@@ -83,17 +81,22 @@ export async function generateMerchSayings(opts: {
 
 Give me ${count} distinct candidate sayings for Boss Daddy merch on this theme. Vary the angle across the batch (proud-dad, tough-love humor, faith/family, everyday-dad-life). Best ones first.`
 
-  const { data } = await createStructured({
-    system: [{ type: 'text', text: MERCH_SAYINGS_SYSTEM, cache_control: { type: 'ephemeral' } }],
+  // Merch copy is short & wearable, NOT the long-form voice — its own tighter
+  // system prompt (a plain string → one Anthropic cache breakpoint). Content
+  // bucket so it rides the same provider toggle as other generation.
+  const data = await aiGenerateObject<{ sayings?: unknown[] }>({
+    bucket: 'content',
+    tag: 'merch-sayings',
+    schema: SAYINGS_SCHEMA,
+    system: MERCH_SAYINGS_SYSTEM,
     messages: [{ role: 'user', content: userPrompt }],
-    tool: SAYINGS_TOOL,
-    maxTokens: 2000,
+    maxOutputTokens: 2000,
     // Merch copy wants punch + variety across the batch, so run hotter than the
-    // long-form default (0.8). Still bounded by the tool schema + banlist.
+    // long-form default (0.8). Still bounded by the schema + banlist.
     temperature: 1.0,
   })
 
-  const raw = (data?.sayings as unknown[]) ?? []
+  const raw = data?.sayings ?? []
   return raw
     .map((s): MerchSaying | null => {
       const o = s as Record<string, unknown>

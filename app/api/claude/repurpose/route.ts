@@ -1,9 +1,10 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { jsonSchema } from 'ai'
 import { createClient } from '@/lib/supabase/server'
-import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
-import { MODEL, OPUS_MODEL } from '@/lib/claude/client'
-import { createStructured } from '@/lib/claude/structured'
+import { buildBossDaddySystemMessages } from '@/lib/voiceProfile'
+import { MODELS } from '@/lib/ai/models'
+import { aiGenerateObject } from '@/lib/ai/client'
+import { classifyClaudeError } from '@/lib/ai/errors'
 import { serializeForX } from '@/lib/x/serialize'
 import { getPlatform } from '@/lib/social-platforms'
 import { checkRateLimit } from '@/lib/rate-limit'
@@ -22,33 +23,37 @@ export const maxDuration = 180
 
 const X_CHAR_LIMIT = getPlatform('x').charLimit ?? 280
 
-const REPURPOSE_TOOL: Anthropic.Tool = {
-  name: 'submit_repurpose',
-  description: 'Return the source content repurposed into an X Article, an X thread, and standalone X posts.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      article: {
-        type: 'object',
-        properties: {
-          title:     { type: 'string' },
-          body_html: { type: 'string' },
-        },
-        required: ['title', 'body_html'],
-      },
-      thread: {
-        type: 'object',
-        properties: {
-          title: { type: 'string' },
-          posts: { type: 'array', items: { type: 'string' } },
-        },
-        required: ['title', 'posts'],
-      },
-      posts: { type: 'array', items: { type: 'string' } },
-    },
-    required: ['article', 'thread', 'posts'],
-  },
+type RepurposePayload = {
+  article?: { title?: string; body_html?: string }
+  thread?:  { title?: string; posts?: string[] }
+  posts?:   string[]
 }
+
+// The model output is validated against this schema — the SDK enforces it
+// instead of us regex-parsing JSON from text.
+const REPURPOSE_SCHEMA = jsonSchema<RepurposePayload>({
+  type: 'object',
+  properties: {
+    article: {
+      type: 'object',
+      properties: {
+        title:     { type: 'string' },
+        body_html: { type: 'string' },
+      },
+      required: ['title', 'body_html'],
+    },
+    thread: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        posts: { type: 'array', items: { type: 'string' } },
+      },
+      required: ['title', 'posts'],
+    },
+    posts: { type: 'array', items: { type: 'string' } },
+  },
+  required: ['article', 'thread', 'posts'],
+})
 
 const RepurposeInput = z.object({
   source_type: z.enum(['review', 'guide']),
@@ -127,45 +132,38 @@ X FORMATTING & READABILITY (applies to every thread post and standalone post):
 EDGE OFF: if the source covers loss, mental health, marriage strain, or safety-critical topics (car seats, infant sleep, water safety, firearms), drop the roast and smirk — write in warm Protector mode per the voice rules.
 Never use "game-changer", "must-have", "revolutionary", or "life-changing". No corporate speak.`
 
-  const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
+  const systemMessages = await buildBossDaddySystemMessages(supabase, user.id)
 
-  let result
+  // The sonnet/opus tier picker maps to a concrete Claude model (explicit
+  // per-request override), NOT the content-bucket default — repurpose gives the
+  // operator a deliberate quality/speed choice. Still gets automatic Claude
+  // fallback via the wrapper.
+  let data: RepurposePayload
   try {
-    result = await createStructured({
-      system: systemBlocks,
+    data = await aiGenerateObject<RepurposePayload>({
+      bucket: 'content',
+      tag: 'repurpose',
+      model: model === 'opus' ? MODELS.claudeOpus : MODELS.claudeSonnet,
+      schema: REPURPOSE_SCHEMA,
+      system: systemMessages,
       messages: [{ role: 'user', content: prompt }],
-      tool: REPURPOSE_TOOL,
-      model: model === 'opus' ? OPUS_MODEL : MODEL,
-      // Article (400–700 words) + thread + 3 posts is a large tool input.
-      maxTokens: 6000,
+      // Article (400–700 words) + thread + 3 posts is a large output.
+      maxOutputTokens: 6000,
       temperature: 0.8,
       maxRetries: 3,
     })
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err)
-    console.error('Claude API error (repurpose):', msg)
-    const isTimeout  = /timeout|timed.?out|deadline/i.test(msg)
-    const isOverload = /overload|529|capacity/i.test(msg)
-    return NextResponse.json({
-      error: isTimeout
-        ? 'Generation timed out — the AI is busy. Please wait a moment and try again.'
-        : isOverload
-        ? 'The AI service is currently overloaded. Please try again in a minute.'
-        : `AI service error: ${msg.slice(0, 120)}`,
-    }, { status: 502 })
+    const c = classifyClaudeError(err)
+    console.error('repurpose generation error:', c.kind, '-', c.detail)
+    if (c.kind === 'truncated') {
+      return NextResponse.json({ error: 'The output ran long and got cut off. Try again.' }, { status: 502 })
+    }
+    return NextResponse.json({ error: c.userMessage }, { status: c.status })
   }
 
-  if (result.stopReason === 'max_tokens') {
-    console.error('repurpose hit max_tokens — output truncated')
-    return NextResponse.json({ error: 'The output ran long and got cut off. Try again.' }, { status: 502 })
-  }
-
-  const data = result.data
-  if (!data) return NextResponse.json({ error: 'AI returned an unexpected format — please try again.' }, { status: 502 })
-
-  const article = data.article as { title?: string; body_html?: string } | undefined
-  const thread  = data.thread  as { title?: string; posts?: string[] } | undefined
-  const posts   = Array.isArray(data.posts) ? (data.posts as string[]) : []
+  const article = data.article
+  const thread  = data.thread
+  const posts   = Array.isArray(data.posts) ? data.posts : []
 
   // Run the article through the X-safe serializer (Phase 2) so the workspace can
   // warn about anything X would silently strip before the author pastes it.
@@ -181,7 +179,7 @@ Never use "game-changer", "must-have", "revolutionary", or "life-changing". No c
       },
       thread: {
         title: thread?.title ?? '',
-        posts: Array.isArray(thread?.posts) ? thread!.posts : [],
+        posts: Array.isArray(thread?.posts) ? thread.posts : [],
       },
       posts,
     },

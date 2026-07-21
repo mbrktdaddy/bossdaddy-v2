@@ -61,16 +61,27 @@ function withClaudeFallback(model: string): ResolvedModel {
  * Resolve the model a bucket should use, honoring operator env overrides and the
  * compliance pins.
  */
-export function resolveModel(bucket: AiBucket, opts?: { sensitive?: boolean }): ResolvedModel {
-  // Concierge vulnerable-topic lane has its own knob, checked first.
+export function resolveModel(
+  bucket: AiBucket,
+  opts?: { sensitive?: boolean; model?: string },
+): ResolvedModel {
+  // Compliance-pinned buckets ignore ALL overrides (env, sensitive, explicit) —
+  // checked first so nothing can route them off Claude.
+  if (PINNED.has(bucket)) {
+    return { model: BUCKET_DEFAULT[bucket], fallback: [] }
+  }
+
+  // Explicit per-request model (e.g. a user-facing sonnet/opus tier picker in
+  // X Studio repurpose). Supersedes the env override and bucket default, but
+  // still gets the automatic Claude fallback.
+  if (isValidModelSlug(opts?.model)) {
+    return withClaudeFallback(opts!.model!.trim())
+  }
+
+  // Concierge vulnerable-topic lane has its own knob.
   if (bucket === 'concierge' && opts?.sensitive) {
     const raw = process.env[CONCIERGE_SENSITIVE_ENV]
     return withClaudeFallback(isValidModelSlug(raw) ? raw.trim() : BUCKET_DEFAULT.concierge)
-  }
-
-  // Compliance-pinned buckets ignore overrides entirely.
-  if (PINNED.has(bucket)) {
-    return { model: BUCKET_DEFAULT[bucket], fallback: [] }
   }
 
   return withClaudeFallback(envOverride(bucket) ?? BUCKET_DEFAULT[bucket])

@@ -53,4 +53,33 @@ describe('resolveModel', () => {
       fallback: [MODELS.claudeSonnet],
     })
   })
+
+  it('honors an explicit per-request model, superseding the bucket default and env', () => {
+    process.env.AI_MODEL_CONTENT = MODELS.grok
+    // A user-facing tier picker (X Studio repurpose) chooses Opus outright —
+    // any non-Sonnet model still gets the automatic Sonnet fallback.
+    expect(resolveModel('content', { model: MODELS.claudeOpus })).toEqual({
+      model: MODELS.claudeOpus,
+      fallback: [MODELS.claudeSonnet],
+    })
+    // A non-Claude explicit pick still gets the automatic Claude fallback.
+    expect(resolveModel('content', { model: MODELS.grok })).toEqual({
+      model: MODELS.grok,
+      fallback: [MODELS.claudeSonnet],
+    })
+  })
+
+  it('ignores an invalid explicit model and falls back to normal resolution', () => {
+    expect(resolveModel('content', { model: 'opus' })).toEqual({
+      model: MODELS.claudeSonnet,
+      fallback: [],
+    })
+  })
+
+  it('never lets an explicit model override a compliance-pinned bucket', () => {
+    expect(resolveModel('moderation', { model: MODELS.grok })).toEqual({
+      model: MODELS.claudeSonnet,
+      fallback: [],
+    })
+  })
 })
