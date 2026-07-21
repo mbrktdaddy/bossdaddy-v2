@@ -55,20 +55,31 @@ export function researchProviderFor(model: string): 'xai' | 'anthropic' {
 // key on the tools object is `web_search` for both so prompts read the same. The
 // two providers' tools have different input/output generics; widen to the common
 // `Tool` type so they can share one `tools` slot.
+//
+// The `as unknown as Tool` casts bridge a type-declaration skew, NOT a runtime
+// gap: `@ai-sdk/xai` / `@ai-sdk/anthropic` type their provider-executed tools
+// against a different internal SDK tool-spec version (SharedV3ProviderOptions,
+// `Schema` without `[schemaSymbol]`) than `ai@6` re-exports for `Tool`
+// (SharedV4ProviderOptions). Bare `tsc` resolves the packages' node export
+// condition and the two line up; `next build` resolves a different export
+// condition and they diverge — which is why this only broke in the Vercel build.
+// The tool objects are consumed structurally by the SDK/Gateway, so the cast is
+// safe. Re-check when bumping `ai` or the provider majors (see the 3.x pin note
+// in docs/ai-provider-layer.md).
 function webSearchToolFor(model: string, cfg: ResearchSearchConfig): Tool {
   if (researchProviderFor(model) === 'xai') {
     // Grok Live Search — real-time X + web. No max_uses knob; bounded by maxSteps.
     return xai.tools.webSearch({
       ...(cfg.allowedDomains ? { allowedDomains: cfg.allowedDomains } : {}),
       ...(cfg.blockedDomains ? { excludedDomains: cfg.blockedDomains } : {}),
-    })
+    }) as unknown as Tool
   }
   // Anthropic native web search — the default provider and the fallback provider.
   return anthropic.tools.webSearch_20260209({
     ...(cfg.maxUses != null ? { maxUses: cfg.maxUses } : {}),
     ...(cfg.allowedDomains ? { allowedDomains: cfg.allowedDomains } : {}),
     ...(cfg.blockedDomains ? { blockedDomains: cfg.blockedDomains } : {}),
-  })
+  }) as unknown as Tool
 }
 
 // Transient PROVIDER errors worth failing over for. A format error (no_object /
