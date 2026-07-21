@@ -1,6 +1,5 @@
-import Anthropic from '@anthropic-ai/sdk'
-import { getClaudeClient, MODEL } from '@/lib/claude/client'
-import { extractToolInput } from '@/lib/claude/structured'
+import { jsonSchema, type JSONSchema7 } from 'ai'
+import { aiResearch } from '@/lib/ai/research'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { appendAmazonTag, buildAmazonAffiliateUrl, extractAsin } from '@/lib/amazon-tag'
 import { checkRateLimit } from '@/lib/rate-limit'
@@ -38,12 +37,11 @@ HARD RULES:
 - If you cannot find enough credible options for this specific need, ABSTAIN: call submit_research with abstained=true, picks=[], and one line why. A fast honest abstain beats a slow run that times out — do NOT burn the search budget chasing an obscure query.
 - Compare like with like and stay near the user's budget if they gave one.
 
-OUTPUT: When done (or abstaining), you MUST return the result by calling the submit_research tool. Do not answer in plain prose.`
+OUTPUT: When done (or abstaining), return the result as the required structured object (abstained, picks). To abstain, set abstained=true with picks=[] and one short line why in note.`
 
-const RESEARCH_TOOL: Anthropic.Tool = {
-  name: 'submit_research',
-  description: 'Return the researched (NOT tested) shortlist after gathering web data, or abstain.',
-  input_schema: {
+// The shortlist is returned as one schema-validated object (AI SDK `Output.object`)
+// after the model runs its web_search steps — no output tool, no prose salvage.
+const RESEARCH_SCHEMA: JSONSchema7 = {
     type: 'object',
     properties: {
       abstained: { type: 'boolean' },
@@ -74,7 +72,6 @@ const RESEARCH_TOOL: Anthropic.Tool = {
       },
     },
     required: ['abstained', 'picks'],
-  },
 }
 
 type RawPick = {
@@ -408,42 +405,27 @@ export const researchGear: BossTool = {
       }
     }
 
-    // ── The web-search research call (own messages.create, like specs-grade). ──
-    const tools: Anthropic.Messages.MessageCreateParams['tools'] = [
-      { type: 'web_search_20260209', name: 'web_search', max_uses: WEB_SEARCH_MAX_USES },
-      RESEARCH_TOOL,
-    ]
+    // ── The web-search research call (research bucket; provider-native search). ──
+    // The SDK runs the search steps and returns one schema-validated object — no
+    // pause_turn loop, no output tool, no prose salvage. Flip AI_MODEL_RESEARCH to
+    // a grok slug and this switches to Grok Live Search with no change here.
     const prompt = `Need: ${query}${fit ? `\nConstraints: ${fit}` : ''}${category ? `\nCategory: ${category}` : ''}
 
-Research 3-5 currently-available products that fit this, spanning price tiers, and return them via submit_research. Abstain promptly if you can't credibly source options for this specific need.`
-    const messages: Anthropic.Messages.MessageParam[] = [{ role: 'user', content: prompt }]
-    const createArgs = (msgs: Anthropic.Messages.MessageParam[]) => ({
-      model: MODEL,
-      max_tokens: 4000,
-      system: [{ type: 'text' as const, text: RESEARCH_SYSTEM, cache_control: { type: 'ephemeral' as const } }],
-      tools,
-      messages: msgs,
-    })
-    const reqOpts = { maxRetries: 3 }
+Research 3-5 currently-available products that fit this, spanning price tiers, and return them as the structured object. Abstain promptly if you can't credibly source options for this specific need.`
 
     let out: Record<string, unknown> | null = null
     try {
-      let message = await getClaudeClient().messages.create(createArgs(messages), reqOpts)
-      let guard = 0
-      while (message.stop_reason === 'pause_turn' && guard < 3) {
-        guard++
-        messages.push({ role: 'assistant', content: message.content })
-        message = await getClaudeClient().messages.create(createArgs(messages), reqOpts)
-      }
-      out = extractToolInput(message, 'submit_research')
-      if (!out) {
-        const text = message.content
-          .filter((b): b is Anthropic.TextBlock => b.type === 'text')
-          .map((b) => b.text)
-          .join('\n')
-        const jsonMatch = text.match(/\{[\s\S]*\}/)
-        if (jsonMatch) { try { out = JSON.parse(jsonMatch[0]) } catch { out = null } }
-      }
+      const res = await aiResearch<Record<string, unknown>>({
+        tag: 'boss-research',
+        system: RESEARCH_SYSTEM,
+        prompt,
+        schema: jsonSchema<Record<string, unknown>>(RESEARCH_SCHEMA),
+        search: { maxUses: WEB_SEARCH_MAX_USES },
+        maxSteps: WEB_SEARCH_MAX_USES + 3,
+        maxOutputTokens: 4000,
+        maxRetries: 3,
+      })
+      out = res.object
     } catch {
       return {
         content: JSON.stringify({

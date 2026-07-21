@@ -1,4 +1,4 @@
-import { APICallError, NoObjectGeneratedError } from 'ai'
+import { APICallError, NoObjectGeneratedError, NoOutputGeneratedError } from 'ai'
 
 // Consolidates the timeout/overload error-classification regex that was
 // copy-pasted across the Claude routes, and maps AI SDK error types
@@ -61,6 +61,12 @@ export function classifyClaudeError(err: unknown): ClassifiedAiError {
     return err.finishReason === 'length'
       ? classified('truncated', 502, detail)
       : classified('no_object', 502, detail)
+  }
+
+  // generateText + `Output.object` (the research bucket) throws this when the run
+  // ended without producing the structured output — same class of failure.
+  if (NoOutputGeneratedError.isInstance(err)) {
+    return classified('no_object', 502, detail)
   }
 
   // Transport / provider errors surfaced by the gateway.

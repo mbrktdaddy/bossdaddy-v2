@@ -41,7 +41,9 @@ interface CallBase {
 // System block with an Anthropic ephemeral cache breakpoint. Providers that
 // don't support explicit caching ignore it (xAI caches automatically); the
 // Gateway forwards it to Anthropic when that provider is active.
-function cachedSystem(text: string): SystemModelMessage {
+// Exported so the research helper (lib/ai/research.ts) shares one cache-breakpoint
+// convention with the one-shot wrappers.
+export function cachedSystem(text: string): SystemModelMessage {
   return {
     role: 'system',
     content: text,

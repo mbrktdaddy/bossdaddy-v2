@@ -19,10 +19,13 @@
     "test:rls": "supabase test db",
     "smoke": "node --env-file=.env.local scripts/smoke-test.mjs",
     "ai:smoke": "node --env-file=.env.local scripts/ai-smoke.mjs",
+    "ai:research-smoke": "node --env-file=.env.local scripts/ai-research-smoke.mjs",
     "merch:sync": "node --env-file=.env.local scripts/sync-printful.mjs",
     "merch:discover": "node --env-file=.env.local scripts/discover-merch-blanks.mjs"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.99",
+    "@ai-sdk/xai": "^3.0.111",
     "@anthropic-ai/sdk": "^0.112.4",
     "@react-email/components": "^1.0.12",
     "@react-email/render": "^2.1.0",
