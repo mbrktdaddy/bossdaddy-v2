@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { jsonSchema } from 'ai'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { getClaudeClient, MODEL } from '@/lib/claude/client'
+import { aiGenerateObject } from '@/lib/ai/client'
+import { classifyClaudeError } from '@/lib/ai/errors'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { getSpecTemplate } from '@/lib/spec-templates'
 import { z } from 'zod'
@@ -19,6 +21,19 @@ Rules:
 - Prefer the provided preferred labels when the text contains that information, so specs line up across products. Add extra specs only when clearly stated and genuinely useful.
 - Values must be concise (a few words, with units) — not sentences.
 - "brand" is the manufacturer/brand name only (e.g. "DeWalt"), or null if not clearly stated.`
+
+const PRODUCT_FACTS_SCHEMA = jsonSchema<{ brand: unknown; specs: unknown }>({
+  type: 'object',
+  properties: {
+    brand: { type: ['string', 'null'] },
+    specs: { type: 'array', items: {
+      type: 'object',
+      properties: { label: { type: 'string' }, value: { type: 'string' } },
+      required: ['label', 'value'],
+    } },
+  },
+  required: ['brand', 'specs'],
+})
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -57,22 +72,18 @@ ${rawText}
 """`
 
   try {
-    const message = await getClaudeClient().messages.create({
-      model: MODEL,
-      max_tokens: 800,
-      system: [{ type: 'text', text: PRODUCT_FACTS_SYSTEM, cache_control: { type: 'ephemeral' } }],
-      messages: [{ role: 'user', content: prompt }],
+    const out = await aiGenerateObject<{ brand: unknown; specs: unknown }>({
+      bucket: 'utility',
+      tag: 'product-facts',
+      system: PRODUCT_FACTS_SYSTEM,
+      schema: PRODUCT_FACTS_SCHEMA,
+      prompt,
+      maxOutputTokens: 800,
     })
 
-    const text = message.content.find((b) => b.type === 'text')?.text ?? ''
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) return NextResponse.json({ error: 'Model returned unexpected format' }, { status: 502 })
-
-    const parsedOut = JSON.parse(jsonMatch[0]) as { brand?: unknown; specs?: unknown }
-
-    const brand = typeof parsedOut.brand === 'string' && parsedOut.brand.trim() ? parsedOut.brand.trim() : null
-    const specs = Array.isArray(parsedOut.specs)
-      ? parsedOut.specs
+    const brand = typeof out.brand === 'string' && out.brand.trim() ? out.brand.trim() : null
+    const specs = Array.isArray(out.specs)
+      ? out.specs
           .filter((s): s is { label: string; value: string } =>
             !!s && typeof s === 'object'
             && typeof (s as Record<string, unknown>).label === 'string'
@@ -84,7 +95,8 @@ ${rawText}
 
     return NextResponse.json({ brand, specs })
   } catch (err) {
-    console.error('Product facts extraction error:', err)
-    return NextResponse.json({ error: 'Extraction failed' }, { status: 502 })
+    const c = classifyClaudeError(err)
+    console.error('product-facts error:', c.kind, '-', c.detail)
+    return NextResponse.json({ error: c.userMessage }, { status: c.status })
   }
 }
