@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { jsonSchema } from 'ai'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
-import { createStructured } from '@/lib/claude/structured'
+import { buildBossDaddySystemMessages } from '@/lib/voiceProfile'
+import { aiGenerateObject } from '@/lib/ai/client'
+import { classifyClaudeError } from '@/lib/ai/errors'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
@@ -16,14 +17,12 @@ const RefineInput = z.object({
   instruction:  z.string().min(4).max(1000),
 })
 
-// The shape the model must return — enforced as the refine tool's input_schema
-// so the SDK hands back a validated object instead of free-text JSON to parse.
-const REFINE_TOOL: Anthropic.Tool = {
-  name: 'submit_refined_review',
-  description: 'Return the full updated review after applying the requested changes.',
-  input_schema: {
-    type: 'object',
-    properties: {
+// The shape the model must return — the SDK validates its output against this
+// schema (reused from the old submit_refined_review tool) instead of us parsing
+// free-text JSON.
+const REFINE_SCHEMA = jsonSchema<Record<string, unknown>>({
+  type: 'object',
+  properties: {
       title:        { type: 'string', description: 'Updated title if instructions require it, otherwise the original' },
       excerpt:      { type: 'string', description: 'Updated excerpt if needed, max 160 chars' },
       tldr:         { type: 'string', description: '2–3 sentence skimmer summary; update if the verdict shifts' },
@@ -47,8 +46,7 @@ const REFINE_TOOL: Anthropic.Tool = {
       cons:         { type: 'array', items: { type: 'string' } },
     },
     required: ['title', 'excerpt', 'introduction', 'sections', 'verdict', 'pros', 'cons'],
-  },
-}
+})
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -91,36 +89,26 @@ Refinement instructions: ${instruction}
 Apply the changes, then return the full updated review by calling the submit_refined_review tool. Update only what the instructions specify; preserve everything else and keep the first-person dad voice throughout.`
 
   try {
-    const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
-    const { data: draft, stopReason } = await createStructured({
-      system: systemBlocks,
+    const systemMessages = await buildBossDaddySystemMessages(supabase, user.id)
+    const draft = await aiGenerateObject<Record<string, unknown>>({
+      bucket: 'content',
+      tag: 'review-refine',
+      schema: REFINE_SCHEMA,
+      system: systemMessages,
       messages: [{ role: 'user', content: prompt }],
-      tool: REFINE_TOOL,
       // A full-review refine regenerates every field (sections, faqs, lists);
-      // 8000 leaves room for the whole document so the tool input isn't truncated.
-      maxTokens: 8000,
+      // 8000 leaves room for the whole document so the output isn't truncated.
+      maxOutputTokens: 8000,
       maxRetries: 4,
     })
-
-    // Truncated tool input is incomplete and unsafe to apply — say so plainly.
-    if (stopReason === 'max_tokens') {
-      return NextResponse.json({ error: 'The refine ran long and was cut off — try a more specific instruction.' }, { status: 502 })
-    }
-    if (!draft) {
-      return NextResponse.json({ error: 'Model returned an unexpected format — try again.' }, { status: 502 })
-    }
     return NextResponse.json({ draft })
   } catch (err) {
-    console.error('Review refine error:', err)
-    const msg = err instanceof Error ? err.message : String(err)
-    const isOverload = /overload|529|capacity/i.test(msg)
-    const isTimeout = /timeout|timed.?out|deadline/i.test(msg)
-    return NextResponse.json({
-      error: isOverload
-        ? 'The AI service is busy right now (overloaded). Wait a minute and try again.'
-        : isTimeout
-        ? 'The refine timed out — try again in a moment.'
-        : 'Refinement failed',
-    }, { status: 502 })
+    const c = classifyClaudeError(err)
+    console.error('review-refine error:', c.kind, '-', c.detail)
+    // Truncated output is incomplete and unsafe to apply — say so plainly.
+    if (c.kind === 'truncated') {
+      return NextResponse.json({ error: 'The refine ran long and was cut off — try a more specific instruction.' }, { status: 502 })
+    }
+    return NextResponse.json({ error: c.userMessage }, { status: c.status })
   }
 }

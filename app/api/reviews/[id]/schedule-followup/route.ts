@@ -2,8 +2,9 @@ import { NextResponse, type NextRequest } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getClaudeClient, MODEL } from '@/lib/claude/client'
-import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
+import { jsonSchema } from 'ai'
+import { aiGenerateObject } from '@/lib/ai/client'
+import { buildBossDaddySystemMessages } from '@/lib/voiceProfile'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { generateUniqueSlug } from '@/lib/slug'
 import { sanitizeHtml } from '@/lib/sanitize'
@@ -19,6 +20,14 @@ const MIN_PARENT_AGE_DAYS = 30
 
 const ScheduleSchema = z.object({
   milestone_label: z.string().trim().min(2).max(80),
+})
+
+// Scaffold output shape — the SDK validates the model's object against this, so
+// the old regex-match + JSON.parse of free text is gone.
+const SCAFFOLD_SCHEMA = jsonSchema<{ content: string }>({
+  type: 'object',
+  properties: { content: { type: 'string' } },
+  required: ['content'],
 })
 
 function staticScaffold(milestoneDays: number, previousRating: number | null): string {
@@ -81,22 +90,20 @@ REQUIRED OUTPUT — four HTML sections in this exact order, each headed by an <h
 
 Tone: prompt the author, do not answer for them. Voice should match the brand but stay open-ended — "What is different now?" not "Six months in, the carrier holds up." Do not write conclusions or verdicts — that is the author's job.
 
-Return JSON ONLY (no markdown, no code fences): { "content": "<h2>What changed</h2>\\n<p>...</p>\\n..." }`
+Return the four sections as the "content" field: { "content": "<h2>What changed</h2>\\n<p>...</p>\\n..." }`
 
   try {
-    const systemBlocks = await buildBossDaddySystemBlocks(opts.supabase, opts.parentAuthorId)
-    const result = await getClaudeClient().messages.create({
-      model: MODEL,
-      max_tokens: 600,
-      system: systemBlocks,
+    const systemMessages = await buildBossDaddySystemMessages(opts.supabase, opts.parentAuthorId)
+    const { content } = await aiGenerateObject<{ content: string }>({
+      bucket: 'content',
+      tag: 'followup-scaffold',
+      schema: SCAFFOLD_SCHEMA,
+      system: systemMessages,
       messages: [{ role: 'user', content: prompt }],
+      maxOutputTokens: 600,
     })
-    const text = result.content.find((b) => b.type === 'text')?.text ?? ''
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) return fallback
-    const parsed = JSON.parse(jsonMatch[0]) as { content?: unknown }
-    const content = typeof parsed.content === 'string' ? parsed.content.trim() : ''
-    return content || fallback
+    const trimmed = typeof content === 'string' ? content.trim() : ''
+    return trimmed || fallback
   } catch (err) {
     console.error('schedule-followup scaffold generation failed, using static fallback:', err)
     return fallback
