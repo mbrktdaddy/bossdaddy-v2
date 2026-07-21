@@ -35,6 +35,8 @@ interface ProfileRow {
   account_status: AccountStatus | null
   suspended_until: string | null
   moderation_reason: string | null
+  trusted_commenter: boolean | null
+  trust_locked: boolean | null
 }
 interface MessageRow { id: string; body: string; sender_id: string; created_at: string }
 
@@ -68,7 +70,7 @@ export default async function AdminReportsPage() {
 
   const [{ data: profileRows }, { data: messageRows }] = await Promise.all([
     userIds.length
-      ? admin.from('profiles').select('id, username, account_status, suspended_until, moderation_reason').in('id', userIds)
+      ? admin.from('profiles').select('id, username, account_status, suspended_until, moderation_reason, trusted_commenter, trust_locked').in('id', userIds)
       : Promise.resolve({ data: [] }),
     messageIds.length
       ? admin.from('messages').select('id, body, sender_id, created_at').in('id', messageIds)
@@ -163,6 +165,8 @@ export default async function AdminReportsPage() {
                         status={(reported.account_status ?? 'active') as AccountStatus}
                         suspendedUntil={reported.suspended_until ?? null}
                         reason={reported.moderation_reason ?? null}
+                        trusted={reported.trusted_commenter ?? false}
+                        trustLocked={reported.trust_locked ?? false}
                         isSelf={reported.id === me.id}
                       />
                     )}

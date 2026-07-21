@@ -11,7 +11,7 @@ export default async function UsersPage() {
 
   const { data: users } = await supabase
     .from('profiles')
-    .select('id, username, role, created_at, account_status, suspended_until, moderation_reason')
+    .select('id, username, role, created_at, account_status, suspended_until, moderation_reason, trusted_commenter, trust_locked')
     .order('created_at', { ascending: false })
 
   const counts = {
@@ -84,6 +84,8 @@ export default async function UsersPage() {
                 status={(u.account_status ?? 'active') as AccountStatus}
                 suspendedUntil={u.suspended_until ?? null}
                 reason={u.moderation_reason ?? null}
+                trusted={u.trusted_commenter ?? false}
+                trustLocked={u.trust_locked ?? false}
                 isSelf={u.id === me.id}
               />
               <RoleSelector userId={u.id} currentRole={u.role} isSelf={u.id === me.id} />

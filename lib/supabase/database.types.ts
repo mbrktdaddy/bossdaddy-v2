@@ -1847,6 +1847,7 @@ export type Database = {
           role: string
           suspended_until: string | null
           tagline: string | null
+          trust_locked: boolean
           trusted_commenter: boolean
           username: string
         }
@@ -1866,6 +1867,7 @@ export type Database = {
           role?: string
           suspended_until?: string | null
           tagline?: string | null
+          trust_locked?: boolean
           trusted_commenter?: boolean
           username: string
         }
@@ -1885,6 +1887,7 @@ export type Database = {
           role?: string
           suspended_until?: string | null
           tagline?: string | null
+          trust_locked?: boolean
           trusted_commenter?: boolean
           username?: string
         }

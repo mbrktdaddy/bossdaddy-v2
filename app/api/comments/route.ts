@@ -119,14 +119,16 @@ export async function POST(request: NextRequest) {
 
   const sanitized = sanitizeHtml(parsed.data.body.trim())
 
-  // Fetch trust status
+  // Fetch trust status. `trust_locked` means an admin has manually decided this
+  // user's trust — automatic promotion must not override it (migration 124).
   const { data: profile } = await supabase
     .from('profiles')
-    .select('trusted_commenter')
+    .select('trusted_commenter, trust_locked')
     .eq('id', user.id)
     .single()
 
   const isTrusted = profile?.trusted_commenter === true
+  const isTrustLocked = profile?.trust_locked === true
 
   // ── Publish-first policy ────────────────────────────────────────────────
   // Commenting should feel free and immediate. Everything publishes on submit
@@ -188,8 +190,9 @@ export async function POST(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: 'Failed to post comment' }, { status: 500 })
 
-  // Check trust promotion after any approved insert
-  if (status === 'approved' && !isTrusted) {
+  // Check trust promotion after any approved insert — unless an admin has
+  // locked this user's trust, in which case the automatic rule must not touch it.
+  if (status === 'approved' && !isTrusted && !isTrustLocked) {
     checkTrustPromotion(supabase, user.id).catch(() => {})
   }
 

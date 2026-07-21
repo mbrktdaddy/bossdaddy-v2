@@ -12,8 +12,12 @@ interface Props {
   status: Status
   suspendedUntil: string | null
   reason: string | null
+  trusted: boolean
+  trustLocked: boolean
   isSelf: boolean
 }
+
+type TrustMode = 'trust' | 'untrust' | 'auto'
 
 const STATUS_BADGE: Record<Status, { label: string; classes: string }> = {
   active:            { label: 'Active',     classes: 'bg-success-bg text-forest border-success-line' },
@@ -43,7 +47,9 @@ const ACTIONS_BY_STATUS: Record<Status, Array<{ key: string; label: string; tone
   ],
 }
 
-export default function ModerationActions({ userId, username, status, suspendedUntil, reason, isSelf }: Props) {
+const TRUSTED_CHIP = 'text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md border bg-accent-tint text-accent-text-soft border-accent-border/40'
+
+export default function ModerationActions({ userId, username, status, suspendedUntil, reason, trusted, trustLocked, isSelf }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [pendingAction, setPendingAction] = useState<string | null>(null)
@@ -84,11 +90,35 @@ export default function ModerationActions({ userId, username, status, suspendedU
     router.refresh()
   }
 
+  async function submitTrust(mode: TrustMode) {
+    setLoading(true); setError(null)
+    const res = await fetch('/api/admin/users/trust', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, mode }),
+    })
+    const json = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      setError(json.error ?? 'Action failed')
+      setLoading(false)
+      return
+    }
+    setLoading(false); setOpen(false)
+    router.refresh()
+  }
+
+  const trustTitle = trusted
+    ? `Trusted commenter — comments skip AI moderation${trustLocked ? ' (admin-locked)' : ' (auto-earned)'}`
+    : undefined
+
   if (isSelf) {
     return (
-      <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md border ${badge.classes}`}>
-        {badge.label}
-      </span>
+      <div className="flex items-center gap-2">
+        {trusted && <span className={TRUSTED_CHIP} title={trustTitle}>Trusted</span>}
+        <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md border ${badge.classes}`}>
+          {badge.label}
+        </span>
+      </div>
     )
   }
 
@@ -96,6 +126,7 @@ export default function ModerationActions({ userId, username, status, suspendedU
 
   return (
     <div className="flex items-center gap-2 relative">
+      {trusted && <span className={TRUSTED_CHIP} title={trustTitle}>Trusted</span>}
       <span
         className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md border ${badge.classes}`}
         title={
@@ -139,6 +170,30 @@ export default function ModerationActions({ userId, username, status, suspendedU
                   {label}
                 </button>
               ))}
+
+              {/* Comment-trust — separate from account status. Trusted
+                  commenters skip AI moderation. A manual decision locks the
+                  flag so auto-promotion can't override it (migration 124). */}
+              <div className="my-1 border-t border-soft" />
+              <button
+                role="menuitem"
+                onClick={() => submitTrust(trusted ? 'untrust' : 'trust')}
+                disabled={loading}
+                className="block w-full text-left px-3 py-2 rounded-lg text-sm text-prose-muted hover:bg-surface hover:text-prose transition-colors disabled:opacity-50"
+              >
+                {trusted ? 'Revoke commenter trust' : 'Trust commenter (skip AI moderation)'}
+              </button>
+              {trustLocked && (
+                <button
+                  role="menuitem"
+                  onClick={() => submitTrust('auto')}
+                  disabled={loading}
+                  className="block w-full text-left px-3 py-2 rounded-lg text-sm text-prose-faint hover:bg-surface hover:text-prose transition-colors disabled:opacity-50"
+                >
+                  Reset to automatic trust
+                </button>
+              )}
+              {error && <p className="text-xs text-danger-ink px-3 pt-1 pb-2">{error}</p>}
             </>
           ) : (
             <div className="p-2 space-y-3">
