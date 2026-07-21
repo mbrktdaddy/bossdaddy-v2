@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Supabase CLI
-        uses: supabase/setup-cli@v1
+        uses: supabase/setup-cli@v3
         with:
           version: latest
 
@@ -70,7 +70,7 @@ jobs:
           rm -f "bd-backup-$STAMP.tar.gz" roles.sql schema.sql data.sql
 
       - name: Upload encrypted artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: db-backup-${{ env.STAMP }}
           path: bd-backup-${{ env.STAMP }}.tar.gz.gpg
