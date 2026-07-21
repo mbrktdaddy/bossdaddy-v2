@@ -23,10 +23,10 @@
     "merch:discover": "node --env-file=.env.local scripts/discover-merch-blanks.mjs"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.112.3",
+    "@anthropic-ai/sdk": "^0.112.4",
     "@react-email/components": "^1.0.12",
     "@react-email/render": "^2.1.0",
-    "@sentry/nextjs": "^10.50.0",
+    "@sentry/nextjs": "^10.67.0",
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.103.1",
     "@tailwindcss/typography": "^0.5.20",
