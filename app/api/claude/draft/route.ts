@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { jsonSchema } from 'ai'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
-import { createStructured } from '@/lib/claude/structured'
+import { buildBossDaddySystemMessages } from '@/lib/voiceProfile'
+import { aiGenerateObject } from '@/lib/ai/client'
+import { classifyClaudeError } from '@/lib/ai/errors'
 import { fetchTagVocabulary, tagSlugList } from '@/lib/claude/tag-vocab'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
@@ -10,14 +11,12 @@ import { z } from 'zod'
 // 8000-token reviews can take 1-2 min under load; 90s was cutting it close.
 export const maxDuration = 180
 
-// The model returns the draft by calling this tool — its input_schema is the
-// shape, so the SDK validates it instead of us regex-parsing JSON from text.
-const DRAFT_TOOL: Anthropic.Tool = {
-  name: 'submit_review',
-  description: 'Return the finished product review draft.',
-  input_schema: {
-    type: 'object',
-    properties: {
+// The model output is validated against this schema (reused verbatim from the
+// old submit_review tool's input_schema — the SDK enforces it instead of us
+// regex-parsing JSON from text).
+const DRAFT_SCHEMA = jsonSchema<Record<string, unknown>>({
+  type: 'object',
+  properties: {
       title:        { type: 'string' },
       excerpt:      { type: 'string' },
       tldr:         { type: 'string' },
@@ -59,8 +58,7 @@ const DRAFT_TOOL: Anthropic.Tool = {
       'subScores', 'wouldRebuy', 'introduction', 'sections', 'verdict', 'pros',
       'cons', 'imagePrompt', 'inlineImages', 'suggestedTags',
     ],
-  },
-}
+})
 
 const DraftInput = z.object({
   productName:     z.string().min(2).max(120),
@@ -221,48 +219,35 @@ Topic: ${tagSlugList(tagVocab, 'topic')}
 
 Return your result by calling the submit_review tool. Field guidance: title is an SEO title including the product name (max 70 chars); excerpt is one punchy card sentence (max 160 chars); tldr is 1–2 skimmer sentences; section bodies are 150–250 words with paragraphs separated by \\n\\n; subScores are four 1–10 integers; imagePrompt is a product photography prompt (no people, no text, under 180 chars); each inlineImages.afterHeading MUST match one of your section headings; suggestedTags are 3–6 slugs from the controlled vocabulary above.`
 
-  const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
-  let result
+  const systemMessages = await buildBossDaddySystemMessages(supabase, user.id)
+  let draft: Record<string, unknown>
   try {
-    result = await createStructured({
-      system: systemBlocks,
+    draft = await aiGenerateObject<Record<string, unknown>>({
+      bucket: 'content',
+      tag: 'review-draft',
+      schema: DRAFT_SCHEMA,
+      system: systemMessages,
       messages: [{ role: 'user', content: prompt }],
-      tool: DRAFT_TOOL,
       // A full review (intro + 3-5 sections + verdict + pros/cons + FAQs +
       // takeaways + sub-scores + image prompts + tags) is large; 8000 keeps the
-      // tool input from truncating. claude-sonnet-4-6 handles 8k easily.
-      maxTokens: 8000,
+      // output from truncating. claude-sonnet-4-6 handles 8k easily.
+      maxOutputTokens: 8000,
       // Below the 1.0 default: a fact-heavy review against a strict banlist
       // ("every claim has specifics") is where slip/hallucination hurts most.
       temperature: 0.8,
       maxRetries: 4,
     })
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err)
-    console.error('Claude API error (review-draft):', msg)
-    const isTimeout = /timeout|timed.?out|deadline/i.test(msg)
-    const isOverload = /overload|529|capacity/i.test(msg)
-    return NextResponse.json({
-      error: isTimeout
-        ? 'Generation timed out — the AI is busy. Please wait a moment and try again.'
-        : isOverload
-        ? 'The AI service is currently overloaded. Please try again in a minute.'
-        : `AI service error: ${msg.slice(0, 120)}`,
-    }, { status: 502 })
-  }
-
-  // Truncation guard: if the model hit the token ceiling the tool input is cut
-  // off and unsafe to use — say so plainly instead of returning a partial draft.
-  if (result.stopReason === 'max_tokens') {
-    console.error('review-draft hit max_tokens — output truncated')
-    return NextResponse.json({
-      error: 'The draft ran long and got cut off. Try again, or drop the inline image slots to 0–2 and regenerate.',
-    }, { status: 502 })
-  }
-
-  const draft = result.data
-  if (!draft) {
-    return NextResponse.json({ error: 'AI returned an unexpected format — please try again.' }, { status: 502 })
+    const c = classifyClaudeError(err)
+    console.error('review-draft generation error:', c.kind, '-', c.detail)
+    // Truncation keeps its bespoke message (the output ran past the token
+    // ceiling and is unsafe to use — steer the author to drop image slots).
+    if (c.kind === 'truncated') {
+      return NextResponse.json({
+        error: 'The draft ran long and got cut off. Try again, or drop the inline image slots to 0–2 and regenerate.',
+      }, { status: 502 })
+    }
+    return NextResponse.json({ error: c.userMessage }, { status: c.status })
   }
 
   // Extract the AI-suggested image prompt — return it so the form can pre-fill

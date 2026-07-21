@@ -12,8 +12,13 @@
 // Streaming (the Boss concierge) and the web_search research surfaces are NOT
 // covered by these one-shot helpers — they migrate in later phases.
 
-import { gateway, generateObject, generateText, type FlexibleSchema, type ModelMessage } from 'ai'
+import { gateway, generateObject, generateText, type FlexibleSchema, type ModelMessage, type SystemModelMessage } from 'ai'
 import { resolveModel, type AiBucket } from '../flags'
+
+// A call's system prompt: either a single string (wrapped with one Anthropic
+// cache breakpoint) or pre-built SystemModelMessages (multi-block voice system,
+// each carrying its own breakpoint — see buildBossDaddySystemMessages).
+type SystemArg = string | SystemModelMessage[]
 
 interface CallBase {
   /** Purpose bucket — selects the provider/model. See lib/flags.ts. */
@@ -30,12 +35,19 @@ interface CallBase {
 // System block with an Anthropic ephemeral cache breakpoint. Providers that
 // don't support explicit caching ignore it (xAI caches automatically); the
 // Gateway forwards it to Anthropic when that provider is active.
-function cachedSystem(text: string) {
+function cachedSystem(text: string): SystemModelMessage {
   return {
-    role: 'system' as const,
+    role: 'system',
     content: text,
-    providerOptions: { anthropic: { cacheControl: { type: 'ephemeral' as const } } },
+    providerOptions: { anthropic: { cacheControl: { type: 'ephemeral' } } },
   }
+}
+
+// A string gets one cache breakpoint; pre-built SystemModelMessages pass through
+// unchanged (they already carry their own breakpoints).
+function resolveSystem(system?: SystemArg): { system?: string | SystemModelMessage[] } {
+  if (system == null) return {}
+  return { system: typeof system === 'string' ? [cachedSystem(system)] : system }
 }
 
 function gatewayOptions(tag: string, fallback: string[]) {
@@ -54,7 +66,7 @@ function gatewayOptions(tag: string, fallback: string[]) {
  */
 export async function aiGenerateObject<T>(
   opts: CallBase & {
-    system?: string
+    system?: SystemArg
     // Zod schema OR a reused JSON schema via `jsonSchema()` — the SDK validates
     // the model output against it and returns a typed, parsed object.
     schema: FlexibleSchema<T>
@@ -66,7 +78,7 @@ export async function aiGenerateObject<T>(
   const { object } = await generateObject({
     model: gateway(model),
     schema: opts.schema,
-    ...(opts.system ? { system: cachedSystem(opts.system) } : {}),
+    ...resolveSystem(opts.system),
     ...(opts.messages ? { messages: opts.messages } : { prompt: opts.prompt ?? '' }),
     maxOutputTokens: opts.maxOutputTokens,
     ...(opts.temperature != null ? { temperature: opts.temperature } : {}),
@@ -79,7 +91,7 @@ export async function aiGenerateObject<T>(
 /** One-shot plain-text generation (moderation prose, vision alt-text, refines). */
 export async function aiGenerateText(
   opts: CallBase & {
-    system?: string
+    system?: SystemArg
     prompt?: string
     messages?: ModelMessage[]
   },
@@ -87,7 +99,7 @@ export async function aiGenerateText(
   const { model, fallback } = resolveModel(opts.bucket, { sensitive: opts.sensitive })
   const { text } = await generateText({
     model: gateway(model),
-    ...(opts.system ? { system: cachedSystem(opts.system) } : {}),
+    ...resolveSystem(opts.system),
     ...(opts.messages ? { messages: opts.messages } : { prompt: opts.prompt ?? '' }),
     maxOutputTokens: opts.maxOutputTokens,
     ...(opts.temperature != null ? { temperature: opts.temperature } : {}),
