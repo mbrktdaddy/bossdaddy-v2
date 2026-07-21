@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { generateMerchSayings } from '@/lib/merch/sayings'
+import { classifyClaudeError } from '@/lib/ai/errors'
 
 export const runtime = 'nodejs'
 
@@ -45,7 +46,8 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json({ sayings })
   } catch (err) {
-    console.error('[merch/sayings] generation failed', err)
-    return NextResponse.json({ error: 'Generation failed. Try again.' }, { status: 502 })
+    const c = classifyClaudeError(err)
+    console.error('[merch/sayings] generation failed:', c.kind, '-', c.detail)
+    return NextResponse.json({ error: c.userMessage }, { status: c.status })
   }
 }

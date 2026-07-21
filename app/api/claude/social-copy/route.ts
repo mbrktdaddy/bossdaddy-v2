@@ -1,9 +1,10 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { jsonSchema } from 'ai'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { buildBossDaddySystemBlocks } from '@/lib/voiceProfile'
-import { createStructured } from '@/lib/claude/structured'
+import { buildBossDaddySystemMessages } from '@/lib/voiceProfile'
+import { aiGenerateObject } from '@/lib/ai/client'
+import { classifyClaudeError } from '@/lib/ai/errors'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { PLATFORM_IDS, type SocialPlatform } from '@/lib/social-platforms'
 import { requireSocialActor, fetchGenSource } from '@/lib/social/generate'
@@ -11,27 +12,29 @@ import { z } from 'zod'
 
 export const maxDuration = 45
 
-// The model returns the posts by calling this tool — its input_schema is the
-// shape, so the SDK validates it instead of us regex-parsing JSON.
-const POSTS_TOOL: Anthropic.Tool = {
-  name: 'submit_social_posts',
-  description: 'Return one native social post per requested platform.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      posts: { type: 'array', items: {
-        type: 'object',
-        properties: {
-          platform: { type: 'string' },
-          body:     { type: 'string' },
-          hashtags: { type: 'array', items: { type: 'string' } },
-        },
-        required: ['platform', 'body', 'hashtags'],
-      } },
-    },
-    required: ['posts'],
-  },
+interface SocialDraft {
+  platform: string
+  body: string
+  hashtags: string[]
 }
+
+// The model output is validated against this schema — the SDK enforces it
+// instead of us regex-parsing JSON from text.
+const POSTS_SCHEMA = jsonSchema<{ posts?: SocialDraft[] }>({
+  type: 'object',
+  properties: {
+    posts: { type: 'array', items: {
+      type: 'object',
+      properties: {
+        platform: { type: 'string' },
+        body:     { type: 'string' },
+        hashtags: { type: 'array', items: { type: 'string' } },
+      },
+      required: ['platform', 'body', 'hashtags'],
+    } },
+  },
+  required: ['posts'],
+})
 
 const Schema = z.object({
   content_type: z.enum(['guide', 'review', 'collection']),
@@ -59,12 +62,6 @@ const PLATFORM_SPEC: Record<SocialPlatform, { label: string; rules: string }> = 
     label: 'Threads',
     rules: '1–2 short paragraphs. Conversational, like X but with more breathing room. 500 char comfortable max.',
   },
-}
-
-interface SocialDraft {
-  platform: string
-  body: string
-  hashtags: string[]
 }
 
 export async function POST(request: NextRequest) {
@@ -133,25 +130,26 @@ Each platform's post should feel native to that platform, not a copy-paste. Retu
 
 Body should NOT include the hashtags themselves; we list them separately. Always include the URL exactly once at the end of the body.`
 
-  let result
+  let json: { posts?: SocialDraft[] }
   try {
-    const systemBlocks = await buildBossDaddySystemBlocks(supabase, user.id)
-    result = await createStructured({
-      system: systemBlocks,
+    const systemMessages = await buildBossDaddySystemMessages(supabase, user.id)
+    json = await aiGenerateObject<{ posts?: SocialDraft[] }>({
+      bucket: 'content',
+      tag: 'social-copy',
+      schema: POSTS_SCHEMA,
+      system: systemMessages,
       messages: [{ role: 'user', content: prompt }],
-      tool: POSTS_TOOL,
-      maxTokens: 1500,
+      maxOutputTokens: 1500,
     })
   } catch (err) {
-    console.error('social-copy generation error:', err)
-    return NextResponse.json({ error: 'Generation failed — try again' }, { status: 502 })
+    const c = classifyClaudeError(err)
+    console.error('social-copy generation error:', c.kind, '-', c.detail)
+    if (c.kind === 'truncated') {
+      return NextResponse.json({ error: 'The copy ran long and got cut off. Try fewer platforms and regenerate.' }, { status: 502 })
+    }
+    return NextResponse.json({ error: c.userMessage }, { status: c.status })
   }
 
-  if (result.stopReason === 'max_tokens') {
-    return NextResponse.json({ error: 'The copy ran long and got cut off. Try fewer platforms and regenerate.' }, { status: 502 })
-  }
-
-  const json = (result.data ?? {}) as { posts?: SocialDraft[] }
   const drafts = Array.isArray(json.posts) ? json.posts : []
   if (drafts.length === 0) {
     return NextResponse.json({ error: 'No posts returned' }, { status: 502 })
