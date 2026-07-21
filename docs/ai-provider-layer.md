@@ -57,6 +57,16 @@ Both auto-apply: Gateway failover to Claude, a `surface:<tag>` cost tag, and an 
 
 1. **Foundation + seam** — `ai@6`, `lib/ai/models.ts`, `lib/flags.ts` resolver, `lib/ai/client.ts` wrappers, unit tests. Everything still resolves to Claude; existing call sites untouched. ✅ **done**
 2. **`content` + `utility` one-shot sites** — migrate the 13 `createStructured` callers + plain-text sites to the wrappers. Verify caching + JSON reliability live.
-3. **`research` (web_search)** — provider-conditional: Anthropic `web_search_20260209` + `pause_turn` loop vs xAI `xai.tools.webSearch`. Consolidate the 3 hand-rolled loops.
-4. **`concierge` streaming agent** — hardest; migrate `lib/boss/agent.ts` to `streamText` / `ToolLoopAgent`, preserving the sensitive-lane split.
+3. **`research` (web_search)** — ✅ **done.** One helper `lib/ai/research.ts` (`aiResearch()`) backs all three surfaces (specs-grade, `research_gear`, radar). See **Research bucket** below.
+4. **`concierge` streaming agent** — hardest; migrate `lib/boss/agent.ts` to `streamText` / `ToolLoopAgent`, preserving the sensitive-lane split. Still on the raw `@anthropic-ai/sdk` (`getClaudeClient`) until then.
+
+## Research bucket (`lib/ai/research.ts`)
+
+The only bucket that does live web search. Web search is **provider-native, not portable**: each provider ships its own search tool with its own data + freshness (Anthropic web search vs **xAI / Grok Live Search** over the real-time X firehose). So `aiResearch()` dispatches the search tool by the **resolved provider** — `researchProviderFor(model)`: `xai/*` → `xai.tools.webSearch()`, everything else → `anthropic.tools.webSearch_20260209()`. Flip `AI_MODEL_RESEARCH=xai/grok-4.5` and the whole bucket (including the Boss's `research_gear` search) switches to Grok Live Search with **no code change**.
+
+Design decisions:
+- **Provider-native, not Gateway-native.** The Gateway also offers portable search tools (`gateway.tools.parallelSearch/exaSearch/perplexitySearch`), which would be one code path for any model — but they route to Perplexity/Exa/Parallel, **not** Grok. Since the operator specifically wants Grok's real-time search when the bucket is on Grok, provider-native is the only path that delivers it.
+- **App-level failover, not the Gateway `models` chain.** The in-call `providerOptions.gateway.models` failover would swap the model but not the matching search tool. So this bucket does an app-level retry instead: on a *transient* provider error (`timeout`/`overload`/`rate_limit`/`budget` per `classifyClaudeError`), `aiResearch` retries once on Claude + Anthropic search. Format errors (`no_object`/`truncated`) rethrow — they'd fail identically on Claude.
+- **SDK multi-step + `Output.object`** replace the three hand-rolled `pause_turn` continuation loops and each surface's `submit_*` output tool + prose-JSON salvage. `stopWhen: stepCountIs(maxUses + buffer)` bounds the search loop; the model emits one schema-validated object. Each surface reuses its existing JSON schema via `jsonSchema()` and keeps all its normalization/clamping.
+- Requires `@ai-sdk/anthropic` + `@ai-sdk/xai` (pinned to the **3.x** line — 4.x pulls `@ai-sdk/provider-utils@5`, which mismatches `ai@6.0.230`'s `4.0.40`).
 5. **Pilot Grok** — flip `content` (guides) to `xai/grok-4.5` behind the flag, eval voice + JSON reliability, expand only where it wins. Moderation stays Claude.

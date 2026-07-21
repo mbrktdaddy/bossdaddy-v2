@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest, after } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { jsonSchema, type JSONSchema7 } from 'ai'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { getClaudeClient, MODEL } from '@/lib/claude/client'
-import { extractToolInput } from '@/lib/claude/structured'
+import { aiResearch } from '@/lib/ai/research'
+import { classifyClaudeError } from '@/lib/ai/errors'
 import { createJob, getJob, markRunning, markDone, markError } from '@/lib/aiJobs'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { getCategoryLabel } from '@/lib/categories'
@@ -55,18 +55,13 @@ HARD RULES:
 - Compare like with like (drills to drills, not the whole tool aisle).
 - COMPARE WITHIN THE SAME PRICE TIER. Comparable models should sit in roughly the same price class as the subject — anchor on the curated competitors and the subject's price (a rough 0.5×–2× price band is a sensible default). Do NOT grade a budget product against a flagship, or vice-versa; a cross-tier comparison skews the grade. If in-band comparables are thin, widen the band modestly and SAY SO in the rationale (e.g. "limited direct comparables in this price class"), or grade against the closest available and note the caveat — abstain only if there's no comparable field at any reasonable band.
 
-OUTPUT: When you have gathered enough comparison data (or have decided to abstain), you MUST return your result by calling the submit_specs_grade tool. Do NOT write the grading as plain text. To abstain, call the tool with grade=null and abstained=true and explain why in the rationale.`
+OUTPUT: When you have gathered enough comparison data (or have decided to abstain), return your result as the required structured object (grade, abstained, rationale, comparedAgainst, sources). To abstain, set grade=null and abstained=true and explain why in the rationale.`
 
-// The model returns its grading by calling this tool. It runs ALONGSIDE the
-// web_search server tool, so tool_choice can't force it (that would skip the
-// search) — the system prompt instructs the model to finish by calling it, and
-// the handler falls back to text-parsing if the model answers in prose instead.
-const GRADE_TOOL: Anthropic.Tool = {
-  name: 'submit_specs_grade',
-  description: 'Return the final specs grade after gathering comparison data (or when abstaining).',
-  input_schema: {
-    type: 'object',
-    properties: {
+// The grading is returned as one schema-validated object (AI SDK `Output.object`)
+// after the model runs its web_search steps — no output tool, no prose salvage.
+const GRADE_SCHEMA: JSONSchema7 = {
+  type: 'object',
+  properties: {
       grade:     { type: ['number', 'null'], description: '1-10 specs grade, or null when abstaining' },
       abstained: { type: 'boolean' },
       rationale: { type: 'string', description: '3-5 factual sentences referencing concrete spec deltas' },
@@ -91,7 +86,6 @@ const GRADE_TOOL: Anthropic.Tool = {
       } },
     },
     required: ['grade', 'abstained', 'rationale', 'comparedAgainst', 'sources'],
-  },
 }
 
 function isHttpUrl(s: unknown): s is string {
@@ -107,53 +101,22 @@ function usd(cents: number | null | undefined): string | null {
 // it, and returns the payload. Throws on API error / unusable output — the
 // caller maps that to the job's error field.
 async function runSpecsGrade(prompt: string): Promise<Record<string, unknown>> {
-  // 6 searches comfortably covers 4-6 comparable models (≈1 each) while keeping
-  // the run well under the ceiling.
-  const tools: Anthropic.Messages.MessageCreateParams['tools'] = [
-    { type: 'web_search_20260209', name: 'web_search', max_uses: 6 },
-    GRADE_TOOL,
-  ]
-  const messages: Anthropic.Messages.MessageParam[] = [{ role: 'user', content: prompt }]
-  const createArgs = (msgs: Anthropic.Messages.MessageParam[]) => ({
-    model: MODEL,
-    max_tokens: 8000,
-    system: [{ type: 'text' as const, text: SPECS_GRADE_SYSTEM, cache_control: { type: 'ephemeral' as const } }],
-    tools,
-    messages: msgs,
+  // Provider-native web search + one schema-validated object (no output tool, no
+  // pause_turn loop, no prose salvage — the SDK guarantees `out` or throws). 6
+  // searches comfortably covers 4-6 comparable models (≈1 each); maxSteps leaves
+  // room for those search steps plus the final structured-output step.
+  const { object: out } = await aiResearch<Record<string, unknown>>({
+    tag: 'specs-grade',
+    system: SPECS_GRADE_SYSTEM,
+    prompt,
+    schema: jsonSchema<Record<string, unknown>>(GRADE_SCHEMA),
+    search: { maxUses: 6 },
+    maxSteps: 9,
+    maxOutputTokens: 8000,
+    // Anthropic returns transient 529 overloaded_error under load — extra retry
+    // headroom rides out a brief spike.
+    maxRetries: 4,
   })
-  // Anthropic returns transient 529 overloaded_error under load — give the SDK
-  // extra retry headroom to ride out a brief spike.
-  const reqOpts = { maxRetries: 4 }
-
-  let message = await getClaudeClient().messages.create(createArgs(messages), reqOpts)
-  // web_search can return stop_reason 'pause_turn' on long loops — continue the
-  // turn (passing the partial content back) until it finishes, capped.
-  let guard = 0
-  while (message.stop_reason === 'pause_turn' && guard < 3) {
-    guard++
-    messages.push({ role: 'assistant', content: message.content })
-    message = await getClaudeClient().messages.create(createArgs(messages), reqOpts)
-  }
-
-  // Preferred: the model called submit_specs_grade. Fallback: it answered in
-  // prose (web_search + a forced output tool can't coexist) — salvage JSON.
-  let out: Record<string, unknown> | null = extractToolInput(message, 'submit_specs_grade')
-  if (!out) {
-    const text = message.content
-      .filter((b): b is Anthropic.TextBlock => b.type === 'text')
-      .map((b) => b.text)
-      .join('\n')
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (jsonMatch) { try { out = JSON.parse(jsonMatch[0]) } catch { out = null } }
-  }
-  if (!out) {
-    const hint = message.stop_reason === 'max_tokens'
-      ? ' (the comparison ran long — try again)'
-      : message.stop_reason === 'pause_turn'
-      ? ' (the web search timed out — try again)'
-      : ''
-    throw new Error(`Model returned an unexpected format${hint}.`)
-  }
 
   const abstained = out.abstained === true
   let grade: number | null = null
@@ -289,15 +252,9 @@ Use the verified specs above as ground truth, and stay within the subject's pric
         const result = await runSpecsGrade(prompt)
         await markDone(jobId, result)
       } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err)
-        console.error('specs-grade job failed:', msg)
-        const isOverload = /overload|529|capacity/i.test(msg)
-        const isTimeout = /timeout|timed.?out|deadline/i.test(msg)
-        await markError(jobId, isOverload
-          ? 'The AI service is busy right now (overloaded). Wait a minute and try again.'
-          : isTimeout
-          ? 'The grading search timed out — try again; it usually works on a second run.'
-          : msg)
+        const c = classifyClaudeError(err)
+        console.error('specs-grade job failed:', c.kind, c.detail)
+        await markError(jobId, c.userMessage)
       }
     })
 
