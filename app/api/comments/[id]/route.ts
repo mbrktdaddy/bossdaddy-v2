@@ -52,7 +52,7 @@ export async function PUT(
   return NextResponse.json({ comment: data })
 }
 
-// DELETE /api/comments/[id] — own pending comment or admin
+// DELETE /api/comments/[id] — own comment (any status) or admin
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -64,19 +64,47 @@ export async function DELETE(
 
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
 
+  // Grab the parent-content coordinates (returned by the delete) so we can flush
+  // the public page cache afterward.
+  let deleted: { content_type: string; content_id: string } | null = null
+
   if (profile?.role === 'admin') {
     const admin = createAdminClient()
-    await admin.from('comments').delete().eq('id', id)
+    const { data } = await admin
+      .from('comments')
+      .delete()
+      .eq('id', id)
+      .select('content_type, content_id')
+      .maybeSingle()
+    deleted = data ?? null
   } else {
-    // Authors can only delete their own non-approved comments
-    const { error } = await supabase
+    // Authors can delete their OWN comment regardless of status (RLS enforces
+    // ownership too — see migration 123). If nothing comes back, the comment
+    // wasn't theirs (or is already gone) → 404, not a silent success.
+    const { data, error } = await supabase
       .from('comments')
       .delete()
       .eq('id', id)
       .eq('author_id', user.id)
-      .neq('status', 'approved')
+      .select('content_type, content_id')
+      .maybeSingle()
 
     if (error) return NextResponse.json({ error: 'Action failed' }, { status: 500 })
+    if (!data) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    deleted = data
+  }
+
+  // Flush the parent content page so the removed comment disappears immediately.
+  if (deleted) {
+    const tableMap  = { review: 'reviews', guide: 'guides', product: 'products' } as const
+    const prefixMap = { review: '/reviews', guide: '/guides', product: '/bench' } as const
+    const table  = tableMap[deleted.content_type as keyof typeof tableMap]
+    const prefix = prefixMap[deleted.content_type as keyof typeof prefixMap]
+    if (table && prefix) {
+      const admin = createAdminClient()
+      const { data: content } = await admin.from(table).select('slug').eq('id', deleted.content_id).single()
+      if (content?.slug) revalidatePath(`${prefix}/${content.slug}`)
+    }
   }
 
   return NextResponse.json({ success: true })

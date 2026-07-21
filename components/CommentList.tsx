@@ -1,5 +1,6 @@
 import { createAnonClient } from '@/lib/supabase/anon'
 import CommentShareButton from './CommentShareButton'
+import CommentDeleteButton from './CommentDeleteButton'
 import LikeButton from './LikeButton'
 
 interface Props {
@@ -15,7 +16,7 @@ export default async function CommentList({ contentType, contentId }: Props) {
 
   const { data: comments } = await supabase
     .from('comments')
-    .select('id, body, created_at, profiles(username)')
+    .select('id, body, created_at, author_id, profiles(username)')
     .eq('content_type', contentType)
     .eq('content_id', contentId)
     .eq('status', 'approved')
@@ -57,7 +58,10 @@ export default async function CommentList({ contentType, contentId }: Props) {
             <p className="text-prose-muted text-sm leading-relaxed whitespace-pre-line">{c.body}</p>
             <div className="mt-3 pt-3 border-t border-soft flex items-center justify-between">
               <LikeButton contentType="comment" contentId={c.id} size="sm" />
-              <CommentShareButton commentId={c.id} shareCount={shareCountMap[c.id] ?? 0} />
+              <div className="flex items-center gap-3">
+                <CommentShareButton commentId={c.id} shareCount={shareCountMap[c.id] ?? 0} />
+                {c.author_id && <CommentDeleteButton commentId={c.id} authorId={c.author_id} />}
+              </div>
             </div>
           </div>
         )
