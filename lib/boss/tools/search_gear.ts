@@ -1,5 +1,5 @@
-import { CATEGORY_SLUGS } from '@/lib/categories'
-import type { BossTool, Citation } from '../types'
+import { orTsQuery } from '../searchQuery'
+import type { Block, BossTool } from '../types'
 
 const GEAR_LIMIT = 8
 
@@ -19,7 +19,6 @@ export const searchGear: BossTool = {
           type: 'string',
           description: 'Keywords for the product need, e.g. "lightweight twin stroller" or "cordless drill for a tall guy".',
         },
-        category: { type: 'string', enum: [...CATEGORY_SLUGS], description: 'Optional category filter.' },
         price_min_cents: { type: 'integer', description: 'Optional minimum price in cents.' },
         price_max_cents: { type: 'integer', description: 'Optional maximum price in cents.' },
         limit: { type: 'integer', maximum: GEAR_LIMIT, description: 'Max results (<= 8).' },
@@ -32,23 +31,35 @@ export const searchGear: BossTool = {
     const limit = Math.min(Number(input.limit) || GEAR_LIMIT, GEAR_LIMIT)
     if (!query) return { content: JSON.stringify({ candidates: [], note: 'No query provided.' }) }
 
-    let q = ctx.supabase
-      .from('reviews')
-      .select(
-        'slug, title, product_name, product_slug, rating, score_quality, score_value, score_ease, score_daily_use, score_specs, excerpt, is_top_pick',
-      )
-      .eq('status', 'approved')
-      .eq('is_visible', true)
-      .textSearch('search_vector', query, { type: 'websearch' })
-      .order('rating', { ascending: false, nullsFirst: false })
-      .order('is_top_pick', { ascending: false })
-      .limit(limit)
+    // Strict full-text first (precise); broaden to an OR-of-terms fallback only
+    // when strict finds nothing, so natural phrasing ("cordless drill for a tall
+    // guy") still surfaces a tested pick instead of a false "no pick yet". NO
+    // category filter — a review's category must never hide the best-RATED match
+    // from a differently-categorized query (a swing set filed under outdoors was
+    // hidden from a kids-family guess). Rating order lets the Boss's score decide.
+    const base = () =>
+      ctx.supabase
+        .from('reviews')
+        .select(
+          'slug, title, product_name, product_slug, rating, score_quality, score_value, score_ease, score_daily_use, score_specs, excerpt, is_top_pick',
+        )
+        .eq('status', 'approved')
+        .eq('is_visible', true)
+        .order('rating', { ascending: false, nullsFirst: false })
+        .order('is_top_pick', { ascending: false })
+        .limit(limit)
 
-    if (typeof input.category === 'string' && input.category) q = q.eq('category', input.category)
-
-    const { data, error } = await q
-    if (error) throw error
-    let rows = data ?? []
+    const strict = await base().textSearch('search_vector', query, { type: 'websearch' })
+    if (strict.error) throw strict.error
+    let rows = strict.data ?? []
+    if (!rows.length) {
+      const orQuery = orTsQuery(query)
+      if (orQuery) {
+        const relaxed = await base().textSearch('search_vector', orQuery)
+        if (relaxed.error) throw relaxed.error
+        rows = relaxed.data ?? []
+      }
+    }
 
     // Reviews don't carry price — pull it from the linked products when bounded.
     const min = typeof input.price_min_cents === 'number' ? input.price_min_cents : null
@@ -74,7 +85,7 @@ export const searchGear: BossTool = {
       }
     }
 
-    const citations: Citation[] = rows.map((r) => ({
+    const citations: Block[] = rows.map((r) => ({
       kind: 'review',
       slug: r.slug,
       title: r.title,

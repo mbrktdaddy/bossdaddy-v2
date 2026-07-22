@@ -1,4 +1,4 @@
-import type Anthropic from '@anthropic-ai/sdk'
+import type { ModelMessage } from 'ai'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
@@ -8,7 +8,7 @@ import { getEntitlements } from '@/lib/boss/entitlements'
 import { buildBossConciergeSystemBlocks } from '@/lib/boss/prompt'
 import { runBossAgent } from '@/lib/boss/agent'
 import { BOSS_TOOLS } from '@/lib/boss/tools'
-import type { BossStreamEvent, Citation } from '@/lib/boss/types'
+import type { Block, BossStreamEvent } from '@/lib/boss/types'
 
 // Streaming keeps the connection open for the turn. Most turns are short, but the
 // gap-fallback research_gear tool fires Anthropic web_search synchronously inside
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
   const { message, conversationId, context, history } = parsed.data
 
   // Build the running message list.
-  let priorTurns: Anthropic.Messages.MessageParam[] = []
+  let priorTurns: ModelMessage[] = []
   let activeConversationId: string | null = null
 
   if (user) {
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
   }
 
   const userContent = context ? `(Context the user is viewing: ${context})\n\n${message}` : message
-  const messages: Anthropic.Messages.MessageParam[] = [
+  const messages: ModelMessage[] = [
     ...priorTurns,
     { role: 'user', content: userContent },
   ]
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
 
   const encoder = new TextEncoder()
   let assistantText = ''
-  const citations: Citation[] = []
+  const blocks: Block[] = []
   const toolNames: string[] = []
 
   const stream = new ReadableStream<Uint8Array>({
@@ -103,7 +103,9 @@ export async function POST(req: NextRequest) {
       try {
         for await (const ev of runBossAgent({ system, messages, tools: BOSS_TOOLS, ctx })) {
           if (ev.type === 'text') assistantText += ev.delta
-          if (ev.type === 'citations') citations.push(...ev.items)
+          // `blocks` is the current channel; `citations` is the legacy event name
+          // (kept on the union until the last producer drops it).
+          if (ev.type === 'blocks' || ev.type === 'citations') blocks.push(...ev.items)
           if (ev.type === 'tool_start') toolNames.push(ev.name)
 
           if (ev.type === 'done') {
@@ -116,7 +118,7 @@ export async function POST(req: NextRequest) {
                 conversationId: activeConversationId,
                 userMessage: message,
                 assistantText,
-                citations,
+                blocks,
                 toolNames,
               })
               messageId = res.messageId
@@ -167,7 +169,7 @@ async function persistTurn(opts: {
   conversationId: string | null
   userMessage: string
   assistantText: string
-  citations: Citation[]
+  blocks: Block[]
   toolNames: string[]
 }): Promise<{ conversationId: string | null; messageId: string | null }> {
   const { supabase, userId } = opts
@@ -200,7 +202,9 @@ async function persistTurn(opts: {
         user_id: userId,
         role: 'assistant',
         content: opts.assistantText,
-        citations: opts.citations.length ? opts.citations : null,
+        // Persisted in the existing `citations` jsonb column (Block[]); the
+        // renderer reads both the historical and new block shapes.
+        citations: opts.blocks.length ? opts.blocks : null,
         tool_calls: opts.toolNames.length ? opts.toolNames.map((name) => ({ name })) : null,
       })
       .select('id')

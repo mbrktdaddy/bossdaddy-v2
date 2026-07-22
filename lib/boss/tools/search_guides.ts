@@ -1,5 +1,5 @@
-import { CATEGORY_SLUGS } from '@/lib/categories'
-import type { BossTool, Citation } from '../types'
+import { orTsQuery } from '../searchQuery'
+import type { Block, BossTool } from '../types'
 
 const GUIDE_LIMIT = 6
 
@@ -15,7 +15,6 @@ export const searchGuides: BossTool = {
       type: 'object',
       properties: {
         query: { type: 'string', description: 'Topic keywords.' },
-        category: { type: 'string', enum: [...CATEGORY_SLUGS], description: 'Optional category filter.' },
         limit: { type: 'integer', maximum: GUIDE_LIMIT, description: 'Max results (<= 6).' },
       },
       required: ['query'],
@@ -26,25 +25,39 @@ export const searchGuides: BossTool = {
     const limit = Math.min(Number(input.limit) || GUIDE_LIMIT, GUIDE_LIMIT)
     if (!query) return { content: JSON.stringify({ guides: [], note: 'No query provided.' }) }
 
-    let q = ctx.supabase
-      .from('guides')
-      .select('slug, title, excerpt')
-      .eq('status', 'approved')
-      .eq('is_visible', true)
-      .textSearch('search_vector', query, { type: 'websearch' })
-      .limit(limit)
+    // Strict full-text first; broaden to an OR-of-terms fallback when strict finds
+    // nothing, so natural phrasing ("how do I PREVENT razor rash") still matches a
+    // guide whose text lacks one word. No category filter (see search_gear).
+    const base = () =>
+      ctx.supabase
+        .from('guides')
+        .select('slug, title, excerpt, category, reading_time_minutes')
+        .eq('status', 'approved')
+        .eq('is_visible', true)
+        .limit(limit)
 
-    if (typeof input.category === 'string' && input.category) q = q.eq('category', input.category)
+    const strict = await base().textSearch('search_vector', query, { type: 'websearch' })
+    if (strict.error) throw strict.error
+    let rows = strict.data ?? []
+    if (!rows.length) {
+      const orQuery = orTsQuery(query)
+      if (orQuery) {
+        const relaxed = await base().textSearch('search_vector', orQuery)
+        if (relaxed.error) throw relaxed.error
+        rows = relaxed.data ?? []
+      }
+    }
 
-    const { data, error } = await q
-    if (error) throw error
-    const rows = data ?? []
-
-    const citations: Citation[] = rows.map((r) => ({
+    // Enrich the block so the client renders a first-class guide card (category +
+    // one-line "why this helps" + read-time) without a second fetch.
+    const citations: Block[] = rows.map((r) => ({
       kind: 'guide',
       slug: r.slug,
       title: r.title,
       url: `/guides/${r.slug}`,
+      excerpt: r.excerpt,
+      category: r.category,
+      readingMinutes: r.reading_time_minutes,
     }))
 
     const guides = rows.map((r) => ({

@@ -2,11 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import type { BossStreamEvent, Citation } from '@/lib/boss/types'
-import RecommendationCard from './RecommendationCard'
-import { ResearchedList } from './ResearchedList'
+import type { Block, BossStreamEvent } from '@/lib/boss/types'
+import { normalizeBossText } from '@/lib/boss/normalizeText'
+import BossBlocks from './BossBlocks'
 
-type Msg = { role: 'user' | 'assistant'; content: string; citations?: Citation[]; error?: boolean }
+// `failed` = a hard failure with no streamed text (the whole bubble is the error).
+// `errorNote` = a mid-stream cutoff AFTER text arrived — keep what streamed and
+// show a short note below it, never wipe the partial answer.
+type Msg = { role: 'user' | 'assistant'; content: string; citations?: Block[]; errorNote?: string; failed?: boolean }
 
 const DRAFT_KEY = 'bd_boss_draft'
 const EXAMPLES = [
@@ -61,6 +64,9 @@ export default function BossChat({ isMember, seedContext }: { isMember: boolean;
               : 'Pulling up guides…',
         )
         break
+      // `blocks` is the current channel; `citations` is the legacy event name kept
+      // until the agent migration (PR 1 step 2). The renderer accepts both.
+      case 'blocks':
       case 'citations':
         updateLastAssistant((m) => ({ ...m, citations: [...(m.citations ?? []), ...ev.items] }))
         break
@@ -68,7 +74,11 @@ export default function BossChat({ isMember, seedContext }: { isMember: boolean;
         if (ev.conversationId) setConvId(ev.conversationId)
         break
       case 'error':
-        updateLastAssistant((m) => ({ ...m, content: m.content || ev.message, error: true }))
+        updateLastAssistant((m) =>
+          m.content.trim()
+            ? { ...m, errorNote: ev.message } // keep the partial answer, note the cutoff
+            : { ...m, content: ev.message, failed: true },
+        )
         break
       case 'quota_exhausted':
         setQuota(true)
@@ -126,7 +136,11 @@ export default function BossChat({ isMember, seedContext }: { isMember: boolean;
         }
       }
     } catch {
-      updateLastAssistant((m) => ({ ...m, content: m.content || 'The Boss hit a snag. Give it another shot.', error: true }))
+      updateLastAssistant((m) =>
+        m.content.trim()
+          ? { ...m, errorNote: 'The Boss got cut off. Give it another shot.' }
+          : { ...m, content: 'The Boss hit a snag. Give it another shot.', failed: true },
+      )
     } finally {
       setBusy(false)
       setToolNote(null)
@@ -162,27 +176,18 @@ export default function BossChat({ isMember, seedContext }: { isMember: boolean;
                   m.role === 'user'
                     ? 'bg-accent text-white rounded-2xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap'
                     : `rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
-                        m.error ? 'bg-danger-bg text-danger-ink border border-danger-line' : 'bg-surface text-prose border border-soft'
+                        m.failed ? 'bg-danger-bg text-danger-ink border border-danger-line' : 'bg-surface text-prose border border-soft'
                       }`
                 }
               >
-                {m.content || (busy && i === msgs.length - 1 ? <span className="text-prose-faint">{toolNote ?? 'Thinking…'}</span> : '')}
+                {/* Assistant prose is normalized (markdown backstop); user text is shown verbatim. */}
+                {(m.role === 'assistant' ? normalizeBossText(m.content) : m.content) ||
+                  (busy && i === msgs.length - 1 ? <span className="text-prose-faint">{toolNote ?? 'Thinking…'}</span> : '')}
               </div>
-              {m.citations && m.citations.length > 0 && (() => {
-                const items = dedupe(m.citations)
-                const researched = items.filter((c) => c.researched)
-                const rest = items.filter((c) => !c.researched)
-                return (
-                  <div className="mt-2 space-y-2">
-                    {rest.map((c) => (
-                      <RecommendationCard key={`${c.kind}:${c.slug}`} c={c} />
-                    ))}
-                    {researched.length > 0 && (
-                      <ResearchedList items={researched} query={i > 0 ? msgs[i - 1]?.content : undefined} />
-                    )}
-                  </div>
-                )
-              })()}
+              {m.errorNote && <p className="mt-1 text-[11px] text-danger-ink">{m.errorNote}</p>}
+              {m.citations && m.citations.length > 0 && (
+                <BossBlocks items={m.citations} query={i > 0 ? msgs[i - 1]?.content : undefined} />
+              )}
             </div>
           </div>
         ))}
@@ -242,16 +247,4 @@ export default function BossChat({ isMember, seedContext }: { isMember: boolean;
       )}
     </div>
   )
-}
-
-function dedupe(items: Citation[]): Citation[] {
-  const seen = new Set<string>()
-  const out: Citation[] = []
-  for (const c of items) {
-    const key = `${c.kind}:${c.slug}`
-    if (seen.has(key)) continue
-    seen.add(key)
-    out.push(c)
-  }
-  return out
 }

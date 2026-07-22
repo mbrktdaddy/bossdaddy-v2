@@ -20,6 +20,7 @@
     "smoke": "node --env-file=.env.local scripts/smoke-test.mjs",
     "ai:smoke": "node --env-file=.env.local scripts/ai-smoke.mjs",
     "ai:research-smoke": "node --env-file=.env.local scripts/ai-research-smoke.mjs",
+    "boss:eval": "vitest run --config vitest.eval.config.ts",
     "merch:sync": "node --env-file=.env.local scripts/sync-printful.mjs",
     "merch:discover": "node --env-file=.env.local scripts/discover-merch-blanks.mjs"
   },
