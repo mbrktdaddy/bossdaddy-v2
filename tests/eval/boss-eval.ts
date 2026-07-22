@@ -119,6 +119,19 @@ describe.skipIf(!READY)('Boss concierge golden eval', () => {
     expect(r.tools).toContain('search_gear')
   })
 
+  it('gear rec surfaces the highest-rated pick across categories', async () => {
+    // Regression: a kids-family category guess hard-filtered out the 9.0 Gorilla
+    // (outdoors), leaving only the 4.75 FUNLIO. Category filter removed — rating decides.
+    const r = await runGolden('what is your recommendation for a swing set')
+    summarize('gear/cross-category-ranking', r)
+    assertVoice('swing-set', r.text)
+    expect(r.tools).toContain('search_gear')
+    expect(
+      r.citations.some((c) => c.slug.includes('gorilla')),
+      'expected the top-rated swing set (Gorilla) surfaced, not just the low-rated one',
+    ).toBe(true)
+  })
+
   it('how-to with likely guide → calls search_guides', async () => {
     const r = await runGolden('How do I fix a squeaky door hinge?')
     summarize('howto/search_guides', r)
@@ -126,10 +139,23 @@ describe.skipIf(!READY)('Boss concierge golden eval', () => {
     expect(r.tools).toContain('search_guides')
   })
 
-  it('how-to with no guide → still useful, in voice', async () => {
-    const r = await runGolden('How do I prevent razor rash when I shave?')
+  it('how-to matches an existing guide despite natural phrasing', async () => {
+    // Regression: "prevent razor rash" AND-missed the "Razor Rash…" guide via
+    // websearch AND-semantics ("prevent" isn't in the guide); the OR fallback recovers it.
+    const r = await runGolden('how do i prevent razor rash')
+    summarize('howto/razor-guide', r)
+    assertVoice('razor-guide', r.text)
+    expect(r.tools).toContain('search_guides')
+    expect(
+      r.citations.some((c) => c.kind === 'guide'),
+      'expected the razor rash guide surfaced, not a false "no guide yet"',
+    ).toBe(true)
+  })
+
+  it('how-to with genuinely no guide → still useful, in voice', async () => {
+    const r = await runGolden('How do I get my toddler to stop biting other kids?')
     summarize('howto/no-guide', r)
-    assertVoice('razor-rash', r.text)
+    assertVoice('no-guide', r.text)
     // Should still produce a genuinely useful answer even with thin local content.
     expect(r.text.length).toBeGreaterThan(80)
   })
