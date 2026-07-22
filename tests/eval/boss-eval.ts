@@ -17,6 +17,14 @@ import type { BossStreamEvent, Citation } from '@/lib/boss/types'
 //
 // Run: `npm run boss:eval`. Reads live output — treat WARN logs as "look here",
 // hard `expect` failures as objective brand-rule violations.
+//
+// FREE-KEY CAVEAT: on a free Vercel gateway key the embedding model
+// (cohere/embed-v4.0) rate-limits under load. When a query embed 429s, the
+// grounded tools fall back to STRICT full-text (AND), so a semantic-recall case
+// (e.g. "prevent razor rash", where the guide lacks "prevent") can flake to
+// citations:0 — an environment limit, NOT a retrieval regression. The deterministic
+// `npm run hybrid:smoke` proves the RPC ranking directly; run the eval on a
+// pro-team key for a clean full pass.
 // ────────────────────────────────────────────────────────────────────────────
 
 const SUPABASE_URL =
@@ -143,6 +151,24 @@ describe.skipIf(!READY)('Boss concierge golden eval', () => {
     expect(
       r.citations.some((c) => c.slug.includes('gorilla')),
       'expected the top-rated swing set (Gorilla) surfaced, not just the low-rated one',
+    ).toBe(true)
+  })
+
+  it('gear rec stays on-topic on a natural query — no irrelevant cards', async () => {
+    // Regression (the PR-1 OR-fallback): "great swing sets for a 5 yr old"
+    // over-matched common terms ("set", "old") with NO relevance ranking and
+    // rendered baby-formula / carrier / cook-stove cards. Hybrid semantic + RRF +
+    // a similarity floor (migration 125) keeps only on-topic picks. Requires the
+    // embedding backfill to have run.
+    const r = await runGolden('what are some great swing sets for a 5 year old')
+    summarize('gear/no-junk', r)
+    assertVoice('swing-set-natural', r.text)
+    expect(r.tools).toContain('search_gear')
+    const reviews = r.citations.filter((c) => c.kind === 'review')
+    expect(reviews.length, 'expected the tested swing set(s) to surface').toBeGreaterThan(0)
+    expect(
+      reviews.every((c) => c.slug.includes('swing')),
+      `every gear card must be a swing set — got: ${reviews.map((c) => c.slug).join(', ')}`,
     ).toBe(true)
   })
 

@@ -29,7 +29,10 @@ jobs:
 
     services:
       postgres:
-        image: postgres:16
+        # pgvector's official image = postgres:16 + the `vector` extension.
+        # Migration 125 does `create extension vector`; stock postgres:16 lacks
+        # the extension control file, so the replay must run on this image.
+        image: pgvector/pgvector:pg16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres

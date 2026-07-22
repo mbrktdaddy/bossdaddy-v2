@@ -44,6 +44,10 @@
     {
       "path": "/api/cron/radar",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/embed-content",
+      "schedule": "*/15 * * * *"
     }
   ]
 }
