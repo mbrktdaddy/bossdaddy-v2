@@ -16,47 +16,31 @@ import { tierAtLeast } from './entitlements'
 const MAX_TOKENS = 2048
 const CONCIERGE_TAG = 'boss-concierge'
 
-// First-turn patterns that route to the edge-off SENSITIVE Claude lane (loss,
-// self-harm, medical, legal, financial). These are exactly the four deflect lanes,
-// where a careful on-brand redirect matters more than saving tokens — so a match
-// resolves the sensitive lane via resolveModel('concierge', { sensitive: true })
-// (defaults to Claude, operator-overridable independently — see lib/flags.ts).
+// First-turn patterns that force-route to the careful Claude "sensitive" lane
+// (resolveModel('concierge', { sensitive: true }) — defaults to Claude,
+// operator-overridable independently; see lib/flags.ts).
 //
-// gap G: matching is word-boundary / stem-based and deliberately tuned to
-// OVER-match (safe-default-up). The old substring list under-matched — 'hurt
-// myself' missed "hurting myself", and ' sue ' (space-padded) missed "sue him"
-// and sentence-final "sue." A false positive just runs a benign turn on the
-// careful Claude lane (a little pricier, edge-off tone); a false negative runs a
-// genuine crisis/medical/legal/financial turn on the cheap fast lane. The first
-// is cheap insurance; the second is the failure that matters. So stems match
-// inflections (suicid → suicidal/suicide, invest → investing/investment) and
-// single words use \b, not surrounding spaces.
+// SCOPE: crisis / self-harm ONLY. This is the one lane where forcing the careful
+// Claude lane is a genuine, provider-agnostic safety floor — irreversible stakes,
+// and the protection that still holds if an operator ever points the everyday
+// bucket at another provider. Legal / medical / financial deliberately do NOT
+// route here: they don't need a different MODEL — any capable model gives the
+// "general info + name a pro" behavior from the prompt's HARD LIMITS block, and
+// the edge-off tone is prompt-driven regardless of lane. Routing them here was
+// over-tooling (a pricier model switch for topics the everyday lane handles).
+//
+// gap G: matching is word-boundary / stem-based and tuned to OVER-match
+// (safe-default-up). A false positive just runs a benign turn on the careful
+// lane (a little pricier); a false negative runs a genuine crisis turn on the
+// cheap fast lane — the failure that matters. Stems match inflections
+// (suicid → suicidal/suicide) and single words use \b, not surrounding spaces.
 const SENSITIVE_PATTERNS: RegExp[] = [
-  // Mental-health crisis / self-harm
   /\bsuicid/,
   /\bself[-\s]?harm/,
   /\bkill(?:ing)?\s+myself\b/,
   /\bhurt\w*\s+myself\b/,
   /\bend(?:ing)?\s+(?:it all|my life)\b/,
   /\boverdos/,
-  // Medical
-  /\bdiagnos/,
-  /\bsymptom/,
-  /\bprescri/,
-  /\bdosag|\bdosing\b/,
-  /\bmedication/,
-  // Legal
-  /\bcustod/,
-  /\bdivorc/,
-  /\blawsuit/,
-  /\bsue\b|\bsuing\b/,
-  /\battorney/,
-  /\blawyer/,
-  // Financial / investment / tax
-  /\binvest/,
-  /\bstocks?\b/,
-  /\bcrypto/,
-  /\btax(?:es|ed)?\b/,
 ]
 
 export function isSensitive(text: string): boolean {
