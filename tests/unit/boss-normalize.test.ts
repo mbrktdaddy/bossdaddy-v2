@@ -40,4 +40,39 @@ describe('normalizeBossText', () => {
     expect(MARKDOWN.test(raw)).toBe(true)
     expect(MARKDOWN.test(normalizeBossText(raw))).toBe(false)
   })
+
+  // ── Cards own the links (PR 2a compliance backstop) ──
+  it('drops a whole line that is just a link reference', () => {
+    const raw =
+      "This is the one — 1,181 lbs of cedar.\nReview: /reviews/gorilla-wilderness-gym\nBuy link (affiliate, no extra cost to you): /go/gorilla-wilderness-gym"
+    expect(normalizeBossText(raw)).toBe('This is the one — 1,181 lbs of cedar.')
+  })
+
+  it('strips a bare inline internal path but keeps the surrounding prose', () => {
+    expect(normalizeBossText('The full review /reviews/some-slug covers the rest.')).toBe(
+      'The full review covers the rest.',
+    )
+    expect(normalizeBossText('Grab it here (/go/some-slug).')).toBe('Grab it here.')
+  })
+
+  it('never leaves a bare /reviews//guides//go/ path in the output', () => {
+    const BARE = /(?<![\w.])\/(?:reviews|guides|go)\/[a-z0-9-]+/i
+    const raw =
+      'Shower shaving is the move.\nGuide: /guides/shaving-in-the-shower\nStill helps: see /reviews/foo and /go/bar too.'
+    expect(BARE.test(raw)).toBe(true)
+    expect(BARE.test(normalizeBossText(raw))).toBe(false)
+  })
+
+  it('does not mangle absolute URLs that merely contain the path segments', () => {
+    // The lookbehind spares a full URL — only bare relative paths are stripped.
+    expect(normalizeBossText('see https://bossdaddylife.com/reviews/x for more')).toBe(
+      'see https://bossdaddylife.com/reviews/x for more',
+    )
+  })
+
+  it('preserves a legit "label:" lead-in line that has no link path', () => {
+    expect(normalizeBossText("Here's the deal:\n• sharp blade\n• shave with the grain")).toBe(
+      "Here's the deal:\n• sharp blade\n• shave with the grain",
+    )
+  })
 })

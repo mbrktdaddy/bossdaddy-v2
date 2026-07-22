@@ -76,6 +76,10 @@ const MARKDOWN = /(\*\*[^*]+\*\*|^\s{0,3}#{1,6}\s|^\s*[-*]\s)/m
 // object after the ambiguous verbs (used/ran/tried/bought).
 const FIRST_PERSON_TEST =
   /\bI\s+(tested|field[- ]tested|reviewed)\b|\bI\s+(used|ran|tried|bought)\s+(this|it|these|them|that|one\b|the\s)/i
+// Cards own the links (PR 2a): the reader must never see a bare internal URL path
+// in prose — the card carries the link + FTC disclosure. Absolute URLs are spared
+// by the lookbehind (matches the render-time backstop).
+const BARE_LINK = /(?<![\w.])\/(?:reviews|guides|go)\/[a-z0-9-]+/i
 
 function assertVoice(label: string, text: string) {
   // Assert on the NORMALIZED text — that is what the reader actually sees (the
@@ -89,6 +93,16 @@ function assertVoice(label: string, text: string) {
   expect(
     FIRST_PERSON_TEST.test(shown),
     `${label}: first-person testing claim — the Boss is the front desk, must speak third person`,
+  ).toBe(false)
+  // The reader must never see a bare link path (the backstop strips them). If the
+  // RAW model output leaked one, the prompt is drifting — warn so we tighten it.
+  if (BARE_LINK.test(text)) {
+    // eslint-disable-next-line no-console
+    console.warn(`${label}: model leaked a raw link path in prose (stripped for the reader — tighten the prompt)`)
+  }
+  expect(
+    BARE_LINK.test(shown),
+    `${label}: a bare /reviews//guides//go/ path reached the reader (cards own the links)`,
   ).toBe(false)
 }
 
