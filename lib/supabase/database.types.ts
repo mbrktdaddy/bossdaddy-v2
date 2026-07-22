@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       abuse_reports: {
@@ -805,6 +830,7 @@ export type Database = {
           content: string
           content_type: string
           created_at: string | null
+          embedding: string | null
           excerpt: string | null
           faqs: Json
           featured: boolean
@@ -840,6 +866,7 @@ export type Database = {
           content: string
           content_type?: string
           created_at?: string | null
+          embedding?: string | null
           excerpt?: string | null
           faqs?: Json
           featured?: boolean
@@ -875,6 +902,7 @@ export type Database = {
           content?: string
           content_type?: string
           created_at?: string | null
+          embedding?: string | null
           excerpt?: string | null
           faqs?: Json
           featured?: boolean
@@ -1971,6 +1999,7 @@ export type Database = {
           content: string
           created_at: string | null
           disclosure_acknowledged: boolean | null
+          embedding: string | null
           excerpt: string | null
           faqs: Json
           featured: boolean
@@ -2034,6 +2063,7 @@ export type Database = {
           content: string
           created_at?: string | null
           disclosure_acknowledged?: boolean | null
+          embedding?: string | null
           excerpt?: string | null
           faqs?: Json
           featured?: boolean
@@ -2097,6 +2127,7 @@ export type Database = {
           content?: string
           created_at?: string | null
           disclosure_acknowledged?: boolean | null
+          embedding?: string | null
           excerpt?: string | null
           faqs?: Json
           featured?: boolean
@@ -3172,6 +3203,138 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      boss_hybrid_guides: {
+        Args: {
+          match_count?: number
+          min_similarity?: number
+          query_embedding: string
+          query_text: string
+          rrf_k?: number
+        }
+        Returns: {
+          author_id: string
+          category: string
+          content: string
+          content_type: string
+          created_at: string | null
+          embedding: string | null
+          excerpt: string | null
+          faqs: Json
+          featured: boolean
+          has_affiliate_links: boolean
+          id: string
+          image_url: string | null
+          is_visible: boolean
+          key_takeaways: Json
+          legacy_slugs: string[]
+          meta_description: string | null
+          meta_title: string | null
+          moderation_flags: Json | null
+          moderation_score: number | null
+          published_at: string | null
+          reading_time_minutes: number | null
+          rejection_reason: string | null
+          scheduled_publish_at: string | null
+          scroll_100_count: number
+          scroll_25_count: number
+          scroll_50_count: number
+          scroll_75_count: number
+          search_vector: unknown
+          slug: string
+          status: string
+          title: string
+          tldr: string | null
+          updated_at: string | null
+          view_count: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "guides"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      boss_hybrid_reviews: {
+        Args: {
+          match_count?: number
+          min_similarity?: number
+          price_max_cents?: number
+          price_min_cents?: number
+          query_embedding: string
+          query_text: string
+          rrf_k?: number
+        }
+        Returns: {
+          author_id: string
+          best_for: Json
+          category: string
+          comparison_product_slugs: string[]
+          cons: Json | null
+          content: string
+          created_at: string | null
+          disclosure_acknowledged: boolean | null
+          embedding: string | null
+          excerpt: string | null
+          faqs: Json
+          featured: boolean
+          has_affiliate_links: boolean | null
+          how_you_used_it: string | null
+          id: string
+          image_url: string | null
+          is_top_pick: boolean
+          is_visible: boolean
+          key_takeaways: Json
+          legacy_slugs: string[]
+          meta_description: string | null
+          meta_title: string | null
+          milestone_days: number | null
+          milestone_label: string | null
+          moderation_flags: Json | null
+          moderation_score: number | null
+          not_for: Json
+          parent_review_id: string | null
+          previous_rating: number | null
+          price_paid_cents: number | null
+          product_name: string
+          product_slug: string | null
+          pros: Json | null
+          published_at: string | null
+          rating: number | null
+          reading_time_minutes: number | null
+          rejection_reason: string | null
+          scheduled_publish_at: string | null
+          score_daily_use: number | null
+          score_ease: number | null
+          score_quality: number | null
+          score_specs: number | null
+          score_value: number | null
+          scroll_100_count: number
+          scroll_25_count: number
+          scroll_50_count: number
+          scroll_75_count: number
+          search_vector: unknown
+          slug: string
+          specs_grade_data: Json
+          specs_grade_rationale: string | null
+          standout_moment: string | null
+          status: string
+          testing_duration: string | null
+          testing_note: string | null
+          testing_since: string | null
+          title: string
+          tldr: string | null
+          updated_at: string | null
+          verdict_change: string | null
+          view_count: number
+          would_rebuy: boolean | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "reviews"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_or_create_dm: { Args: { _other_user: string }; Returns: string }
       get_review_rating_summary: {
         Args: { p_review_id: string }
@@ -3338,6 +3501,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },

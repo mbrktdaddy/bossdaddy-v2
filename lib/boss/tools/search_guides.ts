@@ -1,11 +1,25 @@
-import { orTsQuery } from '../searchQuery'
+import { embedQuery } from '@/lib/ai/embedding'
 import type { Block, BossTool } from '../types'
 
 const GUIDE_LIMIT = 6
+// See search_gear — same cosine-similarity floor (0.35), chosen from the measured
+// distribution so on-topic guides clear it while adjacent/off-topic ones fall out.
+const MIN_SIMILARITY = 0.35
 
-// B — Fix & Build. Grounded retrieval over approved guides/how-tos. When a guide
-// exists, cite + link it; when none matches, the model answers from general
-// knowledge in voice WITHOUT pretending to cite a guide.
+const COLS = 'slug, title, excerpt, category, reading_time_minutes'
+
+type Row = {
+  slug: string
+  title: string
+  excerpt: string | null
+  category: string | null
+  reading_time_minutes: number | null
+}
+
+// B — Fix & Build. Grounded retrieval over approved guides/how-tos via HYBRID
+// search (migration 125): full-text precision + semantic recall, RRF-fused and
+// similarity-floored. When a guide matches, cite + link it; when none does, the
+// model answers from general knowledge in voice WITHOUT pretending to cite a guide.
 export const searchGuides: BossTool = {
   definition: {
     name: 'search_guides',
@@ -25,27 +39,30 @@ export const searchGuides: BossTool = {
     const limit = Math.min(Number(input.limit) || GUIDE_LIMIT, GUIDE_LIMIT)
     if (!query) return { content: JSON.stringify({ guides: [], note: 'No query provided.' }) }
 
-    // Strict full-text first; broaden to an OR-of-terms fallback when strict finds
-    // nothing, so natural phrasing ("how do I PREVENT razor rash") still matches a
-    // guide whose text lacks one word. No category filter (see search_gear).
-    const base = () =>
-      ctx.supabase
+    let rows: Row[] = []
+    try {
+      const embedding = await embedQuery(query)
+      const { data, error } = await ctx.supabase
+        .rpc('boss_hybrid_guides', {
+          query_text: query,
+          query_embedding: JSON.stringify(embedding),
+          match_count: limit,
+          min_similarity: MIN_SIMILARITY,
+        })
+        .select(COLS)
+      if (error) throw error
+      rows = (data ?? []) as Row[]
+    } catch {
+      // Degraded mode (embedding/gateway hiccup): STRICT full-text only — precise,
+      // no OR-of-terms junk (semantic recall replaced that path).
+      const { data } = await ctx.supabase
         .from('guides')
-        .select('slug, title, excerpt, category, reading_time_minutes')
+        .select(COLS)
         .eq('status', 'approved')
         .eq('is_visible', true)
         .limit(limit)
-
-    const strict = await base().textSearch('search_vector', query, { type: 'websearch' })
-    if (strict.error) throw strict.error
-    let rows = strict.data ?? []
-    if (!rows.length) {
-      const orQuery = orTsQuery(query)
-      if (orQuery) {
-        const relaxed = await base().textSearch('search_vector', orQuery)
-        if (relaxed.error) throw relaxed.error
-        rows = relaxed.data ?? []
-      }
+        .textSearch('search_vector', query, { type: 'websearch' })
+      rows = (data ?? []) as Row[]
     }
 
     // Enrich the block so the client renders a first-class guide card (category +
