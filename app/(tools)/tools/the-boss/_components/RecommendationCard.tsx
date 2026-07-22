@@ -1,23 +1,12 @@
 import Link from 'next/link'
-import type { Citation } from '@/lib/boss/types'
+import type { ReviewBlock } from '@/lib/boss/types'
 
-// Renders a grounded citation. Reviews become a pick card (verdict scores + buy
-// link + FTC line); guides become a link chip. The card is the actionable CTA —
-// every link here comes from a real approved review/guide via the tool result,
-// so the UI can never surface an unsourced product even if the prose drifts.
-export default function RecommendationCard({ c }: { c: Citation }) {
-  if (c.kind === 'guide') {
-    return (
-      <Link
-        href={c.url}
-        className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline border border-soft rounded-lg px-3 py-2 bg-surface min-h-[44px]"
-      >
-        <span className="text-[10px] uppercase tracking-widest text-eyebrow">Guide</span>
-        {c.title}
-      </Link>
-    )
-  }
-
+// The rich pick card for a real, hands-on TESTED review (kind 'review') — verdict
+// scores + buy link + FTC line. Guides render in GuideCard, researched picks in
+// ResearchedList; BossBlocks routes each block kind to its card. Every link comes
+// from a real approved review via the tool result, so the UI can never surface an
+// unsourced product even if the prose drifts.
+export default function RecommendationCard({ c }: { c: ReviewBlock }) {
   const s = c.scores
   return (
     <div className="border border-soft rounded-xl p-3 bg-surface">

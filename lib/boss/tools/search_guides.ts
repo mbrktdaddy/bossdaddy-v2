@@ -1,5 +1,5 @@
 import { CATEGORY_SLUGS } from '@/lib/categories'
-import type { BossTool, Citation } from '../types'
+import type { Block, BossTool } from '../types'
 
 const GUIDE_LIMIT = 6
 
@@ -28,7 +28,7 @@ export const searchGuides: BossTool = {
 
     let q = ctx.supabase
       .from('guides')
-      .select('slug, title, excerpt')
+      .select('slug, title, excerpt, category, reading_time_minutes')
       .eq('status', 'approved')
       .eq('is_visible', true)
       .textSearch('search_vector', query, { type: 'websearch' })
@@ -40,11 +40,16 @@ export const searchGuides: BossTool = {
     if (error) throw error
     const rows = data ?? []
 
-    const citations: Citation[] = rows.map((r) => ({
+    // Enrich the block so the client renders a first-class guide card (category +
+    // one-line "why this helps" + read-time) without a second fetch.
+    const citations: Block[] = rows.map((r) => ({
       kind: 'guide',
       slug: r.slug,
       title: r.title,
       url: `/guides/${r.slug}`,
+      excerpt: r.excerpt,
+      category: r.category,
+      readingMinutes: r.reading_time_minutes,
     }))
 
     const guides = rows.map((r) => ({

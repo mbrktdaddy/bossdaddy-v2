@@ -1,8 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import type { SystemModelMessage } from 'ai'
+import { cachedSystem } from '@/lib/ai/client'
 import { getApprovedPhrases, formatVoiceLexiconForPrompt } from '@/lib/voiceLexicon'
 import { getVoiceProfile, formatVoiceProfileForPrompt } from '@/lib/voiceProfile'
-
-type SystemBlock = { type: 'text'; text: string; cache_control?: { type: 'ephemeral' } }
 
 // The conversational concierge prompt. This is NOT BOSS_DADDY_SYSTEM — that one
 // is a first-person writing prompt that ends "Return valid JSON only." The Boss
@@ -51,8 +51,10 @@ VOICE:
 - Keep answers tight and scannable. Lead with the answer.`
 
 /**
- * Build the Claude `system` array for The Boss. Block order is most-stable →
- * most-volatile for prompt-cache efficiency (mirrors buildBossDaddySystemBlocks):
+ * Build the AI-SDK `system` messages for The Boss. Block order is most-stable →
+ * most-volatile for prompt-cache efficiency (mirrors buildBossDaddySystemMessages);
+ * `cachedSystem` carries the Anthropic ephemeral cache breakpoint (forwarded by the
+ * Gateway; ignored by providers without explicit caching):
  *   1. BOSS_CONCIERGE_BASE — cached. Shared across ALL callers.
  *   2. Voice card          — cached. Per-member, stable (approved phrases only).
  *   3. Voice profile facts — UNCACHED. Small, volatile (ages recompute).
@@ -64,10 +66,8 @@ export async function buildBossConciergeSystemBlocks(
   supabase: SupabaseClient,
   userId: string | null,
   opts: { personalize?: boolean } = {},
-): Promise<SystemBlock[]> {
-  const blocks: SystemBlock[] = [
-    { type: 'text', text: BOSS_CONCIERGE_BASE, cache_control: { type: 'ephemeral' } },
-  ]
+): Promise<SystemModelMessage[]> {
+  const blocks: SystemModelMessage[] = [cachedSystem(BOSS_CONCIERGE_BASE)]
 
   const personalize = opts.personalize ?? true
   if (!userId || !personalize) return blocks
@@ -78,10 +78,10 @@ export async function buildBossConciergeSystemBlocks(
   ])
 
   const voiceCard = formatVoiceLexiconForPrompt(phrases)
-  if (voiceCard) blocks.push({ type: 'text', text: voiceCard, cache_control: { type: 'ephemeral' } })
+  if (voiceCard) blocks.push(cachedSystem(voiceCard))
 
   const voiceBlock = formatVoiceProfileForPrompt(profile)
-  if (voiceBlock) blocks.push({ type: 'text', text: voiceBlock })
+  if (voiceBlock) blocks.push({ role: 'system', content: voiceBlock })
 
   return blocks
 }

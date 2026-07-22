@@ -38,6 +38,13 @@ const PINNED: ReadonlySet<AiBucket> = new Set<AiBucket>(['moderation'])
 // independently of the everyday concierge model.
 const CONCIERGE_SENSITIVE_ENV = 'AI_MODEL_CONCIERGE_SENSITIVE'
 
+// The concierge "fast lane" — the cheap opening turn before any tool round (a
+// Haiku-first cost optimization). Defaults to Haiku (NOT the bucket's Sonnet
+// default) and is operator-overridable independently, so the cheap lane can be
+// pointed at another model without touching the everyday/sensitive lanes.
+const CONCIERGE_FAST_ENV = 'AI_MODEL_CONCIERGE_FAST'
+const CONCIERGE_FAST_DEFAULT = MODELS.claudeHaiku
+
 export interface ResolvedModel {
   /** Primary gateway slug the call should use. */
   model: string
@@ -63,7 +70,7 @@ function withClaudeFallback(model: string): ResolvedModel {
  */
 export function resolveModel(
   bucket: AiBucket,
-  opts?: { sensitive?: boolean; model?: string },
+  opts?: { sensitive?: boolean; fast?: boolean; model?: string },
 ): ResolvedModel {
   // Compliance-pinned buckets ignore ALL overrides (env, sensitive, explicit) —
   // checked first so nothing can route them off Claude.
@@ -78,10 +85,17 @@ export function resolveModel(
     return withClaudeFallback(opts!.model!.trim())
   }
 
-  // Concierge vulnerable-topic lane has its own knob.
+  // Concierge vulnerable-topic lane has its own knob. Checked before `fast` so a
+  // sensitive turn is never downgraded to the cheap lane (safety over cost).
   if (bucket === 'concierge' && opts?.sensitive) {
     const raw = process.env[CONCIERGE_SENSITIVE_ENV]
     return withClaudeFallback(isValidModelSlug(raw) ? raw.trim() : BUCKET_DEFAULT.concierge)
+  }
+
+  // Concierge cheap opening-turn lane — its own knob, defaulting to Haiku.
+  if (bucket === 'concierge' && opts?.fast) {
+    const raw = process.env[CONCIERGE_FAST_ENV]
+    return withClaudeFallback(isValidModelSlug(raw) ? raw.trim() : CONCIERGE_FAST_DEFAULT)
   }
 
   return withClaudeFallback(envOverride(bucket) ?? BUCKET_DEFAULT[bucket])

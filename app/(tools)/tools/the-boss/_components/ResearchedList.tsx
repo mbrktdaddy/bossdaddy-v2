@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import type { Citation } from '@/lib/boss/types'
+import type { ProductBlock } from '@/lib/boss/types'
 
 // The gap-fallback shortlist. Deliberately LIGHTER than RecommendationCard (the
 // rich, bordered card used for real Boss-tested reviews) — researched picks get
@@ -12,13 +12,13 @@ import type { Citation } from '@/lib/boss/types'
 // came from research_gear's sourced web search.
 const TIER_LABEL: Record<string, string> = { budget: 'Budget', mid: 'Mid', premium: 'Premium' }
 
-function priceLabel(c: Citation): string | null {
+function priceLabel(c: ProductBlock): string | null {
   const tier = c.priceTier ? TIER_LABEL[c.priceTier] : null
   if (tier && c.priceText) return `${tier} · ${c.priceText}`
   return tier ?? c.priceText ?? null
 }
 
-export function ResearchedList({ items, query }: { items: Citation[]; query?: string }) {
+export function ResearchedList({ items, query }: { items: ProductBlock[]; query?: string }) {
   if (!items.length) return null
   const hasBuy = items.some((c) => c.buyUrl)
 

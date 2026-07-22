@@ -4,6 +4,7 @@ import { runBossAgent } from '@/lib/boss/agent'
 import { BOSS_TOOLS } from '@/lib/boss/tools'
 import { buildBossConciergeSystemBlocks } from '@/lib/boss/prompt'
 import { getEntitlements } from '@/lib/boss/entitlements'
+import { normalizeBossText } from '@/lib/boss/normalizeText'
 import type { BossStreamEvent, Citation } from '@/lib/boss/types'
 
 // ── Boss concierge GOLDEN EVAL ──────────────────────────────────────────────
@@ -77,11 +78,16 @@ const FIRST_PERSON_TEST =
   /\bI\s+(tested|field[- ]tested|reviewed)\b|\bI\s+(used|ran|tried|bought)\s+(this|it|these|them|that|one\b|the\s)/i
 
 function assertVoice(label: string, text: string) {
-  expect(text.trim().length, `${label}: got an empty answer`).toBeGreaterThan(0)
-  expect(EMOJI.test(text), `${label}: emoji found (banned on web surfaces)`).toBe(false)
-  expect(MARKDOWN.test(text), `${label}: markdown found (chat renders raw text; use "• " bullets)`).toBe(false)
+  // Assert on the NORMALIZED text — that is what the reader actually sees (the
+  // shared renderer runs normalizeBossText). The markdown check thus validates the
+  // PR-1 backstop end-to-end; PR 2 will additionally harden the prompt so raw
+  // output stops leaking markdown in the first place.
+  const shown = normalizeBossText(text)
+  expect(shown.trim().length, `${label}: got an empty answer`).toBeGreaterThan(0)
+  expect(EMOJI.test(shown), `${label}: emoji found (banned on web surfaces)`).toBe(false)
+  expect(MARKDOWN.test(shown), `${label}: markdown found after normalization (backstop failed)`).toBe(false)
   expect(
-    FIRST_PERSON_TEST.test(text),
+    FIRST_PERSON_TEST.test(shown),
     `${label}: first-person testing claim — the Boss is the front desk, must speak third person`,
   ).toBe(false)
 }
