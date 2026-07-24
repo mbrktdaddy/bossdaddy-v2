@@ -18,6 +18,7 @@ export interface MerchSaying {
   ip_note: string       // why it was flagged ('' when ip_risk === 'none')
 }
 
+// Brand messaging lines named below are canonical in lib/brand.ts — keep in sync.
 const MERCH_SAYINGS_SYSTEM = `You write short, wearable merch copy for Boss Daddy (BossDaddyLife.com) — the brand for men who Dad Like a Boss. These lines go on t-shirts, hats, and coffee mugs, so they must be SHORT, punchy, and instantly readable across a room.
 
 VOICE: Confident, no-BS dad — the older, wiser brother. Tough-loving humor with a playfully cynical edge toward soft culture and weak excuses. Grounded in faith, family, and brotherhood — never preachy. Proud-dad energy.

@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import PwaInstallProvider from "@/components/pwa/PwaInstallProvider";
 import { ogImageMeta } from "@/lib/og";
+import { BRAND } from "@/lib/brand";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -51,15 +52,15 @@ if (process.env.NEXT_PUBLIC_PINTEREST_VERIFY) socialVerification['p:domain_verif
 
 // Shared default preview image for the homepage and any page that inherits the
 // root metadata. Used by BOTH openGraph.images and twitter.images.
-const defaultOgImage = ogImageMeta({ title: 'Boss Daddy Life', type: 'review', alt: 'Boss Daddy Life — The Boss Dad Standard.' })
+const defaultOgImage = ogImageMeta({ title: 'Boss Daddy Life', type: 'review', alt: `Boss Daddy Life — ${BRAND.positioning}.` })
 
 export const metadata: Metadata = {
   title: {
-    default: 'Boss Daddy — Dad Like a Boss',
+    default: `Boss Daddy — ${BRAND.tagline}`,
     template: '%s | Boss Daddy',
   },
   description:
-    'The Boss Dad Standard. Honest reviews, smart tools, and real-dad wisdom for men who Dad Like a Boss — zero paid placements, zero fluff.',
+    `${BRAND.positioning}. Honest reviews, smart tools, and real-dad wisdom for men who Dad Like a Boss — zero paid placements, zero fluff.`,
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   ),

@@ -14,6 +14,7 @@ import HomeHero from '@/components/home/HomeHero'
 import { MerchStrip } from '@/components/MerchStrip'
 import CodeRedirect from './_components/CodeRedirect'
 import { buildSocialMetadata } from '@/lib/og'
+import { BRAND } from '@/lib/brand'
 import type { Metadata } from 'next'
 
 interface Review {
@@ -45,15 +46,15 @@ export function generateMetadata(): Metadata {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   return buildSocialMetadata({
     title: 'Boss Daddy Life — Reviews, Guides & Gear for Dads',
-    description: 'The Boss Dad Standard. Field-tested reviews, real-dad guides, and free tools for men who Dad Like a Boss. Zero paid placements, zero fluff.',
+    description: `${BRAND.positioning}. Field-tested reviews, real-dad guides, and free tools for men who Dad Like a Boss. Zero paid placements, zero fluff.`,
     path: '/',
     siteUrl,
-    ogTitle: 'Dad Like a Boss.',
+    ogTitle: BRAND.tagline,
     ogType: 'website',
     type: 'site',
     cta: 'Explore Boss Daddy',
     heroUrl: `${siteUrl}/images/hero-workshop.webp`,
-    imageAlt: 'Boss Daddy Life — The Boss Dad Standard.',
+    imageAlt: `Boss Daddy Life — ${BRAND.positioning}.`,
   })
 }
 

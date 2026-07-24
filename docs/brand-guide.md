@@ -145,6 +145,8 @@ The edge exists to call up men who are *coasting*. It is never aimed at men in t
 
 The Boss Daddy messaging system is a **five-level hierarchy**. Each line has a distinct job — don't swap jobs, don't blend them into one line. Use them together in the recommended lockups below.
 
+> **The literal strings are canonical in code at `lib/brand.ts`** (imported by the UI + metadata). Treat the lines here as the human-readable spec; if you change a line, change it in both places.
+
 | Level | Element | Line | Purpose | Primary usage |
 |---|---|---|---|---|
 | **Positioning** | Main identity | **The Boss Dad Standard** | Who we are + status | Hero sections, logo lockup, major branding, video intros, social bios |
