@@ -14,7 +14,8 @@ One owner per domain. Everything else **points** here — never re-states. If tw
 
 | Domain | Authority | Notes |
 |---|---|---|
-| Brand voice / messaging / positioning | `docs/brand-guide.md` §1 | canonical taglines + manifesto live here; the Brief & canva-kit only summarize + point |
+| Brand voice / messaging **doctrine** | `docs/brand-guide.md` §1 | voice, capitalization, when-to-use; the Brief & canva-kit only summarize + point |
+| Brand messaging **strings** (rendered) | `lib/brand.ts` | the literal taglines + manifesto the UI/metadata import; mirrors brand-guide §1.7 |
 | Design system (colors, type, components) | `docs/brand-guide.md` §2–12 (human-readable) + `app/globals.css` (exact token values **win**) | |
 | Strategy / mission / roadmap | `docs/boss-daddy-claude-project.md` (the Brief) | summary + the portable phone Claude Project file |
 | Runtime AI voice | `lib/claude/client.ts` `BOSS_DADDY_SYSTEM`, `lib/boss/prompt.ts`, `lib/merch/sayings.ts` | must match brand-guide §1 (execution layer) |

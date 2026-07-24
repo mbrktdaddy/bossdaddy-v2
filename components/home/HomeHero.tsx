@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { BRAND, splitLastWord } from '@/lib/brand'
 
 /* Homepage full-bleed Photo hero — Manifesto v2 (docs/home-manifesto-spec.md).
    DESKTOP: wide workshop shot, subject right, manifesto in the dark-left column.
@@ -14,9 +15,10 @@ const SUBHEAD =
   'Field-tested gear, no-fluff guides, and free tools for men who show up every day. If it can’t survive my house, it doesn’t get a score.'
 
 function Headline({ className = '' }: { className?: string }) {
+  const { lead, last } = splitLastWord(BRAND.tagline)
   return (
     <h1 className={`font-black tracking-tight leading-[0.98] text-prose ${className}`}>
-      Dad Like a <br className="sm:hidden" /><span className="text-accent">Boss.</span>
+      {lead} <br className="sm:hidden" /><span className="text-accent">{last}</span>
     </h1>
   )
 }
