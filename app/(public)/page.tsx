@@ -319,9 +319,8 @@ export default async function HomePage() {
         <div className="max-w-3xl mx-auto px-6 py-16 md:py-24 text-center">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-eyebrow mb-6">The mission</p>
           <blockquote className="font-editorial-display font-semibold text-prose text-2xl md:text-4xl leading-[1.3] tracking-tight">
-            Boss Daddy isn’t just another review site. It’s a standard — and a resource — for men who
-            believe being a dad isn’t a compromise of his strength, but{' '}
-            <span className="text-accent">the ultimate expression of it.</span>
+            {BRAND.creed}{' '}
+            <span className="text-accent">That&rsquo;s {BRAND.positioning}.</span>
           </blockquote>
           <p className="mt-8 text-xs font-bold uppercase tracking-[0.16em] text-prose-faint">— The Boss</p>
         </div>

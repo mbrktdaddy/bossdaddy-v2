@@ -5,6 +5,7 @@ import { ogImageUrl, OG_SITE } from '@/lib/og'
 import CategoryIcon from '@/components/CategoryIcon'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { EmailSignup } from '@/components/EmailSignup'
+import { BRAND } from '@/lib/brand'
 
 export const revalidate = 3600
 
@@ -94,7 +95,7 @@ export default async function AboutPage() {
  <p>
  Every single day since, I&apos;ve made a non-negotiable commitment: show up, get better, and
  never settle. I pray. I grind. I work on being the best husband and father my family
- deserves. That&apos;s what Boss Daddy means to me. It&apos;s not a cute title. It&apos;s a standard.
+ deserves. That&apos;s what Boss Daddy means to me. It&apos;s not a cute title. It&apos;s {BRAND.positioning}.
  A daily decision to be strong, present, and proud — exactly the kind of man my daughter
  deserves to look up to.
  </p>
@@ -128,7 +129,7 @@ export default async function AboutPage() {
  own backyard, garage, and living room.
  </p>
 
- <h2>Real Dad. Smart Tools.</h2>
+ <h2>{BRAND.credibility}</h2>
  <p>
  We are still a founder-led operation — buying the stuff, testing it in our own backyards,
  sweating through the projects, and living the dad life every single day. But to deliver
@@ -184,9 +185,7 @@ export default async function AboutPage() {
  <div className="bg-accent-tint rounded-xl px-8 py-10 text-center">
  <h2 className="text-2xl font-black mb-3">Built for Dads Who Show Up.</h2>
  <p className="text-prose-muted mb-2">
- This isn&apos;t just another review site. This is Boss Daddy — a resource, a community, and
- a brand for every man who&apos;s decided that being a Boss Dad isn&apos;t a compromise of his
- strength… it&apos;s the ultimate expression of it.
+ {BRAND.manifesto}
  </p>
  <p className="text-prose-faint text-sm mb-8">
  Welcome to the Boss Daddy crew. Now let&apos;s dad like a boss — together.

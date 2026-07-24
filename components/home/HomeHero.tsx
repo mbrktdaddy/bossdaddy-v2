@@ -129,7 +129,7 @@ export default function HomeHero({ motion }: Props) {
         <div className="max-w-6xl mx-auto w-full px-6 pb-14">
           <div className="max-w-2xl">
             <p className="text-[11px] font-bold text-eyebrow uppercase tracking-[0.28em] mb-5">
-              Real dads · Zero paid placements · Bought with my own money
+              {BRAND.credibility}
             </p>
             <Headline className="text-7xl md:text-[5.5rem]" />
             <p className="text-lg text-prose-muted leading-[1.6] max-w-xl mt-6">
@@ -158,7 +158,7 @@ export default function HomeHero({ motion }: Props) {
       <div className="relative z-10 sm:hidden flex flex-1 flex-col justify-between px-6 pt-10 pb-7">
         <div className="text-center">
           <p className="text-[11px] font-bold text-eyebrow uppercase tracking-[0.24em] mb-4">
-            Zero paid placements
+            {BRAND.credibility}
           </p>
           <Headline className="text-5xl" />
         </div>

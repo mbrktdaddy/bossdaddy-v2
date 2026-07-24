@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { SOCIAL } from '@/lib/social'
 import { LABELS } from '@/lib/labels'
+import { BRAND } from '@/lib/brand'
 
 interface BrowseLink { href: string; label: string; hint?: string }
 
@@ -114,6 +115,7 @@ export default function Footer() {
                 <span> DADDY LIFE</span>
               </span>
             </Link>
+            <p className="text-sm font-semibold text-prose mb-2">{BRAND.credibility}</p>
             <p className="text-sm text-prose-muted leading-relaxed mb-5 max-w-sm">
               Real-world reviews. No PR samples. No paid placements. Just an honest verdict from a dad who bought the thing and used it.
             </p>
@@ -170,7 +172,7 @@ export default function Footer() {
             © {year} Boss Daddy LLC. All rights reserved.
           </p>
           <p className="text-[11px] text-zinc-600 tracking-wide">
-            Built by a dad. For dads.
+            {BRAND.tagline}
           </p>
         </div>
       </div>

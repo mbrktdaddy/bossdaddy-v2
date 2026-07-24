@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { getMerchDisplayImage, type Merch } from '@/lib/merch'
+import { BRAND } from '@/lib/brand'
 
 /**
  * MerchStrip — slim, proud "Made by Boss Daddy" strip. Shared component used
@@ -40,7 +41,7 @@ export async function MerchStrip({ exploreHref = '#merch' }: { exploreHref?: str
             <div className="w-[3px] bg-accent-brand rounded-full" />
             <div>
               <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-0.5">— Made by Boss Daddy</p>
-              <h2 className="text-xl font-black text-prose leading-tight">Boss Daddy Merch</h2>
+              <h2 className="text-xl font-black text-prose leading-tight">{BRAND.merchVoice}</h2>
             </div>
           </div>
           <a href={exploreHref} className="text-sm text-accent-text font-semibold hover:text-accent-text-soft transition-colors shrink-0">
