@@ -30,6 +30,13 @@ export const BRAND = {
   /** Canonical manifesto — do not paraphrase in hero/about placements. */
   manifesto:
     `Boss Daddy isn't just another men's fashion, fitness, or lifestyle brand. It is the gold standard and trusted hub for men living The Boss Dad Standard — men who believe being a proud and present father who shows up every day isn't a compromise of strength, but the ultimate expression of it.`,
+  /**
+   * Short-form creed for the homepage "Creed" moment — a sanctioned excerpt of
+   * the manifesto body; pages append "That's The Boss Dad Standard." from
+   * `positioning`. Keep in sync with `manifesto` + brand-guide §1.7.
+   */
+  creed:
+    `Being a proud, present father who shows up every day isn't a compromise of strength — it's the ultimate expression of it.`,
 } as const
 
 /**

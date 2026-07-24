@@ -2,6 +2,7 @@ import { ImageResponse } from 'next/og'
 import { type NextRequest } from 'next/server'
 import sharp from 'sharp'
 import { isOwnImageUrl } from '@/lib/images/og-host'
+import { BRAND } from '@/lib/brand'
 
 // Node runtime (not edge) so `sharp` can run — it converts the hero from WebP
 // (which Satori/ImageResponse can't read) to PNG and crops it to exactly
@@ -90,7 +91,7 @@ export async function GET(request: NextRequest) {
           {cta} →
         </div>
       ) : (
-        <span style={{ color: '#f48a4a', fontSize: '15px', fontWeight: 700 }}>Dad-Tested · Honestly Rated</span>
+        <span style={{ color: '#f48a4a', fontSize: '15px', fontWeight: 700 }}>{BRAND.tagline}</span>
       )}
     </div>
   )
