@@ -8,6 +8,20 @@
 
 > **Project Brief (living doc)**: see [`docs/boss-daddy-claude-project.md`](docs/boss-daddy-claude-project.md) — the high-level mission, brand voice, roadmap snapshot, and strategy context. Doubles as the Claude Project knowledge file used from the phone app. Consult it for strategy/voice/positioning questions; keep its §6 roadmap snapshot current as work ships.
 
+## Source-of-Truth Map
+
+One owner per domain. Everything else **points** here — never re-states. If two sources disagree, the authority below wins; fix the copy, don't fork it.
+
+| Domain | Authority | Notes |
+|---|---|---|
+| Brand voice / messaging / positioning | `docs/brand-guide.md` §1 | canonical taglines + manifesto live here; the Brief & canva-kit only summarize + point |
+| Design system (colors, type, components) | `docs/brand-guide.md` §2–12 (human-readable) + `app/globals.css` (exact token values **win**) | |
+| Strategy / mission / roadmap | `docs/boss-daddy-claude-project.md` (the Brief) | summary + the portable phone Claude Project file |
+| Runtime AI voice | `lib/claude/client.ts` `BOSS_DADDY_SYSTEM`, `lib/boss/prompt.ts`, `lib/merch/sayings.ts` | must match brand-guide §1 (execution layer) |
+| Display labels | `lib/labels.ts` | see Naming Doctrine below |
+
+Historical/shipped design + brand docs live in `docs/archive/` — recall-able, not authoritative.
+
 ## Stack
 - **Framework**: Next.js 16 App Router, TypeScript strict
 - **Auth + DB**: Supabase (`@supabase/ssr`) with Row-Level Security

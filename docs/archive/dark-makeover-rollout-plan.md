@@ -1,7 +1,7 @@
 # Dark-First Brand Makeover — Rollout Plan
 
-> Status: PLANNED (2026-06-19). Sandbox decisions locked in `/brand-lab` + `/brand-lab/reading` (not committed). This doc is the rollout spec.
-> Companion memory: `project_dark_makeover.md`. Design authority: `docs/brand-guide.md` (update it when this ships).
+> Status: **SHIPPED / HISTORICAL** — the dark-first makeover is live site-wide. Archived rollout record. Current design authority: `docs/brand-guide.md` §2–12 + `app/globals.css`.
+> Companion memory: `project_dark_makeover.md`.
 
 ## Goal
 Pivot Boss Daddy from a light editorial-affiliate look to a **dark-first, masculine, modern-tech identity** — "the everyday command center for dads" — without a rewrite, leaning on the existing role-token system.

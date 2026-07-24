@@ -1,7 +1,9 @@
 # Boss Daddy — Canva Pro Brand Kit Reference
 
 > A copy-paste reference for setting up the Boss Daddy brand kit in Canva Pro.
-> Canva doesn't accept a single upload — you'll enter colors, upload logos, and pick fonts manually in the Brand Kit panel. Keep this file open while you do it.
+> Canva doesn't accept a single upload — you enter colors, upload logos, and pick fonts manually in the Brand Kit panel. Keep this file open while you do it.
+>
+> **This file is Canva mechanics only.** For brand *doctrine* (voice, messaging, design system) the authority is **`docs/brand-guide.md`**; for exact color/token values the machine truth is **`app/globals.css`**. If those change, update this file — don't let it drift.
 >
 > **Where in Canva:** click your team/account icon (top right) → **Brand Kit**
 
@@ -9,86 +11,83 @@
 
 ## 1. Logos to Upload
 
-Upload these PNGs from `public/images/` (in your project folder):
+Upload these PNGs from `public/images/`:
 
 | File | Purpose | Canva label |
 |---|---|---|
-| `bd-logo-final.png` | Primary logo (full mark) | **Primary Logo** |
-| `bd-logo-icon.png` | Runtime icon — used in every nav, footer, and email | **Icon / App Mark** |
-| `bd-favicon.png` | Favicon-tier mark | **Favicon** |
+| `bd-logo-final.png` | Primary logo (full mark) — source asset | **Primary Logo** |
+| `bd-logo-icon.png` | The only runtime icon — nav, footer, every layout, emails | **Icon / App Mark** |
 
 **Local path:** `C:\Users\msb1c\bossdaddy-v2\public\images\`
 
+> Favicons are **not** in `public/images/` — they're served via Next's file convention from `app/icon.png` + `app/apple-icon.png`. Don't upload a separate favicon to Canva.
+
 ---
 
-## 2. Brand Colors
+## 2. Brand Colors (dark-first — matches `app/globals.css`)
 
-Canva Brand Kit lets you organize colors into groups. Set them up exactly like this:
+The site is **dark-first everywhere**. Orange is the ONLY accent. **No gold, no per-category rainbow, no cream / peach / brown.** Set up three color groups exactly like this:
 
-### Group A — Primary Brand (Earthy Orange)
-
-| Name | Hex | Notes |
-|---|---|---|
-| Boss Orange (Primary) | `#CC5500` | Main brand orange — CTAs, highlights, marquee text |
-| Orange Hover | `#D96200` | Hover state, secondary accent |
-| Orange Glow | `#E87030` | Light accent on dark backgrounds |
-| Orange Deep | `#A34400` | Darker borders, pressed states |
-| Orange Earth | `#7D3300` | Deep accent |
-| Orange Shadow | `#5C2600` | Background tints |
-| Orange Pit | `#3D1A00` | Deepest tint, almost black-orange |
-
-### Group B — Forge Base (Warm Black UI)
+### Group A — Brand Orange (Hot, on dark)
 
 | Name | Hex | Notes |
 |---|---|---|
-| Forge Black | `#0B0B0D` | Page background |
-| Forge Surface | `#141418` | Card surfaces |
-| Forge Raised | `#1C1C22` | Raised cards / hover |
-| Forge Border | `#28282E` | Hairlines, dividers |
+| Accent (Primary) | `#E55A1A` | THE brand accent on dark — CTAs, active nav, buttons |
+| Accent Hover | `#CC5500` | Core orange — button hover / pressed |
+| Link / Eyebrow | `#f48a4a` | Inline links + eyebrow labels on dark (orange-400) |
+| Deep tint | `#8a3f0e` | Decorative borders/tints only (orange-800) |
+| Deepest tint | `#3d1a00` | Deepest decorative tint (orange-950) |
+
+### Group B — Canvas & Surfaces (dark)
+
+| Name | Hex | Notes |
+|---|---|---|
+| Canvas / Chrome | `#09090b` | Page background + masthead/footer (flush) |
+| Surface | `#18181b` | Cards / panels |
+| Raised | `#27272a` | Elevated cards, alt sections |
+| Hover | `#3f3f46` | Interactive hover lift |
+| Border (soft) | `#27272a` | Card hairlines |
+| Border (strong) | `#3f3f46` | Confident edges |
 
 ### Group C — Text
 
 | Name | Hex | Notes |
 |---|---|---|
-| Text Bright | `#F5F5F5` | Primary text on dark |
-| Text Muted | `#A8A8B0` | Secondary text |
-| Text Faint | `#6A6A72` | Tertiary text, captions |
-
-### Group D — Editorial Cream (Second Voice)
-
-| Name | Hex | Notes |
-|---|---|---|
-| Cream Paper | `#EDE6D3` | Editorial moments, warm headers |
-| Cream Muted | `#C9BFA8` | Cream secondary |
+| Text Bright | `#f4f4f5` | Primary text on dark |
+| Text Muted | `#d4d4d8` | Captions, secondary |
+| Text Faint | `#a1a1aa` | Timestamps, decorative (clears WCAG AA on dark) |
 
 ### NEVER use
 
-- `#F97316` — vivid Tailwind orange. Looks too loud / generic. Always use `#CC5500` instead.
+- `#f97316` — vivid Tailwind orange. Too loud/generic. Always `#E55A1A` (Hot) / `#CC5500` (core).
+- **Any cream / peach / brown fill** (e.g. the retired `#EDE6D3` "editorial cream"). Warmth lives in the orange accent, not in surfaces.
 
 ---
 
 ## 3. Brand Fonts
 
-All three fonts are free on **Google Fonts** — they're already available in Canva by default (Canva pulls from Google Fonts).
+All four are free on **Google Fonts** (Canva pulls from Google Fonts).
 
-| Role | Font | Weights to enable in Canva | Used for |
+| Role | Font | Weights to enable | Used for |
 |---|---|---|---|
-| **Display / Headings** | **Montserrat** | 800, 900 (Black) | H1, H2, H3, marquee, "BOSS DADDY" wordmark |
+| **Display / Headings** | **Montserrat** | 800, 900 (Black) | Section headings (`font-black`), hero, `BOSS DADDY` wordmark |
+| **Editorial display serif** | **Fraunces** | 500, 600 | Editorial headings — Cover Story, `PageHeader` H1s, guide titles, the Creed (Manifesto v2) |
 | **Body / UI** | **Geist** | 400, 500, 600, 700 | All body copy, buttons, UI labels |
-| **Editorial Serif** | **Source Serif 4** | 400, 600 | Long-form quotes, editorial pull-outs, second voice |
+| **Editorial body serif** | **Source Serif 4** | 400, 600 | Blockquotes / pull-quotes only |
 
-**In Canva:** Brand Kit → Brand Fonts → **+ Add a font** → search by name above. Set Montserrat as Heading, Geist as Body, Source Serif 4 as Subheading or Other.
+**In Canva:** Brand Kit → Brand Fonts → **+ Add a font** → search by name. Montserrat = Heading, Geist = Body, Fraunces / Source Serif 4 = Subheading/Other.
 
 **Type pairing rules:**
-- Headings: `Montserrat Black` (900), uppercase, tight letter-spacing
-- Body: `Geist Regular` (400) at 16–18px
-- Eyebrow labels: `Geist Bold` (700), 11–12px, ALL CAPS, letter-spacing 0.2em, color `#D96200`
+- Section headings: `Montserrat Black` (900). **Editorial** headings: `Fraunces` 600.
+- Body: `Geist Regular` (400) at 16–18px.
+- Eyebrow labels: `Geist Bold` (700), 11–12px, ALL CAPS, letter-spacing 0.2em, color `#f48a4a`.
+- **Messaging lines** (below) are the one Title-Case exception — never all-caps them.
 
 ---
 
-## 4. Messaging System & Wordmark Usage (v3.4 — locked 2026-07-19)
+## 4. Messaging System (v3.5) — quick reference
 
-Full spec + usage lockups: `docs/brand-guide.md` §1.7. Five-level hierarchy — each line has its own job.
+Full spec + usage lockups + capitalization doctrine: **`docs/brand-guide.md` §1.7** (authority). This table is a Canva convenience copy.
 
 | Level | Line | Use in |
 |---|---|---|
@@ -97,8 +96,7 @@ Full spec + usage lockups: `docs/brand-guide.md` §1.7. Five-level hierarchy —
 | **Action line** | **Boss Up.** | Community, emails, challenges, button text |
 | **Credibility line** | **Real Dads. Smart Tools. Better Decisions.** | Reviews, guides, product pages, "How We Test", footer |
 | **Philosophy** | *(full manifesto — see brand guide §1.7)* | About page, founder story, welcome sequence |
-
-**Merch voice (context-specific, outside the core five):** **Boss Stuff for Boss Dads** — store/product/merch only.
+| **Merch voice** | **Boss Stuff for Boss Dads** | Store / product / merch only |
 
 **Homepage hero lockup:**
 > The Boss Dad Standard.
@@ -107,72 +105,56 @@ Full spec + usage lockups: `docs/brand-guide.md` §1.7. Five-level hierarchy —
 >
 > Real Dads. Smart Tools. Better Decisions.
 
-### Capitalization (v3.4 — Title Case wins)
-
-The five core lines and the merch line are **Title Case with periods** — never all-caps, never cap `BOSS` mid-line (retired: "Dad like a BOSS").
-
-| Form | When to use |
-|---|---|
-| **`BOSS DADDY`** (all caps) | **Wordmark / logo lockup ONLY** |
-| **Boss Daddy** (title case) | Everywhere else — hero H1s, taglines, OG cards, merch, editorial body, dashboards |
-| **`BOSS`** (caps, alone) | Rare noun of address — *"Stay locked in, BOSS."* (sparingly, the one exception) |
-
-**Never:** lowercase, camel-case (`BossDaddy`), or "Boss daddy" with mixed casing.
+**Capitalization (Title Case wins):** core + merch lines are Title Case with periods (lowercase articles) — never all-caps, never cap `BOSS` mid-line. `BOSS DADDY` all-caps is **wordmark/logo only**; title-case *Boss Daddy* everywhere else; `BOSS` alone is a rare noun of address ("Stay locked in, BOSS.").
 
 ---
 
-## 5. Brand Voice Quick Reference
+## 5. Brand Voice — quick reference
+
+Full voice spec + banlist + edge-off rules: **`docs/brand-guide.md` §1.6** (authority). Snapshot:
 
 **Archetype:** Wise Warrior / Protector King — older, wiser brother voice.
 
-**Tone dial:**
-- 70% confident, direct, no-fluff
-- 20% playfully cynical toward mediocrity
-- 10% warm and present (deploy when topic is struggle, loss, fatherhood vulnerability — NEVER edge here)
+**Tone dial:** ~70% confident/direct/no-fluff · ~20% playfully cynical toward mediocrity · ~10% warm-and-present (struggle, loss, safety, vulnerability — edge OFF here).
 
-**Vocabulary — "Stuff":**
-- *The good stuff* — recommendations
-- *Boss stuff* — merch, curated picks
-- *Dad stuff* — categories, editorial framing
+**Vocabulary — "Stuff":** *the good stuff* (recommendations) · *boss stuff* (merch/picks) · *dad stuff* (categories).
 
-**Never say:** "synergy," "leverage" (as a verb in copy), "level up," "game-changer," "must-have," generic hype words.
+**Reader address (v3.5):** "Brother," "Friends," "Fellow Dads," "you" are fine. "Boss Dads" is a third-person identity term, never a greeting.
+
+**Never say:** "revolutionary," "synergy," "leverage" (verb), "circle back," "stakeholder," "deep-dive," "ecosystem," sponsored phrasing, soft-parenting tells.
 
 ---
 
 ## 6. Image / Asset Style Guide for Canva Designs
 
-When making Canva graphics for the site, social, or merch:
-
 | Asset type | Canvas size | Notes |
 |---|---|---|
 | Review hero | 1200×675 (16:9) | `object-cover` on site — center subject in upper third |
 | Review card thumbnail | 1200×675 | Same as hero |
-| OG / social card | 1200×630 | Site auto-generates these but useful for manual social posts |
+| OG / social card | 1200×630 | Site auto-generates these; useful for manual social posts |
 | Instagram post | 1080×1080 | Square |
 | Instagram story | 1080×1920 | Portrait, 9:16 |
 | Pinterest pin | 1000×1500 | Portrait, 2:3 |
 | Email header | 1200×400 | Wide banner |
 | Merch graphic (tee front) | 4500×5400 (300 DPI) | Print-resolution |
 
-**Photo treatment:**
-- Slight desaturation — earthy, not punchy
-- Subtle grain overlay (3–5% noise)
-- Avoid neon / vivid colors
-- Real-world dad photos > stock photos every time
+**Photo treatment (modern, not woodsy):**
+- Clean, premium-gallery feel (think Vercel / Linear / Apple), not rustic/ornamental.
+- Real-world dad photos > stock, every time.
+- Dark-first legible — subjects readable on a near-black canvas; frame white-background product shots so they don't glare.
+- Avoid neon/vivid colors and heavy grain/vintage filters.
 
 ---
 
 ## 7. Setup Checklist
 
-Work through this in order in Canva:
-
-- [ ] Brand Kit → upload all 3 logos (rename in Canva using the "Canva label" column above)
-- [ ] Brand Colors → create the 4 color groups above (A: Primary Brand, B: Forge Base, C: Text, D: Editorial Cream)
-- [ ] Brand Fonts → add Montserrat (Heading), Geist (Body), Source Serif 4 (Subheading)
-- [ ] Brand Voice → paste in the primary tagline + voice paragraph
+- [ ] Brand Kit → upload both logos (rename using the "Canva label" column)
+- [ ] Brand Colors → create the 3 groups above (A: Brand Orange, B: Canvas & Surfaces, C: Text)
+- [ ] Brand Fonts → add Montserrat (Heading), Geist (Body), Fraunces + Source Serif 4 (Subheading/Other)
+- [ ] Brand Voice → paste the primary tagline + voice snapshot
 - [ ] Create a "Templates" section → save the canvas sizes from §6 as starter templates
 
 ---
 
-**Last updated:** 2026-05-07
-**Source of truth for design tokens:** `app/globals.css` and `docs/brand-guide.md` — if those change, update this file.
+**Last updated:** 2026-07-24 (v3.5)
+**Source of truth:** doctrine → `docs/brand-guide.md`; exact tokens → `app/globals.css`. If those change, update this file.

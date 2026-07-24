@@ -1,6 +1,6 @@
 /**
  * ArticleSurface — single source of truth for the long-form reading surface
- * on dark (dark-first makeover, docs/dark-makeover-rollout-plan.md).
+ * on dark (dark-first makeover, docs/archive/dark-makeover-rollout-plan.md).
  *
  * Policy: an elevated reading PANEL below `lg` (phone + tablet — no page
  * margin to frame the column, and OLED halation is worst there), and bare
