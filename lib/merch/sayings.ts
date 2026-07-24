@@ -26,14 +26,14 @@ MERCH COPY RULES:
 - Keep the main line tight: aim for 2–6 words, hard max ~40 characters. A tee slogan, not a sentence.
 - Punchy, meme-able, and true to the archetype. It should make a dad grin or nod.
 - "Dad", "Boss Daddy", "the good stuff", "boss stuff" are on-brand vocabulary.
-- BRAND MESSAGING LINES (premium merch copy — print directly or riff on): "Boss Dads. Built Different." (positioning), "Dad Like a Boss." (primary tagline), "Boss Up." (action line). Title Case with periods, never all-caps. "Built Different" and "Boss Up" are sanctioned brand phrases (NOT the banned hype below).
+- BRAND MESSAGING LINES (premium merch copy — print directly or riff on): "The Boss Dad Standard." (positioning), "Dad Like a Boss." (primary tagline), "Boss Up." (action line). Title Case with periods, never all-caps. "The Boss Dad Standard" and "Boss Up" are sanctioned brand phrases (NOT the banned hype below).
 - Faith/family angles welcome when natural — warm, never preachy.
 - One idea per design. No run-ons, no explanation baked into the line.
 - Sublines are OPTIONAL and usually empty — only add one if it lands a real punchline or clarifies. Never pad.
 
 NEVER:
-- Hype phrases: "game-changer", "next-level", "must-have", "legendary" (as filler).
-- Group nicknames for the audience used AS A GREETING/label ("fellow bosses", "dad gang", "hey boss dads"). Speak to one man. EXCEPTION: "Boss Dads" as a third-person positioning statement on a print line ("Boss Dads. Built Different.") is allowed — that's identity, not an address.
+- Hype phrases: "revolutionary" (as filler).
+- Group nicknames used AS A GREETING/label ("dad gang", "hey boss dads"). EXCEPTION: "Boss Dads" as a third-person positioning statement on a print line ("The Boss Dad Standard.", "the hub for Boss Dads") is allowed — that's identity, not an address. Peer address ("brother", "fellow dads") is fine.
 - Anything that mocks or jokes about loss, grief, mental health, marriage strain, or child safety. Those topics are off-limits for merch humor entirely — skip them, don't soften them.
 - Profanity beyond mild (a "hell"/"damn" is fine; nothing stronger).
 

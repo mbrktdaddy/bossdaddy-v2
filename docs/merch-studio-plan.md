@@ -6,7 +6,7 @@
 > - **Automation depth:** Full push to Printful (generate print files + create Printful product via API as a draft; existing `merch:sync` brings it live). Not fully autonomous — a human "confirm publish" gate stays.
 > - **Design types (v1):** (a) text sayings/memes, (b) logo / brand-name-only lockups. **No AI image generation in v1** — decorative graphics and text-over-AI-graphic are deferred.
 > - **Editorial control:** Claude *proposes* sayings/idioms; the operator approves/edits/rejects each one. Sayings are never auto-selected into a design or published without review.
-> - **Brand copy (v3.4):** the messaging-system lines are premium merch copy — "Boss Dads. Built Different." (positioning), "Dad Like a Boss." (primary), "Boss Up." (action), plus "Boss Stuff for Boss Dads" (merch voice). Title Case with periods, never all-caps. "Built Different"/"Boss Up" are sanctioned (exempt from the hype banlist); "Boss Dads" is allowed as a print statement but never as an address. The `MERCH_SAYINGS_SYSTEM` prompt encodes this. Full spec: `docs/brand-guide.md` §1.7 + `docs/brand-v3.4-makeover.md`.
+> - **Brand copy (v3.5):** the messaging-system lines are premium merch copy — "The Boss Dad Standard." (positioning), "Dad Like a Boss." (primary), "Boss Up." (action), plus "Boss Stuff for Boss Dads" (merch voice). Title Case with periods, never all-caps. "The Boss Dad Standard"/"Boss Up" are sanctioned (exempt from the hype banlist); "Boss Dads" is allowed as a print statement but never as an address. The `MERCH_SAYINGS_SYSTEM` prompt encodes this. Full spec: `docs/brand-guide.md` §1.7.
 
 ---
 

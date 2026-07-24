@@ -92,7 +92,7 @@ Full spec + usage lockups: `docs/brand-guide.md` §1.7. Five-level hierarchy —
 
 | Level | Line | Use in |
 |---|---|---|
-| **Positioning** | **Boss Dads. Built Different.** | Hero, logo lockup, major branding, social bios |
+| **Positioning** | **The Boss Dad Standard** | Hero, logo lockup, major branding, social bios |
 | **Primary tagline** | **Dad Like a Boss.** | Campaigns, CTAs, merch, social, article sign-offs |
 | **Action line** | **Boss Up.** | Community, emails, challenges, button text |
 | **Credibility line** | **Real Dads. Smart Tools. Better Decisions.** | Reviews, guides, product pages, "How We Test", footer |
@@ -101,8 +101,7 @@ Full spec + usage lockups: `docs/brand-guide.md` §1.7. Five-level hierarchy —
 **Merch voice (context-specific, outside the core five):** **Boss Stuff for Boss Dads** — store/product/merch only.
 
 **Homepage hero lockup:**
-> Boss Dads.
-> Built Different.
+> The Boss Dad Standard.
 >
 > Dad Like a Boss.
 >

@@ -11,7 +11,7 @@
 ## Stack
 - **Framework**: Next.js 16 App Router, TypeScript strict
 - **Auth + DB**: Supabase (`@supabase/ssr`) with Row-Level Security
-- **AI**: Anthropic Claude API via `@anthropic-ai/sdk` (`claude-sonnet-4-6`)
+- **AI**: Vercel AI Gateway via the AI SDK v6 (`ai` package); call wrappers in `lib/ai/` (`aiGenerateObject`/`aiGenerateText`, `streamText` for the concierge). Models addressed as gateway slugs (e.g. `anthropic/claude-sonnet-4.6`)
 - **Email**: Resend (templates in `emails/`)
 - **Rate limiting**: Upstash Redis
 - **Styling**: Tailwind CSS v4
@@ -64,12 +64,16 @@ If a rename leaks (someone hardcoded "Wishlist" instead of using `LABELS.bench.s
 
 ---
 
-## Claude API Usage
+## AI Usage (Vercel AI Gateway + AI SDK v6)
 
-- Model: `claude-sonnet-4-6` (defined in `lib/claude/client.ts`)
-- **Use prompt caching** on the system prompt for all Claude calls (pass `cache_control: { type: 'ephemeral' }` on the system text block).
-- Rate limit is 10 draft generations per user per hour — do not remove or increase without operator approval.
-- Both the draft and moderation endpoints expect **raw JSON responses** — strip markdown code fences before parsing.
+- **All generation routes through `lib/ai/`** — one-shot `aiGenerateObject`/`aiGenerateText` (`lib/ai/client.ts`), `streamText` for the Boss concierge (`lib/boss/agent.ts`), web-search research via `lib/ai/research.ts`. Do not call a provider SDK (`@anthropic-ai/sdk`) directly for generation — that path is legacy.
+- **Model selection is centralized** in `lib/flags.ts` `resolveModel(bucket)` — buckets: `content`, `utility`, `moderation`, `research`, `concierge` (+ concierge sensitive/fast lanes). Override per bucket via `AI_MODEL_*` env vars; models are gateway slugs (`anthropic/claude-sonnet-4.6`, `anthropic/claude-haiku-4.5`, `anthropic/claude-opus-4.8`, `xai/grok-4.5`). `moderation` is compliance-pinned to Claude (no override).
+- **Auth** via `VERCEL_OIDC_TOKEN` (auto on Vercel; `vercel env pull` locally) or `AI_GATEWAY_API_KEY`. No provider API keys in the gateway path.
+- **Prompt caching is automatic** — `lib/ai/client.ts` wraps the system prompt in an Anthropic ephemeral cache breakpoint (`cachedSystem()`). Don't hand-roll `cache_control`.
+- **No manual JSON parsing / fence-stripping** — `aiGenerateObject` enforces a schema and returns a typed, validated object. Only raw `aiGenerateText` paths return plain text.
+- **Gateway failover:** the chosen provider falls back to Claude on error/budget; each call carries a `surface:<tag>` cost-attribution tag for the Gateway dashboard.
+- Rate limit is **10 draft generations per user per hour** — do not remove or increase without operator approval.
+- **System-prompt strings** (`BOSS_DADDY_SYSTEM`, `MODERATOR_SYSTEM`, `COMMENT_MODERATOR_SYSTEM`) still live in `lib/claude/client.ts` and are consumed by the gateway wrappers; that file is otherwise legacy (`getClaudeClient`/`createStructured` have no live callers).
 
 ---
 

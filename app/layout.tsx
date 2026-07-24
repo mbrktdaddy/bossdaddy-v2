@@ -51,7 +51,7 @@ if (process.env.NEXT_PUBLIC_PINTEREST_VERIFY) socialVerification['p:domain_verif
 
 // Shared default preview image for the homepage and any page that inherits the
 // root metadata. Used by BOTH openGraph.images and twitter.images.
-const defaultOgImage = ogImageMeta({ title: 'Boss Daddy Life', type: 'review', alt: 'Boss Daddy Life — Boss Dads. Built Different.' })
+const defaultOgImage = ogImageMeta({ title: 'Boss Daddy Life', type: 'review', alt: 'Boss Daddy Life — The Boss Dad Standard.' })
 
 export const metadata: Metadata = {
   title: {
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
     template: '%s | Boss Daddy',
   },
   description:
-    'Boss Dads. Built Different. Honest reviews, smart tools, and real-dad wisdom for men who Dad Like a Boss — zero paid placements, zero fluff.',
+    'The Boss Dad Standard. Honest reviews, smart tools, and real-dad wisdom for men who Dad Like a Boss — zero paid placements, zero fluff.',
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   ),

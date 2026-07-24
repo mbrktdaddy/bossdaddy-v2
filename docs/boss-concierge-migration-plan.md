@@ -1,9 +1,9 @@
 # Boss Concierge → AI Gateway migration plan
 
-> Status: **IN PROGRESS** (branch `refactor/phase4-ai-concierge`). Started 2026-07-21.
+> Status: **SHIPPED** (merged through #53, 2026-07-22). Started 2026-07-21. Kept as an execution record.
 > Design authority: memory `project_boss_concierge_northstar` + `project_ai_provider_layer`. This doc is the execution tracker.
 
-The "Ask the Boss" concierge (`lib/boss/agent.ts`) is the **last raw `getClaudeClient` caller**. This migrates it onto the Vercel AI Gateway (AI SDK v6, `streamText`) as the final Phase-4 bucket, and — per the locked north star — reshapes the display protocol to accept action tools and content-first grounding.
+The "Ask the Boss" concierge (`lib/boss/agent.ts`) **was the last raw `getClaudeClient` caller**. This migrated it onto the Vercel AI Gateway (AI SDK v6, `streamText`) as the final Phase-4 bucket, and — per the locked north star — reshaped the display protocol to accept action tools and content-first grounding.
 
 ## North star (locked)
 The Boss = a **chief of staff for dads**: knows you / does things for you / answers you. **Useful-first, not product-first.** Local-content-grounded with a useful fallback and a return path. See memory `project_boss_concierge_northstar` for the full spec, query-handling flow, and display decisions.

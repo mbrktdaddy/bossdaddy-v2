@@ -1,6 +1,8 @@
 # Boss Daddy — v3.4 Brand Makeover (tracking doc)
 
 > Started 2026-07-19. The v3.4 makeover began with a new **messaging system** (five-level tagline hierarchy + Title-Case capitalization doctrine) and ripples out to voice, positioning, design, merch, email, and code. This doc tracks what's locked, what's done, and what's open. Authoritative brand spec still lives in `docs/brand-guide.md` — this is the makeover changelog + checklist.
+>
+> **⚠️ Superseded (v3.5, 2026-07-24):** the Positioning line **"Boss Dads. Built Different."** was **retired** and replaced by **"The Boss Dad Standard."** Entries below still name the old line — they record what v3.4 shipped. For current wording see `docs/brand-guide.md` §1.7 and the project brief.
 
 ---
 

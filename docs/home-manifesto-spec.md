@@ -23,8 +23,8 @@
 | "Meet the Boss" | → `/about` |
 | Nav | Transparent-over-hero → solid on scroll (Phase 1b — see Open items) |
 
-### The Creed (mid-page dark moment, signed) — canonical v3.4 manifesto
-> Boss Daddy isn't just another men's fashion, fitness, or lifestyle brand. It is the gold standard and trusted hub for Boss Dads Built Different — men who believe being a proud and present father isn't a compromise of his strength, but **the ultimate expression of it.**
+### The Creed (mid-page dark moment, signed) — canonical v3.5 manifesto
+> Boss Daddy isn't just another men's fashion, fitness, or lifestyle brand. It is the gold standard and trusted hub for men living The Boss Dad Standard — men who believe being a proud and present father who shows up every day isn't a compromise of strength, but **the ultimate expression of it.**
 > — The Boss
 
 This is the **single canonical manifesto** (source: `docs/brand-guide.md` §1.7). It replaced the old "isn't just another review site" Creed — do not reintroduce that variant. Use this exact wording. (payoff phrase "the ultimate expression of it" in `text-accent`; rendered in `font-editorial-display`.)
