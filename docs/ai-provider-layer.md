@@ -1,6 +1,6 @@
 # AI Provider Layer (`lib/ai/` + `lib/flags.ts`)
 
-> **Status:** Phase 1 shipped (foundation + seam, no call sites migrated yet).
+> **Status:** COMPLETE — all buckets migrated to the Gateway (content, utility, moderation, research, concierge/streaming). `@anthropic-ai/sdk` + `lib/claude/client.ts` remain only as legacy (shared system-prompt strings; `createStructured` is dead code).
 > Target architecture for **multi-provider by design** — not a one-off Grok pilot.
 
 ## Why this exists
@@ -56,9 +56,9 @@ Both auto-apply: Gateway failover to Claude, a `surface:<tag>` cost tag, and an 
 ## Migration phases
 
 1. **Foundation + seam** — `ai@6`, `lib/ai/models.ts`, `lib/flags.ts` resolver, `lib/ai/client.ts` wrappers, unit tests. Everything still resolves to Claude; existing call sites untouched. ✅ **done**
-2. **`content` + `utility` one-shot sites** — migrate the 13 `createStructured` callers + plain-text sites to the wrappers. Verify caching + JSON reliability live.
+2. **`content` + `utility` one-shot sites** — ✅ **done.** All `createStructured` callers + plain-text sites moved to the wrappers (`aiGenerateObject`/`aiGenerateText`); `createStructured` is now dead code.
 3. **`research` (web_search)** — ✅ **done.** One helper `lib/ai/research.ts` (`aiResearch()`) backs all three surfaces (specs-grade, `research_gear`, radar). See **Research bucket** below.
-4. **`concierge` streaming agent** — hardest; migrate `lib/boss/agent.ts` to `streamText` / `ToolLoopAgent`, preserving the sensitive-lane split. Still on the raw `@anthropic-ai/sdk` (`getClaudeClient`) until then.
+4. **`concierge` streaming agent** — ✅ **done.** `lib/boss/agent.ts` runs on `streamText` through the Gateway (`resolveModel('concierge', …)`), preserving the sensitive-lane split. Hybrid semantic + full-text retrieval, thumbs feedback, and a crisis-only sensitive router shipped on top.
 
 ## Research bucket (`lib/ai/research.ts`)
 

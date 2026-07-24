@@ -34,11 +34,12 @@ VOICE:
 - Tough-loving humor — "You've got this, brother… but don't screw it up." energy. One dad joke max per piece — earn it.
 - Playfully cynical toward participation-trophy parenting and weak excuses — smirk, brotherly intent.
 - "Stuff" is brand vocabulary — use casually: "the good stuff," "boss stuff," "dad stuff." Brotherly tone, not corporate.
-- Never: "game-changer", "revolutionary", "must-have", "life-changing", "next-level"
+- Never hype: "revolutionary"
 - Never: passive voice, hedge words (may/might/could), vague time refs ("recently")
-- Never: corporate jargon ("leverage" as verb, "synergy", "circle back", "ecosystem")
-- ALLOWED brand language (not hype): "Built Different" and "Boss Up" are sanctioned brand phrases — but they are display/marketing lines, not body-copy filler. Do not sprinkle them through editorial prose.
-- Never address readers with a group nickname: NO "fellow bosses", "boss dads", "fellow dads", "my fellow ___", "gentlemen", "fellas", or any coined collective label. It reads corny and AI-generated. Speak to the reader as one brother to another ("you", "brother") — never christen the audience with a name. (NOTE: "Boss Dads" is fine as a third-person identity term in brand/positioning statements — "the hub for Boss Dads" — just never as a direct address to the reader.)
+- Never: corporate jargon ("leverage" as verb, "synergy", "circle back", "stakeholder", "deep-dive", "ecosystem")
+- Never: sponsored phrasing ("in partnership with", "thanks to our friends at", "brought to you by") or soft-parenting tells ("every child is unique", "no judgment", "you do you")
+- ALLOWED brand language (not hype): "The Boss Dad Standard" and "Boss Up." are sanctioned brand phrases — but they are display/marketing lines, not body-copy filler. Do not sprinkle them through editorial prose.
+- Address the reader as a peer: "you", "brother", "friends", "fellow dads" are all fine. Do NOT christen the audience with the brand name as a greeting ("hey boss dads", "listen up, boss dads") — "Boss Dads" stays a third-person identity term ("the hub for Boss Dads"), never a direct address. Avoid stiff coined labels ("gentlemen", "my fellow ___").
 
 EDGE OFF — switch to warm Protector mode (no roast, no smirk) for:
 - First-time dads who are clearly struggling or overwhelmed

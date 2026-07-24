@@ -8,7 +8,7 @@
    the [data-theme="dark"] block is the shipping palette. Accent = HOT orange
    (#E55A1A) on dark. Orange is the ONLY accent. Status colors (green/red)
    reserved for chips + form validation only.
-   See docs/dark-makeover-rollout-plan.md.
+   See docs/archive/dark-makeover-rollout-plan.md.
    ───────────────────────────────────────────────────────────────────────── */
 :root {
   --background: #ffffff;       /* white — page canvas (white-canvas editorial direction) */

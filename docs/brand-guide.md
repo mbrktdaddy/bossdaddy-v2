@@ -1,7 +1,7 @@
 # Boss Daddy — Brand Guide
 
 > Single source of truth for the Boss Daddy v2 design system. Update this file when design decisions change.
-> Last revised: 2026-07-19 (v3.4 messaging system — §1.7)
+> Last revised: 2026-07-24 (v3.5 — "The Boss Dad Standard" positioning; design sections reconciled to shipped reality)
 
 ## 0. Naming & Vocabulary
 
@@ -50,7 +50,7 @@ Boss Daddy's mission is to be the gold standard and trusted hub for men of all a
 Rooted in an uncompromising duty to God, Family, and Faith, we stand for honesty, loyalty, and brotherhood. Through smart tools, honest reviews, practical guides, and real brotherhood, we help dads make better decisions and lead with strength, pride, and purpose — because being a proud and present father isn't a compromise of his strength, but the ultimate expression of it.
 
 ### 1.2 Positioning & Brand Essence
-**Positioning (who we are):** *Boss Dads. Built Different.* — the identity line. Boss Dads aren't a softer kind of man; they're men who treat present, proud fatherhood as the ultimate expression of strength.
+**Positioning (who we are):** *The Boss Dad Standard* — the identity line. Boss Dads aren't a softer kind of man; they live to a standard: present, proud fatherhood as the ultimate expression of strength.
 
 **Essence (one-liner):** *Boss Daddy — the gold standard and trusted hub for men who Dad Like a Boss.*
 
@@ -76,7 +76,7 @@ Rooted in an uncompromising duty to God, Family, and Faith, we stand for honesty
 ### 1.6 Tone of Voice
 
 **Two registers — know which one you're in.** Boss Daddy speaks in two voices, and copy fails when they collide:
-- **Declarative register (brand statements)** — the elevated, confident voice of the positioning line, manifesto, hero, creed, and pull-quotes. Short, absolute, no hedging: *"Boss Dads. Built Different." "…the ultimate expression of it."* This is the brand announcing itself. Sanctioned brand phrases ("Built Different," "Boss Up") live here.
+- **Declarative register (brand statements)** — the elevated, confident voice of the positioning line, manifesto, hero, creed, and pull-quotes. Short, absolute, no hedging: *"The Boss Dad Standard." "…the ultimate expression of it."* This is the brand announcing itself. Sanctioned brand phrases ("The Boss Dad Standard," "Boss Up.") live here.
 - **Brotherly register (editorial body)** — the first-person, tough-loving older-brother voice for reviews, guides, emails, and everyday copy. Specific, warm, a little cynical toward mediocrity. This is one dad talking to another.
 
 Declarative is for **display moments only** — heroes, taglines, creed, sign-offs. Everywhere else, write brotherly. Never staple a marketing tagline into the middle of a review. The rules below govern the brotherly register (the one you write in 95% of the time).
@@ -95,21 +95,21 @@ Declarative is for **display moments only** — heroes, taglines, creed, sign-of
 - First-person always: "I used this for 3 weekends," "I built a fence with it."
 - Active voice. No hedge words (may/might/could). No vague time refs ("recently," "lately").
 - Sentences 15–25 words. Paragraphs 3–5 sentences. Lead with the useful info, not background.
-- Address the reader as a peer: "Fellow bosses," "Brother," direct "you." `BOSS` as noun-of-address sparingly.
+- Address the reader as a peer: "Brother," "Friends," "Fellow Dads," direct "you." `BOSS` as noun-of-address sparingly.
 - Direct openers welcome: "Here's the deal:", "Bottom line:", "Real talk:".
 
 *Banlist — never use*
-- Hype phrases: "game-changer," "revolutionary," "must-have," "life-changing," "next-level." Hype is for mediocrity.
+- Hype phrases: "revolutionary." Hype is for mediocrity.
 - Corporate jargon: "leverage" (as verb), "synergy," "circle back," "stakeholder," "deep-dive," "ecosystem."
 - Sponsored-content phrasing: "in partnership with," "thanks to our friends at," "brought to you by."
 - Soft-parenting tells: "every child is unique," "no judgment," "you do you."
 
-*Sanctioned brand language (v3.4 — NOT hype, do not flag)*
-- **"Built Different"** and **"Boss Up"** are brand-owned messaging (see §1.7), not banned swagger. They read like hype-adjacent phrases but are approved positioning/CTA language. Use "Built Different" only in the positioning line ("Boss Dads. Built Different."); use "Boss Up." as the action/CTA verb. Don't spray them through body copy as filler — that's what makes hype hype.
+*Sanctioned brand language (v3.5 — NOT hype, do not flag)*
+- **"The Boss Dad Standard"** and **"Boss Up."** are brand-owned messaging (see §1.7), not banned swagger. Use "The Boss Dad Standard" as the positioning line; use "Boss Up." as the action/CTA verb. Don't spray them through body copy as filler — that's what makes hype hype.
 
 *"Boss Dads" — identity term, never an address*
-- **"Boss Dads" is a third-person identity/positioning term** (brand → world): "Boss Dads. Built Different.", "the hub for Boss Dads." ✅
-- It is **never a second-person address** (writer → reader). "Hey boss dads," / "Listen up, boss dads" ❌ — still banned alongside "fellow bosses," "gentlemen," "fellas." Address the reader one brother to another ("you," "brother"), never christen the audience with a name. See [[feedback_no_reader_nicknames]].
+- **"Boss Dads" is a third-person identity/positioning term** (brand → world): "the hub for Boss Dads," "men living The Boss Dad Standard." ✅
+- It is **never a second-person address** (writer → reader). "Hey boss dads," / "Listen up, boss dads" ❌ — still off. But direct peer address **is** welcome (v3.5): "Brother," "Friends," "Fellow Dads," "you." Address the reader one brother to another; just don't christen the audience with the brand name. See [[feedback_no_reader_nicknames]].
 
 *Specificity — always required*
 - Every claim has specifics: durations ("4 hours of continuous use"), conditions ("18°F garage, no insulation"), outcomes ("zip-tied in under a minute").
@@ -141,20 +141,20 @@ The playfully cynical / borderline-condescending edge is OFF and warmth/presence
 
 The edge exists to call up men who are *coasting*. It is never aimed at men in the trenches.
 
-### 1.7 Messaging System & Wordmark Usage (v3.4 — locked 2026-07-19)
+### 1.7 Messaging System & Wordmark Usage (v3.5 — locked 2026-07-24)
 
 The Boss Daddy messaging system is a **five-level hierarchy**. Each line has a distinct job — don't swap jobs, don't blend them into one line. Use them together in the recommended lockups below.
 
 | Level | Element | Line | Purpose | Primary usage |
 |---|---|---|---|---|
-| **Positioning** | Main identity | **Boss Dads. Built Different.** | Who we are + status | Hero sections, logo lockup, major branding, video intros, social bios |
+| **Positioning** | Main identity | **The Boss Dad Standard** | Who we are + status | Hero sections, logo lockup, major branding, video intros, social bios |
 | **Primary Tagline** | Rallying cry | **Dad Like a Boss.** | Action + emotional hook | Campaigns, CTAs, merch, social, article sign-offs |
 | **Action Line** | Motivational CTA | **Boss Up.** | Call to action & growth | Community, emails, challenges, button text |
 | **Credibility Line** | Trust builder | **Real Dads. Smart Tools. Better Decisions.** | Honesty & value proof | Reviews, guides, product pages, footer trust bar, "How We Test" |
 | **Philosophy** | Manifesto | *(full statement below)* | Core belief & differentiation | About page, founder story, welcome sequence, long-form/sales pages |
 
 **Philosophy / Manifesto (canonical wording — do not paraphrase in hero/about placements):**
-> Boss Daddy isn't just another men's fashion, fitness, or lifestyle brand. It is the gold standard and trusted hub for Boss Dads Built Different — men who believe being a proud and present father isn't a compromise of his strength, but the ultimate expression of it.
+> Boss Daddy isn't just another men's fashion, fitness, or lifestyle brand. It is the gold standard and trusted hub for men living The Boss Dad Standard — men who believe being a proud and present father who shows up every day isn't a compromise of strength, but the ultimate expression of it.
 
 > *Scope note:* the "fashion, fitness, or lifestyle" phrasing is **contrast/positioning framing only** — it elevates us above generic lifestyle brands. It is **not** a commitment to ship fashion or fitness content pillars. The content roadmap (reviews, guides, gear, community) is unchanged.
 
@@ -162,17 +162,16 @@ The Boss Daddy messaging system is a **five-level hierarchy**. Each line has a d
 
 *Homepage hero lockup:*
 ```
-Boss Dads.
-Built Different.
+The Boss Dad Standard.
 
 Dad Like a Boss.
 
 Real Dads. Smart Tools. Better Decisions.
 ```
 
-*About page structure:* Hero → **Boss Dads. Built Different.** · Sub-head → **Dad Like a Boss.** · Body → full Philosophy statement · Trust block → **Real Dads. Smart Tools. Better Decisions.**
+*About page structure:* Hero → **The Boss Dad Standard.** · Sub-head → **Dad Like a Boss.** · Body → full Philosophy statement · Trust block → **Real Dads. Smart Tools. Better Decisions.**
 
-*Social / email:* Lead with **Boss Dads. Built Different.**, support with **Dad Like a Boss.**, close the CTA with **Boss Up.**
+*Social / email:* Lead with **The Boss Dad Standard.**, support with **Dad Like a Boss.**, close the CTA with **Boss Up.**
 
 *Email specifics:* the **welcome sequence** carries the full manifesto (it's the "our why" moment). Use **"Boss Up."** as an action-oriented subject-line / challenge verb. Sign off editorial and newsletter emails with **"Dad Like a Boss."** Keep the declarative register for these display moments; the body of the email is still brotherly. (Note: email templates render light, not dark — see §2.)
 
@@ -180,7 +179,7 @@ Real Dads. Smart Tools. Better Decisions.
 - **"Boss Stuff for Boss Dads"** — the merch/shop tagline. Use only in store, product, and merch-graphic contexts. It does a job the core system doesn't; keep it scoped to the shop so it doesn't dilute the positioning lines.
 
 **Capitalization rule (v3.4 — Title Case wins):**
-- The five core lines and the merch line are written in **Title Case with periods** — e.g. *Boss Dads. Built Different.* / *Dad Like a Boss.* / *Boss Up.* The clean title-case treatment reads cleaner and more premium; the periods give punch without shouting. **Do not** set these lines in all-caps or cap `BOSS` mid-line (retired: the old "Dad like a BOSS" emphasis).
+- The five core lines and the merch line are written in **Title Case with periods** — e.g. *The Boss Dad Standard.* / *Dad Like a Boss.* / *Boss Up.* Lowercase the articles ("a," "the") per Title Case. The periods give punch without shouting. **Do not** set these lines in all-caps or cap `BOSS` mid-line (retired: the old "Dad like a BOSS" emphasis).
 - **All-caps `BOSS DADDY` is reserved strictly for the wordmark/logo lockup.** Do not all-caps the brand name in hero H1s, taglines, OG cards, email banners, or body copy.
 - **Title-case `Boss Daddy`** everywhere else the name is referenced — editorial body, in-narrative mentions ("Boss Daddy was built because…"), reviews, guides, dashboards.
 - Never lowercase. Never camel-case ("BossDaddy") except in code/file/identifier contexts.
@@ -326,7 +325,7 @@ Magazine-cover detail. Single character, big editorial signal.
 
 The v3.4 messaging lines (§1.7) are the **one place headline copy is set in Title Case, not uppercase.** Everything else in the display system — section headings (`font-black`), eyebrows (uppercase, tracked) — stays as documented above. Don't uppercase the messaging lines to "match" a heading, and don't Title-Case a section heading to match a messaging line. They are different type roles.
 
-- **Positioning lockup** — *Boss Dads. Built Different.* Set as **two stacked lines**, each with its period, tight leading (`leading-[0.98]`), `font-black` Montserrat, `tracking-tight`. The hero H1 pattern (`HomeHero`) is the reference: the second half carries the `text-accent` color (e.g. "Boss." / "Built Different." in accent). Largest type on the page.
+- **Positioning lockup** — *The Boss Dad Standard.* Set with tight leading (`leading-[0.98]`), `font-black` Montserrat, `tracking-tight`; "Standard." can carry the `text-accent` color. Largest type on the page. (Note: the live homepage hero H1 currently renders the primary tagline "Dad Like a Boss." with "Boss." in accent — `HomeHero` is the reference pattern.)
 - **Primary tagline** — *Dad Like a Boss.* One line, `font-black`, accent on the final word ("Boss.") when it sits alone as a hero/marquee line.
 - **Action line** — *Boss Up.* Button/CTA weight (`font-extrabold`/`font-bold`), never larger than the tagline it sits under.
 - **Credibility line** — *Real Dads. Smart Tools. Better Decisions.* Small-to-mid supporting type; works as a footer trust bar or a sub-deck under the hero. Not `font-black` — it's a supporting line, set in body/UI weight.
@@ -339,31 +338,34 @@ The v3.4 messaging lines (§1.7) are the **one place headline copy is set in Tit
 ## 4. Shape Language
 
 ### Corner radius
-- **Cards, panels, buttons, inputs**: `rounded-2xl` (16px). One number, used everywhere.
+- **Cards, panels, buttons, inputs**: `rounded-xl` (12px). One number, used everywhere.
 - **Pills**: `rounded-full` (badges, filter buttons, status pills).
-- **Small avatar / image holder**: `rounded-2xl` on hero card swatches; `rounded-full` on user avatars.
+- **Small avatar / image holder**: `rounded-xl` on hero card swatches; `rounded-full` on user avatars.
 
-We tested 0px, 4px, 8px, 16px, 24px and landed on 16px for the right balance of *modern* and *not blocky*. Sharper than 16px reads cold; softer reads consumer.
+We landed on 12px (`rounded-xl`) for the balance of *modern* and *not blocky* — tightened from the earlier 16px (`rounded-2xl`). Sharper reads cold; softer reads consumer.
 
-### Border principle — Shadow Skin
-Cards have **no borders**. Visual separation is achieved through:
-1. Elevation (drop shadows)
-2. Surface-color contrast (`bg-gray-900` on `bg-gray-950` page)
-3. Whitespace
+### Border principle — Border + soft shadow (dark-first)
+On the dark canvas, **elevation comes from a visible border plus a *soft* shadow** — pure black drop-shadows vanish on near-black. The shipping card skin is:
 
-Borders survive only on:
-- Small badge pills (`border-orange-800/50` on hero trust pill etc.)
-- Form inputs that need clarity (the newsletter input)
-- The brand horizontal architectural rule (orange hairline at top of Featured Review section)
-- The 3px vertical orange rule next to section headers
+```
+bg-surface rounded-xl border border-soft shadow-lg shadow-black/5
+hover:border-copper hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1
+```
 
-### Shadow scale
+1. `border border-soft` — the primary separator (→ `border-copper`/`border-strong` on hover).
+2. A soft shadow at low opacity (`shadow-black/5` → `shadow-black/10` on hover) for a subtle lift.
+3. A small hover translate (`-translate-y-0.5` / `-translate-y-1`).
+4. Surface-color contrast (raised surfaces) + whitespace.
+
+The shared primitive `components/ui/Card.tsx` is border-only (`bg-surface rounded-xl border border-soft`, no shadow). The old "Shadow Skin / no borders / `shadow-black/40`" system is **retired**.
+
+### Shadow scale (soft — dark-first)
+Shadows are low-opacity accents *on top of* the border, not the primary separator.
 | Class | Use |
 |---|---|
-| `shadow-md shadow-black/30` | Subtle — small inline elements, pills, list rows |
-| `shadow-lg shadow-black/40` | Standard cards (review/article/wishlist) |
-| `shadow-xl shadow-black/40` | Feature cards (Featured Review, hero cards, callouts) |
-| `shadow-xl shadow-black/60` | Card hover state |
+| `shadow-md shadow-black/5` | Subtle — pills, list rows, wishlist cards |
+| `shadow-lg shadow-black/5` | Standard cards (review/guide) |
+| `shadow-xl shadow-black/10` | Card hover (paired with `hover:border-copper` + `-translate-y-1`) |
 
 ---
 
@@ -424,33 +426,35 @@ The page ends with a deliberate punctuation:
 
 ## 6. Component Patterns
 
-### Card skeleton (review / article / wishlist / shop)
+### Card skeleton (review / guide / wishlist / shop)
+Real pattern (see `ReviewCard.tsx` / `GuideCard.tsx`): semantic tokens only, `rounded-xl`, border + soft shadow, hover lift.
 ```jsx
 <Link
   href="..."
-  className="group flex flex-col bg-gray-900 rounded-2xl overflow-hidden shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition-all duration-200"
+  className="group relative flex flex-col bg-surface rounded-xl overflow-hidden border border-soft shadow-lg shadow-black/5 hover:border-copper hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-200"
 >
-  {/* Image — 44 height, object-cover, hover scale */}
-  <div className="relative w-full h-44 bg-gray-800 shrink-0">
+  {/* Image — h-44, object-cover, hover scale */}
+  <div className="relative w-full h-44 bg-surface-raised shrink-0">
     <Image ... className="object-cover group-hover:scale-105 transition-transform duration-300" />
     {/* Boss Approved badge top-right when rating >= 8 */}
   </div>
   <div className="p-5 flex flex-col flex-1">
-    {/* Top row: product/category pill + rating score */}
+    {/* Top row: category (CategoryIcon SVG) + rating score */}
     <div className="flex items-center justify-between mb-3">
-      <span className="text-xs font-medium text-orange-500/80 uppercase tracking-widest bg-orange-950/40 px-2.5 py-1 rounded-full truncate max-w-[60%]">
-        {productName}
+      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-eyebrow uppercase tracking-widest truncate max-w-[60%]">
+        <CategoryIcon slug={cat.slug} className="w-4 h-4" />
+        {cat.label}
       </span>
       <RatingScore rating={rating} />
     </div>
-    <h3 className="text-base font-semibold leading-snug text-white group-hover:text-orange-400 transition-colors flex-1">
+    <h3 className="text-base font-semibold leading-snug text-prose group-hover:text-accent-text transition-colors flex-1">
       {title}
     </h3>
-    <p className="text-gray-500 text-sm mt-2 line-clamp-2">{excerpt}</p>
-    {/* Foot row: date + action link (no border-t) */}
+    <p className="text-prose-faint text-sm mt-2 line-clamp-2">{excerpt}</p>
+    {/* Foot row: date + action link */}
     <div className="flex items-center justify-between mt-4 pt-4">
-      <span className="text-xs text-gray-600">{date}</span>
-      <span className="text-xs text-orange-500 font-medium">Read review →</span>
+      <span className="text-xs text-prose-faint">{date}</span>
+      <span className="text-xs text-accent-text font-medium">Read review →</span>
     </div>
   </div>
 </Link>
@@ -466,17 +470,17 @@ The page ends with a deliberate punctuation:
 ### Filter pills
 ```jsx
 {/* Active */}
-className="px-4 py-2.5 rounded-full text-sm font-semibold bg-orange-600 text-white shadow-md shadow-black/30"
+className="px-4 py-2.5 rounded-full text-sm font-semibold bg-accent text-white"
 
 {/* Inactive */}
-className="px-4 py-2.5 rounded-full text-sm font-medium bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white shadow-sm shadow-black/20 hover:shadow-md hover:shadow-black/40 transition-all"
+className="px-4 py-2.5 rounded-full text-sm font-medium bg-surface text-prose-muted border border-soft hover:border-strong hover:text-prose transition-all"
 ```
 
 ### Buttons
-- **Primary** (CTAs): `bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-2xl px-6 py-3`
-- **Secondary**: `bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white font-semibold rounded-2xl px-6 py-3` (no border)
-- **Tertiary / link**: `text-orange-500 hover:text-orange-400 transition-colors` (text-only)
-- **Tracked-caps action link**: `text-xs text-gray-500 hover:text-orange-400 transition-colors uppercase tracking-widest font-semibold`
+- **Primary** (CTAs): `bg-accent hover:bg-accent-hover text-white font-extrabold rounded-xl px-7 py-3.5 min-h-[48px]`
+- **Secondary**: `border border-strong text-prose hover:border-accent hover:text-accent font-bold rounded-xl px-7 py-3.5 min-h-[48px]`
+- **Tertiary / link**: `text-accent-text hover:text-accent transition-colors` (text-only)
+- **Tracked-caps action link**: `text-xs text-prose-faint hover:text-accent-text transition-colors uppercase tracking-widest font-semibold`
 
 ### Index numbers (More Reviews TOC treatment)
 ```jsx
@@ -488,9 +492,9 @@ Magazine table-of-contents detail. Used on the More Reviews grid on the homepage
 
 ### Empty states
 ```jsx
-<div className="text-center py-24 bg-gray-900/40 rounded-2xl">
-  <p className="text-gray-500 text-lg font-semibold">No items here yet.</p>
-  <p className="text-gray-600 text-sm mt-2">Check back soon, Boss.</p>
+<div className="text-center py-24 bg-surface/40 rounded-xl">
+  <p className="text-prose-faint text-lg font-semibold">No items here yet.</p>
+  <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
 </div>
 ```
 No dashed borders. Soft panel that reads as "this is intentional" not "this is broken."
@@ -503,9 +507,9 @@ No dashed borders. Soft panel that reads as "this is intentional" not "this is b
 
 ## 7. Iconography
 
-- **Categories**: emoji-based (👶 🏕️ 🛠️ 👨‍🍳 💪 🎮 🎒). Source of truth: `lib/categories.ts`.
+- **Categories**: inline stroke SVGs (24×24, `currentColor`, `strokeWidth={2}`) via `components/CategoryIcon.tsx`, keyed by category slug. **No emoji on web surfaces.** (The `icon` emoji field in `lib/categories.ts` is vestigial — not rendered.)
 - **Status indicators**: small colored circle (`w-2 h-2 rounded-full`) + animated pulse for "live" feels.
-- **Inline UI**: no icon library — minimal, type-led.
+- **Inline UI**: hand-drawn stroke SVGs, Heroicons-style. Minimal, type-led; no emoji, no icon library.
 
 ---
 
@@ -564,7 +568,7 @@ No dashed borders. Soft panel that reads as "this is intentional" not "this is b
 | `EmailSignup` | `components/EmailSignup.tsx` | Newsletter sections |
 | `Header` / `Footer` | `components/Header.tsx`, `Footer.tsx` | Site shell |
 | `ReviewCard` | `app/(public)/reviews/_components/ReviewCard.tsx` | `/reviews`, homepage |
-| `ArticleCard` | `app/(public)/articles/_components/ArticleCard.tsx` | `/articles`, homepage |
+| `GuideCard` | `app/(public)/guides/_components/GuideCard.tsx` | `/guides`, homepage |
 | `WishlistCard` | `components/wishlist/WishlistCard.tsx` | `/wishlist` |
 
 ---
@@ -576,7 +580,8 @@ A short history of key choices and why — useful when reconsidering trade-offs 
 | Decision | Rationale |
 |---|---|
 | **Forge Base palette** (neutral warm-black, not brown-warm) | After A/B with 14 alternative palettes (Ranger heritage, Atlas navy, Voltage electric, Hearth domestic, Graphite mono, Trophy hunter green, Ember oxblood, etc.), Forge's earthy orange + neutral dark won for workshop/honest-craftsman feel without going too cold. |
-| **16px corners** (`rounded-2xl`) | Tested 0/2/4/8/12/16/20/24px live. 8px felt too blocky in real context; 16px holds the modern-friendly feel without going consumer-soft. |
+| **16px corners** (`rounded-2xl`) | Tested 0/2/4/8/12/16/20/24px live. 8px felt too blocky in real context; 16px holds the modern-friendly feel without going consumer-soft. *(Later tightened to 12px `rounded-xl` in the dark-first build — see §4.)* |
+| **Border + soft shadow** (retired "Shadow Skin") | On the near-black dark canvas, black drop-shadows are invisible, so the original no-border/shadow-only "Shadow Skin" was dropped. Cards now separate with `border border-soft` + a low-opacity `shadow-black/5` and a hover lift. See §4. |
 | **Inter Black 900 → kept Montserrat in production** | Inter Black tested as the heading font in prototypes but the deployed site uses Montserrat (already loaded). Tested Anton/Bebas/Oswald/Archivo Black/Playfair/Fraunces — sans-bold won over condensed/serif alternatives. |
 | **Hybrid hero gradient** (spotlight + linear) | A/B between Spotlight Bright/Soft/Wide, Linear Strong/Soft, and Hybrid. Hybrid keeps the centered focal point AND the even top-down wash. |
 | **Shadow skin** (no card borders) | Tested hairline, hairline-strong, chunky 2px, shadow, float, inset-glow. Shadow won for being "modern SaaS without losing tactical edge." |
@@ -604,26 +609,29 @@ A short history of key choices and why — useful when reconsidering trade-offs 
 ## 12. Quick Reference (cheat sheet)
 
 ```
-Page bg          bg-gray-950 / #0b0b0d
-Card surface     bg-gray-900 / #141418
-Brand accent     #CC5500 (text-orange-500 / bg-orange-600)
-Text             #f5f5f5 / text-muted #a8a8b0 / text-faint #6a6a72
+Canvas (dark)    bg-background / #09090b            (token — not bg-gray-950)
+Card surface     bg-surface #18181b · raised bg-surface-raised #27272a
+Brand accent     text-accent / bg-accent = #E55A1A (Hot, on dark) · hover #CC5500
+Inline links     text-accent-text / text-eyebrow = #f48a4a
+Text             text-prose #f4f4f5 · text-prose-muted #d4d4d8 · text-prose-faint #a1a1aa
+Borders          border-soft #27272a · border-strong #3f3f46
 
-Cards            bg-gray-900 rounded-2xl shadow-lg shadow-black/40
-Cards hover      hover:shadow-xl hover:shadow-black/60
-Featured cards   shadow-xl shadow-black/40
-Empty state      bg-gray-900/40 rounded-2xl
+Cards            bg-surface rounded-xl border border-soft shadow-lg shadow-black/5
+Cards hover      hover:border-copper hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1
+Empty state      bg-surface/40 rounded-xl (no dashed border)
 
-Hero H1          text-6xl md:text-[7.5rem] leading-[0.92] tracking-tight
+Hero H1          text-5xl (mobile) · text-7xl md:text-[5.5rem] (desktop) font-black leading-[0.98]
 Page H1          text-4xl md:text-5xl font-black tracking-tight
+Editorial H1     font-editorial-display font-semibold (PageHeader — Fraunces)
 Section H2       text-2xl font-black
-Eyebrow          text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold
+Eyebrow          text-[11px] text-eyebrow uppercase tracking-[0.2em] font-bold
                  (prefix with em-dash: "— Just In")
 
-Section opener   3px vertical orange-600 rule + eyebrow + h2
+Section opener   3px vertical accent rule + eyebrow + h2  (use SectionHeader)
+Icons            inline SVG (CategoryIcon) — no emoji
 
-Container        max-w-6xl mx-auto px-6
-Section padding  py-16
+Container        max-w-6xl mx-auto px-6   (detail pages max-w-7xl)
+Section padding  py-12 md:py-16
 Card grid        gap-5
 Numbers          tabular-nums
 ```
