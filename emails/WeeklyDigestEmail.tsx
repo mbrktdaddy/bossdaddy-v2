@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { LABELS } from '@/lib/labels'
+import { BRAND } from '@/lib/brand'
 
 interface DigestItem {
   type: 'review' | 'guide'
@@ -126,6 +127,14 @@ export function WeeklyDigestEmail({ email, items, weekLabel, siteUrl = 'https://
                         </td>
                       </tr>
                     </table>
+                  </td>
+                </tr>
+
+                {/* Sign-off */}
+                <tr>
+                  <td style={{ padding: '4px 40px 28px 40px' }}>
+                    <p style={{ color: ORANGE, fontWeight: 800, fontSize: '15px', margin: '0 0 2px 0' }}>{BRAND.tagline}</p>
+                    <p style={{ color: FAINT, fontSize: '13px', margin: 0 }}>— The Boss</p>
                   </td>
                 </tr>
 

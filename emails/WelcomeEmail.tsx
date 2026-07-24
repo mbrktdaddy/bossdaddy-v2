@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { BRAND } from '@/lib/brand'
 
 interface Props {
   email: string
@@ -54,6 +55,10 @@ export function WelcomeEmail({ email, siteUrl = 'https://www.bossdaddylife.com' 
                     <p style={{ color: '#9ca3af', fontSize: '16px', lineHeight: '1.6', margin: '0 0 24px 0' }}>
                       No sponsored posts. No affiliate pressure. Just a real dad who buys the stuff, tests it on weekends, and gives you the honest verdict.
                     </p>
+                    <p style={{ color: '#9ca3af', fontSize: '16px', lineHeight: '1.6', margin: '0 0 24px 0' }}>
+                      Quick on the why: I&apos;m a first-time dad who decided that showing up — strong, present, every single day — isn&apos;t a compromise of my strength. It&apos;s the ultimate expression of it. That&apos;s {BRAND.positioning}, and if you&apos;re reading this, you already live it.{' '}
+                      <a href={`${siteUrl}/about`} style={{ color: '#CC5500', textDecoration: 'none', fontWeight: 700 }}>The whole story →</a>
+                    </p>
 
                     {/* CTA */}
                     <table cellPadding={0} cellSpacing={0} style={{ margin: '32px 0' }}>
@@ -72,6 +77,8 @@ export function WelcomeEmail({ email, siteUrl = 'https://www.bossdaddylife.com' 
                     <p style={{ color: '#6b7280', fontSize: '14px', lineHeight: '1.6', margin: 0 }}>
                       Real talk: I only email when I have something worth saying. No weekly fluff, no daily spam. Just the good stuff.
                     </p>
+                    <p style={{ color: '#CC5500', fontWeight: 800, fontSize: '16px', margin: '28px 0 2px 0' }}>{BRAND.tagline}</p>
+                    <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>— The Boss</p>
                   </td>
                 </tr>
 
