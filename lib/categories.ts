@@ -137,7 +137,7 @@ export const CATEGORIES = [
   },
   {
     slug: 'tech-edc',
-    label: 'Tech & EDC',
+    label: 'Tech & Gadgets',
     shortLabel: 'Tech',
     description: 'Gadgets, everyday carry, and the gear that keeps a dad productive and prepared.',
     icon: '📱',
@@ -268,6 +268,62 @@ export const CATEGORIES = [
       {
         question: 'Do you consider budget when recommending home goods?',
         answer: "Always. Home goods range from $10 to $10,000 and the premium isn't always justified. I try to give a clear answer on when it's worth spending more and when it isn't.",
+      },
+    ],
+  },
+  {
+    slug: 'table-duty',
+    label: 'Table Duty',
+    shortLabel: 'Table Duty',
+    description: 'The conversations a father refuses to leave unspoken — meaning, faith, culture, and duty, wrestled with honestly.',
+    icon: '🗣️',
+    color: 'from-surface-raised/50 to-surface/40',
+    border: 'border-strong/40',
+    accent: 'text-accent-text',
+    targetWords: 1600,
+    pov: "I don't write these as a man who has it all figured out. I write them as a dad who refuses to hand his kids a world he never bothered to think about. Student first, imperfect, still learning — but unwilling to stay silent on the things that matter most. These are the talks we should be having at the table: what a life is for, what we believe, what we let shape our kids, and what we owe the people counting on us. I'll take a position and show my work — but I'd rather leave you with a sharper question than a cheap answer.",
+    faqs: [
+      {
+        question: 'Is this political?',
+        answer: "Not in the partisan sense. I treat these as questions worth wrestling with, not sides to pick. When a piece takes a position, it earns it out loud — and you're free to think it through and land somewhere else.",
+      },
+      {
+        question: 'Why cover this on a site about dad gear?',
+        answer: "Because being a father isn't only about the gear. What we believe, what we allow into our homes, and what we stand for shapes our kids more than any product. That deserves at least as much thought as which drill to buy.",
+      },
+      {
+        question: "What's the difference between Table Duty and Watch Duty?",
+        answer: "Table Duty is the timeless conversation — the questions that never expire. Watch Duty is what's happening right now, on our watch. Timely pieces there often grow into deeper essays here.",
+      },
+      {
+        question: 'Do you preach?',
+        answer: "No. Faith is part of how I see the world and it shows up honestly, but I'm not here to sermonize or judge another man's walk. Take what's useful and leave the rest.",
+      },
+    ],
+  },
+  {
+    slug: 'watch-duty',
+    label: 'Watch Duty',
+    shortLabel: 'Watch Duty',
+    description: "What's happening on our watch right now — current events read through one question: why does this matter at the family table?",
+    icon: '👁️',
+    color: 'from-surface-raised/50 to-surface/40',
+    border: 'border-strong/40',
+    accent: 'text-accent-text',
+    targetWords: 1000,
+    pov: "I'm not a news anchor and I won't pretend to be neutral about my kids' future. Watch Duty is where I react to what's happening now — not with a hot take, but with 'here's what I'm seeing and the questions it raises.' Every piece clears one bar before it runs: does this actually land on fathers, kids, or the world we're handing them? If it doesn't, it stays out. I'd rather post less and mean it than chase every headline.",
+    faqs: [
+      {
+        question: 'How is this different from the news?',
+        answer: "I'm not chasing headlines for clicks. I weigh in only when something genuinely reaches the family table, and I care more about the questions it raises than scoring a point.",
+      },
+      {
+        question: 'Will these pieces stay up forever?',
+        answer: "No. Watch Duty is timely by design. Most pieces stay front-and-center for a few weeks, then get archived or grow into a deeper Table Duty essay.",
+      },
+      {
+        question: 'Is this partisan?',
+        answer: "No. Same rule as Table Duty: I'll wrestle honestly and sometimes take a position, but I'm not carrying anyone's water. Fathers, families, and the next generation are the only constituency here.",
       },
     ],
   },

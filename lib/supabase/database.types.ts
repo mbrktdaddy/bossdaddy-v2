@@ -1332,6 +1332,36 @@ export type Database = {
           },
         ]
       }
+      merch_tags: {
+        Row: {
+          merch_id: string
+          tag_slug: string
+        }
+        Insert: {
+          merch_id: string
+          tag_slug: string
+        }
+        Update: {
+          merch_id?: string
+          tag_slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merch_tags_merch_id_fkey"
+            columns: ["merch_id"]
+            isOneToOne: false
+            referencedRelation: "merch"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merch_tags_tag_slug_fkey"
+            columns: ["tag_slug"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       merch_variants: {
         Row: {
           color: string | null
@@ -2824,27 +2854,41 @@ export type Database = {
       }
       tags: {
         Row: {
+          category_slug: string | null
           created_at: string | null
           display_order: number
           label: string
+          parent_slug: string | null
           slug: string
           tag_group: string
         }
         Insert: {
+          category_slug?: string | null
           created_at?: string | null
           display_order?: number
           label: string
+          parent_slug?: string | null
           slug: string
           tag_group: string
         }
         Update: {
+          category_slug?: string | null
           created_at?: string | null
           display_order?: number
           label?: string
+          parent_slug?: string | null
           slug?: string
           tag_group?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tags_parent_slug_fkey"
+            columns: ["parent_slug"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["slug"]
+          },
+        ]
       }
       tool_email_subscriptions: {
         Row: {

@@ -93,6 +93,10 @@ export const SPEC_TEMPLATES: Record<CategorySlug, SpecTemplateField[]> = {
     { label: 'Color options', hint: 'e.g. 5' },
     { label: 'Warranty', hint: 'e.g. 10-year' },
   ],
+  // Essay / discussion pillars — no product spec fields. Table Duty and Watch
+  // Duty carry essays, not gear, so the Product Facts panel stays empty.
+  'table-duty': [],
+  'watch-duty': [],
 }
 
 /** Template for a category slug, or the universal fallback. */
