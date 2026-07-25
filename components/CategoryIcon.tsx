@@ -51,6 +51,20 @@ const ICONS: Record<string, React.ReactNode> = {
   'home-lifestyle': (
     <path d="M3 12l9-9 9 9M5 10v10h14V10M10 20v-5h4v5" />
   ),
+  'table-duty': (
+    <>
+      <path d="M3 10h18" />
+      <path d="M5 10v8M19 10v8" />
+      <path d="M12 10V6" />
+      <circle cx="12" cy="4.5" r="1.5" />
+    </>
+  ),
+  'watch-duty': (
+    <>
+      <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z" />
+      <circle cx="12" cy="12" r="2.5" />
+    </>
+  ),
 }
 
 export default function CategoryIcon({ slug, className = '' }: Props) {

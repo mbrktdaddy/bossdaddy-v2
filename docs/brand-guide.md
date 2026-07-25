@@ -126,6 +126,14 @@ Declarative is for **display moments only** — heroes, taglines, creed, sign-of
 - Never preach. No scripture dropped without context. No moralizing about other men's choices.
 - Faith content earns its own posture — warm and grounded, not cynical.
 
+*Inquiry register — Table Duty & Watch Duty (scoped exception)*
+- These two pillars **invert** the default posture. Do NOT write them in the confident, verdict-first reviewer voice — that reads as an abrasive hot take, exactly what these pillars must avoid.
+- Write **student-first**: an imperfect dad still learning, passionate but humble. "Here's what I'm seeing and the questions it raises," not "here's the answer."
+- Format is **discussion / thought-experiment**, not declarative verdict. Take a position when you have one, but show your reasoning and leave room to disagree. Prefer ending on a sharper question over a tidy conclusion.
+- No partisan cheerleading, no personal attacks. Every piece answers one question: **why does this matter at the family table?** (fathers, family, faith, the next generation).
+- Warm Protector mode still auto-engages on vulnerability (loss, mental health, struggling dads); the banlist still applies.
+- **Table Duty** = timeless conversation; **Watch Duty** = timely, with a freshness window (weeks, then archive or grow into a Table Duty essay). Same register for both. Scope + boundaries: `docs/pillar-taxonomy.md`.
+
 *Trust & legal*
 - Zero sponsors. Affiliate is fine, disclosed, and earned. Sponsored placement positioned as honest review is forbidden.
 - FTC affiliate disclosure auto-injected on reviews with affiliate links — never bypass.
