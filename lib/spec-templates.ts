@@ -57,7 +57,7 @@ export const SPEC_TEMPLATES: Record<CategorySlug, SpecTemplateField[]> = {
     { label: 'Seasonality', hint: '3-season / 4-season' },
     { label: 'Warranty', hint: 'e.g. lifetime' },
   ],
-  'tech-edc': [
+  'tech-gadgets': [
     { label: 'Battery life', hint: 'e.g. 30 hrs' },
     { label: 'Connectivity', hint: 'e.g. Bluetooth 5.3, USB-C' },
     { label: 'Water resistance', hint: 'e.g. IP67' },

@@ -428,6 +428,30 @@ export type Database = {
         }
         Relationships: []
       }
+      categories: {
+        Row: {
+          created_at: string
+          label: string
+          position: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          label: string
+          position?: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          label?: string
+          position?: number
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       collection_items: {
         Row: {
           best_for: string | null
@@ -946,6 +970,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "guides_category_fkey"
+            columns: ["category"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["slug"]
+          },
         ]
       }
       hashtag_presets: {
@@ -1176,6 +1207,13 @@ export type Database = {
           url?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "media_assets_category_fkey"
+            columns: ["category"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["slug"]
+          },
           {
             foreignKeyName: "media_assets_product_id_fkey"
             columns: ["product_id"]
@@ -1886,6 +1924,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "products_category_fkey"
+            columns: ["category"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["slug"]
+          },
+          {
             foreignKeyName: "products_review_id_fkey"
             columns: ["review_id"]
             isOneToOne: false
@@ -2225,6 +2270,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_category_fkey"
+            columns: ["category"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["slug"]
           },
           {
             foreignKeyName: "reviews_parent_review_id_fkey"
@@ -2881,6 +2933,13 @@ export type Database = {
           tag_group?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tags_category_slug_fkey"
+            columns: ["category_slug"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["slug"]
+          },
           {
             foreignKeyName: "tags_parent_slug_fkey"
             columns: ["parent_slug"]

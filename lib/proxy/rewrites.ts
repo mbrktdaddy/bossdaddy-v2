@@ -1,8 +1,29 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
+// Renamed category slugs → current slug. Category slugs are URL segments on
+// five route families (/category, /gear/category, /guides/category,
+// /reviews/category, /feed/category), so a rename in lib/categories.ts must
+// land here too or every indexed URL 404s.
+//
+// Per the Naming Doctrine, renaming a slug is only justified when the
+// user-facing URL is actually wrong — add the old → new pair here, never drop
+// the old one.
+const LEGACY_CATEGORY_SLUGS: Record<string, string> = {
+  // Relabeled "Tech & EDC" → "Tech & Gadgets"; the slug was left stale and
+  // contradicted the label everywhere it appeared in a URL.
+  'tech-edc': 'tech-gadgets',
+}
+
 // Public legacy URL redirects — work for unauthenticated users too.
 // Keep these in sync with sitemap.xml exclusions and any external links.
 export function rewritePublicLegacy(pathname: string): string | null {
+  // Renamed category slugs, across every /…/category/<slug> route family.
+  const category = pathname.match(/^(|\/gear|\/guides|\/reviews|\/feed)\/category\/([^/]+)\/?$/)
+  if (category) {
+    const renamed = LEGACY_CATEGORY_SLUGS[category[2]]
+    if (renamed) return `${category[1]}/category/${renamed}`
+  }
+
   // /shop and /shop/* → /gear (shop unified into the gear page)
   if (pathname === '/shop' || pathname === '/shop/') return '/gear'
   if (pathname.startsWith('/shop/')) return '/gear'

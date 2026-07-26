@@ -39,7 +39,7 @@ When a piece feels like it fits several pillars, don't ask *"what is this produc
 | **Tools & DIY** | Building, repairing, or making something with tools |
 | **Grilling & Cooking** | Making a meal (indoor or outdoor) |
 | **Outdoors & Adventure** | **Recreation away from home** — camping, hiking, fishing, adventure |
-| **Tech & EDC** | Staying productive/prepared with gadgets & everyday carry |
+| **Tech & Gadgets** | Staying productive/prepared with gadgets & everyday carry |
 | **Vehicles & Garage** | Owning, driving, or maintaining a vehicle |
 | **Health & Wellness** | Taking care of body & mind |
 | **Home & Lifestyle** | **Maintaining the house & property** — including the yard/lawn |
@@ -77,7 +77,7 @@ Each pillar below lists **what belongs**, **what does NOT**, and where the near-
   (→ Vehicles & Garage, tag as needed), backyard grilling (→ Grilling & Cooking).
 - Litmus test: *do you leave the property to use it for fun?* If not, it's probably Home.
 
-### Tech & EDC — `tech-edc`
+### Tech & Gadgets — `tech-gadgets`
 - **Belongs:** gadgets, everyday carry (wallets, knives, flashlights, watches, bags, earbuds,
   chargers), smart-home tech, wearables, audio.
 - **Not:** physical home goods/furniture (→ Home & Lifestyle — the *smart-home* split lives here,
@@ -92,13 +92,13 @@ Each pillar below lists **what belongs**, **what does NOT**, and where the near-
 ### Health & Wellness — `health-wellness`
 - **Belongs:** fitness gear, supplements, sleep, mental health, mindfulness, personal growth, faith
   as it relates to wellbeing.
-- **Not:** a smartwatch reviewed as a gadget (→ Tech & EDC, tag `wearables`), a bike reviewed as
+- **Not:** a smartwatch reviewed as a gadget (→ Tech & Gadgets, tag `wearables`), a bike reviewed as
   outdoor recreation (→ Outdoors).
 
 ### Home & Lifestyle — `home-lifestyle`
 - **Belongs:** furniture, organization, comfort, appliances, cleaning, **and all lawn/yard/garden
   property maintenance** (mowing, weeds, watering, outdoor cleaning).
-- **Not:** the *smart-home/tech* layer (→ Tech & EDC), building projects with tools (→ Tools & DIY).
+- **Not:** the *smart-home/tech* layer (→ Tech & Gadgets), building projects with tools (→ Tools & DIY).
 - This is the catch-all for "maintaining the place you live." If a job is done *to the house or
   yard* and isn't a build project or a gadget, it lands here.
 
