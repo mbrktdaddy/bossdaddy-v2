@@ -300,7 +300,7 @@ Every section heading sitewide uses the same shape: a 3px × 18px brand-orange v
 | Element | Class | Notes |
 |---|---|---|
 | Hero H1 (homepage) | `text-6xl md:text-[7.5rem] leading-[0.92] tracking-tight` | "Dad Like a Boss." energy |
-| Page H1 (listings) | `text-4xl md:text-5xl font-black tracking-tight` | Editorial weight |
+| Page H1 (app chrome: account, cart, order) | `text-4xl md:text-5xl font-black tracking-tight` | Sans. **Public pages do NOT use this** — they use the `PageHeader` row below (Manifesto v2 Phase 2/2.5 migrated every public listing to it). |
 | Section H2 | `text-2xl font-black` | Big-Quiet rhythm — sections stay quiet so content can breathe |
 | Card H3 | `text-base font-semibold leading-snug` | Card titles |
 | Hero/Featured H3 | `text-2xl md:text-3xl font-black` | Featured-card titles |

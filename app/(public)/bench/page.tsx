@@ -3,6 +3,7 @@ import type { WishlistItem } from '@/lib/wishlist'
 import { groupByStatus, BENCH_SELECT } from '@/lib/wishlist'
 import { WishlistCard } from '@/components/wishlist/WishlistCard'
 import { VotePayoffBanner } from '@/components/VotePayoffBanner'
+import PageHeader from '@/components/PageHeader'
 import { ogImageUrl, OG_SITE } from '@/lib/og'
 import type { Metadata } from 'next'
 
@@ -97,80 +98,73 @@ export default async function BenchPage() {
   const hasContent = items.length > 0
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
-      {/* Header */}
-      <div className="mb-10">
-        <div className="inline-flex items-center gap-2 bg-accent-tint border border-accent-border/50 rounded-full px-4 py-1.5 text-xs text-accent-text-soft font-medium mb-4">
-          <span className="w-1.5 h-1.5 rounded-full bg-accent-hover animate-pulse" />
-          Live Testing Pipeline
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-black mb-3">
-          On the Bench
-        </h1>
-        <p className="text-prose-muted max-w-xl">
-          Everything I&apos;m currently testing, planning to review, or decided to skip — with the reasons.
-          Vote on what gets reviewed next.
-        </p>
-      </div>
+    <>
+      <PageHeader
+        eyebrow="Live Testing Pipeline"
+        title="On the Bench"
+        deck="Everything I'm currently testing, planning to review, or decided to skip — with the reasons. Vote on what gets reviewed next."
+      />
 
-      {/* Personalized loop closure: if you voted for something that's now a
-          published review, this tells you (client-fetched, dismissible). */}
-      <VotePayoffBanner />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
+        {/* Personalized loop closure: if you voted for something that's now a
+            published review, this tells you (client-fetched, dismissible). */}
+        <VotePayoffBanner />
 
-      {!hasContent ? (
-        <div className="bg-surface/40 rounded-xl p-12 text-center">
-          <p className="text-prose-faint font-semibold">Nothing on the bench yet. Check back soon.</p>
-        </div>
-      ) : (
-        <div className="space-y-12">
-          {sections.map(({ key, heading, sub, icon }) => {
-            const sectionItems = groups[key]
-            if (sectionItems.length === 0) return null
+        {!hasContent ? (
+          <div className="bg-surface/40 rounded-xl p-12 text-center">
+            <p className="text-prose-faint font-semibold">Nothing on the bench yet. Check back soon.</p>
+          </div>
+        ) : (
+          <div className="space-y-12">
+            {sections.map(({ key, heading, sub, icon }) => {
+              const sectionItems = groups[key]
+              if (sectionItems.length === 0) return null
 
-            if (key === 'passed') {
+              if (key === 'passed') {
+                return (
+                  <details key={key} className="group">
+                    <summary className="flex items-center gap-2 cursor-pointer list-none mb-4">
+                      <span className="text-xs font-black uppercase tracking-widest text-prose-muted">{heading}</span>
+                      <span className="text-xs text-prose-faint">({sectionItems.length})</span>
+                      <svg className="w-3 h-3 text-prose-faint group-open:rotate-180 transition-transform ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </summary>
+                    <div className="space-y-3">
+                      {sectionItems.map((item) => (
+                        <div key={item.id} className="p-4 bg-surface rounded-xl shadow-md shadow-black/5">
+                          <p className="text-sm font-semibold text-prose-muted">{item.title}</p>
+                          {item.skip_reason && (
+                            <p className="text-xs text-prose-faint mt-1">{item.skip_reason}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                )
+              }
+
               return (
-                <details key={key} className="group">
-                  <summary className="flex items-center gap-2 cursor-pointer list-none mb-4">
-                    <span className="text-xs font-black uppercase tracking-widest text-prose-muted">{heading}</span>
-                    <span className="text-xs text-prose-faint">({sectionItems.length})</span>
-                    <svg className="w-3 h-3 text-prose-faint group-open:rotate-180 transition-transform ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </summary>
-                  <div className="space-y-3">
+                <section key={key}>
+                  <div className="mb-5">
+                    <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
+                    <h2 className="text-lg font-black inline-flex items-center">
+                      {icon && <span className="text-accent-text-soft">{icon}</span>}
+                      {heading}
+                    </h2>
+                    <p className="text-xs text-prose-muted mt-0.5">{sub}</p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {sectionItems.map((item) => (
-                      <div key={item.id} className="p-4 bg-surface rounded-xl shadow-md shadow-black/5">
-                        <p className="text-sm font-semibold text-prose-muted">{item.title}</p>
-                        {item.skip_reason && (
-                          <p className="text-xs text-prose-faint mt-1">{item.skip_reason}</p>
-                        )}
-                      </div>
+                      <WishlistCard key={item.id} item={item} />
                     ))}
                   </div>
-                </details>
+                </section>
               )
-            }
-
-            return (
-              <section key={key}>
-                <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                  <h2 className="text-lg font-black inline-flex items-center">
-                    {icon && <span className="text-accent-text-soft">{icon}</span>}
-                    {heading}
-                  </h2>
-                  <p className="text-xs text-prose-muted mt-0.5">{sub}</p>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {sectionItems.map((item) => (
-                    <WishlistCard key={item.id} item={item} />
-                  ))}
-                </div>
-              </section>
-            )
-          })}
-        </div>
-      )}
-    </div>
+            })}
+          </div>
+        )}
+      </div>
+    </>
   )
 }

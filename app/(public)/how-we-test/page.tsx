@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import CategoryIcon from '@/components/CategoryIcon'
+import PageHeader from '@/components/PageHeader'
 import { getCategoryLabel } from '@/lib/categories'
 import { ogImageUrl, OG_SITE } from '@/lib/og'
 
@@ -86,12 +87,17 @@ const EDITORIAL_PILLARS: { slug: string; description: string }[] = [
 
 export default function HowWeTestPage() {
  return (
- <div className="max-w-3xl mx-auto px-6 py-16">
+ <>
+ <PageHeader
+ eyebrow="The Standard"
+ title="How We Test"
+ deck="Real products. Real testing. Real dads. No lab coats, no paid placements, no shortcuts."
+ />
 
- <h1 className="text-3xl font-black mb-2 text-prose">How We Test</h1>
- <p className="text-prose-faint text-sm mb-10">
- Real products. Real testing. Real dads. No lab coats, no paid placements, no shortcuts.
- </p>
+ {/* Prose column is left-aligned inside the same max-w-6xl rail the header
+     band uses, so the article's left edge lines up with the H1 above it. */}
+ <div className="max-w-6xl mx-auto px-6 py-12">
+ <div className="max-w-3xl">
 
  <div className="prose prose-zinc prose-orange max-w-none
  prose-p:text-prose-muted prose-p:leading-relaxed
@@ -173,7 +179,7 @@ export default function HowWeTestPage() {
  <h2>The Two Pillars We Don&apos;t Test</h2>
  <p>
  Two of our pillars aren&apos;t about products at all, so &quot;testing&quot; is the
- wrong word for them. <strong>Table Duty</strong> and <strong>Watch Duty</strong> are
+ wrong word for them. <strong>Table Duty</strong> and <strong>Watch Duty</strong>{' '}are
  writing, not gear — the conversations at the table and the things happening on our
  watch. There&apos;s no bench test for an essay. They&apos;re held to a different
  standard instead:
@@ -216,7 +222,7 @@ export default function HowWeTestPage() {
  <li><strong>Real-world reliability.</strong> Does it hold up when the conditions aren&apos;t perfect — because they never are?</li>
  </ul>
  <p>
- <strong>Ratings are set by humans.</strong> Not AI. Not an algorithm. A person who
+ <strong>Ratings are set by humans.</strong>{' '}Not AI. Not an algorithm. A person who
  has used the product makes the call and signs their name to it. A product can check
  every spec-sheet box and still rate poorly if it fails when it counts. That&apos;s the
  whole point.
@@ -230,7 +236,7 @@ export default function HowWeTestPage() {
  </div>
  <h2 className="text-3xl font-black text-prose mb-4">Boss Daddy Approved</h2>
  <p className="text-prose-muted leading-relaxed mb-4">
- <strong className="text-prose">Boss Daddy Approved</strong> is the top designation on
+ <strong className="text-prose">Boss Daddy Approved</strong>{' '}is the top designation on
  this site. It&apos;s not a sticker we slap on anything we want to sell. It&apos;s earned.
  </p>
  <p className="text-prose-muted leading-relaxed mb-4">
@@ -239,7 +245,7 @@ export default function HowWeTestPage() {
  now. One good weekend doesn&apos;t earn the badge. Neither does a spec sheet.
  </p>
  <p className="text-prose-muted leading-relaxed mb-4">
- Most products we review <strong className="text-prose">don&apos;t</strong> earn it. That&apos;s
+ Most products we review <strong className="text-prose">don&apos;t</strong>{' '}earn it. That&apos;s
  on purpose. If everything were Boss Daddy Approved, the badge would mean nothing.
  </p>
  <p className="text-prose-muted leading-relaxed">
@@ -314,5 +320,7 @@ export default function HowWeTestPage() {
  </div>
 
  </div>
+ </div>
+ </>
  )
 }
