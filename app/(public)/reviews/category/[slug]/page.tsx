@@ -7,6 +7,7 @@ import { createAnonClient } from '@/lib/supabase/anon'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCategoryBySlug, CATEGORIES } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
+import PageHeader from '@/components/PageHeader'
 import RatingScore from '@/components/RatingScore'
 import { PillFilterStrip, PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 import BenchStrip from '@/components/BenchStrip'
@@ -73,6 +74,12 @@ export default async function CategoryPage({ params }: Props) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
+      <PageHeader
+        eyebrow={`Reviews / ${cat.label}`}
+        title={`${cat.label} Reviews`}
+        deck={cat.description}
+      />
+
       <div className="w-full max-w-6xl mx-auto px-6 py-12">
 
         {/* Category filter — horizontal scroll strip */}
@@ -91,16 +98,6 @@ export default async function CategoryPage({ params }: Props) {
             </Link>
           ))}
         </PillFilterStrip>
-
-        {/* Category header */}
-        <div className="mb-10">
-          <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-          <p className="flex items-center gap-1.5 text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">
-            <CategoryIcon slug={cat.slug} className="w-4 h-4 text-accent-text" /> Reviews
-          </p>
-          <h1 className="text-3xl md:text-4xl font-black mb-4">{cat.label}</h1>
-          <p className="text-prose-muted max-w-2xl leading-relaxed">{cat.description}</p>
-        </div>
 
         {/* Review grid */}
         {reviews && reviews.length > 0 ? (

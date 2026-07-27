@@ -22,8 +22,7 @@ function fmt(r: number | null): string {
  * Score display. `plain` is the free-floating orange number used since the
  * dark-first makeover. `ring` is the Manifesto v2 dial (docs/home-manifesto-
  * spec.md) — one component, tiered by surface: ring on the big moments, plain
- * or a raw numeric chip in dense grids. Pair with [ScoreBubble] when a score
- * must overlay an unpredictable image.
+ * or a raw numeric chip in dense grids.
  */
 export default function ScoreBlock({
   rating,

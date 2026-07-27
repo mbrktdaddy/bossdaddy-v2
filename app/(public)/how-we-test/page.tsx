@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import CategoryIcon from '@/components/CategoryIcon'
+import PageHeader from '@/components/PageHeader'
 import { getCategoryLabel } from '@/lib/categories'
 import { ogImageUrl, OG_SITE } from '@/lib/og'
 
@@ -86,12 +87,17 @@ const EDITORIAL_PILLARS: { slug: string; description: string }[] = [
 
 export default function HowWeTestPage() {
  return (
- <div className="max-w-3xl mx-auto px-6 py-16">
+ <>
+ <PageHeader
+ eyebrow="The Standard"
+ title="How We Test"
+ deck="Real products. Real testing. Real dads. No lab coats, no paid placements, no shortcuts."
+ />
 
- <h1 className="text-3xl font-black mb-2 text-prose">How We Test</h1>
- <p className="text-prose-faint text-sm mb-10">
- Real products. Real testing. Real dads. No lab coats, no paid placements, no shortcuts.
- </p>
+ {/* Prose column is left-aligned inside the same max-w-6xl rail the header
+     band uses, so the article's left edge lines up with the H1 above it. */}
+ <div className="max-w-6xl mx-auto px-6 py-12">
+ <div className="max-w-3xl">
 
  <div className="prose prose-zinc prose-orange max-w-none
  prose-p:text-prose-muted prose-p:leading-relaxed
@@ -314,5 +320,7 @@ export default function HowWeTestPage() {
  </div>
 
  </div>
+ </div>
+ </>
  )
 }
