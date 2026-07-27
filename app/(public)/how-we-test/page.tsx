@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import CategoryIcon from '@/components/CategoryIcon'
+import { getCategoryLabel } from '@/lib/categories'
 import { ogImageUrl, OG_SITE } from '@/lib/og'
 
 export const metadata: Metadata = {
@@ -20,78 +22,65 @@ export const revalidate = 86400
 
 const ICON_CLS = 'w-7 h-7 text-accent-text'
 
-// Outlined Heroicons-style SVGs per the no-emoji-on-web brand rule.
-const PILLAR_TESTING: { icon: React.ReactNode; title: string; description: string }[] = [
+// Keyed by category slug so titles and icons come from the source of truth
+// (lib/categories.ts + CategoryIcon). A label rename there propagates here —
+// this page previously drifted three renames behind the taxonomy.
+// Order matches the CATEGORIES array.
+const PILLAR_TESTING: { slug: string; description: string }[] = [
  {
- icon: (
-   <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-     <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003.001 2.48z" />
-     <path strokeLinecap="round" strokeLinejoin="round" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1A3.75 3.75 0 0012 18z" />
-   </svg>
- ),
- title: 'Cooking & Grilling',
- description:
- 'We cook on it. Multiple sessions, multiple proteins, across weekends. A grill gets low-and-slow ribs, a screaming-hot steak sear, and a weeknight burger rush with kids yelling for dinner. We watch heat zones, how it handles flare-ups, how the grates season in, and how clean-up goes at 9 p.m. when you\'re tired. One cook tells you nothing. Three weekends starts to tell the truth.',
- },
- {
- icon: (
-   <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-     <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z" />
-   </svg>
- ),
- title: 'Tools & DIY / Home Improvement',
- description:
- 'No demo cuts. No showroom runs. Tools go on real projects — deck boards, framing, trim, car repair, fence posts. We note battery life under load, how the tool balances after an hour, whether the chuck holds, whether the case survives a toolbox. If a drill can\'t hang on a full Saturday of work, the review says so.',
- },
- {
- icon: (
-   <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m-9-12h17.25m-1.5-3.75H4.5m16.5 0V21" />
-   </svg>
- ),
- title: 'Outdoors & Adventure',
- description:
- 'Tested in the weather, not the forecast. Coolers get loaded and left in the sun. Packs get hauled. Tents get pitched in wind and rain. Knives get used for real camp work, not paper cuts. We report what failed, what held, and what we\'d actually take with us next time — including with a kid in tow, because that changes the calculation.',
- },
- {
- icon: (
-   <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-   </svg>
- ),
- title: 'Health & Fitness',
- description:
- 'Supplements and stuff get weeks, not days. A pre-workout gets a full training cycle. A protein powder gets mixed in every drink style a real guy uses — shaker, blender, oatmeal, coffee. Equipment gets used in home-gym reality: concrete floors, limited space, interruptions. Outcomes are reported honestly, including the ones that didn\'t move the needle.',
- },
- {
- icon: (
-   <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-   </svg>
- ),
- title: 'Kid Gear & Baby Gear',
+ slug: 'kids-family',
  description:
  'Used by an actual kid, in the actual chaos. Strollers go over curbs, gravel, and airport tile. Car seats get installed and re-installed. Monitors run overnight, every night. Toys survive — or don\'t survive — a real toddler. If it can\'t take a blowout, a tantrum, and a dropped bottle, that\'s in the review. Safety-critical stuff is checked against current standards before it ever gets written up.',
  },
  {
- icon: (
-   <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-     <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
-   </svg>
- ),
- title: 'Dad Life & Fatherhood Culture',
+ slug: 'tools-diy',
  description:
- 'Books, stuff, wallets, watches, EDC, gifts — things dads actually carry and use. We live with them. A wallet rides in the back pocket for a month. A watch goes in the shower, the gym, the job site. A book gets read cover-to-cover before we write a word about it. No skim-and-summarize.',
+ 'No demo cuts. No showroom runs. Tools go on real projects — deck boards, framing, trim, car repair, fence posts. We note battery life under load, how the tool balances after an hour, whether the chuck holds, whether the case survives a toolbox. If a drill can\'t hang on a full Saturday of work, the review says so.',
  },
  {
- icon: (
-   <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-   </svg>
- ),
- title: 'Family Living & Lifestyle',
+ slug: 'grilling-cooking',
  description:
- 'Home goods, family tech, organization, routines, and the stuff that makes a house run. Tested in the actual house — with a wife, a baby, a dog, a garage full of projects. If a product promises to simplify something and makes it harder, we say so. Nothing here gets a pass for looking nice on Instagram.',
+ 'We cook on it. Multiple sessions, multiple proteins, across weekends. A grill gets low-and-slow ribs, a screaming-hot steak sear, and a weeknight burger rush with kids yelling for dinner. We watch heat zones, how it handles flare-ups, how the grates season in, and how clean-up goes at 9 p.m. when you\'re tired. One cook tells you nothing. Three weekends starts to tell the truth.',
+ },
+ {
+ slug: 'outdoors-adventure',
+ description:
+ 'Tested in the weather, not the forecast. Coolers get loaded and left in the sun. Packs get hauled. Tents get pitched in wind and rain. Knives get used for real camp work, not paper cuts. We report what failed, what held, and what we\'d actually take with us next time — including with a kid in tow, because that changes the calculation.',
+ },
+ {
+ slug: 'tech-gadgets',
+ description:
+ 'Carried, not unboxed. A wallet rides in the back pocket for a month. A watch goes in the shower, the gym, and the job site. Earbuds get a commute, a mower, and a crying baby. Battery claims get measured against real daily use, not a lab loop. Smart-home stuff has to survive setup, a router reboot, and a wife who shouldn\'t need a manual. Still in the rotation at six months, or it doesn\'t make the list.',
+ },
+ {
+ slug: 'vehicles-garage',
+ description:
+ 'Installed and driven, not spec-sheeted. Accessories get bolted on and lived with through a season — heat, road salt, car washes, a bed full of lumber. Maintenance stuff gets used on our own oil changes and brake jobs. Detailing products go on a truck that actually gets dirty. Anything touching safety — recovery gear, jacks, brake parts — is held to a higher bar and we say plainly where our limits are.',
+ },
+ {
+ slug: 'health-wellness',
+ description:
+ 'Supplements and stuff get weeks, not days. A pre-workout gets a full training cycle. A protein powder gets mixed in every drink style a real guy uses — shaker, blender, oatmeal, coffee. Equipment gets used in home-gym reality: concrete floors, limited space, interruptions. Sleep and mental-health tools get a fair run and an honest verdict. Outcomes are reported straight, including the ones that didn\'t move the needle. We\'re not doctors, and we say so where it matters.',
+ },
+ {
+ slug: 'home-lifestyle',
+ description:
+ 'Home goods, organization, routines, and the stuff that makes a house run. Tested in the actual house — with a wife, a baby, a dog, and a garage full of projects. Furniture takes a year of family abuse before we call it durable. An organizer only counts if it still gets put back correctly in month six. If a product promises to simplify something and makes it harder, we say so. Nothing here gets a pass for looking nice on Instagram.',
+ },
+]
+
+// Table Duty and Watch Duty aren't product pillars — nothing gets bench-tested.
+// They're held to an editorial standard instead, described in its own section.
+const EDITORIAL_PILLARS: { slug: string; description: string }[] = [
+ {
+ slug: 'table-duty',
+ description:
+ 'Nothing to test here — these are the conversations, not the products. The standard is different: we show our work. When a piece takes a position, it earns it out loud instead of assuming you already agree. Sources get named. The strongest version of the other side gets stated fairly, not built out of straw. And we\'d rather leave you with a sharper question than a cheap answer. Written as a student first — imperfect, still learning, unwilling to stay quiet.',
+ },
+ {
+ slug: 'watch-duty',
+ description:
+ 'Timely by design, so the bar is restraint. Every piece clears one question before it runs: does this actually land on fathers, kids, or the world we\'re handing them? If it doesn\'t, it stays out. We don\'t chase headlines for clicks, we don\'t pretend to be neutral about our kids\' future, and we date what we knew and when we knew it. If the facts move, the piece gets updated or it comes down — no quiet edits.',
  },
 ]
 
@@ -157,17 +146,46 @@ export default function HowWeTestPage() {
 
  <h2>What Testing Looks Like in Each Category</h2>
  <p>
- Each of our seven pillars has its own version of &quot;real-world testing.&quot; Here&apos;s
- what that means in practice:
+ Each of our eight product pillars has its own version of &quot;real-world
+ testing.&quot; Here&apos;s what that means in practice:
  </p>
 
  </div>
 
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 not-prose mb-12">
- {PILLAR_TESTING.map(({ icon, title, description }) => (
- <div key={title} className="bg-surface rounded-xl p-5">
- <div className="mb-3">{icon}</div>
- <h3 className="font-bold text-card-title text-base mb-2">{title}</h3>
+ {PILLAR_TESTING.map(({ slug, description }) => (
+ <div key={slug} className="bg-surface rounded-xl p-5">
+ <div className="mb-3"><CategoryIcon slug={slug} className={ICON_CLS} /></div>
+ <h3 className="font-bold text-card-title text-base mb-2">{getCategoryLabel(slug)}</h3>
+ <p className="text-prose-faint text-sm leading-relaxed">{description}</p>
+ </div>
+ ))}
+ </div>
+
+ <div className="prose prose-zinc prose-orange max-w-none
+ prose-p:text-prose-muted prose-p:leading-relaxed
+ prose-h2:font-black prose-h2:text-prose prose-h2:text-xl prose-h2:mt-10
+ prose-h3:font-bold prose-h3:text-prose prose-h3:text-lg prose-h3:mt-8
+ prose-a:text-accent-text-soft prose-a:no-underline hover:prose-a:text-accent
+ prose-strong:text-prose
+ prose-ul:text-prose-muted prose-li:my-1">
+
+ <h2>The Two Pillars We Don&apos;t Test</h2>
+ <p>
+ Two of our pillars aren&apos;t about products at all, so &quot;testing&quot; is the
+ wrong word for them. <strong>Table Duty</strong> and <strong>Watch Duty</strong> are
+ writing, not gear — the conversations at the table and the things happening on our
+ watch. There&apos;s no bench test for an essay. They&apos;re held to a different
+ standard instead:
+ </p>
+
+ </div>
+
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 not-prose mb-12">
+ {EDITORIAL_PILLARS.map(({ slug, description }) => (
+ <div key={slug} className="bg-surface rounded-xl p-5">
+ <div className="mb-3"><CategoryIcon slug={slug} className={ICON_CLS} /></div>
+ <h3 className="font-bold text-card-title text-base mb-2">{getCategoryLabel(slug)}</h3>
  <p className="text-prose-faint text-sm leading-relaxed">{description}</p>
  </div>
  ))}

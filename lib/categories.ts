@@ -136,7 +136,7 @@ export const CATEGORIES = [
     ],
   },
   {
-    slug: 'tech-edc',
+    slug: 'tech-gadgets',
     label: 'Tech & Gadgets',
     shortLabel: 'Tech',
     description: 'Gadgets, everyday carry, and the gear that keeps a dad productive and prepared.',
@@ -259,7 +259,7 @@ export const CATEGORIES = [
       },
       {
         question: 'Do you cover smart home products in this category?',
-        answer: "The home automation and tech side lives in Tech & EDC. This category covers physical home goods — furniture, organization, comfort, appliances.",
+        answer: "The home automation and tech side lives in Tech & Gadgets. This category covers physical home goods — furniture, organization, comfort, appliances.",
       },
       {
         question: 'How do you rate home organization products?',

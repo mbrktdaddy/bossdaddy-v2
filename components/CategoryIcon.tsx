@@ -31,7 +31,7 @@ const ICONS: Record<string, React.ReactNode> = {
       <circle cx="17" cy="7" r="2" />
     </>
   ),
-  'tech-edc': (
+  'tech-gadgets': (
     <>
       <rect x="7" y="2" width="10" height="20" rx="2" />
       <path d="M11 19h2" />
