@@ -132,7 +132,7 @@ pillars = [
         ("Water Sports [e]", ""),
         ("Outdoor Apparel [+]", ""),
     ]),
-    ("5. Tech & Gadgets", "tech-edc", [
+    ("5. Tech & Gadgets", "tech-gadgets", [
         ("EDC / Everyday Carry [e]", ""),
         ("Audio Gear [e]", ""),
         ("Wearables [e]", ""),
