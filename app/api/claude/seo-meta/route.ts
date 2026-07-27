@@ -73,6 +73,9 @@ Rules:
       // Deterministic lane: same page in → same meta out. Previously unset, which
       // inherited the provider default (~1.0) on what is a mechanical extraction.
       temperature: 0,
+      // Extraction under a character limit — measured 3x faster at low with no
+      // quality cost (`npm run ai:ab-utility`).
+      effort: 'low',
     })
     return NextResponse.json({ metaTitle: meta.metaTitle, metaDescription: meta.metaDescription })
   } catch (err) {

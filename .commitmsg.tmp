@@ -1,17 +1,45 @@
-test(ai): add the utility-bucket A/B harness used to settle the model choice
+feat(ai): quality-first settings for public-facing content + fix the timeout ceiling
 
-scripts/ai-utility-ab.mjs + npm run ai:ab-utility. Runs the three call shapes the
-utility bucket actually uses — vision alt-text, schema-validated extraction with
-a hallucination trap, and length-constrained SEO meta — against each candidate
-model, using the real prompts and schemas copied from the routes.
+Measured with two new harnesses (ai:probe-thinking, ai:ab-content) rather than
+inferred from docs. Three findings drove this:
 
-Two real prod product images with known ground truth are used for the vision
-test so output can be graded rather than eyeballed for plausibility. The
-product-facts fixture states three of six requested spec labels; returning a
-value for weight, warranty, or material is confabulation and is flagged.
+1. THE 180s maxDuration WAS ALREADY UNSAFE. Long-form generations on the
+   5-generation models measured 57-125s, and one config (sonnet-5 at xhigh
+   effort) took 194s — over the routes' declared ceiling, which would 504 in
+   production. draft also sets maxRetries: 4 against that same ceiling. Raised
+   draft + guide-draft to 300s, Vercel's current per-function limit. This was a
+   pre-existing fragility masked by Sonnet 4.6 being fast; it is not caused by
+   the registry bump, but the bump would have exposed it.
 
-Committed because the utility-bucket choice will be revisited whenever a
-candidate model changes, and re-deriving the fixtures each time is wasted work.
-Dev tool only — not imported by the app; makes a few cents of real calls.
+2. ADAPTIVE THINKING SHARES THE OUTPUT BUDGET. The 5 generation runs adaptive
+   thinking by default and its tokens come out of maxOutputTokens, so thinking
+   competes with the article text. Measured: it declines to fire on most
+   creative long-form (0 reasoning tokens in 7 of 8 runs) but consumed 57% of
+   output on sonnet-5/xhigh, reaching 94% of the old 8000 ceiling. Combined with
+   Sonnet 5 tokenizing ~30% heavier for the same prose, budgets were too tight:
+   draft 8000 -> 12000, guide essay/howto 3800 -> 5700, guide 8000 -> 12000.
+   Kept under 16000, above which non-streaming generateObject risks a timeout.
+
+3. EFFORT IS A REAL LEVER AND WE WERE NOT USING IT. The pinned
+   @ai-sdk/anthropic@3.0.99 exposes providerOptions.anthropic.effort, and it
+   reaches the provider through the Gateway (verified: low=55, high=127,
+   max=1008 reasoning tokens on the same prompt). Plumbed an optional `effort`
+   through both wrappers and set it explicitly per lane:
+   - long-form content (draft, guide-draft) -> 'high'. NOT 'xhigh': that is the
+     config that blew the time budget on Sonnet 5 and hard-failed on Opus 5,
+     for a modest word gain.
+   - extraction + moderation (seo-meta, product-facts, suggest-links, moderate,
+     comments) -> 'low'. 3x faster with no measured quality cost.
+
+Model choice is deliberately NOT hardcoded here: Opus 5 for the content bucket
+is AI_MODEL_CONTENT=anthropic/claude-opus-5, an operator env decision that keeps
+its automatic Sonnet 5 failover. Opus 5 measured 30-40% more prose and better
+brand voice than Sonnet 5 at ~2x cost.
+
+Also adds scripts/ai-content-quality-ab.mjs + ai-thinking-probe.mjs so these
+numbers can be re-derived when a model changes, and gitignores the generated
+sample drafts.
+
+135 tests green, tsc + eslint clean, full next build green.
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>

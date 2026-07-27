@@ -33,6 +33,18 @@ interface CallBase {
    * compliance-pinned buckets. Still gets the automatic Claude fallback.
    */
   model?: string
+  /**
+   * Anthropic reasoning depth: 'low' | 'medium' | 'high' | 'xhigh' | 'max'.
+   * Omitted = the provider default ('high'). Ignored by non-Anthropic providers.
+   *
+   * Measured 2026-07-27 (`npm run ai:ab-content`) on the long-form content path:
+   *   • `high`  — 57–125s, no reasoning tokens spent on creative generation.
+   *   • `xhigh` — Sonnet 5 spent 57% of its output budget on thinking and took
+   *     194s, OVER the routes' 180s maxDuration; Opus 5 hit a hard gateway
+   *     failure. Do not raise a long-form route to xhigh without re-measuring.
+   * Cheap extraction lanes want 'low' — 3x faster with no quality cost.
+   */
+  effort?: 'low' | 'medium' | 'high' | 'xhigh' | 'max'
   maxOutputTokens: number
   temperature?: number
   maxRetries?: number
@@ -58,12 +70,17 @@ function resolveSystem(system?: SystemArg): { system?: string | SystemModelMessa
   return { system: typeof system === 'string' ? [cachedSystem(system)] : system }
 }
 
-function gatewayOptions(tag: string, fallback: string[]) {
+// Provider options every call carries: the Gateway failover chain + cost tag, and
+// (when the caller asked for one) the Anthropic reasoning-effort level. The
+// `anthropic` block is inert on non-Anthropic providers, so it is safe to set on
+// a bucket an operator has pointed at Grok.
+function callProviderOptions(tag: string, fallback: string[], effort?: CallBase['effort']) {
   return {
     gateway: {
       ...(fallback.length ? { models: fallback } : {}),
       tags: [`surface:${tag}`],
     },
+    ...(effort ? { anthropic: { effort } } : {}),
   }
 }
 
@@ -91,7 +108,7 @@ export async function aiGenerateObject<T>(
     maxOutputTokens: opts.maxOutputTokens,
     ...(opts.temperature != null ? { temperature: opts.temperature } : {}),
     ...(opts.maxRetries != null ? { maxRetries: opts.maxRetries } : {}),
-    providerOptions: gatewayOptions(opts.tag, fallback),
+    providerOptions: callProviderOptions(opts.tag, fallback, opts.effort),
   })
   return object
 }
@@ -112,7 +129,7 @@ export async function aiGenerateText(
     maxOutputTokens: opts.maxOutputTokens,
     ...(opts.temperature != null ? { temperature: opts.temperature } : {}),
     ...(opts.maxRetries != null ? { maxRetries: opts.maxRetries } : {}),
-    providerOptions: gatewayOptions(opts.tag, fallback),
+    providerOptions: callProviderOptions(opts.tag, fallback, opts.effort),
   })
   return text
 }

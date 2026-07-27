@@ -22,6 +22,8 @@
     "ai:smoke": "node --env-file=.env.local scripts/ai-smoke.mjs",
     "ai:drift": "node --env-file=.env.local scripts/ai-model-drift.mjs",
     "ai:ab-utility": "node --env-file=.env.local scripts/ai-utility-ab.mjs",
+    "ai:probe-thinking": "node --env-file=.env.local scripts/ai-thinking-probe.mjs",
+    "ai:ab-content": "node --env-file=.env.local scripts/ai-content-quality-ab.mjs",
     "ai:drift:ci": "node scripts/ai-model-drift.mjs",
     "ai:research-smoke": "node --env-file=.env.local scripts/ai-research-smoke.mjs",
     "embed:smoke": "node --env-file=.env.local scripts/embed-smoke.mjs",

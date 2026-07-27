@@ -148,6 +148,7 @@ Return your result by calling the submit_links tool with the chosen 1-based indi
       maxOutputTokens: 256,
       // Picking indices from a fixed candidate list — a selection, not a creative act.
       temperature: 0,
+      effort: 'low',
     })
 
     const raw = out.indices

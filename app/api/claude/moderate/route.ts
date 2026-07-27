@@ -75,6 +75,9 @@ Return JSON: { "score": number (0-1), "flags": string[], "recommendation": "appr
       // the same way twice, or the audit trail means nothing. Previously unset
       // (provider default ~1.0) — the one lane where sampling is indefensible.
       temperature: 0,
+      // Classification against a fixed rubric — deep reasoning buys nothing here,
+      // and the gate sits in the submit path where latency is user-visible.
+      effort: 'low',
     })
 
     await supabase

@@ -81,6 +81,7 @@ ${rawText}
       maxOutputTokens: 800,
       // Spec extraction — invention is the failure mode here, so pin it cold.
       temperature: 0,
+      effort: 'low',
     })
 
     const brand = typeof out.brand === 'string' && out.brand.trim() ? out.brand.trim() : null
