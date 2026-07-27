@@ -84,7 +84,7 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
       ) : (
         <div className="border border-red-300 bg-red-50 rounded-xl p-4 space-y-3">
           <p className="text-sm text-prose leading-relaxed">
-            This schedules your account for permanent deletion in <strong>{COOLDOWN_DAYS} days</strong>. You can cancel any time before then by signing back in. After {COOLDOWN_DAYS} days, comments, votes, and subscriptions are wiped and the account can&apos;t be recovered.
+            This schedules your account for permanent deletion in <strong>{COOLDOWN_DAYS} days</strong>. You can cancel any time before then by signing back in. After {COOLDOWN_DAYS}{' '}days, comments, votes, and subscriptions are wiped and the account can&apos;t be recovered.
           </p>
           <label className="block text-xs text-prose-muted">
             Reason for leaving (optional, helps us improve)

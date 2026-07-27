@@ -125,7 +125,7 @@ export default async function AcceptInvitePage({ params }: PageProps) {
       <Layout title="Goal archived">
         <p className="text-prose-muted text-sm leading-relaxed">
           <strong className="text-prose">{ctx.goalName}</strong> has been archived
-          by its owner. Ask {ctx.inviterName} if it&apos;s still active.
+          by its owner. Ask {ctx.inviterName}{' '}if it&apos;s still active.
         </p>
         <BackHome />
       </Layout>
@@ -199,7 +199,7 @@ export default async function AcceptInvitePage({ params }: PageProps) {
         <p className="text-2xl font-black text-prose leading-tight">{ctx.goalName}</p>
       </div>
       <p className="text-prose-muted text-sm leading-relaxed">
-        Join {ctx.inviterName.replace(/^@/, '')} on this goal. You&apos;ll be able to log
+        Join {ctx.inviterName.replace(/^@/, '')}{' '}on this goal. You&apos;ll be able to log
         contributions toward the same streak — the goal succeeds when either of you
         shows up that day.
       </p>

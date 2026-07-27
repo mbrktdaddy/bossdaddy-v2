@@ -47,7 +47,7 @@ export function SavingsSpouseNudgeEmail({
                       Savings · {goalName}
                     </p>
                     <h1 style={{ color: '#ffffff', fontSize: '24px', fontWeight: 800, margin: '0 0 16px 0', lineHeight: 1.3 }}>
-                      {partnerName} hasn&apos;t logged today — want to cover it?
+                      {partnerName}{' '}hasn&apos;t logged today — want to cover it?
                     </h1>
                     <p style={{ color: '#9ca3af', fontSize: '15px', lineHeight: 1.6, margin: '0 0 24px 0' }}>
                       The goal is at <strong style={{ color: '#ffffff' }}>{totalSavedLabel}</strong>. {amountLabel} from you keeps the streak alive for both of you. Whoever shows up that day, the goal stays on track.
