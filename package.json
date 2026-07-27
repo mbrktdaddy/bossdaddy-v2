@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.99",
-    "@ai-sdk/xai": "^3.0.111",
+    "@ai-sdk/xai": "^4.0.19",
     "@anthropic-ai/sdk": "^0.115.0",
     "@react-email/components": "^1.0.12",
     "@react-email/render": "^2.1.0",
