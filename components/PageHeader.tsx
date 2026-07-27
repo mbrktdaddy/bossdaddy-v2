@@ -1,6 +1,12 @@
 interface Props {
-  /** Small uppercase kicker above the H1 (the page's ROLE / section). */
-  eyebrow: string
+  /**
+   * Small uppercase kicker above the H1 (the page's ROLE / section). Normally a
+   * plain string. ReactNode is allowed ONLY to prefix the label with a status
+   * glyph — /bench's live-testing pulse is the sanctioned case. It is NOT a slot
+   * for chips, links, or a second line: the eyebrow names the role once
+   * (eyebrow doctrine, brand-guide §3).
+   */
+  eyebrow: React.ReactNode
   /** Page title — rendered in the Fraunces editorial serif. */
   title: string
   /** Optional one- or two-line deck under the title. */

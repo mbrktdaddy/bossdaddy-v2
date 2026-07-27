@@ -100,7 +100,18 @@ export default async function BenchPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Live Testing Pipeline"
+        eyebrow={
+          <>
+            {/* Live pulse — the one status glyph the eyebrow carries. Kept in the
+                eyebrow rather than restated as a chip below it (eyebrow doctrine),
+                so it survives on mobile where PageHeader's `actions` slot hides. */}
+            <span
+              aria-hidden
+              className="inline-block w-1.5 h-1.5 rounded-full bg-accent animate-pulse mr-2 align-[1.5px]"
+            />
+            Live Testing Pipeline
+          </>
+        }
         title="On the Bench"
         deck="Everything I'm currently testing, planning to review, or decided to skip — with the reasons. Vote on what gets reviewed next."
       />
