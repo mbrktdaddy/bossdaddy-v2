@@ -1,0 +1,57 @@
+name: Check AI model drift
+
+# The AI Gateway has no floating "latest" alias, so every model slug in
+# lib/ai/models.ts is pinned by hand — and a hand-pinned registry rots silently.
+# Before this workflow existed, the registry sat a full generation behind
+# (sonnet-4.6 / opus-4.8 while the gateway already served sonnet-5 / opus-5) and
+# nothing surfaced it. This job makes that visible.
+#
+# It NEVER auto-upgrades. A failure here is a notification: go look, eval, and
+# bump lib/ai/models.ts deliberately. Bumping moves the moderation compliance gate
+# and the content bucket's brand voice, so it is a human call by design.
+#
+# Also catches the reverse risk: a slug we pin being RETIRED by the provider, which
+# otherwise shows up as a runtime 400 on a live surface instead of in CI.
+#
+# Runs weekly + on any change to the registry or the checker itself. Manual
+# dispatch is enabled for ad-hoc checks.
+
+on:
+  schedule:
+    # Mondays 13:00 UTC — start of week, so a bump can be evaluated with time.
+    - cron: '0 13 * * 1'
+  pull_request:
+    paths:
+      - 'lib/ai/models.ts'
+      - 'scripts/ai-model-drift.mjs'
+      - '.github/workflows/check-ai-model-drift.yml'
+  workflow_dispatch:
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Uses the CI variant of the script (no --env-file); the key comes from the
+      # repo secret. If AI_GATEWAY_API_KEY is absent the gateway call fails and the
+      # step errors loudly rather than silently reporting "no drift".
+      - name: Check registry against live gateway
+        env:
+          AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
+        run: |
+          if [ -z "${AI_GATEWAY_API_KEY:-}" ]; then
+            echo "::error::AI_GATEWAY_API_KEY repo secret is not set — cannot check model drift."
+            exit 1
+          fi
+          npm run ai:drift:ci

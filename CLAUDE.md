@@ -26,7 +26,7 @@ Historical/shipped design + brand docs live in `docs/archive/` — recall-able, 
 ## Stack
 - **Framework**: Next.js 16 App Router, TypeScript strict
 - **Auth + DB**: Supabase (`@supabase/ssr`) with Row-Level Security
-- **AI**: Vercel AI Gateway via the AI SDK v6 (`ai` package); call wrappers in `lib/ai/` (`aiGenerateObject`/`aiGenerateText`, `streamText` for the concierge). Models addressed as gateway slugs (e.g. `anthropic/claude-sonnet-4.6`)
+- **AI**: Vercel AI Gateway via the AI SDK v6 (`ai` package); call wrappers in `lib/ai/` (`aiGenerateObject`/`aiGenerateText`, `streamText` for the concierge). Models addressed as gateway slugs (e.g. `anthropic/claude-sonnet-5`)
 - **Email**: Resend (templates in `emails/`)
 - **Rate limiting**: Upstash Redis
 - **Styling**: Tailwind CSS v4
@@ -82,7 +82,9 @@ If a rename leaks (someone hardcoded "Wishlist" instead of using `LABELS.bench.s
 ## AI Usage (Vercel AI Gateway + AI SDK v6)
 
 - **All generation routes through `lib/ai/`** — one-shot `aiGenerateObject`/`aiGenerateText` (`lib/ai/client.ts`), `streamText` for the Boss concierge (`lib/boss/agent.ts`), web-search research via `lib/ai/research.ts`. Do not call a provider SDK (`@anthropic-ai/sdk`) directly for generation — that path is legacy.
-- **Model selection is centralized** in `lib/flags.ts` `resolveModel(bucket)` — buckets: `content`, `utility`, `moderation`, `research`, `concierge` (+ concierge sensitive/fast lanes). Override per bucket via `AI_MODEL_*` env vars; models are gateway slugs (`anthropic/claude-sonnet-4.6`, `anthropic/claude-haiku-4.5`, `anthropic/claude-opus-4.8`, `xai/grok-4.5`). `moderation` is compliance-pinned to Claude (no override).
+- **Model selection is centralized** in `lib/flags.ts` `resolveModel(bucket)` — buckets: `content`, `utility`, `moderation`, `research`, `concierge` (+ concierge sensitive/fast lanes). Override per bucket via `AI_MODEL_*` env vars; models are gateway slugs (`anthropic/claude-sonnet-5`, `anthropic/claude-haiku-4.5`, `anthropic/claude-fable-5`, `anthropic/claude-opus-5`, `xai/grok-4.5`). `moderation` is compliance-pinned to Claude (no override).
+- **Model slugs are pinned by hand — the Gateway has no "latest" alias.** The registry is `lib/ai/models.ts`; never invent a slug. `npm run ai:drift` reports when a pin is retired or a generation behind (weekly in CI). Bumping the registry also moves the moderation compliance gate and the content bucket's brand voice — eval, don't bump blind. Details: `docs/ai-provider-layer.md` §Model slugs.
+- **Set `temperature` explicitly on new AI call sites** — unset inherits the provider default (~1.0). Deterministic lanes (moderation, extraction) are `0`; see the per-lane table in `docs/ai-provider-layer.md`.
 - **Auth** via `VERCEL_OIDC_TOKEN` (auto on Vercel; `vercel env pull` locally) or `AI_GATEWAY_API_KEY`. No provider API keys in the gateway path.
 - **Prompt caching is automatic** — `lib/ai/client.ts` wraps the system prompt in an Anthropic ephemeral cache breakpoint (`cachedSystem()`). Don't hand-roll `cache_control`.
 - **No manual JSON parsing / fence-stripping** — `aiGenerateObject` enforces a schema and returns a typed, validated object. Only raw `aiGenerateText` paths return plain text.

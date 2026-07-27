@@ -10,7 +10,10 @@ import { z } from 'zod'
 
 // Deep guides generate up to 8000 tokens (5–8 long sections + blocks), which can
 // take 1–2 min under load; 90s was cutting it close for the comprehensive tier.
-export const maxDuration = 180
+// 300s = Vercel's current per-function ceiling. See the note in
+// app/api/claude/draft/route.ts — the guide path measured slower than the review
+// path (125s at opus-5/high), so it has less margin, not more.
+export const maxDuration = 300
 
 // Piece-type depth toggle (Decision A, 2026-07-05). Drives the generated
 // structure, which structured content blocks are forced, AND the token budget:
@@ -93,9 +96,12 @@ const PIECE_CONFIG: Record<PieceType, {
   contentBlocks: string
   fieldGuidanceBlocks: string
 }> = {
+  // maxTokens raised ~50% across all three piece types for the 5 generation: it
+  // tokenizes ~30% heavier for the same prose, and adaptive thinking now shares
+  // this budget with the answer text. See app/api/claude/draft/route.ts.
   essay: {
     label: 'personal essay',
-    maxTokens: 3800,
+    maxTokens: 5700,
     structure: `STRUCTURE (personal essay — narrative, first-person, voice-forward):
 - Introduction: open inside a real moment or memory that pulls the reader in — no throat-clearing, no "in this article".
 - Sections: 4–7 flowing sections that move the story or argument forward. Each has a heading and 150–300 words of prose. Let paragraphs breathe — this is not a listicle.
@@ -106,7 +112,7 @@ const PIECE_CONFIG: Record<PieceType, {
   },
   howto: {
     label: 'how-to guide',
-    maxTokens: 3800,
+    maxTokens: 5700,
     structure: `STRUCTURE (how-to — tight and scannable):
 - Introduction: 2–3 sentences naming the problem and what the reader will be able to do.
 - Sections: 3–5 sections, each 120–200 words, each a clear step or decision with a concrete takeaway. Keep paragraphs short — a time-poor dad should be able to skim it on a phone.
@@ -119,7 +125,7 @@ const PIECE_CONFIG: Record<PieceType, {
   },
   guide: {
     label: 'guide',
-    maxTokens: 8000,
+    maxTokens: 12000,
     structure: `STRUCTURE (comprehensive guide):
 - Introduction: 2–3 sentences that hook the reader with a real scenario (first-person dad).
 - Sections: 5–8 sections, each 200–350 words, each with a clear practical takeaway. Cover the topic thoroughly — the reader shouldn't need to open another article.
@@ -216,6 +222,9 @@ Return your result by calling the submit_guide tool. Field guidance: title is a 
       system: systemMessages,
       messages: [{ role: 'user', content: prompt }],
       maxOutputTokens: cfg.maxTokens,
+      // Pinned rather than left to the provider default; deliberately not xhigh
+      // (measured over this route's time budget on Sonnet 5). See lib/ai/client.ts.
+      effort: 'high',
       temperature: 0.8,
       maxRetries: 4,
     })

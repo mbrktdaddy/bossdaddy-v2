@@ -28,7 +28,7 @@ async function main() {
   // 2: live structured call through the gateway with our exact call shape.
   try {
     const { object, usage } = await generateObject({
-      model: gateway('anthropic/claude-sonnet-4.6'),
+      model: gateway('anthropic/claude-sonnet-5'),
       schema: z.object({ ok: z.boolean(), word: z.string() }),
       prompt: 'Respond by returning ok=true and word set to "pong". Nothing else.',
       maxOutputTokens: 100,

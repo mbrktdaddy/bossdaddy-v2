@@ -9,7 +9,11 @@ import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 // 8000-token reviews can take 1-2 min under load; 90s was cutting it close.
-export const maxDuration = 180
+// 300s = Vercel's current per-function ceiling. Raised from 180 because measured
+// long-form generations run 57–125s on the 5-generation models and a single slow
+// call plus the retries below already exceeded 180 in testing
+// (`npm run ai:ab-content`, 2026-07-27). 180 was safe only while Sonnet 4.6 was fast.
+export const maxDuration = 300
 
 // The model output is validated against this schema (reused verbatim from the
 // old submit_review tool's input_schema — the SDK enforces it instead of us
@@ -231,7 +235,15 @@ Return your result by calling the submit_review tool. Field guidance: title is a
       // A full review (intro + 3-5 sections + verdict + pros/cons + FAQs +
       // takeaways + sub-scores + image prompts + tags) is large; 8000 keeps the
       // output from truncating. claude-sonnet-4-6 handles 8k easily.
-      maxOutputTokens: 8000,
+      // 12000, up from 8000. Sonnet 5 tokenizes ~30% heavier than 4.6 for the same
+      // prose, and adaptive thinking (on by default from the 5 generation) shares
+      // this budget with the answer text — measured at 57% of output on one config.
+      // Observed peak was 7496, i.e. 94% of the old ceiling. Kept under 16000, above
+      // which non-streaming generateObject risks an HTTP timeout.
+      maxOutputTokens: 12000,
+      // Long-form brand copy: reasoning depth pinned rather than left to the
+      // provider default, and deliberately NOT xhigh — see lib/ai/client.ts.
+      effort: 'high',
       // Below the 1.0 default: a fact-heavy review against a strict banlist
       // ("every claim has specifics") is where slip/hallucination hurts most.
       temperature: 0.8,
