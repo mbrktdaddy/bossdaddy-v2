@@ -1,24 +1,17 @@
-docs(ai): correct the Fable 5 registry note — top tier, not a fast tier
+test(ai): add the utility-bucket A/B harness used to settle the model choice
 
-The comment I shipped in the previous commit described claude-fable-5 as "the
-new fast frontier model and the candidate to replace this [Haiku] lane." That is
-wrong in the most expensive possible direction, and left uncorrected it would
-have pointed the cheap utility lane at a $10/$50 model.
+scripts/ai-utility-ab.mjs + npm run ai:ab-utility. Runs the three call shapes the
+utility bucket actually uses — vision alt-text, schema-validated extraction with
+a hallucination trap, and length-constrained SEO meta — against each candidate
+model, using the real prompts and schemas copied from the routes.
 
-Fable 5 is Anthropic's MOST CAPABLE and most EXPENSIVE model — $10/$50 per MTok,
-2x Opus 5 and 10x Haiku 4.5. It is disqualified from any cost-sensitive lane on
-four independent grounds:
-- thinking is always on and cannot be disabled (thinking.disabled returns 400),
-  so trivial extraction still pays reasoning tokens;
-- single turns can run for minutes, which is wrong for interactive surfaces;
-- it requires 30-day data retention and is unavailable under ZDR;
-- safety classifiers can return stop_reason 'refusal' with HTTP 200 and empty
-  content, which every caller would need to branch on.
+Two real prod product images with known ground truth are used for the vision
+test so output can be graded rather than eyeballed for plausibility. The
+product-facts fixture states three of six requested spec labels; returning a
+value for weight, warranty, or material is confabulation and is flagged.
 
-Kept the registry entry (the drift checker tracks it, and a future
-hardest-reasoning surface has a named target) but rewrote the note to say what
-it actually is. Nothing points at it.
-
-No behavior change — comment only. 135 tests green, drift check passes.
+Committed because the utility-bucket choice will be revisited whenever a
+candidate model changes, and re-deriving the fixtures each time is wasted work.
+Dev tool only — not imported by the app; makes a few cents of real calls.
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
