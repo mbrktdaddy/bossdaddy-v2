@@ -529,7 +529,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                   The {occ.label} list is being built
                 </h2>
                 <p className="text-prose-muted leading-relaxed mb-6 max-w-xl">
-                  Boss Daddy is curating the {occ.label.toLowerCase()} guide right now — every pick personally tested, no corporate gift-list filler. Drop your email and you&apos;ll be the first to know when it goes live.
+                  Boss Daddy is curating the {occ.label.toLowerCase()}{' '}guide right now — every pick personally tested, no corporate gift-list filler. Drop your email and you&apos;ll be the first to know when it goes live.
                 </p>
                 <div className="max-w-md">
                   <EmailSignup

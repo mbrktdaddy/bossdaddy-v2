@@ -291,7 +291,7 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
 
       {images.length > 0 && (
         <p className="text-xs text-prose-faint">
-          {images.length} image{images.length === 1 ? '' : 's'} staged. The one marked Primary becomes the product&apos;s hero — change with the Star button.
+          {images.length} image{images.length === 1 ? '' : 's'}{' '}staged. The one marked Primary becomes the product&apos;s hero — change with the Star button.
           {category && <> All new uploads will be tagged <code className="text-accent-text-soft/80">{category}</code>.</>}
         </p>
       )}

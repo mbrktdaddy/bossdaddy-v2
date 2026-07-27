@@ -298,7 +298,7 @@ export function MerchForm({ item }: Props) {
         <div>
           <p className="text-sm font-semibold text-prose">Product Images</p>
           <p className="text-xs text-prose-faint mt-0.5">
-            The <span className="text-accent-text-soft font-semibold">primary</span> image is the card thumbnail. Hide any you don&apos;t want on the product page, or remove them entirely. Mockups generated in Merch Studio land here.
+            The <span className="text-accent-text-soft font-semibold">primary</span>{' '}image is the card thumbnail. Hide any you don&apos;t want on the product page, or remove them entirely. Mockups generated in Merch Studio land here.
           </p>
         </div>
 

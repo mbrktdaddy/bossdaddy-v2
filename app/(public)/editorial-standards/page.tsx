@@ -55,7 +55,7 @@ export default function EditorialStandardsPage() {
 
  <h2>2. What &quot;Boss Daddy Approved&quot; Means</h2>
  <p>
- <strong>&quot;Boss Daddy Approved&quot;</strong> is not a slogan we stick on anything we want
+ <strong>&quot;Boss Daddy Approved&quot;</strong>{' '}is not a slogan we stick on anything we want
  to sell. It&apos;s a designation a product has to earn — tested in the places dads
  actually use this stuff, holding up over time, worth buying again. Commission rate,
  brand size, and marketing budget have zero influence on it.
@@ -97,7 +97,7 @@ export default function EditorialStandardsPage() {
 
  <h2>5. Rating Methodology</h2>
  <p>
- We rate products on a <strong>1.0 – 10.0 scale</strong> in half-point increments.
+ We rate products on a <strong>1.0 – 10.0 scale</strong>{' '}in half-point increments.
  More precision means more honesty — the difference between a 7.5 and an 8.5 is real,
  and our scale reflects it. When we score a product, we&apos;re weighing five factors:
  </p>

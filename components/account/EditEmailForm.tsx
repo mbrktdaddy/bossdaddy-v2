@@ -42,7 +42,7 @@ export default function EditEmailForm({ current }: { current: string }) {
       <div className="bg-green-50 border border-green-300 rounded-xl p-4">
         <p className="text-forest text-sm font-semibold mb-1">Confirmation sent</p>
         <p className="text-prose-muted text-sm">
-          Check <span className="text-prose">{email.trim()}</span> for a confirmation link.
+          Check <span className="text-prose">{email.trim()}</span>{' '}for a confirmation link.
           Your email won&apos;t change until you click it.
         </p>
         <button onClick={reset} className="text-xs text-prose-faint hover:text-prose mt-3 transition-colors">Done</button>

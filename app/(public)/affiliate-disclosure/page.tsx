@@ -58,7 +58,7 @@ export default function AffiliateDisclosurePage() {
 
  <h2>Commissions Don&apos;t Influence Reviews</h2>
  <p>
- <strong>This is the one that matters.</strong> We do not accept payment in exchange
+ <strong>This is the one that matters.</strong>{' '}We do not accept payment in exchange
  for positive coverage. We do not let commission rates decide what we recommend.
  If a higher-paying product isn&apos;t worth your money, we&apos;ll say so — or we won&apos;t
  cover it at all.
