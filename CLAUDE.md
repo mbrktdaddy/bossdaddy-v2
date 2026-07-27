@@ -154,6 +154,7 @@ Surface/text/border tokens: `--color-chrome` (masthead/footer, `#09090b`), `--co
 - **No vivid orange.** Never use Tailwind's default `#f97316`. The accent is `#E55A1A` (Hot, on dark) / `#CC5500` (core) — route through `text-accent`/`bg-accent`, not raw `orange-*`.
 - **No per-category rainbow colors.** All categories use one unified treatment. Source of truth: `lib/categories.ts`.
 - **Section headings:** default `font-black` (Montserrat). **Manifesto v2 exception:** editorial section titles use `font-editorial-display font-semibold` (Fraunces) via `EditorialHeader` — scoped to editorial surfaces only (Cover Story, section headers, `PageHeader` H1s, guide titles, Creed). Never blanket-apply serif to cards/nav/UI. See `docs/brand-guide.md` §3.
+- **Two section-header lanes (settled 2026-07-27):** `EditorialHeader` on editorial surfaces, `SectionHeader` (3px rule) on utility surfaces. **`/gear` is deliberately utility-styled** — don't convert it. **`/about` is exempt from `PageHeader`** — it's a story page with a bespoke two-line H1, a second reference impl like the homepage. Both are decisions, not drift.
 - **Card titles** in pillar/feature grids: `text-orange-500` — **except** the homepage Manifesto pillars ("In this issue"), which use `text-prose` (white) editorial titles by design.
 - **Eyebrow labels:** `text-xs text-orange-500 uppercase tracking-widest`.
 - **Mobile tap targets:** minimum 44px. Use `py-2.5` on pills, `py-3` on buttons/pagination/nav links.

@@ -280,8 +280,16 @@ For bordered chips prefer the token recipe (`bg-{danger,success,warn,info}-bg` +
 ### The accent band (replaced the dark-island rule)
 Everything is dark now, so the old "one dark island per page" rule is retired. Its successor: **one elevated accent band** per page (e.g., the homepage TrustBand) — `bg-surface-raised` + a 3px orange top rule — as the single punctuating moment.
 
-### The section header convention
-Every section heading sitewide uses the same shape: a 3px × 18px brand-orange vertical rule + uppercase tracked label, optional right-side link. Use the `SectionHeader` component — do not inline this pattern.
+### The section header convention — two lanes (settled 2026-07-27)
+
+There are **two** sanctioned section-header shapes. Pick by surface, never by taste, and **never inline either pattern**:
+
+| Lane | Component | Shape | Use on |
+|---|---|---|---|
+| **Editorial** | `EditorialHeader` | sans eyebrow (role) + Fraunces serif title + optional right link | public editorial surfaces — homepage, listings, editorial pages |
+| **Utility** | `SectionHeader` | 3px × 18px brand-orange vertical rule + uppercase tracked `font-black` label | utility surfaces — **`/gear`** (the sanctioned utility public page), dashboard/admin, compact panels |
+
+The prior wording ("every section heading sitewide uses `SectionHeader`") was written before Manifesto v2 and is retired: it contradicted the editorial rollout and described an admin population that no longer used the component. **`/gear` is deliberately utility-styled** — it's a working gear list, not an editorial read, and it stays on `SectionHeader` (5 call sites). That is a decision, not drift; don't "fix" it to `EditorialHeader`.
 
 ---
 
