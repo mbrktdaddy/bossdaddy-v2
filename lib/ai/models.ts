@@ -31,11 +31,22 @@ export const MODELS = {
   //    (moderation) and the edge-off / vulnerable-topic concierge lane. ──
   claudeSonnet: 'anthropic/claude-sonnet-5',
   // NOTE: there is no `claude-haiku-5` on the Gateway — 4.5 IS the current cheap
-  // Anthropic tier. `claude-fable-5` is the new fast frontier model and the
-  // candidate to replace this lane; pending an eval, not swapped blind.
+  // Anthropic tier ($1/$5 per MTok), and the only Anthropic option for a
+  // cost-sensitive lane.
   claudeHaiku: 'anthropic/claude-haiku-4.5',
-  claudeFable: 'anthropic/claude-fable-5',
   claudeOpus: 'anthropic/claude-opus-5',
+  // ⚠️ TOP TIER, NOT A FAST TIER. Fable 5 is Anthropic's most capable model and
+  // the most EXPENSIVE — $10/$50 per MTok, 2× Opus 5 and 10× Haiku 4.5. Do NOT
+  // reach for it as a cheap/fast lane:
+  //   • thinking is ALWAYS ON and cannot be disabled (`thinking.disabled` → 400),
+  //     so every call pays reasoning tokens even for trivial extraction;
+  //   • single turns can run minutes — wrong for interactive surfaces;
+  //   • requires 30-day data retention (unavailable under ZDR);
+  //   • safety classifiers can return `stop_reason: 'refusal'` (HTTP 200, empty
+  //     content) — callers must branch on it before reading output.
+  // Registered only so the drift checker tracks it and a future
+  // hardest-reasoning surface has a named entry. Nothing points here today.
+  claudeFable: 'anthropic/claude-fable-5',
   // ── xAI / Grok — opt-in second provider (per-bucket, via env). grok-4.5 is
   //    the current general model; grok-4.1-fast for cheap/low-latency turns. ──
   grok: 'xai/grok-4.5',
