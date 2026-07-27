@@ -71,6 +71,10 @@ Return JSON: { "score": number (0-1), "flags": string[], "recommendation": "appr
       system: MODERATOR_SYSTEM,
       prompt,
       maxOutputTokens: 512,
+      // A compliance gate must be reproducible: the same submission has to score
+      // the same way twice, or the audit trail means nothing. Previously unset
+      // (provider default ~1.0) — the one lane where sampling is indefensible.
+      temperature: 0,
     })
 
     await supabase

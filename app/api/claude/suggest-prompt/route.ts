@@ -93,6 +93,10 @@ Give 3 distinct angles they could take on this article — different in scope, a
       schema: type === 'review' ? REVIEW_SUGGEST_SCHEMA : GUIDE_SUGGEST_SCHEMA,
       prompt,
       maxOutputTokens: 900,
+      // NOT zero — this is ideation, and the operator re-clicks it for fresh
+      // angles, so identical output every time would be the bug. Tightened off
+      // the provider default (~1.0) only enough to cut off-the-wall suggestions.
+      temperature: 0.7,
     })
     return NextResponse.json(out)
   } catch (err) {

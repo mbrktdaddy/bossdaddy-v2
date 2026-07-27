@@ -22,6 +22,13 @@ const BUCKET_DEFAULT: Record<AiBucket, string> = {
   content: MODELS.claudeSonnet,
   research: MODELS.claudeSonnet,
   utility: MODELS.claudeSonnet,
+  // ⚠️ COMPLIANCE GATE. This tracks MODELS.claudeSonnet, so bumping that constant
+  // MOVES THE FTC / affiliate moderation gate too. That is intended (the gate
+  // should not rot a generation behind) but it is NOT a free change: re-verify
+  // moderation behavior on the new model before merging a registry bump. The
+  // fail-safe below it is what makes this survivable — an unparseable result
+  // throws rather than auto-publishing (comments fall back to lightweight-scan,
+  // reviews 502). See CLAUDE.md §3.
   moderation: MODELS.claudeSonnet,
   concierge: MODELS.claudeSonnet,
 }

@@ -51,6 +51,8 @@ Return ONLY the alt text, nothing else.`
       bucket: 'utility',
       tag: 'alt-text',
       maxOutputTokens: 120,
+      // Describing what is actually in the image — accuracy over flourish.
+      temperature: 0,
       messages: [{
         role: 'user',
         content: [

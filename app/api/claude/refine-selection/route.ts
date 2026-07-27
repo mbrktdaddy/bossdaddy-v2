@@ -41,6 +41,10 @@ export async function POST(request: NextRequest) {
       system: 'You are an editor. The user provides an excerpt and an instruction. Return ONLY the revised text — no preamble, no explanation, no quotes. Preserve any HTML tags that were in the original.',
       prompt: `Instruction: ${instruction}\n\nExcerpt:\n${text}`,
       maxOutputTokens: 600,
+      // Low but not zero: it is rewriting the operator's prose to a specific
+      // instruction, so faithfulness beats invention — but flat-0 editing reads
+      // mechanical. Warmer than the extraction lanes, cooler than drafting.
+      temperature: 0.3,
     })
     refined = raw.trim()
   } catch (err) {

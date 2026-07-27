@@ -13,7 +13,7 @@ import { gateway, generateText, Output, stepCountIs } from 'ai'
 import { anthropic } from '@ai-sdk/anthropic'
 import { z } from 'zod'
 
-const MODEL = 'anthropic/claude-sonnet-4.6'
+const MODEL = 'anthropic/claude-sonnet-5'
 
 const schema = z.object({
   picks: z

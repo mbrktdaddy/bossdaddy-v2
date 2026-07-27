@@ -78,6 +78,9 @@ async function moderateWithClaude(body: string): Promise<ModerationResult> {
     system: COMMENT_MODERATOR_SYSTEM,
     prompt: body,
     maxOutputTokens: 256,
+    // Deterministic for the same reason as the review gate: an identical comment
+    // must not pass on one attempt and hold on the next.
+    temperature: 0,
   })
 }
 

@@ -40,7 +40,40 @@ Set any toggle to a gateway slug, e.g. `AI_MODEL_CONTENT=xai/grok-4.5`. Invalid 
 
 ## Model slugs
 
-Gateway slugs use **dots** for versions, not hyphens: `anthropic/claude-sonnet-4.6`. Registry: `lib/ai/models.ts`. Verified 2026-07-20 — Anthropic from `https://ai-gateway.vercel.sh/v1/models`, Grok (`xai/grok-4.5`) from the Vercel changelog. **Before pointing production at a new slug, confirm it live via `gateway.getAvailableModels()`.**
+Gateway slugs use **dots** for versions, not hyphens: `anthropic/claude-sonnet-5`. Registry: `lib/ai/models.ts`. Verified live 2026-07-27 via `gateway.getAvailableModels()` (`npm run ai:smoke` — 300 models). **Before pointing production at a new slug, confirm it live** — do not trust a doc or memory.
+
+### Staying current: pin the decision, automate the detection
+
+The Gateway has **no floating "latest" alias.** There is no `anthropic/claude-sonnet-latest`, and no routing option resolves "newest of a family" (the options are only `order`, `only`, `models`, `user`, `tags`). So a generation jump is always a deliberate edit to `lib/ai/models.ts`.
+
+The slugs do carry **no date**, though — `anthropic/claude-sonnet-5`, not `...-5-20260214`. So the Gateway already abstracts snapshot-level refreshes: what we pin is a **generation, not a snapshot.**
+
+Auto-floating would be wrong here even if it existed:
+- `moderation` is a legal/compliance gate — it must not move without review.
+- 19 surfaces depend on `generateObject` schema adherence, which shifts across generations.
+- The `content` bucket's brand voice is tuned per model; a silent swap is a voice regression discovered in published copy.
+- Prompt-cache breakpoints re-warm and per-token prices change with no signal but the invoice.
+
+Old versions stay served for a long time (`claude-3-haiku`, `opus-4`, `sonnet-4` are all still listed), so pinning carries no sudden-breakage risk.
+
+**Therefore:** `npm run ai:drift` (`scripts/ai-model-drift.mjs`) compares the registry against the live gateway and reports two things — **RETIRED** (a pinned slug no longer served → will 400 at runtime, fix now) and **DRIFT** (a newer generation exists → advisory, eval then bump). It runs weekly in CI (`.github/workflows/check-ai-model-drift.yml`) plus on any change to the registry. It never auto-upgrades. Requires the `AI_GATEWAY_API_KEY` repo secret.
+
+Version ordering is a heuristic across xAI's scheme (`4.20` sorts above `4.5`), which is another reason the script only advises.
+
+### Sampling temperature per lane
+
+Temperature is set per call site, not per bucket, because it tracks the *task* rather than the provider:
+
+| Lane | Temp | Why |
+|---|---|---|
+| moderation (review + comment) | `0` | A compliance gate must be reproducible — the same submission has to score the same way twice or the audit trail is meaningless. |
+| seo-meta, product-facts, suggest-links, alt-text | `0` | Mechanical extraction/selection; invention is the failure mode. |
+| refine-selection | `0.3` | Rewriting the operator's prose to an instruction — faithfulness first, but flat-0 editing reads mechanical. |
+| suggest-prompt | `0.7` | Ideation the operator re-clicks for fresh angles; identical output would be the bug. |
+| drafts, guides, repurpose | `0.8` | Brand-voice long-form. |
+| merch sayings | `1.0` | Deliberately widest — short, punchy, high-variance output. |
+
+Anything left unset inherits the provider default (~1.0), which is why the deterministic lanes above are now explicit.
 
 ## Auth
 

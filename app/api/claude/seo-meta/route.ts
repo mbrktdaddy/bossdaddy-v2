@@ -70,6 +70,9 @@ Rules:
       schema: SEO_SCHEMA,
       prompt,
       maxOutputTokens: 400,
+      // Deterministic lane: same page in → same meta out. Previously unset, which
+      // inherited the provider default (~1.0) on what is a mechanical extraction.
+      temperature: 0,
     })
     return NextResponse.json({ metaTitle: meta.metaTitle, metaDescription: meta.metaDescription })
   } catch (err) {
