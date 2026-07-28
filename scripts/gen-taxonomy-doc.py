@@ -229,11 +229,12 @@ for s in [
     "Voice register — BOSS_DADDY_SYSTEM + brand-guide §1.6 inquiry-register block.",
     "docs/pillar-taxonomy.md — rewritten to the hierarchical model (the authority).",
     "next build green; db:types regenerated.",
+    "TagPicker UI renders the tree — collapsible pillar sections, leaves nested under their "
+    "group, Cross-Cutting last, label filter. One component serves reviews/guides/products.",
 ]:
     bullet(s)
 
 h2("Fast-follows (not built)")
-bullet("TagPicker UI that renders the hierarchy tree (buildTagTree has no consumer yet).")
 bullet("Watch Duty freshness/archive mechanic (dated prominence -> promote to a Table Duty essay).")
 
 out = r"C:\Users\msb1c\Desktop\BossDaddy-Pillar-Tier-Plan.docx"

@@ -229,3 +229,11 @@ stance* — never mixed into the subject tree:
 `category_slug` is a plain TEXT pointer to a code-defined pillar — intentionally not a FK/CHECK
 (Naming Doctrine: pillars are owned by `lib/categories.ts`, not the DB). Build the pillar → group
 → leaf tree with `buildTagTree()` in `lib/tags.ts`.
+
+**Authoring UI.** `components/workspace/TagPicker.tsx` renders that tree and is the single tag
+surface for every workspace (reviews, guides, admin products) — fix it once, all three follow.
+Layout: facets first (flat, they cut across pillars), then subjects as one collapsible section per
+pillar with Tier-3 leaves indented under their group, and **Cross-Cutting** as the last section.
+Sections auto-open when they hold a selection; the filter box searches labels across all sections
+and force-opens matches. `/api/tags` must keep selecting `parent_slug, category_slug` — without
+them every topic tag reads as cross-cutting.
