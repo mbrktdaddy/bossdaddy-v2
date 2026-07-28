@@ -1,5 +1,7 @@
 {
   "regions": ["pdx1"],
+  "_comment_ignoreCommand": "Skip preview builds for dependabot branches. Exit 0 = skip, exit 1 = build. Dependency bumps get typechecked by CI (.github/workflows/ci.yml) and don't need a preview URL — before this, five dependabot PRs in one day each triggered their own build and buried the real deploys in noise. Everything else, including master, still builds normally. Dashboard equivalent lives under Settings > Build and Deployment > Ignored Build Step; kept here instead so it is version-controlled.",
+  "ignoreCommand": "case \"$VERCEL_GIT_COMMIT_REF\" in dependabot/*) exit 0 ;; *) exit 1 ;; esac",
   "crons": [
     {
       "path": "/api/cron/publish-scheduled",
