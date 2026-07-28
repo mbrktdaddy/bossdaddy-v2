@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { MODERATOR_SYSTEM } from '@/lib/claude/client'
+import { isInquiryCategory } from '@/lib/categories'
 import { aiGenerateObject } from '@/lib/ai/client'
 import { classifyClaudeError } from '@/lib/ai/errors'
 import { ModerationResultSchema, type ModerationResult } from '@/lib/claude/moderation'
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
   const table = isGuide ? 'guides' : 'reviews'
 
   const { data: content, error } = isGuide
-    ? await supabase.from('guides').select('id, title, content').eq('id', contentId).single()
+    ? await supabase.from('guides').select('id, title, content, category').eq('id', contentId).single()
     : await supabase.from('reviews').select('id, title, content, has_affiliate_links, disclosure_acknowledged').eq('id', contentId).single()
 
   if (error || !content) {
@@ -49,9 +50,19 @@ export async function POST(request: NextRequest) {
   const hasAffiliateLinks = 'has_affiliate_links' in content ? content.has_affiliate_links : false
   const disclosureAcknowledged = 'disclosure_acknowledged' in content ? content.disclosure_acknowledged : false
 
-  const prompt = `Review the following content submission:
+  // Discussion essays get judged as essays, not as product content — without
+  // this the gear-shaped rubric reads unfalsifiable claims about God or meaning
+  // as "misleading claims" and a missing verdict as thin content. Derived from
+  // the pillar rather than passed in: inquiry mode isn't persisted on the row,
+  // and moderation must not be steerable by the caller anyway. The consequence
+  // is that an inquiry piece filed under a gear pillar is moderated as gear.
+  // Reviews are never inquiry pieces. The literal "INQUIRY MODE: ON" line is the
+  // trigger MODERATOR_SYSTEM keys off — don't reword it.
+  const inquiry = isGuide && isInquiryCategory((content as { category?: string }).category ?? '')
 
-Title: ${content.title}
+  const prompt = `${inquiry ? `INQUIRY MODE: ON\n\n` : ''}Review the following content submission:
+
+Title: ${content.title}${inquiry ? `\nPillar: ${(content as { category?: string }).category}` : ''}
 Has affiliate links: ${hasAffiliateLinks ?? false}
 Disclosure acknowledged: ${disclosureAcknowledged ?? false}
 

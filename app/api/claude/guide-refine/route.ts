@@ -4,6 +4,7 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { buildBossDaddySystemMessages } from '@/lib/voiceProfile'
 import { aiGenerateObject } from '@/lib/ai/client'
 import { classifyClaudeError } from '@/lib/ai/errors'
+import { isInquiryCategory } from '@/lib/categories'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
@@ -45,6 +46,10 @@ const RefineInput = z.object({
   tldr:          z.string().max(600).optional(),
   keyTakeaways:  z.array(z.string()).optional(),
   faqs:          z.array(FAQSchema).optional(),
+  // Keeps a refine pass from sanding the student-first inquiry voice back into
+  // confident reviewer voice. Omitted means "infer from the category" — the only
+  // signal the workspace has, since inquiry mode isn't persisted on the article.
+  inquiryMode:   z.boolean().optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -61,7 +66,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { title, category, content, instruction, tldr, keyTakeaways, faqs } = parsed.data
+  const { title, category, content, instruction, tldr, keyTakeaways, faqs, inquiryMode } = parsed.data
+  const inquiry = inquiryMode ?? isInquiryCategory(category)
 
   // Strip HTML tags so Claude receives clean readable text — avoids nested-quote JSON breakage
   const plainText = content
@@ -76,7 +82,17 @@ export async function POST(request: NextRequest) {
     faqs?.length ? `Current FAQs:\n${faqs.map((f) => `Q: ${f.question}\nA: ${f.answer}`).join('\n\n')}` : null,
   ].filter(Boolean).join('\n\n')
 
-  const prompt = `You are editing an existing Boss Daddy guide. Apply ONLY the requested changes — preserve everything else.
+  // The literal "INQUIRY MODE: ON" line is the trigger the INQUIRY REGISTER
+  // block in BOSS_DADDY_SYSTEM keys off — don't reword it.
+  const inquiryHeader = inquiry
+    ? `INQUIRY MODE: ON
+
+This piece runs in the inquiry register (student-first, Socratic — see your system prompt). Preserving it outranks tidiness: do not flatten the humility, close the open questions, cut the steelmanned objections, or convert the reasoning into a verdict. Do not add practical takeaways, action items or product recommendations. If the instruction below would strip the register, honor what it is actually asking for while keeping the register intact.
+
+`
+    : ''
+
+  const prompt = `${inquiryHeader}You are editing an existing Boss Daddy guide. Apply ONLY the requested changes — preserve everything else.
 
 Title: ${title}
 Category: ${category}

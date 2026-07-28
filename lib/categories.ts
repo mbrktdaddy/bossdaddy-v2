@@ -331,6 +331,23 @@ export const CATEGORIES = [
 
 export type CategorySlug = (typeof CATEGORIES)[number]['slug']
 
+/**
+ * Pillars whose pieces default to the INQUIRY REGISTER — the student-first,
+ * Socratic voice used for philosophical and moral discussion (meaning, purpose,
+ * faith and doubt, the existence of God, duty, what we hand the next
+ * generation). See the INQUIRY REGISTER block in `BOSS_DADDY_SYSTEM`
+ * (`lib/claude/client.ts`) and `docs/brand-guide.md` §1.6.
+ *
+ * This is a DEFAULT, not a lock. The guide wizard can switch inquiry mode on for
+ * any category (a Health & Wellness essay on grief and faith wants it) or off
+ * for a Table Duty piece that is genuinely a straight guide.
+ */
+export const INQUIRY_CATEGORY_SLUGS = ['table-duty', 'watch-duty'] as const
+
+export function isInquiryCategory(slug: string): boolean {
+  return (INQUIRY_CATEGORY_SLUGS as readonly string[]).includes(slug)
+}
+
 export const CATEGORY_SLUGS = CATEGORIES.map((c) => c.slug)
 
 export function getCategoryBySlug(slug: string) {

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { CATEGORIES } from '@/lib/categories'
+import { CATEGORIES, isInquiryCategory } from '@/lib/categories'
 
 const STORAGE_KEY = 'bd:guide-wizard-draft'
 
@@ -38,6 +38,9 @@ export function GuideCreateWizard() {
   const [category, setCategory]       = useState('')
   const [pieceType, setPieceType]     = useState<PieceType>('guide')
   const [imageSlots, setImageSlots]   = useState<number | 'auto'>('auto')
+  // null = follow the category default (on for Table Duty / Watch Duty); an
+  // explicit true/false is the operator overriding it either way.
+  const [inquiryOverride, setInquiryOverride] = useState<boolean | null>(null)
   const [suggesting, setSuggesting]   = useState(false)
   const [suggestions, setSuggestions] = useState<{ topic: string; angle: string; keyPoints: string[] }[]>([])
 
@@ -57,15 +60,21 @@ export function GuideCreateWizard() {
       if (saved.description) setDescription(saved.description)
       if (saved.pieceType)   setPieceType(saved.pieceType)
       if (saved.imageSlots !== undefined) setImageSlots(saved.imageSlots)
+      if (saved.inquiryOverride !== undefined) setInquiryOverride(saved.inquiryOverride)
     } catch { /* ignore */ }
   }, [])
 
   // Persist form state to localStorage on change
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, topic, keyPoints, context, category, pieceType, imageSlots }))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, topic, keyPoints, context, category, pieceType, imageSlots, inquiryOverride }))
     } catch { /* ignore */ }
-  }, [description, topic, keyPoints, context, category, pieceType, imageSlots])
+  }, [description, topic, keyPoints, context, category, pieceType, imageSlots, inquiryOverride])
+
+  // Inquiry register: student-first, Socratic voice for philosophical/moral
+  // topics. Defaults on for Table Duty / Watch Duty, off elsewhere — and the
+  // operator can flip it either way for any category.
+  const inquiryMode = inquiryOverride ?? isInquiryCategory(category)
 
   // Holds generated draft between the preview step and the save step. The
   // structured blocks travel too — for how-tos/deep guides they persist; essays
@@ -103,7 +112,7 @@ export function GuideCreateWizard() {
       const res = await fetch('/api/claude/suggest-prompt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description, type: 'guide' }),
+        body: JSON.stringify({ description, type: 'guide', category, inquiryMode }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Suggest failed')
@@ -140,10 +149,12 @@ export function GuideCreateWizard() {
           topic,
           category,
           pieceType,
+          inquiryMode,
           keyPoints: keyPoints.split('\n').map(p => p.trim()).filter(Boolean),
           ...(context.trim() ? { context: context.trim() } : {}),
           imageSlots,
-          ...(selectedSlugs.length ? { productSlugs: selectedSlugs } : {}),
+          // Inquiry pieces carry no affiliate links — the register forbids them.
+          ...(!inquiryMode && selectedSlugs.length ? { productSlugs: selectedSlugs } : {}),
         }),
       })
       const genJson = await genRes.json()
@@ -265,7 +276,9 @@ export function GuideCreateWizard() {
   }
 
   if (step === 'generating' || step === 'saving') {
-    const label = step === 'generating' ? '✍️ Writing full guide with Claude…' : '💾 Saving draft…'
+    const label = step === 'generating'
+      ? (inquiryMode ? '✍️ Thinking through the discussion piece…' : '✍️ Writing full guide with Claude…')
+      : '💾 Saving draft…'
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <div className="w-8 h-8 border-4 border-soft border-t-orange-500 rounded-full animate-spin" />
@@ -456,6 +469,51 @@ export function GuideCreateWizard() {
           </select>
         </div>
 
+        {/* Inquiry register — the student-first, Socratic voice for meaning,
+            purpose, faith and doubt. On by default for Table Duty / Watch Duty,
+            available to any category, and always overridable either way. */}
+        <div>
+          <label className="block text-sm text-prose-muted mb-1.5">Voice register</label>
+          <label
+            className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${
+              inquiryMode
+                ? 'bg-accent-tint border-accent'
+                : 'bg-surface border-soft hover:border-accent-border/60'
+            }`}
+          >
+            <input
+              type="checkbox"
+              checked={inquiryMode}
+              onChange={(e) => setInquiryOverride(e.target.checked)}
+              className="shrink-0 mt-0.5"
+            />
+            <span className="min-w-0">
+              <span className={`block text-sm font-semibold ${inquiryMode ? 'text-prose' : 'text-prose-muted'}`}>
+                Inquiry mode
+                {isInquiryCategory(category) && (
+                  <span className="ml-2 text-xs font-normal text-prose-faint">
+                    default for this pillar
+                  </span>
+                )}
+              </span>
+              <span className="block text-xs text-prose-faint mt-0.5 leading-snug">
+                For philosophical and moral discussion — meaning, purpose, faith and doubt, the existence of God.
+                Student-first and Socratic: reasons out loud, steelmans the other side, ends on a sharper question.
+                Drops the gear pillars, the forced action-item takeaways, and all affiliate links.
+              </span>
+            </span>
+          </label>
+          {inquiryOverride !== null && inquiryOverride !== isInquiryCategory(category) && (
+            <button
+              type="button"
+              onClick={() => setInquiryOverride(null)}
+              className="mt-1 text-xs text-prose-faint hover:text-prose-muted transition-colors"
+            >
+              Reset to the category default
+            </button>
+          )}
+        </div>
+
         <div>
           <label className="block text-sm text-prose-muted mb-1.5">
             Inline image slots <span className="text-prose-faint">(empty placeholders to fill from the editor)</span>
@@ -487,7 +545,11 @@ export function GuideCreateWizard() {
           <label className="block text-sm text-prose-muted mb-1.5">
             Affiliate products <span className="text-prose-faint">(optional — for roundups, gift guides)</span>
           </label>
-          {!productsLoaded ? (
+          {inquiryMode ? (
+            <div className="px-4 py-2.5 bg-surface border border-strong rounded-lg text-sm text-prose-faint">
+              Off in inquiry mode — discussion pieces don&apos;t carry affiliate links.
+            </div>
+          ) : !productsLoaded ? (
             <div className="px-4 py-2.5 bg-surface border border-strong rounded-lg text-sm text-prose-faint">
               Loading products…
             </div>

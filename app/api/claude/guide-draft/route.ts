@@ -5,6 +5,7 @@ import { buildBossDaddySystemMessages } from '@/lib/voiceProfile'
 import { aiGenerateObject } from '@/lib/ai/client'
 import { classifyClaudeError } from '@/lib/ai/errors'
 import { fetchTagVocabulary, tagSlugList } from '@/lib/claude/tag-vocab'
+import { isInquiryCategory } from '@/lib/categories'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
@@ -85,6 +86,11 @@ const GuideDraftInput = z.object({
   productSlugs: z.array(z.string().regex(/^[a-z0-9-]+$/).max(80)).max(15).optional(),
   // 'auto' lets Claude pick (2–3 images); a number forces exactly that many.
   imageSlots: z.union([z.literal('auto'), z.number().int().min(0).max(6)]).default('auto'),
+  // Inquiry register (student-first, Socratic) for philosophical/moral topics —
+  // meaning, purpose, faith and doubt, the existence of God. Omitted means "use
+  // the category default" (on for table-duty/watch-duty); an explicit boolean
+  // from the wizard always wins in either direction.
+  inquiryMode: z.boolean().optional(),
 })
 
 // Per-type prompt fragments + token budget. Deep guides get the long budget;
@@ -139,6 +145,54 @@ const PIECE_CONFIG: Record<PieceType, {
   },
 }
 
+// Inquiry-register overlay. Same schema, same piece types, same token budgets —
+// only the framing changes, because the default framing is takeaway-first and
+// actively wrong for a question about meaning or God ("3–5 actionable bullet
+// points readers can act on immediately" is a category error on a moral
+// question). The structured blocks stay in the schema so the wizard, the DB
+// shape and the public guide page are untouched; they're just re-pointed at
+// question-shaped content. Register doctrine lives in BOSS_DADDY_SYSTEM's
+// INQUIRY REGISTER block — this only supplies the per-piece-type structure.
+const INQUIRY_CONFIG: Record<PieceType, Pick<
+  (typeof PIECE_CONFIG)[PieceType], 'label' | 'structure' | 'contentBlocks' | 'fieldGuidanceBlocks'
+>> = {
+  essay: {
+    label: 'personal essay',
+    structure: `STRUCTURE (personal essay, inquiry register — narrative, first-person, thinking out loud):
+- Introduction: open inside the real moment, memory or conversation that put this question in front of you. Name the question plainly. No throat-clearing, no "in this article".
+- Sections: 4–7 flowing sections that move the thinking forward — each should be a genuine step in the reasoning, not a restatement. At least one section must steelman the strongest view opposed to where you land. Each 150–300 words of prose; let paragraphs breathe.
+- Conclusion: 1–2 paragraphs that say honestly where you've landed and what you still don't know. End on the question that remains, not a bow on top.
+- Separate paragraphs within each section with \\n\\n`,
+    contentBlocks: '',
+    fieldGuidanceBlocks: '',
+  },
+  howto: {
+    label: 'short discussion piece',
+    structure: `STRUCTURE (short discussion, inquiry register — tight but honest):
+- Introduction: 2–3 sentences naming the question and why it lands at the family table.
+- Sections: 3–5 sections, each 120–200 words, each one move in the thinking. One of them must give the strongest opposing view a fair hearing. Short paragraphs — a tired dad should be able to follow it on a phone.
+- Conclusion: 1–2 sentences with where you've landed, held honestly, or the question you're leaving open.
+- Separate paragraphs within each section with \\n\\n`,
+    contentBlocks: `CONTENT BLOCKS (required — these render as structured UI elements, not prose):
+- tldr: 2–3 sentences naming the question this piece wrestles with and where you land — or that you don't. Not a claim of conclusions the piece didn't earn.
+- keyTakeaways: 3–5 load-bearing ideas or distinctions worth sitting with. NOT action items — a moral question has no to-do list.`,
+    fieldGuidanceBlocks: ' tldr names the question and where you land (or don\'t); keyTakeaways are 3–5 ideas worth sitting with, not action items;',
+  },
+  guide: {
+    label: 'long-form discussion piece',
+    structure: `STRUCTURE (long-form discussion, inquiry register):
+- Introduction: 2–3 sentences that put the reader inside a real scenario where this question actually bites (first-person dad). Name the question.
+- Sections: 5–8 sections, each 200–350 words, each advancing the argument one real step — the tension, the distinctions that matter, where the easy answers break down. At least one full section must steelman the strongest opposing view before you answer it. Do not force a practical takeaway onto a section that doesn't have one.
+- Conclusion: 1–2 paragraphs saying where you've landed and what you still hold loosely. End on the sharper question, not a summary.
+- Separate paragraphs within each section with \\n\\n`,
+    contentBlocks: `CONTENT BLOCKS (required — these render as structured UI elements, not prose):
+- tldr: 2–3 sentences naming the question this piece wrestles with and where you land — or that you don't. Not a claim of conclusions the piece didn't earn.
+- keyTakeaways: 3–5 load-bearing ideas, distinctions or reframes worth sitting with. NOT action items — a moral or metaphysical question has no to-do list.
+- faqs: 3–5 honest objections a thoughtful reader would raise, each written in its strongest form and answered without dodging. Phrase them the way a sharp friend would actually push back, not the way a marketer would set up a softball.`,
+    fieldGuidanceBlocks: ' tldr names the question and where you land (or don\'t); keyTakeaways are 3–5 ideas worth sitting with, not action items; faqs are 3–5 strongest-form objections with honest answers;',
+  },
+}
+
 function inlineImagesInstruction(slots: number | 'auto'): string {
   if (slots === 0) {
     return 'INLINE IMAGES:\n- Do not include any inline images. Return an empty array for "inlineImages".'
@@ -177,15 +231,35 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { topic, category, pieceType, keyPoints, context, targetAudience, productSlugs, imageSlots } = parsed.data
-  const slugs = (productSlugs ?? []).filter(Boolean)
+  const { topic, category, pieceType, keyPoints, context, targetAudience, productSlugs, imageSlots, inquiryMode } = parsed.data
+
+  // Explicit wizard toggle wins in either direction; otherwise the pillar decides.
+  const inquiry = inquiryMode ?? isInquiryCategory(category)
+
+  // Inquiry pieces carry no affiliate links — BOSS_DADDY_SYSTEM forbids [[BUY:]]
+  // tokens in that register, so drop any selected slugs rather than send the
+  // model a prompt that contradicts its own system rules. The wizard hides the
+  // product picker in inquiry mode, so this is a backstop for direct API calls.
+  const slugs = inquiry ? [] : (productSlugs ?? []).filter(Boolean)
   const brief = context?.trim()
-  const cfg = PIECE_CONFIG[pieceType]
+  const cfg = inquiry
+    ? { ...PIECE_CONFIG[pieceType], ...INQUIRY_CONFIG[pieceType] }
+    : PIECE_CONFIG[pieceType]
 
   // DB-driven tag vocabulary (killed the hardcoded slug list that used to drift).
   const tagVocab = await fetchTagVocabulary(supabase)
 
-  const prompt = `Write a dad-focused ${cfg.label} on this topic:
+  // The literal "INQUIRY MODE: ON" line is the trigger the INQUIRY REGISTER
+  // block in BOSS_DADDY_SYSTEM keys off — don't reword it.
+  const inquiryHeader = inquiry
+    ? `INQUIRY MODE: ON
+
+This is a discussion piece, not a gear piece. Apply the INQUIRY REGISTER from your system prompt: student-first and humble, reason out loud so the reader can follow and disagree, give the strongest opposing view a fair hearing, and leave them with a sharper question rather than a closed subject. The gear CONTENT PILLARS are suspended, honest uncertainty is allowed, and there are no product links in this piece.
+
+`
+    : ''
+
+  const prompt = `${inquiryHeader}Write a dad-focused ${cfg.label} on this topic:
 
 Topic: ${topic}
 Category: ${category}${keyPoints.length ? `\nKey Points: ${keyPoints.join(', ')}` : ''}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}${slugs.length ? `\nProduct slugs: ${slugs.join(', ')}` : ''}

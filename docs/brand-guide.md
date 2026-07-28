@@ -126,13 +126,21 @@ Declarative is for **display moments only** — heroes, taglines, creed, sign-of
 - Never preach. No scripture dropped without context. No moralizing about other men's choices.
 - Faith content earns its own posture — warm and grounded, not cynical.
 
-*Inquiry register — Table Duty & Watch Duty (scoped exception)*
-- These two pillars **invert** the default posture. Do NOT write them in the confident, verdict-first reviewer voice — that reads as an abrasive hot take, exactly what these pillars must avoid.
-- Write **student-first**: an imperfect dad still learning, passionate but humble. "Here's what I'm seeing and the questions it raises," not "here's the answer."
-- Format is **discussion / thought-experiment**, not declarative verdict. Take a position when you have one, but show your reasoning and leave room to disagree. Prefer ending on a sharper question over a tidy conclusion.
+*Inquiry register — philosophical & moral discussion (scoped exception)*
+- **What it's for:** meaning and purpose, faith and doubt, the existence of God, death and grief, duty, conscience, what a life is for, what we're handing our kids. It is the house default for **Table Duty** and **Watch Duty**, and it can be switched on for any pillar when a piece has earned it (a Health & Wellness essay on grief and faith wants it).
+- These pieces **invert** the default posture. Do NOT write them in the confident, verdict-first reviewer voice — that reads as an abrasive hot take, exactly what this register must avoid.
+- Write **student-first**: an imperfect dad still learning, passionate but humble. "Here's what I'm seeing and the questions it raises," not "here's the answer." That's the opening posture, not a disclaimer bolted on at the end.
+- Format is **discussion / thought-experiment**, not declarative verdict. Take a position when you have one, but arrive at it as the visible conclusion of reasoning the reader can follow — and disagree with.
+- **Steelman before you answer.** Name the strongest opposing view in its best form, from someone who actually holds it, before you say why you land elsewhere.
+- Prefer ending on a sharper question over a tidy conclusion. A piece that leaves the reader thinking has done its job; one that closes the subject has not.
+- **Suspended here:** the four gear content pillars (Practical Win / Family Proof / Honest Assessment / Value Play) and affiliate links. Never force a "practical takeaway" onto a moral or metaphysical question — the value delivered is clearer thinking, not a checklist.
+- **Relaxed here:** the hedge-word ban. Honest uncertainty is the point ("I might be wrong", "I don't know"). Vagueness is still banned — be specific about *what* you're uncertain about.
+- Faith is **lived, not preached** — doubt gets the same honest airtime as belief, and a genuine question never gets closed with a verse as though that settled it.
 - No partisan cheerleading, no personal attacks. Every piece answers one question: **why does this matter at the family table?** (fathers, family, faith, the next generation).
-- Warm Protector mode still auto-engages on vulnerability (loss, mental health, struggling dads); the banlist still applies.
+- Warm Protector mode still auto-engages on vulnerability (loss, mental health, struggling dads); the rest of the banlist still applies.
 - **Table Duty** = timeless conversation; **Watch Duty** = timely, with a freshness window (weeks, then archive or grow into a Table Duty essay). Same register for both. Scope + boundaries: `docs/pillar-taxonomy.md`.
+
+> **How it fires (execution layer).** The register is opt-in, never ambient: `BOSS_DADDY_SYSTEM` only applies it when the user message carries a literal `INQUIRY MODE: ON` line. The guide wizard's **Inquiry mode** toggle sends it — checked by default for `table-duty`/`watch-duty` (`isInquiryCategory()` in `lib/categories.ts`), overridable in both directions. `guide-draft`, `guide-refine` and `suggest-prompt` all honor the flag; refine infers it from the article's category, since the mode isn't persisted on the row. The submit-time moderator (`MODERATOR_SYSTEM`) has the matching carve-out and judges these as essays — it derives the mode from the pillar rather than accepting it from the caller, because a compliance gate must not be steerable by what it is gating.
 
 *Trust & legal*
 - Zero sponsors. Affiliate is fine, disclosed, and earned. Sponsored placement positioned as honest review is forbidden.
