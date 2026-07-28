@@ -7,9 +7,25 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
+      # MONTHLY, not weekly. Weekly produced a steady trickle that turned into
+      # five open PRs in a single day for a solo operator — pure coordination
+      # noise. Security advisories are NOT on this schedule; they still fire
+      # immediately via Dependabot alerts.
+      interval: "monthly"
+    open-pull-requests-limit: 3
     groups:
+      # ── The AI SDK moves as ONE unit, majors included. ──
+      # `ai`, `@ai-sdk/anthropic` and `@ai-sdk/xai` share a transitive
+      # `@ai-sdk/provider-utils`. Bumping any one alone splits that tree
+      # (4.0.40 vs 5.0.12) and breaks lib/ai/research.ts with SharedV4-vs-V3
+      # type errors. Dependabot's default of one-PR-per-major produced exactly
+      # that: three separate, individually-unmergeable PRs (#68/#69/#70).
+      # Listed FIRST so these packages land here rather than in the group below.
+      ai-sdk:
+        patterns:
+          - "ai"
+          - "@ai-sdk/*"
+        update-types: ["minor", "patch", "major"]
       # Batch low-risk bumps into one PR to keep review load sane for a solo op.
       minor-and-patch:
         update-types: ["minor", "patch"]
@@ -32,4 +48,8 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 2
+    groups:
+      actions:
+        patterns: ["*"]
