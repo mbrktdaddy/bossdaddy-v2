@@ -360,7 +360,7 @@ export const researchGear: BossTool = {
   definition: {
     name: 'research_gear',
     description:
-      "Call this proactively whenever search_gear returns no tested pick but the user is asking what to buy / what's best — don't ask permission first, just research it. Returns a clearly-labeled, NOT-tested shortlist with sources via live web search. These are NEVER presented as Boss-tested and carry no Boss rating — they're 'here's what the research turns up' while we get one on the bench. Offer the bench-vote / notify-me follow-up afterward.",
+      "Call this proactively — never ask permission first — in EITHER case: (a) search_gear returned no tested pick and the user is asking what to buy / what's best, or (b) search_gear DID return a tested pick but the question is broader than that one item (a plural 'best X', a comparison, a whole brand or category). In case (b) you still lead with the tested pick; this fills in the rest of the field so the answer is actually useful instead of just 'we only tested one.' Returns a clearly-labeled, NOT-tested shortlist with price tiers and sources via live web search. These are NEVER presented as Boss-tested and carry no Boss rating — they're 'here's what the research turns up' alongside what's on the bench.",
     input_schema: {
       type: 'object',
       properties: {
