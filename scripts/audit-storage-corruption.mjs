@@ -29,11 +29,13 @@ import { classify } from './lib/image-integrity.mjs'
 // Minimal .env.local reader so this runs without extra deps or a Next context.
 function loadEnv() {
   try {
-    for (const line of readFileSync('.env.local', 'utf8').split('\n')) {
-      const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/)
+    // Split on /\r?\n/, not '\n'. On Windows a CRLF .env.local otherwise leaves a
+    // trailing \r on every value, which makes a JWT fail as "Invalid Compact JWS".
+    for (const line of readFileSync('.env.local', 'utf8').split(/\r?\n/)) {
+      const m = line.match(/^\s*(?:export\s+)?([A-Za-z0-9_]+)\s*=\s*(.*)$/)
       if (!m) continue
       const [, k, raw] = m
-      if (!process.env[k]) process.env[k] = raw.replace(/^["']|["']$/g, '')
+      if (!process.env[k]) process.env[k] = raw.trim().replace(/^["']|["']$/g, '')
     }
   } catch { /* env may already be provided by the shell */ }
 }
@@ -41,14 +43,90 @@ loadEnv()
 
 const URL_BASE = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+// Shape-check without ever printing the value — a malformed key fails deep inside
+// the client with an opaque "Invalid Compact JWS", which is a miserable thing to
+// debug from the outside.
 if (!URL_BASE || !SERVICE_KEY) {
-  console.error('✖ Need NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (check .env.local).')
-  process.exit(1)
+  console.error('✖ Missing env:', [
+    !URL_BASE && 'NEXT_PUBLIC_SUPABASE_URL',
+    !SERVICE_KEY && 'SUPABASE_SERVICE_ROLE_KEY',
+  ].filter(Boolean).join(', '), '— check .env.local')
+  process.exitCode = 1
+  throw new Error('missing env')
+}
+// Accept BOTH key generations: the legacy service-role JWT (3 dot-separated
+// parts) and the current `sb_secret_…` format, which is not a JWT at all. Only a
+// value matching neither is worth flagging — and it's a warning, not a hard stop,
+// because guessing wrong about the key format shouldn't block an audit. Never
+// print the value itself.
+const looksJwt = SERVICE_KEY.split('.').length === 3
+const looksNewKey = /^sb_(secret|publishable)_/.test(SERVICE_KEY)
+if (!looksJwt && !looksNewKey) {
+  console.warn(
+    `⚠ SUPABASE_SERVICE_ROLE_KEY is neither a JWT nor an sb_secret_ key (length ${SERVICE_KEY.length}).` +
+      ' Continuing anyway — if requests fail as "Invalid Compact JWS", suspect stray quotes or a wrapped line in .env.local.',
+  )
 }
 
 const args = process.argv.slice(2)
 const JSON_OUT = args.includes('--json')
 const ONLY_BUCKET = args.includes('--bucket') ? args[args.indexOf('--bucket') + 1] : null
+
+// --paths <file>: one `bucket/path` per line, read over the PUBLIC URL with no
+// credentials at all. Added because the service-role client refused the current
+// `sb_secret_` key format with an opaque "Invalid Compact JWS", and auditing
+// public buckets never needed auth in the first place. Generate the list with:
+//   select bucket_id || '/' || name from storage.objects where bucket_id in (...)
+const PATHS_FILE = args.includes('--paths') ? args[args.indexOf('--paths') + 1] : null
+
+if (PATHS_FILE) {
+  const base = URL_BASE.replace(/\/+$/, '')
+  const lines = readFileSync(PATHS_FILE, 'utf8').split(/\r?\n/).map((l) => l.trim()).filter(Boolean)
+  const rows = []
+
+  for (const [i, line] of lines.entries()) {
+    const slash = line.indexOf('/')
+    const bucket = line.slice(0, slash)
+    const path = line.slice(slash + 1)
+    const url = `${base}/storage/v1/object/public/${bucket}/${path.split('/').map(encodeURIComponent).join('/')}`
+    try {
+      const res = await fetch(url)
+      if (!res.ok) {
+        rows.push({ bucket, path, verdict: 'error', reason: `HTTP ${res.status}` })
+      } else {
+        const buf = Buffer.from(await res.arrayBuffer())
+        rows.push({ bucket, path, bytes: buf.length, ...classify(buf) })
+      }
+    } catch (err) {
+      rows.push({ bucket, path, verdict: 'error', reason: String(err.message ?? err) })
+    }
+    if (!JSON_OUT) process.stdout.write(`\r  scanned ${i + 1}/${lines.length}`)
+  }
+
+  const corrupt = rows.filter((r) => r.verdict === 'corrupt')
+  const suspect = rows.filter((r) => r.verdict === 'suspect')
+  const errored = rows.filter((r) => r.verdict === 'error')
+
+  if (JSON_OUT) {
+    console.log(JSON.stringify({ corrupt, suspect, errored }, null, 2))
+  } else {
+    console.log('\n' + '─'.repeat(64))
+    console.log(`  scanned  ${rows.length}`)
+    console.log(`  healthy  ${rows.length - corrupt.length - suspect.length - errored.length}`)
+    console.log(`  CORRUPT  ${corrupt.length}`)
+    console.log(`  suspect  ${suspect.length}`)
+    console.log(`  errored  ${errored.length}`)
+    console.log('─'.repeat(64))
+    for (const r of corrupt) console.log(`  ✖ ${r.bucket}/${r.path}  [${r.magic}, ${r.bytes.toLocaleString()} bytes, ${r.fffd.toLocaleString()} U+FFFD]`)
+    for (const r of suspect) console.log(`  ? ${r.bucket}/${r.path}  [${r.magic}, ${r.bytes?.toLocaleString()} bytes]`)
+    for (const r of errored) console.log(`  ! ${r.bucket}/${r.path}  — ${r.reason}`)
+    console.log()
+  }
+  // Nothing below applies to this mode, and no Supabase client was created here,
+  // so exiting is clean (the libuv assertion came from tearing down that client).
+  process.exit(corrupt.length ? 1 : 0)
+}
 
 const admin = createClient(URL_BASE, SERVICE_KEY, { auth: { persistSession: false } })
 
@@ -83,7 +161,8 @@ async function fetchBytes(bucket, path) {
 const { data: buckets, error: bucketErr } = await admin.storage.listBuckets()
 if (bucketErr) {
   console.error('✖ Could not list buckets:', bucketErr.message)
-  process.exit(1)
+  process.exitCode = 1
+  throw new Error('listBuckets failed')
 }
 
 const targets = buckets
@@ -92,7 +171,8 @@ const targets = buckets
 
 if (!targets.length) {
   console.error(`✖ No bucket named "${ONLY_BUCKET}". Found: ${buckets.map((b) => b.name).join(', ')}`)
-  process.exit(1)
+  process.exitCode = 1
+  throw new Error('unknown bucket')
 }
 
 const results = { ok: [], corrupt: [], suspect: [], errored: [] }
@@ -129,35 +209,41 @@ for (const bucket of targets) {
   if (!JSON_OUT) process.stdout.write('\n')
 }
 
+// Non-zero exit so this can gate a cleanup task, but set rather than forced:
+// process.exit() while the Supabase client still holds open handles trips a libuv
+// assertion on Windows and buries the report under a crash dump.
+if (results.corrupt.length) process.exitCode = 1
+
 if (JSON_OUT) {
   console.log(JSON.stringify({ corrupt: results.corrupt, suspect: results.suspect, errored: results.errored }, null, 2))
-  process.exit(0)
-}
+} else {
+  const total = results.ok.length + results.corrupt.length + results.suspect.length + results.errored.length
+  console.log('\n' + '─'.repeat(60))
+  console.log(`  scanned  ${total}`)
+  console.log(`  healthy  ${results.ok.length}`)
+  console.log(`  CORRUPT  ${results.corrupt.length}`)
+  console.log(`  suspect  ${results.suspect.length}   (ambiguous — eyeball these)`)
+  console.log(`  errored  ${results.errored.length}`)
+  console.log('─'.repeat(60))
 
-const total = results.ok.length + results.corrupt.length + results.suspect.length + results.errored.length
-console.log('\n' + '─'.repeat(60))
-console.log(`  scanned  ${total}`)
-console.log(`  healthy  ${results.ok.length}`)
-console.log(`  CORRUPT  ${results.corrupt.length}`)
-console.log(`  suspect  ${results.suspect.length}   (ambiguous — eyeball these)`)
-console.log(`  errored  ${results.errored.length}`)
-console.log('─'.repeat(60))
-
-if (results.corrupt.length) {
-  // Oldest corrupt object dates the regression, which tells you whether this
-  // started with a recent dependency bump or has been live for months.
-  const byBucket = {}
-  for (const r of results.corrupt) (byBucket[r.bucket] ??= []).push(r.path)
-  console.log('\nCorrupt objects by bucket:')
-  for (const [b, paths] of Object.entries(byBucket)) {
-    console.log(`\n  ${b} (${paths.length}):`)
-    for (const p of paths) console.log(`    ${p}`)
+  if (results.corrupt.length) {
+    const byBucket = {}
+    for (const r of results.corrupt) (byBucket[r.bucket] ??= []).push(r)
+    console.log('\nCorrupt objects by bucket:')
+    for (const [b, rows] of Object.entries(byBucket)) {
+      console.log(`\n  ${b} (${rows.length}):`)
+      for (const r of rows) console.log(`    ${r.path}  [${r.magic}]`)
+    }
+    console.log(
+      '\nThese cannot be repaired — the original bytes are gone. Regenerate or re-upload.\n',
+    )
+  } else {
+    console.log('\n✓ No corrupted objects found.\n')
   }
-  console.log(
-    '\nThese cannot be repaired — the original bytes are gone. Regenerate or re-upload.' +
-      '\nRe-run after deploying 569b0a2 and generating one new image: it must come back healthy.\n',
-  )
-  process.exit(1)
-}
 
-console.log('\n✓ No corrupted objects found.\n')
+  if (results.suspect.length) {
+    console.log('Suspect (not called corrupt — check by hand):')
+    for (const r of results.suspect) console.log(`  ${r.bucket}/${r.path}  [${r.magic}, ${r.bytes} bytes]`)
+    console.log()
+  }
+}
