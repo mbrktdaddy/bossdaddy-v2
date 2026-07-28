@@ -79,7 +79,7 @@ export async function POST(request: NextRequest, ctx: RouteCtx) {
   }
 
   const path = `${folder}/avatar.webp`
-  const { error: uploadErr } = await admin.storage.from('avatars').upload(path, toStorageBody(buffer), {
+  const { error: uploadErr } = await admin.storage.from('avatars').upload(path, toStorageBody(buffer, 'image/webp'), {
     contentType: 'image/webp',
     upsert: true,
   })

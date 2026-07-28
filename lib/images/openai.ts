@@ -1,7 +1,7 @@
 import OpenAI from 'openai'
 import sharp from 'sharp'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { toStorageBody } from '../storage-body'
+import { toStorageBody, verifyStoredMagic } from '../storage-body'
 
 type Bucket = 'guide-images' | 'review-images' | 'media'
 type ImageSize = '1024x1024' | '1536x1024' | '1024x1536'
@@ -95,9 +95,21 @@ export async function generateAndUploadImage(
   const admin = createAdminClient()
   const { error } = await admin.storage
     .from(bucket)
-    .upload(filename, toStorageBody(webpBuffer), { contentType: 'image/webp', upsert: false })
+    .upload(filename, toStorageBody(webpBuffer, 'image/webp'), { contentType: 'image/webp', upsert: false })
 
   if (error) throw new Error(`Storage upload failed: ${error.message}`)
+
+  // Read the header back before handing out a URL. The 2026-07-28 corruption was
+  // silent — a stringified body still stores an object with a sane size and the
+  // right mimetype, so a broken image looked like a successful generation and was
+  // only discovered by a human days later. One range read makes it loud instead.
+  // Delete the bad object rather than leaving an unrenderable file behind.
+  const corruption = await verifyStoredMagic(admin.storage.from(bucket), filename, 'image/webp')
+  if (corruption) {
+    await admin.storage.from(bucket).remove([filename]).catch(() => { /* best effort */ })
+    console.error(`Image upload verification FAILED for ${bucket}/${filename}: ${corruption}`)
+    throw new Error('Generated image was corrupted in transit and was discarded. Please try again.')
+  }
 
   const { data: { publicUrl } } = admin.storage.from(bucket).getPublicUrl(filename)
   return publicUrl

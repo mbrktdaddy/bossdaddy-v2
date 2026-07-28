@@ -19,7 +19,7 @@ export async function renderAndStorePrintFile(
   const path = `${designId}/${opts.blank}-${opts.template}-${opts.colorway}.png`
   const { error } = await admin.storage
     .from(BUCKET)
-    .upload(path, toStorageBody(buffer), { contentType: 'image/png', upsert: true })
+    .upload(path, toStorageBody(buffer, 'image/png'), { contentType: 'image/png', upsert: true })
   if (error) throw new Error(`Print file upload failed: ${error.message}`)
 
   const { data } = admin.storage.from(BUCKET).getPublicUrl(path)

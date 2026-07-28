@@ -83,7 +83,7 @@ export async function POST(
 
       const { error: uploadError } = await admin.storage
         .from('media')
-        .upload(path, toStorageBody(buffer), { contentType: 'image/webp', upsert: false })
+        .upload(path, toStorageBody(buffer, 'image/webp'), { contentType: 'image/webp', upsert: false })
 
       if (uploadError) continue
 

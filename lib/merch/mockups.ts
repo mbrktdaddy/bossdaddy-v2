@@ -67,7 +67,7 @@ export async function generateAndStoreMockups(opts: {
     const path = `${opts.designId}/mockup-${opts.blank}-${i}.jpg`
     const { error } = await admin.storage
       .from(BUCKET)
-      .upload(path, toStorageBody(buf), { contentType: 'image/jpeg', upsert: true })
+      .upload(path, toStorageBody(buf, 'image/jpeg'), { contentType: 'image/jpeg', upsert: true })
     if (error) throw new Error(`Mockup upload failed: ${error.message}`)
     const { data } = admin.storage.from(BUCKET).getPublicUrl(path)
     stored.push(`${data.publicUrl}?v=${stamp}`)

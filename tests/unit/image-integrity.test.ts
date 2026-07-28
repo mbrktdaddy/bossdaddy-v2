@@ -67,6 +67,22 @@ describe('image-integrity detector', () => {
     expect(classify(broken).verdict).toBe('corrupt') // caught anyway
   })
 
+  it('catches the stringified-byte-array form, which contains no U+FFFD at all', () => {
+    // The second production corruption: Array.prototype.toString on the body.
+    // `String(new Uint8Array([82,73,70,70]))` === '82,73,70,70' — "RIFF" as decimals.
+    const broken = Buffer.from(String(new Uint8Array(HEALTHY)), 'utf8')
+
+    expect(countFFFD(broken)).toBe(0) // the U+FFFD heuristic is blind to this
+    expect(broken.subarray(0, 16).toString('latin1')).toMatch(/^[0-9]+,[0-9]+/)
+    expect(classify(broken).verdict).toBe('corrupt')
+    expect(classify(broken).magic).toBe('stringified-byte-array')
+  })
+
+  it('does not mistake a real image for a stringified array', () => {
+    expect(classify(HEALTHY).verdict).toBe('ok')
+    expect(classify(utf8Mangle(HEALTHY)).magic).not.toBe('stringified-byte-array')
+  })
+
   it('returns suspect rather than corrupt when only one signal fires', () => {
     // Unknown magic but no replacement chars — e.g. a non-image file. Not our bug.
     const plainText = Buffer.from('just some ascii text, not an image at all')

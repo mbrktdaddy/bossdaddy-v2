@@ -22,6 +22,26 @@ export function magicOf(buf) {
   return 'unknown'
 }
 
+/**
+ * Detect the SECOND corruption form: the byte array serialized by
+ * Array.prototype.toString, i.e. `"82,73,70,70,238,..."`. Those leading numbers
+ * are the decimal codes for R, I, F, F — a WebP spelled out as text.
+ *
+ * This form contains no U+FFFD at all (every character is ASCII), so the
+ * replacement-character heuristic misses it completely and it would otherwise be
+ * filed as merely 'suspect'.
+ */
+export function isStringifiedByteArray(buf) {
+  if (buf.length < 32) return false
+  // Require the ENTIRE header to be digits and commas. Deliberately not a
+  // "starts with N numbers" pattern — that was brittle about exactly how many
+  // groups it demanded. A real image container cannot look like this: every known
+  // format puts a non-numeric byte in its magic. The trailing slice may cut
+  // mid-number, which is why a bare digit run is allowed at the end.
+  const head = buf.subarray(0, 64).toString('latin1')
+  return /^[0-9]+(,[0-9]+)*,?$/.test(head)
+}
+
 /** Count non-overlapping U+FFFD (EF BF BD) sequences. */
 export function countFFFD(buf) {
   let n = 0
@@ -55,6 +75,11 @@ export function classify(buf) {
   const magic = magicOf(buf)
   const fffd = countFFFD(buf)
   const healthy = magic !== 'unknown' && magic !== 'too-short'
+
+  // Conclusive on its own — no image container starts with decimal text.
+  if (isStringifiedByteArray(buf)) {
+    return { verdict: 'corrupt', magic: 'stringified-byte-array', fffd }
+  }
 
   // "RIFF" is pure ASCII so it survives, but the 4-byte size field after it often
   // doesn't — which slides the WEBP marker off offset 8. Both real-world corrupted
