@@ -33,6 +33,12 @@ AI calls are grouped into **buckets**, not toggled per-endpoint. Each bucket has
 
 Set any toggle to a gateway slug, e.g. `AI_MODEL_CONTENT=xai/grok-4.5`. Invalid / non-`provider/model` values are ignored (stay on default). Takes effect next deploy.
 
+### Current provider state — **Anthropic on every bucket, every environment** (2026-07-28)
+
+Operator directive: no xAI/Grok calls at this time. **No `AI_MODEL_*` override is set in any environment** — every bucket resolves to its `BUCKET_DEFAULT` (Claude Sonnet 5, plus Haiku 4.5 on the concierge fast lane). The Grok pilot that ran `utility` + `research` on xAI (2026-07-26 → 2026-07-28) is reverted by deleting those two env vars; nothing in code changed then or now.
+
+The multi-provider seam is intentionally left intact — `@ai-sdk/xai`, the `MODELS.grok`/`grokFast` registry entries, and `research.ts`'s provider dispatch all still work. Re-enabling is setting one env var; there is no code to un-write. Keep it that way: if this doc ever says "Anthropic everywhere" while a dashboard var says otherwise, **the dashboard wins** — routing is env-driven and this file cannot enforce it.
+
 ### Two safety rules baked into config (not left to discipline)
 
 1. **`moderation` is pinned to Claude and ignores its overrides.** It's the FTC/affiliate compliance gate (CLAUDE.md §3); it must not be swapped to an unevaluated provider by a stray env var. Un-pin only by editing `PINNED` in `lib/flags.ts` deliberately.
@@ -139,6 +145,7 @@ Both auto-apply: Gateway failover to Claude, a `surface:<tag>` cost tag, and an 
 2. **`content` + `utility` one-shot sites** — ✅ **done.** All `createStructured` callers + plain-text sites moved to the wrappers (`aiGenerateObject`/`aiGenerateText`); `createStructured` is now dead code.
 3. **`research` (web_search)** — ✅ **done.** One helper `lib/ai/research.ts` (`aiResearch()`) backs all three surfaces (specs-grade, `research_gear`, radar). See **Research bucket** below.
 4. **`concierge` streaming agent** — ✅ **done.** `lib/boss/agent.ts` runs on `streamText` through the Gateway (`resolveModel('concierge', …)`), preserving the sensitive-lane split. Hybrid semantic + full-text retrieval, thumbs feedback, and a crisis-only sensitive router shipped on top.
+5. **Pilot Grok** — ✅ **ran, then reverted.** `utility` + `research` ran on xAI 2026-07-26 → 2026-07-28 (`content` was never flipped; moderation stayed pinned). A/B verdict was *higher variance, not reliably better*, and the operator has since taken xAI off all buckets — see **Current provider state** above. The seam stays; re-piloting is an env var, not a rebuild.
 
 ## Research bucket (`lib/ai/research.ts`)
 
@@ -149,4 +156,3 @@ Design decisions:
 - **App-level failover, not the Gateway `models` chain.** The in-call `providerOptions.gateway.models` failover would swap the model but not the matching search tool. So this bucket does an app-level retry instead: on a *transient* provider error (`timeout`/`overload`/`rate_limit`/`budget` per `classifyClaudeError`), `aiResearch` retries once on Claude + Anthropic search. Format errors (`no_object`/`truncated`) rethrow — they'd fail identically on Claude.
 - **SDK multi-step + `Output.object`** replace the three hand-rolled `pause_turn` continuation loops and each surface's `submit_*` output tool + prose-JSON salvage. `stopWhen: stepCountIs(maxUses + buffer)` bounds the search loop; the model emits one schema-validated object. Each surface reuses its existing JSON schema via `jsonSchema()` and keeps all its normalization/clamping.
 - Requires `@ai-sdk/anthropic` + `@ai-sdk/xai` (pinned to the **3.x** line — 4.x pulls `@ai-sdk/provider-utils@5`, which mismatches `ai@6.0.230`'s `4.0.40`).
-5. **Pilot Grok** — flip `content` (guides) to `xai/grok-4.5` behind the flag, eval voice + JSON reliability, expand only where it wins. Moderation stays Claude.
