@@ -1,10 +1,16 @@
-// Audit every Supabase Storage object for the UTF-8 corruption fixed in 569b0a2.
+// Audit Supabase Storage objects for the upload corruption fixed in b02caa6.
 //
-// Every upload written from the deployed runtime while that bug was live had its
-// bytes UTF-8-decoded: each byte >= 0x80 became U+FFFD (EF BF BD). The files kept
-// a valid mimetype and a plausible size, so nothing errored — they simply don't
-// decode as images. This walks the buckets, fetches each object, and reports
-// which ones are damaged so the cleanup is a list instead of a guess.
+// The deployed runtime called String() on raw upload bodies, so every image written
+// from prod while the bug was live is destroyed in one of two ways:
+//   Buffer     -> UTF-8 decode           -> bytes >= 0x80 became U+FFFD
+//   Uint8Array -> Array#toString         -> "82,73,70,70,..." (RIFF as decimals)
+// Both keep a valid mimetype and a plausible size, so nothing errored — the files
+// simply don't decode as images. This fetches each object and reports which are
+// damaged, so cleanup is a list instead of a guess.
+//
+// Result of the 2026-07-28 run: 4 corrupt objects, all written that day between
+// 08:32 and 09:30 UTC. Everything from 2026-05-13 through 2026-07-14 was healthy,
+// as were all objects written after the fix.
 //
 // Detection lives in scripts/lib/image-integrity.mjs and is unit-tested against a
 // real image plus a genuinely mangled copy of it (tests/unit/image-integrity.test.ts).
