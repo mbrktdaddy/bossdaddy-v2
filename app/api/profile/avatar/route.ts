@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import sharp from 'sharp'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { toStorageBody } from '@/lib/storage-body'
 
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
 // Generous input cap — we always re-encode to a 256px WebP server-side, so
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
   }
 
   const path = `${userFolder}/avatar.webp`
-  const { error: uploadErr } = await admin.storage.from('avatars').upload(path, buffer, {
+  const { error: uploadErr } = await admin.storage.from('avatars').upload(path, toStorageBody(buffer), {
     contentType: 'image/webp',
     upsert: true,
   })

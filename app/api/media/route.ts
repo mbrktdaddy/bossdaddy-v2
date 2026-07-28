@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { normalizeImage } from '@/lib/images/normalize'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { toStorageBody } from '@/lib/storage-body'
 
 const ALLOWED_TYPES  = ['image/jpeg', 'image/png', 'image/webp']
 const MAX_SIZE_BYTES = 8 * 1024 * 1024 // 8 MB
@@ -139,7 +140,7 @@ export async function POST(request: NextRequest) {
 
   const { error: uploadError } = await admin.storage
     .from('media')
-    .upload(filename, buffer, { contentType: 'image/webp', upsert: false })
+    .upload(filename, toStorageBody(buffer), { contentType: 'image/webp', upsert: false })
 
   if (uploadError) {
     console.error('Media upload error:', uploadError)

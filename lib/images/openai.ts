@@ -1,6 +1,7 @@
 import OpenAI from 'openai'
 import sharp from 'sharp'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { toStorageBody } from '../storage-body'
 
 type Bucket = 'guide-images' | 'review-images' | 'media'
 type ImageSize = '1024x1024' | '1536x1024' | '1024x1536'
@@ -94,7 +95,7 @@ export async function generateAndUploadImage(
   const admin = createAdminClient()
   const { error } = await admin.storage
     .from(bucket)
-    .upload(filename, webpBuffer, { contentType: 'image/webp', upsert: false })
+    .upload(filename, toStorageBody(webpBuffer), { contentType: 'image/webp', upsert: false })
 
   if (error) throw new Error(`Storage upload failed: ${error.message}`)
 

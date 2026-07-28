@@ -16,6 +16,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getOtherParticipants, isBlockedBetween, pushNewMessage } from '@/lib/messaging-shared'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { sanitizePlainText } from '@/lib/sanitize'
+import { toStorageBody } from '@/lib/storage-body'
 
 export const runtime = 'nodejs' // sharp needs the Node runtime
 export const maxDuration = 60
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
   const path = `${conversationId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`
   const { error: uploadError } = await admin.storage
     .from('dm-media')
-    .upload(path, normalized.buffer, { contentType: 'image/webp', upsert: false })
+    .upload(path, toStorageBody(normalized.buffer), { contentType: 'image/webp', upsert: false })
   if (uploadError) {
     console.error('DM attachment upload error:', uploadError)
     return NextResponse.json({ error: 'Upload failed — please try again' }, { status: 502 })

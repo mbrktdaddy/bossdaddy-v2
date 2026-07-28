@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createMockupTask, getMockupTask } from '@/lib/printful'
+import { toStorageBody } from '../storage-body'
 
 // Generates a realistic product mockup via Printful, then stores it durably in
 // our bucket. Printful's mockup_url is a temporary CDN link (expires ~72h), so we
@@ -66,7 +67,7 @@ export async function generateAndStoreMockups(opts: {
     const path = `${opts.designId}/mockup-${opts.blank}-${i}.jpg`
     const { error } = await admin.storage
       .from(BUCKET)
-      .upload(path, buf, { contentType: 'image/jpeg', upsert: true })
+      .upload(path, toStorageBody(buf), { contentType: 'image/jpeg', upsert: true })
     if (error) throw new Error(`Mockup upload failed: ${error.message}`)
     const { data } = admin.storage.from(BUCKET).getPublicUrl(path)
     stored.push(`${data.publicUrl}?v=${stamp}`)

@@ -51,7 +51,15 @@ export async function GET(request: NextRequest) {
   const { data: blob, error } = await admin.storage.from(bucket).download(key)
   if (error || !blob) return NextResponse.json({ error: 'File not found' }, { status: 404 })
 
-  const buffer = Buffer.from(await blob.arrayBuffer())
+  // MUST be a Uint8Array, never a Node Buffer. `Buffer` is not part of the Web
+  // `BodyInit` union, so when the runtime doesn't recognize it as a TypedArray it
+  // falls back to `String(body)` — a UTF-8 decode that replaces every byte >=
+  // 0x80 with U+FFFD. That shipped a 180KB .webp whose header read
+  // `52 49 46 46 2c ef bf bd` (RIFF + replacement chars) with 41,102 U+FFFD runs
+  // and the WEBP marker shoved from offset 8 to 10 — silently corrupt, and only
+  // on the deployed runtime, so it looked fine in local dev.
+  // `app/api/img/route.ts` already wraps in Uint8Array for this reason.
+  const bytes = new Uint8Array(await blob.arrayBuffer())
   const ext = key.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'webp'
   const stem =
     (downloadName ? downloadName.replace(/[^a-zA-Z0-9-_ ]/g, '').trim().replace(/\s+/g, '-') : '') ||
@@ -59,11 +67,11 @@ export async function GET(request: NextRequest) {
     'boss-daddy-image'
   const filename = `${stem}.${ext}`
 
-  return new NextResponse(buffer, {
+  return new NextResponse(bytes, {
     headers: {
       'Content-Type': blob.type || 'application/octet-stream',
       'Content-Disposition': `attachment; filename="${filename}"`,
-      'Content-Length': String(buffer.length),
+      'Content-Length': String(bytes.byteLength),
       'Cache-Control': 'private, no-store',
     },
   })

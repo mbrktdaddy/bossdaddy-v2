@@ -4,6 +4,7 @@ import { requireAdminApi } from '@/lib/auth-cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { fetchProductImages } from '@/lib/amazon-pa-api'
 import { normalizeImage } from '@/lib/images/normalize'
+import { toStorageBody } from '@/lib/storage-body'
 
 export async function POST(
   _req: NextRequest,
@@ -82,7 +83,7 @@ export async function POST(
 
       const { error: uploadError } = await admin.storage
         .from('media')
-        .upload(path, buffer, { contentType: 'image/webp', upsert: false })
+        .upload(path, toStorageBody(buffer), { contentType: 'image/webp', upsert: false })
 
       if (uploadError) continue
 

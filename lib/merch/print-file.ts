@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { renderMerchPng, type RenderOpts } from './render'
+import { toStorageBody } from '../storage-body'
 
 // Renders a design's print-ready PNG and stores it in the public merch-designs
 // bucket, returning the public URL. Printful's POST /files fetches this URL, so
@@ -18,7 +19,7 @@ export async function renderAndStorePrintFile(
   const path = `${designId}/${opts.blank}-${opts.template}-${opts.colorway}.png`
   const { error } = await admin.storage
     .from(BUCKET)
-    .upload(path, buffer, { contentType: 'image/png', upsert: true })
+    .upload(path, toStorageBody(buffer), { contentType: 'image/png', upsert: true })
   if (error) throw new Error(`Print file upload failed: ${error.message}`)
 
   const { data } = admin.storage.from(BUCKET).getPublicUrl(path)
