@@ -9,7 +9,23 @@ const GEAR_LIMIT = 8
 // (kids water table 0.25, cook stove 0.23, a gas grill for a "smoker" query 0.30),
 // and absent categories (no stroller/drill reviewed, top match ~0.25-0.27) correctly
 // return nothing → honest "no tested pick" + the research fallback.
-const MIN_SIMILARITY = 0.35
+// LOWERED 0.35 -> 0.29 in migration 130, and only safe BECAUSE of it. With the
+// old headline-only embeddings the classes overlapped — "gas grills" scored 0.2738
+// against the tested Weber grill while the wrong-category "pellet smoker" scored
+// 0.3007, so NO threshold separated them and 0.35 was the least-bad guess.
+// Widening the embedded source text (title + product_name + category + excerpt +
+// tldr + 1800 chars of body) moved both the right way: real targets rose and
+// pellet smoker FELL to 0.2752, opening a real window.
+//
+//   lowest real target  "gas grills"    0.3032
+//   highest control     "pellet smoker" 0.2752
+//   0.29 sits between them, ~0.014 clear of each.
+//
+// ⚠️ That window is narrow and measured against only five controls. Re-run
+// `npm run ai:probe-retrieval` after adding reviews in new categories; if a
+// control creeps above 0.29, widen the control set and re-tune rather than
+// nudging this number by feel.
+const MIN_SIMILARITY = 0.29
 
 const COLS =
   'slug, title, product_name, product_slug, rating, score_quality, score_value, score_ease, score_daily_use, score_specs, excerpt, is_top_pick'

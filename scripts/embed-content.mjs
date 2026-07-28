@@ -14,6 +14,33 @@ import { embedMany } from 'ai'
 const MODEL = 'cohere/embed-v4.0' // keep in sync with lib/ai/embedding.ts EMBEDDING_MODEL
 const BATCH = 64
 
+// ⚠️ THE TEXT BUILDERS BELOW ARE A HAND-COPY of lib/boss/embedContent.ts.
+// This is a .mjs ops script and that is TypeScript, so the duplication is
+// structural — but it BIT US: migration 130 widened the app-side builders and
+// this script still built the old headline-only text, so running it would have
+// silently re-embedded the whole catalog with the narrow vectors it was meant to
+// replace. If you change reviewText/guideText/BODY_CHARS there, change them here.
+const BODY_CHARS = 1800
+const bodyText = (c) =>
+  !c ? '' : c.replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;|&#\d+;/gi, ' ').replace(/\s+/g, ' ').trim().slice(0, BODY_CHARS)
+const categoryText = (c) => (c ? c.replace(/-/g, ' ') : '')
+
+const REVIEW_COLS = 'title, product_name, excerpt, tldr, category, content'
+const reviewText = (r) =>
+  [r.title, r.product_name, categoryText(r.category), r.excerpt, r.tldr, bodyText(r.content)]
+    .filter(Boolean).join('\n').trim()
+
+const GUIDE_COLS = 'title, excerpt, tldr, category, content'
+const guideText = (g) =>
+  [g.title, categoryText(g.category), g.excerpt, g.tldr, bodyText(g.content)]
+    .filter(Boolean).join('\n').trim()
+
+// --force re-embeds EVERY approved+visible row, not just rows whose embedding is
+// null. Needed whenever the embedded TEXT SHAPE changes: the rows still hold
+// valid-looking vectors built from the old shape, so the default null-only pass
+// finds nothing to do and the change silently never lands.
+const FORCE = process.argv.includes('--force')
+
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY
 if (!url || !key) {
@@ -32,12 +59,13 @@ async function embedDocs(texts) {
 }
 
 async function backfill(table, buildText, cols) {
-  const { data, error } = await db
+  let q = db
     .from(table)
     .select(`id, ${cols}`)
     .eq('status', 'approved')
     .eq('is_visible', true)
-    .is('embedding', null)
+  if (!FORCE) q = q.is('embedding', null)
+  const { data, error } = await q
   if (error) throw error
   const rows = (data ?? []).map((r) => ({ id: r.id, text: buildText(r) })).filter((r) => r.text.length > 0)
   let n = 0
@@ -53,16 +81,9 @@ async function backfill(table, buildText, cols) {
 }
 
 async function main() {
-  const reviews = await backfill(
-    'reviews',
-    (r) => [r.title, r.product_name, r.excerpt].filter(Boolean).join('\n').trim(),
-    'title, product_name, excerpt',
-  )
-  const guides = await backfill(
-    'guides',
-    (g) => [g.title, g.excerpt].filter(Boolean).join('\n').trim(),
-    'title, excerpt',
-  )
+  console.log(FORCE ? 'FORCE — re-embedding every approved+visible row' : 'filling null embeddings only')
+  const reviews = await backfill('reviews', reviewText, REVIEW_COLS)
+  const guides = await backfill('guides', guideText, GUIDE_COLS)
   console.log(`Backfill complete — reviews embedded: ${reviews}, guides embedded: ${guides}`)
 }
 
