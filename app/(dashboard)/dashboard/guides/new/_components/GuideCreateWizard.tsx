@@ -498,8 +498,9 @@ export function GuideCreateWizard() {
               </span>
               <span className="block text-xs text-prose-faint mt-0.5 leading-snug">
                 For philosophical and moral discussion — meaning, purpose, faith and doubt, the existence of God.
-                Student-first and Socratic: reasons out loud, steelmans the other side, ends on a sharper question.
-                Drops the gear pillars, the forced action-item takeaways, and all affiliate links.
+                Humble in posture, decisive in substance: reasons out loud, engages the other side fairly,
+                then commits to a best answer. Drops the gear pillars, the forced action-item takeaways,
+                and all affiliate links.
               </span>
             </span>
           </label>

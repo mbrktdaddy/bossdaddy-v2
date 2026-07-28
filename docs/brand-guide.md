@@ -128,14 +128,16 @@ Declarative is for **display moments only** — heroes, taglines, creed, sign-of
 
 *Inquiry register — philosophical & moral discussion (scoped exception)*
 - **What it's for:** meaning and purpose, faith and doubt, the existence of God, death and grief, duty, conscience, what a life is for, what we're handing our kids. It is the house default for **Table Duty** and **Watch Duty**, and it can be switched on for any pillar when a piece has earned it (a Health & Wellness essay on grief and faith wants it).
-- These pieces **invert** the default posture. Do NOT write them in the confident, verdict-first reviewer voice — that reads as an abrasive hot take, exactly what this register must avoid.
-- Write **student-first**: an imperfect dad still learning, passionate but humble. "Here's what I'm seeing and the questions it raises," not "here's the answer." That's the opening posture, not a disclaimer bolted on at the end.
-- Format is **discussion / thought-experiment**, not declarative verdict. Take a position when you have one, but arrive at it as the visible conclusion of reasoning the reader can follow — and disagree with.
-- **Steelman before you answer.** Name the strongest opposing view in its best form, from someone who actually holds it, before you say why you land elsewhere.
-- Prefer ending on a sharper question over a tidy conclusion. A piece that leaves the reader thinking has done its job; one that closes the subject has not.
-- **Suspended here:** the four gear content pillars (Practical Win / Family Proof / Honest Assessment / Value Play) and affiliate links. Never force a "practical takeaway" onto a moral or metaphysical question — the value delivered is clearer thinking, not a checklist.
-- **Relaxed here:** the hedge-word ban. Honest uncertainty is the point ("I might be wrong", "I don't know"). Vagueness is still banned — be specific about *what* you're uncertain about.
-- Faith is **lived, not preached** — doubt gets the same honest airtime as belief, and a genuine question never gets closed with a verse as though that settled it.
+- **The balance is humble in posture, decisive in substance.** Both halves are load-bearing, and the failure modes run in both directions: the abrasive verdict-first hot take on one side, the wishy-washy survey that never commits on the other. The second is the easier mistake to make here.
+- Write **student-first**: an imperfect dad thinking it through out loud, not a man handing down the verdict. Show the reasoning so the reader can follow it and disagree.
+- **But land it.** Make a real attempt at an answer — a position, an explanation, a way of thinking that actually helps. Humility governs how you *hold* a conclusion; it is not permission to avoid reaching one. A piece that circles a question and walks away has failed the reader. A closing question is welcome *after* the answer, never instead of it.
+- **Use what's already known.** Philosophy, theology, psychology, history and hard-won common sense have serious answers to most of these questions. Bring them, say where the weight of thoughtful opinion sits, and name which view convinces you. Don't reason from scratch on a question people have worked on for millennia.
+- Engage the **strongest** version of the opposing view, never a strawman — then say why you still land where you land.
+- Honest uncertainty is allowed but it isn't the deliverable. "I don't know" earns its place attached to what you *do* think — name the specific unsettled piece rather than hedging the whole essay.
+- **Suspended here:** the four gear content pillars (Practical Win / Family Proof / Honest Assessment / Value Play) and affiliate links. Don't force a gear-style action item onto a moral question — what you owe the reader is clearer thinking.
+- **Relaxed here:** the hedge-word ban, for the purpose above. Vagueness is still banned.
+- Faith is **lived, not preached** — no sermonizing, no judging another man's walk. It can absolutely be where you land; show the reasoning that got you there rather than letting a verse stand in for it. Doubt gets honest airtime too.
+- **Weight varies with the subject** — some pieces are hard-won life lessons, others are genuinely fun thought experiments. Match it.
 - No partisan cheerleading, no personal attacks. Every piece answers one question: **why does this matter at the family table?** (fathers, family, faith, the next generation).
 - Warm Protector mode still auto-engages on vulnerability (loss, mental health, struggling dads); the rest of the banlist still applies.
 - **Table Duty** = timeless conversation; **Watch Duty** = timely, with a freshness window (weeks, then archive or grow into a Table Duty essay). Same register for both. Scope + boundaries: `docs/pillar-taxonomy.md`.

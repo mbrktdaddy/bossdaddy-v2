@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
   const inquiryHeader = inquiry
     ? `INQUIRY MODE: ON
 
-This piece runs in the inquiry register (student-first, Socratic — see your system prompt). Preserving it outranks tidiness: do not flatten the humility, close the open questions, cut the steelmanned objections, or convert the reasoning into a verdict. Do not add practical takeaways, action items or product recommendations. If the instruction below would strip the register, honor what it is actually asking for while keeping the register intact.
+This piece runs in the inquiry register (see your system prompt): humble in posture, decisive in substance. Keep the visible reasoning and the honest treatment of opposing views — but also keep it committed to an answer. Don't flatten it into a hedge, and don't flatten it into a verdict handed down without reasoning. Do not add practical takeaways, action items or product recommendations.
 
 `
     : ''

@@ -160,8 +160,8 @@ const INQUIRY_CONFIG: Record<PieceType, Pick<
     label: 'personal essay',
     structure: `STRUCTURE (personal essay, inquiry register — narrative, first-person, thinking out loud):
 - Introduction: open inside the real moment, memory or conversation that put this question in front of you. Name the question plainly. No throat-clearing, no "in this article".
-- Sections: 4–7 flowing sections that move the thinking forward — each should be a genuine step in the reasoning, not a restatement. At least one section must steelman the strongest view opposed to where you land. Each 150–300 words of prose; let paragraphs breathe.
-- Conclusion: 1–2 paragraphs that say honestly where you've landed and what you still don't know. End on the question that remains, not a bow on top.
+- Sections: 4–7 flowing sections that move the thinking forward — each a genuine step in the reasoning, not a restatement. Somewhere in there, give the strongest opposing view a fair hearing. Each 150–300 words of prose; let paragraphs breathe.
+- Conclusion: 1–2 paragraphs that commit to your best answer and say plainly why you find it convincing. Be honest about any piece that stays unsettled, but don't end on a shrug.
 - Separate paragraphs within each section with \\n\\n`,
     contentBlocks: '',
     fieldGuidanceBlocks: '',
@@ -170,26 +170,26 @@ const INQUIRY_CONFIG: Record<PieceType, Pick<
     label: 'short discussion piece',
     structure: `STRUCTURE (short discussion, inquiry register — tight but honest):
 - Introduction: 2–3 sentences naming the question and why it lands at the family table.
-- Sections: 3–5 sections, each 120–200 words, each one move in the thinking. One of them must give the strongest opposing view a fair hearing. Short paragraphs — a tired dad should be able to follow it on a phone.
-- Conclusion: 1–2 sentences with where you've landed, held honestly, or the question you're leaving open.
+- Sections: 3–5 sections, each 120–200 words, each one move in the thinking. One of them should give the strongest opposing view a fair hearing. Short paragraphs — a tired dad should be able to follow it on a phone.
+- Conclusion: 1–2 sentences committing to your best answer, held honestly.
 - Separate paragraphs within each section with \\n\\n`,
     contentBlocks: `CONTENT BLOCKS (required — these render as structured UI elements, not prose):
-- tldr: 2–3 sentences naming the question this piece wrestles with and where you land — or that you don't. Not a claim of conclusions the piece didn't earn.
-- keyTakeaways: 3–5 load-bearing ideas or distinctions worth sitting with. NOT action items — a moral question has no to-do list.`,
-    fieldGuidanceBlocks: ' tldr names the question and where you land (or don\'t); keyTakeaways are 3–5 ideas worth sitting with, not action items;',
+- tldr: 2–3 sentences naming the question and the answer you land on. Lead with the answer, not with the fact that it's complicated.
+- keyTakeaways: 3–5 load-bearing ideas, distinctions or conclusions worth carrying away. These can absolutely include what you decided — they just aren't gear-style action items.`,
+    fieldGuidanceBlocks: ' tldr names the question and the answer you land on; keyTakeaways are 3–5 ideas or conclusions worth carrying away;',
   },
   guide: {
     label: 'long-form discussion piece',
     structure: `STRUCTURE (long-form discussion, inquiry register):
 - Introduction: 2–3 sentences that put the reader inside a real scenario where this question actually bites (first-person dad). Name the question.
-- Sections: 5–8 sections, each 200–350 words, each advancing the argument one real step — the tension, the distinctions that matter, where the easy answers break down. At least one full section must steelman the strongest opposing view before you answer it. Do not force a practical takeaway onto a section that doesn't have one.
-- Conclusion: 1–2 paragraphs saying where you've landed and what you still hold loosely. End on the sharper question, not a summary.
+- Sections: 5–8 sections, each 200–350 words, each advancing the argument one real step — the tension, the distinctions that matter, what the best thinking on this already establishes, where the easy answers break down. One section should give the strongest opposing view a fair hearing before you answer it. Sections don't need a practical takeaway, but they do need to get somewhere.
+- Conclusion: 1–2 paragraphs committing to your best answer and why you find it convincing, plus an honest note on whatever genuinely stays open. A sharper closing question is welcome after that, not in place of it.
 - Separate paragraphs within each section with \\n\\n`,
     contentBlocks: `CONTENT BLOCKS (required — these render as structured UI elements, not prose):
-- tldr: 2–3 sentences naming the question this piece wrestles with and where you land — or that you don't. Not a claim of conclusions the piece didn't earn.
-- keyTakeaways: 3–5 load-bearing ideas, distinctions or reframes worth sitting with. NOT action items — a moral or metaphysical question has no to-do list.
-- faqs: 3–5 honest objections a thoughtful reader would raise, each written in its strongest form and answered without dodging. Phrase them the way a sharp friend would actually push back, not the way a marketer would set up a softball.`,
-    fieldGuidanceBlocks: ' tldr names the question and where you land (or don\'t); keyTakeaways are 3–5 ideas worth sitting with, not action items; faqs are 3–5 strongest-form objections with honest answers;',
+- tldr: 2–3 sentences naming the question and the answer you land on. Lead with the answer, not with the fact that it's complicated.
+- keyTakeaways: 3–5 load-bearing ideas, distinctions, reframes or conclusions worth carrying away. These can absolutely include what you decided — they just aren't gear-style action items.
+- faqs: 3–5 honest objections a thoughtful reader would raise, each in its strongest form and answered with an actual answer. Phrase them the way a sharp friend would push back, not the way a marketer sets up a softball.`,
+    fieldGuidanceBlocks: ' tldr names the question and the answer you land on; keyTakeaways are 3–5 ideas or conclusions worth carrying away; faqs are 3–5 strongest-form objections, each given a real answer;',
   },
 }
 
@@ -254,7 +254,7 @@ export async function POST(request: NextRequest) {
   const inquiryHeader = inquiry
     ? `INQUIRY MODE: ON
 
-This is a discussion piece, not a gear piece. Apply the INQUIRY REGISTER from your system prompt: student-first and humble, reason out loud so the reader can follow and disagree, give the strongest opposing view a fair hearing, and leave them with a sharper question rather than a closed subject. The gear CONTENT PILLARS are suspended, honest uncertainty is allowed, and there are no product links in this piece.
+This is a discussion piece, not a gear piece. Apply the INQUIRY REGISTER from your system prompt: humble in posture, decisive in substance. Reason out loud so the reader can follow and disagree, give the strongest opposing view a fair hearing — and then commit to your best answer. Draw on what philosophy, theology, psychology and plain hard-won experience already establish here; say where thoughtful opinion lands and which view convinces you. Honest uncertainty about a specific piece is fine; hedging the whole essay is not. The gear CONTENT PILLARS are suspended and there are no product links in this piece.
 
 `
     : ''
