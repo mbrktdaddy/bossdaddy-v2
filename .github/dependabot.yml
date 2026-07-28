@@ -23,8 +23,14 @@ updates:
       # Listed FIRST so these packages land here rather than in the group below.
       ai-sdk:
         patterns:
+          # Listed EXPLICITLY, not as "@ai-sdk/*". The wildcard did not match the
+          # scoped packages: the first run after grouping still produced `ai`
+          # grouped (#76) but @ai-sdk/anthropic (#77) and @ai-sdk/xai (#78) as
+          # separate, individually-unmergeable PRs. Add any new @ai-sdk/* package
+          # to this list by name.
           - "ai"
-          - "@ai-sdk/*"
+          - "@ai-sdk/anthropic"
+          - "@ai-sdk/xai"
         update-types: ["minor", "patch", "major"]
       # Batch low-risk bumps into one PR to keep review load sane for a solo op.
       minor-and-patch:

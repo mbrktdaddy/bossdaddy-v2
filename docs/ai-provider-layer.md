@@ -75,6 +75,53 @@ Temperature is set per call site, not per bucket, because it tracks the *task* r
 
 Anything left unset inherits the provider default (~1.0), which is why the deterministic lanes above are now explicit.
 
+## AI SDK v7 upgrade — assessed 2026-07-27, deliberately deferred
+
+**The three packages are interlocked and must move as one PR.** `ai`,
+`@ai-sdk/anthropic` and `@ai-sdk/xai` share a transitive `@ai-sdk/provider-utils`.
+Bumping any one alone splits that tree and breaks `lib/ai/research.ts` with the
+SharedV4-vs-V3 type errors documented under *Research bucket* below:
+
+| | `@ai-sdk/provider` | `provider-utils` |
+|---|---|---|
+| current (`ai@6.0.230`, anthropic 3.x, xai 3.x) | 3.0.14 | 4.0.40 |
+| v7 (`ai@7`, anthropic 4.x, xai 4.x) | 4.0.3 | 5.0.12 |
+
+Dependabot's default is one PR per major, which produced three individually
+unmergeable PRs (#68/#69/#70, then #76/#77/#78). Fixed at the source: the
+`ai-sdk` group in `.github/dependabot.yml` batches them **including majors**, with
+the packages listed by name — the `@ai-sdk/*` wildcard did **not** match the
+scoped packages.
+
+**Assessment result — it looked clean.** Installed together
+(`ai@7.0.38` / `@ai-sdk/anthropic@4.0.22` / `@ai-sdk/xai@4.0.19`) the tree
+resolved on `provider-utils@5.0.13` and:
+
+- `tsc --noEmit` — 0 errors
+- `next build` — compiled (the check that matters; bare `tsc` resolves export
+  conditions differently and has passed on a build that then failed)
+- 135 unit tests, eslint — green
+- `npm run ai:smoke` — live `generateObject` through the gateway ✓
+- `npm run ai:research-smoke` — provider-native web search + `Output.object` ✓
+- `npm run embed:smoke`, `npm run hybrid:smoke` ✓
+- `npm run boss:eval` — **10/11**, one failure not diagnosed
+
+**Deferred anyway.** Not because of that failure — the golden eval has known
+run-to-run variance (10/11 at PR #52, 11/11 on identical code the same day), so it
+is probably noise. Deferred because a major bump across `lib/ai`, the concierge and
+the content money path buys **nothing user-facing**, and it landed at the end of a
+churn-heavy day. No feature, no fix, no speed — just currency.
+
+**When the grouped PR arrives, this is the checklist:**
+
+1. `npm ci && npm run check && npm run build` — build, not just `tsc`.
+2. `npm run boss:eval` **twice** — confirm any failure is variance, not a regression.
+3. `npm run ai:research-smoke` — the highest-risk path; v7 is precisely where the
+   provider-executed web-search tool typings changed.
+4. Check whether the two `as unknown as Tool` casts in `lib/ai/research.ts` are
+   still needed. They exist only to bridge the v6/v7 declaration skew, so v7 may
+   let them be deleted — verify with `next build`, not `tsc`.
+
 ## Auth
 
 Gateway auth resolves in order: `AI_GATEWAY_API_KEY` (static, for CI/local) → `VERCEL_OIDC_TOKEN` (default on Vercel; `vercel env pull` locally, ~24h TTL). No provider keys are handled in `lib/ai/`. The legacy `ANTHROPIC_API_KEY` is only used by not-yet-migrated call sites still on `lib/claude/client.ts`.
