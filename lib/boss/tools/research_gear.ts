@@ -6,12 +6,17 @@ import { checkRateLimit } from '@/lib/rate-limit'
 import { CATEGORY_SLUGS } from '@/lib/categories'
 import type { BossTool, Citation } from '../types'
 
-// A (gap fallback) — Decide & Buy when there is NO tested pick. This is the
-// second-class lane: search_gear (hands-on, tested) is always tried first; only
-// when it returns nothing does The Boss escalate here. The output is EXPLICITLY
-// "researched, not tested" — no Boss rating, sources always shown. We reuse the
-// Specs-Grade methodology (Anthropic native web_search + cited sources +
-// abstain) so this is our research, not generic ChatGPT-with-Amazon-links.
+// Decide & Buy — the RESEARCHED lane, always second-class to the tested vault.
+// search_gear (hands-on, rated) runs first and always leads. This tool escalates in
+// TWO cases: search_gear found nothing, or it found something NARROWER than the
+// question (a plural "best X", a brand or category sweep against one tested item).
+// That second case is why "we only tested one" is never the whole answer.
+//
+// The output is EXPLICITLY "researched, not tested" — no Boss rating, sources always
+// shown. We reuse the Specs-Grade methodology (provider-native web search + cited
+// sources + prompt abstain), so this is our research, not ChatGPT-with-Amazon-links.
+// The search provider follows the `research` bucket: Grok Live Search when
+// AI_MODEL_RESEARCH points at an xai slug, Anthropic web search otherwise.
 //
 // Cost control: web_search is the priciest call in the stack. This tool is
 // member-gated (minTier 'free') and carries its own tight per-user rate key on
@@ -19,7 +24,7 @@ import type { BossTool, Citation } from '../types'
 // promptly on niche queries (it 504'd on specs-grade before that guardrail).
 
 const MAX_PICKS = 5
-const WEB_SEARCH_MAX_USES = 4
+const WEB_SEARCH_MAX_USES = 3
 
 const RESEARCH_SYSTEM = `You research consumer gear for "Boss Daddy", an affiliate site for dads. The founder has NOT field-tested the item the user is asking about, so you build a SHORTLIST FROM RESEARCH ONLY — clearly second-class to his hands-on reviews. You are judged on honesty and real sourcing, never generosity.
 
@@ -423,14 +428,40 @@ Research 3-5 currently-available products that fit this, spanning price tiers, a
         search: { maxUses: WEB_SEARCH_MAX_USES },
         maxSteps: WEB_SEARCH_MAX_USES + 3,
         maxOutputTokens: 4000,
-        maxRetries: 3,
+        // ── WALL-CLOCK BUDGET (this runs INSIDE a live chat turn) ──
+        // The route caps the whole turn at maxDuration 200s, and this tool is only
+        // one step in it: search_gear runs before, and the concierge still has to
+        // write the answer after. Measured un-bounded, this call pushed a
+        // thin-coverage turn past 180s and timed the turn out.
+        //
+        // So: ONE bounded attempt, and no Claude re-run on a transient error.
+        //   120s cap + no SDK retry + no transient fallback  →  ≤ ~120s here,
+        //   leaving ~80s under the 200s route cap for search_gear + synthesis
+        //   (synthesis measured ~16s).
+        //
+        // maxRetries 0, not radar's 1: radar has a 300s cron budget and can afford a
+        // second attempt. Here a retry doubles the worst case, and the thing it would
+        // be retrying ("this took too long") is not something a retry fixes.
+        //
+        // ⚠️ The right VALUE depends on which provider serves the research bucket,
+        // which is still an open decision. Measured locally against the bucket
+        // DEFAULT (Anthropic web search) the call exceeded both 90s and 140s and
+        // degraded. Production runs Grok (AI_MODEL_RESEARCH=xai/grok-4.5) and is NOT
+        // yet measured. 120s is chosen to be safe under the route cap either way —
+        // retune once the interactive lane's search provider is settled.
+        timeout: 120_000,
+        maxRetries: 0,
+        retryOnTransient: false,
       })
       out = res.object
     } catch {
+      // DEGRADE, don't fail the turn. The concierge may already be holding a tested
+      // pick from search_gear (the thin-coverage path), so the honest answer is
+      // still a good one — tell it to lead with what it has rather than apologize.
       return {
         content: JSON.stringify({
           picks: [],
-          note: "The research desk hit a snag (live web search). Tell the user honestly and offer to bench it for testing or try again shortly.",
+          note: "The research desk came up empty this time (live web search timed out). Do NOT stall or apologize at length: if you already have a tested pick, lead with it and give useful general context on the category from your own knowledge, noting the wider lineup isn't researched right now. Offer to bench it for testing.",
         }),
       }
     }

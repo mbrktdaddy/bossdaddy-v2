@@ -117,6 +117,17 @@ export async function aiResearch<T>(opts: {
   maxRetries?: number
   /** Per-call wall-clock cap (ms) — radar bounds this tightly under the cron cap. */
   timeout?: number
+  /**
+   * Whether a TRANSIENT provider error (timeout/overload/rate_limit/budget) should
+   * be retried once on Claude. Default true, which is right for BACKGROUND callers
+   * (specs-grade, radar) that would rather wait than come back empty.
+   *
+   * INTERACTIVE callers should set this false. The retry is a second full research
+   * call, so it roughly doubles worst-case wall clock — and the thing it is retrying
+   * is usually "this took too long," which the retry cannot fix. On a live chat turn
+   * a fast degraded answer beats a slow complete one.
+   */
+  retryOnTransient?: boolean
 }): Promise<AiResearchResult<T>> {
   const { model, fallback } = resolveModel('research')
   const search = opts.search ?? {}
@@ -151,6 +162,7 @@ export async function aiResearch<T>(opts: {
     // App-level failover: retry once on Claude + Anthropic search for a transient
     // provider error. `fallback` is non-empty only when the primary wasn't Claude.
     const { kind, detail } = classifyClaudeError(err)
+    if (opts.retryOnTransient === false) throw err
     if (fallback.length && FALLBACK_KINDS.has(kind)) {
       console.warn(`aiResearch[${opts.tag}]: ${model} failed (${kind}: ${detail}) — falling back to ${fallback[0]}`)
       return await run(fallback[0])
