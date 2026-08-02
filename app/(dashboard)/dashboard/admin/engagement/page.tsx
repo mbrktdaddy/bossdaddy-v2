@@ -21,6 +21,24 @@ interface ContentRow {
   click_count: number
 }
 
+type Metrics = {
+  view_count: number
+  scroll_25_count: number
+  scroll_50_count: number
+  scroll_75_count: number
+  scroll_100_count: number
+}
+
+// Content that has never been viewed has no metrics row yet — read it as zeros
+// rather than letting nulls leak into the totals and completion-rate maths.
+const ZERO_METRICS: Metrics = {
+  view_count: 0,
+  scroll_25_count: 0,
+  scroll_50_count: 0,
+  scroll_75_count: 0,
+  scroll_100_count: 0,
+}
+
 export default async function EngagementPage() {
   await requireAdmin()
 
@@ -32,12 +50,21 @@ export default async function EngagementPage() {
     { data: clicks },
     { data: recentClicks },
   ] = await Promise.all([
+    // Counters live in {guide,review}_metrics since migration 131 — keeping them
+    // on the content row meant every view tripped `touch_updated_at` and rewrote
+    // `updated_at`, which poisoned og:image cache-busting and sitemap
+    // lastModified. The embed is one-to-one (the content id is the metrics PK),
+    // so PostgREST returns an object, not an array. Null = never viewed.
+    //
+    // These select strings must stay inline STRING LITERALS — supabase-js parses
+    // them at the type level, and interpolating a helper collapses the result to
+    // ParserError.
     admin.from('guides')
-      .select('id, title, slug, category, view_count, scroll_25_count, scroll_50_count, scroll_75_count, scroll_100_count, published_at')
+      .select('id, title, slug, category, published_at, guide_metrics(view_count, scroll_25_count, scroll_50_count, scroll_75_count, scroll_100_count)')
       .eq('status', 'approved')
       .eq('is_visible', true),
     admin.from('reviews')
-      .select('id, title, slug, category, view_count, scroll_25_count, scroll_50_count, scroll_75_count, scroll_100_count, published_at')
+      .select('id, title, slug, category, published_at, review_metrics(view_count, scroll_25_count, scroll_50_count, scroll_75_count, scroll_100_count)')
       .eq('status', 'approved')
       .eq('is_visible', true),
     admin.from('affiliate_clicks')
@@ -59,18 +86,30 @@ export default async function EngagementPage() {
     }
   }
 
+  // Flatten the embedded metrics back onto the row so the table markup below —
+  // and ContentRow itself — stay exactly as they were.
+  type Embedded = Omit<ContentRow, 'type' | 'click_count' | keyof Metrics> &
+    { guide_metrics?: Metrics | null; review_metrics?: Metrics | null }
+
+  const flatten = (
+    row: Embedded,
+    type: 'guide' | 'review',
+    clickKey: string,
+  ): ContentRow => {
+    const { guide_metrics, review_metrics, ...rest } = row
+    return {
+      ...rest,
+      ...(guide_metrics ?? review_metrics ?? ZERO_METRICS),
+      type,
+      click_count: clicksByContent.get(clickKey) ?? 0,
+    }
+  }
+
   const rows: ContentRow[] = [
-    ...((articles ?? []) as Omit<ContentRow, 'type' | 'click_count'>[]).map((a) => ({
-      ...a,
-      type: 'guide' as const,
-      click_count: clicksByContent.get(`article:${a.id}`) ?? 0,
-    })),
-    ...((reviews ?? []) as Omit<ContentRow, 'type' | 'click_count'>[]).map((r) => ({
-      ...r,
-      type: 'review' as const,
-      click_count: clicksByContent.get(`review:${r.id}`) ?? 0,
-    })),
-  ].sort((a, b) => (b.view_count ?? 0) - (a.view_count ?? 0))
+    // affiliate_clicks still stores guides under the pre-rename 'article' key.
+    ...((articles ?? []) as Embedded[]).map((a) => flatten(a, 'guide', `article:${a.id}`)),
+    ...((reviews ?? []) as Embedded[]).map((r) => flatten(r, 'review', `review:${r.id}`)),
+  ].sort((a, b) => b.view_count - a.view_count)
 
   // Aggregate totals
   const totalViews = rows.reduce((s, r) => s + (r.view_count ?? 0), 0)

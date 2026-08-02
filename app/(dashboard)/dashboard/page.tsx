@@ -17,8 +17,10 @@ export default async function DashboardHome() {
     { count: mediaCount },
     { data: latestPendingComments },
   ] = await Promise.all([
-    admin.from('guides').select('id, title, slug, category, status, moderation_score, moderation_flags, created_at, view_count, published_at, image_url').order('created_at', { ascending: false }).limit(300),
-    admin.from('reviews').select('id, title, slug, category, status, moderation_score, moderation_flags, created_at, view_count, published_at, image_url').order('created_at', { ascending: false }).limit(300),
+    // view_count moved to {guide,review}_metrics in migration 131 — one-to-one
+    // embed, so it comes back as an object (null until first view).
+    admin.from('guides').select('id, title, slug, category, status, moderation_score, moderation_flags, created_at, published_at, image_url, guide_metrics(view_count)').order('created_at', { ascending: false }).limit(300),
+    admin.from('reviews').select('id, title, slug, category, status, moderation_score, moderation_flags, created_at, published_at, image_url, review_metrics(view_count)').order('created_at', { ascending: false }).limit(300),
     admin.from('comments').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
     admin.from('media_assets').select('id', { count: 'exact', head: true }),
     admin.from('comments').select('id, body, created_at, profiles(username)').eq('status', 'pending').order('created_at', { ascending: false }).limit(1),
@@ -66,14 +68,14 @@ export default async function DashboardHome() {
   const topPerformers = [
     ...articlesTyped.filter((a) => a.status === 'approved').map((a) => ({
       id: a.id, title: a.title, slug: (a as unknown as { slug: string }).slug, category: a.category,
-      view_count: (a as unknown as { view_count: number | null }).view_count,
+      view_count: (a as unknown as { guide_metrics: { view_count: number } | null }).guide_metrics?.view_count ?? 0,
       image_url: (a as unknown as { image_url: string | null }).image_url,
       type: 'guide' as const,
       published_at: (a as unknown as { published_at: string | null }).published_at,
     })),
     ...reviewsTyped.filter((r) => r.status === 'approved').map((r) => ({
       id: r.id, title: r.title, slug: (r as unknown as { slug: string }).slug, category: r.category,
-      view_count: (r as unknown as { view_count: number | null }).view_count,
+      view_count: (r as unknown as { review_metrics: { view_count: number } | null }).review_metrics?.view_count ?? 0,
       image_url: (r as unknown as { image_url: string | null }).image_url,
       type: 'review' as const,
       published_at: (r as unknown as { published_at: string | null }).published_at,

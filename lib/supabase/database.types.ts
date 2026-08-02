@@ -823,6 +823,47 @@ export type Database = {
           },
         ]
       }
+      guide_metrics: {
+        Row: {
+          created_at: string
+          guide_id: string
+          last_viewed_at: string | null
+          scroll_100_count: number
+          scroll_25_count: number
+          scroll_50_count: number
+          scroll_75_count: number
+          view_count: number
+        }
+        Insert: {
+          created_at?: string
+          guide_id: string
+          last_viewed_at?: string | null
+          scroll_100_count?: number
+          scroll_25_count?: number
+          scroll_50_count?: number
+          scroll_75_count?: number
+          view_count?: number
+        }
+        Update: {
+          created_at?: string
+          guide_id?: string
+          last_viewed_at?: string | null
+          scroll_100_count?: number
+          scroll_25_count?: number
+          scroll_50_count?: number
+          scroll_75_count?: number
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guide_metrics_guide_id_fkey"
+            columns: ["guide_id"]
+            isOneToOne: true
+            referencedRelation: "guides"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guide_tags: {
         Row: {
           guide_id: string
@@ -878,17 +919,12 @@ export type Database = {
           reading_time_minutes: number | null
           rejection_reason: string | null
           scheduled_publish_at: string | null
-          scroll_100_count: number
-          scroll_25_count: number
-          scroll_50_count: number
-          scroll_75_count: number
           search_vector: unknown
           slug: string
           status: string
           title: string
           tldr: string | null
           updated_at: string | null
-          view_count: number
         }
         Insert: {
           author_id: string
@@ -914,17 +950,12 @@ export type Database = {
           reading_time_minutes?: number | null
           rejection_reason?: string | null
           scheduled_publish_at?: string | null
-          scroll_100_count?: number
-          scroll_25_count?: number
-          scroll_50_count?: number
-          scroll_75_count?: number
           search_vector?: unknown
           slug: string
           status?: string
           title: string
           tldr?: string | null
           updated_at?: string | null
-          view_count?: number
         }
         Update: {
           author_id?: string
@@ -950,17 +981,12 @@ export type Database = {
           reading_time_minutes?: number | null
           rejection_reason?: string | null
           scheduled_publish_at?: string | null
-          scroll_100_count?: number
-          scroll_25_count?: number
-          scroll_50_count?: number
-          scroll_75_count?: number
           search_vector?: unknown
           slug?: string
           status?: string
           title?: string
           tldr?: string | null
           updated_at?: string | null
-          view_count?: number
         }
         Relationships: [
           {
@@ -2040,6 +2066,47 @@ export type Database = {
         }
         Relationships: []
       }
+      review_metrics: {
+        Row: {
+          created_at: string
+          last_viewed_at: string | null
+          review_id: string
+          scroll_100_count: number
+          scroll_25_count: number
+          scroll_50_count: number
+          scroll_75_count: number
+          view_count: number
+        }
+        Insert: {
+          created_at?: string
+          last_viewed_at?: string | null
+          review_id: string
+          scroll_100_count?: number
+          scroll_25_count?: number
+          scroll_50_count?: number
+          scroll_75_count?: number
+          view_count?: number
+        }
+        Update: {
+          created_at?: string
+          last_viewed_at?: string | null
+          review_id?: string
+          scroll_100_count?: number
+          scroll_25_count?: number
+          scroll_50_count?: number
+          scroll_75_count?: number
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_metrics_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: true
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_tags: {
         Row: {
           review_id: string
@@ -2115,10 +2182,6 @@ export type Database = {
           score_quality: number | null
           score_specs: number | null
           score_value: number | null
-          scroll_100_count: number
-          scroll_25_count: number
-          scroll_50_count: number
-          scroll_75_count: number
           search_vector: unknown
           slug: string
           specs_grade_data: Json
@@ -2132,7 +2195,6 @@ export type Database = {
           tldr: string | null
           updated_at: string | null
           verdict_change: string | null
-          view_count: number
           would_rebuy: boolean | null
         }
         Insert: {
@@ -2179,10 +2241,6 @@ export type Database = {
           score_quality?: number | null
           score_specs?: number | null
           score_value?: number | null
-          scroll_100_count?: number
-          scroll_25_count?: number
-          scroll_50_count?: number
-          scroll_75_count?: number
           search_vector?: unknown
           slug: string
           specs_grade_data?: Json
@@ -2196,7 +2254,6 @@ export type Database = {
           tldr?: string | null
           updated_at?: string | null
           verdict_change?: string | null
-          view_count?: number
           would_rebuy?: boolean | null
         }
         Update: {
@@ -2243,10 +2300,6 @@ export type Database = {
           score_quality?: number | null
           score_specs?: number | null
           score_value?: number | null
-          scroll_100_count?: number
-          scroll_25_count?: number
-          scroll_50_count?: number
-          scroll_75_count?: number
           search_vector?: unknown
           slug?: string
           specs_grade_data?: Json
@@ -2260,7 +2313,6 @@ export type Database = {
           tldr?: string | null
           updated_at?: string | null
           verdict_change?: string | null
-          view_count?: number
           would_rebuy?: boolean | null
         }
         Relationships: [
@@ -3344,17 +3396,12 @@ export type Database = {
           reading_time_minutes: number | null
           rejection_reason: string | null
           scheduled_publish_at: string | null
-          scroll_100_count: number
-          scroll_25_count: number
-          scroll_50_count: number
-          scroll_75_count: number
           search_vector: unknown
           slug: string
           status: string
           title: string
           tldr: string | null
           updated_at: string | null
-          view_count: number
         }[]
         SetofOptions: {
           from: "*"
@@ -3417,10 +3464,6 @@ export type Database = {
           score_quality: number | null
           score_specs: number | null
           score_value: number | null
-          scroll_100_count: number
-          scroll_25_count: number
-          scroll_50_count: number
-          scroll_75_count: number
           search_vector: unknown
           slug: string
           specs_grade_data: Json
@@ -3434,7 +3477,6 @@ export type Database = {
           tldr: string | null
           updated_at: string | null
           verdict_change: string | null
-          view_count: number
           would_rebuy: boolean | null
         }[]
         SetofOptions: {
