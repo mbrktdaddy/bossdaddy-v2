@@ -185,7 +185,9 @@ export function ReviewDraftPreview({
         {/* Article body */}
         {content && (
           <div
-            className="prose prose-sm prose-zinc prose-orange max-w-none
+            /* prose-invert is load-bearing — plain prose-zinc makes headings
+               zinc-900 on a zinc-900 surface. See TiptapEditor. */
+            className="prose prose-sm prose-zinc prose-invert prose-orange max-w-none
               prose-headings:font-black prose-headings:font-sans prose-headings:tracking-tight
               prose-h2:text-base prose-h2:mt-6 prose-h2:mb-2
               prose-p:text-prose-muted prose-p:leading-relaxed prose-p:text-xs

@@ -256,34 +256,42 @@ export default async function GuidePage({ params }: Props) {
           </LightboxImage>
         )}
 
-        {/* Quick Take — the skimmer summary (guides.tldr). Warm accent box =
-            "the answer"; label is a real <h2> so search/AI overviews can extract
-            it as the summary section. Renders ONLY when the field has content,
-            so clearing it in the workspace removes it here. Sits ABOVE the
-            .bd-content wrapper, so this h2 never leaks into the TOC. */}
-        {guide.tldr && (
-          <div className="mb-6 bg-accent-tint border border-accent-border/40 rounded-xl p-5 sm:p-6">
-            <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-            <h2 className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Quick Take</h2>
-            <p className="text-prose leading-relaxed text-sm sm:text-base">{guide.tldr}</p>
-          </div>
-        )}
+        {/* Quick Take — ONE summary surface holding both registers: the tldr
+            paragraph (the 5-second answer) and the key_takeaways bullets (the
+            30-second skim). These were two stacked peer cards; as equal-weight
+            boxes above the body they read as the same job done twice. Merged,
+            they mirror the review VerdictCard's shape — prose first, structured
+            detail beneath a rule, one frame.
 
-        {/* Key Takeaways — the bullet list (guides.key_takeaways). Deliberately
-            styled as a NEUTRAL surface card (not accent-tint) so it reads as a
-            distinct element from the Quick Take above rather than a second warm
-            box. Label is a real <h2> for the same SEO reason as Quick Take. */}
-        {guideKeyTakeaways.length > 0 && (
-          <div className="mb-10 bg-surface border border-soft rounded-xl p-5 sm:p-6">
-            <h2 className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Key Takeaways</h2>
-            <ul className="space-y-2">
-              {guideKeyTakeaways.map((item, i) => (
-                <li key={i} className="flex items-start gap-2.5 text-sm text-prose-muted">
-                  <span className="text-accent-text mt-0.5 shrink-0">→</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
+            Both labels stay real <h2>s so search/AI overviews can still extract
+            each block separately. Either field alone renders fine (the rule only
+            appears when both are present), so clearing one in the workspace
+            degrades gracefully. Sits ABOVE the .bd-content wrapper, so neither
+            h2 leaks into the TOC. */}
+        {(guide.tldr || guideKeyTakeaways.length > 0) && (
+          <div className="mb-10 bg-accent-tint border border-accent-border/40 rounded-xl p-5 sm:p-6">
+            <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
+
+            {guide.tldr && (
+              <>
+                <h2 className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Quick Take</h2>
+                <p className="text-prose leading-relaxed text-sm sm:text-base">{guide.tldr}</p>
+              </>
+            )}
+
+            {guideKeyTakeaways.length > 0 && (
+              <div className={guide.tldr ? 'mt-5 border-t border-accent-border/30 pt-5' : ''}>
+                <h2 className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Key Takeaways</h2>
+                <ul className="space-y-2">
+                  {guideKeyTakeaways.map((item, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm text-prose-muted">
+                      <span className="text-accent-text mt-0.5 shrink-0">→</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
 

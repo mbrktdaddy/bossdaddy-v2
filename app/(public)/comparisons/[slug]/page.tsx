@@ -391,7 +391,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
                   <h2 className="text-2xl font-black text-prose leading-tight">What sets these apart</h2>
                 </div>
                 <div
-                  className="prose prose-zinc prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
+                  className="prose prose-zinc prose-invert prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
                   dangerouslySetInnerHTML={{ __html: comparison.intro_html }}
                 />
               </section>

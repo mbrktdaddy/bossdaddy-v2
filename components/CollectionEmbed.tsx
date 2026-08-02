@@ -98,7 +98,12 @@ export default async function CollectionEmbed({ slug }: Props) {
           {meta.eyebrow}
         </p>
         <Link href={finalHref} className="group inline-block">
-          <h3 className="text-xl sm:text-2xl font-black text-prose leading-snug group-hover:text-accent-text-soft transition-colors">
+          {/* data-toc-skip — same reason as ContentLinkCard: an embedded
+              collection's title is a link target, not a section of this guide. */}
+          <h3
+            data-toc-skip
+            className="text-xl sm:text-2xl font-black text-prose leading-snug group-hover:text-accent-text-soft transition-colors"
+          >
             {c.title}
           </h3>
         </Link>

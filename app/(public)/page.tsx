@@ -3,18 +3,21 @@ import Image from 'next/image'
 import { Suspense } from 'react'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getCategoryBySlug } from '@/lib/categories'
+import { CATEGORIES, getCategoryBySlug } from '@/lib/categories'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import EditorialHeader from '@/components/EditorialHeader'
 import ScoreBlock from '@/components/ScoreBlock'
 import DroppedCard from '@/components/DroppedCard'
 import GuideRow from '@/components/GuideRow'
+import LibraryGuideCard from '@/components/LibraryGuideCard'
+import VaultCard from '@/components/VaultCard'
 import EmailCaptureSection from '@/components/EmailCaptureSection'
 import HomeHero from '@/components/home/HomeHero'
 import { MerchStrip } from '@/components/MerchStrip'
 import CodeRedirect from './_components/CodeRedirect'
 import { buildSocialMetadata } from '@/lib/og'
 import { BRAND } from '@/lib/brand'
+import { LABELS } from '@/lib/labels'
 import type { Metadata } from 'next'
 
 interface Review {
@@ -40,6 +43,18 @@ interface Guide {
   reading_time_minutes: number | null
 }
 
+// Shape VaultCard consumes — it owns the per-type routing (/stacks, /comparisons,
+// /picks, /gifts/[occasion]), so `occasion` has to come along.
+interface VaultCollection {
+  slug: string
+  title: string
+  description: string | null
+  hero_image_url: string | null
+  collection_type: string
+  occasion: string | null
+  published_at: string | null
+}
+
 export const revalidate = 3600
 
 export function generateMetadata(): Metadata {
@@ -61,6 +76,55 @@ export function generateMetadata(): Metadata {
 // Bench items are ranked testing → queued → considering (mirrors BenchStrip).
 const BENCH_RANK: Record<string, number> = { testing: 0, queued: 1, considering: 2 }
 
+// The Library fills 9 slots in three descending weights: 1 lead split card, a
+// 3-up card grid, then 5 compact rows. The tiering is the cadence — nine guides
+// in one flat list reads as a wall, the same nine tiered reads as an edited page.
+//
+// 9 and not 12: with MAX_PER_TOPIC = 2 the eligible pool is the SUM of
+// min(guides, 2) per topic, and two topics currently hold a single guide each —
+// so the ceiling is 12 exactly. Filling 12 would consume the whole pool, making
+// the section a fixed set that reaches months back and undercuts its own
+// "Latest guides" eyebrow. 9 keeps 3 spare and stays genuinely recent.
+const LIBRARY_SLOTS = 9
+const LIBRARY_GRID_CARDS = 3
+const MAX_PER_TOPIC = 2
+
+// The Vault strip hides below this many live collections — a one-card strip reads
+// as broken rather than sparse.
+const VAULT_MIN_ITEMS = 2
+
+/**
+ * Newest-first pick that won't let a single topic own the section.
+ *
+ * Walks the feed in recency order and skips a guide once its topic already holds
+ * `maxPerTopic` slots. If the cap leaves the list short — a small or very lopsided
+ * library, where variety genuinely isn't available — the skipped guides go back in,
+ * still in recency order. A full section beats an honest but half-empty one, and
+ * that fallback can only trigger when there was no variety to find in the first place.
+ *
+ * Note the first pick is never displaced: counts start at zero, so `[0]` is always
+ * the newest guide in the feed. The hero's "New guide" motion item depends on that.
+ */
+function pickVariedByTopic(feed: Guide[], slots: number, maxPerTopic: number): Guide[] {
+  const perTopic = new Map<string, number>()
+  const picked: Guide[] = []
+  const skipped: Guide[] = []
+
+  for (const g of feed) {
+    const topic = g.category ?? '__uncategorized'
+    const held = perTopic.get(topic) ?? 0
+    if (held >= maxPerTopic) {
+      skipped.push(g)
+      continue
+    }
+    perTopic.set(topic, held + 1)
+    picked.push(g)
+    if (picked.length === slots) return picked
+  }
+
+  return picked.concat(skipped).slice(0, slots)
+}
+
 export default async function HomePage() {
   const supabase = createAnonClient()
   // Bench items (statuses testing/queued/considering) aren't publicly readable,
@@ -74,6 +138,8 @@ export default async function HomePage() {
     { data: recentRaw },
     { data: guidesRaw },
     { data: benchRaw },
+    { data: guideTopicRows },
+    { data: vaultRaw },
   ] = await Promise.all([
     supabase
       .from('reviews')
@@ -94,26 +160,60 @@ export default async function HomePage() {
       .limit(4),
     // Guides are the growth engine — pull a deeper set for the enlarged Library
     // section (one lead feature + a reading list).
+    //
+    // Fetches 3x the slots it fills. pickVariedByTopic() drops guides once a topic
+    // has hit its cap, so it needs a bench of replacements to promote — at exactly
+    // LIBRARY_SLOTS there is nothing to promote and the cap can only shorten the
+    // list. health-wellness alone is ~44% of the library, so without the surplus
+    // the section reliably came out as three topics across six slots.
     supabase
       .from('guides')
       .select('id, slug, title, category, excerpt, image_url, published_at, reading_time_minutes')
       .eq('status', 'approved').eq('is_visible', true)
       .order('published_at', { ascending: false })
-      .limit(6),
+      .limit(LIBRARY_SLOTS * 3),
     admin
       .from('products')
       .select('slug, title:name, status, priority')
       .in('status', ['testing', 'queued', 'considering'])
       .order('priority', { ascending: false })
       .limit(20),
+    // Topic chips need EVERY category with a live guide, which is a different
+    // question from "what are the newest guides" — so it gets its own query
+    // rather than being derived from the feed above. Deriving it from the feed is
+    // what hid 4 of 7 topics: grilling-cooking had 5 published guides and no chip,
+    // because none of them were in the 6 most recent. One column, so it stays cheap.
+    supabase
+      .from('guides')
+      .select('category')
+      .eq('status', 'approved').eq('is_visible', true),
+    // The Vault (picks / comparisons / gift guides / stacks) had NO homepage
+    // presence — a new stack was reachable only by nav or direct link. Safe on the
+    // anon client: collections_public_read is `to anon, authenticated` gated on
+    // is_visible, so this matches what a logged-out visitor can actually see.
+    // published_at is also required — is_visible alone would leak scheduled items.
+    supabase
+      .from('collections')
+      .select('slug, title, description, hero_image_url, collection_type, occasion, published_at')
+      .eq('is_visible', true)
+      .not('published_at', 'is', null)
+      .order('published_at', { ascending: false })
+      .limit(6),
   ])
 
   const featured: Review | null = (featuredHero as Review | null) ?? (topRatedOne as Review | null)
   const recent: Review[] = (recentRaw ?? []) as Review[]
-  const guides: Guide[] = (guidesRaw ?? []) as Guide[]
+  const guideFeed: Guide[] = (guidesRaw ?? []) as Guide[]
 
-  const leadGuide = guides[0] ?? null
-  const restGuides = guides.slice(1)
+  // Max 2 guides per topic across the Library's 6 slots. Straight recency filled it
+  // with 3 health-wellness pieces out of 6 — that one topic is ~44% of the library —
+  // so the section read as a single subject rather than a library.
+  const libraryGuides = pickVariedByTopic(guideFeed, LIBRARY_SLOTS, MAX_PER_TOPIC)
+  const leadGuide = libraryGuides[0] ?? null
+  const gridGuides = libraryGuides.slice(1, 1 + LIBRARY_GRID_CARDS)
+  const restGuides = libraryGuides.slice(1 + LIBRARY_GRID_CARDS)
+
+  const vaultItems = (vaultRaw ?? []) as VaultCollection[]
 
   // ── Hero "In Motion" band — real recent activity, not inventory counts.
   // Shows momentum (latest tested · next on the bench · newest guide) so the
@@ -127,16 +227,23 @@ export default async function HomePage() {
   if (benchItem) motion.push({ label: 'On the bench', title: benchItem.title, href: `/bench/${benchItem.slug}` })
   if (leadGuide) motion.push({ label: 'New guide', title: leadGuide.title, href: `/guides/${leadGuide.slug}` })
 
-  // Distinct guide topics (for the browse chips) — derived from what's live,
-  // deduped, linking to the guide-category listings.
-  const guideTopics = Array.from(
-    new Map(
-      guides
-        .map((g) => g.category)
-        .filter((c): c is string => Boolean(c))
-        .map((slug) => [slug, getCategoryBySlug(slug)?.label ?? slug] as const)
-    ).entries()
-  ).slice(0, 5)
+  // Topic chips — EVERY category holding at least one live guide, in lib/categories.ts
+  // taxonomy order. Taxonomy order (not guide count, not recency) so the row matches
+  // the nav and doesn't reshuffle between visits; these chips are wayfinding, and
+  // wayfinding that moves is worse than wayfinding that's imperfectly ranked.
+  //
+  // Labels come from the taxonomy rather than the row data, so a category rename can't
+  // leave a stale label stranded here. A slug with no taxonomy entry is dropped rather
+  // than rendered raw — mig 128 put categories behind an FK, so that shouldn't happen,
+  // and a chip reading "home-lifestyle" would be worse than one chip fewer.
+  const liveTopics = new Set(
+    ((guideTopicRows ?? []) as { category: string | null }[])
+      .map((r) => r.category)
+      .filter((c): c is string => Boolean(c)),
+  )
+  const guideTopics = CATEGORIES
+    .filter((c) => liveTopics.has(c.slug))
+    .map((c) => [c.slug, c.label] as const)
 
   return (
     <>
@@ -222,7 +329,7 @@ export default async function HomePage() {
         <section className="bg-surface border-b border-soft">
           <div className="max-w-6xl mx-auto px-6 py-12 md:py-16">
             <EditorialHeader
-              eyebrow="From the library"
+              eyebrow="Latest guides"
               title="The Library"
               right={{ label: 'All guides', href: '/guides' }}
             />
@@ -286,7 +393,17 @@ export default async function HomePage() {
               </div>
             </Link>
 
-            {/* Reading list — the rest */}
+            {/* Middle weight — 3-up card grid. Steps the section down from the
+                lead split card before it reaches the compact rows. */}
+            {gridGuides.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                {gridGuides.map((g) => (
+                  <LibraryGuideCard key={g.id} guide={g} />
+                ))}
+              </div>
+            )}
+
+            {/* Lightest weight — the reading list */}
             {restGuides.length > 0 && (
               <div className="mt-4">
                 {restGuides.map((g, i) => (
@@ -298,12 +415,38 @@ export default async function HomePage() {
         </section>
       )}
 
+      {/* ── THE VAULT — picks / comparisons / gift guides / stacks. Sits between
+            the Library and Just Dropped so the page runs widest-to-narrowest:
+            guides (deep reading) → collections (curated sets) → single reviews.
+            Hidden below VAULT_MIN_ITEMS because a one-card strip reads broken. ── */}
+      {vaultItems.length >= VAULT_MIN_ITEMS && (
+        <section className="border-b border-soft">
+          <div className="max-w-6xl mx-auto px-6 py-12 md:py-16">
+            <EditorialHeader
+              eyebrow="From the vault"
+              title={LABELS.vault.full}
+              right={{ label: `All ${LABELS.vault.short.toLowerCase()} items`, href: '/vault' }}
+            />
+            {/* The canonical tagline — LABELS.vault exists precisely so the metaphor
+                teaches itself wherever "Vault" lands cold, this strip included. */}
+            <p className="text-base text-prose-muted leading-[1.7] max-w-2xl -mt-2 mb-8">
+              {LABELS.vault.tagline}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {vaultItems.slice(0, 3).map((col) => (
+                <VaultCard key={`${col.collection_type}:${col.slug}`} col={col} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── JUST DROPPED — recent reviews grid ────────────────────────────── */}
       {recent.length > 0 && (
         <section className="border-b border-soft">
           <div className="max-w-6xl mx-auto px-6 py-12 md:py-16">
             <EditorialHeader
-              eyebrow="Fresh off the bench"
+              eyebrow="Latest reviews"
               title="Just dropped"
               right={{ label: 'All reviews', href: '/reviews' }}
             />
@@ -319,8 +462,13 @@ export default async function HomePage() {
         <div className="max-w-3xl mx-auto px-6 py-16 md:py-24 text-center">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-eyebrow mb-6">The mission</p>
           <blockquote className="font-editorial-display font-semibold text-prose text-2xl md:text-4xl leading-[1.3] tracking-tight">
-            {BRAND.creed}{' '}
-            <span className="text-accent">That&rsquo;s {BRAND.positioning}.</span>
+            {BRAND.creed}
+            {/* `block` (not a <br/> or a wrap-dependent trick) so the payoff line
+                lands on its own line at EVERY breakpoint — inline, it wrapped into
+                the creed and read as an accident. The preceding {' '} is gone on
+                purpose: a block element needs no inline separator, and leaving it
+                would trail a stray space at the end of the creed. */}
+            <span className="block text-accent mt-3 md:mt-4">That&rsquo;s {BRAND.positioning}.</span>
           </blockquote>
           <p className="mt-8 text-xs font-bold uppercase tracking-[0.16em] text-prose-faint">— The Boss</p>
         </div>

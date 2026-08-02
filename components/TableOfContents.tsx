@@ -33,7 +33,17 @@ export default function TableOfContents({ target = '.bd-content', minHeadings = 
     const el = document.querySelector(target)
     if (!el) return
 
-    const headings = Array.from(el.querySelectorAll('h2, h3')) as HTMLHeadingElement[]
+    // Only AUTHORED headings belong in the outline. Cards injected inline by
+    // splitContentForInlineCards (cross-links, collection embeds) render the
+    // linked item's title as an <h3>, so an unfiltered scan listed other
+    // articles as if they were sections of this guide.
+    //
+    // Opting out at the source with [data-toc-skip] rather than blacklisting
+    // card class names here: the TOC stays generic, and any future embed opts
+    // out the same way. `closest` covers both the heading itself carrying the
+    // attribute and any wrapper carrying it.
+    const headings = (Array.from(el.querySelectorAll('h2, h3')) as HTMLHeadingElement[])
+      .filter((h) => !h.closest('[data-toc-skip]'))
     const usedIds = new Set<string>()
     const collected: TocItem[] = []
 

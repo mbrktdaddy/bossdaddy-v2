@@ -199,6 +199,18 @@ export default function VerdictCard({
   )
 
   // ── Sidebar variant — sticky on XL, narrow column ──────────────────────────
+  // DELIBERATELY NOT a scale copy of the in-body card. At >=1280px both variants
+  // are on screen at once, so anything rendered in full here reads as the verdict
+  // stated twice. This rail carries only the DECISION + the ACTION — score, rebuy,
+  // buy button — so it stays useful at scroll depth without repeating the in-body
+  // card sitting 400px away.
+  //
+  // Two things are omitted on purpose; don't add them back:
+  //   - tldr: was line-clamp-3 here, and a truncated verdict statement is worse
+  //     than none. The full sentence lives in the in-body card.
+  //   - SubScoreBars: a comparison instrument. Four axes get read once, at full
+  //     width; shrunk into a 288px rail they're decoration.
+  // The props still arrive (call shape is uniform across variants) — unused here.
   if (variant === 'sidebar') {
     return (
       <section
@@ -213,18 +225,8 @@ export default function VerdictCard({
           {hasRebuy && <RebuyChip rebuy={wouldRebuy!} size="sm" />}
         </div>
 
-        {tldr && (
-          <p className="mt-4 line-clamp-3 text-xs leading-relaxed text-prose-muted">{tldr}</p>
-        )}
-
-        {hasSubScores && (
-          <div className="mt-4 border-t border-soft/60 pt-4">
-            <SubScoreBars scores={subScores!} size="sm" />
-          </div>
-        )}
-
         {product && (
-          <div className="mt-4">
+          <div className="mt-5">
             <ProductCtaButton product={product} size="sm" />
           </div>
         )}

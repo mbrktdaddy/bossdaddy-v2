@@ -459,9 +459,17 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
     editorProps: {
       attributes: {
         class: [
-          'prose prose-zinc prose-sm max-w-none',
+          // prose-invert is REQUIRED, not cosmetic. The editor surface is
+          // bg-surface (#18181b) and plain `prose-zinc` sets
+          // --tw-prose-headings to zinc-900 — the same #18181b. Headings render
+          // perfectly invisible. Every other element below has an explicit
+          // colour override, which is why only h2/h3/h4 ever disappeared.
+          // prose-invert flips the whole variable set (headings, captions,
+          // bullets, code, hr) in one token; the brand overrides after it still
+          // win. Matches the public pages, which already invert.
+          'prose prose-zinc prose-invert prose-sm max-w-none',
           'prose-headings:font-black prose-headings:font-sans prose-headings:tracking-tight',
-          'prose-h2:text-xl prose-h3:text-lg',
+          'prose-h2:text-xl prose-h3:text-lg prose-h4:text-base',
           'prose-a:text-accent-text-soft prose-a:no-underline',
           'prose-p:text-prose-muted prose-li:text-prose-muted',
           'prose-strong:text-prose prose-blockquote:border-accent',

@@ -755,7 +755,10 @@ export default async function ReviewPage({ params }: Props) {
         {/* ── Sidebar ───────────────────────────────────────────────────── */}
         <aside className="hidden xl:flex flex-col gap-4 w-72 shrink-0 sticky top-6 self-start">
 
-          {/* Quick Verdict — same VerdictCard component, sidebar variant */}
+          {/* Quick Verdict — same component, sidebar variant. This is a persistent
+              score + buy rail, NOT a second verdict: the variant deliberately drops
+              the tldr and the sub-score bars so nothing on screen at xl (where the
+              in-body card is also visible) is stated twice. See VerdictCard. */}
           <VerdictCard
             variant="sidebar"
             productName={review.product_name}

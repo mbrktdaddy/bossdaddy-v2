@@ -62,7 +62,13 @@ export default async function ContentLinkCard({ contentType, slug }: Props) {
           <p className="text-[10px] sm:text-xs text-accent-text-soft uppercase tracking-[0.2em] font-black mb-1.5">
             {eyebrow}
           </p>
-          <h3 className="text-base sm:text-lg font-black text-prose leading-snug group-hover:text-accent-text-soft transition-colors line-clamp-2">
+          {/* data-toc-skip: this is ANOTHER article's title, not a section of the
+              page it's embedded in. Stays an <h3> for the card's own outline, but
+              the guide TOC must not list it. See components/TableOfContents.tsx. */}
+          <h3
+            data-toc-skip
+            className="text-base sm:text-lg font-black text-prose leading-snug group-hover:text-accent-text-soft transition-colors line-clamp-2"
+          >
             {t.title}
           </h3>
           {isReview && typeof t.rating === 'number' && t.rating > 0 && (

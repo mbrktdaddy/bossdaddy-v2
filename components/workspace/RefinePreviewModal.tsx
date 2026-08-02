@@ -9,8 +9,11 @@ interface Props {
   onDiscard: () => void
 }
 
+// prose-invert is load-bearing: without it --tw-prose-headings is zinc-900,
+// which equals the dark surface these render on, so headings go invisible.
+// See TiptapEditor for the full note.
 const proseClasses = `
-  prose prose-sm prose-zinc prose-orange max-w-none
+  prose prose-sm prose-zinc prose-invert prose-orange max-w-none
   prose-headings:font-black prose-headings:font-sans prose-headings:tracking-tight
   prose-h2:text-sm prose-h2:mt-4 prose-h2:mb-1
   prose-p:text-prose-muted prose-p:leading-relaxed prose-p:text-xs
