@@ -1,4 +1,4 @@
-import Image from 'next/image'
+import { getImageProps } from 'next/image'
 import Link from 'next/link'
 import { BRAND, splitLastWord } from '@/lib/brand'
 
@@ -13,6 +13,47 @@ import { BRAND, splitLastWord } from '@/lib/brand'
 
 const SUBHEAD =
   'Field-tested gear, no-fluff guides, and free tools for men who show up every day. If it can’t survive my house, it doesn’t get a score.'
+
+/* Art-directed hero — two crops, but only ONE is ever downloaded.
+   `<picture>` + `<source media>` lets the browser's preload scanner pick the
+   right file per viewport at parse time, which is why this needs no
+   `<link rel="preload">` at all. `getImageProps` is Next's supported escape
+   hatch for art direction (`<Image>` can't emit `<source media>` itself) — we
+   still get the /_next/image srcset, AVIF/WebP negotiation and deviceSizes.
+
+   DO NOT go back to two <Image> elements toggled by `hidden sm:block`. That
+   cost us in both directions: the desktop crop had to drop `priority` (so it
+   went lazy while being the desktop LCP element), and the mobile crop's
+   `priority` emitted an unconditional preload that fired on desktop too, where
+   it is display:none — 86 KB fetched and thrown away. Both showed up as
+   next/image console warnings. Swapping in the real hero shoot = change the two
+   `src` values (and the intrinsic width/height) here, nothing else. */
+/* NB: `priority: true` is deliberately NOT used. On <Image> it does two jobs —
+   un-lazy the img AND emit <link rel="preload"> — but `getImageProps` only
+   returns the second as `meta.preload` for the caller to render, and a plain
+   preload link has no media query, so it would re-create the exact
+   fetch-both-crops bug this markup exists to kill. `loading`/`fetchPriority`
+   are set by hand instead; the preload scanner covers discovery. */
+const HERO_PRIORITY = {
+  alt: '',
+  sizes: '100vw',
+  loading: 'eager',
+  fetchPriority: 'high',
+} as const
+
+const { props: desktopHero } = getImageProps({
+  ...HERO_PRIORITY,
+  src: '/images/hero-workshop.webp',
+  width: 3072,
+  height: 1024,
+})
+
+const { props: mobileHero } = getImageProps({
+  ...HERO_PRIORITY,
+  src: '/images/hero-workshop-mobile.webp',
+  width: 1290,
+  height: 1935,
+})
 
 function Headline({ className = '' }: { className?: string }) {
   const { lead, last } = splitLastWord(BRAND.tagline)
@@ -79,27 +120,21 @@ export default function HomeHero({ motion }: Props) {
   return (
     <>
     <section className="relative min-h-[80svh] sm:min-h-[88vh] flex flex-col overflow-hidden border-b border-soft">
-      {/* Desktop image — subject right, dark left for the text. Lazy: it's
-          display:none on mobile, where the portrait crop is the real LCP. */}
-      <Image
-        src="/images/hero-workshop.webp"
-        alt=""
-        fill
-        sizes="100vw"
-        className="hidden sm:block object-cover object-right"
-      />
-      {/* Mobile image — subject low in the source (top ~half is empty wall), so
-          we zoom + anchor to the bottom to lift the man into the clear middle
-          band of the split (between the top title and the bottom CTAs). Tune
-          `scale-*` to taste; re-crop for the real hero shoot. `priority` = LCP. */}
-      <Image
-        src="/images/hero-workshop-mobile.webp"
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="sm:hidden object-cover object-center scale-[1.35] origin-bottom -translate-y-[5%]"
-      />
+      {/* Hero art. Desktop: wide crop, subject right, dark left for the text.
+          Mobile: portrait crop whose subject sits low in the source (top ~half
+          is empty wall), so we zoom + anchor to the bottom to lift the man into
+          the clear middle band of the split (between the top title and the
+          bottom CTAs). Tune `scale-*` to taste; re-crop for the real shoot.
+          One <img>, so the two treatments are responsive classes on it. */}
+      <picture>
+        <source media="(min-width: 640px)" srcSet={desktopHero.srcSet} sizes="100vw" />
+        <source media="(max-width: 639px)" srcSet={mobileHero.srcSet} sizes="100vw" />
+        <img
+          {...mobileHero}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover object-center scale-[1.35] origin-bottom -translate-y-[5%] sm:object-right sm:scale-100 sm:translate-y-0"
+        />
+      </picture>
 
       {/* Desktop wash — anchors the left manifesto column on near-black */}
       <div
