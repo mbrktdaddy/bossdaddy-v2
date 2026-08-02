@@ -62,7 +62,11 @@ export default async function ComparisonsIndexPage({ searchParams }: Props) {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filtered.map((c) => (
+          {/* The first card is the LCP candidate — without `priority` it would
+              render loading="lazy" and the whole page waits on it. Index 0 only,
+              not the first desktop row: on mobile this grid is one column, so
+              prioritising three would preload two images nobody can see yet. */}
+          {filtered.map((c, i) => (
             <Link
               key={c.id}
               href={`/comparisons/${c.slug}`}
@@ -74,6 +78,7 @@ export default async function ComparisonsIndexPage({ searchParams }: Props) {
                     src={c.hero_image_url}
                     alt={c.title}
                     fill
+                    priority={i === 0}
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />

@@ -28,7 +28,11 @@ export default function GuidesGrid({ initialItems, total, category }: Props) {
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {items.map((a, i) => <GuideCard key={a.id} guide={a} priority={i < 3} />)}
+        {/* Index 0 only. `i < 3` targeted the first DESKTOP row, but this grid
+            is one column on mobile — it preloaded two images below the fold on
+            the viewport that can least afford them. The rest of the row loads
+            fine at normal priority. */}
+        {items.map((a, i) => <GuideCard key={a.id} guide={a} priority={i === 0} />)}
       </div>
       {hasMore && (
         <div className="mt-10 text-center">
