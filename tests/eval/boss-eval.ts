@@ -105,7 +105,7 @@ function assertVoice(label: string, text: string) {
   // The reader must never see a bare link path (the backstop strips them). If the
   // RAW model output leaked one, the prompt is drifting — warn so we tighten it.
   if (BARE_LINK.test(text)) {
-    // eslint-disable-next-line no-console
+     
     console.warn(`${label}: model leaked a raw link path in prose (stripped for the reader — tighten the prompt)`)
   }
   expect(
@@ -116,7 +116,7 @@ function assertVoice(label: string, text: string) {
 
 function summarize(label: string, r: Collected) {
   const preview = r.text.replace(/\s+/g, ' ').trim().slice(0, 320)
-  // eslint-disable-next-line no-console
+   
   console.log(
     `\n── ${label} ──\n  tools: [${r.tools.join(', ') || '—'}]  citations: ${r.citations.length}` +
       (r.error ? `  ERROR: ${r.error}` : '') +
@@ -127,7 +127,7 @@ function summarize(label: string, r: Collected) {
 describe.skipIf(!READY)('Boss concierge golden eval', () => {
   if (!READY) {
     it('skipped — missing env', () => {
-      // eslint-disable-next-line no-console
+       
       console.warn('boss:eval skipped — need SUPABASE URL + anon key + (AI_GATEWAY_API_KEY|ANTHROPIC_API_KEY)')
     })
     return

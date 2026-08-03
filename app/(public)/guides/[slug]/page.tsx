@@ -217,7 +217,7 @@ export default async function GuidePage({ params }: Props) {
         {/* FTC Disclosure — rendered whenever the guide contains affiliate links */}
         {guide.has_affiliate_links && (
           <div
-            className="mb-8 text-xs text-prose-faint bg-surface rounded-xl px-4 py-3 shadow-md shadow-black/5"
+            className="mb-8 text-xs text-prose-faint bg-surface border border-soft rounded-xl px-4 py-3"
             dangerouslySetInnerHTML={{ __html: FTC_DISCLOSURE_HTML }}
           />
         )}
@@ -372,7 +372,7 @@ export default async function GuidePage({ params }: Props) {
 
             {/* Email signup CTA */}
             <div className="mt-12 pt-8">
-              <div className="bg-surface-raised border border-soft rounded-xl p-6 sm:p-8 text-center shadow-xl shadow-black/5">
+              <div className="bg-surface-raised border border-soft rounded-xl p-6 sm:p-8 text-center">
                 <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3 mx-auto" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Liked this guide?</p>
                 <h3 className="text-xl font-black mb-2">Get the next one in your inbox</h3>
@@ -413,7 +413,7 @@ export default async function GuidePage({ params }: Props) {
                     <Link
                       key={r.id}
                       href={`/reviews/${r.slug}`}
-                      className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden shadow-md shadow-black/5 hover:shadow-lg hover:shadow-black/10 hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
+                      className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
                     >
                       {r.image_url ? (
                         <div className="relative w-full h-36 bg-surface-raised shrink-0">
@@ -463,7 +463,7 @@ export default async function GuidePage({ params }: Props) {
                     <Link
                       key={a.id}
                       href={`/guides/${a.slug}`}
-                      className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden shadow-md shadow-black/5 hover:shadow-lg hover:shadow-black/10 hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
+                      className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
                     >
                       {a.image_url ? (
                         <div className="relative w-full h-36 bg-surface-raised shrink-0 overflow-hidden">

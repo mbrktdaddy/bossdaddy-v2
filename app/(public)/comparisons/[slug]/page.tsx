@@ -331,7 +331,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
               <section
                 id="bottom-line"
                 aria-label="Bottom line"
-                className="mb-12 rounded-xl border border-accent-border/40 bg-accent-tint p-5 sm:p-7 shadow-lg shadow-black/5"
+                className="mb-12 rounded-xl border border-accent-border/40 bg-accent-tint p-5 sm:p-7"
               >
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">The Bottom Line</p>
                 <p className="text-base sm:text-lg text-prose leading-relaxed font-medium">{comparison.winner_summary}</p>
@@ -519,7 +519,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
                     <article
                       key={review.id}
                       id={`dive-${review.slug}`}
-                      className="scroll-mt-28 rounded-xl overflow-hidden bg-surface border border-soft shadow-lg shadow-black/5"
+                      className="scroll-mt-28 rounded-xl overflow-hidden bg-surface border border-soft"
                     >
                       <div className={`flex flex-col ${imageLeft ? 'sm:flex-row' : 'sm:flex-row-reverse'} gap-0`}>
                         {/* Hero image column */}
@@ -673,7 +673,7 @@ function ContenderCard({
   return (
     <a
       href={`#dive-${review.slug}`}
-      className={`group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden shadow-md shadow-black/5 hover:shadow-lg hover:shadow-black/10 hover:border-accent-border/40 hover:-translate-y-1 transition-all ${className ?? ''}`}
+      className={`group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden hover:border-accent-border/40 hover:-translate-y-1 transition-all ${className ??''}`}
     >
       <div className="relative w-full aspect-square bg-surface-sunken">
         {review.image_url && (

@@ -79,7 +79,7 @@ export default async function CollectionsForReview({ reviewId }: Props) {
             <li key={c.id}>
               <Link
                 href={href}
-                className="group flex items-center gap-4 p-4 bg-surface border border-soft hover:border-accent-border/40 hover:-translate-y-1 rounded-xl shadow-md shadow-black/5 transition-all"
+                className="group flex items-center gap-4 p-4 bg-surface border border-soft hover:border-accent-border/40 hover:-translate-y-1 rounded-xl transition-all"
               >
                 <span className="text-accent-text-soft shrink-0">{meta.icon}</span>
                 <div className="min-w-0 flex-1">

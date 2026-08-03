@@ -115,7 +115,7 @@ export default async function BenchDetailPage({ params }: Props) {
           )}
 
           {isSkipped && wishlistItem.skip_reason && (
-            <div className="p-4 bg-surface-raised border border-soft rounded-xl mb-4 shadow-md shadow-black/5">
+            <div className="p-4 bg-surface-raised border border-soft rounded-xl mb-4">
               <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
               <p className="text-xs font-black uppercase tracking-widest text-prose-muted mb-1">Why I&apos;m not testing this</p>
               <p className="text-sm text-prose-muted">{wishlistItem.skip_reason}</p>
@@ -162,7 +162,7 @@ export default async function BenchDetailPage({ params }: Props) {
       </div>
 
       {!isReviewed && !isSkipped && (
-        <div className="mt-8 p-4 bg-accent-tint rounded-xl shadow-md shadow-black/5">
+        <div className="mt-8 p-4 bg-accent-tint border border-soft rounded-xl">
           <p className="text-sm text-accent-text/80">
             <strong className="text-accent-text-soft">{wishlistItem.vote_count as number} {wishlistItem.vote_count === 1 ? 'person has' : 'people have'} voted</strong> for this review.
             The more votes, the sooner it gets done.

@@ -194,7 +194,7 @@ export default async function GearPage() {
               <Link
                 key={occ.slug}
                 href={`/gifts/${occ.slug}`}
-                className="shrink-0 w-40 rounded-xl overflow-hidden bg-surface border border-soft shadow-lg shadow-black/5 hover:border-accent-border/40 hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all"
+                className="shrink-0 w-40 rounded-xl overflow-hidden bg-surface border border-soft hover:border-accent-border/40 hover:-translate-y-1 transition-all"
               >
                 <div className="relative w-full h-24 bg-surface-raised">
                   {pick?.hero_image_url ? (
@@ -219,7 +219,7 @@ export default async function GearPage() {
               <Link
                 key={occ.slug}
                 href={`/gifts/${occ.slug}`}
-                className="group relative rounded-xl overflow-hidden border border-soft shadow-lg shadow-black/5 hover:border-accent-border/40 hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all"
+                className="group relative rounded-xl overflow-hidden border border-soft hover:border-accent-border/40 hover:-translate-y-1 transition-all"
               >
                 <div className="relative w-full h-36 bg-surface-raised">
                   {pick?.hero_image_url ? (
@@ -271,7 +271,7 @@ export default async function GearPage() {
 
           <Link
             href={`/picks/${featuredPick.slug}`}
-            className="group block bg-surface rounded-xl overflow-hidden border border-soft shadow-md shadow-black/5 hover:border-accent-border/40 hover:shadow-lg hover:shadow-black/10 hover:-translate-y-1 transition-all"
+            className="group block bg-surface rounded-xl overflow-hidden border border-soft hover:border-accent-border/40 hover:-translate-y-1 transition-all"
           >
             <div className="flex flex-col sm:flex-row">
               <div className="relative w-full sm:w-72 h-48 sm:h-auto sm:min-h-[220px] shrink-0 bg-surface-raised">

@@ -82,7 +82,7 @@ export default async function GuidesPage() {
           path-based category routes (indexable, prerendered). */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
         <Link href="/guides"
-          className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-prose text-background border border-prose shadow-sm shadow-black/10 transition-colors">
+          className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-prose text-background border border-prose transition-colors">
           All Guides
         </Link>
         {CATEGORIES.map((c) => (

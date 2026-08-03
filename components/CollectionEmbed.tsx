@@ -89,7 +89,7 @@ export default async function CollectionEmbed({ slug }: Props) {
 
   return (
     <aside
-      className="not-prose my-8 bg-accent-tint border border-accent-border/40 rounded-xl p-5 sm:p-6 shadow-lg shadow-black/5"
+      className="not-prose my-8 bg-accent-tint border border-accent-border/40 rounded-xl p-5 sm:p-6"
       aria-label={`Featured ${meta.eyebrow}: ${c.title}`}
     >
       <div className="mb-4">

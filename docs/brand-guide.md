@@ -487,6 +487,20 @@ The page ends with a deliberate punctuation:
 
 ### Card skeleton (review / guide / wishlist / shop)
 Real pattern (see `ReviewCard.tsx` / `LibraryGuideCard.tsx`): semantic tokens only, `rounded-xl`/`rounded-2xl`, **border + hover lift — no shadow.** Black shadows are invisible on the near-black canvas; `shadow-lg shadow-black/5` is decoration that renders as nothing. See §2 and `feedback_dark_canvas_anti_patterns`.
+
+> **Enforced since 2026-08-03.** `npm run check:shadow` (in `prebuild`) fails the build on
+> any `shadow-black/*`. The pattern had reached 63 occurrences across 46 files precisely
+> *because this skeleton taught it* — every new card was copied from a documented example
+> carrying `shadow-lg shadow-black/5 hover:shadow-xl hover:shadow-black/10`. Fixing the doc
+> couldn't stop copy-paste from existing components, so the build now does.
+>
+> **If you want elevation on dark, tint it.** A coloured glow renders where black cannot:
+> `shadow-[0_0_10px_rgba(229,90,26,0.7)]` (BenchStrip's live dot), `shadow-accent/30`
+> (MobileBottomNav), `shadow-orange-950/25` (BossApprovedBadge). Those are all allowed.
+>
+> Known gap: bare `shadow-md|lg|xl|2xl` with no colour override is *also* invisible, and
+> ~26 survive on overlay surfaces (modals, dropdowns, lightboxes, toasts) that already sit
+> above a backdrop scrim. Not enforced — see the guard's header for the reasoning.
 ```jsx
 <Link
   href="..."

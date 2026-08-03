@@ -74,7 +74,7 @@ export default async function OffTheBench({ limit = 3, className = '' }: Props) 
           <Link
             key={item.reviewSlug}
             href={`/reviews/${item.reviewSlug}`}
-            className="group flex items-center gap-3 sm:flex-col sm:items-stretch bg-surface border border-soft rounded-xl overflow-hidden shadow-md shadow-black/5 hover:border-accent-border/40 hover:shadow-lg hover:shadow-black/10 hover:-translate-y-1 transition-all"
+            className="group flex items-center gap-3 sm:flex-col sm:items-stretch bg-surface border border-soft rounded-xl overflow-hidden hover:border-accent-border/40 hover:-translate-y-1 transition-all"
           >
             <div className="relative shrink-0 w-20 h-20 sm:w-full sm:h-auto sm:aspect-[4/3] bg-surface-sunken">
               {item.image ? (

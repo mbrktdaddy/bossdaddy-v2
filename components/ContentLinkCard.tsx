@@ -49,7 +49,7 @@ export default async function ContentLinkCard({ contentType, slug }: Props) {
 
   return (
     <aside
-      className="not-prose my-8 bg-surface border border-soft hover:border-accent-border/40 rounded-xl overflow-hidden transition-colors shadow-lg shadow-black/5"
+      className="not-prose my-8 bg-surface border border-soft hover:border-accent-border/40 rounded-xl overflow-hidden transition-colors"
       aria-label={`${eyebrow}: ${t.title}`}
     >
       <Link href={href} className="group flex items-stretch gap-4">

@@ -70,7 +70,7 @@ export default async function ComparisonsIndexPage({ searchParams }: Props) {
             <Link
               key={c.id}
               href={`/comparisons/${c.slug}`}
-              className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden shadow-lg shadow-black/5 hover:shadow-xl hover:shadow-black/10 hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
+              className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
             >
               <div className="relative w-full aspect-[4/3] bg-surface-raised shrink-0">
                 {c.hero_image_url ? (

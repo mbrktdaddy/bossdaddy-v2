@@ -56,7 +56,7 @@ export function VotePayoffBanner() {
   }
 
   return (
-    <div className="mb-8 flex items-start gap-3 rounded-xl bg-accent-tint border border-accent-border/50 p-4 shadow-md shadow-black/5">
+    <div className="mb-8 flex items-start gap-3 rounded-xl bg-accent-tint border border-accent-border/50 p-4">
       <span className="mt-0.5 shrink-0 text-accent-text-soft" aria-hidden>
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

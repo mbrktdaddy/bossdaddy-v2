@@ -287,7 +287,7 @@ export default function Header() {
 
             {/* Mega-menu panel — elevated zinc-800 to lift from masthead */}
             {catOpen && (
-              <div className="absolute right-0 top-full mt-2 w-[580px] bg-surface-raised border border-strong rounded-xl shadow-2xl shadow-black/5 p-5 z-50">
+              <div className="absolute right-0 top-full mt-2 w-[580px] bg-surface-raised border border-strong rounded-xl p-5 z-50">
                 <p className="text-xs text-copper uppercase tracking-widest font-semibold mb-4">Browse by Category</p>
                 <div className="grid grid-cols-2 gap-1">
                   {CATEGORIES.map((cat) => (
@@ -419,7 +419,7 @@ export default function Header() {
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-surface-raised border border-strong rounded-xl shadow-2xl shadow-black/5 p-1.5 z-50">
+                <div className="absolute right-0 top-full mt-2 w-56 bg-surface-raised border border-strong rounded-xl p-1.5 z-50">
                   <div className="px-3 py-2 border-b border-soft mb-1">
                     <p className="text-[10px] uppercase tracking-widest text-prose-muted font-semibold">Signed in as</p>
                     <p className="text-sm font-bold text-prose truncate">@{username}</p>

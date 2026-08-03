@@ -172,7 +172,7 @@ export default async function AboutPage() {
  <Link
  key={cat.slug}
  href={`/category/${cat.slug}`}
- className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium bg-surface border border-soft text-prose-muted hover:bg-surface-raised hover:text-prose hover:border-accent-border/40 shadow-sm shadow-black/5 transition-colors"
+ className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium bg-surface border border-soft text-prose-muted hover:bg-surface-raised hover:text-prose hover:border-accent-border/40 transition-colors"
  >
  <CategoryIcon slug={cat.slug} className="w-4 h-4 text-accent-text shrink-0" />
  <span className="truncate">{cat.label}</span>

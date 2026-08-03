@@ -43,7 +43,7 @@ export function GearCard({
   // Avoids invalid <a>-inside-<a> HTML that nested cards had previously.
   return (
     <article
-      className={`group relative flex flex-col bg-surface rounded-xl overflow-hidden border border-soft shadow-lg shadow-black/5 hover:border-accent-border/40 hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-200 ${
+      className={`group relative flex flex-col bg-surface rounded-xl overflow-hidden border border-soft hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200 ${
         isHero ? 'lg:col-span-2 lg:row-span-2' : ''
       }`}
     >

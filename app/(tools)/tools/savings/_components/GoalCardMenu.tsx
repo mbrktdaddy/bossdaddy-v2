@@ -100,7 +100,7 @@ export default function GoalCardMenu({ goalId, goalName, status }: Props) {
           />
           <div
             role="menu"
-            className="absolute right-0 top-10 z-20 w-44 bg-surface border border-strong rounded-xl p-1 shadow-lg shadow-black/30"
+            className="absolute right-0 top-10 z-20 w-44 bg-surface border border-strong rounded-xl p-1"
           >
             <MenuItem onClick={onEdit} disabled={pending}>Edit</MenuItem>
             {!isArchived && (
