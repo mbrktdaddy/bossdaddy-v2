@@ -1,11 +1,11 @@
 import Link from 'next/link'
-import Image from 'next/image'
+import { Fragment } from 'react'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { CATEGORIES } from '@/lib/categories'
-import { getBadgesByProductSlug } from '@/lib/collection-listings'
 import CategoryIcon from '@/components/CategoryIcon'
-import RatingScore from '@/components/RatingScore'
+import CredibilityBreak from '@/components/CredibilityBreak'
 import FeaturedReviewCard from '@/components/FeaturedReviewCard'
+import TopicBlock from '@/components/TopicBlock'
 import BenchStrip from '@/components/BenchStrip'
 import AskTheBoss from '@/components/AskTheBoss'
 import PageHeader from '@/components/PageHeader'
@@ -46,23 +46,11 @@ export default async function ReviewsPage() {
     .order('published_at', { ascending: false })
     .limit(200)
 
-  const rawReviews = (data ?? []) as ReviewRow[]
-  // Batch-fetch collection badges for every visible product in one query so
-  // ReviewCard can render chips per row without N+1.
-  const slugsForBadges = rawReviews.map((r) => r.product_slug).filter((s): s is string => Boolean(s))
-  const badgeMap = await getBadgesByProductSlug(supabase, slugsForBadges)
-  const reviews: ReviewRow[] = rawReviews.map((r) => ({
-    ...r,
-    badges: r.product_slug ? badgeMap.get(r.product_slug) ?? [] : [],
-  }))
-
-  const sections = CATEGORIES
-    .map(cat => ({
-      cat,
-      items: reviews.filter(r => r.category === cat.slug).slice(0, 3),
-      total: reviews.filter(r => r.category === cat.slug).length,
-    }))
-    .filter(s => s.items.length > 0)
+  // No badge batch-fetch here. It used to hydrate `badges` on every row for
+  // "ReviewCard to render chips" — but ReviewCard belongs to ReviewsGrid, which this
+  // static hub doesn't render, and neither FeaturedReviewCard nor the category rows
+  // read `badges`. It was an awaited query per render whose result nothing displayed.
+  const reviews = (data ?? []) as ReviewRow[]
 
   // Featured card preference order: admin-flagged > highest-rated (the latter
   // preserves prior behavior when nothing has been flagged yet).
@@ -70,6 +58,17 @@ export default async function ReviewsPage() {
     reviews.find((r) => r.featured && r.image_url) ??
     reviews.filter((r) => r.image_url).sort((a, b) => b.rating - a.rating)[0] ??
     null
+
+  // 4 per section, not 3: TopicBlock spends the first on its lead card, so 4 is
+  // what fills lead + 3 rows — the same module /guides and the homepage render.
+  // `featured` is excluded so the page's showcase card doesn't headline its own
+  // category block a screen later.
+  const sections = CATEGORIES
+    .map(cat => {
+      const inCat = reviews.filter(r => r.category === cat.slug && r.id !== featured?.id)
+      return { cat, items: inCat.slice(0, 4), total: inCat.length }
+    })
+    .filter(s => s.items.length > 0)
 
   return (
     <>
@@ -120,31 +119,30 @@ export default async function ReviewsPage() {
         </div>
       ) : (
         sections.map(({ cat, items, total }, i) => (
-          <section key={cat.slug} className={i > 0 ? 'mt-12' : ''}>
-            <div className="flex items-end justify-between mb-5 gap-4">
-              <div className="min-w-0">
-                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                <h2 className="text-xl md:text-2xl font-black text-prose flex items-center gap-2.5 leading-tight">
-                  <CategoryIcon slug={cat.slug} className="w-5 h-5 sm:w-6 sm:h-6 text-accent-text shrink-0" />
-                  <span className="truncate">{cat.label}</span>
-                </h2>
-                {cat.description && (
-                  <p className="text-sm text-prose-faint mt-1.5 line-clamp-1">{cat.description}</p>
-                )}
-              </div>
-              {total > items.length && (
-                <Link
-                  href={`/reviews/category/${cat.slug}`}
-                  className="self-end shrink-0 text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold"
-                >
-                  View all {total}
-                </Link>
-              )}
-            </div>
-            <div className="divide-y divide-soft">
-              {items.map((r) => <ReviewRow key={r.id} review={r} />)}
-            </div>
-          </section>
+          <Fragment key={cat.slug}>
+          {i === Math.ceil(sections.length / 2) && <CredibilityBreak />}
+          <TopicBlock
+            index={i}
+            label={cat.label}
+            viewAllHref={`/reviews/category/${cat.slug}`}
+            viewAllCount={total > items.length ? total : undefined}
+            description={cat.description}
+            cta="Read the review"
+            on="background"
+            items={items.map((r) => ({
+              id: r.id,
+              href: `/reviews/${r.slug}`,
+              eyebrow: cat.label,
+              // Headline is the review's own title here, with the product name as the
+              // sub — the inverse of the homepage, where the product IS the news.
+              headline: r.title,
+              sub: r.product_name,
+              excerpt: r.excerpt,
+              rating: r.rating,
+              imageUrl: r.image_url,
+            }))}
+          />
+          </Fragment>
         ))
       )}
 
@@ -157,39 +155,6 @@ export default async function ReviewsPage() {
   )
 }
 
-// Editorial row — image left, title + product name right, rating far right.
-// Same geometry as the /gear Solid Gear rows. Used for the per-category
-// directory lists on the unfiltered /reviews surface.
-function ReviewRow({ review: r }: { review: ReviewRow }) {
-  return (
-    <Link
-      href={`/reviews/${r.slug}`}
-      className="group flex items-center gap-5 py-5 -mx-4 px-4 rounded-xl hover:bg-surface/40 transition-colors"
-    >
-      <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-surface-raised shrink-0">
-        {r.image_url ? (
-          <Image
-            src={r.image_url}
-            alt={r.product_name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 640px) 80px, 96px"
-          />
-        ) : (
-          <div className="w-full h-full bg-surface-raised flex items-center justify-center">
-            <CategoryIcon slug={r.category} className="w-6 h-6 text-accent-text/40" />
-          </div>
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
-        <h3 className="text-base md:text-lg font-bold text-prose group-hover:text-accent-text-soft transition-colors leading-snug">
-          {r.title}
-        </h3>
-        <p className="text-xs text-prose-faint mt-1 truncate">{r.product_name}</p>
-      </div>
-      <div className="shrink-0">
-        <RatingScore rating={r.rating ?? 0} />
-      </div>
-    </Link>
-  )
-}
+// A local `ReviewRow` component lived here — an image-left row that also shadowed
+// the imported `ReviewRow` *type* from ./actions. Replaced by the shared ContentRow
+// (inside TopicBlock), which /guides and the homepage Library use too.

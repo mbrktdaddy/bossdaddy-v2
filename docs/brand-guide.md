@@ -182,12 +182,43 @@ The Boss Daddy messaging system is a **five-level hierarchy**. Each line has a d
 
 *Homepage hero lockup:*
 ```
-The Boss Dad Standard.
+The Boss Dad Standard.        ← eyebrow (identity kicker)
 
-Dad Like a Boss.
+Dad Like a Boss.              ← H1
 
-Real Dads. Smart Tools. Better Decisions.
+Field-tested gear, no-fluff guides…  ← subhead (page copy, not a brand line)
 ```
+
+*Homepage line assignment (revised 2026-08-03).* One brand line per beat, spaced down
+the page, each doing a different job — so no line does two jobs in one viewport:
+
+| Beat | Line |
+|---|---|
+| Hero eyebrow | **Positioning** — an eyebrow above the H1 is an *identity* slot |
+| Hero H1 | **Primary tagline** |
+| Mid-directory interstitial (`CredibilityBreak`) | **Credibility** — proof, delivered mid-browse where trust is actually decided |
+| The Creed | **Creed** + "That's The Boss Dad Standard." (deliberate bookend with the eyebrow) |
+| Email capture button | **Action line** — §1.7 names button text; this is the site's one real call to join |
+| Merch strip | **Merch voice** |
+| Footer trust bar | **Credibility** |
+
+Two changes from the older lockup, both deliberate:
+
+- **The hero no longer carries the credibility line.** It moved to the mid-directory
+  interstitial on the homepage Library, `/guides`, and `/reviews`. In the hero it was
+  an 11px kicker decorating the H1; mid-browse it's the only voice in ~3,500px of
+  repeated module, at the moment a reader is deciding whether to trust the shelf. The
+  footer trust bar keeps its copy, so the line still appears twice per page — far
+  apart rather than bunched at the top.
+- **The hero subhead is page copy, not a brand line,** and stays that way. "Field-tested
+  gear… If it can't survive my house, it doesn't get a score." is first-person with a
+  falsifiable standard — §1 voice. Do **not** swap in `essence`: it's third-person
+  brand-about-brand ("gold standard and trusted hub"), it restates the H1 it sits
+  under, and it deletes the gear/guides/tools wayfinding a first-time visitor needs.
+
+**`essence` renders nowhere, on purpose.** It describes the brand to itself, which is
+right for meta descriptions, social bios, and the phone Claude Project file — and wrong
+for any reader-facing surface. Don't find it a slot.
 
 *About page structure:* Hero → **The Boss Dad Standard.** · Sub-head → **Dad Like a Boss.** · Body → full Philosophy statement · Trust block → **Real Dads. Smart Tools. Better Decisions.**
 
@@ -455,11 +486,14 @@ The page ends with a deliberate punctuation:
 ## 6. Component Patterns
 
 ### Card skeleton (review / guide / wishlist / shop)
-Real pattern (see `ReviewCard.tsx` / `GuideCard.tsx`): semantic tokens only, `rounded-xl`, border + soft shadow, hover lift.
+Real pattern (see `ReviewCard.tsx` / `LibraryGuideCard.tsx`): semantic tokens only, `rounded-xl`/`rounded-2xl`, **border + hover lift — no shadow.** Black shadows are invisible on the near-black canvas; `shadow-lg shadow-black/5` is decoration that renders as nothing. See §2 and `feedback_dark_canvas_anti_patterns`.
 ```jsx
 <Link
   href="..."
-  className="group relative flex flex-col bg-surface rounded-xl overflow-hidden border border-soft shadow-lg shadow-black/5 hover:border-copper hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-200"
+  className="group relative flex flex-col bg-surface rounded-xl overflow-hidden border border-soft hover:border-accent hover:-translate-y-0.5 transition-all duration-200"
+  /* NO shadow-*: black shadows are invisible on near-black. Elevation = border
+     colour change + a small lift. `hover:border-accent`, not the legacy
+     `hover:border-copper` alias. */
 >
   {/* Image — h-44, object-cover, hover scale */}
   <div className="relative w-full h-44 bg-surface-raised shrink-0">
@@ -596,7 +630,10 @@ No dashed borders. Soft panel that reads as "this is intentional" not "this is b
 | `EmailSignup` | `components/EmailSignup.tsx` | Newsletter sections |
 | `Header` / `Footer` | `components/Header.tsx`, `Footer.tsx` | Site shell |
 | `ReviewCard` | `app/(public)/reviews/_components/ReviewCard.tsx` | `/reviews`, homepage |
-| `GuideCard` | `app/(public)/guides/_components/GuideCard.tsx` | `/guides`, homepage |
+| `LibraryGuideCard` | `components/LibraryGuideCard.tsx` | `/guides/category/[slug]` 3-up grid. Takes `on={'background' \| 'surface'}`. Replaced `guides/_components/GuideCard.tsx` (deleted 2026-08-03). |
+| `LeadCard` | `components/LeadCard.tsx` | Lead half of a "Template A" module. Takes the same `on` prop. |
+| `ContentRow` | `components/ContentRow.tsx` | The compact directory row, site-wide: text left, thumbnail right. **The editorial lane.** `/gear` keeps its own image-left rows on purpose — don't convert it. |
+| `TopicBlock` | `components/TopicBlock.tsx` | A category as `LeadCard` + `ContentRow`s. Behind the homepage Library, `/guides`, and `/reviews` — one pattern, three surfaces. Blocks alternate handedness by `index` (serpentine); rows mirror with them. Settled 2026-08-03 — see `home-manifesto-spec.md`. |
 | `WishlistCard` | `components/wishlist/WishlistCard.tsx` | `/wishlist` |
 
 ---

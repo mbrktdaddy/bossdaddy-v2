@@ -163,8 +163,15 @@ export default function HomeHero({ motion }: Props) {
       <div className="relative z-10 hidden sm:flex flex-1 items-end">
         <div className="max-w-6xl mx-auto w-full px-6 pb-14">
           <div className="max-w-2xl">
+            {/* Positioning, not the credibility line. An eyebrow above the H1 is an
+                IDENTITY slot, and brand-guide §1.7 lists hero sections as
+                positioning's primary usage — while credibility is a *proof* line,
+                which now does its work mid-browse in the Library instead of
+                decorating the hero. Reads as identity-kicker → rallying cry.
+                `positioning` is stored without a period (so it can sit mid-sentence);
+                standing alone as a display line it takes one. */}
             <p className="text-[11px] font-bold text-eyebrow uppercase tracking-[0.28em] mb-5">
-              {BRAND.credibility}
+              {BRAND.positioning}.
             </p>
             <Headline className="text-7xl md:text-[5.5rem]" />
             <p className="text-lg text-prose-muted leading-[1.6] max-w-xl mt-6">
@@ -192,8 +199,9 @@ export default function HomeHero({ motion }: Props) {
       {/* MOBILE content — Option B: tighter split (title top / CTAs bottom, shorter hero) */}
       <div className="relative z-10 sm:hidden flex flex-1 flex-col justify-between px-6 pt-10 pb-7">
         <div className="text-center">
+          {/* Same swap as the desktop block above — keep the two in step. */}
           <p className="text-[11px] font-bold text-eyebrow uppercase tracking-[0.24em] mb-4">
-            {BRAND.credibility}
+            {BRAND.positioning}.
           </p>
           <Headline className="text-5xl" />
         </div>

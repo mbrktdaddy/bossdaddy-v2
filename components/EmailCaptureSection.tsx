@@ -1,9 +1,21 @@
+import { BRAND } from '@/lib/brand'
+
 interface Props {
   eyebrow?: string
   heading?: string
   subhead?: string
   /** Defaults to /api/newsletter/subscribe — overridable for re-use in other contexts. */
   action?: string
+  /**
+   * Defaults to the brand action line ("Boss Up.") — brand-guide §1.7 names *button
+   * text* as a primary usage for it, and this is the site's one real call to join.
+   * It's the only placement that line has anywhere in the app.
+   *
+   * The trade-off is deliberate: a branded label is less literal than "Subscribe".
+   * It stays unambiguous because it sits beside an email field, under "Sunday
+   * morning. One email." and "Unsubscribe anytime" — the context carries the
+   * meaning, the button carries the voice. Pass `buttonLabel="Subscribe"` to revert.
+   */
   buttonLabel?: string
   /** Comma-separated list of interest tags persisted with the subscription. */
   interests?: string
@@ -14,7 +26,7 @@ export default function EmailCaptureSection({
   heading = 'Sunday morning. One email.',
   subhead = "New reviews, what I'm testing, and the verdicts about to drop. No PR-speak. Unsubscribe anytime.",
   action = '/api/newsletter/subscribe',
-  buttonLabel = 'Subscribe',
+  buttonLabel = BRAND.actionLine,
   interests = 'newsletter',
 }: Props) {
   return (

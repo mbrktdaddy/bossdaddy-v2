@@ -1,12 +1,12 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import Image from 'next/image'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCategoryBySlug, CATEGORIES } from '@/lib/categories'
 import { ogImageUrl, OG_SITE } from '@/lib/og'
 import CategoryIcon from '@/components/CategoryIcon'
+import LibraryGuideCard from '@/components/LibraryGuideCard'
 import PageHeader from '@/components/PageHeader'
 import { PillFilterStrip, PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 import BenchStrip from '@/components/BenchStrip'
@@ -102,42 +102,14 @@ export default async function GuideCategoryPage({ params }: Props) {
           ))}
         </PillFilterStrip>
 
-        {/* Guide grid */}
+        {/* Guide grid — shared LibraryGuideCard, the same card the homepage Library
+            uses. This grid used to inline a near-copy of it whose elevation was
+            `shadow-lg shadow-black/5`, i.e. a black shadow on a near-black page:
+            invisible. `on="background"` because this page has no surface tint. */}
         {guides && guides.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {guides.map((g) => (
-              <Link
-                key={g.id}
-                href={`/guides/${g.slug}`}
-                className="group bg-surface border border-soft rounded-xl overflow-hidden shadow-lg shadow-black/5 hover:shadow-xl hover:shadow-black/10 hover:border-accent-border/40 hover:-translate-y-1 transition-all"
-              >
-                {g.image_url ? (
-                  <div className="relative w-full h-48">
-                    <Image
-                      src={g.image_url}
-                      alt={g.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full h-48 bg-surface-raised flex items-center justify-center">
-                    <CategoryIcon slug={cat.slug} className="w-8 h-8 text-accent-text" />
-                  </div>
-                )}
-                <div className="p-5 space-y-2">
-                  <h2 className="font-black text-base leading-snug group-hover:text-accent-text-soft transition-colors line-clamp-2">
-                    {g.title}
-                  </h2>
-                  {g.excerpt && (
-                    <p className="text-sm text-prose-faint line-clamp-2 leading-relaxed">{g.excerpt}</p>
-                  )}
-                  {g.reading_time_minutes && (
-                    <p className="text-xs text-prose-faint">{g.reading_time_minutes} min read</p>
-                  )}
-                </div>
-              </Link>
+              <LibraryGuideCard key={g.id} guide={g} on="background" />
             ))}
           </div>
         ) : (

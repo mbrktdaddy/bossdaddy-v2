@@ -40,7 +40,48 @@ This is the **single canonical manifesto** (source: `docs/brand-guide.md` §1.7)
 | `PageHeader` | `components/PageHeader.tsx` | Interior "slim editorial band": eyebrow + Fraunces H1 + deck + hairline. **Every non-home page.** |
 | `ScoreBlock` | `components/ScoreBlock.tsx` | `variant="ring"` (hero moments) or `variant="plain"` (default). |
 
-Reused as-is: `DroppedCard`, `GuideRow`, `EmailCaptureSection`, `BossApprovedBadge`, `getCategoryBySlug`.
+Reused as-is: `GuideRow`, `EmailCaptureSection`, `BossApprovedBadge`, `getCategoryBySlug`.
+
+**Cadence primitives (added 2026-08-03, Wirecutter-derived).** The homepage runs one
+repeated module shape — "Template A": a `LeadCard` paired with a column of compact
+rows — so adjacent sections never share a weight:
+
+| Component | Path | Notes |
+|---|---|---|
+| `LeadCard` | `components/LeadCard.tsx` | Lead half of a Template A module. Shared by Just Dropped (reviews), the Library's topic blocks, `/guides`, and `/reviews`. |
+| `ContentRow` | `components/ContentRow.tsx` | **The** compact directory row, site-wide. Text left, thumbnail right. Replaced four near-identical rows (`GuideRow`, `ReviewRow`, `/guides`'s `GuideRowItem`, `/reviews`'s local `ReviewRow`) that had drifted into two geometries. Optional `rating` — pass it on `/reviews`, omit it on recency surfaces. |
+| `TopicBlock` | `components/TopicBlock.tsx` | One category as a Template A module, and the single implementation behind **all three** per-category directories: homepage Library, `/guides`, `/reviews`. Content-kind agnostic — callers map to `TopicItem`. **One shape, ungated:** thin categories render with a short/empty row column by decision. Don't re-add a depth gate or a per-count layout swap; both were built and rejected. Takes `index` — see Alternating handedness below. |
+
+### Alternating handedness (settled 2026-08-03)
+
+Topic blocks run **serpentine**: even blocks lead-left/rows-right, odd blocks
+lead-right/rows-left, across all three per-category directories. Driven by
+`TopicBlock`'s `index` prop, so the rule has one home and no surface can drift.
+
+- **This departs from Wirecutter on purpose.** All nine of their lead+rows modules
+  run the same way round, holding the lead card on a single vertical scan line. Both
+  versions were built and compared live across the three surfaces; the serpentine won.
+  Don't "restore" uniform handedness as a consistency fix.
+- **The rows mirror with the module** (`flip` → `ContentRow`). Non-negotiable: an
+  unmirrored row in a left-hand column stacks its thumbnails against the middle
+  gutter, hard against the lead card. Mirroring keeps thumbnails on the outer edge so
+  the module's silhouette mirrors cleanly instead of just swapping sides.
+- **It's `lg:order-*`, never reordered children.** DOM order stays lead-then-rows, so
+  the single-column mobile stack always opens on the lead card. Reversing children
+  instead would bury the lead on mobile — invisible on desktop, wrong on the phone.
+- Alternation is desktop-only by nature: below `lg` every module is one column.
+| `LatestRail` | `components/home/LatestRail.tsx` | Text-only recency index beside the Cover Story — the page's only image-free tier. Rendered as a bordered panel, not naked text. |
+| `BossToolsSection` | `components/home/BossToolsSection.tsx` | Boss Tools extracted verbatim so it could move mid-page. |
+| `CredibilityBreak` | `components/CredibilityBreak.tsx` | Mid-directory breather at the halfway mark of the topic blocks, on all three directories. Renders `BRAND.credibility`. **No card, no big type, no link** — the pause comes from the absence of a card and from vertical air; §359 specs this line as supporting weight. See brand-guide §1.7 line assignment. |
+
+`on={'background' | 'surface'}` on `LeadCard` and `LibraryGuideCard` names the surface
+the card sits **on** and picks the card's own background. Getting it wrong is the
+dark-canvas bug: a `bg-surface` card inside a `bg-surface` section is invisible but for
+its border.
+
+`DroppedCard`, `guides/_components/GuideCard`, and `guides/_components/GuidesGrid` were
+**deleted 2026-08-03** — orphaned by the restructure (the latter two had already been
+dead). `LibraryGuideCard` survives and is now shared with `/guides/category/[slug]`.
 `SectionHeader` (3px-rule) is the **utility** lane; `EditorialHeader` is the **editorial** lane. Settled 2026-07-27: `/gear` is deliberately utility-styled and keeps `SectionHeader` (5 call sites) — it's a working gear list, not an editorial read. Full rule: `brand-guide.md` §2 "two lanes".
 
 ### Type / token gotchas
@@ -53,12 +94,18 @@ Reused as-is: `DroppedCard`, `GuideRow`, `EmailCaptureSection`, `BossApprovedBad
 
 1. **Hero** — `HomeHero` (full-bleed photo, "Dad Like a Boss.", ticker)
 2. **The Cover Story** — featured review as editorial split (photo + serif title + excerpt + `ScoreBlock` ring + CTA)
-3. **The Library** — enlarged guides footprint (the growth engine): topic chips + lead feature guide + reading list (`GuideRow`). Fetches 6 guides. Promoted into the slot the old wayfinding pillars used.
-4. **Just Dropped** — recent reviews grid (`DroppedCard`)
-5. **The Creed** — mission statement, dark `bg-chrome` moment
-6. **Boss Tools** — Ask the Boss (feature) + Weekends Until + Savings
-7. **Merch strip** — slim "Made by Boss Daddy" band, reused `MerchStrip` (`exploreHref="/gear#merch"`)
-8. **Email capture** — `EmailCaptureSection`
+2b. **The Latest rail** — `LatestRail`, in the Cover Story's right column (`lg:grid-cols-[1fr_300px]`). Merged guide+review recency index, text only, no images. Gives the first screen ~8 entry points instead of 1.
+3. **The Library** — the guides footprint (the growth engine), organised as a **topic directory**: chips + lead feature guide + one `TopicBlock` per category with a live guide, in `lib/categories.ts` taxonomy order. Eyebrow is "Every topic", not "Latest guides" — below the lead it isn't recency-ordered. Fetches **every** published guide (capped at `GUIDE_FETCH_CAP`), because a recency window can't feed a per-category directory.
+4. **Boss Tools** — Ask the Boss (feature) + Weekends Until + Savings. Moved up from position 6: it's the only image-free content section, so it's the mid-scroll breath between two image grids. Wirecutter's Finder sits in the same slot.
+5. **The Vault** — collections strip, flat 3-up (`VaultCard`)
+6. **Just Dropped** — Template A: `LeadCard` + 3 `ReviewRow`s. Was a flat 2/4-up grid, which put two same-weight card grids back to back with the Vault — the page's flattest stretch. Deduped against the Cover Story's `featured` review.
+7. **The Creed** — mission statement, dark `bg-chrome` moment. Stays late: `Creed → Email capture` is the payoff-then-ask sequence.
+8. **Merch strip** — slim "Made by Boss Daddy" band, reused `MerchStrip` (`exploreHref="/gear#merch"`)
+9. **Email capture** — `EmailCaptureSection`
+
+**The cadence rule:** no two adjacent sections share a shape. Reading down —
+big-image split, text rail, per-topic Template A modules, text cards, flat 3-up grid,
+Template A, centred prose. If you add a section, check what sits either side of it.
 
 ### Removed vs. the previous homepage (preserved in git history)
 - **"In this issue" wayfinding pillars** — dropped; the sticky nav already handles wayfinding, and the space was reallocated to the enlarged **Library**.

@@ -14,24 +14,32 @@ interface Guide {
 }
 
 /**
- * Medium-weight guide card — the middle tier of the homepage Library's cadence:
- * one lead split card, then a 3-up row of these, then compact GuideRows. The
- * descending weight is what keeps nine guides reading as an edited section
- * rather than a list that got truncated at nine.
+ * Medium-weight guide card — a 3-up grid cell. Shaped like VaultCard (h-40 image,
+ * dot + eyebrow, 2-line clamp) so guide and collection grids read as one card
+ * language. Distinct from FeaturedGuideCard, which is a large horizontal split
+ * built for the /guides listing hero and carries its own `mb-20`.
  *
- * Deliberately shaped like VaultCard (h-40 image, dot + eyebrow, 2-line clamp)
- * because the Vault strip sits directly beneath this grid — matching the card
- * language keeps the two sections looking like one page. Distinct from
- * FeaturedGuideCard, which is a large horizontal split built for the /guides
- * listing hero and carries its own `mb-20`.
+ * Used by the `/guides/category/[slug]` grid, which previously inlined a near-copy
+ * of this markup carrying `shadow-lg shadow-black/5` — shadows that are invisible
+ * on a near-black canvas. Elevation here is border + hover lift only.
+ *
+ * `on` names the surface the card sits ON, and therefore picks the card's own
+ * background: a `bg-surface` card inside a `bg-surface` section is invisible except
+ * for its border, and a `bg-background` card on a plain page background is the same
+ * bug in reverse. Same prop, same reason, as LeadCard.
  */
-export default function LibraryGuideCard({ guide: g }: { guide: Guide }) {
+export default function LibraryGuideCard({
+  guide: g,
+  on = 'surface',
+}: { guide: Guide; on?: 'background' | 'surface' }) {
   const cat = g.category ? getCategoryBySlug(g.category) : null
 
   return (
     <Link
       href={`/guides/${g.slug}`}
-      className="group flex flex-col bg-background border border-soft rounded-2xl overflow-hidden hover:border-accent hover:-translate-y-0.5 transition-all duration-200"
+      className={`group flex flex-col border border-soft rounded-2xl overflow-hidden hover:border-accent hover:-translate-y-0.5 transition-all duration-200 ${
+        on === 'surface' ? 'bg-background' : 'bg-surface'
+      }`}
     >
       <div className="relative h-40 bg-surface-raised shrink-0">
         {g.image_url && (
