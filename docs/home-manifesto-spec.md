@@ -72,7 +72,35 @@ lead-right/rows-left, across all three per-category directories. Driven by
 - Alternation is desktop-only by nature: below `lg` every module is one column.
 | `LatestRail` | `components/home/LatestRail.tsx` | Text-only recency index beside the Cover Story — the page's only image-free tier. Rendered as a bordered panel, not naked text. |
 | `BossToolsSection` | `components/home/BossToolsSection.tsx` | Boss Tools extracted verbatim so it could move mid-page. |
-| `CredibilityBreak` | `components/CredibilityBreak.tsx` | Mid-directory breather at the halfway mark of the topic blocks, on all three directories. Renders `BRAND.credibility`. **No card, no big type, no link** — the pause comes from the absence of a card and from vertical air; §359 specs this line as supporting weight. See brand-guide §1.7 line assignment. |
+| `CredibilityBreak` | `components/CredibilityBreak.tsx` | Mid-directory breather at the halfway mark of the topic blocks, on all three directories. Renders `BRAND.credibility` as a **photo band** over `public/images/credibility-texture.webp`. See below. |
+
+### The credibility band (settled 2026-08-03)
+
+Chosen from thirteen rendered directions. Two earlier treatments shipped and were
+rejected on sight, both recorded in the component so they aren't retried:
+
+1. A bare centred line, no card — theory was "everything else here is a bordered card,
+   so the absence of one is the differentiation." It read as a stray paragraph.
+2. A neutral banded strip with an outline icon per beat. Better, still generic — a SaaS
+   feature row.
+
+**Why imagery, and not just bigger type:** brand-guide §359 pins this line to
+*supporting* type — small-to-mid, UI weight, explicitly not `font-black` — so no
+treatment can get presence from the type itself. A photo sidesteps the constraint
+entirely: the art carries the weight, the type stays restrained, doctrine holds. That's
+the reasoning to preserve if the band is ever redesigned.
+
+**The art is load-bearing.** `credibility-texture.webp` is a 2.5:1 macro with warm light
+entering from the left and a deliberately **dead-black centre**. That empty centre is why
+the scrim sits at only 35% — heavier would flatten the art to a grey rectangle and we'd
+be paying 58KB for nothing. Any replacement banner needs the same dark middle or the
+copy stops being legible. `credibility-tools.webp` (a tool flat-lay) is the runner-up,
+kept in the repo but unreferenced.
+
+Other invariants: flat black scrim, **never** a dark→white gradient (documented
+dark-canvas anti-pattern); `text-shadow` on the copy is legibility over a photo, not
+elevation; and no `on` prop — unlike `LeadCard`/`LibraryGuideCard`, a photo band supplies
+its own contrast on any surface.
 
 `on={'background' | 'surface'}` on `LeadCard` and `LibraryGuideCard` names the surface
 the card sits **on** and picks the card's own background. Getting it wrong is the

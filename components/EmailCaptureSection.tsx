@@ -41,7 +41,12 @@ export default function EmailCaptureSection({
         <p className="text-base text-prose-muted leading-relaxed mb-8 max-w-md mx-auto">
           {subhead}
         </p>
-        <form action={action} method="POST" className="flex flex-wrap gap-2 max-w-md mx-auto">
+        {/* `justify-center` because the button WRAPS to its own line on mobile (the
+            input's basis-60 leaves no room beside it) and would otherwise sit
+            flex-start — reading as misaligned under a centred section. Paired with
+            `basis-full` on the button below, so on mobile it's a full-width CTA
+            rather than a small centred one. */}
+        <form action={action} method="POST" className="flex flex-wrap justify-center gap-2 max-w-md mx-auto">
           <input type="hidden" name="interests" value={interests} />
           <label htmlFor="email-capture-input" className="sr-only">Email address</label>
           <input
@@ -54,7 +59,7 @@ export default function EmailCaptureSection({
           />
           <button
             type="submit"
-            className="px-6 py-3.5 text-sm font-extrabold text-white bg-accent hover:bg-accent-hover rounded-xl transition-colors"
+            className="basis-full sm:basis-auto px-6 py-3.5 min-h-[48px] text-sm font-extrabold text-white bg-accent hover:bg-accent-hover rounded-xl transition-colors"
           >
             {buttonLabel} →
           </button>

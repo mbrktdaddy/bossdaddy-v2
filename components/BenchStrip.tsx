@@ -81,17 +81,21 @@ export default async function BenchStrip({
                 )}
               </div>
 
-              {/* Status pill — fixed-width column so titles align */}
-              <span
-                className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-surface-raised border border-soft shrink-0 text-center sm:min-w-[88px] ${getStatusColor(item.status as WishlistStatus)}`}
-              >
-                {getStatusLabel(item.status as WishlistStatus)}
-              </span>
-
-              {/* Title */}
-              <p className="text-sm font-bold text-prose group-hover:text-accent-text-soft transition-colors line-clamp-1 flex-1">
-                {item.title}
-              </p>
+              {/* Pill + title. On mobile they stack: in one row the fixed-width pill
+                  left the title ~40% of a 320px screen, so `line-clamp-1` chopped
+                  nearly every product name. Stacked, the title gets the full width and
+                  two lines. From `sm` up it's the original single row, where the pill's
+                  min-width keeps titles aligned down the list. */}
+              <div className="min-w-0 flex-1 flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-4">
+                <span
+                  className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-surface-raised border border-soft shrink-0 text-center sm:min-w-[88px] ${getStatusColor(item.status as WishlistStatus)}`}
+                >
+                  {getStatusLabel(item.status as WishlistStatus)}
+                </span>
+                <p className="min-w-0 text-sm font-bold text-prose group-hover:text-accent-text-soft transition-colors line-clamp-2 sm:line-clamp-1 sm:flex-1">
+                  {item.title}
+                </p>
+              </div>
 
               {/* Arrow */}
               <span aria-hidden className="text-prose-faint group-hover:text-copper transition-colors text-lg shrink-0">

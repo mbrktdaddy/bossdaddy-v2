@@ -29,24 +29,36 @@ export default function LatestRail({ items, allHref }: { items: LatestItem[]; al
   if (items.length === 0) return null
 
   return (
-    /* `h-full`, not `self-start`: the panel matches the row height so its border
-       frames the whole column. With `self-start` it stopped at its last item, which
-       put the void under whichever column happened to be shorter. */
-    <aside className="bg-surface border border-soft rounded-2xl p-6 lg:p-7 h-full">
+    /* Below `lg` this is a bare horizontal scroll strip; from `lg` (where the section
+       grid moves it into the 300px right column) it's a bordered vertical panel.
+       Stacked vertically on a phone, six items was a long dead scroll past the fold
+       before the reader reached the Library.
+       One DOM, responsive direction — no `sm:hidden` / `hidden sm:block` twin blocks,
+       so the list isn't duplicated for screen readers and crawlers.
+       `h-full` (not `self-start`) so the desktop panel matches the row height and its
+       border frames the whole column. */
+    <aside className="lg:bg-surface lg:border lg:border-soft lg:rounded-2xl lg:p-7 lg:h-full">
       <span aria-hidden className="block h-px w-6 bg-accent mb-4" />
       <h3 className="font-editorial-display font-semibold text-prose text-xl leading-tight tracking-tight">
         The latest
       </h3>
 
-      <ul className="mt-4 divide-y divide-soft">
+      {/* `-mx-6 px-6` breaks the scroller out to the container edge and restores the
+          inset inside it, so the strip bleeds correctly instead of leaking overflow to
+          the page (see CLAUDE.md — never put `overflow-x-auto` in a padded container).
+          At `lg` the flex row becomes a divided column and the breakout is undone. */}
+      <ul className="mt-4 flex gap-3 overflow-x-auto scrollbar-hide -mx-6 px-6 pb-1 lg:mt-4 lg:flex-col lg:gap-0 lg:overflow-visible lg:mx-0 lg:px-0 lg:pb-0 lg:divide-y lg:divide-soft">
         {items.map((it) => {
           const date = it.published_at
             ? new Date(it.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
             : null
           return (
-            <li key={it.href}>
-              <Link href={it.href} className="group block py-3.5">
-                <p className="text-[15px] font-bold text-prose leading-snug group-hover:text-accent transition-colors">
+            <li
+              key={it.href}
+              className="shrink-0 w-[220px] bg-surface border border-soft rounded-xl lg:w-auto lg:shrink lg:bg-transparent lg:border-0 lg:rounded-none"
+            >
+              <Link href={it.href} className="group block p-3.5 lg:p-0 lg:py-3.5">
+                <p className="text-[15px] font-bold text-prose leading-snug group-hover:text-accent transition-colors line-clamp-3 lg:line-clamp-none">
                   {it.title}
                 </p>
                 <p className="mt-1 flex items-center gap-2 text-[11px] text-prose-faint">

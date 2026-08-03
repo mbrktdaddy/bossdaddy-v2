@@ -1,9 +1,10 @@
+import Image from 'next/image'
 import { Fragment } from 'react'
 import { BRAND } from '@/lib/brand'
 
 /**
- * The mid-directory breather — a single restrained line dropped between topic
- * blocks on the homepage Library, `/guides`, and `/reviews`.
+ * The mid-directory breather — dropped between topic blocks on the homepage Library,
+ * `/guides`, and `/reviews`.
  *
  * Two jobs. It breaks a very long run of identical modules (the Library is ~3,500px
  * of one repeated shape), and it puts the credibility line where trust is actually
@@ -11,30 +12,38 @@ import { BRAND } from '@/lib/brand'
  * decorates rather than persuades. brand-guide §1.7 names reviews AND guides as
  * primary usage contexts for this line.
  *
- * WHY IT HAS NO CARD: every other thing in these sections is a bordered card, so
- * the absence of one is the strongest differentiation available, and it's free. Don't
- * "finish" this by wrapping it in a panel — the bare treatment IS the pause.
+ * DESIGN HISTORY, so it isn't re-litigated. This went through three treatments:
+ *   1. A bare centred line, no card, on the theory that "everything else here is a
+ *      bordered card, so the absence of one is the strongest differentiation." That
+ *      did not survive being looked at — it read as a stray paragraph.
+ *   2. A neutral banded strip with outline icons per beat. Better, still generic —
+ *      it looked like a SaaS feature row.
+ *   3. This: a photo band. Chosen from thirteen rendered directions.
  *
- * WHY IT ISN'T BIG TYPE: brand-guide §359 specs the credibility line as *supporting*
- * type — small-to-mid, body/UI weight, explicitly NOT `font-black`. So the breath
- * comes from vertical air, not from type size. Resist promoting it to a display line.
+ * Why the photo wins where type could not: brand-guide §359 pins this line to
+ * *supporting* type — small-to-mid, UI weight, explicitly NOT `font-black`. So the
+ * treatment can never get presence from the type itself. Imagery sidesteps that
+ * entirely: the art carries the weight, the type stays restrained, doctrine holds.
  *
- * Also deliberately NOT here, all of which were tempting:
- *   - `bg-clip-text` gradient — dark→white gradients are a documented dark-canvas
- *     anti-pattern; they read as a rendering bug on a near-black page.
- *   - `text-shadow` — nothing sits behind this, so a shadow is invisible cost.
+ * The art is doing a specific job, so don't swap it casually: `credibility-texture.webp`
+ * is a 2.5:1 macro with warm light entering from the left and a deliberately DEAD BLACK
+ * centre. That empty centre is why the scrim can sit at 35% — a heavier scrim would
+ * flatten the art to a grey rectangle and we'd be paying 58KB for nothing. Any
+ * replacement needs the same dark middle or the copy stops being legible.
+ *
+ * Deliberately absent, all of which were tried or tempting:
+ *   - A dark→white gradient scrim — that's the documented dark-canvas anti-pattern. A
+ *     flat black scrim over a photo is a different thing and is correct here.
+ *   - `bg-accent/10` icon chips — pale-orange fills are forbidden; warmth lives in
+ *     border, icon, and text, never a tinted background.
  *   - `font-editorial-display` (Fraunces) — reserved for editorial DISPLAY moments
- *     (section titles, PageHeader H1s, the Creed). This is a supporting line; serif
- *     would promote it into competition with the block headers around it.
- *   - `font-black` — §359 forbids it for this line specifically.
- *
- * WHY IT HAS NO LINK: the section header above already carries "All guides →". A CTA
- * here would turn the breather back into a module, which defeats it. The Creed takes
- * the same approach.
- *
- * Imports BRAND itself rather than taking the line as a prop, so the three surfaces
- * can't drift apart.
+ *     (section titles, PageHeader H1s, the Creed). Serif here would compete with the
+ *     topic-block headers either side of it.
+ *   - An `on={'background'|'surface'}` prop — the other shared cards need one so they
+ *     don't vanish into a same-coloured section, but a photo band supplies its own
+ *     contrast on any surface.
  */
+
 /**
  * "Real Dads. Smart Tools. Better Decisions." is three two-word beats, and setting it
  * as one wrapped sentence throws that away — the parallel structure IS the line's
@@ -42,56 +51,84 @@ import { BRAND } from '@/lib/brand'
  *
  * Derived from the canonical string rather than hardcoded, so a wording change in
  * lib/brand.ts still renders. Falls back to one plain line if the string ever stops
- * being multi-sentence — better a flat render than a broken one.
+ * being multi-sentence — better a flat render than a broken rank.
  */
-function beats(line: string): { lead: string; last: string }[] {
-  const sentences = line.split('.').map((s) => s.trim()).filter(Boolean)
-  if (sentences.length < 2) return []
-  return sentences.map((s) => {
-    const i = s.lastIndexOf(' ')
-    return i === -1 ? { lead: '', last: s } : { lead: s.slice(0, i), last: s.slice(i + 1) }
-  })
+function beats(line: string): string[] {
+  return line.split('.').map((s) => s.trim()).filter(Boolean)
 }
 
 export default function CredibilityBreak() {
   const lines = beats(BRAND.credibility)
 
-  if (lines.length === 0) {
-    return (
-      <div className="mt-12 pt-12 border-t border-soft">
-        <p className="py-10 md:py-14 text-center text-base md:text-xl font-bold uppercase tracking-[0.14em] text-prose">
-          {BRAND.credibility}
-        </p>
-      </div>
-    )
-  }
-
   return (
     <div className="mt-12 pt-12 border-t border-soft">
-      {/* Presence comes from WIDTH, not point size. Set in a max-w-xl column this
-          line read as a stray paragraph adrift in a 1152px section; uppercase and
-          tracked out across the full measure it reads as a deliberate trust bar,
-          while the type stays mid-size and UI-weight per §359.
-          One DOM, layout adapts: stacked on mobile (narrow measure), one horizontal
-          rank from `sm` up. Don't split this into duplicated per-breakpoint blocks —
-          the sentence would appear twice in the DOM for no structural reason. */}
-      <div className="py-10 md:py-14 flex flex-col sm:flex-row sm:items-center sm:justify-center gap-3 sm:gap-0 text-center">
-        {lines.map(({ lead, last }, i) => (
-          <Fragment key={last}>
-            {i > 0 && (
-              // Accent dot separators — the same dot that kickers use on LeadCard and
-              // LibraryGuideCard, so the accent vocabulary stays consistent. Hidden on
-              // mobile, where the stack already separates the beats.
-              <span
-                aria-hidden
-                className="hidden sm:block shrink-0 w-1.5 h-1.5 rounded-full bg-accent mx-5 md:mx-8"
-              />
-            )}
-            <span className="text-base md:text-xl font-bold uppercase tracking-[0.14em] text-prose whitespace-nowrap">
-              {lead && `${lead} `}{last}.
-            </span>
-          </Fragment>
-        ))}
+      <div className="relative rounded-2xl overflow-hidden border border-soft min-h-[220px] md:min-h-[260px] flex items-center">
+        <Image
+          src="/images/credibility-texture.webp"
+          alt=""
+          fill
+          sizes="(max-width: 1024px) 100vw, 1100px"
+          className="object-cover"
+        />
+        <div aria-hidden className="absolute inset-0 bg-black/35" />
+
+        {/* text-shadow here is legibility over a photograph, NOT elevation — the
+            copy is centred over the dark middle, but at narrow widths the block
+            reaches toward the lit left edge. Same reason HomeHero carries one. */}
+        <div className="relative w-full px-5 sm:px-6 py-12 text-center [text-shadow:0_1px_3px_rgba(0,0,0,0.6)]">
+          {/* No eyebrow. There was a "The standard" kicker here; removed on request.
+              The band is a statement, not a titled section — and with the copy alone
+              the art gets more room to read. Don't reinstate a kicker without a reason:
+              `positioning` is already the hero eyebrow, so a literal one here would be
+              a third brand-line occurrence on a single page. */}
+          {lines.length < 2 ? (
+            <p className="text-sm sm:text-base md:text-xl font-bold uppercase tracking-[0.12em] sm:tracking-[0.14em] text-white">
+              {BRAND.credibility}
+            </p>
+          ) : (
+            /* Mobile wraps 2 + 1 — the leading beats share a line and the closing one
+               drops beneath it. Three separate stacked lines read as a bulleted list
+               rather than one statement.
+               Mobile type and padding tighten (text-sm, tighter tracking, px-5, closer
+               dots) because at `text-base` the first two beats plus their separator
+               overflow a 320px screen and it silently falls back to three lines. */
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 sm:gap-x-0 sm:gap-y-0">
+              {lines.map((beat, i) => {
+                const isLast = i === lines.length - 1
+                return (
+                  <Fragment key={beat}>
+                    {i > 0 && (
+                      // Accent dot separators — the same dot the kickers on LeadCard
+                      // and LibraryGuideCard use, keeping the accent vocabulary
+                      // consistent. The one before the closing beat hides on mobile,
+                      // where the line break separates them instead.
+                      <span
+                        aria-hidden
+                        className={`${isLast ? 'hidden sm:block' : 'block'} shrink-0 w-1.5 h-1.5 rounded-full bg-accent mx-2 sm:mx-6`}
+                      />
+                    )}
+                    {/* Zero-height full-basis spacer forces the wrap before the closing
+                        beat on mobile only. Cheaper and more robust than hardcoding a
+                        2-then-1 grouping, which would break if the line's beat count
+                        ever changed. */}
+                    {isLast && <span aria-hidden className="basis-full h-0 sm:hidden" />}
+                    <p
+                      className={`text-sm sm:text-base md:text-xl font-bold uppercase tracking-[0.12em] sm:tracking-[0.14em] whitespace-nowrap ${
+                        // Closing beat in accent — it's the payoff of the three, and on
+                        // dark the *text* orange (orange-400) is the right token: the
+                        // primary #E55A1A is a fill colour and next to white it reads
+                        // as recessed rather than emphasised.
+                        isLast ? 'text-accent-text' : 'text-white'
+                      }`}
+                    >
+                      {beat}.
+                    </p>
+                  </Fragment>
+                )
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
