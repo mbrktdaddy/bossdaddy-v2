@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { OG_SITE } from '@/lib/og'
+import { OG_SITE, OG_CARD_PATH } from '@/lib/og'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { getKids } from '@/lib/dad-tools/kid-actions'
 import { LABELS } from '@/lib/labels'
@@ -60,7 +60,9 @@ export async function generateMetadata(
   const description = LABELS.tools.weekendsUntil.metaDescription
 
   // If we have enough state to compute N, build a dynamic OG image URL.
-  let ogImageUrl = '/api/og/weekends'
+  // Advertised on /og-card/* so robots' `Disallow: /api/` can't hide it from
+  // Twitterbot (see OG_CARD_PATH in lib/og.ts); rewritten onto /api/og/weekends.
+  let ogImageUrl = `${OG_CARD_PATH}/weekends`
   if (
     parsed.birthdate &&
     /^\d{4}-\d{2}-\d{2}$/.test(parsed.birthdate) &&
@@ -81,7 +83,7 @@ export async function generateMetadata(
       // First-initial only, never the full name.
       const initial = (parsed.name ?? '').trim().charAt(0).toUpperCase()
       if (initial) ogParams.set('for', initial)
-      ogImageUrl = `/api/og/weekends?${ogParams.toString()}`
+      ogImageUrl = `${OG_CARD_PATH}/weekends?${ogParams.toString()}`
     }
   }
 

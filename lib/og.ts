@@ -19,6 +19,28 @@
  */
 export const OG_TEMPLATE_VERSION = 6
 
+/**
+ * PUBLIC path the social card is advertised on. Deliberately NOT under `/api/`.
+ *
+ * Root cause of the long-running "X renders the card but no image" bug, proven
+ * from Vercel logs on 2026-08-04: Twitterbot fetched the page HTML three times
+ * and NEVER requested the image once — no function invocation, and no CDN hit
+ * either (a cached hit does log, so the absence is real evidence). It was
+ * obeying `Disallow: /api/` and ignoring the more-specific `Allow: /api/og`
+ * that was supposed to override it. Specificity precedence is RFC 9309 /
+ * Google behavior, not universal — the 1994 spec had no `Allow` at all.
+ *
+ * Serving from a path no robots rule touches removes the entire class of
+ * problem: it can't be broken by a crawler's precedence rules, and it works
+ * against X's CACHED robots.txt immediately rather than waiting out its
+ * refresh. `/api/og` still functions (next.config.ts rewrites this onto it),
+ * so preview images already cached elsewhere by URL keep resolving.
+ *
+ * Do NOT move this back under `/api/`, and do not add a robots rule for it —
+ * being covered by the plain `Allow: /` is the entire point.
+ */
+export const OG_CARD_PATH = '/og-card'
+
 // 'site' = a section/home card with no content-type badge.
 export type OgType = 'review' | 'guide' | 'article' | 'site'
 
@@ -80,7 +102,7 @@ export function ogImageUrl(opts: {
   if (image) params.set('img', image)
   const contentVersion = updatedAt ? Date.parse(updatedAt) || 0 : 0
   params.set('v', `${OG_TEMPLATE_VERSION}-${contentVersion}`)
-  return `${base}/api/og?${params.toString()}`
+  return `${base}${OG_CARD_PATH}?${params.toString()}`
 }
 
 /**

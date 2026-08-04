@@ -56,7 +56,9 @@ async function prewarmOne(siteUrl: string, path: string): Promise<void> {
     if (!match) return
     const imageUrl = decodeHtmlEntities(match[1])
     // Only warm our own generated cards; skip any externally-hosted image.
-    if (!imageUrl.includes('/api/og')) return
+    // Accept both the advertised path (/og-card) and the underlying route it
+    // rewrites onto (/api/og) — see OG_CARD_PATH in lib/og.ts.
+    if (!imageUrl.includes('/og-card') && !imageUrl.includes('/api/og')) return
     await fetchWithTimeout(imageUrl, IMAGE_TIMEOUT_MS)
   } catch {
     // best-effort — warming is never allowed to throw

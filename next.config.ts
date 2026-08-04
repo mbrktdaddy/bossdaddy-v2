@@ -45,6 +45,19 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  // Social preview cards are advertised on /og-card, NOT /api/og — Twitterbot
+  // obeys `Disallow: /api/` and ignores the more-specific `Allow: /api/og`, so it
+  // was silently never fetching the image (proven from runtime logs 2026-08-04).
+  // These rewrites keep the route code where it lives while serving it from a path
+  // no robots rule touches. /api/og stays reachable so preview images already
+  // cached by URL on other platforms keep resolving. See OG_CARD_PATH in lib/og.ts.
+  async rewrites() {
+    return [
+      { source: '/og-card', destination: '/api/og' },
+      { source: '/og-card/weekends', destination: '/api/og/weekends' },
+    ]
+  },
+
   async headers() {
     return [
       {

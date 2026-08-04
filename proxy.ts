@@ -63,6 +63,6 @@ export async function proxy(request: NextRequest) {
 // `api/og/weekends`.)
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|api/og|api/img|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|og-card|api/og|api/img|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
