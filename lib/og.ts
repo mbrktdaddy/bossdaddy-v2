@@ -44,6 +44,17 @@ export const OG_CARD_PATH = '/og-card'
 // 'site' = a section/home card with no content-type badge.
 export type OgType = 'review' | 'guide' | 'article' | 'site'
 
+/**
+ * How the hero image fills the 1200×630 card.
+ *
+ * - 'cover' (default) — fill the frame and crop the overflow. Correct for
+ *   editorial hero photos: any slice of the scene still reads.
+ * - 'contain' — fit the whole image inside and letterbox with the card's
+ *   near-black. Correct for PRODUCT MOCKUPS, which are square — covering one
+ *   zooms so far in the product gets cut off.
+ */
+export type OgFit = 'cover' | 'contain'
+
 // Brand X/Twitter handle — matches app/layout.tsx. Included in every social card
 // so per-page metadata (which fully REPLACES the layout's twitter object) keeps
 // the site/creator attribution.
@@ -94,12 +105,16 @@ export function ogImageUrl(opts: {
    * validates the host and falls back to the text card otherwise.
    */
   image?: string | null
+  /** How the hero fills the frame. Omit for 'cover'; use 'contain' for products. */
+  fit?: OgFit
 }): string {
-  const { title, type = 'guide', category, updatedAt, base = '', cta, image } = opts
+  const { title, type = 'guide', category, updatedAt, base = '', cta, image, fit } = opts
   const params = new URLSearchParams({ title, type })
   if (category) params.set('category', category)
   if (cta) params.set('cta', cta)
   if (image) params.set('img', image)
+  // Only emit the non-default so existing cover-card URLs keep their cache key.
+  if (fit === 'contain') params.set('fit', fit)
   const contentVersion = updatedAt ? Date.parse(updatedAt) || 0 : 0
   params.set('v', `${OG_TEMPLATE_VERSION}-${contentVersion}`)
   return `${base}${OG_CARD_PATH}?${params.toString()}`
@@ -121,12 +136,16 @@ export function ogImageMeta(opts: {
   cta?: string
   /** Absolute hero image URL — renders a photo card (see ogImageUrl). */
   image?: string | null
+  /** How the hero fills the frame. Omit for 'cover'; use 'contain' for products. */
+  fit?: OgFit
   /** Override the default "<title> — Boss Daddy Life" alt text. */
   alt?: string
 }): { url: string; width: number; height: number; alt: string } {
   const { alt, ...urlOpts } = opts
   return {
     url: ogImageUrl(urlOpts),
+    // 1200×630 is the frame the card is always rendered at, regardless of `fit`
+    // — 'contain' letterboxes inside it rather than changing the output size.
     width: 1200,
     height: 630,
     alt: alt ?? `${opts.title} — Boss Daddy Life`,
@@ -187,20 +206,22 @@ export function buildSocialMetadata(opts: {
   cta?: string
   /** Absolute hero URL → photo card. Falsy → text card. */
   heroUrl?: string | null
+  /** How the hero fills the frame. Omit for 'cover'; use 'contain' for products. */
+  fit?: OgFit
   updatedAt?: string | null
   /** Override the card alt text. */
   imageAlt?: string
 }): import('next').Metadata {
   const {
     title, description, path, siteUrl, ogTitle, type = 'guide',
-    ogType = 'article', category, cta, heroUrl, updatedAt, imageAlt,
+    ogType = 'article', category, cta, heroUrl, fit, updatedAt, imageAlt,
   } = opts
 
   const canonicalUrl = `${siteUrl}${path}`
   const socialTitle = ogTitle ?? title
   const image = ogImageMeta({
     title: socialTitle, type, category, updatedAt, base: siteUrl, cta,
-    image: heroUrl || undefined, alt: imageAlt,
+    image: heroUrl || undefined, fit, alt: imageAlt,
   })
   const socialDescription = clampSocialDescription(description)
 

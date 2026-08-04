@@ -19,10 +19,18 @@ export const maxDuration = 30
 const OG_W = 1200
 const OG_H = 630
 
+// The card canvas colour, as sharp wants it. Must stay in sync with the '#0a0a0a'
+// backgroundColor on the text card below so a letterboxed product photo blends
+// into the card instead of sitting on a visible slab.
+const CARD_BG_RGB = { r: 10, g: 10, b: 10 }
+
+/** How the hero fills the 1200×630 frame. See heroDataUri. */
+type OgFit = 'cover' | 'contain'
+
 // Fetch the hero and return a 1200×630 PNG data URI, or null on any failure
 // (missing/invalid url, fetch error, decode error) so the caller falls back to
 // the text card rather than emitting a broken image.
-async function heroDataUri(rawUrl: string | null): Promise<string | null> {
+async function heroDataUri(rawUrl: string | null, fit: OgFit): Promise<string | null> {
   if (!rawUrl) return null
   const url = rawUrl.split('?')[0]
   if (!isOwnImageUrl(url)) return null
@@ -30,10 +38,20 @@ async function heroDataUri(rawUrl: string | null): Promise<string | null> {
     const res = await fetch(url)
     if (!res.ok) return null
     const input = Buffer.from(await res.arrayBuffer())
+    // 'cover'   — fill the frame, crop the overflow. Right for editorial hero
+    //             photos, where any 1200×630 slice of the scene still reads.
+    // 'contain' — fit the WHOLE image inside the frame and letterbox the gap with
+    //             the card's own near-black. Right for product mockups, which are
+    //             square: covering one zooms so far in that the product is cut off
+    //             (a mug card showed a black wall and half a wordmark).
+    const resize =
+      fit === 'contain'
+        ? { fit: 'contain' as const, background: CARD_BG_RGB }
+        : { fit: 'cover' as const, position: 'attention' as const }
     // JPEG (not PNG): photos compress ~8× smaller, keeping the base64 data-URI
     // that Satori decodes lightweight. The final card is re-encoded by ImageResponse.
     const jpeg = await sharp(input)
-      .resize(OG_W, OG_H, { fit: 'cover', position: 'attention' })
+      .resize(OG_W, OG_H, resize)
       .jpeg({ quality: 82, mozjpeg: true })
       .toBuffer()
     return `data:image/jpeg;base64,${jpeg.toString('base64')}`
@@ -61,7 +79,10 @@ export async function GET(request: NextRequest) {
     ? category.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
     : ''
 
-  const bg = await heroDataUri(searchParams.get('img'))
+  const bg = await heroDataUri(
+    searchParams.get('img'),
+    searchParams.get('fit') === 'contain' ? 'contain' : 'cover',
+  )
 
   // IMMUTABLE, one year. Safe because this URL already uniquely identifies its
   // own bytes: every render input is a query param (title/type/category/cta/img)

@@ -28,7 +28,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const supabase = createAnonClient()
   const { data } = await supabase
-    .from('merch').select('name, description, image_url, default_image_url').eq('slug', slug).maybeSingle()
+    // updated_at feeds the card's `v=` cache-buster. Without it every merch card
+    // is pinned at `v=<template>-0` forever, and since /og-card is cached
+    // `immutable` for a year, swapping a product mockup would never refresh the
+    // preview. Every other content type already passes its row timestamp.
+    .from('merch').select('name, description, image_url, default_image_url, updated_at').eq('slug', slug).maybeSingle()
   if (!data) return {}
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
 
@@ -54,6 +58,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ogType: 'website',
     cta: 'Shop the Gear',
     heroUrl: toAbsoluteUrl(data.image_url ?? data.default_image_url, siteUrl),
+    // Product mockups are square; 'cover' zooms so far into a 1200×630 frame that
+    // the product is cut off. Letterbox the whole thing onto the card canvas.
+    fit: 'contain',
+    updatedAt: data.updated_at,
   })
 }
 
