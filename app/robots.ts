@@ -1,13 +1,40 @@
 import type { MetadataRoute } from 'next'
 
 /**
- * Paths that must never be crawled by anyone: private app surfaces, auth flows,
- * and affiliate redirects. Shared by every user-agent group below so a group can
- * never accidentally open one of these up.
+ * ONE group, deliberately.
  *
- * NOTE: `/api/` is deliberately NOT in here — see the crawler groups below.
+ * There were briefly per-crawler groups for Twitterbot and facebookexternalhit,
+ * added because the social card lived at `/api/og` under a broad `Disallow: /api/`
+ * and Twitterbot does NOT honour the more-specific `Allow: /api/og` meant to
+ * override it (proven from runtime logs 2026-08-04: it fetched the page HTML three
+ * times and never once requested the image). That workaround is obsolete — the card
+ * moved to `/og-card` and the crops to `/img-crop`, both outside every Disallow, and
+ * `npm run check:og` now fails the build if any card URL creeps back under `/api/`.
+ *
+ * Named groups are worth removing rather than leaving as belt-and-braces: per spec a
+ * named group fully REPLACES `*` for that agent, so any Disallow added here later
+ * would silently not apply to those two crawlers. A silent robots divergence is a
+ * worse failure than the build error that now guards the original problem.
+ *
+ * THE INVARIANT: any URL that appears in a meta tag, JSON-LD block, <link>, or the
+ * sitemap must live outside every Disallow below. Don't add a rule without checking
+ * it against that.
  */
-const PRIVATE_PATHS = [
+
+/**
+ * AI crawlers (GPTBot, ClaudeBot, PerplexityBot, Google-Extended, CCBot, …) are
+ * intentionally ALLOWED, via `*`. This is a deliberate decision, not an oversight:
+ * being cited in AI answers is a discovery channel we want. No named group is needed
+ * — adding one would only re-create the divergence trap described above. If that
+ * stance ever changes, add the Disallow to the `*` group rather than a new group.
+ *
+ * Note robots.txt is not the only lever: Vercel's Firewall has a "Block AI Bots"
+ * toggle that overrides this at the edge. It must stay OFF for this to hold.
+ */
+const DISALLOW = [
+  // Application surfaces. Every one of these is also auth-gated — robots.txt is a
+  // politeness protocol, not a security boundary — so this is crawl-budget hygiene.
+  '/api/',
   '/dashboard/',
   '/studio/',
   '/login',
@@ -16,49 +43,42 @@ const PRIVATE_PATHS = [
   '/reset-password',
   '/reset-callback',
   '/callback',
-  '/bench/*',
+  // Affiliate redirects: kept out of the index so paid links aren't crawled as
+  // ordinary destinations.
   '/go/',
-  '/feed.xml',
-  '/feed/',
 ]
 
-/**
- * Link-preview crawlers get their OWN groups, with no `/api/` disallow at all.
+/*
+ * Two paths were REMOVED from the list above on 2026-08-04:
  *
- * Why this exists: the social card image is served from `/api/og`, which sat under
- * a broad `Disallow: /api/`. The `*` group works around that with a longer, more
- * specific `Allow: /api/og` — correct per RFC 9309 and Google's parser, where the
- * most specific match wins. But specificity precedence is NOT universal (the
- * original 1994 robots.txt spec had no `Allow` directive at all), and a crawler
- * that ignores `Allow` or matches the first rule in file order will block the
- * image while still rendering the card from the page HTML — which is exactly the
- * "card renders, image missing" symptom, and exactly why it never reproduced over
- * SMS (iMessage/Android link previewers don't read robots.txt).
+ * `/bench/*` — bench detail pages already send `robots: noindex, follow` and
+ *   deliberately carry a share card ("out of search but still a rich share
+ *   preview", bench/[slug]). Disallowing them defeated both halves: Twitterbot
+ *   couldn't fetch the page so there was no card at all, and Googlebot couldn't
+ *   read the noindex it was supposed to obey — a disallowed URL can still get
+ *   indexed from external links, just without a snippet. noindex is the right
+ *   tool here; Disallow is not.
  *
- * Rather than bet on any crawler's precedence rules, give these agents a group
- * with nothing to misparse. Per the spec a named group fully REPLACES `*` for that
- * agent, so each one must re-declare the private paths — hence PRIVATE_PATHS.
+ * `/feed.xml` + `/feed/` — the layout advertises all three feeds via
+ *   <link rel="alternate" type="application/rss+xml"> while robots.txt forbade
+ *   fetching them. Feeds are a legitimate discovery surface for search and AI
+ *   crawlers. To keep the raw XML from surfacing AS a search result, the feeds
+ *   now send `X-Robots-Tag: noindex, follow` (lib/rss.ts) — crawlable and
+ *   followable, but not itself indexable.
  */
-const PREVIEW_CRAWLERS = ['Twitterbot', 'facebookexternalhit']
 
 export default function robots(): MetadataRoute.Robots {
   const base = 'https://www.bossdaddylife.com'
   return {
     rules: [
-      ...PREVIEW_CRAWLERS.map((userAgent) => ({
-        userAgent,
-        allow: '/',
-        disallow: PRIVATE_PATHS,
-      })),
       {
         userAgent: '*',
-        // Allow the image endpoints explicitly — they live under /api/ but must
-        // be crawlable: /api/og for link-preview scrapers and /api/img for the
-        // JSON-LD structured-data image crops Googlebot fetches. Longer match
-        // wins over the broad /api/ disallow below for compliant parsers; the
-        // preview crawlers above don't have to rely on that.
+        // /api/og and /api/img are LEGACY-only: nothing advertises them since the
+        // move to /og-card and /img-crop, but the routes still resolve, so these
+        // keep any URL cached elsewhere before the move working for crawlers that
+        // do honour Allow precedence. Harmless to keep, and not load-bearing.
         allow: ['/', '/api/og', '/api/img'],
-        disallow: ['/api/', ...PRIVATE_PATHS],
+        disallow: DISALLOW,
       },
     ],
     sitemap: `${base}/sitemap.xml`,

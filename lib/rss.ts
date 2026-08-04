@@ -197,6 +197,12 @@ export function rssResponse(xml: string): Response {
     headers: {
       'Content-Type': 'application/rss+xml; charset=utf-8',
       'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+      // The feeds are crawlable again (robots.txt used to Disallow them even though
+      // the layout advertises all three via <link rel="alternate">). This is the
+      // other half of that: `noindex` keeps the raw XML from showing up AS a search
+      // result, while `follow` still lets crawlers walk through to the articles.
+      // Header rather than a meta tag — XML has nowhere to put one.
+      'X-Robots-Tag': 'noindex, follow',
     },
   })
 }
