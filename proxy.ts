@@ -44,8 +44,18 @@ export async function proxy(request: NextRequest) {
   return response
 }
 
+// `api/og` and `api/img` are PUBLIC IMAGE endpoints, not app routes. They were
+// matching this proxy only because they carry no file extension, so every social
+// preview render paid a Supabase refreshSession() round-trip plus a
+// checkModerationGate() DB query before the image work even started — latency on
+// the one path where a crawler timeout costs a broken card for ~7 days. Worse, if
+// such a request ever arrived with cookies, the session refresh would attach
+// Set-Cookie and make the response uncacheable at the CDN. Nothing in the
+// pipeline applies to them: they take no session, serve no user data, and must
+// stay reachable while logged out. (The `api/og` prefix also covers
+// `api/og/weekends`.)
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api/og|api/img|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

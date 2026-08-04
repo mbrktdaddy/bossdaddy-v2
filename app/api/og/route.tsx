@@ -57,8 +57,21 @@ export async function GET(request: NextRequest) {
 
   const bg = await heroDataUri(searchParams.get('img'))
 
+  // IMMUTABLE, one year. Safe because this URL already uniquely identifies its
+  // own bytes: every render input is a query param (title/type/category/cta/img)
+  // and the only hidden input — the card DESIGN — is versioned by the `v=`
+  // cache-buster (OG_TEMPLATE_VERSION, see lib/og.ts). Change any input and you
+  // get a different URL, so a cached entry can never go stale.
+  //
+  // Why this matters more than it looks: Vercel's CDN caches PER EDGE POP. At the
+  // old 24h TTL, X/Facebook crawling from their own datacenters hit a POP nobody
+  // had warmed and paid the full ~2s cold render (fetch hero → sharp → Satori →
+  // sharp-to-JPEG). A scraper that times out there caches a NO-IMAGE card for
+  // ~7 days, and X retired its Card Validator so there's no manual re-scrape.
+  // `lib/og/prewarm.ts` can only ever warm the one POP it lands on, so a long
+  // immutable TTL — not warming — is what actually closes the window.
   const cacheHeaders = {
-    'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',
+    'Cache-Control': 'public, max-age=31536000, s-maxage=31536000, immutable',
   }
 
   const Brand = (
@@ -137,9 +150,19 @@ export async function GET(request: NextRequest) {
   // Text cards are small PNGs and keep text crisp — return as-is. Photo cards
   // come out ~0.8–1.3 MB as PNG (ImageResponse only emits PNG), which trips the
   // "image too heavy" preview warning, so recompress those to JPEG (~150–250 KB).
+  // Declare Content-Length explicitly. The body is fully buffered by the time we
+  // return, but without this header the platform streams it as
+  // `Transfer-Encoding: chunked` with no declared size — and preview crawlers that
+  // size-check a response before downloading it (X caps card images at 5MB) can
+  // refuse an unknown-length body.
   if (!bg) {
-    return new Response(await image.arrayBuffer(), {
-      headers: { 'Content-Type': 'image/png', ...cacheHeaders },
+    const png = await image.arrayBuffer()
+    return new Response(png, {
+      headers: {
+        'Content-Type': 'image/png',
+        'Content-Length': String(png.byteLength),
+        ...cacheHeaders,
+      },
     })
   }
 
@@ -147,6 +170,10 @@ export async function GET(request: NextRequest) {
     .jpeg({ quality: 82, mozjpeg: true })
     .toBuffer()
   return new Response(new Uint8Array(jpeg), {
-    headers: { 'Content-Type': 'image/jpeg', ...cacheHeaders },
+    headers: {
+      'Content-Type': 'image/jpeg',
+      'Content-Length': String(jpeg.byteLength),
+      ...cacheHeaders,
+    },
   })
 }

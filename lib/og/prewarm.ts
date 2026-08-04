@@ -8,10 +8,20 @@
  * out and cache a "no image" card — and X no longer offers a manual re-scrape,
  * so that broken card can stick for ~7 days.
  *
- * Warming closes the gap: immediately after publish we fetch the public page
+ * Warming narrows the gap: immediately after publish we fetch the public page
  * (which also warms its ISR render) and read the EXACT `og:image` URL the page
  * emits — same `v=` cache-buster, hero, cta, category — then fetch that URL so
  * Vercel's CDN caches the image (`x-vercel-cache: HIT`) before any scraper runs.
+ *
+ * IMPORTANT — warming alone does NOT solve the cold-MISS problem, so don't treat
+ * this module as the guarantee. Vercel's CDN caches PER EDGE POP: this warms only
+ * whichever POP our own request lands on, while X/Facebook crawl from their own
+ * datacenters and hit a different POP entirely — a guaranteed MISS no matter how
+ * diligently we warm. What actually closes the window is the one-year `immutable`
+ * Cache-Control on `/api/og` (safe because `v=` makes every URL uniquely identify
+ * its bytes). Keep this module for the ISR page warm and the same-POP win, but
+ * never reintroduce a short TTL on the image on the assumption that warming
+ * covers it. See the header comment in `app/api/og/route.tsx`.
  *
  * Reading the real emitted URL (rather than rebuilding it here) guarantees we
  * warm the same cache key the page will advertise, no matter how the metadata is
