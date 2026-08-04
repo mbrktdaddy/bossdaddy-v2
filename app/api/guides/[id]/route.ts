@@ -13,6 +13,7 @@ import { getResend, FROM_EMAIL } from '@/lib/resend'
 import { ModerationResultEmail } from '@/emails/ModerationResultEmail'
 import { CATEGORY_SLUGS } from '@/lib/categories'
 import { prewarmOgForPaths } from '@/lib/og/prewarm'
+import { revalidateGuidePaths } from '@/lib/revalidate'
 import * as React from 'react'
 import { z } from 'zod'
 
@@ -122,10 +123,7 @@ export async function PUT(
       return NextResponse.json({ error: `Moderation action failed: ${error.message}` }, { status: 500 })
     }
 
-    revalidatePath('/')
-    revalidatePath('/guides')
-    revalidatePath('/about')
-    if (data?.slug) revalidatePath(`/guides/${data.slug}`)
+    revalidateGuidePaths([data as { slug?: string | null; category?: string | null }])
 
     // Pre-warm the OG preview image so the first social scrape hits a warm CDN
     // cache instead of a cold ~2s MISS (which X can time out on and cache blank).
@@ -226,9 +224,13 @@ export async function PUT(
   )
 
   if (wasApproved && data?.slug) {
-    revalidatePath('/')
-    revalidatePath('/guides')
-    revalidatePath(`/guides/${data.slug}`)
+    // `current.category` is the PRE-edit category: if this edit re-categorised a
+    // live guide, the category it left has to be purged too or it keeps listing
+    // the guide for up to an hour.
+    revalidateGuidePaths(
+      [data as { slug?: string | null; category?: string | null }],
+      [current.category as string | null],
+    )
 
     // Editing a LIVE guide changes updated_at → a new OG image URL (the `v=`
     // cache-buster). Pre-warm it so the first social scrape hits a warm CDN

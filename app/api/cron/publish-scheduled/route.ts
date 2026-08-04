@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest, after } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { prewarmOgForPaths } from '@/lib/og/prewarm'
+import { revalidateGuidePaths, revalidateReviewPaths } from '@/lib/revalidate'
 import { getResend, FROM_EMAIL } from '@/lib/resend'
 import { ModerationResultEmail } from '@/emails/ModerationResultEmail'
 import * as React from 'react'
@@ -37,13 +38,13 @@ export async function GET(request: NextRequest) {
   const [{ data: dueArticles }, { data: dueReviews }, { data: dueCollections }] = await Promise.all([
     admin
       .from('guides')
-      .select('id, slug, title, author_id')
+      .select('id, slug, title, author_id, category')
       .not('scheduled_publish_at', 'is', null)
       .lte('scheduled_publish_at', now)
       .in('status', ['draft', 'pending', 'rejected']),
     admin
       .from('reviews')
-      .select('id, slug, title, author_id')
+      .select('id, slug, title, author_id, category')
       .not('scheduled_publish_at', 'is', null)
       .lte('scheduled_publish_at', now)
       .in('status', ['draft', 'pending', 'rejected']),
@@ -110,16 +111,11 @@ export async function GET(request: NextRequest) {
 
   // Revalidate public pages that might have changed
   if (articlesPublished > 0) {
-    revalidatePath('/')
-    revalidatePath('/guides')
-    ;(dueArticles ?? []).forEach((a) => a.slug && revalidatePath(`/guides/${a.slug}`))
+    revalidateGuidePaths(dueArticles ?? [])
     warmPaths.push(...(dueArticles ?? []).filter((a) => a.slug).map((a) => `/guides/${a.slug}`))
   }
   if (reviewsPublished > 0) {
-    revalidatePath('/')
-    revalidatePath('/reviews')
-    revalidatePath('/about')
-    ;(dueReviews ?? []).forEach((r) => r.slug && revalidatePath(`/reviews/${r.slug}`))
+    revalidateReviewPaths(dueReviews ?? [])
     warmPaths.push(...(dueReviews ?? []).filter((r) => r.slug).map((r) => `/reviews/${r.slug}`))
   }
   if (collectionsPublished > 0) {

@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { prewarmOgForPaths } from '@/lib/og/prewarm'
+import { revalidateGuidePaths } from '@/lib/revalidate'
 import { z } from 'zod'
 
 const BulkSchema = z.object({
@@ -29,37 +30,50 @@ export async function POST(request: NextRequest) {
   let affected = 0
   const now = new Date().toISOString()
 
+  // Which public pages to purge afterwards. Captured per-branch because the
+  // delete branch loses the rows once they're gone.
+  let touched: { slug: string | null; category: string | null }[] = []
+
   if (action === 'publish') {
     const { data, count, error } = await admin
       .from('guides')
       .update({ status: 'approved', published_at: now }, { count: 'exact' })
       .in('id', ids)
-      .select('slug')
+      .select('slug, category')
     if (error) return NextResponse.json({ error: `Publish failed: ${error.message}` }, { status: 500 })
     affected = count ?? 0
+    touched = data ?? []
     // Pre-warm each newly-live guide's OG image so the first social scrape hits
     // a warm CDN cache instead of a cold ~2s MISS (X can time out + cache blank).
     const paths = (data ?? []).map((g) => g.slug).filter(Boolean).map((s) => `/guides/${s}`)
     if (paths.length) after(() => prewarmOgForPaths(paths))
   } else if (action === 'unpublish') {
-    const { count, error } = await admin
+    const { data, count, error } = await admin
       .from('guides')
       .update({ status: 'draft', published_at: null }, { count: 'exact' })
       .in('id', ids)
+      .select('slug, category')
     if (error) return NextResponse.json({ error: `Unpublish failed: ${error.message}` }, { status: 500 })
     affected = count ?? 0
+    touched = data ?? []
   } else {
+    // Read the rows BEFORE deleting — afterwards there's nothing left to tell us
+    // which category pages were listing them.
+    const { data: doomed } = await admin
+      .from('guides')
+      .select('slug, category')
+      .in('id', ids)
     const { count, error } = await admin
       .from('guides')
       .delete({ count: 'exact' })
       .in('id', ids)
     if (error) return NextResponse.json({ error: `Delete failed: ${error.message}` }, { status: 500 })
     affected = count ?? 0
+    touched = doomed ?? []
   }
 
   revalidatePath('/dashboard/guides')
-  revalidatePath('/guides')
-  revalidatePath('/')
+  revalidateGuidePaths(touched)
 
   return NextResponse.json({ success: true, affected, action })
 }

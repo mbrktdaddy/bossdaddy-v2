@@ -15,6 +15,7 @@ import { notifyWishlistSubscribers } from '@/lib/wishlist-emails'
 import { createNotification } from '@/lib/notifications'
 import { ReviewUpdateSchema, ReviewModerateSchema } from '@/lib/reviews/schema'
 import { prewarmOgForPaths } from '@/lib/og/prewarm'
+import { revalidateReviewPaths } from '@/lib/revalidate'
 import * as React from 'react'
 
 // GET /api/reviews/[id]
@@ -100,13 +101,7 @@ export async function PUT(
       return NextResponse.json({ error: `Moderation action failed: ${error.message}` }, { status: 500 })
     }
 
-    revalidatePath('/')
-    revalidatePath('/reviews')
-    revalidatePath('/gear')
-    revalidatePath('/about')
-    if (data?.slug)     revalidatePath(`/reviews/${data.slug}`)
-    if (data?.category) revalidatePath(`/reviews/category/${data.category}`)
-    if (data?.category) revalidatePath(`/category/${data.category}`)
+    revalidateReviewPaths([data as { slug?: string | null; category?: string | null }])
 
     // Pre-warm the OG preview image so the first social scrape hits a warm CDN
     // cache instead of a cold ~2s MISS (which X can time out on and cache blank).
@@ -289,12 +284,12 @@ export async function PUT(
   )
 
   if (wasApproved && data?.slug) {
-    revalidatePath('/')
-    revalidatePath('/reviews')
-    revalidatePath('/gear')
-    revalidatePath(`/reviews/${data.slug}`)
-    if (data?.category) revalidatePath(`/reviews/category/${data.category}`)
-    if (data?.category) revalidatePath(`/category/${data.category}`)
+    // `current.category` is the PRE-edit category — purge the category this
+    // review left, not just the one it joined.
+    revalidateReviewPaths(
+      [data as { slug?: string | null; category?: string | null }],
+      [current.category as string | null],
+    )
 
     // Editing a LIVE review changes updated_at → a new OG image URL (the `v=`
     // cache-buster). Pre-warm it so the first social scrape hits a warm CDN
