@@ -14,11 +14,18 @@ import { checkModerationGate } from '@/lib/proxy/moderation'
 import { checkPublicLegacyRewrite } from '@/lib/proxy/rewrites'
 import { checkSlugRedirect } from '@/lib/proxy/slug-redirect'
 import { checkAuthGuard } from '@/lib/proxy/auth-guard'
+import { isCrawlerUa, logCrawlerHit } from '@/lib/crawler-ua'
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // 0. Canonical host (apex → www) — short-circuit before any DB/session work.
+  // 0a. DIAGNOSTIC: record link-preview crawler page hits (see lib/crawler-ua.ts).
+  // Logged before the canonical-host redirect so an apex request that gets a 308
+  // still shows up — if a crawler stops at the redirect, that's worth seeing.
+  const ua = request.headers.get('user-agent')
+  if (isCrawlerUa(ua)) logCrawlerHit('page', ua, request.url)
+
+  // 0b. Canonical host (apex → www) — short-circuit before any DB/session work.
   const canonical = checkCanonicalHost(request)
   if (canonical) return canonical
 

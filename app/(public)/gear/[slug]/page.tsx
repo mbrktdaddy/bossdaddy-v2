@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { formatPrice, getMerchDisplayImage } from '@/lib/merch'
 import MerchProductView from './_components/MerchProductView'
-import { ogImageUrl, OG_SITE } from '@/lib/og'
+import { buildSocialMetadata, toAbsoluteUrl } from '@/lib/og'
 import type { Metadata } from 'next'
 
 interface Props {
@@ -31,24 +31,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .from('merch').select('name, description, image_url, default_image_url').eq('slug', slug).maybeSingle()
   if (!data) return {}
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
-  const ogImage = (data.image_url ?? data.default_image_url)
-    ? `${siteUrl}${data.image_url ?? data.default_image_url}`
-    : ogImageUrl({ title: data.name, type: 'guide', base: siteUrl })
-  return {
-    // Absolute — the name-based title already carries the brand; avoids the
-    // template double-branding ("… — Boss Daddy Life | Boss Daddy").
-    title: { absolute: `${data.name} — Boss Daddy Life` },
-    description: data.description ?? undefined,
-    alternates: { canonical: `${siteUrl}/gear/${slug}` },
-    openGraph: {
-      ...OG_SITE,
-      title: `${data.name} | Boss Daddy`,
-      description: data.description ?? undefined,
-      url: `${siteUrl}/gear/${slug}`,
-      images: [{ url: ogImage, width: 1200, height: 630 }],
-    },
-    twitter: { card: 'summary_large_image' },
-  }
+
+  // Route through buildSocialMetadata like every other public page. The bespoke
+  // block this replaced was broken three ways: it prefixed siteUrl onto an
+  // ALREADY-ABSOLUTE Printful URL (emitting the nonexistent host
+  // "www.bossdaddylife.comhttps//files.cdn.printful.com/…", so every merch card
+  // image 404'd), it declared 1200×630 on a square product mockup, and its
+  // `twitter: { card }` object REPLACED the layout's — dropping the @bossdaddylife
+  // site/creator handles (Next replaces `twitter`/`openGraph`, never deep-merges).
+  // toAbsoluteUrl passes absolute URLs through and only prefixes relative ones.
+  return buildSocialMetadata({
+    // The name-based title already carries the brand — buildSocialMetadata emits
+    // it as `absolute`, avoiding "… — Boss Daddy Life | Boss Daddy".
+    title: `${data.name} — Boss Daddy Life`,
+    ogTitle: data.name,
+    description: data.description,
+    path: `/gear/${slug}`,
+    siteUrl,
+    // 'site' = no content-type badge. Merch is neither a review nor an article,
+    // and the old `type: 'guide'` stamped a wrong "ARTICLE" badge on the card.
+    type: 'site',
+    ogType: 'website',
+    cta: 'Shop the Gear',
+    heroUrl: toAbsoluteUrl(data.image_url ?? data.default_image_url, siteUrl),
+  })
 }
 
 export default async function MerchDetailPage({ params }: Props) {
