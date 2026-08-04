@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCategoryBySlug, CATEGORIES } from '@/lib/categories'
-import { ogImageUrl, OG_SITE } from '@/lib/og'
+import { ogImageUrl, OG_SITE, TWITTER_HANDLE } from '@/lib/og'
 import CategoryIcon from '@/components/CategoryIcon'
 import LibraryGuideCard from '@/components/LibraryGuideCard'
 import PageHeader from '@/components/PageHeader'
@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: `${siteUrl}/guides/category/${slug}`,
       images: [{ url: ogImageUrl({ title: `${cat.label} Guides`, type: 'guide' }), width: 1200, height: 630 }],
     },
-    twitter: { card: 'summary_large_image' },
+    twitter: { card: 'summary_large_image', site: TWITTER_HANDLE, creator: TWITTER_HANDLE },
     robots: (count ?? 0) === 0 ? { index: false, follow: true } : undefined,
   }
 }

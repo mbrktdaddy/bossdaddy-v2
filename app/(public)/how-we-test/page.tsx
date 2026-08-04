@@ -3,21 +3,19 @@ import Link from 'next/link'
 import CategoryIcon from '@/components/CategoryIcon'
 import PageHeader from '@/components/PageHeader'
 import { getCategoryLabel } from '@/lib/categories'
-import { ogImageUrl, OG_SITE } from '@/lib/og'
+import { buildSocialMetadata, SITE_URL } from '@/lib/og'
 
-export const metadata: Metadata = {
- // Absolute — brand already in the title; avoids the template double-branding.
- title: { absolute: 'How We Test — Boss Daddy Life' },
+// See the note in about/page.tsx: the hand-rolled `twitter: { card }` block dropped
+// the layout's site/creator handles and twitter:image.
+export const metadata: Metadata = buildSocialMetadata({
+ title: 'How We Test — Boss Daddy Life',
+ ogTitle: 'How We Test',
  description: 'Real products, real testing, real dads. Here\'s exactly how Boss Daddy Life reviews stuff and earns the Boss Daddy Approved designation.',
- alternates: { canonical: '/how-we-test' },
- openGraph: {
-   ...OG_SITE,
-   title: 'How We Test | Boss Daddy Life',
-   description: 'Real products, real testing, real dads. How Boss Daddy Life earns the Boss Daddy Approved designation.',
-   images: [{ url: ogImageUrl({ title: 'How We Test', type: 'guide' }), width: 1200, height: 630 }],
- },
- twitter: { card: 'summary_large_image' },
-}
+ path: '/how-we-test',
+ siteUrl: SITE_URL,
+ type: 'guide',
+ ogType: 'website',
+})
 
 export const revalidate = 86400
 

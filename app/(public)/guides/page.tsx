@@ -8,7 +8,7 @@ import FeaturedGuideCard from '@/components/FeaturedGuideCard'
 import TopicBlock from '@/components/TopicBlock'
 import AskTheBoss from '@/components/AskTheBoss'
 import PageHeader from '@/components/PageHeader'
-import { ogImageUrl, OG_SITE } from '@/lib/og'
+import { ogImageUrl, OG_SITE, TWITTER_HANDLE } from '@/lib/og'
 import type { GuideRow } from './actions'
 import type { Metadata } from 'next'
 
@@ -25,6 +25,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
+    site: TWITTER_HANDLE,
+    creator: TWITTER_HANDLE,
     title: 'Dad Guides — Boss Daddy Life',
   },
   alternates: { canonical: '/guides' },

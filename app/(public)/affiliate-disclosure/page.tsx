@@ -1,15 +1,20 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ogImageUrl, OG_SITE } from '@/lib/og'
+import { buildSocialMetadata, SITE_URL } from '@/lib/og'
 
-export const metadata: Metadata = {
- // Absolute — brand already in the title; avoids the template double-branding.
- title: { absolute: 'Affiliate Disclosure — Boss Daddy Life' },
+// Routed through buildSocialMetadata: the hand-rolled block this replaced set
+// `twitter: { card }`, which REPLACES the layout's twitter object rather than
+// merging with it, so the card shipped with no @bossdaddylife attribution and no
+// twitter:image/alt. Same defect the /gear pages had.
+export const metadata: Metadata = buildSocialMetadata({
+ title: 'Affiliate Disclosure — Boss Daddy Life',
+ ogTitle: 'Affiliate Disclosure',
  description: 'How Boss Daddy Life makes money, how affiliate links work, and why commissions never influence our recommendations. We buy everything ourselves first.',
- openGraph: { ...OG_SITE, title: 'Affiliate Disclosure — Boss Daddy Life', images: [{ url: ogImageUrl({ title: 'Affiliate Disclosure', type: 'article' }), width: 1200, height: 630 }] },
- twitter: { card: 'summary_large_image' },
- alternates: { canonical: '/affiliate-disclosure' },
-}
+ path: '/affiliate-disclosure',
+ siteUrl: SITE_URL,
+ type: 'article',
+ ogType: 'website',
+})
 
 const LAST_UPDATED = 'April 19, 2026'
 const CONTACT_EMAIL = 'hello@bossdaddylife.com'

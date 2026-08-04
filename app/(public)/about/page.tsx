@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CATEGORIES } from '@/lib/categories'
-import { ogImageUrl, OG_SITE } from '@/lib/og'
+import { buildSocialMetadata, SITE_URL } from '@/lib/og'
 import CategoryIcon from '@/components/CategoryIcon'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { EmailSignup } from '@/components/EmailSignup'
@@ -9,20 +9,20 @@ import { BRAND } from '@/lib/brand'
 
 export const revalidate = 3600
 
-export const metadata: Metadata = {
- // Absolute — this title already carries the brand; the root '%s | Boss Daddy'
- // template would otherwise double it.
- title: { absolute: 'About — Boss Daddy Life' },
+// Routed through buildSocialMetadata: the hand-rolled block set `twitter: { card }`,
+// which REPLACES the layout's twitter object rather than merging, so the card
+// shipped with no @bossdaddylife attribution and no twitter:image/alt. Same defect
+// the /gear pages had. (This page is exempt from PageHeader by design — that's a
+// LAYOUT decision and doesn't extend to metadata, which stays uniform.)
+export const metadata: Metadata = buildSocialMetadata({
+ title: 'About — Boss Daddy Life',
+ ogTitle: 'About Boss Daddy Life',
  description: 'The real story behind Boss Daddy Life. A first-time dad on a mission to be the best version of himself — and help other dads do the same.',
- alternates: { canonical: '/about' },
- openGraph: {
-   ...OG_SITE,
-   title: 'About Boss Daddy Life',
-   description: 'The real story behind Boss Daddy Life. A first-time dad on a mission to be the best version of himself — and help other dads do the same.',
-   images: [{ url: ogImageUrl({ title: 'About Boss Daddy Life', type: 'guide' }), width: 1200, height: 630 }],
- },
- twitter: { card: 'summary_large_image' },
-}
+ path: '/about',
+ siteUrl: SITE_URL,
+ type: 'guide',
+ ogType: 'website',
+})
 
 export default async function AboutPage() {
  const supabase = createAnonClient()

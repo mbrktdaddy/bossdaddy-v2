@@ -1,15 +1,18 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ogImageUrl, OG_SITE } from '@/lib/og'
+import { buildSocialMetadata, SITE_URL } from '@/lib/og'
 
-export const metadata: Metadata = {
- // Absolute — brand already in the title; avoids the template double-branding.
- title: { absolute: 'Privacy Policy — Boss Daddy Life' },
+// See the note in affiliate-disclosure: the hand-rolled `twitter: { card }` block
+// dropped the layout's site/creator handles and twitter:image.
+export const metadata: Metadata = buildSocialMetadata({
+ title: 'Privacy Policy — Boss Daddy Life',
+ ogTitle: 'Privacy Policy',
  description: 'What data Boss Daddy Life collects, how we use it, and what rights you have over your information. Written in plain English, not legalese.',
- openGraph: { ...OG_SITE, title: 'Privacy Policy — Boss Daddy Life', images: [{ url: ogImageUrl({ title: 'Privacy Policy', type: 'article' }), width: 1200, height: 630 }] },
- twitter: { card: 'summary_large_image' },
- alternates: { canonical: '/privacy-policy' },
-}
+ path: '/privacy-policy',
+ siteUrl: SITE_URL,
+ type: 'article',
+ ogType: 'website',
+})
 
 const LAST_UPDATED = 'April 19, 2026'
 const CONTACT_EMAIL = 'hello@bossdaddylife.com'

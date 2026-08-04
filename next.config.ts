@@ -55,6 +55,8 @@ const nextConfig: NextConfig = {
     return [
       { source: '/og-card', destination: '/api/og' },
       { source: '/og-card/weekends', destination: '/api/og/weekends' },
+      // Same reasoning for the JSON-LD aspect crops — see IMG_CROP_PATH.
+      { source: '/img-crop', destination: '/api/img' },
     ]
   },
 

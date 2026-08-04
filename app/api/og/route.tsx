@@ -2,7 +2,6 @@ import { ImageResponse } from 'next/og'
 import { type NextRequest } from 'next/server'
 import sharp from 'sharp'
 import { isOwnImageUrl } from '@/lib/images/og-host'
-import { logCrawlerHit } from '@/lib/crawler-ua'
 import { BRAND } from '@/lib/brand'
 
 // Node runtime (not edge) so `sharp` can run — it converts the hero from WebP
@@ -61,11 +60,6 @@ async function heroDataUri(rawUrl: string | null, fit: OgFit): Promise<string | 
 }
 
 export async function GET(request: NextRequest) {
-  // DIAGNOSTIC: log EVERY invocation's user agent, not just crawler ones — the
-  // question we're answering is who fetches this at all (see lib/crawler-ua.ts).
-  // Only fires on a CDN miss, so volume stays low; a cached hit never gets here.
-  logCrawlerHit('og-image', request.headers.get('user-agent'), request.url)
-
   const { searchParams } = new URL(request.url)
   const title = searchParams.get('title') ?? 'Boss Daddy Life'
   const type = searchParams.get('type') ?? 'review'

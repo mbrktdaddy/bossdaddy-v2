@@ -41,6 +41,22 @@ export const OG_TEMPLATE_VERSION = 6
  */
 export const OG_CARD_PATH = '/og-card'
 
+/**
+ * PUBLIC path for the JSON-LD aspect crops. Off `/api/` for the same reason as
+ * OG_CARD_PATH above — Googlebot honours the `Allow: /api/img` override today
+ * (it's Google's own spec), but Twitterbot demonstrably does not honour the
+ * equivalent rule, so betting structured-data images on a crawler's precedence
+ * handling is the bet we just lost. Rewritten onto /api/img in next.config.ts.
+ */
+export const IMG_CROP_PATH = '/img-crop'
+
+/**
+ * Canonical site origin for metadata. Pages with a STATIC `export const metadata`
+ * can't take a siteUrl argument, so they read this. Same fallback the rest of the
+ * codebase repeats inline.
+ */
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
+
 // 'site' = a section/home card with no content-type badge.
 export type OgType = 'review' | 'guide' | 'article' | 'site'
 
@@ -175,8 +191,12 @@ export function toAbsoluteUrl(url: string | null | undefined, base: string): str
  */
 export function aspectVariants(heroUrl: string | null | undefined, base: string): string[] | undefined {
   if (!heroUrl) return undefined
+  // `v` is the flush lever: the crops are cached immutable for a year, so a change
+  // to the crop logic needs a new URL. Reuses OG_TEMPLATE_VERSION so one bump
+  // flushes every generated image site-wide, cards and crops alike.
   return ['16x9', '4x3', '1x1'].map(
-    (ar) => `${base}/api/img?ar=${ar}&url=${encodeURIComponent(heroUrl)}`,
+    (ar) =>
+      `${base}${IMG_CROP_PATH}?ar=${ar}&url=${encodeURIComponent(heroUrl)}&v=${OG_TEMPLATE_VERSION}`,
   )
 }
 

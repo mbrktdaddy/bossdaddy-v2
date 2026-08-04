@@ -60,10 +60,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { data: guideTagRows },
     { data: picks },
     { data: benchItems },
+    { data: merchItems },
   ] = await Promise.all([
     supabase
       .from('reviews')
-      .select('slug, category, published_at, updated_at')
+      // `rating` is here only to date the /gear/category pages, which list
+      // reviews scoring 8+ — see gearCategoryUrls.
+      .select('slug, category, rating, published_at, updated_at')
       .eq('status', 'approved')
       .eq('is_visible', true)
       .order('published_at', { ascending: false }),
@@ -84,6 +87,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     admin.from('collections').select('slug, updated_at, collection_type, occasion').eq('is_visible', true),
     // Mirrors the /bench query — the pipeline statuses that page renders.
     admin.from('products').select('updated_at').in('status', ['considering', 'queued', 'testing']),
+    // Merch. Mirrors the filter in gear/[slug]'s generateStaticParams so the
+    // sitemap lists exactly the pages that actually prerender.
+    admin.from('merch').select('slug, updated_at')
+      .in('status', ['available', 'coming_soon'])
+      .is('archived_at', null),
   ])
 
   const reviewRows = reviews ?? []
@@ -120,6 +128,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const newestReview = newestOf(reviewRows.map(contentDate))
   const newestGuide  = newestOf(guideRows.map(contentDate))
   const newestBench  = newestOf((benchItems ?? []).map((b) => b.updated_at))
+  const merchRows    = merchItems ?? []
+  const newestMerch  = newestOf(merchRows.map((m) => m.updated_at))
+
+  // /gear/category/[slug] lists REVIEWS rated 8+ (not merch, despite the URL
+  // sharing the /gear prefix with the merch detail pages). Date those pages by
+  // the newest review that actually clears the bar, so the lastmod matches what
+  // the page renders — the whole doctrine at the top of this file.
+  const gearGradeRows = reviewRows.filter((r) => (r.rating ?? 0) >= 8)
+  const gearCategoryDates = newestByKey(gearGradeRows, (r) => r.category, contentDate)
+  const newestGearReview  = newestOf(gearGradeRows.map(contentDate))
+  // Everything the /gear hub actually renders.
+  const newestGear = newestOf([
+    newestGearReview?.toISOString(),
+    newestMerch?.toISOString(),
+    newestCollectionOf('gift_guide', 'general', 'best_of')?.toISOString(),
+  ])
   const newestAnything = newestOf([
     newestReview?.toISOString(),
     newestGuide?.toISOString(),
@@ -196,6 +220,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
     })
 
+  // Merch detail pages. These were absent entirely — Google was never told the
+  // store existed, and it's why they escaped the OG sweep that reads sitemap.xml.
+  const merchUrls: MetadataRoute.Sitemap = merchRows.map((m) => ({
+    url: `${base}/gear/${m.slug}`,
+    lastModified: m.updated_at ?? undefined,
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }))
+
+  // Only categories that actually have a review scoring 8+, matching how the
+  // review/guide category lists above skip empty categories.
+  const gearCategoryUrls: MetadataRoute.Sitemap = CATEGORY_SLUGS
+    .filter((slug) => gearCategoryDates.has(slug))
+    .map((slug) => ({
+      url: `${base}/gear/category/${slug}`,
+      lastModified: gearCategoryDates.get(slug),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    }))
+
   // Every defined occasion — stable URLs that compound SEO whether content
   // exists or not. Occasions with no guide written yet carry NO lastmod: the
   // URL is real and worth crawling, but nothing has been modified.
@@ -217,12 +261,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/picks`,        lastModified: newestCollectionOf('best_of', 'general'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${base}/comparisons`,  lastModified: newestCollectionOf('comparison'),      changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${base}/stacks`,       lastModified: newestCollectionOf('stack'),           changeFrequency: 'weekly',  priority: 0.8 },
-    { url: `${base}/gear`,         lastModified: newestReview,                          changeFrequency: 'weekly',  priority: 0.8 },
+    // /gear is a HUB over three sources — reviews scoring 8+ (top picks), the
+    // seasonal gift guides + featured collection, and MerchPanel. It was dated
+    // `newestReview`, which counts reviews below the 8 cutoff that the page never
+    // shows, and misses merch entirely. Date it by the newest of what it renders.
+    { url: `${base}/gear`,         lastModified: newestGear,                            changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${base}/bench`,        lastModified: newestBench,                           changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${base}/about`,                                                             changeFrequency: 'monthly', priority: 0.5 },
     { url: `${base}/how-we-test`,                                                       changeFrequency: 'yearly',  priority: 0.5 },
     ...categoryUrls,
     ...guideCategoryUrls,
+    ...gearCategoryUrls,
+    ...merchUrls,
     ...tagUrls,
     ...guideTagUrls,
     ...reviewUrls,

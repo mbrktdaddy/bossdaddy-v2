@@ -34,7 +34,15 @@ export async function GET(request: NextRequest) {
     return new NextResponse(new Uint8Array(jpeg), {
       headers: {
         'Content-Type': 'image/jpeg',
-        'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',
+        // Declared so crawlers that size-check before downloading don't see an
+        // unknown-length chunked body.
+        'Content-Length': String(jpeg.byteLength),
+        // Immutable for a year: the URL encodes both render inputs (ar + url) and
+        // `aspectVariants` appends `v=OG_TEMPLATE_VERSION`, so a change to this
+        // crop logic mints new URLs. At the old 24h TTL — with Vercel's CDN caching
+        // per edge POP — Googlebot repeatedly paid a cold sharp render for the
+        // JSON-LD image set.
+        'Cache-Control': 'public, max-age=31536000, s-maxage=31536000, immutable',
       },
     })
   } catch {

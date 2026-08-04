@@ -1,15 +1,18 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ogImageUrl, OG_SITE } from '@/lib/og'
+import { buildSocialMetadata, SITE_URL } from '@/lib/og'
 
-export const metadata: Metadata = {
- // Absolute — brand already in the title; avoids the template double-branding.
- title: { absolute: 'Terms of Use — Boss Daddy Life' },
+// See the note in affiliate-disclosure: the hand-rolled `twitter: { card }` block
+// dropped the layout's site/creator handles and twitter:image.
+export const metadata: Metadata = buildSocialMetadata({
+ title: 'Terms of Use — Boss Daddy Life',
+ ogTitle: 'Terms of Use',
  description: 'The ground rules for using bossdaddylife.com — content ownership, acceptable use, liability, and your rights as a reader. Straight talk, not legalese.',
- openGraph: { ...OG_SITE, title: 'Terms of Use — Boss Daddy Life', images: [{ url: ogImageUrl({ title: 'Terms of Use', type: 'article' }), width: 1200, height: 630 }] },
- twitter: { card: 'summary_large_image' },
- alternates: { canonical: '/terms' },
-}
+ path: '/terms',
+ siteUrl: SITE_URL,
+ type: 'article',
+ ogType: 'website',
+})
 
 const LAST_UPDATED = 'April 19, 2026'
 const CONTACT_EMAIL = 'hello@bossdaddylife.com'

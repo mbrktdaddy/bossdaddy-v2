@@ -14,18 +14,11 @@ import { checkModerationGate } from '@/lib/proxy/moderation'
 import { checkPublicLegacyRewrite } from '@/lib/proxy/rewrites'
 import { checkSlugRedirect } from '@/lib/proxy/slug-redirect'
 import { checkAuthGuard } from '@/lib/proxy/auth-guard'
-import { isCrawlerUa, logCrawlerHit } from '@/lib/crawler-ua'
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // 0a. DIAGNOSTIC: record link-preview crawler page hits (see lib/crawler-ua.ts).
-  // Logged before the canonical-host redirect so an apex request that gets a 308
-  // still shows up — if a crawler stops at the redirect, that's worth seeing.
-  const ua = request.headers.get('user-agent')
-  if (isCrawlerUa(ua)) logCrawlerHit('page', ua, request.url)
-
-  // 0b. Canonical host (apex → www) — short-circuit before any DB/session work.
+  // 0. Canonical host (apex → www) — short-circuit before any DB/session work.
   const canonical = checkCanonicalHost(request)
   if (canonical) return canonical
 
@@ -51,7 +44,13 @@ export async function proxy(request: NextRequest) {
   return response
 }
 
-// `api/og` and `api/img` are PUBLIC IMAGE endpoints, not app routes. They were
+// Also excluded: robots.txt, sitemap.xml and manifest.webmanifest. They are
+// crawler-facing files with no session to refresh, and running the pipeline on
+// them spends a Supabase round-trip per crawl — and would attach Set-Cookie to a
+// response that ought to stay cacheable.
+//
+// `og-card`/`img-crop` (and the `api/og`/`api/img` routes they rewrite onto) are
+// PUBLIC IMAGE endpoints, not app routes. They were
 // matching this proxy only because they carry no file extension, so every social
 // preview render paid a Supabase refreshSession() round-trip plus a
 // checkModerationGate() DB query before the image work even started — latency on
@@ -63,6 +62,6 @@ export async function proxy(request: NextRequest) {
 // `api/og/weekends`.)
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|og-card|api/og|api/img|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|og-card|img-crop|api/og|api/img|robots.txt|sitemap.xml|manifest.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

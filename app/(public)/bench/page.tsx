@@ -4,7 +4,7 @@ import { groupByStatus, BENCH_SELECT } from '@/lib/wishlist'
 import { WishlistCard } from '@/components/wishlist/WishlistCard'
 import { VotePayoffBanner } from '@/components/VotePayoffBanner'
 import PageHeader from '@/components/PageHeader'
-import { ogImageUrl, OG_SITE } from '@/lib/og'
+import { ogImageUrl, OG_SITE, TWITTER_HANDLE } from '@/lib/og'
 import type { Metadata } from 'next'
 
 export const revalidate = 300
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     description: "Vote on what Boss Daddy tests next. See what's in progress, coming soon, and already reviewed.",
     images: [{ url: ogImageUrl({ title: 'On the Bench', type: 'guide' }), width: 1200, height: 630 }],
   },
-  twitter: { card: 'summary_large_image' },
+  twitter: { card: 'summary_large_image', site: TWITTER_HANDLE, creator: TWITTER_HANDLE },
 }
 
 export default async function BenchPage() {

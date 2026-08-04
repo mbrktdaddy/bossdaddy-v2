@@ -12,7 +12,18 @@
 
 import { ImageResponse } from 'next/og'
 
-export const dynamic = 'force-dynamic'
+// NOT force-dynamic. This render is a pure function of its query params (n, unit,
+// for) — nothing about it varies per request — but force-dynamic made the platform
+// serve `Cache-Control: public, must-revalidate, max-age=0`, so EVERY scrape paid a
+// full cold render. Vercel's CDN caches per edge POP, so a social crawler landing
+// on an unwarmed POP could time out and cache a no-image card for ~7 days. That is
+// the same failure that hid the /api/og bug, and this is the most shareable card on
+// the site. Cached immutable below, with `v=` in the URL as the flush lever.
+export const revalidate = false
+
+// One year, immutable — safe because the URL encodes every render input, and the
+// page appends `v=OG_TEMPLATE_VERSION` so a template change mints new URLs.
+const CACHE_CONTROL = 'public, max-age=31536000, s-maxage=31536000, immutable'
 
 const ORANGE   = '#CC5500'
 const SURFACE  = '#fafafa'
@@ -40,7 +51,7 @@ export async function GET(request: Request) {
     ? `${unitWord} left with ${initial}.`
     : `${unitWord} left.`
 
-  return new ImageResponse(
+  const image = new ImageResponse(
     (
       <div
         style={{
@@ -155,4 +166,16 @@ export async function GET(request: Request) {
       height: 630,
     },
   )
+
+  // Buffer so we can declare Content-Length. ImageResponse streams by default,
+  // which leaves the response chunked with no declared size — preview crawlers
+  // that size-check before downloading can refuse an unknown-length body.
+  const png = await image.arrayBuffer()
+  return new Response(png, {
+    headers: {
+      'Content-Type': 'image/png',
+      'Content-Length': String(png.byteLength),
+      'Cache-Control': CACHE_CONTROL,
+    },
+  })
 }

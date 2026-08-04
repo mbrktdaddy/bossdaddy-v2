@@ -3,7 +3,7 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { getCollectionsWithCategory } from '@/lib/collection-listings'
-import { ogImageUrl, OG_SITE } from '@/lib/og'
+import { ogImageUrl, OG_SITE, TWITTER_HANDLE } from '@/lib/og'
 import CategoryFilterPills from '@/components/collections/CategoryFilterPills'
 import BenchStrip from '@/components/BenchStrip'
 import PageHeader from '@/components/PageHeader'
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     description: 'Dad-tested head-to-head matchups. Real products, real scores, one clear winner per dimension.',
     images: [{ url: ogImageUrl({ title: 'Head-to-Head Comparisons', type: 'guide' }), width: 1200, height: 630 }],
   },
-  twitter: { card: 'summary_large_image' },
+  twitter: { card: 'summary_large_image', site: TWITTER_HANDLE, creator: TWITTER_HANDLE },
 }
 
 interface Props { searchParams: Promise<{ cat?: string }> }

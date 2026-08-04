@@ -9,7 +9,7 @@ import { GearCard, type GearReview } from '../../_components/GearCards'
 import BenchStrip from '@/components/BenchStrip'
 import AskTheBoss from '@/components/AskTheBoss'
 import PageHeader from '@/components/PageHeader'
-import { ogImageUrl, OG_SITE } from '@/lib/og'
+import { buildSocialMetadata, SITE_URL } from '@/lib/og'
 
 export const revalidate = 3600
 
@@ -26,18 +26,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const cat = getCategoryBySlug(slug)
   if (!cat) return { title: 'Not Found' }
-  return {
-    title: { absolute: `${cat.label} Gear — Boss Daddy` },
+  // Routed through buildSocialMetadata: the hand-rolled `twitter` object here set
+  // only card+title, which REPLACES the layout's rather than merging — so the card
+  // shipped with no @bossdaddylife attribution and no twitter:image/alt. Same
+  // defect the /gear detail pages had.
+  return buildSocialMetadata({
+    title: `${cat.label} Gear — Boss Daddy`,
+    ogTitle: `${cat.label} Gear`,
     description: `Boss Daddy's field-tested ${cat.label.toLowerCase()} gear — every pick bought, used hard, and rated 8+. Earned, not sponsored.`,
-    alternates: { canonical: `/gear/category/${slug}` },
-    openGraph: {
-      ...OG_SITE,
-      title: `${cat.label} Gear — Boss Daddy Life`,
-      description: `Field-tested ${cat.label.toLowerCase()} gear, rated 8+.`,
-      images: [{ url: ogImageUrl({ title: `${cat.label} Gear`, type: 'review' }), width: 1200, height: 630 }],
-    },
-    twitter: { card: 'summary_large_image', title: `${cat.label} Gear — Boss Daddy Life` },
-  }
+    path: `/gear/category/${slug}`,
+    siteUrl: SITE_URL,
+    type: 'review',
+    ogType: 'website',
+  })
 }
 
 export default async function GearCategoryPage({ params }: Props) {

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { OG_SITE, OG_CARD_PATH } from '@/lib/og'
+import { OG_SITE, OG_CARD_PATH, TWITTER_HANDLE, OG_TEMPLATE_VERSION } from '@/lib/og'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { getKids } from '@/lib/dad-tools/kid-actions'
 import { LABELS } from '@/lib/labels'
@@ -62,7 +62,9 @@ export async function generateMetadata(
   // If we have enough state to compute N, build a dynamic OG image URL.
   // Advertised on /og-card/* so robots' `Disallow: /api/` can't hide it from
   // Twitterbot (see OG_CARD_PATH in lib/og.ts); rewritten onto /api/og/weekends.
-  let ogImageUrl = `${OG_CARD_PATH}/weekends`
+  // `v` is the flush lever — the card is cached immutable for a year, so a design
+  // change to the weekends render needs a new URL.
+  let ogImageUrl = `${OG_CARD_PATH}/weekends?v=${OG_TEMPLATE_VERSION}`
   if (
     parsed.birthdate &&
     /^\d{4}-\d{2}-\d{2}$/.test(parsed.birthdate) &&
@@ -83,10 +85,17 @@ export async function generateMetadata(
       // First-initial only, never the full name.
       const initial = (parsed.name ?? '').trim().charAt(0).toUpperCase()
       if (initial) ogParams.set('for', initial)
+      ogParams.set('v', String(OG_TEMPLATE_VERSION))
       ogImageUrl = `${OG_CARD_PATH}/weekends?${ogParams.toString()}`
     }
   }
 
+  // This page can't use buildSocialMetadata — its card is the bespoke
+  // /og-card/weekends render, not a title-derived card — so it re-declares
+  // site/creator by hand. Next REPLACES the layout's `twitter` object rather than
+  // merging, and omitting these is what left the card with no @bossdaddylife
+  // attribution. Anything that hand-rolls `twitter` must carry TWITTER_HANDLE.
+  const imageAlt = `${LABELS.tools.weekendsUntil.pageTitle} — Boss Daddy Life`
   return {
     title,
     description,
@@ -94,13 +103,15 @@ export async function generateMetadata(
       ...OG_SITE,
       title:       LABELS.tools.weekendsUntil.pageTitle,
       description,
-      images: [{ url: ogImageUrl, width: 1200, height: 630 }],
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: imageAlt }],
     },
     twitter: {
       card: 'summary_large_image',
+      site:    TWITTER_HANDLE,
+      creator: TWITTER_HANDLE,
       title:       LABELS.tools.weekendsUntil.pageTitle,
       description,
-      images: [ogImageUrl],
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: imageAlt }],
     },
   }
 }
