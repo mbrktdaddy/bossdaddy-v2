@@ -41,6 +41,37 @@ export async function isBlockedBetween(
 }
 
 /**
+ * True if `meId` is still connected to everyone in `others`.
+ *
+ * The sibling of isBlockedBetween, and here for the same reason it is: a
+ * conversation outlives the state that allowed it. get_or_create_dm gates
+ * CREATION on an accepted connection (migration 140 §7), but a connection can be
+ * removed — or blocked away — long after the thread exists, and without this the
+ * thread would keep working forever. Disconnecting has to actually stop the
+ * messages, or it isn't disconnecting.
+ *
+ * Grandfathered threads are fine: migration 140 back-filled an accepted
+ * connection for every conversation that already existed.
+ */
+export async function isConnectedTo(
+  admin: Admin,
+  meId: string,
+  others: string[],
+): Promise<boolean> {
+  if (others.length === 0) return true
+  const { data } = await admin
+    .from('user_connections')
+    .select('user_a, user_b')
+    .eq('status', 'accepted')
+    .or(`user_a.eq.${meId},user_b.eq.${meId}`)
+
+  const connected = new Set(
+    (data ?? []).map((r) => (r.user_a === meId ? r.user_b : r.user_a)),
+  )
+  return others.every((id) => connected.has(id))
+}
+
+/**
  * Out-of-network awareness. No in-app notification row per message — DMs live
  * in the Messages surface. Web push is the immediacy layer; the debounced
  * digest email (cron) is the slow fallback. Both are privacy-first: sender name

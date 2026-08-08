@@ -46,6 +46,34 @@ export async function POST(request: NextRequest, ctx: RouteCtx) {
     return NextResponse.json({ ok: true, goalId: res.data?.goalId })
   }
 
+  // Connection requests answer from the notification itself — the whole point of
+  // an actionable notification is not making someone go and find the page.
+  //
+  // BOTH branches run through respondToConnection, including decline: it owns the
+  // rule that an accept notifies and a decline does not (migration 140, rule 4),
+  // and it is what stamps declined_at so the cooldown has something to measure.
+  // Falling through to the generic handler below would record the decline on the
+  // notification and leave the connection row pending forever.
+  if (notif.type === 'connection_request') {
+    const requesterId = typeof payload.requester_id === 'string' ? payload.requester_id : null
+    if (!requesterId) return NextResponse.json({ error: 'Request is missing its sender' }, { status: 400 })
+
+    const { data: me } = await supabase
+      .from('profiles').select('username, display_name').eq('id', user.id).maybeSingle()
+    const myName = me?.display_name?.trim() || (me?.username ? `@${me.username}` : 'A Boss Daddy member')
+
+    const { respondToConnection } = await import('@/lib/connections')
+    const res = await respondToConnection(supabase, {
+      otherUserId: requesterId, accept: action === 'accept', myName,
+    })
+    if (!res.ok) return NextResponse.json({ error: res.error }, { status: 400 })
+
+    await supabase.from('notifications')
+      .update({ action_state: action === 'accept' ? 'accepted' : 'declined', read_at: now })
+      .eq('id', id)
+    return NextResponse.json({ ok: true })
+  }
+
   await supabase.from('notifications')
     .update({ action_state: action === 'accept' ? 'accepted' : 'declined', read_at: now })
     .eq('id', id)

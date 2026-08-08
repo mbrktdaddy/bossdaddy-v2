@@ -435,6 +435,16 @@ export default function Header() {
                     Account Settings
                   </Link>
                   <Link
+                    href="/account/connections"
+                    onClick={() => setUserMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-surface-hover hover:text-prose transition-colors"
+                  >
+                    <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-1a4 4 0 00-3-3.87M9 20H4v-1a4 4 0 013-3.87m10-4.63a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Your Corner
+                  </Link>
+                  <Link
                     href="/account/messages"
                     onClick={() => setUserMenuOpen(false)}
                     className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-surface-hover hover:text-prose transition-colors"
@@ -666,6 +676,16 @@ export default function Header() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                   Account Settings
+                </Link>
+                <Link
+                  href="/account/connections"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-prose-muted hover:text-prose hover:bg-surface-raised transition-colors"
+                >
+                  <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-1a4 4 0 00-3-3.87M9 20H4v-1a4 4 0 013-3.87m10-4.63a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Your Corner
                 </Link>
                 <Link
                   href="/account/messages"

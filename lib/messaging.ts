@@ -9,12 +9,18 @@
 
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getOtherParticipants, isBlockedBetween, pushNewMessage } from '@/lib/messaging-shared'
+import { getOtherParticipants, isBlockedBetween, isConnectedTo, pushNewMessage } from '@/lib/messaging-shared'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { sanitizePlainText } from '@/lib/sanitize'
 import { revalidatePath } from 'next/cache'
 
-type Result<T = undefined> = { ok: true; data?: T } | { ok: false; error: string }
+// `code` lets a caller distinguish "you two aren't connected yet" — a normal,
+// actionable state that should render a Connect button — from a real failure.
+// Optional so every existing call site keeps compiling and ignoring it.
+type FailureCode = 'not_connected' | 'blocked'
+type Result<T = undefined> =
+  | { ok: true; data?: T }
+  | { ok: false; error: string; code?: FailureCode }
 
 const MAX_BODY = 4000
 
@@ -27,8 +33,18 @@ export async function getOrCreateDm(otherUserId: string): Promise<Result<{ conve
 
   const { data, error } = await supabase.rpc('get_or_create_dm', { _other_user: otherUserId })
   if (error || !data) {
-    const blocked = (error?.message ?? '').includes('blocked')
-    return { ok: false, error: blocked ? 'You cannot message this user.' : 'Could not start the conversation' }
+    // The RPC raises distinguishable strings (migration 140 §7). 'not connected'
+    // is a NORMAL state, not a failure — you just haven't connected yet — so it
+    // gets its own copy and a caller-visible code the UI can branch on to show a
+    // Connect button instead of an error.
+    const message = error?.message ?? ''
+    if (message.includes('not connected')) {
+      return { ok: false, error: 'Connect with them first — then you can message.', code: 'not_connected' }
+    }
+    if (message.includes('blocked')) {
+      return { ok: false, error: 'You cannot message this user.', code: 'blocked' }
+    }
+    return { ok: false, error: 'Could not start the conversation' }
   }
   return { ok: true, data: { conversationId: data as string } }
 }
@@ -58,6 +74,11 @@ export async function sendMessage(conversationId: string, body: string): Promise
   if (others.length === 0) return { ok: false, error: 'Conversation not found' }
   if (await isBlockedBetween(admin, user.id, others)) {
     return { ok: false, error: 'Messaging is unavailable with this user.' }
+  }
+  // Connections can be ended after a thread exists — same reasoning as the block
+  // check above. Disconnecting has to actually stop the messages.
+  if (!await isConnectedTo(admin, user.id, others)) {
+    return { ok: false, error: 'You\'re not connected any more.', code: 'not_connected' }
   }
 
   // RLS additionally enforces: sender is a participant AND the account is active.

@@ -1,0 +1,176 @@
+// Your corner — who you're connected to, who's asking, who you've asked, who you've
+// shut out.
+//
+// This page is also the app's FIRST blocked-list. Before connections, blocking
+// lived in the ⋮ menu inside a DM thread, so you could only block someone you had
+// already talked to and there was nowhere to see or undo it. That was fine while
+// DMs were open to everyone; it stops being fine the moment a stranger can put a
+// request in front of you.
+//
+// No client JavaScript: plain forms POSTing to /api/connections.
+
+import Link from 'next/link'
+import type { Metadata } from 'next'
+import { createClient, getUserSafe } from '@/lib/supabase/server'
+import { LoginLink } from '@/components/LoginLink'
+import {
+  listConnections, listIncoming, listOutgoing, listBlocked,
+  type ConnectionRow, type ConnectionPerson,
+} from '@/lib/connections'
+
+export const metadata: Metadata = {
+  title: 'Your corner',
+  robots: { index: false, follow: false },
+}
+
+type Props = { searchParams: Promise<{ msg?: string }> }
+
+export default async function ConnectionsPage({ searchParams }: Props) {
+  const { msg } = await searchParams
+
+  const supabase = await createClient()
+  const { user } = await getUserSafe(supabase)
+  if (!user) {
+    return (
+      <Wrap>
+        <h1 className="text-2xl font-black text-prose">Sign in to see your corner.</h1>
+        <LoginLink className="mt-6 inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl transition-colors">
+          Sign in →
+        </LoginLink>
+      </Wrap>
+    )
+  }
+
+  const [connected, incoming, outgoing, blocked] = await Promise.all([
+    listConnections(supabase, user.id),
+    listIncoming(supabase, user.id),
+    listOutgoing(supabase, user.id),
+    listBlocked(supabase, user.id),
+  ])
+
+  return (
+    <Wrap>
+      <header className="space-y-2">
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Your corner</p>
+        <h1 className="text-2xl sm:text-3xl font-black text-prose leading-tight tracking-tight">
+          Who you&apos;re connected to
+        </h1>
+        <p className="text-sm text-prose-muted leading-snug">
+          Connecting is what lets two of you message each other and share a goal.
+          Either of you can end it whenever you like, and nobody gets told.
+        </p>
+      </header>
+
+      {msg ? (
+        <p className="mt-6 rounded-lg border border-strong bg-surface-raised px-4 py-3 text-sm text-accent-text">
+          {msg.slice(0, 220)}
+        </p>
+      ) : null}
+
+      {/* ── waiting on you ─────────────────────────────────────────────────── */}
+      {incoming.length > 0 ? (
+        <Section title="Waiting on you">
+          {incoming.map((p) => (
+            <Card key={p.userId} person={p}>
+              <Act op="accept" userId={p.userId} label="Accept" primary />
+              <Act op="decline" userId={p.userId} label="Not now" />
+              <Act op="block" userId={p.userId} label="Block" />
+            </Card>
+          ))}
+        </Section>
+      ) : null}
+
+      {/* ── connected ──────────────────────────────────────────────────────── */}
+      <Section title="In your corner">
+        {connected.length === 0 ? (
+          <Empty>
+            Nobody yet. Find someone from{' '}
+            <Link href="/account/messages" className="text-accent-text hover:text-prose">
+              your messages
+            </Link>
+            {' '}and ask them to connect.
+          </Empty>
+        ) : connected.map((p) => (
+          <Card key={p.userId} person={p} sub={`Connected since ${p.since.slice(0, 10)}`}>
+            <Act op="remove" userId={p.userId} label="Disconnect" />
+            <Act op="block" userId={p.userId} label="Block" />
+          </Card>
+        ))}
+      </Section>
+
+      {/* ── you asked ──────────────────────────────────────────────────────── */}
+      {outgoing.length > 0 ? (
+        <Section title="You asked">
+          {outgoing.map((p) => (
+            <Card key={p.userId} person={p} sub="Waiting on them">
+              <Act op="withdraw" userId={p.userId} label="Pull it back" />
+            </Card>
+          ))}
+        </Section>
+      ) : null}
+
+      {/* ── blocked ────────────────────────────────────────────────────────── */}
+      <Section title="Blocked">
+        {blocked.length === 0 ? (
+          <Empty>Nobody. Good.</Empty>
+        ) : blocked.map((p) => (
+          <Card key={p.userId} person={p} sub="Can&rsquo;t reach you at all">
+            <Act op="unblock" userId={p.userId} label="Unblock" />
+          </Card>
+        ))}
+      </Section>
+    </Wrap>
+  )
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="mt-10 space-y-3">
+      <h2 className="text-sm font-bold text-prose uppercase tracking-wide">{title}</h2>
+      {children}
+    </section>
+  )
+}
+
+function Empty({ children }: { children: React.ReactNode }) {
+  return <p className="text-sm text-faint">{children}</p>
+}
+
+function Card({
+  person, sub, children,
+}: { person: ConnectionRow | ConnectionPerson; sub?: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-xl border border-soft bg-surface p-5">
+      <p className="text-sm font-semibold text-prose truncate">{person.label}</p>
+      {person.username ? (
+        <p className="mt-0.5 text-xs text-faint truncate">@{person.username}</p>
+      ) : null}
+      {sub ? <p className="mt-1 text-xs text-muted">{sub}</p> : null}
+      <div className="mt-4 flex flex-wrap gap-2">{children}</div>
+    </div>
+  )
+}
+
+/** One button, one form. Each is its own POST so nothing can submit the wrong op. */
+function Act({
+  op, userId, label, primary,
+}: { op: string; userId: string; label: string; primary?: boolean }) {
+  return (
+    <form action="/api/connections" method="post">
+      <input type="hidden" name="op" value={op} />
+      <input type="hidden" name="userId" value={userId} />
+      <button
+        type="submit"
+        className={primary
+          ? 'min-h-11 rounded-lg bg-accent px-5 py-3 text-xs font-bold text-white hover:bg-accent-hover transition-colors'
+          : 'min-h-11 rounded-lg border border-soft bg-surface px-5 py-3 text-xs font-semibold text-muted hover:bg-surface-hover hover:text-prose transition-colors'}
+      >
+        {label}
+      </button>
+    </form>
+  )
+}
+
+function Wrap({ children }: { children: React.ReactNode }) {
+  return <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">{children}</div>
+}

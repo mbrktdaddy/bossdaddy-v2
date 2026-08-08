@@ -1,18 +1,28 @@
 'use client'
 
-// Search members by username/display name and open a DM with one. Forgiving of
-// a leading "@" (usernames display as @name everywhere). Uses getOrCreateDm,
-// then hard-navigates to the thread.
+// Search members by username, display name, or an exact email address, then
+// either open a DM or ask to connect. Forgiving of a leading "@" (usernames
+// display as @name everywhere).
+//
+// MESSAGING NOW REQUIRES AN ACCEPTED CONNECTION (migration 140), so this can no
+// longer assume a click means "open a thread". The search route returns
+// `connectionState` per result and the row renders the verb that actually
+// applies — Message, Connect, or a disabled "Asked". Letting the click through
+// and surfacing the error instead would be a worse version of the same
+// information, delivered after the fact.
 
 import { useState, useRef } from 'react'
 import Image from 'next/image'
 import { getOrCreateDm } from '@/lib/messaging'
+
+type ConnectionState = 'none' | 'pending_in' | 'pending_out' | 'accepted' | 'declined' | 'blocked'
 
 interface Member {
   id: string
   username: string
   displayName: string | null
   avatarUrl: string | null
+  connectionState: ConnectionState
 }
 
 export default function MemberSearch() {
@@ -63,13 +73,7 @@ export default function MemberSearch() {
       {results.length > 0 && (
         <div className="mt-2 border border-soft rounded-xl overflow-hidden divide-y divide-soft">
           {results.map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              onClick={() => startDm(m)}
-              disabled={busy}
-              className="flex items-center gap-3 w-full text-left px-4 py-2.5 hover:bg-surface-raised disabled:opacity-50 transition-colors"
-            >
+            <div key={m.id} className="flex items-center gap-3 px-4 py-2.5">
               <span className="w-9 h-9 rounded-full overflow-hidden bg-accent/15 flex items-center justify-center shrink-0">
                 {m.avatarUrl ? (
                   <Image src={m.avatarUrl} alt="" width={36} height={36} className="object-cover w-full h-full" unoptimized />
@@ -77,11 +81,31 @@ export default function MemberSearch() {
                   <span className="text-sm font-black text-accent">{(m.displayName || m.username || '?')[0]?.toUpperCase()}</span>
                 )}
               </span>
-              <span className="min-w-0">
+              <span className="min-w-0 flex-1">
                 <span className="block text-sm font-semibold text-prose truncate">{m.displayName || m.username}</span>
                 <span className="block text-xs text-prose-faint truncate">@{m.username}</span>
               </span>
-            </button>
+
+              {/* The verb that actually applies. Connecting is a plain form POST —
+                  no client JS, and a real navigation, which is what works on
+                  mobile + PWA. Only Message needs the RPC round trip. */}
+              {m.connectionState === 'accepted' ? (
+                <button
+                  type="button"
+                  onClick={() => startDm(m)}
+                  disabled={busy}
+                  className="shrink-0 min-h-11 rounded-lg bg-accent px-4 py-2.5 text-xs font-bold text-white hover:bg-accent-hover disabled:opacity-50 transition-colors"
+                >
+                  Message
+                </button>
+              ) : m.connectionState === 'pending_out' ? (
+                <span className="shrink-0 px-3 py-2.5 text-xs font-semibold text-faint">Asked</span>
+              ) : m.connectionState === 'pending_in' ? (
+                <ConnectForm userId={m.id} op="accept" label="Accept" />
+              ) : (
+                <ConnectForm userId={m.id} op="request" label="Connect" />
+              )}
+            </div>
           ))}
         </div>
       )}
@@ -92,5 +116,26 @@ export default function MemberSearch() {
         </p>
       )}
     </div>
+  )
+}
+
+/**
+ * A one-button form posting to /api/connections. Deliberately a real form rather
+ * than a fetch: it needs no JavaScript, it survives the mobile/PWA navigation
+ * quirks the sign-in flow already works around, and the 303 lands the user on
+ * /account/connections where the request they just sent is visible.
+ */
+function ConnectForm({ userId, op, label }: { userId: string; op: string; label: string }) {
+  return (
+    <form action="/api/connections" method="post" className="shrink-0">
+      <input type="hidden" name="op" value={op} />
+      <input type="hidden" name="userId" value={userId} />
+      <button
+        type="submit"
+        className="min-h-11 rounded-lg border border-strong bg-surface px-4 py-2.5 text-xs font-bold text-accent-text hover:bg-surface-hover transition-colors"
+      >
+        {label}
+      </button>
+    </form>
   )
 }

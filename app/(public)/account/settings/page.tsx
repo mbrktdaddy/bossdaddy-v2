@@ -9,6 +9,7 @@ import MyKidsSection from '@/components/dad-tools/MyKidsSection'
 import WorkingOnSection from '@/components/goals/WorkingOnSection'
 import InstallAppButton from '@/components/pwa/InstallAppButton'
 import MessageEmailToggle from '@/components/account/MessageEmailToggle'
+import ConnectionPrefs from '@/components/account/ConnectionPrefs'
 import PushNotificationSetting from '@/components/account/PushNotificationSetting'
 import BioForm from '@/components/account/BioForm'
 import type { Metadata } from 'next'
@@ -32,7 +33,7 @@ export default async function AccountSettingsPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('username, role, account_status, created_at, deletion_requested_at, avatar_url, display_name, tagline, bio, email_new_message')
+    .select('username, role, account_status, created_at, deletion_requested_at, avatar_url, display_name, tagline, bio, email_new_message, connection_requests_from, discoverable_by_email')
     .eq('id', user.id)
     .single()
 
@@ -171,6 +172,16 @@ export default async function AccountSettingsPage() {
       {/* Notification preferences */}
       <PushNotificationSetting />
       <MessageEmailToggle initialEnabled={(profile as { email_new_message?: boolean } | null)?.email_new_message ?? true} />
+
+      <ConnectionPrefs
+        initialRequestsFrom={
+          (profile as { connection_requests_from?: string } | null)?.connection_requests_from === 'nobody'
+            ? 'nobody' : 'everyone'
+        }
+        initialDiscoverableByEmail={
+          (profile as { discoverable_by_email?: boolean } | null)?.discoverable_by_email ?? true
+        }
+      />
 
       {/* Goal reminders are per-schedule, not a global toggle: the time, the days,
           and the channels belong to the reminder itself, so a global switch here

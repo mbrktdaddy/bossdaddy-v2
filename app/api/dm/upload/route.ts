@@ -13,7 +13,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { normalizeImage } from '@/lib/images/normalize'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getOtherParticipants, isBlockedBetween, pushNewMessage } from '@/lib/messaging-shared'
+import { getOtherParticipants, isBlockedBetween, isConnectedTo, pushNewMessage } from '@/lib/messaging-shared'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { sanitizePlainText } from '@/lib/sanitize'
 import { toStorageBody } from '@/lib/storage-body'
@@ -75,6 +75,11 @@ export async function POST(request: NextRequest) {
   if (others.length === 0) return NextResponse.json({ error: 'Conversation not found' }, { status: 404 })
   if (await isBlockedBetween(admin, user.id, others)) {
     return NextResponse.json({ error: 'Messaging is unavailable with this user.' }, { status: 403 })
+  }
+  // Same post-hoc re-check as the block above: the connection that allowed this
+  // thread can be ended after the fact, and the image path must not outlive it.
+  if (!await isConnectedTo(admin, user.id, others)) {
+    return NextResponse.json({ error: 'You\'re not connected any more.' }, { status: 403 })
   }
 
   // Normalize: auto-rotate, fit within max dimension, WebP. minDimension 0 so

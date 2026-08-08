@@ -407,6 +407,30 @@ export async function acceptInvitation(
     return { ok: false, reason: 'That invite can\'t be accepted.' }
   }
 
+  // THE CONNECTION GATE. An accepted connection is the consent (migration 140);
+  // a goal invite is what you do with it, not a way around it.
+  //
+  // This is also what closes the stale-token hole migration 141 left open. Ending
+  // a connection cascades away the participant row, but the invite TOKEN survives
+  // in whatever inbox it landed in, and without this check re-opening that link
+  // would quietly re-establish everything that was just ended. The check belongs
+  // here rather than in the cascade because this is the first moment the
+  // invitee's identity is actually known — goal_invitations only ever held an
+  // optional, unverified email.
+  const [ca, cb] = [ownerId, args.userId].sort()
+  const { data: connection } = await admin
+    .from('user_connections')
+    .select('status')
+    .eq('user_a', ca)
+    .eq('user_b', cb)
+    .maybeSingle()
+  if ((connection as { status: string } | null)?.status !== 'accepted') {
+    return {
+      ok: false,
+      reason: 'Connect with them first, then this link will work.',
+    }
+  }
+
   // `sensitive_ack` mirrors the tier the OWNER chose at invite time, which
   // createInvitation only allows on a sensitive goal once he's confirmed what the
   // partner would see. The invitee never makes this call — it isn't theirs to make.

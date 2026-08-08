@@ -95,6 +95,23 @@ function getLimiter(type: string): Ratelimit | null {
     // public URL is either an attacker probing the shared token or a retry storm.
     // Generous cap so real bursts pass; throttles abuse of the discovered URL.
     'printful-webhook': new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(100, '1 m'), prefix: 'bd_printful_webhook' }),
+    // Accountability-partner invites that actually SEND (email or a member's
+    // notifications), keyed by the owner. A form that mails an arbitrary address
+    // from our domain is a spam vector whatever it's for. Nobody recruits ten
+    // people an hour to watch him quit smoking, so this never touches a real user.
+    // Minting a copy-only link is NOT counted — that reaches nobody.
+    'goal-invite':      new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1 h'), prefix: 'bd_goal_invite' }),
+    // Connection requests, keyed by the sender. The request is now the ONLY way
+    // to reach a stranger (migration 140 gated DMs behind an accepted
+    // connection), which makes it the app's remaining cold-contact surface and
+    // therefore the one worth a real cap. 20/day is far past normal use and well
+    // short of scripted spraying.
+    'connection-request': new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, '24 h'), prefix: 'bd_conn_req' }),
+    // Member search, keyed by user. Exact-match email lookup makes this an
+    // account-existence oracle — "is this address a member here" — so it needs a
+    // cap tight enough that walking a list of addresses is not worth anyone's
+    // time, while a person typing a name never notices it.
+    'member-search':      new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, '1 m'), prefix: 'bd_member_search' }),
   }
 
   limiters[type] = configs[type] ?? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1 h'), prefix: `bd_${type}` })
@@ -103,7 +120,7 @@ function getLimiter(type: string): Ratelimit | null {
 
 export async function checkRateLimit(
   identifier: string,
-  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' | 'voice' | 'boss' | 'boss-anon' | 'boss-plus' | 'boss-research' | 'boss-notify' | 'radar' | 'merch-sayings' | 'merch-publish' | 'message' | 'checkout' | 'printful-webhook' = 'draft'
+  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' | 'voice' | 'boss' | 'boss-anon' | 'boss-plus' | 'boss-research' | 'boss-notify' | 'radar' | 'merch-sayings' | 'merch-publish' | 'message' | 'checkout' | 'printful-webhook' | 'goal-invite' | 'connection-request' | 'member-search' = 'draft'
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
   const failClosed = FAIL_CLOSED_TYPES.has(type)
   const limiter = getLimiter(type)

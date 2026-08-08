@@ -12,11 +12,13 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
+import { SITE_URL } from '@/lib/og'
 import { LABELS } from '@/lib/labels'
 import { LoginLink } from '@/components/LoginLink'
 import {
   listParticipants, listInvitations, TIER_COPY, TIERS, type ShareTier,
 } from '@/lib/goals/participants'
+import { listGoalContacts } from '@/lib/goals/contacts'
 
 export const metadata: Metadata = {
   title: `Sharing — ${LABELS.goals.short}`,
@@ -25,12 +27,12 @@ export const metadata: Metadata = {
 
 type Props = {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ msg?: string; token?: string }>
+  searchParams: Promise<{ msg?: string; token?: string; sent?: string }>
 }
 
 export default async function GoalSharePage({ params, searchParams }: Props) {
   const { id } = await params
-  const { msg, token } = await searchParams
+  const { msg, token, sent } = await searchParams
 
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
@@ -56,16 +58,23 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
 
   const sensitive = goal.config?.sensitive === true
 
-  const [participants, invitations] = await Promise.all([
+  const [participants, invitations, contacts] = await Promise.all([
     listParticipants(supabase, goal.id),
     listInvitations(supabase, goal.id),
+    listGoalContacts(supabase, { userId: user.id, goalId: goal.id }),
   ])
   const pending = invitations.filter((i) => i.state === 'pending')
 
   // Shown once, right after minting. The link is the delivery mechanism on
   // purpose: he sends it however he likes, so we never put a cessation goal in
   // someone's inbox without him choosing to.
-  const freshLink = token ? `/goals/invite/${token}` : null
+  // ABSOLUTE, not a path. This link's whole job is to leave the app — into a text
+  // message, a WhatsApp thread, an email he writes himself. A bare "/goals/invite/…"
+  // pasted anywhere off-site is dead on arrival. Same canonical SITE_URL the
+  // calendar feed builds from; set NEXT_PUBLIC_SITE_URL locally if you want the
+  // copied link to point at your dev server instead of production.
+  const inviteUrl = (t: string) => `${SITE_URL}/goals/invite/${t}`
+  const freshLink = token ? inviteUrl(token) : null
 
   return (
     <Wrap>
@@ -92,14 +101,21 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
 
       {freshLink ? (
         <div className="mt-6 rounded-xl border border-strong bg-surface-raised p-5">
-          <p className="text-sm font-semibold text-prose">Invite ready. Send him this:</p>
+          <p className="text-sm font-semibold text-prose">
+            {sent === 'member' ? 'Sent. He\'ll see it in the app and in his inbox.'
+              : sent === 'email' ? 'Sent. It\'s on its way to their inbox.'
+              : 'Invite ready. Send him this:'}
+          </p>
           {/* Selectable text rather than a copy button — a button needs client JS,
-              and long-press-to-copy is native on the phone this is built for. */}
+              and long-press-to-copy is native on the phone this is built for. Shown
+              even when we sent it: mail gets filtered, and this is the fallback. */}
           <p className="mt-3 break-all rounded-lg border border-soft bg-surface px-4 py-3 font-mono text-xs text-accent-text">
             {freshLink}
           </p>
           <p className="mt-2 text-xs text-faint">
-            Good for 7 days, one use. Nothing was emailed — that&apos;s your call to make.
+            {sent === 'none'
+              ? 'Good for 7 days, one use. Nothing was emailed — that\'s your call to make.'
+              : 'Good for 7 days, one use. Here it is as well, in case you\'d rather text it.'}
           </p>
         </div>
       ) : null}
@@ -173,7 +189,7 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
                   {TIER_COPY[invite.tier].label} · expires {invite.expiresAt.slice(0, 10)}
                 </p>
                 <p className="mt-2 break-all font-mono text-[11px] text-faint">
-                  /goals/invite/{invite.token}
+                  {inviteUrl(invite.token)}
                 </p>
               </div>
               <form action="/api/goals/share" method="post" className="shrink-0">
@@ -207,8 +223,33 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
 
           {sensitive ? <SensitiveAck /> : null}
 
+          {/* WHO — a name he already talks to, or an address, or neither.
+              All three go through the same submit; the route decides which it
+              was. A <select> can't change the form's `op` without client JS, and
+              this page has none. */}
+          {contacts.length > 0 ? (
+            <label className="block">
+              <span className="text-sm font-semibold text-prose">Someone in your corner</span>
+              <select
+                name="contactUserId"
+                defaultValue=""
+                className="mt-2 min-h-11 w-full rounded-lg border border-soft bg-surface px-4 py-3 text-prose"
+              >
+                <option value="">Pick a name…</option>
+                {contacts.map((c) => (
+                  <option key={c.userId} value={c.userId}>{c.label}</option>
+                ))}
+              </select>
+              <span className="mt-2 block text-xs text-faint">
+                Goes straight to them — in the app and by email. No link to pass on.
+              </span>
+            </label>
+          ) : null}
+
           <label className="block">
-            <span className="text-sm text-muted">Their email (optional — just so you remember who)</span>
+            <span className="text-sm text-muted">
+              {contacts.length > 0 ? 'Or their email' : 'Their email'}
+            </span>
             <input
               type="email"
               name="email"
@@ -216,7 +257,8 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
               className="mt-2 w-full rounded-lg border border-soft bg-surface px-4 py-3 text-prose"
             />
             <span className="mt-2 block text-xs text-faint">
-              We don&apos;t send it. You get a link to pass on however you want.
+              We&apos;ll email them the invite. Leave it blank and you just get a link
+              to send however you like.
             </span>
           </label>
 
@@ -224,7 +266,7 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
             type="submit"
             className="min-h-11 w-full rounded-lg bg-accent px-6 py-3 font-bold text-white hover:bg-accent-hover transition-colors"
           >
-            Make an invite link
+            Send the invite
           </button>
         </form>
       </section>

@@ -2595,8 +2595,10 @@ export type Database = {
           account_status: string
           avatar_url: string | null
           bio: string | null
+          connection_requests_from: string
           created_at: string | null
           deletion_requested_at: string | null
+          discoverable_by_email: boolean
           display_name: string | null
           email_new_message: boolean
           id: string
@@ -2615,8 +2617,10 @@ export type Database = {
           account_status?: string
           avatar_url?: string | null
           bio?: string | null
+          connection_requests_from?: string
           created_at?: string | null
           deletion_requested_at?: string | null
+          discoverable_by_email?: boolean
           display_name?: string | null
           email_new_message?: boolean
           id: string
@@ -2635,8 +2639,10 @@ export type Database = {
           account_status?: string
           avatar_url?: string | null
           bio?: string | null
+          connection_requests_from?: string
           created_at?: string | null
           deletion_requested_at?: string | null
+          discoverable_by_email?: boolean
           display_name?: string | null
           email_new_message?: boolean
           id?: string
@@ -3740,6 +3746,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_connections: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          decline_count: number
+          declined_at: string | null
+          requester_id: string
+          status: string
+          updated_at: string
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          decline_count?: number
+          declined_at?: string | null
+          requester_id: string
+          status?: string
+          updated_at?: string
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          decline_count?: number
+          declined_at?: string | null
+          requester_id?: string
+          status?: string
+          updated_at?: string
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: []
+      }
       user_ratings: {
         Row: {
           created_at: string
@@ -4038,6 +4080,7 @@ export type Database = {
       }
     }
     Functions: {
+      are_connected: { Args: { _other: string }; Returns: boolean }
       boss_hybrid_guides: {
         Args: {
           match_count?: number
@@ -4160,6 +4203,18 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      connection_cooldown_days: {
+        Args: { _decline_count: number }
+        Returns: number
+      }
+      connection_state_with: { Args: { _other: string }; Returns: string }
+      connection_states_for: {
+        Args: { _others: string[] }
+        Returns: {
+          other_id: string
+          state: string
+        }[]
+      }
       get_or_create_dm: { Args: { _other_user: string }; Returns: string }
       get_review_rating_summary: {
         Args: { p_review_id: string }
@@ -4204,6 +4259,11 @@ export type Database = {
       is_savings_goal_participant: {
         Args: { _goal_id: string }
         Returns: boolean
+      }
+      request_connection: { Args: { _other: string }; Returns: string }
+      respond_to_connection: {
+        Args: { _accept: boolean; _other: string }
+        Returns: string
       }
     }
     Enums: {

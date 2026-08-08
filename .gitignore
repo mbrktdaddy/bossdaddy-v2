@@ -59,3 +59,9 @@ ai-content-ab-samples.json
 # Scratch files for multi-line commit messages / PR bodies
 .commitmsg.tmp
 .prbody.tmp
+
+# Playwright (browser-verification harness)
+/test-results/
+/playwright-report/
+/blob-report/
+/.playwright/
