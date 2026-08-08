@@ -63,6 +63,15 @@ const MAIN_SPOKES: SpokeCard[] = [
     blurb: LABELS.tools.savings.spokeBlurb,
     href:  '/tools/savings',
   },
+  // Goals lives at a top-level /goals URL rather than under /tools/ — it isn't a
+  // calculator you visit, it's a daily loop that pings you. The card belongs here
+  // because this hub is where a dad looks for his own stuff.
+  {
+    role:  LABELS.goals.spokeRole,
+    title: LABELS.goals.full,
+    blurb: LABELS.goals.spokeBlurb,
+    href:  '/goals',
+  },
   // Presence is intentionally NOT a card here — it lives on each family
   // member's page, and "days since last moment" now surfaces directly in the
   // per-member rows above the tool grid.

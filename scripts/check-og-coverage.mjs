@@ -30,6 +30,10 @@ const ALLOW = [
   /[\\/]tools[\\/]email-unsubscribe[\\/]/,
   /[\\/]tools[\\/]family[\\/]/,
   /[\\/]tools[\\/]savings[\\/]/,
+  // /goals + /goals/[id] — same category as savings: an authenticated personal
+  // tracker holding medication schedules, cessation logs, and weight history.
+  // The detail page is explicitly noindex. Nothing here should be shareable.
+  /[\\/]goals[\\/]/,
 ]
 
 const MARKERS = ['buildSocialMetadata', 'ogImageMeta', 'ogImageUrl']

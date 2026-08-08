@@ -99,6 +99,39 @@ export const LABELS = {
   // Internal vocab is locked: container = "[Kid]'s Log", unit = "moment",
   // verb = "capture". This vocab is load-bearing across UI, emails, and
   // share copy. Do not drift.
+  // goals / goal_schedules / goal_occurrences tables → /goals route.
+  //
+  // NAMING IS NOT SETTLED — "Goals" is the neutral default, not a decision. The
+  // internal names (`goals`, the route segment, the `kind` values) are permanent;
+  // every display string below is free to change here without a migration. If
+  // this becomes "The Grind" or "Duty" or anything else, this block is the only
+  // place it changes.
+  goals: {
+    short:           'Goals',
+    full:            'Goals',
+    pageTitle:       'Goals — Boss Daddy',
+    metaDescription: 'Set a target, get a nudge, log it in one tap. Tapers, habits, programs — whatever you\'re actually working on.',
+    spokeRole:       'Track',
+    spokeBlurb:      'Quit something, start something, stick to something. Set the target, get the nudge, log it in one tap.',
+    eyebrow:         'What you\'re working on',
+    h1:              'The stuff you said you\'d do.',
+    tagline:         'Set the target, pick when you want the nudge, log it in one tap. No guilt trips.',
+    emptyHeading:    'Nothing on the board yet.',
+    emptyBody:       'A goal is a target plus a schedule — quitting a habit, taking your vitamins, hitting the gym three times a week.',
+    logCta:          'Log it',
+    newCta:          'Set one up',
+    newHeading:      'What are we working on?',
+    newBody:         'Pick the shape of it. You can change every detail after.',
+    // Display names for the `kind` discriminator. DB values never change.
+    kinds: {
+      reduce:    'Cutting back',
+      adherence: 'Daily habit',
+      program:   'Program',
+      metric:    'Tracking',
+      custom:    'Reminder',
+    } as Record<string, string>,
+  },
+
   tools: {
     short: 'Tools',
     full:  'Boss Daddy Tools',
