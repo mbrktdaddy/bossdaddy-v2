@@ -426,6 +426,13 @@ async function notifyDue(
   // schedule that only asked for push still gets an email when push reached no
   // device. That's why this claim can't be merged with the push claim above —
   // the target set isn't known until the pushes have actually been attempted.
+  //
+  // RATIFIED 2026-08-08 — this is deliberate, not an oversight. It knowingly
+  // overrides a stated channel preference on failure, and that's the intended
+  // trade: push subscriptions die silently (revoked permission, unregistered
+  // service worker, expired endpoint), and a reminder system whose only channel
+  // is dead stops working in month three without telling anyone. Don't "fix" it
+  // into strict opt-in without re-deciding that trade.
   const emailTargets = dueNow.filter((o) => {
     const wantsEmail = schedules.get(o.schedule_id)!.channels.includes('email')
     return wantsEmail || !landed.has(o.id)
