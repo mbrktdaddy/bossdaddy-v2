@@ -56,11 +56,18 @@ type StatRow = {
   today_target: number | null
 }
 
-type Props = { searchParams: Promise<{ archived?: string; deleted?: string }> }
+type Props = {
+  searchParams: Promise<{
+    archived?: string; deleted?: string; msg?: string; confirmDelete?: string
+  }>
+}
 
 export default async function GoalsIndexPage({ searchParams }: Props) {
-  const { archived, deleted } = await searchParams
+  const { archived, deleted, msg, confirmDelete } = await searchParams
   const showArchived = archived === '1'
+  // Ids arrive comma-separated from the bulk route's first POST. Capped so a
+  // hand-edited URL cannot make this page render a thousand rows.
+  const pendingDeleteIds = (confirmDelete ?? '').split(',').filter(Boolean).slice(0, 200)
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
 
@@ -106,6 +113,57 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
         </Link>
       </header>
 
+      {msg ? (
+        <p className="rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-muted">
+          {msg.slice(0, 200)}
+        </p>
+      ) : null}
+
+      {/* Bulk delete confirm. Driven by ids in the query string rather than
+          session state, so a refresh cannot silently re-fire it. */}
+      {pendingDeleteIds.length ? (
+        <section className="rounded-xl border border-strong bg-surface-raised p-5">
+          <p className="text-sm font-semibold text-prose">
+            Delete {pendingDeleteIds.length} goal{pendingDeleteIds.length === 1 ? '' : 's'} for good?
+          </p>
+          <ul className="mt-3 space-y-1 text-xs text-muted">
+            {goals.filter((g) => pendingDeleteIds.includes(g.id)).map((g) => (
+              <li key={g.id}>&middot; {g.title}</li>
+            ))}
+          </ul>
+          <p className="mt-3 text-xs text-muted">
+            Their schedules, every logged day, and all history go with them. This
+            cannot be undone &mdash; archive instead if you just want them out of the way.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <form action="/api/goals/bulk" method="post">
+              <input type="hidden" name="op" value="delete" />
+              <input type="hidden" name="confirm" value="yes" />
+              <input type="hidden" name="scope" value="selected" />
+              <input type="hidden" name="view" value={showArchived ? 'archived' : 'active'} />
+              {pendingDeleteIds.map((gid) => (
+                <input key={gid} type="hidden" name="goalIds" value={gid} />
+              ))}
+              <button
+                type="submit"
+                className="min-h-11 rounded-lg border border-strong bg-surface px-5 py-3 text-xs font-bold text-accent-text hover:bg-surface-hover transition-colors"
+              >
+                Yes, delete {pendingDeleteIds.length === 1 ? 'it' : 'them'}
+              </button>
+            </form>
+            <Link
+              href={showArchived ? '/goals?archived=1' : '/goals'}
+              className="min-h-11 inline-flex items-center rounded-lg px-5 py-3 text-xs font-semibold text-muted hover:text-prose"
+            >
+              Keep them
+            </Link>
+          </div>
+        </section>
+      ) : null}
+
+      <form action="/api/goals/bulk" method="post" className="space-y-4">
+        <input type="hidden" name="view" value={showArchived ? 'archived' : 'active'} />
+
       <ul className="space-y-4">
         {goals.map((goal) => {
           const schedule = schedules.find((s) => s.goal_id === goal.id)
@@ -129,10 +187,20 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
           const openCount = stat?.open_count ?? 0
 
           return (
-            <li key={goal.id}>
+            <li key={goal.id} className="flex items-stretch gap-2">
+              {/* Sibling of the anchor, never a child &mdash; a checkbox inside a
+                  link is invalid HTML and unclickable. This keeps the whole card
+                  tappable while still allowing selection. */}
+              <label className="flex min-h-11 min-w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-soft bg-surface">
+                <input
+                  type="checkbox" name="goalIds" value={goal.id}
+                  className="accent-accent"
+                  aria-label={`Select ${goal.title}`}
+                />
+              </label>
               <Link
                 href={`/goals/${goal.id}`}
-                className="block bg-surface border border-soft hover:border-strong rounded-xl p-5 sm:p-6 transition-colors"
+                className="block flex-1 min-w-0 bg-surface border border-soft hover:border-strong rounded-xl p-5 sm:p-6 transition-colors"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
@@ -185,6 +253,51 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
         })}
       </ul>
 
+        <fieldset className="rounded-xl border border-soft bg-surface p-5">
+          <legend className="px-1 text-xs text-muted">Do this to several at once</legend>
+
+          {/* Scope is a radio, not a "select all" checkbox: ticking every box from
+              one control needs JavaScript, and the server already knows what is
+              in this view. */}
+          <div className="mt-1 space-y-2">
+            {[
+              { value: 'selected', label: 'Just the ones I check' },
+              { value: 'all', label: showArchived ? 'Everything archived' : 'Every goal on this page' },
+            ].map((option) => (
+              <label
+                key={option.value}
+                className="flex min-h-11 items-center gap-3 rounded-lg border border-soft bg-surface-raised px-4 py-3"
+              >
+                <input
+                  type="radio" name="scope" value={option.value}
+                  defaultChecked={option.value === 'selected'}
+                  className="accent-accent"
+                />
+                <span className="text-sm text-prose">{option.label}</span>
+              </label>
+            ))}
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-3">
+            {showArchived ? (
+              <BulkButton op="restore" label="Restore" />
+            ) : (
+              <>
+                <BulkButton op="pause" label="Pause" />
+                <BulkButton op="resume" label="Resume" />
+                <BulkButton op="archive" label="Archive" />
+              </>
+            )}
+            <BulkButton op="delete" label="Delete" destructive />
+          </div>
+
+          <p className="mt-3 text-xs text-faint">
+            Delete asks once more before anything goes. Pause and archive are
+            reversible &mdash; your log survives either way.
+          </p>
+        </fieldset>
+      </form>
+
       <div className="space-y-2 border-t border-soft pt-6">
         <p className="text-xs text-faint">
           Reminders arrive by push and email. Tap the link in either one to log
@@ -198,6 +311,23 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
         </Link>
       </div>
     </div>
+  )
+}
+
+function BulkButton({ op, label, destructive }: { op: string; label: string; destructive?: boolean }) {
+  return (
+    <button
+      type="submit"
+      name="op"
+      value={op}
+      className={`min-h-11 rounded-lg border px-5 py-3 text-xs font-semibold transition-colors hover:bg-surface-hover ${
+        destructive
+          ? 'border-strong bg-surface text-accent-text'
+          : 'border-soft bg-surface text-prose'
+      }`}
+    >
+      {label}
+    </button>
   )
 }
 

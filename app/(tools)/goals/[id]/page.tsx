@@ -390,6 +390,20 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
               </button>
             </form>
           ) : null}
+
+          {/* Sits WITH the other two rather than as faint text below the log.
+              It was styled text-faint/text-xs underlined to signal "destructive,
+              tread carefully" and the result was that nobody could find it.
+              Discoverability and caution aren't the same axis — the caution
+              lives in the two-step confirm, not in low contrast. */}
+          {!confirmingDelete ? (
+            <Link
+              href={`/goals/${goal.id}?confirm=delete`}
+              className="min-h-11 inline-flex items-center rounded-lg border border-soft bg-surface px-5 py-3 text-xs font-semibold text-accent-text hover:bg-surface-hover transition-colors"
+            >
+              Delete
+            </Link>
+          ) : null}
         </div>
 
         <p className="text-xs text-faint">
@@ -398,9 +412,10 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
             : 'Pausing stops the nudges and stops new days being scheduled. Archiving hides it from your list. Either way the log stays put — you can come back to it.'}
         </p>
 
-        {/* Deleting is a two-step confirm, not a one-tap button: it cascades
-            through every occurrence and log entry, and there's no undo. A bare
-            delete link would also be destroyable by a link prefetch. */}
+        {/* Deleting is a two-step confirm: it cascades through every occurrence
+            and log entry with no undo, and a one-shot delete link would also be
+            destroyable by a link prefetcher. The Delete button above only
+            navigates here; this panel holds the only form that mutates. */}
         {confirmingDelete ? (
           <div className="rounded-xl border border-strong bg-surface-raised p-5">
             <p className="text-sm font-semibold text-prose">
@@ -430,14 +445,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
               </Link>
             </div>
           </div>
-        ) : (
-          <Link
-            href={`/goals/${goal.id}?confirm=delete`}
-            className="inline-flex items-center py-3 text-xs text-faint hover:text-muted underline"
-          >
-            Delete this goal
-          </Link>
-        )}
+        ) : null}
       </section>
     </div>
   )
