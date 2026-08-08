@@ -43,6 +43,14 @@ const FORBIDDEN = [
   // loadGoalFacts returns the identity fields, so importing it into a reminder
   // path is one destructuring away from a breach even though it names nothing.
   { pattern: /loadGoalFacts|goals\/facts/, what: 'lib/goals/facts (it carries identity)' },
+  // Accountability partners must NEVER be notified — not now, not as a setting.
+  // A push to a man's wife saying he missed his meds is the surveillance product
+  // migration 137 was designed to not be. The sweep's recipient lookup stays
+  // owner-only, so reading participants anywhere near it is the breach.
+  {
+    pattern: /goal_participants|goal_share_summary|goal_share_days|goals\/participants/,
+    what: 'a participant lookup in a notification path (mig 137: partners are never notified)',
+  },
   { pattern: /\bvote(s)? for\b/i, what: 'identity "vote" language' },
   { pattern: /\banother vote\b/i, what: 'identity "vote" language' },
   { pattern: /who you(’|')?re becoming/i, what: 'identity "becoming" language' },

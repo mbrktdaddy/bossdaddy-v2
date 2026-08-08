@@ -76,7 +76,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
 
   // RLS scopes every one of these to the signed-in user — no user_id filter to
   // forget, and an admin browsing this page sees their own goals, not everyone's.
-  const [{ data: goalRows }, { data: scheduleRows }, { data: statRows }] = await Promise.all([
+  const [{ data: goalRows }, { data: scheduleRows }, { data: statRows }, { count: sharedRaw }] = await Promise.all([
     supabase.from('goals')
       .select('id, title, kind, status, metric_unit, baseline_value, target_value, identity_short')
       .in('status', showArchived ? ['archived'] : ['active', 'paused'])
@@ -84,7 +84,12 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
     supabase.from('goal_schedules').select('goal_id, timezone, muted'),
     supabase.from('goal_stats')
       .select('goal_id, streak, logged_done, logged_total, latest_value, open_count, next_due_at, today_local_date, today_target'),
+    // Goals OTHER people share with him. Counted against the definer view (mig
+    // 137), which returns nothing unless he's a participant — head:true so this
+    // costs no rows on a page that already does three reads.
+    supabase.from('goal_share_summary').select('goal_id', { count: 'exact', head: true }),
   ])
+  const sharedCount = sharedRaw ?? 0
 
   const goals = (goalRows ?? []) as unknown as GoalRow[]
   if (goals.length === 0) return <Empty showArchived={showArchived} deleted={deleted === '1'} />
@@ -118,6 +123,21 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
         <p className="rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-muted">
           {msg.slice(0, 200)}
         </p>
+      ) : null}
+
+      {/* Only when someone actually shared something. An always-on link would be
+          clutter for the many people nobody has invited. */}
+      {sharedCount > 0 ? (
+        <Link
+          href="/goals/shared"
+          className="flex items-center justify-between gap-3 rounded-xl border border-soft bg-surface px-4 py-3 hover:border-strong transition-colors"
+        >
+          <span className="text-sm text-prose">
+            {LABELS.goals.sharedHeading}
+            <span className="text-muted"> · {sharedCount} shared with you</span>
+          </span>
+          <span className="text-xs font-semibold text-accent-text">Look →</span>
+        </Link>
       ) : null}
 
       {/* Bulk delete confirm. Driven by ids in the query string rather than

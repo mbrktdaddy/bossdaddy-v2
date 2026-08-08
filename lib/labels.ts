@@ -135,6 +135,12 @@ export const LABELS = {
     identityShortLabel: 'Short version',
     identityShortHint:  'What shows up next to this goal in a list.',
     votingFor:       'Voting for',
+    // Accountability partners (mig 137). "In your corner" rather than "Shared
+    // with me" — the point is who's got your back, not a permissions list.
+    sharedEyebrow:   'Someone asked you',
+    sharedHeading:   'In your corner',
+    sharedEmpty:     'Nobody has shared a goal with you yet. When someone does, it shows up here — and you\'ll never get pinged about it.',
+    shareCta:        'Who can see this',
     // Start date. Today or later only — see the note in /goals/new.
     startLegend:     'When does it start?',
     startHint:       'Today, or pick the day you\'re starting. Nothing gets scheduled before then.',

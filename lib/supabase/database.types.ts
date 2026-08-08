@@ -875,6 +875,7 @@ export type Database = {
           id: string
           kind: string
           local_date: string
+          logged_by: string | null
           metric_key: string | null
           note: string | null
           observed_at: string
@@ -890,6 +891,7 @@ export type Database = {
           id?: string
           kind?: string
           local_date: string
+          logged_by?: string | null
           metric_key?: string | null
           note?: string | null
           observed_at?: string
@@ -905,6 +907,7 @@ export type Database = {
           id?: string
           kind?: string
           local_date?: string
+          logged_by?: string | null
           metric_key?: string | null
           note?: string | null
           observed_at?: string
@@ -918,6 +921,13 @@ export type Database = {
             foreignKeyName: "goal_entries_goal_id_fkey"
             columns: ["goal_id"]
             isOneToOne: false
+            referencedRelation: "goal_share_summary"
+            referencedColumns: ["goal_id"]
+          },
+          {
+            foreignKeyName: "goal_entries_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
             referencedRelation: "goals"
             referencedColumns: ["id"]
           },
@@ -926,6 +936,63 @@ export type Database = {
             columns: ["occurrence_id"]
             isOneToOne: false
             referencedRelation: "goal_occurrences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          declined_at: string | null
+          expires_at: string
+          goal_id: string
+          id: string
+          invited_by: string
+          invitee_email: string | null
+          revoked_at: string | null
+          tier: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          declined_at?: string | null
+          expires_at: string
+          goal_id: string
+          id?: string
+          invited_by: string
+          invitee_email?: string | null
+          revoked_at?: string | null
+          tier?: string
+          token: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          declined_at?: string | null
+          expires_at?: string
+          goal_id?: string
+          id?: string
+          invited_by?: string
+          invitee_email?: string | null
+          revoked_at?: string | null
+          tier?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_invitations_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal_share_summary"
+            referencedColumns: ["goal_id"]
+          },
+          {
+            foreignKeyName: "goal_invitations_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
             referencedColumns: ["id"]
           },
         ]
@@ -981,6 +1048,13 @@ export type Database = {
             foreignKeyName: "goal_occurrences_goal_id_fkey"
             columns: ["goal_id"]
             isOneToOne: false
+            referencedRelation: "goal_share_summary"
+            referencedColumns: ["goal_id"]
+          },
+          {
+            foreignKeyName: "goal_occurrences_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
             referencedRelation: "goals"
             referencedColumns: ["id"]
           },
@@ -989,6 +1063,61 @@ export type Database = {
             columns: ["schedule_id"]
             isOneToOne: false
             referencedRelation: "goal_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_participants: {
+        Row: {
+          created_at: string
+          goal_id: string
+          id: string
+          invited_by: string | null
+          joined_at: string
+          sensitive_ack: boolean
+          tier: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          goal_id: string
+          id?: string
+          invited_by?: string | null
+          joined_at?: string
+          sensitive_ack?: boolean
+          tier?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          goal_id?: string
+          id?: string
+          invited_by?: string | null
+          joined_at?: string
+          sensitive_ack?: boolean
+          tier?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_participants_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal_share_summary"
+            referencedColumns: ["goal_id"]
+          },
+          {
+            foreignKeyName: "goal_participants_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_participants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1053,6 +1182,13 @@ export type Database = {
             foreignKeyName: "goal_schedules_goal_id_fkey"
             columns: ["goal_id"]
             isOneToOne: false
+            referencedRelation: "goal_share_summary"
+            referencedColumns: ["goal_id"]
+          },
+          {
+            foreignKeyName: "goal_schedules_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
             referencedRelation: "goals"
             referencedColumns: ["id"]
           },
@@ -1102,6 +1238,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "goal_stats_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: true
+            referencedRelation: "goal_share_summary"
+            referencedColumns: ["goal_id"]
+          },
           {
             foreignKeyName: "goal_stats_goal_id_fkey"
             columns: ["goal_id"]
@@ -3819,7 +3962,56 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      goal_share_days: {
+        Row: {
+          day_state: string | null
+          goal_id: string | null
+          local_date: string | null
+        }
+        Insert: {
+          day_state?: never
+          goal_id?: string | null
+          local_date?: string | null
+        }
+        Update: {
+          day_state?: never
+          goal_id?: string | null
+          local_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_occurrences_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal_share_summary"
+            referencedColumns: ["goal_id"]
+          },
+          {
+            foreignKeyName: "goal_occurrences_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_share_summary: {
+        Row: {
+          goal_id: string | null
+          kind: string | null
+          logged_done: number | null
+          logged_total: number | null
+          my_tier: string | null
+          open_count: number | null
+          owner_id: string | null
+          started_on: string | null
+          status: string | null
+          streak: number | null
+          target_date: string | null
+          title: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       boss_hybrid_guides: {
@@ -3960,6 +4152,13 @@ export type Database = {
           user_subscribed: boolean
           vote_count: number
         }[]
+      }
+      goal_is_sensitive: { Args: { _goal_id: string }; Returns: boolean }
+      goal_owner_id: { Args: { _goal_id: string }; Returns: string }
+      goal_participant_tier: { Args: { _goal_id: string }; Returns: string }
+      goal_tier_at_least: {
+        Args: { _goal_id: string; _min: string }
+        Returns: boolean
       }
       increment_guide_views: { Args: { row_id: string }; Returns: undefined }
       increment_review_views: { Args: { row_id: string }; Returns: undefined }

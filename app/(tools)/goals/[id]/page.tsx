@@ -396,12 +396,20 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-sm font-bold text-prose uppercase tracking-wide">Reminders</h2>
-          <Link
-            href={`/goals/${goal.id}/edit`}
-            className="min-h-11 inline-flex items-center text-xs font-semibold text-accent-text hover:text-prose"
-          >
-            Edit goal &amp; reminders →
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href={`/goals/${goal.id}/share`}
+              className="min-h-11 inline-flex items-center text-xs font-semibold text-accent-text hover:text-prose"
+            >
+              {LABELS.goals.shareCta} →
+            </Link>
+            <Link
+              href={`/goals/${goal.id}/edit`}
+              className="min-h-11 inline-flex items-center text-xs font-semibold text-accent-text hover:text-prose"
+            >
+              Edit →
+            </Link>
+          </div>
         </div>
         {schedules.length === 0 ? (
           <p className="text-sm text-faint">No schedule on this goal yet.</p>
