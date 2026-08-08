@@ -121,7 +121,20 @@ export const LABELS = {
     logCta:          'Log it',
     newCta:          'Set one up',
     newHeading:      'What are we working on?',
-    newBody:         'Pick the shape of it. You can change every detail after.',
+    newBody:         'Pick a plan to start from. Every detail is yours to change.',
+    // The escape hatch under the shelf of concrete plans — the five generic
+    // shapes live behind it (goal_templates.is_kind_default).
+    newOtherCta:     'Something else',
+    newOtherBody:    'Start from a shape instead of a plan.',
+    // Identity. Prefilled from the template, never a blank box, always skippable.
+    identityLegend:  'Who does this make you?',
+    identityHint:    'Present tense, and about the man — not the habit. Every day you log is a vote for it. Leave it blank if it feels early.',
+    identityShortLabel: 'Short version',
+    identityShortHint:  'What shows up next to this goal in a list.',
+    votingFor:       'Voting for',
+    // Start date. Today or later only — see the note in /goals/new.
+    startLegend:     'When does it start?',
+    startHint:       'Today, or pick the day you\'re starting. Nothing gets scheduled before then.',
     // Display names for the `kind` discriminator. DB values never change.
     kinds: {
       reduce:    'Cutting back',

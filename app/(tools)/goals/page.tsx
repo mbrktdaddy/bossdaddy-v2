@@ -40,6 +40,7 @@ type GoalRow = {
   metric_unit: string | null
   baseline_value: number | null
   target_value: number | null
+  identity_short: string | null
 }
 
 type ScheduleRow = { goal_id: string; timezone: string; muted: boolean }
@@ -77,7 +78,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
   // forget, and an admin browsing this page sees their own goals, not everyone's.
   const [{ data: goalRows }, { data: scheduleRows }, { data: statRows }] = await Promise.all([
     supabase.from('goals')
-      .select('id, title, kind, status, metric_unit, baseline_value, target_value')
+      .select('id, title, kind, status, metric_unit, baseline_value, target_value, identity_short')
       .in('status', showArchived ? ['archived'] : ['active', 'paused'])
       .order('created_at', { ascending: false }),
     supabase.from('goal_schedules').select('goal_id, timezone, muted'),
@@ -216,6 +217,15 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
                     <h2 className="mt-1 text-lg sm:text-xl font-bold text-prose line-clamp-2">
                       {goal.title}
                     </h2>
+                    {/* The short identity, which is the only form that fits here —
+                        a 160-character sentence would swamp the card. Absent for
+                        goals with no identity set, and it never carries a count:
+                        this row is who he's becoming, not how he's scoring. */}
+                    {goal.identity_short ? (
+                      <p className="mt-1 truncate text-xs text-muted">
+                        {LABELS.goals.votingFor}: {goal.identity_short}
+                      </p>
+                    ) : null}
                   </div>
                   {openCount > 0 && goal.status === 'active' ? (
                     <span className="shrink-0 rounded-full bg-accent px-3 py-1 text-xs font-bold text-white">

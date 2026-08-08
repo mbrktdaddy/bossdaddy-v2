@@ -1111,6 +1111,98 @@ export type Database = {
           },
         ]
       }
+      goal_templates: {
+        Row: {
+          baseline_value: number | null
+          blurb: string
+          created_at: string
+          curve: string
+          direction: string | null
+          guide_slug: string | null
+          identity_short_suggestion: string | null
+          identity_suggestion: string | null
+          is_kind_default: boolean
+          is_sensitive: boolean
+          kind: string
+          label: string
+          local_time: string
+          metric_key: string | null
+          metric_unit: string | null
+          recur_days: string[]
+          recur_when: string
+          slug: string
+          sort_order: number
+          status: string
+          step_every_days: number | null
+          target_value: number | null
+          title_suggestion: string
+          updated_at: string
+          weeks: number | null
+        }
+        Insert: {
+          baseline_value?: number | null
+          blurb: string
+          created_at?: string
+          curve?: string
+          direction?: string | null
+          guide_slug?: string | null
+          identity_short_suggestion?: string | null
+          identity_suggestion?: string | null
+          is_kind_default?: boolean
+          is_sensitive?: boolean
+          kind: string
+          label: string
+          local_time?: string
+          metric_key?: string | null
+          metric_unit?: string | null
+          recur_days?: string[]
+          recur_when?: string
+          slug: string
+          sort_order?: number
+          status?: string
+          step_every_days?: number | null
+          target_value?: number | null
+          title_suggestion?: string
+          updated_at?: string
+          weeks?: number | null
+        }
+        Update: {
+          baseline_value?: number | null
+          blurb?: string
+          created_at?: string
+          curve?: string
+          direction?: string | null
+          guide_slug?: string | null
+          identity_short_suggestion?: string | null
+          identity_suggestion?: string | null
+          is_kind_default?: boolean
+          is_sensitive?: boolean
+          kind?: string
+          label?: string
+          local_time?: string
+          metric_key?: string | null
+          metric_unit?: string | null
+          recur_days?: string[]
+          recur_when?: string
+          slug?: string
+          sort_order?: number
+          status?: string
+          step_every_days?: number | null
+          target_value?: number | null
+          title_suggestion?: string
+          updated_at?: string
+          weeks?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_templates_guide_slug_fkey"
+            columns: ["guide_slug"]
+            isOneToOne: false
+            referencedRelation: "guides"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       goals: {
         Row: {
           archived_at: string | null
@@ -1122,6 +1214,8 @@ export type Database = {
           description: string | null
           direction: string | null
           id: string
+          identity_short: string | null
+          identity_statement: string | null
           kind: string
           metric_key: string | null
           metric_unit: string | null
@@ -1130,6 +1224,7 @@ export type Database = {
           step_every_days: number | null
           target_date: string | null
           target_value: number | null
+          template_slug: string | null
           title: string
           updated_at: string
           user_id: string
@@ -1144,6 +1239,8 @@ export type Database = {
           description?: string | null
           direction?: string | null
           id?: string
+          identity_short?: string | null
+          identity_statement?: string | null
           kind: string
           metric_key?: string | null
           metric_unit?: string | null
@@ -1152,6 +1249,7 @@ export type Database = {
           step_every_days?: number | null
           target_date?: string | null
           target_value?: number | null
+          template_slug?: string | null
           title: string
           updated_at?: string
           user_id: string
@@ -1166,6 +1264,8 @@ export type Database = {
           description?: string | null
           direction?: string | null
           id?: string
+          identity_short?: string | null
+          identity_statement?: string | null
           kind?: string
           metric_key?: string | null
           metric_unit?: string | null
@@ -1174,6 +1274,7 @@ export type Database = {
           step_every_days?: number | null
           target_date?: string | null
           target_value?: number | null
+          template_slug?: string | null
           title?: string
           updated_at?: string
           user_id?: string

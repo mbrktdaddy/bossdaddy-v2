@@ -35,6 +35,8 @@ type GoalRow = {
   baseline_value: number | null; target_value: number | null
   curve: string; step_every_days: number | null
   started_on: string; target_date: string | null
+  identity_statement: string | null; identity_short: string | null
+  template_slug: string | null
 }
 type ScheduleRow = {
   id: string; label: string | null; rrule: string; local_time: string
@@ -46,6 +48,12 @@ type OccurrenceRow = {
 }
 type EntryRow = {
   id: string; local_date: string; kind: string; value: number | null; note: string | null
+}
+// PostgREST embeds a to-one relationship as an object (or null when RLS hides it).
+type PlanRow = {
+  slug: string
+  guide_slug: string | null
+  guides: { slug: string; title: string } | null
 }
 
 export default async function GoalDetailPage({ params, searchParams }: Props) {
@@ -68,11 +76,25 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
 
   const { data: goalRow } = await supabase
     .from('goals')
-    .select('id, title, description, kind, status, metric_key, metric_unit, direction, baseline_value, target_value, curve, step_every_days, started_on, target_date')
+    .select('id, title, description, kind, status, metric_key, metric_unit, direction, baseline_value, target_value, curve, step_every_days, started_on, target_date, identity_statement, identity_short, template_slug')
     .eq('id', id)
     .maybeSingle()
   const goal = goalRow as unknown as GoalRow | null
   if (!goal) notFound()
+
+  // The plan this came from, only to find out whether there's something to read.
+  // Skipped entirely for a goal that wasn't started from a template, and the link
+  // is hidden when the guide is unpublished — RLS on `guides` returns no embedded
+  // row in that case, so the gate is the database's rather than a status check I
+  // could forget to keep in sync.
+  const plan = goal.template_slug
+    ? ((await supabase
+        .from('goal_templates')
+        .select('slug, guide_slug, guides(slug, title)')
+        .eq('slug', goal.template_slug)
+        .maybeSingle()).data as unknown as PlanRow | null)
+    : null
+  const planGuide = plan?.guides?.slug ? plan.guides : null
 
   const [{ data: scheduleRows }, { data: occurrenceRows }, { data: entryRows }] = await Promise.all([
     supabase.from('goal_schedules')
@@ -134,6 +156,27 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
         </h1>
         {goal.description ? (
           <p className="text-base text-prose-muted leading-snug">{goal.description}</p>
+        ) : null}
+
+        {/* ── who this is making him ────────────────────────────────────────
+            Stated, never scored. There is no number beside it and nothing here
+            can go down: a missed day is silent by design, and identity framing
+            that could be contradicted by a bad week would be worse than none.
+            Absent when he never set one — the page then reads exactly as it did
+            before this layer existed. */}
+        {goal.identity_statement ? (
+          <p className="border-l-2 border-strong pl-4 text-base text-prose-muted leading-snug">
+            {goal.identity_statement}
+          </p>
+        ) : null}
+
+        {planGuide ? (
+          <Link
+            href={`/guides/${planGuide.slug}`}
+            className="inline-flex min-h-11 items-center text-xs font-semibold text-accent-text hover:text-prose"
+          >
+            Read the plan behind this →
+          </Link>
         ) : null}
       </header>
 

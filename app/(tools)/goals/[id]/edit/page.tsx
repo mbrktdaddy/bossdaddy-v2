@@ -38,6 +38,7 @@ type GoalRow = {
   baseline_value: number | null; target_value: number | null
   curve: string; step_every_days: number | null
   started_on: string; target_date: string | null
+  identity_statement: string | null; identity_short: string | null
 }
 type ScheduleRow = {
   id: string; label: string | null; rrule: string; local_time: string
@@ -76,7 +77,7 @@ export default async function EditGoalPage({ params, searchParams }: Props) {
 
   const { data: goalRow } = await supabase
     .from('goals')
-    .select('id, title, description, kind, metric_key, metric_unit, direction, baseline_value, target_value, curve, step_every_days, started_on, target_date')
+    .select('id, title, description, kind, metric_key, metric_unit, direction, baseline_value, target_value, curve, step_every_days, started_on, target_date, identity_statement, identity_short')
     .eq('id', id)
     .maybeSingle()
   const goal = goalRow as unknown as GoalRow | null
@@ -147,6 +148,31 @@ export default async function EditGoalPage({ params, searchParams }: Props) {
             className="mt-2 w-full rounded-lg border border-soft bg-surface px-4 py-3 text-prose"
           />
         </Field>
+
+        {/* ── identity ──────────────────────────────────────────────────────
+            Always available, never required, and clearing it is a first-class
+            action: empty both boxes and every surface goes back to plain process
+            language. Nothing else has to be switched off. */}
+        <fieldset className="space-y-3 rounded-xl border border-soft bg-surface p-5">
+          <legend className="px-1 text-sm font-semibold text-prose">
+            {LABELS.goals.identityLegend}
+          </legend>
+          <input
+            type="text" name="identityStatement" maxLength={160}
+            defaultValue={goal.identity_statement ?? ''}
+            placeholder="I am the kind of dad who…"
+            className="w-full rounded-lg border border-soft bg-surface-raised px-4 py-3 text-prose"
+          />
+          <Field label={LABELS.goals.identityShortLabel}>
+            <input
+              type="text" name="identityShort" maxLength={24}
+              defaultValue={goal.identity_short ?? ''}
+              placeholder="Smoke-Free"
+              className="mt-2 w-full rounded-lg border border-soft bg-surface-raised px-4 py-3 text-prose"
+            />
+          </Field>
+          <p className="text-xs text-faint">{LABELS.goals.identityHint}</p>
+        </fieldset>
 
         {goal.metric_key != null || wantsCurve ? (
           <div className="grid grid-cols-2 gap-3">

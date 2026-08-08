@@ -30,6 +30,11 @@ const FormSchema = z.object({
   target: z.string().trim().optional(),
   weeks: z.string().trim().optional(),
   stepDays: z.string().trim().optional(),
+  // Identity. Always editable and always clearable — the moment someone clears
+  // it, every surface falls back to process language with no other switch to
+  // flip. Caps match the CHECKs in migration 136.
+  identityStatement: z.string().trim().max(160, 'Keep the identity line short — a phrase, not a paragraph.').optional(),
+  identityShort: z.string().trim().max(24, 'The short version needs to fit in a list — 24 characters.').optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -94,6 +99,16 @@ export async function POST(request: NextRequest) {
       curve,
       step_every_days: curve === 'step' ? stepDays : null,
       target_date: targetDate,
+      // ABSENT ≠ EMPTY. A form that submits '' is a deliberate clear; a caller
+      // that omits the field entirely (a future partial-edit form, a script)
+      // must not silently wipe an identity someone typed. An empty text input
+      // still posts a key, so the distinction survives the round trip.
+      ...(input.identityStatement !== undefined
+        ? { identity_statement: emptyToNull(input.identityStatement) }
+        : {}),
+      ...(input.identityShort !== undefined
+        ? { identity_short: emptyToNull(input.identityShort) }
+        : {}),
     })
     .eq('id', input.goalId)
   if (error) {

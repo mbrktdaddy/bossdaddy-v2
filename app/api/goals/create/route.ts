@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { assertValidSchedule, isValidTimeZone, RecurrenceError } from '@/lib/goals/recurrence'
 import { buildRrule, normalizeDays } from '@/lib/goals/schedule-input'
 import { materializeScheduleById } from '@/lib/goals/sweep'
+import { loadTemplate } from '@/lib/goals/templates'
 
 // Creates a goal plus its first schedule, then redirects to the goal.
 //
@@ -30,6 +31,17 @@ const FormSchema = z.object({
   localTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Pick a time.'),
   timezone: z.string().min(1),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  // The form's notion of "today" in the visitor's zone, so a future-only start
+  // date can be enforced without the server guessing where he is.
+  clientToday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  // Which template this came from. Looked up rather than trusted: the row is the
+  // only source for `is_sensitive`, and a slug that no longer resolves is stored
+  // as NULL instead of dangling.
+  templateSlug: z.string().trim().max(80).optional(),
+  // Identity. Optional at every layer — the caps match the CHECKs in migration
+  // 136 so an over-long paste bounces with a sentence instead of a 500.
+  identityStatement: z.string().trim().max(160, 'Keep the identity line short — a phrase, not a paragraph.').optional(),
+  identityShort: z.string().trim().max(24, 'The short version needs to fit in a list — 24 characters.').optional(),
 })
 
 
@@ -41,21 +53,35 @@ export async function POST(request: NextRequest) {
   const parsed = FormSchema.safeParse(raw)
   if (!parsed.success) {
     const first = parsed.error.issues[0]
-    return bounce(request, String(raw.kind ?? ''), first?.message ?? 'Something in that form didn\'t look right.')
+    return bounce(
+      request,
+      { template: String(raw.templateSlug ?? ''), kind: String(raw.kind ?? '') },
+      first?.message ?? 'Something in that form didn\'t look right.',
+    )
   }
   const input = parsed.data
+  const origin = { template: input.templateSlug ?? '', kind: input.kind }
 
   if (!isValidTimeZone(input.timezone)) {
-    return bounce(request, input.kind, 'That timezone didn\'t look right.')
+    return bounce(request, origin, 'That timezone didn\'t look right.')
   }
 
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
   if (!user) return NextResponse.redirect(new URL('/login?next=/goals/new', request.url), 303)
 
+  // No backdating. The materializer would expand every day since, and the sweep
+  // would age them all out to `missed` — a wall of failures on day one, which on
+  // a cessation goal is exactly the evidence-against-the-identity this layer
+  // exists to avoid. (Stale nudges aren't the risk; the sweep skips anything too
+  // old to be one.) The form's `min` says the same thing; this is the gate.
+  if (input.clientToday && input.startDate < input.clientToday) {
+    return bounce(request, origin, 'Start today or later — I can\'t schedule days that already happened.')
+  }
+
   const days = normalizeDays(form.getAll('days').map(String))
   if (input.when === 'days' && days.length === 0) {
-    return bounce(request, input.kind, 'Pick at least one day of the week.')
+    return bounce(request, origin, 'Pick at least one day of the week.')
   }
   const rrule = buildRrule(input.when, input.startDate, days)
 
@@ -70,7 +96,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (err) {
     const message = err instanceof RecurrenceError ? err.message : 'That schedule didn\'t work out.'
-    return bounce(request, input.kind, message)
+    return bounce(request, origin, message)
   }
 
   // ── curve numbers ─────────────────────────────────────────────────────────
@@ -85,15 +111,22 @@ export async function POST(request: NextRequest) {
   let curve = input.curve
   if (curve !== 'none' && (baseline == null || target == null || weeks == null)) {
     if (input.kind === 'reduce' || input.kind === 'metric') {
-      return bounce(request, input.kind, 'Fill in the starting number, the target, and how many weeks.')
+      return bounce(request, origin, 'Fill in the starting number, the target, and how many weeks.')
     }
     curve = 'none'
   }
   if (curve === 'step' && (stepDays == null || stepDays < 1)) {
-    return bounce(request, input.kind, 'How many days between steps?')
+    return bounce(request, origin, 'How many days between steps?')
   }
 
   const targetDate = weeks != null ? addDays(input.startDate, weeks * 7) : null
+
+  // ── where it came from ────────────────────────────────────────────────────
+  // The template row is the ONLY source for `is_sensitive` — it decides whether
+  // this goal gets edge-off framing from the Boss and from the UI, so it can't
+  // come from a form field a hand-rolled POST could flip. A slug that no longer
+  // resolves is dropped rather than stored dangling.
+  const template = input.templateSlug ? await loadTemplate(supabase, input.templateSlug) : null
 
   // ── write ─────────────────────────────────────────────────────────────────
   // Session client, so RLS is what ties these rows to the signed-in user.
@@ -112,13 +145,22 @@ export async function POST(request: NextRequest) {
       step_every_days: curve === 'step' ? stepDays : null,
       started_on: input.startDate,
       target_date: targetDate,
+      // Optional at every layer. Blank stays NULL rather than '' so "has he set
+      // an identity?" is one null check everywhere downstream.
+      identity_statement: emptyToNull(input.identityStatement),
+      identity_short: emptyToNull(input.identityShort),
+      template_slug: template?.slug ?? null,
+      // `config` is this table's home for kind-specific extras (134), validated
+      // here rather than by Postgres. Only written when true, so the key's
+      // presence means something and an ordinary goal keeps an empty object.
+      config: template?.isSensitive ? { sensitive: true } : {},
     })
     .select('id')
     .single()
 
   if (goalError || !goalRow) {
     console.error('goals/create goal insert failed', goalError?.message)
-    return bounce(request, input.kind, 'Couldn\'t save that goal. Try again.')
+    return bounce(request, origin, 'Couldn\'t save that goal. Try again.')
   }
   const goalId = (goalRow as unknown as { id: string }).id
 
@@ -161,9 +203,21 @@ export async function POST(request: NextRequest) {
   return NextResponse.redirect(new URL(`/goals/${goalId}`, request.url), 303)
 }
 
-function bounce(request: NextRequest, kind: string, message: string): NextResponse {
+/**
+ * Back to the form he was on, with the reason.
+ *
+ * Prefers the template slug so the prefill survives the round trip; `kind` is the
+ * fallback for a POST that predates templates, and /goals/new still resolves it
+ * to that kind's default.
+ */
+function bounce(
+  request: NextRequest,
+  origin: { template: string; kind: string },
+  message: string,
+): NextResponse {
   const url = new URL('/goals/new', request.url)
-  if (kind) url.searchParams.set('kind', kind)
+  if (origin.template) url.searchParams.set('t', origin.template)
+  else if (origin.kind) url.searchParams.set('kind', origin.kind)
   url.searchParams.set('msg', message)
   return NextResponse.redirect(url, 303)
 }
