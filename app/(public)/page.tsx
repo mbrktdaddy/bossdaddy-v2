@@ -126,16 +126,23 @@ const LATEST_RAIL_SLOTS = 6
  * topic chips applies: an index that reshuffles between visits is worse than one
  * that's imperfectly ranked. It also keeps the blocks in step with the nav.
  *
- * `lead` is excluded from every block. It's already the section's lead feature, so
- * leaving it in would headline the same guide twice.
+ * The lead feature is NOT held back from the blocks. It used to be — the thinking
+ * was that repeating it would headline the same guide twice — but the lead is the
+ * newest guide site-wide, so excluding it silently docked one item from whichever
+ * category happened to own it. Table Duty had 4 live guides and rendered 3, and the
+ * hole moved between categories as new guides published, which reads as a bug.
+ *
+ * A block is an index of its category and has to be complete; the lead card is a
+ * promotional slot above it. Editorial homepages (NYT, Guardian, Wirecutter) repeat
+ * the hero in its section list for the same reason. Don't "fix" this by re-adding
+ * the exclusion.
  */
 function buildTopicBlocks(
   guides: Guide[],
-  lead: Guide | null,
 ): { slug: string; label: string; items: TopicItem[] }[] {
   const byTopic = new Map<string, Guide[]>()
   for (const g of guides) {
-    if (!g.category || g.id === lead?.id) continue
+    if (!g.category) continue
     const held = byTopic.get(g.category)
     if (held) held.push(g)
     else byTopic.set(g.category, [g])
@@ -236,11 +243,10 @@ export default async function HomePage() {
   const guideFeed: Guide[] = (guidesRaw ?? []) as Guide[]
 
   // `guideFeed` is every published guide, newest first. The lead feature is the
-  // newest of them, reserved before the blocks are built — the hero's "New guide"
-  // motion item reads `leadGuide` and has to be the newest guide on the site, so a
-  // block must never be able to claim it.
+  // newest of them, and it also still appears in its own topic block below — see
+  // buildTopicBlocks. The hero's "New guide" motion item reads the same guide.
   const leadGuide = guideFeed[0] ?? null
-  const topicBlocks = buildTopicBlocks(guideFeed, leadGuide)
+  const topicBlocks = buildTopicBlocks(guideFeed)
 
   // Just Dropped leads with the newest review the Cover Story isn't already
   // showing. `featured` is the admin-flagged review and falls back to top-rated —
