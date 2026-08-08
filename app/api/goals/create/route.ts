@@ -48,7 +48,10 @@ const FormSchema = z.object({
 export async function POST(request: NextRequest) {
   const form = await request.formData()
   const raw = Object.fromEntries(form.entries())
-  const channels = form.getAll('channels').map(String).filter((c) => c === 'push' || c === 'email')
+  // 'inapp' writes into the shared notifications feed (mig 082) via the sweep.
+  // It was missing from this filter, so even a hand-rolled POST couldn't set it.
+  const channels = form.getAll('channels').map(String)
+    .filter((c) => c === 'push' || c === 'email' || c === 'inapp')
 
   const parsed = FormSchema.safeParse(raw)
   if (!parsed.success) {

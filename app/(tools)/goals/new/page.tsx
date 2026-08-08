@@ -406,19 +406,36 @@ export default async function NewGoalPage({ searchParams }: Props) {
           <p className="text-xs text-faint">{LABELS.goals.startHint}</p>
         </fieldset>
 
+        {/* The third channel was reachable only from the edit page, so every goal
+            was created push+email and the notifications feed never fired for it.
+            Offered here, DEFAULT OFF on purpose: a daily goal posts one feed row
+            a day, and thirty unread items a month would bury the DMs and replies
+            the bell exists for. Push and email already carry the one-tap link,
+            which is the actual job. */}
         <fieldset className="space-y-2">
           <legend className="text-sm font-semibold text-prose">How should I reach you?</legend>
           {[
-            { value: 'push', label: 'Push notification' },
-            { value: 'email', label: 'Email' },
+            { value: 'push', label: 'Push notification', on: true, hint: null },
+            { value: 'email', label: 'Email', on: true, hint: null },
+            {
+              value: 'inapp',
+              label: 'Also drop it in my notifications feed',
+              on: false,
+              hint: 'Handy for a weekly nudge. A daily one will stack up in there.',
+            },
           ].map((channel) => (
-            <label key={channel.value} className="flex items-center gap-3 rounded-lg border border-soft bg-surface px-4 py-3">
+            <label key={channel.value} className="flex items-start gap-3 rounded-lg border border-soft bg-surface px-4 py-3">
               <input
                 type="checkbox" name="channels" value={channel.value}
-                defaultChecked
-                className="accent-accent"
+                defaultChecked={channel.on}
+                className="mt-0.5 accent-accent"
               />
-              <span className="text-sm text-prose">{channel.label}</span>
+              <span className="min-w-0">
+                <span className="block text-sm text-prose">{channel.label}</span>
+                {channel.hint ? (
+                  <span className="mt-0.5 block text-xs text-faint">{channel.hint}</span>
+                ) : null}
+              </span>
             </label>
           ))}
           <p className="text-xs text-faint">

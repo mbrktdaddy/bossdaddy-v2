@@ -120,6 +120,9 @@ export const LABELS = {
     emptyBody:       'A goal is a target plus a schedule — quitting a habit, taking your vitamins, hitting the gym three times a week.',
     logCta:          'Log it',
     newCta:          'Set one up',
+    // The profile section that lists BOTH kinds of goal — the spine's and
+    // savings'. Deliberately not "Goals": a dad has one mental category here.
+    workingOnHeading: 'What you\'re working on',
     newHeading:      'What are we working on?',
     newBody:         'Pick a plan to start from. Every detail is yours to change.',
     // The escape hatch under the shelf of concrete plans — the five generic

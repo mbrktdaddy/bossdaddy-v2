@@ -6,7 +6,7 @@ import EditUsernameForm from '@/components/account/EditUsernameForm'
 import EditEmailForm from '@/components/account/EditEmailForm'
 import AccountDeletion from '@/components/account/AccountDeletion'
 import MyKidsSection from '@/components/dad-tools/MyKidsSection'
-import SavingsGoalsSection from '@/components/dad-tools/SavingsGoalsSection'
+import WorkingOnSection from '@/components/goals/WorkingOnSection'
 import InstallAppButton from '@/components/pwa/InstallAppButton'
 import MessageEmailToggle from '@/components/account/MessageEmailToggle'
 import PushNotificationSetting from '@/components/account/PushNotificationSetting'
@@ -172,6 +172,24 @@ export default async function AccountSettingsPage() {
       <PushNotificationSetting />
       <MessageEmailToggle initialEnabled={(profile as { email_new_message?: boolean } | null)?.email_new_message ?? true} />
 
+      {/* Goal reminders are per-schedule, not a global toggle: the time, the days,
+          and the channels belong to the reminder itself, so a global switch here
+          would either lie about what it controls or fight the per-goal mute. Point
+          at the real control instead of duplicating it. */}
+      <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+        <p className="text-sm font-semibold text-prose">Goal reminders</p>
+        <p className="text-xs text-prose-faint mt-1 leading-relaxed">
+          Each goal carries its own reminder — the time, the days, and how it
+          reaches you. Mute or change any of them on the goal itself.
+        </p>
+        <Link
+          href="/goals"
+          className="mt-3 inline-flex min-h-11 items-center text-xs font-semibold text-accent-text hover:text-prose"
+        >
+          Manage your goals →
+        </Link>
+      </div>
+
       {/* ── YOUR STUFF — family, savings, activity ─────────────────────── */}
       <h2 className="text-base font-black text-prose mb-3 mt-10">Your Stuff</h2>
 
@@ -180,9 +198,12 @@ export default async function AccountSettingsPage() {
         <MyKidsSection />
       </div>
 
-      {/* Savings goals — Dad Tools v1.2 */}
+      {/* What he's working on — the goals spine AND savings, one list.
+          Replaced a savings-only section: the spine shipped with no presence on
+          the one page every member actually visits, so the whole feature was
+          invisible from the profile. Two tables underneath, one list on top. */}
       <div className="mb-6">
-        <SavingsGoalsSection />
+        <WorkingOnSection />
       </div>
 
       {/* Activity */}
