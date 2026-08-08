@@ -77,7 +77,12 @@ export async function GET(
         const [dtstartLine, rruleLine] = icsRuleLines({
           rrule: schedule.rrule,
           startDate: schedule.start_date,
-          localTime: schedule.local_time,
+          // Postgres `time` comes back as HH:MM:SS and the engine demands HH:MM,
+          // so this slice is load-bearing, not cosmetic — see sweep.ts, which does
+          // the same thing at its own call site. Without it every schedule throws
+          // RecurrenceError, the catch below swallows it one row at a time, and the
+          // feed serves a perfectly valid EMPTY calendar to every subscriber.
+          localTime: schedule.local_time.slice(0, 5),
           timezone: schedule.timezone,
         })
         return [{
@@ -99,6 +104,18 @@ export async function GET(
         return []
       }
     })
+
+    // ONE bad rule is a skip; ALL of them is a broken feed wearing a valid one's
+    // clothes. That distinction is what hid the HH:MM:SS bug above — a subscriber
+    // sees an empty calendar and reads it as "nothing scheduled", and the per-row
+    // catch means nothing else complains. Say it loudly enough to notice.
+    const scheduleCount = (scheduleRows ?? []).length
+    if (events.length === 0 && scheduleCount > 0) {
+      console.error(
+        `goals calendar: EVERY schedule failed to expand for user ${userId} ` +
+        `(${scheduleCount} active) — serving an empty feed`,
+      )
+    }
   }
 
   const body = buildCalendar(events, {

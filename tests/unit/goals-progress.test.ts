@@ -140,30 +140,49 @@ describe('compareToTarget', () => {
 // counting past the end of a finished plan, claiming a day before the plan
 // started, and reporting a day number beyond the plan's length.
 
+// Every bounded fixture below uses `start + weeks * 7`, because that is the only
+// target date the app can produce (/api/goals/create). The earlier fixtures used
+// `start + 55` and so agreed with a `+1` that made every real 8-week plan render
+// "Day 1 of 57" — a green suite describing a plan nothing could create.
+const EIGHT_WEEKS_FROM_AUG_1 = '2026-09-26'   // 2026-08-01 + 56
+const EIGHT_WEEKS_FROM_JUN_1 = '2026-07-27'   // 2026-06-01 + 56
+
 describe('planWindow', () => {
-  it('spans start to target, inclusive, and says which day of it today is', () => {
-    const w = planWindow('2026-08-01', '2026-09-25', '2026-08-24')
+  it('runs start → target and says which day of it today is', () => {
+    const w = planWindow('2026-08-01', EIGHT_WEEKS_FROM_AUG_1, '2026-08-24')
     expect(w).not.toBeNull()
     expect(w!.start).toBe('2026-08-01')
-    expect(w!.end).toBe('2026-09-25')
-    expect(w!.planDays).toBe(56)          // 8 weeks, both ends counted
+    expect(w!.end).toBe(EIGHT_WEEKS_FROM_AUG_1)
+    expect(w!.planDays).toBe(56)          // 8 weeks reads as 8 weeks
     expect(w!.dayInPlan).toBe(24)
   })
 
   it('is day 1 on the first day', () => {
-    expect(planWindow('2026-08-01', '2026-09-25', '2026-08-01')!.dayInPlan).toBe(1)
+    expect(planWindow('2026-08-01', EIGHT_WEEKS_FROM_AUG_1, '2026-08-01')!.dayInPlan).toBe(1)
+  })
+
+  it('agrees with the target date /api/goals/create actually writes', () => {
+    // The regression guard. create does addDays(startDate, weeks * 7) and
+    // lib/goals/curve.ts needs that exact span for its step count, so planDays
+    // has to be the DURATION. If someone re-adds the inclusive +1 here, or
+    // shortens create's span to suit it, one of these two numbers moves.
+    for (const weeks of [1, 4, 8, 12]) {
+      const target = new Date(Date.UTC(2026, 7, 1) + weeks * 7 * 86_400_000)
+        .toISOString().slice(0, 10)
+      expect(planWindow('2026-08-01', target, '2026-08-01')!.planDays).toBe(weeks * 7)
+    }
   })
 
   it('stops the window at the target date rather than at today', () => {
     // Once a plan is over its count is final. Letting `end` drift to today would
     // keep accruing votes against a target that already came and went.
-    const w = planWindow('2026-06-01', '2026-07-26', '2026-08-24')!
-    expect(w.end).toBe('2026-07-26')
+    const w = planWindow('2026-06-01', EIGHT_WEEKS_FROM_JUN_1, '2026-08-24')!
+    expect(w.end).toBe(EIGHT_WEEKS_FROM_JUN_1)
   })
 
   it('clamps the day number to the plan length once the plan is over', () => {
     // "Day 81 of 56" is a bug on screen even though the arithmetic is right.
-    const w = planWindow('2026-06-01', '2026-07-26', '2026-08-24')!
+    const w = planWindow('2026-06-01', EIGHT_WEEKS_FROM_JUN_1, '2026-08-24')!
     expect(w.planDays).toBe(56)
     expect(w.dayInPlan).toBe(56)
   })
@@ -190,10 +209,11 @@ describe('planWindow', () => {
 
   it('counts calendar days across a spring-forward boundary', () => {
     // UTC-midnight arithmetic on both ends, so the 23-hour day cancels. A plan
-    // that spans a DST change must not come out a day short.
-    const w = planWindow('2026-03-01', '2026-03-31', '2026-03-31')!
-    expect(w.planDays).toBe(31)
-    expect(w.dayInPlan).toBe(31)
+    // that spans a DST change must not come out a day short. Spring-forward is
+    // 2026-03-08, inside both spans below.
+    const w = planWindow('2026-03-01', '2026-03-31', '2026-03-15')!
+    expect(w.planDays).toBe(30)
+    expect(w.dayInPlan).toBe(15)
   })
 
   it('returns null on a malformed date rather than a wrong number', () => {

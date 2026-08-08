@@ -167,15 +167,25 @@ export function compareToTarget(
  * `dayInPlan` is 0 before the start date (a plan that hasn't begun is on no day
  * at all) and clamped to `planDays` after the end, so a finished 56-day plan
  * reads "Day 56 of 56" instead of "Day 81 of 56".
+ *
+ * ⚠️ `planDays` IS A DURATION, AND THAT IS COUPLED TO `/api/goals/create`.
+ * Create writes `target_date = started_on + weeks * 7`, and `lib/goals/curve.ts`
+ * depends on that exact span: a 56-day window with a 7-day step is 8 steps, and
+ * shortening it by one to make the ordinal arithmetic tidy would silently turn a
+ * 20→0 taper into 7 steps of 2.86 instead of 8 of 2.5. So the span stays and the
+ * count is `target − start`, which is what makes "8 weeks" read "of 56".
+ * Counting both ends instead read "of 57" for every plan the app can create —
+ * the tests missed it because their fixtures used `start + 55`, a target date
+ * nothing in the app ever produces.
  */
 export type PlanWindow = {
-  /** Inclusive, YYYY-MM-DD. */
+  /** Day 1 of the plan, YYYY-MM-DD. */
   start: string
-  /** Inclusive, YYYY-MM-DD. */
+  /** The target date the plan runs to, YYYY-MM-DD. */
   end: string
   /** 1-based; 0 when the plan hasn't started yet. */
   dayInPlan: number
-  /** null when the goal has no end date. */
+  /** Length in days (`end − start`); null when the goal has no end date. */
   planDays: number | null
 }
 
@@ -193,7 +203,7 @@ export function planWindow(
   // length, fall back to open-ended — the phrase degrades, the number doesn't lie.
   const bounded = targetMs != null && targetMs >= startMs
 
-  const planDays = bounded ? Math.round((targetMs! - startMs) / DAY_MS) + 1 : null
+  const planDays = bounded ? Math.round((targetMs! - startMs) / DAY_MS) : null
   const rawDay = Math.round((todayMs - startMs) / DAY_MS) + 1
 
   return {
