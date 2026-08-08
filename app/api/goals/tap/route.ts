@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyOccurrenceToken } from '@/lib/goals/links'
+import { recomputeGoalStats } from '@/lib/goals/stats'
 
 // The mutating half of the one-tap flow. app/g/[token]/page.tsx renders a plain
 // form that POSTs here; this is the only place the token can cause a write.
@@ -99,6 +100,9 @@ export async function POST(request: NextRequest) {
   if (entryError && !isDuplicate(entryError)) {
     console.error('goals/tap entry insert failed', entryError.message)
   }
+
+  // Keep the index card honest — streak and open count both just moved.
+  await recomputeGoalStats(admin, [occurrence.goal_id])
 
   return redirectTo(request, `/g/${token}?state=${action === 'skipped' ? 'skipped' : 'logged'}`)
 }

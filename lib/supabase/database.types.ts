@@ -1058,6 +1058,59 @@ export type Database = {
           },
         ]
       }
+      goal_stats: {
+        Row: {
+          computed_at: string
+          goal_id: string
+          latest_local_date: string | null
+          latest_value: number | null
+          logged_done: number
+          logged_total: number
+          next_due_at: string | null
+          open_count: number
+          streak: number
+          today_local_date: string | null
+          today_target: number | null
+          user_id: string
+        }
+        Insert: {
+          computed_at?: string
+          goal_id: string
+          latest_local_date?: string | null
+          latest_value?: number | null
+          logged_done?: number
+          logged_total?: number
+          next_due_at?: string | null
+          open_count?: number
+          streak?: number
+          today_local_date?: string | null
+          today_target?: number | null
+          user_id: string
+        }
+        Update: {
+          computed_at?: string
+          goal_id?: string
+          latest_local_date?: string | null
+          latest_value?: number | null
+          logged_done?: number
+          logged_total?: number
+          next_due_at?: string | null
+          open_count?: number
+          streak?: number
+          today_local_date?: string | null
+          today_target?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_stats_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: true
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goals: {
         Row: {
           archived_at: string | null

@@ -2,6 +2,15 @@
 // sign-in CTA rather than a redirect — same shape as /tools/savings, and it
 // avoids next/navigation's redirect() which this project's Sentry
 // instrumentation swallows in Server Components.
+//
+// READS PRE-COMPUTED STATS. This page used to load up to 2,000 log entries across
+// every goal and fold streaks in memory: correct, and O(all history) on a page a
+// dad opens daily. `goal_stats` (mig 135) is written on every log and at the end
+// of every sweep tick, so the fold happens where the writes already are and this
+// page reads one row per goal.
+//
+// A goal with no stats row yet still renders — it just shows less. Stats are
+// derived, never authoritative.
 
 import Link from 'next/link'
 import type { Metadata } from 'next'
@@ -9,7 +18,7 @@ import { OG_SITE } from '@/lib/og'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { LABELS } from '@/lib/labels'
 import { LoginLink } from '@/components/LoginLink'
-import { computeStreak, adherenceRate, latestValue, progressToTarget } from '@/lib/goals/progress'
+import { progressToTarget } from '@/lib/goals/progress'
 import { localDateInZone } from '@/lib/goals/recurrence'
 
 export const metadata: Metadata = {
@@ -28,17 +37,24 @@ type GoalRow = {
   title: string
   kind: string
   status: string
-  metric_key: string | null
   metric_unit: string | null
-  direction: string | null
   baseline_value: number | null
   target_value: number | null
-  target_date: string | null
 }
 
-type ScheduleRow = { goal_id: string; timezone: string; local_time: string; muted: boolean }
-type OccurrenceRow = { goal_id: string; local_date: string; status: string; target_value: number | null; due_at: string }
-type EntryRow = { goal_id: string; local_date: string; kind: string; value: number | null }
+type ScheduleRow = { goal_id: string; timezone: string; muted: boolean }
+
+type StatRow = {
+  goal_id: string
+  streak: number
+  logged_done: number
+  logged_total: number
+  latest_value: number | null
+  open_count: number
+  next_due_at: string | null
+  today_local_date: string | null
+  today_target: number | null
+}
 
 type Props = { searchParams: Promise<{ archived?: string; deleted?: string }> }
 
@@ -52,37 +68,24 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
 
   // RLS scopes every one of these to the signed-in user — no user_id filter to
   // forget, and an admin browsing this page sees their own goals, not everyone's.
-  const [{ data: goalRows }, { data: scheduleRows }] = await Promise.all([
+  const [{ data: goalRows }, { data: scheduleRows }, { data: statRows }] = await Promise.all([
     supabase.from('goals')
-      .select('id, title, kind, status, metric_key, metric_unit, direction, baseline_value, target_value, target_date')
+      .select('id, title, kind, status, metric_unit, baseline_value, target_value')
       .in('status', showArchived ? ['archived'] : ['active', 'paused'])
       .order('created_at', { ascending: false }),
-    supabase.from('goal_schedules').select('goal_id, timezone, local_time, muted'),
+    supabase.from('goal_schedules').select('goal_id, timezone, muted'),
+    supabase.from('goal_stats')
+      .select('goal_id, streak, logged_done, logged_total, latest_value, open_count, next_due_at, today_local_date, today_target'),
   ])
 
   const goals = (goalRows ?? []) as unknown as GoalRow[]
   if (goals.length === 0) return <Empty showArchived={showArchived} deleted={deleted === '1'} />
 
   const schedules = (scheduleRows ?? []) as unknown as ScheduleRow[]
-  const goalIds = goals.map((g) => g.id)
-
-  const [{ data: occurrenceRows }, { data: entryRows }] = await Promise.all([
-    supabase.from('goal_occurrences')
-      .select('goal_id, local_date, status, target_value, due_at')
-      .in('goal_id', goalIds)
-      .order('due_at', { ascending: true }),
-    supabase.from('goal_entries')
-      .select('goal_id, local_date, kind, value')
-      .in('goal_id', goalIds)
-      .order('local_date', { ascending: false })
-      .limit(2000),
-  ])
-  const occurrences = (occurrenceRows ?? []) as unknown as OccurrenceRow[]
-  const entries = (entryRows ?? []) as unknown as EntryRow[]
-  // `new Date()` rather than `Date.now()` — the React 19 purity lint flags the
-  // latter in render. Same value, one call, reused below.
+  const stats = new Map(
+    ((statRows ?? []) as unknown as StatRow[]).map((s) => [s.goal_id, s]),
+  )
   const now = new Date()
-  const nowMs = now.getTime()
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
@@ -106,19 +109,24 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
       <ul className="space-y-4">
         {goals.map((goal) => {
           const schedule = schedules.find((s) => s.goal_id === goal.id)
+          const stat = stats.get(goal.id)
           const zone = schedule?.timezone ?? 'UTC'
-          const today = localDateInZone(now, zone)
+          const today = safeToday(now, zone)
 
-          const mine = occurrences.filter((o) => o.goal_id === goal.id)
-          const myEntries = entries.filter((e) => e.goal_id === goal.id)
-          const streak = computeStreak(myEntries, today)
-          const { pct } = adherenceRate(mine)
-          const latest = latestValue(myEntries)
-          const progress = progressToTarget(goal.baseline_value, goal.target_value, latest?.value ?? null)
-
-          const todays = mine.find((o) => o.local_date === today)
-          const next = mine.find((o) => new Date(o.due_at).getTime() > nowMs)
-          const needsAction = todays && (todays.status === 'pending' || todays.status === 'notified' || todays.status === 'missed')
+          const pct = stat && stat.logged_total > 0
+            ? Math.round((stat.logged_done / stat.logged_total) * 100)
+            : null
+          const progress = progressToTarget(
+            goal.baseline_value, goal.target_value, stat?.latest_value ?? null,
+          )
+          // A materialized "today" is wrong the moment the day rolls over, so the
+          // stamped target only shows when its date agrees with this reader's.
+          const todayTarget = stat && stat.today_local_date === today
+            ? stat.today_target
+            : null
+          // open_count covers ANYTHING unresolved and due — including yesterday's
+          // missed day, which the old today-only check stayed silent about.
+          const openCount = stat?.open_count ?? 0
 
           return (
             <li key={goal.id}>
@@ -137,9 +145,9 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
                       {goal.title}
                     </h2>
                   </div>
-                  {needsAction ? (
+                  {openCount > 0 && goal.status === 'active' ? (
                     <span className="shrink-0 rounded-full bg-accent px-3 py-1 text-xs font-bold text-white">
-                      Due
+                      {openCount > 1 ? `${openCount} open` : 'Due'}
                     </span>
                   ) : null}
                 </div>
@@ -154,16 +162,22 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
                     </div>
                     <p className="mt-2 text-xs text-faint">
                       {goal.baseline_value}{unitOf(goal)} → {goal.target_value}{unitOf(goal)}
-                      {latest ? <> · now at <span className="text-prose">{latest.value}{unitOf(goal)}</span></> : null}
+                      {stat?.latest_value != null ? (
+                        <> · now at <span className="text-prose">{stat.latest_value}{unitOf(goal)}</span></>
+                      ) : null}
                     </p>
                   </div>
                 ) : null}
 
                 <p className="mt-4 text-sm text-muted">
-                  {streak > 0 ? <>{streak} day{streak === 1 ? '' : 's'} running</> : 'No run going yet'}
+                  {stat && stat.streak > 0
+                    ? <>{stat.streak} day{stat.streak === 1 ? '' : 's'} running</>
+                    : 'No run going yet'}
                   {pct != null ? <> · {pct}% logged</> : null}
-                  {todays?.target_value != null ? <> · today: {todays.target_value}{unitOf(goal)}</> : null}
-                  {!todays && next ? <> · next {next.local_date}</> : null}
+                  {todayTarget != null ? <> · today: {todayTarget}{unitOf(goal)}</> : null}
+                  {openCount === 0 && stat?.next_due_at
+                    ? <> · next {stat.next_due_at.slice(0, 10)}</>
+                    : null}
                 </p>
               </Link>
             </li>
@@ -189,6 +203,15 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
 
 function unitOf(goal: { metric_unit: string | null }): string {
   return goal.metric_unit ? ` ${goal.metric_unit}` : ''
+}
+
+/** A bad stored zone must never blank the whole index. */
+function safeToday(now: Date, zone: string): string {
+  try {
+    return localDateInZone(now, zone)
+  } catch {
+    return localDateInZone(now, 'UTC')
+  }
 }
 
 function SignedOut() {
@@ -247,13 +270,16 @@ function Empty({ showArchived, deleted }: { showArchived: boolean; deleted: bool
         </p>
       </header>
       {showArchived ? (
-        <Link href="/goals" className="inline-flex items-center py-3 text-sm text-muted hover:text-prose underline">
+        <Link
+          href="/goals"
+          className="inline-flex items-center py-3 text-sm text-muted hover:text-prose underline"
+        >
           ← Back to active goals
         </Link>
       ) : (
         <Link
           href="/goals/new"
-          className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 font-semibold text-white hover:bg-accent-hover transition-colors"
+          className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-3 font-semibold text-white hover:bg-accent-hover transition-colors"
         >
           {LABELS.goals.newCta} →
         </Link>

@@ -36,6 +36,7 @@ import type { createAdminClient } from '@/lib/supabase/admin'
 import { expandOccurrences, type GoalSchedule } from '@/lib/goals/recurrence'
 import { targetForDate, type CurveInput } from '@/lib/goals/curve'
 import { oneTapUrl } from '@/lib/goals/links'
+import { recomputeGoalStats } from '@/lib/goals/stats'
 import { sendPushToUser } from '@/lib/push'
 import { sendEmail } from '@/lib/email'
 import { GoalReminderEmail } from '@/emails/GoalReminderEmail'
@@ -100,6 +101,7 @@ export type SweepReport = {
   suppressed: number
   missed: number
   reArmed: number
+  statsRecomputed: number
   errors: string[]
 }
 
@@ -111,19 +113,34 @@ export async function runGoalsSweep(
   const report: SweepReport = {
     materializedSchedules: 0, occurrencesCreated: 0, due: 0, notified: 0,
     pushSent: 0, emailSent: 0, inAppSent: 0, suppressed: 0, missed: 0,
-    reArmed: 0, errors: [],
+    reArmed: 0, statsRecomputed: 0, errors: [],
   }
 
-  await materialize(admin, now, report)
-  await notifyDue(admin, now, siteUrl, report)
-  await ageOut(admin, now, report)
+  // Goals this tick moved in any way. Their derived stats are stale afterwards,
+  // so they get recomputed once at the end rather than per phase.
+  const touched = new Set<string>()
+
+  await materialize(admin, now, report, touched)
+  await notifyDue(admin, now, siteUrl, report, touched)
+  await ageOut(admin, now, report, touched)
+
+  if (touched.size) {
+    const { updated, errors } = await recomputeGoalStats(admin, [...touched], now)
+    report.statsRecomputed = updated
+    report.errors.push(...errors)
+  }
 
   return report
 }
 
 // ── phase 1: materialize ────────────────────────────────────────────────────
 
-async function materialize(admin: Admin, now: Date, report: SweepReport): Promise<void> {
+async function materialize(
+  admin: Admin,
+  now: Date,
+  report: SweepReport,
+  touched: Set<string>,
+): Promise<void> {
   const horizonEnd = new Date(now.getTime() + HORIZON_DAYS * 86_400_000)
   // Top up anything that has never been expanded or whose window closes within
   // the next week, so a schedule can never run dry between ticks.
@@ -151,6 +168,7 @@ async function materialize(admin: Admin, now: Date, report: SweepReport): Promis
     // expanding occurrences nobody will be asked to do.
     if (!goal || goal.status !== 'active') continue
     await materializeOne(admin, schedule, goal, horizonEnd, report)
+    touched.add(schedule.goal_id)
   }
 }
 
@@ -221,6 +239,48 @@ async function materializeOne(
 }
 
 /**
+ * Rebuilds a schedule's future window after its rule, time, zone, or the goal's
+ * curve changed.
+ *
+ * ONLY UNRESOLVED FUTURE OCCURRENCES ARE DISCARDED. Anything already completed,
+ * skipped, or missed is history — a dad who moves his reminder from 8pm to 7pm
+ * must not lose the twelve days he already logged, and a target he was actually
+ * asked for on March 3rd must not retroactively change because he extended his
+ * end date. Past-dated pending rows are also left alone so a catch-up stays
+ * available.
+ *
+ * Resetting `materialized_through` is what makes the re-expansion start from the
+ * schedule's own start date instead of resuming at the old horizon.
+ */
+export async function rematerializeSchedule(
+  admin: Admin,
+  scheduleId: string,
+  now: Date,
+): Promise<number> {
+  const { error: clearError } = await admin
+    .from('goal_occurrences')
+    .delete()
+    .eq('schedule_id', scheduleId)
+    .in('status', ['pending', 'snoozed'])
+    .gt('due_at', now.toISOString())
+  if (clearError) {
+    console.error('rematerializeSchedule/clear', clearError.message)
+    return 0
+  }
+
+  const { error: pointerError } = await admin
+    .from('goal_schedules')
+    .update({ materialized_through: null })
+    .eq('id', scheduleId)
+  if (pointerError) {
+    console.error('rematerializeSchedule/pointer', pointerError.message)
+    return 0
+  }
+
+  return materializeScheduleById(admin, scheduleId, now)
+}
+
+/**
  * Materialize a single schedule by id, loading what it needs. Used by the create
  * flow so a brand-new goal has its window populated before the page renders.
  * Returns the number of occurrences written (0 on any problem — the next sweep
@@ -234,7 +294,7 @@ export async function materializeScheduleById(
   const report: SweepReport = {
     materializedSchedules: 0, occurrencesCreated: 0, due: 0, notified: 0,
     pushSent: 0, emailSent: 0, inAppSent: 0, suppressed: 0, missed: 0,
-    reArmed: 0, errors: [],
+    reArmed: 0, statsRecomputed: 0, errors: [],
   }
 
   const { data } = await admin
@@ -251,6 +311,10 @@ export async function materializeScheduleById(
 
   const horizonEnd = new Date(now.getTime() + HORIZON_DAYS * 86_400_000)
   await materializeOne(admin, schedule, goal, horizonEnd, report)
+  // Stats immediately, so a brand-new goal's index card isn't blank until the
+  // next tick.
+  const stats = await recomputeGoalStats(admin, [schedule.goal_id], now)
+  report.errors.push(...stats.errors)
   if (report.errors.length) console.error('materializeScheduleById', report.errors)
   return report.occurrencesCreated
 }
@@ -262,6 +326,7 @@ async function notifyDue(
   now: Date,
   siteUrl: string,
   report: SweepReport,
+  touched: Set<string>,
 ): Promise<void> {
   // A schedule's lead_minutes shifts its nudge earlier than due_at, so the
   // window has to look ahead by the largest lead in play rather than at now().
@@ -306,6 +371,7 @@ async function notifyDue(
   }
   report.due = dueNow.length
   if (!dueNow.length) return
+  for (const occurrence of dueNow) touched.add(occurrence.goal_id)
 
   const emails = await loadEmails(admin, [...new Set(dueNow.map((o) => o.user_id))], report)
 
@@ -533,7 +599,12 @@ async function settleDeliveries(
 
 // ── phase 3: age out ────────────────────────────────────────────────────────
 
-async function ageOut(admin: Admin, now: Date, report: SweepReport): Promise<void> {
+async function ageOut(
+  admin: Admin,
+  now: Date,
+  report: SweepReport,
+  touched: Set<string>,
+): Promise<void> {
   // Re-arm lapsed snoozes first, so a snooze that expired into a still-valid
   // window gets its nudge on this tick instead of next.
   //
@@ -590,7 +661,10 @@ async function ageOut(admin: Admin, now: Date, report: SweepReport): Promise<voi
     .update({ status: 'missed', resolved_at: now.toISOString() })
     .in('id', lapsed.map((l) => l.id))
   if (missError) report.errors.push(`ageOut/mark: ${missError.message}`)
-  else report.missed = lapsed.length
+  else {
+    report.missed = lapsed.length
+    for (const row of lapsed) touched.add(row.goal_id)
+  }
 }
 
 // ── shared loaders + copy ───────────────────────────────────────────────────
