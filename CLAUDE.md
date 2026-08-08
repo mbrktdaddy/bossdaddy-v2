@@ -32,6 +32,8 @@ Historical/shipped design + brand docs live in `docs/archive/` — recall-able, 
 - **Styling**: Tailwind CSS v4
 - **Deployment**: Vercel (auto-deploys from `master`)
 
+> **`vercel.json` `"regions": ["pdx1"]` is load-bearing — do not remove it.** `pdx1` is us-west-2, the same region as the Supabase project (West US / Oregon), so functions sit next to the database. The Vercel *dashboard* shows `iad1` as the project default; the `vercel.json` pin overrides it, and `x-vercel-id` confirms functions execute in `pdx1`. Deleting the key as "unnecessary config" would move every server-side query cross-country — roughly 1–3ms → 65ms, paid 1–2× per request in `proxy.ts` alone, on every page of the site. JSON can't carry a comment, which is why this note lives here.
+
 ---
 
 ## Naming Doctrine — Internal Names ≠ Display Labels
