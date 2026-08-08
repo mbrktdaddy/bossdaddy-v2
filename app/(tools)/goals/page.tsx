@@ -200,7 +200,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
               </label>
               <Link
                 href={`/goals/${goal.id}`}
-                className="block flex-1 min-w-0 bg-surface border border-soft hover:border-strong rounded-xl p-5 sm:p-6 transition-colors"
+                className="block flex-1 min-w-0 bg-surface border border-soft hover:border-strong rounded-xl p-4 sm:p-6 transition-colors"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
@@ -209,7 +209,11 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
                       {goal.status === 'paused' ? ' · Paused' : ''}
                       {schedule?.muted ? ' · Muted' : ''}
                     </p>
-                    <h2 className="mt-1 text-lg sm:text-xl font-bold text-prose truncate">
+                    {/* line-clamp-2, not truncate: the checkbox column costs ~52px
+                        of card width, which leaves roughly 13 characters beside a
+                        "Due" badge at 320px. Two lines fits a real goal name; one
+                        clipped line reads like a bug. */}
+                    <h2 className="mt-1 text-lg sm:text-xl font-bold text-prose line-clamp-2">
                       {goal.title}
                     </h2>
                   </div>
