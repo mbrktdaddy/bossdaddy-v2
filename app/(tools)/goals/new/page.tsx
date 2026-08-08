@@ -19,6 +19,8 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { LABELS } from '@/lib/labels'
 import { LoginLink } from '@/components/LoginLink'
 import { isValidTimeZone, localDateInZone } from '@/lib/goals/recurrence'
+// Shared with the edit form so the two pickers can't drift apart.
+import { WEEKDAY_OPTIONS, COMMON_ZONES } from '@/lib/goals/schedule-input'
 
 export const metadata: Metadata = {
   title: `${LABELS.goals.newCta} — ${LABELS.goals.short}`,
@@ -113,29 +115,7 @@ const KINDS = {
   },
 } as const
 
-// RRULE BYDAY tokens. Monday-first to match RFC 5545's default WKST=MO, and
-// because a training week reads better starting Monday than Sunday.
-const WEEKDAYS = [
-  { value: 'MO', label: 'Mon' },
-  { value: 'TU', label: 'Tue' },
-  { value: 'WE', label: 'Wed' },
-  { value: 'TH', label: 'Thu' },
-  { value: 'FR', label: 'Fri' },
-  { value: 'SA', label: 'Sat' },
-  { value: 'SU', label: 'Sun' },
-] as const
-
 type KindKey = keyof typeof KINDS
-
-const COMMON_ZONES = [
-  'America/New_York', 'America/Chicago', 'America/Denver', 'America/Phoenix',
-  'America/Los_Angeles', 'America/Anchorage', 'Pacific/Honolulu',
-  'America/Toronto', 'America/Mexico_City', 'America/Sao_Paulo',
-  'Europe/London', 'Europe/Dublin', 'Europe/Paris', 'Europe/Berlin',
-  'Africa/Johannesburg', 'Asia/Jerusalem', 'Asia/Dubai', 'Asia/Kolkata',
-  'Asia/Singapore', 'Asia/Tokyo', 'Australia/Perth', 'Australia/Sydney',
-  'Pacific/Auckland', 'UTC',
-]
 
 export default async function NewGoalPage({ searchParams }: Props) {
   const { kind: kindParam, msg } = await searchParams
@@ -331,7 +311,7 @@ export default async function NewGoalPage({ searchParams }: Props) {
               Which days? (used when you pick &ldquo;only the days I pick&rdquo;)
             </legend>
             <div className="mt-1 flex flex-wrap gap-2">
-              {WEEKDAYS.map((day) => (
+              {WEEKDAY_OPTIONS.map((day) => (
                 <label
                   key={day.value}
                   className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-soft bg-surface-raised px-3 py-3 sm:flex-none"

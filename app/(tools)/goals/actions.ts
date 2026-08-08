@@ -1,7 +1,10 @@
 'use server'
 
+import { randomUUID } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
+import { recomputeGoalStats } from '@/lib/goals/stats'
+import { localDateInZone } from '@/lib/goals/recurrence'
 
 // Mutations for the goals UI.
 //
@@ -85,8 +88,87 @@ export async function logOccurrence(formData: FormData): Promise<void> {
     }
   }
 
+  await recomputeGoalStats(supabase, [goalId])
   revalidatePath('/goals')
   revalidatePath(`/goals/${goalId}`)
+}
+
+/**
+ * Logs something that wasn't scheduled — "I just weighed myself", an extra
+ * workout, a cigarette count on an off day.
+ *
+ * Every entry used to require an occurrence, which meant an honest log on an
+ * unscheduled day had nowhere to go and the only way to record reality was to
+ * wait for a slot. Occurrence-less entries still count toward the streak, since
+ * computeStreak folds over entries by local date, not by occurrence.
+ *
+ * `local_date` comes from the goal's own timezone rather than the server's — the
+ * server's idea of today is not the user's, especially late at night.
+ */
+export async function logUnprompted(formData: FormData): Promise<void> {
+  const goalId = String(formData.get('goalId') ?? '')
+  const rawValue = formData.get('value')
+  const note = String(formData.get('note') ?? '').trim()
+  const forDate = String(formData.get('localDate') ?? '').trim()
+  if (!goalId) return
+
+  const supabase = await createClient()
+  const { user } = await getUserSafe(supabase)
+  if (!user) return
+
+  const { data: goalRow } = await supabase
+    .from('goals')
+    .select('id, metric_key')
+    .eq('id', goalId)
+    .maybeSingle()
+  const goal = goalRow as unknown as { id: string; metric_key: string | null } | null
+  if (!goal) return
+
+  const { data: scheduleRow } = await supabase
+    .from('goal_schedules')
+    .select('timezone')
+    .eq('goal_id', goalId)
+    .limit(1)
+    .maybeSingle()
+  const zone = (scheduleRow as unknown as { timezone: string } | null)?.timezone ?? 'UTC'
+
+  const parsed = rawValue == null || String(rawValue).trim() === '' ? null : Number(rawValue)
+  const value = parsed != null && Number.isFinite(parsed) ? parsed : null
+
+  // A measurement without a number violates the CHECK on goal_entries, and a
+  // measuring goal logged with no value tells us nothing anyway.
+  if (goal.metric_key && value == null) return
+
+  const localDate = /^\d{4}-\d{2}-\d{2}$/.test(forDate)
+    ? forDate
+    : safeLocalDate(zone)
+
+  const { error } = await supabase.from('goal_entries').insert({
+    goal_id: goalId,
+    occurrence_id: null,
+    user_id: user.id,
+    local_date: localDate,
+    kind: goal.metric_key ? 'measurement' : 'completed',
+    value,
+    note: note || null,
+    source: 'web',
+    // A fresh id per unprompted log — unlike the occurrence-bound path, logging
+    // twice in a day here is legitimate (two weigh-ins, two workouts).
+    client_entry_id: randomUUID(),
+  })
+  if (error) throw new Error(`Could not save that: ${error.message}`)
+
+  await recomputeGoalStats(supabase, [goalId])
+  revalidatePath('/goals')
+  revalidatePath(`/goals/${goalId}`)
+}
+
+function safeLocalDate(zone: string): string {
+  try {
+    return localDateInZone(new Date(), zone)
+  } catch {
+    return localDateInZone(new Date(), 'UTC')
+  }
 }
 
 /** Silence or re-arm reminders for one schedule. The knob, not a lock. */
@@ -132,6 +214,7 @@ export async function setGoalStatus(formData: FormData): Promise<void> {
     .eq('id', goalId)
   if (error) throw new Error(`Could not update that goal: ${error.message}`)
 
+  await recomputeGoalStats(supabase, [goalId])
   revalidatePath('/goals')
   revalidatePath(`/goals/${goalId}`)
 }

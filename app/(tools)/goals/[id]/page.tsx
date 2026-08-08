@@ -16,7 +16,8 @@ import { localDateInZone } from '@/lib/goals/recurrence'
 import {
   computeStreak, adherenceRate, latestValue, progressToTarget, compareToTarget,
 } from '@/lib/goals/progress'
-import { logOccurrence, toggleScheduleMute, setGoalStatus } from '../actions'
+import { describeRrule } from '@/lib/goals/schedule-input'
+import { logOccurrence, logUnprompted, toggleScheduleMute, setGoalStatus } from '../actions'
 
 export const metadata: Metadata = {
   title: LABELS.goals.pageTitle,
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
 
 type Props = {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ confirm?: string; msg?: string }>
+  searchParams: Promise<{ confirm?: string; msg?: string; saved?: string }>
 }
 
 type GoalRow = {
@@ -49,7 +50,7 @@ type EntryRow = {
 
 export default async function GoalDetailPage({ params, searchParams }: Props) {
   const { id } = await params
-  const { confirm, msg } = await searchParams
+  const { confirm, msg, saved } = await searchParams
   const confirmingDelete = confirm === 'delete'
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
@@ -141,6 +142,11 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
           That didn&apos;t delete. Try again, or archive it instead.
         </p>
       ) : null}
+      {saved === '1' ? (
+        <p className="rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-muted">
+          Saved.
+        </p>
+      ) : null}
 
       {/* ── the one thing to do ─────────────────────────────────────────── */}
       {actionable ? (
@@ -207,6 +213,60 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
         </section>
       )}
 
+      {/* ── log something that wasn't scheduled ─────────────────────────── */}
+      {/* Behind a <details> so it never competes with the primary action above,
+          but present on every goal — an entry with no occurrence still counts
+          toward the streak, because computeStreak folds by local date. Before
+          this existed, an honest log on an off day had nowhere to go. */}
+      <details className="rounded-xl border border-soft bg-surface p-5">
+        <summary className="min-h-11 flex cursor-pointer items-center text-sm font-semibold text-prose">
+          Log something else
+        </summary>
+        <p className="mt-2 text-xs text-faint">
+          An extra workout, a weigh-in nobody asked for, an honest count on a day
+          nothing was due.
+        </p>
+        <form action={logUnprompted} className="mt-4 space-y-3">
+          <input type="hidden" name="goalId" value={goal.id} />
+
+          {wantsNumber ? (
+            <label className="block">
+              <span className="text-sm text-muted">
+                {goal.metric_key}{unit ? ` (${goal.metric_unit})` : ''}
+              </span>
+              <input
+                type="number" name="value" step="any" inputMode="decimal" required
+                className="mt-2 w-full rounded-lg border border-soft bg-surface-raised px-4 py-3 text-lg text-prose"
+              />
+            </label>
+          ) : null}
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label className="block">
+              <span className="text-sm text-muted">Which day</span>
+              <input
+                type="date" name="localDate" defaultValue={today} max={today}
+                className="mt-2 w-full rounded-lg border border-soft bg-surface-raised px-4 py-3 text-prose"
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm text-muted">Note (optional)</span>
+              <input
+                type="text" name="note" maxLength={280}
+                className="mt-2 w-full rounded-lg border border-soft bg-surface-raised px-4 py-3 text-prose"
+              />
+            </label>
+          </div>
+
+          <button
+            type="submit"
+            className="min-h-11 w-full rounded-lg border border-strong bg-surface px-6 py-3 text-sm font-bold text-prose hover:bg-surface-hover transition-colors"
+          >
+            Log it
+          </button>
+        </form>
+      </details>
+
       {/* ── where it stands ─────────────────────────────────────────────── */}
       <section className="space-y-4">
         <h2 className="text-sm font-bold text-prose uppercase tracking-wide">Where it stands</h2>
@@ -239,7 +299,15 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
 
       {/* ── reminders ───────────────────────────────────────────────────── */}
       <section className="space-y-3">
-        <h2 className="text-sm font-bold text-prose uppercase tracking-wide">Reminders</h2>
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-sm font-bold text-prose uppercase tracking-wide">Reminders</h2>
+          <Link
+            href={`/goals/${goal.id}/edit`}
+            className="min-h-11 inline-flex items-center text-xs font-semibold text-accent-text hover:text-prose"
+          >
+            Edit goal &amp; reminders →
+          </Link>
+        </div>
         {schedules.length === 0 ? (
           <p className="text-sm text-faint">No schedule on this goal yet.</p>
         ) : schedules.map((schedule) => (
@@ -249,10 +317,10 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
                 {schedule.label?.trim() || 'Reminder'}
               </p>
               <p className="mt-1 text-xs text-muted">
-                {schedule.local_time.slice(0, 5)} · {schedule.timezone.replace(/_/g, ' ')}
+                {describeRrule(schedule.rrule, schedule.local_time)}
               </p>
               <p className="mt-1 text-xs text-faint">
-                {schedule.rrule} · {schedule.channels.join(' + ')}
+                {schedule.timezone.replace(/_/g, ' ')} · {schedule.channels.join(' + ')}
               </p>
             </div>
             <form action={toggleScheduleMute} className="shrink-0">
