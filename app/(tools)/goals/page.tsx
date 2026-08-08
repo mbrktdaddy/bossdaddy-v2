@@ -100,6 +100,13 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
   )
   const now = new Date()
 
+  // Open work across every ACTIVE goal, from the stats rows already loaded above —
+  // no extra query. Paused goals are excluded because a paused goal isn't asking.
+  const openTotal = goals.reduce(
+    (sum, g) => sum + (g.status === 'active' ? (stats.get(g.id)?.open_count ?? 0) : 0),
+    0,
+  )
+
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
       <header className="flex items-end justify-between gap-4">
@@ -123,6 +130,25 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
         <p className="rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-muted">
           {msg.slice(0, 200)}
         </p>
+      ) : null}
+
+      {/* Straight to the day's work. Above the goal list on purpose: this page is
+          for managing goals, /today is for doing them, and "doing" is the common
+          errand. Only shown when something's actually open — a link to an empty
+          screen trains people to ignore it. */}
+      {openTotal > 0 ? (
+        <Link
+          href="/today"
+          className="flex items-center justify-between gap-3 rounded-xl border border-strong bg-surface-raised px-4 py-3 hover:border-accent-border/60 transition-colors"
+        >
+          <span className="text-sm font-semibold text-prose">
+            {LABELS.goals.todayEyebrow}
+            <span className="font-normal text-muted">
+              {' '}· {openTotal} waiting on you
+            </span>
+          </span>
+          <span className="text-xs font-semibold text-accent-text">Do it →</span>
+        </Link>
       ) : null}
 
       {/* Only when someone actually shared something. An always-on link would be

@@ -34,6 +34,10 @@ const ALLOW = [
   // tracker holding medication schedules, cessation logs, and weight history.
   // The detail page is explicitly noindex. Nothing here should be shareable.
   /[\\/]goals[\\/]/,
+  // /today — the same data as /goals, arranged by what's due. It's a list of one
+  // man's medication and cessation schedule for the day; a social card for it is
+  // the last thing anybody wants.
+  /[\\/]today[\\/]page\.tsx$/,
 ]
 
 const MARKERS = ['buildSocialMetadata', 'ogImageMeta', 'ogImageUrl']

@@ -141,6 +141,13 @@ export const LABELS = {
     sharedHeading:   'In your corner',
     sharedEmpty:     'Nobody has shared a goal with you yet. When someone does, it shows up here — and you\'ll never get pinged about it.',
     shareCta:        'Who can see this',
+    // /today — the "what do I do right now" screen, and the PWA's real home.
+    todayTitle:         'Today — Boss Daddy',
+    todayEyebrow:       'Today',
+    todayHeading:       'Here\'s your day.',
+    todayClearHeading:  'You\'re square.',
+    todayClearBody:     'Nothing open right now. Anything later today is below.',
+    todayNothing:       'Nothing scheduled right now. Either you\'re done or there\'s nothing on the board yet.',
     // Start date. Today or later only — see the note in /goals/new.
     startLegend:     'When does it start?',
     startHint:       'Today, or pick the day you\'re starting. Nothing gets scheduled before then.',

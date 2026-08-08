@@ -32,6 +32,24 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color:     '#0a0a0a',
     theme_color:          '#0a0a0a',
     categories:           ['lifestyle', 'shopping', 'productivity'],
+    // Long-press the home-screen icon → straight to what's due. The icon itself
+    // still lands on the homepage (this is not a "tools app"), but a dad who
+    // installed it to log a taper shouldn't have to navigate there twice a day.
+    // Android surfaces up to 4; keep this list to the things worth a long-press.
+    shortcuts: [
+      {
+        name:       'Today',
+        short_name: 'Today',
+        url:        '/today',
+        description: 'Everything due right now, one tap each.',
+      },
+      {
+        name:       'Goals',
+        short_name: 'Goals',
+        url:        '/goals',
+        description: 'What you\'re working on.',
+      },
+    ],
     icons: [
       {
         src:     '/icon-192.png',

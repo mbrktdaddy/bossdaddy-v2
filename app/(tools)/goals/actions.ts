@@ -55,6 +55,9 @@ export async function logOccurrence(formData: FormData): Promise<void> {
 
   revalidatePath('/goals')
   revalidatePath(`/goals/${goalId}`)
+  // /today lists open occurrences across every goal, so it's stale the moment one
+  // is resolved — and it's the surface this action is most often invoked from.
+  revalidatePath('/today')
 }
 
 /**
