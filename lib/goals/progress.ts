@@ -21,7 +21,30 @@ export type OccurrenceLike = {
 }
 
 const DAY_MS = 86_400_000
-const COUNTS_AS_DONE = new Set(['completed', 'catchup'])
+
+/**
+ * The entry kinds that count as showing up: a prompted completion and a
+ * catch-up on a day that had already gone by.
+ *
+ * THIS IS THE VOTE RULE, and there is deliberately no target in it. Six
+ * cigarettes against a target of five is still a vote — a man who logs an honest
+ * number on a bad day has done the hardest thing this tool asks of him, and
+ * withholding the vote would make honest logging the penalised behaviour.
+ * Whether he beat the number is the CURVE's question; compareToTarget() answers
+ * it, kindly. Two numbers, two questions.
+ *
+ * A `skipped` is not a vote (he said not today) and neither is a `relapse` or a
+ * bare `measurement`. None of them are anti-votes either: nothing subtracts.
+ *
+ * Exported because the goal page counts votes in the DATABASE rather than
+ * folding rows — an exact count can't be truncated by a row cap the way a
+ * limit(400) fetch silently would on a long plan. One constant, both callers.
+ */
+export const VOTE_KINDS = ['completed', 'catchup'] as const
+
+// Derived from VOTE_KINDS rather than written out again: a streak and a vote ask
+// the same question ("did he show up?"), so they must not be able to drift.
+const COUNTS_AS_DONE: ReadonlySet<string> = new Set(VOTE_KINDS)
 
 /**
  * Consecutive days ending today (or yesterday) with a completed/catch-up entry.
@@ -126,6 +149,59 @@ export function compareToTarget(
   if (direction === 'up') return actual > target ? 'better' : 'over'
   if (direction === 'hold') return 'over'
   return actual < target ? 'better' : 'over'   // 'down' and the default
+}
+
+/**
+ * The stretch of calendar this plan covers, and how far into it he is.
+ *
+ * VOTES ARE SCOPED TO THE CURRENT PLAN, NOT TO ALL TIME. A lifetime counter still
+ * reads 47 after a month away — protective, but it has stopped describing now.
+ * "18 votes toward this plan · Day 24 of 56" means something specific and can't
+ * go stale, and starting a new plan resets the meaning on purpose.
+ *
+ * `end` is the target date, not today: once a plan is over, its vote count is
+ * final rather than quietly continuing to accrue against a finished target.
+ * A goal with no target date is open-ended — the plan IS "since I started", so
+ * `planDays` is null and the caller drops the "Day X of Y" half of the phrase.
+ *
+ * `dayInPlan` is 0 before the start date (a plan that hasn't begun is on no day
+ * at all) and clamped to `planDays` after the end, so a finished 56-day plan
+ * reads "Day 56 of 56" instead of "Day 81 of 56".
+ */
+export type PlanWindow = {
+  /** Inclusive, YYYY-MM-DD. */
+  start: string
+  /** Inclusive, YYYY-MM-DD. */
+  end: string
+  /** 1-based; 0 when the plan hasn't started yet. */
+  dayInPlan: number
+  /** null when the goal has no end date. */
+  planDays: number | null
+}
+
+export function planWindow(
+  startedOn: string,
+  targetDate: string | null,
+  todayLocal: string,
+): PlanWindow | null {
+  const startMs = ymdToMs(startedOn)
+  const todayMs = ymdToMs(todayLocal)
+  if (startMs == null || todayMs == null) return null
+
+  const targetMs = targetDate ? ymdToMs(targetDate) : null
+  // A target before the start can't describe a plan. Rather than emit a negative
+  // length, fall back to open-ended — the phrase degrades, the number doesn't lie.
+  const bounded = targetMs != null && targetMs >= startMs
+
+  const planDays = bounded ? Math.round((targetMs! - startMs) / DAY_MS) + 1 : null
+  const rawDay = Math.round((todayMs - startMs) / DAY_MS) + 1
+
+  return {
+    start: startedOn,
+    end: bounded ? targetDate! : todayLocal,
+    dayInPlan: rawDay < 1 ? 0 : planDays != null ? Math.min(rawDay, planDays) : rawDay,
+    planDays,
+  }
 }
 
 function ymdToMs(ymd: string): number | null {

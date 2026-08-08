@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   computeStreak, adherenceRate, latestValue, progressToTarget, compareToTarget,
+  planWindow, VOTE_KINDS,
   type EntryLike, type OccurrenceLike,
 } from '@/lib/goals/progress'
 
@@ -129,5 +130,96 @@ describe('compareToTarget', () => {
 
   it('defaults to down when direction is unset', () => {
     expect(compareToTarget(6, 8, null)).toBe('better')
+  })
+})
+
+// ── the vote window ─────────────────────────────────────────────────────────
+// Votes are scoped to the CURRENT PLAN, which is the whole reason this function
+// exists: a lifetime counter still reads 47 after a month away, so it stops
+// describing now. These tests pin the three ways the phrase could lie —
+// counting past the end of a finished plan, claiming a day before the plan
+// started, and reporting a day number beyond the plan's length.
+
+describe('planWindow', () => {
+  it('spans start to target, inclusive, and says which day of it today is', () => {
+    const w = planWindow('2026-08-01', '2026-09-25', '2026-08-24')
+    expect(w).not.toBeNull()
+    expect(w!.start).toBe('2026-08-01')
+    expect(w!.end).toBe('2026-09-25')
+    expect(w!.planDays).toBe(56)          // 8 weeks, both ends counted
+    expect(w!.dayInPlan).toBe(24)
+  })
+
+  it('is day 1 on the first day', () => {
+    expect(planWindow('2026-08-01', '2026-09-25', '2026-08-01')!.dayInPlan).toBe(1)
+  })
+
+  it('stops the window at the target date rather than at today', () => {
+    // Once a plan is over its count is final. Letting `end` drift to today would
+    // keep accruing votes against a target that already came and went.
+    const w = planWindow('2026-06-01', '2026-07-26', '2026-08-24')!
+    expect(w.end).toBe('2026-07-26')
+  })
+
+  it('clamps the day number to the plan length once the plan is over', () => {
+    // "Day 81 of 56" is a bug on screen even though the arithmetic is right.
+    const w = planWindow('2026-06-01', '2026-07-26', '2026-08-24')!
+    expect(w.planDays).toBe(56)
+    expect(w.dayInPlan).toBe(56)
+  })
+
+  it('reports day 0 for a plan that has not started yet', () => {
+    // The start date can be in the future — the create form allows it. A plan
+    // that hasn't begun is on no day at all, and the caller hides the day clause.
+    const w = planWindow('2026-09-01', '2026-10-27', '2026-08-24')!
+    expect(w.dayInPlan).toBe(0)
+  })
+
+  it('goes open-ended with no target date', () => {
+    const w = planWindow('2026-08-01', null, '2026-08-24')!
+    expect(w.planDays).toBeNull()         // caller drops "Day X of Y"
+    expect(w.end).toBe('2026-08-24')
+    expect(w.dayInPlan).toBe(24)
+  })
+
+  it('treats a target before the start as open-ended instead of a negative plan', () => {
+    const w = planWindow('2026-08-01', '2026-07-01', '2026-08-24')!
+    expect(w.planDays).toBeNull()
+    expect(w.end).toBe('2026-08-24')
+  })
+
+  it('counts calendar days across a spring-forward boundary', () => {
+    // UTC-midnight arithmetic on both ends, so the 23-hour day cancels. A plan
+    // that spans a DST change must not come out a day short.
+    const w = planWindow('2026-03-01', '2026-03-31', '2026-03-31')!
+    expect(w.planDays).toBe(31)
+    expect(w.dayInPlan).toBe(31)
+  })
+
+  it('returns null on a malformed date rather than a wrong number', () => {
+    expect(planWindow('not-a-date', null, '2026-08-24')).toBeNull()
+    expect(planWindow('2026-08-01', null, 'nope')).toBeNull()
+  })
+})
+
+describe('VOTE_KINDS', () => {
+  it('is showing up, with no target in it', () => {
+    // An honest 6 against a target of 5 is still a vote. If a target check ever
+    // appears in the vote rule, this is the test that should have stopped it.
+    expect([...VOTE_KINDS]).toEqual(['completed', 'catchup'])
+  })
+
+  it('agrees with what the streak counts as done', () => {
+    // Both answer "did he show up?", so they're derived from one constant. A
+    // streak that counted a kind the votes ignored would make two numbers on the
+    // same page disagree about the same day.
+    const entries: EntryLike[] = VOTE_KINDS.map((kind, i) => ({
+      local_date: `2026-08-${String(24 - i).padStart(2, '0')}`,
+      kind,
+      value: null,
+    }))
+    for (const entry of entries) {
+      expect(computeStreak([entry], entry.local_date)).toBe(1)
+    }
   })
 })

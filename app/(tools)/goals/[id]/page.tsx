@@ -15,6 +15,7 @@ import { LoginLink } from '@/components/LoginLink'
 import { localDateInZone } from '@/lib/goals/recurrence'
 import {
   computeStreak, adherenceRate, latestValue, progressToTarget, compareToTarget,
+  planWindow, VOTE_KINDS,
 } from '@/lib/goals/progress'
 import { describeRrule } from '@/lib/goals/schedule-input'
 import { logOccurrence, logUnprompted, toggleScheduleMute, setGoalStatus } from '../actions'
@@ -137,6 +138,33 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
     .slice(0, 3)
 
   const wantsNumber = Boolean(goal.metric_key)
+
+  // ── votes ─────────────────────────────────────────────────────────────────
+  // Only for a goal that has an identity: without one there's nothing to vote
+  // FOR, and the page falls back to plain process language with no other switch
+  // to flip.
+  //
+  // Counted in the DATABASE rather than folded from `entries` above, which is
+  // capped at 400 rows — that cap is fine for a streak (it only ever reads back
+  // from today) but it would silently undercount votes on a plan longer than 400
+  // logged days, and a vote count that quietly drops is the one thing this whole
+  // layer must never do. `head: true` transfers no rows.
+  const voteWindow = goal.identity_statement
+    ? planWindow(goal.started_on, goal.target_date, today)
+    : null
+  let votes: number | null = null
+  if (voteWindow) {
+    const { count, error } = await supabase
+      .from('goal_entries')
+      .select('id', { count: 'exact', head: true })
+      .eq('goal_id', goal.id)
+      .in('kind', [...VOTE_KINDS])
+      .gte('local_date', voteWindow.start)
+      .lte('local_date', voteWindow.end)
+    // A failed count renders nothing rather than a zero — "0 votes" on a goal
+    // he's been keeping for three weeks would be a lie with a number on it.
+    if (!error) votes = count ?? 0
+  }
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
@@ -331,6 +359,30 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
               </p>
             ) : null}
           </div>
+        ) : null}
+
+        {/* ── votes ────────────────────────────────────────────────────────
+            A PHRASE, NOT A STAT. It sits below the curve and outside the stat
+            grid on purpose: in the grid it would read as a third score competing
+            with adherence, and this number is not a score. It only ever holds
+            still or goes up — a missed day adds nothing and subtracts nothing,
+            because one day never gets to rewrite who he's becoming. */}
+        {votes != null ? (
+          <p className="text-sm text-muted">
+            {votes > 0 ? (
+              <>
+                <span className="font-bold text-prose">{votes}</span>
+                {votes === 1 ? ' vote' : ' votes'} toward this plan
+                {voteWindow?.planDays && voteWindow.dayInPlan > 0 ? (
+                  <> · Day {voteWindow.dayInPlan} of {voteWindow.planDays}</>
+                ) : null}
+              </>
+            ) : (
+              // No zero. A "0 votes" scoreboard on day one is exactly the framing
+              // this layer exists to avoid, so the empty state points forward.
+              <>Your first vote is the next day you log.</>
+            )}
+          </p>
         ) : null}
 
         <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
