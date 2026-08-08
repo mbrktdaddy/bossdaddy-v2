@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyOccurrenceToken } from '@/lib/goals/links'
-import { recomputeGoalStats } from '@/lib/goals/stats'
+import { logOccurrenceEntry } from '@/lib/goals/log'
 
 // The mutating half of the one-tap flow. app/g/[token]/page.tsx renders a plain
 // form that POSTs here; this is the only place the token can cause a write.
@@ -64,51 +64,30 @@ export async function POST(request: NextRequest) {
     return redirectTo(request, `/g/${token}?state=snoozed`)
   }
 
-  // ── resolve the occurrence, guarded ───────────────────────────────────────
-  // A `missed` row is still loggable: catch-up is a first-class action, never a
-  // closed door. Already-completed/skipped rows match nothing and fall through.
-  const { data: updated } = await admin
-    .from('goal_occurrences')
-    .update({ status: action, resolved_at: now.toISOString(), snoozed_until: null })
-    .eq('id', occurrence.id)
-    .in('status', ['pending', 'notified', 'snoozed', 'missed'])
-    .select('id')
-
-  if (!updated?.length) {
-    return redirectTo(request, `/g/${token}?state=${action === 'skipped' ? 'skipped' : 'logged'}`)
-  }
-
-  // ── write the log entry ───────────────────────────────────────────────────
-  const wasCatchup = occurrence.status === 'missed'
+  // ── resolve the occurrence and write the entry ────────────────────────────
+  // Both halves of the idempotency described above live in lib/goals/log.ts,
+  // shared with the goals UI and the Boss's log_goal_entry tool — a second copy
+  // here is how the three paths would drift on which day a late-night tap counts
+  // for. A `missed` row is still loggable: catch-up is first-class, never a closed
+  // door, and an already-resolved row falls through to the same confirmation.
+  //
+  // Failures are logged, not thrown: this request's job is to land the dad on a
+  // page that tells him the truth, and the page reads live state.
   const parsed = rawValue == null || String(rawValue).trim() === '' ? null : Number(rawValue)
-  const value = parsed != null && Number.isFinite(parsed) ? parsed : null
 
-  const { error: entryError } = await admin.from('goal_entries').insert({
-    goal_id: occurrence.goal_id,
-    occurrence_id: occurrence.id,
-    user_id: occurrence.user_id,
-    // The occurrence's own local date, never a date derived here — the server's
-    // idea of "today" is not the user's, and a late-night log belongs to the day
-    // it was meant for.
-    local_date: occurrence.local_date,
-    observed_at: now.toISOString(),
-    kind: action === 'skipped' ? 'skipped' : wasCatchup ? 'catchup' : 'completed',
-    value,
-    source: 'push',
-    client_entry_id: occurrence.id,
-  })
-  if (entryError && !isDuplicate(entryError)) {
-    console.error('goals/tap entry insert failed', entryError.message)
+  try {
+    await logOccurrenceEntry(admin, {
+      occurrenceId: occurrence.id,
+      userId: occurrence.user_id,
+      action,
+      value: parsed,
+      source: 'push',
+    })
+  } catch (err) {
+    console.error('goals/tap log failed', err instanceof Error ? err.message : String(err))
   }
-
-  // Keep the index card honest — streak and open count both just moved.
-  await recomputeGoalStats(admin, [occurrence.goal_id])
 
   return redirectTo(request, `/g/${token}?state=${action === 'skipped' ? 'skipped' : 'logged'}`)
-}
-
-function isDuplicate(error: { code?: string }): boolean {
-  return error.code === '23505'  // unique_violation — the second tap, as designed
 }
 
 // 303 so the browser follows with GET and a refresh can't re-POST the form.

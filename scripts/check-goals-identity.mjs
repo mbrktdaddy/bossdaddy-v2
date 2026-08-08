@@ -40,6 +40,9 @@ const FORBIDDEN = [
   { pattern: /identity_short/i, what: 'the identity_short column' },
   { pattern: /identityStatement/, what: 'the identity statement' },
   { pattern: /identityShort/, what: 'the short identity label' },
+  // loadGoalFacts returns the identity fields, so importing it into a reminder
+  // path is one destructuring away from a breach even though it names nothing.
+  { pattern: /loadGoalFacts|goals\/facts/, what: 'lib/goals/facts (it carries identity)' },
   { pattern: /\bvote(s)? for\b/i, what: 'identity "vote" language' },
   { pattern: /\banother vote\b/i, what: 'identity "vote" language' },
   { pattern: /who you(’|')?re becoming/i, what: 'identity "becoming" language' },

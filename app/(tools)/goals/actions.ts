@@ -1,10 +1,10 @@
 'use server'
 
-import { randomUUID } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { recomputeGoalStats } from '@/lib/goals/stats'
 import { localDateInZone } from '@/lib/goals/recurrence'
+import { logOccurrenceEntry, logOffDayEntry } from '@/lib/goals/log'
 
 // Mutations for the goals UI.
 //
@@ -25,10 +25,10 @@ import { localDateInZone } from '@/lib/goals/recurrence'
 /**
  * Resolve one occurrence and write its log entry.
  *
- * `client_entry_id` is the occurrence id — the same key the one-tap email route
- * uses — so logging the same occurrence twice (once here, once from an email on
- * your phone) is refused by the unique constraint instead of double-counting.
- * For a medication or a taper that's the whole ballgame.
+ * The write itself — the status guard, the occurrence-id idempotency key, the
+ * catch-up kind — lives in lib/goals/log.ts, shared with the one-tap email route
+ * and the Boss's log_goal_entry tool. This wrapper is the form contract: pull the
+ * fields, hand them over, revalidate.
  */
 export async function logOccurrence(formData: FormData): Promise<void> {
   const occurrenceId = String(formData.get('occurrenceId') ?? '')
@@ -43,52 +43,16 @@ export async function logOccurrence(formData: FormData): Promise<void> {
   const { user } = await getUserSafe(supabase)
   if (!user) return
 
-  const { data: occurrenceRow } = await supabase
-    .from('goal_occurrences')
-    .select('id, goal_id, status, local_date')
-    .eq('id', occurrenceId)
-    .maybeSingle()
-  const occurrence = occurrenceRow as unknown as
-    { id: string; goal_id: string; status: string; local_date: string } | null
-  if (!occurrence) return
+  const parsed = rawValue == null || String(rawValue).trim() === '' ? null : Number(rawValue)
 
-  const wasCatchup = occurrence.status === 'missed'
+  await logOccurrenceEntry(supabase, {
+    occurrenceId,
+    userId: user.id,
+    action,
+    value: parsed,
+    source: 'web',
+  })
 
-  // Guarded on current status so a double submit resolves exactly once. A
-  // `missed` row stays loggable — catch-up is always available, never demanded.
-  const { data: updated, error: updateError } = await supabase
-    .from('goal_occurrences')
-    .update({ status: action, resolved_at: new Date().toISOString(), snoozed_until: null })
-    .eq('id', occurrence.id)
-    .in('status', ['pending', 'notified', 'snoozed', 'missed'])
-    .select('id')
-  if (updateError) throw new Error(`Could not update that day: ${updateError.message}`)
-
-  // Zero rows means someone already resolved it. Revalidate and let the page
-  // show the truth.
-  if (updated?.length) {
-    const parsed = rawValue == null || String(rawValue).trim() === '' ? null : Number(rawValue)
-    const value = parsed != null && Number.isFinite(parsed) ? parsed : null
-
-    const { error } = await supabase.from('goal_entries').insert({
-      goal_id: occurrence.goal_id,
-      occurrence_id: occurrence.id,
-      user_id: user.id,
-      // The occurrence's own local date — never a date derived on the server,
-      // whose "today" is not the user's.
-      local_date: occurrence.local_date,
-      kind: action === 'skipped' ? 'skipped' : wasCatchup ? 'catchup' : 'completed',
-      value,
-      source: 'web',
-      client_entry_id: occurrence.id,
-    })
-    // 23505 (unique_violation) is the intended outcome of a double submit.
-    if (error && error.code !== '23505') {
-      throw new Error(`Could not save that entry: ${error.message}`)
-    }
-  }
-
-  await recomputeGoalStats(supabase, [goalId])
   revalidatePath('/goals')
   revalidatePath(`/goals/${goalId}`)
 }
@@ -116,14 +80,6 @@ export async function logUnprompted(formData: FormData): Promise<void> {
   const { user } = await getUserSafe(supabase)
   if (!user) return
 
-  const { data: goalRow } = await supabase
-    .from('goals')
-    .select('id, metric_key')
-    .eq('id', goalId)
-    .maybeSingle()
-  const goal = goalRow as unknown as { id: string; metric_key: string | null } | null
-  if (!goal) return
-
   const { data: scheduleRow } = await supabase
     .from('goal_schedules')
     .select('timezone')
@@ -133,32 +89,18 @@ export async function logUnprompted(formData: FormData): Promise<void> {
   const zone = (scheduleRow as unknown as { timezone: string } | null)?.timezone ?? 'UTC'
 
   const parsed = rawValue == null || String(rawValue).trim() === '' ? null : Number(rawValue)
-  const value = parsed != null && Number.isFinite(parsed) ? parsed : null
 
-  // A measurement without a number violates the CHECK on goal_entries, and a
-  // measuring goal logged with no value tells us nothing anyway.
-  if (goal.metric_key && value == null) return
-
-  const localDate = /^\d{4}-\d{2}-\d{2}$/.test(forDate)
-    ? forDate
-    : safeLocalDate(zone)
-
-  const { error } = await supabase.from('goal_entries').insert({
-    goal_id: goalId,
-    occurrence_id: null,
-    user_id: user.id,
-    local_date: localDate,
-    kind: goal.metric_key ? 'measurement' : 'completed',
-    value,
-    note: note || null,
+  await logOffDayEntry(supabase, {
+    goalId,
+    userId: user.id,
+    // The goal's own zone, not the server's — the server's idea of today is not
+    // the user's, especially late at night.
+    localDate: /^\d{4}-\d{2}-\d{2}$/.test(forDate) ? forDate : safeLocalDate(zone),
+    value: parsed,
+    note,
     source: 'web',
-    // A fresh id per unprompted log — unlike the occurrence-bound path, logging
-    // twice in a day here is legitimate (two weigh-ins, two workouts).
-    client_entry_id: randomUUID(),
   })
-  if (error) throw new Error(`Could not save that: ${error.message}`)
 
-  await recomputeGoalStats(supabase, [goalId])
   revalidatePath('/goals')
   revalidatePath(`/goals/${goalId}`)
 }
