@@ -232,12 +232,19 @@ export default async function EditGoalPage({ params, searchParams }: Props) {
           const zones = COMMON_ZONES.includes(schedule.timezone)
             ? COMMON_ZONES
             : [schedule.timezone, ...COMMON_ZONES]
+          // Collapsed by default. Each reminder's form is a dozen controls
+          // (4 radios, 7 day chips, time, zone, 3 channels), so three reminders
+          // expanded made this page a wall on a phone. The summary carries the
+          // whole answer in one line, and you open only the one you're changing.
           return (
-            <div key={schedule.id} className="rounded-xl border border-soft bg-surface p-5">
-              <p className="text-sm font-semibold text-prose">
-                {describeRrule(schedule.rrule, schedule.local_time)}
-                {schedule.muted ? ' · muted' : ''}
-              </p>
+            <details key={schedule.id} className="rounded-xl border border-soft bg-surface p-5">
+              <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3">
+                <span className="text-sm font-semibold text-prose">
+                  {describeRrule(schedule.rrule, schedule.local_time)}
+                  {schedule.muted ? ' · muted' : ''}
+                </span>
+                <span className="shrink-0 text-xs text-accent-text">Change</span>
+              </summary>
 
               <form action="/api/goals/schedule" method="post" className="mt-4 space-y-4">
                 <input type="hidden" name="goalId" value={goal.id} />
@@ -285,7 +292,7 @@ export default async function EditGoalPage({ params, searchParams }: Props) {
                   </button>
                 </form>
               ) : null}
-            </div>
+            </details>
           )
         })}
 
