@@ -49,6 +49,10 @@
     {
       "path": "/api/cron/embed-content",
       "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/goals-sweep",
+      "schedule": "*/15 * * * *"
     }
   ]
 }
