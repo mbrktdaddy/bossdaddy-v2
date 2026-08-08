@@ -823,6 +823,310 @@ export type Database = {
           },
         ]
       }
+      goal_deliveries: {
+        Row: {
+          attempts: number
+          channel: string
+          created_at: string
+          id: string
+          last_error: string | null
+          occurrence_id: string
+          sent_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          channel: string
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          occurrence_id: string
+          sent_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          channel?: string
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          occurrence_id?: string
+          sent_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_deliveries_occurrence_id_fkey"
+            columns: ["occurrence_id"]
+            isOneToOne: false
+            referencedRelation: "goal_occurrences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_entries: {
+        Row: {
+          client_entry_id: string
+          created_at: string
+          goal_id: string
+          id: string
+          kind: string
+          local_date: string
+          metric_key: string | null
+          note: string | null
+          observed_at: string
+          occurrence_id: string | null
+          source: string
+          user_id: string
+          value: number | null
+        }
+        Insert: {
+          client_entry_id?: string
+          created_at?: string
+          goal_id: string
+          id?: string
+          kind?: string
+          local_date: string
+          metric_key?: string | null
+          note?: string | null
+          observed_at?: string
+          occurrence_id?: string | null
+          source?: string
+          user_id: string
+          value?: number | null
+        }
+        Update: {
+          client_entry_id?: string
+          created_at?: string
+          goal_id?: string
+          id?: string
+          kind?: string
+          local_date?: string
+          metric_key?: string | null
+          note?: string | null
+          observed_at?: string
+          occurrence_id?: string | null
+          source?: string
+          user_id?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_entries_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_entries_occurrence_id_fkey"
+            columns: ["occurrence_id"]
+            isOneToOne: false
+            referencedRelation: "goal_occurrences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_occurrences: {
+        Row: {
+          created_at: string
+          due_at: string
+          goal_id: string
+          id: string
+          local_date: string
+          local_time: string
+          resolved_at: string | null
+          schedule_id: string
+          shifted: boolean
+          snoozed_until: string | null
+          status: string
+          target_value: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          due_at: string
+          goal_id: string
+          id?: string
+          local_date: string
+          local_time: string
+          resolved_at?: string | null
+          schedule_id: string
+          shifted?: boolean
+          snoozed_until?: string | null
+          status?: string
+          target_value?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          due_at?: string
+          goal_id?: string
+          id?: string
+          local_date?: string
+          local_time?: string
+          resolved_at?: string | null
+          schedule_id?: string
+          shifted?: boolean
+          snoozed_until?: string | null
+          status?: string
+          target_value?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_occurrences_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_occurrences_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "goal_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_schedules: {
+        Row: {
+          channels: string[]
+          created_at: string
+          goal_id: string
+          grace_minutes: number
+          id: string
+          label: string | null
+          lead_minutes: number
+          local_time: string
+          materialized_through: string | null
+          muted: boolean
+          rrule: string
+          start_date: string
+          status: string
+          timezone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channels?: string[]
+          created_at?: string
+          goal_id: string
+          grace_minutes?: number
+          id?: string
+          label?: string | null
+          lead_minutes?: number
+          local_time: string
+          materialized_through?: string | null
+          muted?: boolean
+          rrule: string
+          start_date: string
+          status?: string
+          timezone: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channels?: string[]
+          created_at?: string
+          goal_id?: string
+          grace_minutes?: number
+          id?: string
+          label?: string | null
+          lead_minutes?: number
+          local_time?: string
+          materialized_through?: string | null
+          muted?: boolean
+          rrule?: string
+          start_date?: string
+          status?: string
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_schedules_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goals: {
+        Row: {
+          archived_at: string | null
+          baseline_value: number | null
+          completed_at: string | null
+          config: Json
+          created_at: string
+          curve: string
+          description: string | null
+          direction: string | null
+          id: string
+          kind: string
+          metric_key: string | null
+          metric_unit: string | null
+          started_on: string
+          status: string
+          step_every_days: number | null
+          target_date: string | null
+          target_value: number | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          baseline_value?: number | null
+          completed_at?: string | null
+          config?: Json
+          created_at?: string
+          curve?: string
+          description?: string | null
+          direction?: string | null
+          id?: string
+          kind: string
+          metric_key?: string | null
+          metric_unit?: string | null
+          started_on?: string
+          status?: string
+          step_every_days?: number | null
+          target_date?: string | null
+          target_value?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          baseline_value?: number | null
+          completed_at?: string | null
+          config?: Json
+          created_at?: string
+          curve?: string
+          description?: string | null
+          direction?: string | null
+          id?: string
+          kind?: string
+          metric_key?: string | null
+          metric_unit?: string | null
+          started_on?: string
+          status?: string
+          step_every_days?: number | null
+          target_date?: string | null
+          target_value?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       guide_metrics: {
         Row: {
           created_at: string

@@ -13,6 +13,10 @@ export default defineConfig({
   resolve: {
     alias: [
       { find: /^@\//, replacement: fileURLToPath(new URL('./', import.meta.url)) },
+      // `server-only` is resolved internally by Next, not installed as a
+      // package, so anything carrying the marker is unimportable here without
+      // this stub. See tests/stubs/server-only.ts.
+      { find: 'server-only', replacement: fileURLToPath(new URL('./tests/stubs/server-only.ts', import.meta.url)) },
     ],
   },
 })
