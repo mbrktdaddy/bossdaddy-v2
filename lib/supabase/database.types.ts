@@ -823,6 +823,30 @@ export type Database = {
           },
         ]
       }
+      goal_calendar_tokens: {
+        Row: {
+          created_at: string
+          last_used_at: string | null
+          rotated_at: string | null
+          token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          last_used_at?: string | null
+          rotated_at?: string | null
+          token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          last_used_at?: string | null
+          rotated_at?: string | null
+          token?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       goal_deliveries: {
         Row: {
           attempts: number

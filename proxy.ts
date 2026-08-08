@@ -60,8 +60,16 @@ export async function proxy(request: NextRequest) {
 // pipeline applies to them: they take no session, serve no user data, and must
 // stay reachable while logged out. (The `api/og` prefix also covers
 // `api/og/weekends`.)
+// `api/goals/calendar` is excluded for the same reasons, plus one of its own. The
+// callers are Google's and Apple's calendar servers polling an .ics feed every few
+// hours, and they authenticate with the TOKEN IN THE PATH — never a cookie. So the
+// session refresh here is pure latency on a request that can't use it, and if such a
+// request ever did arrive with cookies, refreshSession() would attach Set-Cookie to
+// a response the route deliberately marks `private, no-store`. Excluding it also
+// keeps the token lookup in the route as the single, obvious authorization for that
+// feed rather than something a reader might assume the proxy participates in.
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|og-card|img-crop|api/og|api/img|robots.txt|sitemap.xml|manifest.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|og-card|img-crop|api/og|api/img|api/goals/calendar|robots.txt|sitemap.xml|manifest.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

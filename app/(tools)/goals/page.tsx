@@ -14,7 +14,7 @@
 
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { OG_SITE } from '@/lib/og'
+import { OG_SITE, SITE_URL } from '@/lib/og'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { LABELS } from '@/lib/labels'
 import { LoginLink } from '@/components/LoginLink'
@@ -106,6 +106,20 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
     (sum, g) => sum + (g.status === 'active' ? (stats.get(g.id)?.open_count ?? 0) : 0),
     0,
   )
+
+  // The calendar subscription, if he's made one. Read here rather than in the panel
+  // so the whole page stays one render pass with no nested async component.
+  const { data: calendarRow } = await supabase
+    .from('goal_calendar_tokens')
+    .select('token')
+    .maybeSingle()
+  const calendarToken = (calendarRow as { token: string } | null)?.token ?? null
+  // webcal:// is what makes a tap on a phone offer to subscribe instead of
+  // downloading a file. Same URL, different scheme — so the host comes from the
+  // canonical SITE_URL rather than being rebuilt by hand.
+  const calendarFeedUrl = calendarToken
+    ? `webcal://${new URL(SITE_URL).host}/api/goals/calendar/${calendarToken}`
+    : null
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
@@ -357,6 +371,70 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
           </p>
         </fieldset>
       </form>
+
+      {/* ── calendar subscription ───────────────────────────────────────────
+          Collapsed: useful, but not what anyone came here for. Anchored so the
+          route handler can bring him back to it opened after minting a link. */}
+      <details id="calendar" className="rounded-xl border border-soft bg-surface p-5">
+        <summary className="min-h-11 flex cursor-pointer items-center text-sm font-semibold text-prose">
+          Put these in your calendar
+        </summary>
+
+        {calendarToken ? (
+          <div className="mt-4 space-y-3">
+            <p className="text-xs text-muted">
+              Subscribe to this in Google Calendar, Apple Calendar or Outlook. It
+              updates itself when you change a reminder.
+            </p>
+            {/* Selectable text, not a copy button — a button needs client JS, and
+                long-press-to-copy is native on the phone this is built for. */}
+            <p className="break-all rounded-lg border border-soft bg-surface-raised px-4 py-3 font-mono text-[11px] text-accent-text">
+              {calendarFeedUrl}
+            </p>
+            <p className="text-xs text-faint">
+              Anyone with that link can read your goal titles and times without
+              signing in — that&apos;s how calendar subscriptions work. Reset it if
+              it gets out.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <form action="/api/goals/calendar" method="post">
+                <input type="hidden" name="op" value="reset" />
+                <button
+                  type="submit"
+                  className="min-h-11 rounded-lg border border-soft bg-surface px-4 py-3 text-xs font-semibold text-prose hover:bg-surface-hover transition-colors"
+                >
+                  Reset the link
+                </button>
+              </form>
+              <form action="/api/goals/calendar" method="post">
+                <input type="hidden" name="op" value="remove" />
+                <button
+                  type="submit"
+                  className="min-h-11 rounded-lg border border-soft bg-surface px-4 py-3 text-xs font-semibold text-accent-text hover:bg-surface-hover transition-colors"
+                >
+                  Turn it off
+                </button>
+              </form>
+            </div>
+          </div>
+        ) : (
+          <form action="/api/goals/calendar" method="post" className="mt-4 space-y-3">
+            <input type="hidden" name="op" value="create" />
+            <p className="text-xs text-muted">
+              You&apos;ll get a private link to subscribe to. Your active goals show
+              up as recurring events — <span className="text-prose">under their real
+              names</span>, so bear that in mind if the calendar you add it to is one
+              you share. No alarms: your push and email reminders already cover that.
+            </p>
+            <button
+              type="submit"
+              className="min-h-11 w-full rounded-lg border border-strong bg-surface-raised px-5 py-3 text-xs font-bold text-prose hover:bg-surface-hover transition-colors"
+            >
+              Make me a calendar link
+            </button>
+          </form>
+        )}
+      </details>
 
       <div className="space-y-2 border-t border-soft pt-6">
         <p className="text-xs text-faint">
