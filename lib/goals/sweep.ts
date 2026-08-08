@@ -123,6 +123,7 @@ export async function runGoalsSweep(
   await materialize(admin, now, report, touched)
   await notifyDue(admin, now, siteUrl, report, touched)
   await ageOut(admin, now, report, touched)
+  await refreshStaleStats(admin, now, report, touched)
 
   if (touched.size) {
     const { updated, errors } = await recomputeGoalStats(admin, [...touched], now)
@@ -664,6 +665,71 @@ async function ageOut(
   else {
     report.missed = lapsed.length
     for (const row of lapsed) touched.add(row.goal_id)
+  }
+}
+
+// ── phase 4: self-heal stale or missing stats ───────────────────────────────
+
+/** Stats older than this are refreshed even if nothing else touched the goal. */
+const STATS_STALE_AFTER_MINUTES = 90
+/** Bounded so a big cold start spreads over several ticks instead of one long one. */
+const MAX_STATS_REFRESH_PER_TICK = 50
+
+/**
+ * Recomputes stats for goals nothing else touched.
+ *
+ * Without this, `goal_stats` only ever gets written for goals the tick actually
+ * moved — and a goal materialized 60 days out, with nothing due right now, is
+ * touched by nothing. Goals that existed before migration 135 would therefore
+ * never get a stats row at all, and the index would report "no run going yet" for
+ * a goal with a real streak: not a crash, just quietly wrong, which is worse.
+ *
+ * Self-healing rather than a one-off backfill, so the same code covers the
+ * migration's cold start, a manually deleted row, and any future drift.
+ */
+async function refreshStaleStats(
+  admin: Admin,
+  now: Date,
+  report: SweepReport,
+  touched: Set<string>,
+): Promise<void> {
+  const { data: goalRows, error: goalError } = await admin
+    .from('goals')
+    .select('id')
+    .in('status', ['active', 'paused'])
+    .limit(500)
+  if (goalError) {
+    report.errors.push(`staleStats/goals: ${goalError.message}`)
+    return
+  }
+  const goalIds = ((goalRows ?? []) as unknown as { id: string }[]).map((g) => g.id)
+  if (!goalIds.length) return
+
+  const { data: statRows, error: statError } = await admin
+    .from('goal_stats')
+    .select('goal_id, computed_at')
+    .in('goal_id', goalIds)
+  if (statError) {
+    report.errors.push(`staleStats/stats: ${statError.message}`)
+    return
+  }
+  const computedAt = new Map(
+    ((statRows ?? []) as unknown as { goal_id: string; computed_at: string }[])
+      .map((s) => [s.goal_id, s.computed_at]),
+  )
+
+  const cutoff = now.getTime() - STATS_STALE_AFTER_MINUTES * 60_000
+  let added = 0
+  for (const goalId of goalIds) {
+    if (added >= MAX_STATS_REFRESH_PER_TICK) break
+    if (touched.has(goalId)) continue
+    const stamp = computedAt.get(goalId)
+    // Missing row, or one old enough that a day boundary may have moved under it
+    // (today_local_date and open_count both go stale with the clock).
+    if (!stamp || new Date(stamp).getTime() < cutoff) {
+      touched.add(goalId)
+      added++
+    }
   }
 }
 
