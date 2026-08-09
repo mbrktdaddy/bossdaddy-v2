@@ -50,7 +50,7 @@ export default function ConnectionPrefs({
 
       <Row
         label="Let people ask to connect"
-        hint="Connecting is what lets two of you message each other and share a goal. Turn this off and nobody new can ask — the people already in your corner stay."
+        hint="Connecting is what lets two of you message each other and share a goal. Turn this off and nobody new can ask — everyone you're already connected to stays."
         checked={openToRequests}
         disabled={saving}
         onToggle={() => {

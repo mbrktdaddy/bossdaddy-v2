@@ -188,7 +188,13 @@ export const LABELS = {
     // Accountability partners (mig 137). "In your corner" rather than "Shared
     // with me" — the point is who's got your back, not a permissions list.
     sharedEyebrow:   'Someone asked you',
-    sharedHeading:   'In your corner',
+    // ⚠️ THIS PAGE IS THE OTHER DIRECTION. /goals/shared lists goals OTHER PEOPLE
+    // shared with you — you are in THEIR corner, not the reverse. It read "In your
+    // corner", which describes the opposite relationship and collided with the two
+    // places that legitimately use that phrase: the participant list on
+    // /goals/[id]/share, and the derived section on /account. The eyebrow above
+    // ("Someone asked you") was already saying the right thing.
+    sharedHeading:   'You\'re in their corner',
     sharedEmpty:     'Nobody has shared a goal with you yet. When someone does, it shows up here — and you\'ll never get pinged about it.',
     // NAMES THE ACTION, not the state. This read "Who can see this", which is an
     // accurate description of the page and the wrong thing to put on a button:

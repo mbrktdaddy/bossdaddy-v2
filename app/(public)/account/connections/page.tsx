@@ -1,5 +1,10 @@
-// Your corner — who you're connected to, who's asking, who you've asked, who you've
+// Contacts — who you're connected to, who's asking, who you've asked, who you've
 // shut out.
+//
+// NOT "your corner", which this was called first and which meant something else.
+// A contact is who you CAN reach; your corner is who accepted a share on one of
+// your goals, which is derived from goal_participants and lives on /account. See
+// LABELS.contacts.
 //
 // This page is also the app's FIRST blocked-list. Before connections, blocking
 // lived in the ⋮ menu inside a DM thread, so you could only block someone you had
@@ -34,7 +39,7 @@ export default async function ConnectionsPage({ searchParams }: Props) {
   if (!user) {
     return (
       <Wrap>
-        <h1 className="text-2xl font-black text-prose">Sign in to see your corner.</h1>
+        <h1 className="text-2xl font-black text-prose">Sign in to see your contacts.</h1>
         <LoginLink className="mt-6 inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl transition-colors">
           Sign in →
         </LoginLink>

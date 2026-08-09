@@ -21,7 +21,7 @@ import { getSharedGoal, listSharedDays, TIER_COPY } from '@/lib/goals/participan
 import { planWindow } from '@/lib/goals/progress'
 
 export const metadata: Metadata = {
-  title: `In your corner — ${LABELS.goals.short}`,
+  title: `${LABELS.goals.sharedHeading} — ${LABELS.goals.short}`,
   robots: { index: false, follow: false },
 }
 

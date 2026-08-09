@@ -42,8 +42,22 @@ export async function checkAuthGuard(args: {
 }): Promise<NextResponse | null> {
   const { request, pathname, supabase, user } = args
 
-  // 1. /dashboard requires auth
-  if (pathname.startsWith('/dashboard') && !user) {
+  // 1. /dashboard and /account require auth.
+  //
+  // ⚠️ /account IS GUARDED HERE AND NOT IN THE PAGES, and it has to be. Those
+  // pages each call redirect() from a Server Component, and in this codebase that
+  // silently does not work — the NEXT_REDIRECT control-flow error gets swallowed
+  // and the visitor receives a 200 with the error serialized into the body
+  // instead of a 307 to /login. Reproduced on every /account route: logged out,
+  // all three returned 200 with `NEXT_REDIRECT` in the HTML.
+  //
+  // Nothing leaked (no user means no rows to read), but a logged-out visitor got
+  // a broken page where the sign-in screen should be. A NextResponse.redirect
+  // from the proxy is a real Response that nothing in the render path can
+  // intercept — the same reasoning /api/goals/share uses for its 303s.
+  //
+  // The pages keep their own redirect() calls as a belt-and-braces fallback.
+  if ((pathname.startsWith('/dashboard') || pathname.startsWith('/account')) && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     url.searchParams.set('next', pathname)
