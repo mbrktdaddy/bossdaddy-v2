@@ -41,6 +41,8 @@ export async function deliverGoalInvite(args: {
   tier: ShareTier
   goalTitle: string
   inviterName: string
+  /** Who is sending — needed to honour the recipient's preferences. */
+  senderUserId: string
   /** A typed-in address, or null. */
   email?: string | null
   /** A member picked from his contacts, or null. */
@@ -49,6 +51,20 @@ export async function deliverGoalInvite(args: {
   const url = goalInviteUrl(args.token)
   const copy = TIER_COPY[args.tier]
   let outcome: DeliveryOutcome = 'none'
+
+  // MAY WE PUT THIS IN FRONT OF THEM AT ALL? The contact picker only offers
+  // connections, so that path is already consensual — but the email field takes
+  // any address, and without this a member who set "nobody can ask" is reachable
+  // by anyone who knows their address. Returning 'none' degrades to "here's a
+  // link you can pass on", which is what the sender sees for a blank address or a
+  // Resend failure too — so a refusal reveals nothing. See lib/invite-guard.ts.
+  const { mayInviteEmail, mayInviteMember } = await import('@/lib/invite-guard')
+  if (args.memberUserId && !await mayInviteMember(args.memberUserId, args.senderUserId)) {
+    return 'none'
+  }
+  if (!args.memberUserId && args.email && !await mayInviteEmail(args.email, args.senderUserId)) {
+    return 'none'
+  }
 
   // ── the member's in-app notification ──────────────────────────────────────
   // `link` is a PATH, not the absolute URL: this one is opened from inside the

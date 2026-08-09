@@ -106,6 +106,7 @@ export async function POST(request: NextRequest) {
         sent = await deliverGoalInvite({
           token: result.token,
           tier,
+          senderUserId: user.id,
           goalTitle: (goalRow as { title: string } | null)?.title ?? 'a goal',
           inviterName: profile?.display_name?.trim()
             || (profile?.username ? `@${profile.username}` : 'A Boss Daddy member'),

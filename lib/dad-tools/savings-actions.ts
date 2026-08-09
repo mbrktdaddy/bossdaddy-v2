@@ -808,7 +808,18 @@ export async function createInvite(
 
   // Relay to an existing member's in-app notifications so they can accept or
   // decline from their profile without needing the link.
-  if (parsed.data.inviteeUserId) {
+  // RECIPIENT PREFERENCES APPLY HERE TOO. Savings invites predate
+  // profiles.connection_requests_from and shipped with no opt-out of any kind, so
+  // "nobody can ask to connect with me" was silently untrue for anyone who knew
+  // your email or your user id. Both paths below now ask first.
+  //
+  // A refusal is SILENT and indistinguishable from not providing an address: the
+  // token is already minted and the link is already on screen, so the owner can
+  // still pass it on by hand. Saying why would leak whether that address belongs
+  // to a member here. See lib/invite-guard.ts.
+  const { mayInviteMember, mayInviteEmail } = await import('@/lib/invite-guard')
+
+  if (parsed.data.inviteeUserId && await mayInviteMember(parsed.data.inviteeUserId, user.id)) {
     const { data: goalRow } = await admin.from('savings_goals').select('name').eq('id', parsed.data.goalId).maybeSingle()
     const goalName = (goalRow as { name: string } | null)?.name ?? 'a savings goal'
     const { data: ip } = await admin.from('profiles').select('username, display_name').eq('id', user.id).maybeSingle()
@@ -828,7 +839,7 @@ export async function createInvite(
   // If the inviter provided a recipient email, fire-and-forget send the
   // invite email. Best-effort: a Resend failure here doesn't break the
   // invite link generation — the owner can still share the URL by hand.
-  if (parsed.data.email) {
+  if (parsed.data.email && await mayInviteEmail(parsed.data.email, user.id)) {
     const { data: goalRow } = await admin.from('savings_goals')
       .select('name')
       .eq('id', parsed.data.goalId)
