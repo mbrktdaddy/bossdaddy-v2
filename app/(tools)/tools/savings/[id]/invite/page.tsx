@@ -89,7 +89,7 @@ export default async function InviteGoalParticipantsPage({ params }: PageProps) 
           href={`/tools/savings/${id}`}
           className="text-sm text-prose-faint hover:text-prose-muted transition-colors"
         >
-          ← Back to {goal.name}
+          ← {goal.name}
         </Link>
         <h1 className="text-2xl sm:text-3xl font-black text-prose leading-tight tracking-tight">
           Invite participants

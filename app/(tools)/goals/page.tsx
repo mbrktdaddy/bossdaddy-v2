@@ -259,9 +259,14 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
                   aria-label={`Select ${goal.title}`}
                 />
               </label>
+              {/* The CARD is this div, not the anchor. Splitting them is what lets
+                  a labelled Share row live inside the card border — a link can't
+                  nest inside a link, same constraint that puts the checkbox
+                  outside. The upper area stays one big tap target for opening. */}
+              <div className="flex-1 min-w-0 overflow-hidden rounded-xl border border-soft bg-surface transition-colors hover:border-strong">
               <Link
                 href={`/goals/${goal.id}`}
-                className="block flex-1 min-w-0 bg-surface border border-soft hover:border-strong rounded-xl p-4 sm:p-6 transition-colors"
+                className="block p-4 sm:p-6"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
@@ -322,6 +327,29 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
                     : null}
                 </p>
               </Link>
+
+              {/* LABELLED, not an icon in the rail. The first attempt was an
+                  icon-only button beside the checkbox, which read as a second
+                  selection control and made the reader guess at a person-plus
+                  glyph. A word costs nothing here and takes no width from the
+                  title, which is already under pressure from the checkbox column.
+
+                  Reachable without opening the goal: sharing used to sit one level
+                  down, so bringing three people into three goals meant six
+                  navigations. */}
+              {showArchived ? null : (
+                <Link
+                  href={`/goals/${goal.id}/share`}
+                  aria-label={`${LABELS.goals.shareShort} ${goal.title}`}
+                  className="flex min-h-11 items-center gap-2 border-t border-soft px-4 text-xs font-semibold text-muted transition-colors hover:bg-surface-hover hover:text-accent-text sm:px-6"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-1a4 4 0 00-3-3.87M9 20H4v-1a4 4 0 013-3.87m10-4.63a3 3 0 11-6 0 3 3 0 016 0zM19 8v6m3-3h-6" />
+                  </svg>
+                  {LABELS.goals.shareCta}
+                </Link>
+              )}
+              </div>
             </li>
           )
         })}
@@ -445,7 +473,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
           href={showArchived ? '/goals' : '/goals?archived=1'}
           className="inline-flex items-center py-3 text-xs text-muted hover:text-prose underline"
         >
-          {showArchived ? '← Back to active goals' : 'See archived goals'}
+          {showArchived ? '← Active goals' : 'See archived goals'}
         </Link>
       </div>
     </div>
@@ -542,7 +570,7 @@ function Empty({ showArchived, deleted }: { showArchived: boolean; deleted: bool
           href="/goals"
           className="inline-flex items-center py-3 text-sm text-muted hover:text-prose underline"
         >
-          ← Back to active goals
+          ← Active goals
         </Link>
       ) : (
         <Link

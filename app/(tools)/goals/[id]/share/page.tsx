@@ -84,8 +84,11 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
 
       <header className="mt-4 space-y-2">
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Sharing</p>
+        {/* Matches the link that got you here. Landing on a different noun than
+            the button you pressed is its own small confusion, and this page is
+            reached from three places now. */}
         <h1 className="text-2xl sm:text-3xl font-black text-prose leading-tight tracking-tight">
-          Who can see this
+          {LABELS.goals.shareCta}
         </h1>
         <p className="text-sm text-prose-muted leading-snug">
           Someone in your corner makes this stick. They can look — they never get

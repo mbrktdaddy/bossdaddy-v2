@@ -53,7 +53,7 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
           href="/"
           className="inline-block px-5 py-3 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
         >
-          Back to Boss Daddy
+          ← Boss Daddy
         </Link>
       </div>
     </div>

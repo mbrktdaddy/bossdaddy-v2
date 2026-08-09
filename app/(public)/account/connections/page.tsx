@@ -12,6 +12,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
+import { LABELS } from '@/lib/labels'
 import { LoginLink } from '@/components/LoginLink'
 import {
   listConnections, listIncoming, listOutgoing, listBlocked,
@@ -19,7 +20,7 @@ import {
 } from '@/lib/connections'
 
 export const metadata: Metadata = {
-  title: 'Your corner',
+  title: LABELS.contacts.short,
   robots: { index: false, follow: false },
 }
 
@@ -51,13 +52,21 @@ export default async function ConnectionsPage({ searchParams }: Props) {
   return (
     <Wrap>
       <header className="space-y-2">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Your corner</p>
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+          {LABELS.contacts.eyebrow}
+        </p>
         <h1 className="text-2xl sm:text-3xl font-black text-prose leading-tight tracking-tight">
-          Who you&apos;re connected to
+          {LABELS.contacts.h1}
         </h1>
-        <p className="text-sm text-prose-muted leading-snug">
-          Connecting is what lets two of you message each other and share a goal.
-          Either of you can end it whenever you like, and nobody gets told.
+        <p className="text-sm text-prose-muted leading-snug">{LABELS.contacts.tagline}</p>
+        {/* Points at the DERIVED set rather than pretending this is it. A contact
+            is who you can ask; your corner is who said yes, and that lives on
+            /account because it's computed from goal_participants. */}
+        <p className="text-xs text-faint leading-snug">
+          Looking for who&apos;s keeping you honest?{' '}
+          <Link href="/account" className="text-accent-text hover:text-prose">
+            {LABELS.contacts.cornerLabel} →
+          </Link>
         </p>
       </header>
 
@@ -81,7 +90,9 @@ export default async function ConnectionsPage({ searchParams }: Props) {
       ) : null}
 
       {/* ── connected ──────────────────────────────────────────────────────── */}
-      <Section title="In your corner">
+      {/* NOT "in your corner" — this is everyone you can reach. The corner is the
+          smaller, derived set on /account. */}
+      <Section title="Connected">
         {connected.length === 0 ? (
           <Empty>
             Nobody yet. Find someone from{' '}
@@ -92,6 +103,10 @@ export default async function ConnectionsPage({ searchParams }: Props) {
           </Empty>
         ) : connected.map((p) => (
           <Card key={p.userId} person={p} sub={`Connected since ${p.since.slice(0, 10)}`}>
+            {/* Message is the PRIMARY action here. Connecting is what unlocks
+                messaging, so this list is the one place where the door being open
+                should come with a handle — it shipped without one. */}
+            <Act op="message" userId={p.userId} label="Message" primary />
             <Act op="remove" userId={p.userId} label="Disconnect" />
             <Act op="block" userId={p.userId} label="Block" />
           </Card>

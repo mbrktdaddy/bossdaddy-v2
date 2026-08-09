@@ -118,7 +118,7 @@ export default async function SavingsGoalPage({ params }: PageProps) {
           href="/tools/savings"
           className="text-sm text-prose-faint hover:text-prose-muted transition-colors"
         >
-          ← Back to goals
+          {LABELS.tools.savings.upLink}
         </Link>
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div className="min-w-0">

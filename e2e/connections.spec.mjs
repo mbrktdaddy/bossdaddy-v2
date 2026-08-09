@@ -107,7 +107,9 @@ test.describe.serial('connections', () => {
     await expect(c.getByRole('heading', { name: /waiting on you/i })).toBeVisible()
     await c.getByRole('button', { name: /^accept$/i }).first().click()
     await c.waitForURL(/connections/)
-    await expect(c.getByRole('heading', { name: /in your corner/i })).toBeVisible()
+    // "Connected", not "in your corner" — the contact list is everyone you can
+    // reach; your corner is the smaller derived set on /account.
+    await expect(c.getByRole('heading', { name: /^connected$/i })).toBeVisible()
 
     // And now the DM works both ways.
     const after = await findMember(c, 'bd-verify-a')
@@ -250,29 +252,86 @@ test.describe.serial('connections', () => {
     expect(gone, 'a blocked member must not appear in search at all').toBeNull()
     const alsoGone = await findMember(c, 'bd-verify-a')
     expect(alsoGone, 'blocking is mutual in search, both directions').toBeNull()
+
+    // UNBLOCK, and restore the baseline this test breaks for everything after it.
+    // A block makes the pair mutually invisible, so leaving it in place made every
+    // later test involving C fail on a null search result — which looks like a
+    // product bug and is just test ordering. Doubles as unblock coverage.
+    await post(page, 'unblock', state.cId)
+    expect(await findMember(page, 'bd-verify-c'), 'unblocking restores visibility').toBeTruthy()
+    expect(await findMember(c, 'bd-verify-a'), 'both directions come back').toBeTruthy()
     await ctx.close()
   })
 
   // ── the entry point that was missing ──────────────────────────────────────
-  test('account settings surfaces the connection count and links to the list', async ({ page }) => {
-    await signIn(page, A, '/account/settings')
-    await page.goto('/account/settings')
+  test('the nav badge counts people waiting on you', async ({ browser, page }) => {
+    // C asks A, so A has something pending. The badge lives inside the avatar
+    // dropdown, which is conditionally mounted — it only fetches once opened,
+    // which is the whole reason it's cheap enough to sit in the nav.
+    const ctx = await browser.newContext()
+    const c = await ctx.newPage()
+    await signIn(c, C)
+    const a = await findMember(c, 'bd-verify-a')
+    await post(c, 'request', a.id)
 
+    await signIn(page, A, '/goals')
+    const pending = await page.request.get('/api/connections/pending')
+    const { count } = await pending.json()
+    console.log('   pending count:', count)
+    expect(count, 'the endpoint should see the waiting request').toBeGreaterThan(0)
+
+    // And it renders in the menu rather than only existing in the API.
+    await page.goto('/goals')
+    await page.getByRole('button', { name: /account|menu/i }).first().click()
+    const link = page.locator('a[href="/account/connections"]').first()
+    await expect(link).toBeVisible()
+    await expect(link.getByLabel(/waiting on you/i)).toBeVisible()
+
+    // Clear it so the later tests start from the documented baseline.
+    await post(page, 'decline', state.cId)
+    await ctx.close()
+  })
+
+  test('/account is the personal home and /account/settings is only settings', async ({ page }) => {
+    await signIn(page, A, '/account')
+    await page.goto('/account')
+
+    // Things you HAVE.
+    await expect(page.getByRole('heading', { name: /your stuff/i })).toBeVisible()
     const card = page.locator('a[href="/account/connections"]')
-    await expect(card, 'settings must offer a way INTO the list, not just the toggles').toHaveCount(1)
-
+    await expect(card, 'the home must offer a way INTO the contact list').toHaveCount(1)
     const text = await card.innerText()
-    console.log('   corner card:', text.replace(/\s+/g, ' ').trim())
-    expect(text).toMatch(/connection/i)
+    console.log('   contacts card:', text.replace(/\s+/g, ' ').trim())
+    expect(text, 'the card counts CONTACTS, not corner members').toMatch(/contact/i)
 
-    // The policy switches stay here too, and stay separate from the list.
+    // Things you CONFIGURE, and none of the above.
+    await page.goto('/account/settings')
+    await expect(page.getByRole('heading', { name: /account settings/i })).toBeVisible()
     await expect(page.getByText(/who can reach you/i)).toBeVisible()
     await expect(page.getByRole('switch', { name: /let people ask to connect/i })).toBeVisible()
     await expect(page.getByRole('switch', { name: /findable by my email/i })).toBeVisible()
+    await expect(
+      page.getByText(/liked content/i),
+      'your stuff moved off the settings page',
+    ).toHaveCount(0)
 
+    await page.goto('/account')
     await card.click()
     await page.waitForURL(/\/account\/connections/)
-    await expect(page.getByRole('heading', { name: /who you're connected to/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /who you can reach/i })).toBeVisible()
+  })
+
+  // The naming distinction this whole rename exists to protect.
+  test('contacts and "your corner" are different sets', async ({ page }) => {
+    await signIn(page, A, '/account/connections')
+    await page.goto('/account/connections')
+
+    const body = (await page.locator('body').innerText()).toLowerCase()
+    // The flat list is everyone you can reach — it must NOT claim to be the corner.
+    expect(body, 'the contact list is not "your corner"').not.toContain('in your corner\n')
+    expect(body).toContain('connected')
+    // …and it points at where the real corner lives.
+    await expect(page.locator('a[href="/account"]')).toHaveCount(1)
   })
 
   // ── email discovery ───────────────────────────────────────────────────────
@@ -289,5 +348,36 @@ test.describe.serial('connections', () => {
 
     const stem = await findMember(page, 'bd-verify-b@')
     expect(stem, 'a stem must find nobody either').toBeNull()
+  })
+
+  test('turning off "findable by my email" actually hides you', async ({ browser, page }) => {
+    // Driven through the real switch rather than a direct DB write — the point is
+    // that the toggle a member can reach does what it says, not that the column
+    // works.
+    const ctx = await browser.newContext()
+    const c = await ctx.newPage()
+    await signIn(c, C, '/account/settings')
+    await c.goto('/account/settings')
+
+    const toggle = c.getByRole('switch', { name: /findable by my email/i })
+    await expect(toggle).toHaveAttribute('aria-checked', 'true')   // permissive default
+    await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-checked', 'false')
+
+    await signIn(page, A, '/account/connections')
+    const hidden = await findMember(page, 'bd-verify-c@example.com')
+    expect(hidden, 'an opted-out member must not be findable by their address').toBeNull()
+
+    // …but they're still findable the ordinary way. The setting governs EMAIL
+    // discovery only; turning it on shouldn't quietly delist you from search.
+    const byName = await findMember(page, 'bd-verify-c')
+    expect(byName, 'the opt-out covers email lookup, not username search').toBeTruthy()
+
+    // Put it back so the fixture stays at its documented baseline.
+    await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-checked', 'true')
+    const restored = await findMember(page, 'bd-verify-c@example.com')
+    expect(restored, 'switching it back on should restore email discovery').toBeTruthy()
+    await ctx.close()
   })
 })

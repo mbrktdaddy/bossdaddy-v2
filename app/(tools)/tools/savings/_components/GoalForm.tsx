@@ -608,9 +608,20 @@ export default function GoalForm({ mode, initial, kids }: Props) {
             ? (mode === 'create' ? 'Creating…' : 'Saving…')
             : (mode === 'create' ? LABELS.tools.savings.newCta : 'Save changes')}
         </button>
+        {/* Cancel is the one place router.back() is right — "abandon this and
+            return whence I came" IS chronological, and it's labelled Cancel, so it
+            promises nothing about hierarchy.
+
+            But it needs a floor. Landing here straight from a push notification, a
+            bookmark or an emailed link means there's no in-app history, and a bare
+            back() walks the visitor off the site entirely. Fall back to the parent
+            index in that case. */}
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() => {
+            if (window.history.length > 1) router.back()
+            else router.push('/tools/savings')
+          }}
           className="text-sm text-prose-faint hover:text-prose-muted transition-colors"
         >
           Cancel

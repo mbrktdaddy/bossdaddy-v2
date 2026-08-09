@@ -1,0 +1,197 @@
+// Your stuff — the personal home.
+//
+// This page didn't exist. Everything on it was living inside /account/settings,
+// which meant a settings URL was where your kid profiles, your taper, your likes
+// and your followed gear lived. That's two different jobs on one page: things you
+// HAVE versus things you CONFIGURE. Every product that has both splits them —
+// Facebook Profile vs Settings, LinkedIn Me→Profile vs Settings & Privacy, GitHub
+// Your repositories vs Settings — and none of them file "your stuff" under
+// preferences.
+//
+// So settings kept the configuration (profile fields, email, notification
+// toggles, who-can-reach-you, delete account) and everything else moved here.
+//
+// Note the two people-shaped cards are deliberately DIFFERENT SETS:
+//   • ContactsCard      — everyone you're connected to. Who you CAN ask.
+//   • YourCornerSection — who accepted a share on one of your goals. Who SAID YES.
+// Collapsing them is what made "Your Corner" meaningless the first time round.
+
+import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import type { Metadata } from 'next'
+import { createClient, getUserSafe } from '@/lib/supabase/server'
+import MyKidsSection from '@/components/dad-tools/MyKidsSection'
+import WorkingOnSection from '@/components/goals/WorkingOnSection'
+import ContactsCard from '@/components/account/ContactsCard'
+import YourCornerSection from '@/components/account/YourCornerSection'
+
+export const metadata: Metadata = {
+  title: 'Your Stuff',
+  robots: { index: false, follow: false },
+}
+
+const BENCH_STATUS_LABEL: Record<string, string> = {
+  queued:      'Up next',
+  testing:     'Testing',
+  considering: 'Considering',
+  reviewed:    'Reviewed',
+}
+
+export default async function AccountHomePage() {
+  const supabase = await createClient()
+  const { user } = await getUserSafe(supabase)
+  if (!user) redirect('/login?next=/account')
+
+  const [
+    { count: commentCount },
+    { count: likesGiven },
+    { data: likedReviewLinks },
+    { data: likedArticleLinks },
+    { data: benchSubs },
+  ] = await Promise.all([
+    supabase.from('comments').select('id', { count: 'exact', head: true }).eq('author_id', user.id),
+    supabase.from('likes').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+    supabase.from('likes').select('content_id').eq('user_id', user.id).eq('content_type', 'review')
+      .order('created_at', { ascending: false }).limit(10),
+    supabase.from('likes').select('content_id').eq('user_id', user.id).eq('content_type', 'guide')
+      .order('created_at', { ascending: false }).limit(10),
+    supabase.from('wishlist_subscriptions')
+      .select('wishlist_item_id, products(id, slug, title:name, status)')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(20),
+  ])
+
+  const likedReviewIds  = likedReviewLinks?.map((l) => l.content_id) ?? []
+  const likedArticleIds = likedArticleLinks?.map((l) => l.content_id) ?? []
+
+  const [{ data: likedReviews }, { data: likedArticles }] = await Promise.all([
+    likedReviewIds.length
+      ? supabase.from('reviews').select('id, slug, title, product_name')
+          .in('id', likedReviewIds).eq('status', 'approved').eq('is_visible', true)
+      : Promise.resolve({ data: [] }),
+    likedArticleIds.length
+      ? supabase.from('guides').select('id, slug, title')
+          .in('id', likedArticleIds).eq('status', 'approved').eq('is_visible', true)
+      : Promise.resolve({ data: [] }),
+  ])
+
+  const reviewMap  = new Map(likedReviews?.map((r) => [r.id, r]))
+  const articleMap = new Map(likedArticles?.map((a) => [a.id, a]))
+  const orderedLikedReviews  = likedReviewIds.map((id) => reviewMap.get(id)).filter(Boolean)
+  const orderedLikedArticles = likedArticleIds.map((id) => articleMap.get(id)).filter(Boolean)
+  const hasLikedContent = orderedLikedReviews.length > 0 || orderedLikedArticles.length > 0
+
+  type BenchItem = { id: string; slug: string; title: string; status: string }
+  const subscribedItems: BenchItem[] = (benchSubs ?? [])
+    .map((s) => s.products as unknown as BenchItem | null)
+    .filter((item): item is BenchItem => item !== null)
+
+  return (
+    <div data-theme="dark" className="bg-background text-prose min-h-[calc(100vh-4rem)]">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
+
+        <div className="mb-8">
+          <h1 className="text-2xl font-black">Your Stuff</h1>
+          <p className="text-prose-faint text-sm mt-1">
+            Your people, your goals, your family, and what you&apos;ve saved.
+          </p>
+        </div>
+
+        {/* People first — the only things here that can be waiting on him. */}
+        <ContactsCard />
+        <YourCornerSection />
+
+        <div className="mb-6">
+          <MyKidsSection />
+        </div>
+
+        {/* Goals AND savings, one list. Two tables underneath. */}
+        <div className="mb-6">
+          <WorkingOnSection />
+        </div>
+
+        <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Activity</p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center">
+              <p className="text-2xl font-black text-prose">{commentCount ?? 0}</p>
+              <p className="text-xs text-prose-faint mt-1">Comments Left</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-black text-accent-text-soft">{likesGiven ?? 0}</p>
+              <p className="text-xs text-prose-faint mt-1">Likes Given</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Liked Content</p>
+          {!hasLikedContent ? (
+            <p className="text-sm text-prose-faint text-center py-4">
+              Nothing liked yet — heart a review or article and it will appear here.
+            </p>
+          ) : (
+            <div className="space-y-1.5">
+              {orderedLikedReviews.slice(0, 5).map((r) => r && (
+                <Link key={r.id} href={`/reviews/${r.slug}`}
+                  className="flex items-center gap-3 px-3 py-2.5 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-lg transition-colors group min-h-[44px]">
+                  <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-accent-tint text-accent-text-soft border border-accent-border/60 shrink-0 font-medium">Review</span>
+                  <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate min-w-0 flex-1">{r.title}</p>
+                  <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </Link>
+              ))}
+              {orderedLikedArticles.slice(0, 5).map((a) => a && (
+                <Link key={a.id} href={`/guides/${a.slug}`}
+                  className="flex items-center gap-3 px-3 py-2.5 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-lg transition-colors group min-h-[44px]">
+                  <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-info-bg text-info-ink border border-info-line shrink-0 font-medium">Guide</span>
+                  <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate min-w-0 flex-1">{a.title}</p>
+                  <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </Link>
+              ))}
+              {(orderedLikedReviews.length > 5 || orderedLikedArticles.length > 5) && (
+                <p className="text-center text-xs text-prose-faint pt-2">
+                  Showing 5 of each · {orderedLikedReviews.length + orderedLikedArticles.length} total liked
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Following on the Bench</p>
+          {subscribedItems.length === 0 ? (
+            <p className="text-sm text-prose-faint text-center py-4">
+              Not following anything yet —{' '}
+              <Link href="/bench" className="text-accent-text-soft hover:underline">visit the Bench</Link>
+              {' '}to subscribe for review updates.
+            </p>
+          ) : (
+            <div className="space-y-1">
+              {subscribedItems.map((item) => (
+                <Link key={item.id} href={`/bench/${item.slug}`}
+                  className="flex items-center gap-3 p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group">
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-surface-raised text-prose-muted border border-strong shrink-0">
+                    {BENCH_STATUS_LABEL[item.status] ?? item.status}
+                  </span>
+                  <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate min-w-0">{item.title}</p>
+                  <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 ml-auto transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="border-t border-soft pt-6">
+          <Link
+            href="/account/settings"
+            className="inline-flex min-h-11 items-center text-xs font-semibold text-accent-text hover:text-prose"
+          >
+            Account settings →
+          </Link>
+        </div>
+
+      </div>
+    </div>
+  )
+}

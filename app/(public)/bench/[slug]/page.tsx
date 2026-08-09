@@ -187,7 +187,7 @@ export default async function BenchDetailPage({ params }: Props) {
 
       <div className="mt-8 pt-6">
         <Link href="/bench" className="text-sm text-prose-faint hover:text-prose-muted transition-colors">
-          ← Back to the bench
+          ← On the Bench
         </Link>
       </div>
 

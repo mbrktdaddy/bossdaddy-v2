@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { CATEGORIES } from '@/lib/categories'
 import { LABELS } from '@/lib/labels'
 import CartIcon from '@/components/CartIcon'
+import ConnectionBadge from '@/components/account/ConnectionBadge'
 import CategoryIcon from '@/components/CategoryIcon'
 import ActivityMenu from '@/components/ActivityMenu'
 
@@ -434,6 +435,19 @@ export default function Header() {
                     </svg>
                     Account Settings
                   </Link>
+                  {/* Your Stuff sits ABOVE Settings — it's the page a member
+                      actually wants, and it used to be reachable only by going to
+                      a settings URL. */}
+                  <Link
+                    href="/account"
+                    onClick={() => setUserMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-surface-hover hover:text-prose transition-colors"
+                  >
+                    <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm4 4h8M8 14h5" />
+                    </svg>
+                    Your Stuff
+                  </Link>
                   <Link
                     href="/account/connections"
                     onClick={() => setUserMenuOpen(false)}
@@ -442,7 +456,8 @@ export default function Header() {
                     <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-1a4 4 0 00-3-3.87M9 20H4v-1a4 4 0 013-3.87m10-4.63a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    Your Corner
+                    {LABELS.contacts.short}
+                    <ConnectionBadge />
                   </Link>
                   <Link
                     href="/account/messages"
@@ -678,6 +693,16 @@ export default function Header() {
                   Account Settings
                 </Link>
                 <Link
+                  href="/account"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-prose-muted hover:text-prose hover:bg-surface-raised transition-colors"
+                >
+                  <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm4 4h8M8 14h5" />
+                  </svg>
+                  Your Stuff
+                </Link>
+                <Link
                   href="/account/connections"
                   onClick={() => setMobileOpen(false)}
                   className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-prose-muted hover:text-prose hover:bg-surface-raised transition-colors"
@@ -685,7 +710,8 @@ export default function Header() {
                   <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-1a4 4 0 00-3-3.87M9 20H4v-1a4 4 0 013-3.87m10-4.63a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  Your Corner
+                  {LABELS.contacts.short}
+                  <ConnectionBadge />
                 </Link>
                 <Link
                   href="/account/messages"

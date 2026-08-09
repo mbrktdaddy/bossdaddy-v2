@@ -12,6 +12,31 @@
 //
 // Do NOT add labels for body copy, article text, or one-off page strings.
 // Do NOT centralize the brand name "Boss Daddy" — it's stable.
+//
+// ─── TWO RULES THIS FILE LEARNED THE HARD WAY ────────────────────────────────
+//
+// 1. ONE WORD, ONE FEATURE. The doctrine above keeps internal names stable and
+//    lets display names move freely — but it says nothing about two features
+//    claiming the SAME display word, which is how savings and the goals spine
+//    both ended up calling themselves "goals". A profile card then showed "Set
+//    one up" and "Start a goal" side by side, leading to different products.
+//    Before reusing a noun another block already owns, disambiguate one of them.
+//
+// 2. UP IS NOT BACK. A link to a fixed parent is an UP link: it says "this page
+//    lives inside that section", it is the same every time, and it is correct
+//    when someone arrives cold from a push notification, a bookmark, or an
+//    emailed invite — which is most of how this app gets opened.
+//
+//    "Back" is chronological and belongs to the browser and the OS gesture. A
+//    hardcoded link labelled "← Back to goals" makes a promise about HISTORY and
+//    breaks it for everyone who didn't come from there. Naming the DESTINATION
+//    instead — "← Savings" — is the same link, the same target, and cannot lie
+//    however the visitor arrived.
+//
+//    So: label up-links with where they GO, never with "Back to". And don't fake
+//    real back-navigation by threading `?from=` through URLs — it pollutes every
+//    link, breaks on refresh and share, and duplicates what the device already
+//    does correctly.
 
 export const LABELS = {
   // wishlist_items table → /bench public route
@@ -102,6 +127,29 @@ export const LABELS = {
   // goals / goal_schedules / goal_occurrences tables → /goals route.
   //
   // NAMING IS NOT SETTLED — "Goals" is the neutral default, not a decision. The
+  // Member-to-member connections. The internal names — the `user_connections`
+  // table, the `/account/connections` route — are permanent; this block is the
+  // only place the wording changes.
+  //
+  // ⚠️ CALLED "CONTACTS", NOT "YOUR CORNER", AND THE DISTINCTION IS LOAD-BEARING.
+  // A connection means "we can message each other and I could ask you". It is not
+  // the same set as the people in your corner, which is who actually accepted a
+  // share on one of your goals — that's derived from goal_participants and lives
+  // in YourCornerSection. Labelling the flat list "Your Corner" (which is what
+  // shipped first) put a gear-chat acquaintance under the same heading as the
+  // wife witnessing a taper, and made the phrase mean nothing.
+  contacts: {
+    short:       'Contacts',
+    full:        'Contacts',
+    pageTitle:   'Contacts — Boss Daddy',
+    h1:          'Who you can reach',
+    tagline:     'Connecting is what lets two of you message each other and share a goal. Either of you can end it whenever you like, and nobody gets told.',
+    eyebrow:     'Contacts',
+    emptyBody:   'Nobody yet.',
+    /** The DERIVED set — people participating in your goals. Never the list. */
+    cornerLabel: 'In your corner',
+  },
+
   // internal names (`goals`, the route segment, the `kind` values) are permanent;
   // every display string below is free to change here without a migration. If
   // this becomes "The Grind" or "Duty" or anything else, this block is the only
@@ -119,7 +167,9 @@ export const LABELS = {
     emptyHeading:    'Nothing on the board yet.',
     emptyBody:       'A goal is a target plus a schedule — quitting a habit, taking your vitamins, hitting the gym three times a week.',
     logCta:          'Log it',
-    newCta:          'Set one up',
+    // Names what it MAKES. "Set one up" reads fine under an empty state but is
+    // unresolvable next to savings' CTA in the one card that shows both.
+    newCta:          'New goal',
     // The profile section that lists BOTH kinds of goal — the spine's and
     // savings'. Deliberately not "Goals": a dad has one mental category here.
     workingOnHeading: 'What you\'re working on',
@@ -140,7 +190,15 @@ export const LABELS = {
     sharedEyebrow:   'Someone asked you',
     sharedHeading:   'In your corner',
     sharedEmpty:     'Nobody has shared a goal with you yet. When someone does, it shows up here — and you\'ll never get pinged about it.',
-    shareCta:        'Who can see this',
+    // NAMES THE ACTION, not the state. This read "Who can see this", which is an
+    // accurate description of the page and the wrong thing to put on a button:
+    // someone who wants to bring their wife in doesn't scan for a privacy audit.
+    // The sober framing the old wording carried hasn't gone anywhere — it moved to
+    // the dek and the per-tier copy on the page itself, where it's read at the
+    // moment it matters rather than used as a label.
+    shareCta:        'Share this goal',
+    /** Icon-button / tight-space form of the same action. */
+    shareShort:      'Share',
     // /today — the "what do I do right now" screen, and the PWA's real home.
     todayTitle:         'Today — Boss Daddy',
     todayEyebrow:       'Today',
@@ -255,12 +313,23 @@ export const LABELS = {
       metaDescription: 'Daily and weekly micro-savings habits with one-tap commitment. Real reminders, real accountability.',
       spokeRole:       'Money',
       spokeBlurb:      'Small commitments, daily. Tap "yes," send the dollars, watch them stack.',
-      // Page-level copy
-      hubEyebrow:      'Your goals',
+      // Page-level copy.
+      //
+      // ⚠️ SAVINGS DOES NOT CALL ITSELF "GOALS" ANY MORE. It got the word first
+      // and owned it throughout this block — "Your goals", "Start a goal", "Back
+      // to goals" — and then the goals SPINE shipped and took the same word for a
+      // different feature. The result on /account was two CTAs in one card
+      // labelled "Set one up" and "Start a goal", pointing at different products,
+      // and a "Back to goals" link that correctly landed on savings and looked
+      // broken. Internal names (`savings`, /tools/savings) are permanent; this
+      // block is where the collision gets resolved. Keep "savings" in the words.
+      hubEyebrow:      'Savings',
       indexEmptyTitle: 'No savings goals yet.',
-      indexEmptyBody:  '$2 a day is easier than $94k all at once. Start a goal.',
-      newCta:          'Start a goal',
-      newCtaArrow:     'Start a goal →',
+      indexEmptyBody:  '$2 a day is easier than $94k all at once. Start one.',
+      newCta:          'Start a savings goal',
+      newCtaArrow:     'Start a savings goal →',
+      /** Destination-named up-link. Never "Back to …" — see the doctrine below. */
+      upLink:          '← Savings',
       // Hero/section copy
       h1:              'Small habits, real progress.',
       tagline:         'Set a tiny daily commitment. Tap "yes" each day. Watch the dollars stack.',

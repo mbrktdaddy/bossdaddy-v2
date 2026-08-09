@@ -336,7 +336,7 @@ export default async function ReviewPage({ params }: Props) {
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
-            Back to the original review
+            ← The original review
           </Link>
         )}
 

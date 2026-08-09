@@ -60,7 +60,7 @@ export default async function EditSavingsGoalPage({ params }: PageProps) {
           href={`/tools/savings/${id}`}
           className="text-sm text-prose-faint hover:text-prose-muted transition-colors"
         >
-          ← Back to {data.goal.name}
+          ← {data.goal.name}
         </Link>
         <h1 className="text-3xl sm:text-4xl font-black text-prose leading-[1.05] tracking-tight">
           Edit goal

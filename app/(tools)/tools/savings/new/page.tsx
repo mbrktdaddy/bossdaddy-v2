@@ -63,7 +63,7 @@ export default async function NewSavingsGoalPage({ searchParams }: PageProps) {
           href="/tools/savings"
           className="text-sm text-prose-faint hover:text-prose-muted transition-colors"
         >
-          ← Back to goals
+          {LABELS.tools.savings.upLink}
         </Link>
         <h1 className="text-3xl sm:text-4xl font-black text-prose leading-[1.05] tracking-tight">
           {LABELS.tools.savings.newCta}
