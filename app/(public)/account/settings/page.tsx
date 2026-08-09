@@ -10,6 +10,7 @@ import WorkingOnSection from '@/components/goals/WorkingOnSection'
 import InstallAppButton from '@/components/pwa/InstallAppButton'
 import MessageEmailToggle from '@/components/account/MessageEmailToggle'
 import ConnectionPrefs from '@/components/account/ConnectionPrefs'
+import YourCornerCard from '@/components/account/YourCornerCard'
 import PushNotificationSetting from '@/components/account/PushNotificationSetting'
 import BioForm from '@/components/account/BioForm'
 import type { Metadata } from 'next'
@@ -203,6 +204,12 @@ export default async function AccountSettingsPage() {
 
       {/* ── YOUR STUFF — family, savings, activity ─────────────────────── */}
       <h2 className="text-base font-black text-prose mb-3 mt-10">Your Stuff</h2>
+
+      {/* Connections. First in the section because a pending request is the only
+          thing here that's waiting on him — everything below is his own stuff.
+          The policy switches for this live up in ConnectionPrefs; this is the
+          list. */}
+      <YourCornerCard />
 
       {/* Your Family — kid profiles + the Log */}
       <div className="mb-6">

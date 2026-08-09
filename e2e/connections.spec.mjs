@@ -248,6 +248,28 @@ test.describe.serial('connections', () => {
     await ctx.close()
   })
 
+  // ── the entry point that was missing ──────────────────────────────────────
+  test('account settings surfaces the connection count and links to the list', async ({ page }) => {
+    await signIn(page, A, '/account/settings')
+    await page.goto('/account/settings')
+
+    const card = page.locator('a[href="/account/connections"]')
+    await expect(card, 'settings must offer a way INTO the list, not just the toggles').toHaveCount(1)
+
+    const text = await card.innerText()
+    console.log('   corner card:', text.replace(/\s+/g, ' ').trim())
+    expect(text).toMatch(/connection/i)
+
+    // The policy switches stay here too, and stay separate from the list.
+    await expect(page.getByText(/who can reach you/i)).toBeVisible()
+    await expect(page.getByRole('switch', { name: /let people ask to connect/i })).toBeVisible()
+    await expect(page.getByRole('switch', { name: /findable by my email/i })).toBeVisible()
+
+    await card.click()
+    await page.waitForURL(/\/account\/connections/)
+    await expect(page.getByRole('heading', { name: /who you're connected to/i })).toBeVisible()
+  })
+
   // ── email discovery ───────────────────────────────────────────────────────
   test('email search matches only exact, and never returns the address', async ({ page }) => {
     await signIn(page, A)
