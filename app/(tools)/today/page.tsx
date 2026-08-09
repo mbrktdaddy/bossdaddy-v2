@@ -11,16 +11,19 @@
 // time: due now, or coming later. Each row then shows the occurrence's OWN
 // local_date, which is the date it counts for.
 //
-// No client JavaScript: every row is a plain form bound to the same Server Action
-// the goal page uses, so this works with JS disabled and has nothing to hydrate.
-// Logging offline is a separate problem and deliberately not solved here — see the
-// note at the bottom of this file.
+// Every row is a plain form bound to the same Server Action the goal page uses, so
+// this works with JS disabled and has nothing to hydrate. The one client component
+// is OfflineLogQueue, which is inert whenever the connection is up: it intercepts a
+// submit only when the browser already reports itself offline, queues it locally,
+// and drains when signal returns. The page itself is still NOT cached — see that
+// component, and the note at the bottom of this file.
 
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { LABELS } from '@/lib/labels'
 import { LoginLink } from '@/components/LoginLink'
+import OfflineLogQueue from '@/components/goals/OfflineLogQueue'
 import { logOccurrence } from '../goals/actions'
 
 export const metadata: Metadata = {
@@ -163,6 +166,13 @@ export default async function TodayPage() {
           })}
         </section>
       ) : null}
+
+      {/* The ONLY client JavaScript on this page, and it does nothing at all while
+          the connection is up — it intercepts a submit only when the browser
+          already reports itself offline. See the component for why /today is not
+          cached: a stale "what's due" list is a worse failure than a page that
+          needs signal. */}
+      <OfflineLogQueue />
 
       {/* ── nothing at all ──────────────────────────────────────────────────── */}
       {live.length === 0 ? (

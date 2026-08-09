@@ -434,6 +434,47 @@ test.describe.serial('goals spine — browser pass', () => {
   })
 
   // ──────────────────────────────────────────────────────────────────────────
+  // 9. Losing signal mid-session
+  // ──────────────────────────────────────────────────────────────────────────
+  test('a log made offline is queued and flushes when signal returns', async ({ page, context }) => {
+    await signInVia(page, A, '/goals')
+    const goalId = await createTaper(page, 'offline', 120)
+
+    await page.goto('/today')
+    const card = page.locator(`form:has(input[name="goalId"][value="${goalId}"])`).first()
+    await expect(card).toHaveCount(1)
+    await card.locator('input[name="value"]').fill('4')
+
+    // Drop the connection AFTER the page is open — the exact case this covers.
+    await context.setOffline(true)
+    await card.getByRole('button', { name: /^log/i }).click()
+
+    await expect(
+      page.getByText(/waiting/i).first(),
+      'an offline log should say it is held on the phone',
+    ).toBeVisible()
+
+    // Nothing private in the queue: an occurrence id and a number, no goal title.
+    const stored = await page.evaluate(() => localStorage.getItem('bd_goal_log_queue_v1'))
+    console.log('   queued:', stored)
+    expect(stored).toContain('completed')
+    expect(stored, 'the queue must not carry the goal title').not.toMatch(/quit|smok|E2E/i)
+
+    // Signal back — the queue drains on its own and the row is gone.
+    await context.setOffline(false)
+    await page.waitForFunction(
+      () => localStorage.getItem('bd_goal_log_queue_v1') === null,
+      undefined, { timeout: 20_000 },
+    )
+    await page.goto('/today')
+    await expect(
+      page.locator(`form:has(input[name="goalId"][value="${goalId}"])`),
+      'the flushed occurrence should be resolved',
+    ).toHaveCount(0)
+    console.log('   queue drained and the occurrence resolved')
+  })
+
+  // ──────────────────────────────────────────────────────────────────────────
   // 7. Mobile is the source of truth — nothing may scroll sideways at 393px
   // ──────────────────────────────────────────────────────────────────────────
   test('no horizontal overflow on any goals surface at 393px', async ({ page }) => {
