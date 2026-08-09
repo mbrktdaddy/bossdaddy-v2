@@ -71,6 +71,29 @@ export async function POST(request: NextRequest) {
       return back(request, op === 'withdraw' ? 'Request pulled back.' : 'Disconnected.')
     }
 
+    // ── open the thread ─────────────────────────────────────────────────────
+    // Being connected is precisely the state where messaging is unlocked, so the
+    // list of people you're connected to has to offer it — otherwise the page
+    // tells you the door is open and gives you no handle.
+    //
+    // Goes through getOrCreateDm rather than linking somewhere, because the
+    // conversation may not exist yet: connecting doesn't create a thread, the
+    // first message does. That also means this inherits the connection gate in
+    // migration 140 §7 for free — if the connection ended in another tab, the
+    // RPC refuses and the friendly copy comes back rather than a dead thread.
+    case 'message': {
+      const { getOrCreateDm } = await import('@/lib/messaging')
+      const result = await getOrCreateDm(otherUserId)
+      // Narrow on `ok` first — the failure branch is the only one carrying
+      // `error`, and the success branch's `data` is optional in the shared Result
+      // type even though this call always populates it.
+      if (!result.ok) return back(request, result.error)
+      if (!result.data) return back(request, 'Could not open that conversation.')
+      return NextResponse.redirect(
+        new URL(`/account/messages/${result.data.conversationId}`, request.url), 303,
+      )
+    }
+
     case 'block': {
       await blockAndDisconnect(supabase, { userId: user.id, otherUserId })
       // Say the cascade out loud. Someone blocking a person who was watching

@@ -99,23 +99,6 @@ export async function connectionStatesFor(
   return out
 }
 
-/**
- * Is this declined request still inside its cooldown, from the REQUESTER's side?
- *
- * Only used by listOutgoing, and deliberately narrow: it answers the cooldown
- * question and nothing else. Do not grow it back into a general state resolver —
- * that reimplementation is what migration 143 exists to undo.
- */
-function stillWaitingOnThem(
-  row: { requester_id: string; status: string; declined_at: string | null; decline_count: number },
-  userId: string,
-): boolean {
-  if (row.status === 'pending') return row.requester_id === userId
-  if (row.status !== 'declined' || row.requester_id !== userId) return false
-  const cooldownMs = Math.max(row.decline_count, 1) * 30 * 86_400_000
-  return new Date(row.declined_at ?? 0).getTime() + cooldownMs > Date.now()
-}
-
 // ── lists ───────────────────────────────────────────────────────────────────
 
 async function hydrate(
@@ -176,17 +159,34 @@ export async function listIncoming(client: Client, userId: string): Promise<Conn
  * the same masking connection_state_with() applies. Seeing a request vanish from
  * this list the moment it was refused would tell the requester exactly what the
  * silence is there to withhold.
+ *
+ * WHICH ROWS STILL COUNT AS PENDING IS ASKED OF THE DATABASE, not recomputed
+ * here. This used to carry its own copy of the 30-day cooldown arithmetic, which
+ * is the same shape of duplication that made blocking half-work until migration
+ * 143 — one of the two copies is always the one nobody updates. `pending_out` is
+ * exactly "still waiting on them", masking included, so the RPC answers it.
  */
 export async function listOutgoing(client: Client, userId: string): Promise<ConnectionRow[]> {
   const { data, error } = await client
     .from('user_connections')
-    .select(`${SELECT}, declined_at, decline_count`)
+    .select(SELECT)
     .in('status', ['pending', 'declined'])
     .eq('requester_id', userId)
     .or(`user_a.eq.${userId},user_b.eq.${userId}`)
   if (error) { console.error('connections: outgoing failed —', error.message); return [] }
 
-  const stillShowing = (data ?? []).filter((r) => stillWaitingOnThem(r, userId))
+  const rows = data ?? []
+  if (rows.length === 0) return []
+
+  const states = await connectionStatesFor(
+    client, userId,
+    rows.map((r) => (r.user_a === userId ? r.user_b : r.user_a)),
+  )
+  const stillShowing = rows.filter((r) => {
+    const other = r.user_a === userId ? r.user_b : r.user_a
+    return states.get(other) === 'pending_out'
+  })
+
   return (await hydrate(client, stillShowing, userId))
     .map((r) => ({ ...r, status: 'pending' as const }))
 }
