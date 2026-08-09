@@ -24,10 +24,30 @@ project: Pixel 5, 393×851, Chrome-on-Android UA, touch on.
 straight through the admin API with `email_confirm: true` so nothing waits on a
 mailbox. They are **real rows in production**.
 
+A third account, `bd-verify-c@example.com`, exists to be a **stranger**: A and B
+were grandfathered into a connection by migration 140, so neither can exercise
+request → accept from a clean slate.
+
 ```powershell
-npm run e2e:accounts -- --clean      # drop the "E2E …" goals, keep the users
-npm run e2e:accounts -- --teardown   # delete both users (cascades everything)
+npm run e2e:accounts -- --clean      # reset to baseline, keep the users
+npm run e2e:accounts -- --teardown   # delete the users (cascades everything)
 ```
+
+`--clean` restores the baseline the specs assume: A↔B connected, C a stranger, no
+leftover goals, no blocks, and rate-limit quotas returned.
+
+### ⚠️ Restart the dev server after `--clean`
+
+The suite spends three connection requests per run against one account, and the
+limit is 20 per 24 hours — so after a handful of runs A is throttled and the
+request silently doesn't happen. The failure then surfaces two steps later as "C
+never received it", which reads exactly like a product bug.
+
+`--clean` deletes the Redis keys, **but that alone doesn't unblock you**:
+`@upstash/ratelimit` keeps an in-process cache of exhausted identifiers and
+`lib/rate-limit.ts` caches the limiter instances at module level, so a
+long-running dev server keeps refusing an account whose keys are already gone.
+Restart it.
 
 ## What it covers
 

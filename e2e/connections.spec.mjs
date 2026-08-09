@@ -189,7 +189,12 @@ test.describe.serial('connections', () => {
   // ── decline is silent, and cools down ─────────────────────────────────────
   test('a decline tells the requester nothing, and blocks a re-ask', async ({ browser, page }) => {
     await signIn(page, A)
-    await post(page, 'request', state.cId)
+    const asked = await post(page, 'request', state.cId)
+    // Surfaced explicitly: this is the step most likely to be eaten by the
+    // connection-request rate limit across repeated suite runs, and without the
+    // message the failure looks like "C never got the request" instead of
+    // "A was throttled".
+    console.log('   request outcome:', msgOf(asked))
 
     const ctx = await browser.newContext()
     const c = await ctx.newPage()

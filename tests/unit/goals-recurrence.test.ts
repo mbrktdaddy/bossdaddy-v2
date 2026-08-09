@@ -288,4 +288,50 @@ describe('icsRuleLines', () => {
       'RRULE:FREQ=DAILY',
     ])
   })
+
+  // The feed switched to all-day chips after subscribing in Google Calendar and
+  // finding that two or three daily goals as timed blocks make a week view
+  // unreadable. A DATE-valued DTSTART carries NO TZID — all-day events are
+  // floating by definition, and the date already came from the schedule's zone.
+  it('emits a DATE-valued DTSTART with no TZID for an all-day chip', () => {
+    expect(icsRuleLines(NY_0630, { allDay: true })).toEqual([
+      'DTSTART;VALUE=DATE:20261029',
+      'RRULE:FREQ=DAILY',
+    ])
+  })
+
+  // Unbounded recurrence was a real defect: the stored rule is bare, so a finished
+  // eight-week taper kept filling the calendar forever and nothing ever left.
+  it('bounds the rule at the goal target date', () => {
+    const [, rule] = icsRuleLines(NY_0630, { allDay: true, until: '2026-12-25' })
+    expect(rule).toBe('RRULE:FREQ=DAILY;UNTIL=20261225')
+  })
+
+  // RFC 5545 §3.3.10 — UNTIL must match DTSTART's value type. A DATE start takes a
+  // DATE; a zoned DATE-TIME start takes a UTC DATE-TIME. One client tolerates a
+  // mismatch and the next one drops the rule entirely.
+  it('matches UNTIL to the DTSTART value type', () => {
+    const [, timed] = icsRuleLines(NY_0630, { until: '2026-12-25' })
+    expect(timed).toBe('RRULE:FREQ=DAILY;UNTIL=20261225T235959Z')
+  })
+
+  it('leaves an open-ended goal open-ended', () => {
+    expect(icsRuleLines(NY_0630, { allDay: true, until: null })[1]).toBe('RRULE:FREQ=DAILY')
+  })
+
+  // Appending a second terminator, or an UNTIL beside a COUNT, is invalid — the
+  // whole rule gets rejected rather than the extra part being ignored.
+  it('refuses to append UNTIL to a rule that already terminates', () => {
+    const counted = { ...NY_0630, rrule: 'FREQ=DAILY;COUNT=5' }
+    expect(icsRuleLines(counted, { until: '2026-12-25' })[1]).toBe('RRULE:FREQ=DAILY;COUNT=5')
+
+    const bounded = { ...NY_0630, rrule: 'FREQ=DAILY;UNTIL=20261101T000000Z' }
+    expect(icsRuleLines(bounded, { until: '2026-12-25' })[1])
+      .toBe('RRULE:FREQ=DAILY;UNTIL=20261101T000000Z')
+  })
+
+  it('ignores a malformed until rather than emitting a broken rule', () => {
+    expect(icsRuleLines(NY_0630, { allDay: true, until: 'next tuesday' })[1])
+      .toBe('RRULE:FREQ=DAILY')
+  })
 })

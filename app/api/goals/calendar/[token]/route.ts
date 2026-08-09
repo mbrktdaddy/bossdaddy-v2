@@ -28,7 +28,16 @@ type ScheduleRow = {
   timezone: string
 }
 
-type GoalRow = { id: string; title: string; status: string }
+type GoalRow = { id: string; title: string; status: string; target_date: string | null }
+
+/** "20:00:00" → "8:00pm". The exact minute lives in the title now, not the grid. */
+function friendlyTime(localTime: string): string {
+  const [h, m] = localTime.split(':')
+  const hour = Number(h)
+  const suffix = hour < 12 ? 'am' : 'pm'
+  const twelve = hour % 12 === 0 ? 12 : hour % 12
+  return `${twelve}:${m}${suffix}`
+}
 
 export async function GET(
   _request: NextRequest,
@@ -52,7 +61,7 @@ export async function GET(
   // is out of his life — neither belongs on his calendar.
   const { data: goalRows } = await admin
     .from('goals')
-    .select('id, title, status')
+    .select('id, title, status, target_date')
     .eq('user_id', userId)
     .eq('status', 'active')
   const goals = new Map(((goalRows ?? []) as GoalRow[]).map((g) => [g.id, g]))
@@ -64,11 +73,15 @@ export async function GET(
       .select('id, goal_id, label, rrule, start_date, local_time, timezone')
       .eq('user_id', userId)
       .eq('status', 'active')
+      // MUTED SCHEDULES ARE NOW EXCLUDED, reversing the original decision. "Mute
+      // silences the nudge, not the commitment" reads well and did not survive
+      // contact with a real calendar: mute is the clearest signal a man has that he
+      // doesn't want to hear about something, and a split where it means one thing
+      // for push and another here is harder to explain than it's worth. It was also
+      // a direct contributor to the crowding that prompted this change.
+      .eq('muted', false)
       .in('goal_id', [...goals.keys()])
 
-    // MUTED SCHEDULES ARE STILL INCLUDED, deliberately. Mute silences the nudge;
-    // it doesn't mean the commitment stopped existing, and a calendar is for seeing
-    // the shape of the week rather than for being told.
     events = ((scheduleRows ?? []) as ScheduleRow[]).flatMap((schedule) => {
       const goal = goals.get(schedule.goal_id)
       if (!goal) return []
@@ -84,14 +97,32 @@ export async function GET(
           // feed serves a perfectly valid EMPTY calendar to every subscriber.
           localTime: schedule.local_time.slice(0, 5),
           timezone: schedule.timezone,
+        }, {
+          // Chips in the all-day strip rather than blocks on the grid. Two or three
+          // daily goals rendered as timed events make a week view unusable — found
+          // by subscribing for real. See CalendarEvent.allDay.
+          allDay: true,
+          // Bounded at the goal's target date. Without this every rule ran to
+          // infinity, so a finished eight-week taper kept filling the calendar
+          // months after it ended and nothing ever left. Open-ended goals (no
+          // target_date) legitimately still recur forever.
+          until: goal.target_date,
         })
+        const base = schedule.label?.trim()
+          ? `${goal.title} — ${schedule.label.trim()}`
+          : goal.title
         return [{
           // The schedule's own row id — stable across every poll for as long as the
-          // reminder exists. See lib/goals/ics.ts on why that matters.
+          // reminder exists. See lib/goals/ics.ts on why that matters. It's also
+          // what makes THIS change safe to ship to existing subscribers: clients
+          // update the events they already hold instead of deleting and recreating
+          // every one of them, which would be a notification storm.
           uid: schedule.id,
-          summary: schedule.label?.trim()
-            ? `${goal.title} — ${schedule.label.trim()}`
-            : goal.title,
+          // The time moved into the title when these became all-day. Title FIRST so
+          // several goals sort by name in the strip — leading with a 12-hour clock
+          // sorts "1:00pm" above "8:00am".
+          summary: `${base} · ${friendlyTime(schedule.local_time)}`,
+          allDay: true,
           dtstartLine,
           rruleLine,
         }]

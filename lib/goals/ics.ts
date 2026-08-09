@@ -36,12 +36,27 @@ export type CalendarEvent = {
   /** What the event is called in his calendar. */
   summary: string
   description?: string | null
-  /** `DTSTART;TZID=…:…` — exactly as icsRuleLines returns it. */
+  /** `DTSTART;TZID=…:…` or `DTSTART;VALUE=DATE:…` — as icsRuleLines returns it. */
   dtstartLine: string
   /** `RRULE:…` — exactly as icsRuleLines returns it. */
   rruleLine: string
   /** How long the block appears. Reminders are moments, so keep it short. */
   durationMinutes?: number
+  /**
+   * All-day chip rather than a block on the grid.
+   *
+   * WHY THIS IS THE DEFAULT FOR REMINDERS. A daily habit rendered as a timed
+   * 15-minute block puts N events into the grid every single day, and with two or
+   * three goals a week view becomes unreadable — verified in Google Calendar, and
+   * the operator's word for it was "bothersome". An all-day event collapses into
+   * the thin strip at the top instead.
+   *
+   * It's also the more honest model: push and email already carry the exact
+   * minute. The calendar's job here is "what am I committed to today", not
+   * "reserve 8:00–8:15pm", and a medication reminder was never really an
+   * appointment. The time rides in the SUMMARY so nothing is lost.
+   */
+  allDay?: boolean
 }
 
 const CRLF = '\r\n'
@@ -77,7 +92,13 @@ export function buildCalendar(
       `UID:${event.uid}@${opts.domain}`,
       `DTSTAMP:${stamp}`,
       event.dtstartLine,
-      `DURATION:PT${Math.max(1, Math.round(event.durationMinutes ?? DEFAULT_DURATION_MINUTES))}M`,
+      // RFC 5545 §3.3.6: with a DATE-valued DTSTART the duration must be in days
+      // or weeks — a PT15M against an all-day start is invalid and clients
+      // disagree about how to recover from it. P1D is the whole day, which is
+      // what an all-day chip means.
+      event.allDay
+        ? 'DURATION:P1D'
+        : `DURATION:PT${Math.max(1, Math.round(event.durationMinutes ?? DEFAULT_DURATION_MINUTES))}M`,
       event.rruleLine,
       `SUMMARY:${escapeText(event.summary)}`,
     )

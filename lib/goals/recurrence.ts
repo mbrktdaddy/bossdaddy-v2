@@ -183,13 +183,41 @@ export function nextOccurrence(schedule: GoalSchedule, after: Date): Occurrence 
  * The two ICS content lines this schedule represents. `.ics` export builds a
  * VEVENT around these — the same string the engine itself parses, so the
  * calendar a dad subscribes to can't drift from the nudges he gets.
+ *
+ * `allDay` emits a DATE-valued DTSTART instead of a zoned DATE-TIME, which is
+ * what turns a block on the grid into a chip in the all-day strip. See
+ * CalendarEvent.allDay in lib/goals/ics.ts for why that's the default.
+ *
+ * `until` (YYYY-MM-DD) BOUNDS THE RECURRENCE, and its absence was a real defect:
+ * the stored rrule is bare (`FREQ=DAILY`), so every goal recurred to infinity and
+ * an eight-week taper kept filling the calendar months after it ended. Nothing
+ * ever left. Pass the goal's target_date.
  */
-export function icsRuleLines(schedule: GoalSchedule): [string, string] {
+export function icsRuleLines(
+  schedule: GoalSchedule,
+  opts: { allDay?: boolean; until?: string | null } = {},
+): [string, string] {
   assertValidSchedule(schedule)
-  return [
-    `DTSTART;TZID=${schedule.timezone}:${icsBasicLocal(schedule)}`,
-    `RRULE:${schedule.rrule}`,
-  ]
+
+  // RFC 5545 §3.3.10: UNTIL must match DTSTART's value type. A DATE-valued start
+  // takes a DATE; a zoned DATE-TIME start takes a UTC DATE-TIME. Getting this
+  // wrong is the kind of thing one client ignores and the next one chokes on.
+  const untilPart = (() => {
+    if (!opts.until || !YMD_RE.test(opts.until)) return ''
+    // Never append to a rule that already terminates — doubling UNTIL, or adding
+    // one alongside a COUNT, is invalid.
+    if (/(^|;)(UNTIL|COUNT)=/i.test(schedule.rrule)) return ''
+    const compact = opts.until.replace(/-/g, '')
+    return opts.allDay ? `;UNTIL=${compact}` : `;UNTIL=${compact}T235959Z`
+  })()
+
+  const dtstart = opts.allDay
+    // No TZID on a DATE value — all-day events are floating by definition, which
+    // is correct here: the date came from the schedule's own zone already.
+    ? `DTSTART;VALUE=DATE:${schedule.startDate.replace(/-/g, '')}`
+    : `DTSTART;TZID=${schedule.timezone}:${icsBasicLocal(schedule)}`
+
+  return [dtstart, `RRULE:${schedule.rrule}${untilPart}`]
 }
 
 /**

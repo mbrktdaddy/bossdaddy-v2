@@ -90,6 +90,49 @@ async function ensureDm() {
 }
 
 /**
+ * Give the fixture accounts their rate-limit quotas back.
+ *
+ * WHY THIS IS PART OF THE RESET. connection-request is 20 per 24 hours, and the
+ * suite spends three of them per run against the same account. After six or seven
+ * runs A is throttled, the request silently doesn't happen, and the failure
+ * surfaces two steps later as "C never received it" — which reads exactly like a
+ * product bug and isn't one. Cost me a debugging round to work that out.
+ *
+ * These share the real Upstash instance, so this deletes ONLY keys belonging to
+ * the three throwaway user ids. No-op when Upstash isn't configured locally.
+ *
+ * ⚠️ CLEARING REDIS IS NOT ENOUGH ON ITS OWN. @upstash/ratelimit keeps an
+ * in-process cache of identifiers it has already seen exhausted, and
+ * lib/rate-limit.ts caches the Ratelimit instances at module level — so a
+ * long-running `npm run dev` keeps refusing an account whose Redis keys you just
+ * deleted. Verified: Redis reported zero bd_conn_req keys while the server still
+ * answered "That's a lot of requests today." RESTART THE DEV SERVER after running
+ * this, or the reset looks like it did nothing.
+ */
+async function clearRateLimits(userIds) {
+  const url = process.env.UPSTASH_REDIS_REST_URL
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN
+  if (!url || !token || userIds.length === 0) return
+
+  try {
+    const { Redis } = await import('@upstash/redis')
+    const redis = new Redis({ url, token })
+    // Every limiter the e2e suite can trip. See lib/rate-limit.ts for the prefixes.
+    const prefixes = ['bd_conn_req', 'bd_goal_invite', 'bd_member_search']
+    let removed = 0
+    for (const prefix of prefixes) {
+      for (const id of userIds) {
+        const keys = await redis.keys(`${prefix}:${id}*`)
+        if (keys.length) { await redis.del(...keys); removed += keys.length }
+      }
+    }
+    console.log(`cleared ${removed} rate-limit keys for the fixture accounts`)
+  } catch (err) {
+    console.log('rate-limit clear skipped —', err instanceof Error ? err.message : err)
+  }
+}
+
+/**
  * Reset to the fixture's baseline: A and B connected (as migration 140's
  * grandfathering left them), C a stranger to both, no leftover E2E goals.
  *
@@ -115,6 +158,8 @@ async function clean() {
     )
     console.log('cleared blocks + connections between the fixture accounts')
   }
+
+  await clearRateLimits(ids)
 
   const a = found.find((f) => f.email.includes('-a@'))
   const b = found.find((f) => f.email.includes('-b@'))

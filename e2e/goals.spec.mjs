@@ -294,9 +294,36 @@ test.describe.serial('goals spine — browser pass', () => {
     }
     expect(body).not.toContain('�')
 
-    const dt = [...body.matchAll(/^DTSTART[^:]*:.*$/gm)].map((x) => x[0])
+    const dt = [...body.matchAll(/^DTSTART[^:]*:[^\r\n]*/gm)].map((x) => x[0])
     console.log('   DTSTARTs:', dt.slice(0, 3))
     expect(dt.length, 'the feed should carry at least one event').toBeGreaterThan(0)
+
+    // ── all-day chips, not blocks on the grid ────────────────────────────────
+    // Timed events made a real week view unreadable with two or three daily
+    // goals. A DATE-valued DTSTART carries no TZID, and RFC 5545 §3.3.6 requires
+    // a day-or-week DURATION to go with it.
+    for (const line of dt) {
+      expect(line, 'reminders are all-day chips now').toContain('VALUE=DATE:')
+      expect(line, 'a DATE value must not carry a TZID').not.toContain('TZID')
+    }
+    expect(body, 'a DATE start needs a day-scale duration').toContain('DURATION:P1D')
+    expect(body, 'PT15M against an all-day start is invalid').not.toContain('DURATION:PT')
+
+    // The time moved into the title when the grid position went away.
+    const summaries = [...body.matchAll(/^SUMMARY:([^\r\n]*)/gm)].map((x) => x[1])
+    console.log('   summaries:', summaries.slice(0, 3))
+    for (const s of summaries) {
+      expect(s, 'every chip should still say what time it is for').toMatch(/·\s*\d{1,2}:\d{2}(am|pm)/)
+    }
+
+    // ── bounded ──────────────────────────────────────────────────────────────
+    // These fixtures are 8-week tapers, so every rule must terminate. Unbounded
+    // recurrence is what kept finished plans in the calendar forever.
+    const rules = [...body.matchAll(/^RRULE:([^\r\n]*)/gm)].map((x) => x[1])
+    console.log('   rules:', rules.slice(0, 3))
+    for (const r of rules) {
+      expect(r, 'a goal with a target date must stop').toMatch(/UNTIL=\d{8}(?!T)/)
+    }
 
     // UIDs must be stable across polls or every refresh re-creates every event.
     const uids = (s) => [...s.matchAll(/^UID:(.*)$/gm)].map((x) => x[1]).sort()
