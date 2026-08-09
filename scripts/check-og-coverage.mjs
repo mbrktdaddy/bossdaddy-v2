@@ -105,6 +105,25 @@ const HYGIENE = [
     fix: 'Route through buildSocialMetadata(), or include site + creator:\n' +
          'TWITTER_HANDLE — Next replaces the layout\'s twitter object, never merges.',
   },
+  {
+    id: 'per-request metadata on a bearer-token invite page',
+    // These pages exist to be PASTED INTO A TEXT MESSAGE, and every messaging
+    // platform fetches the URL server-side to build a preview. Their metadata is
+    // therefore shown to bystanders in the thread, not to the person who chose to
+    // open the link — so it must be static and brand-generic.
+    //
+    // generateMetadata() on one of them is how the private payload gets out: a
+    // reasonable-looking "make the preview friendlier" change renders "Quit
+    // smoking" as a rich card in whatever group chat the link lands in. The page
+    // BODY may name the goal; the unfurl may not.
+    //
+    // Scoped to invite routes by the caller below — the test only sees their source.
+    id_scope: /[\\/]invite[\\/]/,
+    test: (src) => /export\s+(async\s+)?function\s+generateMetadata/.test(src),
+    fix: 'Keep `export const metadata` static on invite pages. The goal title must\n' +
+         'never reach og:title/og:description — it is read by every platform the\n' +
+         'link is pasted into, before the invitee has agreed to anything.',
+  },
 ]
 
 /**
@@ -131,18 +150,32 @@ const hygiene = new Map(HYGIENE.map((h) => [h.id, []]))
 let checked = 0
 
 for (const file of pages) {
-  if (ALLOW.some((re) => re.test(file))) continue
-  checked++
   const src = readFileSync(file, 'utf8')
   const rel = file.replace(root, '').replace(/^[\\/]/, '').replace(/\\/g, '/')
+  const code = stripComments(src)
+
+  // SCOPED RULES RUN ON EVERY PAGE, allowlisted included, before the skip below.
+  // The allowlist means "this page needs no social card" — it does NOT mean "this
+  // page is never shared". An invite link is private, carries no card of its own,
+  // and is pasted into text threads all day; skipping it here would have made the
+  // invite rule dead code on the only file it exists to guard.
+  for (const h of HYGIENE) {
+    if (!h.id_scope || !h.id_scope.test(file)) continue
+    if (h.test(code)) hygiene.get(h.id).push(rel)
+  }
+
+  if (ALLOW.some((re) => re.test(file))) continue
+  checked++
 
   const hasCard =
     MARKERS.some((m) => src.includes(m)) ||
     /openGraph[\s\S]*?images\s*:/.test(src)
   if (!hasCard) missing.push(rel)
 
-  const code = stripComments(src)
-  for (const h of HYGIENE) if (h.test(code)) hygiene.get(h.id).push(rel)
+  for (const h of HYGIENE) {
+    if (h.id_scope) continue          // already handled above, don't double-report
+    if (h.test(code)) hygiene.get(h.id).push(rel)
+  }
 }
 
 let failed = false

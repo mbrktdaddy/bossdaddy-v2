@@ -17,12 +17,54 @@ import type { Metadata } from 'next'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { LABELS } from '@/lib/labels'
+import { ogImageMeta } from '@/lib/og'
 import { LoginLink } from '@/components/LoginLink'
 import { previewInvitation, TIER_COPY } from '@/lib/goals/participants'
+
+// ⚠️ THE GOAL TITLE MUST NEVER APPEAR IN THIS METADATA. STATIC ONLY — do not turn
+// this into generateMetadata().
+//
+// This link's entire job is to be pasted into a text message, and every messaging
+// platform fetches it server-side to build a preview. A friendly-looking
+// improvement like `title: \`${goal.title} — an invite\`` would render "Quit
+// smoking" as a rich card in whatever group chat it lands in, to everyone in the
+// thread, before the invitee has agreed to anything. The page body may name the
+// goal — that's shown to someone who opened the link deliberately. The unfurl is
+// shown to bystanders.
+//
+// Branded rather than bare on purpose: a link with no preview reads as phishing in
+// a text thread, which works against the very thing the invite is trying to do.
+// Signal group invites, Calendly and Doodle all take the same line — name the
+// brand and the category, never the payload.
+//
+// The images are set EXPLICITLY even though the root layout has defaults, because
+// Next.js REPLACES `openGraph` wholesale rather than merging it: defining
+// og:title here without og:image would silently drop the card image and leave a
+// text-only unfurl. Same trap the root layout documents for twitter.images.
+const socialCard = ogImageMeta({
+  title: 'Someone wants you in their corner',
+  type: 'review',
+  alt: 'Boss Daddy Life — an invitation.',
+})
 
 export const metadata: Metadata = {
   title: `An invite — ${LABELS.goals.short}`,
   robots: { index: false, follow: false },
+  openGraph: {
+    title: 'Someone wants you in their corner',
+    description: 'A Boss Daddy member asked you to help him stick to something.',
+    siteName: 'Boss Daddy Life',
+    type: 'website',
+    locale: 'en_US',
+    images: [socialCard],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@bossdaddylife',
+    title: 'Someone wants you in their corner',
+    description: 'A Boss Daddy member asked you to help him stick to something.',
+    images: [socialCard],
+  },
 }
 
 type Props = {
