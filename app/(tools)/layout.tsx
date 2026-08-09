@@ -17,10 +17,10 @@ export default async function ToolsLayout({
   const { user } = await getUserSafe(supabase)
   const isAuthed = !!user
 
-  // Role-aware account link — members live on /account/settings, authors and
+  // Role-aware account link — members live on /account, authors and
   // admins live on /dashboard. The header label matches the destination so the
   // user isn't told "Dashboard" then bounced to "Account Settings."
-  let accountHref = '/account/settings'
+  let accountHref = '/account'
   let accountLabel = 'Account'
   if (isAuthed) {
     const { data: profile } = await supabase

@@ -146,9 +146,10 @@ function isActive(pathname: string, href: string) {
 
 export default function Header() {
   const { username, role, avatarUrl, userId, resolved } = useAuthUser()
-  // Personal profile/account is /account/settings for EVERY role — the
-  // dashboard is workspace-only. Authors/admins still get a separate Dashboard
-  // link below.
+  // The SETTINGS item specifically — profile fields, sign-in, notification and
+  // privacy toggles. "Your Stuff" (/account) is a separate item above it, and
+  // holds everything that isn't configuration. Same for every role; the
+  // dashboard is workspace-only.
   const profileHref = '/account/settings'
   const hasDashboard = role === 'author' || role === 'admin'
 

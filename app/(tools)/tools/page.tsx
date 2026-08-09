@@ -93,9 +93,9 @@ export default async function ToolsHubPage() {
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
 
-  // "Manage kids" routes everyone to /account/settings, where MyKidsSection
+  // "Manage kids" routes everyone to /account, where MyKidsSection
   // now lives for all roles.
-  const manageKidsHref = '/account/settings'
+  const manageKidsHref = '/account'
   let kids: Kid[] = []
 
   if (user) {

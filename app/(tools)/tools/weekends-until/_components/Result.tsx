@@ -152,7 +152,7 @@ export default function Result({
           <p className="text-sm text-prose">
             {saveMessage}{' '}
             <a
-              href="/register?next=/account/settings"
+              href="/register?next=/account"
               className="text-accent hover:underline font-semibold"
             >
               Create an account

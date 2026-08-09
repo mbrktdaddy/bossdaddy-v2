@@ -172,7 +172,7 @@ function revalidateSavingsSurfaces(goalId?: string) {
   revalidatePath('/tools/savings')
   if (goalId) revalidatePath(`/tools/savings/${goalId}`)
   revalidatePath('/dashboard')
-  revalidatePath('/account/settings')
+  revalidatePath('/account')
   revalidatePath('/tools')
 }
 
@@ -1073,7 +1073,7 @@ export async function acceptInvite(
   revalidatePath(`/tools/savings/${goalId}`)
   revalidatePath(`/tools/savings/${goalId}/invite`)
   revalidatePath('/tools/savings')
-  revalidatePath('/account/settings')
+  revalidatePath('/account')
   return { ok: true, data: { goalId } }
 }
 

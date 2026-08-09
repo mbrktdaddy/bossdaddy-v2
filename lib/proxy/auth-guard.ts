@@ -2,8 +2,8 @@ import { NextResponse, type NextRequest } from 'next/server'
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 import { rewriteLegacyRoute } from './rewrites'
 
-// Members hitting the dashboard get their own account settings page.
-const MEMBER_ACCOUNT = '/account/settings'
+// Members hitting the dashboard get their own account home.
+const MEMBER_ACCOUNT = '/account'
 
 // Admin-only dashboard surfaces. Authors AND members are blocked from these.
 // Three pages live outside /dashboard/admin/ for historical reasons — list them

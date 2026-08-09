@@ -323,7 +323,7 @@ export async function updateKidMoneyState(
 // gains a new home.
 function revalidateKidSurfaces() {
   revalidatePath('/dashboard')
-  revalidatePath('/account/settings')
+  revalidatePath('/account')
   revalidatePath('/tools')
   revalidatePath('/tools/family/[id]', 'page')
   revalidatePath('/tools/weekends-until')
