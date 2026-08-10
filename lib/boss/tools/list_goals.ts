@@ -38,7 +38,7 @@ export const listGoals: BossTool = {
       return { content: JSON.stringify({ goals: [], note: 'Not signed in.' }) }
     }
 
-    const goals = await loadPickableGoals(ctx.supabase, {
+    const goals = await loadPickableGoals(ctx.supabase, ctx.userId, {
       includePaused: input.include_paused !== false,
     })
 

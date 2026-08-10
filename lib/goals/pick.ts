@@ -67,12 +67,23 @@ const MAX_GOALS = 25
  */
 export async function loadPickableGoals(
   client: Queryable,
+  /**
+   * ⚠️ REQUIRED, and not optional for a reason. This used to lean on RLS to mean
+   * "mine", which stopped being true when migration 137 added goals_teammate_read
+   * so a partner could see the goal they support. Every caller of this then
+   * silently widened: the profile's "What you're working on" listed goals the
+   * reader merely supports as their own, and the Boss's list_goals told him about
+   * somebody else's medication plan.
+   */
+  userId: string,
   opts: { includePaused?: boolean } = {},
 ): Promise<PickableGoal[]> {
+  if (!userId) return []
   const statuses = opts.includePaused === false ? ['active'] : ['active', 'paused']
   const { data, error } = await client
     .from('goals')
     .select(GOAL_PICK_COLUMNS)
+    .eq('user_id', userId)
     .in('status', statuses)
     .order('created_at', { ascending: false })
     .limit(MAX_GOALS)

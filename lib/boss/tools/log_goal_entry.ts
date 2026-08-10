@@ -80,7 +80,7 @@ export const logGoalEntry: BossTool = {
     const note = typeof input.note === 'string' ? input.note.slice(0, 280) : null
 
     // ── which goal ──────────────────────────────────────────────────────────
-    const goals = await loadPickableGoals(ctx.supabase)
+    const goals = await loadPickableGoals(ctx.supabase, ctx.userId)
     if (!goals.length) {
       return {
         content: JSON.stringify({

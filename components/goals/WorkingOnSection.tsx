@@ -31,7 +31,7 @@ export default async function WorkingOnSection() {
   const { user } = await getUserSafe(supabase)
   if (!user) return null
 
-  const goals = await loadPickableGoals(supabase)
+  const goals = await loadPickableGoals(supabase, user.id)
   const [stats, savings] = await Promise.all([
     loadStatsFor(supabase, goals.map((g) => g.id)),
     // RLS scopes this to owned + joined goals, archived excluded.

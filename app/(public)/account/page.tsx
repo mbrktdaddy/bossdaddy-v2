@@ -94,22 +94,32 @@ export default async function AccountHomePage() {
         <div className="mb-8">
           <h1 className="text-2xl font-black">Your Stuff</h1>
           <p className="text-prose-faint text-sm mt-1">
-            Your people, your goals, your family, and what you&apos;ve saved.
+            Your family, your people, and what you&apos;re working on.
           </p>
         </div>
 
-        {/* People first — the only things here that can be waiting on him. */}
-        <ContactsCard />
-        <YourCornerSection />
+        {/* ORDER IS DELIBERATE, and it isn't "most urgent first" — that was the
+            first attempt and it read as noise. It's concentric: the people he's
+            responsible for, then the people he can call on, then the work, then
+            who's watching the work.
 
+            Your corner sits AFTER what you're working on because it's a fact
+            about those goals. Above them it was an answer to a question the page
+            hadn't asked yet — the participant's view opened with an empty corner
+            card before he'd seen a single goal. */}
         <div className="mb-6">
           <MyKidsSection />
         </div>
 
-        {/* Goals AND savings, one list. Two tables underneath. */}
+        <ContactsCard />
+
+        {/* Goals AND savings, one list. Two tables underneath. Carries its own
+            empty state — a card that leads straight to /goals/new. */}
         <div className="mb-6">
           <WorkingOnSection />
         </div>
+
+        <YourCornerSection />
 
         <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Activity</p>
