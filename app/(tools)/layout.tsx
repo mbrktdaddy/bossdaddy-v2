@@ -5,36 +5,17 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import Footer from '@/components/Footer'
-import { LoginLink } from '@/components/LoginLink'
-import { createClient, getUserSafe } from '@/lib/supabase/server'
+import AccountMenu from '@/components/AccountMenu'
 
-export default async function ToolsLayout({
+// No longer async: the only await was a profiles role lookup, done solely to
+// choose between the words "Account" and "Dashboard" on a link the account menu
+// now renders itself. Removing it takes a per-render database round trip off
+// every page in /goals, /today and /tools.
+export default function ToolsLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const { user } = await getUserSafe(supabase)
-  const isAuthed = !!user
-
-  // Role-aware account link — members live on /account, authors and
-  // admins live on /dashboard. The header label matches the destination so the
-  // user isn't told "Dashboard" then bounced to "Account Settings."
-  let accountHref = '/account'
-  let accountLabel = 'Account'
-  if (isAuthed) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-    const role = profile?.role
-    if (role === 'author' || role === 'admin') {
-      accountHref = '/dashboard'
-      accountLabel = 'Dashboard'
-    }
-  }
-
   return (
     <div data-theme="dark" className="min-h-screen bg-background text-prose flex flex-col">
       <a
@@ -68,25 +49,20 @@ export default async function ToolsLayout({
               Tools · Beta
             </Link>
           </div>
+          {/* THE SAME MENU THE REST OF THE SITE HAS. This chrome is deliberately
+              minimal (docs/dad-tools-plan.md §5) and had grown its own bespoke
+              nav instead: a "← Boss Daddy" link, and an Account/Dashboard text
+              link whose label needed a role lookup on every render.
+
+              All three were redundant once the real menu is here — the wordmark
+              already goes home, and the dropdown already carries Dashboard,
+              Account Settings and Sign In. Deleting them also deletes a database
+              query per page load.
+
+              alwaysShow because there's no hamburger drawer in this chrome to
+              repeat the links at narrow widths. */}
           <nav className="flex items-center gap-3 shrink-0">
-            <Link
-              href="/"
-              className="hidden sm:inline text-sm text-prose-faint hover:text-prose transition-colors"
-            >
-              ← Boss Daddy
-            </Link>
-            {isAuthed ? (
-              <Link
-                href={accountHref}
-                className="text-sm font-medium text-accent hover:underline"
-              >
-                {accountLabel}
-              </Link>
-            ) : (
-              <LoginLink className="text-sm font-medium text-accent hover:underline">
-                Sign in
-              </LoginLink>
-            )}
+            <AccountMenu alwaysShow />
           </nav>
         </div>
       </header>
