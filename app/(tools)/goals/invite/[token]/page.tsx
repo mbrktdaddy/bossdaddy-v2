@@ -76,9 +76,33 @@ export default async function GoalInvitePage({ params, searchParams }: Props) {
   const { token } = await params
   const { msg } = await searchParams
 
-  const preview = await previewInvitation(createAdminClient(), token)
+  // WHO'S LOOKING IS RESOLVED FIRST, because the preview depends on it: an invite
+  // addressed to a specific member won't show its goal to anyone else, and won't
+  // show it at all to a visitor we can't identify.
+  //
+  // A bare link invite is unaffected — signed-out visitors still see the whole
+  // offer before being asked for anything, because "sign in to find out what this
+  // is" is how an invite gets abandoned. The token survives the round trip in
+  // `next`.
+  const supabase = await createClient()
+  const { user } = await getUserSafe(supabase)
+
+  const preview = await previewInvitation(createAdminClient(), token, user?.id ?? null)
 
   if (!preview.ok) {
+    // An addressed invite viewed signed-out isn't a dead end — it's one step from
+    // working, so offer the step rather than a shrug.
+    if (preview.needsSignIn) {
+      return (
+        <Wrap>
+          <h1 className="text-2xl font-black text-prose">You&apos;ve been invited.</h1>
+          <p className="mt-3 text-sm text-prose-muted">{preview.reason}</p>
+          <LoginLink className="mt-6 inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl transition-colors">
+            Sign in to see it →
+          </LoginLink>
+        </Wrap>
+      )
+    }
     return (
       <Wrap>
         <h1 className="text-2xl font-black text-prose">That invite won&apos;t open.</h1>
@@ -94,12 +118,6 @@ export default async function GoalInvitePage({ params, searchParams }: Props) {
   }
 
   const { goalTitle, inviterName, tier, expiresAt } = preview.preview
-
-  // Signed-out visitors see the whole offer BEFORE being asked to sign in —
-  // "sign in to find out what this is" is how an invite gets abandoned. The token
-  // survives the round trip in `next`.
-  const supabase = await createClient()
-  const { user } = await getUserSafe(supabase)
 
   return (
     <Wrap>

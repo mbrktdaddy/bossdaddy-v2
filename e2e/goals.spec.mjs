@@ -13,6 +13,9 @@ import { test, expect } from '@playwright/test'
 
 const A = { email: 'bd-verify-a@example.com', password: 'VerifyPass!A1' }
 const B = { email: 'bd-verify-b@example.com', password: 'VerifyPass!B1' }
+// The third party. Needed to prove an addressed invite refuses someone who isn't
+// the named recipient — B is A's contact, so B can't play that role.
+const C = { email: 'bd-verify-c@example.com', password: 'VerifyPass!C1' }
 
 /** Carried between steps. */
 const state = {
@@ -458,6 +461,102 @@ test.describe.serial('goals spine — browser pass', () => {
     const msg = new URL(location, 'http://localhost:3000').searchParams.get('msg') ?? ''
     console.log('   refusal msg:', msg)
     expect(msg).toMatch(/connected to/i)
+  })
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // 8b. An addressed invite belongs to the person it names (migration 144)
+  //
+  // This guard FAILS OPEN by construction: it only fires when invitee_user_id is
+  // set, because a bare link invite legitimately names nobody. So "unaddressed"
+  // and "we forgot to store the id" look identical at runtime, and only a test
+  // can tell them apart. That's the whole reason this exists.
+  // ──────────────────────────────────────────────────────────────────────────
+  test('a contact-addressed invite refuses a third party, title and all', async ({ browser, page }) => {
+    // SELF-SUFFICIENT ON PURPOSE — makes its own goal rather than reusing
+    // state.goalId, so it can be run alone with `-g` instead of dragging the whole
+    // serial block behind it just to check one behaviour.
+    //
+    // The title is a NONSENSE UNIQUE STRING, and that matters: the assertions below
+    // prove the goal name never reaches the wrong reader, so they have to look for
+    // something that could only have come from this goal. Asserting on a shared
+    // word like "quit smoking" would pass whether or not anything leaked.
+    const secret = `zarquon${Date.now().toString().slice(-7)}`
+    await signInVia(page, A, '/goals/new?t=quit-smoking-taper')
+    await page.goto('/goals/new?t=quit-smoking-taper')
+    await page.locator('input[name="title"]').fill(secret)
+    await page.getByRole('button', { name: /start|create|save|begin/i }).last().click()
+    await page.waitForURL(/\/goals\/[0-9a-f-]{36}/, { timeout: 30_000 })
+    const goalId = page.url().match(/\/goals\/([0-9a-f-]{36})/)[1]
+
+    // ── FIRST: a BARE link invite must be unchanged ──────────────────────────
+    // The gate reordered this page's logic, and the anonymous link is the common
+    // path — most invites get texted, not addressed. A null invitee_user_id must
+    // skip the gate entirely and still show the whole offer before asking for
+    // anything, because "sign in to find out what this is" is how an invite dies.
+    await page.goto(`/goals/${goalId}/share`)
+    await inviteForm(page).locator('input[name="tier"][value="cheer"]').check()
+    await inviteForm(page).getByRole('button', { name: /send the invite/i }).click()
+    await page.waitForURL(/token=/)
+    const bareToken = new URL(page.url()).searchParams.get('token')
+
+    const bareCtx = await browser.newContext()
+    const bare = await bareCtx.newPage()
+    await bare.goto(`/goals/invite/${bareToken}`)
+    const bareBody = await bare.locator('body').innerText()
+    expect(bareBody, 'a bare link invite still shows the goal to a signed-out visitor')
+      .toContain(secret)
+    await expect(
+      bare.getByRole('link', { name: /sign in to accept/i }),
+      'and still offers the accept-after-sign-in route',
+    ).toBeVisible()
+    await bareCtx.close()
+
+    // ── THEN: A addresses an invite to B by picking them from contacts ───────
+    await page.goto(`/goals/${goalId}/share`)
+    const picker = inviteForm(page).locator('select[name="contactUserId"]')
+    await expect(picker, 'needs a contact to address it to').toHaveCount(1)
+    await picker.selectOption({ label: '@bd-verify-b' })
+    await inviteForm(page).locator('input[name="tier"][value="cheer"]').check()
+    await inviteForm(page).getByRole('button', { name: /send the invite/i }).click()
+    await page.waitForURL(/token=/)
+    const token = new URL(page.url()).searchParams.get('token')
+
+    // ── signed out: no title, just a way in ──────────────────────────────────
+    const anon = await browser.newContext()
+    const out = await anon.newPage()
+    await out.goto(`/goals/invite/${token}`)
+    const anonBody = await out.locator('body').innerText()
+    expect(anonBody, 'an addressed invite must not show its goal to a stranger')
+      .not.toContain(secret)
+    expect(anonBody.toLowerCase()).toContain('invited')
+    await expect(out.getByRole('link', { name: /sign in/i }).first()).toBeVisible()
+    await anon.close()
+
+    // ── signed in as the WRONG member ────────────────────────────────────────
+    const ctx = await browser.newContext()
+    const c = await ctx.newPage()
+    await signInVia(c, C, `/goals/invite/${token}`)
+    await c.goto(`/goals/invite/${token}`)
+    const wrongBody = (await c.locator('body').innerText()).toLowerCase()
+    console.log('   third party sees:', wrongBody.split('\n').find((l) => l.trim()) ?? '')
+    expect(wrongBody, 'the goal title must not reach the wrong member')
+      .not.toContain(secret)
+    expect(
+      await c.getByRole('button', { name: /accept|join|count me in|i'm in/i }).count(),
+      'and there should be nothing to accept',
+    ).toBe(0)
+    await ctx.close()
+
+    // ── the person it was actually for ───────────────────────────────────────
+    const right = await browser.newContext()
+    const b = await right.newPage()
+    await signInVia(b, B, `/goals/invite/${token}`)
+    await b.goto(`/goals/invite/${token}`)
+    await expect(
+      b.getByRole('button', { name: /accept|join|count me in|i'm in/i }).first(),
+      'the named recipient must still be able to accept',
+    ).toBeVisible()
+    await right.close()
   })
 
   // ──────────────────────────────────────────────────────────────────────────

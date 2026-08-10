@@ -364,7 +364,15 @@ export type InvitePreview = {
 export async function previewInvitation(
   admin: Queryable,
   token: string,
-): Promise<{ ok: true; preview: InvitePreview } | { ok: false; reason: string }> {
+  /**
+   * Who is looking, if anyone. Only consulted for an ADDRESSED invite — see the
+   * gate at the bottom of this function.
+   */
+  viewerId?: string | null,
+): Promise<
+  | { ok: true; preview: InvitePreview }
+  | { ok: false; reason: string; needsSignIn?: true }
+> {
   if (!token) return { ok: false, reason: 'That invite link is incomplete.' }
 
   const { data } = await admin
@@ -384,6 +392,34 @@ export async function previewInvitation(
   if (invite.revoked_at) return { ok: false, reason: 'That invite was called back.' }
   if (new Date(invite.expires_at).getTime() < Date.now()) {
     return { ok: false, reason: 'That invite has expired. Ask him for a fresh one.' }
+  }
+
+  // ⚠️ AN ADDRESSED INVITE DOESN'T SHOW ITS GOAL TO STRANGERS.
+  //
+  // The accept path already refuses the wrong person, but refusing at accept is
+  // one step too late: this function returns the goal TITLE, and the page renders
+  // it. Forward a contact-addressed invite for "Quit smoking" and the wrong
+  // person reads the title — they simply can't join. On a sensitive goal the
+  // title IS the disclosure, which is the thing the tiers exist to control.
+  //
+  // Signed out, we can't tell who's looking, so an addressed invite asks them to
+  // sign in FIRST. That costs nothing real: it was addressed to a member, so they
+  // have an account. A bare link invite — no named recipient, token is the whole
+  // addressing — still shows the full offer before asking for anything, because
+  // "sign in to find out what this is" is how an invite gets abandoned.
+  if (invite.invitee_user_id) {
+    if (!viewerId) {
+      return {
+        ok: false,
+        needsSignIn: true,
+        reason: 'This invite was sent to someone in particular. Sign in and we\'ll show you.',
+      }
+    }
+    if (viewerId !== invite.invitee_user_id) {
+      // Same deliberate vagueness as the block check: naming who it WAS for tells
+      // the wrong person something about the right one.
+      return { ok: false, reason: 'That invite isn\'t valid.' }
+    }
   }
 
   const [{ data: goalRow }, { data: inviterRow }] = await Promise.all([
@@ -421,7 +457,10 @@ export async function acceptInvitation(
   admin: Queryable,
   args: { token: string; userId: string },
 ): Promise<{ ok: true; goalId: string } | { ok: false; reason: string }> {
-  const preview = await previewInvitation(admin, args.token)
+  // The viewer MUST be passed here. previewInvitation refuses an addressed invite
+  // to anyone it can't identify, so omitting it would turn away the very person
+  // the invite names.
+  const preview = await previewInvitation(admin, args.token, args.userId)
   if (!preview.ok) return { ok: false, reason: preview.reason }
 
   const { goalId, tier, invitationId } = preview.preview
