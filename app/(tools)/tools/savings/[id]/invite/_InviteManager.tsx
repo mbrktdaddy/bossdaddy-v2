@@ -12,9 +12,12 @@ interface MemberHit { id: string; username: string; displayName: string | null }
 
 interface PendingInvite {
   id:         string
+  /** What the shareable URL is built from. NOT `id` — see the list below. */
+  token:      string
   createdAt:  string
   expiresAt:  string
-  email:      string | null
+  /** Member display name, else the address, else null for a bare link invite. */
+  label:      string | null
 }
 
 interface Props {
@@ -236,12 +239,13 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
           </p>
           {pendingInvites.map((inv) => {
             const url = typeof window !== 'undefined'
-              ? `${window.location.origin}/tools/savings/invite/${inv.id}`
+              ? `${window.location.origin}/tools/savings/invite/${inv.token}`
               : ''
-            // The server doesn't expose the token to the client (we don't need
-            // it for revoke), so the "copy link" button regenerates the link
-            // by hitting createInvite again. For now we just show the email
-            // and a Revoke button — the link can be re-generated.
+            // This used to build the URL from `inv.id` — the row's primary key —
+            // because the token wasn't among the columns the page selected. Every
+            // link this list rendered was therefore dead, while the one shown
+            // straight after generating worked, which made it look like links
+            // expired immediately. The token is fetched now.
             return (
               <div
                 key={inv.id}
@@ -249,24 +253,32 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
               >
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-prose truncate">
-                    {inv.email ?? 'Untagged invite'}
+                    {inv.label ?? 'Link invite (no recipient)'}
                   </p>
                   <p className="text-[11px] text-prose-faint">
                     Expires {fmtRelative(inv.expiresAt)}
                   </p>
+                  {/* The actual link, copyable. Previously an sr-only span holding
+                      a dead URL, present only to satisfy the linter. */}
+                  <p className="mt-1 break-all font-mono text-[10px] text-prose-faint">{url}</p>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(url, inv.id)}
+                  className="shrink-0 px-3 py-1.5 bg-background border border-soft hover:border-strong text-prose-muted font-medium rounded-lg text-xs transition-colors"
+                  aria-label={`Copy the invite link for ${inv.label ?? 'the shared link'}`}
+                >
+                  {copied === inv.id ? 'Copied' : 'Copy'}
+                </button>
                 <button
                   type="button"
                   onClick={() => onRevoke(inv.id)}
                   disabled={pending}
                   className="shrink-0 px-3 py-1.5 bg-background border border-soft hover:border-danger-line text-danger-ink font-medium rounded-lg text-xs transition-colors"
-                  aria-label={`Revoke invite for ${inv.email ?? 'untagged invite'}`}
+                  aria-label={`Revoke invite for ${inv.label ?? 'the shared link'}`}
                 >
                   Revoke
                 </button>
-                {/* url referenced only to silence the lint warning around the
-                    unused inv.id usage — kept for future "regenerate link" UX. */}
-                <span className="sr-only">{url}</span>
               </div>
             )
           })}

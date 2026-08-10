@@ -7,7 +7,7 @@
 // Mirrors the form patterns in /tools/weekends-until — native form,
 // useTransition for pending state, inline error display. No react-hook-form.
 
-import { useState, useTransition, useMemo } from 'react'
+import { useState, useTransition, useMemo, useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
 import { LABELS } from '@/lib/labels'
 import type {
@@ -46,23 +46,40 @@ export interface GoalFormInitial {
   reminder_hour_utc?:   number | null
 }
 
-// UTC reminder-hour options. Labels include the corresponding US Eastern
-// equivalent so users picking a time can sanity-check it against their day.
-// We do NOT do per-user timezones — that's user-profile scope, not goal scope.
-const REMINDER_HOUR_OPTIONS: { value: number; label: string }[] = [
-  { value: 12, label: '12:00 UTC (7am ET)' },
-  { value: 13, label: '13:00 UTC (8am ET)' },
-  { value: 14, label: '14:00 UTC (9am ET)' },
-  { value: 15, label: '15:00 UTC (10am ET)' },
-  { value: 16, label: '16:00 UTC (11am ET)' },
-  { value: 17, label: '17:00 UTC (noon ET)' },
-  { value: 18, label: '18:00 UTC (1pm ET)' },
-  { value: 22, label: '22:00 UTC (5pm ET)' },
-  { value: 23, label: '23:00 UTC (6pm ET)' },
-  { value: 0,  label: '00:00 UTC (7pm ET)' },
-  { value: 1,  label: '01:00 UTC (8pm ET)' },
-  { value: 2,  label: '02:00 UTC (9pm ET)' },
-]
+// The hours a reminder can be sent at, stored as UTC because that's all the
+// column holds — savings has `reminder_hour_utc`, an integer, with no timezone
+// and no minutes. (The goals spine fixed this properly with an IANA zone plus a
+// local time; folding savings onto that model is tracked separately.)
+//
+// ⚠️ THE "(8am ET)" LABELS THAT USED TO BE HERE WERE WRONG HALF THE YEAR. They
+// were hardcoded against EST (UTC−5), so every summer, once Eastern moved to EDT
+// (UTC−4), each one was an hour off — "13:00 UTC (8am ET)" is 9am ET in August.
+// And they only ever spoke to Eastern readers; a Central user reading "8am ET"
+// had to do the arithmetic anyway, and would sometimes find the number happened
+// to be right for them while the zone name wasn't, which is the most misleading
+// way for a label to be broken.
+//
+// So the equivalent is computed from the reader's OWN zone, at render, by the
+// browser — which knows about DST and doesn't need a table maintained.
+const REMINDER_HOURS = [12, 13, 14, 15, 16, 17, 18, 22, 23, 0, 1, 2] as const
+
+/**
+ * "13:00 UTC · 8:00 AM your time" for whoever is looking.
+ *
+ * Returns the bare UTC label until `local` is true. The caller flips that after
+ * mount: the server has no idea what zone the reader is in, so rendering the
+ * local half during SSR would produce a hydration mismatch on every visit.
+ */
+function reminderHourLabel(hourUtc: number, local: boolean): string {
+  const utc = `${String(hourUtc).padStart(2, '0')}:00 UTC`
+  if (!local) return utc
+  // Any date works — we only want the wall-clock conversion, and using TODAY is
+  // what makes it respect the DST currently in force.
+  const at = new Date()
+  at.setUTCHours(hourUtc, 0, 0, 0)
+  const mine = at.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+  return `${utc} · ${mine} your time`
+}
 
 interface Props {
   mode:        'create' | 'edit'
@@ -116,7 +133,21 @@ export default function GoalForm({ mode, initial, kids }: Props) {
     (initial?.reminder_cadence ?? (initial?.cadence ?? 'daily')) as 'daily' | 'weekly' | 'monthly' | 'off'
   )
   const [reminderHourUtc, setReminderHourUtc] = useState<number>(
-    initial?.reminder_hour_utc ?? 13   // 8am ET default
+    initial?.reminder_hour_utc ?? 13   // morning across the US time zones
+  )
+
+  // False on the server, true in the browser — which is exactly what
+  // useSyncExternalStore's two snapshot functions are for, and why this isn't a
+  // useState/useEffect pair (react-hooks/set-state-in-effect rightly objects to
+  // that, and it would also paint once with the wrong label).
+  //
+  // The server cannot know the visitor's zone, so the local half of each option
+  // can only be rendered client-side. Until then the options read as plain UTC:
+  // honest rather than wrong.
+  const showLocalTimes = useSyncExternalStore(
+    () => () => {},   // never changes after mount, so nothing to subscribe to
+    () => true,       // client
+    () => false,      // server
   )
 
   // Two-step picker — category, then specific preset. When a preset is picked
@@ -541,7 +572,9 @@ export default function GoalForm({ mode, initial, kids }: Props) {
           </p>
           <p className="text-xs text-prose-faint">
             We&apos;ll email you (and any spouse you invite) at the cadence you pick.
-            Times are in UTC — pick whichever lands in your morning.
+            {showLocalTimes
+              ? ' Each option shows what it works out to where you are.'
+              : ' Times are shown in UTC.'}
           </p>
         </div>
 
@@ -582,8 +615,10 @@ export default function GoalForm({ mode, initial, kids }: Props) {
                 onChange={(e) => setReminderHourUtc(Number(e.target.value))}
                 className="w-full px-3 py-2.5 bg-surface-sunken border border-soft focus:border-accent rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent/30"
               >
-                {REMINDER_HOUR_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                {REMINDER_HOURS.map((hour) => (
+                  <option key={hour} value={hour}>
+                    {reminderHourLabel(hour, showLocalTimes)}
+                  </option>
                 ))}
               </select>
             </div>

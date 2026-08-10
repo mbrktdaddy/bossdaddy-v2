@@ -22,7 +22,11 @@ export const metadata: Metadata = {
 }
 
 const PARTICIPANT_COLUMNS = 'id, goal_id, user_id, role, joined_at, destination_url, destination_type, destination_label'
-const INVITE_COLUMNS = 'id, goal_id, inviter_id, email, expires_at, used_at, used_by, created_at'
+// `token` is what the shareable URL is built from — it was missing, so the
+// pending-invites list fell back to the row id and every link it rendered was
+// dead. `invitee_user_id` (migration 144) is what lets a member-addressed invite
+// show a name instead of "Untagged invite".
+const INVITE_COLUMNS = 'id, goal_id, inviter_id, email, token, invitee_user_id, expires_at, used_at, used_by, created_at'
 
 export default async function InviteGoalParticipantsPage({ params }: PageProps) {
   const { id } = await params
@@ -66,13 +70,17 @@ export default async function InviteGoalParticipantsPage({ params }: PageProps) 
   }
   type InviteRow = {
     id: string; goal_id: string; inviter_id: string; email: string | null;
+    token: string; invitee_user_id: string | null;
     expires_at: string; used_at: string | null; used_by: string | null; created_at: string
   }
   const participants = ((participantRows ?? []) as unknown as ParticipantRow[])
   const pendingInvites = ((pendingRows ?? []) as unknown as InviteRow[])
 
   // Resolve display names for participants. Single batch lookup keeps it cheap.
-  const userIds = participants.map((p) => p.user_id)
+  const userIds = [
+    ...participants.map((p) => p.user_id),
+    ...pendingInvites.map((i) => i.invitee_user_id).filter((v): v is string => !!v),
+  ]
   const { data: profileRows } = userIds.length > 0
     ? await supabase.from('profiles').select('id, username, display_name, avatar_url').in('id', userIds)
     : { data: [] }
@@ -138,12 +146,22 @@ export default async function InviteGoalParticipantsPage({ params }: PageProps) 
       <InviteManager
         goalId={id}
         goalName={goal.name}
-        pendingInvites={pendingInvites.map((i) => ({
-          id:         i.id,
-          createdAt:  i.created_at,
-          expiresAt:  i.expires_at,
-          email:      i.email,
-        }))}
+        pendingInvites={pendingInvites.map((i) => {
+          const invitee = i.invitee_user_id ? profileById.get(i.invitee_user_id) : null
+          return {
+            id:         i.id,
+            // The SHAREABLE value. Was omitted entirely, so the list built its
+            // links from the row id and every one of them 404'd.
+            token:      i.token,
+            createdAt:  i.created_at,
+            expiresAt:  i.expires_at,
+            // Prefer the named member over the address; "Untagged invite" now
+            // only means what it says — a bare link with no recipient at all.
+            label:      invitee
+              ? (invitee.display_name?.trim() || `@${invitee.username}`)
+              : i.email,
+          }
+        })}
         seatsRemaining={Math.max(0, 5 - totalSeats)}
       />
     </div>
