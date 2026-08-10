@@ -239,7 +239,16 @@ export const LABELS = {
       eyebrow:          'Free tools for dads',
       heroTitle:        'Tools I built for me.',
       heroTitleSecond:  'You can use them too.',
-      heroBody:         'No PR samples. No app downloads. No sign-up walls. Plug in a birthdate, get a number that means something. Capture the ones that count.',
+      // ⚠️ "NO SIGN-UP WALLS" WAS REMOVED BECAUSE IT STOPPED BEING TRUE. When
+      // this was written the hub was two calculators. It now leads with the Boss,
+      // goals and savings, all of which need an account — so a visitor read the
+      // promise, tapped the first tool, and hit a sign-in screen. A claim the
+      // product doesn't keep costs more than the friction it was hiding.
+      //
+      // Saying WHICH tools need one, and why, is the honest version and reads as
+      // a reason rather than a wall: something that remembers where you left off
+      // has to know who you are.
+      heroBody:         'No PR samples. No app store. Plug in a birthdate and get a number that means something — no account needed. The ones that remember where you left off need one.',
       loggedInGreeting: 'Welcome back, Boss.',
       // UTILITY, NOT INTROSPECTION. Two earlier drafts framed this as a status
       // check — "Where you are right now, with your family", then "Where you
