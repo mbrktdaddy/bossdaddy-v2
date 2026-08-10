@@ -18,6 +18,7 @@ import {
   planWindow, VOTE_KINDS,
 } from '@/lib/goals/progress'
 import { describeRrule } from '@/lib/goals/schedule-input'
+import NotesFeed from '@/components/goals/NotesFeed'
 import { logOccurrence, logUnprompted, toggleScheduleMute, setGoalStatus } from '../actions'
 
 export const metadata: Metadata = {
@@ -139,6 +140,17 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
     .slice(0, 3)
 
   const wantsNumber = Boolean(goal.metric_key)
+
+  // Who can actually READ the notes feed, besides him. Partners on the goal are
+  // not the same set: thread_access is orthogonal to tier (migration 145), and it
+  // defaults to 'none', so a goal can be shared with three people and still have a
+  // completely private journal. `head: true` transfers no rows.
+  const { count: feedReaders } = await supabase
+    .from('goal_participants')
+    .select('id', { count: 'exact', head: true })
+    .eq('goal_id', goal.id)
+    .neq('thread_access', 'none')
+  const feedReaderCount = feedReaders ?? 0
 
   // ── votes ─────────────────────────────────────────────────────────────────
   // Only for a goal that has an identity: without one there's nothing to vote
@@ -458,6 +470,16 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
           </ul>
         </section>
       ) : null}
+
+      {/* ── notes ───────────────────────────────────────────────────────────
+          Sits after the log and before Manage on purpose: it's the thing you
+          come back to, not an administrative afterthought. `readerCount` is what
+          decides whether this renders as a private journal or a conversation —
+          note that it counts partners who can actually READ THE FEED, not
+          partners on the goal. Three cheer partners with no feed access is still
+          a journal, and framing it as a conversation would imply an audience
+          that isn't listening. */}
+      <NotesFeed subject={{ type: 'goal', id: goal.id }} readerCount={feedReaderCount} isSubjectOwner />
 
       {/* ── manage: pause, archive, delete ──────────────────────────────── */}
       <section className="space-y-4 border-t border-soft pt-6">

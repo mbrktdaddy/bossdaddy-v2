@@ -15,9 +15,17 @@ export type NotificationType =
   // An accountability-partner invite on a goal. `link` points at the token page,
   // so accepting happens there rather than through the notification action route —
   // no `action_required`, nothing new to teach /api/notifications/[id]/action.
-  // This is the ONLY notification a partner ever receives; migration 137 forbids
-  // telling them anything about the goal once they're in.
   | 'goal_invite'
+  // Someone posted in a goal's notes feed (migration 145).
+  //
+  // ⚠️ THE ONE PARTNER-FACING NOTIFICATION, AND NOT A HOLE IN MIGRATION 137.
+  //    137 forbids telling a partner ANYTHING THE SYSTEM OBSERVED — "he missed his
+  //    meds" is surveillance and the sweep stays owner-only. This is a person
+  //    speaking to another person, which is a message, and suppressing it would
+  //    just mean nobody ever comes back to the feed. Carries WHO and WHERE only:
+  //    the note body never leaves the auth wall, and a sensitive goal is never
+  //    named. See lib/goals/note-notify.ts for the full reasoning.
+  | 'goal_note'
   // A member asking to connect. Actionable — accept/decline live on the
   // notification itself. DECLINING SENDS NOTHING BACK (migration 140, rule 4),
   // which is why there is no 'connection_declined' here and must never be one.

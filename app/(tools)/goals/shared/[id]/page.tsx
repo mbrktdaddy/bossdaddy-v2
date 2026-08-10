@@ -5,9 +5,19 @@
 // refuses them — there is no tier branch in this file to get wrong, which is the
 // point of doing the filtering in SQL.
 //
-// What you will not find here, at any tier below teammate: a number, a note, a
-// reminder time, or his identity statement. A partner is here to notice, not to
+// What you will not find here, at any tier below teammate: a number, a LOG note,
+// a reminder time, or his identity statement. A partner is here to notice, not to
 // audit.
+//
+// ⚠️ THE NOTES FEED AT THE BOTTOM IS NOT AN EXCEPTION TO THAT. Two different
+//    things are called "notes" in this domain and they are gated by two different
+//    columns. `goal_entries.note` is what he wrote NEXT TO A LOGGED DOSE — data
+//    the system collected, withheld from everyone below teammate, and still
+//    withheld here. `goal_notes` is what he chose to SAY TO YOU, gated by
+//    thread_access, which is orthogonal to tier on purpose (migration 145). A
+//    cheer partner who can see no numbers and no calendar can still be in the
+//    conversation, and for a lot of people that combination is the whole point.
+//    NotesFeed renders nothing at all when thread_access is 'none'.
 //
 // And the leave button. Stepping out takes nobody's permission and tells nobody.
 
@@ -18,6 +28,7 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { LABELS } from '@/lib/labels'
 import { LoginLink } from '@/components/LoginLink'
 import { getSharedGoal, listSharedDays, TIER_COPY } from '@/lib/goals/participants'
+import NotesFeed from '@/components/goals/NotesFeed'
 import { planWindow } from '@/lib/goals/progress'
 
 export const metadata: Metadata = {
@@ -119,6 +130,14 @@ export default async function SharedGoalPage({ params }: Props) {
           <p className="mt-2 text-xs text-faint">{TIER_COPY[goal.myTier].blind}</p>
         </section>
       )}
+
+      {/* ── the conversation ────────────────────────────────────────────────
+          Renders nothing unless the owner granted thread_access. readerCount is
+          1 rather than a query: from a partner's seat the owner is always on the
+          other end, so this is never the journal face. */}
+      <div className="mt-10">
+        <NotesFeed subject={{ type: 'goal', id: goal.goalId }} readerCount={1} isSubjectOwner={false} />
+      </div>
 
       {/* ── step out ────────────────────────────────────────────────────────── */}
       <section className="mt-12 border-t border-soft pt-6">

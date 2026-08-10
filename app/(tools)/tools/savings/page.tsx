@@ -9,6 +9,7 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { LABELS } from '@/lib/labels'
 import { getGoals } from '@/lib/dad-tools/savings-actions'
 import { getKids } from '@/lib/dad-tools/kid-actions'
+import { unreadNoteCounts } from '@/lib/goals/notes'
 import GoalCard from './_components/GoalCard'
 import InstallPWA from '@/components/InstallPWA'
 import { LoginLink } from '@/components/LoginLink'
@@ -75,6 +76,14 @@ export default async function SavingsIndexPage() {
   ])
   const kidNameById = new Map(kids.map((k) => [k.id, k.name]))
 
+  // Unread notes for every card in one call — see unreadNoteCounts. Done after
+  // getGoals rather than alongside it because it needs the ids.
+  const unreadNotes = await unreadNoteCounts(
+    supabase,
+    'savings_goal',
+    goalsWithStats.map((g) => g.goal.id),
+  )
+
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
 
@@ -125,6 +134,7 @@ export default async function SavingsIndexPage() {
               data={g}
               kidName={g.goal.kid_profile_id ? kidNameById.get(g.goal.kid_profile_id) ?? null : null}
               isOwner={g.goal.owner_id === user.id}
+              unreadNotes={unreadNotes.get(g.goal.id) ?? 0}
             />
           ))}
         </div>

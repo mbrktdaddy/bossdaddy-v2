@@ -29,6 +29,20 @@ type Queryable = {
 export const TIERS = ['cheer', 'witness', 'teammate'] as const
 export type ShareTier = (typeof TIERS)[number]
 
+/**
+ * Access to the goal's notes feed (migration 145) — SEPARATE FROM `tier`, and
+ * deliberately not a fourth rung on it.
+ *
+ * `tier` graduates what the SYSTEM reveals: the streak, then the calendar, then
+ * the log. This graduates what the OWNER CHOOSES TO TYPE. They are different
+ * kinds of disclosure and they do not belong on one ladder — a partner can be at
+ * `cheer`, seeing no numbers and no day-by-day at all, and still be fully in the
+ * conversation. For a lot of people that combination IS the product: someone to
+ * talk to who isn't auditing you.
+ */
+export const THREAD_ACCESS = ['none', 'read', 'write'] as const
+export type ThreadAccess = (typeof THREAD_ACCESS)[number]
+
 /** Days an invitation stays good for. Matches the savings invite window. */
 const INVITE_TTL_DAYS = 7
 
@@ -53,6 +67,40 @@ export const TIER_COPY: Record<ShareTier, { label: string; sees: string; blind: 
     label: 'Do it with him',
     sees: 'The whole goal — every day, every number, every note.',
     blind: 'For goals you are genuinely in together.',
+  },
+}
+
+/**
+ * The feed offer, in the words both sides read — the owner on the share page, the
+ * invitee before accepting.
+ *
+ * `warns` is not decoration. Migration 145 gives a newly granted partner the WHOLE
+ * history, including notes written while the goal was still solo, and there is no
+ * per-note toggle to soften that. This copy is the only thing standing between the
+ * owner and handing over his private journal, so the share page renders it with the
+ * real note count substituted in. Do not quietly drop it while tidying the form.
+ *
+ * ⚠️ THE WORDING SAYS "IN THIS FEED", NOT "YOU HAVE WRITTEN", AND THAT IS EXACT.
+ *    countNotes() counts every author's notes, because granting access exposes the
+ *    whole feed — including what earlier partners wrote. On an already-shared goal
+ *    a your-notes-only count would understate what is being handed over. If anyone
+ *    rewords this to sound more personal, the count underneath has to change too.
+ */
+export const THREAD_ACCESS_COPY: Record<ThreadAccess, { label: string; sees: string; warns: string | null }> = {
+  none: {
+    label: 'Keep my notes private',
+    sees: 'Nothing. What you write on this goal stays yours alone.',
+    warns: null,
+  },
+  read: {
+    label: 'Let him read along',
+    sees: 'He can read everything you write on this goal. He cannot reply.',
+    warns: 'Including all {count} already in this feed — the ones you wrote before today too.',
+  },
+  write: {
+    label: 'Talk it through together',
+    sees: 'He can read what you write and write back — this becomes a conversation.',
+    warns: 'Including all {count} already in this feed — the ones you wrote before today too.',
   },
 }
 
@@ -137,6 +185,7 @@ export type ParticipantRow = {
   id: string
   userId: string
   tier: ShareTier
+  threadAccess: ThreadAccess
   joinedAt: string
   username: string | null
   displayName: string | null
@@ -149,7 +198,7 @@ export async function listParticipants(
 ): Promise<ParticipantRow[]> {
   const { data, error } = await client
     .from('goal_participants')
-    .select('id, user_id, tier, joined_at, profiles(username, display_name)')
+    .select('id, user_id, tier, thread_access, joined_at, profiles(username, display_name)')
     .eq('goal_id', goalId)
     .order('joined_at', { ascending: true })
   if (error) {
@@ -162,6 +211,7 @@ export async function listParticipants(
       id: String(r.id),
       userId: String(r.user_id),
       tier: r.tier as ShareTier,
+      threadAccess: (r.thread_access as ThreadAccess) ?? 'none',
       joinedAt: String(r.joined_at),
       username: profile?.username ?? null,
       displayName: profile?.display_name ?? null,
@@ -172,6 +222,7 @@ export async function listParticipants(
 export type InvitationRow = {
   id: string
   tier: ShareTier
+  threadAccess: ThreadAccess
   email: string | null
   token: string
   expiresAt: string
@@ -185,7 +236,7 @@ export async function listInvitations(
 ): Promise<InvitationRow[]> {
   const { data, error } = await client
     .from('goal_invitations')
-    .select('id, tier, invitee_email, token, expires_at, accepted_at, declined_at, revoked_at')
+    .select('id, tier, thread_access, invitee_email, token, expires_at, accepted_at, declined_at, revoked_at')
     .eq('goal_id', goalId)
     .order('created_at', { ascending: false })
     .limit(20)
@@ -197,6 +248,7 @@ export async function listInvitations(
   return (data ?? []).map((r: Record<string, unknown>) => ({
     id: String(r.id),
     tier: r.tier as ShareTier,
+    threadAccess: (r.thread_access as ThreadAccess) ?? 'none',
     email: (r.invitee_email as string | null) ?? null,
     token: String(r.token),
     expiresAt: String(r.expires_at),
@@ -262,6 +314,8 @@ export async function createInvitation(
     inviteeUserId?: string | null
     /** The owner's explicit "I understand what he'd see" on a sensitive goal. */
     sensitiveAck?: boolean
+    /** Access to the notes feed. Defaults to 'none' — sharing a goal is not sharing a journal. */
+    threadAccess?: ThreadAccess
   },
 ): Promise<{ ok: true; token: string } | { ok: false; error: string }> {
   // WHERE THE SENSITIVE CAP IS ACTUALLY DECIDED.
@@ -278,7 +332,16 @@ export async function createInvitation(
   // skipped the checkbox could mint a witness invite on a sensitive goal, because
   // 137 has no `goal_invitations.sensitive_ack` column to constrain. Closing that
   // properly is one column in a later migration; until then this guard is the gate.
-  if (args.tier !== 'cheer') {
+  //
+  // ⚠️ THE CONDITION COVERS thread_access TOO, AND MUST STAY IN STEP WITH THE
+  //    TRIGGER. Migration 145 widened enforce_goal_sensitive_share_cap() to fire on
+  //    `tier <> 'cheer' OR thread_access <> 'none'`. If this guard checked only the
+  //    tier, an invite at cheer + write would pass here, and then the TRIGGER would
+  //    refuse the insert at accept time — handing the invitee a dead link for a
+  //    decision the owner was never asked to make. Two conditions, one meaning:
+  //    keep them identical.
+  const threadAccess: ThreadAccess = args.threadAccess ?? 'none'
+  if (args.tier !== 'cheer' || threadAccess !== 'none') {
     const { data } = await client
       .from('goals')
       .select('config')
@@ -331,6 +394,7 @@ export async function createInvitation(
     invitee_email: args.email?.trim() || null,
     invitee_user_id: args.inviteeUserId || null,
     tier: args.tier,
+    thread_access: threadAccess,
     token,
     expires_at: expires,
   })
@@ -346,6 +410,8 @@ export type InvitePreview = {
   goalId: string
   goalTitle: string
   tier: ShareTier
+  /** The feed offer. The invite page must spell this out — it is part of the consent. */
+  threadAccess: ThreadAccess
   inviterName: string
   expiresAt: string
   /** Set when the invite names a specific member (migration 144). */
@@ -377,11 +443,12 @@ export async function previewInvitation(
 
   const { data } = await admin
     .from('goal_invitations')
-    .select('id, goal_id, tier, expires_at, accepted_at, declined_at, revoked_at, invited_by, invitee_user_id')
+    .select('id, goal_id, tier, thread_access, expires_at, accepted_at, declined_at, revoked_at, invited_by, invitee_user_id')
     .eq('token', token)
     .maybeSingle()
   const invite = data as {
-    id: string; goal_id: string; tier: ShareTier; expires_at: string
+    id: string; goal_id: string; tier: ShareTier; thread_access: ThreadAccess | null
+    expires_at: string
     accepted_at: string | null; declined_at: string | null; revoked_at: string | null
     invited_by: string; invitee_user_id: string | null
   } | null
@@ -435,6 +502,7 @@ export async function previewInvitation(
       goalId: invite.goal_id,
       goalTitle: (goalRow as { title: string } | null)?.title ?? 'a goal',
       tier: invite.tier,
+      threadAccess: invite.thread_access ?? 'none',
       inviterName: inviter?.display_name?.trim() || inviter?.username || 'A Boss Daddy member',
       expiresAt: invite.expires_at,
       inviteeUserId: invite.invitee_user_id,
@@ -463,7 +531,7 @@ export async function acceptInvitation(
   const preview = await previewInvitation(admin, args.token, args.userId)
   if (!preview.ok) return { ok: false, reason: preview.reason }
 
-  const { goalId, tier, invitationId } = preview.preview
+  const { goalId, tier, threadAccess, invitationId } = preview.preview
 
   const { data: ownerRow } = await admin.from('goals').select('user_id').eq('id', goalId).maybeSingle()
   const ownerId = (ownerRow as { user_id: string } | null)?.user_id
@@ -524,14 +592,21 @@ export async function acceptInvitation(
     }
   }
 
-  // `sensitive_ack` mirrors the tier the OWNER chose at invite time, which
+  // `sensitive_ack` mirrors what the OWNER chose at invite time, which
   // createInvitation only allows on a sensitive goal once he's confirmed what the
   // partner would see. The invitee never makes this call — it isn't theirs to make.
+  //
+  // ⚠️ THE CONDITION MUST MATCH createInvitation'S GUARD AND MIGRATION 145'S
+  //    TRIGGER, WHICH BOTH FIRE ON `tier <> 'cheer' OR thread_access <> 'none'`.
+  //    Leaving this as `tier !== 'cheer'` makes every cheer + feed-access invite
+  //    to a sensitive goal die HERE, at the accept, with the invitee holding a
+  //    link that just says it didn't work.
   const { error: insertError } = await admin.from('goal_participants').insert({
     goal_id: goalId,
     user_id: args.userId,
     tier,
-    sensitive_ack: tier !== 'cheer',
+    thread_access: threadAccess,
+    sensitive_ack: tier !== 'cheer' || threadAccess !== 'none',
     invited_by: ownerId,
   })
   if (insertError) {
@@ -604,16 +679,40 @@ export async function removeParticipant(
 
 /**
  * Change what an existing partner can see. Owner-only by RLS; the sensitive cap
- * trigger still applies, so raising a sensitive goal above cheer requires the
- * acknowledgement to travel with the change.
+ * trigger still applies, so raising a sensitive goal above cheer — or opening its
+ * notes at all — requires the acknowledgement to travel with the change.
+ *
+ * Tier and feed access move together in ONE update because they are one form
+ * submission and one trigger evaluation. Writing them separately would let a
+ * sensitive goal's tier bump succeed and its feed grant fail, leaving the owner
+ * looking at a half-applied change he never asked for.
+ *
+ * ⚠️ `threadAccess` IS OPTIONAL, AND OMITTING IT LEAVES THE COLUMN ALONE. It is not
+ *    defaulted to 'none' here, because "the caller didn't mention it" and "revoke
+ *    it" are different instructions and this function cannot tell them apart. A
+ *    form that changes only the tier would otherwise silently close a conversation
+ *    the owner never touched — the kind of revocation you only discover when your
+ *    partner stops replying.
  */
 export async function setParticipantTier(
   client: Queryable,
-  args: { goalId: string; userId: string; tier: ShareTier; sensitiveAck: boolean },
+  args: {
+    goalId: string
+    userId: string
+    tier: ShareTier
+    threadAccess?: ThreadAccess
+    sensitiveAck: boolean
+  },
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  const patch: Record<string, unknown> = {
+    tier: args.tier,
+    sensitive_ack: args.sensitiveAck,
+  }
+  if (args.threadAccess !== undefined) patch.thread_access = args.threadAccess
+
   const { error } = await client
     .from('goal_participants')
-    .update({ tier: args.tier, sensitive_ack: args.sensitiveAck })
+    .update(patch)
     .eq('goal_id', args.goalId)
     .eq('user_id', args.userId)
   if (error) {
@@ -631,4 +730,8 @@ export async function setParticipantTier(
 
 export function isShareTier(value: unknown): value is ShareTier {
   return typeof value === 'string' && (TIERS as readonly string[]).includes(value)
+}
+
+export function isThreadAccess(value: unknown): value is ThreadAccess {
+  return typeof value === 'string' && (THREAD_ACCESS as readonly string[]).includes(value)
 }

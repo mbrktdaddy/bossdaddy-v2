@@ -20,6 +20,7 @@ import { LABELS } from '@/lib/labels'
 import { LoginLink } from '@/components/LoginLink'
 import { progressToTarget } from '@/lib/goals/progress'
 import { localDateInZone } from '@/lib/goals/recurrence'
+import { unreadNoteCounts } from '@/lib/goals/notes'
 
 export const metadata: Metadata = {
   title:       LABELS.goals.pageTitle,
@@ -126,6 +127,11 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
     .select('token')
     .maybeSingle()
   const calendarToken = (calendarRow as { token: string } | null)?.token ?? null
+
+  // Unread notes per goal, in ONE call rather than one per card. The RPC applies
+  // the same access check the feed does, so a badge can never advertise notes this
+  // reader can't open.
+  const unreadNotes = await unreadNoteCounts(supabase, 'goal', goals.map((g) => g.id))
   // webcal:// is what makes a tap on a phone offer to subscribe instead of
   // downloading a file. Same URL, different scheme — so the host comes from the
   // canonical SITE_URL rather than being rebuilt by hand.
@@ -304,11 +310,22 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
                       </p>
                     ) : null}
                   </div>
-                  {openCount > 0 && goal.status === 'active' ? (
-                    <span className="shrink-0 rounded-full bg-accent px-3 py-1 text-xs font-bold text-white">
-                      {openCount > 1 ? `${openCount} open` : 'Due'}
-                    </span>
-                  ) : null}
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    {openCount > 0 && goal.status === 'active' ? (
+                      <span className="rounded-full bg-accent px-3 py-1 text-xs font-bold text-white">
+                        {openCount > 1 ? `${openCount} open` : 'Due'}
+                      </span>
+                    ) : null}
+                    {/* Unread notes. Shown on PAUSED and ARCHIVED goals too, unlike
+                        the Due badge: a paused goal isn't asking anything of you,
+                        but a person who wrote in it is, and that's the one thing
+                        worth surfacing on a goal you've set down. */}
+                    {(unreadNotes.get(goal.id) ?? 0) > 0 ? (
+                      <span className="rounded-full border border-strong bg-surface-raised px-3 py-1 text-xs font-bold text-accent-text">
+                        {unreadNotes.get(goal.id)} new
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
 
                 {progress != null ? (

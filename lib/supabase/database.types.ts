@@ -43,6 +43,7 @@ export type Database = {
         Row: {
           conversation_id: string | null
           created_at: string
+          goal_note_id: string | null
           id: string
           message_id: string | null
           note: string | null
@@ -54,6 +55,7 @@ export type Database = {
         Insert: {
           conversation_id?: string | null
           created_at?: string
+          goal_note_id?: string | null
           id?: string
           message_id?: string | null
           note?: string | null
@@ -65,6 +67,7 @@ export type Database = {
         Update: {
           conversation_id?: string | null
           created_at?: string
+          goal_note_id?: string | null
           id?: string
           message_id?: string | null
           note?: string | null
@@ -79,6 +82,13 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "abuse_reports_goal_note_id_fkey"
+            columns: ["goal_note_id"]
+            isOneToOne: false
+            referencedRelation: "goal_notes"
             referencedColumns: ["id"]
           },
           {
@@ -976,6 +986,7 @@ export type Database = {
           invitee_email: string | null
           invitee_user_id: string | null
           revoked_at: string | null
+          thread_access: string
           tier: string
           token: string
         }
@@ -990,6 +1001,7 @@ export type Database = {
           invitee_email?: string | null
           invitee_user_id?: string | null
           revoked_at?: string | null
+          thread_access?: string
           tier?: string
           token: string
         }
@@ -1004,6 +1016,7 @@ export type Database = {
           invitee_email?: string | null
           invitee_user_id?: string | null
           revoked_at?: string | null
+          thread_access?: string
           tier?: string
           token?: string
         }
@@ -1020,6 +1033,65 @@ export type Database = {
             columns: ["goal_id"]
             isOneToOne: false
             referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_note_reads: {
+        Row: {
+          last_read_at: string
+          subject_id: string
+          subject_type: string
+          user_id: string
+        }
+        Insert: {
+          last_read_at?: string
+          subject_id: string
+          subject_type: string
+          user_id: string
+        }
+        Update: {
+          last_read_at?: string
+          subject_id?: string
+          subject_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      goal_notes: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          edited_at: string | null
+          id: string
+          subject_id: string
+          subject_type: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          edited_at?: string | null
+          id?: string
+          subject_id: string
+          subject_type: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          edited_at?: string | null
+          id?: string
+          subject_id?: string
+          subject_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_notes_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1102,6 +1174,7 @@ export type Database = {
           invited_by: string | null
           joined_at: string
           sensitive_ack: boolean
+          thread_access: string
           tier: string
           user_id: string
         }
@@ -1112,6 +1185,7 @@ export type Database = {
           invited_by?: string | null
           joined_at?: string
           sensitive_ack?: boolean
+          thread_access?: string
           tier?: string
           user_id: string
         }
@@ -1122,6 +1196,7 @@ export type Database = {
           invited_by?: string | null
           joined_at?: string
           sensitive_ack?: boolean
+          thread_access?: string
           tier?: string
           user_id?: string
         }
@@ -4239,6 +4314,10 @@ export type Database = {
         }[]
       }
       goal_is_sensitive: { Args: { _goal_id: string }; Returns: boolean }
+      goal_note_access: {
+        Args: { _subject_id: string; _subject_type: string }
+        Returns: string
+      }
       goal_owner_id: { Args: { _goal_id: string }; Returns: string }
       goal_participant_tier: { Args: { _goal_id: string }; Returns: string }
       goal_tier_at_least: {
@@ -4270,6 +4349,13 @@ export type Database = {
       respond_to_connection: {
         Args: { _accept: boolean; _other: string }
         Returns: string
+      }
+      unread_note_counts: {
+        Args: { _subject_ids: string[]; _subject_type: string }
+        Returns: {
+          subject_id: string
+          unread: number
+        }[]
       }
     }
     Enums: {

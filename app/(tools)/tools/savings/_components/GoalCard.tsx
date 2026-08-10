@@ -19,9 +19,11 @@ interface Props {
   data: GoalWithStats
   kidName?: string | null
   isOwner?: boolean
+  /** Unread notes in this goal's feed. 0 renders nothing. */
+  unreadNotes?: number
 }
 
-export default function GoalCard({ data, kidName, isOwner = false }: Props) {
+export default function GoalCard({ data, kidName, isOwner = false, unreadNotes = 0 }: Props) {
   const { goal, stats } = data
   const statusClass = STATUS_PILL[goal.status] ?? STATUS_PILL.active
 
@@ -47,6 +49,14 @@ export default function GoalCard({ data, kidName, isOwner = false }: Props) {
             <span className={`text-xs px-2 py-0.5 rounded-full font-medium border shrink-0 capitalize ${statusClass}`}>
               {goal.status}
             </span>
+            {/* Someone said something here. Sits beside the status pill rather
+                than in the stats row below — this is the one thing on the card
+                that's about a person rather than a number. */}
+            {unreadNotes > 0 && (
+              <span className="text-xs px-2 py-0.5 rounded-full font-bold border border-strong bg-surface-raised text-accent-text shrink-0">
+                {unreadNotes} new
+              </span>
+            )}
           </div>
         </div>
 

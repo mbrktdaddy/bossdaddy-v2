@@ -18,6 +18,7 @@ import GoalDangerZone from '../_components/GoalDangerZone'
 import GoalStatusButton from '../_components/GoalStatusButton'
 import LeaveGoalButton from '../_components/LeaveGoalButton'
 import MyDestinationPanel from '../_components/MyDestinationPanel'
+import NotesFeed from '@/components/goals/NotesFeed'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -200,6 +201,16 @@ export default async function SavingsGoalPage({ params }: PageProps) {
         entries={entries}
         profileById={profileById}
         showAttribution={showAttribution}
+      />
+
+      {/* The feed. Savings has no thread_access ladder — 078 is full-visibility
+          by design, so membership IS write, and every participant can post.
+          readerCount excludes the viewer, which is what keeps a solo pot framed
+          as a journal rather than a conversation with nobody. */}
+      <NotesFeed
+        subject={{ type: 'savings_goal', id: goal.id }}
+        readerCount={Math.max(0, participants.length - 1)}
+        isSubjectOwner={isOwner}
       />
 
       {myParticipant && (

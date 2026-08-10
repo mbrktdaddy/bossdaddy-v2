@@ -205,6 +205,30 @@ export const LABELS = {
     shareCta:        'Share this goal',
     /** Icon-button / tight-space form of the same action. */
     shareShort:      'Share',
+    // ── The notes feed (mig 145) ────────────────────────────────────────────
+    // TWO HEADINGS FOR ONE TABLE, and that is the feature rather than a naming
+    // wobble. `goal_notes` is the permanent internal name; what a dad sees
+    // depends on whether anyone else can read it. Alone it is a journal, so
+    // calling it "The conversation" would be addressing an empty room. Once a
+    // partner is in, calling it "Your notes" would hide the fact that someone is
+    // reading. Both strings are shared with the savings feed, which is the same
+    // component.
+    notesSolo:       'Your notes',
+    notesShared:     'The conversation',
+    notesEmptySolo:  'Nothing here yet. Write down why this one matters — you\'ll want it on a bad week.',
+    notesEmptyShared: 'Nothing here yet. Say the first thing.',
+    notesEmptyRead:  'Nothing here yet.',
+    /** Under the composer on an UNSHARED feed. See migration 145 rule 2 — this is
+     *  the standing half of the exposure warning, and the share page carries the
+     *  other half with the real count in it. */
+    notesPrivateHint: 'Private for now. If you give someone access later, they\'ll be able to read everything here.',
+    notesReadOnly:   'You can read along here. Only the owner can write.',
+    notesPlaceholderSolo:   'How did it go? What got in the way?',
+    notesPlaceholderShared: 'Say something…',
+    notesSaveSolo:   'Save note',
+    notesSaveShared: 'Send',
+    notesOlderCta:   'Show earlier notes',
+    notesLoadFailed: 'Couldn\'t load your notes just now. Refresh and they\'ll be here.',
     // /today — the "what do I do right now" screen, and the PWA's real home.
     todayTitle:         'Today — Boss Daddy',
     todayEyebrow:       'Today',

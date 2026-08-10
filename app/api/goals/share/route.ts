@@ -3,7 +3,7 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { checkRateLimit } from '@/lib/rate-limit'
 import {
   createInvitation, revokeInvitation, removeParticipant, setParticipantTier,
-  isShareTier,
+  isShareTier, isThreadAccess,
 } from '@/lib/goals/participants'
 import { isInvitableContact } from '@/lib/goals/contacts'
 import { deliverGoalInvite, type DeliveryOutcome } from '@/lib/goals/invite-delivery'
@@ -29,13 +29,25 @@ import { deliverGoalInvite, type DeliveryOutcome } from '@/lib/goals/invite-deli
 //
 // The forms POST urlencoded, so all of this works with JavaScript disabled.
 //
-// THE ONLY THING THAT EVER GETS SENT IS THE INVITE ITSELF. One email, or one
-// notification, at the moment the owner asks for it — see lib/goals/invite-
-// delivery.ts. After that: nothing, to anybody, in either direction, forever. No
-// "he missed his meds", no "she stopped watching", no digest. That silence is the
-// feature (migration 137's header has the reasoning); sharing state is something
-// you see by looking, which is what keeps this accountability rather than
-// surveillance. Revoking and leaving stay silent on both sides.
+// NOTHING ON THIS ROUTE EVER SENDS ANYTHING EXCEPT THE INVITE ITSELF. One email,
+// or one notification, at the moment the owner asks for it — see lib/goals/invite-
+// delivery.ts. After that this route is silent, to anybody, in either direction,
+// forever. No "he missed his meds", no "she stopped watching", no digest. That
+// silence is the feature (migration 137's header has the reasoning); sharing state
+// is something you see by looking, which is what keeps this accountability rather
+// than surveillance. Revoking and leaving stay silent on both sides.
+//
+// ⚠️ THE ONE THING THAT DOES NOTIFY, AND WHY IT ISN'T A HOLE IN THE ABOVE:
+//    posting to a goal's notes feed (migration 145) pings the other people in it.
+//    The distinction is not a loophole, it's the whole line — THE SYSTEM NEVER
+//    REPORTS ON YOU; PEOPLE MAY SPEAK TO YOU. A cron telling your wife you missed
+//    a dose is surveillance. Your wife typing "proud of you" is a message, and
+//    swallowing it isn't privacy, it's just a dead feed. The goals sweep's
+//    recipient lookup remains owner-only and is not touched by any of this.
+//
+// `thread_access` is granted HERE, alongside the tier, and is the only thing that
+// can turn a private journal into a conversation. It defaults to 'none': sharing a
+// goal is not sharing the journal.
 
 export async function POST(request: NextRequest) {
   const form = await request.formData()
@@ -54,6 +66,13 @@ export async function POST(request: NextRequest) {
     case 'invite': {
       const tier = String(form.get('tier') ?? 'cheer')
       if (!isShareTier(tier)) return back(request, sharePath(goalId), 'Pick what they can see.')
+
+      // Absent field → 'none'. A form that forgets to render the control must
+      // fall through to the private default, never to an accidental grant.
+      const threadAccess = String(form.get('threadAccess') ?? 'none')
+      if (!isThreadAccess(threadAccess)) {
+        return back(request, sharePath(goalId), 'Pick whether they can see your notes.')
+      }
 
       const email = String(form.get('email') ?? '').trim()
       const contactUserId = String(form.get('contactUserId') ?? '').trim()
@@ -89,8 +108,9 @@ export async function POST(request: NextRequest) {
         // Verified against his real contacts by isInvitableContact above, so this
         // is safe to persist as the invite's intended recipient (migration 144).
         inviteeUserId: contactUserId || null,
+        threadAccess,
         // The owner's explicit acknowledgement on a sensitive goal. The domain
-        // service refuses a non-cheer invite without it.
+        // service refuses a non-cheer invite, OR any feed grant, without it.
         sensitiveAck: String(form.get('sensitiveAck') ?? '') === 'yes',
       })
 
@@ -158,10 +178,21 @@ export async function POST(request: NextRequest) {
       const tier = String(form.get('tier') ?? '')
       if (!participantUserId || !isShareTier(tier)) return back(request, sharePath(goalId))
 
+      // ABSENT ≠ 'none' ON THIS OP. Unlike the invite above, this is an edit to a
+      // row that already exists: a form that submits only a tier must leave the
+      // feed exactly as it was. Passing undefined tells the domain service not to
+      // touch the column at all.
+      const rawAccess = form.get('threadAccess')
+      const threadAccess = rawAccess === null ? undefined : String(rawAccess)
+      if (threadAccess !== undefined && !isThreadAccess(threadAccess)) {
+        return back(request, sharePath(goalId))
+      }
+
       const result = await setParticipantTier(supabase, {
         goalId,
         userId: participantUserId,
         tier,
+        threadAccess,
         sensitiveAck: String(form.get('sensitiveAck') ?? '') === 'yes',
       })
       return back(request, sharePath(goalId), result.ok ? undefined : result.error)

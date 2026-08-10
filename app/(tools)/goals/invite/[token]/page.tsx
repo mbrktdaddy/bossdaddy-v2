@@ -19,7 +19,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { LABELS } from '@/lib/labels'
 import { ogImageMeta } from '@/lib/og'
 import { LoginLink } from '@/components/LoginLink'
-import { previewInvitation, TIER_COPY } from '@/lib/goals/participants'
+import { previewInvitation, TIER_COPY, THREAD_ACCESS_COPY } from '@/lib/goals/participants'
 
 // ⚠️ THE GOAL TITLE MUST NEVER APPEAR IN THIS METADATA. STATIC ONLY — do not turn
 // this into generateMetadata().
@@ -117,7 +117,7 @@ export default async function GoalInvitePage({ params, searchParams }: Props) {
     )
   }
 
-  const { goalTitle, inviterName, tier, expiresAt } = preview.preview
+  const { goalTitle, inviterName, tier, threadAccess, expiresAt } = preview.preview
 
   return (
     <Wrap>
@@ -147,8 +147,31 @@ export default async function GoalInvitePage({ params, searchParams }: Props) {
         <p className="mt-1 text-sm text-faint">{TIER_COPY[tier].blind}</p>
       </div>
 
+      {/* The feed offer, stated on its own. It is a different kind of access from
+          the tier — what he chose to SAY, not what the app recorded — and an
+          invitee who is about to be handed someone's private journal should be
+          told that in its own box rather than in a footnote. */}
+      {threadAccess !== 'none' ? (
+        <div className="mt-4 rounded-xl border border-soft bg-surface p-5">
+          <p className="text-sm font-bold text-prose">{THREAD_ACCESS_COPY[threadAccess].label}</p>
+          <p className="mt-2 text-sm text-prose-muted">{THREAD_ACCESS_COPY[threadAccess].sees}</p>
+        </div>
+      ) : null}
+
       <ul className="mt-6 space-y-2 text-xs text-faint">
-        <li>· You&apos;ll never be notified about this. Nothing gets pushed or emailed to you — you look when you want to.</li>
+        {/*
+          ⚠️ THIS LINE IS CONDITIONAL BECAUSE IT IS A PROMISE. Unconditionally it
+             used to read "you'll never be notified about this" — true when the
+             only thing to know was whether he'd logged a dose, and the sweep is
+             still owner-only so that half stands. But a notes feed pings you when
+             someone writes in it (migration 145), and telling an invitee otherwise
+             on the screen where they consent would be a lie at the worst moment.
+        */}
+        {threadAccess === 'none' ? (
+          <li>· You&apos;ll never be notified about this. Nothing gets pushed or emailed to you — you look when you want to.</li>
+        ) : (
+          <li>· You&apos;ll be pinged when someone writes in the notes — and only then. Nothing tells you about a day he missed.</li>
+        )}
         <li>· You can walk away whenever you like, and you don&apos;t need his say-so.</li>
         <li>· He can stop sharing whenever he likes too.</li>
         <li>· Expires {expiresAt.slice(0, 10)}.</li>

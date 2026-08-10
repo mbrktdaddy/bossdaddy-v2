@@ -148,6 +148,13 @@ export async function reportContent(input: {
   reportedUserId?: string | null
   messageId?:      string | null
   conversationId?: string | null
+  /**
+   * A note in a goal's notes feed (migration 145). Every other place two members
+   * can address each other has a report route; the feed is not the exception, and
+   * the owner's ability to DELETE something said there is not the same thing —
+   * deletion is silent and leaves no record for a moderator.
+   */
+  goalNoteId?:     string | null
   reason:          string
   note?:           string | null
 }): Promise<Result> {
@@ -161,6 +168,7 @@ export async function reportContent(input: {
     reported_user_id: input.reportedUserId ?? null,
     message_id:       input.messageId ?? null,
     conversation_id:  input.conversationId ?? null,
+    goal_note_id:     input.goalNoteId ?? null,
     reason,
     note:             input.note ?? null,
   })
