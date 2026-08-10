@@ -794,13 +794,20 @@ export async function createInvite(
   // Expiring rather than deleting keeps the audit trail. Only matches invites
   // with an address: a bare link invite has no identifiable recipient, and two
   // of those legitimately mean two different people.
-  if (parsed.data.email) {
-    await admin.from('savings_goal_invitations')
-      .update({ expires_at: new Date().toISOString() })
+  // Matches on whichever addressing was used. invitee_user_id is new in migration
+  // 144 — this action already RECEIVED the id and used it only to fire a
+  // notification, so a repeat invite to a member picked by name minted a second
+  // live token with nothing to match the first against.
+  const nowIsoDedupe = new Date().toISOString()
+  if (parsed.data.inviteeUserId || parsed.data.email) {
+    const stale = admin.from('savings_goal_invitations')
+      .update({ expires_at: nowIsoDedupe })
       .eq('goal_id', parsed.data.goalId)
-      .eq('email', parsed.data.email)
       .is('used_at', null)
-      .gt('expires_at', new Date().toISOString())
+      .gt('expires_at', nowIsoDedupe)
+    await (parsed.data.inviteeUserId
+      ? stale.eq('invitee_user_id', parsed.data.inviteeUserId)
+      : stale.eq('email', parsed.data.email!))
   }
 
   const { data, error } = await admin.from('savings_goal_invitations')
@@ -809,6 +816,7 @@ export async function createInvite(
       inviter_id: user.id,
       token,
       email:      parsed.data.email ?? null,
+      invitee_user_id: parsed.data.inviteeUserId ?? null,
       expires_at: expiresAt,
     })
     .select('id')

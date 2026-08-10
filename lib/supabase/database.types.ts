@@ -974,6 +974,7 @@ export type Database = {
           id: string
           invited_by: string
           invitee_email: string | null
+          invitee_user_id: string | null
           revoked_at: string | null
           tier: string
           token: string
@@ -987,6 +988,7 @@ export type Database = {
           id?: string
           invited_by: string
           invitee_email?: string | null
+          invitee_user_id?: string | null
           revoked_at?: string | null
           tier?: string
           token: string
@@ -1000,6 +1002,7 @@ export type Database = {
           id?: string
           invited_by?: string
           invitee_email?: string | null
+          invitee_user_id?: string | null
           revoked_at?: string | null
           tier?: string
           token?: string
@@ -3032,6 +3035,7 @@ export type Database = {
           expires_at: string
           goal_id: string
           id: string
+          invitee_user_id: string | null
           inviter_id: string
           token: string
           used_at: string | null
@@ -3043,6 +3047,7 @@ export type Database = {
           expires_at: string
           goal_id: string
           id?: string
+          invitee_user_id?: string | null
           inviter_id: string
           token: string
           used_at?: string | null
@@ -3054,6 +3059,7 @@ export type Database = {
           expires_at?: string
           goal_id?: string
           id?: string
+          invitee_user_id?: string | null
           inviter_id?: string
           token?: string
           used_at?: string | null

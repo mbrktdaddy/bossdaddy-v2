@@ -86,6 +86,9 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         tier,
         email,
+        // Verified against his real contacts by isInvitableContact above, so this
+        // is safe to persist as the invite's intended recipient (migration 144).
+        inviteeUserId: contactUserId || null,
         // The owner's explicit acknowledgement on a sensitive goal. The domain
         // service refuses a non-cheer invite without it.
         sensitiveAck: String(form.get('sensitiveAck') ?? '') === 'yes',

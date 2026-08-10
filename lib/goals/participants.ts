@@ -254,6 +254,12 @@ export async function createInvitation(
     userId: string
     tier: ShareTier
     email?: string | null
+    /**
+     * The member this invite is FOR, when picked from contacts (migration 144).
+     * Verified server-side by isInvitableContact before it reaches here — never a
+     * raw form value. NULL for a bare link invite, which stays a first-class case.
+     */
+    inviteeUserId?: string | null
     /** The owner's explicit "I understand what he'd see" on a sensitive goal. */
     sensitiveAck?: boolean
   },
@@ -298,26 +304,32 @@ export async function createInvitation(
   // Revoked, not deleted: `revoked_at` is what makes invitationState() report
   // "called back" instead of silently losing the history.
   //
-  // ⚠️ ONLY COVERS EMAIL INVITES. A contact picked by name stores no identifier —
-  // goal_invitations has invitee_email and nothing else — so member invites can
-  // still stack up. Closing that needs an `invitee_user_id` column, which would
-  // also let migration 141's cascade scope its revocation to the pair and let
-  // accept verify the intended recipient. Three things, one column.
-  if (args.email?.trim()) {
-    await client
-      .from('goal_invitations')
-      .update({ revoked_at: new Date().toISOString() })
-      .eq('goal_id', args.goalId)
-      .eq('invitee_email', args.email.trim())
-      .is('accepted_at', null)
-      .is('declined_at', null)
-      .is('revoked_at', null)
+  // Covers BOTH addressing modes since migration 144 added invitee_user_id. A bare
+  // link invite with neither is deliberately never deduped: two of those legitimately
+  // mean two different people.
+  //
+  // Not merely tidiness — migration 144's partial unique indexes now REFUSE a second
+  // live invite for the same recipient, so skipping this turns a repeat invite into
+  // a 23505 instead of a replacement.
+  const stale = client
+    .from('goal_invitations')
+    .update({ revoked_at: new Date().toISOString() })
+    .eq('goal_id', args.goalId)
+    .is('accepted_at', null)
+    .is('declined_at', null)
+    .is('revoked_at', null)
+
+  if (args.inviteeUserId) {
+    await stale.eq('invitee_user_id', args.inviteeUserId)
+  } else if (args.email?.trim()) {
+    await stale.eq('invitee_email', args.email.trim())
   }
 
   const { error } = await client.from('goal_invitations').insert({
     goal_id: args.goalId,
     invited_by: args.userId,
     invitee_email: args.email?.trim() || null,
+    invitee_user_id: args.inviteeUserId || null,
     tier: args.tier,
     token,
     expires_at: expires,
@@ -336,6 +348,8 @@ export type InvitePreview = {
   tier: ShareTier
   inviterName: string
   expiresAt: string
+  /** Set when the invite names a specific member (migration 144). */
+  inviteeUserId: string | null
 }
 
 /**
@@ -355,13 +369,13 @@ export async function previewInvitation(
 
   const { data } = await admin
     .from('goal_invitations')
-    .select('id, goal_id, tier, expires_at, accepted_at, declined_at, revoked_at, invited_by')
+    .select('id, goal_id, tier, expires_at, accepted_at, declined_at, revoked_at, invited_by, invitee_user_id')
     .eq('token', token)
     .maybeSingle()
   const invite = data as {
     id: string; goal_id: string; tier: ShareTier; expires_at: string
     accepted_at: string | null; declined_at: string | null; revoked_at: string | null
-    invited_by: string
+    invited_by: string; invitee_user_id: string | null
   } | null
 
   if (!invite) return { ok: false, reason: 'That invite link isn\'t valid.' }
@@ -387,6 +401,7 @@ export async function previewInvitation(
       tier: invite.tier,
       inviterName: inviter?.display_name?.trim() || inviter?.username || 'A Boss Daddy member',
       expiresAt: invite.expires_at,
+      inviteeUserId: invite.invitee_user_id,
     },
   }
 }
@@ -417,6 +432,21 @@ export async function acceptInvitation(
 
   if (ownerId === args.userId) {
     return { ok: false, reason: 'That\'s your own goal — you already see everything.' }
+  }
+
+  // ADDRESSED INVITES ARE FOR THE PERSON THEY NAME (migration 144).
+  //
+  // Until the column existed, whoever opened the link became the participant —
+  // fine for "make me something I can text", wrong for an invite picked from
+  // contacts, where the owner chose a specific person and a forwarded link would
+  // quietly substitute someone else onto a medication log.
+  //
+  // Only enforced when set. A bare link invite still has the token as its only
+  // addressing, which remains a deliberate, first-class case.
+  if (preview.preview.inviteeUserId && preview.preview.inviteeUserId !== args.userId) {
+    // Deliberately vague, same as the block check: confirming who it WAS for
+    // tells the wrong person something about the right one.
+    return { ok: false, reason: 'That invite can\'t be accepted.' }
   }
 
   const { data: blocks } = await admin
