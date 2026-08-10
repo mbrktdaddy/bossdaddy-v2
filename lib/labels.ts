@@ -241,19 +241,32 @@ export const LABELS = {
       heroTitleSecond:  'You can use them too.',
       heroBody:         'No PR samples. No app downloads. No sign-up walls. Plug in a birthdate, get a number that means something. Capture the ones that count.',
       loggedInGreeting: 'Welcome back, Boss.',
-      // ⚠️ NOT "…with your family". This hub holds a cessation taper and a
-      // medication schedule as readily as it holds a countdown to a kid's
-      // eighteenth — framing the whole page as family made the personal half
-      // invisible, and told a man quitting smoking that the page wasn't for him.
+      // UTILITY, NOT INTROSPECTION. Two earlier drafts framed this as a status
+      // check — "Where you are right now, with your family", then "Where you
+      // stand right now". Both were wrong for a hub: it's a place you come to
+      // PICK something up, not to be told how you're doing. The individual tools
+      // report status; the shelf they sit on shouldn't.
       //
-      // Neutral rather than motivational on purpose. "Who's counting on you"
-      // reads fine over a savings goal and lands very differently over a relapse,
-      // and brand-guide §1.6 puts the edge OFF for exactly that.
+      // "Toolbox" also fixes the older problem. The family framing made the
+      // personal half invisible — this holds a cessation taper and a medication
+      // schedule as readily as a countdown to a kid's eighteenth — and a toolbox
+      // makes no claim about whose life the tools are for.
+      //
+      // No brand name in the H1: the wordmark sits directly above it.
       //
       // Avoids two phrases already spoken for: "Your Stuff" is /account, and
       // "What you're working on" is the goals+savings section ON /account.
-      loggedInBody:     'Where you stand right now.',
-      loggedInDek:      'Your goals, your money, and the time you\'ve got with them.',
+      // The dek names one tool per verb, in the order they're most used. Note
+      // "capture a moment" and NOT "log a memory": the Dad Tools vocab is locked
+      // at the top of this block — container "[Kid]'s Log", unit "moment", verb
+      // "capture" — and this hub is where a reader learns it. Drifting here is
+      // how the vocabulary stops being load-bearing everywhere else.
+      //
+      // "the ultimate toolbox for Boss Dads" was cut from the second sentence:
+      // the H1 directly above already says Toolbox, and superlatives are the
+      // hype register brand-guide §1 rules out.
+      loggedInBody:     'Your Toolbox.',
+      loggedInDek:      'Set a goal, calculate a savings plan, track a milestone, or capture a moment. Start one today — and invite a friend or family member as an accountability partner. More tools are on the way.',
       manageKidsCta:    'Manage your family →',
       addFirstKidCta:   'Add your first family member →',
     },
