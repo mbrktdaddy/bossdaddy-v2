@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { assertValidSchedule, isValidTimeZone, RecurrenceError } from '@/lib/goals/recurrence'
+import { assertValidSchedule, isValidTimeZone, localDateInZone, RecurrenceError } from '@/lib/goals/recurrence'
 import { buildRrule, normalizeDays } from '@/lib/goals/schedule-input'
 import { materializeScheduleById } from '@/lib/goals/sweep'
 import { loadTemplate } from '@/lib/goals/templates'
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       first?.message ?? 'Something in that form didn\'t look right.',
     )
   }
-  const input = parsed.data
+  const input = { ...parsed.data }
   const origin = { template: input.templateSlug ?? '', kind: input.kind }
 
   if (!isValidTimeZone(input.timezone)) {
@@ -78,8 +78,23 @@ export async function POST(request: NextRequest) {
   // a cessation goal is exactly the evidence-against-the-identity this layer
   // exists to avoid. (Stale nudges aren't the risk; the sweep skips anything too
   // old to be one.) The form's `min` says the same thing; this is the gate.
-  if (input.clientToday && input.startDate < input.clientToday) {
-    return bounce(request, origin, 'Start today or later — I can\'t schedule days that already happened.')
+  //
+  // ⚠️ "TODAY" IS RECOMPUTED HERE, AT SUBMIT TIME. It used to trust `clientToday`,
+  // a hidden field stamped when the FORM RENDERED — so both the default start date
+  // and the check that validated it came from the same stale moment and happily
+  // agreed with each other.
+  //
+  // Observed: a goal created at 00:02 local was dated to the previous day, because
+  // the form had been open since 23:5x. Every plan then reads a day ahead of
+  // itself — "Day 2" on the day you started — and the first occurrence materializes
+  // for a date already gone.
+  //
+  // Clamped rather than rejected. A form that went stale across midnight is not a
+  // user error, and "today or later" is satisfied by moving it to today: he asked
+  // to start now and that's what he gets. A genuinely future date is left alone.
+  const serverToday = localDateInZone(new Date(), input.timezone)
+  if (input.startDate < serverToday) {
+    input.startDate = serverToday
   }
 
   const days = normalizeDays(form.getAll('days').map(String))

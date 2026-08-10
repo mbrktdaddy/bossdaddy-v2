@@ -47,11 +47,16 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
     )
   }
 
-  // RLS: only the owner reads a goal here, so a goal that isn't his is a 404.
+  // Owner-only, filtered EXPLICITLY. This used to say "RLS: only the owner reads a
+  // goal here" and lean on that — untrue since migration 137 gave teammates base
+  // -table read, which would have let a teammate open the SHARING screen for
+  // somebody else's goal. A goal that isn't his is a 404; the reader's own view of
+  // a shared goal is /goals/shared/[id].
   const { data: goalRow } = await supabase
     .from('goals')
     .select('id, title, config')
     .eq('id', id)
+    .eq('user_id', user.id)
     .maybeSingle()
   const goal = goalRow as { id: string; title: string; config: { sensitive?: unknown } | null } | null
   if (!goal) notFound()

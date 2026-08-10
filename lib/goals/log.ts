@@ -72,10 +72,22 @@ export async function logOccurrenceEntry(
   }
   if (!args.occurrenceId || !args.userId) return empty
 
+  // ⚠️ OWNERSHIP IS CHECKED HERE, NOT LEFT TO RLS.
+  //
+  // This looked the occurrence up by id alone. Safe until migration 137, which
+  // gave teammates read on goal_occurrences — and `goal_entries_owner_write` only
+  // asserts `user_id = auth.uid()`, NOT that the goal belongs to the writer. So a
+  // teammate could resolve someone else's occurrence and write an entry against
+  // their goal under their own user id. The row would even look legitimate.
+  //
+  // The teammate WRITE path is deliberately unbuilt (migration 137 defers it), so
+  // owner-only is the correct rule today. When it IS built it lands here, and it
+  // needs `logged_by` — it must not be re-enabled by loosening this lookup.
   const { data: occurrenceRow } = await client
     .from('goal_occurrences')
     .select('id, goal_id, status, local_date')
     .eq('id', args.occurrenceId)
+    .eq('user_id', args.userId)
     .maybeSingle()
   const occurrence = occurrenceRow as
     { id: string; goal_id: string; status: string; local_date: string } | null

@@ -81,6 +81,7 @@ export default async function TodayPage() {
   const { data: occurrenceRows } = await supabase
     .from('goal_occurrences')
     .select('id, goal_id, local_date, local_time, status, target_value, due_at, shifted')
+    .eq('user_id', user.id)
     .in('status', OPEN_STATUSES)
     .lte('due_at', horizon.toISOString())
     .order('due_at', { ascending: true })
@@ -93,6 +94,7 @@ export default async function TodayPage() {
     ? await supabase
         .from('goals')
         .select('id, title, status, metric_key, metric_unit, identity_short')
+        .eq('user_id', user.id)
         .in('id', goalIds)
     : { data: [] }
 

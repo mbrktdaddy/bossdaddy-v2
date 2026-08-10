@@ -79,6 +79,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
     .from('goals')
     .select('id, title, description, kind, status, metric_key, metric_unit, direction, baseline_value, target_value, curve, step_every_days, started_on, target_date, identity_statement, identity_short, template_slug')
     .eq('id', id)
+    .eq('user_id', user.id)
     .maybeSingle()
   const goal = goalRow as unknown as GoalRow | null
   if (!goal) notFound()

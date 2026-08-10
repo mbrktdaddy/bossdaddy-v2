@@ -74,16 +74,28 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
 
   if (!user) return <SignedOut />
 
-  // RLS scopes every one of these to the signed-in user — no user_id filter to
-  // forget, and an admin browsing this page sees their own goals, not everyone's.
+  // ⚠️ EVERY ONE OF THESE FILTERS BY user_id EXPLICITLY. Do not remove them on
+  // the grounds that RLS already scopes the rows — it no longer does what that
+  // sentence used to mean, and this comment previously said "no user_id filter to
+  // forget", which is how the bug shipped.
+  //
+  // Migration 137 added `goals_teammate_read` (plus the same on goal_schedules,
+  // goal_stats, goal_occurrences and goal_entries) so a teammate can see the goal
+  // they're supporting. Correct for that feature — and it means RLS no longer
+  // equals "mine". An unfiltered read here put somebody else's goal in this list
+  // as though the reader owned it, with edit and share controls attached.
+  //
+  // RLS stays the backstop. The filter is the app saying which rows it MEANT.
   const [{ data: goalRows }, { data: scheduleRows }, { data: statRows }, { count: sharedRaw }] = await Promise.all([
     supabase.from('goals')
       .select('id, title, kind, status, metric_unit, baseline_value, target_value, identity_short')
+      .eq('user_id', user.id)
       .in('status', showArchived ? ['archived'] : ['active', 'paused'])
       .order('created_at', { ascending: false }),
-    supabase.from('goal_schedules').select('goal_id, timezone, muted'),
+    supabase.from('goal_schedules').select('goal_id, timezone, muted').eq('user_id', user.id),
     supabase.from('goal_stats')
-      .select('goal_id, streak, logged_done, logged_total, latest_value, open_count, next_due_at, today_local_date, today_target'),
+      .select('goal_id, streak, logged_done, logged_total, latest_value, open_count, next_due_at, today_local_date, today_target')
+      .eq('user_id', user.id),
     // Goals OTHER people share with him. Counted against the definer view (mig
     // 137), which returns nothing unless he's a participant — head:true so this
     // costs no rows on a page that already does three reads.

@@ -28,6 +28,38 @@ type Row = {
   profiles: { username: string | null; display_name: string | null } | null
 }
 
+/**
+ * The other direction: goals OTHER people have shared with YOU.
+ *
+ * The corner section answers "who's backing me"; this answers "who am I backing".
+ * Without it /account was asymmetric — you could see everyone keeping you honest
+ * and had no way to reach the goals you'd agreed to watch, even though accepting
+ * an invite is how most people meet this feature at all.
+ *
+ * Counted against the definer view, which returns nothing unless you're actually
+ * a participant, so this costs no rows.
+ */
+async function BackingLink() {
+  const supabase = await createClient()
+  const { count } = await supabase
+    .from('goal_share_summary')
+    .select('goal_id', { count: 'exact', head: true })
+  if (!count) return null
+
+  return (
+    <Link
+      href="/goals/shared"
+      className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-soft bg-surface-sunken px-4 py-3 text-xs transition-colors hover:border-strong"
+    >
+      <span className="text-prose">
+        {LABELS.goals.sharedHeading}
+        <span className="text-faint"> · {count} shared with you</span>
+      </span>
+      <span className="shrink-0 text-muted" aria-hidden="true">→</span>
+    </Link>
+  )
+}
+
 export default async function YourCornerSection() {
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
@@ -106,6 +138,7 @@ export default async function YourCornerSection() {
             </Link>
           </>
         )}
+        <BackingLink />
       </div>
     )
   }
@@ -152,6 +185,7 @@ export default async function YourCornerSection() {
           </div>
         ))}
       </div>
+      <BackingLink />
     </div>
   )
 }
