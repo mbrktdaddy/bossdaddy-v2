@@ -124,9 +124,6 @@ export const LABELS = {
   // Internal vocab is locked: container = "[Kid]'s Log", unit = "moment",
   // verb = "capture". This vocab is load-bearing across UI, emails, and
   // share copy. Do not drift.
-  // goals / goal_schedules / goal_occurrences tables → /goals route.
-  //
-  // NAMING IS NOT SETTLED — "Goals" is the neutral default, not a decision. The
   // Member-to-member connections. The internal names — the `user_connections`
   // table, the `/account/connections` route — are permanent; this block is the
   // only place the wording changes.
@@ -150,6 +147,9 @@ export const LABELS = {
     cornerLabel: 'In your corner',
   },
 
+  // goals / goal_schedules / goal_occurrences tables → /goals route.
+  //
+  // NAMING IS NOT SETTLED — "Goals" is the neutral default, not a decision. The
   // internal names (`goals`, the route segment, the `kind` values) are permanent;
   // every display string below is free to change here without a migration. If
   // this becomes "The Grind" or "Duty" or anything else, this block is the only
@@ -241,7 +241,19 @@ export const LABELS = {
       heroTitleSecond:  'You can use them too.',
       heroBody:         'No PR samples. No app downloads. No sign-up walls. Plug in a birthdate, get a number that means something. Capture the ones that count.',
       loggedInGreeting: 'Welcome back, Boss.',
-      loggedInBody:     'Where you are right now, with your family.',
+      // ⚠️ NOT "…with your family". This hub holds a cessation taper and a
+      // medication schedule as readily as it holds a countdown to a kid's
+      // eighteenth — framing the whole page as family made the personal half
+      // invisible, and told a man quitting smoking that the page wasn't for him.
+      //
+      // Neutral rather than motivational on purpose. "Who's counting on you"
+      // reads fine over a savings goal and lands very differently over a relapse,
+      // and brand-guide §1.6 puts the edge OFF for exactly that.
+      //
+      // Avoids two phrases already spoken for: "Your Stuff" is /account, and
+      // "What you're working on" is the goals+savings section ON /account.
+      loggedInBody:     'Where you stand right now.',
+      loggedInDek:      'Your goals, your money, and the time you\'ve got with them.',
       manageKidsCta:    'Manage your family →',
       addFirstKidCta:   'Add your first family member →',
     },

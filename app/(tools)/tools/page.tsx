@@ -106,7 +106,12 @@ export default async function ToolsHubPage() {
     kids = (rawKids ?? []) as Kid[]
   }
 
-  const isLoggedInWithKids = !!user && kids.length > 0
+  // TWO GATES, not one. The hero is about being SIGNED IN; the kid cards are
+  // about having kids. Conflating them meant a signed-in member with no family
+  // added — someone here for a taper — was shown the logged-out sales pitch
+  // ("no sign-up walls") on a page he'd signed up for.
+  const isSignedIn = !!user
+  const isLoggedInWithKids = isSignedIn && kids.length > 0
 
   // Per-member tool state for the family rows: days-since-last-moment + total
   // saved across that member's goals. Batched so the hub stays a fixed number
@@ -144,13 +149,16 @@ export default async function ToolsHubPage() {
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
       <section className="mb-10 sm:mb-14">
         <p className="text-xs uppercase tracking-widest font-semibold text-eyebrow mb-3">
-          {isLoggedInWithKids ? LABELS.tools.hub.loggedInGreeting : LABELS.tools.hub.eyebrow}
+          {isSignedIn ? LABELS.tools.hub.loggedInGreeting : LABELS.tools.hub.eyebrow}
         </p>
-        {isLoggedInWithKids ? (
+        {isSignedIn ? (
           <>
             <h1 className="text-3xl sm:text-5xl font-black text-prose leading-[1.05] tracking-tight mb-3">
               {LABELS.tools.hub.loggedInBody}
             </h1>
+            <p className="text-base sm:text-lg text-prose-muted leading-[1.7] max-w-2xl">
+              {LABELS.tools.hub.loggedInDek}
+            </p>
           </>
         ) : (
           <>

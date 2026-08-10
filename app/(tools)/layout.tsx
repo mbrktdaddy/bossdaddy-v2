@@ -42,13 +42,12 @@ export default function ToolsLayout({
                 <span className="text-prose"> DADDY</span>
               </span>
             </Link>
-            <Link
-              href="/tools"
-              className="text-[10px] sm:text-xs font-medium uppercase tracking-widest text-accent-text border border-accent/30 hover:border-accent rounded-full px-2 py-0.5 shrink-0 transition-colors"
-            >
-              Tools · Beta
-            </Link>
           </div>
+          {/* No "Tools · Beta" pill. It crowded the row on a phone — wordmark,
+              pill, bell and avatar in 393px — and it was doing a job the pages
+              already do for themselves: /tools, /goals and /today each open with
+              their own H1. A chrome-level label that repeats the page title only
+              earns its width when the page doesn't say where you are. */}
           {/* THE SAME MENU THE REST OF THE SITE HAS. This chrome is deliberately
               minimal (docs/dad-tools-plan.md §5) and had grown its own bespoke
               nav instead: a "← Boss Daddy" link, and an Account/Dashboard text
