@@ -785,6 +785,24 @@ export async function createInvite(
   const token = newInviteToken()
   const expiresAt = new Date(Date.now() + INVITE_TTL_MS).toISOString()
 
+  // ⚠️ ONE LIVE INVITE PER ADDRESS. Minting used to just append, so inviting the
+  // same person three times left THREE valid tokens — and revoking is per-row, so
+  // calling one back left the other two working. An owner who believes he has
+  // withdrawn access and hasn't is the failure worth preventing here; the
+  // duplicate rows in the pending list are only the visible symptom.
+  //
+  // Expiring rather than deleting keeps the audit trail. Only matches invites
+  // with an address: a bare link invite has no identifiable recipient, and two
+  // of those legitimately mean two different people.
+  if (parsed.data.email) {
+    await admin.from('savings_goal_invitations')
+      .update({ expires_at: new Date().toISOString() })
+      .eq('goal_id', parsed.data.goalId)
+      .eq('email', parsed.data.email)
+      .is('used_at', null)
+      .gt('expires_at', new Date().toISOString())
+  }
+
   const { data, error } = await admin.from('savings_goal_invitations')
     .insert({
       goal_id:    parsed.data.goalId,

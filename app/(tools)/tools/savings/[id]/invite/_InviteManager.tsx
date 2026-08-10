@@ -163,8 +163,14 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
           </div>
 
           <div className="border-t border-soft pt-4">
+            {/* The copy here said the email was "for your records only" and that
+                "we don't auto-send invites yet". Both untrue — createInvite has
+                sent SavingsInviteEmail for as long as this field has existed. It
+                was telling the owner the opposite of what the button does, which
+                on a page whose whole job is deciding who to let in is the wrong
+                thing to be wrong about. */}
             <label htmlFor="invite-email" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
-              Recipient email <span className="normal-case text-prose-faint">(optional — for your records)</span>
+              Recipient email <span className="normal-case text-prose-faint">(optional — we&apos;ll send it)</span>
             </label>
             <input
               id="invite-email"
@@ -176,8 +182,9 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
               className="w-full px-3 py-2.5 bg-surface-sunken border border-soft focus:border-accent rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent/30"
             />
             <p className="text-xs text-prose-faint mt-1.5">
-              Email is for your records only — we don&apos;t auto-send invites yet.
-              Share the link by text, DM, or email yourself.
+              Fill this in and we&apos;ll email them the invite. Leave it blank and
+              you just get a link to share by text or DM. Inviting the same address
+              again replaces the earlier link rather than adding a second one.
             </p>
           </div>
           <button

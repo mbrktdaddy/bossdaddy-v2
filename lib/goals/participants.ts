@@ -290,6 +290,30 @@ export async function createInvitation(
   const token = randomBytes(24).toString('base64url')
   const expires = new Date(Date.now() + INVITE_TTL_DAYS * 86_400_000).toISOString()
 
+  // ⚠️ ONE LIVE INVITE PER ADDRESS, for the same reason as savings. Every mint is
+  // another BEARER TOKEN, and revoking is per-row — so inviting the same person
+  // three times and then calling one back leaves two links that still work. On a
+  // sensitive goal that's an owner who thinks he's withdrawn access and hasn't.
+  //
+  // Revoked, not deleted: `revoked_at` is what makes invitationState() report
+  // "called back" instead of silently losing the history.
+  //
+  // ⚠️ ONLY COVERS EMAIL INVITES. A contact picked by name stores no identifier —
+  // goal_invitations has invitee_email and nothing else — so member invites can
+  // still stack up. Closing that needs an `invitee_user_id` column, which would
+  // also let migration 141's cascade scope its revocation to the pair and let
+  // accept verify the intended recipient. Three things, one column.
+  if (args.email?.trim()) {
+    await client
+      .from('goal_invitations')
+      .update({ revoked_at: new Date().toISOString() })
+      .eq('goal_id', args.goalId)
+      .eq('invitee_email', args.email.trim())
+      .is('accepted_at', null)
+      .is('declined_at', null)
+      .is('revoked_at', null)
+  }
+
   const { error } = await client.from('goal_invitations').insert({
     goal_id: args.goalId,
     invited_by: args.userId,
