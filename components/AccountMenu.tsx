@@ -148,7 +148,16 @@ export default function AccountMenu(
                 username[0].toUpperCase()
               )}
             </div>
-            <span className="text-sm text-prose-muted max-w-[120px] truncate">@{username}</span>
+            {/* DESKTOP ONLY. The handle costs up to 120px, and with the bell beside
+                it the trigger ran ~180px — which on the tools chrome (where
+                `alwaysShow` keeps this visible at every width, since there's no
+                drawer to hide it in) collided with the wordmark at 393px. It is also
+                redundant: the panel this button opens leads with @{username}. So the
+                trigger is avatar + chevron on a phone, which is what every app chrome
+                does, and the name appears the moment there's room for it. */}
+            <span className="hidden sm:inline text-sm text-prose-muted max-w-[120px] truncate">
+              @{username}
+            </span>
             <svg
               className={`w-3 h-3 text-prose-faint transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`}
               fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
