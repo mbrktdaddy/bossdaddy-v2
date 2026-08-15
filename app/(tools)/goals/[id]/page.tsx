@@ -6,6 +6,7 @@
 // client, so RLS decides ownership — a goal that isn't yours is a 404, not a
 // hand-written filter I could forget.
 
+import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
@@ -21,7 +22,13 @@ import {
 } from '@/lib/goals/progress'
 import { describeRrule } from '@/lib/goals/schedule-input'
 import { MAX_ENTRY_NOTE_LENGTH } from '@/lib/goals/log'
+import {
+  buildHistoryGrid, gridWindow, monthGridWindow, monthOf, addMonths,
+} from '@/lib/goals/history'
 import NotesFeed from '@/components/goals/NotesFeed'
+import WeekStrip from '@/components/goals/WeekStrip'
+import HistoryGrid from '@/components/goals/HistoryGrid'
+import MetricTrend from '@/components/goals/MetricTrend'
 import { logOccurrence, logUnprompted, toggleScheduleMute, setGoalStatus } from '../actions'
 
 export const metadata: Metadata = {
@@ -31,7 +38,8 @@ export const metadata: Metadata = {
 
 type Props = {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ confirm?: string; msg?: string; saved?: string }>
+  /** `m` is the calendar month, `YYYY-MM`. Clamped to the goal's lifetime below. */
+  searchParams: Promise<{ confirm?: string; msg?: string; saved?: string; m?: string }>
 }
 
 type GoalRow = {
@@ -68,7 +76,7 @@ type PlanRow = {
 
 export default async function GoalDetailPage({ params, searchParams }: Props) {
   const { id } = await params
-  const { confirm, msg, saved } = await searchParams
+  const { confirm, msg, saved, m } = await searchParams
   const confirmingDelete = confirm === 'delete'
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
@@ -160,6 +168,41 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
   const { done, total, pct } = adherenceRate(occurrences)
   const recent = recentAdherence(occurrences, today)
   const latest = latestValue(entries)
+
+  // Built ONCE and shared: the calendar draws the
+  // cells and the trend reads the values and stamped targets out of the same
+  // array, so the picture and the heat map can never describe different days.
+  // ── the calendar ──────────────────────────────────────────────────────────
+  // Which month to show: `?m=YYYY-MM`, defaulting to the one we're in. CLAMPED to
+  // the goal's own lifetime, so paging back can't walk into months that existed
+  // before the goal did — an empty calendar you can scroll forever is worse than no
+  // arrow at all. `started_on` is the floor, this month is the ceiling.
+  const thisMonth = monthOf(today)!
+  const firstMonth = monthOf(goal.started_on) ?? thisMonth
+  const requested = typeof m === 'string' && /^\d{4}-\d{2}$/.test(m) ? m : thisMonth
+  const shownMonth = requested < firstMonth ? firstMonth
+    : requested > thisMonth ? thisMonth
+    : requested
+
+  const monthWindow = monthGridWindow(shownMonth)
+  const monthCells = monthWindow
+    ? buildHistoryGrid({
+        occurrences, entries, fromYmd: monthWindow.from, toYmd: monthWindow.to,
+      })
+    : []
+  const prevMonth = addMonths(shownMonth, -1)
+  const nextMonth = addMonths(shownMonth, 1)
+
+  // The strip is its own week, built from the same arrays by the same function — the
+  // month on screen may not contain today, so it can't be sliced off the calendar.
+  const weekWindow = gridWindow(today, 1)
+  const weekCells = weekWindow
+    ? buildHistoryGrid({
+        occurrences, entries, fromYmd: weekWindow.from, toYmd: weekWindow.to,
+      })
+    : []
+  // The trend follows the calendar, so paging months moves both together.
+  const historyCells = monthCells
   const progress = progressToTarget(goal.baseline_value, goal.target_value, latest?.value ?? null)
   const unit = goal.metric_unit ? ` ${goal.metric_unit}` : ''
 
@@ -226,9 +269,13 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
       </div>
 
       <header className="space-y-3">
+        {/* The eyebrow carries the state AND the start date now. "Since" was a stat
+            tile competing with three numbers that change; a start date never does. */}
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
           {LABELS.goals.kinds[goal.kind] ?? LABELS.goals.kinds.custom}
           {goal.status === 'paused' ? ' · Paused' : ''}
+          {finished ? ' · Finished' : ''}
+          <span className="text-prose-faint"> · since {goal.started_on}</span>
         </p>
         <h1 className="text-3xl sm:text-4xl font-black text-prose leading-[1.05] tracking-tight">
           {goal.title}
@@ -338,7 +385,15 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
         </section>
       ) : null}
 
-      {/* ── the one thing to do ─────────────────────────────────────────── */}
+      {/* ── ACT ──────────────────────────────────────────────────────────────
+          Where you are in the week, then the one thing to do about it. The strip
+          replaced a sentence ("Nothing open right now. Next one lands 2026-08-17 at
+          19:00.") that made the reader parse a date to learn something a row of
+          seven chips says instantly. */}
+      {finished ? null : weekCells.length === 7 ? (
+        <WeekStrip cells={weekCells} todayLocal={today} unit={unit} />
+      ) : null}
+
       {finished ? null : actionable ? (
         <section className="bg-surface-raised border border-strong rounded-xl p-5 sm:p-6">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
@@ -515,6 +570,13 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
           </div>
         ) : null}
 
+        {/* The same journey as the bar above, with the shape of it. Only for a goal
+            that measures something and has at least two readings — one reading is a
+            stat, and the grid above already carries "did it or didn't". */}
+        {wantsNumber ? (
+          <MetricTrend cells={historyCells} unit={unit} metricLabel={goal.metric_key} />
+        ) : null}
+
         {/* ── votes ────────────────────────────────────────────────────────
             A PHRASE, NOT A STAT. It sits below the curve and outside the stat
             grid on purpose: in the grid it would read as a third score competing
@@ -552,25 +614,41 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
 
             Best run is what makes a broken streak survivable: it's monotonic, so
             the day he loses a 40-day run he still has the 40. */}
-        <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {/* NUMBER FIRST, LABEL UNDER IT. These read `Days running` in a loud
+            uppercase micro-label with a text-lg value beside it, which is the
+            emphasis exactly backwards — the label is chrome and the number is the
+            point. Three tiles, not four: "Since" was the weakest of them and moved
+            to the header meta line, where a start date belongs. */}
+        <dl className="grid grid-cols-3 gap-3">
           <Stat
-            label="Days running"
             value={streak > 0 ? String(streak) : '—'}
-            hint={kept > streak ? `${kept} kept all time` : undefined}
+            label="running"
+            hint={kept > streak ? `${kept} all time` : undefined}
           />
-          <Stat label="Best run" value={bestRun > 0 ? String(bestRun) : '—'} />
+          <Stat value={bestRun > 0 ? String(bestRun) : '—'} label="best run" />
           <Stat
-            label="Logged"
             value={recent.pct != null ? `${recent.pct}%` : pct != null ? `${pct}%` : '—'}
+            label={recent.total > 0 ? `last ${RATE_WINDOW_DAYS} days` : 'all time'}
             hint={
               recent.total > 0
-                ? `${recent.done} of ${recent.total} · last ${RATE_WINDOW_DAYS} days`
-                : total > 0 ? `${done} of ${total} · all time` : undefined
+                ? `${recent.done} of ${recent.total}`
+                : total > 0 ? `${done} of ${total}` : undefined
             }
           />
-          <Stat label="Since" value={goal.started_on} />
         </dl>
       </section>
+
+      {/* ── the last twelve weeks ───────────────────────────────────────────
+          After the numbers and before the machinery: this is the part he actually
+          scrolls to, and it answers a question no single figure can ("which days do
+          I keep dropping?"). Renders nothing until there's something to look at. */}
+      <HistoryGrid
+        cells={monthCells}
+        month={shownMonth}
+        unit={unit}
+        prevHref={prevMonth && prevMonth >= firstMonth ? `/goals/${goal.id}?m=${prevMonth}` : null}
+        nextHref={nextMonth && nextMonth <= thisMonth ? `/goals/${goal.id}?m=${nextMonth}` : null}
+      />
 
       {/* ── reminders ───────────────────────────────────────────────────── */}
       <section className="space-y-3">
@@ -589,16 +667,22 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
           <p className="text-sm text-prose-faint">No schedule on this goal yet.</p>
         ) : schedules.map((schedule) => (
           <div key={schedule.id} className="bg-surface border border-soft rounded-xl p-5 flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-prose">
-                {schedule.label?.trim() || 'Reminder'}
-              </p>
-              <p className="mt-1 text-xs text-prose-muted">
-                {describeRrule(schedule.rrule, schedule.local_time)}
-              </p>
-              <p className="mt-1 text-xs text-prose-faint">
-                {schedule.timezone.replace(/_/g, ' ')} · {schedule.channels.join(' + ')}
-              </p>
+            {/* CHIPS, NOT A PARAGRAPH. This was three stacked lines of prose per
+                reminder — label, then the schedule, then zone · channels — which on a
+                goal with two reminders is six lines of small grey text describing
+                settings. The same four facts as pills scan in one pass, and the label
+                only appears when the user actually gave one (a bare "Reminder"
+                heading above "Weekdays at 7:00 PM" was pure filler). */}
+            <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+              {schedule.label?.trim() ? (
+                <span className="text-sm font-semibold text-prose">
+                  {schedule.label.trim()}
+                </span>
+              ) : null}
+              <Chip>{describeRrule(schedule.rrule, schedule.local_time)}</Chip>
+              <Chip>{schedule.timezone.split('/').pop()?.replace(/_/g, ' ')}</Chip>
+              <Chip>{schedule.channels.join(' + ')}</Chip>
+              {schedule.muted ? <Chip>muted</Chip> : null}
             </div>
             <form action={toggleScheduleMute} className="shrink-0">
               <input type="hidden" name="scheduleId" value={schedule.id} />
@@ -616,9 +700,19 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
       </section>
 
       {/* ── history ─────────────────────────────────────────────────────── */}
+      {/* COLLAPSED. The chain grid above now tells this story visually, so fourteen
+          rows of dates and one-word verdicts were the same information twice — and
+          the second telling was the one taking the vertical space. Still one tap
+          away, because the note attached to a day only lives here. */}
       {entries.length > 0 ? (
-        <section className="space-y-3">
-          <h2 className="text-sm font-bold text-prose uppercase tracking-wide">Log</h2>
+        <details className="rounded-xl border border-soft bg-surface">
+          <summary className="min-h-11 flex cursor-pointer items-center justify-between gap-3 px-5 py-3">
+            <span className="text-sm font-bold text-prose uppercase tracking-wide">Log</span>
+            <span className="text-xs text-prose-faint">
+              {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
+            </span>
+          </summary>
+          <div className="px-5 pb-5 space-y-3">
           {/* THE LOG HAS TO SAY WHAT WAS LOGGED. It showed a date and one word, so
               an unprompted entry was indistinguishable from the scheduled one —
               two rows reading "Done" on the same date — and the note typed into
@@ -661,7 +755,8 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
               )
             })}
           </ul>
-        </section>
+          </div>
+        </details>
       ) : null}
 
       {/* ── notes ───────────────────────────────────────────────────────────
@@ -675,8 +770,26 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
       <NotesFeed subject={{ type: 'goal', id: goal.id }} readerCount={feedReaderCount} isSubjectOwner />
 
       {/* ── manage: pause, archive, delete ──────────────────────────────── */}
-      <section className="space-y-4 border-t border-soft pt-6">
-        <h2 className="text-sm font-bold text-prose uppercase tracking-wide">Manage</h2>
+      {/* ── MANAGE, COLLAPSED ───────────────────────────────────────────────
+          Pause, archive and delete are things you do to a goal a handful of times in
+          its life, and they sat permanently open at the foot of the page with a
+          paragraph explaining what each one does. Behind a disclosure the paragraph
+          becomes helpful instead of unavoidable — you only read it when you've
+          already decided to do one of these things.
+
+          Delete stays a two-step confirm INSIDE here; the caution lives in the
+          confirm, not in hiding the button. */}
+      <details className="rounded-xl border border-soft bg-surface">
+        <summary className="min-h-11 flex cursor-pointer items-center justify-between gap-3 px-5 py-3">
+          <span className="text-sm font-bold text-prose uppercase tracking-wide">Manage</span>
+          <span className="text-xs text-prose-faint">
+            {goal.status === 'archived' ? 'archived'
+              : finished ? 'finished'
+              : goal.status === 'paused' ? 'paused'
+              : 'active'}
+          </span>
+        </summary>
+        <div className="space-y-4 px-5 pb-5">
 
         {/* An archived goal gets Restore, not Pause — the old version showed
             "Pause" here, which would have quietly moved it from archived to
@@ -775,7 +888,8 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
             </div>
           </div>
         ) : null}
-      </section>
+        </div>
+      </details>
     </div>
   )
 }
@@ -806,12 +920,34 @@ function entryKindCopy(kind: string): string {
   return 'Done'
 }
 
-function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
+/**
+ * A fact as a pill. Deliberately neutral — a chip here is information, not a status,
+ * so it takes no accent and no colour of its own. (Also: no pale bg-{colour}-50
+ * chips on a dark canvas; that's the anti-pattern in feedback_dark_canvas.)
+ */
+function Chip({ children }: { children: ReactNode }) {
   return (
-    <div className="bg-surface border border-soft rounded-xl p-4">
-      <dt className="text-xs text-prose-faint uppercase tracking-widest">{label}</dt>
-      <dd className="mt-1 text-lg font-bold text-prose">{value}</dd>
-      {hint ? <p className="text-xs text-prose-faint">{hint}</p> : null}
+    <span className="rounded-full border border-soft bg-surface-raised px-2.5 py-1 text-xs text-prose-muted">
+      {children}
+    </span>
+  )
+}
+
+/**
+ * A stat tile: the figure first, at a size you can read at arm's length, with the
+ * label beneath it as a lower-case whisper.
+ *
+ * This was the other way round — a loud uppercase tracked label above a text-lg
+ * value — which put the emphasis on the chrome and left three numbers looking like
+ * three form fields. Proportional figures on purpose: `tabular-nums` on a large
+ * standalone number makes "121" read loose, and these align with nothing.
+ */
+function Stat({ value, label, hint }: { value: string; label: string; hint?: string }) {
+  return (
+    <div className="rounded-xl border border-soft bg-surface p-4">
+      <dd className="text-3xl font-black leading-none text-prose">{value}</dd>
+      <dt className="mt-1.5 text-xs text-prose-faint">{label}</dt>
+      {hint ? <p className="text-[10px] text-prose-faint">{hint}</p> : null}
     </div>
   )
 }

@@ -172,22 +172,33 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
 
       {/* Straight to the day's work. Above the goal list on purpose: this page is
           for managing goals, /today is for doing them, and "doing" is the common
-          errand. Only shown when something's actually open — a link to an empty
-          screen trains people to ignore it. */}
-      {openTotal > 0 ? (
-        <Link
-          href="/today"
-          className="flex items-center justify-between gap-3 rounded-xl border border-strong bg-surface-raised px-4 py-3 hover:border-accent-border/60 transition-colors"
-        >
-          <span className="text-sm font-semibold text-prose">
-            {LABELS.goals.todayEyebrow}
-            <span className="font-normal text-prose-muted">
-              {' '}· {openTotal} waiting on you
-            </span>
+          errand.
+
+          NO LONGER GATED ON `openTotal > 0`. The old note said a link to an empty
+          screen trains people to ignore it — fair for a link that leads nowhere, and
+          wrong here, because it removed the ONLY entrance to /today at exactly the
+          moment a man wants the reassurance of a clear day. It also meant the daily
+          surface was unreachable from anywhere in the app whenever nothing was due.
+          Now it always shows and says which of the two it is; the panel is quieter
+          when there's nothing waiting, so it doesn't shout on a clear day. */}
+      <Link
+        href="/today"
+        className={`flex items-center justify-between gap-3 rounded-xl px-4 py-3 transition-colors ${
+          openTotal > 0
+            ? 'border border-strong bg-surface-raised hover:border-accent-border/60'
+            : 'border border-soft bg-surface hover:border-strong'
+        }`}
+      >
+        <span className="text-sm font-semibold text-prose">
+          {LABELS.goals.todayEyebrow}
+          <span className="font-normal text-prose-muted">
+            {openTotal > 0 ? <>{' '}· {openTotal} waiting on you</> : <>{' '}· all clear</>}
           </span>
-          <span className="text-xs font-semibold text-accent-text">Do it →</span>
-        </Link>
-      ) : null}
+        </span>
+        <span className="text-xs font-semibold text-accent-text">
+          {openTotal > 0 ? 'Do it →' : 'Look →'}
+        </span>
+      </Link>
 
       {/* Only when someone actually shared something. An always-on link would be
           clutter for the many people nobody has invited. */}
