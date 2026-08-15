@@ -20,6 +20,10 @@ import { getGoals } from '@/lib/dad-tools/savings-actions'
 import { fmtUsdWhole } from '@/lib/dad-tools/savings'
 import type { Kid } from '@/lib/dad-tools/kid-actions'
 import type { Metadata } from 'next'
+import TodayCard from '@/components/goals/TodayCard'
+import WorkingOnSection from '@/components/goals/WorkingOnSection'
+import YourCornerSection from '@/components/account/YourCornerSection'
+import ToolTiles, { CalculatorIcon } from '@/components/dad-tools/ToolTiles'
 
 export function generateMetadata(): Metadata {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
@@ -175,6 +179,14 @@ export default async function ToolsHubPage() {
         )}
       </section>
 
+      {/* ── THE LAUNCHER, HIGH AND THIN ──────────────────────────────────────
+          Straight under the hero, before anything else competes for the fold. This is
+          the row a returning dad aims his thumb at without reading, so it goes where
+          his thumb already expects it — and at ~76px it costs less height than one of
+          the old cards. Signed-out visitors get the full pitch further down instead;
+          they have no muscle memory to serve. */}
+      {isSignedIn ? <ToolTiles className="mb-10 sm:mb-14" /> : null}
+
       <InstallPWA className="mb-10 sm:mb-14" body="Install Boss Daddy — your dad tools, one tap from the home screen." />
 
       {/* ── PERSONALIZED STATE — only when logged in with kids ──────────── */}
@@ -282,33 +294,85 @@ export default async function ToolsHubPage() {
         </section>
       )}
 
-      {/* ── MAIN SPOKES — the three core tools ───────────────────────────── */}
-      <section className="mb-10 sm:mb-14">
-        <div className="flex items-baseline justify-between mb-5">
-          <h2 className="text-xl sm:text-2xl font-black text-prose tracking-tight">
+      {/* ── WHAT'S OPEN RIGHT NOW ────────────────────────────────────────────
+          The hub is the front door to everything a signed-in dad touches daily and it
+          carried NO personalization at all — you arrived at a directory and had to
+          remember which spoke your own work was behind. The card renders nothing for a
+          visitor with no active goals, so the shelf below is still the first thing a
+          newcomer sees. */}
+      {user ? (
+        <div className="mb-10 sm:mb-14 space-y-6">
+          <TodayCard userId={user.id} />
+          {/* WHAT'S DUE, THEN WHAT YOU HAVE, THEN THE SHELF.
+              The hub listed only what you COULD use — a directory you had to translate
+              into your own work before it was any help. The card answers "what now"
+              and this answers "what am I carrying", and both come before the tools
+              because a returning user is not shopping for a tool. Renders nothing when
+              signed out or empty, so a newcomer still meets the shelf first.
+
+              This is the content move from docs/nav-ia-plan.md Phase D. Its twin on
+              /account is still there for the moment — see the note there. */}
+          <WorkingOnSection userId={user.id} />
+          {/* Who's watching the work sits WITH the work. It's a fact about these
+              goals — on /account it was a fact about goals that page no longer
+              shows. */}
+          <YourCornerSection />
+        </div>
+      ) : null}
+
+      {/* ── THE SHELF, IN TWO STATES ─────────────────────────────────────────
+          A signed-in dad gets tiles; a visitor keeps the cards.
+
+          The blurbs are doing real work for somebody who has never used these and no
+          work at all for a member who opens this page every morning — five of them
+          stacked under his own goals is five paragraphs of advertising between him and
+          what he came for. Same gate the hero already uses, so this costs no new query
+          and no new branch of state.
+
+          ONE SECTION NOW, not two. "Reference calculators" was a heading organising a
+          single item; Dad Math keeps its not-part-of-the-daily-loop status through last
+          position plus a quieter treatment (a chip on the card, a recessive tile), which
+          is what the heading was really communicating. */}
+      {/* Signed-out only: the four daily tools with their full pitch. A signed-in dad
+          already has them as the launcher row at the top of the page. */}
+      {isSignedIn ? null : (
+        <section className="mb-10 sm:mb-14">
+          <h2 className="mb-5 text-xl sm:text-2xl font-black text-prose tracking-tight">
             The tools
           </h2>
-          <p className="text-xs text-prose-faint uppercase tracking-widest">
-            Hub &amp; spoke
-          </p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {MAIN_SPOKES.map((spoke) => renderSpoke(spoke, 'main'))}
-        </div>
-      </section>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {MAIN_SPOKES.map((spoke) => renderSpoke(spoke, 'main'))}
+          </div>
+        </section>
+      )}
 
-      {/* ── REFERENCE CALCULATORS — strategic, not part of the daily loop ── */}
+      {/* ── CALCULATORS — its own area, for everyone, with room to grow ───────
+          Restored as a section after briefly folding it into the shelf. The earlier
+          reasoning was that a heading organising ONE item costs more than it earns —
+          true then, wrong now: this is a category with more coming, and a named area
+          people can learn is what makes the second and third calculator findable
+          instead of surprising. The placeholder is doing real work; it says the room
+          isn't finished. */}
       <section>
-        <div className="flex items-baseline justify-between mb-5">
-          <h2 className="text-base sm:text-lg font-black text-prose tracking-tight">
-            Reference calculators
-          </h2>
-          <p className="text-xs text-prose-faint uppercase tracking-widest">
-            Planning
-          </p>
-        </div>
+        <h2 className="mb-5 text-xl sm:text-2xl font-black text-prose tracking-tight">
+          Calculators
+        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {REFERENCE_TOOLS.map((spoke) => renderSpoke(spoke, 'reference'))}
+
+          {/* Not a link, and deliberately not styled like one — a dashed, faint tile
+              reads as "space reserved" where a solid card would read as "broken". */}
+          <div className="flex min-h-[120px] items-center justify-center rounded-2xl border border-dashed border-soft bg-surface-sunken px-6 py-6 text-center">
+            <div>
+              <span className="block text-accent" aria-hidden>
+                <CalculatorIcon />
+              </span>
+              <p className="mt-2 text-sm font-semibold text-prose-muted">More coming</p>
+              <p className="mt-1 text-xs text-prose-faint">
+                College costs, take-home pay, the real price of a car.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
     </div>
@@ -346,11 +410,10 @@ function renderSpoke(spoke: SpokeCard, weight: 'main' | 'reference') {
       <p className="text-sm text-prose-muted leading-relaxed">
         {spoke.blurb}
       </p>
-      {spoke.href && (
-        <p className="mt-4 text-xs font-semibold text-accent uppercase tracking-widest inline-flex items-center gap-1">
-          Open <span aria-hidden>→</span>
-        </p>
-      )}
+      {/* No "Open →". The whole card is the link, so that was a second call to action
+          for the same tap, printed five times down the page — and it cost every card a
+          row of height to say nothing the cursor didn't already say. The title turns
+          accent on hover, which is the affordance doing the work. */}
     </>
   )
 

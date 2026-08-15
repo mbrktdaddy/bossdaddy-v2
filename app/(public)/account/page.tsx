@@ -11,19 +11,23 @@
 // So settings kept the configuration (profile fields, email, notification
 // toggles, who-can-reach-you, delete account) and everything else moved here.
 //
-// Note the two people-shaped cards are deliberately DIFFERENT SETS:
-//   • ContactsCard      — everyone you're connected to. Who you CAN ask.
+// The two people-shaped cards are deliberately DIFFERENT SETS, and they now live on
+// different pages:
+//   • ContactsCard      — everyone you're connected to. Who you CAN ask. HERE, because
+//                         connecting and blocking are management.
 //   • YourCornerSection — who accepted a share on one of your goals. Who SAID YES.
-// Collapsing them is what made "Your Corner" meaningless the first time round.
+//                         Moved to /tools, because it's a fact about goals this page no
+//                         longer shows (docs/nav-ia-plan.md Phase D).
+// Collapsing them is what made "Your Corner" meaningless the first time round; keep
+// them apart even though they're now apart by more than a heading.
 
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import MyKidsSection from '@/components/dad-tools/MyKidsSection'
-import WorkingOnSection from '@/components/goals/WorkingOnSection'
+import TodayCard from '@/components/goals/TodayCard'
 import ContactsCard from '@/components/account/ContactsCard'
-import YourCornerSection from '@/components/account/YourCornerSection'
 
 export const metadata: Metadata = {
   title: 'Your Stuff',
@@ -94,32 +98,37 @@ export default async function AccountHomePage() {
         <div className="mb-8">
           <h1 className="text-2xl font-black">Your Stuff</h1>
           <p className="text-prose-faint text-sm mt-1">
-            Your family, your people, and what you&apos;re working on.
+            Your family, your people, and your account.
           </p>
         </div>
 
-        {/* ORDER IS DELIBERATE, and it isn't "most urgent first" — that was the
-            first attempt and it read as noise. It's concentric: the people he's
-            responsible for, then the people he can call on, then the work, then
-            who's watching the work.
+        {/* ── MANAGEMENT LIVES HERE; STATE AND WORK LIVE ON /tools ─────────────
+            One rule, and it decides every section on both pages: this page is where
+            you CHANGE things — family members, who you're connected to, your profile
+            — and /tools is where you see what's happening. So "what you're working
+            on" and "in your corner" moved there (docs/nav-ia-plan.md Phase D), while
+            family and contacts stayed, because adding a kid and blocking a contact
+            are management, not state.
 
-            Your corner sits AFTER what you're working on because it's a fact
-            about those goals. Above them it was an answer to a question the page
-            hadn't asked yet — the participant's view opened with an empty corner
-            card before he'd seen a single goal. */}
+            The dek changed with them: it promised "what you're working on", which
+            this page no longer shows.
+
+            Order is concentric rather than most-urgent-first — the people he's
+            responsible for, then the people he can call on. */}
         <div className="mb-6">
           <MyKidsSection />
         </div>
 
         <ContactsCard />
 
-        {/* Goals AND savings, one list. Two tables underneath. Carries its own
-            empty state — a card that leads straight to /goals/new. */}
+        {/* THE ONE WORK ITEM LEFT ON A MANAGEMENT PAGE, and it's here by request:
+            you come to your own page and want to know whether the day is clear.
+            `emptyPrompt={false}` — this page no longer carries the goals list, so
+            there's nothing for a first-run invitation to sit beside; the ask belongs
+            on /tools, where it can show what the day would look like. */}
         <div className="mb-6">
-          <WorkingOnSection />
+          <TodayCard userId={user.id} emptyPrompt={false} />
         </div>
-
-        <YourCornerSection />
 
         <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Activity</p>

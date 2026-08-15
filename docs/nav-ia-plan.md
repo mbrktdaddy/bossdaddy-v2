@@ -107,6 +107,12 @@ nav), so it ships as-is and gets revisited.
 
 ### Phase D — one signed-in home
 
+> **The rule that settled it, from the operator:** *management stays on `/account`;
+> state and work move to `/tools`.* Contacts is managing people, Family is managing
+> family — both stay. "What you're working on" and "In your corner" are live state
+> about goals — both move. That one line decides every section on both pages, and it's
+> sharper than the "what you can use vs what you have" framing this phase started with.
+
 `/tools` lists *what you can use*; `/account` ("Your Stuff") lists *what you have*. Two
 half-built front doors, and the user has to know which to pick.
 

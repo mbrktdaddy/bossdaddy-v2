@@ -26,10 +26,22 @@ import { fmtUsdWhole } from '@/lib/dad-tools/savings'
 
 const ROW_CAP = 8
 
-export default async function WorkingOnSection() {
+/**
+ * `userId` is optional and skips an auth round trip when the caller already has it.
+ * Both surfaces that render this resolve the user anyway, and getUserSafe is a real
+ * network call to Supabase Auth — the same round trip the tools layout was rewritten
+ * to stop paying on every page. Falls back to resolving it, so the component still
+ * works dropped anywhere.
+ */
+export default async function WorkingOnSection({ userId }: { userId?: string } = {}) {
   const supabase = await createClient()
-  const { user } = await getUserSafe(supabase)
-  if (!user) return null
+  let ownerId = userId
+  if (!ownerId) {
+    const { user } = await getUserSafe(supabase)
+    ownerId = user?.id
+  }
+  if (!ownerId) return null
+  const user = { id: ownerId }
 
   const goals = await loadPickableGoals(supabase, user.id)
   const [stats, savings] = await Promise.all([
@@ -108,6 +120,15 @@ export default async function WorkingOnSection() {
             />
           ))}
 
+          {/* GATED AGAIN — same shape as the original, for a different and now-valid
+              reason. It was gated on `hidden > 0`, which stranded anyone with eight or
+              fewer goals: this was the ONLY route to /goals on the page, so hiding it
+              hid the exit. The launcher row at the top of /tools now owns navigation,
+              which leaves this link exactly one job — "the list is cut off, see the
+              rest" — and that job genuinely only exists when it IS cut off.
+
+              ⚠️ If this section is ever placed on a surface WITHOUT the launcher, the
+              exit disappears again. That's the trap the first version fell into. */}
           {hidden > 0 && (
             <Link
               href="/goals"
@@ -117,14 +138,11 @@ export default async function WorkingOnSection() {
             </Link>
           )}
 
-          {savings.length === 0 && (
-            <Link
-              href="/tools/savings/new"
-              className="block text-center text-xs font-semibold text-prose-faint hover:text-accent-text-soft py-2 transition-colors"
-            >
-              {LABELS.tools.savings.newCta} →
-            </Link>
-          )}
+          {/* "Start a savings goal →" removed. This is a STATUS LIST, and that link was
+              advertising a product line inside it to anybody who hadn't opted in — the
+              one thing on the page that wasn't about what he's already carrying. The
+              Savings tile is in the launcher at the top, and /tools/savings has its own
+              create CTA, so nothing is unreachable. */}
         </div>
       )}
     </section>
