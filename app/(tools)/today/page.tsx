@@ -25,8 +25,7 @@ import { LABELS } from '@/lib/labels'
 import { LoginLink } from '@/components/LoginLink'
 import OfflineLogQueue from '@/components/goals/OfflineLogQueue'
 import WeekStrip from '@/components/goals/WeekStrip'
-import { buildHistoryGrid, gridWindow } from '@/lib/goals/history'
-import { localDateInZone } from '@/lib/goals/recurrence'
+import { loadTodayWork, loadTodayWeek } from '@/lib/goals/today'
 import { logOccurrence } from '../goals/actions'
 
 export const metadata: Metadata = {
@@ -34,31 +33,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },   // private data, never indexed
 }
 
-// How far ahead "coming up" reaches. 16 hours covers the rest of the day in any
-// zone the app supports without turning this into a week view.
-const LOOKAHEAD_HOURS = 16
+// The lookahead window, the open-status list, and the row shapes all moved to
+// lib/goals/today.ts when the query did — see TODAY_LOOKAHEAD_HOURS there. Keeping
+// local copies is how the page and the cards would start disagreeing about what
+// "due" means.
+import type { TodayOccurrence, TodayGoal } from '@/lib/goals/today'
 
-const OPEN_STATUSES = ['pending', 'notified', 'snoozed', 'missed'] as const
-
-type OccurrenceRow = {
-  id: string
-  goal_id: string
-  local_date: string
-  local_time: string
-  status: string
-  target_value: number | null
-  due_at: string
-  shifted: boolean
-}
-
-type GoalRow = {
-  id: string
-  title: string
-  status: string
-  metric_key: string | null
-  metric_unit: string | null
-  identity_short: string | null
-}
+type OccurrenceRow = TodayOccurrence
+type GoalRow = TodayGoal
 
 export default async function TodayPage() {
   const supabase = await createClient()
@@ -76,92 +58,24 @@ export default async function TodayPage() {
   }
 
   const now = new Date()
-  const horizon = new Date(now.getTime() + LOOKAHEAD_HOURS * 3_600_000)
 
-  // RLS scopes both reads to this user. The partial index on (due_at) where
-  // status='pending' (migration 134) is what keeps this cheap as history grows —
-  // it's sized to the work queue, not to the log.
-  const [{ data: occurrenceRows }, { data: zoneRows }] = await Promise.all([
-    supabase
-      .from('goal_occurrences')
-      .select('id, goal_id, local_date, local_time, status, target_value, due_at, shifted')
-      .eq('user_id', user.id)
-      .in('status', OPEN_STATUSES)
-      .lte('due_at', horizon.toISOString())
-      .order('due_at', { ascending: true })
-      .limit(60),
-    supabase.from('goal_schedules').select('timezone').eq('user_id', user.id),
+  // THE SAME LOADER EVERY TodayCard USES (lib/goals/today.ts). It used to be inline
+  // here; once the summary also had to appear on /goals, /tools and /account, four
+  // copies of "what counts as due" would have drifted until a card claimed two things
+  // waiting and this page listed three.
+  const [work, week] = await Promise.all([
+    loadTodayWork(supabase, user.id, now),
+    // The strip's zone choice and its cells both live in lib/goals/today.ts now, so
+    // this page and every TodayCard draw the same seven days from the same rule.
+    loadTodayWeek(supabase, user.id, now),
   ])
+  const { dueNow, later, goals } = work
+  const weekCells = week.cells
+  const stripToday = week.todayLocal
 
-  const occurrences = (occurrenceRows ?? []) as unknown as OccurrenceRow[]
-
-  // ⚠️ THE WEEK STRIP FORCES A ZONE, AND THIS PAGE DELIBERATELY HAS NO GLOBAL ONE.
-  // Every schedule carries its own IANA zone (migration 134, decision 2), so a man
-  // travelling genuinely has two goals whose "today" differ by a day — which is why
-  // the rows below split on `due_at` against real time and each shows its own
-  // local_date. A seven-day calendar can't be zone-agnostic, so the strip uses the
-  // zone MOST of his schedules are in and is explicitly the approximate view: it
-  // answers "how has my week gone", while the rows underneath stay authoritative
-  // about what is actually due right now. Falls back to UTC with no schedules.
-  const stripZone = majorityZone(((zoneRows ?? []) as { timezone: string }[]).map((z) => z.timezone))
-  const stripToday = safeLocalDate(now, stripZone)
-  const stripWindow = gridWindow(stripToday, 1)
-
-  const goalIds = [...new Set(occurrences.map((o) => o.goal_id))]
-  const [{ data: goalRows }, { data: weekOccurrenceRows }, { data: weekEntryRows }] =
-    await Promise.all([
-      goalIds.length
-        ? supabase
-            .from('goals')
-            .select('id, title, status, metric_key, metric_unit, identity_short')
-            .eq('user_id', user.id)
-            .in('id', goalIds)
-        : Promise.resolve({ data: [] }),
-      // The whole week across EVERY goal, not just what's open — the strip's job is
-      // the week behind you as much as the day in front of you.
-      stripWindow
-        ? supabase
-            .from('goal_occurrences')
-            .select('local_date, status, target_value')
-            .eq('user_id', user.id)
-            .gte('local_date', stripWindow.from)
-            .lte('local_date', stripWindow.to)
-        : Promise.resolve({ data: [] }),
-      stripWindow
-        ? supabase
-            .from('goal_entries')
-            .select('local_date, kind, value')
-            .eq('user_id', user.id)
-            .gte('local_date', stripWindow.from)
-            .lte('local_date', stripWindow.to)
-        : Promise.resolve({ data: [] }),
-    ])
-
-  // Aggregated across goals, so a day reads "kept" when SOMETHING was logged. That's
-  // the same rule the per-goal grid uses for a two-dose day (partial counts as kept)
-  // rather than a second, stricter idea of a good day.
-  const weekCells = stripWindow
-    ? buildHistoryGrid({
-        occurrences: (weekOccurrenceRows ?? []) as unknown as
-          { local_date: string; status: string; target_value: number | null }[],
-        entries: (weekEntryRows ?? []) as unknown as
-          { local_date: string; kind: string; value: number | null }[],
-        fromYmd: stripWindow.from,
-        toYmd: stripWindow.to,
-      })
-    : []
-
-  const goals = new Map(
-    ((goalRows ?? []) as unknown as GoalRow[]).map((g) => [g.id, g]),
-  )
-
-  // A paused goal shouldn't be asking for anything. The sweep stops materializing
-  // new days when a goal is paused, but days already on the books survive the
-  // pause — dropping them here is what makes "paused" mean what it says.
-  const live = occurrences.filter((o) => goals.get(o.goal_id)?.status === 'active')
-
-  const dueNow = live.filter((o) => new Date(o.due_at).getTime() <= now.getTime())
-  const later = live.filter((o) => new Date(o.due_at).getTime() > now.getTime())
+  // The zone choice, the window and the cells all moved into loadTodayWeek — including
+  // the reasoning for why a seven-day calendar has to approximate on a page that is
+  // deliberately zone-agnostic. Read the ⚠️ note there before changing either.
 
   return (
     <Wrap>
@@ -238,7 +152,7 @@ export default async function TodayPage() {
       <OfflineLogQueue />
 
       {/* ── nothing at all ──────────────────────────────────────────────────── */}
-      {live.length === 0 ? (
+      {dueNow.length + later.length === 0 ? (
         <div className="mt-8 rounded-xl border border-soft bg-surface p-5">
           <p className="text-sm text-prose-muted">{LABELS.goals.todayNothing}</p>
           <Link
@@ -353,32 +267,8 @@ function Row({
   )
 }
 
-/**
- * The zone most of this user's schedules are in.
- *
- * Ties break toward the first one seen, which is stable enough for a strip that is
- * explicitly the approximate view. With no schedules at all there is nothing to
- * approximate, so UTC — the strip then shows a week of "nothing due", which is true.
- */
-function majorityZone(zones: string[]): string {
-  const counts = new Map<string, number>()
-  for (const zone of zones) counts.set(zone, (counts.get(zone) ?? 0) + 1)
-  let best = 'UTC'
-  let bestCount = 0
-  for (const [zone, count] of counts) {
-    if (count > bestCount) { best = zone; bestCount = count }
-  }
-  return best
-}
-
-/** A bad zone must never take down the page. Mirrors lib/goals/stats.ts. */
-function safeLocalDate(now: Date, zone: string): string {
-  try {
-    return localDateInZone(now, zone)
-  } catch {
-    return localDateInZone(now, 'UTC')
-  }
-}
+// `majorityZone` and the safe local-date helper moved to lib/goals/today.ts with
+// loadTodayWeek, so the page and every TodayCard resolve the strip's zone identically.
 
 function Wrap({ children }: { children: React.ReactNode }) {
   return <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">{children}</div>

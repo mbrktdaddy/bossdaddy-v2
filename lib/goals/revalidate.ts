@@ -34,7 +34,12 @@ import { revalidatePath } from 'next/cache'
  * is the other side of a shared goal — both go stale on a rename or a status change
  * and neither is obvious from the goal page you were standing on.
  */
-const SHARED_PATHS = ['/goals', '/today', '/account/settings', '/goals/shared'] as const
+// `/tools` and `/account` are here because TodayCard renders on both. A surface that
+// shows goal state and isn't on this list goes stale after every log — which reads as
+// "my edit didn't save", the exact bug this module exists to prevent.
+const SHARED_PATHS = [
+  '/goals', '/today', '/tools', '/account', '/account/settings', '/goals/shared',
+] as const
 
 /** Paths belonging to one goal. `/share` is here because the partner list and the
  *  feed-reader count both render on the detail page too. */

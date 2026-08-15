@@ -21,6 +21,7 @@ import { LoginLink } from '@/components/LoginLink'
 import { progressToTarget } from '@/lib/goals/progress'
 import { localDateInZone } from '@/lib/goals/recurrence'
 import { unreadNoteCounts } from '@/lib/goals/notes'
+import TodayCard from '@/components/goals/TodayCard'
 
 export const metadata: Metadata = {
   title:       LABELS.goals.pageTitle,
@@ -119,12 +120,11 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
   )
   const now = new Date()
 
-  // Open work across every ACTIVE goal, from the stats rows already loaded above —
-  // no extra query. Paused goals are excluded because a paused goal isn't asking.
-  const openTotal = goals.reduce(
-    (sum, g) => sum + (g.status === 'active' ? (stats.get(g.id)?.open_count ?? 0) : 0),
-    0,
-  )
+  // The page-level open count is GONE. It folded `goal_stats.open_count` across the
+  // active goals — a second source for a number TodayCard reads from live occurrences,
+  // and a stats row is only as fresh as the last sweep tick. One source now; the
+  // per-card "Due" badges below still read open_count, which is correct for a badge
+  // that describes one goal's own row.
 
   // The calendar subscription, if he's made one. Read here rather than in the panel
   // so the whole page stays one render pass with no nested async component.
@@ -174,31 +174,12 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
           for managing goals, /today is for doing them, and "doing" is the common
           errand.
 
-          NO LONGER GATED ON `openTotal > 0`. The old note said a link to an empty
-          screen trains people to ignore it — fair for a link that leads nowhere, and
-          wrong here, because it removed the ONLY entrance to /today at exactly the
-          moment a man wants the reassurance of a clear day. It also meant the daily
-          surface was unreachable from anywhere in the app whenever nothing was due.
-          Now it always shows and says which of the two it is; the panel is quieter
-          when there's nothing waiting, so it doesn't shout on a clear day. */}
-      <Link
-        href="/today"
-        className={`flex items-center justify-between gap-3 rounded-xl px-4 py-3 transition-colors ${
-          openTotal > 0
-            ? 'border border-strong bg-surface-raised hover:border-accent-border/60'
-            : 'border border-soft bg-surface hover:border-strong'
-        }`}
-      >
-        <span className="text-sm font-semibold text-prose">
-          {LABELS.goals.todayEyebrow}
-          <span className="font-normal text-prose-muted">
-            {openTotal > 0 ? <>{' '}· {openTotal} waiting on you</> : <>{' '}· all clear</>}
-          </span>
-        </span>
-        <span className="text-xs font-semibold text-accent-text">
-          {openTotal > 0 ? 'Do it →' : 'Look →'}
-        </span>
-      </Link>
+          NOW THE SHARED CARD. This was a bespoke panel here, which is how /tools and
+          /account ended up with no equivalent at all — and it read its count from
+          `openTotal`, folded out of goal_stats, while /today counts live occurrences.
+          Two sources for one number is how a card comes to claim two things waiting
+          and link to a page listing three. */}
+      <TodayCard userId={user.id} />
 
       {/* Only when someone actually shared something. An always-on link would be
           clutter for the many people nobody has invited. */}
