@@ -51,6 +51,8 @@ type StatRow = {
   streak: number
   logged_done: number
   logged_total: number
+  rate_30d_done: number
+  rate_30d_total: number
   latest_value: number | null
   open_count: number
   next_due_at: string | null
@@ -91,11 +93,15 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
     supabase.from('goals')
       .select('id, title, kind, status, metric_unit, baseline_value, target_value, identity_short')
       .eq('user_id', user.id)
-      .in('status', showArchived ? ['archived'] : ['active', 'paused'])
+      // `completed` sits in the DEFAULT view, not the archive. A plan that just
+      // finished is the last thing to hide from someone — he should see it, look at
+      // it, and archive it himself when he's done with it. (Without this it would
+      // vanish from both views the moment the sweep finished it.)
+      .in('status', showArchived ? ['archived'] : ['active', 'paused', 'completed'])
       .order('created_at', { ascending: false }),
     supabase.from('goal_schedules').select('goal_id, timezone, muted').eq('user_id', user.id),
     supabase.from('goal_stats')
-      .select('goal_id, streak, logged_done, logged_total, latest_value, open_count, next_due_at, today_local_date, today_target')
+      .select('goal_id, streak, logged_done, logged_total, rate_30d_done, rate_30d_total, latest_value, open_count, next_due_at, today_local_date, today_target')
       .eq('user_id', user.id),
     // Goals OTHER people share with him. Counted against the definer view (mig
     // 137), which returns nothing unless he's a participant — head:true so this
@@ -159,7 +165,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
       </header>
 
       {msg ? (
-        <p className="rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-muted">
+        <p className="rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-prose-muted">
           {msg.slice(0, 200)}
         </p>
       ) : null}
@@ -175,7 +181,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
         >
           <span className="text-sm font-semibold text-prose">
             {LABELS.goals.todayEyebrow}
-            <span className="font-normal text-muted">
+            <span className="font-normal text-prose-muted">
               {' '}· {openTotal} waiting on you
             </span>
           </span>
@@ -192,7 +198,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
         >
           <span className="text-sm text-prose">
             {LABELS.goals.sharedHeading}
-            <span className="text-muted"> · {sharedCount} shared with you</span>
+            <span className="text-prose-muted"> · {sharedCount} shared with you</span>
           </span>
           <span className="text-xs font-semibold text-accent-text">Look →</span>
         </Link>
@@ -205,12 +211,12 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
           <p className="text-sm font-semibold text-prose">
             Delete {pendingDeleteIds.length} goal{pendingDeleteIds.length === 1 ? '' : 's'} for good?
           </p>
-          <ul className="mt-3 space-y-1 text-xs text-muted">
+          <ul className="mt-3 space-y-1 text-xs text-prose-muted">
             {goals.filter((g) => pendingDeleteIds.includes(g.id)).map((g) => (
               <li key={g.id}>&middot; {g.title}</li>
             ))}
           </ul>
-          <p className="mt-3 text-xs text-muted">
+          <p className="mt-3 text-xs text-prose-muted">
             Their schedules, every logged day, and all history go with them. This
             cannot be undone &mdash; archive instead if you just want them out of the way.
           </p>
@@ -232,7 +238,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
             </form>
             <Link
               href={showArchived ? '/goals?archived=1' : '/goals'}
-              className="min-h-11 inline-flex items-center rounded-lg px-5 py-3 text-xs font-semibold text-muted hover:text-prose"
+              className="min-h-11 inline-flex items-center rounded-lg px-5 py-3 text-xs font-semibold text-prose-muted hover:text-prose"
             >
               Keep them
             </Link>
@@ -250,9 +256,15 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
           const zone = schedule?.timezone ?? 'UTC'
           const today = safeToday(now, zone)
 
-          const pct = stat && stat.logged_total > 0
-            ? Math.round((stat.logged_done / stat.logged_total) * 100)
-            : null
+          // Rolling 30 days, falling back to lifetime when nothing resolved in the
+          // window. The card has no room to name which one it's showing — the
+          // detail page's hint does that — so the rule is "the most current number
+          // available", never a lifetime figure when a recent one exists.
+          const pct = stat && stat.rate_30d_total > 0
+            ? Math.round((stat.rate_30d_done / stat.rate_30d_total) * 100)
+            : stat && stat.logged_total > 0
+              ? Math.round((stat.logged_done / stat.logged_total) * 100)
+              : null
           const progress = progressToTarget(
             goal.baseline_value, goal.target_value, stat?.latest_value ?? null,
           )
@@ -291,7 +303,11 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
                     <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
                       {LABELS.goals.kinds[goal.kind] ?? LABELS.goals.kinds.custom}
                       {goal.status === 'paused' ? ' · Paused' : ''}
-                      {schedule?.muted ? ' · Muted' : ''}
+                      {goal.status === 'completed' ? ' · Finished' : ''}
+                      {/* Mute is about nudges, and a finished plan sends none — so
+                          saying "Muted" there would describe a setting that no
+                          longer does anything. */}
+                      {schedule?.muted && goal.status !== 'completed' ? ' · Muted' : ''}
                     </p>
                     {/* line-clamp-2, not truncate: the checkbox column costs ~52px
                         of card width, which leaves roughly 13 characters beside a
@@ -305,7 +321,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
                         goals with no identity set, and it never carries a count:
                         this row is who he's becoming, not how he's scoring. */}
                     {goal.identity_short ? (
-                      <p className="mt-1 truncate text-xs text-muted">
+                      <p className="mt-1 truncate text-xs text-prose-muted">
                         {LABELS.goals.votingFor}: {goal.identity_short}
                       </p>
                     ) : null}
@@ -336,7 +352,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
                         style={{ width: `${Math.round(progress * 100)}%` }}
                       />
                     </div>
-                    <p className="mt-2 text-xs text-faint">
+                    <p className="mt-2 text-xs text-prose-faint">
                       {goal.baseline_value}{unitOf(goal)} → {goal.target_value}{unitOf(goal)}
                       {stat?.latest_value != null ? (
                         <> · now at <span className="text-prose">{stat.latest_value}{unitOf(goal)}</span></>
@@ -345,7 +361,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
                   </div>
                 ) : null}
 
-                <p className="mt-4 text-sm text-muted">
+                <p className="mt-4 text-sm text-prose-muted">
                   {stat && stat.streak > 0
                     ? <>{stat.streak} day{stat.streak === 1 ? '' : 's'} running</>
                     : 'No run going yet'}
@@ -370,7 +386,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
                 <Link
                   href={`/goals/${goal.id}/share`}
                   aria-label={`${LABELS.goals.shareShort} ${goal.title}`}
-                  className="flex min-h-11 items-center gap-2 border-t border-soft px-4 text-xs font-semibold text-muted transition-colors hover:bg-surface-hover hover:text-accent-text sm:px-6"
+                  className="flex min-h-11 items-center gap-2 border-t border-soft px-4 text-xs font-semibold text-prose-muted transition-colors hover:bg-surface-hover hover:text-accent-text sm:px-6"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-1a4 4 0 00-3-3.87M9 20H4v-1a4 4 0 013-3.87m10-4.63a3 3 0 11-6 0 3 3 0 016 0zM19 8v6m3-3h-6" />
@@ -385,7 +401,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
       </ul>
 
         <fieldset className="rounded-xl border border-soft bg-surface p-5">
-          <legend className="px-1 text-xs text-muted">Do this to several at once</legend>
+          <legend className="px-1 text-xs text-prose-muted">Do this to several at once</legend>
 
           {/* Scope is a radio, not a "select all" checkbox: ticking every box from
               one control needs JavaScript, and the server already knows what is
@@ -422,7 +438,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
             <BulkButton op="delete" label="Delete" destructive />
           </div>
 
-          <p className="mt-3 text-xs text-faint">
+          <p className="mt-3 text-xs text-prose-faint">
             Delete asks once more before anything goes. Pause and archive are
             reversible &mdash; your log survives either way.
           </p>
@@ -439,7 +455,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
 
         {calendarToken ? (
           <div className="mt-4 space-y-3">
-            <p className="text-xs text-muted">
+            <p className="text-xs text-prose-muted">
               Subscribe to this in Google Calendar, Apple Calendar or Outlook. It
               updates itself when you change a reminder.
             </p>
@@ -448,7 +464,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
             <p className="break-all rounded-lg border border-soft bg-surface-raised px-4 py-3 font-mono text-[11px] text-accent-text">
               {calendarFeedUrl}
             </p>
-            <p className="text-xs text-faint">
+            <p className="text-xs text-prose-faint">
               Anyone with that link can read your goal titles and times without
               signing in — that&apos;s how calendar subscriptions work. Reset it if
               it gets out.
@@ -477,7 +493,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
         ) : (
           <form action="/api/goals/calendar" method="post" className="mt-4 space-y-3">
             <input type="hidden" name="op" value="create" />
-            <p className="text-xs text-muted">
+            <p className="text-xs text-prose-muted">
               You&apos;ll get a private link to subscribe to. Your active goals show
               up as recurring events — <span className="text-prose">under their real
               names</span>, so bear that in mind if the calendar you add it to is one
@@ -494,13 +510,13 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
       </details>
 
       <div className="space-y-2 border-t border-soft pt-6">
-        <p className="text-xs text-faint">
+        <p className="text-xs text-prose-faint">
           Reminders arrive by push and email. Tap the link in either one to log
           without opening the app.
         </p>
         <Link
           href={showArchived ? '/goals' : '/goals?archived=1'}
-          className="inline-flex items-center py-3 text-xs text-muted hover:text-prose underline"
+          className="inline-flex items-center py-3 text-xs text-prose-muted hover:text-prose underline"
         >
           {showArchived ? '← Active goals' : 'See archived goals'}
         </Link>
@@ -577,7 +593,7 @@ function Empty({ showArchived, deleted }: { showArchived: boolean; deleted: bool
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-6">
       {deleted ? (
-        <p className="rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-muted">
+        <p className="rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-prose-muted">
           Gone. Log and all.
         </p>
       ) : null}
@@ -597,7 +613,7 @@ function Empty({ showArchived, deleted }: { showArchived: boolean; deleted: bool
       {showArchived ? (
         <Link
           href="/goals"
-          className="inline-flex items-center py-3 text-sm text-muted hover:text-prose underline"
+          className="inline-flex items-center py-3 text-sm text-prose-muted hover:text-prose underline"
         >
           ← Active goals
         </Link>

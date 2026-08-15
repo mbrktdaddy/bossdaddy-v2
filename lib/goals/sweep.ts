@@ -33,8 +33,9 @@
 import 'server-only'
 import * as React from 'react'
 import type { createAdminClient } from '@/lib/supabase/admin'
-import { expandOccurrences, type GoalSchedule } from '@/lib/goals/recurrence'
+import { expandOccurrences, localDateInZone, type GoalSchedule } from '@/lib/goals/recurrence'
 import { targetForDate, type CurveInput } from '@/lib/goals/curve'
+import { isPlanFinished } from '@/lib/goals/progress'
 import { oneTapUrl } from '@/lib/goals/links'
 import { recomputeGoalStats } from '@/lib/goals/stats'
 import { sendPushToUser } from '@/lib/push'
@@ -101,6 +102,10 @@ export type SweepReport = {
   suppressed: number
   missed: number
   reArmed: number
+  /** Unresolved days deleted because they sat past the goal's target date. */
+  pruned: number
+  /** Plans that reached their end date this tick. */
+  completed: number
   statsRecomputed: number
   errors: string[]
 }
@@ -113,7 +118,7 @@ export async function runGoalsSweep(
   const report: SweepReport = {
     materializedSchedules: 0, occurrencesCreated: 0, due: 0, notified: 0,
     pushSent: 0, emailSent: 0, inAppSent: 0, suppressed: 0, missed: 0,
-    reArmed: 0, statsRecomputed: 0, errors: [],
+    reArmed: 0, pruned: 0, completed: 0, statsRecomputed: 0, errors: [],
   }
 
   // Goals this tick moved in any way. Their derived stats are stale afterwards,
@@ -123,6 +128,11 @@ export async function runGoalsSweep(
   await materialize(admin, now, report, touched)
   await notifyDue(admin, now, siteUrl, report, touched)
   await ageOut(admin, now, report, touched)
+  // Prune BEFORE completing: leftover days past the target date are exactly what
+  // would otherwise hold a finished plan open forever, so both have to happen on
+  // the same tick or the first plan to finish waits an extra fifteen minutes.
+  await pruneBeyondTarget(admin, report, touched)
+  await completePlans(admin, now, report, touched)
   await refreshStaleStats(admin, now, report, touched)
 
   if (touched.size) {
@@ -204,13 +214,34 @@ async function materializeOne(
     return
   }
 
+  // ── BOUNDED BY THE PLAN ────────────────────────────────────────────────────
+  // `buildRrule` emits no UNTIL or COUNT, so every stored rule is infinite by
+  // construction. Without this filter an eight-week taper kept materializing days
+  // — and therefore nudging "Today's number: 0" — forever, while `planWindow`
+  // froze at "Day 56 of 56" and the vote count stopped moving.
+  //
+  // The proof this was a defect rather than a decision: `icsRuleLines` ALREADY
+  // bounds the same rule at the goal's target_date, so a man's subscribed calendar
+  // ended the plan on time while his push and email didn't. Two halves of one
+  // system disagreeing about whether something was over.
+  //
+  // Filtering on the occurrence's own LOCAL DATE, not by converting target_date to
+  // an instant: the expansion already carries the local date, so there's no zone
+  // arithmetic here to get wrong. An open-ended goal (no target_date) is untouched
+  // and still recurs forever, which is correct.
+  const inPlan = goal.target_date
+    ? occurrences.filter((o) => o.localDate <= goal.target_date!)
+    : occurrences
+
   const through = horizonEnd.toISOString().slice(0, 10)
-  if (!occurrences.length) {
+  if (!inPlan.length) {
+    // Pointer still advances: the rule was expanded, everything it produced fell
+    // outside the plan, and re-expanding it every quarter-hour would be pure waste.
     await admin.from('goal_schedules').update({ materialized_through: through }).eq('id', schedule.id)
     return
   }
 
-  const rows = occurrences.map((o) => ({
+  const rows = inPlan.map((o) => ({
     goal_id: schedule.goal_id,
     schedule_id: schedule.id,
     user_id: schedule.user_id,
@@ -295,7 +326,7 @@ export async function materializeScheduleById(
   const report: SweepReport = {
     materializedSchedules: 0, occurrencesCreated: 0, due: 0, notified: 0,
     pushSent: 0, emailSent: 0, inAppSent: 0, suppressed: 0, missed: 0,
-    reArmed: 0, statsRecomputed: 0, errors: [],
+    reArmed: 0, pruned: 0, completed: 0, statsRecomputed: 0, errors: [],
   }
 
   const { data } = await admin
@@ -675,7 +706,201 @@ async function ageOut(
   }
 }
 
-// ── phase 4: self-heal stale or missing stats ───────────────────────────────
+// ── phase 4: prune days scheduled past the end of the plan ──────────────────
+
+/** Bounded so one tick can't turn into a mass delete. */
+const MAX_PRUNE_PER_TICK = 2000
+
+/**
+ * Deletes unresolved days scheduled beyond a goal's target date.
+ *
+ * `materializeOne` now refuses to create them, but every goal that existed before
+ * that fix already has up to sixty days of them on the books — and since a plan
+ * only completes once nothing is unresolved, those rows would keep every existing
+ * bounded goal permanently unfinished. This is the retroactive half of the same
+ * fix, written as a standing sweep phase rather than a one-off backfill so it also
+ * covers a target date pulled EARLIER by an edit.
+ *
+ * ONLY `pending` AND `snoozed`, ONLY STRICTLY BEYOND THE TARGET DATE. Never a
+ * notified, missed, completed or skipped row: those are history, and history
+ * includes the record of a nudge that actually went out. `goal_deliveries`
+ * cascades on occurrence delete, so deleting a notified row would erase the proof
+ * we sent something. Entries survive either way — `goal_entries.occurrence_id` is
+ * ON DELETE SET NULL.
+ */
+async function pruneBeyondTarget(
+  admin: Admin,
+  report: SweepReport,
+  touched: Set<string>,
+): Promise<void> {
+  const { data: goalRows, error: goalError } = await admin
+    .from('goals')
+    .select('id, target_date')
+    .eq('status', 'active')
+    .not('target_date', 'is', null)
+    .limit(500)
+  if (goalError) {
+    report.errors.push(`prune/goals: ${goalError.message}`)
+    return
+  }
+  const goals = ((goalRows ?? []) as unknown as { id: string; target_date: string }[])
+  if (!goals.length) return
+
+  const targetByGoal = new Map(goals.map((g) => [g.id, g.target_date]))
+  // Any row worth deleting sits past its OWN target date, so it also sits past the
+  // earliest target date in the set. Pushing that bound into SQL keeps this from
+  // dragging back every future occurrence these goals own.
+  const earliestTarget = goals.reduce(
+    (min, g) => (g.target_date < min ? g.target_date : min),
+    goals[0].target_date,
+  )
+
+  const { data: rows, error } = await admin
+    .from('goal_occurrences')
+    .select('id, goal_id, local_date')
+    .in('goal_id', [...targetByGoal.keys()])
+    .in('status', ['pending', 'snoozed'])
+    .gt('local_date', earliestTarget)
+    .limit(MAX_PRUNE_PER_TICK)
+  if (error) {
+    report.errors.push(`prune/load: ${error.message}`)
+    return
+  }
+
+  const doomed = ((rows ?? []) as unknown as { id: string; goal_id: string; local_date: string }[])
+    .filter((row) => row.local_date > (targetByGoal.get(row.goal_id) ?? '9999-12-31'))
+  if (!doomed.length) return
+
+  const { error: deleteError } = await admin
+    .from('goal_occurrences')
+    .delete()
+    .in('id', doomed.map((d) => d.id))
+  if (deleteError) {
+    report.errors.push(`prune/delete: ${deleteError.message}`)
+    return
+  }
+  report.pruned = doomed.length
+  for (const row of doomed) touched.add(row.goal_id)
+}
+
+// ── phase 5: finish plans that have run their course ────────────────────────
+
+/**
+ * Marks a goal `completed` once its target date has passed in its own zone and
+ * nothing is left unresolved.
+ *
+ * DERIVED, NOT A BUTTON. Nobody should have to tell the app that eight weeks is
+ * over — and until this existed, `goals.status = 'completed'` and `completed_at`
+ * were unreachable from anywhere in the product (migration 134 defined them; no
+ * writer ever set them).
+ *
+ * A `missed` day does NOT block completion. It's resolved — the fact was recorded,
+ * catch-up stays available forever, and holding a plan open indefinitely because
+ * of one bad Tuesday would be the opposite of this domain's whole posture.
+ *
+ * Paused and archived goals are left alone: a plan somebody deliberately parked is
+ * not a plan that finished. The status guard on the UPDATE makes the pass
+ * idempotent under retry, overlap, or a redeploy mid-run — the same discipline the
+ * delivery outbox uses.
+ *
+ * ⚠️ IN-APP ONLY. A completion notification goes in `notifications` (082) and
+ * NOWHERE ELSE. No push, no email: the copy for a finished cessation plan is
+ * exactly where identity language wants to leak into an inbox with no
+ * conversational context around it, and `check:goals-identity` fails the build if
+ * it ever does (migration 136). Nothing here reads identity_statement.
+ */
+async function completePlans(
+  admin: Admin,
+  now: Date,
+  report: SweepReport,
+  touched: Set<string>,
+): Promise<void> {
+  // Coarse SQL prefilter, refined per zone below. A target date at or before the
+  // UTC date can never exclude a goal that should finish: zones ahead of UTC are
+  // already on a later local date, and zones behind it get rejected in JS.
+  const utcToday = now.toISOString().slice(0, 10)
+
+  const { data: goalRows, error: goalError } = await admin
+    .from('goals')
+    .select('id, user_id, title, status, target_date')
+    .eq('status', 'active')
+    .not('target_date', 'is', null)
+    .lte('target_date', utcToday)
+    .limit(200)
+  if (goalError) {
+    report.errors.push(`complete/goals: ${goalError.message}`)
+    return
+  }
+  const candidates = ((goalRows ?? []) as unknown as
+    { id: string; user_id: string; title: string; status: string; target_date: string }[])
+  if (!candidates.length) return
+
+  const ids = candidates.map((g) => g.id)
+
+  const [{ data: scheduleRows }, { data: openRows, error: openError }] = await Promise.all([
+    admin.from('goal_schedules').select('goal_id, timezone').in('goal_id', ids),
+    admin.from('goal_occurrences')
+      .select('goal_id')
+      .in('goal_id', ids)
+      .in('status', ['pending', 'notified', 'snoozed']),
+  ])
+  if (openError) {
+    report.errors.push(`complete/open: ${openError.message}`)
+    return
+  }
+
+  const zones = new Map(
+    ((scheduleRows ?? []) as unknown as { goal_id: string; timezone: string }[])
+      .map((s) => [s.goal_id, s.timezone]),
+  )
+  const stillOpen = new Set(
+    ((openRows ?? []) as unknown as { goal_id: string }[]).map((o) => o.goal_id),
+  )
+
+  // The rule itself is pure and unit-tested — see isPlanFinished in
+  // lib/goals/progress.ts. This phase's job is only to feed it true facts.
+  const finished = candidates.filter((goal) => isPlanFinished({
+    status: goal.status,
+    targetDate: goal.target_date,
+    todayLocal: safeLocalDate(now, zones.get(goal.id) ?? 'UTC'),
+    hasUnresolved: stillOpen.has(goal.id),
+  }))
+  if (!finished.length) return
+
+  const { data: updated, error: updateError } = await admin
+    .from('goals')
+    .update({ status: 'completed', completed_at: now.toISOString() })
+    .in('id', finished.map((g) => g.id))
+    .eq('status', 'active')          // idempotent: a second tick updates nothing
+    .select('id')
+  if (updateError) {
+    report.errors.push(`complete/update: ${updateError.message}`)
+    return
+  }
+
+  const done = new Set(((updated ?? []) as unknown as { id: string }[]).map((r) => r.id))
+  if (!done.size) return
+  report.completed = done.size
+  for (const id of done) touched.add(id)
+
+  // PROCESS LANGUAGE ONLY, and in-app only. The identity moment belongs on the
+  // page, where there's context around it — see the header note.
+  const rows = finished
+    .filter((goal) => done.has(goal.id))
+    .map((goal) => ({
+      user_id: goal.user_id,
+      type: 'goal_completed',
+      title: `${goal.title} — that's the plan done.`,
+      body: 'You reached the end date. Have a look at how it went.',
+      link: `/goals/${goal.id}`,
+      payload: { goal_id: goal.id },
+    }))
+
+  const { error: notifyError } = await admin.from('notifications').insert(rows)
+  if (notifyError) report.errors.push(`complete/notify: ${notifyError.message}`)
+}
+
+// ── phase 6: self-heal stale or missing stats ───────────────────────────────
 
 /** Stats older than this are refreshed even if nothing else touched the goal. */
 const STATS_STALE_AFTER_MINUTES = 90
@@ -787,6 +1012,15 @@ async function loadEmails(admin: Admin, userIds: string[], report: SweepReport):
     }))
   }
   return out
+}
+
+/** A bad zone must never stop a plan from finishing. Mirrors lib/goals/stats.ts. */
+function safeLocalDate(now: Date, zone: string): string {
+  try {
+    return localDateInZone(now, zone)
+  } catch {
+    return localDateInZone(now, 'UTC')
+  }
 }
 
 function toGoalSchedule(schedule: ScheduleRow): GoalSchedule {
