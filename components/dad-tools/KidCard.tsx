@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { LoginLink } from '@/components/LoginLink'
 import { deleteKid, type Kid } from '@/lib/dad-tools/kid-actions'
-import { logTitle } from '@/lib/labels'
+import { logTitle, LABELS } from '@/lib/labels'
 import {
   ageInYearsMonths,
   milestoneDate,
@@ -125,7 +125,7 @@ export default function KidCard({ kid, initialMoments, momentCount, isAuthentica
         </div>
       )}
 
-      {/* Numbers strip — Until-18 stat doubles as the link into Weekends Until,
+      {/* Numbers strip — Until-18 stat doubles as the link into Milestones,
           prefilled with this kid's data. */}
       {mode === 'view' && (
         <div className="grid grid-cols-2 gap-3">
@@ -135,7 +135,7 @@ export default function KidCard({ kid, initialMoments, momentCount, isAuthentica
             <Link
               href={`/tools/weekends-until?kid=${kid.id}&birthdate=${kid.birthdate}&milestone=until_18&unit=weekends${kid.name ? `&for=${encodeURIComponent(kid.name.charAt(0))}` : ''}`}
               className="block bg-surface-sunken hover:bg-accent/5 rounded-xl px-3 py-2.5 transition-colors group"
-              title="See the full breakdown in Weekends Until"
+              title={`See the full breakdown in ${LABELS.tools.weekendsUntil.short}`}
             >
               <p className="text-2xl font-black text-prose group-hover:text-accent leading-tight transition-colors">
                 {weekendsUntil18}

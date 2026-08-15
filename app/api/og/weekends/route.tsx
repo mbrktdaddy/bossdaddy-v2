@@ -11,6 +11,7 @@
 // only by default; full name display is opt-in, not opt-out.
 
 import { ImageResponse } from 'next/og'
+import { LABELS } from '@/lib/labels'
 
 // NOT force-dynamic. This render is a pure function of its query params (n, unit,
 // for) — nothing about it varies per request — but force-dynamic made the platform
@@ -75,7 +76,7 @@ export async function GET(request: Request) {
             textTransform: 'uppercase',
           }}
         >
-          Weekends Until · Boss Daddy
+          {LABELS.tools.weekendsUntil.short} · Boss Daddy
         </div>
 
         {/* The number — the entire reason for the card */}

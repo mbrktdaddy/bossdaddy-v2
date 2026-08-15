@@ -199,7 +199,7 @@ export default async function KidProfilePage({ params }: PageProps) {
         <KidHeaderActions kid={kidRow} />
       </header>
 
-      {/* Time card — child-only (Weekends Until 18) */}
+      {/* Time card — child-only (the Milestones tool, counting to 18) */}
       {isChild && (
         <section className="bg-surface border border-soft rounded-2xl p-5 sm:p-6">
           <div className="flex items-baseline justify-between gap-3">
@@ -211,7 +211,7 @@ export default async function KidProfilePage({ params }: PageProps) {
                 href={weekendsHref}
                 className="text-xs font-semibold text-accent hover:underline"
               >
-                Open Weekends Until →
+                Open {LABELS.tools.weekendsUntil.short} →
               </Link>
             )}
           </div>
@@ -243,7 +243,7 @@ export default async function KidProfilePage({ params }: PageProps) {
               href={weekendsHref}
               className="text-xs font-semibold text-accent hover:underline"
             >
-              Open Weekends Until →
+              Open {LABELS.tools.weekendsUntil.short} →
             </Link>
           </div>
           <p className="mt-3 text-sm text-prose-muted leading-relaxed">

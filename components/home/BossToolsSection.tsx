@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import EditorialHeader from '@/components/EditorialHeader'
+import { LABELS } from '@/lib/labels'
 
 /**
  * Boss Tools — the homepage's only image-free content section, which is why it
@@ -41,7 +42,7 @@ export default function BossToolsSection() {
             href="/tools/weekends-until"
             className="block bg-surface border border-soft hover:border-accent rounded-2xl p-6 sm:p-8 transition-colors group"
           >
-            <p className="text-xs text-eyebrow uppercase tracking-widest font-bold">Time · Weekends Until</p>
+            <p className="text-xs text-eyebrow uppercase tracking-widest font-bold">Time · {LABELS.tools.weekendsUntil.short}</p>
             <h3 className="text-xl sm:text-2xl font-black mt-2 text-prose group-hover:text-accent transition-colors leading-tight">
               How many weekends do you have left with your kid?
             </h3>

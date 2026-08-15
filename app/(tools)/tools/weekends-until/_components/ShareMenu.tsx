@@ -2,6 +2,7 @@
 
 import { useState, useSyncExternalStore } from 'react'
 import type { Milestone, Unit } from '@/lib/dad-tools/calc'
+import { LABELS } from '@/lib/labels'
 
 // Subscribe no-op — we only need the server vs client snapshot split, not
 // reactive updates. Stable identity to avoid resubscribe churn.
@@ -89,7 +90,7 @@ export default function ShareMenu({
     void (navigator as Navigator & {
       share: (data: { title?: string; text?: string; url?: string }) => Promise<void>
     }).share({
-      title: 'Weekends Until — Boss Daddy',
+      title: LABELS.tools.weekendsUntil.pageTitle,
       text: shareText,
       url: shareUrl,
     }).catch(() => { /* user cancelled — no-op */ })

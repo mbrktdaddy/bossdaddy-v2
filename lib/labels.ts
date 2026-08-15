@@ -315,10 +315,16 @@ export const LABELS = {
       spokeBlurb:      'Tested gear picks, straight answers, and dad-life help — grounded in real reviews. Just ask the Boss.',
     },
 
+    // ⚠️ THE KEY AND THE ROUTE STAY `weekendsUntil` / `/tools/weekends-until`.
+    // Renamed to "Milestones" on display 2026-08-15. Per the Naming Doctrine in
+    // CLAUDE.md, internal names are permanent and display labels are free — so the URL
+    // is NOT chased to match. Changing it would need a legacy_slugs entry and a 301 in
+    // proxy.ts to avoid breaking every shared link and OG card already in the wild, and
+    // the URL isn't wrong, just older than the name.
     weekendsUntil: {
-      short:           'Weekends Until',
-      full:            'Weekends Until',
-      pageTitle:       'Weekends Until — Boss Daddy',
+      short:           'Milestones',
+      full:            'Milestones',
+      pageTitle:       'Milestones — Boss Daddy',
       metaDescription: 'How many weekends do you have left? Find out, then make them count.',
       spokeRole:       'Time',
       spokeBlurb:      'How many weekends do you have left with your kid? Pick a milestone. Get a number. Then make them count.',

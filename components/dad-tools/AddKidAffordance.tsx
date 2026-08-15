@@ -49,7 +49,7 @@ export default function AddKidAffordance({
             href="/tools/weekends-until"
             className="text-sm text-accent hover:underline font-medium"
           >
-            Try Weekends Until →
+            Try {LABELS.tools.weekendsUntil.short} →
           </a>
         </div>
       </div>
