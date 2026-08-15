@@ -1300,12 +1300,16 @@ export type Database = {
         Row: {
           computed_at: string
           goal_id: string
+          kept_total: number
           latest_local_date: string | null
           latest_value: number | null
           logged_done: number
           logged_total: number
+          longest_streak: number
           next_due_at: string | null
           open_count: number
+          rate_30d_done: number
+          rate_30d_total: number
           streak: number
           today_local_date: string | null
           today_target: number | null
@@ -1314,12 +1318,16 @@ export type Database = {
         Insert: {
           computed_at?: string
           goal_id: string
+          kept_total?: number
           latest_local_date?: string | null
           latest_value?: number | null
           logged_done?: number
           logged_total?: number
+          longest_streak?: number
           next_due_at?: string | null
           open_count?: number
+          rate_30d_done?: number
+          rate_30d_total?: number
           streak?: number
           today_local_date?: string | null
           today_target?: number | null
@@ -1328,12 +1336,16 @@ export type Database = {
         Update: {
           computed_at?: string
           goal_id?: string
+          kept_total?: number
           latest_local_date?: string | null
           latest_value?: number | null
           logged_done?: number
           logged_total?: number
+          longest_streak?: number
           next_due_at?: string | null
           open_count?: number
+          rate_30d_done?: number
+          rate_30d_total?: number
           streak?: number
           today_local_date?: string | null
           today_target?: number | null

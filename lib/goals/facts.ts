@@ -48,7 +48,18 @@ export type GoalFacts = {
   dayInPlan: number | null
   planDays: number | null
 
+  /** Consecutive SCHEDULED days kept — not calendar days. A MO/WE/FR goal keeps
+   *  its run through Tuesday, which is why the Boss can talk about it at all. */
   streak: number | null
+  /** Best run ever. Monotonic (mig 146), so it's safe to praise. */
+  longestStreak: number | null
+  /** Adherence over the last 30 local days, as a pair. `total: 0` means NO DATA —
+   *  say nothing rather than "0%". The lifetime figure is deliberately absent:
+   *  it's the number that can't recover, so it isn't the one to lead with. */
+  rate30dDone: number | null
+  rate30dTotal: number | null
+  /** All-time days kept, across every plan. Only ever goes up. */
+  keptTotal: number | null
   todayTarget: number | null
   latestValue: number | null
   openCount: number | null
@@ -86,15 +97,22 @@ export async function loadGoalFacts(
   const [{ data: scheduleRow }, { data: statRow }] = await Promise.all([
     client.from('goal_schedules').select('timezone').eq('goal_id', goalId).limit(1).maybeSingle(),
     client.from('goal_stats')
-      .select('streak, latest_value, open_count')
+      .select('streak, longest_streak, rate_30d_done, rate_30d_total, kept_total, latest_value, open_count')
       .eq('goal_id', goalId)
       .maybeSingle(),
   ])
 
   const timezone = (scheduleRow as { timezone: string } | null)?.timezone ?? 'UTC'
   const today = safeLocalDate(now, timezone)
-  const stats = statRow as
-    { streak: number; latest_value: number | null; open_count: number } | null
+  const stats = statRow as {
+    streak: number
+    longest_streak: number
+    rate_30d_done: number
+    rate_30d_total: number
+    kept_total: number
+    latest_value: number | null
+    open_count: number
+  } | null
 
   // Votes only mean something when there's an identity to vote for. Without one
   // the caller falls back to process language, so the count isn't even fetched.
@@ -131,6 +149,10 @@ export async function loadGoalFacts(
     dayInPlan: win ? win.dayInPlan : null,
     planDays: win?.planDays ?? null,
     streak: stats?.streak ?? null,
+    longestStreak: stats?.longest_streak ?? null,
+    rate30dDone: stats?.rate_30d_done ?? null,
+    rate30dTotal: stats?.rate_30d_total ?? null,
+    keptTotal: stats?.kept_total ?? null,
     todayTarget: targetForDate(goal, today),
     latestValue: stats?.latest_value ?? null,
     openCount: stats?.open_count ?? null,

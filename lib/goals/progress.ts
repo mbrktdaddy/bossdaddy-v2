@@ -84,6 +84,145 @@ export function computeStreak(entries: EntryLike[], todayLocal: string): number 
   return streak
 }
 
+// ── the schedule-aware streak ───────────────────────────────────────────────
+//
+// `computeStreak` above folds by CALENDAR DATE, which is only correct for a goal
+// that asks for something every single day. For MO/WE/FR lifting or a Sunday
+// weigh-in it can never read above 1 — Tuesday has no entry, so the walk stops
+// there. Both shapes ship as seeded templates (migration 136), so the number on
+// those pages wasn't conservative, it was wrong.
+//
+// A streak here is consecutive SCHEDULED DAYS KEPT:
+//
+//   kept    a vote entry exists on that local date            → the run continues
+//   open    no vote, and an occurrence that day is still
+//           pending / notified / snoozed                      → SKIPPED ENTIRELY
+//   broken  no vote, and every occurrence that day resolved
+//           (missed / skipped)                                → the run ends
+//
+// GRACE COMES FROM THE STATUS, NOT FROM THE CALENDAR. The sweep marks an
+// occurrence `missed` exactly when `due_at + grace_minutes` lapses, so "is this
+// day still in play?" is a question it has already answered. Reading its answer
+// instead of special-casing `todayLocal` is what makes an 11 pm dose with a
+// four-hour grace behave correctly across midnight, and what stops a tick that
+// failed to run from zeroing everybody's streak. It's also why there's no
+// `todayLocal` parameter here at all: future days are pending, therefore open,
+// therefore skipped, with no date arithmetic left to get wrong.
+//
+// OFF-DAY ENTRIES DON'T EXTEND IT. An unprompted Tuesday workout is still a vote
+// and still counts in `keptTotal` — it just isn't part of the MO/WE/FR chain,
+// because the chain's question is "did he show up on the days he committed to".
+//
+// PARTIAL DAYS COUNT AS KEPT. One of two doses logged is kept here and 50% in
+// `adherenceRate`, which is per-occurrence and already carries that detail. One
+// number trying to answer two questions is how both end up untrustworthy.
+
+export type DayState = 'kept' | 'open' | 'broken'
+
+/** Occurrence statuses that mean "this day hasn't resolved yet". */
+const OPEN_OCCURRENCE_STATUSES: ReadonlySet<string> =
+  new Set(['pending', 'notified', 'snoozed'])
+
+/**
+ * Every date this goal actually asked for something, in chronological order,
+ * each classified against the log. The shared basis for the current streak, the
+ * best run, and (Phase 3) the history grid — one classification, so those three
+ * can never disagree about the same day.
+ */
+export function classifyScheduledDays(
+  occurrences: OccurrenceLike[],
+  entries: EntryLike[],
+): { date: string; state: DayState }[] {
+  const voted = new Set<string>()
+  for (const entry of entries) {
+    if (COUNTS_AS_DONE.has(entry.kind)) voted.add(entry.local_date)
+  }
+
+  const statusesByDate = new Map<string, string[]>()
+  for (const occurrence of occurrences) {
+    const statuses = statusesByDate.get(occurrence.local_date) ?? []
+    statuses.push(occurrence.status)
+    statusesByDate.set(occurrence.local_date, statuses)
+  }
+
+  // YYYY-MM-DD sorts lexicographically, so a plain sort is chronological.
+  return [...statusesByDate.keys()].sort().map((date) => {
+    let state: DayState = 'broken'
+    if (voted.has(date)) state = 'kept'
+    else if ((statusesByDate.get(date) ?? []).some((s) => OPEN_OCCURRENCE_STATUSES.has(s))) {
+      state = 'open'
+    }
+    return { date, state }
+  })
+}
+
+/**
+ * Consecutive scheduled days kept, counting back from the most recent day that
+ * actually resolved.
+ *
+ * Falls to 0 for a goal with no occurrences at all — a goal whose schedules were
+ * deleted has no scheduled days to count, and callers use `computeStreak` over
+ * the bare log in that case.
+ */
+export function computeScheduledStreak(
+  occurrences: OccurrenceLike[],
+  entries: EntryLike[],
+): number {
+  const days = classifyScheduledDays(occurrences, entries)
+  let streak = 0
+  for (let i = days.length - 1; i >= 0; i--) {
+    const { state } = days[i]
+    if (state === 'open') continue     // grace — hasn't resolved either way
+    if (state === 'kept') { streak++; continue }
+    break                              // broken
+  }
+  return streak
+}
+
+/**
+ * The best run this goal has ever had, in scheduled days kept.
+ *
+ * An `open` day in the middle of history (a sweep that didn't run, a day still
+ * within grace) joins the runs either side of it rather than splitting them.
+ * Deliberately generous: an unresolved day is not evidence of a miss, and this
+ * number's whole job is to be the one that survives a bad week.
+ *
+ * ⚠️ `goal_stats.longest_streak` is written as max(stored, computed) — see
+ * migration 146. This function only ever sees the history it was handed.
+ */
+export function longestScheduledStreak(
+  occurrences: OccurrenceLike[],
+  entries: EntryLike[],
+): number {
+  let best = 0
+  let run = 0
+  for (const { state } of classifyScheduledDays(occurrences, entries)) {
+    if (state === 'open') continue
+    if (state === 'kept') {
+      run++
+      if (run > best) best = run
+      continue
+    }
+    run = 0
+  }
+  return best
+}
+
+/**
+ * All-time days kept. The companion to plan-scoped votes (migration 136), which
+ * reset when a new plan starts — this is the number for a habit somebody has held
+ * for a year across three of them.
+ *
+ * Counts DATES, not entries: two walks in one day is one day kept.
+ */
+export function keptTotal(entries: EntryLike[]): number {
+  const dates = new Set<string>()
+  for (const entry of entries) {
+    if (COUNTS_AS_DONE.has(entry.kind)) dates.add(entry.local_date)
+  }
+  return dates.size
+}
+
 /**
  * Completion rate over the occurrences that have actually resolved. Pending and
  * snoozed rows are excluded — a day that hasn't happened yet is not a miss, and
@@ -100,6 +239,45 @@ export function adherenceRate(
     if (occurrence.status === 'completed') done++
   }
   return { done, total, pct: total === 0 ? null : Math.round((done / total) * 100) }
+}
+
+/** The rolling window `recentAdherence` measures, and the one the UI names. */
+export const RATE_WINDOW_DAYS = 30
+
+/**
+ * Adherence over the last `days` local days, today inclusive.
+ *
+ * WHY A WINDOW EXISTS AT ALL: `adherenceRate` over a goal's whole life is the one
+ * number on the page that cannot recover. Six months in, a bad month costs a few
+ * points and a perfect fortnight wins a few back, so it stops answering the
+ * question anybody is actually asking — which is "how am I doing now". The
+ * lifetime pair stays (it's the honest all-time record); this is what gets read
+ * first.
+ *
+ * Returns the same shape as `adherenceRate`, so a `total` of 0 still means "no
+ * data" rather than 0%.
+ */
+export function recentAdherence(
+  occurrences: OccurrenceLike[],
+  todayLocal: string,
+  days: number = RATE_WINDOW_DAYS,
+): { done: number; total: number; pct: number | null } {
+  const from = shiftLocalDate(todayLocal, -(days - 1))
+  if (from == null) return { done: 0, total: 0, pct: null }
+  return adherenceRate(
+    occurrences.filter((o) => o.local_date >= from && o.local_date <= todayLocal),
+  )
+}
+
+/**
+ * `YYYY-MM-DD` shifted by whole days, or null if the input is malformed.
+ *
+ * Pure calendar arithmetic through UTC midnight — no zone involved, which is
+ * correct because both ends are already local dates in the goal's own zone.
+ */
+export function shiftLocalDate(ymd: string, days: number): string | null {
+  const ms = ymdToMs(ymd)
+  return ms == null ? null : msToYmd(ms + days * DAY_MS)
 }
 
 /** The most recent measured value, for goals that measure something. */
@@ -212,6 +390,42 @@ export function planWindow(
     dayInPlan: rawDay < 1 ? 0 : planDays != null ? Math.min(rawDay, planDays) : rawDay,
     planDays,
   }
+}
+
+/**
+ * Has this plan run its course?
+ *
+ * DERIVED, NEVER ASSERTED. Nobody should have to tell the app that eight weeks is
+ * over, and `goals.status = 'completed'` has no writer anywhere except the sweep
+ * phase that calls this. It lives here, beside `planWindow`, because it's the same
+ * question from the other end — and because a rule this consequential should be
+ * unit-testable without a database.
+ *
+ * Four conditions, each of them load-bearing:
+ *
+ *   • ONLY FROM `active`. A plan somebody deliberately paused or archived is not a
+ *     plan that finished, and re-finishing an already-finished one would re-stamp
+ *     completed_at and re-notify.
+ *   • AN OPEN-ENDED GOAL NEVER FINISHES. "Take your vitamins" has no end date
+ *     because there isn't one; finishing it would be the tool inventing a deadline.
+ *   • NOTHING UNRESOLVED. Pending, notified and snoozed days are still in play.
+ *     A `missed` day is NOT one of them: it's resolved, catch-up stays available
+ *     forever, and holding a plan open indefinitely over one bad Tuesday is the
+ *     opposite of how this domain treats a miss.
+ *   • THE TARGET DAY ITSELF IS STILL PLAYABLE — strictly `<`, so a plan ending
+ *     today finishes tomorrow. `todayLocal` must come from the goal's own zone;
+ *     the server's idea of today is not the user's.
+ */
+export function isPlanFinished(args: {
+  status: string
+  targetDate: string | null
+  todayLocal: string
+  hasUnresolved: boolean
+}): boolean {
+  if (args.status !== 'active') return false
+  if (!args.targetDate) return false
+  if (args.hasUnresolved) return false
+  return args.targetDate < args.todayLocal
 }
 
 function ymdToMs(ymd: string): number | null {

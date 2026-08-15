@@ -7,14 +7,15 @@
 //
 // BULK BY DEFAULT. The single-goal case (someone taps "log it") calls the same
 // function with one id, so there's one code path and the query count is fixed at
-// four regardless of how many goals a sweep tick touched. Recomputing per goal
-// would have quietly undone the sweep's batching.
+// five loads plus one upsert regardless of how many goals a sweep tick touched.
+// Recomputing per goal would have quietly undone the sweep's batching.
 
 import 'server-only'
 import { targetForDate, type CurveInput } from '@/lib/goals/curve'
 import { localDateInZone } from '@/lib/goals/recurrence'
 import {
-  computeStreak, adherenceRate, latestValue,
+  computeStreak, computeScheduledStreak, longestScheduledStreak, keptTotal,
+  adherenceRate, recentAdherence, latestValue,
   type EntryLike, type OccurrenceLike,
 } from '@/lib/goals/progress'
 
@@ -35,7 +36,7 @@ export async function recomputeGoalStats(
 
   const errors: string[] = []
 
-  const [goalsRes, schedulesRes, occurrencesRes, entriesRes] = await Promise.all([
+  const [goalsRes, schedulesRes, occurrencesRes, entriesRes, priorRes] = await Promise.all([
     client.from('goals')
       .select('id, user_id, curve, baseline_value, target_value, started_on, target_date, step_every_days')
       .in('id', ids),
@@ -46,11 +47,16 @@ export async function recomputeGoalStats(
     client.from('goal_entries')
       .select('goal_id, local_date, kind, value')
       .in('goal_id', ids),
+    // What we already know about each goal's best run. `longest_streak` is
+    // monotonic BY CONTRACT (migration 146) — it's written back as max(stored,
+    // computed) so that capping the history reads above, which is the obvious
+    // future optimisation, can never shorten a run somebody actually had.
+    client.from('goal_stats').select('goal_id, longest_streak').in('goal_id', ids),
   ])
 
   for (const [label, res] of [
     ['goals', goalsRes], ['schedules', schedulesRes],
-    ['occurrences', occurrencesRes], ['entries', entriesRes],
+    ['occurrences', occurrencesRes], ['entries', entriesRes], ['prior', priorRes],
   ] as const) {
     if (res.error) errors.push(`stats/${label}: ${res.error.message}`)
   }
@@ -65,6 +71,10 @@ export async function recomputeGoalStats(
   const schedules = (schedulesRes.data ?? []) as ScheduleRow[]
   const occurrences = (occurrencesRes.data ?? []) as OccRow[]
   const entries = (entriesRes.data ?? []) as EntRow[]
+  const priorLongest = new Map(
+    ((priorRes.data ?? []) as { goal_id: string; longest_streak: number | null }[])
+      .map((row) => [row.goal_id, row.longest_streak ?? 0]),
+  )
   const nowMs = now.getTime()
 
   const rows = goals.map((goal) => {
@@ -78,7 +88,16 @@ export async function recomputeGoalStats(
     const mineEntries = entries.filter((e) => e.goal_id === goal.id)
 
     const { done, total } = adherenceRate(mine)
+    const recent = recentAdherence(mine, today)
     const latest = latestValue(mineEntries)
+
+    // SCHEDULE-AWARE when the goal has occurrences: a MO/WE/FR run counts
+    // consecutive scheduled days, not consecutive calendar dates. The bare
+    // calendar fold survives only as the fallback for a goal whose schedules were
+    // deleted — nothing scheduled means there are no scheduled days to walk.
+    const streak = mine.length
+      ? computeScheduledStreak(mine, mineEntries)
+      : computeStreak(mineEntries, today)
 
     // Unresolved AND already due. A day that hasn't arrived isn't "open".
     const open = mine.filter((o) =>
@@ -93,9 +112,17 @@ export async function recomputeGoalStats(
     return {
       goal_id: goal.id,
       user_id: goal.user_id,
-      streak: computeStreak(mineEntries, today),
+      streak,
+      // Monotonic by contract — never let a shorter recompute lower it.
+      longest_streak: Math.max(
+        priorLongest.get(goal.id) ?? 0,
+        longestScheduledStreak(mine, mineEntries),
+      ),
       logged_done: done,
       logged_total: total,
+      rate_30d_done: recent.done,
+      rate_30d_total: recent.total,
+      kept_total: keptTotal(mineEntries),
       latest_value: latest?.value ?? null,
       latest_local_date: latest?.localDate ?? null,
       open_count: open.length,
