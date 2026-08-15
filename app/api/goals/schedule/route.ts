@@ -6,6 +6,7 @@ import { assertValidSchedule, isValidTimeZone, RecurrenceError, localDateInZone 
 import { buildRrule, normalizeDays } from '@/lib/goals/schedule-input'
 import { rematerializeSchedule, materializeScheduleById } from '@/lib/goals/sweep'
 import { recomputeGoalStats } from '@/lib/goals/stats'
+import { revalidateGoal } from '@/lib/goals/revalidate'
 
 // Create, edit, and remove the schedules on a goal. One handler with an `op`
 // field rather than three routes — the validation and re-materialization are
@@ -73,6 +74,7 @@ export async function POST(request: NextRequest) {
     if (error) return bounce(request, goalId, 'Couldn\'t remove that reminder.')
 
     await recomputeGoalStats(supabase, [goalId])
+    revalidateGoal(goalId)
     return NextResponse.redirect(new URL(`/goals/${goalId}/edit?saved=1`, request.url), 303)
   }
 
@@ -128,6 +130,7 @@ export async function POST(request: NextRequest) {
     }
     await materializeScheduleById(admin, (data as unknown as { id: string }).id, new Date())
     await recomputeGoalStats(supabase, [goalId])
+    revalidateGoal(goalId)
     return NextResponse.redirect(new URL(`/goals/${goalId}/edit?saved=1`, request.url), 303)
   }
 
@@ -154,6 +157,11 @@ export async function POST(request: NextRequest) {
 
   await rematerializeSchedule(admin, scheduleId, new Date())
   await recomputeGoalStats(supabase, [goalId])
+  // ⚠️ WITHOUT THIS THE EDIT SILENTLY LOOKS LIKE IT DIDN'T TAKE. This redirect
+  // lands on `/edit?saved=1`, which renders fresh — but the goal page the man taps
+  // back to is a cached entry from before the write, so his reminders section shows
+  // the old schedule. The row in the database was right the whole time.
+  revalidateGoal(goalId)
   return NextResponse.redirect(new URL(`/goals/${goalId}/edit?saved=1`, request.url), 303)
 }
 

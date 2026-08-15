@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { recomputeGoalStats } from '@/lib/goals/stats'
+import { revalidateGoals } from '@/lib/goals/revalidate'
 
 // Bulk pause / resume / archive / restore / delete from the goals index.
 //
@@ -74,6 +75,7 @@ export async function POST(request: NextRequest) {
       console.error('goals/bulk delete failed', error.message)
       return bounce(request, backTo, 'Couldn\'t delete those.')
     }
+    revalidateGoals(ids)
     return bounce(request, backTo, `Deleted ${ids.length} goal${ids.length === 1 ? '' : 's'}.`)
   }
 
@@ -86,6 +88,10 @@ export async function POST(request: NextRequest) {
     .update({
       status: targetStatus,
       archived_at: targetStatus === 'archived' ? new Date().toISOString() : null,
+      // Same rule as setGoalStatus: going back to active clears the finish stamp,
+      // archiving keeps it. An active goal carrying a completed_at is a row that
+      // contradicts itself.
+      ...(targetStatus === 'active' ? { completed_at: null } : {}),
     })
     .in('id', ids)
     .select('id')
@@ -98,6 +104,7 @@ export async function POST(request: NextRequest) {
   // open_count and next_due_at both change when a goal pauses, so the index
   // cards would keep showing a stale "Due" badge without this.
   if (touched.length) await recomputeGoalStats(supabase, touched)
+  revalidateGoals(touched)
 
   const verb = op === 'pause' ? 'Paused'
     : op === 'archive' ? 'Archived'

@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidateGoal } from '@/lib/goals/revalidate'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { recomputeGoalStats } from '@/lib/goals/stats'
 import { localDateInZone } from '@/lib/goals/recurrence'
@@ -35,6 +35,9 @@ export async function logOccurrence(formData: FormData): Promise<void> {
   const goalId = String(formData.get('goalId') ?? '')
   const action = String(formData.get('action') ?? 'completed')
   const rawValue = formData.get('value')
+  // Optional annotation on the day. Absent from /today by design — that surface is
+  // one tap per row with nothing to read — so this is empty for most logs.
+  const note = String(formData.get('note') ?? '')
 
   if (!occurrenceId || !goalId) return
   if (action !== 'completed' && action !== 'skipped') return
@@ -50,14 +53,14 @@ export async function logOccurrence(formData: FormData): Promise<void> {
     userId: user.id,
     action,
     value: parsed,
+    note,
     source: 'web',
   })
 
-  revalidatePath('/goals')
-  revalidatePath(`/goals/${goalId}`)
-  // /today lists open occurrences across every goal, so it's stale the moment one
-  // is resolved — and it's the surface this action is most often invoked from.
-  revalidatePath('/today')
+  // One list of surfaces, shared with the API routes — see lib/goals/revalidate.ts.
+  // /today matters most here: it lists open occurrences across every goal, so it's
+  // stale the moment one is resolved, and it's where this action is usually invoked.
+  revalidateGoal(goalId)
 }
 
 /**
@@ -66,8 +69,14 @@ export async function logOccurrence(formData: FormData): Promise<void> {
  *
  * Every entry used to require an occurrence, which meant an honest log on an
  * unscheduled day had nowhere to go and the only way to record reality was to
- * wait for a slot. Occurrence-less entries still count toward the streak, since
- * computeStreak folds over entries by local date, not by occurrence.
+ * wait for a slot.
+ *
+ * WHAT AN OFF-DAY LOG COUNTS FOR: it's a vote, and it counts in `kept_total`. It
+ * does NOT extend the streak, because the streak walks SCHEDULED days
+ * (`computeScheduledStreak`) — the chain's question is "did he show up on the days
+ * he committed to", and a Tuesday workout on a MO/WE/FR plan isn't one of them.
+ * It can't break the chain either. This used to read "still counts toward the
+ * streak", which was true of the calendar-date fold it replaced.
  *
  * `local_date` comes from the goal's own timezone rather than the server's — the
  * server's idea of today is not the user's, especially late at night.
@@ -104,8 +113,7 @@ export async function logUnprompted(formData: FormData): Promise<void> {
     source: 'web',
   })
 
-  revalidatePath('/goals')
-  revalidatePath(`/goals/${goalId}`)
+  revalidateGoal(goalId)
 }
 
 function safeLocalDate(zone: string): string {
@@ -133,12 +141,18 @@ export async function toggleScheduleMute(formData: FormData): Promise<void> {
     .eq('id', scheduleId)
   if (error) throw new Error(`Could not update reminders: ${error.message}`)
 
-  revalidatePath(`/goals/${goalId}`)
+  revalidateGoal(goalId)
 }
 
 /**
- * Pause or resume a whole goal. Paused goals stop materializing new days and
- * stop nudging; the log is untouched, so resuming picks up where it left off.
+ * Pause, resume, archive — or reopen a finished plan.
+ *
+ * Paused goals stop materializing new days and stop nudging; the log is untouched,
+ * so resuming picks up where it left off.
+ *
+ * `completed` is NOT accepted here and never will be: finishing is derived from the
+ * plan's end date by the sweep (completePlans), not asserted by a form. Going back
+ * to `active` from it is allowed, which is what the Reopen button does.
  */
 export async function setGoalStatus(formData: FormData): Promise<void> {
   const goalId = String(formData.get('goalId') ?? '')
@@ -155,11 +169,14 @@ export async function setGoalStatus(formData: FormData): Promise<void> {
     .update({
       status,
       archived_at: status === 'archived' ? new Date().toISOString() : null,
+      // Reopening clears the finish stamp. An active goal still carrying a
+      // completed_at would render the finished banner on a live plan. Archiving a
+      // finished plan KEEPS it — when it finished is a fact worth holding on to.
+      ...(status === 'active' ? { completed_at: null } : {}),
     })
     .eq('id', goalId)
   if (error) throw new Error(`Could not update that goal: ${error.message}`)
 
   await recomputeGoalStats(supabase, [goalId])
-  revalidatePath('/goals')
-  revalidatePath(`/goals/${goalId}`)
+  revalidateGoal(goalId)
 }

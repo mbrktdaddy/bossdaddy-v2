@@ -6,6 +6,7 @@ import { assertValidSchedule, isValidTimeZone, localDateInZone, RecurrenceError 
 import { buildRrule, normalizeDays } from '@/lib/goals/schedule-input'
 import { materializeScheduleById } from '@/lib/goals/sweep'
 import { loadTemplate } from '@/lib/goals/templates'
+import { revalidateGoal } from '@/lib/goals/revalidate'
 
 // Creates a goal plus its first schedule, then redirects to the goal.
 //
@@ -201,7 +202,8 @@ export async function POST(request: NextRequest) {
     console.error('goals/create schedule insert failed', scheduleError?.message)
     // The goal exists but has no schedule — send them to it rather than
     // stranding them on the form. The detail page says "no schedule yet".
-    return NextResponse.redirect(new URL(`/goals/${goalId}`, request.url), 303)
+    revalidateGoal(goalId)
+  return NextResponse.redirect(new URL(`/goals/${goalId}`, request.url), 303)
   }
 
   // Materialize immediately so the goal isn't blank until the next */15 tick.
@@ -218,6 +220,7 @@ export async function POST(request: NextRequest) {
     console.error('goals/create materialize failed', err instanceof Error ? err.message : String(err))
   }
 
+  revalidateGoal(goalId)
   return NextResponse.redirect(new URL(`/goals/${goalId}`, request.url), 303)
 }
 

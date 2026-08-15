@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { logOccurrenceEntry } from '@/lib/goals/log'
+import { revalidateGoal } from '@/lib/goals/revalidate'
 
 // The flush endpoint for the offline queue on /today.
 //
@@ -49,5 +50,8 @@ export async function POST(request: NextRequest) {
   //   'not_found'        — not his occurrence, or it's gone. Never becomes valid.
   // Returning 200 for all three is deliberate: a queued entry that can never
   // succeed must not sit in localStorage retrying forever.
+  // The queue flushes while the app is open, so the page showing this goal is
+  // already rendered and now holds pre-log numbers.
+  revalidateGoal(result.goalId)
   return NextResponse.json({ ok: true, outcome: result.outcome })
 }

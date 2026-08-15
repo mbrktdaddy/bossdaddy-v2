@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyOccurrenceToken } from '@/lib/goals/links'
 import { logOccurrenceEntry } from '@/lib/goals/log'
+import { revalidateGoal } from '@/lib/goals/revalidate'
 
 // The mutating half of the one-tap flow. app/g/[token]/page.tsx renders a plain
 // form that POSTs here; this is the only place the token can cause a write.
@@ -76,13 +77,15 @@ export async function POST(request: NextRequest) {
   const parsed = rawValue == null || String(rawValue).trim() === '' ? null : Number(rawValue)
 
   try {
-    await logOccurrenceEntry(admin, {
+    const result = await logOccurrenceEntry(admin, {
       occurrenceId: occurrence.id,
       userId: occurrence.user_id,
       action,
       value: parsed,
       source: 'push',
     })
+    // He logged from his inbox; the goal pages he already had open are now stale.
+    revalidateGoal(result.goalId)
   } catch (err) {
     console.error('goals/tap log failed', err instanceof Error ? err.message : String(err))
   }

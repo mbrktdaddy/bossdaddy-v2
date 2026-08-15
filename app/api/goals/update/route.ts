@@ -4,6 +4,7 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { rematerializeSchedule } from '@/lib/goals/sweep'
 import { recomputeGoalStats } from '@/lib/goals/stats'
+import { revalidateGoal } from '@/lib/goals/revalidate'
 
 // Edits a goal's own fields: title, description, metric, and the target curve.
 // Schedules are handled separately by /api/goals/schedule.
@@ -137,6 +138,7 @@ export async function POST(request: NextRequest) {
   }
 
   await recomputeGoalStats(supabase, [input.goalId])
+  revalidateGoal(input.goalId)
   return NextResponse.redirect(new URL(`/goals/${input.goalId}?saved=1`, request.url), 303)
 }
 

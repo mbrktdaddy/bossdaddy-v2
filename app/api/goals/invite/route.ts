@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { acceptInvitation, declineInvitation } from '@/lib/goals/participants'
+import { revalidateGoal } from '@/lib/goals/revalidate'
 
 // Accepting or declining an invite to watch someone's goal.
 //
@@ -32,6 +33,9 @@ export async function POST(request: NextRequest) {
   // the link can give, and requiring sign-in first would be a strange gate on "no".
   if (op === 'decline') {
     await declineInvitation(admin, token)
+    // No goal id: a decline is silent by design and the owner is never told, so
+    // only the shared surfaces need re-rendering.
+    revalidateGoal(null)
     return redirectTo(request, '/goals/shared?declined=1')
   }
 
@@ -51,6 +55,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.redirect(url, 303)
   }
 
+  // Accepting changes both sides: the owner's participant list and this partner's
+  // /goals/shared index. revalidateGoal covers both.
+  revalidateGoal(result.goalId)
   return redirectTo(request, `/goals/shared/${result.goalId}`)
 }
 

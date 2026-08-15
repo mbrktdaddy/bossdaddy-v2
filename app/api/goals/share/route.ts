@@ -7,6 +7,7 @@ import {
 } from '@/lib/goals/participants'
 import { isInvitableContact } from '@/lib/goals/contacts'
 import { deliverGoalInvite, type DeliveryOutcome } from '@/lib/goals/invite-delivery'
+import { revalidateGoal } from '@/lib/goals/revalidate'
 
 // Every mutation on who can see a goal. One route with an `op`, mirroring
 // /api/goals/schedule — the alternative is four endpoints that all do the same
@@ -207,9 +208,23 @@ function sharePath(goalId: string): string {
   return `/goals/${goalId}/share`
 }
 
-/** 303 so the browser follows with GET and a refresh can't re-POST the form. */
+/**
+ * 303 so the browser follows with GET and a refresh can't re-POST the form.
+ *
+ * Revalidates on the way out, unconditionally. Every op that reaches here either
+ * changed the participant list or was refused, and re-rendering after a refusal
+ * costs one render — while missing one leaves the share page insisting somebody is
+ * still a teammate after they were removed.
+ */
 function back(request: NextRequest, path: string, msg?: string): NextResponse {
+  revalidateGoal(goalIdFromSharePath(path))
   const url = new URL(path, request.url)
   if (msg) url.searchParams.set('msg', msg)
   return NextResponse.redirect(url, 303)
+}
+
+/** `/goals/<id>/share` → `<id>`. Null for any other path, which revalidates the
+ *  shared surfaces only. */
+function goalIdFromSharePath(path: string): string | null {
+  return /^\/goals\/([0-9a-f-]{36})\/share$/i.exec(path)?.[1] ?? null
 }

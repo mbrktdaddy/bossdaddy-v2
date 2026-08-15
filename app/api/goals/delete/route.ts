@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
+import { revalidateGoal } from '@/lib/goals/revalidate'
 
 // Permanently deletes a goal. Reached from the two-step confirm on the detail
 // page — never from a bare link, so a prefetch or a mis-tap can't destroy a log.
@@ -34,5 +35,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.redirect(new URL(`/goals/${goalId}?msg=delete_failed`, request.url), 303)
   }
 
+  // The goal is gone, and the index it vanished from still has to be re-rendered.
+  revalidateGoal(goalId)
   return NextResponse.redirect(new URL('/goals?deleted=1', request.url), 303)
 }
