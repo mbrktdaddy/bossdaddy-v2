@@ -102,7 +102,7 @@ export default async function EditGoalPage({ params, searchParams }: Props) {
     <Wrap>
       <Link
         href={`/goals/${goal.id}`}
-        className="inline-flex items-center py-3 text-xs text-muted hover:text-prose"
+        className="inline-flex items-center py-3 text-xs text-prose-muted hover:text-prose"
       >
         ← {goal.title}
       </Link>
@@ -122,7 +122,7 @@ export default async function EditGoalPage({ params, searchParams }: Props) {
         </p>
       ) : null}
       {saved === '1' && !msg ? (
-        <p className="mt-6 rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-muted">
+        <p className="mt-6 rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-prose-muted">
           Saved.
         </p>
       ) : null}
@@ -142,12 +142,22 @@ export default async function EditGoalPage({ params, searchParams }: Props) {
           />
         </Field>
 
-        <Field label="Notes (optional)">
+        {/* This is `goals.description`, and it was labelled "Notes (optional)" —
+            which is the one word this domain cannot afford to reuse. There are now
+            three places to type prose on a goal: this, the note stapled to a single
+            logged day, and the notes feed. A man who writes here and then can't
+            find it later has been told nothing about where it went. */}
+        <Field label="What this is about (optional)">
           <textarea
             name="description" rows={3} maxLength={2000}
             defaultValue={goal.description ?? ''}
             className="mt-2 w-full rounded-lg border border-soft bg-surface px-4 py-3 text-prose"
           />
+          <p className="mt-2 text-xs text-prose-faint">
+            Shows under the title on the goal page. Not the notes feed — that&apos;s
+            the running conversation at the bottom of the goal, and not the note you
+            can attach to a single day when you log it.
+          </p>
         </Field>
 
         {/* ── identity ──────────────────────────────────────────────────────
@@ -172,7 +182,7 @@ export default async function EditGoalPage({ params, searchParams }: Props) {
               className="mt-2 w-full rounded-lg border border-soft bg-surface-raised px-4 py-3 text-prose"
             />
           </Field>
-          <p className="text-xs text-faint">{LABELS.goals.identityHint}</p>
+          <p className="text-xs text-prose-faint">{LABELS.goals.identityHint}</p>
         </fieldset>
 
         {goal.metric_key != null || wantsCurve ? (
@@ -226,7 +236,7 @@ export default async function EditGoalPage({ params, searchParams }: Props) {
                 />
               </Field>
             ) : null}
-            <p className="text-xs text-faint">
+            <p className="text-xs text-prose-faint">
               Weeks count from {goal.started_on}, when you started — moving the
               deadline won&apos;t restart a taper you&apos;re already into. Changing any
               of these re-stamps the targets on days that haven&apos;t happened yet.
@@ -244,10 +254,13 @@ export default async function EditGoalPage({ params, searchParams }: Props) {
       </form>
 
       {/* ── schedules ────────────────────────────────────────────────────── */}
-      <section className="mt-12 space-y-4 border-t border-soft pt-8">
+      {/* `id` is the deep-link target for "Add or change →" on the goal page, so a
+          man who wants a second reminder lands on the reminders editor instead of
+          scrolling past every goal field to find it. */}
+      <section id="reminders" className="mt-12 space-y-4 border-t border-soft pt-8 scroll-mt-6">
         <div>
           <h2 className="text-sm font-bold text-prose uppercase tracking-wide">Reminders</h2>
-          <p className="mt-2 text-xs text-faint">
+          <p className="mt-2 text-xs text-prose-faint">
             A goal can have more than one. Lifting Mon/Wed/Fri plus a Sunday
             weigh-in is one goal with two reminders.
           </p>
@@ -313,7 +326,7 @@ export default async function EditGoalPage({ params, searchParams }: Props) {
                   <input type="hidden" name="scheduleId" value={schedule.id} />
                   <button
                     type="submit"
-                    className="min-h-11 inline-flex items-center text-xs text-faint hover:text-muted underline"
+                    className="min-h-11 inline-flex items-center text-xs text-prose-faint hover:text-prose-muted underline"
                   >
                     Remove this reminder
                   </button>
@@ -358,7 +371,7 @@ export default async function EditGoalPage({ params, searchParams }: Props) {
           </form>
         </details>
 
-        <p className="text-xs text-faint">
+        <p className="text-xs text-prose-faint">
           Changing a time or the days rebuilds the days ahead. Anything you already
           logged, skipped, or missed is history and stays put. Removing a reminder
           keeps your log{unit ? '' : ''} — it just stops the nudges from that one.
@@ -383,7 +396,7 @@ function WhenFields({
   return (
     <>
       <fieldset className="space-y-2">
-        <legend className="text-xs text-muted">When</legend>
+        <legend className="text-xs text-prose-muted">When</legend>
         {WHEN_OPTIONS.map((option) => (
           <label
             key={option.value}
@@ -400,7 +413,7 @@ function WhenFields({
       </fieldset>
 
       <fieldset>
-        <legend className="text-xs text-muted">Which days (for &ldquo;only the days I pick&rdquo;)</legend>
+        <legend className="text-xs text-prose-muted">Which days (for &ldquo;only the days I pick&rdquo;)</legend>
         <div className="mt-2 flex flex-wrap gap-2">
           {WEEKDAY_OPTIONS.map((day) => (
             <label
@@ -438,7 +451,7 @@ function WhenFields({
       </div>
 
       <fieldset>
-        <legend className="text-xs text-muted">How to reach you</legend>
+        <legend className="text-xs text-prose-muted">How to reach you</legend>
         <div className="mt-2 flex flex-wrap gap-2">
           {CHANNEL_OPTIONS.map((channel) => (
             <label
@@ -466,7 +479,7 @@ function Wrap({ children }: { children: React.ReactNode }) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="text-sm text-muted">{label}</span>
+      <span className="text-sm text-prose-muted">{label}</span>
       {children}
     </label>
   )

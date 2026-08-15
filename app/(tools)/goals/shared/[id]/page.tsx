@@ -73,7 +73,7 @@ export default async function SharedGoalPage({ params }: Props) {
 
   return (
     <Wrap>
-      <Link href="/goals/shared" className="inline-flex items-center py-3 text-xs text-muted hover:text-prose">
+      <Link href="/goals/shared" className="inline-flex items-center py-3 text-xs text-prose-muted hover:text-prose">
         ← {LABELS.goals.sharedHeading}
       </Link>
 
@@ -85,7 +85,7 @@ export default async function SharedGoalPage({ params }: Props) {
           {goal.title}
         </h1>
         {goal.status === 'paused' ? (
-          <p className="text-sm text-muted">He&apos;s got this one paused right now.</p>
+          <p className="text-sm text-prose-muted">He&apos;s got this one paused right now.</p>
         ) : null}
       </header>
 
@@ -117,17 +117,17 @@ export default async function SharedGoalPage({ params }: Props) {
               )
             })}
           </div>
-          <p className="text-xs text-faint">
+          <p className="text-xs text-prose-faint">
             One square a day. Filled means he did it. Nothing here shows numbers or
             anything he wrote down.
           </p>
         </section>
       ) : (
         <section className="mt-10">
-          <p className="text-sm text-muted">
+          <p className="text-sm text-prose-muted">
             {TIER_COPY[goal.myTier].sees}
           </p>
-          <p className="mt-2 text-xs text-faint">{TIER_COPY[goal.myTier].blind}</p>
+          <p className="mt-2 text-xs text-prose-faint">{TIER_COPY[goal.myTier].blind}</p>
         </section>
       )}
 
@@ -152,7 +152,7 @@ export default async function SharedGoalPage({ params }: Props) {
             Step out of this
           </button>
         </form>
-        <p className="mt-3 text-xs text-faint">
+        <p className="mt-3 text-xs text-prose-faint">
           Takes effect right away. He isn&apos;t told, and you don&apos;t need his
           say-so — if he wants you back in, he&apos;ll send a fresh invite.
         </p>
@@ -175,7 +175,7 @@ function pad(n: number): string {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border border-soft bg-surface p-4">
-      <dt className="text-xs text-faint uppercase tracking-widest">{label}</dt>
+      <dt className="text-xs text-prose-faint uppercase tracking-widest">{label}</dt>
       <dd className="mt-1 text-lg font-bold text-prose">{value}</dd>
     </div>
   )

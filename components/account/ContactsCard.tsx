@@ -40,7 +40,7 @@ export default async function ContactsCard() {
           </p>
           <p className="mt-2 text-2xl font-black text-prose">
             {connected.length}
-            <span className="ml-2 text-sm font-semibold text-muted">
+            <span className="ml-2 text-sm font-semibold text-prose-muted">
               {connected.length === 1 ? 'contact' : 'contacts'}
             </span>
           </p>
@@ -58,7 +58,7 @@ export default async function ContactsCard() {
             {incoming.length}
           </span>
         ) : (
-          <span className="shrink-0 text-muted" aria-hidden="true">→</span>
+          <span className="shrink-0 text-prose-muted" aria-hidden="true">→</span>
         )}
       </div>
     </Link>

@@ -99,7 +99,7 @@ export default function MemberSearch() {
                   Message
                 </button>
               ) : m.connectionState === 'pending_out' ? (
-                <span className="shrink-0 px-3 py-2.5 text-xs font-semibold text-faint">Asked</span>
+                <span className="shrink-0 px-3 py-2.5 text-xs font-semibold text-prose-faint">Asked</span>
               ) : m.connectionState === 'pending_in' ? (
                 <ConnectForm userId={m.id} op="accept" label="Accept" />
               ) : (

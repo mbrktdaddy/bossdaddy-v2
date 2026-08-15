@@ -114,7 +114,7 @@ export default async function OneTapPage({ params, searchParams }: Props) {
       <h1 className="mt-2 text-2xl font-black text-prose sm:text-3xl">
         {isCatchup ? 'Logging a catch-up' : 'Log it'}
       </h1>
-      <p className="mt-3 text-sm text-muted">
+      <p className="mt-3 text-sm text-prose-muted">
         {occurrence.local_date} at {occurrence.local_time.slice(0, 5)}
         {occurrence.target_value != null ? (
           <> &middot; target <span className="text-prose">{occurrence.target_value}{goal.metric_unit ? ` ${goal.metric_unit}` : ''}</span></>
@@ -132,7 +132,7 @@ export default async function OneTapPage({ params, searchParams }: Props) {
 
         {wantsNumber ? (
           <label className="block">
-            <span className="text-sm text-muted">
+            <span className="text-sm text-prose-muted">
               {goal.metric_key}{goal.metric_unit ? ` (${goal.metric_unit})` : ''} — what actually happened
             </span>
             <input
@@ -168,14 +168,14 @@ export default async function OneTapPage({ params, searchParams }: Props) {
             type="submit"
             name="action"
             value="skipped"
-            className="flex-1 rounded-lg border border-soft bg-surface px-4 py-3 text-sm font-semibold text-muted hover:bg-surface-hover"
+            className="flex-1 rounded-lg border border-soft bg-surface px-4 py-3 text-sm font-semibold text-prose-muted hover:bg-surface-hover"
           >
             Not today
           </button>
         </div>
       </form>
 
-      <p className="mt-8 text-xs text-faint">
+      <p className="mt-8 text-xs text-prose-faint">
         &ldquo;Not today&rdquo; costs you nothing. Showing up tomorrow is the whole game.
       </p>
     </Shell>
@@ -201,7 +201,7 @@ function Message({ heading, body, goalId }: { heading: string; body: string; goa
   return (
     <>
       <h1 className="text-2xl font-black text-prose">{heading}</h1>
-      <p className="mt-3 text-sm text-muted">{body}</p>
+      <p className="mt-3 text-sm text-prose-muted">{body}</p>
       <Link
         href={goalId ? `/goals/${goalId}` : '/goals'}
         className="mt-8 inline-block rounded-lg bg-accent px-6 py-3 font-bold text-white hover:bg-accent-hover"

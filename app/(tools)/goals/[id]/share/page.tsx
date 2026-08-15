@@ -88,7 +88,7 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
 
   return (
     <Wrap>
-      <Link href={`/goals/${goal.id}`} className="inline-flex items-center py-3 text-xs text-muted hover:text-prose">
+      <Link href={`/goals/${goal.id}`} className="inline-flex items-center py-3 text-xs text-prose-muted hover:text-prose">
         ← {goal.title}
       </Link>
 
@@ -125,7 +125,7 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
           <p className="mt-3 break-all rounded-lg border border-soft bg-surface px-4 py-3 font-mono text-xs text-accent-text">
             {freshLink}
           </p>
-          <p className="mt-2 text-xs text-faint">
+          <p className="mt-2 text-xs text-prose-faint">
             {sent === 'none'
               ? 'Good for 7 days, one use. Nothing was emailed — that\'s your call to make.'
               : 'Good for 7 days, one use. Here it is as well, in case you\'d rather text it.'}
@@ -138,7 +138,7 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
         <h2 className="text-sm font-bold text-prose uppercase tracking-wide">In your corner</h2>
 
         {participants.length === 0 ? (
-          <p className="text-sm text-faint">
+          <p className="text-sm text-prose-faint">
             Nobody yet. This goal is yours alone.
           </p>
         ) : participants.map((p) => (
@@ -148,12 +148,12 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
                 <p className="text-sm font-semibold text-prose truncate">
                   {p.displayName?.trim() || p.username || 'A member'}
                 </p>
-                <p className="mt-1 text-xs text-muted">{TIER_COPY[p.tier].label}</p>
-                <p className="mt-1 text-xs text-faint">{TIER_COPY[p.tier].sees}</p>
+                <p className="mt-1 text-xs text-prose-muted">{TIER_COPY[p.tier].label}</p>
+                <p className="mt-1 text-xs text-prose-faint">{TIER_COPY[p.tier].sees}</p>
                 {/* Stated separately from the tier because it IS separate — and
                     because "can he read my notes?" is the question an owner will
                     want answered at a glance. */}
-                <p className="mt-1 text-xs text-faint">
+                <p className="mt-1 text-xs text-prose-faint">
                   {THREAD_ACCESS_COPY[p.threadAccess].sees}
                 </p>
               </div>
@@ -173,7 +173,7 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
 
             {/* Change what they see. Collapsed so it never competes with Remove. */}
             <details className="mt-4">
-              <summary className="min-h-11 flex cursor-pointer items-center text-xs font-semibold text-muted hover:text-prose">
+              <summary className="min-h-11 flex cursor-pointer items-center text-xs font-semibold text-prose-muted hover:text-prose">
                 Change what they see
               </summary>
               <form action="/api/goals/share" method="post" className="mt-3 space-y-2">
@@ -214,7 +214,7 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
                 <p className="text-sm font-semibold text-prose truncate">
                   {invite.email || 'Whoever you sent the link to'}
                 </p>
-                <p className="mt-1 text-xs text-muted">
+                <p className="mt-1 text-xs text-prose-muted">
                   {TIER_COPY[invite.tier].label} · expires {invite.expiresAt.slice(0, 10)}
                 </p>
                 {/* A live invite is a bearer token for whatever it offers, so the
@@ -225,7 +225,7 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
                     {THREAD_ACCESS_COPY[invite.threadAccess].label}
                   </p>
                 ) : null}
-                <p className="mt-2 break-all font-mono text-[11px] text-faint">
+                <p className="mt-2 break-all font-mono text-[11px] text-prose-faint">
                   {inviteUrl(invite.token)}
                 </p>
               </div>
@@ -235,7 +235,7 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
                 <input type="hidden" name="invitationId" value={invite.id} />
                 <button
                   type="submit"
-                  className="min-h-11 rounded-lg border border-soft bg-surface px-4 py-3 text-xs font-semibold text-muted hover:bg-surface-hover transition-colors"
+                  className="min-h-11 rounded-lg border border-soft bg-surface px-4 py-3 text-xs font-semibold text-prose-muted hover:bg-surface-hover transition-colors"
                 >
                   Call it back
                 </button>
@@ -282,14 +282,14 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
                   <option key={c.userId} value={c.userId}>{c.label}</option>
                 ))}
               </select>
-              <span className="mt-2 block text-xs text-faint">
+              <span className="mt-2 block text-xs text-prose-faint">
                 Goes straight to them — in the app and by email. No link to pass on.
               </span>
             </label>
           ) : null}
 
           <label className="block">
-            <span className="text-sm text-muted">
+            <span className="text-sm text-prose-muted">
               {contacts.length > 0 ? 'Or their email' : 'Their email'}
             </span>
             <input
@@ -298,7 +298,7 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
               maxLength={200}
               className="mt-2 w-full rounded-lg border border-soft bg-surface px-4 py-3 text-prose"
             />
-            <span className="mt-2 block text-xs text-faint">
+            <span className="mt-2 block text-xs text-prose-faint">
               We&apos;ll email them the invite. Leave it blank and you just get a link
               to send however you like.
             </span>
@@ -335,8 +335,8 @@ function TierChoices({ current, name }: { current: ShareTier; name: string }) {
           />
           <span className="min-w-0">
             <span className="block text-sm font-semibold text-prose">{TIER_COPY[tier].label}</span>
-            <span className="mt-0.5 block text-xs text-muted">{TIER_COPY[tier].sees}</span>
-            <span className="mt-0.5 block text-xs text-faint">{TIER_COPY[tier].blind}</span>
+            <span className="mt-0.5 block text-xs text-prose-muted">{TIER_COPY[tier].sees}</span>
+            <span className="mt-0.5 block text-xs text-prose-faint">{TIER_COPY[tier].blind}</span>
           </span>
         </label>
       ))}
@@ -392,7 +392,7 @@ function ThreadAccessChoices({
             />
             <span className="min-w-0">
               <span className="block text-sm font-semibold text-prose">{copy.label}</span>
-              <span className="mt-0.5 block text-xs text-muted">{copy.sees}</span>
+              <span className="mt-0.5 block text-xs text-prose-muted">{copy.sees}</span>
               {warn ? (
                 <span className="mt-0.5 block text-xs text-accent-text">{warn}</span>
               ) : null}
@@ -427,7 +427,7 @@ function SensitiveAck() {
         <span className="block text-sm font-semibold text-prose">
           This one&apos;s sensitive — I know what they&apos;d see.
         </span>
-        <span className="mt-0.5 block text-xs text-muted">
+        <span className="mt-0.5 block text-xs text-prose-muted">
           Needed for anything past cheering you on, and for opening your notes. Past
           that, they see every day you missed. Only you know whether that helps.
         </span>

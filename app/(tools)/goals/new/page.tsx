@@ -86,7 +86,7 @@ export default async function NewGoalPage({ searchParams }: Props) {
         {/* A slug that no longer resolves lands here. Say so — silently showing
             the shelf reads like the tap didn't register. */}
         {templateParam || kindParam ? (
-          <p className="mt-6 rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-muted">
+          <p className="mt-6 rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-prose-muted">
             That plan isn&apos;t around any more. Here&apos;s what is.
           </p>
         ) : null}
@@ -99,7 +99,7 @@ export default async function NewGoalPage({ searchParams }: Props) {
         {plans.length === 0 && kindDefaults.length === 0 ? (
           // Only reachable if the read failed or the seed never ran. Better than
           // an empty page that looks like the feature is broken with no recourse.
-          <p className="mt-8 rounded-xl border border-soft bg-surface p-5 text-sm text-muted">
+          <p className="mt-8 rounded-xl border border-soft bg-surface p-5 text-sm text-prose-muted">
             Can&apos;t load the plans right now. Give it a minute and try again.
           </p>
         ) : null}
@@ -112,7 +112,7 @@ export default async function NewGoalPage({ searchParams }: Props) {
                 className="block bg-surface border border-soft hover:border-strong rounded-xl p-5 transition-colors"
               >
                 <p className="text-base font-bold text-prose">{plan.label}</p>
-                <p className="mt-1 text-sm text-muted">{plan.blurb}</p>
+                <p className="mt-1 text-sm text-prose-muted">{plan.blurb}</p>
                 {plan.identityShort ? (
                   <p className="mt-3 text-xs text-eyebrow uppercase tracking-widest font-semibold">
                     {LABELS.goals.votingFor}: {plan.identityShort}
@@ -138,7 +138,7 @@ export default async function NewGoalPage({ searchParams }: Props) {
             <summary className="min-h-11 flex cursor-pointer items-center text-sm font-semibold text-prose">
               {LABELS.goals.newOtherCta}
             </summary>
-            <p className="mt-2 text-xs text-faint">{LABELS.goals.newOtherBody}</p>
+            <p className="mt-2 text-xs text-prose-faint">{LABELS.goals.newOtherBody}</p>
             <ul className="mt-4 space-y-2">
               {kindDefaults.map((shape) => (
                 <li key={shape.slug}>
@@ -147,7 +147,7 @@ export default async function NewGoalPage({ searchParams }: Props) {
                     className="block rounded-lg border border-soft bg-surface-raised px-4 py-3 hover:bg-surface-hover transition-colors"
                   >
                     <p className="text-sm font-bold text-prose">{shape.label}</p>
-                    <p className="mt-1 text-xs text-muted">{shape.blurb}</p>
+                    <p className="mt-1 text-xs text-prose-muted">{shape.blurb}</p>
                   </Link>
                 </li>
               ))}
@@ -172,7 +172,7 @@ export default async function NewGoalPage({ searchParams }: Props) {
 
   return (
     <Wrap>
-      <Link href="/goals/new" className="inline-flex items-center py-3 text-xs text-muted hover:text-prose">
+      <Link href="/goals/new" className="inline-flex items-center py-3 text-xs text-prose-muted hover:text-prose">
         ← Pick a different plan
       </Link>
 
@@ -270,7 +270,7 @@ export default async function NewGoalPage({ searchParams }: Props) {
                   defaultValue={template.stepDays}
                   className="mt-2 w-full rounded-lg border border-soft bg-surface px-4 py-3 text-prose"
                 />
-                <span className="mt-2 block text-xs text-faint">
+                <span className="mt-2 block text-xs text-prose-faint">
                   Holds steady between steps, so each level gets a fair run.
                 </span>
               </Field>
@@ -304,11 +304,11 @@ export default async function NewGoalPage({ searchParams }: Props) {
               placeholder="Smoke-Free"
               className="mt-2 w-full rounded-lg border border-soft bg-surface-raised px-4 py-3 text-prose"
             />
-            <span className="mt-2 block text-xs text-faint">
+            <span className="mt-2 block text-xs text-prose-faint">
               {LABELS.goals.identityShortHint}
             </span>
           </Field>
-          <p className="text-xs text-faint">{LABELS.goals.identityHint}</p>
+          <p className="text-xs text-prose-faint">{LABELS.goals.identityHint}</p>
         </fieldset>
 
         <fieldset className="space-y-3">
@@ -336,7 +336,7 @@ export default async function NewGoalPage({ searchParams }: Props) {
               appears after a round trip is worse than one that's simply ignored
               unless "the days I pick" is selected. */}
           <fieldset className="rounded-lg border border-soft bg-surface p-4">
-            <legend className="px-1 text-xs text-muted">
+            <legend className="px-1 text-xs text-prose-muted">
               Which days? (used when you pick &ldquo;only the days I pick&rdquo;)
             </legend>
             <div className="mt-1 flex flex-wrap gap-2">
@@ -354,7 +354,7 @@ export default async function NewGoalPage({ searchParams }: Props) {
                 </label>
               ))}
             </div>
-            <p className="mt-3 text-xs text-faint">
+            <p className="mt-3 text-xs text-prose-faint">
               One day is a weekly reminder. Check all seven and it&apos;s the same
               as every day.
             </p>
@@ -379,7 +379,7 @@ export default async function NewGoalPage({ searchParams }: Props) {
               </select>
             </Field>
           </div>
-          <p className="text-xs text-faint">
+          <p className="text-xs text-prose-faint">
             Your clock, not the server&apos;s. 8:30 means 8:30 all year — daylight
             saving doesn&apos;t move it.
           </p>
@@ -403,7 +403,7 @@ export default async function NewGoalPage({ searchParams }: Props) {
             min={todayLocal}
             className="w-full rounded-lg border border-soft bg-surface px-4 py-3 text-prose"
           />
-          <p className="text-xs text-faint">{LABELS.goals.startHint}</p>
+          <p className="text-xs text-prose-faint">{LABELS.goals.startHint}</p>
         </fieldset>
 
         {/* The third channel was reachable only from the edit page, so every goal
@@ -433,12 +433,12 @@ export default async function NewGoalPage({ searchParams }: Props) {
               <span className="min-w-0">
                 <span className="block text-sm text-prose">{channel.label}</span>
                 {channel.hint ? (
-                  <span className="mt-0.5 block text-xs text-faint">{channel.hint}</span>
+                  <span className="mt-0.5 block text-xs text-prose-faint">{channel.hint}</span>
                 ) : null}
               </span>
             </label>
           ))}
-          <p className="text-xs text-faint">
+          <p className="text-xs text-prose-faint">
             If push is dead on your device, email covers you anyway. You can mute
             any of it later.
           </p>
@@ -465,7 +465,7 @@ function Wrap({ children }: { children: React.ReactNode }) {
 
 function Back() {
   return (
-    <Link href="/goals" className="inline-flex items-center py-3 text-xs text-muted hover:text-prose">
+    <Link href="/goals" className="inline-flex items-center py-3 text-xs text-prose-muted hover:text-prose">
       ← {LABELS.goals.short}
     </Link>
   )
@@ -474,7 +474,7 @@ function Back() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="text-sm text-muted">{label}</span>
+      <span className="text-sm text-prose-muted">{label}</span>
       {children}
     </label>
   )

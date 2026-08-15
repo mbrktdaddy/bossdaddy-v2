@@ -53,9 +53,9 @@ async function BackingLink() {
     >
       <span className="text-prose">
         {LABELS.goals.sharedHeading}
-        <span className="text-faint"> · {count} shared with you</span>
+        <span className="text-prose-faint"> · {count} shared with you</span>
       </span>
-      <span className="shrink-0 text-muted" aria-hidden="true">→</span>
+      <span className="shrink-0 text-prose-muted" aria-hidden="true">→</span>
     </Link>
   )
 }
@@ -175,10 +175,10 @@ export default async function YourCornerSection() {
                 <Link
                   key={`${person.label}-${e.goalId}`}
                   href={`/goals/${e.goalId}/share`}
-                  className="flex items-center justify-between gap-3 min-h-11 text-xs text-muted hover:text-prose transition-colors"
+                  className="flex items-center justify-between gap-3 min-h-11 text-xs text-prose-muted hover:text-prose transition-colors"
                 >
                   <span className="truncate">{e.title}</span>
-                  <span className="shrink-0 text-faint">{TIER_COPY[e.tier].label}</span>
+                  <span className="shrink-0 text-prose-faint">{TIER_COPY[e.tier].label}</span>
                 </Link>
               ))}
             </div>

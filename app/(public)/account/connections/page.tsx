@@ -67,7 +67,7 @@ export default async function ConnectionsPage({ searchParams }: Props) {
         {/* Points at the DERIVED set rather than pretending this is it. A contact
             is who you can ask; your corner is who said yes, and that lives on
             /account because it's computed from goal_participants. */}
-        <p className="text-xs text-faint leading-snug">
+        <p className="text-xs text-prose-faint leading-snug">
           Looking for who&apos;s keeping you honest?{' '}
           <Link href="/account" className="text-accent-text hover:text-prose">
             {LABELS.contacts.cornerLabel} →
@@ -153,7 +153,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function Empty({ children }: { children: React.ReactNode }) {
-  return <p className="text-sm text-faint">{children}</p>
+  return <p className="text-sm text-prose-faint">{children}</p>
 }
 
 function Card({
@@ -163,9 +163,9 @@ function Card({
     <div className="rounded-xl border border-soft bg-surface p-5">
       <p className="text-sm font-semibold text-prose truncate">{person.label}</p>
       {person.username ? (
-        <p className="mt-0.5 text-xs text-faint truncate">@{person.username}</p>
+        <p className="mt-0.5 text-xs text-prose-faint truncate">@{person.username}</p>
       ) : null}
-      {sub ? <p className="mt-1 text-xs text-muted">{sub}</p> : null}
+      {sub ? <p className="mt-1 text-xs text-prose-muted">{sub}</p> : null}
       <div className="mt-4 flex flex-wrap gap-2">{children}</div>
     </div>
   )
@@ -183,7 +183,7 @@ function Act({
         type="submit"
         className={primary
           ? 'min-h-11 rounded-lg bg-accent px-5 py-3 text-xs font-bold text-white hover:bg-accent-hover transition-colors'
-          : 'min-h-11 rounded-lg border border-soft bg-surface px-5 py-3 text-xs font-semibold text-muted hover:bg-surface-hover hover:text-prose transition-colors'}
+          : 'min-h-11 rounded-lg border border-soft bg-surface px-5 py-3 text-xs font-semibold text-prose-muted hover:bg-surface-hover hover:text-prose transition-colors'}
       >
         {label}
       </button>

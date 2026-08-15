@@ -144,7 +144,7 @@ export default async function GoalInvitePage({ params, searchParams }: Props) {
       <div className="mt-8 rounded-xl border border-strong bg-surface-raised p-5">
         <p className="text-sm font-bold text-prose">{TIER_COPY[tier].label}</p>
         <p className="mt-2 text-sm text-prose-muted">{TIER_COPY[tier].sees}</p>
-        <p className="mt-1 text-sm text-faint">{TIER_COPY[tier].blind}</p>
+        <p className="mt-1 text-sm text-prose-faint">{TIER_COPY[tier].blind}</p>
       </div>
 
       {/* The feed offer, stated on its own. It is a different kind of access from
@@ -158,7 +158,7 @@ export default async function GoalInvitePage({ params, searchParams }: Props) {
         </div>
       ) : null}
 
-      <ul className="mt-6 space-y-2 text-xs text-faint">
+      <ul className="mt-6 space-y-2 text-xs text-prose-faint">
         {/*
           ⚠️ THIS LINE IS CONDITIONAL BECAUSE IT IS A PROMISE. Unconditionally it
              used to read "you'll never be notified about this" — true when the
@@ -208,7 +208,7 @@ export default async function GoalInvitePage({ params, searchParams }: Props) {
             <input type="hidden" name="token" value={token} />
             <button
               type="submit"
-              className="min-h-11 w-full rounded-lg border border-soft bg-surface px-6 py-3 text-sm font-semibold text-muted hover:bg-surface-hover transition-colors sm:w-auto"
+              className="min-h-11 w-full rounded-lg border border-soft bg-surface px-6 py-3 text-sm font-semibold text-prose-muted hover:bg-surface-hover transition-colors sm:w-auto"
             >
               No thanks
             </button>

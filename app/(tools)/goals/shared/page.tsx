@@ -43,7 +43,7 @@ export default async function SharedGoalsPage({ searchParams }: Props) {
 
   return (
     <Wrap>
-      <Link href="/goals" className="inline-flex items-center py-3 text-xs text-muted hover:text-prose">
+      <Link href="/goals" className="inline-flex items-center py-3 text-xs text-prose-muted hover:text-prose">
         ← {LABELS.goals.short}
       </Link>
 
@@ -57,13 +57,13 @@ export default async function SharedGoalsPage({ searchParams }: Props) {
       </header>
 
       {declined === '1' ? (
-        <p className="mt-6 rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-muted">
+        <p className="mt-6 rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-prose-muted">
           Turned that one down. Nobody was told.
         </p>
       ) : null}
 
       {shared.length === 0 ? (
-        <p className="mt-8 rounded-xl border border-soft bg-surface p-5 text-sm text-muted">
+        <p className="mt-8 rounded-xl border border-soft bg-surface p-5 text-sm text-prose-muted">
           {LABELS.goals.sharedEmpty}
         </p>
       ) : (
@@ -83,8 +83,8 @@ export default async function SharedGoalsPage({ searchParams }: Props) {
                   className="block rounded-xl border border-soft bg-surface p-5 hover:border-strong transition-colors"
                 >
                   <p className="text-base font-bold text-prose">{g.title}</p>
-                  <p className="mt-1 text-sm text-muted">{facts.slice(0, 2).join(' · ')}</p>
-                  <p className="mt-2 text-xs text-faint">{TIER_COPY[g.myTier].label}</p>
+                  <p className="mt-1 text-sm text-prose-muted">{facts.slice(0, 2).join(' · ')}</p>
+                  <p className="mt-2 text-xs text-prose-faint">{TIER_COPY[g.myTier].label}</p>
                 </Link>
               </li>
             )
@@ -92,7 +92,7 @@ export default async function SharedGoalsPage({ searchParams }: Props) {
         </ul>
       )}
 
-      <p className="mt-8 text-xs text-faint">
+      <p className="mt-8 text-xs text-prose-faint">
         You can step out of any of these whenever you want, and you don&apos;t need
         to ask. Nobody gets told either way.
       </p>

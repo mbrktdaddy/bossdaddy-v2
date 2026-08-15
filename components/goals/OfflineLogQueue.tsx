@@ -147,7 +147,7 @@ export default function OfflineLogQueue() {
           <span className="font-semibold">
             {pending === 1 ? 'One log is waiting' : `${pending} logs are waiting`}
           </span>{' '}
-          <span className="text-muted">
+          <span className="text-prose-muted">
             — no signal right now. Saved on this phone; it&apos;ll go up on its own
             when you&apos;re back.
           </span>

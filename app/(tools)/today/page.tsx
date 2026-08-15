@@ -155,12 +155,12 @@ export default async function TodayPage() {
                 <span className="min-w-0">
                   <span className="block truncate text-sm text-prose">{goal.title}</span>
                   {goal.identity_short ? (
-                    <span className="block truncate text-xs text-faint">
+                    <span className="block truncate text-xs text-prose-faint">
                       {LABELS.goals.votingFor}: {goal.identity_short}
                     </span>
                   ) : null}
                 </span>
-                <span className="shrink-0 text-xs text-muted tabular-nums">
+                <span className="shrink-0 text-xs text-prose-muted tabular-nums">
                   {occurrence.local_time.slice(0, 5)}
                 </span>
               </Link>
@@ -179,7 +179,7 @@ export default async function TodayPage() {
       {/* ── nothing at all ──────────────────────────────────────────────────── */}
       {live.length === 0 ? (
         <div className="mt-8 rounded-xl border border-soft bg-surface p-5">
-          <p className="text-sm text-muted">{LABELS.goals.todayNothing}</p>
+          <p className="text-sm text-prose-muted">{LABELS.goals.todayNothing}</p>
           <Link
             href="/goals"
             className="mt-4 inline-flex min-h-11 items-center text-xs font-semibold text-accent-text hover:text-prose"
@@ -235,7 +235,7 @@ function Row({
               {LABELS.goals.votingFor}: {goal.identity_short}
             </p>
           ) : null}
-          <p className="mt-1 text-xs text-muted">
+          <p className="mt-1 text-xs text-prose-muted">
             {isCatchup
               ? `Still open from ${occurrence.local_date}`
               : `Due ${occurrence.local_time.slice(0, 5)}`}
@@ -255,7 +255,7 @@ function Row({
 
         {wantsNumber ? (
           <label className="block">
-            <span className="text-xs text-muted">
+            <span className="text-xs text-prose-muted">
               {goal.metric_key}{unit ? ` (${goal.metric_unit})` : ''} — what actually happened
             </span>
             <input
@@ -282,7 +282,7 @@ function Row({
             type="submit"
             name="action"
             value="skipped"
-            className="min-h-11 rounded-lg border border-soft bg-surface px-5 py-3 text-sm font-semibold text-muted hover:bg-surface-hover transition-colors"
+            className="min-h-11 rounded-lg border border-soft bg-surface px-5 py-3 text-sm font-semibold text-prose-muted hover:bg-surface-hover transition-colors"
           >
             Not today
           </button>

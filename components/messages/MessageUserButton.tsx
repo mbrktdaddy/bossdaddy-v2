@@ -61,7 +61,7 @@ export default function MessageUserButton({ targetUserId }: { targetUserId: stri
   }
 
   if (state === 'pending_out') {
-    return <span className="inline-flex items-center px-4 py-2 text-sm font-semibold text-faint">Asked</span>
+    return <span className="inline-flex items-center px-4 py-2 text-sm font-semibold text-prose-faint">Asked</span>
   }
 
   if (state !== 'accepted') {
