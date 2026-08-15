@@ -740,10 +740,14 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
                       ) : null}
                     </span>
                     <span className="shrink-0 text-sm text-prose-muted">
+                      {/* Trailing literal space for the same reason as ContactsCard:
+                          `mr-2` alone reads "Extra195 lb" when copied or read aloud. */}
                       {entry.occurrence_id == null ? (
-                        <span className="mr-2 text-xs uppercase tracking-widest text-prose-faint">
-                          Extra
-                        </span>
+                        <>
+                          <span className="mr-1 text-xs uppercase tracking-widest text-prose-faint">
+                            Extra
+                          </span>{' '}
+                        </>
                       ) : null}
                       {entry.value != null ? `${entry.value}${unit}` : entryKindCopy(entry.kind)}
                     </span>

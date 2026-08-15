@@ -38,9 +38,13 @@ export default async function ContactsCard() {
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
             {LABELS.contacts.short}
           </p>
+          {/* A LITERAL SPACE, not just `ml-2`. The margin looks right on screen and
+              vanishes from copied text and from some screen readers, which announce
+              adjacent inline elements with no separator — "3contacts". The gap is now
+              a real character, with a smaller margin so the width is unchanged. */}
           <p className="mt-2 text-2xl font-black text-prose">
-            {connected.length}
-            <span className="ml-2 text-sm font-semibold text-prose-muted">
+            {connected.length}{' '}
+            <span className="ml-0.5 text-sm font-semibold text-prose-muted">
               {connected.length === 1 ? 'contact' : 'contacts'}
             </span>
           </p>
