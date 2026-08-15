@@ -18,6 +18,7 @@
 
 import 'server-only'
 import { randomUUID } from 'node:crypto'
+import { sanitizePlainText } from '@/lib/sanitize'
 import { recomputeGoalStats } from '@/lib/goals/stats'
 
 /** Minimal client shape — works with the session and service-role clients alike. */
@@ -56,6 +57,12 @@ export type OccurrenceLogResult = {
  * The status update is GUARDED on the current status so a double submit resolves
  * exactly once, and `missed` stays loggable — catch-up is always available and
  * never demanded.
+ *
+ * ⚠️ `note` IS WRITTEN ONLY ON THE INSERT THAT WINS. Because the idempotency key is
+ * the occurrence id, a second submit for the same day is a no-op — so the first
+ * note stands and a later one is dropped. Re-submitting is not how a note gets
+ * edited (nothing edits an entry note; the entry itself is the unit you delete).
+ * That's a consequence of the dedupe being correct, not a gap in it.
  */
 export async function logOccurrenceEntry(
   client: Queryable,
@@ -64,6 +71,9 @@ export async function logOccurrenceEntry(
     userId: string
     action: 'completed' | 'skipped'
     value?: number | null
+    /** Optional annotation on the day. Applies to a skip too — "not today, and
+     *  here's why" is worth more than a bare skip. */
+    note?: string | null
     source?: LogSource
   },
 ): Promise<OccurrenceLogResult> {
@@ -123,6 +133,7 @@ export async function logOccurrenceEntry(
         local_date: occurrence.local_date,
         kind,
         value,
+        note: normalizeEntryNote(args.note),
         source: args.source ?? 'web',
         client_entry_id: occurrence.id,
       })
@@ -173,9 +184,10 @@ export type OffDayLogResult = {
  * Log something that wasn't scheduled — an extra workout, a weigh-in nobody asked
  * for, an honest count on a day nothing was due.
  *
- * Occurrence-less entries still count toward the streak and toward votes, because
- * both fold over entries by local date rather than by occurrence. Before this path
- * existed, an honest log on an off day had nowhere to go.
+ * Occurrence-less entries count as VOTES and in `kept_total`, both of which fold
+ * over entries by local date. They do not extend the streak, which walks scheduled
+ * days only — see computeScheduledStreak. Before this path existed, an honest log
+ * on an off day had nowhere to go at all.
  *
  * `client_entry_id` is a FRESH uuid here, unlike the occurrence-bound path: two
  * weigh-ins or two walks in one day are both legitimate, so there's nothing to
@@ -225,7 +237,7 @@ export async function logOffDayEntry(
       local_date: args.localDate,
       kind,
       value,
-      note: args.note?.trim() || null,
+      note: normalizeEntryNote(args.note),
       source: args.source ?? 'web',
       client_entry_id: randomUUID(),
     })
@@ -301,4 +313,37 @@ export async function deleteGoalEntry(
 function normalizeValue(value: number | null | undefined): number | null {
   if (value == null) return null
   return Number.isFinite(value) ? value : null
+}
+
+/**
+ * The cap on a log annotation, and the `maxLength` both note inputs render.
+ *
+ * `goal_entries.note` has NO database CHECK behind it (unlike `goal_notes`, which
+ * is constrained to 1–4000 by migration 145), and the off-day writer trusted the
+ * form's `maxLength` alone — so a hand-rolled POST could write an unbounded note.
+ * Capping server-side closes that; there's no second writer left to forget it.
+ */
+export const MAX_ENTRY_NOTE_LENGTH = 280
+
+/**
+ * One normalizer for both writers, so a note typed beside a scheduled dose and one
+ * typed on an off day can't diverge in how they're stored.
+ *
+ * Runs through `sanitizePlainText` like every other plain-text field in the app.
+ * Notes render as escaped JSX text, so this is NOT the XSS gate — it's why a
+ * pasted fragment of markup doesn't get stored as markup and then read back as
+ * literal angle brackets three weeks later.
+ *
+ * Over-length input is TRUNCATED rather than refused. These writes come from
+ * `Promise<void>` Server Actions with no channel to explain a rejection, the form
+ * already caps at the same number, and for a medication log a slightly shortened
+ * note beats a save that silently did nothing.
+ */
+export function normalizeEntryNote(note: string | null | undefined): string | null {
+  if (note == null) return null
+  const clean = sanitizePlainText(note).trim()
+  if (!clean) return null
+  return clean.length > MAX_ENTRY_NOTE_LENGTH
+    ? clean.slice(0, MAX_ENTRY_NOTE_LENGTH).trim()
+    : clean
 }

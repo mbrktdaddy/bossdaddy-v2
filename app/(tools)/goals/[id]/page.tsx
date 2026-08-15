@@ -14,10 +14,13 @@ import { LABELS } from '@/lib/labels'
 import { LoginLink } from '@/components/LoginLink'
 import { localDateInZone } from '@/lib/goals/recurrence'
 import {
-  computeStreak, adherenceRate, latestValue, progressToTarget, compareToTarget,
+  computeStreak, computeScheduledStreak, longestScheduledStreak, keptTotal,
+  adherenceRate, recentAdherence, RATE_WINDOW_DAYS,
+  latestValue, progressToTarget, compareToTarget,
   planWindow, VOTE_KINDS,
 } from '@/lib/goals/progress'
 import { describeRrule } from '@/lib/goals/schedule-input'
+import { MAX_ENTRY_NOTE_LENGTH } from '@/lib/goals/log'
 import NotesFeed from '@/components/goals/NotesFeed'
 import { logOccurrence, logUnprompted, toggleScheduleMute, setGoalStatus } from '../actions'
 
@@ -50,6 +53,11 @@ type OccurrenceRow = {
 }
 type EntryRow = {
   id: string; local_date: string; kind: string; value: number | null; note: string | null
+  // `occurrence_id` is null for an unprompted log. It's what lets the Log below
+  // say which row was the scheduled day and which was an extra — without it, two
+  // entries on the same date both read "Done" and the list can't be reconciled.
+  occurrence_id: string | null
+  observed_at: string
 }
 // PostgREST embeds a to-one relationship as an object (or null when RLS hides it).
 type PlanRow = {
@@ -99,7 +107,9 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
     : null
   const planGuide = plan?.guides?.slug ? plan.guides : null
 
-  const [{ data: scheduleRows }, { data: occurrenceRows }, { data: entryRows }] = await Promise.all([
+  const [
+    { data: scheduleRows }, { data: occurrenceRows }, { data: entryRows }, { data: statRow },
+  ] = await Promise.all([
     supabase.from('goal_schedules')
       .select('id, label, rrule, local_time, timezone, muted, status, channels')
       .eq('goal_id', goal.id)
@@ -109,22 +119,46 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
       .eq('goal_id', goal.id)
       .order('due_at', { ascending: true }),
     supabase.from('goal_entries')
-      .select('id, local_date, kind, value, note')
+      .select('id, local_date, kind, value, note, occurrence_id, observed_at')
       .eq('goal_id', goal.id)
       .order('local_date', { ascending: false })
       .limit(400),
+    // The two numbers folded from FULL history rather than from the capped read
+    // below. Missing row is fine — a goal the sweep hasn't reached yet falls back
+    // to what this page can see, which is a floor, never a wrong high number.
+    supabase.from('goal_stats')
+      .select('longest_streak, kept_total')
+      .eq('goal_id', goal.id)
+      .maybeSingle(),
   ])
 
   const schedules = (scheduleRows ?? []) as unknown as ScheduleRow[]
   const occurrences = (occurrenceRows ?? []) as unknown as OccurrenceRow[]
   const entries = (entryRows ?? []) as unknown as EntryRow[]
+  const stats = statRow as unknown as
+    { longest_streak: number; kept_total: number } | null
 
   const zone = schedules[0]?.timezone ?? 'UTC'
   const now = new Date()
   const today = localDateInZone(now, zone)
 
-  const streak = computeStreak(entries, today)
+  // SCHEDULE-AWARE. A MO/WE/FR goal keeps its run through Tuesday; the calendar
+  // fold below is only for a goal whose schedules are gone, which has no scheduled
+  // days to walk. Before this, "Days running" could never read above 1 on any
+  // non-daily goal — including two of the seeded plans.
+  const streak = occurrences.length
+    ? computeScheduledStreak(occurrences, entries)
+    : computeStreak(entries, today)
+  // The stored figures win because they see all of history and longest_streak is
+  // monotonic (migration 146); the local folds are the floor until the sweep writes.
+  const bestRun = Math.max(
+    stats?.longest_streak ?? 0,
+    longestScheduledStreak(occurrences, entries),
+  )
+  const kept = Math.max(stats?.kept_total ?? 0, keptTotal(entries))
+
   const { done, total, pct } = adherenceRate(occurrences)
+  const recent = recentAdherence(occurrences, today)
   const latest = latestValue(entries)
   const progress = progressToTarget(goal.baseline_value, goal.target_value, latest?.value ?? null)
   const unit = goal.metric_unit ? ` ${goal.metric_unit}` : ''
@@ -140,6 +174,10 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
     .slice(0, 3)
 
   const wantsNumber = Boolean(goal.metric_key)
+  // A finished plan asks for nothing. Both log surfaces come off the page — logging
+  // into a plan that's over would accrue entries outside its vote window, which is
+  // the one place a number could quietly stop adding up. Reopening is one tap away.
+  const finished = goal.status === 'completed'
 
   // Who can actually READ the notes feed, besides him. Partners on the goal are
   // not the same set: thread_access is orthogonal to tier (migration 145), and it
@@ -182,7 +220,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
       <div>
-        <Link href="/goals" className="inline-flex items-center py-3 text-xs text-muted hover:text-prose">
+        <Link href="/goals" className="inline-flex items-center py-3 text-xs text-prose-muted hover:text-prose">
           ← {LABELS.goals.short}
         </Link>
       </div>
@@ -219,6 +257,28 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
             Read the plan behind this →
           </Link>
         ) : null}
+
+        {/* ⚠️ THESE BELONG TO THE GOAL, SO THEY LIVE WITH THE GOAL.
+            Both links used to sit in the "Reminders" section heading, which read as
+            "edit reminders" — so the goal's own fields (title, identity, baseline,
+            target, PLAN LENGTH) had no discoverable way in at all, even though the
+            edit page has carried a "The goal" section all along. Phase 2 made that
+            worse: "Extend it" on a finished plan points at exactly those fields.
+            The reminders section keeps its own link, named for reminders. */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 pt-1">
+          <Link
+            href={`/goals/${goal.id}/edit`}
+            className="min-h-11 inline-flex items-center text-xs font-semibold text-accent-text hover:text-prose"
+          >
+            Edit this goal →
+          </Link>
+          <Link
+            href={`/goals/${goal.id}/share`}
+            className="min-h-11 inline-flex items-center text-xs font-semibold text-accent-text hover:text-prose"
+          >
+            {LABELS.goals.shareCta} →
+          </Link>
+        </div>
       </header>
 
       {msg === 'delete_failed' ? (
@@ -227,13 +287,59 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
         </p>
       ) : null}
       {saved === '1' ? (
-        <p className="rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-muted">
+        <p className="rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-prose-muted">
           Saved.
         </p>
       ) : null}
 
+      {/* ── finished ─────────────────────────────────────────────────────────
+          Derived, never asserted: the sweep marks a plan complete once its end
+          date has passed and nothing is left unresolved. Until this existed,
+          `goals.status = 'completed'` was defined by migration 134 and unreachable
+          from anywhere in the product, so an eight-week taper simply ran forever.
+
+          Two ways forward, and deliberately not a third. "Start it again" makes a
+          NEW goal from the same plan — a fresh window, a fresh curve, a vote count
+          that starts over, which is what beginning again actually means. "Extend
+          it" moves the end date on the goal he already has; the update route
+          re-expands every schedule when target_date changes, so that path really
+          works. Reopening without doing either is in Manage, where the caveat fits. */}
+      {finished ? (
+        <section className="rounded-xl border border-strong bg-surface-raised p-5 sm:p-6 space-y-3">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+            Plan finished
+          </p>
+          <h2 className="text-xl font-bold text-prose">
+            {goal.target_date ? <>You ran this to {goal.target_date}.</> : <>This one&apos;s done.</>}
+          </h2>
+          <p className="text-sm text-prose-muted leading-snug">
+            {total > 0
+              ? <>You kept {done} of {total} scheduled days{bestRun > 0 ? <>, with a best run of {bestRun}</> : null}.</>
+              : <>{kept} {kept === 1 ? 'day' : 'days'} kept.</>}
+          </p>
+          <div className="flex flex-wrap gap-3 pt-1">
+            <Link
+              href={goal.template_slug
+                ? `/goals/new?t=${encodeURIComponent(goal.template_slug)}`
+                : '/goals/new'}
+              className="min-h-11 inline-flex items-center rounded-lg bg-accent px-5 py-3 text-sm font-bold text-white hover:bg-accent-hover transition-colors"
+            >
+              Start it again
+            </Link>
+            {goal.target_date ? (
+              <Link
+                href={`/goals/${goal.id}/edit`}
+                className="min-h-11 inline-flex items-center rounded-lg border border-soft bg-surface px-5 py-3 text-sm font-semibold text-prose hover:bg-surface-hover transition-colors"
+              >
+                Extend it →
+              </Link>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
       {/* ── the one thing to do ─────────────────────────────────────────── */}
-      {actionable ? (
+      {finished ? null : actionable ? (
         <section className="bg-surface-raised border border-strong rounded-xl p-5 sm:p-6">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
             {actionable.local_date === today ? 'Today' : `Open from ${actionable.local_date}`}
@@ -255,7 +361,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
             <input type="hidden" name="goalId" value={goal.id} />
             {wantsNumber ? (
               <label className="block">
-                <span className="text-sm text-muted">
+                <span className="text-sm text-prose-muted">
                   {goal.metric_key}{unit ? ` (${goal.metric_unit})` : ''} — what actually happened
                 </span>
                 <input
@@ -268,6 +374,36 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
                 />
               </label>
             ) : null}
+            {/* Behind a disclosure so the fast path stays ONE TAP. An always-open
+                text input above the button turns a ten-second log into a form, and
+                this field is the exception rather than the habit. Inputs inside a
+                closed <details> still submit — as empty — so the primary flow pays
+                nothing for it.
+
+                It applies to "Not today" too, which is the case it earns its keep
+                on: a skip with a reason attached is worth considerably more than a
+                bare skip, to him and to the Boss reading it back.
+
+                NOT the notes feed. That's a conversation with edit, delete and
+                partner access (migration 145); this is one line stapled to one day,
+                withheld from every partner below teammate, and uneditable once
+                written. The copy has to keep those two apart — hence "Add a note"
+                and a placeholder that doesn't echo the feed's prompt. */}
+            <details className="rounded-lg border border-soft bg-surface">
+              <summary className="min-h-11 flex cursor-pointer items-center px-4 text-sm font-semibold text-prose-muted">
+                Add a note
+              </summary>
+              <div className="px-4 pb-4">
+                <input
+                  type="text"
+                  name="note"
+                  maxLength={MAX_ENTRY_NOTE_LENGTH}
+                  placeholder="Anything worth remembering about today"
+                  className="w-full rounded-lg border border-soft bg-surface-raised px-4 py-3 text-prose"
+                />
+              </div>
+            </details>
+
             <div className="flex flex-col gap-3 sm:flex-row">
               <button
                 type="submit"
@@ -281,7 +417,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
                 type="submit"
                 name="action"
                 value="skipped"
-                className="rounded-lg border border-soft bg-surface px-6 py-3 text-sm font-semibold text-muted hover:bg-surface-hover transition-colors"
+                className="rounded-lg border border-soft bg-surface px-6 py-3 text-sm font-semibold text-prose-muted hover:bg-surface-hover transition-colors"
               >
                 Not today
               </button>
@@ -290,7 +426,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
         </section>
       ) : (
         <section className="bg-surface border border-soft rounded-xl p-5 sm:p-6">
-          <p className="text-sm text-muted">
+          <p className="text-sm text-prose-muted">
             Nothing open right now.
             {upcoming[0] ? <> Next one lands {upcoming[0].local_date} at {upcoming[0].local_time.slice(0, 5)}.</> : null}
           </p>
@@ -299,14 +435,16 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
 
       {/* ── log something that wasn't scheduled ─────────────────────────── */}
       {/* Behind a <details> so it never competes with the primary action above,
-          but present on every goal — an entry with no occurrence still counts
-          toward the streak, because computeStreak folds by local date. Before
-          this existed, an honest log on an off day had nowhere to go. */}
+          but present on every goal. An entry with no occurrence is a vote and
+          counts in "kept all time"; it does NOT extend the streak, which walks
+          scheduled days only. Before this existed, an honest log on an off day had
+          nowhere to go at all. */}
+      {finished ? null : (
       <details className="rounded-xl border border-soft bg-surface p-5">
         <summary className="min-h-11 flex cursor-pointer items-center text-sm font-semibold text-prose">
           Log something else
         </summary>
-        <p className="mt-2 text-xs text-faint">
+        <p className="mt-2 text-xs text-prose-faint">
           An extra workout, a weigh-in nobody asked for, an honest count on a day
           nothing was due.
         </p>
@@ -315,7 +453,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
 
           {wantsNumber ? (
             <label className="block">
-              <span className="text-sm text-muted">
+              <span className="text-sm text-prose-muted">
                 {goal.metric_key}{unit ? ` (${goal.metric_unit})` : ''}
               </span>
               <input
@@ -327,16 +465,18 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <label className="block">
-              <span className="text-sm text-muted">Which day</span>
+              <span className="text-sm text-prose-muted">Which day</span>
               <input
                 type="date" name="localDate" defaultValue={today} max={today}
                 className="mt-2 w-full rounded-lg border border-soft bg-surface-raised px-4 py-3 text-prose"
               />
             </label>
             <label className="block">
-              <span className="text-sm text-muted">Note (optional)</span>
+              {/* Named for what it DOES now that the Log renders it: on a goal with
+                  no metric this line is the only record of what the extra was. */}
+              <span className="text-sm text-prose-muted">What it was (optional)</span>
               <input
-                type="text" name="note" maxLength={280}
+                type="text" name="note" maxLength={MAX_ENTRY_NOTE_LENGTH}
                 className="mt-2 w-full rounded-lg border border-soft bg-surface-raised px-4 py-3 text-prose"
               />
             </label>
@@ -350,6 +490,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
           </button>
         </form>
       </details>
+      )}
 
       {/* ── where it stands ─────────────────────────────────────────────── */}
       <section className="space-y-4">
@@ -360,14 +501,14 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
             <div className="h-2 w-full overflow-hidden rounded-full bg-surface-raised">
               <div className="h-full rounded-full bg-accent" style={{ width: `${Math.round(progress * 100)}%` }} />
             </div>
-            <p className="mt-3 text-sm text-muted">
+            <p className="mt-3 text-sm text-prose-muted">
               Started at <span className="text-prose">{goal.baseline_value}{unit}</span>,
               headed for <span className="text-prose">{goal.target_value}{unit}</span>
               {goal.target_date ? <> by {goal.target_date}</> : null}.
               {latest ? <> Last logged <span className="text-prose">{latest.value}{unit}</span> on {latest.localDate}.</> : null}
             </p>
             {latest && todays?.target_value != null ? (
-              <p className="mt-2 text-sm text-muted">
+              <p className="mt-2 text-sm text-prose-muted">
                 {verdictCopy(compareToTarget(latest.value, todays.target_value, goal.direction))}
               </p>
             ) : null}
@@ -381,7 +522,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
             still or goes up — a missed day adds nothing and subtracts nothing,
             because one day never gets to rewrite who he's becoming. */}
         {votes != null ? (
-          <p className="text-sm text-muted">
+          <p className="text-sm text-prose-muted">
             {votes > 0 ? (
               <>
                 <span className="font-bold text-prose">{votes}</span>
@@ -398,9 +539,35 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
           </p>
         ) : null}
 
-        <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <Stat label="Days running" value={streak > 0 ? String(streak) : '—'} />
-          <Stat label="Logged" value={pct != null ? `${pct}%` : '—'} hint={total > 0 ? `${done} of ${total}` : undefined} />
+        {/* Four numbers, and the order is the argument: where he is now, the best
+            he's ever done, how the last month has gone, and since when.
+
+            "Logged" LEADS WITH THE ROLLING WINDOW. A lifetime percentage is the
+            one figure on this page that can't recover — six months in, a bad
+            month costs a couple of points and a perfect fortnight wins them back,
+            so it stops answering the question being asked. Lifetime is still
+            here, as the fallback when nothing resolved in the window (a goal
+            parked for a month, or a brand-new one), and the hint always names
+            which of the two you're looking at.
+
+            Best run is what makes a broken streak survivable: it's monotonic, so
+            the day he loses a 40-day run he still has the 40. */}
+        <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Stat
+            label="Days running"
+            value={streak > 0 ? String(streak) : '—'}
+            hint={kept > streak ? `${kept} kept all time` : undefined}
+          />
+          <Stat label="Best run" value={bestRun > 0 ? String(bestRun) : '—'} />
+          <Stat
+            label="Logged"
+            value={recent.pct != null ? `${recent.pct}%` : pct != null ? `${pct}%` : '—'}
+            hint={
+              recent.total > 0
+                ? `${recent.done} of ${recent.total} · last ${RATE_WINDOW_DAYS} days`
+                : total > 0 ? `${done} of ${total} · all time` : undefined
+            }
+          />
           <Stat label="Since" value={goal.started_on} />
         </dl>
       </section>
@@ -409,33 +576,27 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-sm font-bold text-prose uppercase tracking-wide">Reminders</h2>
-          <div className="flex items-center gap-4">
-            <Link
-              href={`/goals/${goal.id}/share`}
-              className="min-h-11 inline-flex items-center text-xs font-semibold text-accent-text hover:text-prose"
-            >
-              {LABELS.goals.shareCta} →
-            </Link>
-            <Link
-              href={`/goals/${goal.id}/edit`}
-              className="min-h-11 inline-flex items-center text-xs font-semibold text-accent-text hover:text-prose"
-            >
-              Edit →
-            </Link>
-          </div>
+          {/* Named for what it edits, and deep-linked to that part of the page.
+              A bare "Edit →" here is what made the whole goal editor invisible. */}
+          <Link
+            href={`/goals/${goal.id}/edit#reminders`}
+            className="min-h-11 inline-flex shrink-0 items-center text-xs font-semibold text-accent-text hover:text-prose"
+          >
+            Add or change →
+          </Link>
         </div>
         {schedules.length === 0 ? (
-          <p className="text-sm text-faint">No schedule on this goal yet.</p>
+          <p className="text-sm text-prose-faint">No schedule on this goal yet.</p>
         ) : schedules.map((schedule) => (
           <div key={schedule.id} className="bg-surface border border-soft rounded-xl p-5 flex items-start justify-between gap-4">
             <div className="min-w-0">
               <p className="text-sm font-semibold text-prose">
                 {schedule.label?.trim() || 'Reminder'}
               </p>
-              <p className="mt-1 text-xs text-muted">
+              <p className="mt-1 text-xs text-prose-muted">
                 {describeRrule(schedule.rrule, schedule.local_time)}
               </p>
-              <p className="mt-1 text-xs text-faint">
+              <p className="mt-1 text-xs text-prose-faint">
                 {schedule.timezone.replace(/_/g, ' ')} · {schedule.channels.join(' + ')}
               </p>
             </div>
@@ -445,7 +606,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
               <input type="hidden" name="muted" value={schedule.muted ? 'false' : 'true'} />
               <button
                 type="submit"
-                className="min-h-11 rounded-lg border border-soft bg-surface px-5 py-3 text-xs font-semibold text-muted hover:bg-surface-hover transition-colors"
+                className="min-h-11 rounded-lg border border-soft bg-surface px-5 py-3 text-xs font-semibold text-prose-muted hover:bg-surface-hover transition-colors"
               >
                 {schedule.muted ? 'Unmute' : 'Mute'}
               </button>
@@ -458,15 +619,47 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
       {entries.length > 0 ? (
         <section className="space-y-3">
           <h2 className="text-sm font-bold text-prose uppercase tracking-wide">Log</h2>
+          {/* THE LOG HAS TO SAY WHAT WAS LOGGED. It showed a date and one word, so
+              an unprompted entry was indistinguishable from the scheduled one —
+              two rows reading "Done" on the same date — and the note typed into
+              "Log something else" was written to the database and then never shown
+              anywhere. For a goal with no metric, that note is the ONLY record of
+              what the extra actually was.
+
+              Three things distinguish the rows now: an "Extra" marker for an entry
+              with no occurrence, the note underneath, and a clock — but only when
+              the entry was logged ON the day it counts for. A backdated log carries
+              the submit time, which belongs to a different day, so showing it there
+              would be a wrong number rather than a helpful one. */}
           <ul className="divide-y divide-soft border border-soft rounded-xl overflow-hidden">
-            {entries.slice(0, 14).map((entry) => (
-              <li key={entry.id} className="flex items-center justify-between gap-4 bg-surface px-5 py-3">
-                <span className="text-sm text-prose">{entry.local_date}</span>
-                <span className="text-sm text-muted">
-                  {entry.value != null ? `${entry.value}${unit}` : entryKindCopy(entry.kind)}
-                </span>
-              </li>
-            ))}
+            {entries.slice(0, 14).map((entry) => {
+              const loggedAt = new Date(entry.observed_at)
+              // `zone` is already proven valid — localDateInZone(now, zone) ran above.
+              const loggedSameDay = localDateInZone(loggedAt, zone) === entry.local_date
+              return (
+                <li key={entry.id} className="bg-surface px-5 py-3">
+                  <div className="flex items-baseline justify-between gap-4">
+                    <span className="text-sm text-prose">
+                      {entry.local_date}
+                      {loggedSameDay ? (
+                        <span className="ml-2 text-xs text-prose-faint">{timeInZone(loggedAt, zone)}</span>
+                      ) : null}
+                    </span>
+                    <span className="shrink-0 text-sm text-prose-muted">
+                      {entry.occurrence_id == null ? (
+                        <span className="mr-2 text-xs uppercase tracking-widest text-prose-faint">
+                          Extra
+                        </span>
+                      ) : null}
+                      {entry.value != null ? `${entry.value}${unit}` : entryKindCopy(entry.kind)}
+                    </span>
+                  </div>
+                  {entry.note ? (
+                    <p className="mt-1 text-sm text-prose-muted leading-snug">{entry.note}</p>
+                  ) : null}
+                </li>
+              )
+            })}
           </ul>
         </section>
       ) : null}
@@ -500,7 +693,10 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
               type="submit"
               className="min-h-11 rounded-lg border border-soft bg-surface px-5 py-3 text-xs font-semibold text-prose hover:bg-surface-hover transition-colors"
             >
-              {goal.status === 'archived' ? 'Restore' : goal.status === 'paused' ? 'Resume' : 'Pause'}
+              {goal.status === 'archived' ? 'Restore'
+                : goal.status === 'paused' ? 'Resume'
+                : finished ? 'Reopen'
+                : 'Pause'}
             </button>
           </form>
 
@@ -510,7 +706,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
               <input type="hidden" name="status" value="archived" />
               <button
                 type="submit"
-                className="min-h-11 rounded-lg border border-soft bg-surface px-5 py-3 text-xs font-semibold text-muted hover:bg-surface-hover transition-colors"
+                className="min-h-11 rounded-lg border border-soft bg-surface px-5 py-3 text-xs font-semibold text-prose-muted hover:bg-surface-hover transition-colors"
               >
                 Archive
               </button>
@@ -518,7 +714,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
           ) : null}
 
           {/* Sits WITH the other two rather than as faint text below the log.
-              It was styled text-faint/text-xs underlined to signal "destructive,
+              It was styled text-prose-faint/text-xs underlined to signal "destructive,
               tread carefully" and the result was that nobody could find it.
               Discoverability and caution aren't the same axis — the caution
               lives in the two-step confirm, not in low contrast. */}
@@ -532,10 +728,17 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
           ) : null}
         </div>
 
-        <p className="text-xs text-faint">
+        {/* The finished case says the awkward part out loud rather than shipping a
+            button that undoes itself: reopening a plan whose end date has passed
+            puts it straight back in line to finish again on the next sweep, because
+            finishing is derived from that date. Extending it first is the fix, and
+            it's one tap from the panel at the top. */}
+        <p className="text-xs text-prose-faint">
           {goal.status === 'archived'
             ? 'Archived goals sit out of the way. Restoring picks up where you left off — the sweep starts scheduling days again.'
-            : 'Pausing stops the nudges and stops new days being scheduled. Archiving hides it from your list. Either way the log stays put — you can come back to it.'}
+            : finished
+              ? 'Reopening puts it back on your list. If the end date has already passed it will finish again shortly — move that date on the edit page first, or start it again as a new plan.'
+              : 'Pausing stops the nudges and stops new days being scheduled. Archiving hides it from your list. Either way the log stays put — you can come back to it.'}
         </p>
 
         {/* Deleting is a two-step confirm: it cascades through every occurrence
@@ -547,7 +750,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
             <p className="text-sm font-semibold text-prose">
               Delete &ldquo;{goal.title}&rdquo; for good?
             </p>
-            <p className="mt-2 text-xs text-muted">
+            <p className="mt-2 text-xs text-prose-muted">
               This removes the goal, its schedule, and all {entries.length} log
               {entries.length === 1 ? ' entry' : ' entries'}. It can&apos;t be undone.
               If you just want it out of the way, archive it instead.
@@ -565,7 +768,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
               </form>
               <Link
                 href={`/goals/${goal.id}`}
-                className="min-h-11 inline-flex items-center rounded-lg px-5 py-3 text-xs font-semibold text-muted hover:text-prose"
+                className="min-h-11 inline-flex items-center rounded-lg px-5 py-3 text-xs font-semibold text-prose-muted hover:text-prose"
               >
                 Keep it
               </Link>
@@ -589,6 +792,13 @@ function verdictCopy(verdict: 'better' | 'met' | 'over'): string {
   return 'Over the number today. Tomorrow\'s a new one.'
 }
 
+/** Clock time in the GOAL's zone, never the server's. */
+function timeInZone(instant: Date, timezone: string): string {
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone, hour: 'numeric', minute: '2-digit',
+  }).format(instant)
+}
+
 function entryKindCopy(kind: string): string {
   if (kind === 'skipped') return 'Skipped'
   if (kind === 'catchup') return 'Caught up'
@@ -599,9 +809,9 @@ function entryKindCopy(kind: string): string {
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="bg-surface border border-soft rounded-xl p-4">
-      <dt className="text-xs text-faint uppercase tracking-widest">{label}</dt>
+      <dt className="text-xs text-prose-faint uppercase tracking-widest">{label}</dt>
       <dd className="mt-1 text-lg font-bold text-prose">{value}</dd>
-      {hint ? <p className="text-xs text-faint">{hint}</p> : null}
+      {hint ? <p className="text-xs text-prose-faint">{hint}</p> : null}
     </div>
   )
 }
