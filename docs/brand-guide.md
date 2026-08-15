@@ -305,6 +305,33 @@ The site is **dark-first everywhere** (`data-theme="dark"` on `<html>` in `app/l
 - `text-accent` → inline orange text/links · `bg-accent` / `bg-accent-hover` → CTA buttons
 - `border-soft` → card edges · `border-strong` → confident edges
 
+### State is encoded with colour, never with geometry
+
+**A conditional class must never change an item's box.** State — selected, active,
+done, missed, today — is carried by **fill, border colour, or ring**. It is never
+carried by `margin`, `width`, `padding`, `aspect`, or `rounded-*`, because those move
+the item relative to its neighbours and the shift reads as a rendering bug rather
+than as information.
+
+Two failure modes, both found in shipped code:
+
+- **The off-axis item.** A calendar cell got `-ml-[4px] rounded-l-none` when it
+  continued a run. The box grew 4px while its centred day number stayed centred *in
+  the wider box*, so that one day sat visibly off the column everyone else was on.
+  Reported as "why is the 13th rendering odd" — nobody reads a 2px offset as a
+  feature. Fixed by leaving every cell identical and drawing the connection as a
+  separate bar behind the two chips.
+- **The ragged row.** Anything conditional in a flex/grid row of equal siblings —
+  a wider border on the active tab, a bigger radius on the current step — shears the
+  row's rhythm even when the intent is emphasis.
+
+Safe ways to say "this one": `ring-*` (box-shadow based, zero layout), a colour swap
+at equal border width (`border-accent` ↔ `border-transparent`), `font-bold` on
+centred or left-aligned text, an added child (dot, bar, check) inside an unchanged
+box. Negative margins remain legitimate for **containers** — the `-mx-{n}` break-out
+for horizontal scroll strips (§5) — and for hit-area clawback on a lone control
+(`p-1 -mr-1`). The rule is about *items in an aligned set*, not about the utility.
+
 ### Reading surface (reviews / guides)
 Long-form body sits on an elevated **panel below `lg`** (phone/tablet — no margin to frame, OLED halation worst) and **bare canvas at `lg+`** (desktop margins frame the column). Single source of truth: `ARTICLE_SURFACE_CLASS` in `lib/article-surface.ts`. Body is **sans**; the *body* editorial serif (Source Serif 4) is reserved for blockquotes/pull-quotes only. The *display* editorial serif (Fraunces via `.font-editorial-display`) is used for editorial headings per the Manifesto v2 exception (§3). Article images get a subtle frame (`border` + rounded) so white-bg product shots don't glare.
 
