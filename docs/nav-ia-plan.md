@@ -137,6 +137,57 @@ half-built front doors, and the user has to know which to pick.
 
 ---
 
+---
+
+## Next session
+
+Phases A, B and D shipped 2026-08-15 (`c636c11`, `79a0cce`, `bbc7a20`, `1348606`).
+What's left, in the order I'd take it:
+
+### 1. Phase C — unify the chrome (the one that matters)
+
+The "different website" feeling is still there. Full detail above; the gate is unchanged
+and must be checked FIRST: **`(tools)/layout.tsx` sets `data-theme="dark"` on its own
+wrapper div.** If the root layout doesn't set it on `<html>`, moving those pages out of
+that wrapper loses the dark theme on every one of them. CLAUDE.md says it belongs on
+`<html>` — verify, don't assume.
+
+### 2. Phase E — `/goals/shared` folds into `/goals`
+
+Two pages that both list goals; the shared one hides behind a conditional link.
+
+### 3. DECIDE: does the URL follow the name? — `/tools/weekends-until` → ?
+
+The tool is called **Milestones** as of `bbc7a20`. The label changed; the route did not.
+That was the right default (internal names are permanent, display labels are free) but it
+leaves a mismatch anyone reading a URL or sharing a link will see. **This is a decision
+to make deliberately, not a leftover.**
+
+**Measured scope:** 21 references to `tools/weekends-until` across 15 code files, plus
+`docs/dad-tools-plan.md`.
+
+| Option | Cost | Risk |
+|---|---|---|
+| **Leave it** | none | permanent name/URL mismatch, visible in the address bar and in every shared link |
+| **Rename to `/tools/milestones` + 301** | move the directory, a redirect in `proxy.ts`, update 21 call sites | low IF the redirect lands in the same commit |
+| Rename with no redirect | — | **reject.** Breaks live links, splits the OG cache, and 404s the emails below |
+
+**The thing that makes the redirect non-optional:**
+`app/api/cron/yearly-weekends-checkin/route.ts` emails a link into this tool, so the old
+URL is already sitting in people's inboxes — and OG cards are immutable-cached for up to
+a year per POP. A rename without a 301 breaks both.
+
+**Sub-decisions if we rename:**
+- `/api/og/weekends` — rename to match, or leave? It's an internal image path nobody
+  reads. Renaming it changes every card URL (fresh renders, cold caches) and must keep
+  `check:og` green. Leaving it is invisible to users and cheaper.
+- The directory `app/(tools)/tools/weekends-until/_components/` and the
+  `LABELS.tools.weekendsUntil` KEY both stay regardless — those are internal names.
+- Is "milestones" too generic for a URL, given it could collide with a future content
+  type? Worth ten seconds of thought before committing to it.
+
+---
+
 ## Explicitly not merging, and why
 
 - **`/goals/[id]/share` stays a page.** It carries consent language and tier
