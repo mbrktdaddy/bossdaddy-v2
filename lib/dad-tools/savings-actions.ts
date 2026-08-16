@@ -23,7 +23,8 @@ import type {
   SavingsParticipant,
   GoalStats,
 } from './savings'
-import { computeStats } from './savings'
+import { computeStats, goalToday } from './savings'
+import { localDateInZone, isValidTimeZone } from '@/lib/dates'
 
 export type SavingsActionResult<T = void> =
   | { ok: true; data?: T }
@@ -154,6 +155,7 @@ const GOAL_COLUMNS = [
   'destination_mode', 'destination_url', 'destination_type', 'destination_label',
   'reminder_enabled', 'reminder_cadence', 'reminder_hour_utc',
   'status', 'completed_at', 'archived_at',
+  'timezone',
   'created_at', 'updated_at',
 ].join(', ')
 
@@ -162,10 +164,22 @@ const PARTICIPANT_COLUMNS = 'id, goal_id, user_id, role, destination_url, destin
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
-function todayYMD(): string {
-  const d = new Date()
-  const p = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
+/** The caller's IANA zone from Vercel's edge, or null if absent/unrecognised. */
+async function requestZone(): Promise<string | null> {
+  const z = (await headers()).get('x-vercel-ip-timezone')
+  return z && isValidTimeZone(z) ? z : null
+}
+
+/**
+ * Today, as the person making the request would name it.
+ *
+ * Was `new Date()` read through local getters, i.e. the PROCESS zone — UTC on
+ * Vercel. That stamped a 7pm-Pacific contribution with tomorrow's date and set
+ * a goal's start_date a day early (audit #60), the same mismatch that broke the
+ * streak in #5: writes were browser-local, everything server-side was UTC.
+ */
+async function todayYMD(): Promise<string> {
+  return localDateInZone(new Date(), (await requestZone()) ?? 'UTC')
 }
 
 function revalidateSavingsSurfaces(goalId?: string) {
@@ -209,7 +223,10 @@ export async function createGoal(
     description:        parsed.data.description ?? null,
     cadence:            parsed.data.cadence ?? null,
     amount_per_cadence: parsed.data.amount_per_cadence ?? null,
-    start_date:         parsed.data.start_date ?? todayYMD(),
+    start_date:         parsed.data.start_date ?? await todayYMD(),
+    // Owner's zone, captured once at create. Everything day-keyed about this
+    // goal is measured in it from here on (migration 152).
+    timezone:           await requestZone(),
     target_amount:      parsed.data.target_amount ?? null,
     target_date:        parsed.data.target_date ?? null,
     destination_mode:   parsed.data.destination_mode ?? 'per_participant',
@@ -371,6 +388,9 @@ export async function getGoals(
   const entries = ((entryRows ?? []) as unknown as SavingsEntry[])
   const participants = ((participantRows ?? []) as unknown as SavingsParticipant[])
 
+  // Request zone only backs up goals whose owner zone predates migration 152.
+  const requestZone = (await headers()).get('x-vercel-ip-timezone')
+
   return goals.map((goal) => {
     const goalEntries = entries.filter((e) => e.goal_id === goal.id)
     const goalParticipants = participants.filter((p) => p.goal_id === goal.id)
@@ -378,7 +398,7 @@ export async function getGoals(
       goal,
       entries: goalEntries,
       participants: goalParticipants,
-      stats: computeStats(goal, goalEntries),
+      stats: computeStats(goal, goalEntries, goalToday(goal, requestZone)),
     }
   })
 }
@@ -407,11 +427,13 @@ export async function getGoal(id: string): Promise<GoalWithStats | null> {
   const entries = ((entryRows ?? []) as unknown as SavingsEntry[])
   const participants = ((participantRows ?? []) as unknown as SavingsParticipant[])
 
+  const requestZone = (await headers()).get('x-vercel-ip-timezone')
+
   return {
     goal,
     entries,
     participants,
-    stats: computeStats(goal, entries),
+    stats: computeStats(goal, entries, goalToday(goal, requestZone)),
   }
 }
 
@@ -432,7 +454,7 @@ export async function logContribution(
   const payload = {
     goal_id:        parsed.data.goalId,
     contributor_id: user.id,
-    contributed_on: parsed.data.contributedOn ?? todayYMD(),
+    contributed_on: parsed.data.contributedOn ?? await todayYMD(),
     amount:         parsed.data.amount,
     kind:           parsed.data.kind ?? 'contribution',
     note:           parsed.data.note ?? null,
@@ -506,7 +528,7 @@ export async function logAdjustment(
     .insert({
       goal_id:        parsed.data.goalId,
       contributor_id: user.id,
-      contributed_on: parsed.data.occurredOn ?? todayYMD(),
+      contributed_on: parsed.data.occurredOn ?? await todayYMD(),
       amount:         parsed.data.amount,
       kind,
       note:           parsed.data.note ?? null,
@@ -543,7 +565,7 @@ export async function logWithdrawal(
     .insert({
       goal_id:        parsed.data.goalId,
       contributor_id: user.id,
-      contributed_on: parsed.data.withdrawnOn ?? todayYMD(),
+      contributed_on: parsed.data.withdrawnOn ?? await todayYMD(),
       amount:         parsed.data.amount,
       kind:           'withdrawal',
       note:           parsed.data.note ?? null,

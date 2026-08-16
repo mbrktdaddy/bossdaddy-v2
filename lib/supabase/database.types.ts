@@ -3253,6 +3253,7 @@ export type Database = {
           status: string
           target_amount: number | null
           target_date: string | null
+          timezone: string | null
           updated_at: string
         }
         Insert: {
@@ -3277,6 +3278,7 @@ export type Database = {
           status?: string
           target_amount?: number | null
           target_date?: string | null
+          timezone?: string | null
           updated_at?: string
         }
         Update: {
@@ -3301,6 +3303,7 @@ export type Database = {
           status?: string
           target_amount?: number | null
           target_date?: string | null
+          timezone?: string | null
           updated_at?: string
         }
         Relationships: [

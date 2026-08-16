@@ -1,3 +1,5 @@
+import { localDateInZone, parseLocalYMD, isValidTimeZone } from '@/lib/dates'
+
 // Pure math + types for the Savings tool. No client/server context — safe
 // in both. Mirrors the architectural posture of lib/dad-tools/calc.ts and
 // lib/dad-tools/dad-math.ts.
@@ -42,6 +44,11 @@ export interface SavingsGoal {
   cadence:             SavingsCadence | null
   amount_per_cadence:  number | null
   start_date:          string  // YYYY-MM-DD
+  // IANA zone of the goal OWNER (migration 152). Decides which calendar day a
+  // contribution counts for, so the streak is the same number whoever is
+  // looking and from wherever. Null on older rows the backfill couldn't reach —
+  // resolveGoalZone() falls back to the request zone, then UTC.
+  timezone:            string | null
   target_amount:       number | null
   target_date:         string | null
   destination_mode:    DestinationMode
@@ -127,10 +134,45 @@ function pad2(n: number): string {
 }
 
 function parseYMD(ymd: string): Date {
-  // YYYY-MM-DD parsed as local-time midnight (avoids the UTC drift that
-  // `new Date('YYYY-MM-DD')` gives on V8).
-  const [y, m, d] = ymd.split('-').map(Number)
-  return new Date(y, (m ?? 1) - 1, d ?? 1)
+  // Canonical implementation in lib/dates.ts — same rule, one owner.
+  return parseLocalYMD(ymd)
+}
+
+/**
+ * Resolve which zone a goal's days are measured in.
+ *
+ * Stored owner zone wins, so the streak is a property of the GOAL: a partner in
+ * another zone sees the same number, and checking from an airport doesn't move
+ * it. Falls back to the caller's request zone (`x-vercel-ip-timezone`) for rows
+ * migration 152's backfill couldn't reach, then UTC.
+ */
+export function resolveGoalZone(
+  goalTimezone: string | null | undefined,
+  requestZone?: string | null,
+): string {
+  const candidate = goalTimezone || requestZone || 'UTC'
+  return isValidTimeZone(candidate) ? candidate : 'UTC'
+}
+
+/**
+ * The `asOf` every stats caller should pass: midnight of the goal owner's
+ * TODAY, as a Date whose local getters read back that calendar day.
+ *
+ * Everything downstream is day-keyed through `dateToYMD`, which reads
+ * `getFullYear/getMonth/getDate` — the process zone, UTC on Vercel. Handing it
+ * a plain `new Date()` is what made the streak read 0 every evening west of
+ * GMT (audit #5). Handing it local midnight makes the round trip exact.
+ *
+ * Note this is why `computeStats` has no default `asOf` any more: the default
+ * WAS the bug, and a required parameter is the only version of this fix that
+ * can't be silently undone by the next call site.
+ */
+export function goalToday(
+  goal: { timezone?: string | null },
+  requestZone?: string | null,
+  now: Date = new Date(),
+): Date {
+  return parseYMD(localDateInZone(now, resolveGoalZone(goal.timezone, requestZone)))
 }
 
 function dateToYMD(d: Date): string {
@@ -448,7 +490,11 @@ function buildCatchUpSuggestion(
 export function computeStats(
   goal: SavingsGoal,
   entries: SavingsEntry[],
-  asOf: Date = new Date(),
+  // REQUIRED — no default. `new Date()` here was audit finding #5: every day
+  // key downstream is derived in the process zone (UTC on Vercel), so the
+  // server believed it was tomorrow from 17:00 Pacific and zeroed the streak.
+  // Pass goalToday(goal, requestZone).
+  asOf: Date,
 ): GoalStats {
   const total = runningTotal(entries)
   const grossContributed = sumByKind(entries, ['contribution', 'catchup', 'adjustment_credit'])

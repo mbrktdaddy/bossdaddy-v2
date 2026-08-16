@@ -3,7 +3,8 @@ import * as React from 'react'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendEmail } from '@/lib/email'
 import { SavingsReminderEmail } from '@/emails/SavingsReminderEmail'
-import { computeStats, fmtUsdWhole, cadenceUnitLabel } from '@/lib/dad-tools/savings'
+import { computeStats, fmtUsdWhole, cadenceUnitLabel, resolveGoalZone } from '@/lib/dad-tools/savings'
+import { localDateInZone, parseLocalYMD } from '@/lib/dates'
 import type {
   SavingsGoal,
   SavingsEntry,
@@ -12,7 +13,7 @@ import type {
 
 export const maxDuration = 60
 
-const GOAL_COLUMNS = 'id, owner_id, kid_profile_id, name, description, cadence, amount_per_cadence, start_date, target_amount, target_date, destination_mode, destination_url, destination_type, destination_label, reminder_enabled, reminder_cadence, reminder_hour_utc, status, completed_at, archived_at, created_at, updated_at'
+const GOAL_COLUMNS = 'id, owner_id, kid_profile_id, name, description, cadence, amount_per_cadence, start_date, target_amount, target_date, destination_mode, destination_url, destination_type, destination_label, reminder_enabled, reminder_cadence, reminder_hour_utc, status, completed_at, archived_at, timezone, created_at, updated_at'
 const ENTRY_COLUMNS = 'id, goal_id, contributor_id, contributed_on, amount, kind, note, created_at'
 
 // Hourly cron. For each active goal whose reminder_hour_utc matches the
@@ -89,7 +90,11 @@ export async function GET(request: NextRequest) {
 
   for (const goal of candidates) {
     const goalEntries = entries.filter((e) => e.goal_id === goal.id)
-    const stats = computeStats(goal, goalEntries, now)
+    // Cron has no request, so no header zone — the goal's stored owner zone is
+    // the only source, falling back to UTC. That fallback is the pre-152
+    // behaviour, so a goal the backfill couldn't reach is no worse than before.
+    const goalDayYmd = localDateInZone(now, resolveGoalZone(goal.timezone))
+    const stats = computeStats(goal, goalEntries, parseLocalYMD(goalDayYmd))
     const goalParticipants = participants.filter((p) => p.goal_id === goal.id)
     const cadenceForUnit = (goal.cadence ?? goal.reminder_cadence) as SavingsCadence | 'off' | null
     const cadenceLabel = cadenceForUnit === 'daily' ? 'today'
@@ -105,7 +110,7 @@ export async function GET(request: NextRequest) {
       if (!email) { skipped++; continue }
 
       const alreadyLogged = hasContributionForCurrentPeriod(
-        goalEntries, p.user_id, cadenceForUnit, now,
+        goalEntries, p.user_id, cadenceForUnit, goalDayYmd,
       )
       if (alreadyLogged) { skipped++; continue }
 
@@ -167,31 +172,42 @@ function reminderDueToday(goal: SavingsGoal, now: Date): boolean {
 
 // True if this contributor has logged a contribution/catchup in the current
 // cadence period (today / this ISO week / this calendar month).
+// `todayYmd` is the goal owner's calendar day, NOT the server's. Entries store
+// `contributed_on` as the BROWSER's local date; comparing that against a UTC
+// `isoYmd(now)` meant that between 00:00 and 02:00 UTC — i.e. the previous
+// evening in the Americas — a contribution logged minutes earlier didn't count
+// and the nudge went out anyway. Audit finding #34, same root cause as #5.
 function hasContributionForCurrentPeriod(
   entries: SavingsEntry[],
   contributorId: string,
   cadence: SavingsCadence | 'off' | null,
-  now: Date,
+  todayYmd: string,
 ): boolean {
   if (cadence === 'off' || cadence == null) {
     // No cadence → don't filter by period; treat any entry today as logged
     return entries.some((e) =>
       e.contributor_id === contributorId
       && (e.kind === 'contribution' || e.kind === 'catchup')
-      && e.contributed_on === isoYmd(now),
+      && e.contributed_on === todayYmd,
     )
   }
+  // Both sides are projected into UTC-midnight space purely so the ISO-week and
+  // month arithmetic has a common frame — the DAY each side names has already
+  // been decided in the owner's zone.
+  const [ty, tm, td] = todayYmd.split('-').map(Number)
+  const todayAsUtc = new Date(Date.UTC(ty ?? 1970, (tm ?? 1) - 1, td ?? 1))
+
   const periodMatches = (entryYmd: string): boolean => {
     const [ey, em, ed] = entryYmd.split('-').map(Number)
     const eDate = new Date(Date.UTC(ey, (em ?? 1) - 1, ed ?? 1))
     if (cadence === 'daily') {
-      return entryYmd === isoYmd(now)
+      return entryYmd === todayYmd
     }
     if (cadence === 'weekly') {
-      return isoWeekKey(eDate) === isoWeekKey(now)
+      return isoWeekKey(eDate) === isoWeekKey(todayAsUtc)
     }
-    return eDate.getUTCFullYear() === now.getUTCFullYear()
-        && eDate.getUTCMonth()    === now.getUTCMonth()
+    return eDate.getUTCFullYear() === todayAsUtc.getUTCFullYear()
+        && eDate.getUTCMonth()    === todayAsUtc.getUTCMonth()
   }
   return entries.some((e) =>
     e.contributor_id === contributorId
@@ -200,12 +216,10 @@ function hasContributionForCurrentPeriod(
   )
 }
 
-function isoYmd(d: Date): string {
-  const y = d.getUTCFullYear()
-  const m = String(d.getUTCMonth() + 1).padStart(2, '0')
-  const day = String(d.getUTCDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
+// `isoYmd(now)` lived here and was the UTC half of finding #34 — deleted rather
+// than left available, because the only remaining use for a UTC "today" in this
+// file would be a reintroduction of the bug. Day keys come from
+// localDateInZone(now, resolveGoalZone(goal.timezone)).
 
 function isoWeekKey(d: Date): string {
   const dt = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()))

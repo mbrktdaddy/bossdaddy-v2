@@ -23,7 +23,8 @@ import {
 import { KID_COLUMNS, familyPhotoSrc } from '@/lib/dad-tools/family-photo'
 import { runDadMath, fmtUsdCompact } from '@/lib/dad-tools/dad-math'
 import { dadMathTagline } from '@/lib/dad-tools/dad-math-copy'
-import { fmtUsdWhole, computeStats } from '@/lib/dad-tools/savings'
+import { headers } from 'next/headers'
+import { fmtUsdWhole, computeStats, goalToday } from '@/lib/dad-tools/savings'
 import type {
   SavingsGoal as SavingsGoalType,
   SavingsEntry as SavingsEntryType,
@@ -61,6 +62,9 @@ function buildShareUrl(base: string, params: Record<string, string | undefined>)
 
 export default async function KidProfilePage({ params }: PageProps) {
   const { id } = await params
+  // Backs up goals whose owner zone predates migration 152; the stored zone
+  // wins whenever it exists.
+  const requestZone = (await headers()).get('x-vercel-ip-timezone')
 
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
@@ -341,7 +345,7 @@ export default async function KidProfilePage({ params }: PageProps) {
           <div className="mt-4 space-y-1.5">
             {kidGoals.map((g) => {
               const entries = kidGoalEntries.filter((e) => e.goal_id === g.id)
-              const stats = computeStats(g, entries)
+              const stats = computeStats(g, entries, goalToday(g, requestZone))
               return (
                 <Link
                   key={g.id}
