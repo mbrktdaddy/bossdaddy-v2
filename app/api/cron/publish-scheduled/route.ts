@@ -1,8 +1,10 @@
 import { NextResponse, type NextRequest, after } from 'next/server'
 import { revalidatePath } from 'next/cache'
+import * as Sentry from '@sentry/nextjs'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { prewarmOgForPaths } from '@/lib/og/prewarm'
 import { revalidateGuidePaths, revalidateReviewPaths } from '@/lib/revalidate'
+import { isDisclosureBlocked } from '@/lib/reviews'
 import { getResend, FROM_EMAIL } from '@/lib/resend'
 import { ModerationResultEmail } from '@/emails/ModerationResultEmail'
 import * as React from 'react'
@@ -36,15 +38,19 @@ export async function GET(request: NextRequest) {
   // Reviews + guides use status='approved' as their "live" state; collections
   // use is_visible=true.
   const [{ data: dueArticles }, { data: dueReviews }, { data: dueCollections }] = await Promise.all([
+    // The status filter is deliberately WIDER than what we will publish. We
+    // fetch draft/pending/rejected so that a row scheduled without being
+    // submitted can be REPORTED rather than silently ignored — see the gate
+    // below. Narrowing this to `pending` would make stranded rows invisible.
     admin
       .from('guides')
-      .select('id, slug, title, author_id, category')
+      .select('id, slug, title, author_id, category, status, has_affiliate_links, disclosure_acknowledged')
       .not('scheduled_publish_at', 'is', null)
       .lte('scheduled_publish_at', now)
       .in('status', ['draft', 'pending', 'rejected']),
     admin
       .from('reviews')
-      .select('id, slug, title, author_id, category')
+      .select('id, slug, title, author_id, category, status, has_affiliate_links, disclosure_acknowledged')
       .not('scheduled_publish_at', 'is', null)
       .lte('scheduled_publish_at', now)
       .in('status', ['draft', 'pending', 'rejected']),
@@ -56,8 +62,68 @@ export async function GET(request: NextRequest) {
       .eq('is_visible', false),
   ])
 
-  const articleIds    = (dueArticles    ?? []).map((a) => a.id)
-  const reviewIds     = (dueReviews     ?? []).map((r) => r.id)
+  // ── Publication gates ────────────────────────────────────────────────────
+  // Two independent reasons a due row must not go live:
+  //
+  //  1. STATE MACHINE. CLAUDE.md: draft → pending → approved, and only an
+  //     admin approves. Scheduling used to jump draft → approved directly,
+  //     which skipped `submit` — and therefore skipped submit's disclosure
+  //     gate and the moderation pass it triggers. Scheduling now publishes
+  //     only what has actually been submitted for review.
+  //
+  //  2. FTC DISCLOSURE. A row carrying affiliate links whose disclosure has
+  //     not been acknowledged must never become public. Re-asserted here even
+  //     though submit checks it, because `has_affiliate_links` is recomputed
+  //     on every content edit — a row can acquire affiliate links AFTER it was
+  //     acknowledged. Approval is the moment the links go public, so approval
+  //     is the moment that has to hold. (Guides currently have no
+  //     `disclosure_acknowledged` column; migration 148 adds one.)
+  //
+  // Both WITHHOLD rather than drop. The row keeps its `scheduled_publish_at`,
+  // so fixing the cause publishes it on the next tick — and both report, so a
+  // row can never sit stranded and silent. A withheld row re-reports every 15
+  // minutes, hence the per-row fingerprint: Sentry groups instead of flooding.
+  type GatedRow = {
+    id: string
+    title: string
+    slug: string | null
+    status: string
+    has_affiliate_links?: boolean | null
+    disclosure_acknowledged?: boolean | null
+  }
+
+  const withholdReason = (row: GatedRow): string | null => {
+    if (row.status !== 'pending') return `not submitted for review (status: ${row.status})`
+    if (isDisclosureBlocked({
+      has_affiliate_links: row.has_affiliate_links ?? null,
+      disclosure_acknowledged: row.disclosure_acknowledged ?? null,
+    })) return 'affiliate links present, disclosure not acknowledged'
+    return null
+  }
+
+  const gate = <T extends GatedRow>(rows: T[], kind: 'review' | 'guide'): T[] => {
+    const publishable: T[] = []
+    for (const row of rows) {
+      const reason = withholdReason(row)
+      if (!reason) { publishable.push(row); continue }
+      Sentry.captureMessage(`Scheduled ${kind} "${row.title}" withheld: ${reason}`, {
+        level: 'warning',
+        fingerprint: ['scheduled-publish-withheld', kind, row.id],
+        extra: { id: row.id, slug: row.slug, status: row.status, reason },
+      })
+    }
+    return publishable
+  }
+
+  const publishableArticles = gate(dueArticles ?? [], 'guide')
+  const publishableReviews  = gate(dueReviews  ?? [], 'review')
+
+  const withheldCount =
+    ((dueArticles ?? []).length - publishableArticles.length) +
+    ((dueReviews  ?? []).length - publishableReviews.length)
+
+  const articleIds    = publishableArticles.map((a) => a.id)
+  const reviewIds     = publishableReviews.map((r) => r.id)
   const collectionIds = (dueCollections ?? []).map((c) => c.id)
 
   let articlesPublished    = 0
@@ -111,12 +177,12 @@ export async function GET(request: NextRequest) {
 
   // Revalidate public pages that might have changed
   if (articlesPublished > 0) {
-    revalidateGuidePaths(dueArticles ?? [])
-    warmPaths.push(...(dueArticles ?? []).filter((a) => a.slug).map((a) => `/guides/${a.slug}`))
+    revalidateGuidePaths(publishableArticles)
+    warmPaths.push(...publishableArticles.filter((a) => a.slug).map((a) => `/guides/${a.slug}`))
   }
   if (reviewsPublished > 0) {
-    revalidateReviewPaths(dueReviews ?? [])
-    warmPaths.push(...(dueReviews ?? []).filter((r) => r.slug).map((r) => `/reviews/${r.slug}`))
+    revalidateReviewPaths(publishableReviews)
+    warmPaths.push(...publishableReviews.filter((r) => r.slug).map((r) => `/reviews/${r.slug}`))
   }
   if (collectionsPublished > 0) {
     revalidatePath('/')
@@ -199,13 +265,16 @@ export async function GET(request: NextRequest) {
     }
 
     await Promise.allSettled([
-      ...(dueArticles ?? []).filter(a => a.author_id).map(a =>
+      ...publishableArticles.filter(a => a.author_id).map(a =>
         notifyAuthor(a.author_id as string, a.title as string, 'guide')
       ),
-      ...(dueReviews ?? []).filter(r => r.author_id).map(r =>
+      // publishableReviews, not dueReviews — a disclosure-blocked review must
+      // not tell its author it went live, and must not fire wishlist alerts
+      // pointing at a page that is still a draft.
+      ...publishableReviews.filter(r => r.author_id).map(r =>
         notifyAuthor(r.author_id as string, r.title as string, 'review')
       ),
-      ...(dueReviews ?? []).filter(r => r.slug).map(r =>
+      ...publishableReviews.filter(r => r.slug).map(r =>
         notifyWishlist(r.id, r.title as string, r.slug as string)
       ),
     ])
@@ -216,6 +285,7 @@ export async function GET(request: NextRequest) {
     articlesPublished,
     reviewsPublished,
     collectionsPublished,
+    withheld: withheldCount,
     checkedAt: now,
   })
 }

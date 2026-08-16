@@ -8,6 +8,30 @@ const ONE_DAY_MS = 1000 * 60 * 60 * 24
 
 export type VerdictChange = 'improved' | 'unchanged' | 'declined' | 'complete_reversal'
 
+// ── FTC affiliate disclosure gate ────────────────────────────────────────────
+// A review carrying affiliate links must not become publicly visible until its
+// author has acknowledged the disclosure. CLAUDE.md marks this as a legal
+// compliance requirement that must not be bypassed.
+//
+// This lives in ONE place on purpose. The rule was previously enforced only at
+// create (`api/reviews/route.ts`) and submit (`api/reviews/[id]/submit`), and
+// both of those miss the two paths that actually publish: the admin approve
+// branch, and the scheduled-publish cron — which reaches `approved` without
+// passing through submit at all. Audit finding #61.
+//
+// Call this at every transition INTO a publicly-visible state, not at authoring
+// time: `has_affiliate_links` is recomputed on every content edit, so a review
+// can acquire affiliate links after it was acknowledged.
+//
+// Note `guides` has `has_affiliate_links` but no `disclosure_acknowledged`
+// column, so this gate is reviews-only by schema.
+export function isDisclosureBlocked(row: {
+  has_affiliate_links: boolean | null
+  disclosure_acknowledged: boolean | null
+}): boolean {
+  return Boolean(row.has_affiliate_links) && !row.disclosure_acknowledged
+}
+
 // ── AI Specs Grade ───────────────────────────────────────────────────────────
 // Shape of reviews.specs_grade_data — the reusable comparison artifact behind
 // the Specs sub-score. Produced by /api/claude/specs-grade, author-reviewed,

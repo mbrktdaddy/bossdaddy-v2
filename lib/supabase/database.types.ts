@@ -1616,6 +1616,7 @@ export type Database = {
           content: string
           content_type: string
           created_at: string | null
+          disclosure_acknowledged: boolean
           embedding: string | null
           excerpt: string | null
           faqs: Json
@@ -1647,6 +1648,7 @@ export type Database = {
           content: string
           content_type?: string
           created_at?: string | null
+          disclosure_acknowledged?: boolean
           embedding?: string | null
           excerpt?: string | null
           faqs?: Json
@@ -1678,6 +1680,7 @@ export type Database = {
           content?: string
           content_type?: string
           created_at?: string | null
+          disclosure_acknowledged?: boolean
           embedding?: string | null
           excerpt?: string | null
           faqs?: Json
@@ -4188,6 +4191,7 @@ export type Database = {
           content: string
           content_type: string
           created_at: string | null
+          disclosure_acknowledged: boolean
           embedding: string | null
           excerpt: string | null
           faqs: Json

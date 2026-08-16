@@ -4,6 +4,7 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { safeAfter } from '@/lib/server/safeAfter'
+import { isDisclosureBlocked } from '@/lib/reviews'
 
 // POST /api/guides/[id]/submit — transition draft → pending, trigger moderation
 export async function POST(
@@ -23,7 +24,7 @@ export async function POST(
   const admin = createAdminClient()
   const { data: article } = await admin
     .from('guides')
-    .select('id, status, author_id')
+    .select('id, status, author_id, has_affiliate_links, disclosure_acknowledged')
     .eq('id', id)
     .single()
 
@@ -31,6 +32,13 @@ export async function POST(
   if (article.author_id !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   if (!['draft', 'rejected'].includes(article.status)) {
     return NextResponse.json({ error: 'Only drafts or rejected guides can be submitted' }, { status: 422 })
+  }
+  // FTC gate — mirrors api/reviews/[id]/submit. Guides gained the
+  // acknowledgement column in migration 148; before that a guide could carry
+  // affiliate links all the way to publication with nothing recording that the
+  // author had acknowledged the disclosure.
+  if (isDisclosureBlocked(article)) {
+    return NextResponse.json({ error: 'Affiliate disclosure must be acknowledged before submitting' }, { status: 422 })
   }
 
   const { error: updateError } = await admin

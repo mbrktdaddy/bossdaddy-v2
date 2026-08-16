@@ -23,6 +23,13 @@ const CreateGuideSchema = z.object({
   key_takeaways: z.array(z.string()).default([]),
   faqs:          z.array(FAQSchema).default([]),
   suggested_tags: z.array(z.string().max(80)).max(10).default([]),
+  // FTC gate (migration 148). Accepted but NOT enforced here: a new guide is
+  // created as `draft`, which is private, so there is nothing to disclose yet.
+  // The gate is enforced at every transition into a published state — submit,
+  // admin approve, and the scheduled-publish cron. (Reviews additionally gate
+  // at create; that is stricter than necessary and not mirrored here, because
+  // it would block saving a draft.)
+  disclosure_acknowledged: z.boolean().default(false),
 })
 
 export async function POST(request: NextRequest) {
@@ -43,7 +50,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { title, category, content_type, excerpt, content, image_url, tldr, key_takeaways, faqs, suggested_tags } = parsed.data
+    const { title, category, content_type, excerpt, content, image_url, tldr, key_takeaways, faqs, suggested_tags, disclosure_acknowledged } = parsed.data
 
     let sanitizedContent: string
     try {
@@ -78,6 +85,7 @@ export async function POST(request: NextRequest) {
         faqs:                 faqs,
         reading_time_minutes: computeReadingTime(sanitizedContent),
         has_affiliate_links:  detectAffiliateLinks(sanitizedContent),
+        disclosure_acknowledged,
         status:               'draft',
       })
       .select()

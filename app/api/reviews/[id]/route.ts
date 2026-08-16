@@ -14,6 +14,7 @@ import { ModerationResultEmail } from '@/emails/ModerationResultEmail'
 import { notifyWishlistSubscribers } from '@/lib/wishlist-emails'
 import { createNotification } from '@/lib/notifications'
 import { ReviewUpdateSchema, ReviewModerateSchema } from '@/lib/reviews/schema'
+import { isDisclosureBlocked } from '@/lib/reviews'
 import { prewarmOgForPaths } from '@/lib/og/prewarm'
 import { revalidateReviewPaths } from '@/lib/revalidate'
 import * as React from 'react'
@@ -76,6 +77,30 @@ export async function PUT(
 
     const admin = createAdminClient()
     const updateData: Record<string, unknown> = {}
+
+    // FTC disclosure gate, re-asserted at the moment of publication.
+    //
+    // The gate is enforced on create (`api/reviews/route.ts`) and on submit
+    // (`api/reviews/[id]/submit`), but neither runs on this path: an admin can
+    // approve a review that never passed through submit, and `has_affiliate_links`
+    // is recomputed on every content edit (`:249`) — so a review can acquire
+    // affiliate links AFTER it was submitted and acknowledged. `approved` is the
+    // only moment that actually matters, because it is the moment the links
+    // become public. CLAUDE.md marks this gate as legally non-bypassable.
+    if (modParsed.data.action === 'approve') {
+      const { data: current } = await admin
+        .from('reviews')
+        .select('has_affiliate_links, disclosure_acknowledged')
+        .eq('id', id)
+        .single()
+
+      if (current && isDisclosureBlocked(current)) {
+        return NextResponse.json(
+          { error: 'This review contains affiliate links. The disclosure must be acknowledged before it can be approved.' },
+          { status: 422 }
+        )
+      }
+    }
 
     if (modParsed.data.action === 'approve') {
       updateData.status = 'approved'

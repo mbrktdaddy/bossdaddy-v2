@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { CATEGORIES } from '@/lib/categories'
 import { preserveImagesAcrossRefine } from '@/lib/inlineImages'
+import { detectAffiliateLinks } from '@/lib/affiliate'
 import { TiptapEditor } from '@/components/workspace/TiptapEditor'
 import { HeroImagePanel } from '@/components/workspace/HeroImagePanel'
 import { AIRefinePanel } from '@/components/workspace/AIRefinePanel'
@@ -35,6 +36,8 @@ interface GuideData {
   excerpt: string | null
   content: string
   image_url: string | null
+  has_affiliate_links: boolean | null
+  disclosure_acknowledged: boolean | null
   status: string
   slug: string | null
   moderation_score: number | null
@@ -65,6 +68,7 @@ export function GuideWorkspace({ guide: article }: Props) {
   const [metaTitle, setMetaTitle]   = useState(article.meta_title ?? '')
   const [metaDesc, setMetaDesc]     = useState(article.meta_description ?? '')
   const [scheduledAt, setScheduled] = useState<string | null>(article.scheduled_publish_at)
+  const [disclosureAck, setDiscAck] = useState<boolean>(article.disclosure_acknowledged ?? false)
 
   const [tags, setTags]                 = useState<string[]>(article.tags ?? [])
   const [tldr, setTldr]                 = useState(article.tldr ?? '')
@@ -91,6 +95,14 @@ export function GuideWorkspace({ guide: article }: Props) {
   const status = article.status
   const isPublished = status === 'approved'
 
+  // Derived, not stored — content fully determines it, and the server
+  // recomputes the same thing with `detectAffiliateLinks` on every save. Mirrors
+  // ReviewWorkspace, including the decision NOT to auto-clear disclosureAck when
+  // this flips false: the publish gate and the checklist both already condition
+  // on hasAffiliate, and preserving an explicit acknowledgement across
+  // link-toggle cycles is the better UX.
+  const hasAffiliate = useMemo(() => detectAffiliateLinks(content), [content])
+
   const payload = useMemo(() => ({
     title,
     category,
@@ -103,7 +115,8 @@ export function GuideWorkspace({ guide: article }: Props) {
     tldr:                 tldr || null,
     key_takeaways:        keyTakeaways,
     faqs,
-  }), [title, category, excerpt, content, imageUrl, metaTitle, metaDesc, scheduledAt, tldr, keyTakeaways, faqs])
+    disclosure_acknowledged: disclosureAck,
+  }), [title, category, excerpt, content, imageUrl, metaTitle, metaDesc, scheduledAt, tldr, keyTakeaways, faqs, disclosureAck])
 
   const { busy, actionErr, actionMsg, setMsg, deleting, autoSave, manualSave, publishOrUnpublish, handleDelete, handleDuplicate } =
     useContentWorkspace({ id: article.id, contentType: 'guide', payload, tags, isPublished })
@@ -128,6 +141,7 @@ export function GuideWorkspace({ guide: article }: Props) {
     { label: 'TL;DR',      done: tldr.trim().length > 0 },
     { label: 'Content',    done: content.replace(/<[^>]+>/g, '').trim().length >= 100 },
     { label: 'No placeholders', done: !content.includes('bd-image-placeholder') },
+    ...(hasAffiliate ? [{ label: 'Disclosure', done: disclosureAck }] : []),
   ]
 
   const previewUrl = isPublished && article.slug ? `/guides/${article.slug}` : null
@@ -374,6 +388,23 @@ export function GuideWorkspace({ guide: article }: Props) {
           content={content}
           onChangeContent={setContent}
         />
+        {hasAffiliate && (
+          <div className="mt-4 bg-accent-tint border border-accent-border/40 rounded-xl p-4">
+            <p className="text-sm text-accent-text font-semibold mb-2">⚠ Affiliate links detected</p>
+            <label className="flex items-start gap-2 text-sm text-prose-muted cursor-pointer">
+              <input
+                type="checkbox"
+                checked={disclosureAck}
+                onChange={(e) => setDiscAck(e.target.checked)}
+                className="mt-0.5"
+              />
+              <span>
+                I confirm this guide contains affiliate links. FTC disclosure will be auto-inserted before publishing.
+                <a href="/affiliate-disclosure" target="_blank" rel="noopener noreferrer" className="ml-1 text-accent-text-soft hover:text-accent">Learn more →</a>
+              </span>
+            </label>
+          </div>
+        )}
       </div>
 
       {/* ── DISTRIBUTION ─────────────────────────────────────────────── */}

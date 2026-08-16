@@ -14,6 +14,7 @@ import { ModerationResultEmail } from '@/emails/ModerationResultEmail'
 import { CATEGORY_SLUGS } from '@/lib/categories'
 import { prewarmOgForPaths } from '@/lib/og/prewarm'
 import { revalidateGuidePaths } from '@/lib/revalidate'
+import { isDisclosureBlocked } from '@/lib/reviews'
 import * as React from 'react'
 import { z } from 'zod'
 
@@ -38,6 +39,7 @@ const UpdateSchema = z.object({
   tldr:                 z.string().max(600).optional().nullable(),
   key_takeaways:        z.array(z.string()).optional(),
   faqs:                 z.array(FAQItemSchema).optional(),
+  disclosure_acknowledged: z.boolean().optional(),
 })
 
 // GET /api/guides/[id]
@@ -97,6 +99,26 @@ export async function PUT(
 
     const admin = createAdminClient()
     const updateData: Record<string, unknown> = {}
+
+    // FTC disclosure gate, re-asserted at the moment of publication — the same
+    // check the reviews approve branch makes. Submit already gates this, but
+    // `has_affiliate_links` is recomputed on every content edit, so a guide can
+    // acquire affiliate links AFTER it was acknowledged. Approval is when the
+    // links go public, so approval is when it has to hold.
+    if (modParsed.data.action === 'approve') {
+      const { data: current } = await admin
+        .from('guides')
+        .select('has_affiliate_links, disclosure_acknowledged')
+        .eq('id', id)
+        .single()
+
+      if (current && isDisclosureBlocked(current)) {
+        return NextResponse.json(
+          { error: 'This guide contains affiliate links. The disclosure must be acknowledged before it can be approved.' },
+          { status: 422 }
+        )
+      }
+    }
 
     if (modParsed.data.action === 'approve') {
       updateData.status = 'approved'
@@ -182,6 +204,7 @@ export async function PUT(
   if (parsed.data.tldr !== undefined) updates.tldr = parsed.data.tldr
   if (parsed.data.key_takeaways !== undefined) updates.key_takeaways = parsed.data.key_takeaways
   if (parsed.data.faqs !== undefined) updates.faqs = parsed.data.faqs
+  if (parsed.data.disclosure_acknowledged !== undefined) updates.disclosure_acknowledged = parsed.data.disclosure_acknowledged
   if (parsed.data.content) {
     let resolved = await resolveProductTokens(parsed.data.content, supabase)
     resolved = await resolveCollectionTokens(resolved, supabase)

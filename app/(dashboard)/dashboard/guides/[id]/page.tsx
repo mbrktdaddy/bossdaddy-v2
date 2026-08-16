@@ -12,7 +12,7 @@ export default async function GuideWorkspacePage({
 
   const { data: guide } = await admin
     .from('guides')
-    .select('id, title, category, excerpt, content, image_url, status, slug, moderation_score, moderation_flags, created_at, updated_at, reading_time_minutes, rejection_reason, meta_title, meta_description, scheduled_publish_at, tldr, key_takeaways, faqs')
+    .select('id, title, category, excerpt, content, image_url, has_affiliate_links, disclosure_acknowledged, status, slug, moderation_score, moderation_flags, created_at, updated_at, reading_time_minutes, rejection_reason, meta_title, meta_description, scheduled_publish_at, tldr, key_takeaways, faqs')
     .eq('id', id)
     .single()
 
