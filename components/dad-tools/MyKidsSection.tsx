@@ -8,9 +8,8 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { ageInYearsMonths } from '@/lib/dad-tools/calc'
 import { LABELS } from '@/lib/labels'
 import type { Kid } from '@/lib/dad-tools/kid-actions'
+import { KID_COLUMNS, familyPhotoSrc } from '@/lib/dad-tools/family-photo'
 import AddKidAffordance from './AddKidAffordance'
-
-const KID_COLUMNS = 'id, name, birthdate, member_type, photo_url, money_balance, money_monthly, money_target, money_return_rate, created_at, updated_at'
 
 function ageBadge(birthdate: string | null): string {
   if (!birthdate) return ''
@@ -49,6 +48,7 @@ export default async function MyKidsSection() {
           {kids.map((kid) => {
             const name = kid.name?.trim() || LABELS.tools.kids.noNameFallback
             const initial = (kid.name?.trim()?.[0] ?? '?').toUpperCase()
+            const photoSrc = familyPhotoSrc(kid)
             // Children show age; partner/other show their relationship label.
             const meta = kid.member_type === 'child'
               ? ageBadge(kid.birthdate)
@@ -59,10 +59,10 @@ export default async function MyKidsSection() {
                 href={`/tools/family/${kid.id}`}
                 className="group shrink-0 flex flex-col items-center gap-1.5 w-20 sm:w-24 p-2 rounded-xl hover:bg-surface-raised transition-colors"
               >
-                {kid.photo_url ? (
+                {photoSrc ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={kid.photo_url}
+                    src={photoSrc}
                     alt=""
                     className="h-14 w-14 sm:h-16 sm:w-16 rounded-full object-cover bg-surface-sunken ring-2 ring-transparent group-hover:ring-accent transition-all"
                   />

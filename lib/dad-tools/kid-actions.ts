@@ -10,6 +10,7 @@
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
+import { KID_COLUMNS } from './family-photo'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getOrCreateAnonymousId, getAnonymousId } from './cookies'
 
@@ -24,7 +25,9 @@ const KidInputSchema = z.object({
   name: z.string().trim().min(1).max(80).optional().nullable(),
   birthdate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Birthdate must be YYYY-MM-DD').optional().nullable(),
   member_type: MemberTypeSchema.optional(),
-  photo_url: z.string().url().optional().nullable(),
+  // No photo field. `photo_path` is written ONLY by /api/kids/[id]/photo,
+  // which owns the storage object it points at — a second writer here could
+  // set a path to a file that doesn't exist, or orphan one that does.
 })
 
 const UpdateKidInputSchema = KidInputSchema.partial({ birthdate: true }).extend({
@@ -45,7 +48,10 @@ export type Kid = {
   // on member_type and treat a null birthdate as "no age-based numbers."
   birthdate: string | null
   member_type: MemberType
-  photo_url: string | null
+  // Storage path in the private `family-photos` bucket, NOT a URL — private
+  // objects have no durable one. Render with familyPhotoSrc() from
+  // ./family-photo, which points at the owner-gated proxy route. (mig 151)
+  photo_path: string | null
   money_balance: number
   money_monthly: number
   money_target: number
@@ -54,8 +60,8 @@ export type Kid = {
   updated_at: string
 }
 
-const KID_COLUMNS =
-  'id, name, birthdate, member_type, photo_url, money_balance, money_monthly, money_target, money_return_rate, created_at, updated_at'
+// Single definition in ./family-photo — a 'use server' file cannot export a
+// constant, which is why this list used to be duplicated across four files.
 
 // Tier-based kid count limits. Photo upload is a separate gate — anonymous
 // can never upload (no stable identity to scope storage by), authenticated
@@ -124,7 +130,6 @@ export async function addKid(
     name: parsed.data.name ?? null,
     birthdate: parsed.data.birthdate ?? null,
     member_type: memberType,
-    photo_url: parsed.data.photo_url ?? null,
   }
 
   const supabase = await createClient()
@@ -167,7 +172,7 @@ export async function addKid(
   }
 
   const { data, error } = await admin.from('kid_profiles')
-    .insert({ ...payload, anonymous_id: anonId, photo_url: null } as never)
+    .insert({ ...payload, anonymous_id: anonId } as never)
     .select('id')
     .single()
   if (error) return { ok: false, error: error.message }
@@ -185,7 +190,7 @@ export async function updateKid(
     return { ok: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
   }
 
-  const { id, name, birthdate, member_type, photo_url } = parsed.data
+  const { id, name, birthdate, member_type } = parsed.data
   // Guard the one invalid combo: a child cleared of its birthdate.
   if (member_type === 'child' && birthdate === null) {
     return { ok: false, error: 'A birthdate is required for a child.' }
@@ -194,12 +199,10 @@ export async function updateKid(
     name?: string | null
     birthdate?: string | null
     member_type?: MemberType
-    photo_url?: string | null
   } = {}
   if (name        !== undefined) updates.name        = name
   if (birthdate   !== undefined) updates.birthdate   = birthdate
   if (member_type !== undefined) updates.member_type = member_type
-  if (photo_url   !== undefined) updates.photo_url   = photo_url
 
   if (Object.keys(updates).length === 0) {
     return { ok: false, error: 'No fields to update' }

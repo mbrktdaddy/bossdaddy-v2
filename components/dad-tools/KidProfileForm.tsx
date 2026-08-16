@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { addKid, updateKid, type Kid, type MemberType } from '@/lib/dad-tools/kid-actions'
+import { familyPhotoSrc } from '@/lib/dad-tools/family-photo'
 import { LABELS } from '@/lib/labels'
 import KidPhotoUploader from './KidPhotoUploader'
 
@@ -87,7 +88,7 @@ export default function KidProfileForm(props: Props) {
         <div className="pb-3 border-b border-soft mb-1">
           <KidPhotoUploader
             kidId={initialKid.id}
-            initialPhotoUrl={initialKid.photo_url}
+            initialPhotoUrl={familyPhotoSrc(initialKid)}
             initial={photoInitial}
             canUpload={isAuthenticated}
           />

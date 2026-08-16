@@ -15,6 +15,7 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import InstallPWA from '@/components/InstallPWA'
 import { LABELS } from '@/lib/labels'
 import { buildSocialMetadata } from '@/lib/og'
+import { KID_COLUMNS, familyPhotoSrc } from '@/lib/dad-tools/family-photo'
 import { weeksUntil, milestoneDate, momentDayKey, daysSinceDayKey } from '@/lib/dad-tools/calc'
 import { getGoals } from '@/lib/dad-tools/savings-actions'
 import { fmtUsdWhole } from '@/lib/dad-tools/savings'
@@ -104,7 +105,7 @@ export default async function ToolsHubPage() {
 
   if (user) {
     const { data: rawKids } = await supabase.from('kid_profiles')
-      .select('id, name, birthdate, member_type, photo_url, money_balance, money_monthly, money_target, money_return_rate, created_at, updated_at')
+      .select(KID_COLUMNS)
       .eq('user_id', user.id)
       .order('created_at', { ascending: true })
     kids = (rawKids ?? []) as Kid[]
@@ -230,10 +231,10 @@ export default async function ToolsHubPage() {
                   href={`/tools/family/${kid.id}`}
                   className="flex items-center gap-3 px-3 py-3 bg-surface border border-soft hover:border-accent-border/60 rounded-xl transition-colors group min-h-[44px]"
                 >
-                  {kid.photo_url ? (
+                  {familyPhotoSrc(kid) ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={kid.photo_url}
+                      src={familyPhotoSrc(kid) as string}
                       alt=""
                       className="h-10 w-10 rounded-full object-cover bg-surface-sunken shrink-0"
                     />

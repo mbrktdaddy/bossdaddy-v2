@@ -1813,7 +1813,7 @@ export type Database = {
           money_return_rate: number
           money_target: number
           name: string | null
-          photo_url: string | null
+          photo_path: string | null
           schema_version: number
           updated_at: string
           user_id: string | null
@@ -1829,7 +1829,7 @@ export type Database = {
           money_return_rate?: number
           money_target?: number
           name?: string | null
-          photo_url?: string | null
+          photo_path?: string | null
           schema_version?: number
           updated_at?: string
           user_id?: string | null
@@ -1845,7 +1845,7 @@ export type Database = {
           money_return_rate?: number
           money_target?: number
           name?: string | null
-          photo_url?: string | null
+          photo_path?: string | null
           schema_version?: number
           updated_at?: string
           user_id?: string | null

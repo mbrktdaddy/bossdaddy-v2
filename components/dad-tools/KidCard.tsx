@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { LoginLink } from '@/components/LoginLink'
 import { deleteKid, type Kid } from '@/lib/dad-tools/kid-actions'
+import { familyPhotoSrc } from '@/lib/dad-tools/family-photo'
 import { logTitle, LABELS } from '@/lib/labels'
 import {
   ageInYearsMonths,
@@ -55,16 +56,17 @@ export default function KidCard({ kid, initialMoments, momentCount, isAuthentica
 
   const displayName = kid.name?.trim() || 'Your kid'
   const initial = (kid.name?.trim()?.[0] ?? '?').toUpperCase()
+  const photoSrc = familyPhotoSrc(kid)
 
   return (
     <article className="bg-surface border border-faint rounded-2xl p-4 sm:p-5 space-y-4">
 
       {/* Header: avatar + name + age */}
       <header className="flex items-start gap-3">
-        {kid.photo_url ? (
+        {photoSrc ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={kid.photo_url}
+            src={photoSrc}
             alt=""
             className="h-12 w-12 rounded-full object-cover bg-surface-sunken shrink-0"
           />

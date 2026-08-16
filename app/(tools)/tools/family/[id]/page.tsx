@@ -20,6 +20,7 @@ import {
   momentDayKey,
   daysSinceDayKey,
 } from '@/lib/dad-tools/calc'
+import { KID_COLUMNS, familyPhotoSrc } from '@/lib/dad-tools/family-photo'
 import { runDadMath, fmtUsdCompact } from '@/lib/dad-tools/dad-math'
 import { dadMathTagline } from '@/lib/dad-tools/dad-math-copy'
 import { fmtUsdWhole, computeStats } from '@/lib/dad-tools/savings'
@@ -39,7 +40,9 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
-const KID_COLUMNS    = 'id, name, birthdate, member_type, photo_url, money_balance, money_monthly, money_target, money_return_rate, created_at, updated_at'
+// KID_COLUMNS comes from lib/dad-tools/family-photo (one definition).
+// MOMENT_COLUMNS is a different table — `moments.photo_url` is unrelated to a
+// family member's profile photo and is left as-is.
 const MOMENT_COLUMNS = 'id, kid_profile_id, moment_kind, occurred_on, response, photo_url, created_at, updated_at'
 
 export const metadata: Metadata = {
@@ -172,10 +175,10 @@ export default async function KidProfilePage({ params }: PageProps) {
 
       {/* Kid header */}
       <header className="flex items-start gap-4 sm:gap-5">
-        {kidRow.photo_url ? (
+        {familyPhotoSrc(kidRow) ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={kidRow.photo_url}
+            src={familyPhotoSrc(kidRow) as string}
             alt=""
             className="h-16 w-16 sm:h-20 sm:w-20 rounded-full object-cover bg-surface-sunken shrink-0"
           />
