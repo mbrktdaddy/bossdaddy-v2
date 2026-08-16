@@ -89,6 +89,13 @@ async function moderateWithClaude(body: string): Promise<ModerationResult> {
 // ── Trust promotion ─────────────────────────────────────────────────────────
 // After each approved insert, check if the user has reached the 5-comment threshold.
 
+// The promotion WRITE uses the service-role client, not the caller's session.
+// `trusted_commenter` is moderation state: migration 150 blocks browser-
+// originated writes to it (audit #7 — a member could otherwise PATCH their own
+// row and skip comment moderation entirely). Auto-promotion is a system
+// decision that happens to be triggered by a user action, so it belongs on the
+// privileged client. The comment COUNT stays on the session client — it reads
+// only the caller's own approved comments and RLS is the right gate for it.
 async function checkTrustPromotion(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
   const { count } = await supabase
     .from('comments')
@@ -98,10 +105,16 @@ async function checkTrustPromotion(supabase: Awaited<ReturnType<typeof createCli
     .is('moderation_flags', null)
 
   if ((count ?? 0) >= 5) {
-    await supabase
+    const admin = createAdminClient()
+    const { error } = await admin
       .from('profiles')
       .update({ trusted_commenter: true })
       .eq('id', userId)
+      // Never let auto-promotion override an admin's explicit trust decision
+      // (migration 124). The read below honours trust_locked too; this makes
+      // the write itself safe regardless of caller.
+      .eq('trust_locked', false)
+    if (error) console.error('Trust auto-promotion failed:', error)
   }
 }
 
@@ -126,7 +139,11 @@ export async function POST(request: NextRequest) {
 
   // Fetch trust status. `trust_locked` means an admin has manually decided this
   // user's trust — automatic promotion must not override it (migration 124).
-  const { data: profile } = await supabase
+  //
+  // Service-role client: migration 150 revokes SELECT on `trusted_commenter` /
+  // `trust_locked` from `authenticated`, because they are moderation state and
+  // a member reading their own trust level has no legitimate use (audit #2).
+  const { data: profile } = await createAdminClient()
     .from('profiles')
     .select('trusted_commenter, trust_locked')
     .eq('id', user.id)
