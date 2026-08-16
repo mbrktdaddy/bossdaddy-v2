@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import * as Sentry from '@sentry/nextjs'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendAccountStatusEmailDirect } from '@/lib/account-emails'
+import { purgeUserData } from '@/lib/account-purge'
 
 export const maxDuration = 60
 
@@ -60,6 +62,22 @@ export async function GET(request: NextRequest) {
     // Capture email BEFORE deleteUser — auth.users row is gone after, can't look up.
     const { data: authUser } = await admin.auth.admin.getUserById(target.id)
     const email = authUser.user?.email ?? null
+
+    // Remove what foreign keys will not: storage objects (no FK exists, and the
+    // rows holding their paths are about to cascade away) and email-keyed rows
+    // with no link back to the user. Must run BEFORE deleteUser — afterwards
+    // nothing in the system knows the files or subscriptions exist.
+    const purge = await purgeUserData(admin, { userId: target.id, email })
+    if (purge.failures.length > 0) {
+      // Do NOT abort: the account must still be deleted. Surface it instead —
+      // a leftover object is a promise broken in the "all your data has been
+      // removed" email, and silence is how it stays broken.
+      console.error(`cron: purge incomplete for ${target.username}:`, purge.failures)
+      Sentry.captureMessage(
+        `Account purge incomplete for ${target.username} — ${purge.failures.length} operation(s) failed`,
+        { level: 'error', extra: { userId: target.id, failures: purge.failures } },
+      )
+    }
 
     const { error: deleteErr } = await admin.auth.admin.deleteUser(target.id)
     if (deleteErr) {
