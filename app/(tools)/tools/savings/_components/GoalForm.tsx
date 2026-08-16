@@ -292,7 +292,8 @@ export default function GoalForm({ mode, initial, kids }: Props) {
         {kids.length > 0 && (
           <div>
             <label htmlFor="goal-kid" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
-              Tie to a kid <span className="text-prose-faint normal-case">(optional)</span>
+              Tie to a {LABELS.tools.kids.singular}{' '}
+              <span className="text-prose-faint normal-case">(optional)</span>
             </label>
             <select
               id="goal-kid"
@@ -300,9 +301,9 @@ export default function GoalForm({ mode, initial, kids }: Props) {
               onChange={(e) => setKidId(e.target.value)}
               className="w-full px-3 py-2.5 bg-surface-sunken border border-soft focus:border-accent rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent/30"
             >
-              <option value="">No kid tag</option>
+              <option value="">None</option>
               {kids.map((k) => (
-                <option key={k.id} value={k.id}>{k.name ?? 'Unnamed kid'}</option>
+                <option key={k.id} value={k.id}>{k.name ?? 'Unnamed'}</option>
               ))}
             </select>
           </div>

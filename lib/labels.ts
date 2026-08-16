@@ -475,6 +475,9 @@ export const LABELS = {
     // Family dashboard section (internally kid_profiles; "Family" in the UI)
     kids: {
       section:      'Family',
+      // Singular noun for inline sentences ("Tie to a family member"). Distinct
+      // from noNameFallback, which stands in for a PERSON whose name is unset.
+      singular:     'family member',
       addCta:       'Add a family member',
       editCta:      'Edit',
       deleteCta:    'Remove',
