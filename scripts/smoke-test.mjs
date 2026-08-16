@@ -13,7 +13,7 @@ const checks = [
   { label: 'Reviews listing',  url: '/reviews',             expect: 200 },
   { label: 'Guides listing',   url: '/guides',              expect: 200 },
   { label: 'Gear page',        url: '/gear',                expect: 200 },
-  { label: 'Wishlist page',    url: '/wishlist',            expect: 200 },
+  { label: 'Bench page',       url: '/bench',               expect: 200 },
 
   // RSS feeds — expect 200
   { label: 'Guides RSS feed',  url: '/feed/guides.xml',     expect: 200 },
@@ -22,12 +22,15 @@ const checks = [
   // Legacy redirects — expect 301
   { label: '/articles redirect',     url: '/articles',          expect: 301 },
   { label: '/feed/articles redirect', url: '/feed/articles.xml', expect: 301 },
+  { label: '/wishlist redirect',     url: '/wishlist',          expect: 301 },
 
   // Auth-gated — expect 307 redirect to /login (not 500)
   { label: 'Dashboard redirect', url: '/dashboard', expect: 307 },
 
-  // Cron — no secret, expect 401 (not 500 or fail-open 200)
-  { label: 'Cron auth guard', url: '/api/cron/publish-scheduled', expect: 401 },
+  // Cron — no secret. The route returns 403 Forbidden (not 401): a missing
+  // CRON_SECRET on the server is 503 Misconfigured, a wrong/absent caller
+  // token is 403. Either way, never 500 or a fail-open 200.
+  { label: 'Cron auth guard', url: '/api/cron/publish-scheduled', expect: 403 },
 ]
 
 let passed = 0
