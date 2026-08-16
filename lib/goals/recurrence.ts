@@ -55,6 +55,7 @@
 // schedules that never touch a gap.
 
 import { RRuleTemporal } from 'rrule-temporal'
+import { localDateInZone as localDateInZoneUnchecked } from '@/lib/dates'
 
 /** A schedule as stored in `goal_schedules`. Local wall clock + IANA zone. */
 export type GoalSchedule = {
@@ -227,19 +228,17 @@ export function icsRuleLines(
  * on tomorrow's UTC date, and keying by UTC silently breaks his streak the
  * moment he travels. Offline clients compute their own local date at log time
  * and send it — do not re-derive it at sync time.
+ *
+ * The formatting itself now lives in `lib/dates.ts`, which is dependency-free
+ * so client bundles can use it without pulling `rrule-temporal` in through this
+ * module. This wrapper keeps the RecurrenceError contract the goals code and
+ * its tests rely on.
  */
 export function localDateInZone(instant: Date, timezone: string): string {
   if (!isValidTimeZone(timezone)) {
     throw new RecurrenceError(`unknown IANA time zone "${timezone}"`)
   }
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: timezone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(instant)
-  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? ''
-  return `${get('year')}-${get('month')}-${get('day')}`
+  return localDateInZoneUnchecked(instant, timezone)
 }
 
 export function isValidTimeZone(timezone: string): boolean {
