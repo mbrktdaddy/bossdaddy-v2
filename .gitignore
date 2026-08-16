@@ -60,6 +60,9 @@ ai-content-ab-samples.json
 .commitmsg.tmp
 .prbody.tmp
 
+# ESLint cache (regenerable; keyed on file content)
+.eslintcache
+
 # Playwright (browser-verification harness)
 /test-results/
 /playwright-report/

@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Local Supabase stack scratch dir — `supabase start` writes a bundled,
+    // minified edge-runtime `index.ts` in here. Not our code, and it produced
+    // 154 phantom lint errors the first time anyone ran the stack. Already
+    // covered by supabase/.gitignore; ESLint's flat config does not read that.
+    "supabase/.temp/**",
   ]),
   {
     // Honor the underscore-prefix convention for intentionally unused
