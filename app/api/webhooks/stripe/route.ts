@@ -248,6 +248,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
           recipient: {
             name: sd.name ?? '',
             address1: sd.address.line1,
+            address2: sd.address?.line2 ?? undefined,
             city: sd.address?.city ?? '',
             state_code: sd.address?.state ?? '',
             country_code: sd.address?.country ?? 'US',

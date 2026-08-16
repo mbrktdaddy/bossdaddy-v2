@@ -65,6 +65,11 @@ export interface PrintfulShippingRate {
 export interface PrintfulOrderRecipient {
   name: string
   address1: string
+  // Apartment / unit / suite. Stripe collects it as `address.line2` and we
+  // persist and render it everywhere — but it was missing here, so Printful
+  // received street-only and apartment orders shipped without the unit
+  // number. Invisible internally: every stored and displayed copy was right.
+  address2?: string
   city: string
   state_code: string
   country_code: string
