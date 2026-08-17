@@ -66,7 +66,7 @@ Thank you for your time — happy to provide any additional context about the si
 
 Michael Brackett
 Founder, BossDaddyLife.com
-boss@bossdaddylife.com`
+press@bossdaddylife.com`
 
   return { subject, body }
 }
@@ -342,7 +342,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
       <div>
         <h1 className="text-xl md:text-2xl font-black">Press Outreach</h1>
         <p className="text-prose-faint text-xs md:text-sm mt-1">
-          Request product images from brands. Emails send from <span className="text-accent-text-soft">boss@bossdaddylife.com</span> via Resend.
+          Request product images from brands. Emails send from <span className="text-accent-text-soft">press@bossdaddylife.com</span> via Resend.
         </p>
       </div>
 
@@ -539,7 +539,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
           {/* Action row — stack on mobile, row on desktop */}
           <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <p className="text-xs text-prose-faint order-2 sm:order-1">
-              Sending from <span className="text-prose-faint">boss@bossdaddylife.com</span>
+              Sending from <span className="text-prose-faint">press@bossdaddylife.com</span>
             </p>
             <div className="order-1 sm:order-2">
               {method === 'email' ? (

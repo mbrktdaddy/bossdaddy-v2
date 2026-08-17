@@ -1,6 +1,6 @@
 /**
  * One-shot press outreach script — sends product image request emails to 3 brands
- * via Resend from boss@bossdaddylife.com.
+ * via Resend from press@bossdaddylife.com.
  *
  * Usage:
  *   $env:RESEND_API_KEY="re_xxxx"; node scripts/send-press-emails.mjs
@@ -10,7 +10,7 @@
 import { Resend } from 'resend'
 
 const DRY_RUN = process.argv.includes('--dry-run')
-const FROM = 'Michael Brackett | Boss Daddy <boss@bossdaddylife.com>'
+const FROM = 'Michael Brackett | Boss Daddy <press@bossdaddylife.com>'
 
 const emails = [
   {
@@ -28,7 +28,7 @@ Thank you for your time — happy to provide any additional context about the si
 
 Michael Brackett
 Founder, BossDaddyLife.com
-boss@bossdaddylife.com`,
+press@bossdaddylife.com`,
   },
   {
     to: 'customercare@spitjack.com',
@@ -43,7 +43,7 @@ Thanks — keep making great stuff.
 
 Michael Brackett
 Founder, BossDaddyLife.com
-boss@bossdaddylife.com`,
+press@bossdaddylife.com`,
   },
   {
     to: 'support@fanhaoshop.com',
@@ -58,7 +58,7 @@ Thank you — great product and easy to recommend.
 
 Michael Brackett
 Founder, BossDaddyLife.com
-boss@bossdaddylife.com`,
+press@bossdaddylife.com`,
   },
 ]
 

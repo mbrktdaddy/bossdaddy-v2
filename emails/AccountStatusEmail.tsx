@@ -36,7 +36,7 @@ const CONFIG: Record<AccountStatusEvent, {
     subtext: "Your account is temporarily on hold and you can't sign in until the suspension ends.",
     color: '#fbbf24',
     bgColor: '#1c1100',
-    cta: { label: 'Contact Boss Daddy →', path: 'mailto:boss@bossdaddylife.com?subject=Suspension%20question' },
+    cta: { label: 'Contact Boss Daddy →', path: 'mailto:support@bossdaddylife.com?subject=Suspension%20question' },
   },
   banned: {
     subject: 'Your Boss Daddy account has been banned',
@@ -44,7 +44,7 @@ const CONFIG: Record<AccountStatusEvent, {
     subtext: "Your account has been permanently banned from Boss Daddy. If you believe this is a mistake, reach out and we'll take a look.",
     color: '#f87171',
     bgColor: '#2d0c0c',
-    cta: { label: 'Contact Boss Daddy →', path: 'mailto:boss@bossdaddylife.com?subject=Ban%20appeal' },
+    cta: { label: 'Contact Boss Daddy →', path: 'mailto:support@bossdaddylife.com?subject=Ban%20appeal' },
   },
   admin_delete_scheduled: {
     subject: 'Your Boss Daddy account is scheduled for deletion',
@@ -92,7 +92,7 @@ const CONFIG: Record<AccountStatusEvent, {
     subtext: 'Your author access has been removed. Your account stays active — you can still read, comment, and use every member feature. The workspace is no longer available.',
     color: '#fbbf24',
     bgColor: '#1c1100',
-    cta: { label: 'Contact Boss Daddy →', path: 'mailto:boss@bossdaddylife.com?subject=Author%20privileges%20question' },
+    cta: { label: 'Contact Boss Daddy →', path: 'mailto:support@bossdaddylife.com?subject=Author%20privileges%20question' },
   },
 }
 
@@ -193,7 +193,7 @@ export function AccountStatusEmail({ event, username, siteUrl, reason, suspensio
                 <tr>
                   <td style={{ backgroundColor: '#0d0d0d', padding: '24px 40px', borderTop: '1px solid #1f1f1f' }}>
                     <p style={{ color: '#4b5563', fontSize: '12px', margin: '0 0 8px 0', lineHeight: '1.6' }}>
-                      Questions? <a href='mailto:boss@bossdaddylife.com' style={{ color: '#6b7280', textDecoration: 'underline' }}>boss@bossdaddylife.com</a>
+                      Questions? <a href='mailto:support@bossdaddylife.com' style={{ color: '#6b7280', textDecoration: 'underline' }}>support@bossdaddylife.com</a>
                     </p>
                     <p style={{ color: '#4b5563', fontSize: '12px', margin: 0, lineHeight: '1.6' }}>
                       <a href={siteUrl} style={{ color: '#6b7280', textDecoration: 'none' }}>BossDaddyLife.com</a>

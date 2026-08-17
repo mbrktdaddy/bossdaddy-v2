@@ -21,7 +21,7 @@ export default function AccountBlockedPage() {
 
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
         <a
-          href="mailto:boss@bossdaddylife.com?subject=Account%20access%20question"
+          href="mailto:support@bossdaddylife.com?subject=Account%20access%20question"
           className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition-colors text-sm"
         >
           Contact Boss Daddy

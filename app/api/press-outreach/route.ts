@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
     const resend = getResend()
     const { error: emailError } = await resend.emails.send({
-      from: 'Michael Brackett | Boss Daddy <boss@bossdaddylife.com>',
+      from: 'Michael Brackett | Boss Daddy <press@bossdaddylife.com>',
       to: d.contact_email,
       subject: d.subject,
       text: d.body,

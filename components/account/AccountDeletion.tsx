@@ -73,7 +73,7 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
         <div className="border border-soft rounded-xl p-4 bg-surface-sunken">
           <p className="text-sm text-prose-muted leading-relaxed">
             You&apos;ve published reviews or guides on Boss Daddy. Account deletion is a manual process for authors — please reach out to{' '}
-            <a href="mailto:boss@bossdaddylife.com?subject=Account%20deletion%20request" className="text-accent-text-soft hover:text-accent">boss@bossdaddylife.com</a>.
+            <a href="mailto:support@bossdaddylife.com?subject=Account%20deletion%20request" className="text-accent-text-soft hover:text-accent">support@bossdaddylife.com</a>.
           </p>
         </div>
       ) : !confirming ? (

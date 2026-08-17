@@ -32,7 +32,7 @@ export default function OrderPoller() {
       <p className="mt-4 text-sm text-prose-faint">
         Taking longer than expected.{' '}
         <a
-          href="mailto:boss@bossdaddylife.com?subject=Order%20confirmation%20question"
+          href="mailto:support@bossdaddylife.com?subject=Order%20confirmation%20question"
           className="text-accent-text-soft hover:text-accent underline"
         >
           Email us
