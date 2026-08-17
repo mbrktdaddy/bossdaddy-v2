@@ -15,6 +15,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { activityTime } from '@/lib/activity-time'
 
 interface NotificationRow {
   id:              string
@@ -34,11 +35,8 @@ interface ConversationSummary {
   peer:        { id: string; username: string; displayName: string | null; avatarUrl: string | null } | null
   lastMessage: { body: string; createdAt: string; fromMe: boolean } | null
   unread:      boolean
-}
-
-function shortDate(iso: string): string {
-  const d = new Date(iso)
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  unreadCount: number
+  muted:       boolean
 }
 
 export default function ActivityMenu({ userId }: { userId: string }) {
@@ -153,8 +151,9 @@ export default function ActivityMenu({ userId }: { userId: string }) {
   // (from markConversationRead on the thread page) reconciles it afterwards.
   function openConversation(c: ConversationSummary) {
     if (!c.unread) return
-    setConvs((prev) => prev.map((x) => x.id === c.id ? { ...x, unread: false } : x))
-    setMsgUnread((u) => Math.max(0, u - 1))
+    setConvs((prev) => prev.map((x) => x.id === c.id ? { ...x, unread: false, unreadCount: 0 } : x))
+    // A muted thread was never in the badge, so opening it can't decrement one.
+    if (!c.muted) setMsgUnread((u) => Math.max(0, u - 1))
   }
 
   async function act(id: string, action: 'accept' | 'decline') {
@@ -249,7 +248,7 @@ export default function ActivityMenu({ userId }: { userId: string }) {
                           <button type="button" onClick={() => openNotif(n)} className="block flex-1 min-w-0 text-left">
                             <p className="text-sm font-semibold text-prose leading-snug">{n.title}</p>
                             {n.body && <p className="text-xs text-prose-muted mt-0.5 leading-snug">{n.body}</p>}
-                            <p className="text-[11px] text-prose-faint mt-1">{shortDate(n.created_at)}</p>
+                            <p className="text-[11px] text-prose-faint mt-1">{activityTime(n.created_at)}</p>
                           </button>
                           {!n.read_at && (
                             <button
@@ -298,16 +297,32 @@ export default function ActivityMenu({ userId }: { userId: string }) {
                   convs.slice(0, 8).map((c) => (
                     <Link key={c.id} href={`/account/messages/${c.id}`}
                       onClick={() => openConversation(c)}
-                      className={`flex items-center gap-3 px-4 py-3 border-b border-strong/60 last:border-0 hover:bg-surface-hover/50 transition-colors ${c.unread ? 'bg-surface-hover/40' : ''}`}>
+                      className={`flex items-center gap-3 px-4 py-3 border-b border-strong/60 last:border-0 hover:bg-surface-hover/50 transition-colors ${c.unread && !c.muted ? 'bg-surface-hover/40' : ''}`}>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-prose truncate">{peerName(c)}</p>
+                        <div className="flex items-baseline gap-2">
+                          <p className="text-sm font-semibold text-prose truncate">{peerName(c)}</p>
+                          {/* Same formatter as the full list — two surfaces showing
+                              one thread's last activity must not disagree about when
+                              it was. */}
+                          {c.lastMessage && (
+                            <span className="ml-auto shrink-0 text-[11px] text-prose-faint tabular-nums">
+                              {activityTime(c.lastMessage.createdAt)}
+                            </span>
+                          )}
+                        </div>
                         {c.lastMessage && (
                           <p className="text-xs text-prose-muted truncate">
                             {c.lastMessage.fromMe ? 'You: ' : ''}{c.lastMessage.body}
                           </p>
                         )}
                       </div>
-                      {c.unread && <span className="w-2 h-2 rounded-full bg-accent shrink-0" />}
+                      {c.unreadCount > 0 && (
+                        <span className={`shrink-0 inline-flex min-w-5 h-5 items-center justify-center rounded-full px-1.5 text-[11px] font-black tabular-nums ${
+                          c.muted ? 'bg-surface-hover text-prose-muted' : 'bg-accent text-white'
+                        }`}>
+                          {c.unreadCount > 9 ? '9+' : c.unreadCount}
+                        </span>
+                      )}
                     </Link>
                   ))
                 )}

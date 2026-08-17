@@ -66,6 +66,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: `Caption must be ${MAX_CAPTION} characters or fewer` }, { status: 400 })
   }
 
+  // Replying with a photo (migration 155). Accepted here as well as in
+  // sendMessage so the composer behaves the same whether or not an image is
+  // staged — a reply bar that silently stopped applying when you attached a photo
+  // is the kind of inconsistency nobody reports and everybody notices.
+  const replyToRaw = (form.get('replyToId') as string | null)?.trim() ?? ''
+  const replyToId = UUID_RE.test(replyToRaw) ? replyToRaw : null
+
   const admin = createAdminClient()
 
   // Participant + block gate (mirrors sendMessage). RLS would also reject the
@@ -103,6 +110,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Upload failed — please try again' }, { status: 502 })
   }
 
+  // The quoted parent must be in THIS conversation — same enforcement and same
+  // reasoning as sendMessage: a CHECK can't subquery, so without this a crafted
+  // POST could quote a message from a thread the sender isn't in and turn the
+  // reply preview into a read primitive. Silently dropped, not errored: the photo
+  // is worth sending even if the quote isn't valid.
+  let parentId: string | null = null
+  if (replyToId) {
+    const { data: parent } = await admin
+      .from('messages')
+      .select('id')
+      .eq('id', replyToId)
+      .eq('conversation_id', conversationId)
+      .maybeSingle()
+    parentId = parent ? replyToId : null
+  }
+
   // RLS enforces: sender is a participant AND the account is active. If the
   // insert fails, clean up the orphaned object so the bucket doesn't leak.
   const { data: msg, error } = await supabase
@@ -114,6 +137,7 @@ export async function POST(request: NextRequest) {
       attachment_path:   path,
       attachment_width:  normalized.width,
       attachment_height: normalized.height,
+      reply_to_id:       parentId,
     })
     .select('id')
     .single()

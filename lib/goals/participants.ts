@@ -511,6 +511,60 @@ export async function previewInvitation(
 }
 
 /**
+ * Does this invitation NAME the person accepting it? There are two ways to be
+ * named and both are verified server-side rather than read off a form:
+ *
+ *   • `invitee_user_id` — set when the owner picked someone from his contacts
+ *     (migration 144). A verified id; the strongest form of addressing there is.
+ *
+ *   • `invitee_email` — set when he typed an address instead. Matched against an
+ *     address the accepter has PROVEN she controls. THIS IS THE PATH THAT MATTERS
+ *     for a non-member: when he invites his wife she has no account, so there is
+ *     no user id to store, and matching on ids alone would never fire for the one
+ *     person this whole feature was built to bring in.
+ *
+ * A bare link invite sets neither, is addressed to NOBODY, and returns false —
+ * which is the point. Casing is normalised on both sides so a capital can't be
+ * the difference between a relationship and a dead end.
+ *
+ * Pure, and separated from the query so this is testable — same reason
+ * invitationState above is. This is the whole security decision for whether an
+ * accept may create a connection, so it gets to be a function you can assert on
+ * rather than a condition buried in a 200-line handler.
+ */
+export function invitationNamesPerson(
+  row: { inviteeUserId: string | null; inviteeEmail: string | null },
+  who: { userId: string; verifiedEmail?: string | null },
+): boolean {
+  // A verified id wins outright and is NOT falsified by a mismatched address: the
+  // id is the stronger claim, so if it's set it is the only one that counts.
+  if (row.inviteeUserId) return row.inviteeUserId === who.userId
+
+  const named = row.inviteeEmail?.trim().toLowerCase()
+  const mine  = who.verifiedEmail?.trim().toLowerCase()
+  return Boolean(named && mine && named === mine)
+}
+
+async function invitationNames(
+  admin: Queryable,
+  args: { token: string; userId: string; verifiedEmail?: string | null },
+): Promise<boolean> {
+  const { data } = await admin
+    .from('goal_invitations')
+    .select('invitee_user_id, invitee_email')
+    .eq('token', args.token)
+    .maybeSingle()
+
+  const row = data as { invitee_user_id: string | null; invitee_email: string | null } | null
+  if (!row) return false
+
+  return invitationNamesPerson(
+    { inviteeUserId: row.invitee_user_id, inviteeEmail: row.invitee_email },
+    args,
+  )
+}
+
+/**
  * Accept — the only path that creates a participant row.
  *
  * Needs the ADMIN client for the same reason previewInvitation does, and because
@@ -520,10 +574,16 @@ export async function previewInvitation(
  * REFUSES IF EITHER PARTY HAS BLOCKED THE OTHER (`user_blocks`, migration 083).
  * Checked in both directions: a man who blocked someone must not be watchable by
  * them, and someone who blocked him shouldn't be handed a window into his log.
+ *
+ * `verifiedEmail` is an address the caller has PROVEN this user controls, or null
+ * — never a raw form value, and never an unconfirmed one. Only the route layer can
+ * establish that (it holds the session), which is why it is passed in rather than
+ * looked up here. Omitting it doesn't break anything; it only narrows an
+ * email-addressed invite back to the pre-fix behaviour of refusing.
  */
 export async function acceptInvitation(
   admin: Queryable,
-  args: { token: string; userId: string },
+  args: { token: string; userId: string; verifiedEmail?: string | null },
 ): Promise<{ ok: true; goalId: string } | { ok: false; reason: string }> {
   // The viewer MUST be passed here. previewInvitation refuses an addressed invite
   // to anyone it can't identify, so omitting it would turn away the very person
@@ -568,16 +628,44 @@ export async function acceptInvitation(
     return { ok: false, reason: 'That invite can\'t be accepted.' }
   }
 
-  // THE CONNECTION GATE. An accepted connection is the consent (migration 140);
-  // a goal invite is what you do with it, not a way around it.
+  // THE CONNECTION GATE — and the one case that passes THROUGH it rather than
+  // being stopped by it.
   //
-  // This is also what closes the stale-token hole migration 141 left open. Ending
-  // a connection cascades away the participant row, but the invite TOKEN survives
-  // in whatever inbox it landed in, and without this check re-opening that link
-  // would quietly re-establish everything that was just ended. The check belongs
-  // here rather than in the cascade because this is the first moment the
-  // invitee's identity is actually known — goal_invitations only ever held an
-  // optional, unverified email.
+  // An accepted connection is the consent (migration 140) and a goal invite is
+  // what you do with it, not a way around it. That still holds for a BARE LINK
+  // invite: the token is the only addressing there is, so a forwarded link must
+  // not be able to mint a relationship. Accepting one would hand whoever opened it
+  // DM access on top of the participation the token already grants — a strictly
+  // bigger door than the one the owner meant to open.
+  //
+  // ⚠️ BUT AN ADDRESSED INVITE IS ALREADY THE CONSENT, IN BOTH DIRECTIONS, and
+  //    demanding a connection on top of it asks the same question twice. He named
+  //    this person. She proved she is that person and then clicked accept. Until
+  //    now that combination still refused, which dead-ended the exact flow this
+  //    feature exists for: a wife invited by email signed up, clicked accept, and
+  //    got "Connect with them first" as flat text with nothing to click and a
+  //    7-day token running down. So an addressed accept CREATES the connection.
+  //
+  // THIS DOES NOT REOPEN THE STALE-TOKEN HOLE 141 LEFT AND 144 CLOSED. Ending a
+  // connection revokes every live invitation addressed to the ex-partner — by user
+  // id AND by email, migration 144 §4's cascade — so a severed pair's token is
+  // already `revoked_at` and previewInvitation refuses it hundreds of lines above
+  // this one. TOKEN LIVENESS is what encodes "this relationship was ended," not
+  // this check. Verify that cascade still exists before touching either.
+  //
+  // TWO CONSEQUENCES, BOTH DELIBERATE, so neither reads as an oversight later:
+  //
+  //   • A BLOCK STILL REFUSES. The `user_blocks` check above runs first and in both
+  //     directions, so the case that actually matters never reaches here.
+  //
+  //   • `connection_requests_from = 'nobody'` DOES NOT REFUSE, and that is the
+  //     call. lib/invite-guard.ts already suppresses DELIVERY of an invite to
+  //     someone with that preference set, but it can't unmint the token — the owner
+  //     can still hand the link over himself. If she then opens it and clicks
+  //     accept, she has opted in, and that is a stronger and more recent signal
+  //     than a setting whose job is to stop STRANGERS ASKING. Refusing here would
+  //     mean a woman who closed her inbox can never be brought into her husband's
+  //     goal at all, which is the same dead end this change exists to remove.
   const [ca, cb] = [ownerId, args.userId].sort()
   const { data: connection } = await admin
     .from('user_connections')
@@ -585,11 +673,43 @@ export async function acceptInvitation(
     .eq('user_a', ca)
     .eq('user_b', cb)
     .maybeSingle()
+
   if ((connection as { status: string } | null)?.status !== 'accepted') {
-    return {
-      ok: false,
-      reason: 'Connect with them first, then this link will work.',
+    if (!(await invitationNames(admin, args))) {
+      return {
+        ok: false,
+        reason: 'Connect with them first, then this link will work.',
+      }
     }
+
+    // requester_id is the OWNER: he opened this by inviting her, and the column
+    // exists to answer "who asked", which is not derivable from the ordered pair.
+    // Upsert rather than insert because a pending or declined row may already sit
+    // here — she is consenting now, and that outranks whatever the pair last said.
+    const { error: linkErr } = await admin
+      .from('user_connections')
+      .upsert({
+        user_a:       ca,
+        user_b:       cb,
+        requester_id: ownerId,
+        status:       'accepted',
+        // NOT NULL under user_connections_accepted_has_timestamp.
+        accepted_at:  new Date().toISOString(),
+        updated_at:   new Date().toISOString(),
+      }, { onConflict: 'user_a,user_b' })
+
+    if (linkErr) {
+      console.error('acceptInvitation: could not establish connection', linkErr)
+      return { ok: false, reason: 'Couldn\'t set that up. Try again in a minute.' }
+    }
+
+    // DELIBERATELY NOT NOTIFYING THE OWNER, to keep this file's rule intact (see
+    // the header: nothing here notifies anybody, in either direction; sharing
+    // state is visible by looking, and his participant list now shows her). Note
+    // that a connection accepted the ORDINARY way does notify, via
+    // lib/connections.ts respondToConnection — so this is the one accept that
+    // lands silently. If that asymmetry turns out to be wrong, the fix is a
+    // connection_accepted notification here, not loosening the rule generally.
   }
 
   // `sensitive_ack` mirrors what the OWNER chose at invite time, which

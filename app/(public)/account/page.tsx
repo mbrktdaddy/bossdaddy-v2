@@ -34,6 +34,7 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { LABELS } from '@/lib/labels'
 import MyKidsSection from '@/components/dad-tools/MyKidsSection'
 import ContactsCard from '@/components/account/ContactsCard'
+import MessagesCard from '@/components/account/MessagesCard'
 
 export const metadata: Metadata = {
   title: LABELS.account.pageTitle,
@@ -129,7 +130,11 @@ export default async function AccountHomePage() {
           <MyKidsSection />
         </div>
 
+        {/* Contacts then Messages: who you CAN reach, then who is waiting on a
+            reply. Same order as the concentric logic above — the relationship
+            first, the pending obligation second. */}
         <ContactsCard />
+        <MessagesCard />
 
         {/* THE TODAY CARD IS GONE FROM HERE (Phase F), and it's the last piece of
             Phase D. It was kept "by request" as the one work item on a management page,

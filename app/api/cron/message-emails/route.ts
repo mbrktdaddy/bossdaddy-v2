@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
   // 2. Participants of those conversations.
   const { data: partRows } = await admin
     .from('conversation_participants')
-    .select('conversation_id, user_id, last_read_at, last_notified_at, deleted_at')
+    .select('conversation_id, user_id, last_read_at, last_notified_at, deleted_at, muted_at')
     .in('conversation_id', convIds)
   const parts = partRows ?? []
 
@@ -61,6 +61,10 @@ export async function GET(request: NextRequest) {
   const byRecipient = new Map<string, Eligible[]>()
 
   for (const p of parts) {
+    // Muted threads never email (migration 155). Third of the three surfaces that
+    // have to agree — badge (messaging-queries), push (messaging-shared), email
+    // (here). A mute that still lands in the inbox next morning is not a mute.
+    if (p.muted_at) continue
     const incoming = msgs.filter((m) => m.conversation_id === p.conversation_id && m.sender_id !== p.user_id)
     if (incoming.length === 0) continue
     const latest = incoming[incoming.length - 1] // asc order → last is newest

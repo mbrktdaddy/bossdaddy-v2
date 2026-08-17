@@ -12,6 +12,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getOtherParticipants, isBlockedBetween, isConnectedTo, pushNewMessage } from '@/lib/messaging-shared'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { sanitizePlainText } from '@/lib/sanitize'
+import { isReactionKind, type ReactionKind } from '@/lib/messaging-reactions'
 import { revalidatePath } from 'next/cache'
 
 // `code` lets a caller distinguish "you two aren't connected yet" — a normal,
@@ -49,7 +50,12 @@ export async function getOrCreateDm(otherUserId: string): Promise<Result<{ conve
   return { ok: true, data: { conversationId: data as string } }
 }
 
-export async function sendMessage(conversationId: string, body: string): Promise<Result<{ id: string }>> {
+export async function sendMessage(
+  conversationId: string,
+  body: string,
+  /** The message being replied to (migration 155). Must be in this conversation. */
+  replyToId?: string | null,
+): Promise<Result<{ id: string }>> {
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
   if (!user) return { ok: false, error: 'Sign in to send messages' }
@@ -81,10 +87,26 @@ export async function sendMessage(conversationId: string, body: string): Promise
     return { ok: false, error: 'You\'re not connected any more.', code: 'not_connected' }
   }
 
+  // THE PARENT MUST LIVE IN THIS CONVERSATION. A CHECK constraint can't subquery,
+  // so this is the only place it's enforced — and without it a crafted POST could
+  // quote a message from a thread the reader isn't in, turning a reply preview into
+  // a read primitive for someone else's DMs. Silently dropped rather than errored:
+  // the message itself is fine and worth sending, only the quote is not.
+  let parentId: string | null = null
+  if (replyToId) {
+    const { data: parent } = await admin
+      .from('messages')
+      .select('id')
+      .eq('id', replyToId)
+      .eq('conversation_id', conversationId)
+      .maybeSingle()
+    parentId = parent ? replyToId : null
+  }
+
   // RLS additionally enforces: sender is a participant AND the account is active.
   const { data: msg, error } = await supabase
     .from('messages')
-    .insert({ conversation_id: conversationId, sender_id: user.id, body: text })
+    .insert({ conversation_id: conversationId, sender_id: user.id, body: text, reply_to_id: parentId })
     .select('id')
     .single()
   if (error || !msg) return { ok: false, error: 'Could not send message' }
@@ -125,6 +147,97 @@ export async function deleteConversation(conversationId: string): Promise<Result
   if (error) return { ok: false, error: error.message }
   revalidatePath('/account/messages')
   return { ok: true }
+}
+
+/**
+ * Mute / unmute a thread for me only (migration 155).
+ *
+ * NOT BLOCK, and the difference is the whole reason it exists: block severs the
+ * connection — which cascades away goal participation via migration 140's trigger
+ * — so quieting a chatty-but-fine contact used to cost the relationship. This just
+ * stops the pinging. The thread, its history, and sending all keep working.
+ *
+ * Self-directed, so the existing `conv_participants_self_update` policy covers it.
+ */
+export async function setConversationMuted(conversationId: string, muted: boolean): Promise<Result> {
+  const supabase = await createClient()
+  const { user } = await getUserSafe(supabase)
+  if (!user) return { ok: false, error: 'Unauthorized' }
+  const { error } = await supabase
+    .from('conversation_participants')
+    .update({ muted_at: muted ? new Date().toISOString() : null })
+    .eq('conversation_id', conversationId)
+    .eq('user_id', user.id)
+  if (error) return { ok: false, error: 'Could not update notifications for this thread' }
+  // The list row shows a muted glyph and the bell's count changes, so both
+  // surfaces need re-rendering.
+  revalidatePath('/account/messages')
+  return { ok: true }
+}
+
+/**
+ * React to a message, or take the reaction back.
+ *
+ * ONE PER PERSON PER MESSAGE (migration 155's primary key): the same kind again
+ * removes it, a different kind replaces it. Returns the resulting kind (or null)
+ * so the caller can reconcile rather than guess at the toggle.
+ *
+ * ⚠️ GATED ON BLOCK AND CONNECTION, exactly like sendMessage — because a reaction
+ *    IS contact. RLS only proves you're a participant, and a conversation outlives
+ *    the state that allowed it: without these two checks a blocked man could still
+ *    put hearts on the messages of the person who blocked him, and they would
+ *    appear live in her open thread. Quiet failure, loud consequence.
+ */
+export async function toggleReaction(
+  messageId: string,
+  kind: string,
+): Promise<Result<{ kind: ReactionKind | null }>> {
+  if (!isReactionKind(kind)) return { ok: false, error: 'Unknown reaction' }
+
+  const supabase = await createClient()
+  const { user } = await getUserSafe(supabase)
+  if (!user) return { ok: false, error: 'Sign in to react' }
+
+  const admin = createAdminClient()
+
+  const { data: msg } = await admin
+    .from('messages')
+    .select('conversation_id')
+    .eq('id', messageId)
+    .maybeSingle()
+  if (!msg) return { ok: false, error: 'Message not found' }
+
+  const others = await getOtherParticipants(admin, msg.conversation_id, user.id)
+  if (others.length === 0) return { ok: false, error: 'Conversation not found' }
+  if (await isBlockedBetween(admin, user.id, others)) {
+    return { ok: false, error: 'Messaging is unavailable with this user.' }
+  }
+  if (!await isConnectedTo(admin, user.id, others)) {
+    return { ok: false, error: 'You\'re not connected any more.', code: 'not_connected' }
+  }
+
+  const { data: existing } = await supabase
+    .from('message_reactions')
+    .select('kind')
+    .eq('message_id', messageId)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (existing?.kind === kind) {
+    const { error } = await supabase
+      .from('message_reactions')
+      .delete()
+      .eq('message_id', messageId)
+      .eq('user_id', user.id)
+    if (error) return { ok: false, error: 'Could not remove that' }
+    return { ok: true, data: { kind: null } }
+  }
+
+  const { error } = await supabase
+    .from('message_reactions')
+    .upsert({ message_id: messageId, user_id: user.id, kind }, { onConflict: 'message_id,user_id' })
+  if (error) return { ok: false, error: 'Could not react' }
+  return { ok: true, data: { kind } }
 }
 
 export async function blockUser(targetId: string): Promise<Result> {

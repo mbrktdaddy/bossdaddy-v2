@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { listConversationsFor } from '@/lib/messaging-queries'
-import MemberSearch from './_components/MemberSearch'
+import MemberSearch from '@/components/members/MemberSearch'
+import ConversationList from './_components/ConversationList'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -15,6 +15,8 @@ export default async function MessagesPage() {
   const { user } = await getUserSafe(supabase)
   if (!user) redirect('/login?next=/account/messages')
 
+  // Fetched on the server so the first paint carries real rows (no spinner, no
+  // layout jump); ConversationList takes over from here and keeps them live.
   const conversations = await listConversationsFor(supabase, user.id)
 
   return (
@@ -28,32 +30,7 @@ export default async function MessagesPage() {
       </div>
 
       <div className="mt-6 divide-y divide-soft border border-soft rounded-xl overflow-hidden">
-        {conversations.length === 0 ? (
-          <p className="px-4 py-10 text-center text-sm text-prose-faint">
-            No conversations yet — use <span className="font-semibold text-prose">New message</span> above to start one.
-          </p>
-        ) : (
-          conversations.map((c) => {
-            const name = c.peer?.displayName || c.peer?.username || 'Member'
-            return (
-              <Link
-                key={c.id}
-                href={`/account/messages/${c.id}`}
-                className={`flex items-center gap-3 px-4 py-3.5 hover:bg-surface-raised transition-colors ${c.unread ? 'bg-accent-tint/40' : ''}`}
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-prose truncate">{name}</p>
-                  {c.lastMessage && (
-                    <p className="text-xs text-prose-muted truncate">
-                      {c.lastMessage.fromMe ? 'You: ' : ''}{c.lastMessage.body}
-                    </p>
-                  )}
-                </div>
-                {c.unread && <span className="w-2 h-2 rounded-full bg-accent shrink-0" />}
-              </Link>
-            )
-          })
-        )}
+        <ConversationList initial={conversations} userId={user.id} />
       </div>
     </div>
   )

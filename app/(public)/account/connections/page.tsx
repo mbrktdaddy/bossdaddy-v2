@@ -12,9 +12,13 @@
 // DMs were open to everyone; it stops being fine the moment a stranger can put a
 // request in front of you.
 //
-// No client JavaScript: plain forms POSTing to /api/connections.
+// Every ACTION here is a plain form POSTing to /api/connections — no client JS, a
+// real navigation, and nothing to hydrate. The one client component is the member
+// search box, which needs search-as-you-type; its own buttons are still plain
+// forms, so the accept/connect/block paths stay JS-free even inside it.
 
 import Link from 'next/link'
+import MemberSearch from '@/components/members/MemberSearch'
 import type { Metadata } from 'next'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { LABELS } from '@/lib/labels'
@@ -94,18 +98,28 @@ export default async function ConnectionsPage({ searchParams }: Props) {
         </Section>
       ) : null}
 
+      {/* ── find someone ───────────────────────────────────────────────────── */}
+      {/* THE PAGE COULDN'T ADD A CONTACT UNTIL NOW, which is the whole reason this
+          section exists. Search shipped inside the messages route, so the page
+          titled "Who you can reach" had no way to reach anyone new and its empty
+          state sent you to your messages to find someone — a page that is also
+          empty for exactly the member who needed the advice. A closed loop.
+
+          IT SITS BELOW "WAITING ON YOU" ON PURPOSE, and the conditional ordering
+          does two jobs with one layout: a man with requests pending sees those
+          first because answering someone who asked outranks going looking, while a
+          new member — for whom that section is hidden — gets the search box as the
+          first thing under the header, which is where every other product puts it. */}
+      <Section title="Find someone">
+        <MemberSearch />
+      </Section>
+
       {/* ── connected ──────────────────────────────────────────────────────── */}
       {/* NOT "in your corner" — this is everyone you can reach. The corner is the
           smaller, derived set on /account. */}
       <Section title="Connected">
         {connected.length === 0 ? (
-          <Empty>
-            Nobody yet. Find someone from{' '}
-            <Link href="/account/messages" className="text-accent-text hover:text-prose">
-              your messages
-            </Link>
-            {' '}and ask them to connect.
-          </Empty>
+          <Empty>Nobody yet. Search above and ask someone to connect.</Empty>
         ) : connected.map((p) => (
           <Card key={p.userId} person={p} sub={`Connected since ${p.since.slice(0, 10)}`}>
             {/* Message is the PRIMARY action here. Connecting is what unlocks

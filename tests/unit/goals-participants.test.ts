@@ -10,7 +10,7 @@
 
 import { describe, it, expect } from 'vitest'
 import {
-  invitationState, isShareTier, TIERS, TIER_COPY,
+  invitationState, invitationNamesPerson, isShareTier, TIERS, TIER_COPY,
 } from '@/lib/goals/participants'
 
 const NOW = new Date('2026-08-10T12:00:00Z')
@@ -91,5 +91,97 @@ describe('TIER_COPY — the consent contract', () => {
   it('is explicit that teammate sees everything', () => {
     // The one tier where the honest answer is "all of it" — no soft-pedalling.
     expect(TIER_COPY.teammate.sees).toMatch(/whole|every/i)
+  })
+})
+
+// Whether an invitation NAMES the person accepting it is the one thing standing
+// between "his wife can finally accept the link he emailed her" and "anyone
+// holding a forwarded link gets a relationship". It decides whether accept may
+// create the connection, so every branch is asserted here rather than left to the
+// route.
+describe('invitationNamesPerson — may this accept create a connection', () => {
+  const HER = 'user-her'
+  const HIM = 'user-him'
+
+  it('names her when the invite carries her verified user id', () => {
+    expect(invitationNamesPerson(
+      { inviteeUserId: HER, inviteeEmail: null },
+      { userId: HER },
+    )).toBe(true)
+  })
+
+  it('refuses someone else holding an id-addressed invite', () => {
+    expect(invitationNamesPerson(
+      { inviteeUserId: HER, inviteeEmail: null },
+      { userId: HIM, verifiedEmail: 'him@example.com' },
+    )).toBe(false)
+  })
+
+  // The id is the stronger claim, so it decides alone. A stale address on the same
+  // row must not be able to vouch for a different person.
+  it('lets the id decide even when an address on the row would match', () => {
+    expect(invitationNamesPerson(
+      { inviteeUserId: HER, inviteeEmail: 'him@example.com' },
+      { userId: HIM, verifiedEmail: 'him@example.com' },
+    )).toBe(false)
+  })
+
+  // THE PATH THAT MATTERS. She had no account when he typed her address, so there
+  // was never a user id to store — matching on ids alone would never fire for the
+  // person the feature exists to bring in.
+  it('names her when her confirmed address matches the one he typed', () => {
+    expect(invitationNamesPerson(
+      { inviteeUserId: null, inviteeEmail: 'her@example.com' },
+      { userId: HER, verifiedEmail: 'her@example.com' },
+    )).toBe(true)
+  })
+
+  it('ignores casing and surrounding whitespace on both sides', () => {
+    expect(invitationNamesPerson(
+      { inviteeUserId: null, inviteeEmail: '  Her@Example.COM ' },
+      { userId: HER, verifiedEmail: 'her@example.com' },
+    )).toBe(true)
+  })
+
+  // An unconfirmed address is a claim, not proof: the route passes null for it.
+  it('refuses when the accepter has no verified address', () => {
+    expect(invitationNamesPerson(
+      { inviteeUserId: null, inviteeEmail: 'her@example.com' },
+      { userId: HER, verifiedEmail: null },
+    )).toBe(false)
+    expect(invitationNamesPerson(
+      { inviteeUserId: null, inviteeEmail: 'her@example.com' },
+      { userId: HER },
+    )).toBe(false)
+  })
+
+  it('refuses a different address', () => {
+    expect(invitationNamesPerson(
+      { inviteeUserId: null, inviteeEmail: 'her@example.com' },
+      { userId: HIM, verifiedEmail: 'him@example.com' },
+    )).toBe(false)
+  })
+
+  // A BARE LINK IS ADDRESSED TO NOBODY, and must stay that way: accepting one
+  // creates participation (the token is the whole addressing, deliberately) but
+  // must never mint a connection, which would add DM access on top.
+  it('names nobody for a bare link invite', () => {
+    expect(invitationNamesPerson(
+      { inviteeUserId: null, inviteeEmail: null },
+      { userId: HER, verifiedEmail: 'her@example.com' },
+    )).toBe(false)
+  })
+
+  // Two empties are not a match. Without this, a row with no address and a user
+  // with no address would agree on nothing and pass.
+  it('does not treat two blank addresses as agreement', () => {
+    expect(invitationNamesPerson(
+      { inviteeUserId: null, inviteeEmail: '' },
+      { userId: HER, verifiedEmail: '' },
+    )).toBe(false)
+    expect(invitationNamesPerson(
+      { inviteeUserId: null, inviteeEmail: '   ' },
+      { userId: HER, verifiedEmail: '   ' },
+    )).toBe(false)
   })
 })

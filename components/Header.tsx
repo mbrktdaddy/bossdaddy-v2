@@ -10,6 +10,7 @@ import CartIcon from '@/components/CartIcon'
 import CategoryIcon from '@/components/CategoryIcon'
 import AccountMenu, { useAuthUser } from '@/components/AccountMenu'
 import ConnectionBadge from '@/components/account/ConnectionBadge'
+import { isImmersiveRoute } from '@/lib/immersive-routes'
 
 // Vault is intentionally NOT a top-level anchor — its contents
 // (Comparisons / Best Of / Stacks / Gift Guides) live inside the Browse
@@ -355,8 +356,16 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile search bar — dark recessed surface */}
-      <div className={`md:hidden px-4 pb-3 ${pathname === '/search' ? 'hidden' : ''} ${transparent ? 'hidden' : ''}`}>
+      {/* Mobile search bar — dark recessed surface.
+          HIDDEN ON IMMERSIVE ROUTES (the DM thread), for two reasons. The IA one:
+          an immersive surface is app-like and carries minimal chrome — the bottom
+          nav already hides here, and a site-wide "search reviews and guides" field
+          has no business sitting above a conversation. The load-bearing one: this
+          row makes the mobile header ~7.5rem instead of 4rem, and a fixed-height
+          surface below it that assumed 4rem had its composer pushed clean off the
+          bottom of the screen. Thread now measures rather than assuming, but the
+          CSS fallback still needs this to be true. */}
+      <div className={`md:hidden px-4 pb-3 ${pathname === '/search' ? 'hidden' : ''} ${transparent ? 'hidden' : ''} ${isImmersiveRoute(pathname) ? 'hidden' : ''}`}>
         <form action="/search">
           <div className="relative">
             <input

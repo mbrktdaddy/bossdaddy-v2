@@ -60,6 +60,31 @@ export default async function AuthorPage({ params }: Props) {
 
  if (!profile) notFound()
 
+ // ⚠️ THIS ROUTE IS FOR AUTHORS. WITHOUT THIS GATE IT RENDERED FOR EVERY MEMBER,
+ //    and three things followed from that:
+ //
+ //    • Every member had a public page they could neither see nor edit, labelling
+ //      them "Contributor" (the role line below) over an empty portfolio.
+ //      BioForm's own comment states members don't have one — this is what made
+ //      that true rather than aspirational.
+ //
+ //    • IT WAS A MEMBERSHIP ORACLE, and an unauthenticated one. Usernames default
+ //      to the email local part (migration 001: split_part(email, '@', 1)), so
+ //      /author/<local-part> answered "is this address registered here" with 200
+ //      vs 404 — no session, no rate limit, cached an hour, and ignoring
+ //      profiles.discoverable_by_email entirely. /api/members/search goes to real
+ //      lengths to avoid being that exact oracle: auth required, 30/min, exact
+ //      match only, address never echoed. One route can't undo the other's care.
+ //
+ //    • E2E accounts were reachable the same way (/author/bd-verify-a et al).
+ //
+ //    Kept as notFound() rather than a redirect: for anyone who isn't an author
+ //    there is genuinely nothing here, and 404 is the honest answer — it also
+ //    keeps the oracle shut, which a redirect would not. If a real member profile
+ //    is ever built it belongs at its own route with its own auth rules, not by
+ //    loosening this one.
+ if (profile.role !== 'author' && profile.role !== 'admin') notFound()
+
  const [{ data: reviews }, { data: articles }] = await Promise.all([
  supabase
  .from('reviews')

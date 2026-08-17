@@ -708,6 +708,7 @@ export type Database = {
           last_activity_at: string
           last_notified_at: string | null
           last_read_at: string
+          muted_at: string | null
           user_id: string
         }
         Insert: {
@@ -717,6 +718,7 @@ export type Database = {
           last_activity_at?: string
           last_notified_at?: string | null
           last_read_at?: string
+          muted_at?: string | null
           user_id: string
         }
         Update: {
@@ -726,6 +728,7 @@ export type Database = {
           last_activity_at?: string
           last_notified_at?: string | null
           last_read_at?: string
+          muted_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -756,6 +759,48 @@ export type Database = {
           dm_key?: string | null
           id?: string
           last_message_at?: string
+        }
+        Relationships: []
+      }
+      email_suppressions: {
+        Row: {
+          bounce_subtype: string | null
+          bounce_type: string | null
+          created_at: string
+          detail: string | null
+          email: string
+          event_count: number
+          id: string
+          last_email_id: string | null
+          last_subject: string | null
+          reason: string
+          updated_at: string
+        }
+        Insert: {
+          bounce_subtype?: string | null
+          bounce_type?: string | null
+          created_at?: string
+          detail?: string | null
+          email: string
+          event_count?: number
+          id?: string
+          last_email_id?: string | null
+          last_subject?: string | null
+          reason: string
+          updated_at?: string
+        }
+        Update: {
+          bounce_subtype?: string | null
+          bounce_type?: string | null
+          created_at?: string
+          detail?: string | null
+          email?: string
+          event_count?: number
+          id?: string
+          last_email_id?: string | null
+          last_subject?: string | null
+          reason?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -2200,6 +2245,35 @@ export type Database = {
           },
         ]
       }
+      message_reactions: {
+        Row: {
+          created_at: string
+          kind: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          kind: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          kind?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reactions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           attachment_height: number | null
@@ -2209,6 +2283,7 @@ export type Database = {
           conversation_id: string
           created_at: string
           id: string
+          reply_to_id: string | null
           sender_id: string
         }
         Insert: {
@@ -2219,6 +2294,7 @@ export type Database = {
           conversation_id: string
           created_at?: string
           id?: string
+          reply_to_id?: string | null
           sender_id: string
         }
         Update: {
@@ -2229,6 +2305,7 @@ export type Database = {
           conversation_id?: string
           created_at?: string
           id?: string
+          reply_to_id?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -2237,6 +2314,13 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
             referencedColumns: ["id"]
           },
         ]
@@ -4360,9 +4444,25 @@ export type Database = {
         Args: { _conversation_id: string }
         Returns: boolean
       }
+      is_message_participant: {
+        Args: { _message_id: string }
+        Returns: boolean
+      }
       is_savings_goal_participant: {
         Args: { _goal_id: string }
         Returns: boolean
+      }
+      record_email_suppression: {
+        Args: {
+          p_bounce_subtype?: string
+          p_bounce_type?: string
+          p_detail?: string
+          p_email: string
+          p_email_id?: string
+          p_reason: string
+          p_subject?: string
+        }
+        Returns: undefined
       }
       request_connection: { Args: { _other: string }; Returns: string }
       respond_to_connection: {

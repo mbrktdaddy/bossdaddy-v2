@@ -83,6 +83,20 @@ export async function pushNewMessage(
   senderId: string,
   conversationId: string,
 ): Promise<void> {
+  // MUTE IS ENFORCED HERE, NOT JUST IN THE BADGE (migration 155). A mute that
+  // still buzzes the phone is not a mute — and push is the loudest of the three
+  // surfaces, so this is the one that would be noticed first if it were missed.
+  // Read with the admin client because we're resolving OTHER people's rows.
+  const { data: mutedRows } = await admin
+    .from('conversation_participants')
+    .select('user_id')
+    .eq('conversation_id', conversationId)
+    .in('user_id', others)
+    .not('muted_at', 'is', null)
+  const muted = new Set((mutedRows ?? []).map((r) => r.user_id))
+  const recipients = others.filter((uid) => !muted.has(uid))
+  if (recipients.length === 0) return
+
   const { data: me } = await admin
     .from('profiles')
     .select('username, display_name')
@@ -90,7 +104,7 @@ export async function pushNewMessage(
     .single()
   const senderName = me?.display_name?.trim() || me?.username || 'Someone'
   await Promise.all(
-    others.map((uid) =>
+    recipients.map((uid) =>
       sendPushToUser(uid, {
         title: `New message from ${senderName}`,
         url: `/account/messages/${conversationId}`,

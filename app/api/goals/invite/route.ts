@@ -49,7 +49,15 @@ export async function POST(request: NextRequest) {
     return redirectTo(request, `/login?next=${encodeURIComponent(invitePath)}`)
   }
 
-  const result = await acceptInvitation(admin, { token, userId: user.id })
+  // An address is only proof of identity once it's CONFIRMED, and this is the only
+  // layer that can tell — it holds the session. An invite typed to an address (the
+  // path a non-member arrives on: no account existed when it was minted, so there
+  // was no user id to store) is accepted as addressed to whoever demonstrably owns
+  // that mailbox. Unconfirmed, we pass null and the domain refuses as before rather
+  // than treating an unverified claim as consent.
+  const verifiedEmail = user.email_confirmed_at ? user.email ?? null : null
+
+  const result = await acceptInvitation(admin, { token, userId: user.id, verifiedEmail })
   if (!result.ok) {
     const url = new URL(invitePath, request.url)
     url.searchParams.set('msg', result.reason)

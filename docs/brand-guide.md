@@ -610,9 +610,28 @@ No dashed borders. Soft panel that reads as "this is intentional" not "this is b
 
 ## 7. Iconography
 
-- **Categories**: inline stroke SVGs (24×24, `currentColor`, `strokeWidth={2}`) via `components/CategoryIcon.tsx`, keyed by category slug. **No emoji on web surfaces.** (The `icon` emoji field in `lib/categories.ts` is vestigial — not rendered.)
+- **Categories**: inline stroke SVGs (24×24, `currentColor`, `strokeWidth={2}`) via `components/CategoryIcon.tsx`, keyed by category slug. **No emoji as interface iconography.** (The `icon` emoji field in `lib/categories.ts` is vestigial — not rendered.)
 - **Status indicators**: small colored circle (`w-2 h-2 rounded-full`) + animated pulse for "live" feels.
 - **Inline UI**: hand-drawn stroke SVGs, Heroicons-style. Minimal, type-led; no emoji, no icon library.
+
+### 7.1 Emoji — where they're allowed (amended 2026-08-17)
+
+The rule was a flat "no emoji on web surfaces," and it over-reached. The line that
+actually holds:
+
+| | Emoji | Why |
+|---|---|---|
+| **Interface iconography** — nav, section headers, eyebrows, buttons, card meta, status, empty states, marketing copy | **Never** | Renders differently per OS, can't be tinted to the accent or thinned to stroke-1.5, and reads casual against an editorial rhythm that is deliberately anti-casual. Use an inline outlined SVG. |
+| **What one member says to another** — DM bodies, comments, goal-note bodies | **Yes** | It's their text. Stripping or discouraging emoji in a man's own message is editing him, not designing. |
+| **Reaction vocabularies** — DM reactions, comment reactions | **Yes** | Emoji *is* the convention here; a hand-drawn SVG reaction set would be strictly worse — unrecognisable, and it would make us the only messenger on earth with bespoke reactions. |
+
+**The test:** is the glyph *ours* (chrome we're drawing) or *theirs* (content and
+reaction, authored by a member)? Ours → SVG. Theirs → emoji is fine.
+
+Keep reaction sets **small and fixed** (a handful, not a full picker) so the row
+stays a UI element with a predictable width rather than an open text field, and
+render them at text size with no colour treatment — they carry their own colour and
+must not be tinted.
 
 ---
 

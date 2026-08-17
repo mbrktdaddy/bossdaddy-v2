@@ -10,6 +10,15 @@
 // applies — Message, Connect, or a disabled "Asked". Letting the click through
 // and surfacing the error instead would be a worse version of the same
 // information, delivered after the fact.
+//
+// ── WHY THIS LIVES IN components/ AND NOT UNDER ONE ROUTE ─────────────────────
+// It shipped in app/(public)/account/messages/_components/, which made finding a
+// person a MESSAGING feature. That is how /account/connections — the page titled
+// "Who you can reach" — ended up with no way to reach anyone new, and an empty
+// state that told you to go to your messages and connect with someone there. For
+// a member with no contacts, messages is empty too: a closed loop with no door.
+// Both surfaces render this now. It takes no props on purpose — the verb per row
+// is decided by connection state, not by which page is hosting it.
 
 import { useState, useRef } from 'react'
 import Image from 'next/image'
@@ -67,7 +76,7 @@ export default function MemberSearch() {
         placeholder="Search by name or @username…"
         className="w-full px-4 py-2.5 bg-surface border border-strong rounded-xl text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
       />
-      <p className="mt-1.5 text-xs text-prose-faint">Type a name or username — the @ is optional.</p>
+      <p className="mt-1.5 text-xs text-prose-faint">Type a name or username — the @ is optional. An email address has to be exact.</p>
       {error && <p className="text-xs text-danger-ink mt-1.5">{error}</p>}
 
       {results.length > 0 && (
