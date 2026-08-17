@@ -22,6 +22,12 @@ import ConnectionBadge from '@/components/account/ConnectionBadge'
 // Tools used to sit last here and last in the footer, which put the most-used signed-in
 // surface at the end of every list on the site. If you add a fifth spine anchor, add it
 // in all three places or it will read as a different site depending on where you look.
+//
+// ONE SANCTIONED EXCEPTION: `MobileBottomNav` carries Home · Reviews · [Ask] · Guides ·
+// Tools — it has five slots and the elevated Ask FAB owns the middle one, so Gear is
+// deliberately absent there and reaches mobile through THIS array's drawer instead. That
+// is an operator decision (2026-08-17), not drift — don't "restore" Gear to the strip
+// without cutting another tab. Reasoning is in `MobileBottomNav.tsx`.
 const NAV_LINKS = [
   { href: '/',        label: 'Home' },
   { href: '/reviews', label: LABELS.reviews.plural },

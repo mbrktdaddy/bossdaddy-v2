@@ -141,7 +141,7 @@ nav), so it ships as-is and gets revisited.
 
 </details>
 
-### Phase G — the mobile tab set (shipped 2026-08-17)
+### Phase G — the mobile tab set (shipped 2026-08-17, **amended same day — see Phase H**)
 
 Phase C gave the goals spine a bottom nav for the first time; it pointed at four reading
 surfaces and had no entry to Tools at all. **Operator's call, and the reasoning is his:**
@@ -154,6 +154,10 @@ surfaces and had no entry to Tools at all. **Operator's call, and the reasoning 
 - **Order: Reviews · Guides · [Ask] · Tools · Gear.** Reading on the left, doing and
   shopping on the right, the concierge in the middle.
 
+> ⚠️ **The middle bullet was reversed hours later.** Home is a tab again and Gear is the
+> one that yielded. Phase H below is current; this section is kept for the reasoning
+> that *survived* (five slots, centre FAB, Tools protected).
+
 `match` was added to the tab shape for the one tab that owns more than its own subtree:
 Tools lights up across `/tools`, `/goals` and `/today` but **not** `/tools/the-boss`,
 which belongs to the Ask slot — otherwise two things light up for one page. The label
@@ -161,6 +165,40 @@ reads from `LABELS.tools.short`, so the paused Vault/Keep rename lands here for 
 
 Icon is a toolbox drawn from a rect + a handle + a clasp, not a traced wrench — the same
 call the launcher tiles made, because at 20px a multi-path wrench turns to mush.
+
+### Phase H — Home comes back, Gear yields (shipped 2026-08-17)
+
+Reviewing G on a phone, the operator called the Home cut wrong. The reversal, and why:
+
+- **The header wordmark is not a thumb target.** That was G's whole justification for
+  cutting Home, and it doesn't survive contact with the device: on mobile the header sits
+  at the top of a tall scroll while the strip sits under the thumb. "Reachable" and
+  "reachable *from where the hand already is*" are different claims.
+- **Home takes the leftmost slot, not the centre.** The elevated centre is an ACTION
+  register — ask, compose, create. Home is a place. A raised orange FAB that merely
+  navigates home would misread, and Ask both is the differentiator and mirrors the
+  desktop chat badge, which the operator confirmed works. One concept, one register,
+  both breakpoints.
+- **Gear yields instead.** Tabs are earned by REVISIT FREQUENCY, and Gear is the lowest —
+  more to the point, it is reached THROUGH content rather than cold. A review convinces
+  you, then you look at the product; that is the honest funnel anyway. Tools is the
+  daily-return surface and the reason the strip exists, so it was never the candidate.
+- **Order: Home · Reviews · [Ask] · Guides · Tools.** Canonical spine order survives
+  across the FAB (Reviews → Guides → Tools); Home is a prefix, not an insertion into it.
+
+**Gear's four remaining paths**, none of them new work: the header drawer (renders the
+full spine, Gear included), `[[BUY:slug]]` links inside reviews, the Footer's Browse
+column, and the homepage merch strip. The homepage matters more now that Home is one tap
+away — it was previously the surface a mobile user *couldn't easily get to*.
+
+**The trade, stated plainly:** if Amazon Associates goes live and Gear starts earning cold
+traffic, this is the decision to revisit — and the slot to reclaim is one of the two
+reading tabs (Reviews and Guides are both "read" and could arguably share an entry), not
+Ask or Tools. Left as a known trade, not a hidden one.
+
+Home's tab is `exact` — a prefix test on `/` lights up on every page of the site. The
+house icon is one closed path shared verbatim by the filled and stroked states, so the
+silhouette cannot drift between active and inactive.
 
 ### Phase D — one signed-in home
 
@@ -364,3 +402,6 @@ a year per POP. A rename without a 301 breaks both.
    `goal_stats` have different freshness. Decide which owns it by the page's unit.
 8. **`/tools` is the signed-in home.** The day leads it. Nothing gets inserted above the
    `TodayCard` — not a launcher, not a promo.
+9. **Bottom-nav slots are earned by revisit frequency, and there are five.** A destination
+   reached *through* content doesn't need a tab; a destination returned to daily does.
+   Adding a tab means naming the one it replaces — never widen the strip to six.

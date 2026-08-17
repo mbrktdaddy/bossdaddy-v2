@@ -28,6 +28,23 @@ function ToolboxIcon({ active }: { active: boolean }) {
   )
 }
 
+// A HOUSE FROM PRIMITIVES — apex, two eaves, a body, a door — one closed path that
+// reads correctly filled OR stroked, which is the whole reason it's drawn this way:
+// solid and outline are the same `d`, so the silhouette cannot drift between states.
+const HOUSE_PATH = 'M12 3 L21.5 11 L19.5 11 L19.5 20.5 L14 20.5 L14 15 L10 15 L10 20.5 L4.5 20.5 L4.5 11 L2.5 11 Z'
+
+function HomeIcon({ active }: { active: boolean }) {
+  return active ? (
+    <svg className={ICON_CLS} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d={HOUSE_PATH} />
+    </svg>
+  ) : (
+    <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" d={HOUSE_PATH} />
+    </svg>
+  )
+}
+
 function StarIcon({ active }: { active: boolean }) {
   return active ? (
     <svg className={ICON_CLS} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -52,37 +69,37 @@ function BookIcon({ active }: { active: boolean }) {
   )
 }
 
-function BagIcon({ active }: { active: boolean }) {
-  return active ? (
-    <svg className={ICON_CLS} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path fillRule="evenodd" d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 0 0 4.25 22.5h15.5a1.875 1.875 0 0 0 1.865-2.071l-1.263-12a1.875 1.875 0 0 0-1.865-1.679H16.5V6a4.5 4.5 0 1 0-9 0Zm6.75 0a2.25 2.25 0 0 0-4.5 0v.75h4.5V6Zm-1.75 6.75a.75.75 0 0 0-1.5 0v.75a.75.75 0 0 0 1.5 0v-.75Z" clipRule="evenodd" />
-    </svg>
-  ) : (
-    <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-    </svg>
-  )
-}
-
-// READ / READ / ASK / DO / SHOP: Reviews and Guides on the left, "Ask the Boss" in the
-// elevated center slot, Tools and Gear on the right. Search isn't here (header ⌘K pill +
+// HOME / READ / ASK / READ / DO: Home and Reviews on the left, "Ask the Boss" in the
+// elevated center slot, Guides and Tools on the right. Search isn't here (header ⌘K pill +
 // the mobile search bar own it).
 //
-// ── WHY HOME IS NOT A TAB (operator decision, 2026-08-17) ────────────────────────────
-// Tools had NO mobile entry at all — it sits in the desktop header nav, and before
-// nav-ia-plan Phase C those pages ran their own chrome with no bottom strip whatsoever.
-// So the most engaging surface on the site was the hardest to reach on the device it was
-// built for, while four of five slots pointed at reading.
-//
+// ── WHY GEAR IS NOT A TAB, AND HOME IS (operator reversal, 2026-08-17) ───────────────
 // Five slots, not six: six is crowded at 393px, and the elevated FAB has to sit dead
-// centre, which an even count can't give it. So a tab had to yield, and Home is the one
-// that costs nothing — the wordmark in the header goes home from every page on the site.
-// Gear and Ask were explicitly protected.
+// centre, which an even count can't give it. So one of the five spine anchors yields.
+//
+// It was Home for a few hours, on the reasoning that the header wordmark already goes
+// home. The operator overruled that: a wordmark is not a thumb target, and on mobile the
+// header is at the top of a tall scroll while the strip is under the thumb. Home is where
+// every phone-trained user reaches first, so it takes the leftmost slot.
+//
+// GEAR yields instead, because tabs are earned by REVISIT FREQUENCY and gear is reached
+// THROUGH content, not cold: a review convinces you, then you look at the product. It
+// keeps four paths — the header drawer (which renders the full spine, Gear included), the
+// Footer's Browse column, contextual [[BUY:slug]] links inside reviews, and the homepage
+// merch strip, which is a real mobile entry point again now that Home is one tap away.
+// Ask and Tools are protected: Ask is the differentiator and mirrors the desktop chat
+// badge, Tools is the daily-return surface and the reason this strip exists at all.
+//
+// If Gear ever earns cold traffic (Amazon Associates going live would do it), the slot to
+// reclaim is one of the two reading tabs — not this one.
+//
+// Home is `exact` on purpose: a prefix test on '/' lights up on every page of the site.
 //
 // `match` overrides the default prefix test where a tab owns more than its own subtree:
 // Tools covers the whole spine (/tools, /goals, /today) but NOT /tools/the-boss, which
 // belongs to the Ask slot — otherwise two things light up for one page.
 const TABS = [
+  { href: '/',        label: 'Home',                exact: true,  Icon: HomeIcon },
   { href: '/reviews', label: LABELS.reviews.plural, exact: false, Icon: StarIcon },
   { href: '/guides',  label: LABELS.guides.plural,  exact: false, Icon: BookIcon },
   {
@@ -94,7 +111,6 @@ const TABS = [
       !p.startsWith('/tools/the-boss')
       && (p === '/tools' || p.startsWith('/tools/') || p === '/goals' || p.startsWith('/goals/') || p === '/today'),
   },
-  { href: '/gear',    label: LABELS.gear.short,     exact: false, Icon: BagIcon },
 ]
 
 export default function MobileBottomNav() {
