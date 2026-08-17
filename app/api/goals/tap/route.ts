@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { verifyOccurrenceToken } from '@/lib/goals/links'
 import { logOccurrenceEntry } from '@/lib/goals/log'
 import { revalidateGoal } from '@/lib/goals/revalidate'
@@ -54,6 +55,11 @@ export async function POST(request: NextRequest) {
   const now = new Date()
 
   // ── snooze: no log entry, just push the nudge out an hour ──────────────────
+  // Stays on the confirmation page even for a signed-in owner, unlike the two
+  // branches below. "Snooze" means not now — bouncing him into the app is the
+  // opposite of what he asked for, and the detail page would still show the
+  // occurrence as open (a snoozed row is still actionable there), which would
+  // read as if the snooze hadn't taken.
   if (action === 'snoozed') {
     await admin.from('goal_occurrences')
       .update({
@@ -90,7 +96,35 @@ export async function POST(request: NextRequest) {
     console.error('goals/tap log failed', err instanceof Error ? err.message : String(err))
   }
 
+  // ── where he lands ────────────────────────────────────────────────────────
+  // Signed in as the owner → his goal, where the streak has already moved and the
+  // week strip has filled in. That's the payoff, and it's a page he can do the
+  // next thing from; the token confirmation is a cul-de-sac by comparison.
+  //
+  // NOT signed in → the confirmation page, and this is the half that matters. The
+  // whole point of the token is a dad tapping from an email on a device he's never
+  // signed in on. Sending HIM to /goals/<id> means the auth wall — "Sign in to see
+  // this goal" — immediately after a successful write, which reads as "it didn't
+  // save" and invites a second tap. So the check is ownership, not merely a
+  // session: someone else's browser gets the confirmation too.
+  //
+  // Deliberately AFTER the write. An auth round-trip that's slow or broken must
+  // never be able to cost him the log.
+  if (await isOwner(occurrence.user_id)) {
+    return redirectTo(request, `/goals/${occurrence.goal_id}?logged=${action}`)
+  }
   return redirectTo(request, `/g/${token}?state=${action === 'skipped' ? 'skipped' : 'logged'}`)
+}
+
+/** Does the request carry a session belonging to the occurrence's owner? */
+async function isOwner(userId: string): Promise<boolean> {
+  try {
+    const supabase = await createClient()
+    const { user } = await getUserSafe(supabase)
+    return user?.id === userId
+  } catch {
+    return false          // no session, expired cookies, auth server down — same answer
+  }
 }
 
 // 303 so the browser follows with GET and a refresh can't re-POST the form.

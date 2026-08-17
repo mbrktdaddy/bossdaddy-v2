@@ -175,9 +175,29 @@ export default async function OneTapPage({ params, searchParams }: Props) {
         </div>
       </form>
 
-      <p className="mt-8 text-xs text-prose-faint">
-        &ldquo;Not today&rdquo; costs you nothing. Showing up tomorrow is the whole game.
-      </p>
+      <div className="mt-8 space-y-3">
+        <p className="text-xs text-prose-faint">
+          &ldquo;Not today&rdquo; costs you nothing. Showing up tomorrow is the whole game.
+        </p>
+        {/* THE DO-NOTHING EXIT, and it earns its place as much as the buttons do.
+            EVERY other way off this screen writes something — "Did it", "Not today"
+            and snooze all resolve the occurrence — so a man who opened the reminder by
+            accident, or who means to deal with it after work, had one unlabelled logo
+            and a guess. It says what leaving costs, because "does closing this count as
+            a skip?" is exactly the doubt that makes someone tap a button he didn't
+            mean.
+
+            Points at /goals, not /goals/<id>: this link exists for a device that may
+            have no session, where the list degrades into the explainer plus a sign-in
+            and the goal itself would be an auth wall. */}
+        <p className="text-xs text-prose-faint">
+          Leaving logs nothing — this one stays open, and you can still log it later,
+          even days later.{' '}
+          <Link href="/goals" className="font-semibold text-accent-text hover:text-accent">
+            Leave it for now →
+          </Link>
+        </p>
+      </div>
     </Shell>
   )
 }
@@ -186,17 +206,52 @@ function isResolved(status: string): boolean {
   return status === 'completed' || status === 'skipped'
 }
 
+// THE ONLY CHROME THIS PAGE GETS, and it has two jobs beyond decoration.
+//
+// 1. SAY WHERE YOU ARE. This was a bare 36px logo with no text. A dad arriving from
+//    an email — possibly having never seen the site on this device — got an
+//    unlabelled badge that happened to be a link home. The wordmark is the same
+//    lockup as the tools chrome, so "this is Boss Daddy, and that goes home" needs
+//    no guessing.
+// 2. GIVE HIM A WAY OUT. Every state now ends with a neutral exit. There is no
+//    history to go "back" to worth trusting — a push tap or a mail-client handoff
+//    arrives with no referrer, so a Back affordance would be a guess dressed up as a
+//    control, and honest links beat a fake one. It also can't be a JS
+//    `history.back()`: this page is deliberately script-free so it works in a locked
+//    down webview (see the rules at the top of the file).
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5 py-16">
-      <Link href="/" className="mb-10 inline-flex items-center gap-2">
-        <Image src="/images/bd-logo-icon.png" alt="Boss Daddy" width={36} height={36} />
+      <Link href="/" aria-label="Boss Daddy — home" className="mb-10 inline-flex items-center gap-2.5">
+        <Image
+          src="/images/bd-logo-icon.png"
+          alt=""
+          width={36}
+          height={36}
+          className="h-8 w-8 shrink-0 object-contain"
+        />
+        <span className="shrink-0 text-lg font-black tracking-tight">
+          <span className="text-accent">BOSS</span>
+          <span className="text-prose"> DADDY</span>
+        </span>
       </Link>
       {children}
+      <div className="mt-10 border-t border-soft pt-5">
+        <Link
+          href="/"
+          className="inline-flex min-h-11 items-center text-xs font-semibold text-prose-muted hover:text-prose"
+        >
+          ← Home
+        </Link>
+      </div>
     </main>
   )
 }
 
+// The button has always gone to the goal itself when we know which one it is; the
+// label said "Open your goals", which reads like the list and made the right
+// destination look like a wrong one. Say what it does — and when the goal is
+// unknown (bad token, deleted occurrence), the list genuinely is the destination.
 function Message({ heading, body, goalId }: { heading: string; body: string; goalId?: string }) {
   return (
     <>
@@ -206,7 +261,7 @@ function Message({ heading, body, goalId }: { heading: string; body: string; goa
         href={goalId ? `/goals/${goalId}` : '/goals'}
         className="mt-8 inline-block rounded-lg bg-accent px-6 py-3 font-bold text-white hover:bg-accent-hover"
       >
-        Open your goals
+        {goalId ? 'Open this goal →' : 'Open your goals →'}
       </Link>
     </>
   )

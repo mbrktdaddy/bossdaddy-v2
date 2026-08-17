@@ -37,6 +37,15 @@ export type NotificationType =
   | 'review_request_edits'
   | 'account_action'
   | 'goal_completed'
+  // A due reminder on a goal. NOT produced through createNotification(): the
+  // sweep inserts a whole tick's worth in one statement (lib/goals/sweep.ts), so
+  // this member is here to keep the catalogue of live `type` values honest rather
+  // than because anything calls in with it.
+  //
+  // Its `link` points at /goals/<id>?occ=<occurrence> — the DETAIL page, not the
+  // /g/<token> one-tap page that the matching push and email use. In-app is
+  // already past the auth wall; see the reasoning at that insert.
+  | 'goal_reminder'
 
 type NotificationInsert = Database['public']['Tables']['notifications']['Insert']
 

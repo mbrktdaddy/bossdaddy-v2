@@ -504,6 +504,19 @@ async function notifyDue(
   // ── in-app: one claim, one bulk insert into the existing feed ────────────
   // Writes into `notifications` (mig 082) rather than a second feed, so the
   // header bell and /account/notifications work unchanged.
+  //
+  // DELIBERATELY NOT THE ONE-TAP TOKEN URL, unlike push and email above. The
+  // token exists to authorize a dad who ISN'T logged in on the device that
+  // opened the message, and /g/[token] renders its own bare shell (no header,
+  // no nav) to stay usable in an email webview. The bell is already behind the
+  // auth wall, so the token buys nothing there and the bare page would eject
+  // him from the app chrome onto a dead end. The detail page carries the same
+  // one-tap log form plus the target, the week strip, the streak and the notes —
+  // which is what he came to look at.
+  //
+  // `?occ=` names THIS occurrence so a notification opened three days late logs
+  // the day it was about rather than whatever is open now (the ACT card
+  // otherwise falls back to the latest open one).
   const inAppTargets = dueNow.filter((o) => schedules.get(o.schedule_id)!.channels.includes('inapp'))
   const inAppClaimed = await claimDeliveries(admin, inAppTargets, 'inapp', report)
   const inAppRows = inAppTargets
@@ -515,7 +528,7 @@ async function notifyDue(
         type: 'goal_reminder',
         title: ctx.copy.title,
         body: ctx.copy.body,
-        link: ctx.tapUrl ? `/g/${ctx.tapUrl.split('/g/')[1]}` : `/goals/${ctx.goal.id}`,
+        link: `/goals/${ctx.goal.id}?occ=${o.id}`,
         payload: { goal_id: ctx.goal.id, occurrence_id: o.id },
       }
     })

@@ -38,8 +38,17 @@ export const metadata: Metadata = {
 
 type Props = {
   params: Promise<{ id: string }>
-  /** `m` is the calendar month, `YYYY-MM`. Clamped to the goal's lifetime below. */
-  searchParams: Promise<{ confirm?: string; msg?: string; saved?: string; m?: string }>
+  /**
+   * `m` is the calendar month, `YYYY-MM`. Clamped to the goal's lifetime below.
+   * `occ` is an occurrence id — set by the in-app reminder notification so the
+   * ACT card opens on the day the nudge was about (see lib/goals/sweep.ts).
+   * `logged` is 'completed' | 'skipped', set when a one-tap link resolved an
+   * occurrence and sent its signed-in owner here instead of to the token
+   * confirmation page (see app/api/goals/tap/route.ts).
+   */
+  searchParams: Promise<{
+    confirm?: string; msg?: string; saved?: string; m?: string; occ?: string; logged?: string
+  }>
 }
 
 type GoalRow = {
@@ -76,7 +85,7 @@ type PlanRow = {
 
 export default async function GoalDetailPage({ params, searchParams }: Props) {
   const { id } = await params
-  const { confirm, msg, saved, m } = await searchParams
+  const { confirm, msg, saved, m, occ, logged } = await searchParams
   const confirmingDelete = confirm === 'delete'
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
@@ -211,7 +220,14 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
     (o.status === 'pending' || o.status === 'notified' || o.status === 'missed' || o.status === 'snoozed')
     && new Date(o.due_at).getTime() <= now.getTime(),
   )
-  const actionable = todays && isOpen(todays.status) ? todays : openOnes[openOnes.length - 1]
+  // An in-app reminder names its own occurrence (`?occ=`), so opening a nudge from
+  // Tuesday logs Tuesday instead of whatever happens to be open now. Matched
+  // against `openOnes` rather than the raw id, which is the gate as well as the
+  // lookup: an id that's already resolved, not yet due, or from another goal isn't
+  // in there and quietly falls back to the default. Nothing to validate by hand.
+  const nudged = occ ? openOnes.find((o) => o.id === occ) : undefined
+  const actionable = nudged
+    ?? (todays && isOpen(todays.status) ? todays : openOnes[openOnes.length - 1])
   const upcoming = occurrences
     .filter((o) => new Date(o.due_at).getTime() > now.getTime())
     .slice(0, 3)
@@ -336,6 +352,16 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
       {saved === '1' ? (
         <p className="rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-prose-muted">
           Saved.
+        </p>
+      ) : null}
+      {/* He tapped a reminder link and the write already happened; this is the
+          receipt. Needed because arriving from OUTSIDE the app gives him no before
+          state to compare against — logging in-page has the ACT card disappearing
+          as its own confirmation, and a redirect doesn't. Skipping gets the same
+          warmth as doing it: "not today" costs nothing (brand-guide §1.6). */}
+      {logged === 'completed' || logged === 'skipped' ? (
+        <p className="rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-prose-muted">
+          {logged === 'skipped' ? 'Marked as skipped. Tomorrow’s a new one.' : 'Logged. Good work.'}
         </p>
       ) : null}
 
