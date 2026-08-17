@@ -41,7 +41,25 @@ function RegisterForm() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { username } },
+      options: {
+        data: { username },
+        // FALLBACK ONLY. The Confirm-signup template links to /confirm with a
+        // {{ .TokenHash }}, so this value is not used while that template is in
+        // place — the template's href wins.
+        //
+        // It exists because of what happened on 2026-08-16: with no
+        // emailRedirectTo, Supabase fell back to the dashboard Site URL, so the
+        // link carried `redirect_to=https://www.bossdaddylife.com/`. Supabase
+        // appends `?code=…` to that, the homepage has no exchange handler, and
+        // the code was silently discarded — email marked confirmed, user landed
+        // logged OUT. If the template is ever reverted to {{ .ConfirmationURL }},
+        // this sends the code to /callback, which actually exchanges it.
+        //
+        // NEXT_PUBLIC_SITE_URL (not window.location.origin) so the canonical www
+        // host is used even if the visitor typed the apex — the redirect target
+        // has to match Supabase's allowlist exactly.
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin}/callback?next=/dashboard`,
+      },
     })
 
     if (error) {

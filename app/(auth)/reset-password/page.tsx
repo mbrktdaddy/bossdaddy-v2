@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
@@ -10,6 +10,30 @@ export default function ResetPasswordPage() {
   const [confirm, setConfirm] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [needsNewLink, setNeedsNewLink] = useState(false)
+
+  // null = still checking, true = signed in, false = arrived with no session.
+  //
+  // updateUser() can only change the password of an authenticated user, and the
+  // session is established by /reset-callback exchanging the code — NOT by this
+  // page. Anyone who reaches this URL without going through that exchange gets a
+  // form that cannot possibly work. Previously it rendered anyway and then
+  // reported "Your reset link has expired", which was wrong twice over: nothing
+  // had expired, and the real problem (no session) was invisible. That's exactly
+  // how a misrouted signup confirmation looked like a broken reset link.
+  const [authed, setAuthed] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      const supabase = createClient()
+      // getUser(), never getSession() — project rule; getSession() trusts
+      // unverified local storage.
+      const { data } = await supabase.auth.getUser()
+      if (!cancelled) setAuthed(Boolean(data.user))
+    })()
+    return () => { cancelled = true }
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -18,13 +42,15 @@ export default function ResetPasswordPage() {
 
     setLoading(true)
     setError(null)
+    setNeedsNewLink(false)
 
     const supabase = createClient()
     const { error } = await supabase.auth.updateUser({ password })
 
     if (error) {
-      if (error.message.includes('session')) {
-        setError('Your reset link has expired. Please request a new one.')
+      if (error.message.toLowerCase().includes('session')) {
+        setError('Your session has ended, so there is nothing to update from this page.')
+        setNeedsNewLink(true)
       } else {
         setError(error.message)
       }
@@ -34,6 +60,31 @@ export default function ResetPasswordPage() {
 
     router.push('/')
     router.refresh()
+  }
+
+  // Arrived with no session — don't offer a form that can't work.
+  if (authed === false) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-surface-sunken px-4">
+        <div className="w-full max-w-sm">
+          <h1 className="text-2xl font-black text-prose mb-2">This link isn&apos;t valid</h1>
+          <p className="text-prose-muted mb-8 text-sm">
+            Password reset links can only be used once, and they expire. Request a fresh one and
+            we&apos;ll email you a new link.
+          </p>
+          <a
+            href="/forgot-password"
+            className="block w-full text-center py-2.5 px-4 bg-accent hover:bg-accent-hover text-white font-semibold rounded-lg transition-colors"
+          >
+            Request a new reset link
+          </a>
+          <p className="text-prose-faint text-xs mt-4 text-center">
+            Already know your password?{' '}
+            <a href="/login" className="text-accent-text-soft hover:text-accent">Sign in</a>
+          </p>
+        </div>
+      </main>
+    )
   }
 
   return (
@@ -73,7 +124,7 @@ export default function ResetPasswordPage() {
           {error && (
             <div className="text-red-700 text-sm bg-red-50 border border-red-300 rounded-lg px-4 py-2">
               <p>{error}</p>
-              {error.includes('expired') && (
+              {needsNewLink && (
                 <a href="/forgot-password" className="text-accent-text-soft hover:text-accent text-xs mt-1 inline-block">
                   Request a new reset link →
                 </a>
@@ -83,7 +134,7 @@ export default function ResetPasswordPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || authed === null}
             className="w-full py-2.5 px-4 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-semibold rounded-lg transition-colors"
           >
             {loading ? 'Updating…' : 'Update Password'}
