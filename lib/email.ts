@@ -6,7 +6,7 @@
 // one of those is forgotten, failures are invisible. Routing everything
 // through this function makes the correct pattern the only pattern.
 import type * as React from 'react'
-import { getResend, FROM_EMAIL } from '@/lib/resend'
+import { getResend, FROM_EMAIL, REPLY_TO_EMAIL, fromPerson } from '@/lib/resend'
 import { getSuppression, isCriticalTag, suppressionBlocks } from '@/lib/email-suppression'
 
 export type EmailResult =
@@ -29,6 +29,18 @@ export interface SendEmailArgs {
    * safe behaviour is automatic and this is only for one-offs.
    */
   critical?: boolean
+  /**
+   * A person's name to show as the sender, e.g. the inviter on a goal invite.
+   * Renders as `"<name> via Boss Daddy" <hello@…>` — the address is unchanged,
+   * so authentication alignment is unaffected. Omit for brand-voice mail
+   * (digest, order confirmations, account notices).
+   */
+  fromName?: string | null
+  /**
+   * Overrides the default Reply-To (support@). Pass `null` to send no Reply-To
+   * header at all.
+   */
+  replyTo?: string | null
 }
 
 export async function sendEmail(args: SendEmailArgs): Promise<EmailResult> {
@@ -53,11 +65,15 @@ export async function sendEmail(args: SendEmailArgs): Promise<EmailResult> {
   }
 
   try {
+    // `replyTo: null` is an explicit "no header"; undefined takes the default.
+    const replyTo = args.replyTo === null ? null : (args.replyTo ?? REPLY_TO_EMAIL)
+
     const { error } = await getResend().emails.send({
-      from: FROM_EMAIL,
+      from: args.fromName ? fromPerson(args.fromName) : FROM_EMAIL,
       to: args.to,
       subject: args.subject,
       react: args.react,
+      ...(replyTo ? { replyTo } : {}),
     })
     if (error) {
       const msg = error.message ?? String(error)

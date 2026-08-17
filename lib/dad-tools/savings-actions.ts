@@ -915,6 +915,9 @@ export async function createInvite(
       to: parsed.data.email,
       subject: `${inviterName} invited you to a Boss Daddy savings goal`,
       tag: 'savings_invite',
+      // Same reasoning as the goal invite — a named human beats a brand alias
+      // for Primary-tab placement.
+      fromName: inviterName,
       react: React.createElement(SavingsInviteEmail, {
         inviterName,
         goalName,

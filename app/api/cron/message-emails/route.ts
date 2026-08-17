@@ -119,6 +119,10 @@ export async function GET(request: NextRequest) {
         ? `New message from ${senderNames[0]}`
         : 'You have unread messages on Boss Daddy',
       tag: 'new_message',
+      // Mirror the subject's single-vs-multiple split: one sender means this is
+      // genuinely person-to-person, so name them. A multi-sender digest really is
+      // from the site, so it keeps the brand sender.
+      fromName: senderNames.length === 1 ? senderNames[0] : undefined,
       react: React.createElement(NewMessageEmail, {
         senderNames,
         conversationCount: items.length,

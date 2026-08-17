@@ -101,6 +101,9 @@ export async function deliverGoalInvite(args: {
       to,
       subject: `${args.inviterName} invited you to his "${args.goalTitle}" goal`,
       tag: 'goal_invite',
+      // A person-to-person invite with a 7-day expiry can't afford Gmail's
+      // Promotions tab — naming the inviter is the strongest nudge toward Primary.
+      fromName: args.inviterName,
       react: React.createElement(GoalInviteEmail, {
         inviterName: args.inviterName,
         goalTitle: args.goalTitle,
