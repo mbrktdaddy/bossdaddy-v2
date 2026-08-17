@@ -73,7 +73,10 @@ export default async function SharedGoalPage({ params }: Props) {
 
   return (
     <Wrap>
-      <Link href="/goals/shared" className="inline-flex items-center py-3 text-xs text-prose-muted hover:text-prose">
+      {/* Back to the corner GROUP on /goals, which is where that list lives now
+          (nav-ia-plan Phase E). The anchor lands him on it rather than at the top of
+          his own goals. */}
+      <Link href="/goals#corner" className="inline-flex items-center py-3 text-xs text-prose-muted hover:text-prose">
         ← {LABELS.goals.sharedHeading}
       </Link>
 

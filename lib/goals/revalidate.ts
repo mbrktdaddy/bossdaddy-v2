@@ -30,15 +30,17 @@ import { revalidatePath } from 'next/cache'
 /**
  * Surfaces that list or summarize goals, independent of which one changed.
  *
- * `/account/settings` carries the "What you're working on" list, and `/goals/shared`
- * is the other side of a shared goal — both go stale on a rename or a status change
- * and neither is obvious from the goal page you were standing on.
+ * `/account/settings` carries the "What you're working on" list, and `/goals` carries
+ * BOTH sides — your own list and the corner group of goals other people share with you
+ * (nav-ia-plan Phase E folded the separate `/goals/shared` list in). Both go stale on a
+ * rename or a status change, and neither is obvious from the goal page you were
+ * standing on.
  */
 // `/tools` and `/account` are here because TodayCard renders on both. A surface that
 // shows goal state and isn't on this list goes stale after every log — which reads as
 // "my edit didn't save", the exact bug this module exists to prevent.
 const SHARED_PATHS = [
-  '/goals', '/today', '/tools', '/account', '/account/settings', '/goals/shared',
+  '/goals', '/today', '/tools', '/account', '/account/settings',
 ] as const
 
 /** Paths belonging to one goal. `/share` is here because the partner list and the

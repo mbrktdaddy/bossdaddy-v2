@@ -48,7 +48,7 @@ async function BackingLink() {
 
   return (
     <Link
-      href="/goals/shared"
+      href="/goals#corner"
       className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-soft bg-surface-sunken px-4 py-3 text-xs transition-colors hover:border-strong"
     >
       <span className="text-prose">

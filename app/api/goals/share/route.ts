@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
       // A partner who just left can no longer read the goal, so send them to the
       // list rather than a page that would render as "not shared with you".
       const leaving = participantUserId === user.id
-      return back(request, leaving ? '/goals/shared' : sharePath(goalId))
+      return back(request, leaving ? '/goals#corner' : sharePath(goalId))
     }
 
     // ── change what an existing partner sees ────────────────────────────────

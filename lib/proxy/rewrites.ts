@@ -40,6 +40,15 @@ export function rewritePublicLegacy(pathname: string): string | null {
   const wishlistSlug = pathname.match(/^\/wishlist\/([^/]+)\/?$/)
   if (wishlistSlug) return `/bench/${wishlistSlug[1]}`
 
+  // /goals/shared → /goals#corner. The list of goals other people share with you
+  // folded into /goals as a second group (nav-ia-plan Phase E) — it was a whole page
+  // reached by a link gated on a non-zero count, so it could vanish from the app.
+  //
+  // EXACT PATH ONLY. /goals/shared/[id] is still a real page and the only way a
+  // partner reads a goal he's supporting; a prefix match here would break every one
+  // of those links, including the ones sitting in goal_note notification rows.
+  if (pathname === '/goals/shared' || pathname === '/goals/shared/') return '/goals'
+
   // /tools/kids/* → /tools/family/* (the per-member hub now holds partners
   // and others too, so "kids" in the URL was user-facing-wrong). The route
   // segment moved to app/(public)/tools/family; this 301s the old links.

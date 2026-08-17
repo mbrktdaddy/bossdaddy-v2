@@ -18,9 +18,12 @@ import { OG_SITE, SITE_URL } from '@/lib/og'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { LABELS } from '@/lib/labels'
 import { LoginLink } from '@/components/LoginLink'
-import { progressToTarget } from '@/lib/goals/progress'
+import { progressToTarget, planWindow } from '@/lib/goals/progress'
 import { localDateInZone } from '@/lib/goals/recurrence'
 import { unreadNoteCounts } from '@/lib/goals/notes'
+import {
+  listSharedWithMe, TIER_COPY, type SharedGoalSummary,
+} from '@/lib/goals/participants'
 import TodayCard from '@/components/goals/TodayCard'
 
 export const metadata: Metadata = {
@@ -64,11 +67,13 @@ type StatRow = {
 type Props = {
   searchParams: Promise<{
     archived?: string; deleted?: string; msg?: string; confirmDelete?: string
+    /** Set by /api/goals/invite when a share invite is turned down. */
+    declined?: string
   }>
 }
 
 export default async function GoalsIndexPage({ searchParams }: Props) {
-  const { archived, deleted, msg, confirmDelete } = await searchParams
+  const { archived, deleted, msg, confirmDelete, declined } = await searchParams
   const showArchived = archived === '1'
   // Ids arrive comma-separated from the bulk route's first POST. Capped so a
   // hand-edited URL cannot make this page render a thousand rows.
@@ -90,7 +95,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
   // as though the reader owned it, with edit and share controls attached.
   //
   // RLS stays the backstop. The filter is the app saying which rows it MEANT.
-  const [{ data: goalRows }, { data: scheduleRows }, { data: statRows }, { count: sharedRaw }] = await Promise.all([
+  const [{ data: goalRows }, { data: scheduleRows }, { data: statRows }, shared] = await Promise.all([
     supabase.from('goals')
       .select('id, title, kind, status, metric_unit, baseline_value, target_value, identity_short')
       .eq('user_id', user.id)
@@ -104,15 +109,31 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
     supabase.from('goal_stats')
       .select('goal_id, streak, logged_done, logged_total, rate_30d_done, rate_30d_total, latest_value, open_count, next_due_at, today_local_date, today_target')
       .eq('user_id', user.id),
-    // Goals OTHER people share with him. Counted against the definer view (mig
-    // 137), which returns nothing unless he's a participant — head:true so this
-    // costs no rows on a page that already does three reads.
-    supabase.from('goal_share_summary').select('goal_id', { count: 'exact', head: true }),
+    // Goals OTHER people share with him, from the definer view (mig 137), which
+    // returns nothing unless he's a participant and filters columns by tier.
+    //
+    // THE WHOLE ROWS NOW, not a head:true count. This page used to render a link
+    // whose only job was to say a number, so /goals/shared existed to show what the
+    // number meant — a page that could go missing entirely, because the link was
+    // gated on the count being non-zero (nav-ia-plan Phase E). The list is here now,
+    // so the read has to bring the rows.
+    listSharedWithMe(supabase),
   ])
-  const sharedCount = sharedRaw ?? 0
 
   const goals = (goalRows ?? []) as unknown as GoalRow[]
-  if (goals.length === 0) return <Empty showArchived={showArchived} deleted={deleted === '1'} />
+  // ⚠️ THE EMPTY PAGE CARRIES THE CORNER LIST TOO. Someone can own no goals and still
+  // be supporting three — a partner witnessing a taper is the likeliest first
+  // experience of this feature — and returning the bare "start your first goal" screen
+  // would hide every goal he's been trusted with behind a page that says he has none.
+  if (goals.length === 0) {
+    return (
+      <Empty
+        showArchived={showArchived}
+        deleted={deleted === '1'}
+        shared={showArchived ? [] : shared}
+      />
+    )
+  }
 
   const schedules = (scheduleRows ?? []) as unknown as ScheduleRow[]
   const stats = new Map(
@@ -170,6 +191,15 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
         </p>
       ) : null}
 
+      {/* Turning down a share invite lands here now that the corner list does.
+          "Nobody was told" is the load-bearing half — declining is silent by design
+          (migration 140, rule 4), and the man who declined should know that. */}
+      {declined === '1' ? (
+        <p className="rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-prose-muted">
+          Turned that one down. Nobody was told.
+        </p>
+      ) : null}
+
       {/* Straight to the day's work. Above the goal list on purpose: this page is
           for managing goals, /today is for doing them, and "doing" is the common
           errand.
@@ -188,20 +218,8 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
           can't say for itself. */}
       <TodayCard userId={user.id} variant="compact" />
 
-      {/* Only when someone actually shared something. An always-on link would be
-          clutter for the many people nobody has invited. */}
-      {sharedCount > 0 ? (
-        <Link
-          href="/goals/shared"
-          className="flex items-center justify-between gap-3 rounded-xl border border-soft bg-surface px-4 py-3 hover:border-strong transition-colors"
-        >
-          <span className="text-sm text-prose">
-            {LABELS.goals.sharedHeading}
-            <span className="text-prose-muted"> · {sharedCount} shared with you</span>
-          </span>
-          <span className="text-xs font-semibold text-accent-text">Look →</span>
-        </Link>
-      ) : null}
+      {/* The corner list used to be a link from here, gated on a count. It's a section
+          at the bottom of this page now — see CornerSection. */}
 
       {/* Bulk delete confirm. Driven by ids in the query string rather than
           session state, so a refresh cannot silently re-fire it. */}
@@ -444,6 +462,11 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
         </fieldset>
       </form>
 
+      {/* ── the second group: goals that aren't yours ─────────────────────────
+          Yours above, theirs here. Not shown on the archive view — other people's
+          goals don't live in your archive. */}
+      {showArchived ? null : <CornerSection shared={shared} />}
+
       {/* ── calendar subscription ───────────────────────────────────────────
           Collapsed: useful, but not what anyone came here for. Anchored so the
           route handler can bring him back to it opened after minting a link. */}
@@ -524,6 +547,87 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
   )
 }
 
+/**
+ * "You're in their corner" — the goals other people have shared with you.
+ *
+ * ⚠️ ALWAYS RENDERS, EMPTY INCLUDED, and that's the point of folding it in here. It was
+ * its own page reached by a link gated on `count > 0`, which meant a man who had never
+ * been asked to support anyone had no way to learn the feature exists, and the page
+ * could disappear from the app entirely. The empty copy does the teaching, and it makes
+ * the promise that matters: nothing here ever pings you.
+ *
+ * EVERY FIGURE COMES FROM `goal_share_summary`, the definer view (migration 137) —
+ * never from `goals` or `goal_stats`. The tier system IS that view's column filter, so
+ * reaching past it would hand a cheer-level partner the contents of a medication log.
+ * `listSharedWithMe` is the only reader; keep it that way.
+ */
+function CornerSection({ shared }: { shared: SharedGoalSummary[] }) {
+  return (
+    <section id="corner" className="scroll-mt-4 space-y-4">
+      <div className="space-y-1">
+        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+          {LABELS.goals.sharedEyebrow}
+        </p>
+        <h2 className="text-xl font-black text-prose tracking-tight">
+          {LABELS.goals.sharedHeading}
+        </h2>
+      </div>
+
+      {shared.length === 0 ? (
+        <p className="rounded-xl border border-soft bg-surface p-5 text-sm text-prose-muted">
+          {LABELS.goals.sharedEmpty}
+        </p>
+      ) : (
+        <>
+          <ul className="space-y-3">
+            {shared.map((g) => {
+              const win = planWindow(g.startedOn, g.targetDate, todayIsh(g.startedOn))
+              const facts: string[] = []
+              if (g.status === 'paused') facts.push('Paused')
+              if (win?.planDays && win.dayInPlan > 0) facts.push(`Day ${win.dayInPlan} of ${win.planDays}`)
+              if (g.streak && g.streak > 0) facts.push(`${g.streak} day${g.streak === 1 ? '' : 's'} running`)
+              if (!facts.length) facts.push('Just getting going')
+
+              return (
+                <li key={g.goalId}>
+                  <Link
+                    href={`/goals/shared/${g.goalId}`}
+                    className="block rounded-xl border border-soft bg-surface p-5 hover:border-strong transition-colors"
+                  >
+                    <p className="text-base font-bold text-prose">{g.title}</p>
+                    <p className="mt-1 text-sm text-prose-muted">{facts.slice(0, 2).join(' · ')}</p>
+                    <p className="mt-2 text-xs text-prose-faint">{TIER_COPY[g.myTier].label}</p>
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+          <p className="text-xs text-prose-faint">
+            You can step out of any of these whenever you want, and you don&apos;t need
+            to ask. Nobody gets told either way.
+          </p>
+        </>
+      )}
+    </section>
+  )
+}
+
+/**
+ * The view deliberately doesn't expose a shared goal's timezone — that's the owner's
+ * reminder plumbing — so "which day of the plan is it" is computed against the server's
+ * date. Off by at most a day at the edges, which is the right trade for not leaking
+ * where a man lives.
+ */
+function todayIsh(startedOn: string): string {
+  const now = new Date()
+  const ymd = `${now.getUTCFullYear()}-${pad(now.getUTCMonth() + 1)}-${pad(now.getUTCDate())}`
+  return ymd < startedOn ? startedOn : ymd
+}
+
+function pad(n: number): string {
+  return String(n).padStart(2, '0')
+}
+
 function BulkButton({ op, label, destructive }: { op: string; label: string; destructive?: boolean }) {
   return (
     <button
@@ -588,7 +692,13 @@ function SignedOut() {
   )
 }
 
-function Empty({ showArchived, deleted }: { showArchived: boolean; deleted: boolean }) {
+function Empty({
+  showArchived, deleted, shared,
+}: {
+  showArchived: boolean
+  deleted: boolean
+  shared: SharedGoalSummary[]
+}) {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-6">
       {deleted ? (
@@ -623,6 +733,14 @@ function Empty({ showArchived, deleted }: { showArchived: boolean; deleted: bool
         >
           {LABELS.goals.newCta} →
         </Link>
+      )}
+
+      {/* Owning none of your own doesn't mean there's nothing here — see the note at
+          the early return. Suppressed on the archive view, which is about your goals. */}
+      {showArchived ? null : (
+        <div className="border-t border-soft pt-8">
+          <CornerSection shared={shared} />
+        </div>
       )}
     </div>
   )

@@ -184,10 +184,27 @@ half-built front doors, and the user has to know which to pick.
 
 ### Phase E — the remaining merges
 
-- **`/goals/shared` folds into `/goals`** as a second group ("Yours" / "In their
-  corner"). Both pages list goals, and the shared list is currently behind a conditional
-  link, so it can go missing entirely.
-- **Bottom-nav tabs for signed-in users** — revisit after C has settled.
+- **`/goals/shared` folded into `/goals`** as a second group — **shipped 2026-08-17.**
+  It was a whole page reached by a link gated on `count > 0`, so a man nobody had asked
+  to support could not learn the feature existed. Now a `CornerSection` at the bottom of
+  `/goals` that **always renders, empty state included** — the empty copy is what does
+  the teaching, and it carries the promise that matters (nothing here ever pings you).
+  - The old page is deleted and `/goals/shared` 301s to `/goals` in `lib/proxy/rewrites.ts`
+    — **exact path only.** `/goals/shared/[id]` is still the only way a partner reads a
+    goal he's supporting, and `goal_note` notification rows point straight at it, so a
+    prefix match there would break live links.
+  - **The empty-goals branch carries the corner list too.** Owning nothing and supporting
+    three is the likeliest first experience of this feature (a partner witnessing a
+    taper); the bare "start your first goal" screen would have hidden every goal he'd
+    been trusted with behind a page claiming he had none.
+  - Four call sites repointed: `YourCornerSection`, the leave-a-goal redirect in
+    `/api/goals/share`, the decline redirect in `/api/goals/invite` (now
+    `/goals?declined=1#corner`, and `/goals` renders that notice), and the detail page's
+    back-link. `/goals/shared` came out of `revalidate.ts`'s `SHARED_PATHS`.
+  - Still reads **only** `goal_share_summary` via `listSharedWithMe` — the tier system is
+    that view's column filter, and reaching past it would hand a cheer-level partner the
+    contents of a medication log.
+- **Bottom-nav tabs for signed-in users** — done as Phase G above.
 - **Separate pass, not this plan:** the public content side has six collection-ish
   surfaces (`/bench`, `/vault`, `/picks`, `/stacks`, `/comparisons`, `/gifts`). Same
   smell, different domain, and `/vault` is inside the paused rename decision.
@@ -245,7 +262,7 @@ decisions, and that D's own rename never happened.
   only surface that resolves work; two surfaces that both log is how "did that save?"
   starts, and it would put medication logging on a settings-adjacent page.
 
-**Still open after F**
+**Opened by F — one shipped since, two still open**
 
 - **Fold the settings FORM sections up into `/account`?** Only worth it if `/account`
   stays thin. Revisit when either saved list outgrows a screen — at which point `Saved`
@@ -254,15 +271,26 @@ decisions, and that D's own rename never happened.
 - **The Activity tile** (Comments Left / Likes Given) is the least useful thing on
   `/account`. Kept — it's your own record, not a public scale metric — but it is the
   first thing to cut if the page needs room.
-- **`/today` row density** — the reason this review started. Multiple open occurrences
-  each render a full ~200px card with a form, and a twice-daily medication goal renders as
-  two or three near-identical cards. Two changes are agreed in principle and NOT built:
-  **group by goal** (one row, a time chip per slot, each chip its own submit) and **hide
-  the number field behind a disclosure** (it defaults to `target_value`, so the fast path
-  is already one tap). The row-shape choice — compact rows vs first-expanded — is
-  undecided. Constraint: `/today` has **no client JS** (plain forms + the inert
-  `OfflineLogQueue` island); chips-as-submits and `<details>` preserve that, a
-  state-driven accordion would not.
+- **`/today` row density — shipped 2026-08-17.** One card per GOAL, one row per slot:
+  `groupDueByGoal` in `lib/goals/today.ts` (pure, 5 tests) collapses the occurrence queue,
+  so a twice-daily goal pays for its title and identity line once instead of three times.
+  Each slot is a single row with one primary button; the number field and "Not today"
+  moved behind a native `<details>`, since the field defaults to `target_value` and only
+  earns space when he's CORRECTING it — inputs in a closed `<details>` still submit, so
+  the fast path pays nothing and the collapsed state isn't lying about what gets written.
+  Both stay one tap away and ≥44px. The goal title is now a link to the goal, which the
+  old card didn't have at all.
+  - **Ordering question settled by the grouping**, not deferred: pushing catch-ups to the
+    bottom of the page can't be done without splitting a goal's card in half, so a
+    catch-up slot is labelled inside its own card ("Still open from the 6th") and goals
+    keep `dueNow`'s oldest-first order.
+  - Rejected: **"Log all"** (one tap that falsifies a medication or cessation record is
+    not a feature — brand-guide §1.6) and **swipe-to-log** (collides with the Android back
+    gesture on the operator's device).
+  - ⚠️ Constraint that survives: `/today` has **no client JS** (plain forms + the inert
+    `OfflineLogQueue` island). `<details>` and submit buttons preserve that; a
+    state-driven accordion or modal would break it and take the offline queue's
+    plain-form contract with it.
 
 ---
 
@@ -270,22 +298,12 @@ decisions, and that D's own rename never happened.
 
 ## Next session
 
-Phases A, B, D shipped 2026-08-15 (`c636c11`, `79a0cce`, `bbc7a20`, `1348606`);
-F shipped 2026-08-17. What's left, in the order I'd take it:
+**EVERY PHASE OF THIS PLAN HAS SHIPPED.** A, B and D on 2026-08-15 (`c636c11`,
+`79a0cce`, `bbc7a20`, `1348606`); C, F and G on 2026-08-17; E and the `/today` density
+work the same day. What's left is one decision this plan deliberately did not make, plus
+the two follow-ups listed under Phase F.
 
-### 1. Phase C — unify the chrome (the one that matters)
-
-The "different website" feeling is still there. Full detail above; the gate is unchanged
-and must be checked FIRST: **`(tools)/layout.tsx` sets `data-theme="dark"` on its own
-wrapper div.** If the root layout doesn't set it on `<html>`, moving those pages out of
-that wrapper loses the dark theme on every one of them. CLAUDE.md says it belongs on
-`<html>` — verify, don't assume.
-
-### 2. Phase E — `/goals/shared` folds into `/goals`
-
-Two pages that both list goals; the shared one hides behind a conditional link.
-
-### 3. DECIDE: does the URL follow the name? — `/tools/weekends-until` → ?
+### 1. DECIDE: does the URL follow the name? — `/tools/weekends-until` → ?
 
 The tool is called **Milestones** as of `bbc7a20`. The label changed; the route did not.
 That was the right default (internal names are permanent, display labels are free) but it

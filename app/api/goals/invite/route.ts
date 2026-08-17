@@ -36,7 +36,8 @@ export async function POST(request: NextRequest) {
     // No goal id: a decline is silent by design and the owner is never told, so
     // only the shared surfaces need re-rendering.
     revalidateGoal(null)
-    return redirectTo(request, '/goals/shared?declined=1')
+    // /goals carries the corner list now (nav-ia-plan Phase E) and renders this notice.
+    return redirectTo(request, '/goals?declined=1#corner')
   }
 
   if (op !== 'accept') return redirectTo(request, invitePath)
