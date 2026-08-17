@@ -133,6 +133,51 @@ export async function loadTodayWork(
   }
 }
 
+export type TodayGoalGroup = {
+  goal: TodayGoal
+  /** This goal's open slots, still in due order — oldest first, like `dueNow`. */
+  occurrences: TodayOccurrence[]
+}
+
+/**
+ * Collapses the flat work queue into one entry per goal.
+ *
+ * WHY: `dueNow` is a list of OCCURRENCES, and a twice-daily medication goal has two or
+ * three of them open at once. Rendered one card per occurrence, that's the same goal
+ * title, identity line and controls repeated down the screen — the operator's words were
+ * "pretty heavy when there are more than 2". Per goal, the title is paid once and each
+ * slot is a row.
+ *
+ * ORDER IS PRESERVED from `dueNow`, which arrives oldest-first: a goal's position is its
+ * earliest open slot, so the most overdue work still leads. That also settles an earlier
+ * idea about pushing catch-ups to the bottom of the page — it can't be done without
+ * splitting a goal's card in half, so a catch-up slot is labelled inside its card
+ * instead ("Still open from the 6th") rather than exiled from it.
+ *
+ * A goal the `goals` map can't name is dropped rather than rendered as "Something":
+ * loadTodayWork already filters occurrences to ACTIVE goals, so an unnamed one here
+ * means the goal row wasn't readable, and inventing a title for work you can't identify
+ * is worse than not listing it.
+ */
+export function groupDueByGoal(work: TodayWork): TodayGoalGroup[] {
+  const order: string[] = []
+  const slots = new Map<string, TodayOccurrence[]>()
+
+  for (const occurrence of work.dueNow) {
+    const seen = slots.get(occurrence.goal_id)
+    if (seen) { seen.push(occurrence); continue }
+    slots.set(occurrence.goal_id, [occurrence])
+    order.push(occurrence.goal_id)
+  }
+
+  const groups: TodayGoalGroup[] = []
+  for (const goalId of order) {
+    const goal = work.goals.get(goalId)
+    if (goal) groups.push({ goal, occurrences: slots.get(goalId)! })
+  }
+  return groups
+}
+
 // ── the week strip's data ───────────────────────────────────────────────────
 //
 // Extracted here alongside the work query so /today and every TodayCard draw the

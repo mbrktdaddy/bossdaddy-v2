@@ -17,6 +17,14 @@
 // submit only when the browser already reports itself offline, queues it locally,
 // and drains when signal returns. The page itself is still NOT cached — see that
 // component, and the note at the bottom of this file.
+//
+// DENSITY IS A CONSTRAINT HERE, NOT A PREFERENCE. The work is grouped per goal and each
+// slot is one row with one primary button; the number field and "Not today" live behind
+// a native <details>. That's what keeps three open slots on one screen instead of three
+// full-height cards. It also has to stay SCRIPT-FREE: a state-driven accordion would
+// pull this page into client JS and take the offline queue's plain-form contract with
+// it, so chips, buttons and <details> are the only mechanisms available. Don't reach for
+// a modal or a client-side expander here.
 
 import Link from 'next/link'
 import type { Metadata } from 'next'
@@ -25,7 +33,7 @@ import { LABELS } from '@/lib/labels'
 import { LoginLink } from '@/components/LoginLink'
 import OfflineLogQueue from '@/components/goals/OfflineLogQueue'
 import WeekStrip from '@/components/goals/WeekStrip'
-import { loadTodayWork, loadTodayWeek } from '@/lib/goals/today'
+import { loadTodayWork, loadTodayWeek, groupDueByGoal } from '@/lib/goals/today'
 import { logOccurrence } from '../goals/actions'
 
 export const metadata: Metadata = {
@@ -37,7 +45,7 @@ export const metadata: Metadata = {
 // lib/goals/today.ts when the query did — see TODAY_LOOKAHEAD_HOURS there. Keeping
 // local copies is how the page and the cards would start disagreeing about what
 // "due" means.
-import type { TodayOccurrence, TodayGoal } from '@/lib/goals/today'
+import type { TodayOccurrence, TodayGoal, TodayGoalGroup } from '@/lib/goals/today'
 
 type OccurrenceRow = TodayOccurrence
 type GoalRow = TodayGoal
@@ -70,6 +78,7 @@ export default async function TodayPage() {
     loadTodayWeek(supabase, user.id, now),
   ])
   const { dueNow, later, goals } = work
+  const groups = groupDueByGoal(work)
   const weekCells = week.cells
   const stripToday = week.todayLocal
 
@@ -102,15 +111,12 @@ export default async function TodayPage() {
       ) : null}
 
       {/* ── waiting on you ──────────────────────────────────────────────────── */}
-      {dueNow.length > 0 ? (
+      {/* ONE CARD PER GOAL, ONE ROW PER SLOT — not one card per occurrence. See
+          groupDueByGoal in lib/goals/today.ts for why. */}
+      {groups.length > 0 ? (
         <section className="mt-8 space-y-3">
-          {dueNow.map((occurrence) => (
-            <Row
-              key={occurrence.id}
-              occurrence={occurrence}
-              goal={goals.get(occurrence.goal_id)!}
-              now={now}
-            />
+          {groups.map((group) => (
+            <GoalWork key={group.goal.id} group={group} now={now} />
           ))}
         </section>
       ) : null}
@@ -177,11 +183,57 @@ export default async function TodayPage() {
 }
 
 /**
- * One actionable row. The primary button is the whole point of the screen, so it's
- * full-width and "Not today" is the quiet secondary — a skip is a legitimate answer
- * but it should never be as easy to hit by accident as the thing he came to do.
+ * One goal's open work. The title and the identity line are paid ONCE here, however
+ * many slots are open underneath — that repetition is what made a twice-daily
+ * medication goal fill the screen with three near-identical cards.
+ *
+ * The title links to the goal, which the old card didn't: from the densest surface in
+ * the app there was no way through to the history of the thing you were logging.
  */
-function Row({
+function GoalWork({ group, now }: { group: TodayGoalGroup; now: Date }) {
+  const { goal, occurrences } = group
+  return (
+    <div className="rounded-xl border border-strong bg-surface-raised p-4 sm:p-5">
+      <div className="min-w-0">
+        <Link href={`/goals/${goal.id}`} className="block min-w-0">
+          <p className="text-base font-bold text-prose hover:text-accent-text transition-colors">
+            {goal.title}
+          </p>
+        </Link>
+        {goal.identity_short ? (
+          <p className="mt-0.5 text-xs text-eyebrow uppercase tracking-widest font-semibold">
+            {LABELS.goals.votingFor}: {goal.identity_short}
+          </p>
+        ) : null}
+      </div>
+      <ul className="mt-3 border-t border-soft">
+        {occurrences.map((occurrence) => (
+          <Slot key={occurrence.id} occurrence={occurrence} goal={goal} now={now} />
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+/**
+ * One open slot: what it wants, and one tap to log it.
+ *
+ * THE FAST PATH IS THE WHOLE POINT, so it's the only thing at full strength — a
+ * primary button on a single row. Everything else sits behind a disclosure:
+ *
+ *   • The NUMBER FIELD. It defaults to `target_value`, so tapping the primary button
+ *     already logs the target; the field only earns space when he's CORRECTING it.
+ *     Inputs inside a closed <details> still submit, so the fast path pays nothing for
+ *     it and the collapsed state is not a lie about what gets written.
+ *   • "NOT TODAY". A skip is a legitimate answer that should never be as easy to hit
+ *     by accident as the thing he came to do — the same rule the old full-width layout
+ *     encoded by making it the quiet secondary.
+ *
+ * Both stay reachable in one tap, and both are ≥44px targets. The disclosure is
+ * rendered for every slot even when there's no number to adjust, because a control
+ * that moves depending on the goal is a control you have to hunt for.
+ */
+function Slot({
   occurrence, goal, now,
 }: {
   occurrence: OccurrenceRow
@@ -201,69 +253,69 @@ function Row({
   const isCatchup = occurrence.status === 'missed' || overdueDays >= 1
 
   return (
-    <div className="rounded-xl border border-strong bg-surface-raised p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-base font-bold text-prose">{goal.title}</p>
-          {goal.identity_short ? (
-            <p className="mt-0.5 text-xs text-eyebrow uppercase tracking-widest font-semibold">
-              {LABELS.goals.votingFor}: {goal.identity_short}
-            </p>
-          ) : null}
-          <p className="mt-1 text-xs text-prose-muted">
-            {isCatchup
-              ? `Still open from ${occurrence.local_date}`
-              : `Due ${occurrence.local_time.slice(0, 5)}`}
-            {occurrence.target_value != null ? ` · target ${occurrence.target_value}${unit}` : ''}
-          </p>
-          {occurrence.shifted ? (
-            <p className="mt-1 text-xs text-accent-text">
-              Clocks changed, so this one landed at {occurrence.local_time.slice(0, 5)}.
-            </p>
-          ) : null}
-        </div>
-      </div>
-
-      <form action={logOccurrence} className="mt-4 space-y-3">
+    <li className="border-b border-soft last:border-0 py-3 last:pb-0">
+      <form action={logOccurrence}>
         <input type="hidden" name="occurrenceId" value={occurrence.id} />
         <input type="hidden" name="goalId" value={goal.id} />
 
-        {wantsNumber ? (
-          <label className="block">
-            <span className="text-xs text-prose-muted">
-              {goal.metric_key}{unit ? ` (${goal.metric_unit})` : ''} — what actually happened
-            </span>
-            <input
-              type="number"
-              name="value"
-              step="any"
-              inputMode="decimal"
-              defaultValue={occurrence.target_value ?? ''}
-              className="mt-2 w-full rounded-lg border border-soft bg-surface px-4 py-3 text-lg text-prose"
-            />
-          </label>
-        ) : null}
-
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm text-prose">
+              {isCatchup
+                ? `Still open from ${occurrence.local_date}`
+                : `Due ${occurrence.local_time.slice(0, 5)}`}
+              {occurrence.target_value != null ? (
+                <span className="text-prose-muted"> · target {occurrence.target_value}{unit}</span>
+              ) : null}
+            </p>
+            {occurrence.shifted ? (
+              <p className="mt-0.5 text-xs text-accent-text">
+                Clocks changed, so this one landed at {occurrence.local_time.slice(0, 5)}.
+              </p>
+            ) : null}
+          </div>
           <button
             type="submit"
             name="action"
             value="completed"
-            className="min-h-11 flex-1 rounded-lg bg-accent px-6 py-3 font-bold text-white hover:bg-accent-hover transition-colors"
+            className="min-h-11 shrink-0 rounded-lg bg-accent px-5 py-2.5 text-sm font-bold text-white hover:bg-accent-hover transition-colors"
           >
             {LABELS.goals.logCta}
           </button>
-          <button
-            type="submit"
-            name="action"
-            value="skipped"
-            className="min-h-11 rounded-lg border border-soft bg-surface px-5 py-3 text-sm font-semibold text-prose-muted hover:bg-surface-hover transition-colors"
-          >
-            Not today
-          </button>
         </div>
+
+        <details>
+          <summary className="min-h-11 flex cursor-pointer items-center text-xs font-semibold text-prose-faint hover:text-prose-muted">
+            {wantsNumber ? 'Log a different number, or not today' : 'Not today'}
+          </summary>
+          <div className="space-y-3 pb-2">
+            {wantsNumber ? (
+              <label className="block">
+                <span className="text-xs text-prose-muted">
+                  {goal.metric_key}{unit ? ` (${goal.metric_unit})` : ''} — what actually happened
+                </span>
+                <input
+                  type="number"
+                  name="value"
+                  step="any"
+                  inputMode="decimal"
+                  defaultValue={occurrence.target_value ?? ''}
+                  className="mt-1.5 w-full rounded-lg border border-soft bg-surface px-4 py-3 text-lg text-prose"
+                />
+              </label>
+            ) : null}
+            <button
+              type="submit"
+              name="action"
+              value="skipped"
+              className="min-h-11 w-full rounded-lg border border-soft bg-surface px-4 py-2.5 text-sm font-semibold text-prose-muted hover:bg-surface-hover transition-colors"
+            >
+              Not today
+            </button>
+          </div>
+        </details>
       </form>
-    </div>
+    </li>
   )
 }
 
