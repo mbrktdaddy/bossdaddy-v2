@@ -112,6 +112,13 @@ function getLimiter(type: string): Ratelimit | null {
     // cap tight enough that walking a list of addresses is not worth anyone's
     // time, while a person typing a name never notices it.
     'member-search':      new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, '1 m'), prefix: 'bd_member_search' }),
+
+    // Unfurling a shared link makes OUR server fetch a URL a member typed, so this
+    // caps both the SSRF probing surface and our use as an amplifier pointed at
+    // somebody else's site. Generous because previews are cached by URL — a member
+    // reading threads full of links spends none of this on the second view — and
+    // because a chatty group day can legitimately carry a lot of new links.
+    'link-preview':       new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, '1 h'), prefix: 'bd_link_preview' }),
   }
 
   limiters[type] = configs[type] ?? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1 h'), prefix: `bd_${type}` })
@@ -120,7 +127,7 @@ function getLimiter(type: string): Ratelimit | null {
 
 export async function checkRateLimit(
   identifier: string,
-  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' | 'voice' | 'boss' | 'boss-anon' | 'boss-plus' | 'boss-research' | 'boss-notify' | 'radar' | 'merch-sayings' | 'merch-publish' | 'message' | 'checkout' | 'printful-webhook' | 'goal-invite' | 'connection-request' | 'member-search' = 'draft'
+  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' | 'voice' | 'boss' | 'boss-anon' | 'boss-plus' | 'boss-research' | 'boss-notify' | 'radar' | 'merch-sayings' | 'merch-publish' | 'message' | 'checkout' | 'printful-webhook' | 'goal-invite' | 'connection-request' | 'member-search' | 'link-preview' = 'draft'
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
   const failClosed = FAIL_CLOSED_TYPES.has(type)
   const limiter = getLimiter(type)

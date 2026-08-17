@@ -1,5 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
+import { firstLink } from '@/lib/linkify'
+import { readCachedPreviews } from '@/lib/link-preview'
+import type { PublicPreview } from '@/lib/link-preview/types'
 import Thread from './_components/Thread'
 import type { Metadata } from 'next'
 
@@ -87,6 +90,26 @@ export default async function ConversationPage({ params }: PageProps) {
     reactions = data ?? []
   }
 
+  // Link previews for the window — CACHE ONLY, never a live fetch. A slow third
+  // party must not become a slow page load for a conversation that has nothing to
+  // do with it, so misses come back absent and the client asks for them after
+  // paint. Keyed by MESSAGE ID rather than URL so the client never needs the
+  // server-only URL normalizer to look one up.
+  const linkByMessage = new Map<string, string>()
+  for (const m of messages) {
+    const href = firstLink(m.body)
+    if (href) linkByMessage.set(m.id, href)
+  }
+  const cached = await readCachedPreviews(Array.from(linkByMessage.values()))
+  const initialPreviews: Record<string, PublicPreview> = {}
+  for (const [messageId, href] of linkByMessage) {
+    // readCachedPreviews keys by the NORMALIZED url, and `firstLink` already
+    // produced a parsed absolute one, so the two agree for everything the guard
+    // accepts. Anything it rejected simply isn't in the map.
+    const hit = cached.get(href) ?? cached.get(new URL(href).toString())
+    if (hit) initialPreviews[messageId] = hit
+  }
+
   let blocked = false
   if (peerId) {
     const { data: b } = await supabase
@@ -106,6 +129,7 @@ export default async function ConversationPage({ params }: PageProps) {
       initialMessages={messages}
       initialReplyParents={replyParents}
       initialReactions={reactions}
+      initialPreviews={initialPreviews}
       initiallyBlocked={blocked}
       initiallyMuted={!!mine.muted_at}
       initialPeerLastReadAt={peerLastReadAt}

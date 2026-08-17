@@ -88,6 +88,21 @@ function labelFor(url: string): string {
   return `${url.slice(0, MAX_LABEL_LENGTH - 1)}…`
 }
 
+/**
+ * The first linkable URL in a body, or null.
+ *
+ * ONE PREVIEW PER MESSAGE, which is the convention everywhere — a message pasting
+ * five links would otherwise turn into five cards and bury whatever was said around
+ * them. Reuses the tokenizer so "what counts as a link" has exactly one definition:
+ * if it renders as an anchor, it's the thing we'd unfurl.
+ */
+export function firstLink(input: string): string | null {
+  for (const token of tokenizeLinks(input)) {
+    if (token.type === 'link') return token.href
+  }
+  return null
+}
+
 export function tokenizeLinks(input: string): TextToken[] {
   if (!input) return []
 

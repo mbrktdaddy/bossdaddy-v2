@@ -10,7 +10,8 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { compressImage } from '@/lib/compress-image'
 import { REACTION_KINDS, REACTIONS, reactionEmoji, type ReactionKind } from '@/lib/messaging-reactions'
-import { tokenizeLinks } from '@/lib/linkify'
+import { tokenizeLinks, firstLink } from '@/lib/linkify'
+import type { PublicPreview } from '@/lib/link-preview/types'
 import {
   sendMessage, markConversationRead, blockUser, unblockUser, reportContent,
   deleteConversation, setConversationMuted, toggleReaction,
@@ -150,7 +151,7 @@ function MutedIcon({ className = 'w-4 h-4' }: { className?: string }) {
 
 export default function Thread({
   conversationId, meId, peer, initialMessages, initialReplyParents, initialReactions,
-  initiallyBlocked, initiallyMuted, initialPeerLastReadAt,
+  initialPreviews, initiallyBlocked, initiallyMuted, initialPeerLastReadAt,
 }: {
   conversationId: string
   meId: string
@@ -158,6 +159,8 @@ export default function Thread({
   initialMessages: Message[]
   initialReplyParents: ParentMessage[]
   initialReactions: ReactionRow[]
+  /** Keyed by message id. Cache hits only — misses are fetched after paint. */
+  initialPreviews: Record<string, PublicPreview>
   initiallyBlocked: boolean
   initiallyMuted: boolean
   initialPeerLastReadAt: string | null
@@ -165,6 +168,10 @@ export default function Thread({
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [replyParents] = useState<ParentMessage[]>(initialReplyParents)
   const [reactions, setReactions] = useState<ReactionRow[]>(initialReactions)
+  // Message id → preview, or null for "we asked and there is nothing". The null
+  // matters: without it every render would re-request the links that have no
+  // preview, forever.
+  const [previews, setPreviews] = useState<Record<string, PublicPreview | null>>(initialPreviews)
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -363,8 +370,10 @@ export default function Thread({
   // have committed.
   const stagedRef = useRef<StagedImage[]>([])
   const uploadsRef = useRef<OptimisticUpload[]>([])
+  const previewsRef = useRef<Record<string, PublicPreview | null>>(initialPreviews)
   useEffect(() => { stagedRef.current = staged }, [staged])
   useEffect(() => { uploadsRef.current = uploads }, [uploads])
+  useEffect(() => { previewsRef.current = previews }, [previews])
 
   // Revoke every object URL still outstanding when the thread unmounts, so a long
   // session doesn't leak each photo it ever staged. Reads the refs rather than the
@@ -419,6 +428,59 @@ export default function Thread({
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [conversationId, meId])
+
+  /**
+   * Ask the server to unfurl links we have no preview for yet.
+   *
+   * ⚠️ THE SERVER FETCHES, NOT US. This posts a URL and gets back metadata plus a
+   * proxy path for the thumbnail — the browser never contacts the third party. That
+   * is the entire privacy property of the feature: rendering someone's og:image
+   * directly would let whoever sent the link log when this thread was opened and
+   * from which IP.
+   *
+   * Newest first and capped: the links a man is about to look at are at the bottom
+   * of the thread, and a 200-message backlog shouldn't fire 200 outbound requests
+   * to fill in history already scrolled past. Sequential for the same reason the
+   * photo batch is — these are real outbound requests from our infrastructure.
+   */
+  useEffect(() => {
+    const pending: { id: string; href: string }[] = []
+    for (let i = messages.length - 1; i >= 0 && pending.length < 8; i--) {
+      const m = messages[i]
+      if (m.id in previewsRef.current) continue
+      const href = firstLink(m.body)
+      if (href) pending.push({ id: m.id, href })
+    }
+    if (pending.length === 0) return
+
+    let cancelled = false
+    void (async () => {
+      for (const item of pending) {
+        if (cancelled) return
+        let preview: PublicPreview | null = null
+        try {
+          const res = await fetch('/api/dm/link-preview', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: item.href }),
+          })
+          if (res.ok) preview = (await res.json())?.preview ?? null
+        } catch {
+          // Offline, or refused. Stored as "nothing" so it isn't retried in a loop;
+          // a reload asks again.
+        }
+        if (cancelled) return
+        setPreviews((prev) => ({ ...prev, [item.id]: preview }))
+      }
+    })()
+
+    return () => { cancelled = true }
+    // Depends on `messages` but reads `previews` through a REF. Depending on the
+    // previews state would restart this effect on every resolution, since each one
+    // writes to it — and the write is what the effect produces, so that's a loop.
+    // Re-running on a new `messages` identity is harmless: the early return above
+    // makes it a no-op once everything on screen has an entry.
+  }, [messages])
 
   /**
    * Stage photos from any source — the picker, a paste, or a drop.
@@ -810,6 +872,9 @@ export default function Thread({
                       <span className={`block whitespace-pre-wrap ${hasImage ? 'px-2.5 pt-1.5' : ''}`}>
                         <MessageBody text={m.body} fromMe={fromMe} />
                       </span>
+                    )}
+                    {previews[m.id] && (
+                      <LinkPreviewCard preview={previews[m.id]!} fromMe={fromMe} inset={hasImage} />
                     )}
                     {mounted && (
                       <span className={`block text-[10px] mt-0.5 tabular-nums ${hasImage ? 'px-2.5 pb-1' : ''} ${fromMe ? 'text-white/60' : 'text-prose-faint'}`}>
@@ -1204,6 +1269,67 @@ function MessageBody({ text, fromMe }: { text: string; fromMe: boolean }) {
         </a>
       ))}
     </>
+  )
+}
+
+/**
+ * The link preview card.
+ *
+ * ⚠️ `preview.imageSrc` IS ALWAYS ONE OF OUR OWN PATHS (/api/link-preview/image/…),
+ * never the third party's og:image, and that is the security property of the whole
+ * feature rather than a caching nicety. Pointing this <img> at a foreign URL would
+ * make the RECIPIENT'S browser fetch something the SENDER chose — a read receipt
+ * plus their IP and user agent, delivered to a server the sender controls. If
+ * anyone ever "simplifies" this by using the original URL, that is the bug.
+ *
+ * Width/height come from our re-encode, so the space is reserved before the bytes
+ * land and the thread doesn't jump — same reason the photo bubbles carry them.
+ */
+function LinkPreviewCard({
+  preview, fromMe, inset,
+}: { preview: PublicPreview; fromMe: boolean; inset: boolean }) {
+  let host = ''
+  try { host = new URL(preview.url).hostname.replace(/^www\./, '') } catch { host = '' }
+
+  return (
+    <a
+      href={preview.url}
+      target="_blank"
+      rel="noopener noreferrer nofollow"
+      className={`block mt-1.5 rounded-xl overflow-hidden border transition-colors ${inset ? 'mx-2.5 mb-1.5' : ''} ${
+        fromMe
+          ? 'border-white/25 bg-white/10 hover:bg-white/15'
+          : 'border-soft bg-surface hover:bg-surface-hover'
+      }`}
+    >
+      {preview.imageSrc && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={preview.imageSrc}
+          alt=""
+          width={preview.imageWidth ?? undefined}
+          height={preview.imageHeight ?? undefined}
+          className="block w-full max-h-36 object-cover bg-surface-raised"
+        />
+      )}
+      <span className="block px-2.5 py-2">
+        {/* Host first and always. It's the one thing a reader should check before
+            tapping, and the only field a page can't misrepresent. */}
+        <span className={`block text-[10px] font-bold uppercase tracking-wide truncate ${fromMe ? 'text-white/70' : 'text-prose-faint'}`}>
+          {preview.siteName || host}
+        </span>
+        {preview.title && (
+          <span className={`block mt-0.5 text-xs font-bold leading-snug line-clamp-2 ${fromMe ? 'text-white' : 'text-prose'}`}>
+            {preview.title}
+          </span>
+        )}
+        {preview.description && (
+          <span className={`block mt-0.5 text-[11px] leading-snug line-clamp-2 ${fromMe ? 'text-white/75' : 'text-prose-muted'}`}>
+            {preview.description}
+          </span>
+        )}
+      </span>
+    </a>
   )
 }
 

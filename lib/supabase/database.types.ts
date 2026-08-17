@@ -1937,6 +1937,51 @@ export type Database = {
           },
         ]
       }
+      link_previews: {
+        Row: {
+          created_at: string
+          description: string | null
+          error: string | null
+          fetched_at: string
+          id: string
+          image_height: number | null
+          image_path: string | null
+          image_width: number | null
+          site_name: string | null
+          status: string
+          title: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          error?: string | null
+          fetched_at?: string
+          id?: string
+          image_height?: number | null
+          image_path?: string | null
+          image_width?: number | null
+          site_name?: string | null
+          status: string
+          title?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          error?: string | null
+          fetched_at?: string
+          id?: string
+          image_height?: number | null
+          image_path?: string | null
+          image_width?: number | null
+          site_name?: string | null
+          status?: string
+          title?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
       media_assets: {
         Row: {
           alt_text: string | null
