@@ -5,7 +5,7 @@
 // 136) so an operator can reword a plan without a deploy, and the five generic
 // `kind` shapes are rows too — flagged `is_kind_default` — because two prefill
 // mechanisms would have meant a taper's defaults living in two places. The const
-// that used to hold them in app/(tools)/goals/new is gone.
+// that used to hold them in app/(public)/goals/new is gone.
 //
 // WHY EVERY ROW IS RE-VALIDATED HERE
 // The table's CHECKs mirror the create route's Zod schema, so a bad row should be

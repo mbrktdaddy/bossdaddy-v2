@@ -19,7 +19,12 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const APP = join(root, 'app')
 
 // Route groups whose page.tsx files are user-facing + shareable.
-const GROUPS = ['(public)', '(tools)']
+//
+// ONE GROUP NOW. `(tools)` was deleted in nav-ia-plan Phase C — /tools, /goals and
+// /today moved into `(public)` so every authenticated surface shares one chrome. The
+// ALLOW patterns below are matched against PATHS, not groups, so they kept working
+// across the move untouched; this list is the only thing that knew about the group.
+const GROUPS = ['(public)']
 
 // Pages that legitimately need NO social card (private / personal / transactional).
 // If you add a new page that shouldn't have a share preview, add it here.

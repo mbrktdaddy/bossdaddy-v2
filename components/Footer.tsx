@@ -6,9 +6,14 @@ import { BRAND } from '@/lib/brand'
 
 interface BrowseLink { href: string; label: string; hint?: string }
 
+// The four spine anchors lead, in the canonical order the header nav and the mobile tab
+// strip both use — Reviews · Guides · Tools · Gear (see the note on NAV_LINKS in
+// Header.tsx). Tools was last in this column, which buried the most-used signed-in
+// surface at the bottom of a ten-item list. The collections follow.
 const BROWSE: BrowseLink[] = [
   { href: '/reviews',              label: LABELS.reviews.plural },
   { href: '/guides',               label: LABELS.guides.plural },
+  { href: '/tools',                label: LABELS.tools.short, hint: LABELS.tools.hub.metaDescription },
   { href: '/gear',                 label: LABELS.gear.short },
   { href: '/vault',                label: LABELS.vault.full,  hint: LABELS.vault.tagline },
   { href: '/comparisons',          label: LABELS.comparisons.short },
@@ -16,7 +21,6 @@ const BROWSE: BrowseLink[] = [
   { href: '/stacks',               label: LABELS.stacks.short },
   { href: '/gifts',                label: LABELS.gifts.short },
   { href: '/bench',                label: LABELS.bench.full,  hint: LABELS.bench.tagline },
-  { href: '/tools',                label: LABELS.tools.short, hint: LABELS.tools.hub.metaDescription },
 ]
 
 const TRUST: BrowseLink[] = [

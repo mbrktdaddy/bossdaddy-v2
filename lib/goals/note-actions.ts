@@ -9,7 +9,7 @@
 //
 // WHY THESE RETURN STATE INSTEAD OF void: the rest of the goals surface uses
 // `Promise<void>` form actions and treats the revalidated page as the feedback
-// (see app/(tools)/goals/actions.ts). That works for a one-tap "mark it done".
+// (see app/(public)/goals/actions.ts). That works for a one-tap "mark it done".
 // It does not work here — a rejected note has to tell you WHY, and the thing it
 // rejected is a paragraph you just typed and would otherwise lose. So these
 // return a state object for useActionState. Server actions still submit without

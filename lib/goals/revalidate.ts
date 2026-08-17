@@ -4,7 +4,7 @@
 // WHY THIS EXISTS
 //
 // Goal mutations happen through two different mechanisms, and only one of them
-// was clearing Next's caches. The Server Actions in app/(tools)/goals/actions.ts
+// was clearing Next's caches. The Server Actions in app/(public)/goals/actions.ts
 // called revalidatePath; the seven Route Handlers under app/api/goals/ — create,
 // update, schedule, delete, bulk, tap, log — called NOTHING. They wrote to the
 // database, issued a 303, and left every already-visited page holding its

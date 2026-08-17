@@ -46,13 +46,25 @@ type Props = {
    * "start a goal" cards is the redundancy this whole pass is removing.
    */
   emptyPrompt?: boolean
+  /**
+   * 'full' (default) lists the next few items; 'compact' shows the verdict, the week
+   * and the CTA only.
+   *
+   * WHY A VARIANT AND NOT A SECOND COMPONENT: on /goals every goal below the card
+   * already carries its own "Due" / "N open" badge and today's target, so the preview
+   * rows print the same facts twice — from a DIFFERENT source (this card counts live
+   * occurrences; those badges read goal_stats, which is only as fresh as the last
+   * sweep tick). One number per page. The week strip stays even here, because it's
+   * the one thing a list of goals cannot show.
+   */
+  variant?: 'full' | 'compact'
 }
 
 /** Total rows shown across both groups. Four keeps the card a card. */
 const MAX_ROWS = 4
 
 export default async function TodayCard({
-  userId, className = '', emptyPrompt = true,
+  userId, className = '', emptyPrompt = true, variant = 'full',
 }: Props) {
   const supabase = await createClient()
   const [work, week] = await Promise.all([
@@ -77,13 +89,14 @@ export default async function TodayCard({
   // to save. It now carries the same four things the page leads with: the verdict, the
   // week, what's open, and what's later. Same copy strings as the page (LABELS.goals),
   // so the two can't drift into describing the same day differently.
-  const dueItems = todayPreviewItems(work, MAX_ROWS)
-  const laterItems = todayPreviewItems(
+  const compact = variant === 'compact'
+  const dueItems = compact ? [] : todayPreviewItems(work, MAX_ROWS)
+  const laterItems = compact ? [] : todayPreviewItems(
     { ...work, dueNow: work.later },
     Math.max(0, MAX_ROWS - dueItems.length),
   )
   const shown = dueItems.length + laterItems.length
-  const more = work.dueNow.length + work.later.length - shown
+  const more = compact ? 0 : work.dueNow.length + work.later.length - shown
 
   return (
     <Link

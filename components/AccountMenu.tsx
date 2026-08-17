@@ -2,12 +2,15 @@
 
 // The signed-in account menu — avatar, dropdown, notification bell.
 //
-// EXTRACTED SO THERE IS ONE OF IT. This lived inside Header, which meant the
-// (tools) route group — /goals, /today, /tools, i.e. the entire goals spine —
-// had no account menu at all: its layout renders its own minimal chrome and had
-// grown a bespoke "Account"/"Dashboard" text link instead. Two menus would have
-// drifted the moment either gained an item, and this one gained three today
-// (Your Stuff, Contacts, the pending badge).
+// EXTRACTED SO THERE IS ONE OF IT. This lived inside Header, which meant the goals
+// spine — /goals, /today, /tools — had no account menu at all: it ran a separate
+// `(tools)` chrome that had grown a bespoke "Account"/"Dashboard" text link instead.
+// Two menus would have drifted the moment either gained an item, and this one gained
+// three in the session that extracted it (Account, Contacts, the pending badge).
+//
+// That second chrome is gone as of nav-ia-plan Phase C — every authenticated surface
+// now renders the one Header — which is also why the old `alwaysShow` prop went with
+// it: nothing needs to override the desktop-only avatar any more.
 //
 // `useAuthUser` is exported because Header still needs the same values for its
 // mobile drawer. Resolving auth twice on one page is fine — both calls read the
@@ -93,21 +96,23 @@ export function useAuthUser(): AuthUser {
 }
 
 /**
- * @param withBell   Render the notifications bell alongside the avatar.
- * @param alwaysShow Header hides this below `md` because its hamburger drawer
- *                   repeats every link. The tools chrome has no drawer, so there
- *                   the menu must show at every width.
+ * @param withBell Render the notifications bell alongside the avatar.
+ *
+ * ⚠️ THE BELL IS NOT INSIDE `vis`, and that's deliberate. The avatar trigger is
+ * `hidden md:block` because the Header's hamburger drawer repeats every LINK this menu
+ * holds — but an unread COUNT is not a link, and a badge you must open a drawer to see
+ * is a badge that doesn't work. So the bell renders at every width and the avatar
+ * doesn't. Don't "fix" the asymmetry by adding a second mobile-only bell in Header:
+ * that ships two bells in one row (tried 2026-08-17).
  */
-export default function AccountMenu(
-  { withBell = true, alwaysShow = false }: { withBell?: boolean; alwaysShow?: boolean } = {},
-) {
+export default function AccountMenu({ withBell = true }: { withBell?: boolean } = {}) {
   const { username, role, avatarUrl, userId, resolved } = useAuthUser()
   const pathname = usePathname()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const profileHref = '/account/settings'
   const hasDashboard = role === 'author' || role === 'admin'
-  const vis = alwaysShow ? 'block' : 'hidden md:block'
+  const vis = 'hidden md:block'
 
   useEffect(() => {
     if (!userMenuOpen) return
@@ -148,13 +153,12 @@ export default function AccountMenu(
                 username[0].toUpperCase()
               )}
             </div>
-            {/* DESKTOP ONLY. The handle costs up to 120px, and with the bell beside
-                it the trigger ran ~180px — which on the tools chrome (where
-                `alwaysShow` keeps this visible at every width, since there's no
-                drawer to hide it in) collided with the wordmark at 393px. It is also
+            {/* SM AND UP ONLY. The handle costs up to 120px, and with the bell beside it
+                the trigger ran ~180px — which collided with the wordmark at 393px back
+                when the tools chrome kept this whole menu visible on a phone. It is also
                 redundant: the panel this button opens leads with @{username}. So the
-                trigger is avatar + chevron on a phone, which is what every app chrome
-                does, and the name appears the moment there's room for it. */}
+                trigger is avatar + chevron on a narrow screen, which is what every app
+                chrome does, and the name appears the moment there's room for it. */}
             <span className="hidden sm:inline text-sm text-prose-muted max-w-[120px] truncate">
               @{username}
             </span>
@@ -182,9 +186,9 @@ export default function AccountMenu(
                 </svg>
                 Account Settings
               </Link>
-              {/* Your Stuff sits ABOVE Settings — it's the page a member
-                  actually wants, and it used to be reachable only by going to
-                  a settings URL. */}
+              {/* Account sits ABOVE Settings — it's the page a member actually wants,
+                  and it used to be reachable only by going to a settings URL. Label via
+                  LABELS.account (was a hardcoded "Your Stuff" in four places). */}
               <Link
                 href="/account"
                 onClick={() => setUserMenuOpen(false)}
@@ -193,7 +197,7 @@ export default function AccountMenu(
                 <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm4 4h8M8 14h5" />
                 </svg>
-                Your Stuff
+                {LABELS.account.short}
               </Link>
               <Link
                 href="/account/connections"

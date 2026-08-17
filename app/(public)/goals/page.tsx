@@ -178,8 +178,15 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
           /account ended up with no equivalent at all — and it read its count from
           `openTotal`, folded out of goal_stats, while /today counts live occurrences.
           Two sources for one number is how a card comes to claim two things waiting
-          and link to a page listing three. */}
-      <TodayCard userId={user.id} />
+          and link to a page listing three.
+
+          COMPACT HERE, and for the same reason. The full card lists the next four
+          items; every goal below it already carries its own "Due" / "N open" badge and
+          today's target — so the preview rows said it twice on one screen, and the two
+          halves don't even share a source (the card counts live occurrences, the badges
+          read goal_stats). The verdict, the week and the way through are what this page
+          can't say for itself. */}
+      <TodayCard userId={user.id} variant="compact" />
 
       {/* Only when someone actually shared something. An always-on link would be
           clutter for the many people nobody has invited. */}

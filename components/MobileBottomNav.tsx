@@ -2,18 +2,28 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { isImmersiveRoute } from '@/lib/immersive-routes'
+import { LABELS } from '@/lib/labels'
 
 const ICON_CLS = 'w-5 h-5'
 
-function HomeIcon({ active }: { active: boolean }) {
+// A TOOLBOX, DRAWN FROM PRIMITIVES — a rounded rect, a handle, a clasp line — rather
+// than a traced wrench. Same call the launcher tiles made: at 20px a multi-path wrench
+// turns to mush, and a borrowed bézier I can't verify by reading is a glyph I can't
+// trust. Solid and outline share one silhouette, like every other icon in this strip.
+function ToolboxIcon({ active }: { active: boolean }) {
   return active ? (
     <svg className={ICON_CLS} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
-      <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
+      <path d="M9 8.25V6.75A2.25 2.25 0 0 1 11.25 4.5h1.5A2.25 2.25 0 0 1 15 6.75v1.5h-1.5v-1.5a.75.75 0 0 0-.75-.75h-1.5a.75.75 0 0 0-.75.75v1.5H9Z" />
+      <rect x="3" y="8.25" width="18" height="12" rx="1.5" />
     </svg>
   ) : (
     <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-      <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+      <rect x="3" y="8.25" width="18" height="12" rx="1.5" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 8.25V6.75A2.25 2.25 0 0 1 11.25 4.5h1.5A2.25 2.25 0 0 1 15 6.75v1.5M3 13.5h6v1.5a.75.75 0 0 0 .75.75h4.5a.75.75 0 0 0 .75-.75v-1.5h6"
+      />
     </svg>
   )
 }
@@ -54,14 +64,37 @@ function BagIcon({ active }: { active: boolean }) {
   )
 }
 
-// Home / Reviews on the left, Guides / Gear on the right — "Ask the Boss"
-// occupies the elevated center slot (search lives in the header ⌘K pill +
-// the mobile search bar, so it's dropped from the bottom nav).
+// READ / READ / ASK / DO / SHOP: Reviews and Guides on the left, "Ask the Boss" in the
+// elevated center slot, Tools and Gear on the right. Search isn't here (header ⌘K pill +
+// the mobile search bar own it).
+//
+// ── WHY HOME IS NOT A TAB (operator decision, 2026-08-17) ────────────────────────────
+// Tools had NO mobile entry at all — it sits in the desktop header nav, and before
+// nav-ia-plan Phase C those pages ran their own chrome with no bottom strip whatsoever.
+// So the most engaging surface on the site was the hardest to reach on the device it was
+// built for, while four of five slots pointed at reading.
+//
+// Five slots, not six: six is crowded at 393px, and the elevated FAB has to sit dead
+// centre, which an even count can't give it. So a tab had to yield, and Home is the one
+// that costs nothing — the wordmark in the header goes home from every page on the site.
+// Gear and Ask were explicitly protected.
+//
+// `match` overrides the default prefix test where a tab owns more than its own subtree:
+// Tools covers the whole spine (/tools, /goals, /today) but NOT /tools/the-boss, which
+// belongs to the Ask slot — otherwise two things light up for one page.
 const TABS = [
-  { href: '/',        label: 'Home',    exact: true,  Icon: HomeIcon },
-  { href: '/reviews', label: 'Reviews', exact: false, Icon: StarIcon },
-  { href: '/guides',  label: 'Guides',  exact: false, Icon: BookIcon },
-  { href: '/gear',    label: 'Gear',    exact: false, Icon: BagIcon },
+  { href: '/reviews', label: LABELS.reviews.plural, exact: false, Icon: StarIcon },
+  { href: '/guides',  label: LABELS.guides.plural,  exact: false, Icon: BookIcon },
+  {
+    href: '/tools',
+    label: LABELS.tools.short,
+    exact: false,
+    Icon: ToolboxIcon,
+    match: (p: string) =>
+      !p.startsWith('/tools/the-boss')
+      && (p === '/tools' || p.startsWith('/tools/') || p === '/goals' || p.startsWith('/goals/') || p === '/today'),
+  },
+  { href: '/gear',    label: LABELS.gear.short,     exact: false, Icon: BagIcon },
 ]
 
 export default function MobileBottomNav() {
@@ -75,8 +108,8 @@ export default function MobileBottomNav() {
     return exact ? pathname === href : pathname === href || pathname.startsWith(href + '/')
   }
 
-  const renderTab = ({ href, label, exact, Icon }: (typeof TABS)[number]) => {
-    const active = isActive(href, exact)
+  const renderTab = ({ href, label, exact, Icon, match }: (typeof TABS)[number] & { match?: (p: string) => boolean }) => {
+    const active = match ? match(pathname) : isActive(href, exact)
     return (
       <Link
         key={href}

@@ -75,7 +75,41 @@ Net effect: chrome returns to its pre-session state, plus one genuine bug fix.
   and `revalidateGoal` already covers the paths — but it puts medication logging on a
   settings-adjacent page. v1 links through.
 
-### Phase C — one chrome for every authenticated surface
+### Phase C — one chrome for every authenticated surface (shipped 2026-08-17)
+
+**Done via option (i).** `tools/`, `goals/` and `today/` moved into `(public)/` and
+`app/(tools)/layout.tsx` is deleted; the group no longer exists. 21 pages, URLs unchanged.
+
+**The four gates, resolved:**
+
+1. **`data-theme="dark"`** — clear. `app/layout.tsx:137` sets it on `<html>`, so the
+   deleted wrapper `div` was redundant. Nothing lost.
+2. **What `Header` assumes** — nothing that breaks; `/account/*` already proved it over a
+   private surface, and `PublicMain` adds the `pb-14 md:pb-0` bottom-nav clearance those
+   pages now need.
+3. **`HideOnImmersive` / `isImmersiveRoute`** — only DM threads match, so no goals or
+   tools page hides the strip. Checked specifically that nothing under `/tools/the-boss`
+   pins a composer to the bottom, which is the case that would have needed the immersive
+   list extended.
+4. **`alwaysShow`** — dropped from `AccountMenu` entirely; the deleted chrome was its only
+   caller.
+
+**One trap found, and it cost a round trip:** `AccountMenu` renders `ActivityMenu`
+**outside** its own `hidden md:block` wrapper, so the bell has always shown at every
+width while the avatar trigger is desktop-only. Adding a "mobile bell" to `Header` to
+compensate for the lost `alwaysShow` therefore rendered **two bells**. There is now a
+warning at both sites. The asymmetry is correct: a drawer can repeat a link, not a badge.
+
+**Also updated:** `scripts/check-og-coverage.mjs` `GROUPS` is `['(public)']` — its ALLOW
+patterns match PATHS, not groups, so every private-page exemption survived the move
+untouched (37 pages still covered). Stale `app/(tools)/…` paths in five `lib/` comments
+were repointed.
+
+**Left for its own pass:** the bottom nav's tab set was changed with this (see Phase G),
+and the Ask FAB remains desktop-only with the mobile center slot as its counterpart.
+
+<details>
+<summary>Original plan for Phase C, kept for the reasoning</summary>
 
 The fix for "different website". Two ways to do it:
 
@@ -104,6 +138,29 @@ The fix for "different website". Two ways to do it:
 Guides / Gear + an Ask-the-Boss FAB. A signed-in dad logging a taper will have four
 editorial tabs at his thumb. That is not worse than today (he currently has *no* bottom
 nav), so it ships as-is and gets revisited.
+
+</details>
+
+### Phase G — the mobile tab set (shipped 2026-08-17)
+
+Phase C gave the goals spine a bottom nav for the first time; it pointed at four reading
+surfaces and had no entry to Tools at all. **Operator's call, and the reasoning is his:**
+
+- **Five slots, not six.** Six is crowded at 393px, and the elevated Ask FAB has to sit
+  dead centre — an even tab count can't give it that. So a tab had to yield.
+- **Home yielded.** The wordmark in the header goes home from every page, so the tab was
+  the one item on the strip whose job was already done elsewhere. **Gear and Ask were
+  explicitly protected** — neither is negotiable.
+- **Order: Reviews · Guides · [Ask] · Tools · Gear.** Reading on the left, doing and
+  shopping on the right, the concierge in the middle.
+
+`match` was added to the tab shape for the one tab that owns more than its own subtree:
+Tools lights up across `/tools`, `/goals` and `/today` but **not** `/tools/the-boss`,
+which belongs to the Ask slot — otherwise two things light up for one page. The label
+reads from `LABELS.tools.short`, so the paused Vault/Keep rename lands here for free.
+
+Icon is a toolbox drawn from a rect + a handle + a clasp, not a traced wrench — the same
+call the launcher tiles made, because at 20px a multi-path wrench turns to mush.
 
 ### Phase D — one signed-in home
 
@@ -135,14 +192,86 @@ half-built front doors, and the user has to know which to pick.
   surfaces (`/bench`, `/vault`, `/picks`, `/stacks`, `/comparisons`, `/gifts`). Same
   smell, different domain, and `/vault` is inside the paused rename decision.
 
+### Phase F — where the card sits, and what `/account` is for (shipped 2026-08-17)
+
+Phase B put one `TodayCard` on three pages and Phase D made `/tools` the signed-in home.
+Reviewing the result with the operator surfaced that the placements had drifted from both
+decisions, and that D's own rename never happened.
+
+**What was wrong**
+
+1. **`/tools` buried the day.** Order was hero → launcher → PWA banner → family rows →
+   *then* the card. On a 393px phone with two kids, "3 things waiting on you" started
+   ~700px down — under an install advert, on the page whose whole job is answering "what
+   now".
+2. **`/goals` stated "what's open" twice, from two sources.** The full card previews the
+   next four items while every goal row below carries its own `Due` / `N open` badge and
+   today's target — and the card counts **live occurrences** where the badges read
+   **`goal_stats`**, which is only as fresh as the last sweep tick.
+3. **`/account` contradicted its own stated rule.** The page comment says *"management
+   lives here; state and work live on /tools"*, then kept the card as a self-declared
+   exception. Three identical cards pointing at one door; a card that appears everywhere
+   is read nowhere.
+4. **"Your Stuff" was hardcoded in four places** — `AccountMenu`, the `Header` drawer, the
+   H1 and the metadata — with no `account` block in `lib/labels.ts` at all. Phase D
+   specified this rename and it never shipped.
+
+**What shipped**
+
+- **`/tools`** — the card leads the page, launcher second, `InstallPWA` moved below the
+  personalized stack (signed-out keeps it high; it's one `installCta` binding rendered in
+  one of two places). **Card-first even when the day is clear** — the quiet state is
+  reassurance, and reordering by state would mean preloading the query just to learn the
+  tone.
+- **`/goals`** — `<TodayCard variant="compact">`: verdict, week strip, CTA. No preview
+  rows. **One number per page**; on a page whose unit is the goal, the row badges own it.
+  The week strip survives because a list of goals cannot show it.
+- **`/account`** — card off. Sections reordered to family → people → saved → activity.
+- **`lib/labels.ts`** — new `account` block; all four call sites read from it.
+
+**Decisions recorded, so they don't get re-opened**
+
+- **`/account` is NOT renamed to "Profile".** A profile is what other people see — the
+  `display_name` / `tagline` / `bio` / avatar fields that feed member search, which live
+  on `/account/settings`. This page is the opposite: family, contacts, saved links, none
+  of it readable by anyone else. `/dashboard/profile` already owns the word for authors.
+- **`/account` is NOT folded into `/account/settings`.** Wrong direction: `/account` is
+  the shorter URL, it's what `proxy.ts`'s auth guard and the avatar menu point at, and
+  `/account/settings` is linked from `NewMessageEmail` and `WishlistStatusEmail` — folding
+  the good URL into the longer one buys a 301 and worse addresses. The split that stands
+  is **`/account` = what you have, `/account/settings` = what you configure**, which is
+  the Facebook/LinkedIn/GitHub split the page was built on.
+- **Cards never log inline.** Closes the deferred question in Phase B. `/today` is the
+  only surface that resolves work; two surfaces that both log is how "did that save?"
+  starts, and it would put medication logging on a settings-adjacent page.
+
+**Still open after F**
+
+- **Fold the settings FORM sections up into `/account`?** Only worth it if `/account`
+  stays thin. Revisit when either saved list outgrows a screen — at which point `Saved`
+  (liked reviews + guides, Bench follows) probably wants to be its own `/account/saved`
+  rather than two cards on a hub.
+- **The Activity tile** (Comments Left / Likes Given) is the least useful thing on
+  `/account`. Kept — it's your own record, not a public scale metric — but it is the
+  first thing to cut if the page needs room.
+- **`/today` row density** — the reason this review started. Multiple open occurrences
+  each render a full ~200px card with a form, and a twice-daily medication goal renders as
+  two or three near-identical cards. Two changes are agreed in principle and NOT built:
+  **group by goal** (one row, a time chip per slot, each chip its own submit) and **hide
+  the number field behind a disclosure** (it defaults to `target_value`, so the fast path
+  is already one tap). The row-shape choice — compact rows vs first-expanded — is
+  undecided. Constraint: `/today` has **no client JS** (plain forms + the inert
+  `OfflineLogQueue` island); chips-as-submits and `<details>` preserve that, a
+  state-driven accordion would not.
+
 ---
 
 ---
 
 ## Next session
 
-Phases A, B and D shipped 2026-08-15 (`c636c11`, `79a0cce`, `bbc7a20`, `1348606`).
-What's left, in the order I'd take it:
+Phases A, B, D shipped 2026-08-15 (`c636c11`, `79a0cce`, `bbc7a20`, `1348606`);
+F shipped 2026-08-17. What's left, in the order I'd take it:
 
 ### 1. Phase C — unify the chrome (the one that matters)
 
@@ -212,3 +341,8 @@ a year per POP. A rename without a 301 breaks both.
    it is the one list, and a mutation that doesn't revalidate a surface makes edits look
    like they didn't save.
 6. **No route renames** while the tools naming decision is paused.
+7. **One number per page.** If two components on one screen can both claim "what's open",
+   one of them is wrong — and they will disagree, because live occurrences and
+   `goal_stats` have different freshness. Decide which owns it by the page's unit.
+8. **`/tools` is the signed-in home.** The day leads it. Nothing gets inserted above the
+   `TodayCard` — not a launcher, not a promo.

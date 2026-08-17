@@ -4,7 +4,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // WHY THIS IS A MODULE AND NOT INLINE ON THE PAGE
 //
-// This lived inside app/(tools)/today/page.tsx. The moment the same summary had to
+// This lived inside app/(public)/today/page.tsx. The moment the same summary had to
 // appear on /goals, /tools and /account, a copy of "what counts as due" would have
 // existed in four places — and the copies would drift, so a card would eventually
 // say "2 waiting on you" and link to a page listing three. Same reasoning as

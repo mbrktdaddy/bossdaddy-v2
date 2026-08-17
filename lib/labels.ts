@@ -147,6 +147,33 @@ export const LABELS = {
     cornerLabel: 'In your corner',
   },
 
+  // The private personal page at /account. The ROUTE is permanent (it's in
+  // proxy.ts's auth guard and two email templates point at its settings child);
+  // every word a member reads lives here.
+  //
+  // WAS "YOUR STUFF" UNTIL 2026-08-17, and the rename is a consequence, not taste.
+  // That label was earned when the page also carried the goals list, the day's work
+  // and "in your corner" — a genuine pile of your stuff. docs/nav-ia-plan.md Phase D
+  // moved all three to /tools, which left "Your Stuff" naming a page about family,
+  // contacts and saved links. Phase F finished the rename D had already specified.
+  //
+  // ⚠️ NOT "PROFILE", and this is the trap to avoid re-opening. A profile is what
+  // OTHER people see — display_name, tagline, bio, avatar, the fields that feed
+  // member search and live on /account/settings. This page is the opposite: your
+  // family, who you can reach, what you've saved, none of it readable by anyone
+  // else. /dashboard/profile also already owns the word for authors, and two
+  // surfaces called Profile is precisely the ambiguity this whole plan removes.
+  account: {
+    short:        'Account',
+    full:         'Account',
+    pageTitle:    'Account — Boss Daddy',
+    h1:           'Account',
+    /** Names the three groups in page order, so the dek can't drift from the layout. */
+    tagline:      'Your family, your people, and the things you’ve saved.',
+    settingsCta:  'Account settings',
+    savedHeading: 'Saved',
+  },
+
   // goals / goal_schedules / goal_occurrences tables → /goals route.
   //
   // NAMING IS NOT SETTLED — "Goals" is the neutral default, not a decision. The
@@ -287,8 +314,8 @@ export const LABELS = {
       //
       // No brand name in the H1: the wordmark sits directly above it.
       //
-      // Avoids two phrases already spoken for: "Your Stuff" is /account, and
-      // "What you're working on" is the goals+savings section ON /account.
+      // Avoids a phrase already spoken for: "What you're working on" is the
+      // goals+savings section, which now renders on THIS page (nav-ia-plan Phase D).
       // The dek names one tool per verb, in the order they're most used. Note
       // "capture a moment" and NOT "log a memory": the Dad Tools vocab is locked
       // at the top of this block — container "[Kid]'s Log", unit "moment", verb

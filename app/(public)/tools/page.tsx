@@ -148,6 +148,15 @@ export default async function ToolsHubPage() {
     }
   }
 
+  // Declared once, rendered in one of two places depending on who's reading — see the
+  // two call sites below. Two <InstallPWA> literals would be two things to keep in sync.
+  const installCta = (
+    <InstallPWA
+      className="mb-10 sm:mb-14"
+      body="Install Boss Daddy — your dad tools, one tap from the home screen."
+    />
+  )
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
 
@@ -180,15 +189,29 @@ export default async function ToolsHubPage() {
         )}
       </section>
 
+      {/* ── THE DAY, FIRST ───────────────────────────────────────────────────
+          THIS IS THE SIGNED-IN HOME (docs/nav-ia-plan.md Phase D), so the first thing
+          on it is the answer to "what now" — not a directory, and certainly not an
+          install advert. It used to sit fourth, under the launcher, the PWA banner and
+          the family rows: on a 393px phone with two kids, "3 things waiting on you"
+          started around 700px down, which is a work queue you have to go looking for.
+
+          Card-first even when the day is CLEAR, and deliberately so — the quiet state
+          ("You're clear") is reassurance, which is the thing a man opening this page at
+          6am is actually after. That also avoids reordering the page by state, which
+          would mean preloading the query up here just to learn the tone. */}
+      {user ? <TodayCard userId={user.id} className="mb-10 sm:mb-14" /> : null}
+
       {/* ── THE LAUNCHER, HIGH AND THIN ──────────────────────────────────────
-          Straight under the hero, before anything else competes for the fold. This is
-          the row a returning dad aims his thumb at without reading, so it goes where
-          his thumb already expects it — and at ~76px it costs less height than one of
-          the old cards. Signed-out visitors get the full pitch further down instead;
-          they have no muscle memory to serve. */}
+          Second now, still above the fold. This is the row a returning dad aims his
+          thumb at without reading, and at ~76px it costs less height than one of the old
+          cards. Signed-out visitors get the full pitch further down instead; they have
+          no muscle memory to serve. */}
       {isSignedIn ? <ToolTiles className="mb-10 sm:mb-14" /> : null}
 
-      <InstallPWA className="mb-10 sm:mb-14" body="Install Boss Daddy — your dad tools, one tap from the home screen." />
+      {/* Signed-out only up here. For a member this is a promo sitting between him and
+          his own work, so it moves below the personalized stack (further down). */}
+      {isSignedIn ? null : installCta}
 
       {/* ── PERSONALIZED STATE — only when logged in with kids ──────────── */}
       {/* Compact-row pattern matches /account/settings + /dashboard/profile.
@@ -295,24 +318,16 @@ export default async function ToolsHubPage() {
         </section>
       )}
 
-      {/* ── WHAT'S OPEN RIGHT NOW ────────────────────────────────────────────
-          The hub is the front door to everything a signed-in dad touches daily and it
-          carried NO personalization at all — you arrived at a directory and had to
-          remember which spoke your own work was behind. The card renders nothing for a
-          visitor with no active goals, so the shelf below is still the first thing a
-          newcomer sees. */}
+      {/* ── WHAT YOU'RE CARRYING ─────────────────────────────────────────────
+          The card at the top answers "what now"; this answers "what am I carrying".
+          Both come before the tool shelf because a returning user is not shopping for a
+          tool. Renders nothing when signed out or empty, so a newcomer still meets the
+          shelf first.
+
+          This is the content move from docs/nav-ia-plan.md Phase D. The Today card that
+          used to lead this block now leads the PAGE (Phase F). */}
       {user ? (
         <div className="mb-10 sm:mb-14 space-y-6">
-          <TodayCard userId={user.id} />
-          {/* WHAT'S DUE, THEN WHAT YOU HAVE, THEN THE SHELF.
-              The hub listed only what you COULD use — a directory you had to translate
-              into your own work before it was any help. The card answers "what now"
-              and this answers "what am I carrying", and both come before the tools
-              because a returning user is not shopping for a tool. Renders nothing when
-              signed out or empty, so a newcomer still meets the shelf first.
-
-              This is the content move from docs/nav-ia-plan.md Phase D. Its twin on
-              /account is still there for the moment — see the note there. */}
           <WorkingOnSection userId={user.id} />
           {/* Who's watching the work sits WITH the work. It's a fact about these
               goals — on /account it was a fact about goals that page no longer
@@ -320,6 +335,9 @@ export default async function ToolsHubPage() {
           <YourCornerSection />
         </div>
       ) : null}
+
+      {/* The promo, once his own things are dealt with. */}
+      {isSignedIn ? installCta : null}
 
       {/* ── THE SHELF, IN TWO STATES ─────────────────────────────────────────
           A signed-in dad gets tiles; a visitor keeps the cards.

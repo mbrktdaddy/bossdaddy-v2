@@ -15,12 +15,19 @@ import ConnectionBadge from '@/components/account/ConnectionBadge'
 // (Comparisons / Best Of / Stacks / Gift Guides) live inside the Browse
 // mega-menu's "From The Vault" section, and that menu's "See all →" link
 // is the canonical path to /vault itself.
+//
+// ⚠️ CANONICAL SPINE ORDER: Reviews · Guides · Tools · Gear. Every surface that lists
+// these four renders them in this sequence — this array (which feeds BOTH the desktop
+// nav and the mobile drawer), `MobileBottomNav`'s tabs, and the Footer's Browse column.
+// Tools used to sit last here and last in the footer, which put the most-used signed-in
+// surface at the end of every list on the site. If you add a fifth spine anchor, add it
+// in all three places or it will read as a different site depending on where you look.
 const NAV_LINKS = [
   { href: '/',        label: 'Home' },
   { href: '/reviews', label: LABELS.reviews.plural },
   { href: '/guides',  label: LABELS.guides.plural },
-  { href: '/gear',    label: LABELS.gear.short },
   { href: '/tools',   label: LABELS.tools.short },
+  { href: '/gear',    label: LABELS.gear.short },
 ]
 
 // Sub-links surfaced in the "Browse" mega-menu footer + mobile drawer.
@@ -76,9 +83,9 @@ function isActive(pathname: string, href: string) {
 export default function Header() {
   const { username, role, avatarUrl } = useAuthUser()
   // The SETTINGS item specifically — profile fields, sign-in, notification and
-  // privacy toggles. "Your Stuff" (/account) is a separate item above it, and
-  // holds everything that isn't configuration. Same for every role; the
-  // dashboard is workspace-only.
+  // privacy toggles. Account (/account) is a separate item above it, and holds
+  // everything that isn't configuration. Same for every role; the dashboard is
+  // workspace-only.
   const profileHref = '/account/settings'
   const hasDashboard = role === 'author' || role === 'admin'
 
@@ -318,6 +325,11 @@ export default function Header() {
 
           <AccountMenu />
 
+          {/* NO SEPARATE MOBILE BELL HERE, and don't add one: `AccountMenu` renders
+              ActivityMenu OUTSIDE its own `hidden md:block` wrapper (see that file), so
+              the bell already shows at every width while the avatar trigger stays
+              desktop-only. Adding a second one for "mobile" puts two bells in the row. */}
+
           {/* Hamburger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -502,7 +514,7 @@ export default function Header() {
                   <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm4 4h8M8 14h5" />
                   </svg>
-                  Your Stuff
+                  {LABELS.account.short}
                 </Link>
                 <Link
                   href="/account/connections"

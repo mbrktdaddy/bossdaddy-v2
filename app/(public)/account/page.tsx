@@ -1,4 +1,10 @@
-// Your stuff — the personal home.
+// Account — everything about YOU that isn't a form.
+//
+// NOT the signed-in home. /tools is (docs/nav-ia-plan.md Phase D), and this page stopped
+// competing for the job in Phase F when the Today card came off it. What's here is your
+// family, your people and the things you saved; what's on /account/settings is the
+// configuration — profile fields, email and privacy toggles, delete account. The label
+// is LABELS.account, and the reason it is no longer "Your Stuff" is written there.
 //
 // This page didn't exist. Everything on it was living inside /account/settings,
 // which meant a settings URL was where your kid profiles, your taper, your likes
@@ -25,12 +31,12 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
+import { LABELS } from '@/lib/labels'
 import MyKidsSection from '@/components/dad-tools/MyKidsSection'
-import TodayCard from '@/components/goals/TodayCard'
 import ContactsCard from '@/components/account/ContactsCard'
 
 export const metadata: Metadata = {
-  title: 'Your Stuff',
+  title: LABELS.account.pageTitle,
   robots: { index: false, follow: false },
 }
 
@@ -95,10 +101,14 @@ export default async function AccountHomePage() {
     <div data-theme="dark" className="bg-background text-prose min-h-[calc(100vh-4rem)]">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
 
+        {/* "Account", not "Your Stuff" — and both strings now come from
+            lib/labels.ts, which is where a nav link and a page H1 are supposed to read
+            from (CLAUDE.md, Naming Doctrine). The old label was hardcoded in four
+            places; see the block in labels.ts for why the word changed. */}
         <div className="mb-8">
-          <h1 className="text-2xl font-black">Your Stuff</h1>
+          <h1 className="text-2xl font-black">{LABELS.account.h1}</h1>
           <p className="text-prose-faint text-sm mt-1">
-            Your family, your people, and your account.
+            {LABELS.account.tagline}
           </p>
         </div>
 
@@ -121,29 +131,16 @@ export default async function AccountHomePage() {
 
         <ContactsCard />
 
-        {/* THE ONE WORK ITEM LEFT ON A MANAGEMENT PAGE, and it's here by request:
-            you come to your own page and want to know whether the day is clear.
-            `emptyPrompt={false}` — this page no longer carries the goals list, so
-            there's nothing for a first-run invitation to sit beside; the ask belongs
-            on /tools, where it can show what the day would look like. */}
-        <div className="mb-6">
-          <TodayCard userId={user.id} emptyPrompt={false} />
-        </div>
+        {/* THE TODAY CARD IS GONE FROM HERE (Phase F), and it's the last piece of
+            Phase D. It was kept "by request" as the one work item on a management page,
+            which left three identical cards pointing at one door — /tools, /goals and
+            here — and a card that appears everywhere stops being read anywhere. /tools
+            is the signed-in home and leads with it; the avatar menu is one tap away from
+            either page.
 
-        <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Activity</p>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center">
-              <p className="text-2xl font-black text-prose">{commentCount ?? 0}</p>
-              <p className="text-xs text-prose-faint mt-1">Comments Left</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-black text-accent-text-soft">{likesGiven ?? 0}</p>
-              <p className="text-xs text-prose-faint mt-1">Likes Given</p>
-            </div>
-          </div>
-        </div>
-
+            What's left below is what a member HAS: the things he saved, then the two
+            counts. Activity moved under them — it's the least useful thing on the page
+            and it was sitting above the content it counts. */}
         <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Liked Content</p>
           {!hasLikedContent ? (
@@ -201,12 +198,29 @@ export default async function AccountHomePage() {
           )}
         </div>
 
+        {/* Two counts of your own doing, below the content they count. Kept rather
+            than cut — it's your own record, not a scale metric on a public page — but
+            it's the first thing to go if this page needs the room. */}
+        <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Activity</p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center">
+              <p className="text-2xl font-black text-prose">{commentCount ?? 0}</p>
+              <p className="text-xs text-prose-faint mt-1">Comments Left</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-black text-accent-text-soft">{likesGiven ?? 0}</p>
+              <p className="text-xs text-prose-faint mt-1">Likes Given</p>
+            </div>
+          </div>
+        </div>
+
         <div className="border-t border-soft pt-6">
           <Link
             href="/account/settings"
             className="inline-flex min-h-11 items-center text-xs font-semibold text-accent-text hover:text-prose"
           >
-            Account settings →
+            {LABELS.account.settingsCta} →
           </Link>
         </div>
 
