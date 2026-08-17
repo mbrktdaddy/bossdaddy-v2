@@ -44,8 +44,8 @@
     "merch:discover": "node --env-file=.env.local scripts/discover-merch-blanks.mjs"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.99",
-    "@ai-sdk/xai": "^3.0.111",
+    "@ai-sdk/anthropic": "^4.0.38",
+    "@ai-sdk/xai": "^4.0.38",
     "@anthropic-ai/sdk": "^0.115.0",
     "@react-email/components": "^1.0.12",
     "@react-email/render": "^2.1.0",
@@ -63,7 +63,7 @@
     "@upstash/redis": "^1.38.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
-    "ai": "^6.0.230",
+    "ai": "^7.0.65",
     "next": "^16.2.12",
     "openai": "^6.49.0",
     "react": "19.2.8",
