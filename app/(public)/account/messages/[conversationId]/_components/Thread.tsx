@@ -10,6 +10,7 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { compressImage } from '@/lib/compress-image'
 import { REACTION_KINDS, REACTIONS, reactionEmoji, type ReactionKind } from '@/lib/messaging-reactions'
+import { tokenizeLinks } from '@/lib/linkify'
 import {
   sendMessage, markConversationRead, blockUser, unblockUser, reportContent,
   deleteConversation, setConversationMuted, toggleReaction,
@@ -31,6 +32,62 @@ interface ReactionRow { message_id: string; user_id: string; kind: string }
 interface Peer { id: string; username: string; displayName: string | null; avatarUrl: string | null }
 
 const REPORT_REASONS = ['Spam', 'Harassment', 'Inappropriate content', 'Other']
+
+/** Files accepted from the picker, a paste, or a drop. Mirrors the upload route. */
+const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+/** Photos per send. Telegram's number; enough for a batch, few enough to stay a row. */
+const MAX_BATCH = 10
+
+/** A photo chosen but not yet sent — sits in the tray above the composer. */
+interface StagedImage { key: string; file: File; previewUrl: string }
+
+/**
+ * A photo mid-flight, rendered as a real bubble in the thread.
+ *
+ * THE POINT OF THIS TYPE: before it existed, sending a photo made the staged
+ * preview vanish and put NOTHING in the thread until the round trip finished and
+ * Realtime echoed the row back. On a weak connection that's several seconds of a
+ * man wondering whether he just sent it. Every messenger shows the image
+ * immediately with a progress indicator over it; this is that.
+ */
+interface OptimisticUpload {
+  key:        string
+  previewUrl: string
+  caption:    string
+  /** 0–1. Upload only — the server's own work after the bytes land isn't visible. */
+  progress:   number
+  error:      string | null
+}
+
+/**
+ * POST a photo and report upload progress.
+ *
+ * XMLHttpRequest, not fetch: `fetch` still has no upload-progress event (request
+ * streams are Chrome-only and require HTTP/2 plus a duplex flag), and progress is
+ * the entire reason this exists. Never rejects — the caller wants a result to show
+ * on the bubble, not an exception to catch.
+ */
+function uploadWithProgress(
+  body: FormData,
+  onProgress: (fraction: number) => void,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('POST', '/api/dm/upload')
+    xhr.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable) onProgress(e.loaded / e.total)
+    })
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) { resolve({ ok: true }); return }
+      let error = 'Could not send photo'
+      try { error = JSON.parse(xhr.responseText)?.error || error } catch { /* keep default */ }
+      resolve({ ok: false, error })
+    })
+    xhr.addEventListener('error', () => resolve({ ok: false, error: 'Could not send photo — please try again' }))
+    xhr.addEventListener('abort', () => resolve({ ok: false, error: 'Upload cancelled' }))
+    xhr.send(body)
+  })
+}
 
 function draftKey(conversationId: string) { return `bd_dm_draft:${conversationId}` }
 
@@ -122,9 +179,13 @@ export default function Thread({
   const [actionsFor, setActionsFor] = useState<string | null>(null)
   // The message being replied to, if any.
   const [replyToId, setReplyToId] = useState<string | null>(null)
-  // Pending image attachment (one per message) + its object-URL preview. The
-  // draft textarea doubles as an optional caption while one is staged.
-  const [pendingImage, setPendingImage] = useState<{ file: File; previewUrl: string } | null>(null)
+  // Photos chosen but not sent. The draft textarea doubles as a caption for the
+  // batch while any are staged.
+  const [staged, setStaged] = useState<StagedImage[]>([])
+  // Photos in flight, rendered as bubbles at the end of the thread.
+  const [uploads, setUploads] = useState<OptimisticUpload[]>([])
+  // Whether a drag is currently over the composer (desktop drop target).
+  const [dragging, setDragging] = useState(false)
   // Message id whose image is open in the lightbox (null = closed).
   const [lightboxId, setLightboxId] = useState<string | null>(null)
   // Gate locale-formatted timestamps behind mount so SSR (server timezone) and
@@ -264,19 +325,55 @@ export default function Thread({
 
   // Mark read on mount + whenever messages change.
   useEffect(() => { markConversationRead(conversationId) }, [conversationId, messages.length])
-  // Auto-scroll on new messages only while pinned to the bottom.
-  useEffect(() => { if (stickToBottom.current) scrollToBottom() }, [messages.length, scrollToBottom])
+  // Auto-scroll on new messages only while pinned to the bottom. `uploads.length`
+  // counts too — an optimistic bubble is a new thing in the thread and has to
+  // scroll into view exactly like a real one, or the reassurance it exists to give
+  // happens off-screen.
+  useEffect(() => { if (stickToBottom.current) scrollToBottom() }, [messages.length, uploads.length, scrollToBottom])
 
-  // Close the lightbox on Escape.
+  // Lightbox keys: Escape closes, arrows step through the thread's photos. Arrow
+  // stepping matters more now that a batch send puts several photos in a row —
+  // closing and reopening each one is the behaviour nobody expects.
   useEffect(() => {
+    // Captured, not read through the closure: narrowing `lightboxId` above doesn't
+    // carry into a nested function, because TS can't prove it hasn't changed by the
+    // time the handler runs.
     if (!lightboxId) return
-    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setLightboxId(null) }
+    const openId: string = lightboxId
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') { setLightboxId(null); return }
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+      const ids = messages.filter((m) => m.attachment_path).map((m) => m.id)
+      const at = ids.indexOf(openId)
+      if (at === -1) return
+      const next = at + (e.key === 'ArrowRight' ? 1 : -1)
+      if (next >= 0 && next < ids.length) setLightboxId(ids[next])
+    }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [lightboxId])
+  }, [lightboxId, messages])
 
-  // Revoke the staged preview URL if the thread unmounts mid-compose.
-  useEffect(() => () => { if (pendingImage) URL.revokeObjectURL(pendingImage.previewUrl) }, [pendingImage])
+  // Revoke object URLs on unmount so a long session doesn't leak every photo it
+  // ever staged. Refs, not the state values, so this runs exactly once at teardown
+  // instead of re-running (and revoking a URL still on screen) on every change.
+  // Mirrored into refs from effects, NOT during render — a ref write in the render
+  // body is a real bug (it happens on every speculative render, including ones React
+  // throws away) as well as a lint error. `addFiles` also reads stagedRef to measure
+  // remaining room, and it only ever runs from an event handler, by which point these
+  // have committed.
+  const stagedRef = useRef<StagedImage[]>([])
+  const uploadsRef = useRef<OptimisticUpload[]>([])
+  useEffect(() => { stagedRef.current = staged }, [staged])
+  useEffect(() => { uploadsRef.current = uploads }, [uploads])
+
+  // Revoke every object URL still outstanding when the thread unmounts, so a long
+  // session doesn't leak each photo it ever staged. Reads the refs rather than the
+  // state so this can run exactly once at teardown instead of re-running — and
+  // revoking a URL still on screen — every time either list changes.
+  useEffect(() => () => {
+    for (const s of stagedRef.current) URL.revokeObjectURL(s.previewUrl)
+    for (const u of uploadsRef.current) URL.revokeObjectURL(u.previewUrl)
+  }, [])
 
   // Realtime: new messages, the peer's read state (for "Seen"), and reactions.
   useEffect(() => {
@@ -323,27 +420,64 @@ export default function Thread({
     return () => { supabase.removeChannel(channel) }
   }, [conversationId, meId])
 
-  // Stage an image for sending. Compress client-side first so a 12MP phone
-  // shot doesn't upload at full size; the server re-encodes again (and strips
-  // EXIF/GPS) regardless. Falls back to the raw file if compression fails.
-  async function pickImage(e: React.ChangeEvent<HTMLInputElement>) {
-    const raw = e.target.files?.[0]
-    e.target.value = ''
-    if (!raw) return
+  /**
+   * Stage photos from any source — the picker, a paste, or a drop.
+   *
+   * Compressed client-side first so a 12MP phone shot doesn't upload at full size;
+   * the server re-encodes and strips EXIF/GPS regardless, and animated files skip
+   * compression so they don't get flattened. Falls back to the raw file if
+   * compression fails, because a large photo that sends beats a small one that
+   * doesn't.
+   */
+  const addFiles = useCallback(async (incoming: File[]) => {
+    const images = incoming.filter((f) => ACCEPTED_TYPES.includes(f.type))
+    if (images.length === 0) {
+      if (incoming.length > 0) setError('That file type isn\'t supported — JPEG, PNG, WebP or GIF.')
+      return
+    }
     setError(null)
-    const file = await compressImage(raw).catch(() => raw)
-    setPendingImage((prev) => {
-      if (prev) URL.revokeObjectURL(prev.previewUrl)
-      return { file, previewUrl: URL.createObjectURL(file) }
+
+    // Cap against what's ALREADY staged, and say so rather than silently dropping
+    // the tail — a man who selected fifteen photos needs to know five didn't make it.
+    const room = MAX_BATCH - stagedRef.current.length
+    if (room <= 0) { setError(`That's the limit — ${MAX_BATCH} photos at a time.`); return }
+    const take = images.slice(0, room)
+    if (images.length > room) setError(`Only the first ${room} were added — ${MAX_BATCH} photos at a time.`)
+
+    const prepared = await Promise.all(take.map(async (raw) => {
+      const file = await compressImage(raw).catch(() => raw)
+      return {
+        key: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        file,
+        previewUrl: URL.createObjectURL(file),
+      }
+    }))
+    setStaged((prev) => [...prev, ...prepared])
+  }, [])
+
+  async function pickImages(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? [])
+    e.target.value = ''
+    await addFiles(files)
+  }
+
+  function removeStaged(key: string) {
+    setStaged((prev) => {
+      const hit = prev.find((s) => s.key === key)
+      if (hit) URL.revokeObjectURL(hit.previewUrl)
+      return prev.filter((s) => s.key !== key)
     })
   }
 
-  function removePendingImage() {
-    setPendingImage((prev) => {
-      if (prev) URL.revokeObjectURL(prev.previewUrl)
-      return null
-    })
-  }
+  /** Screenshot straight into the composer — the desktop convention. */
+  const onPaste = useCallback((e: React.ClipboardEvent) => {
+    const files = Array.from(e.clipboardData?.files ?? [])
+    if (files.length === 0) return
+    // Only swallow the event when we're actually taking something, so pasting
+    // text into the caption keeps working normally.
+    e.preventDefault()
+    addFiles(files)
+  }, [addFiles])
 
   async function send() {
     const text = draft.trim()
@@ -351,24 +485,58 @@ export default function Thread({
     // Sending always re-pins to the bottom so my own message scrolls into view.
     stickToBottom.current = true
 
-    if (pendingImage) {
-      setSending(true); setError(null)
-      try {
+    if (staged.length > 0) {
+      const batch = staged
+      const caption = text
+      const replyFor = replyToId
+
+      // THE TRAY EMPTIES AND THE BUBBLES APPEAR IN THE SAME TICK. Anything else
+      // leaves a gap where the photos are nowhere on screen, which is the exact
+      // moment that used to read as "did that send?".
+      setStaged([])
+      clearDraft()
+      setReplyToId(null)
+      setError(null)
+      setUploads((prev) => [
+        ...prev,
+        ...batch.map((s, i) => ({
+          key: s.key,
+          previewUrl: s.previewUrl,
+          // Caption and reply attach to the FIRST photo only — one caption for the
+          // batch, the same as WhatsApp's album behaviour. Repeating it on all ten
+          // would be noise.
+          caption: i === 0 ? caption : '',
+          progress: 0,
+          error: null,
+        })),
+      ])
+
+      // SEQUENTIAL, not Promise.all. Order is the reason: these arrive as separate
+      // messages, and firing them together means the server decides the order by
+      // whichever upload finishes first — so ten photos land shuffled. It also
+      // keeps a phone from racing ten uploads over one connection.
+      for (const [i, item] of batch.entries()) {
         const fd = new FormData()
         fd.append('conversationId', conversationId)
-        fd.append('file', pendingImage.file)
-        if (text) fd.append('caption', text)
-        if (replyToId) fd.append('replyToId', replyToId)
-        const res = await fetch('/api/dm/upload', { method: 'POST', body: fd })
-        const json = (await res.json().catch(() => ({}))) as { error?: string }
-        if (!res.ok) { setError(json.error || 'Could not send image'); setSending(false); return }
-        removePendingImage()
-        clearDraft()
-        setReplyToId(null)
-      } catch {
-        setError('Could not send image — please try again')
+        fd.append('file', item.file)
+        if (i === 0 && caption) fd.append('caption', caption)
+        if (i === 0 && replyFor) fd.append('replyToId', replyFor)
+
+        const res = await uploadWithProgress(fd, (fraction) => {
+          setUploads((prev) => prev.map((u) => u.key === item.key ? { ...u, progress: fraction } : u))
+        })
+
+        if (res.ok) {
+          // Drop the placeholder; Realtime delivers the real row. Revoking here
+          // rather than on unmount keeps a long session from holding every blob.
+          setUploads((prev) => prev.filter((u) => u.key !== item.key))
+          URL.revokeObjectURL(item.previewUrl)
+        } else {
+          // KEPT ON SCREEN, marked failed. Removing it would lose the photo and the
+          // reason in one go, and he'd have to work out which of ten didn't make it.
+          setUploads((prev) => prev.map((u) => u.key === item.key ? { ...u, error: res.error } : u))
+        }
       }
-      setSending(false)
       return
     }
 
@@ -380,6 +548,15 @@ export default function Thread({
     clearDraft()
     setReplyToId(null)
     // Realtime will append; nothing else to do.
+  }
+
+  /** Give up on a failed upload — the only way to clear a stuck bubble. */
+  function dismissUpload(key: string) {
+    setUploads((prev) => {
+      const hit = prev.find((u) => u.key === key)
+      if (hit) URL.revokeObjectURL(hit.previewUrl)
+      return prev.filter((u) => u.key !== key)
+    })
   }
 
   /**
@@ -536,7 +713,7 @@ export default function Thread({
           history of making the top of the content unreachable, while mt-auto simply
           has no effect once the content is taller than the pane. */}
       <div ref={listRef} onScroll={onListScroll} className="flex-1 overflow-y-auto flex flex-col">
-        {messages.length === 0 ? (
+        {messages.length === 0 && uploads.length === 0 ? (
           // Centred, and it names him — an empty pane should look deliberate and
           // tell you where you are, not just sit blank with two words in it.
           <div className="m-auto px-6 py-8 text-center">
@@ -630,7 +807,9 @@ export default function Thread({
                       </button>
                     )}
                     {hasText && (
-                      <span className={`block whitespace-pre-wrap ${hasImage ? 'px-2.5 pt-1.5' : ''}`}>{m.body}</span>
+                      <span className={`block whitespace-pre-wrap ${hasImage ? 'px-2.5 pt-1.5' : ''}`}>
+                        <MessageBody text={m.body} fromMe={fromMe} />
+                      </span>
                     )}
                     {mounted && (
                       <span className={`block text-[10px] mt-0.5 tabular-nums ${hasImage ? 'px-2.5 pb-1' : ''} ${fromMe ? 'text-white/60' : 'text-prose-faint'}`}>
@@ -703,6 +882,41 @@ export default function Thread({
               </div>
             )
           })}
+
+          {/* Photos in flight. Real bubbles, in the sender's colour and position,
+              with the local preview showing through a progress ring — so the thread
+              looks the way it will look when this finishes, immediately. */}
+          {uploads.map((u) => (
+            <div key={u.key} className="flex items-end justify-end gap-1.5">
+              <div className={`relative max-w-[75%] rounded-2xl rounded-br-sm overflow-hidden p-1 ${u.error ? 'bg-surface-raised border border-strong' : 'bg-accent'}`}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={u.previewUrl}
+                  alt={u.caption || 'Photo being sent'}
+                  className={`block rounded-xl max-w-[15rem] sm:max-w-[18rem] max-h-[22rem] w-auto h-auto ${u.error ? 'opacity-40' : 'opacity-75'}`}
+                />
+                {u.caption && !u.error && (
+                  <span className="block px-2.5 pt-1.5 text-sm text-white whitespace-pre-wrap">{u.caption}</span>
+                )}
+                {u.error ? (
+                  <div className="px-2.5 py-2">
+                    <p className="text-[11px] font-semibold text-danger-ink leading-snug">{u.error}</p>
+                    <button
+                      type="button"
+                      onClick={() => dismissUpload(u.key)}
+                      className="mt-1 text-[11px] font-bold text-prose-muted hover:text-prose underline"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                ) : (
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <ProgressRing value={u.progress} />
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
           </div>
         )}
       </div>
@@ -713,8 +927,23 @@ export default function Thread({
           You blocked this member. Unblock from the menu to message again.
         </p>
       ) : (
-        <div className="border-t border-soft pt-3">
+        <div
+          className={`border-t pt-3 transition-colors ${dragging ? 'border-accent' : 'border-soft'}`}
+          // Drop-to-attach. Desktop only in practice — there is no drag on touch —
+          // but harmless there, and the dragover handler MUST preventDefault or the
+          // browser navigates away to the dropped file instead.
+          onDragOver={(e) => { if (e.dataTransfer?.types?.includes('Files')) { e.preventDefault(); setDragging(true) } }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            const files = Array.from(e.dataTransfer?.files ?? [])
+            if (files.length === 0) return
+            e.preventDefault()
+            setDragging(false)
+            addFiles(files)
+          }}
+        >
           {error && <p className="text-xs text-danger-ink mb-1.5">{error}</p>}
+          {dragging && <p className="text-xs text-accent-text mb-1.5 font-semibold">Drop photos to attach</p>}
 
           {/* What you're replying to, above the input — the standard place, and the
               only way the quote is visible at the moment you're writing it. */}
@@ -741,37 +970,52 @@ export default function Thread({
             </div>
           )}
 
-          {/* Staged image preview — sits above the input until sent or removed. */}
-          {pendingImage && (
-            <div className="relative inline-block mb-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={pendingImage.previewUrl} alt="Attachment preview" className="max-h-28 w-auto rounded-lg border border-soft" />
-              <button
-                type="button"
-                onClick={removePendingImage}
-                aria-label="Remove image"
-                className="absolute -top-2 -right-2 w-6 h-6 bg-surface border border-soft text-prose-muted hover:text-prose rounded-full flex items-center justify-center shadow"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+          {/* Staged photos — a horizontal tray above the input until sent or removed.
+              Scrolls rather than wrapping, so ten photos never push the composer off
+              the screen (the bug this whole surface was just fixed for). */}
+          {staged.length > 0 && (
+            <div className="mb-2">
+              <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+                {staged.map((s) => (
+                  <div key={s.key} className="relative shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={s.previewUrl} alt="" className="h-20 w-20 object-cover rounded-lg border border-soft" />
+                    <button
+                      type="button"
+                      onClick={() => removeStaged(s.key)}
+                      aria-label="Remove photo"
+                      className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-surface border border-soft text-prose-muted hover:text-prose rounded-full flex items-center justify-center shadow"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-1 text-[11px] text-prose-faint">
+                {staged.length} {staged.length === 1 ? 'photo' : 'photos'} — they send as separate messages, and the caption goes on the first.
+              </p>
             </div>
           )}
 
           <div className="flex items-end gap-2">
+            {/* `multiple` — the single biggest gap this file had against every other
+                messenger. No `capture` attribute, so the OS offers camera AND gallery
+                rather than forcing the camera. */}
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/png,image/jpeg,image/webp"
-              onChange={pickImage}
+              multiple
+              accept={ACCEPTED_TYPES.join(',')}
+              onChange={pickImages}
               className="hidden"
             />
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              disabled={sending || !!pendingImage}
-              aria-label="Attach a photo"
+              disabled={staged.length >= MAX_BATCH}
+              aria-label="Attach photos"
               className="p-2.5 text-prose-faint hover:text-accent disabled:opacity-40 rounded-xl hover:bg-surface-raised transition-colors shrink-0"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -787,11 +1031,16 @@ export default function Thread({
               value={draft}
               onChange={(e) => updateDraft(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
+              onPaste={onPaste}
               rows={1}
-              placeholder={pendingImage ? 'Add a caption…' : 'Write a message…'}
+              placeholder={staged.length > 0 ? 'Add a caption…' : 'Write a message…'}
               className="flex-1 min-w-0 resize-none overflow-y-auto px-4 py-2.5 bg-surface border border-strong rounded-xl text-base md:text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover max-h-32"
             />
-            <button type="button" onClick={send} disabled={sending || (!draft.trim() && !pendingImage)}
+            {/* Not disabled while photos upload: they're already in the thread as
+                bubbles carrying their own progress, so the composer is free again
+                immediately — which is what every messenger does and why sending a
+                batch doesn't block the next message. */}
+            <button type="button" onClick={send} disabled={sending || (!draft.trim() && staged.length === 0)}
               className="px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors shrink-0">
               {sending ? '…' : 'Send'}
             </button>
@@ -800,34 +1049,91 @@ export default function Thread({
       )}
 
       {/* Image lightbox */}
-      {lightboxId && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/90 backdrop-blur-sm"
-          onClick={() => setLightboxId(null)}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Image preview"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`/api/dm/attachment/${lightboxId}`}
-            alt="Photo"
-            className="max-w-full max-h-[85vh] object-contain rounded-lg select-none"
-            style={{ touchAction: 'pinch-zoom' }}
-            draggable={false}
-          />
-          <button
-            type="button"
+      {lightboxId && (() => {
+        const ids = messages.filter((m) => m.attachment_path).map((m) => m.id)
+        const at = ids.indexOf(lightboxId)
+        const hasPrev = at > 0
+        const hasNext = at >= 0 && at < ids.length - 1
+        return (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/90 backdrop-blur-sm"
             onClick={() => setLightboxId(null)}
-            aria-label="Close image"
-            className="absolute top-3 right-3 w-9 h-9 bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full flex items-center justify-center transition-colors"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Image preview"
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-      )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/api/dm/attachment/${lightboxId}`}
+              alt="Photo"
+              className="max-w-full max-h-[85vh] object-contain rounded-lg select-none"
+              style={{ touchAction: 'pinch-zoom' }}
+              draggable={false}
+            />
+
+            {/* Top-right cluster: save, then close. Every control here stops
+                propagation — the backdrop closes on click, and without that a tap
+                on Save would dismiss the lightbox out from under itself. */}
+            <div className="absolute top-3 right-3 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+              {/* A plain link, not a fetch: the route signs a Content-Disposition
+                  for us, which is the only thing that produces a real save — the
+                  `download` attribute is ignored cross-origin and the signed URL is
+                  always another origin. */}
+              <a
+                href={`/api/dm/attachment/${lightboxId}?download=1`}
+                aria-label="Save photo"
+                className="w-9 h-9 bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full flex items-center justify-center transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0-4-4m4 4 4-4M4 20h16" />
+                </svg>
+              </a>
+              <button
+                type="button"
+                onClick={() => setLightboxId(null)}
+                aria-label="Close image"
+                className="w-9 h-9 bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full flex items-center justify-center transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Step through the thread's photos. Rendered only when there IS
+                somewhere to go, so a single-photo thread shows no dead arrows. */}
+            {hasPrev && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setLightboxId(ids[at - 1]) }}
+                aria-label="Previous photo"
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full flex items-center justify-center transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
+            {hasNext && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setLightboxId(ids[at + 1]) }}
+                aria-label="Next photo"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full flex items-center justify-center transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            )}
+            {ids.length > 1 && at >= 0 && (
+              <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-white/70 tabular-nums">
+                {at + 1} of {ids.length}
+              </p>
+            )}
+          </div>
+        )
+      })()}
 
       {/* Report modal */}
       {reportOpen && (
@@ -853,6 +1159,88 @@ export default function Thread({
         </p>
       )}
     </div>
+  )
+}
+
+/**
+ * A message body with its URLs made clickable.
+ *
+ * A pasted link used to render as inert text you could not tap — which is a bug in
+ * a way a missing preview card isn't, and the more urgent half of "we have no link
+ * previews". This is linkification only: NO unfurling, deliberately. Fetching a
+ * preview needs to happen server-side with a proxied thumbnail, because rendering
+ * `<img src={theirOgImage}>` would have the RECIPIENT'S browser fetch an
+ * attacker-chosen URL and hand the sender a read receipt plus their IP address.
+ * That's a scoped piece of work with real SSRF hardening in it, not a bolt-on here.
+ *
+ * Built from tokens, never from an HTML string: the body stays escaped by
+ * construction (see lib/linkify).
+ *
+ * `nofollow` alongside noopener/noreferrer — these are member-authored outbound
+ * links behind an auth wall, and they should carry no SEO weight whatsoever.
+ */
+function MessageBody({ text, fromMe }: { text: string; fromMe: boolean }) {
+  const tokens = tokenizeLinks(text)
+  // Nothing to link — return the string, so the overwhelmingly common case adds no
+  // elements at all.
+  if (tokens.length === 1 && tokens[0].type === 'text') return <>{tokens[0].value}</>
+
+  return (
+    <>
+      {tokens.map((t, i) => t.type === 'text' ? (
+        <span key={i}>{t.value}</span>
+      ) : (
+        <a
+          key={i}
+          href={t.href}
+          target="_blank"
+          rel="noopener noreferrer nofollow"
+          // `break-all` on the link only: a long URL has no spaces to wrap at and
+          // would otherwise push the bubble past its max width. The surrounding
+          // prose keeps normal word wrapping.
+          className={`underline break-all ${fromMe ? 'text-white hover:text-white/80' : 'text-accent-text hover:text-accent'}`}
+        >
+          {t.label}
+        </a>
+      ))}
+    </>
+  )
+}
+
+/**
+ * Upload progress, over the photo it belongs to.
+ *
+ * A ring rather than a bar because it sits ON the image, where a bar would need a
+ * width to anchor to and the image's width varies with its aspect ratio. Drawn from
+ * a dash offset on a rotated circle — the standard trick, and the only way to get
+ * an arc without a second element.
+ *
+ * `aria-valuenow` so a screen reader can report it: an unlabelled spinner tells a
+ * blind user nothing about whether their photo is moving.
+ */
+function ProgressRing({ value }: { value: number }) {
+  const radius = 16
+  const circumference = 2 * Math.PI * radius
+  const pct = Math.max(0, Math.min(1, value))
+  return (
+    <span
+      className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-zinc-900/55"
+      role="progressbar"
+      aria-valuenow={Math.round(pct * 100)}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label="Sending photo"
+    >
+      <svg className="w-9 h-9 -rotate-90" viewBox="0 0 40 40" aria-hidden>
+        <circle cx="20" cy="20" r={radius} fill="none" strokeWidth={3} className="stroke-white/25" />
+        <circle
+          cx="20" cy="20" r={radius} fill="none" strokeWidth={3} strokeLinecap="round"
+          className="stroke-white transition-[stroke-dashoffset] duration-150"
+          strokeDasharray={circumference}
+          strokeDashoffset={circumference * (1 - pct)}
+        />
+      </svg>
+    </span>
   )
 }
 

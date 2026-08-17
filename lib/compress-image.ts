@@ -16,6 +16,27 @@
  *
  * @throws if minPx is set and the image's shortest edge is below it
  */
+/**
+ * Is this WebP animated? There is no browser API that answers this, so read the
+ * container: an animated WebP is a VP8X extended file carrying an `ANIM` chunk
+ * (global animation params) and one `ANMF` frame chunk per frame. Both live near
+ * the front of the file, so a 4KB slice is plenty and nothing large is read.
+ *
+ * latin1 so each byte maps to one character — UTF-8 decoding would mangle the
+ * binary either side of the chunk tags and could split one across a boundary.
+ */
+async function isAnimatedWebp(file: File): Promise<boolean> {
+  try {
+    const head = new Uint8Array(await file.slice(0, 4096).arrayBuffer())
+    const text = new TextDecoder('latin1').decode(head)
+    return text.includes('ANIM') || text.includes('ANMF')
+  } catch {
+    // Unreadable slice — assume animated. Skipping compression costs bandwidth;
+    // guessing "still" costs the animation, and only one of those is recoverable.
+    return true
+  }
+}
+
 export async function compressImage(
   file: File,
   {
@@ -26,6 +47,16 @@ export async function compressImage(
 ): Promise<File> {
   // Already optimal: small WebP that doesn't need resizing
   if (file.type === 'image/webp' && file.size < 200_000) return file
+
+  // ⚠️ ANIMATION CANNOT GO THROUGH CANVAS. `drawImage` paints exactly one frame,
+  // so compressing a GIF here would hand the server a still and the recipient
+  // would get a frozen image — with no error anywhere, because from the code's
+  // point of view everything worked. Pass animated files through untouched and
+  // let the server re-encode them (normalizeImage detects animation and keeps
+  // it). They skip client compression entirely, which is why the server still
+  // enforces the size cap.
+  if (file.type === 'image/gif') return file
+  if (file.type === 'image/webp' && await isAnimatedWebp(file)) return file
 
   return new Promise((resolve, reject) => {
     const img = new Image()

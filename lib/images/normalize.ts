@@ -32,11 +32,33 @@ export async function normalizeImage(
     )
   }
 
-  const { data, info } = await sharp(input)
-    .rotate()
+  // ANIMATION IS DETECTED, NOT DECLARED. Sniffing `pages` from the metadata
+  // covers animated GIF and animated WebP alike, and it can't be lied to by a
+  // wrong Content-Type — which a caller passing an `animated: true` flag could.
+  // Without this the pipeline reads frame one and silently ships a still: the
+  // sender sees the GIF they picked, the recipient gets a frozen frame, and
+  // nothing anywhere reports an error.
+  const animated = (meta.pages ?? 1) > 1
+
+  const pipeline = sharp(input, { animated })
+
+  const { data, info } = await (
+    // .rotate() applies EXIF orientation, which only stills carry — and on a
+    // multi-page image it would rotate the frame STRIP rather than each frame.
+    animated ? pipeline : pipeline.rotate()
+  )
     .resize({ width: MAX_DIMENSION, height: MAX_DIMENSION, fit: 'inside', withoutEnlargement: true })
     .webp({ quality: WEBP_QUALITY })
     .toBuffer({ resolveWithObject: true })
 
-  return { buffer: data, width: info.width, height: info.height }
+  return {
+    buffer: data,
+    width: info.width,
+    // ⚠️ `info.height` ON AN ANIMATED IMAGE IS EVERY FRAME STACKED. Sharp models
+    // animation as one tall vertical strip, so a 10-frame 300px GIF reports 3000.
+    // Storing that lands in the <img> width/height attributes and reserves ten
+    // times the space it needs, leaving a huge hole in the thread. `pageHeight`
+    // is the single-frame height, which is what a renderer means by "height".
+    height: animated ? (info.pageHeight ?? info.height) : info.height,
+  }
 }

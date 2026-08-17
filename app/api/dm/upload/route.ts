@@ -21,7 +21,18 @@ import { toStorageBody } from '@/lib/storage-body'
 export const runtime = 'nodejs' // sharp needs the Node runtime
 export const maxDuration = 60
 
-const ALLOWED_TYPES  = ['image/jpeg', 'image/png', 'image/webp']
+// GIF is here because a messenger without GIFs is missing something people treat
+// as table stakes. Animation survives: normalizeImage detects multi-page input and
+// re-encodes to ANIMATED WebP, and compressImage skips animated files client-side
+// rather than flattening them through a canvas.
+//
+// HEIC IS DELIBERATELY ABSENT. sharp's prebuilt libvips does not reliably carry
+// HEVC decode (the patent situation, not an oversight), so accepting HEIC would
+// mean advertising a format the server may fail to decode — a broken send instead
+// of a clear "pick a different photo". iOS Safari already transcodes HEIC to JPEG
+// on its way through a file input, so this costs iPhone users nothing today. If
+// HEIC is ever added, verify decode ON VERCEL first, not locally.
+const ALLOWED_TYPES  = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const MAX_SIZE_BYTES = 8 * 1024 * 1024 // 8 MB raw (pre-normalize)
 const MAX_CAPTION    = 4000
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
