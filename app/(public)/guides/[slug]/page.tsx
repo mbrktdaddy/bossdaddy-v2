@@ -372,7 +372,7 @@ export default async function GuidePage({ params }: Props) {
 
             {/* Email signup CTA */}
             <div className="mt-12 pt-8">
-              <div className="bg-surface-raised border border-soft rounded-xl p-6 sm:p-8 text-center">
+              <div className="bg-surface-raised border-t-[3px] border-accent rounded-xl p-6 sm:p-8 text-center">
                 <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3 mx-auto" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Liked this guide?</p>
                 <h3 className="text-xl font-black mb-2">Get the next one in your inbox</h3>

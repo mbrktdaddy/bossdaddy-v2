@@ -347,7 +347,7 @@ export default async function ReviewPage({ params }: Props) {
         {/* FTC Disclosure */}
         {review.has_affiliate_links && (
           <div
-            className="mb-8 text-xs text-prose-faint bg-surface-raised border border-soft rounded-xl px-4 py-3"
+            className="mb-8 text-xs text-prose-faint bg-surface border border-soft rounded-xl px-4 py-3"
             dangerouslySetInnerHTML={{ __html: FTC_DISCLOSURE_HTML }}
           />
         )}

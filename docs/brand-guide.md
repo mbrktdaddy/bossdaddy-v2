@@ -333,7 +333,7 @@ for horizontal scroll strips (§5) — and for hit-area clawback on a lone contr
 (`p-1 -mr-1`). The rule is about *items in an aligned set*, not about the utility.
 
 ### Reading surface (reviews / guides)
-Long-form body sits on an elevated **panel below `lg`** (phone/tablet — no margin to frame, OLED halation worst) and **bare canvas at `lg+`** (desktop margins frame the column). Single source of truth: `ARTICLE_SURFACE_CLASS` in `lib/article-surface.ts`. Body is **sans**; the *body* editorial serif (Source Serif 4) is reserved for blockquotes/pull-quotes only. The *display* editorial serif (Fraunces via `.font-editorial-display`) is used for editorial headings per the Manifesto v2 exception (§3). Article images get a subtle frame (`border` + rounded) so white-bg product shots don't glare.
+Long-form body sits on **bare canvas at every breakpoint** (reversed 2026-09-23 — phone/tablet used to get an elevated panel, which washed out nested `bg-surface` elements against its same-color fill). Single source of truth: `ARTICLE_SURFACE_CLASS` in `lib/article-surface.ts`. Body is **sans**; the *body* editorial serif (Source Serif 4) is reserved for blockquotes/pull-quotes only. The *display* editorial serif (Fraunces via `.font-editorial-display`) is used for editorial headings per the Manifesto v2 exception (§3). Article images get a subtle frame (`border` + rounded) so white-bg product shots don't glare.
 
 ### Status colors (chips / pipeline indicators on dark)
 | Status | Color | Use |

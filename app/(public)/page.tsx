@@ -404,7 +404,7 @@ export default async function HomePage() {
             longer recency-ordered below the lead, and the old eyebrow would be
             writing a cheque the layout stopped cashing. ────────────────────── */}
       {leadGuide && (
-        <section className="bg-surface border-b border-soft">
+        <section className="border-b border-soft">
           <div className="max-w-6xl mx-auto px-6 py-12 md:py-16">
             <EditorialHeader
               eyebrow="Every topic"
@@ -416,7 +416,7 @@ export default async function HomePage() {
               <div className="flex gap-2 mb-8 overflow-x-auto scrollbar-hide -mx-6 px-6 pb-1 md:mx-0 md:px-0 md:overflow-visible md:flex-wrap">
                 <Link
                   href="/guides"
-                  className="shrink-0 whitespace-nowrap text-[13px] font-semibold text-prose bg-background border border-strong rounded-full px-4 py-2.5 hover:border-accent hover:text-accent transition-colors"
+                  className="shrink-0 whitespace-nowrap text-[13px] font-semibold text-prose bg-surface border border-strong rounded-full px-4 py-2.5 hover:border-accent hover:text-accent transition-colors"
                 >
                   All topics
                 </Link>
@@ -424,7 +424,7 @@ export default async function HomePage() {
                   <Link
                     key={slug}
                     href={`/guides/category/${slug}`}
-                    className="shrink-0 whitespace-nowrap text-[13px] font-semibold text-prose-muted bg-background border border-soft rounded-full px-4 py-2.5 hover:border-accent hover:text-accent transition-colors"
+                    className="shrink-0 whitespace-nowrap text-[13px] font-semibold text-prose-muted bg-surface border border-soft rounded-full px-4 py-2.5 hover:border-accent hover:text-accent transition-colors"
                   >
                     {label}
                   </Link>
@@ -435,7 +435,7 @@ export default async function HomePage() {
             {/* Lead feature guide */}
             <Link
               href={`/guides/${leadGuide.slug}`}
-              className="group grid grid-cols-1 md:grid-cols-2 rounded-2xl border border-soft bg-background overflow-hidden hover:border-accent transition-colors"
+              className="group grid grid-cols-1 md:grid-cols-2 rounded-2xl border border-soft bg-surface overflow-hidden hover:border-accent transition-colors"
             >
               <div className="relative aspect-[16/10] md:aspect-auto md:min-h-[300px] bg-surface-raised">
                 {leadGuide.image_url && (
@@ -486,7 +486,7 @@ export default async function HomePage() {
                   viewAllHref={`/guides/category/${b.slug}`}
                   items={b.items}
                   cta="Read the guide"
-                  on="surface"
+                  on="background"
                 />
               </Fragment>
             ))}
