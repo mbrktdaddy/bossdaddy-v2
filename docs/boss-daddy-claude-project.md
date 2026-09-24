@@ -1,6 +1,6 @@
 # Boss Daddy — Project Brief
 
-> **Version 3.5 — Updated 2026-07-24.** This is the single source of truth for mission, messaging, brand voice, design system, and technical context. It supersedes all prior briefs and brand summaries.
+> **Version 3.5 — Updated 2026-09-23** (messaging v3.5 from 2026-07-24; roadmap refreshed 2026-09-23). This is the single source of truth for mission, messaging, brand voice, design system, and technical context. It supersedes all prior briefs and brand summaries.
 >
 > **Purpose of this file.** A single, self-contained briefing you can upload to a Claude Project (works on the phone app) so any conversation about Boss Daddy starts fully grounded — strategy, brand voice, and technical context in one place. No codebase access required.
 >
@@ -93,9 +93,9 @@ Primary domain: **bossdaddylife.com**. Core surfaces:
 
 - **Reviews** — honest, field-tested product reviews (4-axis rating plus an AI "Specs Grade" axis). Affiliate links disclosed.
 - **Guides** — all long-form editorial: how-tos, skills, advice, essays. (Never call it a "blog.")
-- **Gear** (`/gear`) — curated "Boss Daddy Approved" picks (rating ≥ 8.0) **+** branded merch ("Made by Boss Daddy"). `/shop` 301-redirects here.
-- **The Bench** (internal `wishlist`) — the public product-testing pipeline; members vote on what gets tested next.
-- **Collections** — curated multi-product lists with spec-comparison tables.
+- **Gear** (`/gear`) — curated "Boss Daddy Approved" picks (rating ≥ 8.0) **+** branded merch ("Made by Boss Daddy"). `/shop` 301-redirects here. ⚠️ **Known problem, top priority:** "Gear" currently means two things — `/gear` is tested gear, but `/gear/[slug]` is a merch product page. See §6.
+- **The Bench** (`/bench`, internal `products` statuses) — the public product-testing pipeline; members vote on what gets tested next. Statuses readers see: Considering → Up Next → Testing Now → (reviewed) or Not Testing. It's the step *before* Reviews, reached from the Browse menu rather than the main nav; once a product's review publishes, its bench page forwards to the review.
+- **The Vault** (`/vault`) — curated multi-product collections built from tested gear, in four types, each with exactly one name: **Comparisons** (`/comparisons`), **Best Of** (`/picks`), **Stacks** (`/stacks`), **Gift Guides** (`/gifts`, organized by occasion). `/vault` shows everything; the four type pages are its tabs, sharing one header and tab bar. The name "The Vault" is **final** (decided 2026-09-23).
 - **The Boss** (`/tools/the-boss`) — the member AI concierge: a tool-using assistant that searches the site's gear/guides and helps with dad-life questions; can do member-gated web research for products not yet tested ("Researched, not tested").
 - **Dad Tools** — free utilities (savings tracker, "weekends-until" countdown) to drive habit and signups.
 - **Merch Shop** — print-on-demand via Printful, payments via Stripe. End-to-end fulfillment is working.
@@ -126,7 +126,7 @@ Full reference lives in `docs/brand-guide.md` (deeper than this summary, and aut
 **Stack:**
 - **Framework:** Next.js 16 (App Router), TypeScript strict.
 - **Auth + DB:** Supabase (`@supabase/ssr`) with Row-Level Security enforced at the DB level.
-- **AI:** the **Vercel AI Gateway via the AI SDK v6** (`ai` package). Generation goes through `lib/ai/*` (`aiGenerateObject`/`aiGenerateText`, and `streamText` for the concierge); models are addressed as gateway slugs (`anthropic/claude-sonnet-4.6`, `anthropic/claude-haiku-4.5`, `anthropic/claude-opus-4.8`, `xai/grok-4.5`). Per-bucket model overrides via `AI_MODEL_*` env vars; auth via `AI_GATEWAY_API_KEY`/`VERCEL_OIDC_TOKEN`. (`@anthropic-ai/sdk` + `lib/claude/client.ts` remain only as legacy: the exported system-prompt strings like `BOSS_DADDY_SYSTEM` are still consumed by the new stack.)
+- **AI:** the **Vercel AI Gateway via the AI SDK v6** (`ai` package). Generation goes through `lib/ai/*` (`aiGenerateObject`/`aiGenerateText`, and `streamText` for the concierge); models are addressed as gateway slugs pinned by hand in `lib/ai/models.ts` (`anthropic/claude-sonnet-5`, `anthropic/claude-haiku-4.5`, `anthropic/claude-opus-5`, `anthropic/claude-fable-5`). **Every bucket (content, utility, moderation, research, concierge) runs on Anthropic — `claude-sonnet-5` by default.** The xAI/Grok slugs remain in the registry but nothing uses them (pilot reverted 2026-07-28). Per-bucket overrides via `AI_MODEL_*` env vars (none set; moderation is locked to Claude); auth via `AI_GATEWAY_API_KEY`/`VERCEL_OIDC_TOKEN`. (`@anthropic-ai/sdk` + `lib/claude/client.ts` remain only as legacy: the exported system-prompt strings like `BOSS_DADDY_SYSTEM` are still consumed by the new stack.)
 - **Email:** Resend (templates in `emails/`).
 - **Rate limiting:** Upstash Redis.
 - **Payments:** Stripe. **Merch fulfillment:** Printful (POD).
@@ -152,6 +152,8 @@ Full reference lives in `docs/brand-guide.md` (deeper than this summary, and aut
 - Reviews + Guides editorial pipeline with AI drafting, content blocks, tags, categories.
 - Collections with spec-comparison tables; AI Specs Grade (5th rating axis).
 - The Bench (product pipeline) → member voting.
+- **Vault + Bench navigation cleanup (2026-09-23).** The Vault went from five separately-designed pages to one hub with four tabs, breadcrumbs back up from every collection, and one name per collection type. The Bench joined the Browse menu, shows its "Not Testing" list, forwards graduated products to their review, and uses one set of status words everywhere.
+- **Article footers standardized (2026-09-23).** Reviews and guides now end in the same order: FAQs → Ask the Boss → final buy box → like/share → author bio → newsletter → keep reading → comments → the Bench → merch.
 - Member AI concierge "The Boss" — fully migrated to the AI Gateway with hybrid semantic + full-text retrieval, thumbs feedback, and a crisis-only sensitive router.
 - Dad Tools (savings tracker shipped).
 - Notifications + direct messaging (in-app, email digest, web push).
@@ -159,13 +161,14 @@ Full reference lives in `docs/brand-guide.md` (deeper than this summary, and aut
 - **Full AI provider layer migrated** to the Vercel AI Gateway + AI SDK v6 across every bucket (content, utility, moderation, research, concierge).
 
 **Open / in flight (confirm current state before acting):**
+- **▶ TOP PRIORITY: sort out what "Gear" means.** Today `/gear` lists tested gear (reviews rated 8+) while `/gear/[slug]` is a merch product page, and the cart links there too. Old `/stuff/{product}` links redirect into that merch lookup and 404. Leftover "Boss Picks" wording remains on `/gear` and in some gift-guide search titles. Three options on the table, no decision yet: **(A)** move the store to its own address (e.g. `/shop`) so Gear means only tested gear (current leaning), **(B)** make `/gear` the store and move tested-gear browsing under Reviews, **(C)** keep both under `/gear` with separate sub-paths. The `/stuff` redirect fix is independent and can ship first. Careful: `/shop` was once merged *into* `/gear`, so splitting it back out must not break cart, checkout or order links.
 - **v3.5 messaging** (2026-07-24): "The Boss Dad Standard" positioning replaces the retired "Built Different"; roll the lines across interior pages, emails, and merch.
 - Merch polish: verify shipped-order tracking/email path; Sentry on swallowed webhook errors.
 - Gear "provenance spine" rebuild: an `adopt` admin UI for researched candidates; reconcile admin overlap.
-- The Boss: Tier-3 action tools (read/write with confirm-before-commit); Grok pilot.
+- The Boss: Tier-3 action tools (read/write with confirm-before-commit). The first write tools (logging goal entries) have shipped; creating things still goes through a confirm step. (The Grok pilot ran and was **reverted 2026-07-28**: higher variance, not better. The plumbing remains, so re-trying it is one environment variable.)
 - Voice-learning system (pgvector exemplar few-shot).
 - Monitoring: set `CRON_SECRET` (embed cron) and confirm Sentry DSN in Vercel.
-- Pending naming decision for the "Tools" / "Vault" area.
+- ~~Pending naming decision for the "Tools" / "Vault" area~~ — **settled 2026-09-23:** "The Vault" stays the collections hub; Tools never takes the name. A different name for Tools is optional and only if the operator raises it.
 
 > Detailed, living status is tracked in the repo's memory index and `docs/` plan files — this section is the high-level read for strategy conversations.
 
