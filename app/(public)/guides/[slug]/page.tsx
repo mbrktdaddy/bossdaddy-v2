@@ -25,7 +25,7 @@ import CommentList from '@/components/CommentList'
 import ImageLightbox from '@/components/ImageLightbox'
 import { MerchCallout } from '@/components/MerchCallout'
 import { LightboxImage } from '@/components/LightboxImage'
-import { EmailSignup } from '@/components/EmailSignup'
+import { NewsletterCard } from '@/components/NewsletterCard'
 import AuthorBio from '@/components/AuthorBio'
 import CategoryIcon from '@/components/CategoryIcon'
 import TrackView from '@/components/TrackView'
@@ -344,25 +344,7 @@ export default async function GuidePage({ params }: Props) {
 
             <AuthorBio username={author} className="mt-8" />
 
-            <div className="mt-8">
-              <div className="bg-surface-raised border-t-[3px] border-accent rounded-xl p-6 sm:p-8 text-center">
-                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3 mx-auto" />
-                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Liked this guide?</p>
-                <h3 className="text-xl font-black mb-2">Get the next one in your inbox</h3>
-                <p className="text-sm text-prose-muted mb-5 max-w-md mx-auto">
-                  One email when there&apos;s actually something worth saying. Plus dad-tested stuff before they go up.
-                </p>
-                <div className="max-w-md mx-auto">
-                  <EmailSignup
-                    heading={null}
-                    description={null}
-                    buttonLabel="Sign me up"
-                    successMessage="You're in. Welcome to the crew."
-                    interests={['newsletter']}
-                  />
-                </div>
-              </div>
-            </div>
+            <NewsletterCard eyebrow="Liked this guide?" className="mt-8" />
 
             {/* Related reviews */}
             {relatedReviews && relatedReviews.length > 0 && (

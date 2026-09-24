@@ -32,7 +32,7 @@ import ProductCtaCard from '@/components/ProductCtaCard'
 import { extractProductSlugs, splitContentForInlineCards } from '@/lib/inline-content'
 import StickyMobileCta from '@/components/StickyMobileCta'
 import ReadingProgressBar from '@/components/ReadingProgressBar'
-import { EmailSignup } from '@/components/EmailSignup'
+import { NewsletterCard } from '@/components/NewsletterCard'
 import AuthorBio from '@/components/AuthorBio'
 import { getProductBySlug, getProductsBySlugs, columnHasSpecs, specComparisonRenderable, type SpecComparisonColumn } from '@/lib/products'
 import SpecComparisonTable from '@/components/products/SpecComparisonTable'
@@ -604,22 +604,7 @@ export default async function ReviewPage({ params }: Props) {
 
         <AuthorBio username={author} className="mt-8" />
 
-        <div className="mt-8">
-          <div className="bg-surface-raised border-t-[3px] border-accent rounded-xl p-6 sm:p-8 text-center">
-            <p className="text-[11px] font-black text-accent uppercase tracking-[0.22em] mb-3">Liked this review?</p>
-            <h3 className="text-2xl font-black mb-2 text-prose tracking-tight">Get the next one in your inbox</h3>
-            <p className="text-sm text-prose-muted mb-5 max-w-md mx-auto">Sunday morning. One email. No PR-speak.</p>
-            <div className="max-w-md mx-auto">
-              <EmailSignup
-                heading={null}
-                description={null}
-                buttonLabel="Subscribe"
-                successMessage="You're in. Welcome to the crew."
-                interests={['newsletter', 'review_alerts']}
-              />
-            </div>
-          </div>
-        </div>
+        <NewsletterCard eyebrow="Liked this review?" interests={['newsletter', 'review_alerts']} className="mt-8" />
 
         {/* ── Keep reading ── */}
         {/* Related guides — the reciprocal flywheel link. Reviews send readers

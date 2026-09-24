@@ -10,6 +10,7 @@ import { getCategoryBySlug } from '@/lib/categories'
 import RatingScore from '@/components/RatingScore'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import { EmailSignup } from '@/components/EmailSignup'
+import { CAPTURE_CARD } from '@/components/NewsletterCard'
 import OccasionIcon from '@/components/OccasionIcon'
 import ArticleTOC from '@/components/collections/ArticleTOC'
 import EditorialMeta from '@/components/collections/EditorialMeta'
@@ -519,7 +520,7 @@ export default async function GiftOccasionPage({ params }: Props) {
               </section>
             ) : (
               /* Empty state — proper SEO landing page with email capture */
-              <div className="bg-accent-tint rounded-xl p-8 md:p-10 border border-accent-border/30 mb-10">
+              <div className={`${CAPTURE_CARD} mb-10`}>
                 <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-bold mb-3">Coming Soon</p>
                 <h2 className="text-2xl md:text-3xl font-black text-prose mb-3">

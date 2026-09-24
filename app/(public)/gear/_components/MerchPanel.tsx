@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { EmailSignup } from '@/components/EmailSignup'
+import { CAPTURE_CARD } from '@/components/NewsletterCard'
 import { formatPrice, getMerchDisplayImage, type Merch } from '@/lib/merch'
 
 /**
@@ -42,7 +43,7 @@ export async function MerchPanel() {
 
         {isEmpty ? (
           /* Empty state — tight callout + email capture */
-          <div className="bg-surface border border-soft rounded-xl px-6 py-8 sm:px-8 sm:py-10">
+          <div className={CAPTURE_CARD}>
             <div className="flex flex-col sm:flex-row sm:items-center gap-6">
               <div className="flex-1">
                 <p className="text-base text-prose-muted leading-relaxed">

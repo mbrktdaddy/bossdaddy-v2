@@ -4,7 +4,7 @@ import { CATEGORIES } from '@/lib/categories'
 import { buildSocialMetadata, SITE_URL } from '@/lib/og'
 import CategoryIcon from '@/components/CategoryIcon'
 import { createAnonClient } from '@/lib/supabase/anon'
-import { EmailSignup } from '@/components/EmailSignup'
+import { NewsletterCard } from '@/components/NewsletterCard'
 import { BRAND } from '@/lib/brand'
 
 export const revalidate = 3600
@@ -170,7 +170,7 @@ export default async function AboutPage() {
  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Categories</p>
  <h2 className="text-2xl font-black mb-2">What We Cover</h2>
- <p className="text-prose-faint text-sm mb-6">Real-world testing across everything modern dads actually love.</p>
+ <p className="text-prose-faint text-sm mb-6">Reviews, guides, and picks across everything modern dads actually love.</p>
  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
  {CATEGORIES.map((cat) => (
  <Link
@@ -185,42 +185,7 @@ export default async function AboutPage() {
  </div>
  </div>
 
- {/* CTA + Newsletter */}
- <div className="bg-accent-tint rounded-xl px-8 py-10 text-center">
- <h2 className="text-2xl font-black mb-3">Built for Dads Who Show Up.</h2>
- <p className="text-prose-muted mb-2">
- {BRAND.manifesto}
- </p>
- <p className="text-prose-faint text-sm mb-8">
- Welcome to the Boss Daddy crew. Now let&apos;s dad like a boss — together.
- </p>
-
- {/* Newsletter signup */}
- <div className="mb-8 max-w-md mx-auto">
- <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3 mx-auto" />
- <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Join the Crew</p>
- <p className="text-prose-muted text-sm mb-4">
- Weekly reviews, the good stuff, and dad-life wins. No spam. No sponsors. Just the crew.
- </p>
- <EmailSignup
- heading={null}
- description={null}
- buttonLabel="Join Free"
- successMessage="You're in. Welcome to the crew."
- interests={['newsletter']}
- />
- <p className="text-xs text-prose-faint mt-3">Unsubscribe anytime. We mean it.</p>
- </div>
-
- <div className="pt-6 flex items-center justify-center gap-4 flex-wrap">
- <Link href="/reviews" className="px-6 py-3 bg-surface-raised hover:bg-surface text-prose-muted font-semibold rounded-xl transition-colors text-sm">
- Browse Reviews
- </Link>
- <Link href="/guides" className="px-6 py-3 bg-surface-raised hover:bg-surface text-prose-muted font-semibold rounded-xl transition-colors text-sm">
- Browse Guides
- </Link>
- </div>
- </div>
+ <NewsletterCard eyebrow="Join the Crew" heading="Built for Dads Who Show Up." headingAs="h2" />
 
  </div>
  )
