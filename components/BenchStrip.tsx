@@ -39,7 +39,7 @@ export default async function BenchStrip({
       {/* Header — eyebrow + invitation tagline + CTA. The pulsing dot
           uses the action orange (vibrant) for "live testing signal"
           while the eyebrow text stays in the orange-700 brand voice. */}
-      <div className="flex items-start justify-between gap-4 mb-5">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4 mb-5">
         <div className="min-w-0">
           <div className="flex items-center gap-2.5">
             <span className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse shadow-[0_0_10px_rgba(229,90,26,0.7)]" />
@@ -49,7 +49,7 @@ export default async function BenchStrip({
             <p className="mt-1.5 text-xs text-prose-muted leading-snug">{subhead}</p>
           )}
         </div>
-        <Link href="/bench" className="shrink-0 text-xs text-prose-muted hover:text-copper transition-colors font-semibold whitespace-nowrap uppercase tracking-widest">
+        <Link href="/bench" className="self-start shrink-0 text-xs text-prose-muted hover:text-copper transition-colors font-semibold whitespace-nowrap uppercase tracking-widest">
           {ctaText} →
         </Link>
       </div>

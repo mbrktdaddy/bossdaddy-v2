@@ -1,4 +1,4 @@
-type Variant = 'inbody' | 'preview'
+type Variant = 'inbody' | 'preview' | 'bare'
 
 interface Props {
   items: string[]
@@ -15,9 +15,10 @@ export default function TakeawaysCard({ items, variant = 'inbody' }: Props) {
   if (!items || items.length === 0) return null
 
   const isPreview = variant === 'preview'
-  const containerCls = isPreview
-    ? 'rounded-xl border border-soft bg-surface-sunken/60 p-4'
-    :'mb-10 rounded-xl border border-soft bg-surface-sunken/60 p-5 sm:p-6'
+  const containerCls =
+    variant === 'preview' ? 'rounded-xl border border-soft bg-surface-sunken/60 p-4' :
+    variant === 'bare'    ? '' :
+                            'mb-10 rounded-xl border border-soft bg-surface-sunken/60 p-5 sm:p-6'
   const eyebrowCls = isPreview
     ? 'mb-3 text-[10px] font-semibold uppercase tracking-widest text-eyebrow'
     : 'mb-4 text-xs font-semibold uppercase tracking-widest text-eyebrow'

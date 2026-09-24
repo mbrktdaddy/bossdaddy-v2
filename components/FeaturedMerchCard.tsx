@@ -35,18 +35,18 @@ export function FeaturedMerchCard({ item, compact = false }: Props) {
           </div>
         )}
       </div>
-      <div className={compact ? 'p-3' : 'p-4'}>
+      <div className={`flex-1 flex flex-col ${compact ? 'p-3' : 'p-4'}`}>
         <p className={`font-semibold text-prose leading-snug group-hover:text-accent-text-soft transition-colors line-clamp-2 ${compact ? 'text-xs' : 'text-sm'}`}>
           {item.name}
         </p>
-        <p className={`text-accent-text font-bold mt-1 ${compact ? 'text-xs' : 'text-sm'}`}>
+        <p className={`text-accent-text font-bold mt-auto pt-1 ${compact ? 'text-xs' : 'text-sm'}`}>
           {item.price_cents != null ? formatPrice(item.price_cents) : 'Shop Now'}
         </p>
       </div>
     </>
   )
 
-  const className = 'group flex flex-col bg-surface rounded-xl overflow-hidden border border-soft hover:border-copper hover:-translate-y-1 transition-all duration-200'
+  const className = 'group flex h-full flex-col bg-surface rounded-xl overflow-hidden border border-soft hover:border-copper hover:-translate-y-1 transition-all duration-200'
 
   if (isExternal) {
     return <a href={href} target="_blank" rel="noopener noreferrer" className={className}>{inner}</a>

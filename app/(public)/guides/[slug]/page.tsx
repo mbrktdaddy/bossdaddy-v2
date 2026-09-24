@@ -31,6 +31,9 @@ import CategoryIcon from '@/components/CategoryIcon'
 import TrackView from '@/components/TrackView'
 import RecentlyViewedStrip from '@/components/RecentlyViewedStrip'
 import AskTheBoss from '@/components/AskTheBoss'
+import BenchStrip from '@/components/BenchStrip'
+import TakeawaysCard from '@/components/reviews/TakeawaysCard'
+import FAQAccordion from '@/components/collections/FAQAccordion'
 
 const TableOfContents = dynamic(() => import('@/components/TableOfContents'))
 const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
@@ -256,44 +259,21 @@ export default async function GuidePage({ params }: Props) {
           </LightboxImage>
         )}
 
-        {/* Quick Take — ONE summary surface holding both registers: the tldr
-            paragraph (the 5-second answer) and the key_takeaways bullets (the
-            30-second skim). These were two stacked peer cards; as equal-weight
-            boxes above the body they read as the same job done twice. Merged,
-            they mirror the review VerdictCard's shape — prose first, structured
-            detail beneath a rule, one frame.
-
-            Both labels stay real <h2>s so search/AI overviews can still extract
-            each block separately. Either field alone renders fine (the rule only
-            appears when both are present), so clearing one in the workspace
-            degrades gracefully. Sits ABOVE the .bd-content wrapper, so neither
-            h2 leaks into the TOC. */}
-        {(guide.tldr || guideKeyTakeaways.length > 0) && (
+        {/* Quick Take — the tldr summary, same accent-tint treatment as
+            before. Sits ABOVE the .bd-content wrapper, so its h2 doesn't leak
+            into the TOC. */}
+        {guide.tldr && (
           <div className="mb-10 bg-accent-tint border border-accent-border/40 rounded-xl p-5 sm:p-6">
             <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-
-            {guide.tldr && (
-              <>
-                <h2 className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Quick Take</h2>
-                <p className="text-prose leading-relaxed text-sm sm:text-base">{guide.tldr}</p>
-              </>
-            )}
-
-            {guideKeyTakeaways.length > 0 && (
-              <div className={guide.tldr ? 'mt-5 border-t border-accent-border/30 pt-5' : ''}>
-                <h2 className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Key Takeaways</h2>
-                <ul className="space-y-2">
-                  {guideKeyTakeaways.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-prose-muted">
-                      <span className="text-accent-text mt-0.5 shrink-0">→</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            <h2 className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Quick Take</h2>
+            <p className="text-prose leading-relaxed text-sm sm:text-base">{guide.tldr}</p>
           </div>
         )}
+
+        {/* Key Takeaways — same standalone TakeawaysCard as reviews (neutral
+            bg-surface-sunken card, not the Quick Take's accent tint), so the
+            two content types render this block identically. */}
+        <TakeawaysCard items={guideKeyTakeaways} />
 
         {/* ── Two-column layout ─────────────────────────────────────────── */}
         <div className="lg:grid lg:grid-cols-[1fr_280px] lg:gap-10 lg:items-start">
@@ -344,34 +324,27 @@ export default async function GuidePage({ params }: Props) {
               </ImageLightbox>
             </div>
 
-            {/* FAQ accordion */}
-            {guideFaqs.length > 0 && (
-              <div className="mt-12 pt-8 border-t border-soft">
-                <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Common Questions</p>
-                  <h2 className="text-xl font-black">Frequently Asked Questions</h2>
-                </div>
-                <div className="space-y-2">
-                  {guideFaqs.map((faq, i) => (
-                    <details key={i} className="group bg-surface border border-soft hover:border-accent-border/40 transition-colors rounded-xl overflow-hidden">
-                      <summary className="flex items-center justify-between gap-3 px-4 py-3.5 cursor-pointer list-none min-h-[44px]">
-                        <span className="text-sm font-semibold text-prose leading-snug">{faq.question}</span>
-                        <svg className="w-4 h-4 shrink-0 text-accent-text transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </summary>
-                      <div className="px-4 pb-4 pt-1 text-sm text-prose-muted leading-relaxed border-t border-soft">
-                        {faq.answer}
-                      </div>
-                    </details>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* ── The article's close: FAQs → Ask ── */}
+            <FAQAccordion faqs={guideFaqs} className="mt-12 pt-8 border-t border-soft" />
 
-            {/* Email signup CTA */}
-            <div className="mt-12 pt-8">
+            <AskTheBoss
+              context={`the guide: ${guide.title}`}
+              prompt="Want tested gear that fits what this guide covers? Ask the Boss."
+              className={guideFaqs.length > 0 ? 'mt-6' : 'mt-12'}
+            />
+
+            {/* ── End-of-article bar ── */}
+            <div className="mt-12 py-4 border-y border-soft flex items-center justify-between gap-4 flex-wrap">
+              <LikeButton contentType="guide" contentId={guide.id} />
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-prose-faint uppercase tracking-widest font-semibold">Share</span>
+                <ShareButtons title={guide.title} />
+              </div>
+            </div>
+
+            <AuthorBio username={author} className="mt-8" />
+
+            <div className="mt-8">
               <div className="bg-surface-raised border-t-[3px] border-accent rounded-xl p-6 sm:p-8 text-center">
                 <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3 mx-auto" />
                 <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Liked this guide?</p>
@@ -503,31 +476,20 @@ export default async function GuidePage({ params }: Props) {
               </div>
             )}
 
-            {/* Author bio */}
-            <AuthorBio username={author} />
-
-            <AskTheBoss
-              context={`the guide: ${guide.title}`}
-              prompt="Want tested gear that fits what this guide covers? Ask the Boss."
-              className="mt-12"
-            />
-
-            {/* Like + Share */}
-            <div className="mt-8 pt-6 flex items-center justify-between flex-wrap gap-4">
-              <LikeButton contentType="guide" contentId={guide.id} />
-              <ShareButtons title={guide.title} />
-            </div>
-
-            {/* Comments */}
-            <div className="mt-12">
-              <h2 className="text-lg font-black mb-6">Comments</h2>
-              <CommentList contentType="guide" contentId={guide.id} />
-              <div className="mt-6">
-                <CommentForm contentType="guide" contentId={guide.id} />
+            {/* ── Community ── */}
+            <section className="mt-12 pt-8 border-t border-soft" aria-labelledby="comments-heading">
+              <h2 id="comments-heading" className="text-xl font-black mb-5">Comments</h2>
+              <CommentForm contentType="guide" contentId={guide.id} />
+              <div className="mt-8">
+                <CommentList contentType="guide" contentId={guide.id} />
               </div>
+            </section>
+
+            {/* ── Ecosystem ── */}
+            <div className="mt-12">
+              <BenchStrip ctaText="See all on the bench" />
             </div>
 
-            {/* Merch callout */}
             <Suspense fallback={null}>
               <MerchCallout />
             </Suspense>

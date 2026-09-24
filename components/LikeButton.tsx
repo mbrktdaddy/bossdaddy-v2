@@ -76,10 +76,10 @@ export default function LikeButton({ contentType, contentId, size = 'md' }: Prop
       disabled={loading}
       aria-pressed={liked}
       aria-label={liked ? 'Unlike' : 'Like'}
-      className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all disabled:opacity-50 ${
+      className={`flex items-center gap-2 h-11 px-4 rounded-full border text-sm font-semibold transition-colors disabled:opacity-50 ${
         liked
-          ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-50'
-          : 'bg-surface border-soft text-prose-muted hover:border-strong hover:text-prose'
+          ? 'bg-red-500/10 border-red-500/40 text-red-400'
+          : 'bg-surface border-soft text-prose-muted hover:border-strong hover:text-prose hover:bg-surface-raised'
       }`}
     >
       <svg
@@ -91,7 +91,8 @@ export default function LikeButton({ contentType, contentId, size = 'md' }: Prop
       >
         <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
       </svg>
-      <span>{count > 0 ? count : ''} {liked ? 'Liked' : 'Like'}</span>
+      <span>{liked ? 'Liked' : 'Like'}</span>
+      {count > 0 && <span className="tabular-nums opacity-80">{count}</span>}
     </button>
   )
 }

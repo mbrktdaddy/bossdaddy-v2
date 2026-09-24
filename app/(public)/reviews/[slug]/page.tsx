@@ -26,6 +26,7 @@ import { LightboxImage } from '@/components/LightboxImage'
 import { MerchCallout } from '@/components/MerchCallout'
 import CollectionsForReview from '@/components/CollectionsForReview'
 import CollectionEmbed from '@/components/CollectionEmbed'
+import FAQAccordion from '@/components/collections/FAQAccordion'
 import ContentLinkCard from '@/components/ContentLinkCard'
 import ProductCtaCard from '@/components/ProductCtaCard'
 import { extractProductSlugs, splitContentForInlineCards } from '@/lib/inline-content'
@@ -579,49 +580,31 @@ export default async function ReviewPage({ params }: Props) {
           </div>
         )}
 
-        {/* Final product CTA — last chance to convert, before the newsletter box */}
+        {/* ── The article's close: FAQs → Ask → final buy box (last word) ── */}
+        <FAQAccordion faqs={faqs} className="mt-12 pt-8 border-t border-soft" />
+
+        <AskTheBoss
+          context={`the ${review.product_name} review`}
+          prompt={`Still have a question about the ${review.product_name}? Ask the Boss.`}
+          className={faqs.length > 0 ? 'mt-6' : 'mt-12'}
+        />
+
         {product && (
           <ProductCtaCard product={product} rating={review.rating ?? undefined} variant="final" />
         )}
 
-        {/* FAQs — collapsible, SEO + reader utility */}
-        {faqs.length > 0 && (
-          <div className="mt-12 pt-8 border-t border-soft">
-            <div className="mb-6">
-              <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Common Questions</p>
-              <h2 className="text-xl font-black">Frequently Asked Questions</h2>
-            </div>
-            <div className="space-y-3">
-              {faqs.map((faq, i) => (
-                <details
-                  key={i}
-                  className="group bg-surface border border-soft hover:border-accent rounded-xl overflow-hidden transition-colors"
-                >
-                  <summary className="flex items-center justify-between gap-4 cursor-pointer list-none px-5 py-4 hover:bg-surface-raised transition-colors min-h-[44px]">
-                    <p className="font-bold text-sm text-prose leading-snug">{faq.question}</p>
-                    <svg
-                      className="w-4 h-4 text-accent-text shrink-0 transition-transform duration-200 group-open:rotate-180"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                      aria-hidden="true"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </summary>
-                  <div className="px-5 pb-5">
-                    <p className="text-sm text-prose-muted leading-relaxed whitespace-pre-line">{faq.answer}</p>
-                  </div>
-                </details>
-              ))}
-            </div>
+        {/* ── End-of-article bar ── */}
+        <div className="mt-12 py-4 border-y border-soft flex items-center justify-between gap-4 flex-wrap">
+          <LikeButton contentType="review" contentId={review.id} />
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-prose-faint uppercase tracking-widest font-semibold">Share</span>
+            <ShareButtons title={review.title} />
           </div>
-        )}
+        </div>
 
-        {/* Bottom CTA — email signup */}
-        <div className="mt-12 pt-8">
+        <AuthorBio username={author} className="mt-8" />
+
+        <div className="mt-8">
           <div className="bg-surface-raised border-t-[3px] border-accent rounded-xl p-6 sm:p-8 text-center">
             <p className="text-[11px] font-black text-accent uppercase tracking-[0.22em] mb-3">Liked this review?</p>
             <h3 className="text-2xl font-black mb-2 text-prose tracking-tight">Get the next one in your inbox</h3>
@@ -638,45 +621,7 @@ export default async function ReviewPage({ params }: Props) {
           </div>
         </div>
 
-        {/* Like + Share */}
-        <div className="mt-8 pt-6 flex items-center justify-between flex-wrap gap-4">
-          <LikeButton contentType="review" contentId={review.id} />
-          <ShareButtons title={review.title} />
-        </div>
-
-        {/* Featured in collections — cross-link strip */}
-        <CollectionsForReview reviewId={review.id} />
-
-        {/* Author bio */}
-        <AuthorBio username={author} />
-
-        <AskTheBoss
-          context={`the ${review.product_name} review`}
-          prompt={`Comparing the ${review.product_name} to something else? Ask the Boss.`}
-          className="mt-12"
-        />
-
-        {/* On the Bench */}
-        <div className="mt-12">
-          <p className="text-xs text-prose-faint mb-3">Liked this review? Here&apos;s what I&apos;m testing next — vote to move it up.</p>
-          <BenchStrip ctaText="See all on the bench" />
-        </div>
-
-        {/* Comments */}
-        <div className="mt-12">
-          <h2 className="text-lg font-black mb-6">Comments</h2>
-          <CommentList contentType="review" contentId={review.id} />
-          <div className="mt-6 space-y-4">
-            <RatingWidget reviewId={review.id} />
-            <CommentForm contentType="review" contentId={review.id} />
-          </div>
-        </div>
-
-        {/* Merch callout */}
-        <Suspense fallback={null}>
-          <MerchCallout />
-        </Suspense>
-
+        {/* ── Keep reading ── */}
         {/* Related guides — the reciprocal flywheel link. Reviews send readers
             back into how-to/explainer content in the same category. */}
         {relatedGuides && relatedGuides.length > 0 && (
@@ -743,8 +688,31 @@ export default async function ReviewPage({ params }: Props) {
           </div>
         )}
 
-        {/* Recently viewed — last (lowest priority; you've already seen these).
-            Comes after "More Reviews" on mobile so editorial content leads. */}
+        <CollectionsForReview reviewId={review.id} />
+
+        {/* ── Community ── Related content sits above comments: while volume is
+            low, an empty thread high on the page reads as a ghost town. */}
+        <section className="mt-12 pt-8 border-t border-soft" aria-labelledby="comments-heading">
+          <h2 id="comments-heading" className="text-xl font-black mb-5">Comments</h2>
+          <div className="space-y-4">
+            <RatingWidget reviewId={review.id} />
+            <CommentForm contentType="review" contentId={review.id} />
+          </div>
+          <div className="mt-8">
+            <CommentList contentType="review" contentId={review.id} />
+          </div>
+        </section>
+
+        {/* ── Ecosystem ── */}
+        <div className="mt-12">
+          <BenchStrip ctaText="See all on the bench" />
+        </div>
+
+        <Suspense fallback={null}>
+          <MerchCallout />
+        </Suspense>
+
+        {/* Recently viewed — last (lowest priority; you've already seen these). */}
         <RecentlyViewedStrip
           exclude={{ slug: review.slug, type: 'review' }}
           className="mt-12"
