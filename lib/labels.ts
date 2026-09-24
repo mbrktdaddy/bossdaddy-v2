@@ -345,9 +345,9 @@ export const LABELS = {
       short:           'The Boss',
       full:            'The Boss',
       pageTitle:       'Ask the Boss — Boss Daddy',
-      metaDescription: 'Ask the Boss for tested gear picks, straight answers, and dad-life help — grounded in real, hands-on reviews.',
+      metaDescription: 'Ask the Boss — straight answers on fixes, gear, plans, and dad life. Free for Boss Daddy members.',
       spokeRole:       'Ask',
-      spokeBlurb:      'Tested gear picks, straight answers, and dad-life help — grounded in real reviews. Just ask the Boss.',
+      spokeBlurb:      'Straight answers on fixes, gear, plans, and dad life. Just ask the Boss.',
     },
 
     // ⚠️ THE KEY AND THE ROUTE STAY `weekendsUntil` / `/tools/weekends-until`.

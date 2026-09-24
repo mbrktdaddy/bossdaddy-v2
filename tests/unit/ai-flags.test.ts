@@ -8,7 +8,6 @@ const ENV_KEYS = [
   'AI_MODEL_UTILITY',
   'AI_MODEL_MODERATION',
   'AI_MODEL_CONCIERGE',
-  'AI_MODEL_CONCIERGE_SENSITIVE',
 ] as const
 
 afterEach(() => {
@@ -37,21 +36,9 @@ describe('resolveModel', () => {
     expect(resolveModel('moderation')).toEqual({ model: MODELS.claudeSonnet, fallback: [] })
   })
 
-  it('keeps the concierge sensitive lane on Claude even when base concierge is Grok', () => {
+  it('applies a concierge override with the Claude fallback', () => {
     process.env.AI_MODEL_CONCIERGE = MODELS.grok
     expect(resolveModel('concierge')).toEqual({ model: MODELS.grok, fallback: [MODELS.claudeSonnet] })
-    expect(resolveModel('concierge', { sensitive: true })).toEqual({
-      model: MODELS.claudeSonnet,
-      fallback: [],
-    })
-  })
-
-  it('allows overriding the concierge sensitive lane independently', () => {
-    process.env.AI_MODEL_CONCIERGE_SENSITIVE = MODELS.grok
-    expect(resolveModel('concierge', { sensitive: true })).toEqual({
-      model: MODELS.grok,
-      fallback: [MODELS.claudeSonnet],
-    })
   })
 
   it('honors an explicit per-request model, superseding the bucket default and env', () => {

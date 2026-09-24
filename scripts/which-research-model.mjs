@@ -12,10 +12,9 @@
 // Prints only variable NAMES and model slugs — no secrets.
 
 const BUCKETS = ['CONTENT', 'RESEARCH', 'UTILITY', 'MODERATION', 'CONCIERGE']
-const LANES = ['CONCIERGE_SENSITIVE', 'CONCIERGE_FAST']
 
 console.log('AI bucket overrides in this environment\n')
-for (const b of [...BUCKETS, ...LANES]) {
+for (const b of BUCKETS) {
   const key = `AI_MODEL_${b}`
   const val = process.env[key]
   const note =

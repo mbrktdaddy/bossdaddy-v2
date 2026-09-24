@@ -27,11 +27,11 @@ export default function BossToolsSection() {
         >
           <p className="text-xs text-eyebrow uppercase tracking-widest font-bold">New · Ask the Boss</p>
           <h3 className="text-xl sm:text-2xl font-black mt-2 text-prose group-hover:text-accent transition-colors leading-tight">
-            Tell the Boss what you need — get a tested pick, not a guess.
+            Tell the Boss what you need — get a straight answer.
           </h3>
           <p className="text-prose-muted mt-3 text-sm sm:text-base max-w-prose">
-            Recommendations grounded in real, hands-on reviews — plus straight answers on how-to,
-            planning, and dad life. Picks come with scores and buy links; the takes come in plain English.
+            How-to, gear questions, planning, a toast you have to give, a hard talk you need to have —
+            straight answers in plain English, from a voice that’s in your corner.
           </p>
           <p className="text-sm text-accent font-semibold mt-5 inline-flex items-center gap-1 group-hover:underline">
             Ask the Boss <span aria-hidden>→</span>

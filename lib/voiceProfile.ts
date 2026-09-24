@@ -91,7 +91,24 @@ export function formatVoiceProfileForPrompt(
   profile: VoiceProfile | null,
   now: Date = new Date(),
 ): string | null {
-  if (!profile) return null
+  const lines = voiceProfileFactLines(profile, now)
+  if (lines.length === 0) return null
+
+  const asOf = now.toISOString().slice(0, 10)
+  return [
+    `About the author — use these facts as ground truth; never invent personal details that contradict or extend them. Dates are as of ${asOf}.`,
+    ...lines,
+    `If a claim would require a personal detail not listed above, write around it or omit it. Do not fabricate family members, hobbies, jobs, locations, or testing scenarios that the author has not confirmed.`,
+  ].join('\n')
+}
+
+/**
+ * The profile's facts as "- label: value" lines (family with computed ages,
+ * background, faith, region, extra facts), with no framing — callers wrap them
+ * for their context (the author for drafts, the member for the Boss chat).
+ */
+export function voiceProfileFactLines(profile: VoiceProfile | null, now: Date = new Date()): string[] {
+  if (!profile) return []
 
   const lines: string[] = []
 
@@ -118,14 +135,7 @@ export function formatVoiceProfileForPrompt(
     lines.push(label ? `- ${label}: ${f.value.trim()}` : `- ${f.value.trim()}`)
   }
 
-  if (lines.length === 0) return null
-
-  const asOf = now.toISOString().slice(0, 10)
-  return [
-    `About the author — use these facts as ground truth; never invent personal details that contradict or extend them. Dates are as of ${asOf}.`,
-    ...lines,
-    `If a claim would require a personal detail not listed above, write around it or omit it. Do not fabricate family members, hobbies, jobs, locations, or testing scenarios that the author has not confirmed.`,
-  ].join('\n')
+  return lines
 }
 
 type SystemBlock =

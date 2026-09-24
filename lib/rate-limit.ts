@@ -7,14 +7,13 @@ function hasUpstash() {
   return !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
 }
 
-// $-budget guards: the autonomous radar cron + the anonymous / priciest AI
-// paths. For these, a missing/unreachable limiter must FAIL CLOSED — skipping a
-// cron run or blocking one anonymous call is far cheaper than letting an
+// $-budget guards: the autonomous radar cron. For these, a missing/unreachable
+// limiter must FAIL CLOSED — skipping a cron run is far cheaper than letting an
 // uncapped path burn the Anthropic/OpenAI budget (the radar cron fires
 // web_search, the priciest call in the stack, with no human waiting). Every
 // other type fails open so local dev without Redis still works. See audit
 // 2026-07-19 (rate limiter fails open on the budget cron).
-const FAIL_CLOSED_TYPES = new Set(['radar', 'boss-anon', 'boss-research'])
+const FAIL_CLOSED_TYPES = new Set(['radar'])
 
 const limiters: Record<string, Ratelimit | null> = {}
 
@@ -54,18 +53,14 @@ function getLimiter(type: string): Ratelimit | null {
     // Voice-lexicon writes (capture/approve/edit a signature phrase). Cheap DB
     // writes, no AI call — generous cap, just a flood backstop.
     'voice':            new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, '1 h'), prefix: 'bd_voice' }),
-    // The Boss concierge — member turns. Each turn may fan out into 1-3 model
-    // calls (tool round-trips), so cap by turns not raw API calls.
-    'boss':             new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(40, '1 h'),  prefix: 'bd_boss' }),
-    // The Boss free-taste for logged-out visitors — keyed by IP. Tight quota so
-    // anonymous use drives signup and can't burn the Anthropic budget.
-    'boss-anon':        new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5,  '24 h'), prefix: 'bd_boss_anon' }),
+    // The Boss — member turns (one model call each, no tools). The hourly window
+    // covers a real back-and-forth session; the daily cap bounds what one free
+    // account can spend, since accounts cost nothing to create. Both are checked.
+    'boss':             new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30,  '1 h'),  prefix: 'bd_boss' }),
+    'boss-daily':       new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(150, '24 h'), prefix: 'bd_boss_daily' }),
     // The Boss paid tier (Boss+). Generous cap; the subscription is the real gate.
     // Unused until monetization ships — defined now so the entitlements seam is typed.
     'boss-plus':        new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(200, '1 h'), prefix: 'bd_boss_plus' }),
-    // The Boss gap-fallback research tool — fires Anthropic web_search (priciest
-    // call in the stack), so a tight per-member quota on top of the turn limit.
-    'boss-research':    new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(8, '24 h'), prefix: 'bd_boss_research' }),
     // The Boss "notify me when tested" wait-list capture — cheap DB write,
     // flood backstop only.
     'boss-notify':      new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, '1 h'), prefix: 'bd_boss_notify' }),
@@ -127,7 +122,7 @@ function getLimiter(type: string): Ratelimit | null {
 
 export async function checkRateLimit(
   identifier: string,
-  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' | 'voice' | 'boss' | 'boss-anon' | 'boss-plus' | 'boss-research' | 'boss-notify' | 'radar' | 'merch-sayings' | 'merch-publish' | 'message' | 'checkout' | 'printful-webhook' | 'goal-invite' | 'connection-request' | 'member-search' | 'link-preview' = 'draft'
+  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' | 'voice' | 'boss' | 'boss-daily' | 'boss-plus' | 'boss-notify' | 'radar' | 'merch-sayings' | 'merch-publish' | 'message' | 'checkout' | 'printful-webhook' | 'goal-invite' | 'connection-request' | 'member-search' | 'link-preview' = 'draft'
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
   const failClosed = FAIL_CLOSED_TYPES.has(type)
   const limiter = getLimiter(type)

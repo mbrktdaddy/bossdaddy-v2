@@ -25,8 +25,6 @@ interface CallBase {
   bucket: AiBucket
   /** Short surface label for Gateway cost attribution, e.g. 'review-draft'. */
   tag: string
-  /** Concierge only: route this turn through the sensitive / edge-off lane. */
-  sensitive?: boolean
   /**
    * Explicit gateway model slug for a per-request tier picker (e.g. X Studio
    * repurpose's sonnet/opus toggle). Supersedes the bucket default; ignored for
@@ -99,7 +97,7 @@ export async function aiGenerateObject<T>(
     messages?: ModelMessage[]
   },
 ): Promise<T> {
-  const { model, fallback } = resolveModel(opts.bucket, { sensitive: opts.sensitive, model: opts.model })
+  const { model, fallback } = resolveModel(opts.bucket, { model: opts.model })
   const { object } = await generateObject({
     model: gateway(model),
     schema: opts.schema,
@@ -121,7 +119,7 @@ export async function aiGenerateText(
     messages?: ModelMessage[]
   },
 ): Promise<string> {
-  const { model, fallback } = resolveModel(opts.bucket, { sensitive: opts.sensitive, model: opts.model })
+  const { model, fallback } = resolveModel(opts.bucket, { model: opts.model })
   const { text } = await generateText({
     model: gateway(model),
     ...resolveSystem(opts.system),

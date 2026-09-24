@@ -26,23 +26,24 @@ AI calls are grouped into **buckets**, not toggled per-endpoint. Each bucket has
 | Bucket | Covers | Toggle env var |
 |---|---|---|
 | `content` | drafts, guides, refines, collections, social copy, repurpose | `AI_MODEL_CONTENT` |
-| `research` | the 3 web-search surfaces (specs-grade, radar, boss research) | `AI_MODEL_RESEARCH` |
+| `research` | the web-search surfaces (specs-grade, radar) | `AI_MODEL_RESEARCH` |
 | `utility` | seo-meta, alt-text, suggest-links/prompt, product-facts | `AI_MODEL_UTILITY` |
-| `concierge` | the Boss streaming agent | `AI_MODEL_CONCIERGE` (+ `AI_MODEL_CONCIERGE_SENSITIVE`) |
+| `concierge` | the Boss streaming chat (members-only, no tools, one model for every turn) | `AI_MODEL_CONCIERGE` |
 | `moderation` | review + comment moderation | **none — pinned** |
 
 Set any toggle to a gateway slug, e.g. `AI_MODEL_CONTENT=xai/grok-4.5`. Invalid / non-`provider/model` values are ignored (stay on default). Takes effect next deploy.
 
 ### Current provider state — **Anthropic on every bucket, every environment** (2026-07-28)
 
-Operator directive: no xAI/Grok calls at this time. **No `AI_MODEL_*` override is set in any environment** — every bucket resolves to its `BUCKET_DEFAULT` (Claude Sonnet 5, plus Haiku 4.5 on the concierge fast lane). The Grok pilot that ran `utility` + `research` on xAI (2026-07-26 → 2026-07-28) is reverted by deleting those two env vars; nothing in code changed then or now.
+Operator directive: no xAI/Grok calls at this time. **No `AI_MODEL_*` override is set in any environment** — every bucket resolves to its `BUCKET_DEFAULT` (Claude Sonnet 5). The Grok pilot that ran `utility` + `research` on xAI (2026-07-26 → 2026-07-28) is reverted by deleting those two env vars; nothing in code changed then or now.
 
 The multi-provider seam is intentionally left intact — `@ai-sdk/xai`, the `MODELS.grok`/`grokFast` registry entries, and `research.ts`'s provider dispatch all still work. Re-enabling is setting one env var; there is no code to un-write. Keep it that way: if this doc ever says "Anthropic everywhere" while a dashboard var says otherwise, **the dashboard wins** — routing is env-driven and this file cannot enforce it.
 
-### Two safety rules baked into config (not left to discipline)
+### A safety rule baked into config (not left to discipline)
 
-1. **`moderation` is pinned to Claude and ignores its overrides.** It's the FTC/affiliate compliance gate (CLAUDE.md §3); it must not be swapped to an unevaluated provider by a stray env var. Un-pin only by editing `PINNED` in `lib/flags.ts` deliberately.
-2. **The concierge sensitive lane** (edge-off / vulnerable-topic turns — loss, mental health, safety-critical) resolves via `AI_MODEL_CONCIERGE_SENSITIVE`, **defaulting to Claude** even when the everyday concierge model is something else. It is still operator-overridable — the operator owns the brand-tone call — it just defaults safe.
+**`moderation` is pinned to Claude and ignores its overrides.** It's the FTC/affiliate compliance gate (CLAUDE.md §3); it must not be swapped to an unevaluated provider by a stray env var. Un-pin only by editing `PINNED` in `lib/flags.ts` deliberately.
+
+The concierge's former sensitive and fast lanes were removed 2026-09-24 when the Boss became a tool-less general chat: medical / legal / financial / crisis handling is now the model's own behavior, verified by the safety cases in `npm run boss:eval`. **Re-run that eval before pointing `AI_MODEL_CONCIERGE` at any other model or provider** — it is the only check on that behavior.
 
 ## Model slugs
 
@@ -76,6 +77,7 @@ Temperature is set per call site, not per bucket, because it tracks the *task* r
 | seo-meta, product-facts, suggest-links, alt-text | `0` | Mechanical extraction/selection; invention is the failure mode. |
 | refine-selection | `0.3` | Rewriting the operator's prose to an instruction — faithfulness first, but flat-0 editing reads mechanical. |
 | suggest-prompt | `0.7` | Ideation the operator re-clicks for fresh angles; identical output would be the bug. |
+| the Boss (concierge chat) | `0.7` | Conversation: warm and varied, but it answers questions, so not as loose as long-form voice. |
 | drafts, guides, repurpose | `0.8` | Brand-voice long-form. |
 | merch sayings | `1.0` | Deliberately widest — short, punchy, high-variance output. |
 
@@ -144,7 +146,7 @@ Both auto-apply: Gateway failover to Claude, a `surface:<tag>` cost tag, and an 
 1. **Foundation + seam** — `ai@6`, `lib/ai/models.ts`, `lib/flags.ts` resolver, `lib/ai/client.ts` wrappers, unit tests. Everything still resolves to Claude; existing call sites untouched. ✅ **done**
 2. **`content` + `utility` one-shot sites** — ✅ **done.** All `createStructured` callers + plain-text sites moved to the wrappers (`aiGenerateObject`/`aiGenerateText`); `createStructured` is now dead code.
 3. **`research` (web_search)** — ✅ **done.** One helper `lib/ai/research.ts` (`aiResearch()`) backs all three surfaces (specs-grade, `research_gear`, radar). See **Research bucket** below.
-4. **`concierge` streaming agent** — ✅ **done.** `lib/boss/agent.ts` runs on `streamText` through the Gateway (`resolveModel('concierge', …)`), preserving the sensitive-lane split. Hybrid semantic + full-text retrieval, thumbs feedback, and a crisis-only sensitive router shipped on top.
+4. **`concierge` streaming agent** — ✅ **done.** `lib/boss/agent.ts` runs on `streamText` through the Gateway (`resolveModel('concierge', …)`), preserving the sensitive-lane split. Hybrid semantic + full-text retrieval, thumbs feedback, and a crisis-only sensitive router shipped on top. *(2026-09-24: simplified to a members-only, tool-less chat on one model — the retrieval tools and lanes were removed; restore from the `boss-concierge-tools-v1` git tag.)*
 5. **Pilot Grok** — ✅ **ran, then reverted.** `utility` + `research` ran on xAI 2026-07-26 → 2026-07-28 (`content` was never flipped; moderation stayed pinned). A/B verdict was *higher variance, not reliably better*, and the operator has since taken xAI off all buckets — see **Current provider state** above. The seam stays; re-piloting is an env var, not a rebuild.
 
 ## Research bucket (`lib/ai/research.ts`)

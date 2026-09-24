@@ -329,7 +329,7 @@ export default async function GuidePage({ params }: Props) {
 
             <AskTheBoss
               context={`the guide: ${guide.title}`}
-              prompt="Want tested gear that fits what this guide covers? Ask the Boss."
+              prompt="Got a follow-up on this one? Ask the Boss."
               className={guideFaqs.length > 0 ? 'mt-6' : 'mt-12'}
             />
 

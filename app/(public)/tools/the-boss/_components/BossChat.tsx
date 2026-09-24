@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
+import { useEffect, useRef, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import type { Block, BossStreamEvent } from '@/lib/boss/types'
 import { normalizeBossText } from '@/lib/boss/normalizeText'
 import BossBlocks from './BossBlocks'
@@ -9,9 +9,10 @@ import BossBlocks from './BossBlocks'
 // `failed` = a hard failure with no streamed text (the whole bubble is the error).
 // `errorNote` = a mid-stream cutoff AFTER text arrived — keep what streamed and
 // show a short note below it, never wipe the partial answer.
-// `messageId` = the persisted boss_messages id (members only, arrives on `done`);
-// its presence is what gates the thumbs. `feedback` = the member's rating.
-type Msg = {
+// `messageId` = the persisted boss_messages id (arrives on `done`, or with a saved
+// conversation); its presence is what gates the thumbs. `feedback` = the rating.
+// `citations` = cards on a saved tool-era turn (nothing streams them today).
+export type BossMsg = {
   role: 'user' | 'assistant'
   content: string
   citations?: Block[]
@@ -23,19 +24,34 @@ type Msg = {
 
 const DRAFT_KEY = 'bd_boss_draft'
 const EXAMPLES = [
-  'Best stroller you’ve tested under $300?',
+  'What actually matters when buying a stroller?',
   'How do I fix a squeaky door hinge?',
   'Plan a Saturday with a 3-year-old.',
   'Help me write a quick birthday toast for my dad.',
 ]
 
-export default function BossChat({ isMember, seedContext }: { isMember: boolean; seedContext?: string }) {
-  const [msgs, setMsgs] = useState<Msg[]>([])
+// Members only — the page renders a sign-in panel for visitors instead of this.
+// A saved conversation arrives as props (the page loads it from ?c=); the page
+// remounts this component (key) when the active conversation changes.
+export default function BossChat({
+  conversationId,
+  initialMessages = [],
+  seedContext,
+}: {
+  conversationId?: string | null
+  initialMessages?: BossMsg[]
+  seedContext?: string
+}) {
+  const router = useRouter()
+  const [msgs, setMsgs] = useState<BossMsg[]>(initialMessages)
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
-  const [convId, setConvId] = useState<string | null>(null)
-  const [quota, setQuota] = useState(false)
-  const [toolNote, setToolNote] = useState<string | null>(null)
+  const [convId, setConvId] = useState<string | null>(conversationId ?? null)
+  // True while the router swaps a just-saved new chat onto its ?c= URL. The page
+  // remounts this component when that lands, so the composer stays locked until
+  // then — a message sent in the gap would be wiped mid-stream by the remount.
+  const [navigating, startNavigation] = useTransition()
+  const locked = busy || navigating
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -45,9 +61,9 @@ export default function BossChat({ isMember, seedContext }: { isMember: boolean;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
-  }, [msgs, toolNote])
+  }, [msgs])
 
-  function updateLastAssistant(fn: (m: Msg) => Msg) {
+  function updateLastAssistant(fn: (m: BossMsg) => BossMsg) {
     setMsgs((prev) => {
       const copy = [...prev]
       for (let i = copy.length - 1; i >= 0; i--) {
@@ -65,24 +81,28 @@ export default function BossChat({ isMember, seedContext }: { isMember: boolean;
       case 'text':
         updateLastAssistant((m) => ({ ...m, content: m.content + ev.delta }))
         break
-      case 'tool_start':
-        setToolNote(
-          ev.name === 'search_gear'
-            ? 'Checking the vault…'
-            : ev.name === 'research_gear'
-              ? 'Searching the web for current picks — give me a few seconds…'
-              : 'Pulling up guides…',
-        )
-        break
-      // `blocks` is the current channel; `citations` is the legacy event name kept
-      // until the agent migration (PR 1 step 2). The renderer accepts both.
-      case 'blocks':
-      case 'citations':
-        updateLastAssistant((m) => ({ ...m, citations: [...(m.citations ?? []), ...ev.items] }))
-        break
       case 'done':
-        if (ev.conversationId) setConvId(ev.conversationId)
-        if (ev.messageId) updateLastAssistant((m) => ({ ...m, messageId: ev.messageId }))
+        if (ev.messageId) {
+          updateLastAssistant((m) => ({ ...m, messageId: ev.messageId }))
+        } else {
+          // The answer arrived but the save failed — say so rather than let the
+          // member find it missing from Past chats later.
+          updateLastAssistant((m) =>
+            m.content.trim() && !m.failed ? { ...m, errorNote: m.errorNote ?? 'This reply couldn’t be saved to your chats.' } : m,
+          )
+        }
+        if (ev.conversationId && !convId) {
+          // First turn of a new chat just got saved. Put its id in the URL so a
+          // refresh (or the back button) returns here, and so the server
+          // re-renders the Past chats list with it on top.
+          const id = ev.conversationId
+          setConvId(id)
+          startNavigation(() => router.replace(`/tools/the-boss?c=${id}`, { scroll: false }))
+        } else if (ev.messageId) {
+          // Existing chat: re-sort Past chats (this one is now most recent). Same
+          // URL, same key — no remount.
+          startNavigation(() => router.refresh())
+        }
         break
       case 'error':
         updateLastAssistant((m) =>
@@ -91,27 +111,19 @@ export default function BossChat({ isMember, seedContext }: { isMember: boolean;
             : { ...m, content: ev.message, failed: true },
         )
         break
-      case 'quota_exhausted':
-        setQuota(true)
-        // Drop the empty assistant placeholder we optimistically added.
-        setMsgs((prev) => (prev.length && prev[prev.length - 1].content === '' ? prev.slice(0, -1) : prev))
-        break
     }
   }
 
   async function send(text: string) {
     const trimmed = text.trim()
-    if (!trimmed || busy || quota) return
+    if (!trimmed || locked) return
 
     const isFirst = msgs.length === 0
-    // Visitors carry their own short history; members continue via conversationId.
-    const history = !isMember ? msgs.slice(-12).map((m) => ({ role: m.role, content: m.content })) : undefined
 
     setMsgs((prev) => [...prev, { role: 'user', content: trimmed }, { role: 'assistant', content: '' }])
     setInput('')
     if (typeof window !== 'undefined') window.localStorage.removeItem(DRAFT_KEY)
     setBusy(true)
-    setToolNote(null)
 
     try {
       const res = await fetch('/api/boss', {
@@ -120,10 +132,14 @@ export default function BossChat({ isMember, seedContext }: { isMember: boolean;
         body: JSON.stringify({
           message: trimmed,
           conversationId: convId ?? undefined,
-          history,
           context: isFirst ? seedContext : undefined,
         }),
       })
+      if (res.status === 401) {
+        // Session expired mid-visit — a full load shows the sign-in panel.
+        window.location.reload()
+        return
+      }
       if (!res.body) throw new Error('no body')
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
@@ -154,11 +170,10 @@ export default function BossChat({ isMember, seedContext }: { isMember: boolean;
       )
     } finally {
       setBusy(false)
-      setToolNote(null)
     }
   }
 
-  // Thumbs on a persisted assistant turn (members only). Optimistic + best-effort:
+  // Thumbs on a persisted assistant turn. Optimistic + best-effort:
   // clicking the active rating again clears it. A failed PATCH leaves the optimistic
   // state — a lost thumb isn't worth interrupting the conversation over.
   function rate(messageId: string, value: 'up' | 'down') {
@@ -175,7 +190,7 @@ export default function BossChat({ isMember, seedContext }: { isMember: boolean;
   return (
     <div className="flex flex-col border border-soft rounded-2xl bg-surface-raised overflow-hidden">
       <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[42vh] max-h-[60vh]">
-        {msgs.length === 0 && !quota && (
+        {msgs.length === 0 && (
           <div className="py-6">
             <p className="text-sm text-prose-muted mb-3">Ask about gear, how-to, planning, writing — or just dad life.</p>
             <div className="flex flex-wrap gap-2">
@@ -207,13 +222,13 @@ export default function BossChat({ isMember, seedContext }: { isMember: boolean;
               >
                 {/* Assistant prose is normalized (markdown backstop); user text is shown verbatim. */}
                 {(m.role === 'assistant' ? normalizeBossText(m.content) : m.content) ||
-                  (busy && i === msgs.length - 1 ? <span className="text-prose-faint">{toolNote ?? 'Thinking…'}</span> : '')}
+                  (busy && i === msgs.length - 1 ? <span className="text-prose-faint">Thinking…</span> : '')}
               </div>
               {m.errorNote && <p className="mt-1 text-[11px] text-danger-ink">{m.errorNote}</p>}
               {m.citations && m.citations.length > 0 && (
                 <BossBlocks items={m.citations} query={i > 0 ? msgs[i - 1]?.content : undefined} />
               )}
-              {isMember && m.role === 'assistant' && m.messageId && !m.failed && (
+              {m.role === 'assistant' && m.messageId && !m.failed && (
                 <div className="mt-1.5 flex items-center gap-0.5">
                   <FeedbackButton
                     kind="up"
@@ -233,57 +248,42 @@ export default function BossChat({ isMember, seedContext }: { isMember: boolean;
         <div ref={bottomRef} />
       </div>
 
-      {quota ? (
-        <div className="border-t border-soft p-4 bg-surface">
-          <p className="text-sm font-semibold text-prose mb-1">That’s the free taste.</p>
-          <p className="text-sm text-prose-muted mb-3">Create a free account to keep asking the Boss.</p>
-          <div className="flex gap-2">
-            <Link href="/register?next=/tools/the-boss" className="text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-lg px-4 py-2.5 min-h-[44px] inline-flex items-center transition-colors">
-              Create free account
-            </Link>
-            <Link href="/login?next=/tools/the-boss" className="text-sm font-semibold text-accent hover:underline px-3 py-2.5 min-h-[44px] inline-flex items-center">
-              Sign in
-            </Link>
-          </div>
-        </div>
-      ) : (
-        <div className="border-t border-soft p-3 bg-surface">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              send(input)
+      <div className="border-t border-soft p-3 bg-surface">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            send(input)
+          }}
+          className="flex items-end gap-2"
+        >
+          <textarea
+            value={input}
+            onChange={(e) => {
+              setInput(e.target.value)
+              if (typeof window !== 'undefined') window.localStorage.setItem(DRAFT_KEY, e.target.value)
             }}
-            className="flex items-end gap-2"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault()
+                send(input)
+              }
+            }}
+            rows={1}
+            placeholder="Ask the Boss…"
+            className="flex-1 resize-none bg-surface-raised border border-soft rounded-xl px-3 py-2.5 text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:border-accent max-h-32"
+          />
+          <button
+            type="submit"
+            disabled={locked || !input.trim()}
+            className="shrink-0 text-sm font-semibold text-white bg-accent hover:bg-accent-hover disabled:opacity-40 rounded-xl px-4 py-2.5 min-h-[44px] transition-colors"
           >
-            <textarea
-              value={input}
-              onChange={(e) => {
-                setInput(e.target.value)
-                if (typeof window !== 'undefined') window.localStorage.setItem(DRAFT_KEY, e.target.value)
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault()
-                  send(input)
-                }
-              }}
-              rows={1}
-              placeholder="Ask the Boss…"
-              className="flex-1 resize-none bg-surface-raised border border-soft rounded-xl px-3 py-2.5 text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:border-accent max-h-32"
-            />
-            <button
-              type="submit"
-              disabled={busy || !input.trim()}
-              className="shrink-0 text-sm font-semibold text-white bg-accent hover:bg-accent-hover disabled:opacity-40 rounded-xl px-4 py-2.5 min-h-[44px] transition-colors"
-            >
-              {busy ? '…' : 'Ask'}
-            </button>
-          </form>
-          <p className="mt-2 text-[11px] text-prose-faint">
-            General info and one dad’s take — not professional advice. Some links earn a commission.
-          </p>
-        </div>
-      )}
+            {busy ? '…' : 'Ask'}
+          </button>
+        </form>
+        <p className="mt-2 text-[11px] text-prose-faint">
+          General info and one dad’s take — not professional advice.
+        </p>
+      </div>
     </div>
   )
 }

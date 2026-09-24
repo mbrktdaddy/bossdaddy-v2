@@ -1,12 +1,13 @@
 import Link from 'next/link'
 
 // Inline "Ask the Boss" entry point. Deep-links into /tools/the-boss with a
-// context seed so the concierge opens primed for the page the dad is on — the
-// decision moment where a tested pick (and an affiliate click) is most useful.
-// The page reads ?context= and feeds it into the first turn.
+// context seed so the Boss opens primed for the page the dad is on. The page
+// reads ?context= and feeds it into the first turn.
+// The Boss can't read site content (no tools), so entry prompts never promise a
+// tested pick — the context is a topic hint, not a lookup.
 export default function AskTheBoss({
   context,
-  prompt = 'Not sure which one? Tell the Boss what you need — get a tested pick, not a guess.',
+  prompt = 'Got a question? Tell the Boss what you need — get a straight answer.',
   className = '',
 }: {
   context?: string
