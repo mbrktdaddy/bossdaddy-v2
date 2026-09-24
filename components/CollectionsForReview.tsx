@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { createAnonClient } from '@/lib/supabase/anon'
+import { LABELS } from '@/lib/labels'
+import { vaultHref, vaultTypeLabel } from '@/lib/vault'
 
 interface Props {
   reviewId: string
@@ -27,11 +29,11 @@ const ICONS = {
   ),
 }
 
-const TYPE_META: Record<string, { label: string; section: string; icon: React.ReactNode }> = {
-  general:    { label: 'Boss Picks',  section: '/picks',       icon: ICONS.star },
-  best_of:    { label: 'Best Of',     section: '/picks',       icon: ICONS.star },
-  comparison: { label: 'Comparison',  section: '/comparisons', icon: ICONS.scales },
-  stack:      { label: 'The Stack',   section: '/stacks',      icon: ICONS.stack },
+const TYPE_ICONS: Record<string, React.ReactNode> = {
+  general:    ICONS.star,
+  best_of:    ICONS.star,
+  comparison: ICONS.scales,
+  stack:      ICONS.stack,
 }
 
 /**
@@ -69,21 +71,23 @@ export default async function CollectionsForReview({ reviewId }: Props) {
       <div className="mb-5">
         <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Featured in</p>
-        <h2 className="text-lg font-black">Boss Daddy collections</h2>
+        <h2 className="text-lg font-black">
+          <Link href="/vault" className="hover:text-accent-text-soft transition-colors">{LABELS.vault.full}</Link>
+        </h2>
       </div>
       <ul className="space-y-2">
         {collections.map((c) => {
-          const meta = TYPE_META[c.collection_type ?? 'general'] ?? TYPE_META.general
-          const href = `${meta.section}/${c.slug}`
+          const icon = TYPE_ICONS[c.collection_type ?? 'general'] ?? TYPE_ICONS.general
+          const href = vaultHref({ collection_type: c.collection_type, slug: c.slug })
           return (
             <li key={c.id}>
               <Link
                 href={href}
                 className="group flex items-center gap-4 p-4 bg-surface border border-soft hover:border-accent-border/40 hover:-translate-y-1 rounded-xl transition-all"
               >
-                <span className="text-accent-text-soft shrink-0">{meta.icon}</span>
+                <span className="text-accent-text-soft shrink-0">{icon}</span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-bold mb-0.5">{meta.label}</p>
+                  <p className="text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-bold mb-0.5">{vaultTypeLabel(c.collection_type)}</p>
                   <p className="text-sm sm:text-base font-bold text-prose group-hover:text-accent-text-soft transition-colors line-clamp-1">{c.title}</p>
                 </div>
                 <span aria-hidden className="text-prose-faint group-hover:text-accent-text-soft transition-colors text-xl shrink-0">→</span>

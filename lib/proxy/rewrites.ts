@@ -96,8 +96,30 @@ export function rewriteLegacyRoute(pathname: string): string | null {
   return null
 }
 
+// /vault?tab=<id> was the Vault's old client-side tab state. Each tab is now a
+// real page (/comparisons, /picks, /stacks, /gifts) rendered in the Vault shell.
+const LEGACY_VAULT_TABS: Record<string, string> = {
+  comparisons: '/comparisons',
+  'best-of':   '/picks',
+  gifts:       '/gifts',
+  stacks:      '/stacks',
+}
+
+export function rewriteLegacyVaultTab(pathname: string, tab: string | null): string | null {
+  if (pathname !== '/vault' && pathname !== '/vault/') return null
+  return tab ? LEGACY_VAULT_TABS[tab] ?? null : null
+}
+
 // Returns a 301 NextResponse if the path matches a public legacy URL, else null.
 export function checkPublicLegacyRewrite(request: NextRequest, pathname: string): NextResponse | null {
+  const vaultTab = rewriteLegacyVaultTab(pathname, request.nextUrl.searchParams.get('tab'))
+  if (vaultTab) {
+    const url = request.nextUrl.clone()
+    url.pathname = vaultTab
+    url.searchParams.delete('tab')
+    return NextResponse.redirect(url, { status: 301 })
+  }
+
   const target = rewritePublicLegacy(pathname)
   if (!target) return null
   const url = request.nextUrl.clone()

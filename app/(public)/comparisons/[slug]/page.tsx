@@ -17,6 +17,7 @@ import { faqPageLd } from '@/lib/seo/faq-ld'
 import { ogImageUrl, ogImageMeta, toAbsoluteUrl, aspectVariants, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
+import VaultBreadcrumb from '@/components/vault/VaultBreadcrumb'
 
 export const revalidate = 60
 
@@ -285,12 +286,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
       {faqLd      && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
       <div className="max-w-7xl mx-auto px-6 py-12">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-prose-faint mb-8">
-          <Link href="/comparisons" className="hover:text-accent-text-soft transition-colors">Comparisons</Link>
-          <span>/</span>
-          <span className="text-prose-muted">{comparison.title}</span>
-        </div>
+        <VaultBreadcrumb tab="comparisons" current={comparison.title} />
 
         <div className="lg:flex lg:gap-10 lg:items-start">
           <main className="lg:flex-1 lg:max-w-3xl min-w-0">

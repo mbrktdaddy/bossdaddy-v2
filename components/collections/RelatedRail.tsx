@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { vaultHref, vaultTypeLabel } from '@/lib/vault'
 
 export type RelatedCollectionType = 'comparison' | 'general' | 'best_of' | 'stack' | 'gift_guide'
 
@@ -9,6 +10,7 @@ export interface RelatedItem {
   description:     string | null
   hero_image_url:  string | null
   collection_type: RelatedCollectionType | string | null
+  occasion?:       string | null
 }
 
 interface Props {
@@ -64,8 +66,8 @@ export default function RelatedRail({
 }
 
 function RelatedCard({ item, className }: { item: RelatedItem; className?: string }) {
-  const meta = TYPE_META[item.collection_type ?? 'general'] ?? TYPE_META.general
-  const href = `${meta.section}/${item.slug}`
+  const icon = (TYPE_ICONS[item.collection_type ?? 'general'] ?? TYPE_ICONS.general)
+  const href = vaultHref({ collection_type: item.collection_type, slug: item.slug, occasion: item.occasion })
   return (
     <Link
       href={href}
@@ -82,8 +84,8 @@ function RelatedCard({ item, className }: { item: RelatedItem; className?: strin
           </div>
         )}
         <span className="absolute top-2 left-2 inline-flex items-center gap-1 bg-surface-sunken/85 backdrop-blur border border-soft rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-accent-text-soft">
-          {meta.icon}
-          {meta.label}
+          {icon}
+          {vaultTypeLabel(item.collection_type)}
         </span>
       </div>
       <div className="p-4 flex-1 flex flex-col">
@@ -103,50 +105,30 @@ function RelatedCard({ item, className }: { item: RelatedItem; className?: strin
 
 const ICON_CLS = 'w-3 h-3 shrink-0'
 
-const TYPE_META: Record<string, { label: string; section: string; icon: React.ReactNode }> = {
-  comparison: {
-    label:   'Comparison',
-    section: '/comparisons',
-    icon: (
+const TYPE_ICONS: Record<string, React.ReactNode> = {
+  comparison: (
       <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z" />
       </svg>
     ),
-  },
-  best_of: {
-    label:   'Best Of',
-    section: '/picks',
-    icon: (
+  best_of: (
       <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
         <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
       </svg>
     ),
-  },
-  general: {
-    label:   'Pick List',
-    section: '/picks',
-    icon: (
+  general: (
       <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
         <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
       </svg>
     ),
-  },
-  stack: {
-    label:   'Stack',
-    section: '/stacks',
-    icon: (
+  stack: (
       <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
         <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
       </svg>
     ),
-  },
-  gift_guide: {
-    label:   'Gift Guide',
-    section: '/gifts',
-    icon: (
+  gift_guide: (
       <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
         <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
       </svg>
     ),
-  },
 }

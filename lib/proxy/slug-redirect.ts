@@ -23,7 +23,37 @@ export async function checkSlugRedirect(args: {
   const guideMatch = pathname.match(/^\/guides\/([^/]+)\/?$/)
   if (guideMatch) return lookupAndRedirect(supabase, request, 'guides', guideMatch[1])
 
+  const benchMatch = pathname.match(/^\/bench\/([^/]+)\/?$/)
+  if (benchMatch) return benchToReview(supabase, request, benchMatch[1])
+
   return null
+}
+
+// A bench item that graduated has one destination: its review. Otherwise the
+// product has two pages (the noindex bench page + the review) and old shared
+// bench links strand readers on the stale one. Mig 111 guarantees at most one
+// TOP-LEVEL review per product (follow-ups share the slug, hence the parent
+// filter). 307, not 301: bench pages are noindex so nothing is lost in search,
+// and a review that's ever unpublished must not leave a cached permanent
+// redirect in readers' browsers.
+async function benchToReview(
+  supabase: SupabaseClient,
+  request: NextRequest,
+  productSlug: string,
+): Promise<NextResponse | null> {
+  const { data } = await supabase
+    .from('reviews')
+    .select('slug')
+    .eq('product_slug', productSlug)
+    .is('parent_review_id', null)
+    .eq('status', 'approved')
+    .eq('is_visible', true)
+    .maybeSingle()
+
+  if (!data?.slug) return null
+  const url = request.nextUrl.clone()
+  url.pathname = `/reviews/${data.slug}`
+  return NextResponse.redirect(url, { status: 307 })
 }
 
 async function lookupAndRedirect(

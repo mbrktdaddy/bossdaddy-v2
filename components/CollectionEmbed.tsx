@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { createAnonClient } from '@/lib/supabase/anon'
+import { LABELS } from '@/lib/labels'
 
 interface Props {
   slug: string
@@ -34,11 +35,11 @@ interface CollectionRow {
 }
 
 const TYPE_META: Record<CollectionType, { eyebrow: string; cta: string; section: string }> = {
-  general:    { eyebrow: 'Boss Picks',  cta: 'See the full list →',     section: '/picks' },
-  best_of:    { eyebrow: 'Best Of',     cta: 'See the full list →',     section: '/picks' },
-  gift_guide: { eyebrow: 'Gift Guide',  cta: 'Open the gift guide →',   section: '/gifts' },
-  comparison: { eyebrow: 'Comparison',  cta: 'See the full scorecard →', section: '/comparisons' },
-  stack:      { eyebrow: 'The Stack',   cta: 'Build the full stack →',  section: '/stacks' },
+  general:    { eyebrow: LABELS.picks.singular,  cta: 'See the full list →',     section: '/picks' },
+  best_of:    { eyebrow: LABELS.picks.singular,  cta: 'See the full list →',     section: '/picks' },
+  gift_guide: { eyebrow: LABELS.gifts.singular,  cta: 'Open the gift guide →',   section: '/gifts' },
+  comparison: { eyebrow: LABELS.comparisons.singular, cta: 'See the full scorecard →', section: '/comparisons' },
+  stack:      { eyebrow: LABELS.stacks.singular, cta: 'Build the full stack →',  section: '/stacks' },
 }
 
 /**

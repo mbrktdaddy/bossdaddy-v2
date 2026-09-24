@@ -16,6 +16,8 @@ import { faqPageLd } from '@/lib/seo/faq-ld'
 import { ogImageUrl, ogImageMeta, toAbsoluteUrl, aspectVariants, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
+import VaultBreadcrumb from '@/components/vault/VaultBreadcrumb'
+import { LABELS } from '@/lib/labels'
 
 export const revalidate = 60
 
@@ -273,17 +275,13 @@ export default async function StackDetailPage({ params }: Props) {
       {faqLd      && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="flex items-center gap-2 text-xs text-prose-faint mb-8">
-          <Link href="/stacks" className="hover:text-accent-text-soft transition-colors">Stacks</Link>
-          <span>/</span>
-          <span className="text-prose-muted">{stack.title}</span>
-        </div>
+        <VaultBreadcrumb tab="stacks" current={stack.title} />
 
         <div className="lg:flex lg:gap-10 lg:items-start">
           <main className="lg:flex-1 lg:max-w-3xl min-w-0">
             <header className="mb-8">
               <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">The Stack</p>
+              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">{LABELS.stacks.singular}</p>
               <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight leading-tight">{stack.title}</h1>
               {stack.description && (
                 <p className="text-lg text-prose-muted leading-relaxed mb-6">{stack.description}</p>

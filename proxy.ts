@@ -33,7 +33,8 @@ export async function proxy(request: NextRequest) {
   const publicLegacy = checkPublicLegacyRewrite(request, pathname)
   if (publicLegacy) return publicLegacy
 
-  // 4. DB-backed slug 301s (legacy_slugs[] lookup on /reviews/* and /guides/*).
+  // 4. DB-backed slug redirects: legacy_slugs[] 301s on /reviews/* and /guides/*,
+  //    and graduated /bench/* items → their published review (307).
   const slug = await checkSlugRedirect({ request, pathname, supabase })
   if (slug) return slug
 

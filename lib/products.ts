@@ -45,10 +45,12 @@ export type ProductStatus =
   | 'passed'
   | 'archived'
 
+// Admin labels. The pipeline three match the public bench vocabulary in
+// lib/wishlist.ts, so the word you pick here is the word readers see.
 export const PRODUCT_STATUS_OPTIONS: { value: ProductStatus; label: string }[] = [
-  { value: 'considering', label: 'Bench' },
-  { value: 'queued',      label: 'Coming Soon' },
-  { value: 'testing',     label: 'Testing' },
+  { value: 'considering', label: 'Considering' },
+  { value: 'queued',      label: 'Up Next' },
+  { value: 'testing',     label: 'Testing Now' },
   { value: 'reviewed',    label: 'Reviewed' },
   { value: 'passed',      label: 'Passed' },
   { value: 'archived',    label: 'Archived' },

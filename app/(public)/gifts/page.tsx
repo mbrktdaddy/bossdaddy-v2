@@ -5,7 +5,7 @@ import { buildSocialMetadata } from '@/lib/og'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { OCCASIONS, OCCASION_GROUPS } from '@/lib/gift-occasions'
 import OccasionIcon from '@/components/OccasionIcon'
-import PageHeader from '@/components/PageHeader'
+import VaultShell from '@/components/vault/VaultShell'
 
 export const revalidate = 60
 
@@ -34,6 +34,7 @@ export default async function GiftsIndexPage() {
     .select('occasion, slug, title, hero_image_url, published_at, collection_items(count)')
     .eq('collection_type', 'gift_guide')
     .eq('is_visible', true)
+    .not('published_at', 'is', null)
     .order('published_at', { ascending: false })
 
   const liveByOccasion = new Map<string, { slug: string; title: string; hero_image_url: string | null; populated: boolean }>()
@@ -51,14 +52,10 @@ export default async function GiftsIndexPage() {
     }
   }
 
+  // Gift guides keep their occasion grid rather than VaultGrid's flat list: a
+  // reader shops by occasion, and unwritten occasions still earn a "Coming Soon" tile.
   return (
-    <>
-      <PageHeader
-        eyebrow="The Gift Vault"
-        title="Gift Guides"
-        deck="Real-tested gift guides for every holiday, milestone, and occasion. Each list curated from a dad who actually buys, tests, and lives with this stuff. No corporate gift-list filler."
-      />
-      <div className="max-w-6xl mx-auto px-6 py-12">
+    <VaultShell active="gifts">
       {/* Grouped occasion grid */}
       {OCCASION_GROUPS.map((group) => (
         <section key={group.id} className="mb-14">
@@ -132,7 +129,6 @@ export default async function GiftsIndexPage() {
           Get on the list →
         </Link>
       </div>
-    </div>
-    </>
+    </VaultShell>
   )
 }

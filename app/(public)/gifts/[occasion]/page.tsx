@@ -19,6 +19,7 @@ import { faqPageLd } from '@/lib/seo/faq-ld'
 import { ogImageUrl, ogImageMeta, toAbsoluteUrl, aspectVariants, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
+import VaultBreadcrumb from '@/components/vault/VaultBreadcrumb'
 
 export const revalidate = 60
 
@@ -287,11 +288,7 @@ export default async function GiftOccasionPage({ params }: Props) {
       {faqLd      && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
       <div className={`${pick ? 'max-w-7xl' : 'max-w-4xl'} mx-auto px-6 py-12`}>
-        <div className="flex items-center gap-2 text-xs text-prose-faint mb-6">
-          <Link href="/gifts" className="hover:text-accent-text-soft transition-colors">Gift Guides</Link>
-          <span>/</span>
-          <span className="text-prose-muted">{occ.label}</span>
-        </div>
+        <VaultBreadcrumb tab="gifts" current={occ.label} className="mb-6" />
 
         <div className={pick ? 'lg:flex lg:gap-10 lg:items-start' : ''}>
           <main className={pick ? 'lg:flex-1 lg:max-w-3xl min-w-0' : ''}>

@@ -1,5 +1,24 @@
 import { describe, it, expect } from 'vitest'
-import { rewritePublicLegacy, rewriteLegacyRoute } from '@/lib/proxy/rewrites'
+import { rewritePublicLegacy, rewriteLegacyRoute, rewriteLegacyVaultTab } from '@/lib/proxy/rewrites'
+
+describe('rewriteLegacyVaultTab — old /vault?tab= state → the tab\'s real page', () => {
+  it.each([
+    ['comparisons', '/comparisons'],
+    ['best-of',     '/picks'],
+    ['gifts',       '/gifts'],
+    ['stacks',      '/stacks'],
+  ])('/vault?tab=%s → %s', (tab, to) => {
+    expect(rewriteLegacyVaultTab('/vault', tab)).toBe(to)
+    expect(rewriteLegacyVaultTab('/vault/', tab)).toBe(to)
+  })
+
+  it('leaves the hub, unknown tabs and other paths alone', () => {
+    expect(rewriteLegacyVaultTab('/vault', null)).toBeNull()
+    expect(rewriteLegacyVaultTab('/vault', 'all')).toBeNull()
+    expect(rewriteLegacyVaultTab('/vault', 'nope')).toBeNull()
+    expect(rewriteLegacyVaultTab('/picks', 'stacks')).toBeNull()
+  })
+})
 
 // Redirect-coverage guardrail for the rename surface (audit Phase 2).
 //

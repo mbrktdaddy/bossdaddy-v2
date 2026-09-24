@@ -42,7 +42,7 @@ const NAV_LINKS = [
 const VAULT_LINKS = [
   {
     href: '/comparisons',
-    label: 'Comparisons',
+    label: LABELS.comparisons.short,
     blurb: 'Head-to-head scorecards',
     icon: (
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
@@ -52,8 +52,8 @@ const VAULT_LINKS = [
   },
   {
     href: '/picks',
-    label: 'Best Of',
-    blurb: 'Curated picks',
+    label: LABELS.picks.short,
+    blurb: 'Ranked category roundups',
     icon: (
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
         <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
@@ -62,7 +62,7 @@ const VAULT_LINKS = [
   },
   {
     href: '/stacks',
-    label: 'Stacks',
+    label: LABELS.stacks.short,
     blurb: 'Kits built for purpose',
     icon: (
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
@@ -72,7 +72,7 @@ const VAULT_LINKS = [
   },
   {
     href: '/gifts',
-    label: 'Gift Guides',
+    label: LABELS.gifts.short,
     blurb: 'Real-tested ideas',
     icon: (
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
@@ -81,6 +81,25 @@ const VAULT_LINKS = [
     ),
   },
 ]
+
+// The Bench lives in Browse, not the primary spine: it's the pipeline that feeds
+// Reviews (being tested → tested), not a top-level place of its own.
+function BenchMenuLink({ onNavigate }: { onNavigate: () => void }) {
+  return (
+    <Link
+      href="/bench"
+      onClick={onNavigate}
+      className="group flex items-center gap-3 p-2.5 -mx-1 rounded-xl hover:bg-surface-hover transition-colors min-h-[44px]"
+    >
+      <span aria-hidden className="w-2 h-2 rounded-full bg-accent animate-pulse shrink-0 ml-1" />
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-bold text-prose leading-tight">{LABELS.bench.full}</p>
+        <p className="text-[11px] text-prose-muted mt-0.5 line-clamp-1">{LABELS.bench.tagline}</p>
+      </div>
+      <span aria-hidden className="text-prose-faint group-hover:text-copper transition-colors">→</span>
+    </Link>
+  )
+}
 
 function isActive(pathname: string, href: string) {
   if (href === '/') return pathname === '/'
@@ -280,6 +299,10 @@ export default function Header() {
                       </Link>
                     ))}
                   </div>
+                </div>
+                {/* The Bench — the review pipeline, one step before Reviews */}
+                <div className="mt-4 pt-4 border-t border-strong">
+                  <BenchMenuLink onNavigate={() => setCatOpen(false)} />
                 </div>
               </div>
             )}
@@ -492,6 +515,11 @@ export default function Header() {
                 </Link>
               ))}
             </div>
+          </div>
+
+          {/* The Bench — the review pipeline, one step before Reviews */}
+          <div className="px-4 pb-4 border-t border-soft pt-3">
+            <BenchMenuLink onNavigate={() => setMobileOpen(false)} />
           </div>
 
           {/* Auth / account */}

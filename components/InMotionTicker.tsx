@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { LABELS } from '@/lib/labels'
+import { getStatusLabel } from '@/lib/wishlist'
 
 // Brand doctrine: no emoji on web surfaces — inline SVGs match the rest of
 // the site (CategoryIcon set, ticker dot in BenchStrip, etc.). Outlined
@@ -41,11 +42,13 @@ function StatusIcon({ kind, className }: { kind: IconKind; className?: string })
   )
 }
 
+// Pipeline labels come from the one bench vocabulary; "Just reviewed" is a
+// recency event, not a bench status, so it stays local.
 const STATUS_META: Record<string, { label: string; kind: IconKind }> = {
-  testing:     { label: 'Testing',       kind: 'testing' },
-  queued:      { label: 'Up next',       kind: 'queued' },
-  considering: { label: 'Considering',   kind: 'considering' },
-  reviewed:    { label: 'Just reviewed', kind: 'reviewed' },
+  testing:     { label: getStatusLabel('testing'),     kind: 'testing' },
+  queued:      { label: getStatusLabel('queued'),      kind: 'queued' },
+  considering: { label: getStatusLabel('considering'), kind: 'considering' },
+  reviewed:    { label: 'Just reviewed',               kind: 'reviewed' },
 }
 
 // Internal status rank so the ticker leads with "testing now" (most active

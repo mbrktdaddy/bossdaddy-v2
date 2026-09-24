@@ -1,6 +1,8 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { WishlistItem } from '@/lib/wishlist'
-import { groupByStatus, BENCH_SELECT } from '@/lib/wishlist'
+import { groupByStatus, getStatusLabel, BENCH_SELECT } from '@/lib/wishlist'
+import { LABELS } from '@/lib/labels'
+import OffTheBench from '@/components/OffTheBench'
 import { WishlistCard } from '@/components/wishlist/WishlistCard'
 import { VotePayoffBanner } from '@/components/VotePayoffBanner'
 import PageHeader from '@/components/PageHeader'
@@ -25,22 +27,31 @@ export const metadata: Metadata = {
 
 export default async function BenchPage() {
   const admin = createAdminClient()
-  // The active bench pipeline. Reviewed gear lives on /reviews now that the bench
-  // and the catalog are one table.
-  const { data } = await admin
-    .from('products')
-    .select(`${BENCH_SELECT}, vote_count:wishlist_votes(count)`)
-    .in('status', ['considering', 'queued', 'testing'])
-    .order('priority', { ascending: false })
-    .order('created_at', { ascending: false })
-    .limit(150)
+  // Active pipeline + the passed list the deck promises. Reviewed items are NOT
+  // listed here: they're the whole reviewed catalog, and "Fresh off the Bench"
+  // (OffTheBench) below shows the recent graduates linked straight to the review.
+  const [{ data }, { data: passedRaw }] = await Promise.all([
+    admin
+      .from('products')
+      .select(`${BENCH_SELECT}, vote_count:wishlist_votes(count)`)
+      .in('status', ['considering', 'queued', 'testing'])
+      .order('priority', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(150),
+    admin
+      .from('products')
+      .select(BENCH_SELECT)
+      .eq('status', 'passed')
+      .order('updated_at', { ascending: false })
+      .limit(50),
+  ])
 
   const items = ((data ?? []) as unknown as (WishlistItem & { vote_count: { count: number }[] })[]).map((i) => ({
     ...i,
     vote_count: i.vote_count?.[0]?.count ?? 0,
   }))
 
-  const groups = groupByStatus(items)
+  const groups = groupByStatus([...items, ...((passedRaw ?? []) as unknown as WishlistItem[])])
 
   // Status icons — inline SVGs per the brand no-emoji-on-web rule. Beaker
   // for testing, clock for queued, question for considering, check for
@@ -49,7 +60,7 @@ export default async function BenchPage() {
   const sections: { key: keyof typeof groups; heading: string; icon: React.ReactNode; sub: string }[] = [
     {
       key: 'testing',
-      heading: 'Testing Now',
+      heading: getStatusLabel('testing'),
       sub: 'Currently putting it through the paces.',
       icon: (
         <svg className={iconCls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
@@ -59,7 +70,7 @@ export default async function BenchPage() {
     },
     {
       key: 'queued',
-      heading: 'Coming Soon',
+      heading: getStatusLabel('queued'),
       sub: 'Confirmed in the pipeline.',
       icon: (
         <svg className={iconCls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
@@ -69,7 +80,7 @@ export default async function BenchPage() {
     },
     {
       key: 'considering',
-      heading: 'Under Consideration',
+      heading: getStatusLabel('considering'),
       sub: 'Vote to move your pick up the queue.',
       icon: (
         <svg className={iconCls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
@@ -78,24 +89,14 @@ export default async function BenchPage() {
       ),
     },
     {
-      key: 'reviewed',
-      heading: 'Already Reviewed',
-      sub: 'Verdict is in — read the full review.',
-      icon: (
-        <svg className={iconCls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-    },
-    {
       key: 'passed',
-      heading: 'Not Testing',
+      heading: getStatusLabel('passed'),
       sub: "Decided against these — here's why.",
       icon: null,
     },
   ]
 
-  const hasContent = items.length > 0
+  const hasContent = items.length > 0 || groups.passed.length > 0
 
   return (
     <>
@@ -112,8 +113,8 @@ export default async function BenchPage() {
             Live Testing Pipeline
           </>
         }
-        title="On the Bench"
-        deck="Everything I'm currently testing, planning to review, or decided to skip — with the reasons. Vote on what gets reviewed next."
+        title={LABELS.bench.full}
+        deck="Everything I'm testing now, what's up next, and what I decided to skip — with the reasons. Vote on what gets reviewed next."
       />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
@@ -175,6 +176,9 @@ export default async function BenchPage() {
             })}
           </div>
         )}
+
+        {/* Graduated — the loop closes on the review itself, not a bench page. */}
+        <OffTheBench className="mt-16" />
       </div>
     </>
   )

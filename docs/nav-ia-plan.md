@@ -216,9 +216,9 @@ half-built front doors, and the user has to know which to pick.
 - **`/account/*` reduces to account management**: profile, settings, connections,
   notifications. Its `AccountMenu` label changes from "Your Stuff" to "Account"
   (`lib/labels.ts`).
-- **NO RENAMING OF ROUTES IN THIS PHASE.** There is a paused decision about the tools
-  naming ("Vault" vs "The Keep") that says ask the operator first. This phase re-scopes
-  what a page contains; it does not touch a URL.
+- **NO RENAMING OF ROUTES IN THIS PHASE.** This phase re-scopes what a page contains;
+  it does not touch a URL. (The "Vault vs The Keep" question it deferred was settled
+  2026-09-23: "The Vault" is the collections hub, final — Tools never takes the name.)
 
 ### Phase E — the remaining merges
 
@@ -243,9 +243,21 @@ half-built front doors, and the user has to know which to pick.
     that view's column filter, and reaching past it would hand a cheer-level partner the
     contents of a medication log.
 - **Bottom-nav tabs for signed-in users** — done as Phase G above.
-- **Separate pass, not this plan:** the public content side has six collection-ish
-  surfaces (`/bench`, `/vault`, `/picks`, `/stacks`, `/comparisons`, `/gifts`). Same
-  smell, different domain, and `/vault` is inside the paused rename decision.
+- **Separate pass, not this plan — DONE 2026-09-23 (Vault/Bench IA pass):** the six
+  collection-ish public surfaces were consolidated.
+  - **The Vault is one hub with five addresses.** `/vault` is "All"; `/comparisons`,
+    `/picks`, `/stacks`, `/gifts` are its tabs, all rendered by `components/vault/VaultShell`
+    (header + underline tab strip) over `lib/vault.ts` (tabs, routing, type names). The
+    sub-routes stay real, indexable pages — they stopped being four separate designs of
+    one list. Old `/vault?tab=` links 301 to the tab's page (`lib/proxy/rewrites.ts`).
+  - **Detail pages link up**: `VaultBreadcrumb` renders "The Vault / {tab} / {title}".
+  - **One name per type** in `lib/labels.ts` (`picks` is "Best Of" everywhere; was four
+    names). Card design is `VaultCard` on every Vault surface.
+  - **The Bench is the Reviews pipeline, not a spine anchor.** It's reachable from the
+    Browse menu (desktop + mobile drawer) rather than the primary nav. `/bench` now shows
+    the passed list its deck promised; graduated items go through `OffTheBench`, and a
+    graduated `/bench/{slug}` 307s to its review in `lib/proxy/slug-redirect.ts`. Status
+    words have one source: `lib/wishlist.ts` (queued = "Up Next", no longer "Coming Soon").
 
 ### Phase F — where the card sits, and what `/account` is for (shipped 2026-08-17)
 

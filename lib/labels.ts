@@ -61,10 +61,17 @@ export const LABELS = {
     full: 'Boss Daddy Approved Gear',
   },
 
-  // collections table → /picks public route
+  // ── The Vault's four collection types ──────────────────────────────────────
+  // ONE NAME PER TYPE. `short` is the tab / nav / footer / H1 word, `singular`
+  // is the card badge. /picks was "Best Of" in the nav, "Picks" in the footer,
+  // "Boss Daddy Picks" as its H1 and "Pick List" on cards — four names for one
+  // page. Route segments (/picks, /gifts) are permanent; only these move.
+
+  // general + best_of collections → /picks
   picks: {
-    short: 'Picks',
-    full: 'Boss Daddy Picks',
+    short:    'Best Of',
+    full:     'Best-Of Lists',
+    singular: 'Best Of',
   },
 
   // guides table (formerly articles) → /guides
@@ -79,34 +86,35 @@ export const LABELS = {
     plural: 'Reviews',
   },
 
-  // gift_guides → /gifts
+  // gift_guide collections → /gifts (routed by occasion, not collection slug)
   gifts: {
-    short: 'Gifts',
-    full: 'Gift Guides',
+    short:    'Gift Guides',
+    full:     'Gift Guides',
+    singular: 'Gift Guide',
   },
 
-  // comparison-type collections → /comparisons
+  // comparison collections → /comparisons
   comparisons: {
-    short: 'Comparisons',
-    full: 'Head-to-Head Comparisons',
+    short:    'Comparisons',
+    full:     'Head-to-Head Comparisons',
     singular: 'Comparison',
   },
 
-  // stack-type collections → /stacks
+  // stack collections → /stacks
   stacks: {
-    short: 'Stacks',
-    full: 'Boss Daddy Stacks',
+    short:    'Stacks',
+    full:     'Boss Daddy Stacks',
     singular: 'Stack',
   },
 
-  // Umbrella for all collection types — the brand surface that unifies
-  // /picks, /comparisons, /stacks, /gifts under one discoverable home.
-  // Same pattern as the Bench: a canonical tagline that teaches the
-  // metaphor wherever the noun "Vault" lands cold (homepage strip, nav).
+  // The hub over the four types above. /vault is "All"; /comparisons, /picks,
+  // /stacks and /gifts are its tabs, rendered by one shell (components/vault/
+  // VaultShell). NAME IS FINAL (operator, 2026-09-23) — never reuse "Vault" for
+  // another surface, including in eyebrow copy.
   vault: {
     short:   'Vault',
     full:    'The Vault',
-    tagline: 'Curated picks, comparisons, and stacks — beyond a single review.',
+    tagline: 'Comparisons, best-of lists, stacks, and gift guides — built from tested gear.',
   },
 
   // PWA install — the "add to home screen" badge surfaced sitewide

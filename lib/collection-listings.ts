@@ -14,6 +14,8 @@ export interface ListingCollection {
   description:       string | null
   hero_image_url:    string | null
   published_at:      string | null
+  collection_type:   string
+  occasion:          string | null
   dominant_category: string | null
 }
 
@@ -26,16 +28,20 @@ export async function getCollectionsWithCategory(
   supabase:        SupabaseClient,
   collectionTypes: string[],
 ): Promise<ListingCollection[]> {
+  // published_at is required alongside is_visible — same rule as the homepage
+  // Vault strip, so every listing agrees on what "live" means.
   const { data: collsRaw } = await supabase
     .from('collections')
-    .select('id, slug, title, description, hero_image_url, published_at, collection_type')
+    .select('id, slug, title, description, hero_image_url, published_at, collection_type, occasion')
     .eq('is_visible', true)
+    .not('published_at', 'is', null)
     .in('collection_type', collectionTypes)
-    .order('published_at', { ascending: false, nullsFirst: false })
+    .order('published_at', { ascending: false })
 
   const colls = (collsRaw ?? []) as Array<{
     id: string; slug: string; title: string; description: string | null
     hero_image_url: string | null; published_at: string | null; collection_type: string
+    occasion: string | null
   }>
 
   if (colls.length === 0) return []
@@ -79,6 +85,8 @@ export async function getCollectionsWithCategory(
     description:       c.description,
     hero_image_url:    c.hero_image_url,
     published_at:      c.published_at,
+    collection_type:   c.collection_type,
+    occasion:          c.occasion,
     dominant_category: pickDominant(c.id),
   }))
 }

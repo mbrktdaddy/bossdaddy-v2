@@ -13,9 +13,12 @@ export type WishlistStatus =
   | 'reviewed'
   | 'passed'
 
+// THE bench status vocabulary — /bench headings, badges, BenchStrip and the
+// homepage ticker all read these. Queued was "Coming Soon", which merch also
+// uses for unreleased products; "Up Next" is unambiguous.
 export const WISHLIST_STATUS_OPTIONS: { value: WishlistStatus; label: string; color: string }[] = [
   { value: 'considering', label: 'Considering',  color: 'text-accent' },
-  { value: 'queued',      label: 'Coming Soon',  color: 'text-blue-700' },
+  { value: 'queued',      label: 'Up Next',      color: 'text-blue-700' },
   { value: 'testing',     label: 'Testing Now',  color: 'text-green-700' },
   { value: 'reviewed',    label: 'Reviewed',     color: 'text-accent' },
   { value: 'passed',      label: 'Not Testing',  color: 'text-prose-faint' },

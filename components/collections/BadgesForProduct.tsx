@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import type { ProductBadge } from '@/lib/collection-listings'
+import { LABELS } from '@/lib/labels'
 
 interface Props {
   /** Pre-resolved badges from getBadgesByProductSlug. Listing pages batch-
@@ -23,7 +24,7 @@ const ICON_CLS = 'w-3 h-3 shrink-0'
 // because their URL is keyed by occasion slug, not collection slug.
 const TYPE_META: Record<string, { label: string; section: string; icon: React.ReactNode }> = {
   comparison: {
-    label:   'Comparison',
+    label:   LABELS.comparisons.singular,
     section: '/comparisons',
     icon: (
       <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
@@ -32,7 +33,7 @@ const TYPE_META: Record<string, { label: string; section: string; icon: React.Re
     ),
   },
   best_of: {
-    label:   'Best Of',
+    label:   LABELS.picks.singular,
     section: '/picks',
     icon: (
       <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
@@ -41,7 +42,7 @@ const TYPE_META: Record<string, { label: string; section: string; icon: React.Re
     ),
   },
   general: {
-    label:   'Pick List',
+    label:   LABELS.picks.singular,
     section: '/picks',
     icon: (
       <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
@@ -50,7 +51,7 @@ const TYPE_META: Record<string, { label: string; section: string; icon: React.Re
     ),
   },
   stack: {
-    label:   'Stack',
+    label:   LABELS.stacks.singular,
     section: '/stacks',
     icon: (
       <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
