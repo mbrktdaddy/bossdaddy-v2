@@ -326,7 +326,7 @@ export default async function PickDetailPage({ params }: Props) {
                   {items.length === 1 ? 'The Pick' : 'The Picks'}
                 </p>
                 <h2 className="text-2xl font-black text-prose leading-tight">
-                  {items.length} dad-tested {items.length === 1 ? 'pick' : 'picks'}, all personally tested
+                  {items.length} dad-picked {items.length === 1 ? 'pick' : 'picks'}
                 </h2>
               </div>
 

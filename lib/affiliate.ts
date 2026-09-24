@@ -18,7 +18,7 @@ export function detectAffiliateLinks(content: string): boolean {
 }
 
 export const FTC_DISCLOSURE_HTML =
-  '<p class="bd-disclosure-inline">This article contains affiliate links. ' +
+  '<p class="bd-disclosure-inline">This page contains affiliate links — if you buy ' +
+  'through them, Boss Daddy may earn a small commission at no extra cost to you. ' +
   'As an Amazon Associate I earn from qualifying purchases. ' +
-  'We may earn a small commission at no extra cost to you. ' +
   '<a href="/affiliate-disclosure/" rel="noopener">Learn more</a></p>'

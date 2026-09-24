@@ -9,7 +9,7 @@ import { buildSocialMetadata, SITE_URL } from '@/lib/og'
 export const metadata: Metadata = buildSocialMetadata({
  title: 'Affiliate Disclosure — Boss Daddy Life',
  ogTitle: 'Affiliate Disclosure',
- description: 'How Boss Daddy Life makes money, how affiliate links work, and why commissions never influence our recommendations. We buy everything ourselves first.',
+ description: 'How Boss Daddy Life makes money, how affiliate links work, and why commissions never influence our recommendations. Every product we review, we bought and used ourselves.',
  path: '/affiliate-disclosure',
  siteUrl: SITE_URL,
  type: 'article',
@@ -57,8 +57,9 @@ export default function AffiliateDisclosurePage() {
  <li>Direct brand affiliate programs</li>
  </ul>
  <p>
- Affiliate links appear in reviews and guides. Where they appear,
- you&apos;ll see a disclosure at the top of that page.
+ Affiliate links appear in reviews, guides, and gift lists — including links to
+ products we mention or recommend but haven&apos;t formally reviewed. Wherever they
+ appear, you&apos;ll see a disclosure at the top of that page.
  </p>
 
  <h2>Commissions Don&apos;t Influence Reviews</h2>
@@ -69,7 +70,7 @@ export default function AffiliateDisclosurePage() {
  cover it at all.
  </p>
  <p>
- The review came first. The affiliate link came second. Not the other way around.
+ The recommendation comes first. The affiliate link comes second. Not the other way around.
  </p>
 
  <h2>What &quot;Boss Daddy Approved&quot; Means in This Context</h2>
@@ -90,12 +91,25 @@ export default function AffiliateDisclosurePage() {
  <p>
  Every product we review editorially has been <strong>personally purchased</strong>,
  personally used, or we have <strong>direct firsthand knowledge</strong> of it. The
- founder does not accept free products in exchange for reviews. Neither do our
- contributors.
+ founder does not accept free products in exchange for reviews, and neither will any
+ future contributor.
  </p>
  <p>
  If a product doesn&apos;t clear that bar, it doesn&apos;t get an editorial review on
  this site.
+ </p>
+
+ <h2>Mentions, Guides &amp; Gift Lists</h2>
+ <p>
+ Not every product we link has a full Boss Daddy review behind it. Guides, articles,
+ and gift lists sometimes mention products we&apos;ve researched, ones recommended by
+ people we trust, or ones that are popular for the job at hand. Those mentions
+ don&apos;t carry a score or the Boss Daddy Approved badge, and we won&apos;t claim
+ hands-on experience we don&apos;t have.
+ </p>
+ <p>
+ If we say we used it, we did. If a friend swears by it, a friend really does. If
+ it&apos;s scored, we tested it. Either way, nobody paid to be there.
  </p>
 
  <h2>Promotional Content — Clearly Labeled</h2>
@@ -114,7 +128,7 @@ export default function AffiliateDisclosurePage() {
  Here&apos;s how we use it:
  </p>
  <ul>
- <li>Every AI-assisted piece is reviewed and approved by a human on the Boss Daddy team before it&apos;s published.</li>
+ <li>Every AI-assisted piece is reviewed and approved by the founder before it&apos;s published.</li>
  <li>Product ratings, verdicts, and firsthand observations come from humans who have actually used the product.</li>
  <li>AI helps with drafting, structure, and research. It does not substitute for lived experience, and it does not make the final call on what&apos;s worth your money.</li>
  <li>Where AI assistance is substantial, we note it.</li>
@@ -124,13 +138,13 @@ export default function AffiliateDisclosurePage() {
  in more detail in our <Link href="/editorial-standards">Editorial Standards</Link>.
  </p>
 
- <h2>Human Contributors</h2>
+ <h2>Contributors</h2>
  <p>
- Boss Daddy Life works with human editors, writers, and content managers in addition
- to the founder. Everyone is held to the same rules: firsthand knowledge, honest
- opinions, no paid placements. Any contributor with a material connection to a
- product, brand, or company they&apos;re writing about is required to disclose it —
- to us, and to you, on the page where it matters.
+ Boss Daddy Life is written and edited by its founder. If editors, writers, or
+ contributors join, they&apos;ll be held to the same rules: firsthand knowledge, honest
+ opinions, no paid placements. Anyone with a material connection to a product, brand,
+ or company they write about will be required to disclose it — to us, and to you, on
+ the page where it matters.
  </p>
 
  <h2>FTC Compliance — In Plain English</h2>

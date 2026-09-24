@@ -3,13 +3,13 @@ export const CATEGORIES = [
     slug: 'kids-family',
     label: 'Kids & Family',
     shortLabel: 'Kids',
-    description: 'Baby gear, toddler stuff, parenting tools, and everything tested by real kids with zero mercy.',
+    description: 'Baby gear, toddler stuff, parenting tools, and everything reviewed on a real kid with zero mercy.',
     icon: '👨‍👧‍👦',
     color: 'from-surface-raised/50 to-surface/40',
     border: 'border-strong/40',
     accent: 'text-accent-text',
     targetWords: 1200,
-    pov: "I test baby and kid gear on an actual kid — not in a lab, not by reading specs. If it can't survive a toddler who throws everything and a newborn who has opinions at 3am, I'm not recommending it. I've bought a lot of duds so you don't have to.",
+    pov: "I test baby and kid gear on an actual kid — not in a lab, not by reading specs. If it can't survive a toddler who throws everything and a newborn who has opinions at 3am, I'm not scoring it. I've bought a lot of duds so you don't have to.",
     faqs: [
       {
         question: 'How do you test baby products?',
@@ -17,7 +17,7 @@ export const CATEGORIES = [
       },
       {
         question: 'Do you use affiliate links in this section?',
-        answer: 'Some links pay me a small commission at no cost to you. I only link to things I personally bought and used. The FTC disclosure on each review explains the specifics.',
+        answer: 'Some links pay me a small commission at no cost to you. Reviews only cover things I personally bought and used; guides may also mention picks I\'ve researched, that people I trust swear by, or that are popular for the job. Nobody pays for placement. The disclosure at the top of each page explains the specifics.',
       },
       {
         question: 'What makes something "Boss Approved" for kids?',
@@ -111,11 +111,11 @@ export const CATEGORIES = [
     border: 'border-strong/40',
     accent: 'text-accent-text',
     targetWords: 1300,
-    pov: "Getting outside with my kid is a priority — even when it means more gear, more planning, and way more snacks than I thought possible. I test outdoor gear on real trips, not in the backyard. If it can handle a weekend with a toddler in tow, it can handle most things.",
+    pov: "Getting outside with my kid is a priority — even when it means more gear, more planning, and way more snacks than I thought possible. When I review outdoor gear, it's from real use, not a spec sheet. The bar is simple: could it handle a weekend with a toddler in tow? If so, it can handle most things.",
     faqs: [
       {
         question: 'Do you test gear solo or with family?',
-        answer: "Both, but most reviews involve at least one trip with my kid. Family-tested gear is held to a higher standard — it has to be simple enough to set up when tired and durable enough to survive curious hands.",
+        answer: "Reviews are based on my own hands-on use. When gear is meant for family trips, I hold it to a higher standard — it has to be simple enough to set up when tired and durable enough to survive curious hands.",
       },
       {
         question: 'What kind of outdoor activities do you cover?',
@@ -123,7 +123,7 @@ export const CATEGORIES = [
       },
       {
         question: 'How do you handle gear that is expensive to test?',
-        answer: "I buy what I can, borrow when I can't, and disclose when something was provided for review. Provided gear gets the same scrutiny as purchased gear — sometimes more.",
+        answer: "I buy what I can and borrow when I can't — never free gear in exchange for a review. For gear I haven't gotten my hands on yet, I'll point you to picks and tell you exactly where the recommendation comes from.",
       },
       {
         question: 'Do you do backpacking or only car camping?',
@@ -187,7 +187,7 @@ export const CATEGORIES = [
       },
       {
         question: 'What vehicles do you currently own or have tested on?',
-        answer: "I'll note the specific vehicle in each review. Most of my testing happens on trucks and SUVs since that's what I drive, but the principles usually apply broadly.",
+        answer: "I'll note the specific vehicle in any review where it matters. Fit and performance can change from one vehicle to the next, so I'll tell you what I used it on and whether it should carry over to yours.",
       },
       {
         question: 'Do you review truck accessories and overlanding gear?',
@@ -229,7 +229,7 @@ export const CATEGORIES = [
       },
       {
         question: 'Do you review supplements?',
-        answer: "Carefully. I review what I personally use and note when the evidence base is thin. I'm skeptical of most supplement marketing and I'll tell you when something isn't worth the money.",
+        answer: "Carefully. Reviews only cover what I've personally used, and I note when the evidence base is thin. I'm always trying new things — when I mention something I haven't tried yet, I'll say so. I'm skeptical of most supplement marketing and I'll tell you when something isn't worth the money.",
       },
       {
         question: 'How does faith factor into your wellness content?',

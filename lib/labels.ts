@@ -114,7 +114,7 @@ export const LABELS = {
   vault: {
     short:   'Vault',
     full:    'The Vault',
-    tagline: 'Comparisons, best-of lists, stacks, and gift guides — built from tested gear.',
+    tagline: 'Comparisons, best-of lists, stacks, and gift guides — built around tested gear and hand-picked finds.',
   },
 
   // PWA install — the "add to home screen" badge surfaced sitewide

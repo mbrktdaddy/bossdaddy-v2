@@ -8,14 +8,14 @@ export const revalidate = 60
 
 export const metadata: Metadata = {
   // Absolute — brand already in the title; avoids the template double-branding.
-  title: { absolute: 'Stacks — Dad-Tested Kits | Boss Daddy' },
+  title: { absolute: 'Stacks — Dad-Picked Kits | Boss Daddy' },
   description: 'Curated kits for a goal. The full setup for newborn nights, weekend cookouts, garage builds, and more.',
   alternates: { canonical: '/stacks' },
   openGraph: {
     ...OG_SITE,
-    title: 'Stacks — Dad-Tested Kits | Boss Daddy',
+    title: 'Stacks — Dad-Picked Kits | Boss Daddy',
     description: 'Curated kits for a goal. The full setup for newborn nights, weekend cookouts, garage builds, and more.',
-    images: [{ url: ogImageUrl({ title: 'Dad-Tested Stacks & Kits', type: 'guide' }), width: 1200, height: 630 }],
+    images: [{ url: ogImageUrl({ title: 'Dad-Picked Stacks & Kits', type: 'guide' }), width: 1200, height: 630 }],
   },
   twitter: { card: 'summary_large_image', site: TWITTER_HANDLE, creator: TWITTER_HANDLE },
 }

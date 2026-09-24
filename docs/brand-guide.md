@@ -112,9 +112,9 @@ Declarative is for **display moments only** — heroes, taglines, creed, sign-of
 - It is **never a second-person address** (writer → reader). "Hey boss dads," / "Listen up, boss dads" ❌ — still off. But direct peer address **is** welcome (v3.5): "Brother," "Friends," "Fellow Dads," "you." Address the reader one brother to another; just don't christen the audience with the brand name. See [[feedback_no_reader_nicknames]].
 
 *Specificity — always required*
-- Every claim has specifics: durations ("4 hours of continuous use"), conditions ("18°F garage, no insulation"), outcomes ("zip-tied in under a minute").
+- Every claim has specifics: durations ("4 hours of continuous use"), conditions ("18°F garage, no insulation"), outcomes ("zip-tied in under a minute"). Specifics come from real use, manufacturer specs, or research — never invented.
 - Reviews require a real-testing reference: "I used this for X," "I ran this through Y."
-- Self-purchased + field-tested is not a slogan — it's a fact-check rule. Don't review what you didn't buy and use.
+- Self-purchased + field-tested is not a slogan — it's a fact-check rule **for reviews**. Don't review, score, or badge what you didn't buy and use. Any piece may *mention or link* products we haven't reviewed, using the four mention types in §1.9 — every mention true, none implying firsthand experience that didn't happen.
 
 *Humor calibration*
 - One dad joke per piece, max. Earn it.
@@ -260,6 +260,27 @@ Keep it a display/CTA line — don't drop "boss up" into the middle of editorial
 - Sponsored content positioned as honest reviews. Affiliate is fine and disclosed; sponsored is not.
 - Preach faith — it's the foundation, not the lecture.
 - Punch down on struggling dads. The edge is for mediocrity, not for men in the trenches.
+- Imply firsthand testing of a product we haven't used — in copy, meta descriptions, or AI drafts.
+- Invent an endorsement — a made-up friend's recommendation or an unsourced "best-seller" claim.
+- Claim a team that doesn't exist. Boss Daddy is founder-written and founder-edited; contributor rules are written in the future tense ("anyone who joins").
+
+### 1.9 Product Mentions & Claims (locked 2026-09-24)
+
+Industry standard, same as Wirecutter / CNN Underscored / Gear Patrol: **one affiliate disclosure per page** (auto-rendered from `lib/affiliate.ts` `FTC_DISCLOSURE_HTML`), **no per-product labels**. Testing claims belong to reviews; selection claims cover everything.
+
+**House line:** *Every review is earned. Every pick is independently chosen.*
+
+| Type | Example | Allowed where | The rule |
+|---|---|---|---|
+| **1. Firsthand** | "I ran this for three weekends" | Reviews, or any piece where it actually happened | Must have actually happened |
+| **2. Secondhand** | "My brother-in-law swears by the ___" | Anywhere | A real person really said it. If they have a stake (work for the brand, sell it), disclose it. |
+| **3. Reputation** | "Many dads go with the ___" / "one of the hottest picks for X right now" | Anywhere | True when written. No exact figures that go stale ("4.8 stars, 20k reviews") unless dated. |
+| **4. Selection** | "If I were buying today, this is the one I'd look at" | Anywhere | Honest opinion |
+
+- Scores and the Boss Daddy Approved badge are type 1 only (reviews).
+- Never let secondhand or reputation drift into firsthand later in the same piece.
+- Listing/gift/stack copy says **"dad-picked" / "hand-picked" / "independently chosen"** — never "dad-tested" or "personally tested" unless every item on the page is a published review. ("Dad-tested" stays correct on review-only surfaces: `/reviews`, review category/tag pages.)
+- Enforced in the AI layer: `BOSS_DADDY_SYSTEM` PRODUCT MENTIONS block + `MODERATOR_SYSTEM` claim checks (`lib/claude/client.ts`). Full rollout record: `docs/disclosure-copy-rewrite.md`.
 
 ---
 

@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .single()
   if (!data) return { title: 'Not Found' }
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
-  const metaTitle       = data.meta_title       ?? `The ${data.title} Stack — Dad-Tested Kit | Boss Daddy`
+  const metaTitle       = data.meta_title       ?? `The ${data.title} Stack — Dad-Picked Kit | Boss Daddy`
   const metaDescription = data.meta_description ?? data.description ?? 'A curated kit-for-purpose from Boss Daddy.'
   const ogImage = ogImageMeta({ title: metaTitle, type: 'guide', updatedAt: data.updated_at, base: siteUrl, cta: 'See the Stack', image: toAbsoluteUrl(data.hero_image_url, siteUrl) })
   return {

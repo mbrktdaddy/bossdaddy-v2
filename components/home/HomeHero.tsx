@@ -90,7 +90,7 @@ function Ticker({ items }: { items: MotionItem[] }) {
           <p className="py-4 text-[13px] font-semibold text-prose-muted inline-flex items-center gap-2.5">
             <span className="text-accent" aria-hidden>●</span>
             <span className="font-black text-prose">Zero paid placements.</span>
-            Every pick is bought, broken, and earned.
+            Every review is earned. Every pick is independently chosen.
           </p>
         ) : (
           // Mobile: stacked full-width rows. Desktop: one non-wrapping line of

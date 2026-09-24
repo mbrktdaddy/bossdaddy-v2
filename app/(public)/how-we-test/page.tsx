@@ -125,10 +125,10 @@ export default function HowWeTestPage() {
  personally reviews. Hands on it. In the real world. Not from a desk.
  </p>
  <p>
- Our human editors and contributors are held to the same bar. If they&apos;re writing an
- editorial review, they&apos;ve used the product or have direct firsthand knowledge of it.
- That&apos;s not a nice-to-have. It&apos;s the rule. <strong>No gifted-product editorial
- reviews. Not for the founder, not for anybody on the team.</strong>
+ Anyone who writes for Boss Daddy in the future will be held to the same bar. If
+ they&apos;re writing an editorial review, they&apos;ve used the product or have direct
+ firsthand knowledge of it. That&apos;s not a nice-to-have. It&apos;s the rule.{' '}
+ <strong>No gifted-product editorial reviews. Not for the founder, not for anybody.</strong>
  </p>
 
  <h2>How Products Get Selected</h2>

@@ -121,7 +121,7 @@ export default function Footer() {
             </Link>
             <p className="text-sm font-semibold text-prose mb-2">{BRAND.credibility}</p>
             <p className="text-sm text-prose-muted leading-relaxed mb-5 max-w-sm">
-              Real-world reviews. No PR samples. No paid placements. Just an honest verdict from a dad who bought the thing and used it.
+              Real-world reviews and independently chosen picks. No PR samples. No paid placements. If I scored it, I bought it and used it.
             </p>
             <Link
               href="/install"

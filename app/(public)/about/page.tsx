@@ -35,7 +35,6 @@ export default async function AboutPage() {
  const STATS = [
  { value: String(reviewCount ?? 0), label: 'Products reviewed' },
  { value: String(articleCount ?? 0), label: 'Guides written' },
- { value: '100%', label: 'Firsthand tested' },
  { value: '$0', label: 'Paid placements' },
  ]
 
@@ -60,7 +59,7 @@ export default async function AboutPage() {
  </div>
 
  {/* Stats */}
- <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+ <div className="grid grid-cols-3 gap-4 mb-16">
  {STATS.map((s) => (
  <div key={s.label} className="bg-surface border border-soft rounded-xl p-5 text-center">
  <p className="text-3xl font-black text-accent-text mb-1">{s.value}</p>
@@ -128,6 +127,11 @@ export default async function AboutPage() {
  tell you to buy it, it&apos;s because it earned that Boss Daddy Approved recommendation in my
  own backyard, garage, and living room.
  </p>
+ <p>
+ When a guide mentions something I haven&apos;t reviewed, I&apos;ll tell you where the
+ recommendation comes from — a buddy who swears by it, a product that&apos;s popular for
+ the job, or my own research. Nobody pays for the spot.
+ </p>
 
  <h2>{BRAND.credibility}</h2>
  <p>
@@ -140,7 +144,7 @@ export default async function AboutPage() {
  </p>
  <p>
  Every guide, every review, and every recommendation still gets personally approved by
- the Boss Daddy team. Whether you&apos;re shopping for a new grill, hunting for kid stuff,
+ me. Whether you&apos;re shopping for a new grill, hunting for kid stuff,
  buying a new tool, or just looking for guidance on a home improvement project — Boss
  Daddy uses every tool available to make sure you get straight answers from guys who
  actually show up. That&apos;s the Boss Daddy way: real dads + smart tech = better decisions

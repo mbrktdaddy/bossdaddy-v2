@@ -16,7 +16,7 @@ export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'Dad Guides — Skills, How-Tos & Advice',
-  description: 'Real guides for real dads — stuff how-tos, backyard projects, grilling tips, and practical advice from a dad who actually tested it. No fluff, just what works.',
+  description: 'Real guides for real dads — stuff how-tos, backyard projects, grilling tips, and practical advice from a dad who\'s actually done it. No fluff, just what works.',
   openGraph: {
     ...OG_SITE,
     title: 'Dad Guides — Boss Daddy Life',
@@ -70,7 +70,7 @@ export default async function GuidesPage() {
       <PageHeader
         eyebrow="The Field Notes"
         title="Guides"
-        deck="Real how-tos for the situations that actually come up — tested by a dad, written without the fluff."
+        deck="Real how-tos for the situations that actually come up — from a dad who's done it, written without the fluff."
       />
       <div className="max-w-6xl mx-auto px-6 py-12">
       {/* Featured guide — the showcase leads the page (Cover Story pattern) */}

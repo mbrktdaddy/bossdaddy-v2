@@ -60,7 +60,8 @@ Title: ${title}${product_name ? `\nProduct: ${product_name}` : ''}${category ? `
 Rules:
 - Meta title: 50–60 chars. Include product name or main topic. Action-oriented. No clickbait.
 - Meta description: 140–160 chars. Summarize the value. Include 1-2 natural keywords. End with a subtle call to action.
-- Write in the Boss Daddy voice — confident, direct, dad-tested credibility.`
+- Write in the Boss Daddy voice — confident, direct, real-dad credibility.
+- Only claim testing ("tested", "dad-tested", "I used") for a review. For a guide, describe the value ("dad-picked", "from a dad who's done it") — never imply the products in it were tested.`
 
   try {
     // No voice system block — meta tags are short SEO snippets, not brand prose.

@@ -50,10 +50,28 @@ export default function EditorialStandardsPage() {
  </ul>
  <p>
  If a product doesn&apos;t clear that bar, we don&apos;t review it. We&apos;d rather publish less
- and mean every word than pad the site with stuff we haven&apos;t actually put hands on.
+ and mean every word than pad the reviews with stuff we haven&apos;t actually put hands on.
  </p>
 
- <h2>2. What &quot;Boss Daddy Approved&quot; Means</h2>
+ <h2>2. Mentions Outside of Reviews</h2>
+ <p>
+ Not every product we link has a full Boss Daddy review behind it. Guides, articles,
+ and gift lists sometimes mention products we&apos;ve researched, ones recommended by
+ people we trust, or ones that are popular for the job at hand. Those mentions
+ don&apos;t carry a score or the Boss Daddy Approved badge, and we&apos;re straight with you
+ about where each one comes from:
+ </p>
+ <ul>
+ <li><strong>Firsthand</strong> — we used it. That&apos;s reviews, or anywhere it actually happened.</li>
+ <li><strong>Secondhand</strong> — someone we know uses it, and we say so.</li>
+ <li><strong>Reputation</strong> — it&apos;s widely rated or popular for the job, and we say that, not more.</li>
+ <li><strong>Our pick</strong> — our honest opinion of what&apos;s worth a look.</li>
+ </ul>
+ <p>
+ We never claim hands-on experience we don&apos;t have, and nobody pays to be mentioned.
+ </p>
+
+ <h2>3. What &quot;Boss Daddy Approved&quot; Means</h2>
  <p>
  <strong>&quot;Boss Daddy Approved&quot;</strong>{' '}is not a slogan we stick on anything we want
  to sell. It&apos;s a designation a product has to earn — tested in the places dads
@@ -65,14 +83,14 @@ export default function EditorialStandardsPage() {
  <Link href="/how-we-test">How We Test</Link>.
  </p>
 
- <h2>3. AI Usage Policy</h2>
+ <h2>4. AI Usage Policy</h2>
  <p>
  We use AI tools — specifically Anthropic&apos;s Claude — to help draft and research
  content. We&apos;re transparent about that because we&apos;d rather tell you up front than
  have you wonder. Here&apos;s exactly how it works:
  </p>
  <ul>
- <li><strong>AI drafts. Humans decide.</strong> Every guide and review is reviewed and approved by a human on the Boss Daddy team before it goes live.</li>
+ <li><strong>AI drafts. Humans decide.</strong> Every guide and review is reviewed and approved by the founder before it goes live.</li>
  <li><strong>AI never substitutes for lived experience.</strong> Firsthand observations, real-world testing notes, and verdicts come from humans who have actually used the product.</li>
  <li><strong>Ratings are always human-verified.</strong> No rating, score, or final recommendation is published without a person signing off on it.</li>
  <li><strong>AI helps with research and structure.</strong> Specs, comparisons, pros-and-cons framing, plain-English explanations — AI is a good tool for that. It is not a good tool for telling you whether something is worth your money. That&apos;s a human call.</li>
@@ -82,11 +100,11 @@ export default function EditorialStandardsPage() {
  AI-generated content, and it&apos;s how we&apos;d want to be told if the roles were reversed.
  </p>
 
- <h2>4. Contributor Standards</h2>
+ <h2>5. Contributor Standards</h2>
  <p>
- Boss Daddy Life is founder-led, but it&apos;s not a one-man operation. We work with
- human editors, writers, and content managers. Every contributor is held to the same
- standards as the founder:
+ Boss Daddy Life is founder-led — every piece is written, edited, and approved by the
+ founder today. Any editor, writer, or contributor who joins will be held to the same
+ standards:
  </p>
  <ul>
  <li>No paid placements. No sponsored ratings. No &quot;pay to play.&quot;</li>
@@ -95,7 +113,7 @@ export default function EditorialStandardsPage() {
  <li>Contributors cannot accept gifts, payment, or perks from a brand in exchange for coverage. If a brand tries, we walk away and tell you about it.</li>
  </ul>
 
- <h2>5. Rating Methodology</h2>
+ <h2>6. Rating Methodology</h2>
  <p>
  We rate products on a <strong>1.0 – 10.0 scale</strong>{' '}in half-point increments.
  More precision means more honesty — the difference between a 7.5 and an 8.5 is real,
@@ -111,7 +129,8 @@ export default function EditorialStandardsPage() {
  <p>What the numbers mean:</p>
  <ul>
  <li><strong>9.0 – 10.0:</strong> Exceptional. Best in class. Earns the <strong>Boss Daddy Approved</strong> badge.</li>
- <li><strong>7.0 – 8.9:</strong> Great to excellent. A confident buy for most dads.</li>
+ <li><strong>8.0 – 8.9:</strong> Excellent. A confident buy for most dads. Earns the <strong>Boss Daddy Approved</strong> badge.</li>
+ <li><strong>7.0 – 7.9:</strong> Great. A solid buy with a trade-off or two worth knowing.</li>
  <li><strong>5.0 – 6.9:</strong> Average to above average. Has real limits or better alternatives.</li>
  <li><strong>Below 5.0:</strong> Poor to avoid. We&apos;ll tell you why and what to buy instead.</li>
  </ul>
@@ -120,7 +139,7 @@ export default function EditorialStandardsPage() {
  generated by an algorithm, and they are not influenced by affiliate payouts.
  </p>
 
- <h2>6. Corrections and Updates</h2>
+ <h2>7. Corrections and Updates</h2>
  <p>
  We get things wrong sometimes. When we do, we fix it — publicly, not quietly.
  </p>
@@ -130,7 +149,7 @@ export default function EditorialStandardsPage() {
  <li><strong>If you spot something wrong,</strong> tell us at <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. We take it seriously.</li>
  </ul>
 
- <h2>7. What We Don&apos;t Do</h2>
+ <h2>8. What We Don&apos;t Do</h2>
  <ul>
  <li><strong>No paid placements.</strong> You cannot buy a review, a ranking, or a mention.</li>
  <li><strong>No gifted-product reviews in the editorial section.</strong> If we didn&apos;t pay for it or have direct firsthand knowledge of it, it doesn&apos;t go in a review.</li>
@@ -142,7 +161,7 @@ export default function EditorialStandardsPage() {
  labeled, it&apos;s separated from editorial reviews, and it never affects ratings.
  </p>
 
- <h2>8. Questions</h2>
+ <h2>9. Questions</h2>
  <p>
  If anything on this site seems off, if a review feels like it crossed a line, or if
  you just want to know how a specific piece was put together — reach out. Straight

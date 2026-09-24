@@ -10,7 +10,7 @@ interface Props {
 const FALLBACK = {
   display_name: 'Boss Daddy',
   tagline: 'First-time dad. Honest gear reviews. No corporate fluff.',
-  bio: "I'm a first-time dad in the trenches — testing every piece of gear on my own kid, my own grill, and my own weekend projects. If I wouldn't buy it again, I'll tell you. If it changed the game, I'll tell you that too. Every review is earned, never sponsored.",
+  bio: "I'm a first-time dad in the trenches — testing gear on my own kid, my own grill, and my own weekend projects. If I wouldn't buy it again, I'll tell you. If it changed the game, I'll tell you that too. Every review is earned. Every pick is independently chosen. Nothing here is sponsored.",
 }
 
 export default async function AuthorBio({ username, className = 'mt-12' }: Props) {

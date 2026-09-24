@@ -7,8 +7,8 @@ import BenchStrip from '@/components/BenchStrip'
 
 export const revalidate = 60
 
-const TITLE = `${LABELS.picks.full} — Dad-Tested Gear Roundups | Boss Daddy`
-const DESCRIPTION = 'Dad-tested best-of lists and category roundups. Every pick is personally bought, tested, and recommended by Boss Daddy.'
+const TITLE = `${LABELS.picks.full} — Dad-Picked Gear Roundups | Boss Daddy`
+const DESCRIPTION = 'Dad-picked best-of lists and category roundups. Every pick independently chosen by Boss Daddy — no paid placements.'
 
 export const metadata: Metadata = {
   // Absolute — brand already in the title; avoids the template double-branding.

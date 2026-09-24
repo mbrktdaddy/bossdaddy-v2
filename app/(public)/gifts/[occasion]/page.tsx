@@ -368,7 +368,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                   <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Gifts</p>
                   <h2 className="text-2xl font-black text-prose leading-tight">
-                    {items.length} dad-tested {items.length === 1 ? 'gift' : 'gifts'}, all personally bought
+                    {items.length} dad-picked {items.length === 1 ? 'gift' : 'gifts'}
                   </h2>
                 </div>
 
@@ -526,7 +526,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                   The {occ.label} list is being built
                 </h2>
                 <p className="text-prose-muted leading-relaxed mb-6 max-w-xl">
-                  Boss Daddy is curating the {occ.label.toLowerCase()}{' '}guide right now — every pick personally tested, no corporate gift-list filler. Drop your email and you&apos;ll be the first to know when it goes live.
+                  Boss Daddy is curating the {occ.label.toLowerCase()}{' '}guide right now — every pick hand-chosen, no corporate gift-list filler. Drop your email and you&apos;ll be the first to know when it goes live.
                 </p>
                 <div className="max-w-md">
                   <EmailSignup

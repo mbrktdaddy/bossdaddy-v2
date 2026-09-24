@@ -218,7 +218,7 @@ export function VoiceProfileForm({ initial }: Props) {
               <textarea
                 value={f.value}
                 onChange={(e) => updateFact(f.id, { value: e.target.value })}
-                placeholder="Fact — e.g. I test every product for at least two weekends before writing the review."
+                placeholder="Fact — e.g. Every product I review gets at least two weekends of real use first."
                 rows={2}
                 className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-y"
               />

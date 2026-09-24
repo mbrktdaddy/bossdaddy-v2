@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!cat) return { title: 'Not Found' }
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   return buildSocialMetadata({
-    title: `${cat.label} — Dad-Tested Reviews & Guides | Boss Daddy`,
+    title: `${cat.label} — Dad-Tested Reviews & Real-Dad Guides | Boss Daddy`,
     description: cat.description,
     path: `/category/${slug}`,
     siteUrl,
