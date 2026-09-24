@@ -85,17 +85,6 @@ function TargetIcon() {
   )
 }
 
-/** Planning — a calculator. Exported for the Calculators section on /tools. */
-export function CalculatorIcon() {
-  return (
-    <svg {...svgProps(ICON)}>
-      <rect x="5.25" y="3.25" width="13.5" height="17.5" rx="2.5" />
-      <path d="M8.75 7.5h6.5" />
-      <path d="M9.25 12h.01M12 12h.01M14.75 12h.01M9.25 16h.01M12 16h.01M14.75 16h.01" />
-    </svg>
-  )
-}
-
 type Tile = { href: string; label: string; Icon: () => React.JSX.Element }
 
 /**

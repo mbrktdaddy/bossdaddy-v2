@@ -1,6 +1,6 @@
 # Money Tools Plan — the Calculators path
 
-> Status: **PLANNED 2026-09-24.** Nothing built yet.
+> Status: **BUILT 2026-09-24** — all four shipped (uncommitted at time of writing). Routes: `/tools/emergency-runway`, `/tools/life-insurance`, `/tools/debt-payoff`, `/tools/loan-math`. Engine `lib/dad-tools/finance.ts` + `tests/unit/finance.test.ts`; shared UI `components/dad-tools/{NumberField,CalculatorParts}.tsx`; URL helpers `lib/dad-tools/{url-params,debt-params}.ts`.
 > Scope: four new calculators in the `/tools` **Calculators** section, joining Dad Math.
 
 ## Decisions (locked)

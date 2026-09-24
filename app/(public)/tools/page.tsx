@@ -24,7 +24,7 @@ import type { Metadata } from 'next'
 import TodayCard from '@/components/goals/TodayCard'
 import WorkingOnSection from '@/components/goals/WorkingOnSection'
 import YourCornerSection from '@/components/account/YourCornerSection'
-import ToolTiles, { CalculatorIcon } from '@/components/dad-tools/ToolTiles'
+import ToolTiles from '@/components/dad-tools/ToolTiles'
 
 export function generateMetadata(): Metadata {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
@@ -82,10 +82,35 @@ const MAIN_SPOKES: SpokeCard[] = [
   // per-member rows above the tool grid.
 ]
 
-// Strategic reference tools — sit below the main spokes. Useful but not a
-// daily-loop anchor. Dad Math is a stateless college-projection calculator
-// you reach for during planning, not part of the weekly rhythm.
+// The Calculators — the money path (docs/money-tools-plan.md). Ordered as the
+// sequence a dad should tackle his money in, NOT build order, and the eyebrows
+// (spokeRole) name the step: Steady → Protect → Clear → Build. Each tool's
+// result links to the next one. All stateless — no account needed.
 const REFERENCE_TOOLS: SpokeCard[] = [
+  {
+    role:  LABELS.tools.runway.spokeRole,
+    title: LABELS.tools.runway.full,
+    blurb: LABELS.tools.runway.spokeBlurb,
+    href:  '/tools/emergency-runway',
+  },
+  {
+    role:  LABELS.tools.lifeInsurance.spokeRole,
+    title: LABELS.tools.lifeInsurance.full,
+    blurb: LABELS.tools.lifeInsurance.spokeBlurb,
+    href:  '/tools/life-insurance',
+  },
+  {
+    role:  LABELS.tools.debtPayoff.spokeRole,
+    title: LABELS.tools.debtPayoff.full,
+    blurb: LABELS.tools.debtPayoff.spokeBlurb,
+    href:  '/tools/debt-payoff',
+  },
+  {
+    role:  LABELS.tools.loanMath.spokeRole,
+    title: LABELS.tools.loanMath.full,
+    blurb: LABELS.tools.loanMath.spokeBlurb,
+    href:  '/tools/loan-math',
+  },
   {
     role:  LABELS.tools.dadMath.spokeRole,
     title: LABELS.tools.dadMath.full,
@@ -370,28 +395,14 @@ export default async function ToolsHubPage() {
           reasoning was that a heading organising ONE item costs more than it earns —
           true then, wrong now: this is a category with more coming, and a named area
           people can learn is what makes the second and third calculator findable
-          instead of surprising. The placeholder is doing real work; it says the room
-          isn't finished. */}
+          instead of surprising. The "More coming" placeholder retired when the money
+          path filled the section (2026-09-24). */}
       <section>
         <h2 className="mb-5 text-xl sm:text-2xl font-black text-prose tracking-tight">
           Calculators
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {REFERENCE_TOOLS.map((spoke) => renderSpoke(spoke, 'reference'))}
-
-          {/* Not a link, and deliberately not styled like one — a dashed, faint tile
-              reads as "space reserved" where a solid card would read as "broken". */}
-          <div className="flex min-h-[120px] items-center justify-center rounded-2xl border border-dashed border-soft bg-surface-sunken px-6 py-6 text-center">
-            <div>
-              <span className="block text-accent" aria-hidden>
-                <CalculatorIcon />
-              </span>
-              <p className="mt-2 text-sm font-semibold text-prose-muted">More coming</p>
-              <p className="mt-1 text-xs text-prose-faint">
-                College costs, take-home pay, the real price of a car.
-              </p>
-            </div>
-          </div>
         </div>
       </section>
     </div>

@@ -13,6 +13,7 @@ import { buildSocialMetadata } from '@/lib/og'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { getKids } from '@/lib/dad-tools/kid-actions'
 import { LABELS } from '@/lib/labels'
+import { pickAmounts, LIFE_INSURANCE_KEYS } from '@/lib/dad-tools/url-params'
 import DadMathTool from './_components/DadMathTool'
 
 interface PageProps {
@@ -65,6 +66,9 @@ export default async function DadMathPage({ searchParams }: PageProps) {
     annualReturn:   parseNum(single(params.r)),
   }
   const initialKidId = parseKid(single(params.kid))
+  // Arrived from Life Insurance's "figure your college number" link: its
+  // inputs ride along so the education number can go back without them.
+  const lifeInsurance = pickAmounts(single(params.li), LIFE_INSURANCE_KEYS)
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
@@ -86,6 +90,7 @@ export default async function DadMathPage({ searchParams }: PageProps) {
         initialKids={kids}
         initialKidId={initialKidId}
         initialFromUrl={initialFromUrl.birthdate ? initialFromUrl : undefined}
+        lifeInsurance={lifeInsurance}
       />
 
       <footer className="pt-6 mt-2 border-t border-soft">

@@ -22,6 +22,7 @@ import {
   DEFAULT_MONTHLY,
   DEFAULT_BALANCE,
 } from '@/lib/dad-tools/dad-math'
+import NumberField from '@/components/dad-tools/NumberField'
 import Result from './Result'
 
 interface Props {
@@ -36,6 +37,7 @@ interface Props {
     targetBy18?:     number
     annualReturn?:   number
   }
+  lifeInsurance?: Record<string, number>
 }
 
 // Pick the starting kid from URL state + saved kids. Same resolver as
@@ -56,7 +58,7 @@ function resolveInitialKid(
   return kids[0]?.id ?? null
 }
 
-export default function DadMathTool({ isAuthenticated, initialKids, initialKidId, initialFromUrl }: Props) {
+export default function DadMathTool({ isAuthenticated, initialKids, initialKidId, initialFromUrl, lifeInsurance }: Props) {
   // Ad-hoc only when the URL has a birthdate AND it doesn't match a saved
   // kid AND no kid id was passed — that's the "shared from someone else"
   // case where the link's birthdate is the source of truth.
@@ -286,76 +288,10 @@ export default function DadMathTool({ isAuthenticated, initialKids, initialKidId
           targetBy18={targetBy18}
           kidId={selectedKidId}
           monthlyContrib={monthlyContrib}
+          lifeInsurance={lifeInsurance}
         />
       )}
 
-    </div>
-  )
-}
-
-// Small composed input. type="text" + inputMode controls the keypad without
-// inheriting <input type="number"> footguns — type=number can refuse to
-// overwrite the user's typed string when React re-renders with a parsed
-// value, leaving leading zeros stuck in the field. Owning the displayed
-// string here is the robust fix.
-function NumberField({
-  label, help, prefix, suffix, value, placeholder, decimal, onChange,
-}: {
-  label:        string
-  help:         string
-  prefix?:      string
-  suffix?:      string
-  value:        number
-  placeholder?: string
-  decimal?:     boolean
-  onChange:     (n: number) => void
-}) {
-  // Strip everything outside the allowed character set, parse, hand the
-  // number back to the parent. Empty string → 0. Stray dots in integer
-  // mode → stripped.
-  function handle(e: React.ChangeEvent<HTMLInputElement>) {
-    const allowed = decimal ? /[^\d.]/g : /\D/g
-    const stripped = e.target.value.replace(allowed, '')
-    if (stripped === '' || stripped === '.') {
-      onChange(0)
-      return
-    }
-    const n = Number(stripped)
-    onChange(Number.isFinite(n) ? n : 0)
-  }
-
-  // Display the canonical form of the value. Hide 0 behind the placeholder
-  // so the field reads as empty waiting for input, instead of a literal "0"
-  // the user has to delete before typing their number.
-  const display = !Number.isFinite(value) || value === 0 ? '' : String(value)
-
-  return (
-    <div>
-      <label className="block text-xs text-prose-faint uppercase tracking-widest mb-1.5">
-        {label}
-      </label>
-      <div className="relative">
-        {prefix && (
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-prose-faint text-sm pointer-events-none">
-            {prefix}
-          </span>
-        )}
-        <input
-          type="text"
-          inputMode={decimal ? 'decimal' : 'numeric'}
-          value={display}
-          placeholder={placeholder}
-          onChange={handle}
-          className={`w-full ${prefix ? 'pl-7' : 'pl-3'} ${suffix ? 'pr-12' : 'pr-3'} py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm placeholder:text-prose-faint focus:outline-none transition-colors`}
-          autoComplete="off"
-        />
-        {suffix && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-prose-faint text-sm pointer-events-none">
-            {suffix}
-          </span>
-        )}
-      </div>
-      <p className="text-xs text-prose-faint mt-1.5">{help}</p>
     </div>
   )
 }

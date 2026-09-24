@@ -12,6 +12,7 @@ import {
   dadMathReasoning,
   dadMathTagline,
 } from '@/lib/dad-tools/dad-math-copy'
+import { toQuery } from '@/lib/dad-tools/url-params'
 
 interface Props {
   result:     DadMathResult
@@ -23,6 +24,9 @@ interface Props {
   monthlyContrib?:  number     // The user's current monthly input — passed
                                // through so the savings handoff can suggest
                                // their existing pace as the starting amount.
+  // Life Insurance inputs carried out on its "figure your college number"
+  // link (money-tools-plan handoffs). Empty when arriving any other way.
+  lifeInsurance?: Record<string, number>
 }
 
 // Verdict → background + border accent. Keeps the visual signal aligned
@@ -55,7 +59,7 @@ function verdictTone(verdict: DadMathResult['verdict']): {
   }
 }
 
-export default function Result({ result, name, targetBy18, kidId, monthlyContrib }: Props) {
+export default function Result({ result, name, targetBy18, kidId, monthlyContrib, lifeInsurance }: Props) {
   // Build the Savings handoff URL — pre-fills /tools/savings/new with the
   // pace the user just dialed in here. If they're behind, suggest the
   // catch-up monthly; if on track, just keep their current monthly. The
@@ -175,6 +179,23 @@ export default function Result({ result, name, targetBy18, kidId, monthlyContrib
           <p className="text-xs text-prose-faint mt-1 leading-snug">
             Set up a {habitAmount > 0 ? `${fmtUsd(habitAmount)}/month` : 'monthly'}{' '}
             savings goal{name ? ` for ${name}` : ''} and tap Yes when you contribute.
+          </p>
+        </div>
+      )}
+
+      {/* Life Insurance handoff — the college target is the E in DIME. Carries
+          any Life Insurance inputs that came in, so the round-trip keeps them. */}
+      {result.verdict !== 'past_18' && targetBy18 > 0 && (
+        <div className="border-t border-soft pt-4">
+          <Link
+            href={`/tools/life-insurance${toQuery({ ...lifeInsurance, edu: targetBy18 })}`}
+            className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:text-accent-hover transition-colors"
+          >
+            Use this in {LABELS.tools.lifeInsurance.full}
+            <span aria-hidden>→</span>
+          </Link>
+          <p className="text-xs text-prose-faint mt-1 leading-snug">
+            Your {fmtUsd(targetBy18)} target becomes the education line, so college is still paid for if you aren’t here to pay it.
           </p>
         </div>
       )}

@@ -370,7 +370,7 @@ export const LABELS = {
       full:            'Dad Math',
       pageTitle:       'Dad Math — Boss Daddy',
       metaDescription: 'College savings math, told straight. Are you on track, or behind?',
-      spokeRole:       'Money',
+      spokeRole:       'Build',   // the money path's last step (was 'Money' before the path shipped)
       spokeBlurb:      'The honest calculator. Are you funding your kid’s future, or just thinking you are?',
       // Page header copy
       h1:              'The honest college math.',
@@ -398,6 +398,58 @@ export const LABELS = {
       },
       // Required legal note. Compliance: estimate, not advice.
       disclosure:       'Estimate, not financial advice. Returns are not guaranteed. Talk to a fiduciary before making real changes.',
+    },
+
+    // ── The money path (docs/money-tools-plan.md) ─────────────────────────
+    // Hub order is the PATH: Steady → Protect → Clear → Build. The spokeRole
+    // is the eyebrow, and it names the step, not the tool. Dad Math (above)
+    // is the Build step. All four are stateless — no account, URL state only.
+    runway: {
+      short:           'Emergency Runway',
+      full:            'Emergency Runway',
+      pageTitle:       'Emergency Runway — Boss Daddy',
+      metaDescription: 'How long could your family last without a paycheck? Get the number in months.',
+      spokeRole:       'Steady',
+      spokeBlurb:      'How long could we last without a paycheck? The first number to know.',
+      h1:              'How long could you last?',
+      tagline:         'If the paycheck stopped tomorrow, this is how many months you’ve got.',
+      disclosure:      'Estimate, not financial advice. The 3–6 month band is a common rule of thumb, not a guarantee. Single-income households and variable earners should aim higher.',
+    },
+
+    lifeInsurance: {
+      short:           'Life Insurance Needs',
+      full:            'Life Insurance Needs',
+      pageTitle:       'Life Insurance Needs — Boss Daddy',
+      metaDescription: 'If you were gone tomorrow, would your family be covered? The DIME method, worked out plainly.',
+      spokeRole:       'Protect',
+      spokeBlurb:      'If I’m gone tomorrow, is my family covered? Work out the gap.',
+      h1:              'Is your family covered?',
+      tagline:         'A hard question with a plain answer. Work it out once, then you can stop carrying it.',
+      disclosure:      'Educational estimate using the DIME method (Debt, Income, Mortgage, Education) — not financial advice and not a quote. Your real need depends on your health, your family and your plans. Talk it through with an independent, licensed agent before you buy.',
+    },
+
+    debtPayoff: {
+      short:           'Debt Payoff Planner',
+      full:            'Debt Payoff Planner',
+      pageTitle:       'Debt Payoff Planner — Boss Daddy',
+      metaDescription: 'Snowball or avalanche? List your debts, set a budget, and see your debt-free date.',
+      spokeRole:       'Clear',
+      spokeBlurb:      'What’s the fastest way out of debt? Snowball vs. avalanche, and your debt-free date.',
+      h1:              'Your debt-free date.',
+      tagline:         'List what you owe. Pick a plan. See the day it’s gone.',
+      disclosure:      'Estimate, not financial advice. Assumes fixed APRs, no new charges, and payments made on time each month. Real statements compound daily and minimums shrink as balances fall.',
+    },
+
+    loanMath: {
+      short:           'Loan Math',
+      full:            'Loan Math',
+      pageTitle:       'Loan Math — Boss Daddy',
+      metaDescription: 'Car or personal loan: the monthly payment, the total interest, and what it really costs you.',
+      spokeRole:       'Clear',
+      spokeBlurb:      'What does this loan really cost me? Car or personal — run it before you sign.',
+      h1:              'What it really costs.',
+      tagline:         'The monthly payment is the number they sell you. The interest is the one they don’t.',
+      disclosure:      'Estimate, not financial advice or a loan offer. Tax and fee rules vary by state; your lender’s disclosure is the final word.',
     },
 
     presence: {

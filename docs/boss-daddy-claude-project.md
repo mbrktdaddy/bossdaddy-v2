@@ -155,7 +155,7 @@ Full reference lives in `docs/brand-guide.md` (deeper than this summary, and aut
 - **Vault + Bench navigation cleanup (2026-09-23).** The Vault went from five separately-designed pages to one hub with four tabs, breadcrumbs back up from every collection, and one name per collection type. The Bench joined the Browse menu, shows its "Not Testing" list, forwards graduated products to their review, and uses one set of status words everywhere.
 - **Article footers standardized (2026-09-23).** Reviews and guides now end in the same order: FAQs → Ask the Boss → final buy box → like/share → author bio → newsletter → keep reading → comments → the Bench → merch.
 - Member AI concierge "The Boss" — fully migrated to the AI Gateway with hybrid semantic + full-text retrieval, thumbs feedback, and a crisis-only sensitive router.
-- Dad Tools (savings tracker shipped).
+- Dad Tools (savings tracker shipped). **Money path calculators shipped 2026-09-24**: Emergency Runway → Life Insurance Needs → Debt Payoff Planner → Loan Math → Dad Math (Steady · Protect · Clear · Build), stateless, linked by URL handoffs — see `docs/money-tools-plan.md`.
 - Notifications + direct messaging (in-app, email digest, web push).
 - **Merch shop end-to-end:** Stripe checkout → Printful fulfillment validated on a real order.
 - **Full AI provider layer migrated** to the Vercel AI Gateway + AI SDK v6 across every bucket (content, utility, moderation, research, concierge).
