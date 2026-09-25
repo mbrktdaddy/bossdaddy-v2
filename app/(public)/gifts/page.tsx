@@ -54,6 +54,14 @@ export default async function GiftsIndexPage() {
     }
   }
 
+  // The first tile that actually has an image is the LCP candidate. Many tiles
+  // render an icon instead, so "index 0" can't be used. Eager, not `priority`:
+  // no preload, so it can't contend with above-the-fold content on mobile if
+  // it lands below the fold there.
+  const eagerOccasion = OCCASION_GROUPS
+    .flatMap((group) => OCCASIONS.filter((o) => o.group === group.id))
+    .find((o) => liveByOccasion.get(o.value)?.hero_image_url)?.value
+
   // Gift guides keep their occasion grid rather than VaultGrid's flat list: a
   // reader shops by occasion, and unwritten occasions still earn a "Coming Soon" tile.
   return (
@@ -85,6 +93,7 @@ export default async function GiftsIndexPage() {
                         fill
                         className="object-cover"
                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        loading={occ.value === eagerOccasion ? 'eager' : undefined}
                       />
                     ) : (
                       <OccasionIcon value={occ.value} className="w-12 h-12 text-accent-text/70" />
