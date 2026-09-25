@@ -6,6 +6,7 @@ import CategoryIcon from '@/components/CategoryIcon'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { NewsletterCard } from '@/components/NewsletterCard'
 import { BRAND } from '@/lib/brand'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 export const revalidate = 3600
 
@@ -44,7 +45,7 @@ export default async function AboutPage() {
  {/* Hero */}
  <div className="mb-16">
  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
- <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">The Real Story Behind Boss Daddy</p>
+ <Eyebrow className="mb-3">The Real Story Behind Boss Daddy</Eyebrow>
  <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6">
  The Dad Who Thought
  <br />
@@ -168,7 +169,7 @@ export default async function AboutPage() {
  {/* Pillars */}
  <div className="mb-16">
  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
- <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Categories</p>
+ <Eyebrow className="mb-2">Categories</Eyebrow>
  <h2 className="text-2xl font-black mb-2">What We Cover</h2>
  <p className="text-prose-faint text-sm mb-6">Reviews, guides, and picks across everything modern dads actually love.</p>
  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">

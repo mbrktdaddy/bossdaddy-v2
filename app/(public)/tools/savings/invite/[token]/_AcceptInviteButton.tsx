@@ -7,6 +7,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { acceptInvite } from '@/lib/dad-tools/savings-actions'
+import { buttonVariants } from '@/components/ui/Button'
 
 export default function AcceptInviteButton({ token }: { token: string }) {
   const router = useRouter()
@@ -35,7 +36,7 @@ export default function AcceptInviteButton({ token }: { token: string }) {
         type="button"
         onClick={onAccept}
         disabled={pending}
-        className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors"
+        className={buttonVariants()}
       >
         {pending ? 'Joining…' : 'Join the goal →'}
       </button>

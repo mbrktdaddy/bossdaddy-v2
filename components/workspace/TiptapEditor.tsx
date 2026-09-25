@@ -129,6 +129,7 @@ const ImageGridNode = Node.create({
 
 import LinkExtension from '@tiptap/extension-link'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 const Link = LinkExtension.extend({
   addAttributes() {
@@ -181,7 +182,7 @@ function LinkDialog({ initial, onConfirm, onCancel }: {
           <button
             type="button"
             onClick={() => onConfirm(url)}
-            className="flex-1 px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-lg transition-colors"
+            className={buttonVariants({ className: 'flex-1' })}
           >
             {url ? 'Insert' : 'Remove link'}
           </button>
@@ -702,7 +703,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
             />
             <button type="button" onClick={handleAiRefine}
               disabled={aiRefining || !aiInstruction.trim()}
-              className="shrink-0 px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-xs font-semibold rounded-lg transition-colors">
+              className={buttonVariants({ size: 'sm', className: 'shrink-0' })}>
               {aiRefining ? 'Refining…' : 'Apply'}
             </button>
             <button type="button" onClick={() => { setSelection(null); setAiInstruction(''); setAiError(null) }}

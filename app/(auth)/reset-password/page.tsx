@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { buttonVariants } from '@/components/ui/Button'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -74,7 +75,7 @@ export default function ResetPasswordPage() {
           </p>
           <a
             href="/forgot-password"
-            className="block w-full text-center py-2.5 px-4 bg-accent hover:bg-accent-hover text-white font-semibold rounded-lg transition-colors"
+            className={buttonVariants({ className: 'w-full' })}
           >
             Request a new reset link
           </a>
@@ -135,7 +136,7 @@ export default function ResetPasswordPage() {
           <button
             type="submit"
             disabled={loading || authed === null}
-            className="w-full py-2.5 px-4 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-semibold rounded-lg transition-colors"
+            className={buttonVariants({ className: 'w-full' })}
           >
             {loading ? 'Updating…' : 'Update Password'}
           </button>

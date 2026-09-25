@@ -32,6 +32,8 @@ import { WEEKDAY_OPTIONS, COMMON_ZONES } from '@/lib/goals/schedule-input'
 import {
   loadTemplateShelf, loadTemplate, loadTemplateForKind,
 } from '@/lib/goals/templates'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const metadata: Metadata = {
   title: `${LABELS.goals.newCta} — ${LABELS.goals.short}`,
@@ -49,7 +51,7 @@ export default async function NewGoalPage({ searchParams }: Props) {
     return (
       <Wrap>
         <h1 className="text-2xl font-black text-prose">Sign in to set up a goal.</h1>
-        <LoginLink className="mt-6 inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl transition-colors">
+        <LoginLink className={buttonVariants({ className: 'mt-6' })}>
           Sign in →
         </LoginLink>
       </Wrap>
@@ -74,9 +76,9 @@ export default async function NewGoalPage({ searchParams }: Props) {
       <Wrap>
         <Back />
         <header className="space-y-3">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+          <Eyebrow>
             {LABELS.goals.newCta}
-          </p>
+          </Eyebrow>
           <h1 className="text-3xl sm:text-4xl font-black text-prose leading-[1.05] tracking-tight">
             {LABELS.goals.newHeading}
           </h1>
@@ -114,9 +116,9 @@ export default async function NewGoalPage({ searchParams }: Props) {
                 <p className="text-base font-bold text-prose">{plan.label}</p>
                 <p className="mt-1 text-sm text-prose-muted">{plan.blurb}</p>
                 {plan.identityShort ? (
-                  <p className="mt-3 text-xs text-eyebrow uppercase tracking-widest font-semibold">
+                  <Eyebrow className="mt-3">
                     {LABELS.goals.votingFor}: {plan.identityShort}
-                  </p>
+                  </Eyebrow>
                 ) : null}
               </Link>
               {/* Outside the card's <Link> — a link inside a link is invalid
@@ -177,9 +179,9 @@ export default async function NewGoalPage({ searchParams }: Props) {
       </Link>
 
       <header className="mt-6 space-y-2">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+        <Eyebrow>
           {LABELS.goals.kinds[template.kind] ?? LABELS.goals.kinds.custom}
-        </p>
+        </Eyebrow>
         <h1 className="text-2xl sm:text-3xl font-black text-prose leading-tight tracking-tight">
           {template.label}
         </h1>
@@ -450,7 +452,7 @@ export default async function NewGoalPage({ searchParams }: Props) {
 
         <button
           type="submit"
-          className="w-full rounded-lg bg-accent px-6 py-3 font-bold text-white hover:bg-accent-hover transition-colors"
+          className={buttonVariants({ size: 'lg', className: 'w-full' })}
         >
           Start it
         </button>

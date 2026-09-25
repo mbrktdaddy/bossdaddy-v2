@@ -1,4 +1,5 @@
 import type { FAQ } from '@/lib/seo/faq-ld'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 export type { FAQ }
 
@@ -27,7 +28,7 @@ export default function FAQAccordion({
     <section id={id} aria-label={heading} className={className}>
       <div className="mb-4">
         <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">FAQ</p>
+        <Eyebrow className="mb-1">FAQ</Eyebrow>
         <h2 className="text-2xl font-black text-prose leading-tight">{heading}</h2>
       </div>
 

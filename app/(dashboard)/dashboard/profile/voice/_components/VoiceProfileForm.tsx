@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { FamilyMember, Gender, VoiceFact, VoiceProfile } from '@/lib/voiceProfile'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   initial: Pick<
@@ -116,7 +117,7 @@ export function VoiceProfileForm({ initial }: Props) {
           <button
             onClick={addMember}
             type="button"
-            className="shrink-0 text-xs px-3 py-2 bg-accent hover:bg-accent-hover text-white font-semibold rounded-lg transition-colors"
+            className={buttonVariants({ size: 'sm', className: 'shrink-0' })}
           >
             + Add family member
           </button>
@@ -184,7 +185,7 @@ export function VoiceProfileForm({ initial }: Props) {
           <button
             onClick={addFact}
             type="button"
-            className="shrink-0 text-xs px-3 py-2 bg-accent hover:bg-accent-hover text-white font-semibold rounded-lg transition-colors"
+            className={buttonVariants({ size: 'sm', className: 'shrink-0' })}
           >
             + Add fact
           </button>
@@ -238,7 +239,7 @@ export function VoiceProfileForm({ initial }: Props) {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="shrink-0 px-5 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
+          className={buttonVariants({ className: 'shrink-0' })}
         >
           {saving ? 'Saving…' : 'Save voice profile'}
         </button>

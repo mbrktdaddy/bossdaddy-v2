@@ -21,6 +21,8 @@ import { ogImageMeta } from '@/lib/og'
 import { LoginLink } from '@/components/LoginLink'
 import { previewInvitation, TIER_COPY, THREAD_ACCESS_COPY } from '@/lib/goals/participants'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 // ⚠️ THE GOAL TITLE MUST NEVER APPEAR IN THIS METADATA. STATIC ONLY — do not turn
 // this into generateMetadata().
@@ -98,7 +100,7 @@ export default async function GoalInvitePage({ params, searchParams }: Props) {
         <Wrap>
           <h1 className="text-2xl font-black text-prose">You&apos;ve been invited.</h1>
           <p className="mt-3 text-sm text-prose-muted">{preview.reason}</p>
-          <LoginLink className="mt-6 inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl transition-colors">
+          <LoginLink className={buttonVariants({ className: 'mt-6' })}>
             Sign in to see it →
           </LoginLink>
         </Wrap>
@@ -123,9 +125,9 @@ export default async function GoalInvitePage({ params, searchParams }: Props) {
   return (
     <Wrap>
       <header className="space-y-3">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+        <Eyebrow>
           An invite
-        </p>
+        </Eyebrow>
         <h1 className="text-2xl sm:text-3xl font-black text-prose leading-tight tracking-tight">
           {inviterName} wants you in his corner.
         </h1>
@@ -186,7 +188,7 @@ export default async function GoalInvitePage({ params, searchParams }: Props) {
           </p>
           {/* LoginLink returns to the CURRENT page after auth (useLoginHref), so
               the token survives the round trip without being threaded anywhere. */}
-          <LoginLink className="mt-4 inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl transition-colors">
+          <LoginLink className={buttonVariants({ className: 'mt-4' })}>
             Sign in to accept →
           </LoginLink>
         </Card>
@@ -197,7 +199,7 @@ export default async function GoalInvitePage({ params, searchParams }: Props) {
             <input type="hidden" name="token" value={token} />
             <button
               type="submit"
-              className="min-h-11 w-full rounded-lg bg-accent px-6 py-3 font-bold text-white hover:bg-accent-hover transition-colors"
+              className={buttonVariants({ size: 'lg', className: 'w-full' })}
             >
               I&apos;m in
             </button>

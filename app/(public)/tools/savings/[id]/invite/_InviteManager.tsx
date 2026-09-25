@@ -8,6 +8,8 @@ import { useState, useRef, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createInvite, revokeInvite } from '@/lib/dad-tools/savings-actions'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface MemberHit { id: string; username: string; displayName: string | null }
 
@@ -117,9 +119,9 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
   return (
     <Card as="section" className="p-6 space-y-5">
       <div className="flex items-baseline justify-between">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+        <Eyebrow>
           Generate a link
-        </p>
+        </Eyebrow>
         <p className="text-xs text-prose-faint">
           {seatsRemaining > 0
             ? `${seatsRemaining} seat${seatsRemaining === 1 ? '' : 's'} available`
@@ -153,7 +155,7 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
                       type="button"
                       onClick={() => inviteMember(m)}
                       disabled={pending || invitingId === m.id}
-                      className="shrink-0 px-3 py-1.5 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-semibold rounded-lg text-xs transition-colors"
+                      className={buttonVariants({ size: 'sm', className: 'shrink-0' })}
                     >
                       {invitingId === m.id ? 'Inviting…' : 'Invite'}
                     </button>
@@ -195,7 +197,7 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
             type="button"
             disabled={pending}
             onClick={onGenerate}
-            className="w-full sm:w-auto bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors min-h-[44px]"
+            className={buttonVariants({ className: 'w-full sm:w-auto' })}
           >
             {pending ? 'Generating…' : 'Generate invite link'}
           </button>
@@ -218,7 +220,7 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
             <button
               type="button"
               onClick={() => copyToClipboard(freshLink, 'fresh')}
-              className="shrink-0 px-3 py-2 bg-accent hover:bg-accent-hover text-white font-semibold rounded-lg text-sm transition-colors min-h-[44px]"
+              className={buttonVariants({ className: 'shrink-0' })}
             >
               {copied === 'fresh' ? 'Copied!' : 'Copy'}
             </button>
@@ -235,9 +237,9 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
 
       {pendingInvites.length > 0 && (
         <div className="space-y-2 pt-2 border-t border-soft">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+          <Eyebrow>
             Pending invites — {pendingInvites.length}
-          </p>
+          </Eyebrow>
           {pendingInvites.map((inv) => {
             const url = typeof window !== 'undefined'
               ? `${window.location.origin}/tools/savings/invite/${inv.token}`

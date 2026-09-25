@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { ReviewBlock } from '@/lib/boss/types'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 // The rich pick card for a real, hands-on TESTED review (kind 'review') — verdict
 // scores + buy link + FTC line. Guides render in GuideCard, researched picks in
@@ -36,7 +37,7 @@ export default function RecommendationCard({ c }: { c: ReviewBlock }) {
             href={c.buyUrl}
             rel="sponsored nofollow noopener"
             target="_blank"
-            className="inline-flex items-center gap-1 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-lg px-3 py-2 min-h-[44px] transition-colors"
+            className={buttonVariants()}
           >
             See it <span aria-hidden>→</span>
           </Link>

@@ -9,6 +9,7 @@ import type { Milestone, Unit } from '@/lib/dad-tools/calc'
 import { LABELS } from '@/lib/labels'
 import YearlyCheckinOptIn from './YearlyCheckinOptIn'
 import ShareMenu from './ShareMenu'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   result: {
@@ -131,7 +132,7 @@ export default function Result({
             type="button"
             onClick={handleSaveKid}
             disabled={saving}
-            className="w-full sm:w-auto px-5 py-3 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
+            className={buttonVariants({ className: 'w-full sm:w-auto' })}
           >
             {saving ? 'Saving…' : 'Save this kid to your Boss Daddy dashboard'}
           </button>
@@ -142,7 +143,7 @@ export default function Result({
             type="button"
             onClick={handleSaveKid}
             disabled={saving}
-            className="w-full sm:w-auto px-5 py-3 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
+            className={buttonVariants({ className: 'w-full sm:w-auto' })}
           >
             {saving ? 'Saving…' : 'Save this kid to your dashboard'}
           </button>
@@ -170,7 +171,7 @@ export default function Result({
           <button
             type="button"
             onClick={() => setShowCapture(true)}
-            className="w-full sm:w-auto px-5 py-3 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
+            className={buttonVariants({ className: 'w-full sm:w-auto' })}
           >
             {LABELS.tools.log.captureWeekendCta}
           </button>
@@ -195,7 +196,7 @@ export default function Result({
               <button
                 type="submit"
                 disabled={capturing || captureText.trim().length === 0}
-                className="px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
+                className={buttonVariants()}
               >
                 {capturing ? 'Capturing…' : 'Capture'}
               </button>

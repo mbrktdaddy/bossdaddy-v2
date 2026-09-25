@@ -21,6 +21,7 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { TIER_COPY, type ShareTier } from '@/lib/goals/participants'
 import { LABELS } from '@/lib/labels'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 type Row = {
   goal_id: string
@@ -104,9 +105,9 @@ export default async function YourCornerSection() {
   if (rows.length === 0) {
     return (
       <Card className="p-6 mb-6">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">
+        <Eyebrow className="mb-1">
           {LABELS.contacts.cornerLabel}
-        </p>
+        </Eyebrow>
         {goals.size === 0 ? (
           <>
             <p className="text-sm text-prose-faint leading-snug">
@@ -159,9 +160,9 @@ export default async function YourCornerSection() {
 
   return (
     <Card className="p-6 mb-6">
-      <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">
+      <Eyebrow className="mb-1">
         {LABELS.contacts.cornerLabel}
-      </p>
+      </Eyebrow>
       <p className="text-xs text-prose-faint mb-4 leading-snug">
         Who&apos;s keeping you honest, and on what. They never get notified about a
         day you missed — and you can cut any of it off from the goal itself.

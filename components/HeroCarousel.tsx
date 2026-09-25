@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import RatingScore from '@/components/RatingScore'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 interface Review {
   id: string
@@ -70,7 +71,7 @@ export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Top Picks</p>
+      <Eyebrow className="mb-3">Top Picks</Eyebrow>
 
       {/* Card + arrow buttons */}
       <div className="relative group">

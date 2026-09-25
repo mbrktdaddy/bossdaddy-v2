@@ -4,20 +4,21 @@ import { formatPrice } from '@/lib/merch'
 import { EmptyState } from '@/components/ui/EmptyState'
 import type { Metadata } from 'next'
 import { Card } from '@/components/ui/Card'
+import { Badge, type BadgeTone } from '@/components/ui/Badge'
 
 export const dynamic = 'force-dynamic'
 export const metadata: Metadata = { title: 'Orders — Admin' }
 
 type OrderStatus = 'pending_payment' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded'
 
-const STATUS_STYLES: Record<OrderStatus, { label: string; cls: string }> = {
-  pending_payment: { label: 'Pending',    cls: 'bg-surface-raised border-strong text-prose-muted' },
-  paid:            { label: 'Paid',       cls: 'bg-warn-bg border-warn-line text-warn-ink' },
-  processing:      { label: 'Processing', cls: 'bg-info-bg border-info-line text-info-ink' },
-  shipped:         { label: 'Shipped',    cls: 'bg-success-bg border-success-line text-forest' },
-  delivered:       { label: 'Delivered',  cls: 'bg-success-bg border-success-line text-forest' },
-  cancelled:       { label: 'Cancelled',  cls: 'bg-danger-bg border-danger-line text-danger-ink' },
-  refunded:        { label: 'Refunded',   cls: 'bg-accent-tint border-accent-border/50 text-accent-text-soft' },
+const STATUS_STYLES: Record<OrderStatus, { label: string; tone: BadgeTone }> = {
+  pending_payment: { label: 'Pending',    tone: 'neutral' },
+  paid:            { label: 'Paid',       tone: 'warn' },
+  processing:      { label: 'Processing', tone: 'info' },
+  shipped:         { label: 'Shipped',    tone: 'success' },
+  delivered:       { label: 'Delivered',  tone: 'success' },
+  cancelled:       { label: 'Cancelled',  tone: 'danger' },
+  refunded:        { label: 'Refunded',   tone: 'accent' },
 }
 
 export default async function AdminOrdersPage() {
@@ -108,9 +109,7 @@ export default async function AdminOrdersPage() {
                   <p className="text-prose-faint text-xs mt-0.5">{date}</p>
                 </div>
                 <p className="text-prose-muted text-sm truncate">{order.email}</p>
-                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${badge.cls}`}>
-                  {badge.label}
-                </span>
+                <Badge tone={badge.tone}>{badge.label}</Badge>
                 <p className="text-accent-text-soft font-bold text-sm text-right">
                   {formatPrice(order.total_cents)}
                 </p>

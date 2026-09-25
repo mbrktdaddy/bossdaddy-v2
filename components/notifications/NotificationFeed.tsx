@@ -18,6 +18,7 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface NotificationRow {
   id:              string
@@ -279,7 +280,7 @@ export default function NotificationFeed({ initial }: { initial: NotificationRow
                   {actionable && (
                     <div className="flex gap-2 mt-2">
                       <button type="button" onClick={() => act(n.id, 'accept')} disabled={busyId === n.id}
-                        className="px-3 py-1.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-xs font-semibold rounded-lg transition-colors">
+                        className={buttonVariants({ size: 'sm' })}>
                         {busyId === n.id ? '…' : 'Accept'}
                       </button>
                       <button type="button" onClick={() => act(n.id, 'decline')} disabled={busyId === n.id}
@@ -320,7 +321,7 @@ export default function NotificationFeed({ initial }: { initial: NotificationRow
                     Keep them
                   </button>
                   <button type="button" onClick={() => bulk('delete')} disabled={bulkBusy}
-                    className="px-4 py-2.5 rounded-lg bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-xs font-semibold transition-colors">
+                    className={buttonVariants({ size: 'sm' })}>
                     {bulkBusy ? '…' : `Delete ${chosen.length}`}
                   </button>
                 </>

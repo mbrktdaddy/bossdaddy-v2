@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { SpecsGradeData } from '@/lib/reviews'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   productName: string
@@ -132,7 +133,7 @@ export function SpecsGradePanel({
       <button
         onClick={handleGrade}
         disabled={!canGrade || loading}
-        className="w-full px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition-colors min-h-[44px]"
+        className={buttonVariants({ className: 'w-full' })}
       >
         {loading ? 'Searching the web…' : score != null || abstainNote ? 'Re-grade with AI' : 'Grade specs with AI'}
       </button>

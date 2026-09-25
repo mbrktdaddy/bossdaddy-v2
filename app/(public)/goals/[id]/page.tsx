@@ -31,6 +31,8 @@ import HistoryGrid from '@/components/goals/HistoryGrid'
 import MetricTrend from '@/components/goals/MetricTrend'
 import { logOccurrence, logUnprompted, toggleScheduleMute, setGoalStatus } from '../actions'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const metadata: Metadata = {
   title: LABELS.goals.pageTitle,
@@ -95,7 +97,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
     return (
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-14 space-y-6">
         <h1 className="text-2xl font-black text-prose">Sign in to see this goal.</h1>
-        <LoginLink className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl transition-colors">
+        <LoginLink className={buttonVariants()}>
           Sign in →
         </LoginLink>
       </div>
@@ -288,12 +290,12 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
       <header className="space-y-3">
         {/* The eyebrow carries the state AND the start date now. "Since" was a stat
             tile competing with three numbers that change; a start date never does. */}
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+        <Eyebrow>
           {LABELS.goals.kinds[goal.kind] ?? LABELS.goals.kinds.custom}
           {goal.status === 'paused' ? ' · Paused' : ''}
           {finished ? ' · Finished' : ''}
           <span className="text-prose-faint"> · since {goal.started_on}</span>
-        </p>
+        </Eyebrow>
         <h1 className="text-3xl sm:text-4xl font-black text-prose leading-[1.05] tracking-tight">
           {goal.title}
         </h1>
@@ -380,9 +382,9 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
           works. Reopening without doing either is in Manage, where the caveat fits. */}
       {finished ? (
         <section className="rounded-xl border border-strong bg-surface-raised p-5 sm:p-6 space-y-3">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+          <Eyebrow>
             Plan finished
-          </p>
+          </Eyebrow>
           <h2 className="text-xl font-bold text-prose">
             {goal.target_date ? <>You ran this to {goal.target_date}.</> : <>This one&apos;s done.</>}
           </h2>
@@ -396,7 +398,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
               href={goal.template_slug
                 ? `/goals/new?t=${encodeURIComponent(goal.template_slug)}`
                 : '/goals/new'}
-              className="min-h-11 inline-flex items-center rounded-lg bg-accent px-5 py-3 text-sm font-bold text-white hover:bg-accent-hover transition-colors"
+              className={buttonVariants()}
             >
               Start it again
             </Link>
@@ -423,10 +425,10 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
 
       {finished ? null : actionable ? (
         <section className="bg-surface-raised border border-strong rounded-xl p-5 sm:p-6">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+          <Eyebrow>
             {actionable.local_date === today ? 'Today' : `Open from ${actionable.local_date}`}
             {actionable.status === 'missed' ? ' · catch-up' : ''}
-          </p>
+          </Eyebrow>
           <h2 className="mt-1 text-xl font-bold text-prose">
             {actionable.target_value != null
               ? <>Target: {actionable.target_value}{unit}</>
@@ -491,7 +493,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
                 type="submit"
                 name="action"
                 value="completed"
-                className="flex-1 rounded-lg bg-accent px-6 py-3 font-bold text-white hover:bg-accent-hover transition-colors"
+                className={buttonVariants({ size: 'lg', className: 'flex-1' })}
               >
                 {LABELS.goals.logCta}
               </button>

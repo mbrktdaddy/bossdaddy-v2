@@ -4,6 +4,7 @@ import CategoryIcon from '@/components/CategoryIcon'
 import PageHeader from '@/components/PageHeader'
 import { getCategoryLabel } from '@/lib/categories'
 import { buildSocialMetadata, SITE_URL } from '@/lib/og'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 // See the note in about/page.tsx: the hand-rolled `twitter: { card }` block dropped
 // the layout's site/creator handles and twitter:image.
@@ -229,9 +230,9 @@ export default function HowWeTestPage() {
  </div>
 
  <div className="not-prose bg-accent-tint rounded-xl p-6 mb-12">
- <div className="text-xs uppercase tracking-widest text-eyebrow font-bold mb-2">
+ <Eyebrow as="div" className="mb-2">
  The Highest Designation
- </div>
+ </Eyebrow>
  <h2 className="text-3xl font-black text-prose mb-4">Boss Daddy Approved</h2>
  <p className="text-prose-muted leading-relaxed mb-4">
  <strong className="text-prose">Boss Daddy Approved</strong>{' '}is the top designation on

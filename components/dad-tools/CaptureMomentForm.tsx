@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { addMoment } from '@/lib/dad-tools/moment-actions'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   kidProfileId: string
@@ -97,7 +98,7 @@ export default function CaptureMomentForm({
         <button
           type="submit"
           disabled={pending || response.trim().length === 0}
-          className="px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
+          className={buttonVariants()}
         >
           {pending ? 'Capturing…' : 'Capture'}
         </button>

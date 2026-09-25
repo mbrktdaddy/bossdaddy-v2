@@ -6,6 +6,7 @@ import { addKid, updateKid, type Kid, type MemberType } from '@/lib/dad-tools/ki
 import { familyPhotoSrc } from '@/lib/dad-tools/family-photo'
 import { LABELS } from '@/lib/labels'
 import KidPhotoUploader from './KidPhotoUploader'
+import { buttonVariants } from '@/components/ui/Button'
 
 const MEMBER_TYPES: MemberType[] = ['child', 'partner', 'other']
 const NAME_PLACEHOLDER: Record<MemberType, string> = {
@@ -160,7 +161,7 @@ export default function KidProfileForm(props: Props) {
         <button
           type="submit"
           disabled={pending || (memberType === 'child' && !birthdate)}
-          className="px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
+          className={buttonVariants()}
         >
           {pending ? 'Saving…' : isEdit ? 'Save' : 'Add to family'}
         </button>

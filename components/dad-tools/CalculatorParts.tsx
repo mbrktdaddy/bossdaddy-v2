@@ -6,6 +6,7 @@
 // from a page and on the client from a tool alike.
 
 import Link from 'next/link'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 export function CalculatorPage({
   role, short, h1, tagline, disclosure, children,
@@ -20,9 +21,9 @@ export function CalculatorPage({
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
       <header className="space-y-3">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-medium">
+        <Eyebrow>
           {role} · {short}
-        </p>
+        </Eyebrow>
         <h1 className="text-3xl sm:text-4xl font-black tracking-tight">{h1}</h1>
         <p className="text-prose-faint text-base sm:text-lg leading-snug">{tagline}</p>
       </header>

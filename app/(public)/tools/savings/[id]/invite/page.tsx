@@ -12,6 +12,7 @@ import { LABELS } from '@/lib/labels'
 import InviteManager from './_InviteManager'
 import RemoveParticipantButton from './_RemoveParticipantButton'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -113,9 +114,9 @@ export default async function InviteGoalParticipantsPage({ params }: PageProps) 
       {/* Current participants */}
       <Card as="section" className="p-6 space-y-4">
         <div className="flex items-baseline justify-between">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+          <Eyebrow>
             On this goal — {participants.length} / 5
-          </p>
+          </Eyebrow>
         </div>
         <div className="space-y-2">
           {participants.map((p) => {

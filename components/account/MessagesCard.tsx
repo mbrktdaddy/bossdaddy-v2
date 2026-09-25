@@ -14,6 +14,7 @@
 import Link from 'next/link'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { listConversationsFor, badgeUnreadCount } from '@/lib/messaging-queries'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 export default async function MessagesCard() {
   const supabase = await createClient()
@@ -32,7 +33,7 @@ export default async function MessagesCard() {
     >
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Messages</p>
+          <Eyebrow>Messages</Eyebrow>
           {/* A LITERAL SPACE, not just a margin — same reason as ContactsCard: the
               margin vanishes from copied text and some screen readers announce
               adjacent inline elements with no separator ("3conversations"). */}

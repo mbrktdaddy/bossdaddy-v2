@@ -9,6 +9,7 @@ import {
   moveMentionToPosition,
   removeMentionAtPosition,
 } from '@/lib/productMentions'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Product {
   id: string
@@ -194,7 +195,7 @@ export function ProductLinkPanel({ content, onChangeContent }: Props) {
                       ) : (
                         <button
                           onClick={() => insertProduct(p.slug)}
-                          className="shrink-0 text-xs px-3 py-2 bg-accent hover:bg-accent-hover text-white font-semibold rounded-lg min-h-[36px] transition-colors"
+                          className={buttonVariants({ size: 'sm', className: 'shrink-0' })}
                         >
                           + Insert
                         </button>

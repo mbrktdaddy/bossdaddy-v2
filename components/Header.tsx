@@ -11,6 +11,7 @@ import CategoryIcon from '@/components/CategoryIcon'
 import AccountMenu, { useAuthUser } from '@/components/AccountMenu'
 import ConnectionBadge from '@/components/account/ConnectionBadge'
 import { isImmersiveRoute } from '@/lib/immersive-routes'
+import { buttonVariants } from '@/components/ui/Button'
 
 // Vault is intentionally NOT a top-level anchor — its contents
 // (Comparisons / Best Of / Stacks / Gift Guides) live inside the Browse
@@ -606,7 +607,7 @@ export default function Header() {
               </div>
             ) : (
               <Link href={`/login?next=${encodeURIComponent(pathname)}`} onClick={() => setMobileOpen(false)}
-                className="block px-4 py-3 rounded-xl text-sm font-semibold text-center bg-accent hover:bg-accent-hover text-white transition-colors">
+                className={buttonVariants()}>
                 Sign In
               </Link>
             )}

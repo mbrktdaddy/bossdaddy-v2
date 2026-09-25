@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/auth-cache'
 import { getCategoryLabel } from '@/lib/categories'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 export const dynamic = 'force-dynamic'
 
@@ -97,9 +98,9 @@ export default async function DemandAdminPage() {
         <>
           {/* Most requested */}
           <section className="mb-10">
-            <h2 className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">
+            <Eyebrow as="h2" className="mb-3">
               Most requested ({ranked.length} distinct)
-            </h2>
+            </Eyebrow>
             <div className="space-y-2">
               {ranked.map((a) => (
                 <Card
@@ -127,9 +128,9 @@ export default async function DemandAdminPage() {
 
           {/* Recent raw requests */}
           <section>
-            <h2 className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">
+            <Eyebrow as="h2" className="mb-3">
               Recent requests
-            </h2>
+            </Eyebrow>
             <div className="space-y-1">
               {rows.slice(0, 50).map((r) => (
                 <div

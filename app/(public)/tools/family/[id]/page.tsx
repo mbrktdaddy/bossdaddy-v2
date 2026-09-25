@@ -37,6 +37,7 @@ import InlineCapture from '@/components/dad-tools/InlineCapture'
 import MomentsFeed from '@/components/dad-tools/MomentsFeed'
 import WeeklyCheckinOptIn from '@/components/dad-tools/WeeklyCheckinOptIn'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -196,9 +197,9 @@ export default async function KidProfilePage({ params }: PageProps) {
           </div>
         )}
         <div className="min-w-0 flex-1 pt-1">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+          <Eyebrow>
             {LABELS.tools.kids.section}
-          </p>
+          </Eyebrow>
           <h1 className="text-2xl sm:text-3xl font-black text-prose leading-tight tracking-tight mt-1">
             {displayName}
           </h1>
@@ -211,9 +212,9 @@ export default async function KidProfilePage({ params }: PageProps) {
       {isChild && (
         <Card as="section" className="p-5 sm:p-6">
           <div className="flex items-baseline justify-between gap-3">
-            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+            <Eyebrow>
               {LABELS.tools.weekendsUntil.spokeRole}
-            </p>
+            </Eyebrow>
             {!past18 && (
               <Link
                 href={weekendsHref}
@@ -244,9 +245,9 @@ export default async function KidProfilePage({ params }: PageProps) {
       {!isChild && (
         <Card as="section" className="p-5 sm:p-6">
           <div className="flex items-baseline justify-between gap-3">
-            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+            <Eyebrow>
               {LABELS.tools.weekendsUntil.spokeRole}
-            </p>
+            </Eyebrow>
             <Link
               href={weekendsHref}
               className="text-xs font-semibold text-accent hover:underline"
@@ -268,9 +269,9 @@ export default async function KidProfilePage({ params }: PageProps) {
       {isChild && dadMath && !past18 && (
         <Card as="section" className="p-5 sm:p-6">
           <div className="flex items-baseline justify-between gap-3">
-            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+            <Eyebrow>
               {LABELS.tools.dadMath.spokeRole}
-            </p>
+            </Eyebrow>
             <Link
               href={dadMathHref}
               className="text-xs font-semibold text-accent hover:underline"
@@ -328,9 +329,9 @@ export default async function KidProfilePage({ params }: PageProps) {
       {/* Savings card — goals tied to this kid */}
       <Card as="section" className="p-5 sm:p-6">
         <div className="flex items-baseline justify-between gap-3">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+          <Eyebrow>
             {LABELS.tools.savings.full}
-          </p>
+          </Eyebrow>
           <Link
             href={`/tools/savings/new?kid=${kidRow.id}${kidRow.name ? `&name=${encodeURIComponent(`Savings for ${kidRow.name}`)}` : ''}`}
             className="text-xs font-semibold text-accent hover:underline"
@@ -380,9 +381,9 @@ export default async function KidProfilePage({ params }: PageProps) {
       {/* Presence card */}
       <Card as="section" className="p-5 sm:p-6">
         <div className="flex items-baseline justify-between gap-3">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+          <Eyebrow>
             {LABELS.tools.presence.spokeRole}
-          </p>
+          </Eyebrow>
           <span className="text-xs text-prose-faint">
             {momentCount === 0
               ? 'No moments yet'

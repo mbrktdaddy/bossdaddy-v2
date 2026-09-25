@@ -16,6 +16,7 @@ import type { KidMoment } from '@/lib/dad-tools/moment-actions'
 import KidProfileForm from './KidProfileForm'
 import CaptureMomentForm from './CaptureMomentForm'
 import MomentsFeed from './MomentsFeed'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 interface Props {
   kid: Kid
@@ -158,9 +159,9 @@ export default function KidCard({ kid, initialMoments, momentCount, isAuthentica
       {mode === 'view' && (
         <div className="space-y-3 pt-1">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-eyebrow uppercase tracking-widest font-medium">
+            <Eyebrow>
               {logTitle(kid.name)}
-            </p>
+            </Eyebrow>
             {momentCount > 0 && (
               <p className="text-xs text-prose-faint">
                 {momentCount} captured

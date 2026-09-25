@@ -10,6 +10,8 @@ import { useState } from 'react'
 import { usePwaInstall } from '@/components/pwa/PwaInstallProvider'
 import { LABELS } from '@/lib/labels'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   /** 'card' = self-contained settings card; 'menu' = dropdown/drawer row. */
@@ -67,14 +69,14 @@ export default function InstallAppButton({ variant = 'card', className = '' }: P
   // card variant — settings/account
   return (
     <Card className="p-6 mb-6">
-      <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Boss Daddy App</p>
+      <Eyebrow className="mb-2">Boss Daddy App</Eyebrow>
       <p className="text-sm text-prose-muted leading-snug mb-4">
         Install Boss Daddy on your phone — your tools, gear, and saved content, one tap from the home screen.
       </p>
       <button
         type="button"
         onClick={handleClick}
-        className="bg-accent hover:bg-accent-hover text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition-colors min-h-[44px]"
+        className={buttonVariants()}
       >
         {canPrompt ? LABELS.app.short : 'How to install'}
       </button>

@@ -15,6 +15,7 @@ import { getKids } from '@/lib/dad-tools/kid-actions'
 import { LABELS } from '@/lib/labels'
 import { pickAmounts, LIFE_INSURANCE_KEYS } from '@/lib/dad-tools/url-params'
 import DadMathTool from './_components/DadMathTool'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 interface PageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>
@@ -74,9 +75,9 @@ export default async function DadMathPage({ searchParams }: PageProps) {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
 
       <header className="space-y-3">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-medium">
+        <Eyebrow>
           {LABELS.tools.dadMath.spokeRole} · {LABELS.tools.dadMath.short}
-        </p>
+        </Eyebrow>
         <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
           {LABELS.tools.dadMath.h1}
         </h1>

@@ -17,6 +17,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { LABELS } from '@/lib/labels'
 import AcceptInviteButton from './_AcceptInviteButton'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface PageProps {
   params: Promise<{ token: string }>
@@ -114,7 +116,7 @@ export default async function AcceptInvitePage({ params }: PageProps) {
         </p>
         <Link
           href={`/tools/savings/${ctx.goalId}`}
-          className="inline-block mt-4 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white font-semibold rounded-lg text-sm transition-colors"
+          className={buttonVariants({ className: 'mt-4' })}
         >
           Open the goal →
         </Link>
@@ -153,9 +155,9 @@ export default async function AcceptInvitePage({ params }: PageProps) {
     return (
       <Layout title={`${ctx.inviterName} invited you to a savings goal`}>
         <Card tone="sunken" className="p-5 space-y-3">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+          <Eyebrow>
             Goal
-          </p>
+          </Eyebrow>
           <p className="text-2xl font-black text-prose leading-tight">{ctx.goalName}</p>
         </Card>
         <p className="text-prose-muted text-sm leading-relaxed">
@@ -166,7 +168,7 @@ export default async function AcceptInvitePage({ params }: PageProps) {
         <div className="flex flex-wrap gap-3">
           <Link
             href={`/login?next=${next}`}
-            className="inline-block px-5 py-2.5 bg-accent hover:bg-accent-hover text-white font-semibold rounded-lg text-sm transition-colors"
+            className={buttonVariants()}
           >
             Sign in to join
           </Link>
@@ -194,9 +196,9 @@ export default async function AcceptInvitePage({ params }: PageProps) {
   return (
     <Layout title={`${ctx.inviterName} invited you to a savings goal`}>
       <Card tone="sunken" className="p-5 space-y-3">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+        <Eyebrow>
           Goal
-        </p>
+        </Eyebrow>
         <p className="text-2xl font-black text-prose leading-tight">{ctx.goalName}</p>
       </Card>
       <p className="text-prose-muted text-sm leading-relaxed">
@@ -215,9 +217,9 @@ function Layout({ title, children }: { title: string; children: React.ReactNode 
   return (
     <div className="max-w-xl mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-6">
       <header>
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+        <Eyebrow>
           {LABELS.tools.savings.short}
-        </p>
+        </Eyebrow>
         <h1 className="text-2xl sm:text-3xl font-black text-prose tracking-tight mt-1">
           {title}
         </h1>

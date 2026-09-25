@@ -20,6 +20,8 @@ import BenchStrip from '@/components/BenchStrip'
 import VaultBreadcrumb from '@/components/vault/VaultBreadcrumb'
 import FtcDisclosure from '@/components/FtcDisclosure'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const revalidate = 60
 
@@ -297,7 +299,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
             {/* Editorial header — eyebrow + H1 + dek + byline */}
             <header className="mb-8">
               <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Comparison</p>
+              <Eyebrow className="mb-3">Comparison</Eyebrow>
               <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight leading-tight">{comparison.title}</h1>
               {comparison.description && (
                 <p className="text-lg text-prose-muted leading-relaxed mb-6">{comparison.description}</p>
@@ -333,7 +335,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
                 aria-label="Bottom line"
                 className="mb-12 rounded-xl border border-accent-border/40 bg-accent-tint p-5 sm:p-7"
               >
-                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">The Bottom Line</p>
+                <Eyebrow className="mb-3">The Bottom Line</Eyebrow>
                 <p className="text-base sm:text-lg text-prose leading-relaxed font-medium">{comparison.winner_summary}</p>
                 {/* Quick verdict chips per item */}
                 {items.some((i) => i.wins_category) && (
@@ -357,7 +359,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
             <section id="contenders" className="mb-12" aria-label="Contenders">
               <div className="mb-5">
                 <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Contenders</p>
+                <Eyebrow className="mb-1">The Contenders</Eyebrow>
                 <h2 className="text-2xl font-black text-prose leading-tight">
                   {items.length} on the scorecard
                 </h2>
@@ -387,7 +389,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
               <section id="overview" className="mb-12">
                 <div className="mb-5">
                   <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Take</p>
+                  <Eyebrow className="mb-1">The Take</Eyebrow>
                   <h2 className="text-2xl font-black text-prose leading-tight">What sets these apart</h2>
                 </div>
                 <div
@@ -411,7 +413,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
               <section id="scorecard" className="mb-12" aria-label="Scorecard">
                 <div className="mb-5">
                   <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Scorecard</p>
+                  <Eyebrow className="mb-1">The Scorecard</Eyebrow>
                   <h2 className="text-2xl font-black text-prose leading-tight">Head-to-head</h2>
                 </div>
 
@@ -505,7 +507,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
             <section className="mb-12" aria-label="Per-product deep dives">
               <div className="mb-5">
                 <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Breakdown</p>
+                <Eyebrow className="mb-1">The Breakdown</Eyebrow>
                 <h2 className="text-2xl font-black text-prose leading-tight">Each contender, examined</h2>
               </div>
 
@@ -613,7 +615,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
                                 target="_blank"
                                 rel={product?.affiliate_url ? 'sponsored nofollow noopener' : 'noopener'}
                                 data-product-slug={review.product_slug ?? undefined}
-                                className="ml-auto px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
+                                className={buttonVariants({ className: 'ml-auto' })}
                               >
                                 Check Price
                               </a>

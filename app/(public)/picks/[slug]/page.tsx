@@ -19,6 +19,8 @@ import VaultBreadcrumb from '@/components/vault/VaultBreadcrumb'
 import FtcDisclosure from '@/components/FtcDisclosure'
 import { LABELS } from '@/lib/labels'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const revalidate = 60
 
@@ -279,7 +281,7 @@ export default async function PickDetailPage({ params }: Props) {
           <main className="lg:flex-1 lg:max-w-3xl min-w-0">
             <header className="mb-8">
               <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">{LABELS.picks.singular}</p>
+              <Eyebrow className="mb-3">{LABELS.picks.singular}</Eyebrow>
               <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight leading-tight">{pick.title}</h1>
               {pick.description && (
                 <p className="text-lg text-prose-muted leading-relaxed mb-6">{pick.description}</p>
@@ -304,7 +306,7 @@ export default async function PickDetailPage({ params }: Props) {
               <section id="overview" className="mb-10">
                 <div className="mb-5">
                   <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Why These</p>
+                  <Eyebrow className="mb-1">Why These</Eyebrow>
                   <h2 className="text-2xl font-black text-prose leading-tight">Behind the picks</h2>
                 </div>
                 <div
@@ -327,9 +329,9 @@ export default async function PickDetailPage({ params }: Props) {
             <section id="picks" className="mb-12" aria-label="The picks">
               <div className="mb-5">
                 <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">
+                <Eyebrow className="mb-1">
                   {items.length === 1 ? 'The Pick' : 'The Picks'}
-                </p>
+                </Eyebrow>
                 <h2 className="text-2xl font-black text-prose leading-tight">
                   {items.length} dad-picked {items.length === 1 ? 'pick' : 'picks'}
                 </h2>
@@ -428,7 +430,7 @@ export default async function PickDetailPage({ params }: Props) {
                                 target="_blank"
                                 rel={product.affiliate_url ? 'sponsored nofollow noopener' : 'noopener'}
                                 data-product-slug={product.slug}
-                                className="ml-auto px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
+                                className={buttonVariants({ className: 'ml-auto' })}
                               >
                                 Check Price
                               </a>
@@ -502,7 +504,7 @@ export default async function PickDetailPage({ params }: Props) {
                               target="_blank"
                               rel={product?.affiliate_url ? 'sponsored nofollow noopener' : 'noopener'}
                               data-product-slug={review.product_slug ?? undefined}
-                              className="ml-auto px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
+                              className={buttonVariants({ className: 'ml-auto' })}
                             >
                               Check Price
                             </a>

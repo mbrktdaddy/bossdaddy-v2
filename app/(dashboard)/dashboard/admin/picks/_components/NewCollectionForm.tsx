@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { buttonVariants } from '@/components/ui/Button'
 
 // Minimal create step — collects only what the POST requires (title, slug,
 // type). Everything else is edited in the full CollectionWorkspace once the
@@ -99,7 +100,7 @@ export function NewCollectionForm() {
       <button
         type="submit"
         disabled={!canCreate}
-        className="px-5 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors min-h-[44px]"
+        className={buttonVariants()}
       >
         {busy ? 'Creating…' : 'Create & edit →'}
       </button>

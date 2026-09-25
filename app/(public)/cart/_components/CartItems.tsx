@@ -8,6 +8,7 @@ import { formatPrice, getMerchDisplayImage } from '@/lib/merch'
 import type { CartItemWithDetails } from '@/lib/merch'
 import { dispatchCartUpdated } from '@/lib/cart-events'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   initialItems: CartItemWithDetails[]
@@ -103,7 +104,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
       <EmptyState
         title="Your cart is empty."
         action={
-          <Link href="/gear" className="inline-flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent-hover text-white font-bold rounded-xl transition-colors">
+          <Link href="/gear" className={buttonVariants({ size: 'lg' })}>
             Browse Gear
           </Link>
         }
@@ -200,7 +201,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
         <button
           onClick={handleCheckout}
           disabled={checkingOut}
-          className="w-full py-3.5 mt-1 bg-accent hover:bg-accent-hover disabled:bg-accent/40 disabled:text-white/40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors text-sm"
+          className={buttonVariants({ size: 'lg', className: 'w-full mt-1 disabled:bg-accent/40 disabled:text-white/40' })}
         >
           {checkingOut ? 'Redirecting to Stripe...' : 'Proceed to Checkout'}
         </button>

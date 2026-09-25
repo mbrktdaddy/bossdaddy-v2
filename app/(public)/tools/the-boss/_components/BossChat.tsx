@@ -6,6 +6,7 @@ import type { Block, BossStreamEvent } from '@/lib/boss/types'
 import { normalizeBossText } from '@/lib/boss/normalizeText'
 import BossBlocks from './BossBlocks'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 // `failed` = a hard failure with no streamed text (the whole bubble is the error).
 // `errorNote` = a mid-stream cutoff AFTER text arrived — keep what streamed and
@@ -276,7 +277,7 @@ export default function BossChat({
           <button
             type="submit"
             disabled={locked || !input.trim()}
-            className="shrink-0 text-sm font-semibold text-white bg-accent hover:bg-accent-hover disabled:opacity-40 rounded-xl px-4 py-2.5 min-h-[44px] transition-colors"
+            className={buttonVariants({ className: 'shrink-0' })}
           >
             {busy ? '…' : 'Ask'}
           </button>

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ADMIN_MODERATION_REASONS, OTHER_REASON } from '@/lib/moderation-reasons'
+import { buttonVariants } from '@/components/ui/Button'
 
 type Status = 'active' | 'suspended' | 'banned' | 'pending_deletion'
 
@@ -254,7 +255,7 @@ export default function ModerationActions({ userId, username, status, suspendedU
                 <button
                   onClick={() => submit(pendingAction)}
                   disabled={loading}
-                  className="flex-1 px-3 py-1.5 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white text-xs font-semibold rounded transition-colors"
+                  className={buttonVariants({ size: 'sm', className: 'flex-1' })}
                 >
                   {loading ? 'Working…' : 'Confirm'}
                 </button>

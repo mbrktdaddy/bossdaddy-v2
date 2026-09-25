@@ -6,6 +6,7 @@ import { fetchAssetAsFile } from '@/lib/images/derive-crop'
 import { CATEGORIES } from '@/lib/categories'
 import ImageCropper from '@/components/ui/ImageCropper'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface MediaAsset {
   id: string
@@ -664,7 +665,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 type="button"
                 onClick={handleGenerate}
                 disabled={genLoading || !genPrompt.trim()}
-                className="w-full px-5 py-3 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-semibold rounded-xl transition-colors"
+                className={buttonVariants({ className: 'w-full' })}
               >
                 {genLoading ? 'Generating…' : 'Generate & Use'}
               </button>
@@ -725,7 +726,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
               type="button"
               onClick={handleConfirm}
               disabled={multi ? multiSelected.size === 0 : !selected}
-              className="px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition-colors"
+              className={buttonVariants()}
             >
               {multi
                 ? multiSelected.size > 1

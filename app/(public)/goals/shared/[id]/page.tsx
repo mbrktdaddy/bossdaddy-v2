@@ -31,6 +31,8 @@ import { getSharedGoal, listSharedDays, TIER_COPY } from '@/lib/goals/participan
 import NotesFeed from '@/components/goals/NotesFeed'
 import { planWindow } from '@/lib/goals/progress'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const metadata: Metadata = {
   title: `${LABELS.goals.sharedHeading} — ${LABELS.goals.short}`,
@@ -57,7 +59,7 @@ export default async function SharedGoalPage({ params }: Props) {
     return (
       <Wrap>
         <h1 className="text-2xl font-black text-prose">Sign in to see this.</h1>
-        <LoginLink className="mt-6 inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl transition-colors">
+        <LoginLink className={buttonVariants({ className: 'mt-6' })}>
           Sign in →
         </LoginLink>
       </Wrap>
@@ -82,9 +84,9 @@ export default async function SharedGoalPage({ params }: Props) {
       </Link>
 
       <header className="mt-4 space-y-2">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+        <Eyebrow>
           {TIER_COPY[goal.myTier].label}
-        </p>
+        </Eyebrow>
         <h1 className="text-2xl sm:text-3xl font-black text-prose leading-tight tracking-tight">
           {goal.title}
         </h1>

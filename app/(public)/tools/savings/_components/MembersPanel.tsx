@@ -7,6 +7,8 @@
 import Link from 'next/link'
 import RemoveParticipantButton from '../[id]/invite/_RemoveParticipantButton'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 export interface MemberDisplay {
   userId:      string
@@ -33,13 +35,13 @@ export default function MembersPanel({ goalId, members, isOwner, seatsRemaining 
   return (
     <Card as="section" className="p-5 space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+        <Eyebrow>
           Members — {members.length} / 5
-        </p>
+        </Eyebrow>
         {isOwner && seatsRemaining > 0 && (
           <Link
             href={`/tools/savings/${goalId}/invite`}
-            className="shrink-0 px-3 py-1.5 bg-accent hover:bg-accent-hover text-white font-semibold rounded-lg text-xs transition-colors"
+            className={buttonVariants({ size: 'sm', className: 'shrink-0' })}
           >
             + Invite
           </Link>

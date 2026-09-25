@@ -5,6 +5,8 @@ import { requireAdmin } from '@/lib/auth-cache'
 import { MERCH_CATEGORIES, MERCH_STATUSES, formatPrice, getMerchDisplayImage, type Merch } from '@/lib/merch'
 import { SyncMerchButton } from '@/components/merch/SyncMerchButton'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { Badge } from '@/components/ui/Badge'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,7 +44,7 @@ export default async function AdminMerchListPage() {
           </Link>
           <Link
             href="/dashboard/admin/merch/new"
-            className="px-4 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
+            className={buttonVariants()}
           >
             + New item
           </Link>
@@ -102,16 +104,16 @@ export default async function AdminMerchListPage() {
                 </div>
 
                 <div className="shrink-0">
-                  <span
-                    className={`px-2 py-1 text-xs rounded-md border ${
-                      p.status === 'available'   ? 'bg-success-bg text-forest border-success-line'  :
-                      p.status === 'coming_soon' ? 'bg-accent-tint text-accent-text-soft border-accent-border/40' :
-                      p.status === 'concept'     ? 'bg-surface-raised text-prose-muted border-strong' :
-                      'bg-danger-bg text-danger-ink border-danger-line'
-                    }`}
+                  <Badge
+                    tone={
+                      p.status === 'available'   ? 'success' :
+                      p.status === 'coming_soon' ? 'accent'  :
+                      p.status === 'concept'     ? 'neutral' :
+                      'danger'
+                    }
                   >
                     {stat?.label ?? p.status}
-                  </span>
+                  </Badge>
                 </div>
               </Link>
             )

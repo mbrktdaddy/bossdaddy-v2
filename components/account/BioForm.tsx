@@ -7,6 +7,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateProfile } from '@/lib/profile-actions'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   initialDisplayName: string | null
@@ -96,7 +97,7 @@ export default function BioForm({
         <button
           type="submit"
           disabled={saving}
-          className="px-5 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors shrink-0"
+          className={buttonVariants({ className: 'shrink-0' })}
         >
           {saving ? 'Saving…' : 'Save bio'}
         </button>

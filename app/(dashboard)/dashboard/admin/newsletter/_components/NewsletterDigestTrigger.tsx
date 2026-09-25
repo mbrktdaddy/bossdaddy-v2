@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { buttonVariants } from '@/components/ui/Button'
 
 export function NewsletterDigestTrigger() {
   const [busy, setBusy] = useState(false)
@@ -46,7 +47,7 @@ export function NewsletterDigestTrigger() {
           type="button"
           onClick={() => trigger(false)}
           disabled={busy}
-          className="px-3 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-xs font-semibold rounded-lg transition-colors"
+          className={buttonVariants({ size: 'sm' })}
         >
           {busy ? 'Sending…' : 'Send digest now'}
         </button>

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { vaultHref, vaultTypeLabel } from '@/lib/vault'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 export type RelatedCollectionType = 'comparison' | 'general' | 'best_of' | 'stack' | 'gift_guide'
 
@@ -42,7 +43,7 @@ export default function RelatedRail({
     <section id={id} aria-label={heading} className="mt-14 pt-10 border-t border-soft">
       <div className="mb-6">
         <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">{eyebrow}</p>
+        <Eyebrow className="mb-1">{eyebrow}</Eyebrow>
         <h2 className="text-2xl font-black text-prose leading-tight">{heading}</h2>
       </div>
 

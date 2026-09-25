@@ -21,6 +21,8 @@ import { LoginLink } from '@/components/LoginLink'
 import {
   parseWhen, describeRrule, WEEKDAY_OPTIONS, COMMON_ZONES,
 } from '@/lib/goals/schedule-input'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const metadata: Metadata = {
   title: `Edit — ${LABELS.goals.short}`,
@@ -68,7 +70,7 @@ export default async function EditGoalPage({ params, searchParams }: Props) {
     return (
       <Wrap>
         <h1 className="text-2xl font-black text-prose">Sign in to edit this goal.</h1>
-        <LoginLink className="mt-6 inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl transition-colors">
+        <LoginLink className={buttonVariants({ className: 'mt-6' })}>
           Sign in →
         </LoginLink>
       </Wrap>
@@ -108,9 +110,9 @@ export default async function EditGoalPage({ params, searchParams }: Props) {
       </Link>
 
       <header className="mt-4 space-y-2">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+        <Eyebrow>
           {LABELS.goals.kinds[goal.kind] ?? LABELS.goals.kinds.custom}
-        </p>
+        </Eyebrow>
         <h1 className="text-2xl sm:text-3xl font-black text-prose leading-tight tracking-tight">
           Edit this goal
         </h1>
@@ -247,7 +249,7 @@ export default async function EditGoalPage({ params, searchParams }: Props) {
 
         <button
           type="submit"
-          className="min-h-11 w-full rounded-lg bg-accent px-6 py-3 font-bold text-white hover:bg-accent-hover transition-colors"
+          className={buttonVariants({ size: 'lg', className: 'w-full' })}
         >
           Save the goal
         </button>
@@ -312,7 +314,7 @@ export default async function EditGoalPage({ params, searchParams }: Props) {
                 <div className="flex flex-wrap gap-3">
                   <button
                     type="submit"
-                    className="min-h-11 rounded-lg bg-accent px-5 py-3 text-xs font-bold text-white hover:bg-accent-hover transition-colors"
+                    className={buttonVariants({ size: 'sm' })}
                   >
                     Save this reminder
                   </button>
@@ -364,7 +366,7 @@ export default async function EditGoalPage({ params, searchParams }: Props) {
 
             <button
               type="submit"
-              className="min-h-11 w-full rounded-lg bg-accent px-5 py-3 text-sm font-bold text-white hover:bg-accent-hover transition-colors"
+              className={buttonVariants({ className: 'w-full' })}
             >
               Add it
             </button>

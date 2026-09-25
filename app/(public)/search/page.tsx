@@ -9,6 +9,8 @@ import BenchStrip from '@/components/BenchStrip'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { buildSocialMetadata } from '@/lib/og'
 import type { Metadata } from 'next'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 export function generateMetadata(): Metadata {
  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
@@ -101,7 +103,7 @@ export default async function SearchPage({ searchParams }: Props) {
  </div>
  <button
  type="submit"
- className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition-colors"
+ className={buttonVariants({ size: 'lg' })}
  >
  Search
  </button>
@@ -126,7 +128,7 @@ export default async function SearchPage({ searchParams }: Props) {
  {(reviews?.length ?? 0) > 0 && (
  <div className="mb-10">
  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
- <p className="text-xs text-eyebrow font-semibold uppercase tracking-widest mb-3">Reviews</p>
+ <Eyebrow className="mb-3">Reviews</Eyebrow>
  <div className="space-y-2">
  {reviews!.map((r) => {
  const cat = getCategoryBySlug(r.category)
@@ -155,7 +157,7 @@ export default async function SearchPage({ searchParams }: Props) {
  {(products?.length ?? 0) > 0 && (
  <div className="mb-10">
  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
- <p className="text-xs text-eyebrow font-semibold uppercase tracking-widest mb-3">On the Bench</p>
+ <Eyebrow className="mb-3">On the Bench</Eyebrow>
  <div className="space-y-2">
  {products!.map((p) => {
  const cat = getCategoryBySlug(p.category ?? '')
@@ -184,7 +186,7 @@ export default async function SearchPage({ searchParams }: Props) {
  {(articles?.length ?? 0) > 0 && (
  <div>
  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
- <p className="text-xs text-eyebrow font-semibold uppercase tracking-widest mb-3">Guides</p>
+ <Eyebrow className="mb-3">Guides</Eyebrow>
  <div className="space-y-2">
  {articles!.map((a) => {
  const cat = getCategoryBySlug(a.category)

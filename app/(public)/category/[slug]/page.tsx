@@ -11,6 +11,7 @@ import RatingScore from '@/components/RatingScore'
 import PageHeader from '@/components/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -118,7 +119,7 @@ export default async function CategoryHubPage({ params }: Props) {
             <div className="flex items-end justify-between mb-8">
               <div>
                 <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Top Rated</p>
+                <Eyebrow className="mb-2">Top Rated</Eyebrow>
                 <h2 className="text-2xl font-black text-prose leading-tight">Best {cat.label}</h2>
               </div>
               <Link
@@ -181,7 +182,7 @@ export default async function CategoryHubPage({ params }: Props) {
             <div className="flex items-end justify-between mb-8">
               <div>
                 <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Know-How</p>
+                <Eyebrow className="mb-2">Know-How</Eyebrow>
                 <h2 className="text-2xl font-black text-prose leading-tight">{cat.label} Guides</h2>
               </div>
               <Link
@@ -274,7 +275,7 @@ export default async function CategoryHubPage({ params }: Props) {
           <section className="mb-16">
             <div className="mb-6">
               <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Common Questions</p>
+              <Eyebrow className="mb-2">Common Questions</Eyebrow>
               <h2 className="text-2xl font-black text-prose leading-tight">{cat.label} FAQ</h2>
             </div>
             <div className="space-y-2">

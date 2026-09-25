@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { compressImage } from '@/lib/compress-image'
 import { downloadImage } from '@/lib/images/download'
+import { buttonVariants } from '@/components/ui/Button'
 
 const MediaPicker  = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 const ImageCropper = dynamic(() => import('@/components/ui/ImageCropper'),   { ssr: false })
@@ -107,7 +108,7 @@ export function GalleryField({
             type="button"
             onClick={() => cameraInputRef.current?.click()}
             disabled={uploading || atMax}
-            className="text-xs px-3 py-1.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white rounded-lg transition-colors min-h-[36px]"
+            className={buttonVariants({ size: 'sm' })}
           >
             {uploading ? 'Uploading…' : '📷 Take Photo'}
           </button>

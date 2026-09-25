@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   onClose: () => void
@@ -64,7 +65,7 @@ export function LoginPromptModal({ onClose, returnPath }: Props) {
           <div className="space-y-3">
             <Link
               href={`/register?next=${encodeURIComponent(returnPath)}`}
-              className="block w-full py-3 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors text-center"
+              className={buttonVariants({ className: 'w-full' })}
             >
               Create free account
             </Link>

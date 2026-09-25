@@ -5,6 +5,7 @@ import { LABELS } from '@/lib/labels'
 import type { SavingsGoal, GoalStats } from '@/lib/dad-tools/savings'
 import { fmtUsdWhole, fmtUsd, cadenceUnitLabel } from '@/lib/dad-tools/savings'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 interface Props {
   goal:  SavingsGoal
@@ -22,9 +23,9 @@ export default function ProgressBlock({ goal, stats }: Props) {
 
       {/* Top — saved + target */}
       <div>
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">
+        <Eyebrow className="mb-2">
           {labels.savedLabel}
-        </p>
+        </Eyebrow>
         <div className="flex items-baseline gap-3 flex-wrap">
           <p className="text-5xl font-black text-prose">{fmtUsdWhole(stats.runningTotal)}</p>
           {goal.target_amount != null && (

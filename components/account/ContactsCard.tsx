@@ -17,6 +17,7 @@ import Link from 'next/link'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { listConnections, listIncoming } from '@/lib/connections'
 import { LABELS } from '@/lib/labels'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 export default async function ContactsCard() {
   const supabase = await createClient()
@@ -35,9 +36,9 @@ export default async function ContactsCard() {
     >
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+          <Eyebrow>
             {LABELS.contacts.short}
-          </p>
+          </Eyebrow>
           {/* A LITERAL SPACE, not just `ml-2`. The margin looks right on screen and
               vanishes from copied text and from some screen readers, which announce
               adjacent inline elements with no separator — "3contacts". The gap is now

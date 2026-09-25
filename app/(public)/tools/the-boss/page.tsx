@@ -8,6 +8,8 @@ import type { Block } from '@/lib/boss/types'
 import BossChat, { type BossMsg } from './_components/BossChat'
 import PastChats, { type PastChat } from './_components/PastChats'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 export function generateMetadata(): Metadata {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
@@ -38,7 +40,7 @@ export default async function TheBossPage({
 
   const header = (
     <header className="mb-5">
-      <p className="text-xs uppercase tracking-widest font-semibold text-eyebrow mb-2">Ask the Boss</p>
+      <Eyebrow className="mb-2">Ask the Boss</Eyebrow>
       <h1 className="text-3xl sm:text-4xl font-black text-prose leading-[1.05] tracking-tight">{LABELS.tools.theBoss.full}</h1>
       <p className="mt-2 text-sm sm:text-base text-prose-muted leading-relaxed max-w-2xl">
         Straight answers on fixes, gear, plans, and dad life — ask it anything.
@@ -61,7 +63,7 @@ export default async function TheBossPage({
           <div className="mt-5 flex flex-wrap gap-2">
             <Link
               href={`/register?next=${next}`}
-              className="text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-lg px-4 py-3 min-h-[44px] inline-flex items-center transition-colors"
+              className={buttonVariants()}
             >
               Create free account
             </Link>

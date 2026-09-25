@@ -4,6 +4,9 @@ import { useState, useCallback } from 'react'
 import type { Product } from '@/lib/products'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Card } from '@/components/ui/Card'
+import { Badge, type BadgeTone } from '@/components/ui/Badge'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 type ContactMethod = 'email' | 'web_form' | 'amazon' | 'phone'
 type OutreachStatus = 'draft' | 'sent' | 'responded' | 'no_response' | 'follow_up'
@@ -37,12 +40,12 @@ const METHOD_LABELS: Record<ContactMethod, string> = {
   phone:    'Phone',
 }
 
-const STATUS_CONFIG: Record<OutreachStatus, { label: string; classes: string }> = {
-  draft:       { label: 'Draft',       classes: 'bg-surface-raised text-prose-muted border-strong' },
-  sent:        { label: 'Sent',        classes: 'bg-info-bg text-info-ink border-info-line' },
-  responded:   { label: 'Responded',   classes: 'bg-success-bg text-forest border-success-line' },
-  no_response: { label: 'No Response', classes: 'bg-warn-bg text-warn-ink border-amber-800/50' },
-  follow_up:   { label: 'Follow Up',   classes: 'bg-accent-tint text-accent-text-soft border-accent-border/50' },
+const STATUS_CONFIG: Record<OutreachStatus, { label: string; tone: BadgeTone }> = {
+  draft:       { label: 'Draft',       tone: 'neutral' },
+  sent:        { label: 'Sent',        tone: 'info' },
+  responded:   { label: 'Responded',   tone: 'success' },
+  no_response: { label: 'No Response', tone: 'warn' },
+  follow_up:   { label: 'Follow Up',   tone: 'accent' },
 }
 
 function buildTemplate(productName: string, brandName: string, contactName: string) {
@@ -353,7 +356,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
 
         {/* Section 1 — Product */}
         <div className="p-4 md:p-6 border-b border-soft">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-medium mb-4">1 · Product</p>
+          <Eyebrow className="mb-4">1 · Product</Eyebrow>
           <div className="space-y-3">
             <div>
               <label htmlFor="ow-product-select" className="block text-xs text-prose-faint mb-1.5">Select from your products</label>
@@ -398,7 +401,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
 
         {/* Section 2 — Contact */}
         <div className="p-4 md:p-6 border-b border-soft">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-medium mb-4">2 · Contact</p>
+          <Eyebrow className="mb-4">2 · Contact</Eyebrow>
           <div className="space-y-3">
 
             {/* Method toggle — horizontal scroll on narrow screens, wraps within bounds otherwise */}
@@ -506,7 +509,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
         {/* Section 3 — Message */}
         <div className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-4 gap-2">
-            <p className="text-xs text-eyebrow uppercase tracking-widest font-medium">3 · Message</p>
+            <Eyebrow>3 · Message</Eyebrow>
             <button
               type="button"
               onClick={handleResetTemplate}
@@ -548,7 +551,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                 <button
                   onClick={handleSend}
                   disabled={busy}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 min-h-[44px] bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors"
+                  className={buttonVariants({ className: 'w-full sm:w-auto' })}
                 >
                   {busy ? (
                     <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
@@ -561,7 +564,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                 <button
                   onClick={handleLogAndCopy}
                   disabled={busy}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 min-h-[44px] bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors"
+                  className={buttonVariants({ className: 'w-full sm:w-auto' })}
                 >
                   {busy ? (
                     <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
@@ -623,9 +626,9 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <span className="text-sm font-semibold">{record.brand_name}</span>
                       <MethodBadge method={record.contact_method} />
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs border ${STATUS_CONFIG[record.status].classes}`}>
+                      <Badge tone={STATUS_CONFIG[record.status].tone} size="sm">
                         {STATUS_CONFIG[record.status].label}
-                      </span>
+                      </Badge>
                     </div>
                     <p className="text-xs text-prose-faint truncate">{record.product_name}</p>
                     <p className="text-xs text-prose-faint mt-0.5 truncate">

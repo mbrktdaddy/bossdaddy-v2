@@ -40,6 +40,8 @@ import {
   type NoteSubject,
 } from '@/lib/goals/note-types'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 type Props = {
   subject: NoteSubject
@@ -142,9 +144,9 @@ export default function NotesFeedClient({
   return (
     <Card as="section" className="p-5 sm:p-6">
       <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+        <Eyebrow as="h2">
           {title}
-        </h2>
+        </Eyebrow>
         {notes.length > 0 && (
           <span className="text-xs text-prose-faint shrink-0">
             {notes.length}
@@ -223,7 +225,7 @@ export default function NotesFeedClient({
           <button
             type="submit"
             disabled={posting}
-            className="mt-3 w-full sm:w-auto px-5 py-3 rounded-xl bg-accent hover:bg-accent-hover text-white text-sm font-semibold disabled:opacity-50"
+            className={buttonVariants({ className: 'mt-3 w-full sm:w-auto' })}
           >
             {posting ? 'Saving…' : shared ? L.notesSaveShared : L.notesSaveSolo}
           </button>
@@ -291,7 +293,7 @@ function NoteItem({
           <button
             type="submit"
             disabled={saving}
-            className="px-4 py-2.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-xs font-semibold disabled:opacity-50"
+            className={buttonVariants({ size: 'sm' })}
           >
             {saving ? 'Saving…' : 'Save'}
           </button>

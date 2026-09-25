@@ -23,6 +23,7 @@
 import { useState, useRef } from 'react'
 import Image from 'next/image'
 import { getOrCreateDm } from '@/lib/messaging'
+import { buttonVariants } from '@/components/ui/Button'
 
 type ConnectionState = 'none' | 'pending_in' | 'pending_out' | 'accepted' | 'declined' | 'blocked'
 
@@ -103,7 +104,7 @@ export default function MemberSearch() {
                   type="button"
                   onClick={() => startDm(m)}
                   disabled={busy}
-                  className="shrink-0 min-h-11 rounded-lg bg-accent px-4 py-2.5 text-xs font-bold text-white hover:bg-accent-hover disabled:opacity-50 transition-colors"
+                  className={buttonVariants({ size: 'sm', className: 'shrink-0' })}
                 >
                   Message
                 </button>

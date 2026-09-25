@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   contentType: 'review' | 'guide' | 'product'
@@ -111,7 +112,7 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
         <div className="flex items-center gap-3">
           <Link
             href={`/login?next=${encodeURIComponent(pathname)}`}
-            className="px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
+            className={buttonVariants()}
           >
             Sign In
           </Link>
@@ -145,7 +146,7 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
         <button
           type="submit"
           disabled={submitting || body.trim().length < 5}
-          className="shrink-0 px-5 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
+          className={buttonVariants({ className: 'shrink-0' })}
         >
           {submitting ? 'Posting...' : 'Post Comment'}
         </button>

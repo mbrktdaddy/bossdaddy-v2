@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { CATEGORIES, isInquiryCategory } from '@/lib/categories'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 const STORAGE_KEY = 'bd:guide-wizard-draft'
 
@@ -294,7 +296,7 @@ export function GuideCreateWizard() {
     return (
       <div className="space-y-5">
         <div className="bg-surface border border-strong rounded-xl p-5 space-y-3">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Draft preview</p>
+          <Eyebrow>Draft preview</Eyebrow>
           <h2 className="text-lg font-black text-prose leading-snug">{previewDraft.title}</h2>
           {previewDraft.excerpt && (
             <p className="text-sm text-prose-muted italic">{previewDraft.excerpt}</p>
@@ -308,7 +310,7 @@ export function GuideCreateWizard() {
           <button
             type="button"
             onClick={handleSaveDraft}
-            className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
+            className={buttonVariants()}
           >
             ✓ Save &amp; open editor
           </button>
@@ -353,7 +355,7 @@ export function GuideCreateWizard() {
             type="button"
             onClick={handleSuggest}
             disabled={suggesting || !description.trim()}
-            className="shrink-0 px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition-colors"
+            className={buttonVariants({ className: 'shrink-0' })}
           >
             {suggesting ? 'Thinking…' : 'Suggest'}
           </button>
@@ -610,7 +612,7 @@ export function GuideCreateWizard() {
           type="button"
           onClick={handleGenerate}
           disabled={!topic.trim()}
-          className="px-5 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
+          className={buttonVariants()}
         >
           ✨ Generate with AI → Edit
         </button>

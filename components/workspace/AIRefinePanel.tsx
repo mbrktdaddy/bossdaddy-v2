@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   title: string
@@ -86,7 +87,7 @@ export function AIRefinePanel({ title, category, content, productName, contentTy
           type="button"
           onClick={handleRefine}
           disabled={loading || !instruction.trim()}
-          className="shrink-0 text-sm px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-semibold rounded-lg transition-colors"
+          className={buttonVariants({ className: 'shrink-0' })}
         >
           {loading ? 'Refining…' : 'Apply'}
         </button>

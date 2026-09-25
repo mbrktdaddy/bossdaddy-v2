@@ -11,6 +11,7 @@ import {
 } from '@/lib/dad-tools/calc'
 import WeekendsTool from './_components/WeekendsTool'
 import InstallPWA from '@/components/InstallPWA'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 const MILESTONE_KEYS: Milestone[] = [
   'until_18', 'next_birthday', 'starts_school', 'gets_license', 'summer', 'custom',
@@ -128,9 +129,9 @@ export default async function WeekendsUntilPage({ searchParams }: PageProps) {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
 
       <header className="space-y-3">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-medium">
+        <Eyebrow>
           {LABELS.tools.weekendsUntil.short}
-        </p>
+        </Eyebrow>
         <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
           How many weekends do you have left?
         </h1>

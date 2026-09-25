@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const metadata = {
   title:   'Email unsubscribe — Boss Daddy Tools',
@@ -51,7 +52,7 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
       <div className="pt-4">
         <Link
           href="/"
-          className="inline-block px-5 py-3 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
+          className={buttonVariants()}
         >
           ← Boss Daddy
         </Link>

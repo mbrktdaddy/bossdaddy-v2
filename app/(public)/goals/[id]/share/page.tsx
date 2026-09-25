@@ -22,6 +22,8 @@ import {
 import { listGoalContacts } from '@/lib/goals/contacts'
 import { countNotes } from '@/lib/goals/notes'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const metadata: Metadata = {
   title: `Sharing — ${LABELS.goals.short}`,
@@ -43,7 +45,7 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
     return (
       <Wrap>
         <h1 className="text-2xl font-black text-prose">Sign in to share a goal.</h1>
-        <LoginLink className="mt-6 inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl transition-colors">
+        <LoginLink className={buttonVariants({ className: 'mt-6' })}>
           Sign in →
         </LoginLink>
       </Wrap>
@@ -94,7 +96,7 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
       </Link>
 
       <header className="mt-4 space-y-2">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Sharing</p>
+        <Eyebrow>Sharing</Eyebrow>
         {/* Matches the link that got you here. Landing on a different noun than
             the button you pressed is its own small confusion, and this page is
             reached from three places now. */}
@@ -307,7 +309,7 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
 
           <button
             type="submit"
-            className="min-h-11 w-full rounded-lg bg-accent px-6 py-3 font-bold text-white hover:bg-accent-hover transition-colors"
+            className={buttonVariants({ size: 'lg', className: 'w-full' })}
           >
             Send the invite
           </button>

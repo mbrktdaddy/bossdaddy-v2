@@ -1,5 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 export default function NotFound() {
   return (
@@ -14,13 +16,13 @@ export default function NotFound() {
           className="h-16 w-16 object-contain"
         />
       </Link>
-      <p className="text-eyebrow text-xs uppercase tracking-widest font-semibold mb-4">404</p>
+      <Eyebrow className="mb-4">404</Eyebrow>
       <h1 className="text-4xl font-black text-prose mb-3">Page not found</h1>
       <p className="text-prose-muted text-sm mb-8 max-w-sm">
         This page doesn&apos;t exist — or it may have moved. Head back and keep dadding like a boss.
       </p>
       <div className="flex items-center gap-4 flex-wrap justify-center">
-        <Link href="/" className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition-colors text-sm">
+        <Link href="/" className={buttonVariants({ size: 'lg' })}>
           Go Home
         </Link>
         <Link href="/reviews" className="px-6 py-3 bg-surface-raised hover:bg-surface border border-strong text-prose-muted font-semibold rounded-xl transition-colors text-sm">

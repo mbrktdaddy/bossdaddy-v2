@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { PLATFORMS, type SocialPlatform } from '@/lib/social-platforms'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface SocialPost {
   id: string
@@ -192,7 +193,7 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
               type="button"
               onClick={() => handleGenerate(selected, false)}
               disabled={busy || selected.length === 0}
-              className="px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-xs font-semibold rounded-lg min-h-[36px] transition-colors"
+              className={buttonVariants({ size: 'sm' })}
             >
               {busy && busyPlatform === null ? 'Generating…' : posts.length > 0 ? '↺ Regenerate selected' : '✨ Generate'}
             </button>

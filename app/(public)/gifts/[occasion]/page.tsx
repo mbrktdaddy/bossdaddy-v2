@@ -23,6 +23,8 @@ import BenchStrip from '@/components/BenchStrip'
 import VaultBreadcrumb from '@/components/vault/VaultBreadcrumb'
 import FtcDisclosure from '@/components/FtcDisclosure'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const revalidate = 60
 
@@ -312,7 +314,7 @@ export default async function GiftOccasionPage({ params }: Props) {
             {/* Header */}
             <header className="mb-8">
               <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Gift Guide · {occ.label}</p>
+              <Eyebrow className="mb-3">Gift Guide · {occ.label}</Eyebrow>
               <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight leading-tight">
                 {pick?.title ?? occ.label}
               </h1>
@@ -345,7 +347,7 @@ export default async function GiftOccasionPage({ params }: Props) {
               <section id="overview" className="mb-10">
                 <div className="mb-5">
                   <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Why These</p>
+                  <Eyebrow className="mb-1">Why These</Eyebrow>
                   <h2 className="text-2xl font-black text-prose leading-tight">Behind the picks</h2>
                 </div>
                 <div
@@ -372,7 +374,7 @@ export default async function GiftOccasionPage({ params }: Props) {
               <section id="picks" className="mb-12">
                 <div className="mb-5">
                   <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Gifts</p>
+                  <Eyebrow className="mb-1">The Gifts</Eyebrow>
                   <h2 className="text-2xl font-black text-prose leading-tight">
                     {items.length} dad-picked {items.length === 1 ? 'gift' : 'gifts'}
                   </h2>
@@ -434,7 +436,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                                   target="_blank"
                                   rel={product.affiliate_url ? 'sponsored nofollow noopener' : 'noopener'}
                                   data-product-slug={product.slug}
-                                  className="ml-auto px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
+                                  className={buttonVariants({ className: 'ml-auto' })}
                                 >
                                   Check Price
                                 </a>
@@ -511,7 +513,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                                 target="_blank"
                                 rel={product?.affiliate_url ? 'sponsored nofollow noopener' : 'noopener'}
                                 data-product-slug={review.product_slug ?? undefined}
-                                className="ml-auto px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
+                                className={buttonVariants({ className: 'ml-auto' })}
                               >
                                 Check Price
                               </a>
@@ -527,7 +529,7 @@ export default async function GiftOccasionPage({ params }: Props) {
               /* Empty state — proper SEO landing page with email capture */
               <div className={`${CAPTURE_CARD} mb-10`}>
                 <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                <p className="text-xs text-eyebrow uppercase tracking-widest font-bold mb-3">Coming Soon</p>
+                <Eyebrow className="mb-3">Coming Soon</Eyebrow>
                 <h2 className="text-2xl md:text-3xl font-black text-prose mb-3">
                   The {occ.label} list is being built
                 </h2>
@@ -554,7 +556,7 @@ export default async function GiftOccasionPage({ params }: Props) {
             {relatedOccasions.length > 0 && (
               <section className="mt-14 pt-10 border-t border-soft">
                 <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-5">More Gift Guides</p>
+                <Eyebrow className="mb-5">More Gift Guides</Eyebrow>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {relatedOccasions.map((r) => (
                     <Link

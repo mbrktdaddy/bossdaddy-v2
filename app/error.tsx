@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import * as Sentry from '@sentry/nextjs'
+import { buttonVariants } from '@/components/ui/Button'
 
 export default function Error({
   error,
@@ -26,7 +27,7 @@ export default function Error({
       <div className="flex items-center gap-4 flex-wrap justify-center">
         <button
           onClick={reset}
-          className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition-colors text-sm"
+          className={buttonVariants({ size: 'lg' })}
         >
           Try Again
         </button>

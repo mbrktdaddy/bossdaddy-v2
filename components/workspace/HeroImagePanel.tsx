@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { fetchAssetAsFile } from '@/lib/images/derive-crop'
 import { downloadImage } from '@/lib/images/download'
+import { buttonVariants } from '@/components/ui/Button'
 const MediaPicker   = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 const ImageCropper  = dynamic(() => import('@/components/ui/ImageCropper'),   { ssr: false })
 
@@ -134,7 +135,7 @@ export function HeroImagePanel({
             type="button"
             onClick={() => cameraInputRef.current?.click()}
             disabled={uploading}
-            className="text-xs px-3 py-1.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white rounded-lg transition-colors min-h-[36px]"
+            className={buttonVariants({ size: 'sm' })}
           >
             {uploading ? 'Uploading…' : '📷 Take Photo'}
           </button>
@@ -210,7 +211,7 @@ export function HeroImagePanel({
           type="button"
           onClick={handleGenerate}
           disabled={generating || (!title && !productName)}
-          className="shrink-0 text-xs px-3 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-semibold rounded-lg transition-colors"
+          className={buttonVariants({ size: 'sm', className: 'shrink-0' })}
         >
           {generating ? 'Generating…' : imageUrl ? '↺ Regenerate' : 'Generate'}
         </button>

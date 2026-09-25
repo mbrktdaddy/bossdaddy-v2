@@ -5,6 +5,9 @@ import { requireAdmin } from '@/lib/auth-cache'
 import type { Product } from '@/lib/products'
 import { PRODUCT_STATUS_OPTIONS } from '@/lib/products'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { Badge } from '@/components/ui/Badge'
+import { BENCH_STATUS_TONE } from '@/components/wishlist/StatusBadge'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,14 +26,6 @@ const STATUS_LABEL = new Map(PRODUCT_STATUS_OPTIONS.map((s) => [s.value, s.label
 
 // Per-status badge accents (colored border + text on the neutral surface — no
 // pale fills, per the design guardrails).
-const STATUS_BADGE: Record<string, string> = {
-  considering: 'text-blue-700 border-blue-400/50',
-  queued:      'text-indigo-700 border-indigo-400/50',
-  testing:     'text-amber-700 border-amber-400/50',
-  reviewed:    'text-green-700 border-green-400/50',
-  passed:      'text-zinc-500 border-zinc-400/50',
-  archived:    'text-rose-700 border-rose-400/50',
-}
 
 type Row = Product & { vote_count?: { count: number }[] }
 
@@ -69,7 +64,7 @@ export default async function ProductsListPage({
         </div>
         <Link
           href="/dashboard/admin/products/new"
-          className="shrink-0 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
+          className={buttonVariants({ className: 'shrink-0' })}
         >
           + New product
         </Link>
@@ -131,11 +126,11 @@ export default async function ProductsListPage({
               </div>
 
               <div className="shrink-0 flex items-center gap-2 text-xs">
-                <span className={`px-2 py-1 rounded-md bg-surface-raised border font-medium ${STATUS_BADGE[p.status] ?? 'text-prose-muted border-strong'}`}>
+                <Badge tone={BENCH_STATUS_TONE[p.status] ?? 'neutral'} pulse={p.status === 'testing'}>
                   {STATUS_LABEL.get(p.status) ?? p.status}
-                </span>
+                </Badge>
                 {!p.affiliate_url && !p.non_affiliate_url ? (
-                  <span className="px-2 py-1 rounded-md bg-danger-bg text-danger-ink border border-danger-line">No URL</span>
+                  <Badge tone="danger">No URL</Badge>
                 ) : null}
               </div>
             </Link>

@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import { compressImage } from '@/lib/compress-image'
 import { fetchAssetAsFile } from '@/lib/images/derive-crop'
 import { downloadImage } from '@/lib/images/download'
+import { buttonVariants } from '@/components/ui/Button'
 
 const MediaPicker  = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 const ImageCropper = dynamic(() => import('@/components/ui/ImageCropper'),   { ssr: false })
@@ -101,7 +102,7 @@ export function ProductImageField({
             type="button"
             onClick={() => cameraInputRef.current?.click()}
             disabled={uploading}
-            className="text-xs px-3 py-1.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white rounded-lg transition-colors min-h-[36px]"
+            className={buttonVariants({ size: 'sm' })}
           >
             {uploading ? 'Uploading…' : '📷 Take Photo'}
           </button>

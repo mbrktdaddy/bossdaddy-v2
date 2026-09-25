@@ -1,6 +1,7 @@
 import { getImageProps } from 'next/image'
 import Link from 'next/link'
 import { BRAND, splitLastWord } from '@/lib/brand'
+import { buttonVariants } from '@/components/ui/Button'
 
 /* Homepage full-bleed Photo hero — Manifesto v2 (docs/home-manifesto-spec.md).
    DESKTOP: wide workshop shot, subject right, manifesto in the dark-left column.
@@ -180,7 +181,7 @@ export default function HomeHero({ motion }: Props) {
             <div className="flex flex-wrap gap-3 mt-8">
               <Link
                 href="/reviews"
-                className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-extrabold text-sm px-7 py-3.5 rounded-xl min-h-[48px] transition-colors"
+                className={buttonVariants({ size: 'lg' })}
               >
                 Browse the reviews
                 <Arrow />
@@ -210,7 +211,7 @@ export default function HomeHero({ motion }: Props) {
           <div className="flex flex-col gap-2.5">
             <Link
               href="/about"
-              className="w-full inline-flex items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-white font-extrabold text-sm px-6 py-3.5 rounded-xl min-h-[48px] transition-colors"
+              className={buttonVariants({ size: 'lg', className: 'w-full' })}
             >
               Meet the Boss
               <Arrow />

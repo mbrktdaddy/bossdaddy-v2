@@ -26,6 +26,8 @@ import {
 } from '@/lib/goals/participants'
 import TodayCard from '@/components/goals/TodayCard'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const metadata: Metadata = {
   title:       LABELS.goals.pageTitle,
@@ -171,16 +173,16 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
       <header className="flex items-end justify-between gap-4">
         <div className="space-y-3">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+          <Eyebrow>
             {LABELS.goals.spokeRole} · {LABELS.goals.short}
-          </p>
+          </Eyebrow>
           <h1 className="text-3xl sm:text-4xl font-black text-prose leading-[1.05] tracking-tight">
             {LABELS.goals.short}
           </h1>
         </div>
         <Link
           href="/goals/new"
-          className="min-h-11 shrink-0 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-white hover:bg-accent-hover transition-colors"
+          className={buttonVariants({ className: 'shrink-0' })}
         >
           {LABELS.goals.newCta}
         </Link>
@@ -318,7 +320,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
-                    <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+                    <Eyebrow>
                       {LABELS.goals.kinds[goal.kind] ?? LABELS.goals.kinds.custom}
                       {goal.status === 'paused' ? ' · Paused' : ''}
                       {goal.status === 'completed' ? ' · Finished' : ''}
@@ -326,7 +328,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
                           saying "Muted" there would describe a setting that no
                           longer does anything. */}
                       {schedule?.muted && goal.status !== 'completed' ? ' · Muted' : ''}
-                    </p>
+                    </Eyebrow>
                     {/* line-clamp-2, not truncate: the checkbox column costs ~52px
                         of card width, which leaves roughly 13 characters beside a
                         "Due" badge at 320px. Two lines fits a real goal name; one
@@ -566,9 +568,9 @@ function CornerSection({ shared }: { shared: SharedGoalSummary[] }) {
   return (
     <section id="corner" className="scroll-mt-4 space-y-4">
       <div className="space-y-1">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+        <Eyebrow>
           {LABELS.goals.sharedEyebrow}
-        </p>
+        </Eyebrow>
         <h2 className="text-xl font-black text-prose tracking-tight">
           {LABELS.goals.sharedHeading}
         </h2>
@@ -663,9 +665,9 @@ function SignedOut() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-8">
       <header className="space-y-3">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+        <Eyebrow>
           {LABELS.goals.spokeRole} · {LABELS.goals.short}
-        </p>
+        </Eyebrow>
         <h1 className="text-3xl sm:text-5xl font-black text-prose leading-[1.05] tracking-tight">
           {LABELS.goals.h1}
         </h1>
@@ -675,9 +677,9 @@ function SignedOut() {
       </header>
 
       <Card as="section" className="p-6 sm:p-8 space-y-4">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+        <Eyebrow>
           How it works
-        </p>
+        </Eyebrow>
         <ul className="space-y-3 text-prose-muted text-sm sm:text-base leading-snug">
           <li>1. Set the target — cut to zero over eight weeks, lift three times a week, take the vitamin.</li>
           <li>2. Pick when you want the nudge. Your clock, your timezone, not ours.</li>
@@ -686,7 +688,7 @@ function SignedOut() {
         </ul>
       </Card>
 
-      <LoginLink className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl transition-colors">
+      <LoginLink className={buttonVariants()}>
         Sign in to start →
       </LoginLink>
     </div>
@@ -708,9 +710,9 @@ function Empty({
         </p>
       ) : null}
       <header className="space-y-3">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+        <Eyebrow>
           {LABELS.goals.spokeRole} · {LABELS.goals.short}
-        </p>
+        </Eyebrow>
         <h1 className="text-3xl sm:text-4xl font-black text-prose leading-tight tracking-tight">
           {showArchived ? 'Nothing archived.' : LABELS.goals.emptyHeading}
         </h1>
@@ -730,7 +732,7 @@ function Empty({
       ) : (
         <Link
           href="/goals/new"
-          className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-3 font-semibold text-white hover:bg-accent-hover transition-colors"
+          className={buttonVariants()}
         >
           {LABELS.goals.newCta} →
         </Link>

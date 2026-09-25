@@ -4,6 +4,7 @@ import { formatPrice } from '@/lib/merch'
 import CartItems from './_components/CartItems'
 import { EmptyState } from '@/components/ui/EmptyState'
 import type { Metadata } from 'next'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const metadata: Metadata = {
   title: 'Your Cart — Boss Daddy Life',
@@ -33,7 +34,7 @@ export default async function CartPage() {
           action={
             <Link
               href="/gear"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent-hover text-white font-bold rounded-xl transition-colors"
+              className={buttonVariants({ size: 'lg' })}
             >
               Browse Gear
             </Link>

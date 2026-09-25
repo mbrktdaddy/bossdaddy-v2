@@ -13,6 +13,8 @@
 import { useState } from 'react'
 import { usePwaInstall } from '@/components/pwa/PwaInstallProvider'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 function StepList({ steps }: { steps: React.ReactNode[] }) {
   return (
@@ -63,7 +65,7 @@ export default function InstallCta() {
           <button
             type="button"
             onClick={handleInstall}
-            className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-extrabold text-sm px-7 py-3.5 rounded-xl transition-colors min-h-[44px]"
+            className={buttonVariants({ size: 'lg' })}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0-4-4m4 4 4-4M4 20h16" />
@@ -79,7 +81,7 @@ export default function InstallCta() {
           dismissed. */}
       {isIOSSafari ? (
         <>
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Add it on iPhone or iPad</p>
+          <Eyebrow className="mb-4">Add it on iPhone or iPad</Eyebrow>
           <StepList
             steps={[
               <>Tap the <span className="font-semibold text-prose">Share</span> button at the bottom of Safari.</>,
@@ -90,7 +92,7 @@ export default function InstallCta() {
         </>
       ) : !canPrompt ? (
         <>
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Add it from your browser</p>
+          <Eyebrow className="mb-4">Add it from your browser</Eyebrow>
           <StepList
             steps={[
               <>Open your browser menu (<span className="font-semibold text-prose">⋮</span> on Android Chrome, or the install icon in the address bar on desktop).</>,

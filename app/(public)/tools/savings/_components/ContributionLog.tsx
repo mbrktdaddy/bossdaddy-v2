@@ -6,6 +6,7 @@
 import type { SavingsEntry } from '@/lib/dad-tools/savings'
 import { fmtUsd, fmtYMDForDisplay } from '@/lib/dad-tools/savings'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 const KIND_BADGE: Record<SavingsEntry['kind'], { label: string; className: string; sign: '+' | '-' | '' }> = {
   contribution:      { label: 'Contribution', className: 'bg-accent-tint text-accent-text-soft border-accent-border/60', sign: '+' },
@@ -54,9 +55,9 @@ export default function ContributionLog({ entries, emptyMessage, profileById, sh
 
   return (
     <Card as="section" className="p-6">
-      <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">
+      <Eyebrow className="mb-4">
         History
-      </p>
+      </Eyebrow>
       <div className="space-y-2">
         {entries.map((e) => {
           const meta = KIND_BADGE[e.kind] ?? KIND_BADGE.contribution

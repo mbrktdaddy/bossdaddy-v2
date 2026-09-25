@@ -12,6 +12,7 @@ import PushNotificationSetting from '@/components/account/PushNotificationSettin
 import BioForm from '@/components/account/BioForm'
 import type { Metadata } from 'next'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 export const metadata: Metadata = {
   title: 'Account Settings',
@@ -99,7 +100,7 @@ export default async function AccountSettingsPage() {
       {/* Public author identity — authors + admins only (members have no /author page) */}
       {isAuthor && (
         <Card className="p-6 mb-6">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Public Author Profile</p>
+          <Eyebrow className="mb-1">Public Author Profile</Eyebrow>
           <p className="text-xs text-prose-faint mb-4">
             Shown under everything you publish, on your{' '}
             <Link href={`/author/${profile?.username}`} target="_blank" rel="noopener noreferrer" className="text-accent-text hover:text-accent-text-soft">public author page</Link>.

@@ -8,6 +8,8 @@
 
 import { useEffect, useState } from 'react'
 import { usePwaInstall } from '@/components/pwa/PwaInstallProvider'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 const DISMISS_KEY = 'bd:pwa-install-dismissed-v1'
 
@@ -62,14 +64,14 @@ export default function InstallPWA({
     return (
       <div className={`bg-accent-tint border border-accent-border/60 rounded-xl p-4 sm:p-5 flex items-start gap-3 sm:gap-4 ${className}`}>
         <div className="min-w-0 flex-1">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">{headline}</p>
+          <Eyebrow className="mb-1">{headline}</Eyebrow>
           <p className="text-sm text-prose-muted leading-snug">{body}</p>
         </div>
         <div className="flex flex-col gap-2 shrink-0">
           <button
             type="button"
             onClick={() => { void promptInstall() }}
-            className="bg-accent hover:bg-accent-hover text-white font-semibold text-sm px-4 py-2 rounded-lg transition-colors min-h-[44px]"
+            className={buttonVariants()}
           >
             Install
           </button>
@@ -90,7 +92,7 @@ export default function InstallPWA({
     return (
       <div className={`bg-accent-tint border border-accent-border/60 rounded-xl p-4 sm:p-5 flex items-start gap-3 sm:gap-4 ${className}`}>
         <div className="min-w-0 flex-1">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">{headline}</p>
+          <Eyebrow className="mb-1">{headline}</Eyebrow>
           <p className="text-sm text-prose-muted leading-snug">
             Tap the <span className="font-semibold text-prose">Share</span> button at the bottom of
             Safari, then <span className="font-semibold text-prose">Add to Home Screen</span>.

@@ -47,6 +47,8 @@ export const metadata: Metadata = {
 // "due" means.
 import type { TodayOccurrence, TodayGoal, TodayGoalGroup } from '@/lib/goals/today'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 type OccurrenceRow = TodayOccurrence
 type GoalRow = TodayGoal
@@ -59,7 +61,7 @@ export default async function TodayPage() {
     return (
       <Wrap>
         <h1 className="text-2xl font-black text-prose">Sign in to see your day.</h1>
-        <LoginLink className="mt-6 inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl transition-colors">
+        <LoginLink className={buttonVariants({ className: 'mt-6' })}>
           Sign in →
         </LoginLink>
       </Wrap>
@@ -90,9 +92,9 @@ export default async function TodayPage() {
   return (
     <Wrap>
       <header className="space-y-2">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+        <Eyebrow>
           {LABELS.goals.todayEyebrow}
-        </p>
+        </Eyebrow>
         <h1 className="text-3xl sm:text-4xl font-black text-prose leading-[1.05] tracking-tight">
           {dueNow.length > 0 ? LABELS.goals.todayHeading : LABELS.goals.todayClearHeading}
         </h1>
@@ -202,9 +204,9 @@ function GoalWork({ group, now }: { group: TodayGoalGroup; now: Date }) {
           </p>
         </Link>
         {goal.identity_short ? (
-          <p className="mt-0.5 text-xs text-eyebrow uppercase tracking-widest font-semibold">
+          <Eyebrow className="mt-0.5">
             {LABELS.goals.votingFor}: {goal.identity_short}
-          </p>
+          </Eyebrow>
         ) : null}
       </div>
       <ul className="mt-3 border-t border-soft">
@@ -279,7 +281,7 @@ function Slot({
             type="submit"
             name="action"
             value="completed"
-            className="min-h-11 shrink-0 rounded-lg bg-accent px-5 py-2.5 text-sm font-bold text-white hover:bg-accent-hover transition-colors"
+            className={buttonVariants({ className: 'shrink-0' })}
           >
             {LABELS.goals.logCta}
           </button>

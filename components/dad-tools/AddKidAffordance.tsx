@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { LABELS } from '@/lib/labels'
 import KidProfileForm from './KidProfileForm'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   ctaLabel?: string
@@ -40,7 +41,7 @@ export default function AddKidAffordance({
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="px-4 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
+            className={buttonVariants()}
           >
             {ctaLabel}
           </button>

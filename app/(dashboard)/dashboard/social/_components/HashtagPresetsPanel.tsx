@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { buttonVariants } from '@/components/ui/Button'
 
 export interface HashtagPreset {
   id: string
@@ -110,7 +111,7 @@ export default function HashtagPresetsPanel({ presets, platform, onPresetsChange
           <button
             onClick={save}
             disabled={saving}
-            className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 text-white text-xs font-medium py-2 rounded-lg transition-colors"
+            className={buttonVariants({ size: 'sm', className: 'w-full' })}
           >
             {saving ? 'Saving…' : 'Save Preset'}
           </button>

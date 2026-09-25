@@ -10,6 +10,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { deleteKid, type Kid } from '@/lib/dad-tools/kid-actions'
 import KidProfileForm from './KidProfileForm'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 interface Props {
   kid: Kid
@@ -71,9 +72,9 @@ export default function KidHeaderActions({ kid }: Props) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+              <Eyebrow>
                 Edit kid
-              </p>
+              </Eyebrow>
               <button
                 type="button"
                 onClick={() => setEditing(false)}

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { claimAnonymousData } from '@/lib/dad-tools/kid-actions'
 import { claimMyPendingInvites } from '@/lib/dad-tools/savings-actions'
+import { buttonVariants } from '@/components/ui/Button'
 
 function LoginForm() {
   const searchParams = useSearchParams()
@@ -111,7 +112,7 @@ function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-2.5 px-4 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-semibold rounded-lg transition-colors"
+        className={buttonVariants({ className: 'w-full' })}
       >
         {loading ? 'Signing in...' : 'Sign In'}
       </button>

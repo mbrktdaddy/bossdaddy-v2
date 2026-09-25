@@ -20,6 +20,7 @@ import LeaveGoalButton from '../_components/LeaveGoalButton'
 import MyDestinationPanel from '../_components/MyDestinationPanel'
 import NotesFeed from '@/components/goals/NotesFeed'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -124,7 +125,7 @@ export default async function SavingsGoalPage({ params }: PageProps) {
         </Link>
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div className="min-w-0">
-            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">
+            <Eyebrow className="mb-1">
               {goal.kid_profile_id && kidName ? (
                 <Link
                   href={`/tools/family/${goal.kid_profile_id}`}
@@ -135,7 +136,7 @@ export default async function SavingsGoalPage({ params }: PageProps) {
               ) : (
                 <>Personal savings</>
               )}
-            </p>
+            </Eyebrow>
             <h1 className="text-2xl sm:text-3xl font-black text-prose leading-tight tracking-tight">
               {goal.name}
             </h1>

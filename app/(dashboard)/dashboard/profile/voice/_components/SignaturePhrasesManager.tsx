@@ -11,6 +11,7 @@ import {
   type AvoidContext,
 } from '@/lib/voiceLexicon'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   initial: VoicePhrase[]
@@ -131,7 +132,7 @@ export function SignaturePhrasesManager({ initial }: Props) {
             type="button"
             onClick={addPhrase}
             disabled={adding || newText.trim().length < 2}
-            className="px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition-colors"
+            className={buttonVariants()}
           >
             {adding ? 'Adding…' : '+ Add phrase'}
           </button>
@@ -283,7 +284,7 @@ function PhraseRow({
             type="button"
             disabled={busy || text.trim().length < 2}
             onClick={() => onSave({ text: text.trim(), kind, tone: tone.trim() || null, contexts_avoid: avoid })}
-            className="px-4 py-1.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-xs font-semibold rounded-lg transition-colors"
+            className={buttonVariants({ size: 'sm' })}
           >
             {busy ? 'Saving…' : 'Save'}
           </button>

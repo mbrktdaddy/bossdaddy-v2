@@ -11,6 +11,7 @@ import {
   removeLinkAtPosition,
   updateLinkText,
 } from '@/lib/internalLinks'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Suggestion {
   type: 'guide' | 'review'
@@ -145,7 +146,7 @@ export function InternalLinkPanel({
           {!loaded && !loading && (
             <button
               onClick={load}
-              className="text-xs px-3 py-2 bg-accent hover:bg-accent-hover text-white font-semibold rounded-lg min-h-[36px] transition-colors"
+              className={buttonVariants({ size: 'sm' })}
             >
               ✨ Get suggestions
             </button>

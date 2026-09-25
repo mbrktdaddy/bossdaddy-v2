@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { buildSpecComparison, specComparisonRenderable, type SpecComparisonColumn } from '@/lib/products'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 interface Props {
   columns: SpecComparisonColumn[]
@@ -105,7 +106,7 @@ export default function SpecComparisonTable({ columns, eyebrow, heading, id, cla
     <section id={id} className={`mb-12 ${className ?? ''}`} aria-label={heading ?? 'Spec comparison'}>
       <div className="mb-5">
         <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-        {eyebrow && <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">{eyebrow}</p>}
+        {eyebrow && <Eyebrow className="mb-1">{eyebrow}</Eyebrow>}
         {heading && <h2 className="text-2xl font-black text-prose leading-tight">{heading}</h2>}
       </div>
       {table}

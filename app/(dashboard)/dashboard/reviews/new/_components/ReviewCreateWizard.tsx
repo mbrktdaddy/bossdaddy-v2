@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { CATEGORIES } from '@/lib/categories'
 import { TESTING_DURATION_OPTIONS } from '@/lib/products'
 import type { ProductSpec } from '@/lib/products'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 const STORAGE_KEY = 'bd:review-wizard-draft'
 
@@ -392,7 +394,7 @@ export function ReviewCreateWizard() {
       <div className="space-y-5">
         <div className="bg-surface border border-strong rounded-xl p-5 space-y-3">
           <div className="flex items-center gap-3">
-            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold flex-1">Draft preview</p>
+            <Eyebrow className="flex-1">Draft preview</Eyebrow>
             <span className="text-sm font-bold text-warn-ink">{previewDraft.rating}/10</span>
           </div>
           <h2 className="text-lg font-black text-prose leading-snug">{previewDraft.title}</h2>
@@ -442,7 +444,7 @@ export function ReviewCreateWizard() {
           <button
             type="button"
             onClick={handleSaveDraft}
-            className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
+            className={buttonVariants()}
           >
             ✓ Save &amp; open editor
           </button>
@@ -486,7 +488,7 @@ export function ReviewCreateWizard() {
             type="button"
             onClick={handleSuggest}
             disabled={suggesting || !description.trim()}
-            className="shrink-0 px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition-colors"
+            className={buttonVariants({ className: 'shrink-0' })}
           >
             {suggesting ? 'Thinking…' : 'Suggest'}
           </button>
@@ -643,7 +645,7 @@ export function ReviewCreateWizard() {
       {/* ── Your Experience ─────────────────────────────────────────────── */}
       <div className="bg-surface border border-accent-border/30 rounded-xl p-5 space-y-4">
         <div>
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-0.5">Your Experience</p>
+          <Eyebrow className="mb-0.5">Your Experience</Eyebrow>
           <p className="text-xs text-prose-faint">Your gut-feel rating shapes the AI&apos;s four sub-scores. The saved overall is computed from those sub-scores — edit them later in the workspace.</p>
         </div>
 
@@ -796,7 +798,7 @@ export function ReviewCreateWizard() {
           type="button"
           onClick={handleGenerate}
           disabled={!productName.trim()}
-          className="px-5 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
+          className={buttonVariants()}
         >
           ✨ Generate with AI → Edit
         </button>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   before: string   // current content HTML
@@ -51,7 +52,7 @@ export function RefinePreviewModal({ before, after, onAccept, onDiscard }: Props
             <button
               type="button"
               onClick={onAccept}
-              className="px-5 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-lg transition-colors"
+              className={buttonVariants()}
             >
               ✓ Accept changes
             </button>

@@ -4,6 +4,7 @@ import { LABELS } from '@/lib/labels'
 import { buildSocialMetadata } from '@/lib/og'
 import InstallCta from './_components/InstallCta'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 export function generateMetadata(): Metadata {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
@@ -49,7 +50,7 @@ export default function InstallPage() {
             className="w-14 h-14 object-contain"
           />
         </div>
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Boss Daddy App</p>
+        <Eyebrow className="mb-3">Boss Daddy App</Eyebrow>
         <h1 className="text-3xl md:text-4xl font-black text-prose leading-[1.1] tracking-tight mb-4">
           Keep Boss Daddy one tap away.
         </h1>

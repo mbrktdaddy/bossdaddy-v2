@@ -1,4 +1,5 @@
 import { EmailSignup } from '@/components/EmailSignup'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 // The one newsletter signup card — reviews, guides, About. Only the eyebrow
 // (and optionally the heading) varies by context; the promise and the button
@@ -27,7 +28,7 @@ export function NewsletterCard({
   return (
     <div className={`${CAPTURE_CARD} text-center ${className}`}>
       <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3 mx-auto" />
-      <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">{eyebrow}</p>
+      <Eyebrow className="mb-2">{eyebrow}</Eyebrow>
       <Heading className="text-xl font-black text-prose mb-2">{heading}</Heading>
       <p className="text-sm text-prose-muted mb-5 max-w-md mx-auto">
         One email a week — only when there&apos;s something new. No spam. No sponsors.

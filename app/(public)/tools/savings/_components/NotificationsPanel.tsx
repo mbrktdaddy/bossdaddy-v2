@@ -14,6 +14,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateGoal, setParticipantMute } from '@/lib/dad-tools/savings-actions'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 interface Props {
   goalId:                 string
@@ -55,9 +56,9 @@ export default function NotificationsPanel({
 
   return (
     <Card as="section" className="p-5 space-y-4">
-      <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+      <Eyebrow>
         Reminders &amp; notifications
-      </p>
+      </Eyebrow>
 
       {isOwner && (
         <Row

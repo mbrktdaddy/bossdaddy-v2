@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,7 +36,7 @@ export default async function PicksListPage() {
         </div>
         <Link
           href="/dashboard/admin/picks/new"
-          className="shrink-0 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
+          className={buttonVariants({ className: 'shrink-0' })}
         >
           + New
         </Link>

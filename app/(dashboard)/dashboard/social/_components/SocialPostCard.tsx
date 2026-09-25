@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import LinkPicker, { type SourceLinks } from './LinkPicker'
 import type { HashtagPreset } from './HashtagPresetsPanel'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
@@ -275,7 +276,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
                 <button
                   onClick={save}
                   disabled={saving || overLimit}
-                  className="text-xs bg-accent hover:bg-accent-hover disabled:opacity-50 text-white px-3 py-1.5 rounded-lg transition-colors font-medium"
+                  className={buttonVariants({ size: 'sm' })}
                 >
                   {saving ? 'Saving…' : 'Save'}
                 </button>

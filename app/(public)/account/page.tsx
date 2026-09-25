@@ -36,6 +36,7 @@ import MyKidsSection from '@/components/dad-tools/MyKidsSection'
 import ContactsCard from '@/components/account/ContactsCard'
 import MessagesCard from '@/components/account/MessagesCard'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 export const metadata: Metadata = {
   title: LABELS.account.pageTitle,
@@ -148,7 +149,7 @@ export default async function AccountHomePage() {
             counts. Activity moved under them — it's the least useful thing on the page
             and it was sitting above the content it counts. */}
         <Card className="p-6 mb-6">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Liked Content</p>
+          <Eyebrow className="mb-4">Liked Content</Eyebrow>
           {!hasLikedContent ? (
             <p className="text-sm text-prose-faint text-center py-4">
               Nothing liked yet — heart a review or article and it will appear here.
@@ -181,7 +182,7 @@ export default async function AccountHomePage() {
         </Card>
 
         <Card className="p-6 mb-6">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Following on the Bench</p>
+          <Eyebrow className="mb-4">Following on the Bench</Eyebrow>
           {subscribedItems.length === 0 ? (
             <p className="text-sm text-prose-faint text-center py-4">
               Not following anything yet —{' '}
@@ -208,7 +209,7 @@ export default async function AccountHomePage() {
             than cut — it's your own record, not a scale metric on a public page — but
             it's the first thing to go if this page needs the room. */}
         <Card className="p-6 mb-6">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Activity</p>
+          <Eyebrow className="mb-4">Activity</Eyebrow>
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center">
               <p className="text-2xl font-black text-prose">{commentCount ?? 0}</p>

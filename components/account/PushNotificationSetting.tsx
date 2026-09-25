@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 const VAPID_PUBLIC = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
 
@@ -96,7 +97,7 @@ export default function PushNotificationSetting() {
 
   return (
     <Card className="p-6 mb-6">
-      <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Push Notifications</p>
+      <Eyebrow className="mb-4">Push Notifications</Eyebrow>
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
           <p className="text-sm font-semibold text-prose">Notify me on this device</p>

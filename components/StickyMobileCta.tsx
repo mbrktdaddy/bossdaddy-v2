@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import type { Product } from '@/lib/products'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   product: Pick<Product, 'slug' | 'name' | 'affiliate_url' | 'non_affiliate_url' | 'image_url' | 'store' | 'custom_store_name'>
@@ -77,7 +78,7 @@ export default function StickyMobileCta({ product }: Props) {
           target="_blank"
           rel={rel}
           data-product-slug={product.slug}
-          className="shrink-0 px-4 py-2.5 bg-accent hover:bg-accent-hover active:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
+          className={buttonVariants({ className: 'shrink-0 active:bg-accent-hover' })}
         >
           Check Price
         </a>

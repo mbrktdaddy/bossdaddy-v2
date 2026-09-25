@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const metadata: Metadata = {
   title: 'Account access restricted',
@@ -9,9 +11,9 @@ export const metadata: Metadata = {
 export default function AccountBlockedPage() {
   return (
     <main className="max-w-xl mx-auto px-6 py-24 text-center">
-      <p className="text-eyebrow text-xs uppercase tracking-widest font-semibold mb-4">
+      <Eyebrow className="mb-4">
         Account access restricted
-      </p>
+      </Eyebrow>
       <h1 className="text-3xl sm:text-4xl font-black mb-4">Your account is on hold.</h1>
       <p className="text-prose-muted leading-relaxed mb-8">
         This account can&apos;t sign in right now. This usually means it has been
@@ -22,7 +24,7 @@ export default function AccountBlockedPage() {
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
         <a
           href="mailto:support@bossdaddylife.com?subject=Account%20access%20question"
-          className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition-colors text-sm"
+          className={buttonVariants({ size: 'lg' })}
         >
           Contact Boss Daddy
         </a>

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { buttonVariants } from '@/components/ui/Button'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -87,7 +88,7 @@ export default function ForgotPasswordPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 px-4 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-semibold rounded-lg transition-colors"
+            className={buttonVariants({ className: 'w-full' })}
           >
             {loading ? 'Sending…' : 'Send Reset Link'}
           </button>

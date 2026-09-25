@@ -7,6 +7,7 @@ import { formatPrice } from '@/lib/merch'
 import OrderPoller from './_components/OrderPoller'
 import CartClearer from './_components/CartClearer'
 import type { Metadata } from 'next'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const metadata: Metadata = {
   title: 'Order Confirmed — Boss Daddy Life',
@@ -144,7 +145,7 @@ export default async function OrderPage({ params }: Props) {
       <div className="text-center">
         <Link
           href="/gear"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent-hover text-white font-bold rounded-xl transition-colors"
+          className={buttonVariants({ size: 'lg' })}
         >
           Continue Shopping
         </Link>

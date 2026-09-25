@@ -4,6 +4,8 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 export interface Candidate {
   id:                 string
@@ -99,7 +101,7 @@ export function CandidatesClient({ candidates }: Props) {
                 <button
                   onClick={() => adopt(c.id)}
                   disabled={busyId === c.id || pending}
-                  className="px-3 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-50"
+                  className={buttonVariants()}
                 >
                   {busyId === c.id ? 'Adopting…' : 'Adopt → Bench'}
                 </button>
@@ -111,9 +113,9 @@ export function CandidatesClient({ candidates }: Props) {
 
       {adopted.length > 0 && (
         <div>
-          <h2 className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">
+          <Eyebrow as="h2" className="mb-3">
             Adopted ({adopted.length})
-          </h2>
+          </Eyebrow>
           <div className="space-y-1">
             {adopted.map((c) => (
               <div

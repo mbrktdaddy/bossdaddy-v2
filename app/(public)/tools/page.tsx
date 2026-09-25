@@ -26,6 +26,8 @@ import WorkingOnSection from '@/components/goals/WorkingOnSection'
 import YourCornerSection from '@/components/account/YourCornerSection'
 import ToolTiles from '@/components/dad-tools/ToolTiles'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 export function generateMetadata(): Metadata {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
@@ -188,9 +190,9 @@ export default async function ToolsHubPage() {
 
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
       <section className="mb-10 sm:mb-14">
-        <p className="text-xs uppercase tracking-widest font-semibold text-eyebrow mb-3">
+        <Eyebrow className="mb-3">
           {isSignedIn ? LABELS.tools.hub.loggedInGreeting : LABELS.tools.hub.eyebrow}
-        </p>
+        </Eyebrow>
         {isSignedIn ? (
           <>
             <h1 className="text-3xl sm:text-5xl font-black text-prose leading-[1.05] tracking-tight mb-3">
@@ -325,9 +327,9 @@ export default async function ToolsHubPage() {
       {/* ── NO KIDS YET — short prompt to add one ───────────────────────── */}
       {user && kids.length === 0 && (
         <Card as="section" tone="raised" className="mb-10 sm:mb-14 p-6 sm:p-8">
-          <p className="text-xs uppercase tracking-widest font-semibold text-eyebrow mb-3">
+          <Eyebrow className="mb-3">
             Get started
-          </p>
+          </Eyebrow>
           <p className="text-lg sm:text-xl font-black text-prose leading-snug mb-2">
             Add a family member to unlock personalized numbers.
           </p>
@@ -337,7 +339,7 @@ export default async function ToolsHubPage() {
           </p>
           <Link
             href={manageKidsHref}
-            className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors"
+            className={buttonVariants()}
           >
             {LABELS.tools.hub.addFirstKidCta}
           </Link>
@@ -426,9 +428,9 @@ function renderSpoke(spoke: SpokeCard, weight: 'main' | 'reference') {
   const inner = (
     <>
       <div className="flex items-baseline justify-between gap-2 mb-2">
-        <p className="text-xs uppercase tracking-widest font-semibold text-eyebrow">
+        <Eyebrow>
           {spoke.role}
-        </p>
+        </Eyebrow>
         {spoke.badge && (
           <span className="text-[10px] uppercase tracking-widest font-semibold text-accent-text border border-accent/30 rounded-full px-2 py-0.5">
             {spoke.badge}

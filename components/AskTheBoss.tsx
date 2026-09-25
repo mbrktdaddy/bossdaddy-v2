@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 // Inline "Ask the Boss" entry point. Deep-links into /tools/the-boss with a
 // context seed so the Boss opens primed for the page the dad is on. The page
@@ -26,7 +27,7 @@ export default function AskTheBoss({
         </svg>
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Ask the Boss</p>
+        <Eyebrow>Ask the Boss</Eyebrow>
         <p className="text-sm sm:text-base font-bold text-prose group-hover:text-accent transition-colors leading-snug">
           {prompt}
         </p>

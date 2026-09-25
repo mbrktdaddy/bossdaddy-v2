@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { SELF_DELETION_REASONS, OTHER_REASON } from '@/lib/moderation-reasons'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   accountStatus: string
@@ -45,7 +46,7 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
         </p>
         {error && <p className="text-sm text-red-700 mb-3">{error}</p>}
         <button onClick={cancel} disabled={loading}
-          className="px-5 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors">
+          className={buttonVariants()}>
           {loading ? 'Canceling…' : 'Cancel deletion — keep my account'}
         </button>
       </div>

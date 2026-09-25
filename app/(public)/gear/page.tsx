@@ -17,6 +17,7 @@ import { getSeasonalOccasions } from '@/lib/gift-occasions'
 import OccasionIcon from '@/components/OccasionIcon'
 import { ogImageUrl, OG_SITE, TWITTER_HANDLE } from '@/lib/og'
 import type { Metadata } from 'next'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 export const revalidate = 3600
 // getSeasonalOccasions() reads the current date, which otherwise nudges Next
@@ -254,7 +255,7 @@ export default async function GearPage() {
           className="group mb-16 flex items-center justify-between gap-4 rounded-xl border border-soft bg-surface px-5 py-4 hover:border-accent-border/40 hover:bg-surface-raised transition-colors"
         >
           <div>
-            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Gift Guides</p>
+            <Eyebrow className="mb-1">Gift Guides</Eyebrow>
             <p className="text-sm font-bold text-prose">Dad-tested gift guides for every occasion</p>
           </div>
           <span className="shrink-0 text-sm font-semibold text-accent-text-soft group-hover:text-accent transition-colors">Explore →</span>
@@ -354,7 +355,7 @@ export default async function GearPage() {
           {/* ── Tier summary — quick jump to each rating band ─────────────── */}
           {(tens.length > 0 || bossPicks > 0) && (
             <div className="flex flex-wrap items-center gap-x-5 gap-y-1 mb-8 text-sm text-prose-faint">
-              <span className="text-xs uppercase tracking-widest font-semibold text-eyebrow">Jump to</span>
+              <Eyebrow as="span">Jump to</Eyebrow>
               {tens.length > 0 && (
                 <a href="#perfect-score" className="hover:text-prose transition-colors">
                   <span className="text-prose font-bold tabular-nums">{tens.length}</span> perfect {tens.length === 1 ? 'score' : 'scores'}

@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { subscribeToToolEmail } from '@/lib/dad-tools/email-actions'
 import { LABELS } from '@/lib/labels'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   kidProfileId: string | null
@@ -68,7 +69,7 @@ export default function YearlyCheckinOptIn({ kidProfileId, fallbackBirthdate }: 
         <button
           type="submit"
           disabled={pending || !email}
-          className="px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors whitespace-nowrap"
+          className={buttonVariants({ className: 'whitespace-nowrap' })}
         >
           {pending ? 'Saving…' : 'Subscribe'}
         </button>

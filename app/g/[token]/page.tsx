@@ -2,6 +2,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyOccurrenceToken } from '@/lib/goals/links'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 // One-tap logging surface. Reached from a push notification or a reminder email,
 // by a dad who is probably not logged in on that device — the signed token in the
@@ -108,9 +110,9 @@ export default async function OneTapPage({ params, searchParams }: Props) {
 
   return (
     <Shell>
-      <p className="text-xs uppercase tracking-widest text-eyebrow">
+      <Eyebrow>
         {goal.title}
-      </p>
+      </Eyebrow>
       <h1 className="mt-2 text-2xl font-black text-prose sm:text-3xl">
         {isCatchup ? 'Logging a catch-up' : 'Log it'}
       </h1>
@@ -150,7 +152,7 @@ export default async function OneTapPage({ params, searchParams }: Props) {
           type="submit"
           name="action"
           value="completed"
-          className="w-full rounded-lg bg-accent px-6 py-3 font-bold text-white hover:bg-accent-hover"
+          className={buttonVariants({ size: 'lg', className: 'w-full' })}
         >
           {isCatchup ? 'Log it anyway' : 'Did it'}
         </button>
@@ -259,7 +261,7 @@ function Message({ heading, body, goalId }: { heading: string; body: string; goa
       <p className="mt-3 text-sm text-prose-muted">{body}</p>
       <Link
         href={goalId ? `/goals/${goalId}` : '/goals'}
-        className="mt-8 inline-block rounded-lg bg-accent px-6 py-3 font-bold text-white hover:bg-accent-hover"
+        className={buttonVariants({ size: 'lg', className: 'mt-8' })}
       >
         {goalId ? 'Open this goal →' : 'Open your goals →'}
       </Link>

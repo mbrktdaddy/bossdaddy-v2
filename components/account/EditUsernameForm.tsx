@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateProfile } from '@/lib/profile-actions'
+import { buttonVariants } from '@/components/ui/Button'
 
 export default function EditUsernameForm({ current }: { current: string }) {
   const router = useRouter()
@@ -44,7 +45,7 @@ export default function EditUsernameForm({ current }: { current: string }) {
           <button
             type="submit"
             disabled={pending || username.trim() === current || username.trim().length < 3}
-            className="px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors shrink-0"
+            className={buttonVariants({ className: 'shrink-0' })}
           >
             {pending ? 'Saving…' : 'Save'}
           </button>

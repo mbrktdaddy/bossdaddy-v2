@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Candidate {
   text: string
@@ -228,7 +229,7 @@ export function MerchStudio({ initialApproved }: { initialApproved: ApprovedDesi
           <button
             onClick={generate}
             disabled={loading || theme.trim().length < 2}
-            className="ml-auto px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors"
+            className={buttonVariants({ className: 'ml-auto' })}
           >
             {loading ? 'Generating…' : 'Generate sayings'}
           </button>
@@ -258,7 +259,7 @@ export function MerchStudio({ initialApproved }: { initialApproved: ApprovedDesi
           <button
             onClick={addCustom}
             disabled={addingCustom || customText.trim().length === 0}
-            className="px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors"
+            className={buttonVariants()}
           >
             {addingCustom ? 'Adding…' : 'Add exact'}
           </button>
@@ -284,7 +285,7 @@ export function MerchStudio({ initialApproved }: { initialApproved: ApprovedDesi
           <button
             onClick={addLogoDesign}
             disabled={addingLogo}
-            className="px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors"
+            className={buttonVariants()}
           >
             {addingLogo ? 'Adding…' : 'Add logo design'}
           </button>
@@ -337,7 +338,7 @@ export function MerchStudio({ initialApproved }: { initialApproved: ApprovedDesi
                         <button
                           onClick={() => approve(idx)}
                           disabled={c.saving || c.text.trim().length === 0}
-                          className="px-3 py-2 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors"
+                          className={buttonVariants({ size: 'sm' })}
                         >
                           {c.saving ? 'Saving…' : 'Approve'}
                         </button>
@@ -653,7 +654,7 @@ function ApprovedDesignCard({ design, onDelete }: { design: ApprovedDesign; onDe
                 <button
                   onClick={publish}
                   disabled={publishing || !options}
-                  className="px-3 py-2 bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg transition-colors"
+                  className={buttonVariants({ size: 'sm' })}
                 >
                   {publishing ? 'Publishing…' : alreadyPublished ? `Re-publish ${blank}` : `Publish ${blank} to Printful`}
                 </button>

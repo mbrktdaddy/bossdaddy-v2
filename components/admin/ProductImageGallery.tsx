@@ -5,6 +5,7 @@ import { compressImage } from '@/lib/compress-image'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
 import ImageCropper from '@/components/ui/ImageCropper'
+import { buttonVariants } from '@/components/ui/Button'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
@@ -386,7 +387,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              className="text-xs px-3 py-1.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-semibold rounded-lg transition-colors"
+              className={buttonVariants({ size: 'sm' })}
             >
               {uploading ? 'Uploading…' : '+ Upload'}
             </button>

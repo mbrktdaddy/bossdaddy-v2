@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   reviewId: string
@@ -139,7 +140,7 @@ export function ScheduleFollowupModal({ reviewId, onClose }: Props) {
           <button
             type="submit"
             disabled={busy}
-            className="px-5 py-2 bg-accent hover:bg-accent-hover disabled:bg-accent-hover disabled:cursor-wait text-white text-sm font-semibold rounded-lg transition-colors"
+            className={buttonVariants({ className: 'disabled:bg-accent-hover disabled:cursor-wait' })}
           >
             {busy ? 'Scheduling…' : 'Schedule follow-up'}
           </button>

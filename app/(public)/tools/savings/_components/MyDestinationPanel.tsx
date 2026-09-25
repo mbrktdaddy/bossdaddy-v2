@@ -15,6 +15,8 @@ import type { DestinationType } from '@/lib/dad-tools/savings'
 import { updateParticipantDestination } from '@/lib/dad-tools/savings-actions'
 import { describeDestination } from '@/lib/dad-tools/savings-deeplinks'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   goalId:                     string
@@ -59,9 +61,9 @@ export default function MyDestinationPanel({
   return (
     <Card as="section" className="p-5 space-y-4">
       <div>
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">
+        <Eyebrow className="mb-1">
           Your destination
-        </p>
+        </Eyebrow>
         <p className="text-xs text-prose-faint leading-snug">
           Where YOUR contributions go on this goal. The owner sets a different
           one — yours is private to you.
@@ -122,7 +124,7 @@ export default function MyDestinationPanel({
         type="button"
         onClick={onSave}
         disabled={pending || !hasChanges}
-        className="bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition-colors min-h-[44px]"
+        className={buttonVariants()}
       >
         {pending ? 'Saving…' : 'Save destination'}
       </button>

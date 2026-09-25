@@ -24,6 +24,7 @@ import {
 } from '@/lib/dad-tools/dad-math'
 import NumberField from '@/components/dad-tools/NumberField'
 import Result from './Result'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   isAuthenticated: boolean
@@ -267,7 +268,7 @@ export default function DadMathTool({ isAuthenticated, initialKids, initialKidId
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
+            className={buttonVariants()}
           >
             {saving ? 'Saving…' : `Save for ${selectedKid.name?.trim() || 'kid'}`}
           </button>

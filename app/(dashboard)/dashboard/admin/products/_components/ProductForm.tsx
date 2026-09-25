@@ -11,6 +11,8 @@ import { PendingImageGallery, flushPendingImages, type PendingImage } from '@/co
 import { buildAmazonAffiliateUrl, extractAsin, isValidAsin } from '@/lib/amazon-tag'
 import { TagPicker } from '@/components/workspace/TagPicker'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   product: Product | null
@@ -585,7 +587,7 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
       <Card tone="sunken" className="p-4 space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Product Facts</p>
+            <Eyebrow>Product Facts</Eyebrow>
             <p className="mt-0.5 text-xs text-prose-faint">
               Optional spec sheet — label &amp; value pairs (e.g. Weight → 2.1 lbs). Fed into the AI review draft and brand comparisons. Leave empty if specs are unreliable.
             </p>
@@ -676,7 +678,7 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
                 type="button"
                 onClick={handleAutofill}
                 disabled={autofilling || !factsText.trim()}
-                className="text-xs px-3 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-semibold rounded-lg transition-colors min-h-[36px]"
+                className={buttonVariants({ size: 'sm' })}
               >
                 {autofilling ? 'Extracting…' : 'Extract facts'}
               </button>
@@ -721,7 +723,7 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
       {/* ── Tags ───────────────────────────────────────────────────────── */}
       <Card tone="sunken" className="p-4 space-y-3">
         <div>
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Tags</p>
+          <Eyebrow>Tags</Eyebrow>
           <p className="mt-0.5 text-xs text-prose-faint">
             Topic &amp; facet tags for cross-cutting discovery (a product can carry tags from other pillars). Curated vocabulary — see docs/pillar-taxonomy.md.
           </p>
@@ -747,7 +749,7 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
 
       {/* ── Bench pipeline ─────────────────────────────────────────────── */}
       <Card tone="sunken" className="p-4 space-y-4">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Bench Pipeline</p>
+        <Eyebrow>Bench Pipeline</Eyebrow>
         <div>
           <label className="block text-sm text-prose-muted mb-1.5">Priority</label>
           <input
@@ -815,7 +817,7 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
         <button
           type="submit"
           disabled={busy || !slug.trim() || !name.trim()}
-          className="px-5 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
+          className={buttonVariants()}
         >
           {busy
             ? 'Saving…'

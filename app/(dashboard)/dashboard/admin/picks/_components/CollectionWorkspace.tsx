@@ -14,6 +14,7 @@ import { SocialPostsPanel } from '@/components/workspace/SocialPostsPanel'
 import { VersionHistoryPanel } from '@/components/workspace/VersionHistoryPanel'
 import { useCollectionWorkspace } from '@/components/workspace/useCollectionWorkspace'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 // InlineMediaPanel is heavy + drags in image upload UI — load lazy.
 const InlineMediaPanel = dynamic(
@@ -1098,7 +1099,7 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
 
       {/* ── ADMIN ────────────────────────────────────────────────────── */}
       <div className="pt-6 border-t border-soft">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Admin</p>
+        <Eyebrow className="mb-4">Admin</Eyebrow>
         <VersionHistoryPanel contentType="collection" contentId={pick.id} />
       </div>
     </WorkspaceShell>

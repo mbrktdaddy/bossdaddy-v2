@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import EditorialHeader from '@/components/EditorialHeader'
 import { LABELS } from '@/lib/labels'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 /**
  * Boss Tools — the homepage's only image-free content section, which is why it
@@ -25,7 +26,7 @@ export default function BossToolsSection() {
           href="/tools/the-boss"
           className="block bg-surface border border-soft hover:border-accent rounded-2xl p-6 sm:p-8 mb-4 transition-colors group"
         >
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-bold">New · Ask the Boss</p>
+          <Eyebrow>New · Ask the Boss</Eyebrow>
           <h3 className="text-xl sm:text-2xl font-black mt-2 text-prose group-hover:text-accent transition-colors leading-tight">
             Tell the Boss what you need — get a straight answer.
           </h3>
@@ -42,7 +43,7 @@ export default function BossToolsSection() {
             href="/tools/weekends-until"
             className="block bg-surface border border-soft hover:border-accent rounded-2xl p-6 sm:p-8 transition-colors group"
           >
-            <p className="text-xs text-eyebrow uppercase tracking-widest font-bold">Time · {LABELS.tools.weekendsUntil.short}</p>
+            <Eyebrow>Time · {LABELS.tools.weekendsUntil.short}</Eyebrow>
             <h3 className="text-xl sm:text-2xl font-black mt-2 text-prose group-hover:text-accent transition-colors leading-tight">
               How many weekends do you have left with your kid?
             </h3>
@@ -57,7 +58,7 @@ export default function BossToolsSection() {
             href="/tools/savings"
             className="block bg-surface border border-soft hover:border-accent rounded-2xl p-6 sm:p-8 transition-colors group"
           >
-            <p className="text-xs text-eyebrow uppercase tracking-widest font-bold">Money · Savings</p>
+            <Eyebrow>Money · Savings</Eyebrow>
             <h3 className="text-xl sm:text-2xl font-black mt-2 text-prose group-hover:text-accent transition-colors leading-tight">
               Small commitments, daily. Tap “yes,” watch the dollars stack.
             </h3>

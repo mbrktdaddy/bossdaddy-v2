@@ -28,6 +28,7 @@ import {
   revertSlot,
   updateSlotMeta,
 } from '@/lib/inlineImages'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   content: string
@@ -484,7 +485,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
             type="button"
             onClick={() => setShowAdd(true)}
             disabled={bulkBusy !== null}
-            className="w-full px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-60 text-white text-sm font-semibold rounded-lg transition-colors min-h-[44px]"
+            className={buttonVariants({ className: 'w-full' })}
           >
             + Add inline image or gallery
           </button>
@@ -583,7 +584,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
               type="button"
               onClick={handleAddSubmit}
               disabled={addBusy || (addMode === 'generate' && !addPrompt.trim())}
-              className="w-full px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition-colors min-h-[44px]"
+              className={buttonVariants({ className: 'w-full' })}
             >
               {addBusy
                 ? 'Working…'
@@ -863,7 +864,7 @@ function GalleryCard(p: GalleryCardProps) {
                   type="button"
                   onClick={() => p.onRegenerateChild(child)}
                   disabled={busySlotId === child.slotId || !child.prompt.trim()}
-                  className="px-3 py-1.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-xs font-semibold rounded-lg min-h-[36px] transition-colors"
+                  className={buttonVariants({ size: 'sm' })}
                 >
                   {busySlotId === child.slotId ? '✨ Working…' : child.filled ? '🔄 Regenerate' : '✨ Generate'}
                 </button>
@@ -1024,7 +1025,7 @@ function SlotCard(p: SlotCardProps) {
       {/* Actions */}
       <div className="flex flex-wrap gap-2 pt-1 border-t border-soft">
         <button type="button" onClick={p.onRegenerate} disabled={busy || !slot.prompt.trim()}
-          className="px-3 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-xs font-semibold rounded-lg min-h-[36px] transition-colors"
+          className={buttonVariants({ size: 'sm' })}
           title={!slot.prompt.trim() ? 'Add an AI prompt first' : 'Regenerate with current prompt'}>
           {busy ? '✨ Working…' : filled ? '🔄 Regenerate' : '✨ Generate'}
         </button>

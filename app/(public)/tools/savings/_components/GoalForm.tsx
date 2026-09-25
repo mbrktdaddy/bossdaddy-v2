@@ -25,6 +25,8 @@ import {
   type DestinationPreset,
 } from '@/lib/dad-tools/destination-presets'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 type RhythmMode = 'regular' | 'freeform'
 type TargetMode = 'none' | 'amount' | 'date' | 'both'
@@ -255,9 +257,9 @@ export default function GoalForm({ mode, initial, kids }: Props) {
 
       {/* ── Name + description + kid ────────────────────────────────────── */}
       <Card as="section" className="p-6 space-y-5">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+        <Eyebrow>
           About this goal
-        </p>
+        </Eyebrow>
 
         <div>
           <label htmlFor="goal-name" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
@@ -314,9 +316,9 @@ export default function GoalForm({ mode, initial, kids }: Props) {
       {/* ── Rhythm ──────────────────────────────────────────────────────── */}
       <Card as="section" className="p-6 space-y-5">
         <div>
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">
+          <Eyebrow className="mb-3">
             Rhythm
-          </p>
+          </Eyebrow>
           <div className="grid grid-cols-2 gap-2">
             {[
               { v: 'regular',  label: 'Regular amount',  body: 'Set a daily, weekly, or monthly target.' },
@@ -381,9 +383,9 @@ export default function GoalForm({ mode, initial, kids }: Props) {
       {/* ── Target ──────────────────────────────────────────────────────── */}
       <Card as="section" className="p-6 space-y-5">
         <div>
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">
+          <Eyebrow className="mb-3">
             Target
-          </p>
+          </Eyebrow>
           <div className="grid grid-cols-4 gap-2 text-center text-xs">
             {[
               { v: 'none',   label: 'No target' },
@@ -448,9 +450,9 @@ export default function GoalForm({ mode, initial, kids }: Props) {
       {/* ── Destination ─────────────────────────────────────────────────── */}
       <Card as="section" className="p-6 space-y-5">
         <div>
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">
+          <Eyebrow className="mb-1">
             Where the money goes
-          </p>
+          </Eyebrow>
           <p className="text-xs text-prose-faint">
             Pick a category, then a specific destination. We never move money — when you
             tap Yes, we open the link and you confirm the transfer yourself.
@@ -569,9 +571,9 @@ export default function GoalForm({ mode, initial, kids }: Props) {
       {/* ── Reminders ────────────────────────────────────────────────────── */}
       <Card as="section" className="p-6 space-y-5">
         <div>
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">
+          <Eyebrow className="mb-1">
             Reminders
-          </p>
+          </Eyebrow>
           <p className="text-xs text-prose-faint">
             We&apos;ll email you (and any spouse you invite) at the cadence you pick.
             {showLocalTimes
@@ -639,7 +641,7 @@ export default function GoalForm({ mode, initial, kids }: Props) {
         <button
           type="submit"
           disabled={pending}
-          className="bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold px-5 py-2.5 rounded-xl transition-colors"
+          className={buttonVariants()}
         >
           {pending
             ? (mode === 'create' ? 'Creating…' : 'Saving…')

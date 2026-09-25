@@ -6,6 +6,8 @@ import { createAnonClient } from '@/lib/supabase/anon'
 import { OCCASIONS, OCCASION_GROUPS } from '@/lib/gift-occasions'
 import OccasionIcon from '@/components/OccasionIcon'
 import VaultShell from '@/components/vault/VaultShell'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const revalidate = 60
 
@@ -61,7 +63,7 @@ export default async function GiftsIndexPage() {
         <section key={group.id} className="mb-14">
           <div className="mb-6">
             <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">{group.label}</p>
+            <Eyebrow className="mb-1">{group.label}</Eyebrow>
             <h2 className="text-2xl font-black text-prose">{group.label}</h2>
           </div>
 
@@ -117,14 +119,14 @@ export default async function GiftsIndexPage() {
       {/* Newsletter pitch */}
       <div className="mt-16 pt-10 border-t border-soft text-center max-w-2xl mx-auto">
         <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3 mx-auto" />
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Stay in the loop</p>
+        <Eyebrow className="mb-2">Stay in the loop</Eyebrow>
         <h3 className="text-xl font-black text-prose mb-2">New gift guides drop with the seasons</h3>
         <p className="text-sm text-prose-muted mb-4">
           Subscribe to the Boss Daddy Crew for fresh gift picks before each major holiday.
         </p>
         <Link
           href="/#newsletter"
-          className="inline-block px-5 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors min-h-[44px]"
+          className={buttonVariants()}
         >
           Get on the list →
         </Link>

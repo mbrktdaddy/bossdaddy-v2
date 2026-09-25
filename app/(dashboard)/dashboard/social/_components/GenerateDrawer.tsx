@@ -7,6 +7,7 @@ import { PLATFORMS } from '@/lib/social-platforms'
 import { XArticlePreview } from '@/lib/x/preview'
 import type { DroppedTag } from '@/lib/x/serialize'
 import { downloadImage } from '@/lib/images/download'
+import { buttonVariants } from '@/components/ui/Button'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
@@ -226,7 +227,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 bg-accent hover:bg-accent-hover text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors shrink-0"
+        className={buttonVariants({ className: 'shrink-0' })}
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -351,7 +352,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                   <button
                     onClick={generate}
                     disabled={loading || (sourceType !== 'original' && !sourceId) || (sourceType === 'original' && !topic.trim())}
-                    className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-medium py-3 rounded-xl transition-colors text-sm"
+                    className={buttonVariants({ className: 'w-full' })}
                   >
                     {loading ? 'Generating 3 variants…' : 'Generate 3 Variants'}
                   </button>
@@ -384,7 +385,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                               <button
                                 onClick={() => saveVariant(i, v.content)}
                                 disabled={saving === i || over}
-                                className="text-xs bg-accent hover:bg-accent-hover disabled:opacity-50 text-white px-4 py-1.5 rounded-lg font-medium transition-colors"
+                                className={buttonVariants({ size: 'sm' })}
                               >
                                 {saving === i ? 'Saving…' : 'Save as Draft'}
                               </button>
@@ -464,7 +465,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                   <button
                     onClick={repurpose}
                     disabled={repLoading || !sourceId}
-                    className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-medium py-3 rounded-xl transition-colors text-sm"
+                    className={buttonVariants({ className: 'w-full' })}
                   >
                     {repLoading ? 'Repurposing…' : 'Repurpose to X'}
                   </button>
@@ -482,7 +483,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                             <button
                               onClick={saveArticle}
                               disabled={savingArticle}
-                              className="text-xs bg-accent hover:bg-accent-hover disabled:opacity-50 text-white px-3 py-1 rounded-lg font-medium transition-colors"
+                              className={buttonVariants({ size: 'sm' })}
                             >
                               {savingArticle ? 'Saving…' : 'Save as article'}
                             </button>
@@ -540,7 +541,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                                 <button
                                   onClick={() => savePost(i, p, repResult.article.title)}
                                   disabled={repSaving === i || over}
-                                  className="text-xs bg-accent hover:bg-accent-hover disabled:opacity-50 text-white px-4 py-1.5 rounded-lg font-medium transition-colors"
+                                  className={buttonVariants({ size: 'sm' })}
                                 >
                                   {repSaving === i ? 'Saving…' : 'Save as Draft'}
                                 </button>

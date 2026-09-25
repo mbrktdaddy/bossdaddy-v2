@@ -15,6 +15,7 @@ import BenchStrip from '@/components/BenchStrip'
 import { buildSocialMetadata, toAbsoluteUrl } from '@/lib/og'
 import type { Metadata } from 'next'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 // Per-user vote/subscribe state is fetched CLIENT-side by VoteButton/
 // SubscribeButton (same pattern as LikeButton + the comment widgets), so this
@@ -136,7 +137,7 @@ export default async function BenchDetailPage({ params }: Props) {
             <div className="mt-4">
               <Link
                 href={linkedReviewSlug ? `/reviews/${linkedReviewSlug}` : '/reviews'}
-                className="inline-flex items-center gap-2 px-5 py-3 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors"
+                className={buttonVariants()}
               >
                 Read the full review
               </Link>
@@ -154,7 +155,7 @@ export default async function BenchDetailPage({ params }: Props) {
                     href={`/go/${wishlistItem.slug}`}
                     target="_blank"
                     rel="sponsored nofollow noopener"
-                    className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
+                    className={buttonVariants()}
                   >
                     {getBuyLabel(wishlistItem.store, wishlistItem.custom_store_name)}
                   </a>

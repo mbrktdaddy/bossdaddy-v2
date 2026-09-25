@@ -2,6 +2,7 @@ import Image from 'next/image'
 import type { Product } from '@/lib/products'
 import { getStoreLabel } from '@/lib/products'
 import RatingScore from './RatingScore'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   product: Pick<Product, 'slug' | 'name' | 'affiliate_url' | 'non_affiliate_url' | 'image_url' | 'store' | 'custom_store_name'>
@@ -57,7 +58,7 @@ export default function ProductCtaCard({ product, rating, variant = 'prominent' 
             target="_blank"
             rel={rel}
             data-product-slug={product.slug}
-            className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-accent hover:bg-accent-hover text-white font-bold rounded-xl transition-colors min-h-[44px] w-full sm:w-auto"
+            className={buttonVariants({ className: 'w-full sm:w-auto' })}
           >
             {buttonLabel}
           </a>

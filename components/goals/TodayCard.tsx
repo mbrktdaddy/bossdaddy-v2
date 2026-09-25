@@ -30,6 +30,7 @@ import {
   loadTodayWork, loadTodayWeek, summarizeTodayWork, todayPreviewItems,
   type TodayPreviewItem,
 } from '@/lib/goals/today'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 type Props = {
   /** Passed in rather than resolved here — every caller has already done the auth
@@ -114,9 +115,9 @@ export default async function TodayCard({
     >
       <div className="flex items-baseline justify-between gap-3">
         <span className="min-w-0">
-          <span className="block text-xs text-eyebrow uppercase tracking-widest font-semibold">
+          <Eyebrow as="span" className="block">
             {LABELS.goals.todayEyebrow}
-          </span>
+          </Eyebrow>
           <span className="mt-1 block text-base font-black leading-tight text-prose">
             {due ? LABELS.goals.todayHeading : LABELS.goals.todayClearHeading}
           </span>
@@ -172,9 +173,9 @@ function EmptyToday({ className = '' }: { className?: string }) {
     >
       <div className="flex items-baseline justify-between gap-3">
         <span className="min-w-0">
-          <span className="block text-xs text-eyebrow uppercase tracking-widest font-semibold">
+          <Eyebrow as="span" className="block">
             {LABELS.goals.todayEyebrow}
-          </span>
+          </Eyebrow>
           <span className="mt-1 block text-base font-black leading-tight text-prose">
             {LABELS.goals.emptyHeading}
           </span>

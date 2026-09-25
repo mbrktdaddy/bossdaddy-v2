@@ -35,6 +35,7 @@ import BenchStrip from '@/components/BenchStrip'
 import TakeawaysCard from '@/components/reviews/TakeawaysCard'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 const TableOfContents = dynamic(() => import('@/components/TableOfContents'))
 const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
@@ -261,7 +262,7 @@ export default async function GuidePage({ params }: Props) {
         {guide.tldr && (
           <div className="mb-10 bg-accent-tint border border-accent-border/40 rounded-xl p-5 sm:p-6">
             <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-            <h2 className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Quick Take</h2>
+            <Eyebrow as="h2" className="mb-3">Quick Take</Eyebrow>
             <p className="text-prose leading-relaxed text-sm sm:text-base">{guide.tldr}</p>
           </div>
         )}
@@ -348,7 +349,7 @@ export default async function GuidePage({ params }: Props) {
                 <div className="flex items-end justify-between mb-5">
                   <div>
                     <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                    <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Reviews</p>
+                    <Eyebrow className="mb-1">Reviews</Eyebrow>
                     <h2 className="text-lg font-black">
                       {category ? `${category.label} Reviews` : 'Related Reviews'}
                     </h2>
@@ -406,7 +407,7 @@ export default async function GuidePage({ params }: Props) {
               <div className="mt-12">
                 <div className="mb-5">
                   <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Guides</p>
+                  <Eyebrow className="mb-1">Guides</Eyebrow>
                   <h2 className="text-lg font-black">More Guides</h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -491,7 +492,7 @@ export default async function GuidePage({ params }: Props) {
               {mentionedProducts && mentionedProducts.length > 0 && (
                 <Card className="hover:border-accent-border/40 transition-colors p-4">
                   <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Products Mentioned</p>
+                  <Eyebrow className="mb-3">Products Mentioned</Eyebrow>
                   <ul className="space-y-3">
                     {mentionedSlugs
                       .map((s) => mentionedProducts.find((p) => p.slug === s))

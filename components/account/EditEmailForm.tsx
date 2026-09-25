@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { buttonVariants } from '@/components/ui/Button'
 
 type Step = 'idle' | 'editing' | 'verifying' | 'sent'
 
@@ -68,7 +69,7 @@ export default function EditEmailForm({ current }: { current: string }) {
         {error && <p className="text-red-700 text-xs">{error}</p>}
         <div className="flex items-center gap-3">
           <button type="submit" disabled={busy || otp.length < 6}
-            className="px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors">
+            className={buttonVariants()}>
             {busy ? 'Verifying…' : 'Verify & Change Email'}
           </button>
           <button type="button" onClick={reset} className="text-xs text-prose-faint hover:text-prose transition-colors">Cancel</button>
@@ -88,7 +89,7 @@ export default function EditEmailForm({ current }: { current: string }) {
         {error && <p className="text-red-700 text-xs">{error}</p>}
         <div className="flex items-center gap-3">
           <button type="submit" disabled={busy || !email.trim() || email.trim() === current}
-            className="px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors">
+            className={buttonVariants()}>
             {busy ? 'Sending code…' : 'Continue'}
           </button>
           <button type="button" onClick={reset} className="text-xs text-prose-faint hover:text-prose transition-colors">Cancel</button>

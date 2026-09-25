@@ -6,6 +6,7 @@ import { compressImage } from '@/lib/compress-image'
 import { downloadImage } from '@/lib/images/download'
 import ImageCropper from '@/components/ui/ImageCropper'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface MediaAsset {
   id: string
@@ -148,7 +149,7 @@ function AssetCard({
         <div className="absolute inset-0 bg-zinc-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
           <button
             onClick={() => onCopy(asset.id, asset.url)}
-            className="px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-xs font-semibold rounded-lg transition-colors"
+            className={buttonVariants({ size: 'sm' })}
           >
             {copiedId === asset.id ? '✓ Copied' : 'Copy URL'}
           </button>
@@ -179,7 +180,7 @@ function AssetCard({
             <button
               onClick={handleAltSave}
               disabled={savingAlt}
-              className="px-2 py-1 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white text-xs rounded transition-colors"
+              className={buttonVariants({ size: 'sm' })}
             >
               {savingAlt ? '…' : 'Save'}
             </button>
@@ -476,7 +477,7 @@ export default function MediaLibraryPage() {
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors"
+            className={buttonVariants()}
           >
             {uploading ? (
               <>

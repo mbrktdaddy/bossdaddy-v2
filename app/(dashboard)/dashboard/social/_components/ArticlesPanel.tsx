@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { Badge, type BadgeTone } from '@/components/ui/Badge'
 
 export interface ArticleListItem {
   id: string
@@ -13,10 +14,10 @@ export interface ArticleListItem {
   updated_at: string
 }
 
-const STATUS_STYLE: Record<string, string> = {
-  draft:  'bg-surface-raised text-prose-muted border-strong/40',
-  ready:  'bg-success-bg text-forest border-success-line',
-  posted: 'bg-info-bg text-info-ink border-info-line',
+const STATUS_TONE: Record<string, BadgeTone> = {
+  draft:  'neutral',
+  ready:  'success',
+  posted: 'info',
 }
 
 export default function ArticlesPanel({ articles }: { articles: ArticleListItem[] }) {
@@ -85,9 +86,9 @@ export default function ArticlesPanel({ articles }: { articles: ArticleListItem[
                         📅 {scheduled.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </span>
                     )}
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize border ${STATUS_STYLE[a.status] ?? STATUS_STYLE.draft}`}>
+                    <Badge tone={STATUS_TONE[a.status] ?? 'neutral'} size="sm" className="capitalize">
                       {a.status}
-                    </span>
+                    </Badge>
                   </span>
                 </Link>
               </li>

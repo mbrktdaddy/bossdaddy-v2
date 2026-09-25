@@ -16,6 +16,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { activityTime } from '@/lib/activity-time'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface NotificationRow {
   id:              string
@@ -267,7 +268,7 @@ export default function ActivityMenu({ userId }: { userId: string }) {
                         {actionable && (
                           <div className="flex gap-2 mt-2 pl-4">
                             <button type="button" onClick={() => act(n.id, 'accept')} disabled={busyId === n.id}
-                              className="px-3 py-1.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-xs font-semibold rounded-lg transition-colors">
+                              className={buttonVariants({ size: 'sm' })}>
                               {busyId === n.id ? '…' : 'Accept'}
                             </button>
                             <button type="button" onClick={() => act(n.id, 'decline')} disabled={busyId === n.id}

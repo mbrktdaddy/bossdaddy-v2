@@ -20,6 +20,8 @@ import VaultBreadcrumb from '@/components/vault/VaultBreadcrumb'
 import FtcDisclosure from '@/components/FtcDisclosure'
 import { LABELS } from '@/lib/labels'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const revalidate = 60
 
@@ -286,7 +288,7 @@ export default async function StackDetailPage({ params }: Props) {
           <main className="lg:flex-1 lg:max-w-3xl min-w-0">
             <header className="mb-8">
               <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">{LABELS.stacks.singular}</p>
+              <Eyebrow className="mb-3">{LABELS.stacks.singular}</Eyebrow>
               <h1 className="text-4xl md:text-5xl font-black mb-4 text-prose tracking-tight leading-tight">{stack.title}</h1>
               {stack.description && (
                 <p className="text-lg text-prose-muted leading-relaxed mb-6">{stack.description}</p>
@@ -323,7 +325,7 @@ export default async function StackDetailPage({ params }: Props) {
               <section id="overview" className="mb-10">
                 <div className="mb-5">
                   <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                  <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Why These</p>
+                  <Eyebrow className="mb-1">Why These</Eyebrow>
                   <h2 className="text-2xl font-black text-prose leading-tight">Why this kit works together</h2>
                 </div>
                 <div
@@ -346,7 +348,7 @@ export default async function StackDetailPage({ params }: Props) {
             <section id="lineup" className="mb-12" aria-label="Stack lineup">
               <div className="mb-5">
                 <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">The Lineup</p>
+                <Eyebrow className="mb-1">The Lineup</Eyebrow>
                 <h2 className="text-2xl font-black text-prose leading-tight">
                   {items.length} {items.length === 1 ? 'piece' : 'pieces'} in this kit
                 </h2>
@@ -404,7 +406,7 @@ export default async function StackDetailPage({ params }: Props) {
                                 target="_blank"
                                 rel={product.affiliate_url ? 'sponsored nofollow noopener' : 'noopener'}
                                 data-product-slug={product.slug}
-                                className="ml-auto px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
+                                className={buttonVariants({ className: 'ml-auto' })}
                               >
                                 Check Price
                               </a>
@@ -472,7 +474,7 @@ export default async function StackDetailPage({ params }: Props) {
                               target="_blank"
                               rel={product?.affiliate_url ? 'sponsored nofollow noopener' : 'noopener'}
                               data-product-slug={review!.product_slug ?? undefined}
-                              className="ml-auto px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-bold rounded-xl transition-colors min-h-[44px] flex items-center"
+                              className={buttonVariants({ className: 'ml-auto' })}
                             >
                               Check Price
                             </a>
@@ -492,7 +494,7 @@ export default async function StackDetailPage({ params }: Props) {
                 aria-label="Build cost"
                 className="mb-12 rounded-xl border border-accent-border/40 bg-accent-tint p-6 sm:p-8 text-center"
               >
-                <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Build Cost</p>
+                <Eyebrow className="mb-3">Build Cost</Eyebrow>
                 <p className="text-4xl sm:text-5xl font-black text-prose tabular-nums mb-2">${(total / 100).toFixed(2)}</p>
                 <p className="text-xs text-prose-faint">
                   {partialPricing

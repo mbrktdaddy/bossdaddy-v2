@@ -1,4 +1,5 @@
 import { BRAND } from '@/lib/brand'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   eyebrow?: string
@@ -59,7 +60,7 @@ export default function EmailCaptureSection({
           />
           <button
             type="submit"
-            className="basis-full sm:basis-auto px-6 py-3.5 min-h-[48px] text-sm font-extrabold text-white bg-accent hover:bg-accent-hover rounded-xl transition-colors"
+            className={buttonVariants({ size: 'lg', className: 'basis-full sm:basis-auto' })}
           >
             {buttonLabel} →
           </button>

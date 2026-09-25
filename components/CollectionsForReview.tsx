@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { LABELS } from '@/lib/labels'
 import { vaultHref, vaultTypeLabel } from '@/lib/vault'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 interface Props {
   reviewId: string
@@ -70,7 +71,7 @@ export default async function CollectionsForReview({ reviewId }: Props) {
     <section className="mt-12 pt-8 border-t border-soft" aria-label="Featured in collections">
       <div className="mb-5">
         <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Featured in</p>
+        <Eyebrow className="mb-1">Featured in</Eyebrow>
         <h2 className="text-lg font-black">
           <Link href="/vault" className="hover:text-accent-text-soft transition-colors">{LABELS.vault.full}</Link>
         </h2>

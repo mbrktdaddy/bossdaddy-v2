@@ -17,6 +17,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getOrCreateDm } from '@/lib/messaging'
+import { buttonVariants } from '@/components/ui/Button'
 
 type State = 'loading' | 'hidden' | 'none' | 'pending_in' | 'pending_out' | 'accepted' | 'blocked'
 
@@ -74,7 +75,7 @@ export default function MessageUserButton({ targetUserId }: { targetUserId: stri
         <input type="hidden" name="userId" value={targetUserId} />
         <button
           type="submit"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-lg transition-colors"
+          className={buttonVariants()}
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -91,7 +92,7 @@ export default function MessageUserButton({ targetUserId }: { targetUserId: stri
         type="button"
         onClick={start}
         disabled={busy}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-colors"
+        className={buttonVariants()}
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />

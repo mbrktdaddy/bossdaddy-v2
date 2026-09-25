@@ -22,6 +22,7 @@ import { buildSocialMetadata } from '@/lib/og'
 import { BRAND } from '@/lib/brand'
 import { LABELS } from '@/lib/labels'
 import type { Metadata } from 'next'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Review {
   id: string
@@ -384,7 +385,7 @@ export default async function HomePage() {
                 </div>
                 <Link
                   href={`/reviews/${featured.slug}`}
-                  className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-extrabold text-sm px-7 py-3.5 rounded-xl min-h-[48px] mt-8 self-start transition-colors"
+                  className={buttonVariants({ size: 'lg', className: 'mt-8 self-start' })}
                 >
                   Read the full verdict
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>

@@ -13,6 +13,7 @@ import {
   deleteGoal,
 } from '@/lib/dad-tools/savings-actions'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 interface Props {
   goalId:    string
@@ -68,9 +69,9 @@ export default function GoalDangerZone({ goalId, status, goalName }: Props) {
   return (
     <Card as="section" className="p-6 space-y-4">
       <div>
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+        <Eyebrow>
           Danger zone
-        </p>
+        </Eyebrow>
         <p className="text-xs text-prose-faint mt-1">
           Archive hides the goal from your list but keeps its history. Delete
           removes everything permanently.

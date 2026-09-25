@@ -14,6 +14,8 @@ import GoalCard from './_components/GoalCard'
 import InstallPWA from '@/components/InstallPWA'
 import { LoginLink } from '@/components/LoginLink'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const metadata: Metadata = {
   title:       `${LABELS.tools.savings.pageTitle} (Beta)`,
@@ -37,9 +39,9 @@ export default async function SavingsIndexPage() {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-8">
         <header className="space-y-3">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+          <Eyebrow>
             {LABELS.tools.savings.spokeRole} · {LABELS.tools.savings.short}
-          </p>
+          </Eyebrow>
           <h1 className="text-3xl sm:text-5xl font-black text-prose leading-[1.05] tracking-tight">
             {LABELS.tools.savings.h1}
           </h1>
@@ -49,9 +51,9 @@ export default async function SavingsIndexPage() {
         </header>
 
         <Card as="section" className="p-6 sm:p-8 space-y-4">
-          <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+          <Eyebrow>
             How it works
-          </p>
+          </Eyebrow>
           <ul className="space-y-3 text-prose-muted text-sm sm:text-base leading-snug">
             <li>1. Set a tiny daily / weekly commitment — like $2/day for a camping trip.</li>
             <li>2. Each day, tap &quot;Yes&quot; — your PayPal or Venmo opens pre-filled.</li>
@@ -63,7 +65,7 @@ export default async function SavingsIndexPage() {
           </p>
         </Card>
 
-        <LoginLink className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl transition-colors">
+        <LoginLink className={buttonVariants()}>
           Sign in to start →
         </LoginLink>
       </div>
@@ -89,9 +91,9 @@ export default async function SavingsIndexPage() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
 
       <header className="space-y-3">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
+        <Eyebrow>
           {LABELS.tools.savings.hubEyebrow}
-        </p>
+        </Eyebrow>
         <div className="flex items-end justify-between gap-3">
           <h1 className="text-3xl sm:text-4xl font-black text-prose leading-[1.05] tracking-tight">
             {LABELS.tools.savings.full}
@@ -99,7 +101,7 @@ export default async function SavingsIndexPage() {
           {goalsWithStats.length > 0 && (
             <Link
               href="/tools/savings/new"
-              className="bg-accent hover:bg-accent-hover text-white font-semibold text-sm px-4 py-2 rounded-lg transition-colors shrink-0"
+              className={buttonVariants({ className: 'shrink-0' })}
             >
               + New
             </Link>
@@ -122,7 +124,7 @@ export default async function SavingsIndexPage() {
           </p>
           <Link
             href="/tools/savings/new"
-            className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl transition-colors"
+            className={buttonVariants()}
           >
             {LABELS.tools.savings.newCtaArrow}
           </Link>

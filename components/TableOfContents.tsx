@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 interface TocItem {
   id: string
@@ -95,7 +96,7 @@ export default function TableOfContents({ target = '.bd-content', minHeadings = 
 
   return (
     <nav aria-label="Table of contents" className="bg-surface border border-soft rounded-xl p-5">
-      <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">In this guide</p>
+      <Eyebrow className="mb-3">In this guide</Eyebrow>
       <ul className="space-y-1.5 text-sm">
         {items.map((item) => {
           const isActive = activeId === item.id

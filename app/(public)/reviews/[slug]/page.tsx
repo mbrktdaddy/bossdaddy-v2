@@ -45,6 +45,7 @@ import { getReviewTimeline, transformFollowupContent, parseSpecsGradeData, type 
 import TrackView from '@/components/TrackView'
 import RecentlyViewedStrip from '@/components/RecentlyViewedStrip'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
 
@@ -468,7 +469,7 @@ export default async function ReviewPage({ params }: Props) {
             aria-label="Follow-up sections"
             className="mt-8 mb-4 px-4 py-3 rounded-xl bg-surface border border-soft"
           >
-            <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">In this update</p>
+            <Eyebrow className="mb-2">In this update</Eyebrow>
             <ol className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
               {followupToc.map((entry) => (
                 <li key={entry.anchor}>
@@ -520,7 +521,7 @@ export default async function ReviewPage({ params }: Props) {
           <section className="mt-12 pt-8 border-t border-soft" aria-label="Specs grade">
             <div className="mb-4">
               <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-              <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Specs Grade</p>
+              <Eyebrow className="mb-1">Specs Grade</Eyebrow>
               <h2 className="text-2xl font-black text-prose leading-tight">How the specs stack up</h2>
             </div>
             <Card className="p-5 sm:p-6">

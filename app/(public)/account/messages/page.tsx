@@ -5,6 +5,7 @@ import MemberSearch from '@/components/members/MemberSearch'
 import ConversationList from './_components/ConversationList'
 import type { Metadata } from 'next'
 import { Card } from '@/components/ui/Card'
+import { Eyebrow } from '@/components/ui/Eyebrow'
 
 export const metadata: Metadata = {
   title: 'Messages',
@@ -26,7 +27,7 @@ export default async function MessagesPage() {
 
       {/* Compose — the obvious "start a conversation" entry point. */}
       <Card className="p-4 sm:p-5">
-        <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">New message</p>
+        <Eyebrow className="mb-3">New message</Eyebrow>
         <MemberSearch />
       </Card>
 

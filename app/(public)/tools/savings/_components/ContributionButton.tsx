@@ -28,6 +28,7 @@ import type { SavingsGoal } from '@/lib/dad-tools/savings'
 import { fmtUsd, todayYMDLocal } from '@/lib/dad-tools/savings'
 import { buildPaymentDeeplink } from '@/lib/dad-tools/savings-deeplinks'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 type Drawer = null | 'custom' | 'adjust' | 'skip'
 
@@ -238,7 +239,7 @@ export default function ContributionButton({
           type="button"
           disabled={pending}
           onClick={() => doLog(defaultAmount, 'contribution')}
-          className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-lg px-5 py-4 rounded-xl transition-colors flex items-center justify-center gap-2"
+          className={buttonVariants({ size: 'lg', className: 'w-full' })}
         >
           {labels.yes} {fmtUsd(defaultAmount)}
           {hasUrl && destLabel && (
@@ -249,7 +250,7 @@ export default function ContributionButton({
         <button
           type="button"
           onClick={() => setOpen('custom')}
-          className="w-full bg-accent hover:bg-accent-hover text-white font-black text-lg px-5 py-4 rounded-xl transition-colors"
+          className={buttonVariants({ size: 'lg', className: 'w-full' })}
         >
           Add a contribution
         </button>
@@ -379,7 +380,7 @@ function CustomDrawer({
           const n = Number(amt)
           if (Number.isFinite(n) && n > 0) onSubmit(n, isBackdated ? 'catchup' : 'contribution', date, note || undefined)
         }}
-        className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-semibold px-4 py-2.5 rounded-lg transition-colors text-sm"
+        className={buttonVariants({ className: 'w-full' })}
       >
         Log {isBackdated ? 'catch-up' : 'contribution'}
       </button>
@@ -489,7 +490,7 @@ function AdjustDrawer({
           const n = Number(amt)
           if (Number.isFinite(n) && n > 0) onSubmit(direction, n, note || undefined)
         }}
-        className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-semibold px-4 py-2.5 rounded-lg transition-colors text-sm"
+        className={buttonVariants({ className: 'w-full' })}
       >
         {direction === 'credit' ? `Add ${amt ? '$' + amt : ''} to balance`.trim() : `Remove ${amt ? '$' + amt : ''} from balance`.trim()}
       </button>

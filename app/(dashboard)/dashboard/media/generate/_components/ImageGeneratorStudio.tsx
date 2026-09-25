@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { downloadImage } from '@/lib/images/download'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface SessionImage {
   id?: string
@@ -146,7 +147,7 @@ Tips:
           type="button"
           onClick={handleGenerate}
           disabled={loading || !prompt.trim()}
-          className="w-full px-5 py-3 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-semibold rounded-xl transition-colors"
+          className={buttonVariants({ className: 'w-full' })}
         >
           {loading ? '✨ Generating…' : '✨ Generate'}
         </button>

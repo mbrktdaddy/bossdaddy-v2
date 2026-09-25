@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import { compressImage } from '@/lib/compress-image'
 import ImageCropper from '@/components/ui/ImageCropper'
 import { MERCH_CATEGORIES, MERCH_STATUSES, type Merch, type MerchCategory, type MerchStatus } from '@/lib/merch'
+import { buttonVariants } from '@/components/ui/Button'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
@@ -358,7 +359,7 @@ export function MerchForm({ item }: Props) {
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="text-xs px-3 py-1.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-semibold rounded-lg transition-colors"
+            className={buttonVariants({ size: 'sm' })}
           >
             {uploading ? 'Uploading…' : '+ Add image'}
           </button>
@@ -404,7 +405,7 @@ export function MerchForm({ item }: Props) {
         <button
           type="submit"
           disabled={busy || !slug.trim() || !name.trim()}
-          className="px-5 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors"
+          className={buttonVariants()}
         >
           {busy ? 'Saving…' : isNew ? 'Create item' : 'Save changes'}
         </button>

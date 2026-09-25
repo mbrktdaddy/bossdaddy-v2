@@ -17,6 +17,7 @@ import {
   deleteConversation, setConversationMuted, toggleReaction,
 } from '@/lib/messaging'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Message {
   id: string
@@ -1107,7 +1108,7 @@ export default function Thread({
                 immediately — which is what every messenger does and why sending a
                 batch doesn't block the next message. */}
             <button type="button" onClick={send} disabled={sending || (!draft.trim() && staged.length === 0)}
-              className="px-4 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors shrink-0">
+              className={buttonVariants({ className: 'shrink-0' })}>
               {sending ? '…' : 'Send'}
             </button>
           </div>
