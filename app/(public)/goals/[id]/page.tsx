@@ -30,6 +30,7 @@ import WeekStrip from '@/components/goals/WeekStrip'
 import HistoryGrid from '@/components/goals/HistoryGrid'
 import MetricTrend from '@/components/goals/MetricTrend'
 import { logOccurrence, logUnprompted, toggleScheduleMute, setGoalStatus } from '../actions'
+import { Card } from '@/components/ui/Card'
 
 export const metadata: Metadata = {
   title: LABELS.goals.pageTitle,
@@ -506,12 +507,12 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
           </form>
         </section>
       ) : (
-        <section className="bg-surface border border-soft rounded-xl p-5 sm:p-6">
+        <Card as="section" className="p-5 sm:p-6">
           <p className="text-sm text-prose-muted">
             Nothing open right now.
             {upcoming[0] ? <> Next one lands {upcoming[0].local_date} at {upcoming[0].local_time.slice(0, 5)}.</> : null}
           </p>
-        </section>
+        </Card>
       )}
 
       {/* ── log something that wasn't scheduled ─────────────────────────── */}
@@ -578,7 +579,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
         <h2 className="text-sm font-bold text-prose uppercase tracking-wide">Where it stands</h2>
 
         {progress != null ? (
-          <div className="bg-surface border border-soft rounded-xl p-5">
+          <Card className="p-5">
             <div className="h-2 w-full overflow-hidden rounded-full bg-surface-raised">
               <div className="h-full rounded-full bg-accent" style={{ width: `${Math.round(progress * 100)}%` }} />
             </div>
@@ -593,7 +594,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
                 {verdictCopy(compareToTarget(latest.value, todays.target_value, goal.direction))}
               </p>
             ) : null}
-          </div>
+          </Card>
         ) : null}
 
         {/* The same journey as the bar above, with the shape of it. Only for a goal
@@ -692,7 +693,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
         {schedules.length === 0 ? (
           <p className="text-sm text-prose-faint">No schedule on this goal yet.</p>
         ) : schedules.map((schedule) => (
-          <div key={schedule.id} className="bg-surface border border-soft rounded-xl p-5 flex items-start justify-between gap-4">
+          <Card key={schedule.id} className="p-5 flex items-start justify-between gap-4">
             {/* CHIPS, NOT A PARAGRAPH. This was three stacked lines of prose per
                 reminder — label, then the schedule, then zone · channels — which on a
                 goal with two reminders is six lines of small grey text describing
@@ -721,7 +722,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
                 {schedule.muted ? 'Unmute' : 'Mute'}
               </button>
             </form>
-          </div>
+          </Card>
         ))}
       </section>
 
@@ -974,10 +975,10 @@ function Chip({ children }: { children: ReactNode }) {
  */
 function Stat({ value, label, hint }: { value: string; label: string; hint?: string }) {
   return (
-    <div className="rounded-xl border border-soft bg-surface p-4">
+    <Card className="p-4">
       <dd className="text-3xl font-black leading-none text-prose">{value}</dd>
       <dt className="mt-1.5 text-xs text-prose-faint">{label}</dt>
       {hint ? <p className="text-[10px] text-prose-faint">{hint}</p> : null}
-    </div>
+    </Card>
   )
 }

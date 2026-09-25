@@ -22,6 +22,7 @@ import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedR
 import BenchStrip from '@/components/BenchStrip'
 import VaultBreadcrumb from '@/components/vault/VaultBreadcrumb'
 import FtcDisclosure from '@/components/FtcDisclosure'
+import { Card } from '@/components/ui/Card'
 
 export const revalidate = 60
 
@@ -385,7 +386,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                       const product = joinedProduct!
                       const href = product.affiliate_url ? `/go/${product.slug}` : product.non_affiliate_url
                       return (
-                        <article key={`product-${product.slug}`} className="flex flex-col sm:flex-row gap-5 bg-surface border border-soft hover:border-accent-border/40 rounded-xl p-5 transition-colors">
+                        <Card as="article" key={`product-${product.slug}`} className="flex flex-col sm:flex-row gap-5 hover:border-accent-border/40 p-5 transition-colors">
                           <div className="flex sm:flex-col items-center gap-3 sm:gap-0 shrink-0">
                             <span className="w-10 h-10 rounded-full bg-accent-tint border border-accent-border/40 flex items-center justify-center text-accent-text-soft font-black text-sm tabular-nums">
                               {idx + 1}
@@ -440,14 +441,14 @@ export default async function GiftOccasionPage({ params }: Props) {
                               )}
                             </div>
                           </div>
-                        </article>
+                        </Card>
                       )
                     }
 
                     const product = review.product_slug ? productMap.get(review.product_slug) : null
                     const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                     return (
-                      <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-surface border border-soft hover:border-accent-border/40 rounded-xl p-5 transition-colors">
+                      <Card as="article" key={review.id} className="flex flex-col sm:flex-row gap-5 hover:border-accent-border/40 p-5 transition-colors">
                         <div className="flex sm:flex-col items-center gap-3 sm:gap-0 shrink-0">
                           <span className="w-10 h-10 rounded-full bg-accent-tint border border-accent-border/40 flex items-center justify-center text-accent-text-soft font-black text-sm tabular-nums">
                             {idx + 1}
@@ -517,7 +518,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                             )}
                           </div>
                         </div>
-                      </article>
+                      </Card>
                     )
                   })}
                 </div>

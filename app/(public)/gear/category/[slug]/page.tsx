@@ -9,6 +9,7 @@ import { GearCard, type GearReview } from '../../_components/GearCards'
 import BenchStrip from '@/components/BenchStrip'
 import AskTheBoss from '@/components/AskTheBoss'
 import PageHeader from '@/components/PageHeader'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { buildSocialMetadata, SITE_URL } from '@/lib/og'
 
 export const revalidate = 3600
@@ -103,10 +104,10 @@ export default async function GearCategoryPage({ params }: Props) {
       <AskTheBoss context={`${cat.label} gear picks`} className="mb-12" />
 
       {!picks.length ? (
-        <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft">
-          <p className="text-prose-faint text-lg font-semibold">No {cat.label.toLowerCase()} gear here yet.</p>
-          <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
-        </div>
+        <EmptyState
+          title={<>No {cat.label.toLowerCase()} gear here yet.</>}
+          body="Check back soon, Boss."
+        />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {picks.map((r) => <GearCard key={r.id} review={r} />)}

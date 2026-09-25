@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { requireUser } from '@/lib/auth-cache'
 import { BulkContentList } from '@/components/workspace/BulkContentList'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 interface Props {
   searchParams: Promise<{ filter?: string }>
@@ -93,12 +94,16 @@ export default async function MyGuidesPage({ searchParams }: Props) {
 
       {/* Articles list with bulk actions */}
       {!displayed?.length && !filter && (
-        <div className="text-center py-24 border border-dashed border-soft rounded-xl">
-          <p className="text-prose-faint text-lg mb-2">No guides yet, Boss.</p>
-          <Link href="/dashboard/guides/new" className="text-accent-text-soft hover:text-accent text-sm">
-            Write your first one →
-          </Link>
-        </div>
+        <EmptyState
+          variant="dashed"
+          size="lg"
+          title="No guides yet, Boss."
+          action={
+            <Link href="/dashboard/guides/new" className="text-accent-text-soft hover:text-accent text-sm">
+              Write your first one →
+            </Link>
+          }
+        />
       )}
       {(displayed?.length || filter) && (
         <BulkContentList

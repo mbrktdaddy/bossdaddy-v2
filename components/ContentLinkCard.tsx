@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createAnonClient } from '@/lib/supabase/anon'
 import RatingScore from '@/components/RatingScore'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   contentType: 'review' | 'guide'
@@ -48,8 +49,8 @@ export default async function ContentLinkCard({ contentType, slug }: Props) {
   const eyebrow = isReview ? 'Read the Review' : 'Read the Guide'
 
   return (
-    <aside
-      className="not-prose my-8 bg-surface border border-soft hover:border-accent-border/40 rounded-xl overflow-hidden transition-colors"
+    <Card as="aside"
+      className="not-prose my-8 hover:border-accent-border/40 overflow-hidden transition-colors"
       aria-label={`${eyebrow}: ${t.title}`}
     >
       <Link href={href} className="group flex items-stretch gap-4">
@@ -81,6 +82,6 @@ export default async function ContentLinkCard({ contentType, slug }: Props) {
           )}
         </div>
       </Link>
-    </aside>
+    </Card>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { SpecsGradeData } from '@/lib/reviews'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   productName: string
@@ -113,7 +114,7 @@ export function SpecsGradePanel({
   const hasResult = score != null || rationale.trim() || data.comparedAgainst.length > 0
 
   return (
-    <div className="bg-surface border border-soft rounded-xl p-4">
+    <Card className="p-4">
       <div className="flex items-center justify-between mb-1 gap-3">
         <p className="text-sm font-semibold text-prose flex items-center gap-2">
           <span className="text-accent-text-soft">⚖</span> Specs Grade
@@ -220,6 +221,6 @@ export function SpecsGradePanel({
           )}
         </div>
       )}
-    </div>
+    </Card>
   )
 }

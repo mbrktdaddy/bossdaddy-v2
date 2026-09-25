@@ -6,6 +6,7 @@
 // only on the explicit "Enable" tap — never on page load.
 
 import { useEffect, useState } from 'react'
+import { Card } from '@/components/ui/Card'
 
 const VAPID_PUBLIC = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
 
@@ -94,7 +95,7 @@ export default function PushNotificationSetting() {
   if (!supported) return null
 
   return (
-    <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+    <Card className="p-6 mb-6">
       <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Push Notifications</p>
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
@@ -123,6 +124,6 @@ export default function PushNotificationSetting() {
           {busy ? '…' : enabled ? 'Turn off' : 'Enable'}
         </button>
       </div>
-    </div>
+    </Card>
   )
 }

@@ -27,6 +27,7 @@ import {
 import type { SavingsGoal } from '@/lib/dad-tools/savings'
 import { fmtUsd, todayYMDLocal } from '@/lib/dad-tools/savings'
 import { buildPaymentDeeplink } from '@/lib/dad-tools/savings-deeplinks'
+import { Card } from '@/components/ui/Card'
 
 type Drawer = null | 'custom' | 'adjust' | 'skip'
 
@@ -229,7 +230,7 @@ export default function ContributionButton({
   }
 
   return (
-    <section className="bg-surface border border-soft rounded-xl p-6 space-y-4">
+    <Card as="section" className="p-6 space-y-4">
 
       {/* Primary CTA — Yes, log the cadence amount */}
       {hasCadence ? (
@@ -293,7 +294,7 @@ export default function ContributionButton({
           {error}
         </div>
       )}
-    </section>
+    </Card>
   )
 }
 
@@ -333,7 +334,7 @@ function CustomDrawer({
   const [note, setNote] = useState('')
   const isBackdated = date !== todayYMD
   return (
-    <div className="bg-surface-sunken border border-soft rounded-xl p-4 space-y-3">
+    <Card tone="sunken" className="p-4 space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="custom-amt" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">Amount</label>
@@ -382,7 +383,7 @@ function CustomDrawer({
       >
         Log {isBackdated ? 'catch-up' : 'contribution'}
       </button>
-    </div>
+    </Card>
   )
 }
 
@@ -393,7 +394,7 @@ function SkipDrawer({
   onConfirm: () => void
 }) {
   return (
-    <div className="bg-surface-sunken border border-soft rounded-xl p-4 space-y-3">
+    <Card tone="sunken" className="p-4 space-y-3">
       <p className="text-sm text-prose-muted">
         Skip today — banked days will cover the gap if you have any. Otherwise the streak resets.
       </p>
@@ -405,7 +406,7 @@ function SkipDrawer({
       >
         Skip today
       </button>
-    </div>
+    </Card>
   )
 }
 
@@ -423,7 +424,7 @@ function AdjustDrawer({
   const [amt, setAmt] = useState('')
   const [note, setNote] = useState('')
   return (
-    <div className="bg-surface-sunken border border-soft rounded-xl p-4 space-y-3">
+    <Card tone="sunken" className="p-4 space-y-3">
       <p className="text-xs text-prose-muted leading-snug">
         Edit the balance up or down. Use this for bonuses, gifts, withdrawals,
         corrections, or syncing to your actual account. Streak stays intact —
@@ -492,6 +493,6 @@ function AdjustDrawer({
       >
         {direction === 'credit' ? `Add ${amt ? '$' + amt : ''} to balance`.trim() : `Remove ${amt ? '$' + amt : ''} from balance`.trim()}
       </button>
-    </div>
+    </Card>
   )
 }

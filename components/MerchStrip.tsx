@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { getMerchDisplayImage, type Merch } from '@/lib/merch'
 import { BRAND } from '@/lib/brand'
+import { Card } from '@/components/ui/Card'
 
 /**
  * MerchStrip — slim, proud "Made by Boss Daddy" strip. Shared component used
@@ -69,7 +70,7 @@ export async function MerchStrip({ exploreHref = '#merch' }: { exploreHref?: str
               const isExternal = p.printful_sync_product_id == null && Boolean(p.external_url)
               const inner = (
                 <>
-                  <div className="relative w-36 h-36 rounded-xl overflow-hidden bg-surface-raised border border-soft">
+                  <Card tone="raised" className="relative w-36 h-36 overflow-hidden">
                     {img ? (
                       <Image src={img} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="144px" />
                     ) : (
@@ -84,7 +85,7 @@ export async function MerchStrip({ exploreHref = '#merch' }: { exploreHref?: str
                         Soon
                       </span>
                     )}
-                  </div>
+                  </Card>
                   <p className="text-xs font-semibold text-prose mt-2 w-36 truncate group-hover:text-accent-text-soft transition-colors">{p.name}</p>
                 </>
               )

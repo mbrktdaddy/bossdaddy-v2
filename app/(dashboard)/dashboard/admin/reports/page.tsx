@@ -2,6 +2,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
 import ModerationActions from '../../users/_components/ModerationActions'
 import ReportActions from './_components/ReportActions'
+import { EmptyState } from '@/components/ui/EmptyState'
 import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
@@ -92,10 +93,12 @@ export default async function AdminReportsPage() {
       </div>
 
       {reports.length === 0 ? (
-        <div className="bg-surface border border-soft rounded-xl p-12 text-center">
-          <p className="text-prose-muted text-lg font-semibold mb-2">No reports.</p>
-          <p className="text-prose-faint text-sm">Member reports of abusive content will appear here.</p>
-        </div>
+        <EmptyState
+          variant="panel"
+          size="lg"
+          title="No reports."
+          body="Member reports of abusive content will appear here."
+        />
       ) : (
         <div className="space-y-4">
           {reports.map((r) => {

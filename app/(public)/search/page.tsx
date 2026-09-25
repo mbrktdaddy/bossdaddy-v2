@@ -6,6 +6,7 @@ import { getCategoryBySlug } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
 import BenchStrip from '@/components/BenchStrip'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { buildSocialMetadata } from '@/lib/og'
 import type { Metadata } from 'next'
 
@@ -118,10 +119,7 @@ export default async function SearchPage({ searchParams }: Props) {
  </p>
 
  {total === 0 && (
- <div className="text-center py-24 bg-surface/40 rounded-xl">
- <p className="text-prose-faint mb-2">Nothing matched that search.</p>
- <p className="text-prose-faint text-sm">Try a product name, category, or topic.</p>
- </div>
+ <EmptyState title="Nothing matched that search." body="Try a product name, category, or topic." />
  )}
 
  {/* Review results */}
@@ -217,9 +215,7 @@ export default async function SearchPage({ searchParams }: Props) {
  )}
 
  {query.length < 2 && !query && (
- <div className="text-center py-24 bg-surface/40 rounded-xl">
- <p className="text-prose-faint">Type something above to search reviews and guides.</p>
- </div>
+ <EmptyState title="Type something above to search reviews and guides." />
  )}
 
  <div className="mt-16">

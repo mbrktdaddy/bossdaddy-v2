@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import type { Block, BossStreamEvent } from '@/lib/boss/types'
 import { normalizeBossText } from '@/lib/boss/normalizeText'
 import BossBlocks from './BossBlocks'
+import { Card } from '@/components/ui/Card'
 
 // `failed` = a hard failure with no streamed text (the whole bubble is the error).
 // `errorNote` = a mid-stream cutoff AFTER text arrived — keep what streamed and
@@ -188,7 +189,7 @@ export default function BossChat({
   }
 
   return (
-    <div className="flex flex-col border border-soft rounded-2xl bg-surface-raised overflow-hidden">
+    <Card tone="raised" className="flex flex-col overflow-hidden">
       <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[42vh] max-h-[60vh]">
         {msgs.length === 0 && (
           <div className="py-6">
@@ -284,7 +285,7 @@ export default function BossChat({
           General info and one dad’s take — not professional advice.
         </p>
       </div>
-    </div>
+    </Card>
   )
 }
 

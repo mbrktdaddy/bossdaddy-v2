@@ -8,6 +8,7 @@ import FeaturedGuideCard from '@/components/FeaturedGuideCard'
 import TopicBlock from '@/components/TopicBlock'
 import AskTheBoss from '@/components/AskTheBoss'
 import PageHeader from '@/components/PageHeader'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { ogImageUrl, OG_SITE, TWITTER_HANDLE } from '@/lib/og'
 import type { GuideRow } from './actions'
 import type { Metadata } from 'next'
@@ -102,10 +103,7 @@ export default async function GuidesPage() {
           replaces 8 identical 3-col card grids with a tighter, scannable
           list per category. Featured card above carries the visual weight. */}
       {sections.length === 0 ? (
-        <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft">
-          <p className="text-prose-faint text-lg font-semibold">No guides here yet.</p>
-          <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
-        </div>
+        <EmptyState title="No guides here yet." body="Check back soon, Boss." />
       ) : (
         sections.map(({ cat, items, total }, i) => (
           <Fragment key={cat.slug}>

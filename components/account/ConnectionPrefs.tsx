@@ -13,6 +13,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { Card } from '@/components/ui/Card'
 
 type Props = {
   initialRequestsFrom: 'everyone' | 'nobody'
@@ -45,7 +46,7 @@ export default function ConnectionPrefs({
   }
 
   return (
-    <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+    <Card className="p-6 mb-6">
       <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Who can reach you</p>
 
       <Row
@@ -74,7 +75,7 @@ export default function ConnectionPrefs({
           }}
         />
       </div>
-    </div>
+    </Card>
   )
 }
 

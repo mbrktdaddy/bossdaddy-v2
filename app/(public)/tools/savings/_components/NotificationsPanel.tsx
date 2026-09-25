@@ -13,6 +13,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateGoal, setParticipantMute } from '@/lib/dad-tools/savings-actions'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   goalId:                 string
@@ -53,7 +54,7 @@ export default function NotificationsPanel({
   }
 
   return (
-    <section className="bg-surface border border-soft rounded-xl p-5 space-y-4">
+    <Card as="section" className="p-5 space-y-4">
       <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
         Reminders &amp; notifications
       </p>
@@ -96,7 +97,7 @@ export default function NotificationsPanel({
           {error}
         </div>
       )}
-    </section>
+    </Card>
   )
 }
 

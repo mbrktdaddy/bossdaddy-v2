@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Card } from '@/components/ui/Card'
 
 export interface Candidate {
   id:                 string
@@ -60,18 +62,18 @@ export function CandidatesClient({ candidates }: Props) {
       )}
 
       {open.length === 0 ? (
-        <div className="bg-surface border border-soft rounded-xl p-8 text-center">
-          <p className="text-prose-muted mb-1">No researched gear waiting.</p>
-          <p className="text-xs text-prose-faint">
-            When a member asks The Boss for gear we haven&apos;t tested, the research picks land here.
-          </p>
-        </div>
+        <EmptyState
+          variant="panel"
+          size="md"
+          title="No researched gear waiting."
+          body="When a member asks The Boss for gear we haven&apos;t tested, the research picks land here."
+        />
       ) : (
         <div className="space-y-2">
           {open.map((c) => (
-            <div
+            <Card
               key={c.id}
-              className="flex items-center gap-4 p-4 bg-surface border border-soft rounded-xl"
+              className="flex items-center gap-4 p-4"
             >
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-prose truncate">{c.name}</p>
@@ -102,7 +104,7 @@ export function CandidatesClient({ candidates }: Props) {
                   {busyId === c.id ? 'Adopting…' : 'Adopt → Bench'}
                 </button>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}

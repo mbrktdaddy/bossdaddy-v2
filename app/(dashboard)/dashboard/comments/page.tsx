@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
 import { CommentActions } from './_components/CommentActions'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   searchParams: Promise<{ status?: string }>
@@ -66,7 +68,7 @@ export default async function CommentsPage({ searchParams }: Props) {
       </div>
 
       {/* Status tabs */}
-      <div className="mb-6 flex gap-1 bg-surface border border-soft rounded-xl p-1 w-fit max-w-full overflow-x-auto scrollbar-hide">
+      <Card className="mb-6 flex gap-1 p-1 w-fit max-w-full overflow-x-auto scrollbar-hide">
         {STATUS_TABS.map((t) => {
           const active = status === t.key
           const count = counts[t.key as keyof typeof counts]
@@ -87,14 +89,15 @@ export default async function CommentsPage({ searchParams }: Props) {
             </Link>
           )
         })}
-      </div>
+      </Card>
 
       {/* Comments list */}
       {!comments?.length ? (
-        <div className="text-center py-24 border border-dashed border-soft rounded-xl">
-          <p className="text-2xl mb-2">{status === 'pending' ? '✅' : '—'}</p>
-          <p className="text-prose-muted font-semibold">No {status} comments.</p>
-        </div>
+        <EmptyState
+          variant="dashed"
+          icon={status === 'pending' ? <svg className="w-8 h-8 text-forest" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> : undefined}
+          title={<>No {status} comments.</>}
+        />
       ) : (
         <div className="space-y-2">
           {comments.map((c) => {
@@ -105,7 +108,7 @@ export default async function CommentsPage({ searchParams }: Props) {
             const flags   = (c.moderation_flags ?? []) as string[]
 
             return (
-              <div key={c.id} className="p-4 bg-surface border border-soft rounded-xl">
+              <Card key={c.id} className="p-4">
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
                     c.content_type === 'review'
@@ -150,7 +153,7 @@ export default async function CommentsPage({ searchParams }: Props) {
                 {status === 'approved' && flags.length > 0 && (
                   <p className="text-xs text-prose-faint mt-2">Auto-published — flagged for your review.</p>
                 )}
-              </div>
+              </Card>
             )
           })}
         </div>

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { createAnonClient } from '@/lib/supabase/anon'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   username: string
@@ -39,7 +40,7 @@ export default async function AuthorBio({ username, className = 'mt-12' }: Props
 
   return (
     <section className={className} aria-label="About the author">
-      <div className="bg-surface border border-soft rounded-xl p-5 sm:p-6">
+      <Card className="p-5 sm:p-6">
         <p className="text-[11px] text-prose-faint uppercase tracking-widest font-semibold mb-4">Written by</p>
         <div className="flex items-start gap-4">
           <Link href={authorHref} className="shrink-0" aria-hidden tabIndex={-1}>
@@ -69,7 +70,7 @@ export default async function AuthorBio({ username, className = 'mt-12' }: Props
         >
           More from {displayName.split(' ')[0]} <span aria-hidden>→</span>
         </Link>
-      </div>
+      </Card>
     </section>
   )
 }

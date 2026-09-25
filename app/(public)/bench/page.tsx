@@ -6,8 +6,10 @@ import OffTheBench from '@/components/OffTheBench'
 import { WishlistCard } from '@/components/wishlist/WishlistCard'
 import { VotePayoffBanner } from '@/components/VotePayoffBanner'
 import PageHeader from '@/components/PageHeader'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { ogImageUrl, OG_SITE, TWITTER_HANDLE } from '@/lib/og'
 import type { Metadata } from 'next'
+import { Card } from '@/components/ui/Card'
 
 export const revalidate = 300
 
@@ -123,9 +125,7 @@ export default async function BenchPage() {
         <VotePayoffBanner />
 
         {!hasContent ? (
-          <div className="bg-surface/40 rounded-xl p-12 text-center">
-            <p className="text-prose-faint font-semibold">Nothing on the bench yet. Check back soon.</p>
-          </div>
+          <EmptyState title="Nothing on the bench yet. Check back soon." />
         ) : (
           <div className="space-y-12">
             {sections.map(({ key, heading, sub, icon }) => {
@@ -144,12 +144,12 @@ export default async function BenchPage() {
                     </summary>
                     <div className="space-y-3">
                       {sectionItems.map((item) => (
-                        <div key={item.id} className="p-4 bg-surface border border-soft rounded-xl">
+                        <Card key={item.id} className="p-4">
                           <p className="text-sm font-semibold text-prose-muted">{item.title}</p>
                           {item.skip_reason && (
                             <p className="text-xs text-prose-faint mt-1">{item.skip_reason}</p>
                           )}
-                        </div>
+                        </Card>
                       ))}
                     </div>
                   </details>

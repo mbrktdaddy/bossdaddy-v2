@@ -5,6 +5,7 @@
 
 import type { SavingsEntry } from '@/lib/dad-tools/savings'
 import { fmtUsd, fmtYMDForDisplay } from '@/lib/dad-tools/savings'
+import { Card } from '@/components/ui/Card'
 
 const KIND_BADGE: Record<SavingsEntry['kind'], { label: string; className: string; sign: '+' | '-' | '' }> = {
   contribution:      { label: 'Contribution', className: 'bg-accent-tint text-accent-text-soft border-accent-border/60', sign: '+' },
@@ -52,7 +53,7 @@ export default function ContributionLog({ entries, emptyMessage, profileById, sh
   }
 
   return (
-    <section className="bg-surface border border-soft rounded-xl p-6">
+    <Card as="section" className="p-6">
       <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">
         History
       </p>
@@ -61,9 +62,9 @@ export default function ContributionLog({ entries, emptyMessage, profileById, sh
           const meta = KIND_BADGE[e.kind] ?? KIND_BADGE.contribution
           const dateLabel = fmtYMDForDisplay(e.contributed_on)
           return (
-            <div
+            <Card tone="sunken"
               key={e.id}
-              className="flex items-center gap-3 p-3 bg-surface-sunken border border-soft rounded-xl"
+              className="flex items-center gap-3 p-3"
             >
               <span className={`text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full border font-medium shrink-0 ${meta.className}`}>
                 {meta.label}
@@ -92,10 +93,10 @@ export default function ContributionLog({ entries, emptyMessage, profileById, sh
                   )}
                 </p>
               </div>
-            </div>
+            </Card>
           )
         })}
       </div>
-    </section>
+    </Card>
   )
 }

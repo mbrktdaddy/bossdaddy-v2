@@ -24,6 +24,7 @@ import {
   type DestinationCategory,
   type DestinationPreset,
 } from '@/lib/dad-tools/destination-presets'
+import { Card } from '@/components/ui/Card'
 
 type RhythmMode = 'regular' | 'freeform'
 type TargetMode = 'none' | 'amount' | 'date' | 'both'
@@ -253,7 +254,7 @@ export default function GoalForm({ mode, initial, kids }: Props) {
     <form onSubmit={onSubmit} className="space-y-6">
 
       {/* ── Name + description + kid ────────────────────────────────────── */}
-      <section className="bg-surface border border-soft rounded-xl p-6 space-y-5">
+      <Card as="section" className="p-6 space-y-5">
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
           About this goal
         </p>
@@ -308,10 +309,10 @@ export default function GoalForm({ mode, initial, kids }: Props) {
             </select>
           </div>
         )}
-      </section>
+      </Card>
 
       {/* ── Rhythm ──────────────────────────────────────────────────────── */}
-      <section className="bg-surface border border-soft rounded-xl p-6 space-y-5">
+      <Card as="section" className="p-6 space-y-5">
         <div>
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">
             Rhythm
@@ -375,10 +376,10 @@ export default function GoalForm({ mode, initial, kids }: Props) {
             </div>
           </div>
         )}
-      </section>
+      </Card>
 
       {/* ── Target ──────────────────────────────────────────────────────── */}
-      <section className="bg-surface border border-soft rounded-xl p-6 space-y-5">
+      <Card as="section" className="p-6 space-y-5">
         <div>
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">
             Target
@@ -442,10 +443,10 @@ export default function GoalForm({ mode, initial, kids }: Props) {
             />
           </div>
         )}
-      </section>
+      </Card>
 
       {/* ── Destination ─────────────────────────────────────────────────── */}
-      <section className="bg-surface border border-soft rounded-xl p-6 space-y-5">
+      <Card as="section" className="p-6 space-y-5">
         <div>
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">
             Where the money goes
@@ -563,10 +564,10 @@ export default function GoalForm({ mode, initial, kids }: Props) {
             {destBehavior.message}
           </div>
         </div>
-      </section>
+      </Card>
 
       {/* ── Reminders ────────────────────────────────────────────────────── */}
-      <section className="bg-surface border border-soft rounded-xl p-6 space-y-5">
+      <Card as="section" className="p-6 space-y-5">
         <div>
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">
             Reminders
@@ -625,7 +626,7 @@ export default function GoalForm({ mode, initial, kids }: Props) {
             </div>
           </div>
         )}
-      </section>
+      </Card>
 
       {/* ── Submit ──────────────────────────────────────────────────────── */}
       {error && (

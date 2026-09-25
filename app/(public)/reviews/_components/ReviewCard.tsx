@@ -6,6 +6,7 @@ import BossApprovedBadge from '@/components/BossApprovedBadge'
 import RatingScore from '@/components/RatingScore'
 import BadgesForProduct from '@/components/collections/BadgesForProduct'
 import type { ReviewRow } from '../actions'
+import { Card } from '@/components/ui/Card'
 
 // Eyebrow doctrine: undefined = default to category (icon + label); null =
 // suppress (use on category/tag landing pages where the page header carries
@@ -23,7 +24,7 @@ export default function ReviewCard({
   const resolvedEyebrow = eyebrow === null ? null : eyebrow ?? cat?.label ?? null
   const showCategoryIcon = eyebrow === undefined && Boolean(cat)
   return (
-    <article className="group relative flex flex-col bg-surface rounded-xl overflow-hidden border border-soft hover:border-copper hover:-translate-y-1 transition-all duration-200">
+    <Card as="article" className="group relative flex flex-col overflow-hidden hover:border-copper hover:-translate-y-1 transition-all duration-200">
       {r.image_url ? (
         <div className="relative w-full h-44 bg-surface-raised shrink-0">
           <Image
@@ -96,6 +97,6 @@ export default function ReviewCard({
           <span className="text-xs text-accent-text font-medium">Read review</span>
         </div>
       </div>
-    </article>
+    </Card>
   )
 }

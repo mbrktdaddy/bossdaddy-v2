@@ -9,6 +9,7 @@ import {
   type Tag,
   type TagGroup,
 } from '@/lib/tags'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   selected: string[]
@@ -78,7 +79,7 @@ export function TagPicker({ selected, onChange }: Props) {
     )
   }
 
-  if (loading) return <div className="h-20 bg-surface-sunken border border-soft rounded-xl animate-pulse" />
+  if (loading) return <Card tone="sunken" className="h-20 animate-pulse" />
 
   const chip = (tag: Tag) => {
     const active = selected.includes(tag.slug)

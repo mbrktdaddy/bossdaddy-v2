@@ -30,6 +30,7 @@ import { LoginLink } from '@/components/LoginLink'
 import { getSharedGoal, listSharedDays, TIER_COPY } from '@/lib/goals/participants'
 import NotesFeed from '@/components/goals/NotesFeed'
 import { planWindow } from '@/lib/goals/progress'
+import { Card } from '@/components/ui/Card'
 
 export const metadata: Metadata = {
   title: `${LABELS.goals.sharedHeading} — ${LABELS.goals.short}`,
@@ -177,10 +178,10 @@ function pad(n: number): string {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-soft bg-surface p-4">
+    <Card className="p-4">
       <dt className="text-xs text-prose-faint uppercase tracking-widest">{label}</dt>
       <dd className="mt-1 text-lg font-bold text-prose">{value}</dd>
-    </div>
+    </Card>
   )
 }
 

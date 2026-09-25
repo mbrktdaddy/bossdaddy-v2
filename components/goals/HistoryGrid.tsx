@@ -44,6 +44,7 @@ import Link from 'next/link'
 import {
   summarizeGrid, WEEKDAY_INITIALS, type CellState, type HistoryCell,
 } from '@/lib/goals/history'
+import { Card } from '@/components/ui/Card'
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -140,7 +141,7 @@ export default function HistoryGrid({ cells, month, prevHref, nextHref, unit = '
         </p>
       ) : null}
 
-      <div className="rounded-xl border border-soft bg-surface p-3">
+      <Card className="p-3">
         {/* aria-hidden: the sentence above carries the same facts, and a screen reader
             reading out forty undifferentiated cells is worse than silence. */}
         <div className="grid grid-cols-7" aria-hidden="true">
@@ -205,7 +206,7 @@ export default function HistoryGrid({ cells, month, prevHref, nextHref, unit = '
             )
           })}
         </div>
-      </div>
+      </Card>
 
       {/* A legend is always present — identity is never colour alone — but only for
           states this month actually had. Listing "skipped · missed · coming up" on a

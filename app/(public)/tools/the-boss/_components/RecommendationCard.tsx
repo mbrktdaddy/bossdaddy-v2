@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { ReviewBlock } from '@/lib/boss/types'
+import { Card } from '@/components/ui/Card'
 
 // The rich pick card for a real, hands-on TESTED review (kind 'review') — verdict
 // scores + buy link + FTC line. Guides render in GuideCard, researched picks in
@@ -9,7 +10,7 @@ import type { ReviewBlock } from '@/lib/boss/types'
 export default function RecommendationCard({ c }: { c: ReviewBlock }) {
   const s = c.scores
   return (
-    <div className="border border-soft rounded-xl p-3 bg-surface">
+    <Card className="p-3">
       <div className="flex items-baseline justify-between gap-2">
         <Link href={c.url} className="font-semibold text-accent hover:underline leading-snug">
           {c.title}
@@ -42,7 +43,7 @@ export default function RecommendationCard({ c }: { c: ReviewBlock }) {
           <p className="mt-1.5 text-[11px] text-prose-faint">Affiliate link — Boss Daddy may earn a commission at no cost to you.</p>
         </div>
       )}
-    </div>
+    </Card>
   )
 }
 

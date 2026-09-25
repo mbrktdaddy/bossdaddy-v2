@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation'
 import type { DestinationType } from '@/lib/dad-tools/savings'
 import { updateParticipantDestination } from '@/lib/dad-tools/savings-actions'
 import { describeDestination } from '@/lib/dad-tools/savings-deeplinks'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   goalId:                     string
@@ -56,7 +57,7 @@ export default function MyDestinationPanel({
   }
 
   return (
-    <section className="bg-surface border border-soft rounded-xl p-5 space-y-4">
+    <Card as="section" className="p-5 space-y-4">
       <div>
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">
           Your destination
@@ -125,6 +126,6 @@ export default function MyDestinationPanel({
       >
         {pending ? 'Saving…' : 'Save destination'}
       </button>
-    </section>
+    </Card>
   )
 }

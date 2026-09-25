@@ -128,6 +128,7 @@ const ImageGridNode = Node.create({
 // + data-product-slug — both must survive editor round-trips.
 
 import LinkExtension from '@tiptap/extension-link'
+import { Card } from '@/components/ui/Card'
 
 const Link = LinkExtension.extend({
   addAttributes() {
@@ -610,7 +611,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center gap-1 flex-wrap bg-surface/60 border border-soft rounded-xl px-2 py-1.5">
+      <Card tone="faint" className="flex items-center gap-1 flex-wrap px-2 py-1.5">
         <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBold().run() }}
           className={`${btn(editor.isActive('bold'))} font-black`}>B</button>
         <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleItalic().run() }}
@@ -677,7 +678,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
           disabled={!editor.can().redo()}
           className="px-2 py-1 rounded-lg text-xs text-prose-muted hover:text-prose hover:bg-zinc-700 disabled:opacity-30 transition-colors"
           title="Redo (⌘⇧Z)">↪</button>
-      </div>
+      </Card>
 
       {/* Editor surface */}
       <div className="bg-surface border border-strong rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-accent-hover transition-shadow">

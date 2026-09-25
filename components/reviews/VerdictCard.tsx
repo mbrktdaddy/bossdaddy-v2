@@ -1,5 +1,6 @@
 import type { Product } from '@/lib/products'
 import { getStoreLabel } from '@/lib/products'
+import { Card } from '@/components/ui/Card'
 
 type Variant = 'inbody' | 'sidebar' | 'preview'
 
@@ -213,8 +214,8 @@ export default function VerdictCard({
   // The props still arrive (call shape is uniform across variants) — unused here.
   if (variant === 'sidebar') {
     return (
-      <section
-        className="rounded-xl border border-soft bg-surface p-5"
+      <Card as="section"
+        className="p-5"
         aria-label="Quick verdict"
       >
         <p className="text-[11px] font-black uppercase tracking-[0.22em] text-accent">Quick Verdict</p>
@@ -230,15 +231,15 @@ export default function VerdictCard({
             <ProductCtaButton product={product} size="sm" />
           </div>
         )}
-      </section>
+      </Card>
     )
   }
 
   // ── Preview variant — workspace draft preview ──────────────────────────────
   if (variant === 'preview') {
     return (
-      <section
-        className="rounded-xl border border-soft bg-surface p-4"
+      <Card as="section"
+        className="p-4"
         aria-label="Verdict preview"
       >
         <p className="text-[11px] font-black uppercase tracking-[0.22em] text-accent">The Verdict</p>
@@ -260,14 +261,14 @@ export default function VerdictCard({
             <SubScoreBars scores={subScores!} size="sm" />
           </div>
         )}
-      </section>
+      </Card>
     )
   }
 
   // ── In-body variant — primary mobile/desktop placement on the public page ──
   return (
-    <section
-      className="mb-8 rounded-xl border border-soft bg-surface p-5 sm:p-6"
+    <Card as="section"
+      className="mb-8 p-5 sm:p-6"
       aria-label="The verdict"
     >
       {/* Header — section label + product name. Label is a real <h2> so
@@ -304,6 +305,6 @@ export default function VerdictCard({
           <ProductCtaButton product={product} size="md" />
         </div>
       )}
-    </section>
+    </Card>
   )
 }

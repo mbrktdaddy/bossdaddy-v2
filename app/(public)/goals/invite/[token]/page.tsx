@@ -20,6 +20,7 @@ import { LABELS } from '@/lib/labels'
 import { ogImageMeta } from '@/lib/og'
 import { LoginLink } from '@/components/LoginLink'
 import { previewInvitation, TIER_COPY, THREAD_ACCESS_COPY } from '@/lib/goals/participants'
+import { Card } from '@/components/ui/Card'
 
 // ⚠️ THE GOAL TITLE MUST NEVER APPEAR IN THIS METADATA. STATIC ONLY — do not turn
 // this into generateMetadata().
@@ -152,10 +153,10 @@ export default async function GoalInvitePage({ params, searchParams }: Props) {
           invitee who is about to be handed someone's private journal should be
           told that in its own box rather than in a footnote. */}
       {threadAccess !== 'none' ? (
-        <div className="mt-4 rounded-xl border border-soft bg-surface p-5">
+        <Card className="mt-4 p-5">
           <p className="text-sm font-bold text-prose">{THREAD_ACCESS_COPY[threadAccess].label}</p>
           <p className="mt-2 text-sm text-prose-muted">{THREAD_ACCESS_COPY[threadAccess].sees}</p>
-        </div>
+        </Card>
       ) : null}
 
       <ul className="mt-6 space-y-2 text-xs text-prose-faint">
@@ -178,7 +179,7 @@ export default async function GoalInvitePage({ params, searchParams }: Props) {
       </ul>
 
       {!user ? (
-        <div className="mt-8 rounded-xl border border-soft bg-surface p-5">
+        <Card className="mt-8 p-5">
           <p className="text-sm text-prose-muted">
             Sign in and this is yours to accept — it&apos;s tied to your account, not
             to this link.
@@ -188,7 +189,7 @@ export default async function GoalInvitePage({ params, searchParams }: Props) {
           <LoginLink className="mt-4 inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl transition-colors">
             Sign in to accept →
           </LoginLink>
-        </div>
+        </Card>
       ) : (
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <form action="/api/goals/invite" method="post" className="flex-1">

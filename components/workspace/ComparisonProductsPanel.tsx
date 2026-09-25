@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Card } from '@/components/ui/Card'
 
 interface Spec { label: string; value: string }
 interface Product {
@@ -74,7 +75,7 @@ export function ComparisonProductsPanel({ value, onChange, category, primarySlug
   }
 
   return (
-    <div className="bg-surface border border-soft rounded-xl p-4">
+    <Card className="p-4">
       <div className="flex items-center justify-between mb-3 gap-3">
         <div>
           <p className="text-sm font-semibold text-prose flex items-center gap-2">
@@ -188,6 +189,6 @@ export function ComparisonProductsPanel({ value, onChange, category, primarySlug
           )}
         </>
       )}
-    </div>
+    </Card>
   )
 }

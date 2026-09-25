@@ -13,6 +13,7 @@ import { SEOPanel } from '@/components/workspace/SEOPanel'
 import { SocialPostsPanel } from '@/components/workspace/SocialPostsPanel'
 import { VersionHistoryPanel } from '@/components/workspace/VersionHistoryPanel'
 import { useCollectionWorkspace } from '@/components/workspace/useCollectionWorkspace'
+import { Card } from '@/components/ui/Card'
 
 // InlineMediaPanel is heavy + drags in image upload UI — load lazy.
 const InlineMediaPanel = dynamic(
@@ -630,14 +631,14 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
           )}
 
           {/* Inline images — manages bd-image-placeholder figures inside the intro */}
-          <div className="mt-3 bg-surface-sunken/60 border border-soft rounded-xl p-4">
+          <Card tone="sunken" className="mt-3 p-4">
             <p className="text-xs text-prose-faint font-medium uppercase tracking-widest mb-3">Inline images</p>
             <InlineMediaPanel
               content={introHtml}
               onChangeContent={setIntro}
               category={heroCategory}
             />
-          </div>
+          </Card>
         </div>
 
         <HeroImagePanel
@@ -860,7 +861,7 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
         </details>
 
         {/* Readiness — quick visual checklist of what's set vs missing */}
-        <div className="bg-surface-sunken/60 border border-soft rounded-xl p-4">
+        <Card tone="sunken" className="p-4">
           <div className="flex items-baseline justify-between mb-3">
             <p className="text-xs text-prose-muted font-semibold uppercase tracking-widest">Ready to publish?</p>
             <p className={`text-xs font-bold tabular-nums ${requiredMissing > 0 ? 'text-warn-ink' : 'text-forest'}`}>
@@ -888,7 +889,7 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
               </li>
             ))}
           </ul>
-        </div>
+        </Card>
       </div>
 
       {/* Items */}
@@ -1010,7 +1011,7 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
                 ? (product?.brand ?? 'Product')
                 : `${review?.product_name} · ${review?.rating}/10`
               return (
-                <div key={key} className="bg-surface border border-soft rounded-xl p-3">
+                <Card key={key} className="p-3">
                   <div className="flex items-start gap-3">
                     {displayImage && (
                       <div className="relative w-12 h-12 shrink-0 rounded-lg bg-surface-raised overflow-hidden">
@@ -1083,7 +1084,7 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
                       className="mt-2 w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover text-base sm:text-sm"
                     />
                   )}
-                </div>
+                </Card>
               )
             })}
           </div>

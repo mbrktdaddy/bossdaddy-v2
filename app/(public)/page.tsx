@@ -341,6 +341,10 @@ export default async function HomePage() {
                     fill
                     sizes="(max-width: 1024px) 100vw, 420px"
                     className="object-cover"
+                    // Desktop LCP (Next dev warns without it). Eager, not `priority`:
+                    // a preload here would compete with HomeHero's art-directed
+                    // hero on mobile — see the note in components/home/HomeHero.tsx.
+                    loading="eager"
                   />
                 )}
                 <span className="absolute top-4 left-4 bg-accent text-white text-[10px] font-black uppercase tracking-[0.1em] px-3 py-1.5 rounded-full">

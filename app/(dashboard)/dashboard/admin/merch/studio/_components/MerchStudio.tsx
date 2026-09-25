@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Card } from '@/components/ui/Card'
 
 interface Candidate {
   text: string
@@ -204,7 +205,7 @@ export function MerchStudio({ initialApproved }: { initialApproved: ApprovedDesi
   return (
     <div className="space-y-8">
       {/* Generator */}
-      <div className="bg-surface border border-soft rounded-xl p-5">
+      <Card className="p-5">
         <label className="block text-xs text-eyebrow uppercase tracking-widest mb-2">Theme / direction</label>
         <textarea
           value={theme}
@@ -233,10 +234,10 @@ export function MerchStudio({ initialApproved }: { initialApproved: ApprovedDesi
           </button>
         </div>
         {error && <p className="text-danger-ink text-sm mt-3">{error}</p>}
-      </div>
+      </Card>
 
       {/* Verbatim entry — use exactly what you type, no AI */}
-      <div className="bg-surface border border-soft rounded-xl p-5">
+      <Card className="p-5">
         <label className="block text-xs text-eyebrow uppercase tracking-widest mb-2">Use my exact words</label>
         <p className="text-xs text-prose-faint mb-3">
           Type a saying exactly as it should print — this skips AI generation and adds it straight to your approved designs.
@@ -265,10 +266,10 @@ export function MerchStudio({ initialApproved }: { initialApproved: ApprovedDesi
         <p className="text-[11px] text-prose-faint mt-2">
           You&apos;re responsible for the wording — don&apos;t use trademarked slogans or quotes you don&apos;t own.
         </p>
-      </div>
+      </Card>
 
       {/* Logo-only design — the brand mark + name, no saying (great for mugs/hats) */}
-      <div className="bg-surface border border-soft rounded-xl p-5">
+      <Card className="p-5">
         <label className="block text-xs text-eyebrow uppercase tracking-widest mb-2">Logo + brand only</label>
         <p className="text-xs text-prose-faint mb-3">
           No saying — just the Boss Daddy mark and wordmark. Add it, then pick the product (mug, tee, hat) and colorway on its card.
@@ -288,7 +289,7 @@ export function MerchStudio({ initialApproved }: { initialApproved: ApprovedDesi
             {addingLogo ? 'Adding…' : 'Add logo design'}
           </button>
         </div>
-      </div>
+      </Card>
 
       {/* Candidates */}
       {candidates.length > 0 && (
@@ -522,7 +523,7 @@ function ApprovedDesignCard({ design, onDelete }: { design: ApprovedDesign; onDe
   const alreadyPublished = publishedBlanks.includes(blank)
 
   return (
-    <div className="bg-surface border border-soft rounded-xl p-4">
+    <Card className="p-4">
       <div className="flex items-start gap-4">
         {/* Preview */}
         <div className="shrink-0 w-40 rounded-lg overflow-hidden border border-soft bg-surface-sunken">
@@ -694,6 +695,6 @@ function ApprovedDesignCard({ design, onDelete }: { design: ApprovedDesign; onDe
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   )
 }

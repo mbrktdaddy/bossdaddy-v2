@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import RatingScore from '@/components/RatingScore'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   href: string
@@ -77,7 +78,7 @@ export default function ContentRow({
           </div>
         )}
       </div>
-      <div className="shrink-0 w-20 h-16 sm:w-28 sm:h-20 rounded-xl overflow-hidden bg-surface-raised border border-soft">
+      <Card tone="raised" className="shrink-0 w-20 h-16 sm:w-28 sm:h-20 overflow-hidden">
         {imageUrl ? (
           <Image
             src={imageUrl}
@@ -93,7 +94,7 @@ export default function ContentRow({
             </svg>
           </div>
         )}
-      </div>
+      </Card>
     </Link>
   )
 }

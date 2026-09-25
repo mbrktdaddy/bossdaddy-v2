@@ -18,6 +18,7 @@ import BenchStrip from '@/components/BenchStrip'
 import VaultBreadcrumb from '@/components/vault/VaultBreadcrumb'
 import FtcDisclosure from '@/components/FtcDisclosure'
 import { LABELS } from '@/lib/labels'
+import { Card } from '@/components/ui/Card'
 
 export const revalidate = 60
 
@@ -351,7 +352,7 @@ export default async function PickDetailPage({ params }: Props) {
                     const researchSources = (product.research_sources ?? []).filter((s) => s?.url)
                     const href = product.affiliate_url ? `/go/${product.slug}` : product.non_affiliate_url
                     return (
-                      <article key={`product-${product.slug}`} className="flex flex-col sm:flex-row gap-5 bg-surface border border-soft hover:border-accent-border/40 rounded-xl p-5 hover:-translate-y-0.5 transition-all duration-200">
+                      <Card as="article" key={`product-${product.slug}`} className="flex flex-col sm:flex-row gap-5 hover:border-accent-border/40 p-5 hover:-translate-y-0.5 transition-all duration-200">
                         {/* Rank — medal for top 3, number for the rest */}
                         <div className="flex sm:flex-col items-center gap-3 sm:gap-1 shrink-0">
                           <RankMedal rank={rank} />
@@ -434,14 +435,14 @@ export default async function PickDetailPage({ params }: Props) {
                             )}
                           </div>
                         </div>
-                      </article>
+                      </Card>
                     )
                   }
 
                   const product = review.product_slug ? productMap.get(review.product_slug) : null
                   const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                   return (
-                    <article key={review.id} className="flex flex-col sm:flex-row gap-5 bg-surface border border-soft hover:border-accent-border/40 rounded-xl p-5 hover:-translate-y-0.5 transition-all duration-200">
+                    <Card as="article" key={review.id} className="flex flex-col sm:flex-row gap-5 hover:border-accent-border/40 p-5 hover:-translate-y-0.5 transition-all duration-200">
                       {/* Rank — medal for top 3, number for the rest */}
                       <div className="flex sm:flex-col items-center gap-3 sm:gap-1 shrink-0">
                         <RankMedal rank={rank} />
@@ -508,7 +509,7 @@ export default async function PickDetailPage({ params }: Props) {
                           )}
                         </div>
                       </div>
-                    </article>
+                    </Card>
                   )
                 })}
               </div>

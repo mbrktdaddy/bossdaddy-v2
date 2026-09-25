@@ -4,6 +4,7 @@ import { useState } from 'react'
 import SocialPostCard, { type Post } from './SocialPostCard'
 import HashtagPresetsPanel, { type HashtagPreset } from './HashtagPresetsPanel'
 import type { SourceLinks } from './LinkPicker'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 interface Props {
   posts: Post[]
@@ -36,9 +37,7 @@ export default function SocialPostList({ posts: initial, charLimit, sourceLinks,
 
       {/* Posts */}
       {posts.length === 0 ? (
-        <div className="text-center py-16 text-prose-faint">
-          <p className="text-sm">No posts yet. Hit Generate to create your first one.</p>
-        </div>
+        <EmptyState variant="dashed" size="md" title="No posts yet. Hit Generate to create your first one." />
       ) : (
         <div className="space-y-4">
           {posts.map((post) => (

@@ -34,6 +34,7 @@ import AskTheBoss from '@/components/AskTheBoss'
 import BenchStrip from '@/components/BenchStrip'
 import TakeawaysCard from '@/components/reviews/TakeawaysCard'
 import FAQAccordion from '@/components/collections/FAQAccordion'
+import { Card } from '@/components/ui/Card'
 
 const TableOfContents = dynamic(() => import('@/components/TableOfContents'))
 const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
@@ -488,7 +489,7 @@ export default async function GuidePage({ params }: Props) {
 
               {/* Compact products panel — in mention order */}
               {mentionedProducts && mentionedProducts.length > 0 && (
-                <div className="bg-surface border border-soft hover:border-accent-border/40 transition-colors rounded-xl p-4">
+                <Card className="hover:border-accent-border/40 transition-colors p-4">
                   <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
                   <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">Products Mentioned</p>
                   <ul className="space-y-3">
@@ -528,7 +529,7 @@ export default async function GuidePage({ params }: Props) {
                         )
                       })}
                   </ul>
-                </div>
+                </Card>
               )}
 
             </div>

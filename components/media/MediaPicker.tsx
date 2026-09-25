@@ -5,6 +5,7 @@ import { compressImage } from '@/lib/compress-image'
 import { fetchAssetAsFile } from '@/lib/images/derive-crop'
 import { CATEGORIES } from '@/lib/categories'
 import ImageCropper from '@/components/ui/ImageCropper'
+import { Card } from '@/components/ui/Card'
 
 interface MediaAsset {
   id: string
@@ -402,7 +403,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
       >
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-3 border-b border-soft shrink-0">
-          <div className="flex items-center gap-1 bg-surface border border-soft rounded-xl p-1">
+          <Card className="flex items-center gap-1 p-1">
             <button
               type="button"
               onClick={() => setTab('library')}
@@ -421,7 +422,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
             >
               Generate
             </button>
-          </div>
+          </Card>
           <div className="flex items-center gap-2 flex-wrap grow sm:grow-0 justify-end">
             {/* Source toggle — only when the caller passed a guide/review context. */}
             {tab === 'library' && sourceId && (

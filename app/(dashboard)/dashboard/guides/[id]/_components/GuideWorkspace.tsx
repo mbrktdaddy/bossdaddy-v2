@@ -21,10 +21,11 @@ import { ListEditor } from '@/components/workspace/ListEditor'
 import { TagPicker } from '@/components/workspace/TagPicker'
 import { RefinePreviewModal } from '@/components/workspace/RefinePreviewModal'
 import { useContentWorkspace } from '@/components/workspace/useContentWorkspace'
+import { Card } from '@/components/ui/Card'
 
 const InlineMediaPanel = dynamic(
   () => import('@/components/workspace/InlineMediaPanel').then((m) => ({ default: m.InlineMediaPanel })),
-  { ssr: false, loading: () => <div className="h-32 bg-surface-sunken border border-soft rounded-xl animate-pulse" /> },
+  { ssr: false, loading: () => <Card tone="sunken" className="h-32 animate-pulse" /> },
 )
 
 interface FAQ { question: string; answer: string }
@@ -314,7 +315,7 @@ export function GuideWorkspace({ guide: article }: Props) {
             </div>
             <div className="space-y-3">
               {faqs.map((faq, i) => (
-                <div key={i} className="bg-surface border border-soft rounded-xl p-3 space-y-2">
+                <Card key={i} className="p-3 space-y-2">
                   <div className="flex items-start gap-2">
                     <span className="text-xs text-prose-faint mt-2 shrink-0">Q</span>
                     <input
@@ -342,7 +343,7 @@ export function GuideWorkspace({ guide: article }: Props) {
                       className="flex-1 px-3 py-1.5 bg-surface-sunken border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none"
                     />
                   </div>
-                </div>
+                </Card>
               ))}
               {faqs.length === 0 && (
                 <p className="text-xs text-prose-faint italic">No FAQs yet. Add questions readers commonly search for — great for SEO.</p>
@@ -357,7 +358,7 @@ export function GuideWorkspace({ guide: article }: Props) {
       <div className="pt-6 border-t border-soft">
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Media</p>
         <div className="space-y-4">
-          <div className="bg-surface/50 border border-soft rounded-xl p-4 space-y-1.5">
+          <Card tone="faint" className="p-4 space-y-1.5">
             <p className="text-xs text-prose-faint font-medium uppercase tracking-widest mb-3">Hero image</p>
             <HeroImagePanel
               imageUrl={imageUrl}
@@ -369,15 +370,15 @@ export function GuideWorkspace({ guide: article }: Props) {
               excerpt={excerpt}
               initialPrompt={heroPromptSuggestion}
             />
-          </div>
-          <div className="bg-surface/50 border border-soft rounded-xl p-4">
+          </Card>
+          <Card tone="faint" className="p-4">
             <p className="text-xs text-prose-faint font-medium uppercase tracking-widest mb-3">Inline images</p>
             <InlineMediaPanel
               content={content}
               onChangeContent={setContent}
               category={category}
             />
-          </div>
+          </Card>
         </div>
       </div>
 

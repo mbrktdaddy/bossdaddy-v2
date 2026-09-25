@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import type { ProductBlock } from '@/lib/boss/types'
+import { Card } from '@/components/ui/Card'
 
 // The gap-fallback shortlist. Deliberately LIGHTER than RecommendationCard (the
 // rich, bordered card used for real Boss-tested reviews) — researched picks get
@@ -23,7 +24,7 @@ export function ResearchedList({ items, query }: { items: ProductBlock[]; query?
   const hasBuy = items.some((c) => c.buyUrl)
 
   return (
-    <div className="border border-soft rounded-xl bg-surface p-3">
+    <Card className="p-3">
       <div className="text-[10px] uppercase tracking-widest text-eyebrow mb-1.5">Researched · not tested</div>
 
       <ul className="divide-y divide-soft">
@@ -74,7 +75,7 @@ export function ResearchedList({ items, query }: { items: ProductBlock[]; query?
           Vote onto the bench →
         </Link>
       </div>
-    </div>
+    </Card>
   )
 }
 

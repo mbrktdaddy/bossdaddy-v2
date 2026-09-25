@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { FamilyMember, Gender, VoiceFact, VoiceProfile } from '@/lib/voiceProfile'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   initial: Pick<
@@ -197,7 +198,7 @@ export function VoiceProfileForm({ initial }: Props) {
 
         <div className="space-y-3">
           {facts.map((f) => (
-            <div key={f.id} className="bg-surface border border-soft rounded-xl p-3 space-y-2">
+            <Card key={f.id} className="p-3 space-y-2">
               <div className="flex items-start gap-3">
                 <input
                   type="text"
@@ -222,7 +223,7 @@ export function VoiceProfileForm({ initial }: Props) {
                 rows={2}
                 className="w-full px-3 py-2 bg-surface-sunken border border-soft rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-y"
               />
-            </div>
+            </Card>
           ))}
         </div>
       </section>
@@ -264,7 +265,7 @@ function FamilyMemberRow({
 }) {
   const age = ageFromDob(member.dob)
   return (
-    <div className="bg-surface border border-soft rounded-xl p-3 space-y-3">
+    <Card className="p-3 space-y-3">
       <div className="flex items-start gap-3">
         <input
           type="text"
@@ -323,7 +324,7 @@ function FamilyMemberRow({
           <option key={r} value={r} />
         ))}
       </datalist>
-    </div>
+    </Card>
   )
 }
 

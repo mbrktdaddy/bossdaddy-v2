@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { resolveCart, getCartItems } from '@/lib/cart'
 import { formatPrice } from '@/lib/merch'
 import CartItems from './_components/CartItems'
+import { EmptyState } from '@/components/ui/EmptyState'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -26,17 +27,18 @@ export default async function CartPage() {
       </div>
 
       {items.length === 0 ? (
-        <div className="bg-surface rounded-xl p-12 text-center">
-          <p className="text-5xl mb-4 opacity-30">🛒</p>
-          <p className="text-prose-muted text-lg font-semibold mb-2">Your cart is empty.</p>
-          <p className="text-prose-faint text-sm mb-8">Add some gear and come back.</p>
-          <Link
-            href="/gear"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent-hover text-white font-bold rounded-xl transition-colors"
-          >
-            Browse Gear
-          </Link>
-        </div>
+        <EmptyState
+          title="Your cart is empty."
+          body="Add some gear and come back."
+          action={
+            <Link
+              href="/gear"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent-hover text-white font-bold rounded-xl transition-colors"
+            >
+              Browse Gear
+            </Link>
+          }
+        />
       ) : (
         <CartItems initialItems={items} initialSubtotal={subtotal} />
       )}

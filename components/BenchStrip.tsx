@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getStatusColor, getStatusLabel, type WishlistStatus } from '@/lib/wishlist'
 import { LABELS } from '@/lib/labels'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   heading?: string
@@ -35,7 +36,7 @@ export default async function BenchStrip({
   if (items.length === 0) return null
 
   return (
-    <div className="rounded-xl bg-surface border border-soft p-5 sm:p-6">
+    <Card className="p-5 sm:p-6">
       {/* Header — eyebrow + invitation tagline + CTA. The pulsing dot
           uses the action orange (vibrant) for "live testing signal"
           while the eyebrow text stays in the orange-700 brand voice. */}
@@ -105,6 +106,6 @@ export default async function BenchStrip({
           </li>
         ))}
       </ul>
-    </div>
+    </Card>
   )
 }

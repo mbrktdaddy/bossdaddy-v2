@@ -11,6 +11,7 @@ import ConnectionPrefs from '@/components/account/ConnectionPrefs'
 import PushNotificationSetting from '@/components/account/PushNotificationSetting'
 import BioForm from '@/components/account/BioForm'
 import type { Metadata } from 'next'
+import { Card } from '@/components/ui/Card'
 
 export const metadata: Metadata = {
   title: 'Account Settings',
@@ -97,7 +98,7 @@ export default async function AccountSettingsPage() {
 
       {/* Public author identity — authors + admins only (members have no /author page) */}
       {isAuthor && (
-        <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+        <Card className="p-6 mb-6">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Public Author Profile</p>
           <p className="text-xs text-prose-faint mb-4">
             Shown under everything you publish, on your{' '}
@@ -108,19 +109,19 @@ export default async function AccountSettingsPage() {
             initialTagline={(profile as { tagline?: string | null } | null)?.tagline ?? null}
             initialBio={(profile as { bio?: string | null } | null)?.bio ?? null}
           />
-        </div>
+        </Card>
       )}
 
       {/* ── ACCOUNT — sign-in + email ──────────────────────────────────── */}
       <h2 className="text-base font-black text-prose mb-3 mt-10">Account</h2>
 
-      <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+      <Card className="p-6 mb-6">
         <EditUsernameForm current={profile?.username ?? ''} />
         <div className="mt-5 pt-5 border-t border-soft">
           <label className="block text-xs text-prose-faint uppercase tracking-widest mb-2">Email</label>
           <EditEmailForm current={user.email ?? ''} />
         </div>
-      </div>
+      </Card>
 
       {/* Notification preferences */}
       <PushNotificationSetting />
@@ -140,7 +141,7 @@ export default async function AccountSettingsPage() {
           and the channels belong to the reminder itself, so a global switch here
           would either lie about what it controls or fight the per-goal mute. Point
           at the real control instead of duplicating it. */}
-      <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+      <Card className="p-6 mb-6">
         <p className="text-sm font-semibold text-prose">Goal reminders</p>
         <p className="text-xs text-prose-faint mt-1 leading-relaxed">
           Each goal carries its own reminder — the time, the days, and how it
@@ -152,7 +153,7 @@ export default async function AccountSettingsPage() {
         >
           Manage your goals →
         </Link>
-      </div>
+      </Card>
 
       {/* Install the app — renders only when installable + not already installed */}
       <InstallAppButton variant="card" />

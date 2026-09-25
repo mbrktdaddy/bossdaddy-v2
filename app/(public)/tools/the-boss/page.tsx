@@ -7,6 +7,7 @@ import { buildSocialMetadata } from '@/lib/og'
 import type { Block } from '@/lib/boss/types'
 import BossChat, { type BossMsg } from './_components/BossChat'
 import PastChats, { type PastChat } from './_components/PastChats'
+import { Card } from '@/components/ui/Card'
 
 export function generateMetadata(): Metadata {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
@@ -51,7 +52,7 @@ export default async function TheBossPage({
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {header}
-        <div className="border border-soft rounded-2xl bg-surface-raised p-6 sm:p-8">
+        <Card tone="raised" className="p-6 sm:p-8">
           <p className="text-base sm:text-lg font-bold text-prose">The Boss is for members.</p>
           <p className="mt-1.5 text-sm sm:text-base text-prose-muted leading-relaxed max-w-prose">
             A free account gets you in. Ask about a fix, a purchase, a weekend plan, a toast you have to
@@ -71,7 +72,7 @@ export default async function TheBossPage({
               Sign in
             </Link>
           </div>
-        </div>
+        </Card>
       </div>
     )
   }

@@ -25,6 +25,7 @@ import {
   listSharedWithMe, TIER_COPY, type SharedGoalSummary,
 } from '@/lib/goals/participants'
 import TodayCard from '@/components/goals/TodayCard'
+import { Card } from '@/components/ui/Card'
 
 export const metadata: Metadata = {
   title:       LABELS.goals.pageTitle,
@@ -310,7 +311,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
                   a labelled Share row live inside the card border — a link can't
                   nest inside a link, same constraint that puts the checkbox
                   outside. The upper area stays one big tap target for opening. */}
-              <div className="flex-1 min-w-0 overflow-hidden rounded-xl border border-soft bg-surface transition-colors hover:border-strong">
+              <Card className="flex-1 min-w-0 overflow-hidden transition-colors hover:border-strong">
               <Link
                 href={`/goals/${goal.id}`}
                 className="block p-4 sm:p-6"
@@ -411,7 +412,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
                   {LABELS.goals.shareCta}
                 </Link>
               )}
-              </div>
+              </Card>
             </li>
           )
         })}
@@ -673,7 +674,7 @@ function SignedOut() {
         </p>
       </header>
 
-      <section className="bg-surface border border-soft rounded-xl p-6 sm:p-8 space-y-4">
+      <Card as="section" className="p-6 sm:p-8 space-y-4">
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
           How it works
         </p>
@@ -683,7 +684,7 @@ function SignedOut() {
           <li>3. Tap once to log it. From the notification, the email, or here.</li>
           <li>4. Miss a day and nothing yells at you. Catch up whenever.</li>
         </ul>
-      </section>
+      </Card>
 
       <LoginLink className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl transition-colors">
         Sign in to start →

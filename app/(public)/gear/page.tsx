@@ -12,6 +12,7 @@ import BenchStrip from '@/components/BenchStrip'
 import AskTheBoss from '@/components/AskTheBoss'
 import SectionHeader from '@/components/SectionHeader'
 import PageHeader from '@/components/PageHeader'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { getSeasonalOccasions } from '@/lib/gift-occasions'
 import OccasionIcon from '@/components/OccasionIcon'
 import { ogImageUrl, OG_SITE, TWITTER_HANDLE } from '@/lib/og'
@@ -347,10 +348,7 @@ export default async function GearPage() {
             9+:  standard 3-col card grid (workhorse middle)
             8+:  compact editorial rows (browse-and-scan base) */}
       {!topPicks.length ? (
-        <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft">
-          <p className="text-prose-faint text-lg font-semibold">Nothing here yet.</p>
-          <p className="text-prose-faint text-sm mt-2">Reviews are being added.</p>
-        </div>
+        <EmptyState title="Nothing here yet." body="Reviews are being added." />
       ) : (
         <div>
           {/* ── Tier summary — quick jump to each rating band ─────────────── */}

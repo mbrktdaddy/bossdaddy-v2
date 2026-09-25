@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
 import { getCategoryBySlug } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
+import { Card } from '@/components/ui/Card'
 
 export const dynamic = 'force-dynamic'
 
@@ -141,7 +142,7 @@ export default async function EngagementPage() {
       </div>
 
       {/* Per-content table */}
-      <div className="mb-10 bg-surface border border-soft rounded-xl overflow-hidden">
+      <Card className="mb-10 overflow-hidden">
         <div className="px-5 py-3 border-b border-soft">
           <p className="text-sm font-semibold">Per-content engagement</p>
           <p className="text-xs text-prose-faint mt-0.5">Sorted by views. Completion = % of viewers who scrolled to the end.</p>
@@ -209,13 +210,13 @@ export default async function EngagementPage() {
             </table>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Two-column lower section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
         {/* Product leaderboard */}
-        <div className="bg-surface border border-soft rounded-xl overflow-hidden">
+        <Card className="overflow-hidden">
           <div className="px-5 py-3 border-b border-soft">
             <p className="text-sm font-semibold">Top products by clicks</p>
             <p className="text-xs text-prose-faint mt-0.5">Across all content.</p>
@@ -235,10 +236,10 @@ export default async function EngagementPage() {
               ))}
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Recent clicks */}
-        <div className="bg-surface border border-soft rounded-xl overflow-hidden">
+        <Card className="overflow-hidden">
           <div className="px-5 py-3 border-b border-soft">
             <p className="text-sm font-semibold">Recent clicks</p>
             <p className="text-xs text-prose-faint mt-0.5">Last 15 affiliate link clicks.</p>
@@ -262,7 +263,7 @@ export default async function EngagementPage() {
               ))}
             </div>
           )}
-        </div>
+        </Card>
       </div>
     </div>
   )
@@ -270,9 +271,9 @@ export default async function EngagementPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-surface border border-soft rounded-xl p-4">
+    <Card className="p-4">
       <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold mb-1">{label}</p>
       <p className="text-2xl font-black text-prose">{value}</p>
-    </div>
+    </Card>
   )
 }

@@ -9,6 +9,7 @@ import { TiptapEditor } from '@/components/workspace/TiptapEditor'
 import { XArticlePreview } from '@/lib/x/preview'
 import type { DroppedTag } from '@/lib/x/serialize'
 import { useSocialArticleWorkspace } from '@/components/workspace/useSocialArticleWorkspace'
+import { Card } from '@/components/ui/Card'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
@@ -174,7 +175,7 @@ export function ArticleWorkspace({ article, initialXHtml, initialDropped }: Prop
       />
 
       {/* Posting status + live URL */}
-      <div className="bg-surface border border-soft rounded-xl px-4 py-4 space-y-3">
+      <Card className="px-4 py-4 space-y-3">
         <p className="text-sm font-semibold text-prose flex items-center gap-2">
           <span className="text-accent-text-soft">𝕏</span> Posting
         </p>
@@ -213,7 +214,7 @@ export function ArticleWorkspace({ article, initialXHtml, initialDropped }: Prop
             {article.posted_at && ` · posted ${new Date(article.posted_at).toLocaleDateString('en-US', { timeZone: 'UTC' })}`}
           </span>
         </div>
-      </div>
+      </Card>
     </WorkspaceShell>
   )
 }

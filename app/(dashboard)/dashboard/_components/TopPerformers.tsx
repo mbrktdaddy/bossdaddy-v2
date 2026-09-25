@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getCategoryBySlug } from '@/lib/categories'
+import { Card } from '@/components/ui/Card'
 
 const DEFAULT_VISIBLE = 5
 
@@ -35,7 +36,7 @@ export function TopPerformers({ items }: { items: TopItem[] }) {
   const hasMore = items.length > DEFAULT_VISIBLE
 
   return (
-    <div className="bg-surface border border-soft rounded-xl overflow-hidden">
+    <Card className="overflow-hidden">
       <div className="px-5 py-3 border-b border-soft flex items-center justify-between">
         <p className="text-sm font-semibold">
           {expanded ? `All ${items.length} published` : 'Top 5 by views'}
@@ -103,6 +104,6 @@ export function TopPerformers({ items }: { items: TopItem[] }) {
           {expanded ? '↑ Show top 5 only' : `↓ Show all ${items.length} published`}
         </button>
       )}
-    </div>
+    </Card>
   )
 }

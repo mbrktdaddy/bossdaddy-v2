@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { formatPrice, getMerchDisplayImage } from '@/lib/merch'
 import type { CartItemWithDetails } from '@/lib/merch'
 import { dispatchCartUpdated } from '@/lib/cart-events'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 interface Props {
   initialItems: CartItemWithDetails[]
@@ -99,12 +100,14 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
 
   if (items.length === 0) {
     return (
-      <div className="bg-surface rounded-xl p-12 text-center">
-        <p className="text-prose-muted text-lg font-semibold mb-6">Your cart is empty.</p>
-        <Link href="/gear" className="inline-flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent-hover text-white font-bold rounded-xl transition-colors">
-          Browse Gear
-        </Link>
-      </div>
+      <EmptyState
+        title="Your cart is empty."
+        action={
+          <Link href="/gear" className="inline-flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent-hover text-white font-bold rounded-xl transition-colors">
+            Browse Gear
+          </Link>
+        }
+      />
     )
   }
 

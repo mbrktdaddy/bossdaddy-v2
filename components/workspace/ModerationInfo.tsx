@@ -1,3 +1,5 @@
+import { Card } from '@/components/ui/Card'
+
 interface Props {
   score: number | null
   flags: string[]
@@ -7,10 +9,10 @@ interface Props {
 export function ModerationInfo({ score, flags, onAddressFlag }: Props) {
   if (score === null && (!flags || flags.length === 0)) {
     return (
-      <div className="bg-surface border border-soft rounded-xl p-4">
+      <Card className="p-4">
         <p className="text-xs text-prose-faint uppercase tracking-wider font-semibold mb-1">Moderation</p>
         <p className="text-sm text-prose-faint">No moderation data yet. It will populate after Claude scans submitted content.</p>
-      </div>
+      </Card>
     )
   }
 

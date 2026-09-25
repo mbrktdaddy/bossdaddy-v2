@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { SELF_DELETION_REASONS, OTHER_REASON } from '@/lib/moderation-reasons'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   accountStatus: string
@@ -65,17 +66,17 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
   }
 
   return (
-    <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+    <Card className="p-6 mb-6">
       <p className="text-xs text-red-700 uppercase tracking-widest font-semibold mb-1">Danger zone</p>
       <p className="text-xs text-prose-faint mb-4">Permanent actions. Use with care.</p>
 
       {hasPublishedContent ? (
-        <div className="border border-soft rounded-xl p-4 bg-surface-sunken">
+        <Card tone="sunken" className="p-4">
           <p className="text-sm text-prose-muted leading-relaxed">
             You&apos;ve published reviews or guides on Boss Daddy. Account deletion is a manual process for authors — please reach out to{' '}
             <a href="mailto:support@bossdaddylife.com?subject=Account%20deletion%20request" className="text-accent-text-soft hover:text-accent">support@bossdaddylife.com</a>.
           </p>
-        </div>
+        </Card>
       ) : !confirming ? (
         <button onClick={() => setConfirming(true)}
           className="px-5 py-2.5 border border-red-300 hover:bg-red-50 hover:border-red-700 text-red-700 text-sm font-semibold rounded-xl transition-colors">
@@ -122,6 +123,6 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
           </div>
         </div>
       )}
-    </div>
+    </Card>
   )
 }

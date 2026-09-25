@@ -36,6 +36,7 @@ import KidHeaderActions from '@/components/dad-tools/KidHeaderActions'
 import InlineCapture from '@/components/dad-tools/InlineCapture'
 import MomentsFeed from '@/components/dad-tools/MomentsFeed'
 import WeeklyCheckinOptIn from '@/components/dad-tools/WeeklyCheckinOptIn'
+import { Card } from '@/components/ui/Card'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -208,7 +209,7 @@ export default async function KidProfilePage({ params }: PageProps) {
 
       {/* Time card — child-only (the Milestones tool, counting to 18) */}
       {isChild && (
-        <section className="bg-surface border border-soft rounded-2xl p-5 sm:p-6">
+        <Card as="section" className="p-5 sm:p-6">
           <div className="flex items-baseline justify-between gap-3">
             <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
               {LABELS.tools.weekendsUntil.spokeRole}
@@ -236,12 +237,12 @@ export default async function KidProfilePage({ params }: PageProps) {
               </p>
             </>
           )}
-        </section>
+        </Card>
       )}
 
       {/* Time card — adults: a custom-milestone Weekends launcher (no age math) */}
       {!isChild && (
-        <section className="bg-surface border border-soft rounded-2xl p-5 sm:p-6">
+        <Card as="section" className="p-5 sm:p-6">
           <div className="flex items-baseline justify-between gap-3">
             <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
               {LABELS.tools.weekendsUntil.spokeRole}
@@ -257,7 +258,7 @@ export default async function KidProfilePage({ params }: PageProps) {
             Pick a milestone that matters with {displayName} — an anniversary, a
             trip, a season — and see how many weekends are left.
           </p>
-        </section>
+        </Card>
       )}
 
       {/* Money card — child-only (Dad Math is a college projection). Suppressed
@@ -265,7 +266,7 @@ export default async function KidProfilePage({ params }: PageProps) {
           using the kid's persisted Dad Math inputs (migration 077). A brand-new
           kid with default 0/0/$94k/6% reads as "Just getting started". */}
       {isChild && dadMath && !past18 && (
-        <section className="bg-surface border border-soft rounded-2xl p-5 sm:p-6">
+        <Card as="section" className="p-5 sm:p-6">
           <div className="flex items-baseline justify-between gap-3">
             <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
               {LABELS.tools.dadMath.spokeRole}
@@ -321,11 +322,11 @@ export default async function KidProfilePage({ params }: PageProps) {
               </div>
             </dl>
           )}
-        </section>
+        </Card>
       )}
 
       {/* Savings card — goals tied to this kid */}
-      <section className="bg-surface border border-soft rounded-2xl p-5 sm:p-6">
+      <Card as="section" className="p-5 sm:p-6">
         <div className="flex items-baseline justify-between gap-3">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
             {LABELS.tools.savings.full}
@@ -374,10 +375,10 @@ export default async function KidProfilePage({ params }: PageProps) {
             })}
           </div>
         )}
-      </section>
+      </Card>
 
       {/* Presence card */}
-      <section className="bg-surface border border-soft rounded-2xl p-5 sm:p-6">
+      <Card as="section" className="p-5 sm:p-6">
         <div className="flex items-baseline justify-between gap-3">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
             {LABELS.tools.presence.spokeRole}
@@ -410,7 +411,7 @@ export default async function KidProfilePage({ params }: PageProps) {
             defaultEmail={user.email ?? undefined}
           />
         </div>
-      </section>
+      </Card>
 
       {/* The Log */}
       <section className="space-y-3">

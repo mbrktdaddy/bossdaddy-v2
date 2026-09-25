@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from 'react'
 import type { Product } from '@/lib/products'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Card } from '@/components/ui/Card'
 
 type ContactMethod = 'email' | 'web_form' | 'amazon' | 'phone'
 type OutreachStatus = 'draft' | 'sent' | 'responded' | 'no_response' | 'follow_up'
@@ -347,7 +349,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
       </div>
 
       {/* Composer */}
-      <div className="bg-surface border border-soft rounded-xl overflow-hidden">
+      <Card className="overflow-hidden">
 
         {/* Section 1 — Product */}
         <div className="p-4 md:p-6 border-b border-soft">
@@ -578,7 +580,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
             </div>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* History */}
       <div>
@@ -607,17 +609,13 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
         </div>
 
         {history.length === 0 ? (
-          <div className="bg-surface border border-soft rounded-xl p-8 text-center">
-            <p className="text-prose-faint text-sm">No outreach logged yet. Send your first email above.</p>
-          </div>
+          <EmptyState variant="panel" size="md" title="No outreach logged yet. Send your first email above." />
         ) : filteredHistory.length === 0 ? (
-          <div className="bg-surface border border-soft rounded-xl p-8 text-center">
-            <p className="text-prose-faint text-sm">No records match this filter.</p>
-          </div>
+          <EmptyState variant="panel" size="md" title="No records match this filter." />
         ) : (
           <div className="space-y-2">
             {filteredHistory.map(record => (
-              <div key={record.id} className="bg-surface border border-soft rounded-xl overflow-hidden">
+              <Card key={record.id} className="overflow-hidden">
 
                 {/* Row summary — stacked on mobile, side-by-side on desktop */}
                 <div className="p-4 flex flex-col gap-3 sm:flex-row sm:items-start">
@@ -739,7 +737,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                     </div>
                   </div>
                 )}
-              </div>
+              </Card>
             ))}
           </div>
         )}

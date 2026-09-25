@@ -22,6 +22,7 @@ import { LABELS } from '@/lib/labels'
 import { getNoteAccess, listNotes } from '@/lib/goals/notes'
 import type { NoteSubject } from '@/lib/goals/note-types'
 import NotesFeedClient from './NotesFeedClient'
+import { Card } from '@/components/ui/Card'
 
 type Props = {
   subject: NoteSubject
@@ -49,9 +50,9 @@ export default async function NotesFeed({ subject, readerCount, isSubjectOwner }
   // the difference between "something broke" and "your notes are gone".
   if (failed) {
     return (
-      <section className="bg-surface border border-soft rounded-xl p-6">
+      <Card as="section" className="p-6">
         <p className="text-sm text-prose-faint">{LABELS.goals.notesLoadFailed}</p>
-      </section>
+      </Card>
     )
   }
 

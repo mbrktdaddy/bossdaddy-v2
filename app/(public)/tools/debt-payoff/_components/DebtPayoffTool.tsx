@@ -19,6 +19,7 @@ import {
 } from '@/lib/dad-tools/finance'
 import { toQuery } from '@/lib/dad-tools/url-params'
 import type { DebtRow } from '@/lib/dad-tools/debt-params'
+import { Card } from '@/components/ui/Card'
 
 const EXTRA_MAX = 2_000
 const EXTRA_STEP = 25
@@ -75,7 +76,7 @@ export default function DebtPayoffTool({ today, initial }: Props) {
       <section className="space-y-3">
         <p className="text-xs text-prose-faint uppercase tracking-widest">What you owe</p>
         {rows.map((r, i) => (
-          <div key={r.id} className="bg-surface border border-soft rounded-2xl p-4 space-y-3">
+          <Card key={r.id} className="p-4 space-y-3">
             <div className="flex items-center gap-3">
               <input
                 type="text"
@@ -107,7 +108,7 @@ export default function DebtPayoffTool({ today, initial }: Props) {
               <NumberField label="Minimum" prefix="$" suffix="/mo" value={r.minPayment} placeholder="0"
                 onChange={(n) => update(r.id, { minPayment: n })} />
             </div>
-          </div>
+          </Card>
         ))}
         <button
           type="button"

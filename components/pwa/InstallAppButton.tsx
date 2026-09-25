@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import { usePwaInstall } from '@/components/pwa/PwaInstallProvider'
 import { LABELS } from '@/lib/labels'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   /** 'card' = self-contained settings card; 'menu' = dropdown/drawer row. */
@@ -65,7 +66,7 @@ export default function InstallAppButton({ variant = 'card', className = '' }: P
 
   // card variant — settings/account
   return (
-    <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+    <Card className="p-6 mb-6">
       <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-2">Boss Daddy App</p>
       <p className="text-sm text-prose-muted leading-snug mb-4">
         Install Boss Daddy on your phone — your tools, gear, and saved content, one tap from the home screen.
@@ -78,6 +79,6 @@ export default function InstallAppButton({ variant = 'card', className = '' }: P
         {canPrompt ? LABELS.app.short : 'How to install'}
       </button>
       {showIosHint && <div className="mt-3">{iosHint}</div>}
-    </div>
+    </Card>
   )
 }

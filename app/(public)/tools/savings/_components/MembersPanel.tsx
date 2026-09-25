@@ -6,6 +6,7 @@
 
 import Link from 'next/link'
 import RemoveParticipantButton from '../[id]/invite/_RemoveParticipantButton'
+import { Card } from '@/components/ui/Card'
 
 export interface MemberDisplay {
   userId:      string
@@ -30,7 +31,7 @@ export default function MembersPanel({ goalId, members, isOwner, seatsRemaining 
   if (solo && !isOwner) return null
 
   return (
-    <section className="bg-surface border border-soft rounded-xl p-5 space-y-4">
+    <Card as="section" className="p-5 space-y-4">
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
           Members — {members.length} / 5
@@ -83,6 +84,6 @@ export default function MembersPanel({ goalId, members, isOwner, seatsRemaining 
           })}
         </div>
       )}
-    </section>
+    </Card>
   )
 }

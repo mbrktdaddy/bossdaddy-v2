@@ -30,6 +30,7 @@
 
 import { buildTrendSeries, trendExtent, type HistoryCell } from '@/lib/goals/history'
 import { daysBetween } from '@/lib/goals/curve'
+import { Card } from '@/components/ui/Card'
 
 const W = 320
 const H = 96
@@ -83,7 +84,7 @@ export default function MetricTrend({ cells, unit = '', metricLabel }: Props) {
     + (last.target != null ? `, target that day ${last.target}${unit}` : '')
 
   return (
-    <div className="rounded-xl border border-soft bg-surface p-4">
+    <Card className="p-4">
       {/* role="img" + a full sentence: a screen reader gets the trend, not 40
           coordinate pairs. The Log list below is the table-view twin. */}
       <svg
@@ -152,6 +153,6 @@ export default function MetricTrend({ cells, unit = '', metricLabel }: Props) {
           </li>
         ) : null}
       </ul>
-    </div>
+    </Card>
   )
 }

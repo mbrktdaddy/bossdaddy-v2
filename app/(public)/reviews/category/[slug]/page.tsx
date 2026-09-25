@@ -10,6 +10,7 @@ import CategoryIcon from '@/components/CategoryIcon'
 import PageHeader from '@/components/PageHeader'
 import RatingScore from '@/components/RatingScore'
 import { PillFilterStrip, PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
+import { EmptyState } from '@/components/ui/EmptyState'
 import BenchStrip from '@/components/BenchStrip'
 
 interface Props { params: Promise<{ slug: string }> }
@@ -136,11 +137,11 @@ export default async function CategoryPage({ params }: Props) {
             ))}
           </div>
         ) : (
-          <div className="text-center py-24 bg-surface/40 rounded-xl">
-            <CategoryIcon slug={cat.slug} className="w-10 h-10 text-accent-text mb-4 mx-auto" />
-            <p className="text-prose-muted text-lg font-semibold mb-2">No {cat.label} reviews yet.</p>
-            <p className="text-prose-faint text-sm">Check back soon — the first one is in progress.</p>
-          </div>
+          <EmptyState
+            icon={<CategoryIcon slug={cat.slug} className="w-10 h-10 text-accent-text" />}
+            title={<>No {cat.label} reviews yet.</>}
+            body="Check back soon — the first one is in progress."
+          />
         )}
 
         {/* On the Bench */}

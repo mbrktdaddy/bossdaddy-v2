@@ -13,6 +13,7 @@ import { unreadNoteCounts } from '@/lib/goals/notes'
 import GoalCard from './_components/GoalCard'
 import InstallPWA from '@/components/InstallPWA'
 import { LoginLink } from '@/components/LoginLink'
+import { Card } from '@/components/ui/Card'
 
 export const metadata: Metadata = {
   title:       `${LABELS.tools.savings.pageTitle} (Beta)`,
@@ -47,7 +48,7 @@ export default async function SavingsIndexPage() {
           </p>
         </header>
 
-        <section className="bg-surface border border-soft rounded-xl p-6 sm:p-8 space-y-4">
+        <Card as="section" className="p-6 sm:p-8 space-y-4">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
             How it works
           </p>
@@ -60,7 +61,7 @@ export default async function SavingsIndexPage() {
           <p className="text-xs text-prose-faint pt-2">
             {LABELS.tools.savings.disclosure}
           </p>
-        </section>
+        </Card>
 
         <LoginLink className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-5 py-2.5 rounded-xl transition-colors">
           Sign in to start →

@@ -46,6 +46,7 @@ export const metadata: Metadata = {
 // local copies is how the page and the cards would start disagreeing about what
 // "due" means.
 import type { TodayOccurrence, TodayGoal, TodayGoalGroup } from '@/lib/goals/today'
+import { Card } from '@/components/ui/Card'
 
 type OccurrenceRow = TodayOccurrence
 type GoalRow = TodayGoal
@@ -159,7 +160,7 @@ export default async function TodayPage() {
 
       {/* ── nothing at all ──────────────────────────────────────────────────── */}
       {dueNow.length + later.length === 0 ? (
-        <div className="mt-8 rounded-xl border border-soft bg-surface p-5">
+        <Card className="mt-8 p-5">
           <p className="text-sm text-prose-muted">{LABELS.goals.todayNothing}</p>
           <Link
             href="/goals"
@@ -167,7 +168,7 @@ export default async function TodayPage() {
           >
             {LABELS.goals.short} →
           </Link>
-        </div>
+        </Card>
       ) : (
         <div className="mt-10 border-t border-soft pt-6">
           <Link

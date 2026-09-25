@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { LABELS } from '@/lib/labels'
 import { buildSocialMetadata } from '@/lib/og'
 import InstallCta from './_components/InstallCta'
+import { Card } from '@/components/ui/Card'
 
 export function generateMetadata(): Metadata {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
@@ -66,11 +67,11 @@ export default function InstallPage() {
       <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6">
         {PERKS.map((perk) => (
           <div key={perk.title}>
-            <div className="w-10 h-10 rounded-xl bg-surface border border-soft flex items-center justify-center text-accent mb-3">
+            <Card className="w-10 h-10 flex items-center justify-center text-accent mb-3">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden>
                 {perk.icon}
               </svg>
-            </div>
+            </Card>
             <h2 className="text-sm font-black text-prose leading-tight mb-1.5">{perk.title}</h2>
             <p className="text-sm text-prose-faint leading-snug">{perk.body}</p>
           </div>

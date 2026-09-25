@@ -25,6 +25,7 @@ import TodayCard from '@/components/goals/TodayCard'
 import WorkingOnSection from '@/components/goals/WorkingOnSection'
 import YourCornerSection from '@/components/account/YourCornerSection'
 import ToolTiles from '@/components/dad-tools/ToolTiles'
+import { Card } from '@/components/ui/Card'
 
 export function generateMetadata(): Metadata {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
@@ -323,7 +324,7 @@ export default async function ToolsHubPage() {
 
       {/* ── NO KIDS YET — short prompt to add one ───────────────────────── */}
       {user && kids.length === 0 && (
-        <section className="mb-10 sm:mb-14 bg-surface-raised border border-soft rounded-2xl p-6 sm:p-8">
+        <Card as="section" tone="raised" className="mb-10 sm:mb-14 p-6 sm:p-8">
           <p className="text-xs uppercase tracking-widest font-semibold text-eyebrow mb-3">
             Get started
           </p>
@@ -340,7 +341,7 @@ export default async function ToolsHubPage() {
           >
             {LABELS.tools.hub.addFirstKidCta}
           </Link>
-        </section>
+        </Card>
       )}
 
       {/* ── WHAT YOU'RE CARRYING ─────────────────────────────────────────────

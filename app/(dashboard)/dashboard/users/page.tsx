@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/auth-cache'
 import RoleSelector from './_components/RoleSelector'
 import ModerationActions from './_components/ModerationActions'
+import { Card } from '@/components/ui/Card'
 
 type AccountStatus = 'active' | 'suspended' | 'banned' | 'pending_deletion'
 
@@ -38,10 +39,10 @@ export default async function UsersPage() {
           { label: 'Authors', value: counts.author, color: 'text-accent-text-soft' },
           { label: 'Members', value: counts.member, color: 'text-prose-muted' },
         ].map((s) => (
-          <div key={s.label} className="bg-surface border border-soft rounded-xl px-5 py-4">
+          <Card key={s.label} className="px-5 py-4">
             <p className={`text-2xl font-black ${s.color}`}>{s.value}</p>
             <p className="text-xs text-prose-faint mt-1 uppercase tracking-wide">{s.label}</p>
-          </div>
+          </Card>
         ))}
       </div>
 
@@ -62,9 +63,9 @@ export default async function UsersPage() {
       {/* Users list */}
       <div className="space-y-2">
         {users?.map((u) => (
-          <div
+          <Card
             key={u.id}
-            className="flex items-center justify-between p-4 bg-surface border border-soft rounded-xl"
+            className="flex items-center justify-between p-4"
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center text-sm font-bold text-white shrink-0">
@@ -90,7 +91,7 @@ export default async function UsersPage() {
               />
               <RoleSelector userId={u.id} currentRole={u.role} isSelf={u.id === me.id} />
             </div>
-          </div>
+          </Card>
         ))}
       </div>
 

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   contentType: 'review' | 'guide' | 'product'
@@ -89,7 +90,7 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
 
   if (submitted === 'pending') {
     return (
-      <div className="bg-surface border border-soft rounded-xl p-5">
+      <Card className="p-5">
         <p className="font-semibold text-sm mb-1 text-prose-muted">Comment submitted</p>
         <p className="text-prose-muted text-sm">Your comment is pending approval and will appear once reviewed.</p>
         <button
@@ -98,7 +99,7 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
         >
           Leave another comment
         </button>
-      </div>
+      </Card>
     )
   }
 

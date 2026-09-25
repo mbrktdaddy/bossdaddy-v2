@@ -10,6 +10,7 @@ import { ProductImageGallery } from '@/components/admin/ProductImageGallery'
 import { PendingImageGallery, flushPendingImages, type PendingImage } from '@/components/admin/PendingImageGallery'
 import { buildAmazonAffiliateUrl, extractAsin, isValidAsin } from '@/lib/amazon-tag'
 import { TagPicker } from '@/components/workspace/TagPicker'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   product: Product | null
@@ -581,7 +582,7 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
       </div>
 
       {/* ── Product Facts (specs) ──────────────────────────────────────── */}
-      <div className="rounded-xl border border-soft bg-surface-sunken p-4 space-y-3">
+      <Card tone="sunken" className="p-4 space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Product Facts</p>
@@ -683,7 +684,7 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
             </div>
           </div>
         </details>
-      </div>
+      </Card>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
@@ -718,7 +719,7 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
       </div>
 
       {/* ── Tags ───────────────────────────────────────────────────────── */}
-      <div className="rounded-xl border border-soft bg-surface-sunken p-4 space-y-3">
+      <Card tone="sunken" className="p-4 space-y-3">
         <div>
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Tags</p>
           <p className="mt-0.5 text-xs text-prose-faint">
@@ -726,7 +727,7 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
           </p>
         </div>
         <TagPicker selected={tags} onChange={setTags} />
-      </div>
+      </Card>
 
       <div>
         <label className="block text-sm text-prose-muted mb-1.5">Status</label>
@@ -745,7 +746,7 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
       </div>
 
       {/* ── Bench pipeline ─────────────────────────────────────────────── */}
-      <div className="rounded-xl border border-soft bg-surface-sunken p-4 space-y-4">
+      <Card tone="sunken" className="p-4 space-y-4">
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">Bench Pipeline</p>
         <div>
           <label className="block text-sm text-prose-muted mb-1.5">Priority</label>
@@ -786,7 +787,7 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
             />
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Linked review badge */}
       {product?.review_id && (

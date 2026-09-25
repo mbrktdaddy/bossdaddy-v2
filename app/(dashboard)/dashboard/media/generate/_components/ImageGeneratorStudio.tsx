@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { downloadImage } from '@/lib/images/download'
+import { Card } from '@/components/ui/Card'
 
 interface SessionImage {
   id?: string
@@ -178,7 +179,7 @@ Tips:
         ) : (
           <div className="space-y-4">
             {session.map((img, i) => (
-              <div key={i} className="bg-surface border border-soft rounded-xl overflow-hidden">
+              <Card key={i} className="overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={img.url} alt={img.prompt} className="w-full object-contain bg-surface-sunken max-h-[500px]" />
                 <div className="p-4 space-y-2">
@@ -210,7 +211,7 @@ Tips:
                     </button>
                   </div>
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         )}

@@ -10,6 +10,7 @@ import {
   type PhraseKind,
   type AvoidContext,
 } from '@/lib/voiceLexicon'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   initial: VoicePhrase[]
@@ -107,7 +108,7 @@ export function SignaturePhrasesManager({ initial }: Props) {
       </div>
 
       {/* Add form */}
-      <div className="bg-surface border border-soft rounded-xl p-3 space-y-2">
+      <Card className="p-3 space-y-2">
         <textarea
           value={newText}
           onChange={(e) => setNewText(e.target.value)}
@@ -135,7 +136,7 @@ export function SignaturePhrasesManager({ initial }: Props) {
             {adding ? 'Adding…' : '+ Add phrase'}
           </button>
         </div>
-      </div>
+      </Card>
 
       {error && <p className="text-sm text-danger-ink">{error}</p>}
 
@@ -294,7 +295,7 @@ function PhraseRow({
   const avoidTags = (phrase.contexts_avoid ?? []).filter(Boolean)
 
   return (
-    <div className="bg-surface border border-soft rounded-xl p-3 flex items-start gap-3">
+    <Card className="p-3 flex items-start gap-3">
       <div className="min-w-0 flex-1">
         <p className="text-sm text-prose">&ldquo;{phrase.text}&rdquo;</p>
         <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
@@ -347,6 +348,6 @@ function PhraseRow({
           ✕
         </button>
       </div>
-    </div>
+    </Card>
   )
 }

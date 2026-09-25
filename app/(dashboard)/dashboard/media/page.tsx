@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { compressImage } from '@/lib/compress-image'
 import { downloadImage } from '@/lib/images/download'
 import ImageCropper from '@/components/ui/ImageCropper'
+import { Card } from '@/components/ui/Card'
 
 interface MediaAsset {
   id: string
@@ -656,11 +657,11 @@ export default function MediaLibraryPage() {
               />
             )}
             {(usageData.social_posts ?? 0) > 0 && (
-              <div className="bg-surface-raised border border-soft rounded-xl px-4 py-3">
+              <Card tone="raised" className="px-4 py-3">
                 <p className="text-xs text-prose-muted">
                   Attached to {usageData.social_posts} social post{usageData.social_posts === 1 ? '' : 's'} — image will be cleared.
                 </p>
-              </div>
+              </Card>
             )}
             {(usageData.articles_body.length > 0 || usageData.reviews_body.length > 0) && (
               <div className="bg-warn-bg border border-warn-line rounded-xl px-4 py-3 space-y-1">

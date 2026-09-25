@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Card } from '@/components/ui/Card'
 
 export interface LatestItem {
   /** Content-type role label — "Guide" or "Review". Never the category: the rail's
@@ -53,9 +54,9 @@ export default function LatestRail({ items, allHref }: { items: LatestItem[]; al
             ? new Date(it.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
             : null
           return (
-            <li
+            <Card as="li"
               key={it.href}
-              className="shrink-0 w-[220px] bg-surface border border-soft rounded-xl lg:w-auto lg:shrink lg:bg-transparent lg:border-0 lg:rounded-none"
+              className="shrink-0 w-[220px] lg:w-auto lg:shrink lg:bg-transparent lg:border-0 lg:rounded-none"
             >
               <Link href={it.href} className="group block p-3.5 lg:p-0 lg:py-3.5">
                 <p className="text-[15px] font-bold text-prose leading-snug group-hover:text-accent transition-colors line-clamp-3 lg:line-clamp-none">
@@ -71,7 +72,7 @@ export default function LatestRail({ items, allHref }: { items: LatestItem[]; al
                   )}
                 </p>
               </Link>
-            </li>
+            </Card>
           )
         })}
       </ul>

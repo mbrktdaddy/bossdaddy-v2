@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
 import type { Product } from '@/lib/products'
 import { PRODUCT_STATUS_OPTIONS } from '@/lib/products'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 export const dynamic = 'force-dynamic'
 
@@ -90,13 +91,17 @@ export default async function ProductsListPage({
       </div>
 
       {rows.length === 0 ? (
-        <div className="bg-surface border border-soft rounded-xl p-8 text-center">
-          <p className="text-prose-muted mb-2">No products in this view.</p>
-          <p className="text-xs text-prose-faint">
-            Create one, or adopt a{' '}
-            <Link href="/dashboard/admin/candidates" className="text-accent-text-soft hover:text-accent">researched candidate</Link>.
-          </p>
-        </div>
+        <EmptyState
+          variant="panel"
+          size="md"
+          title="No products in this view."
+          body={
+            <>
+              Create one, or adopt a{' '}
+              <Link href="/dashboard/admin/candidates" className="text-accent-text-soft hover:text-accent">researched candidate</Link>.
+            </>
+          }
+        />
       ) : (
         <div className="space-y-2">
           {rows.map((p) => (

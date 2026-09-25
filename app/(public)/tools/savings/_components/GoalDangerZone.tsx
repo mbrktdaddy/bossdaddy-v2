@@ -12,6 +12,7 @@ import {
   resumeGoal,
   deleteGoal,
 } from '@/lib/dad-tools/savings-actions'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   goalId:    string
@@ -65,7 +66,7 @@ export default function GoalDangerZone({ goalId, status, goalName }: Props) {
   const isArchived = status === 'archived'
 
   return (
-    <section className="bg-surface border border-soft rounded-xl p-6 space-y-4">
+    <Card as="section" className="p-6 space-y-4">
       <div>
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
           Danger zone
@@ -112,6 +113,6 @@ export default function GoalDangerZone({ goalId, status, goalName }: Props) {
           {error}
         </div>
       )}
-    </section>
+    </Card>
   )
 }

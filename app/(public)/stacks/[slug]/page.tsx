@@ -19,6 +19,7 @@ import BenchStrip from '@/components/BenchStrip'
 import VaultBreadcrumb from '@/components/vault/VaultBreadcrumb'
 import FtcDisclosure from '@/components/FtcDisclosure'
 import { LABELS } from '@/lib/labels'
+import { Card } from '@/components/ui/Card'
 
 export const revalidate = 60
 
@@ -359,9 +360,9 @@ export default async function StackDetailPage({ params }: Props) {
                     const product = joinedProduct
                     const href = product.affiliate_url ? `/go/${product.slug}` : product.non_affiliate_url ?? null
                     return (
-                      <article
+                      <Card as="article"
                         key={`product-${product.slug}`}
-                        className="relative flex flex-col sm:flex-row gap-5 bg-surface border border-soft hover:border-accent-border/40 rounded-xl p-5 hover:-translate-y-0.5 transition-all duration-200"
+                        className="relative flex flex-col sm:flex-row gap-5 hover:border-accent-border/40 p-5 hover:-translate-y-0.5 transition-all duration-200"
                       >
                         {/* Position number — subtle ordering signal */}
                         <span aria-hidden className="absolute top-3 left-3 text-[10px] font-black text-accent-text/30 tabular-nums tracking-widest">
@@ -410,7 +411,7 @@ export default async function StackDetailPage({ params }: Props) {
                             )}
                           </div>
                         </div>
-                      </article>
+                      </Card>
                     )
                   }
 
@@ -418,9 +419,9 @@ export default async function StackDetailPage({ params }: Props) {
                   const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                   const priceCents = product?.price_cents ?? null
                   return (
-                    <article
+                    <Card as="article"
                       key={review!.id}
-                      className="relative flex flex-col sm:flex-row gap-5 bg-surface border border-soft hover:border-accent-border/40 rounded-xl p-5 hover:-translate-y-0.5 transition-all duration-200"
+                      className="relative flex flex-col sm:flex-row gap-5 hover:border-accent-border/40 p-5 hover:-translate-y-0.5 transition-all duration-200"
                     >
                       {/* Position number — subtle ordering signal */}
                       <span aria-hidden className="absolute top-3 left-3 text-[10px] font-black text-accent-text/30 tabular-nums tracking-widest">
@@ -478,7 +479,7 @@ export default async function StackDetailPage({ params }: Props) {
                           )}
                         </div>
                       </div>
-                    </article>
+                    </Card>
                   )
                 })}
               </div>

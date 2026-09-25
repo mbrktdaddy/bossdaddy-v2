@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
 import { MERCH_CATEGORIES, MERCH_STATUSES, formatPrice, getMerchDisplayImage, type Merch } from '@/lib/merch'
 import { SyncMerchButton } from '@/components/merch/SyncMerchButton'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 export const dynamic = 'force-dynamic'
 
@@ -49,12 +50,16 @@ export default async function AdminMerchListPage() {
       </div>
 
       {rows.length === 0 ? (
-        <div className="bg-surface border border-soft rounded-xl p-8 text-center">
-          <p className="text-prose-muted mb-2">No merch items yet.</p>
-          <p className="text-xs text-prose-faint">
-            Add your first item — set status to <code className="text-accent-text-soft">coming_soon</code>{' '}to show it on /gear with a &quot;Notify me&quot; CTA.
-          </p>
-        </div>
+        <EmptyState
+          variant="panel"
+          size="md"
+          title="No merch items yet."
+          body={
+            <>
+              Add your first item — set status to <code className="text-accent-text-soft">coming_soon</code>{' '}to show it on /gear with a &quot;Notify me&quot; CTA.
+            </>
+          }
+        />
       ) : (
         <div className="space-y-2">
           {rows.map((p) => {

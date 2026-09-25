@@ -16,6 +16,7 @@ import {
   sendMessage, markConversationRead, blockUser, unblockUser, reportContent,
   deleteConversation, setConversationMuted, toggleReaction,
 } from '@/lib/messaging'
+import { Card } from '@/components/ui/Card'
 
 interface Message {
   id: string
@@ -1203,7 +1204,7 @@ export default function Thread({
       {/* Report modal */}
       {reportOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/70" onClick={() => setReportOpen(false)}>
-          <div className="bg-surface border border-soft rounded-xl w-full max-w-sm p-5 space-y-3" onClick={(e) => e.stopPropagation()}>
+          <Card className="w-full max-w-sm p-5 space-y-3" onClick={(e) => e.stopPropagation()}>
             <p className="text-base font-black text-prose">Report {peerName}</p>
             <p className="text-xs text-prose-muted">Pick a reason. Our team reviews every report.</p>
             <div className="space-y-1.5">
@@ -1215,7 +1216,7 @@ export default function Thread({
               ))}
             </div>
             <button type="button" onClick={() => setReportOpen(false)} className="text-xs text-prose-faint hover:text-prose">Cancel</button>
-          </div>
+          </Card>
         </div>
       )}
       {reported && (

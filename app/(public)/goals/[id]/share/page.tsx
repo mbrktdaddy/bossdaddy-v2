@@ -21,6 +21,7 @@ import {
 } from '@/lib/goals/participants'
 import { listGoalContacts } from '@/lib/goals/contacts'
 import { countNotes } from '@/lib/goals/notes'
+import { Card } from '@/components/ui/Card'
 
 export const metadata: Metadata = {
   title: `Sharing — ${LABELS.goals.short}`,
@@ -142,7 +143,7 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
             Nobody yet. This goal is yours alone.
           </p>
         ) : participants.map((p) => (
-          <div key={p.id} className="rounded-xl border border-soft bg-surface p-5">
+          <Card key={p.id} className="p-5">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-prose truncate">
@@ -200,7 +201,7 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
                 </button>
               </form>
             </details>
-          </div>
+          </Card>
         ))}
       </section>
 
@@ -209,7 +210,7 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
         <section className="mt-10 space-y-3">
           <h2 className="text-sm font-bold text-prose uppercase tracking-wide">Waiting on</h2>
           {pending.map((invite) => (
-            <div key={invite.id} className="flex items-start justify-between gap-4 rounded-xl border border-soft bg-surface p-5">
+            <Card key={invite.id} className="flex items-start justify-between gap-4 p-5">
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-prose truncate">
                   {invite.email || 'Whoever you sent the link to'}
@@ -240,7 +241,7 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
                   Call it back
                 </button>
               </form>
-            </div>
+            </Card>
           ))}
         </section>
       ) : null}

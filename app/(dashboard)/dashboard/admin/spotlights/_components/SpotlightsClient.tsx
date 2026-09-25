@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { getCategoryBySlug } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
+import { Card } from '@/components/ui/Card'
 
 export interface Candidate {
   id:        string
@@ -222,7 +223,7 @@ interface ZoneProps {
 
 function Zone({ title, hint, busy, current, onClear, clearLabel = 'Clear', children }: ZoneProps) {
   return (
-    <section className="rounded-xl border border-soft bg-surface overflow-hidden">
+    <Card as="section" className="overflow-hidden">
       <header className="px-5 py-4 border-b border-soft flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h2 className="font-black text-prose">{title}</h2>
@@ -248,7 +249,7 @@ function Zone({ title, hint, busy, current, onClear, clearLabel = 'Clear', child
         </div>
       </header>
       <div className="p-3 sm:p-4">{children}</div>
-    </section>
+    </Card>
   )
 }
 

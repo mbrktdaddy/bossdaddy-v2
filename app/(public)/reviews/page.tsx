@@ -9,6 +9,7 @@ import TopicBlock from '@/components/TopicBlock'
 import BenchStrip from '@/components/BenchStrip'
 import AskTheBoss from '@/components/AskTheBoss'
 import PageHeader from '@/components/PageHeader'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { ogImageUrl, OG_SITE, TWITTER_HANDLE } from '@/lib/og'
 import type { ReviewRow } from './actions'
 import type { Metadata } from 'next'
@@ -115,10 +116,7 @@ export default async function ReviewsPage() {
           scannable list per category. Featured card above does the visual
           heavy-lifting; these are quick browse-and-tap entries. */}
       {sections.length === 0 ? (
-        <div className="text-center py-24 bg-surface/40 rounded-xl border border-soft">
-          <p className="text-prose-faint text-lg font-semibold">No reviews here yet.</p>
-          <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
-        </div>
+        <EmptyState title="No reviews here yet." body="Check back soon, Boss." />
       ) : (
         sections.map(({ cat, items, total }, i) => (
           <Fragment key={cat.slug}>

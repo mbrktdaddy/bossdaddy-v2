@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { PLATFORMS, type SocialPlatform } from '@/lib/social-platforms'
+import { Card } from '@/components/ui/Card'
 
 interface SocialPost {
   id: string
@@ -153,7 +154,7 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
       <div className="px-4 pb-4 space-y-4">
 
         {/* Generation controls */}
-        <div className="bg-surface-sunken border border-soft rounded-xl p-4 space-y-3">
+        <Card tone="sunken" className="p-4 space-y-3">
           <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold">Generate for</p>
           <div className="flex flex-wrap gap-2">
             {PLATFORM_ORDER.map((p) => {
@@ -199,7 +200,7 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
           {error && (
             <p className="text-xs text-red-700 bg-red-50 border border-red-300 rounded-lg px-3 py-2">{error}</p>
           )}
-        </div>
+        </Card>
 
         {/* Generated posts */}
         {loading ? (

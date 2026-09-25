@@ -1,7 +1,9 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
 import { formatPrice } from '@/lib/merch'
+import { EmptyState } from '@/components/ui/EmptyState'
 import type { Metadata } from 'next'
+import { Card } from '@/components/ui/Card'
 
 export const dynamic = 'force-dynamic'
 export const metadata: Metadata = { title: 'Orders — Admin' }
@@ -62,12 +64,14 @@ export default async function AdminOrdersPage() {
       </div>
 
       {orders.length === 0 ? (
-        <div className="bg-surface border border-soft rounded-xl p-12 text-center">
-          <p className="text-prose-muted text-lg font-semibold mb-2">No orders yet.</p>
-          <p className="text-prose-faint text-sm">Orders will appear here after your first Stripe checkout.</p>
-        </div>
+        <EmptyState
+          variant="panel"
+          size="lg"
+          title="No orders yet."
+          body="Orders will appear here after your first Stripe checkout."
+        />
       ) : (
-        <div className="bg-surface border border-soft rounded-xl overflow-x-auto">
+        <Card className="overflow-x-auto">
           <div className="min-w-[640px]">
 
           {/* Table header */}
@@ -117,7 +121,7 @@ export default async function AdminOrdersPage() {
             )
           })}
           </div>
-        </div>
+        </Card>
       )}
     </div>
   )

@@ -2,6 +2,7 @@ import { createAnonClient } from '@/lib/supabase/anon'
 import CommentShareButton from './CommentShareButton'
 import CommentDeleteButton from './CommentDeleteButton'
 import LikeButton from './LikeButton'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   contentType: 'review' | 'guide' | 'product'
@@ -45,7 +46,7 @@ export default async function CommentList({ contentType, contentId }: Props) {
         )?.username ?? 'Anonymous'
 
         return (
-          <div key={c.id} id={`comment-${c.id}`} className="bg-surface border border-soft rounded-xl p-5 scroll-mt-24">
+          <Card key={c.id} id={`comment-${c.id}`} className="p-5 scroll-mt-24">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center text-xs font-bold text-white shrink-0">
                 {author[0].toUpperCase()}
@@ -63,7 +64,7 @@ export default async function CommentList({ contentType, contentId }: Props) {
                 {c.author_id && <CommentDeleteButton commentId={c.id} authorId={c.author_id} />}
               </div>
             </div>
-          </div>
+          </Card>
         )
       })}
     </div>

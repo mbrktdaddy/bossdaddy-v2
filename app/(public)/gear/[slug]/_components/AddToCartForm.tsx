@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { formatPrice } from '@/lib/merch'
 import { dispatchCartUpdated } from '@/lib/cart-events'
+import { Card } from '@/components/ui/Card'
 
 interface Variant {
   id: string
@@ -170,7 +171,7 @@ export default function AddToCartForm({
       {/* Qty stepper */}
       <div className="flex items-center gap-3">
         <p className="text-xs text-prose-faint uppercase tracking-widest">Qty</p>
-        <div className="flex items-center gap-1 bg-surface border border-soft rounded-xl px-2 py-1">
+        <Card className="flex items-center gap-1 px-2 py-1">
           <button
             onClick={() => setQty(q => Math.max(1, q - 1))}
             className="w-8 h-8 flex items-center justify-center text-prose-muted hover:text-prose transition-colors text-lg leading-none"
@@ -184,7 +185,7 @@ export default function AddToCartForm({
           >
             +
           </button>
-        </div>
+        </Card>
       </div>
 
       {/* Add to cart */}

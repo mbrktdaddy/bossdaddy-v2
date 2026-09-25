@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
 import { getCategoryLabel } from '@/lib/categories'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Card } from '@/components/ui/Card'
 
 export const dynamic = 'force-dynamic'
 
@@ -85,12 +87,12 @@ export default async function DemandAdminPage() {
       </div>
 
       {ranked.length === 0 ? (
-        <div className="bg-surface border border-soft rounded-xl p-8 text-center">
-          <p className="text-prose-muted mb-1">No demand logged yet.</p>
-          <p className="text-xs text-prose-faint">
-            When a member asks for gear we haven&apos;t tested, the request lands here.
-          </p>
-        </div>
+        <EmptyState
+          variant="panel"
+          size="md"
+          title="No demand logged yet."
+          body="When a member asks for gear we haven&apos;t tested, the request lands here."
+        />
       ) : (
         <>
           {/* Most requested */}
@@ -100,9 +102,9 @@ export default async function DemandAdminPage() {
             </h2>
             <div className="space-y-2">
               {ranked.map((a) => (
-                <div
+                <Card
                   key={a.key}
-                  className="flex items-center gap-4 p-4 bg-surface border border-soft rounded-xl"
+                  className="flex items-center gap-4 p-4"
                 >
                   <div className="shrink-0 w-10 text-center">
                     <span className="text-lg font-black tabular-nums text-accent-text-soft">{a.count}</span>
@@ -118,7 +120,7 @@ export default async function DemandAdminPage() {
                       )}
                     </div>
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           </section>

@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { deleteBossConversations } from '../actions'
+import { Card } from '@/components/ui/Card'
 
 export type PastChat = { id: string; title: string | null; updated_at: string }
 
@@ -106,7 +107,7 @@ export default function PastChats({ chats, activeId }: { chats: PastChat[]; acti
       {failed && <p className="mb-2 text-xs text-danger-ink">Couldn’t delete. Try again in a sec.</p>}
 
       {open && visible.length > 0 && (
-        <div id="boss-past-chats" className="border border-soft rounded-2xl bg-surface overflow-hidden">
+        <Card id="boss-past-chats" className="overflow-hidden">
           {/* Toolbar: enter/leave Select mode; in it, select all + bulk delete. */}
           <div className="flex items-center justify-between gap-2 px-2 border-b border-soft">
             {selecting ? (
@@ -203,7 +204,7 @@ export default function PastChats({ chats, activeId }: { chats: PastChat[]; acti
               )
             })}
           </ul>
-        </div>
+        </Card>
       )}
     </div>
   )

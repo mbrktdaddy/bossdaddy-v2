@@ -7,6 +7,7 @@
 import { useState, useRef, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createInvite, revokeInvite } from '@/lib/dad-tools/savings-actions'
+import { Card } from '@/components/ui/Card'
 
 interface MemberHit { id: string; username: string; displayName: string | null }
 
@@ -114,7 +115,7 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
   const isFull = seatsRemaining <= 0
 
   return (
-    <section className="bg-surface border border-soft rounded-xl p-6 space-y-5">
+    <Card as="section" className="p-6 space-y-5">
       <div className="flex items-baseline justify-between">
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
           Generate a link
@@ -284,6 +285,6 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
           })}
         </div>
       )}
-    </section>
+    </Card>
   )
 }

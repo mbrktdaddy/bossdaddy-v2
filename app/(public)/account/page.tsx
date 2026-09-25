@@ -35,6 +35,7 @@ import { LABELS } from '@/lib/labels'
 import MyKidsSection from '@/components/dad-tools/MyKidsSection'
 import ContactsCard from '@/components/account/ContactsCard'
 import MessagesCard from '@/components/account/MessagesCard'
+import { Card } from '@/components/ui/Card'
 
 export const metadata: Metadata = {
   title: LABELS.account.pageTitle,
@@ -146,7 +147,7 @@ export default async function AccountHomePage() {
             What's left below is what a member HAS: the things he saved, then the two
             counts. Activity moved under them — it's the least useful thing on the page
             and it was sitting above the content it counts. */}
-        <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+        <Card className="p-6 mb-6">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Liked Content</p>
           {!hasLikedContent ? (
             <p className="text-sm text-prose-faint text-center py-4">
@@ -177,9 +178,9 @@ export default async function AccountHomePage() {
               )}
             </div>
           )}
-        </div>
+        </Card>
 
-        <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+        <Card className="p-6 mb-6">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Following on the Bench</p>
           {subscribedItems.length === 0 ? (
             <p className="text-sm text-prose-faint text-center py-4">
@@ -201,12 +202,12 @@ export default async function AccountHomePage() {
               ))}
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Two counts of your own doing, below the content they count. Kept rather
             than cut — it's your own record, not a scale metric on a public page — but
             it's the first thing to go if this page needs the room. */}
-        <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+        <Card className="p-6 mb-6">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Activity</p>
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center">
@@ -218,7 +219,7 @@ export default async function AccountHomePage() {
               <p className="text-xs text-prose-faint mt-1">Likes Given</p>
             </div>
           </div>
-        </div>
+        </Card>
 
         <div className="border-t border-soft pt-6">
           <Link

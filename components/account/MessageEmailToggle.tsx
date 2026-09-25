@@ -7,6 +7,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { Card } from '@/components/ui/Card'
 
 export default function MessageEmailToggle({ initialEnabled }: { initialEnabled: boolean }) {
   const [enabled, setEnabled] = useState(initialEnabled)
@@ -26,7 +27,7 @@ export default function MessageEmailToggle({ initialEnabled }: { initialEnabled:
   }
 
   return (
-    <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+    <Card className="p-6 mb-6">
       <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-4">Notifications</p>
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
@@ -50,6 +51,6 @@ export default function MessageEmailToggle({ initialEnabled }: { initialEnabled:
           </span>
         </button>
       </div>
-    </div>
+    </Card>
   )
 }

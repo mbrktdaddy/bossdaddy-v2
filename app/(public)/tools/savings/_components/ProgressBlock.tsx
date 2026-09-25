@@ -4,6 +4,7 @@
 import { LABELS } from '@/lib/labels'
 import type { SavingsGoal, GoalStats } from '@/lib/dad-tools/savings'
 import { fmtUsdWhole, fmtUsd, cadenceUnitLabel } from '@/lib/dad-tools/savings'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   goal:  SavingsGoal
@@ -17,7 +18,7 @@ export default function ProgressBlock({ goal, stats }: Props) {
     : null
 
   return (
-    <section className="bg-surface border border-soft rounded-xl p-6 space-y-5">
+    <Card as="section" className="p-6 space-y-5">
 
       {/* Top — saved + target */}
       <div>
@@ -93,7 +94,7 @@ export default function ProgressBlock({ goal, stats }: Props) {
           })}
         </p>
       )}
-    </section>
+    </Card>
   )
 }
 

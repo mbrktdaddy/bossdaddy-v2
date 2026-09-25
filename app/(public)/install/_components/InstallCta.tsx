@@ -12,6 +12,7 @@
 
 import { useState } from 'react'
 import { usePwaInstall } from '@/components/pwa/PwaInstallProvider'
+import { Card } from '@/components/ui/Card'
 
 function StepList({ steps }: { steps: React.ReactNode[] }) {
   return (
@@ -35,7 +36,7 @@ export default function InstallCta() {
   // Already running as an installed app — nothing left to do.
   if (isStandalone || installed) {
     return (
-      <div className="bg-surface border border-soft rounded-2xl p-6 sm:p-8 flex items-start gap-4">
+      <Card className="p-6 sm:p-8 flex items-start gap-4">
         <svg className="w-7 h-7 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
         </svg>
@@ -45,7 +46,7 @@ export default function InstallCta() {
             Boss Daddy is on your home screen — tap the icon any time to jump right back in.
           </p>
         </div>
-      </div>
+      </Card>
     )
   }
 
@@ -55,7 +56,7 @@ export default function InstallCta() {
   }
 
   return (
-    <div className="bg-surface border border-soft rounded-2xl p-6 sm:p-8">
+    <Card className="p-6 sm:p-8">
       {/* Native one-tap path — Chrome, Edge, Android. */}
       {canPrompt && (
         <div className="mb-6">
@@ -102,6 +103,6 @@ export default function InstallCta() {
           </p>
         </>
       ) : null}
-    </div>
+    </Card>
   )
 }

@@ -4,6 +4,7 @@ import { listConversationsFor } from '@/lib/messaging-queries'
 import MemberSearch from '@/components/members/MemberSearch'
 import ConversationList from './_components/ConversationList'
 import type { Metadata } from 'next'
+import { Card } from '@/components/ui/Card'
 
 export const metadata: Metadata = {
   title: 'Messages',
@@ -24,10 +25,10 @@ export default async function MessagesPage() {
       <h1 className="text-2xl font-black text-prose mb-4">Messages</h1>
 
       {/* Compose — the obvious "start a conversation" entry point. */}
-      <div className="bg-surface border border-soft rounded-xl p-4 sm:p-5">
+      <Card className="p-4 sm:p-5">
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-3">New message</p>
         <MemberSearch />
-      </div>
+      </Card>
 
       <div className="mt-6 divide-y divide-soft border border-soft rounded-xl overflow-hidden">
         <ConversationList initial={conversations} userId={user.id} />

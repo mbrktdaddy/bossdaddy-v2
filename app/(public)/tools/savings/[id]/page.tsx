@@ -19,6 +19,7 @@ import GoalStatusButton from '../_components/GoalStatusButton'
 import LeaveGoalButton from '../_components/LeaveGoalButton'
 import MyDestinationPanel from '../_components/MyDestinationPanel'
 import NotesFeed from '@/components/goals/NotesFeed'
+import { Card } from '@/components/ui/Card'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -225,7 +226,7 @@ export default async function SavingsGoalPage({ params }: PageProps) {
       {/* Leave-goal affordance — only for non-owner participants. Owner
           has to archive or delete instead (handled in /edit page). */}
       {!isOwner && myParticipant && (
-        <section className="bg-surface-sunken border border-soft rounded-xl p-5 space-y-3">
+        <Card as="section" tone="sunken" className="p-5 space-y-3">
           <div>
             <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold mb-1">
               Your role: Contributor
@@ -237,7 +238,7 @@ export default async function SavingsGoalPage({ params }: PageProps) {
             </p>
           </div>
           <LeaveGoalButton goalId={goal.id} userId={user.id} goalName={goal.name} />
-        </section>
+        </Card>
       )}
 
       {isOwner && (

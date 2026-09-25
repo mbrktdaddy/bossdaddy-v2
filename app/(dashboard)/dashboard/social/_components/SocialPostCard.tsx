@@ -4,6 +4,7 @@ import { useState } from 'react'
 import dynamic from 'next/dynamic'
 import LinkPicker, { type SourceLinks } from './LinkPicker'
 import type { HashtagPreset } from './HashtagPresetsPanel'
+import { Card } from '@/components/ui/Card'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
@@ -141,7 +142,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
 
   return (
     <>
-      <div className="bg-surface border border-soft rounded-xl p-4 space-y-3">
+      <Card className="p-4 space-y-3">
         {/* Top row */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 flex-wrap">
@@ -378,7 +379,7 @@ export default function SocialPostCard({ post, charLimit, sourceLinks, presets, 
             </button>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Image picker modal */}
       {showImagePicker && (

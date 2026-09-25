@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { getCategoryBySlug } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
 import { StatusBadge } from './StatusBadge'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 export interface BulkListItem {
   id: string
@@ -87,11 +88,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
   }
 
   if (!items.length) {
-    return (
-      <div className="text-center py-24 border border-dashed border-soft rounded-xl">
-        <p className="text-prose-faint text-lg">{emptyMessage}</p>
-      </div>
-    )
+    return <EmptyState variant="dashed" size="lg" title={emptyMessage} />
   }
 
   const allSelected = filteredItems.length > 0 && selected.size === filteredItems.length
@@ -154,9 +151,7 @@ export function BulkContentList({ items, contentType, emptyMessage }: Props) {
 
       {/* No search results */}
       {filteredItems.length === 0 && (
-        <div className="text-center py-16 border border-dashed border-soft rounded-xl">
-          <p className="text-prose-faint">No results for &ldquo;{search}&rdquo;</p>
-        </div>
+        <EmptyState variant="dashed" size="md" title={<>No results for &ldquo;{search}&rdquo;</>} />
       )}
 
       {/* List */}

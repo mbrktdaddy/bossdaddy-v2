@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getCategoryBySlug } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 type PendingItem = {
   id: string
@@ -41,13 +42,13 @@ export function AttentionFeed({ pendingItems, pendingComments }: Props) {
 
   if (!hasItems) {
     return (
-      <div className="bg-surface border border-soft rounded-xl p-8 text-center">
-        <svg className="w-8 h-8 text-forest mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <p className="text-prose-muted font-semibold">All clear.</p>
-        <p className="text-prose-faint text-sm mt-1">Nothing needs your attention right now.</p>
-      </div>
+      <EmptyState
+        variant="panel"
+        size="md"
+        icon={<svg className="w-8 h-8 text-forest" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+        title="All clear."
+        body="Nothing needs your attention right now."
+      />
     )
   }
 

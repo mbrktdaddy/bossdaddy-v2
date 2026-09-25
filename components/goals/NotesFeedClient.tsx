@@ -39,6 +39,7 @@ import {
   type NoteRow,
   type NoteSubject,
 } from '@/lib/goals/note-types'
+import { Card } from '@/components/ui/Card'
 
 type Props = {
   subject: NoteSubject
@@ -139,7 +140,7 @@ export default function NotesFeedClient({
   const title = shared ? L.notesShared : L.notesSolo
 
   return (
-    <section className="bg-surface border border-soft rounded-xl p-5 sm:p-6">
+    <Card as="section" className="p-5 sm:p-6">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
           {title}
@@ -232,7 +233,7 @@ export default function NotesFeedClient({
       {access === 'read' && (
         <p className="mt-4 text-xs text-prose-faint">{L.notesReadOnly}</p>
       )}
-    </section>
+    </Card>
   )
 }
 
@@ -307,7 +308,7 @@ function NoteItem({
   }
 
   return (
-    <div className="rounded-xl bg-surface-sunken border border-soft p-3">
+    <Card tone="sunken" className="p-3">
       {/*
         ATTRIBUTION ONLY WHEN THERE IS SOMEONE TO ATTRIBUTE TO. On a solo journal
         every line would read "you", which is noise stapled to every entry.
@@ -359,7 +360,7 @@ function NoteItem({
           </span>
         )}
       </div>
-    </div>
+    </Card>
   )
 }
 

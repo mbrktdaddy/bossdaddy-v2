@@ -16,6 +16,7 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { LABELS } from '@/lib/labels'
 import AcceptInviteButton from './_AcceptInviteButton'
+import { Card } from '@/components/ui/Card'
 
 interface PageProps {
   params: Promise<{ token: string }>
@@ -151,12 +152,12 @@ export default async function AcceptInvitePage({ params }: PageProps) {
     const next = encodeURIComponent(`/tools/savings/invite/${token}`)
     return (
       <Layout title={`${ctx.inviterName} invited you to a savings goal`}>
-        <div className="bg-surface-sunken border border-soft rounded-xl p-5 space-y-3">
+        <Card tone="sunken" className="p-5 space-y-3">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
             Goal
           </p>
           <p className="text-2xl font-black text-prose leading-tight">{ctx.goalName}</p>
-        </div>
+        </Card>
         <p className="text-prose-muted text-sm leading-relaxed">
           Sign in or create a free Boss Daddy account to join this goal. You&apos;ll be able
           to log contributions, see shared progress, and skip days — all while
@@ -192,12 +193,12 @@ export default async function AcceptInvitePage({ params }: PageProps) {
   // Logged-in non-owner — show goal context + Join button
   return (
     <Layout title={`${ctx.inviterName} invited you to a savings goal`}>
-      <div className="bg-surface-sunken border border-soft rounded-xl p-5 space-y-3">
+      <Card tone="sunken" className="p-5 space-y-3">
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
           Goal
         </p>
         <p className="text-2xl font-black text-prose leading-tight">{ctx.goalName}</p>
-      </div>
+      </Card>
       <p className="text-prose-muted text-sm leading-relaxed">
         Join {ctx.inviterName.replace(/^@/, '')}{' '}on this goal. You&apos;ll be able to log
         contributions toward the same streak — the goal succeeds when either of you

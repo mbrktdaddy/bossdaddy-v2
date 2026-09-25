@@ -11,6 +11,7 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { LABELS } from '@/lib/labels'
 import InviteManager from './_InviteManager'
 import RemoveParticipantButton from './_RemoveParticipantButton'
+import { Card } from '@/components/ui/Card'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -110,7 +111,7 @@ export default async function InviteGoalParticipantsPage({ params }: PageProps) 
       </header>
 
       {/* Current participants */}
-      <section className="bg-surface border border-soft rounded-xl p-6 space-y-4">
+      <Card as="section" className="p-6 space-y-4">
         <div className="flex items-baseline justify-between">
           <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold">
             On this goal — {participants.length} / 5
@@ -140,7 +141,7 @@ export default async function InviteGoalParticipantsPage({ params }: PageProps) 
             )
           })}
         </div>
-      </section>
+      </Card>
 
       {/* Invite manager — generate links + pending list */}
       <InviteManager

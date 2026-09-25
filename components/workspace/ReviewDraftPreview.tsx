@@ -6,6 +6,7 @@ import TakeawaysCard from '@/components/reviews/TakeawaysCard'
 import TrustReceipt from '@/components/reviews/TrustReceipt'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import CategoryIcon from '@/components/CategoryIcon'
+import { Card } from '@/components/ui/Card'
 
 interface FAQ { question: string; answer: string }
 
@@ -52,7 +53,7 @@ export function ReviewDraftPreview({
   }
 
   return (
-    <div className="bg-surface-sunken border border-soft rounded-xl overflow-hidden text-sm">
+    <Card tone="sunken" className="overflow-hidden text-sm">
       {/* Header strip */}
       <div className="bg-surface border-b border-soft px-4 py-2 flex items-center justify-between">
         <span className="text-xs text-prose-faint font-medium">Public preview</span>
@@ -211,6 +212,6 @@ export function ReviewDraftPreview({
         )}
 
       </div>
-    </div>
+    </Card>
   )
 }

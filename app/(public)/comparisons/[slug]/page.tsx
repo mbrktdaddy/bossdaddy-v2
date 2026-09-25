@@ -19,6 +19,7 @@ import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedR
 import BenchStrip from '@/components/BenchStrip'
 import VaultBreadcrumb from '@/components/vault/VaultBreadcrumb'
 import FtcDisclosure from '@/components/FtcDisclosure'
+import { Card } from '@/components/ui/Card'
 
 export const revalidate = 60
 
@@ -424,11 +425,11 @@ export default async function ComparisonDetailPage({ params }: Props) {
                         {items.map(({ review }) => (
                           <th key={review!.id} scope="col" className="px-3 py-3 border-b border-soft align-bottom min-w-[120px]">
                             <a href={`#dive-${review!.slug}`} className="group block text-center">
-                              <div className="relative w-14 h-14 mx-auto mb-2 rounded-xl overflow-hidden bg-surface-sunken border border-soft group-hover:border-accent-border transition-colors">
+                              <Card tone="sunken" className="relative w-14 h-14 mx-auto mb-2 overflow-hidden group-hover:border-accent-border transition-colors">
                                 {review!.image_url && (
                                   <Image src={review!.image_url} alt={review!.product_name} fill className="object-cover" sizes="56px" />
                                 )}
-                              </div>
+                              </Card>
                               <p className="text-[11px] font-bold text-accent-text-soft leading-tight line-clamp-2 group-hover:text-accent transition-colors">
                                 {review!.product_name}
                               </p>
@@ -515,10 +516,10 @@ export default async function ComparisonDetailPage({ params }: Props) {
                   const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                   const imageLeft = idx % 2 === 0
                   return (
-                    <article
+                    <Card as="article"
                       key={review.id}
                       id={`dive-${review.slug}`}
-                      className="scroll-mt-28 rounded-xl overflow-hidden bg-surface border border-soft"
+                      className="scroll-mt-28 overflow-hidden"
                     >
                       <div className={`flex flex-col ${imageLeft ? 'sm:flex-row' : 'sm:flex-row-reverse'} gap-0`}>
                         {/* Hero image column */}
@@ -620,7 +621,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
                           </div>
                         </div>
                       </div>
-                    </article>
+                    </Card>
                   )
                 })}
               </div>

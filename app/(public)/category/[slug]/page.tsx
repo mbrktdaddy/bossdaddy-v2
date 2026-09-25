@@ -9,6 +9,8 @@ import BossApprovedBadge from '@/components/BossApprovedBadge'
 import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
 import PageHeader from '@/components/PageHeader'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Card } from '@/components/ui/Card'
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -198,7 +200,7 @@ export default async function CategoryHubPage({ params }: Props) {
                     className="group flex items-center gap-4 sm:gap-5 py-5 -mx-2 px-2 rounded-xl hover:bg-surface/50 transition-colors"
                   >
                     {/* Thumbnail — fixed square, fills */}
-                    <div className="relative shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-surface border border-soft">
+                    <Card className="relative shrink-0 w-20 h-20 sm:w-24 sm:h-24 overflow-hidden">
                       {g.image_url ? (
                         <Image
                           src={g.image_url}
@@ -212,7 +214,7 @@ export default async function CategoryHubPage({ params }: Props) {
                           <CategoryIcon slug={cat.slug} className="w-7 h-7 text-accent-text/40" />
                         </div>
                       )}
-                    </div>
+                    </Card>
 
                     {/* Title + meta */}
                     <div className="min-w-0 flex-1">
@@ -252,17 +254,19 @@ export default async function CategoryHubPage({ params }: Props) {
 
         {/* ── Empty state ───────────────────────────────────────────────── */}
         {!hasReviews && !hasGuides && (
-          <div className="text-center py-24 bg-surface/40 rounded-xl">
-            <CategoryIcon slug={cat.slug} className="w-10 h-10 text-accent-text mb-4 mx-auto" />
-            <p className="text-prose-muted text-lg font-semibold mb-2">No {cat.label} content yet.</p>
-            <p className="text-prose-faint text-sm">Check back soon — it&apos;s on the bench.</p>
-            <Link
-              href="/bench"
-              className="inline-block mt-6 text-sm text-accent-text-soft hover:text-accent font-medium transition-colors"
-            >
-              See what&apos;s coming →
-            </Link>
-          </div>
+          <EmptyState
+            icon={<CategoryIcon slug={cat.slug} className="w-10 h-10 text-accent-text" />}
+            title={<>No {cat.label} content yet.</>}
+            body={<>Check back soon — it&apos;s on the bench.</>}
+            action={
+              <Link
+                href="/bench"
+                className="inline-block mt-6 text-sm text-accent-text-soft hover:text-accent font-medium transition-colors"
+              >
+                See what&apos;s coming →
+              </Link>
+            }
+          />
         )}
 
         {/* ── FAQ accordion ────────────────────────────────────────────── */}

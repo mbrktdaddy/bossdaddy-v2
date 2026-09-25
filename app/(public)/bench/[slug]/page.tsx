@@ -14,6 +14,7 @@ import { BenchGallery } from '@/components/BenchGallery'
 import BenchStrip from '@/components/BenchStrip'
 import { buildSocialMetadata, toAbsoluteUrl } from '@/lib/og'
 import type { Metadata } from 'next'
+import { Card } from '@/components/ui/Card'
 
 // Per-user vote/subscribe state is fetched CLIENT-side by VoteButton/
 // SubscribeButton (same pattern as LikeButton + the comment widgets), so this
@@ -118,11 +119,11 @@ export default async function BenchDetailPage({ params }: Props) {
           )}
 
           {isSkipped && wishlistItem.skip_reason && (
-            <div className="p-4 bg-surface-raised border border-soft rounded-xl mb-4">
+            <Card tone="raised" className="p-4 mb-4">
               <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
               <p className="text-xs font-black uppercase tracking-widest text-prose-muted mb-1">Why I&apos;m not testing this</p>
               <p className="text-sm text-prose-muted">{wishlistItem.skip_reason}</p>
-            </div>
+            </Card>
           )}
 
           {wishlistItem.estimated_review_date && ['queued','testing'].includes(wishlistItem.status) && (

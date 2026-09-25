@@ -3,6 +3,7 @@ import Image from 'next/image'
 import type { WishlistItem } from '@/lib/wishlist'
 import { getBuyLabel } from '@/lib/wishlist'
 import { StatusBadge } from './StatusBadge'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   item: WishlistItem
@@ -16,7 +17,7 @@ export function WishlistCard({ item }: Props) {
   const detailHref = `/bench/${item.slug}`
 
   return (
-    <div className="bg-surface border border-soft rounded-xl overflow-hidden flex flex-col hover:border-strong/60 hover:-translate-y-0.5 transition-all duration-200">
+    <Card className="overflow-hidden flex flex-col hover:border-strong/60 hover:-translate-y-0.5 transition-all duration-200">
       {/* Image */}
       <Link href={detailHref} className="block relative aspect-[4/3] bg-surface-raised">
         {item.image_url ? (
@@ -97,6 +98,6 @@ export function WishlistCard({ item }: Props) {
           )}
         </div>
       </div>
-    </div>
+    </Card>
   )
 }

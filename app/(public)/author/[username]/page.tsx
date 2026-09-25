@@ -8,6 +8,7 @@ import RatingScore from '@/components/RatingScore'
 import BenchStrip from '@/components/BenchStrip'
 import PipelineCounter from '@/components/PipelineCounter'
 import MessageUserButton from '@/components/messages/MessageUserButton'
+import { EmptyState } from '@/components/ui/EmptyState'
 import type { Metadata } from 'next'
 import { buildSocialMetadata } from '@/lib/og'
 
@@ -224,9 +225,7 @@ export default async function AuthorPage({ params }: Props) {
  )}
 
  {totalReviews === 0 && totalGuides === 0 && (
- <div className="text-center py-24 bg-surface/40 rounded-xl">
- <p className="text-prose-faint">No published content yet.</p>
- </div>
+ <EmptyState title="No published content yet." />
  )}
 
  <div className="mt-12 pt-8 border-t border-soft">

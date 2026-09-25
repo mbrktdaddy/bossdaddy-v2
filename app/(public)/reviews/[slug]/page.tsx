@@ -44,6 +44,7 @@ import { VerdictChangeBadge } from '@/components/reviews/VerdictChangeBadge'
 import { getReviewTimeline, transformFollowupContent, parseSpecsGradeData, type VerdictChange } from '@/lib/reviews'
 import TrackView from '@/components/TrackView'
 import RecentlyViewedStrip from '@/components/RecentlyViewedStrip'
+import { Card } from '@/components/ui/Card'
 
 const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
 
@@ -428,7 +429,7 @@ export default async function ReviewPage({ params }: Props) {
         {review.image_url && (
           <div className="relative mb-8">
             <LightboxImage src={review.image_url} alt={review.product_name}>
-              <div className="relative w-full h-64 md:h-80 rounded-xl overflow-hidden bg-surface-raised border border-soft">
+              <Card tone="raised" className="relative w-full h-64 md:h-80 overflow-hidden">
                 <Image
                   src={review.image_url}
                   alt={review.product_name}
@@ -437,7 +438,7 @@ export default async function ReviewPage({ params }: Props) {
                   sizes="(max-width: 768px) 100vw, 768px"
                   priority
                 />
-              </div>
+              </Card>
             </LightboxImage>
             {(review.rating ?? 0) >= 8 && (
               <div className="absolute top-3 right-3 pointer-events-none">
@@ -522,7 +523,7 @@ export default async function ReviewPage({ params }: Props) {
               <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">Specs Grade</p>
               <h2 className="text-2xl font-black text-prose leading-tight">How the specs stack up</h2>
             </div>
-            <div className="rounded-xl border border-soft bg-surface p-5 sm:p-6">
+            <Card className="p-5 sm:p-6">
               <div className="flex items-baseline gap-3 mb-3">
                 <span className="text-3xl font-black text-prose tabular-nums leading-none">
                   {review.score_specs}<span className="text-base text-prose-faint font-bold">/10</span>
@@ -560,7 +561,7 @@ export default async function ReviewPage({ params }: Props) {
                   </div>
                 </details>
               )}
-            </div>
+            </Card>
           </section>
         )}
 
@@ -729,7 +730,7 @@ export default async function ReviewPage({ params }: Props) {
 
           {/* Related Reviews */}
           {related && related.length > 0 && (
-            <div className="bg-surface border border-soft rounded-xl p-5">
+            <Card className="p-5">
               <div className="flex items-stretch gap-3 mb-4">
                 <div className="w-[3px] bg-accent rounded-full shrink-0" />
                 <p className="text-[12px] uppercase tracking-[0.18em] font-black text-prose self-center">More Reviews</p>
@@ -746,7 +747,7 @@ export default async function ReviewPage({ params }: Props) {
                   </Link>
                 ))}
               </div>
-            </div>
+            </Card>
           )}
 
         </aside>

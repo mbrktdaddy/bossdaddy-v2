@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,12 +42,12 @@ export default async function PicksListPage() {
       </div>
 
       {!picks?.length ? (
-        <div className="bg-surface border border-soft rounded-xl p-8 text-center">
-          <p className="text-prose-muted mb-2">The Vault is empty.</p>
-          <p className="text-xs text-prose-faint">
-            Build your first collection — a Father&apos;s Day gift guide, a Yeti-vs-RTIC comparison, a Newborn Survival stack.
-          </p>
-        </div>
+        <EmptyState
+          variant="panel"
+          size="md"
+          title="The Vault is empty."
+          body="Build your first collection — a Father&apos;s Day gift guide, a Yeti-vs-RTIC comparison, a Newborn Survival stack."
+        />
       ) : (
         <div className="space-y-2">
           {(picks ?? []).map((p) => {

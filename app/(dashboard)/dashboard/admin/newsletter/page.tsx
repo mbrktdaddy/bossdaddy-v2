@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
 import { NewsletterDigestTrigger } from './_components/NewsletterDigestTrigger'
+import { Card } from '@/components/ui/Card'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,7 +59,7 @@ export default async function AdminNewsletterPage() {
 
       {/* Interests breakdown (recent 50) */}
       {interestRows.length > 0 && (
-        <div className="mb-8 bg-surface border border-soft rounded-xl p-5">
+        <Card className="mb-8 p-5">
           <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold mb-3">
             Interest tags (most recent 50)
           </p>
@@ -70,11 +71,11 @@ export default async function AdminNewsletterPage() {
               </span>
             ))}
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Recent subscribers */}
-      <div className="bg-surface border border-soft rounded-xl overflow-hidden">
+      <Card className="overflow-hidden">
         <div className="px-5 py-3 border-b border-soft flex items-center justify-between">
           <p className="text-sm font-semibold">Recent signups</p>
           <p className="text-xs text-prose-faint">Showing latest 50</p>
@@ -109,16 +110,16 @@ export default async function AdminNewsletterPage() {
             ))}
           </div>
         )}
-      </div>
+      </Card>
     </div>
   )
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-surface border border-soft rounded-xl p-4">
+    <Card className="p-4">
       <p className="text-xs text-prose-faint uppercase tracking-widest font-semibold mb-1">{label}</p>
       <p className="text-2xl font-black text-prose">{value}</p>
-    </div>
+    </Card>
   )
 }

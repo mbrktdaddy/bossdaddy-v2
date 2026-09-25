@@ -1,3 +1,5 @@
+import { Card } from '@/components/ui/Card'
+
 export default function Loading() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 animate-pulse">
@@ -17,7 +19,7 @@ export default function Loading() {
       {/* Comparison items */}
       <div className="space-y-6">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="flex gap-5 p-5 bg-surface rounded-2xl border border-soft">
+          <Card key={i} className="flex gap-5 p-5">
             <div className="w-24 h-24 bg-surface-raised rounded-xl shrink-0" />
             <div className="flex-1 space-y-3">
               <div className="h-3 w-16 bg-surface-raised rounded" />
@@ -28,7 +30,7 @@ export default function Loading() {
                 <div className="h-5 w-14 bg-surface-raised rounded-full" />
               </div>
             </div>
-          </div>
+          </Card>
         ))}
       </div>
     </div>

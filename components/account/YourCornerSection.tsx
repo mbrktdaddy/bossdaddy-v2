@@ -20,6 +20,7 @@ import Link from 'next/link'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { TIER_COPY, type ShareTier } from '@/lib/goals/participants'
 import { LABELS } from '@/lib/labels'
+import { Card } from '@/components/ui/Card'
 
 type Row = {
   goal_id: string
@@ -102,7 +103,7 @@ export default async function YourCornerSection() {
   // someone would be advice he can't take.
   if (rows.length === 0) {
     return (
-      <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+      <Card className="p-6 mb-6">
         <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">
           {LABELS.contacts.cornerLabel}
         </p>
@@ -139,7 +140,7 @@ export default async function YourCornerSection() {
           </>
         )}
         <BackingLink />
-      </div>
+      </Card>
     )
   }
 
@@ -157,7 +158,7 @@ export default async function YourCornerSection() {
   const people = [...byPerson.values()].sort((a, b) => a.label.localeCompare(b.label))
 
   return (
-    <div className="bg-surface border border-soft rounded-xl p-6 mb-6">
+    <Card className="p-6 mb-6">
       <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">
         {LABELS.contacts.cornerLabel}
       </p>
@@ -186,6 +187,6 @@ export default async function YourCornerSection() {
         ))}
       </div>
       <BackingLink />
-    </div>
+    </Card>
   )
 }
