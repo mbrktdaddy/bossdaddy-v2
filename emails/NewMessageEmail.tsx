@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { EmailLayout, EmailButton, footerText, footerLink, DEFAULT_SITE_URL } from './_components/EmailLayout'
 
 interface Props {
   /** Display names of members with unread messages (already de-duped). */
@@ -19,7 +20,7 @@ export function NewMessageEmail({
   conversationCount,
   messagesUrl,
   manageUrl,
-  siteUrl = 'https://www.bossdaddylife.com',
+  siteUrl = DEFAULT_SITE_URL,
 }: Props) {
   // "Alex" · "Alex and Sam" · "Alex, Sam, and 2 others"
   const headline = (() => {
@@ -33,66 +34,27 @@ export function NewMessageEmail({
   })()
 
   return (
-    <html>
-      <head>
-        <meta name='viewport' content='width=device-width, initial-scale=1.0' />
-      </head>
-      <body style={{ backgroundColor: '#0a0a0a', margin: 0, padding: 0, fontFamily: 'Arial, sans-serif' }}>
-        <table width='100%' cellPadding={0} cellSpacing={0} style={{ backgroundColor: '#0a0a0a', padding: '40px 20px' }}>
-          <tr>
-            <td align='center'>
-              <table width='560' cellPadding={0} cellSpacing={0} style={{ backgroundColor: '#111111', borderRadius: '12px', overflow: 'hidden', maxWidth: '560px', width: '100%' }}>
+    <EmailLayout
+      siteUrl={siteUrl}
+      footer={
+        <p style={footerText}>
+          Boss Daddy Life · <a href={siteUrl} style={footerLink}>bossdaddylife.com</a><br/>
+          <a href={manageUrl} style={footerLink}>Turn off message emails</a>
+        </p>
+      }
+    >
+      <p style={{ color: '#9ca3af', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, margin: '0 0 8px 0' }}>
+        Messages
+      </p>
+      <h1 style={{ color: '#ffffff', fontSize: '24px', fontWeight: 800, margin: '0 0 16px 0', lineHeight: 1.3 }}>
+        {headline}
+      </h1>
+      <p style={{ color: '#9ca3af', fontSize: '15px', lineHeight: 1.6, margin: '0 0 24px 0' }}>
+        Open Boss Daddy to read and reply. We keep the message itself private — you&apos;ll
+        find it waiting in your inbox.
+      </p>
 
-                <tr>
-                  <td style={{ backgroundColor: '#111114', padding: '24px 40px', borderBottom: '1px solid #222226' }}>
-                    <p style={{ margin: 0, color: '#CC5500', fontWeight: 900, fontSize: '20px', letterSpacing: '-0.5px' }}>
-                      BOSS DADDY LIFE
-                    </p>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style={{ padding: '40px' }}>
-                    <p style={{ color: '#9ca3af', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, margin: '0 0 8px 0' }}>
-                      Messages
-                    </p>
-                    <h1 style={{ color: '#ffffff', fontSize: '24px', fontWeight: 800, margin: '0 0 16px 0', lineHeight: 1.3 }}>
-                      {headline}
-                    </h1>
-                    <p style={{ color: '#9ca3af', fontSize: '15px', lineHeight: 1.6, margin: '0 0 24px 0' }}>
-                      Open Boss Daddy to read and reply. We keep the message itself private — you&apos;ll
-                      find it waiting in your inbox.
-                    </p>
-
-                    <table cellPadding={0} cellSpacing={0} style={{ margin: '8px 0 0 0' }}>
-                      <tr>
-                        <td style={{ backgroundColor: '#CC5500', borderRadius: '8px' }}>
-                          <a
-                            href={messagesUrl}
-                            style={{ display: 'inline-block', padding: '14px 28px', color: '#ffffff', fontWeight: 700, fontSize: '15px', textDecoration: 'none' }}
-                          >
-                            Open Messages →
-                          </a>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style={{ backgroundColor: '#0a0a0a', padding: '20px 40px', borderTop: '1px solid #222226' }}>
-                    <p style={{ color: '#6b7280', fontSize: '12px', margin: 0, lineHeight: 1.5 }}>
-                      Boss Daddy Life · <a href={siteUrl} style={{ color: '#9ca3af', textDecoration: 'none' }}>bossdaddylife.com</a><br/>
-                      <a href={manageUrl} style={{ color: '#9ca3af' }}>Turn off message emails</a>
-                    </p>
-                  </td>
-                </tr>
-
-              </table>
-            </td>
-          </tr>
-        </table>
-      </body>
-    </html>
+      <EmailButton href={messagesUrl}>Open Messages →</EmailButton>
+    </EmailLayout>
   )
 }

@@ -6,7 +6,8 @@ import { getBadgesByProductSlug } from '@/lib/collection-listings'
 import CategoryIcon from '@/components/CategoryIcon'
 import { MerchPanel } from './_components/MerchPanel'
 import { MerchStrip } from '@/components/MerchStrip'
-import { GearCard, GearRow, type GearReview } from './_components/GearCards'
+import { GearRow, type GearReview } from './_components/GearCards'
+import ReviewCard from '@/components/ReviewCard'
 import FeaturedReviewCard from '@/components/FeaturedReviewCard'
 import BenchStrip from '@/components/BenchStrip'
 import AskTheBoss from '@/components/AskTheBoss'
@@ -82,7 +83,7 @@ export default async function GearPage() {
 
   const rawTopPicks = (reviews ?? []) as GearReview[]
   // Batch-fetch collection badges for every visible product in one query so
-  // GearCard can render chips per card without N+1 round-trips.
+  // ReviewCard can render chips per card without N+1 round-trips.
   const slugsForBadges = rawTopPicks.map((r) => r.product_slug).filter((s): s is string => Boolean(s))
   const badgeMap = await getBadgesByProductSlug(supabase, slugsForBadges)
   const topPicks: GearReview[] = rawTopPicks.map((r) => ({
@@ -388,18 +389,18 @@ export default async function GearPage() {
                 />
                 {tens.length === 1 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {tens.map((r) => <GearCard key={r.id} review={r} />)}
+                    {tens.map((r) => <ReviewCard key={r.id} review={r} headingLevel="h3" />)}
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-2 gap-5">
                     {tens.slice(0, 3).map((r, i) => (
-                      <GearCard key={r.id} review={r} isHero={i === 0} />
+                      <ReviewCard key={r.id} review={r} hero={i === 0} headingLevel="h3" />
                     ))}
                   </div>
                 )}
                 {tens.length > 3 && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-5">
-                    {tens.slice(3).map((r) => <GearCard key={r.id} review={r} />)}
+                    {tens.slice(3).map((r) => <ReviewCard key={r.id} review={r} headingLevel="h3" />)}
                   </div>
                 )}
               </div>
@@ -415,7 +416,7 @@ export default async function GearPage() {
                 sub="Earned it. These are the ones I recommend without hesitation."
               />
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {nines.map((r) => <GearCard key={r.id} review={r} />)}
+                {nines.map((r) => <ReviewCard key={r.id} review={r} headingLevel="h3" />)}
               </div>
             </section>
           )}

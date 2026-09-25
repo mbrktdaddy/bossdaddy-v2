@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
 import { buttonVariants } from '@/components/ui/Button'
+import { Modal } from '@/components/ui/Modal'
 
 interface Props {
   before: string   // current content HTML
@@ -23,17 +23,8 @@ const proseClasses = `
 `.trim()
 
 export function RefinePreviewModal({ before, after, onAccept, onDiscard }: Props) {
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onDiscard()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onDiscard])
-
   return (
-    <div className="fixed inset-0 z-50 flex items-stretch bg-zinc-900/80 backdrop-blur-sm">
-      <div role="dialog" aria-modal="true" aria-label="Review AI changes" className="flex flex-col w-full max-w-6xl mx-auto my-4 mx-4 bg-surface-sunken border border-soft rounded-xl overflow-hidden shadow-2xl">
+    <Modal onClose={onDiscard} label="Review AI changes" size="xl" closeOnBackdrop={false} className="flex flex-col h-[calc(100dvh-2rem)] overflow-hidden">
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-soft shrink-0">
@@ -45,7 +36,7 @@ export function RefinePreviewModal({ before, after, onAccept, onDiscard }: Props
             <button
               type="button"
               onClick={onDiscard}
-              className="px-4 py-2 bg-surface-raised hover:bg-surface text-prose-muted text-sm font-medium rounded-lg transition-colors"
+              className={buttonVariants({ variant: 'secondary' })}
             >
               Discard
             </button>
@@ -98,7 +89,6 @@ export function RefinePreviewModal({ before, after, onAccept, onDiscard }: Props
           </button>
         </div>
 
-      </div>
-    </div>
+    </Modal>
   )
 }

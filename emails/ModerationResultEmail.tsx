@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { EmailLayout, EmailButton, footerText, footerLink } from './_components/EmailLayout'
 
 type Action = 'approve' | 'reject' | 'request_edits'
 type ContentType = 'review' | 'guide'
@@ -40,105 +41,48 @@ export function ModerationResultEmail({ action, contentType, title, reason, site
   const dashboardUrl = `${siteUrl}/dashboard/${contentType}s`
 
   return (
-    <html>
-      <head>
-        <meta name='viewport' content='width=device-width, initial-scale=1.0' />
-      </head>
-      <body style={{ backgroundColor: '#0a0a0a', margin: 0, padding: 0, fontFamily: 'Arial, sans-serif' }}>
-        <table width='100%' cellPadding={0} cellSpacing={0} style={{ backgroundColor: '#0a0a0a', padding: '40px 20px' }}>
-          <tr>
-            <td align='center'>
-              <table width='560' cellPadding={0} cellSpacing={0} style={{ backgroundColor: '#111111', borderRadius: '12px', overflow: 'hidden', maxWidth: '560px', width: '100%' }}>
+    <EmailLayout
+      siteUrl={siteUrl}
+      footer={
+        <p style={footerText}>
+          <a href={siteUrl} style={footerLink}>BossDaddyLife.com</a>
+          {' · '}
+          <a href='https://x.com/bossdaddylife' style={footerLink}>@bossdaddylife on X</a>
+        </p>
+      }
+    >
+      <h1 style={{ color: cfg.color, fontSize: '24px', fontWeight: 900, margin: '0 0 12px 0', lineHeight: '1.2' }}>
+        {cfg.headline}
+      </h1>
+      <p style={{ color: '#9ca3af', fontSize: '15px', lineHeight: '1.6', margin: '0 0 20px 0' }}>
+        {cfg.subtext}
+      </p>
 
-                {/* Header */}
-                <tr>
-                  <td style={{ backgroundColor: '#111114', padding: '24px 40px', borderBottom: '1px solid #222226' }}>
-                    <table cellPadding={0} cellSpacing={0}>
-                      <tr>
-                        <td style={{ paddingRight: '12px', verticalAlign: 'middle' }}>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={`${siteUrl}/images/bd-logo-icon.png`}
-                            alt="Boss Daddy"
-                            width={36}
-                            height={36}
-                            style={{ display: 'block' }}
-                          />
-                        </td>
-                        <td style={{ verticalAlign: 'middle' }}>
-                          <p style={{ margin: 0, color: '#CC5500', fontWeight: 900, fontSize: '20px', letterSpacing: '-0.5px' }}>
-                            BOSS DADDY LIFE
-                          </p>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
+      {/* Content title pill */}
+      <div style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '8px', padding: '12px 16px', marginBottom: '24px' }}>
+        <p style={{ color: '#6b7280', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px 0' }}>
+          {contentType === 'review' ? 'Review' : 'Article'}
+        </p>
+        <p style={{ color: '#e5e7eb', fontSize: '14px', fontWeight: 600, margin: 0 }}>
+          {title}
+        </p>
+      </div>
 
-                {/* Body */}
-                <tr>
-                  <td style={{ padding: '40px' }}>
-                    <h1 style={{ color: cfg.color, fontSize: '24px', fontWeight: 900, margin: '0 0 12px 0', lineHeight: '1.2' }}>
-                      {cfg.headline}
-                    </h1>
-                    <p style={{ color: '#9ca3af', fontSize: '15px', lineHeight: '1.6', margin: '0 0 20px 0' }}>
-                      {cfg.subtext}
-                    </p>
+      {/* Reason box */}
+      {reason && (
+        <div style={{ backgroundColor: cfg.bgColor, border: `1px solid ${cfg.color}30`, borderRadius: '8px', padding: '16px', marginBottom: '24px' }}>
+          <p style={{ color: cfg.color, fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px 0' }}>
+            {action === 'request_edits' ? 'Changes needed' : 'Reason'}
+          </p>
+          <p style={{ color: '#d1d5db', fontSize: '14px', lineHeight: '1.6', margin: 0 }}>
+            {reason}
+          </p>
+        </div>
+      )}
 
-                    {/* Content title pill */}
-                    <div style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '8px', padding: '12px 16px', marginBottom: '24px' }}>
-                      <p style={{ color: '#6b7280', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px 0' }}>
-                        {contentType === 'review' ? 'Review' : 'Article'}
-                      </p>
-                      <p style={{ color: '#e5e7eb', fontSize: '14px', fontWeight: 600, margin: 0 }}>
-                        {title}
-                      </p>
-                    </div>
-
-                    {/* Reason box */}
-                    {reason && (
-                      <div style={{ backgroundColor: cfg.bgColor, border: `1px solid ${cfg.color}30`, borderRadius: '8px', padding: '16px', marginBottom: '24px' }}>
-                        <p style={{ color: cfg.color, fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px 0' }}>
-                          {action === 'request_edits' ? 'Changes needed' : 'Reason'}
-                        </p>
-                        <p style={{ color: '#d1d5db', fontSize: '14px', lineHeight: '1.6', margin: 0 }}>
-                          {reason}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* CTA */}
-                    <table cellPadding={0} cellSpacing={0} style={{ margin: '8px 0' }}>
-                      <tr>
-                        <td style={{ backgroundColor: '#CC5500', borderRadius: '8px' }}>
-                          <a
-                            href={dashboardUrl}
-                            style={{ display: 'inline-block', padding: '14px 28px', color: '#ffffff', fontWeight: 700, fontSize: '15px', textDecoration: 'none' }}
-                          >
-                            {action === 'approve' ? 'View Your Dashboard →' : 'Go to Dashboard →'}
-                          </a>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-
-                {/* Footer */}
-                <tr>
-                  <td style={{ backgroundColor: '#0d0d0d', padding: '24px 40px', borderTop: '1px solid #1f1f1f' }}>
-                    <p style={{ color: '#4b5563', fontSize: '12px', margin: '0 0 8px 0', lineHeight: '1.6' }}>
-                      <a href={siteUrl} style={{ color: '#6b7280', textDecoration: 'none' }}>BossDaddyLife.com</a>
-                      {' · '}
-                      <a href='https://x.com/bossdaddylife' style={{ color: '#6b7280', textDecoration: 'none' }}>@bossdaddylife on X</a>
-                    </p>
-                  </td>
-                </tr>
-
-              </table>
-            </td>
-          </tr>
-        </table>
-      </body>
-    </html>
+      <EmailButton href={dashboardUrl} style={{ margin: '8px 0' }}>
+        {action === 'approve' ? 'View Your Dashboard →' : 'Go to Dashboard →'}
+      </EmailButton>
+    </EmailLayout>
   )
 }

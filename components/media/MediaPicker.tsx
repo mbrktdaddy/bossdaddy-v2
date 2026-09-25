@@ -7,6 +7,7 @@ import { CATEGORIES } from '@/lib/categories'
 import ImageCropper from '@/components/ui/ImageCropper'
 import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
+import { CloseButton } from '@/components/ui/Modal'
 
 interface MediaAsset {
   id: string
@@ -496,11 +497,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 Upload
               </button>
             )}
-            <button type="button" onClick={onClose} aria-label="Close" className="p-1.5 text-prose-faint hover:text-prose transition-colors rounded-lg hover:bg-surface-raised">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <CloseButton onClick={onClose} className="ml-1" />
           </div>
           <input
             ref={fileInputRef}

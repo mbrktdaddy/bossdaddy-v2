@@ -1,6 +1,6 @@
 'use client'
 import { useState, useTransition } from 'react'
-import ReviewCard from './ReviewCard'
+import ReviewCard from '@/components/ReviewCard'
 import { loadMoreReviews } from '../actions'
 import type { ReviewRow } from '../actions'
 

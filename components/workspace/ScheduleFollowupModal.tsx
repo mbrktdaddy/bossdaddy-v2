@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { buttonVariants } from '@/components/ui/Button'
+import { Modal } from '@/components/ui/Modal'
 
 interface Props {
   reviewId: string
@@ -21,14 +22,6 @@ export function ScheduleFollowupModal({ reviewId, onClose }: Props) {
   const [label, setLabel] = useState('')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
-
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape' && !busy) onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [busy, onClose])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -64,17 +57,8 @@ export function ScheduleFollowupModal({ reviewId, onClose }: Props) {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/80 backdrop-blur-sm p-4"
-      onClick={(e) => { if (e.target === e.currentTarget && !busy) onClose() }}
-    >
-      <form
-        onSubmit={handleSubmit}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Schedule a follow-up review"
-        className="w-full max-w-lg bg-surface-sunken border border-soft rounded-xl overflow-hidden shadow-2xl"
-      >
+    <Modal onClose={onClose} label="Schedule a follow-up review" dismissible={!busy}>
+      <form onSubmit={handleSubmit}>
         <div className="px-5 py-4 border-b border-soft">
           <p className="text-sm font-bold text-prose">Schedule a follow-up review</p>
           <p className="text-xs text-prose-faint mt-0.5">
@@ -118,7 +102,7 @@ export function ScheduleFollowupModal({ reviewId, onClose }: Props) {
           </div>
 
           {err && (
-            <p className="text-sm text-red-700 bg-red-50 border border-red-300 rounded-lg px-4 py-2.5">
+            <p className="text-sm text-danger-ink bg-danger-bg border border-danger-line rounded-lg px-4 py-2.5">
               {err}
             </p>
           )}
@@ -133,7 +117,7 @@ export function ScheduleFollowupModal({ reviewId, onClose }: Props) {
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="px-4 py-2 bg-surface-raised hover:bg-surface text-prose-muted text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+            className={buttonVariants({ variant: 'secondary' })}
           >
             Cancel
           </button>
@@ -146,6 +130,6 @@ export function ScheduleFollowupModal({ reviewId, onClose }: Props) {
           </button>
         </div>
       </form>
-    </div>
+    </Modal>
   )
 }

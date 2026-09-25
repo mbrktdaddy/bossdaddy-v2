@@ -5,7 +5,8 @@ import { createAnonClient } from '@/lib/supabase/anon'
 import { CATEGORIES, getCategoryBySlug } from '@/lib/categories'
 import { getBadgesByProductSlug } from '@/lib/collection-listings'
 import CategoryIcon from '@/components/CategoryIcon'
-import { GearCard, type GearReview } from '../../_components/GearCards'
+import { type GearReview } from '../../_components/GearCards'
+import ReviewCard from '@/components/ReviewCard'
 import BenchStrip from '@/components/BenchStrip'
 import AskTheBoss from '@/components/AskTheBoss'
 import PageHeader from '@/components/PageHeader'
@@ -110,7 +111,7 @@ export default async function GearCategoryPage({ params }: Props) {
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {picks.map((r) => <GearCard key={r.id} review={r} />)}
+          {picks.map((r) => <ReviewCard key={r.id} review={r} headingLevel="h3" />)}
         </div>
       )}
 

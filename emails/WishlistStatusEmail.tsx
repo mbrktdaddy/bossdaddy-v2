@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { EmailLayout, EmailButton } from './_components/EmailLayout'
 
 type WishlistStatus = 'queued' | 'testing' | 'reviewed'
 
@@ -57,139 +58,74 @@ export function WishlistStatusEmail({ status, itemTitle, itemSlug, itemImageUrl,
   const unsubscribeUrl = unsubscribeToken ? `${siteUrl}/api/wishlist/unsubscribe?token=${unsubscribeToken}` : null
 
   return (
-    <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      </head>
-      <body style={{ backgroundColor: '#0a0a0a', margin: 0, padding: 0, fontFamily: '-apple-system, BlinkMacSystemFont, Arial, sans-serif' }}>
-        <table width="100%" cellPadding={0} cellSpacing={0} style={{ backgroundColor: '#0a0a0a', padding: '40px 16px' }}>
-          <tr>
-            <td align="center">
-              <table width="480" cellPadding={0} cellSpacing={0} style={{ backgroundColor: '#141414', borderRadius: '16px', overflow: 'hidden', maxWidth: '480px', width: '100%', border: '1px solid #2a2a2a' }}>
+    <EmailLayout
+      siteUrl={siteUrl}
+      footer={
+        <>
+          <p style={{ margin: '0 0 6px 0', fontSize: '11px', color: '#6b6b6b', lineHeight: 1.6 }}>
+            You&apos;re receiving this because you asked to be notified about <a href={benchUrl} style={{ color: '#9ca3af', textDecoration: 'underline' }}>{itemTitle}</a> on the Boss Daddy bench.
+          </p>
+          <p style={{ margin: 0, fontSize: '11px', color: '#6b6b6b' }}>
+            <a href={`${siteUrl}/account/settings`} style={{ color: '#9ca3af', textDecoration: 'underline' }}>Manage notifications</a>
+            {unsubscribeUrl && (
+              <>
+                {' · '}
+                <a href={unsubscribeUrl} style={{ color: '#9ca3af', textDecoration: 'underline' }}>Unsubscribe</a>
+              </>
+            )}
+            {' · '}
+            <a href={siteUrl} style={{ color: '#9ca3af', textDecoration: 'none' }}>BossDaddyLife.com</a>
+          </p>
+        </>
+      }
+    >
+      <p style={{
+        margin: '0 0 12px 0',
+        color: cfg.accent,
+        fontSize: '11px',
+        fontWeight: 700,
+        textTransform: 'uppercase',
+        letterSpacing: '0.2em',
+      }}>
+        — {cfg.eyebrow}
+      </p>
 
-                {/* Header */}
-                <tr>
-                  <td style={{ backgroundColor: '#111114', padding: '20px 28px', borderBottom: '1px solid #222226' }}>
-                    <table cellPadding={0} cellSpacing={0}>
-                      <tr>
-                        <td style={{ paddingRight: '12px', verticalAlign: 'middle' }}>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={`${siteUrl}/images/bd-logo-icon.png`}
-                            alt="Boss Daddy"
-                            width={36}
-                            height={36}
-                            style={{ display: 'block' }}
-                          />
-                        </td>
-                        <td style={{ verticalAlign: 'middle' }}>
-                          <p style={{ margin: 0, fontWeight: 900, fontSize: '20px', letterSpacing: '-0.5px', color: '#ffffff' }}>
-                            <span style={{ color: '#CC5500' }}>BOSS</span> DADDY
-                          </p>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
+      <h1 style={{ margin: '0 0 12px 0', fontSize: '24px', fontWeight: 900, color: '#ffffff', lineHeight: 1.2 }}>
+        {cfg.headline}
+      </h1>
 
-                {/* Body */}
-                <tr>
-                  <td style={{ padding: '32px 28px' }}>
-                    <p style={{
-                      margin: '0 0 12px 0',
-                      color: cfg.accent,
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.2em',
-                    }}>
-                      — {cfg.eyebrow}
-                    </p>
+      <p style={{ margin: '0 0 24px 0', fontSize: '15px', color: '#a1a1a1', lineHeight: 1.6 }}>
+        {cfg.subtext}
+      </p>
 
-                    <h1 style={{ margin: '0 0 12px 0', fontSize: '24px', fontWeight: 900, color: '#ffffff', lineHeight: 1.2 }}>
-                      {cfg.headline}
-                    </h1>
-
-                    <p style={{ margin: '0 0 24px 0', fontSize: '15px', color: '#a1a1a1', lineHeight: 1.6 }}>
-                      {cfg.subtext}
-                    </p>
-
-                    {/* Item card */}
-                    <table width="100%" cellPadding={0} cellSpacing={0} style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '12px', marginBottom: '24px' }}>
-                      <tr>
-                        {itemImageUrl && (
-                          <td width="80" style={{ padding: '12px 0 12px 12px', verticalAlign: 'middle' }}>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={itemImageUrl}
-                              alt={itemTitle}
-                              width={64}
-                              height={64}
-                              style={{ display: 'block', width: '64px', height: '64px', objectFit: 'contain', backgroundColor: '#0a0a0a', borderRadius: '8px' }}
-                            />
-                          </td>
-                        )}
-                        <td style={{ padding: '14px 16px', verticalAlign: 'middle' }}>
-                          <p style={{ margin: '0 0 2px 0', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#6b7280' }}>
-                            On the Bench
-                          </p>
-                          <p style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#ffffff', lineHeight: 1.3 }}>
-                            {itemTitle}
-                          </p>
-                        </td>
-                      </tr>
-                    </table>
-
-                    {/* CTA */}
-                    <table cellPadding={0} cellSpacing={0} style={{ margin: '0 0 8px 0' }}>
-                      <tr>
-                        <td style={{ backgroundColor: '#CC5500', borderRadius: '10px' }}>
-                          <a
-                            href={ctaUrl}
-                            style={{
-                              display: 'inline-block',
-                              padding: '14px 28px',
-                              color: '#ffffff',
-                              fontWeight: 700,
-                              fontSize: '15px',
-                              textDecoration: 'none',
-                              minHeight: '24px',
-                            }}
-                          >
-                            {cfg.cta} →
-                          </a>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-
-                {/* Footer */}
-                <tr>
-                  <td style={{ borderTop: '1px solid #2a2a2a', padding: '20px 28px' }}>
-                    <p style={{ margin: '0 0 6px 0', fontSize: '11px', color: '#6b6b6b', lineHeight: 1.6 }}>
-                      You&apos;re receiving this because you asked to be notified about <a href={benchUrl} style={{ color: '#9ca3af', textDecoration: 'underline' }}>{itemTitle}</a> on the Boss Daddy bench.
-                    </p>
-                    <p style={{ margin: 0, fontSize: '11px', color: '#6b6b6b' }}>
-                      <a href={`${siteUrl}/account/settings`} style={{ color: '#9ca3af', textDecoration: 'underline' }}>Manage notifications</a>
-                      {unsubscribeUrl && (
-                        <>
-                          {' · '}
-                          <a href={unsubscribeUrl} style={{ color: '#9ca3af', textDecoration: 'underline' }}>Unsubscribe</a>
-                        </>
-                      )}
-                      {' · '}
-                      <a href={siteUrl} style={{ color: '#9ca3af', textDecoration: 'none' }}>BossDaddyLife.com</a>
-                    </p>
-                  </td>
-                </tr>
-
-              </table>
+      {/* Item card */}
+      <table width="100%" cellPadding={0} cellSpacing={0} style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '12px', marginBottom: '24px' }}>
+        <tr>
+          {itemImageUrl && (
+            <td width="80" style={{ padding: '12px 0 12px 12px', verticalAlign: 'middle' }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={itemImageUrl}
+                alt={itemTitle}
+                width={64}
+                height={64}
+                style={{ display: 'block', width: '64px', height: '64px', objectFit: 'contain', backgroundColor: '#0a0a0a', borderRadius: '8px' }}
+              />
             </td>
-          </tr>
-        </table>
-      </body>
-    </html>
+          )}
+          <td style={{ padding: '14px 16px', verticalAlign: 'middle' }}>
+            <p style={{ margin: '0 0 2px 0', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#6b7280' }}>
+              On the Bench
+            </p>
+            <p style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#ffffff', lineHeight: 1.3 }}>
+              {itemTitle}
+            </p>
+          </td>
+        </tr>
+      </table>
+
+      <EmailButton href={ctaUrl} style={{ margin: '0 0 8px 0' }}>{cfg.cta} →</EmailButton>
+    </EmailLayout>
   )
 }
 
