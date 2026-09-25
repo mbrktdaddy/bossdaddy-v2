@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
 import type { Merch } from '@/lib/merch'
 import { MerchForm } from '../_components/MerchForm'
+import { ChevronLeftIcon } from '@/components/icons'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,9 +37,7 @@ export default async function AdminMerchDetailPage({
         href="/dashboard/admin/merch"
         className="inline-flex items-center gap-2 text-xs text-prose-faint hover:text-prose transition-colors mb-6"
       >
-        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
+        <ChevronLeftIcon className="w-3 h-3" strokeWidth={2} />
         All merch items
       </Link>
 

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Badge, type BadgeTone } from '@/components/ui/Badge'
+import { buttonVariants } from '@/components/ui/Button'
 
 export interface ArticleListItem {
   id: string
@@ -52,7 +53,7 @@ export default function ArticlesPanel({ articles }: { articles: ArticleListItem[
         <button
           onClick={newArticle}
           disabled={creating}
-          className="flex items-center gap-2 bg-surface-raised hover:bg-surface disabled:opacity-50 text-prose text-sm font-medium px-4 py-2.5 rounded-xl transition-colors shrink-0 border border-soft"
+          className={buttonVariants({ variant: 'secondary', className: 'shrink-0' })}
         >
           {creating ? 'Creating…' : '+ New Article'}
         </button>

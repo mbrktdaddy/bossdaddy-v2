@@ -284,7 +284,7 @@ export default function NotificationFeed({ initial }: { initial: NotificationRow
                         {busyId === n.id ? '…' : 'Accept'}
                       </button>
                       <button type="button" onClick={() => act(n.id, 'decline')} disabled={busyId === n.id}
-                        className="px-3 py-1.5 bg-surface-raised hover:bg-surface disabled:opacity-40 text-prose-muted text-xs font-semibold rounded-lg transition-colors">
+                        className={buttonVariants({ variant: 'secondary', size: 'sm' })}>
                         Decline
                       </button>
                     </div>

@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { buttonVariants } from '@/components/ui/Button'
+import { SearchIcon } from '@/components/icons'
 
 interface SearchResults {
   articles:    { id: string; title: string; slug: string; status: string; category: string }[]
@@ -78,11 +80,9 @@ export default function GlobalSearch() {
       <button
         onClick={() => setOpen(true)}
         title="Search (⌘K)"
-        className="flex items-center gap-2 px-3 py-1.5 bg-surface-raised hover:bg-surface border border-soft hover:border-strong text-prose-muted hover:text-prose text-xs rounded-lg transition-colors"
+        className={buttonVariants({ variant: 'secondary', size: 'sm' })}
       >
-        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
+        <SearchIcon className="w-3.5 h-3.5" strokeWidth={2} />
         <span>Search</span>
         <kbd className="hidden sm:inline text-xs font-mono bg-surface border border-strong rounded px-1.5 py-0.5 ml-2">⌘K</kbd>
       </button>
@@ -99,9 +99,7 @@ export default function GlobalSearch() {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 px-4 py-3 border-b border-soft shrink-0">
-          <svg className="w-4 h-4 text-prose-faint shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+          <SearchIcon className="w-4 h-4 text-prose-faint shrink-0" strokeWidth={2} />
           <input
             ref={inputRef}
             type="text"

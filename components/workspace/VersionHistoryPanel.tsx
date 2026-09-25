@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Revision {
   id: string
@@ -103,7 +104,7 @@ export function VersionHistoryPanel({ contentType, contentId }: Props) {
                   <button
                     onClick={() => handleRevert(r.id, r.version_number)}
                     disabled={reverting === r.id}
-                    className="text-xs px-3 py-1 bg-surface-raised hover:bg-surface disabled:opacity-50 text-prose-muted rounded-lg transition-colors"
+                    className={buttonVariants({ variant: 'secondary', size: 'sm' })}
                   >
                     {reverting === r.id ? '…' : '↻ Revert'}
                   </button>

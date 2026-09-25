@@ -5,6 +5,7 @@ import { formatPrice, getMerchDisplayImage } from '@/lib/merch'
 import MerchProductView from './_components/MerchProductView'
 import { buildSocialMetadata, toAbsoluteUrl } from '@/lib/og'
 import type { Metadata } from 'next'
+import { ChevronLeftIcon } from '@/components/icons'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -108,9 +109,7 @@ export default async function MerchDetailPage({ params }: Props) {
         href="/gear"
         className="inline-flex items-center gap-1.5 text-sm text-prose-faint hover:text-accent-text-soft transition-colors mb-8"
       >
-        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
+        <ChevronLeftIcon className="w-3.5 h-3.5" strokeWidth={2} />
         ← Gear
       </Link>
 

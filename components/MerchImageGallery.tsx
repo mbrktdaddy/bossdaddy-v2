@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import { XIcon } from '@/components/icons'
 
 interface Props {
   images: string[]
@@ -156,9 +157,7 @@ export function MerchImageGallery({ images, alt, comingSoon = false, selectedInd
             className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-2"
             aria-label="Close"
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <XIcon className="w-5 h-5" strokeWidth={2} />
           </button>
         </div>
       )}

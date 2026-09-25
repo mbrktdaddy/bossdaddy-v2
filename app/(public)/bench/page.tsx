@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { ogImageUrl, OG_SITE, TWITTER_HANDLE } from '@/lib/og'
 import type { Metadata } from 'next'
 import { Card } from '@/components/ui/Card'
+import { ChevronDownIcon } from '@/components/icons'
 
 export const revalidate = 300
 
@@ -138,9 +139,7 @@ export default async function BenchPage() {
                     <summary className="flex items-center gap-2 cursor-pointer list-none mb-4">
                       <span className="text-xs font-black uppercase tracking-widest text-prose-muted">{heading}</span>
                       <span className="text-xs text-prose-faint">({sectionItems.length})</span>
-                      <svg className="w-3 h-3 text-prose-faint group-open:rotate-180 transition-transform ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                      </svg>
+                      <ChevronDownIcon className="w-3 h-3 text-prose-faint group-open:rotate-180 transition-transform ml-1" strokeWidth={2} />
                     </summary>
                     <div className="space-y-3">
                       {sectionItems.map((item) => (

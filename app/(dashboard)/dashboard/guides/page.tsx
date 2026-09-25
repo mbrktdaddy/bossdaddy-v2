@@ -4,6 +4,7 @@ import { requireUser } from '@/lib/auth-cache'
 import { BulkContentList } from '@/components/workspace/BulkContentList'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { buttonVariants } from '@/components/ui/Button'
+import { PlusIcon } from '@/components/icons'
 
 interface Props {
   searchParams: Promise<{ filter?: string }>
@@ -52,9 +53,7 @@ export default async function MyGuidesPage({ searchParams }: Props) {
           href="/dashboard/guides/new"
           className={buttonVariants()}
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
+          <PlusIcon className="w-4 h-4" strokeWidth={2} />
           New Article
         </Link>
       </div>

@@ -8,6 +8,7 @@ import ImageCropper from '@/components/ui/ImageCropper'
 import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
 import { CloseButton } from '@/components/ui/Modal'
+import { CheckIcon, PhotoIcon } from '@/components/icons'
 
 interface MediaAsset {
   id: string
@@ -485,7 +486,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-raised hover:bg-surface disabled:opacity-50 text-prose text-xs font-medium rounded-lg transition-colors"
+                className={buttonVariants({ variant: 'secondary', size: 'sm' })}
               >
                 {uploading ? (
                   <span className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin" />
@@ -531,9 +532,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 className="border-2 border-dashed border-strong rounded-xl py-16 flex flex-col items-center gap-2 text-prose-faint cursor-pointer hover:border-strong transition-colors"
                 onClick={() => !searchQuery && setTab('generate')}
               >
-                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+                <PhotoIcon className="w-8 h-8" strokeWidth={1.5} />
                 <p className="text-sm">
                   {searchQuery
                     ? `No images match "${searchQuery}"`
@@ -573,9 +572,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                           {multi && selectionIdx >= 0 ? (
                             <span className="text-[9px] text-white font-bold leading-none">{selectionIdx + 1}</span>
                           ) : (
-                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                            </svg>
+                            <CheckIcon className="w-3 h-3 text-white" strokeWidth={3} />
                           )}
                         </div>
                       )}
@@ -681,14 +678,14 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
               type="button"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-3 py-1.5 bg-surface-raised hover:bg-surface disabled:opacity-40 text-xs text-prose rounded-lg transition-colors"
+              className={buttonVariants({ variant: 'secondary', size: 'sm' })}
             >← Prev</button>
             <span className="text-xs text-prose-faint">{page} / {totalPages}</span>
             <button
               type="button"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="px-3 py-1.5 bg-surface-raised hover:bg-surface disabled:opacity-40 text-xs text-prose rounded-lg transition-colors"
+              className={buttonVariants({ variant: 'secondary', size: 'sm' })}
             >Next →</button>
           </div>
         )}
@@ -709,14 +706,14 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-surface-raised hover:bg-surface text-prose-muted text-sm rounded-lg transition-colors"
+              className={buttonVariants({ variant: 'secondary' })}
             >Cancel</button>
             {!multi && selected && (
               <button
                 type="button"
                 onClick={handleCropSelected}
                 disabled={uploading}
-                className="px-4 py-2 bg-surface-raised hover:bg-surface disabled:opacity-40 text-prose text-sm font-semibold rounded-lg transition-colors"
+                className={buttonVariants({ variant: 'secondary' })}
               >Crop</button>
             )}
             <button

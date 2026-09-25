@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { buttonVariants } from '@/components/ui/Button'
+import { EnvelopeIcon } from '@/components/icons'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -37,9 +38,7 @@ export default function ForgotPasswordPage() {
       <main className="min-h-screen flex items-center justify-center bg-surface-sunken px-4">
         <div className="w-full max-w-sm text-center">
           <div className="w-14 h-14 rounded-full bg-accent-tint border border-accent-border/50 flex items-center justify-center mx-auto mb-6">
-            <svg className="w-6 h-6 text-accent-text-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
+            <EnvelopeIcon className="w-6 h-6 text-accent-text-soft" strokeWidth={2} />
           </div>
           <h1 className="text-2xl font-black text-prose mb-2">Check your inbox</h1>
           <p className="text-prose-muted text-sm mb-6">

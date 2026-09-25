@@ -189,7 +189,7 @@ function LinkDialog({ initial, onConfirm, onCancel }: {
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 bg-surface-raised hover:bg-surface text-prose-muted text-sm rounded-lg transition-colors"
+            className={buttonVariants({ variant: 'secondary' })}
           >
             Cancel
           </button>
@@ -296,7 +296,7 @@ function CollectionDialog({ onConfirm, onCancel }: {
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 bg-surface-raised hover:bg-surface text-prose-muted text-sm rounded-lg transition-colors"
+            className={buttonVariants({ variant: 'secondary' })}
           >
             Cancel
           </button>
@@ -395,7 +395,7 @@ function CrossLinkDialog({ onConfirm, onCancel }: {
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 bg-surface-raised hover:bg-surface text-prose-muted text-sm rounded-lg transition-colors"
+            className={buttonVariants({ variant: 'secondary' })}
           >
             Cancel
           </button>
@@ -707,7 +707,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
               {aiRefining ? 'Refining…' : 'Apply'}
             </button>
             <button type="button" onClick={() => { setSelection(null); setAiInstruction(''); setAiError(null) }}
-              className="shrink-0 px-3 py-2 bg-surface-raised hover:bg-surface text-prose-muted text-xs rounded-lg transition-colors">
+              className={buttonVariants({ variant: 'secondary', size: 'sm', className: 'shrink-0' })}>
               ✕
             </button>
           </div>

@@ -46,6 +46,7 @@ import TrackView from '@/components/TrackView'
 import RecentlyViewedStrip from '@/components/RecentlyViewedStrip'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { CheckCircleIcon, ChevronLeftIcon } from '@/components/icons'
 
 const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
 
@@ -336,9 +337,7 @@ export default async function ReviewPage({ params }: Props) {
             href={`/reviews/${parentNode.slug}`}
             className="inline-flex items-center gap-1.5 text-xs text-prose-muted hover:text-accent-text-soft transition-colors mb-4"
           >
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
+            <ChevronLeftIcon className="w-3 h-3" strokeWidth={2} />
             ← The original review
           </Link>
         )}
@@ -376,9 +375,7 @@ export default async function ReviewPage({ params }: Props) {
                 title="Products lined up for testing — vote on what gets reviewed next."
                 className="flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-accent-tint border border-accent-border/40 text-accent-text hover:border-accent-border/60 hover:bg-accent-tint hover:text-accent transition-colors"
               >
-                <svg className="w-3.5 h-3.5 text-accent-text-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <CheckCircleIcon className="w-3.5 h-3.5 text-accent-text-soft" strokeWidth={1.5} />
                 From the Bench
               </Link>
             )}

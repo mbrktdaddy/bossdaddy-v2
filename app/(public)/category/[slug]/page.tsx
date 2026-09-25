@@ -12,6 +12,7 @@ import PageHeader from '@/components/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { ChevronDownIcon } from '@/components/icons'
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -283,9 +284,7 @@ export default async function CategoryHubPage({ params }: Props) {
                 <details key={i} className="group bg-surface border border-soft hover:border-accent-border/40 transition-colors rounded-xl overflow-hidden">
                   <summary className="flex items-center justify-between gap-3 px-4 py-3.5 cursor-pointer list-none min-h-[44px]">
                     <span className="text-sm font-semibold text-prose leading-snug">{faq.question}</span>
-                    <svg className="w-4 h-4 shrink-0 text-accent-text transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
+                    <ChevronDownIcon className="w-4 h-4 shrink-0 text-accent-text transition-transform group-open:rotate-180" strokeWidth={2.5} />
                   </summary>
                   <div className="px-4 pb-4 pt-1 text-sm text-prose-muted leading-relaxed border-t border-soft">
                     {faq.answer}

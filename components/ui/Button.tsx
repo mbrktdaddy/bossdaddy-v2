@@ -13,7 +13,7 @@ const BASE =
 
 const VARIANT = {
   primary:   'bg-accent hover:bg-accent-hover text-white',
-  secondary: 'bg-surface-raised hover:bg-surface-hover border border-soft text-prose',
+  secondary: 'bg-surface-raised hover:bg-surface border border-soft text-prose-muted hover:text-prose',
   ghost:     'text-prose-muted hover:text-prose hover:bg-surface-raised',
   danger:    'bg-danger-bg hover:bg-danger-bg/80 border border-danger-line text-danger-ink',
 } as const

@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/Card'
 import { Badge, type BadgeTone } from '@/components/ui/Badge'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
+import { CheckIcon, ChevronDownIcon, XIcon } from '@/components/icons'
 
 type ContactMethod = 'email' | 'web_form' | 'amazon' | 'phone'
 type OutreachStatus = 'draft' | 'sent' | 'responded' | 'no_response' | 'follow_up'
@@ -335,9 +336,9 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
           }`}
         >
           {toast.type === 'success' ? (
-            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            <CheckIcon className="w-4 h-4 shrink-0" strokeWidth={2} />
           ) : (
-            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            <XIcon className="w-4 h-4 shrink-0" strokeWidth={2} />
           )}
           <span className="min-w-0 break-words">{toast.msg}</span>
         </div>
@@ -674,12 +675,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                       aria-label={expandedId === record.id ? 'Collapse message' : 'View full message'}
                       className="w-11 h-11 flex items-center justify-center rounded-lg text-prose-faint hover:text-prose hover:bg-surface-raised transition-colors shrink-0"
                     >
-                      <svg
-                        className={`w-4 h-4 transition-transform ${expandedId === record.id ? 'rotate-180' : ''}`}
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
-                      </svg>
+                      <ChevronDownIcon className={`w-4 h-4 transition-transform ${expandedId === record.id ? 'rotate-180' : ''}`} strokeWidth={1.5} />
                     </button>
                   </div>
                 </div>

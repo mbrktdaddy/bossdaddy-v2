@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { SOCIAL } from '@/lib/social'
 import { LABELS } from '@/lib/labels'
 import { BRAND } from '@/lib/brand'
+import { DownloadIcon } from '@/components/icons'
 
 interface BrowseLink { href: string; label: string; hint?: string }
 
@@ -127,9 +128,7 @@ export default function Footer() {
               href="/install"
               className="inline-flex items-center gap-2 mb-5 px-4 py-2.5 rounded-xl border border-strong hover:border-accent text-sm font-semibold text-zinc-200 hover:text-white transition-colors"
             >
-              <svg className="w-4 h-4 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0-4-4m4 4 4-4M4 20h16" />
-              </svg>
+              <DownloadIcon className="w-4 h-4 text-accent shrink-0" strokeWidth={1.8} />
               {LABELS.app.short}
             </Link>
             <div className="flex items-center gap-1 -ml-1.5">

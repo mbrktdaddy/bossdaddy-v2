@@ -7,6 +7,7 @@ import { downloadImage } from '@/lib/images/download'
 import ImageCropper from '@/components/ui/ImageCropper'
 import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
+import { PhotoIcon } from '@/components/icons'
 
 interface MediaAsset {
   id: string
@@ -467,11 +468,9 @@ export default function MediaLibraryPage() {
           )}
           <Link
             href="/dashboard/media/generate"
-            className="flex items-center gap-2 px-4 py-2.5 bg-surface-raised hover:bg-surface border border-strong text-prose-muted hover:text-prose text-sm font-semibold rounded-xl transition-colors"
+            className={buttonVariants({ variant: 'secondary' })}
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <PhotoIcon className="w-4 h-4" strokeWidth={2} />
             Generate
           </Link>
           <button
@@ -563,9 +562,7 @@ export default function MediaLibraryPage() {
             className="border-2 border-dashed border-strong rounded-xl py-20 flex flex-col items-center gap-3 text-prose-faint cursor-pointer hover:border-strong hover:text-prose-faint transition-colors"
             onClick={() => fileInputRef.current?.click()}
           >
-            <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <PhotoIcon className="w-10 h-10" strokeWidth={1.5} />
             <p className="text-sm font-medium">
               {filterProductId ? 'No images match this filter' : 'Drop images here or click to upload'}
             </p>
@@ -596,7 +593,7 @@ export default function MediaLibraryPage() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="px-4 py-2 bg-surface-raised hover:bg-surface disabled:opacity-40 text-sm text-prose rounded-lg transition-colors"
+            className={buttonVariants({ variant: 'secondary' })}
           >
             ← Prev
           </button>
@@ -604,7 +601,7 @@ export default function MediaLibraryPage() {
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="px-4 py-2 bg-surface-raised hover:bg-surface disabled:opacity-40 text-sm text-prose rounded-lg transition-colors"
+            className={buttonVariants({ variant: 'secondary' })}
           >
             Next →
           </button>
@@ -677,7 +674,7 @@ export default function MediaLibraryPage() {
             <div className="flex gap-3 pt-1">
               <button
                 onClick={() => { setPendingDeleteId(null); setUsageData(null) }}
-                className="flex-1 px-4 py-2.5 bg-surface-raised hover:bg-surface text-prose-muted text-sm rounded-xl transition-colors"
+                className={buttonVariants({ variant: 'secondary', className: 'flex-1' })}
               >
                 Cancel
               </button>

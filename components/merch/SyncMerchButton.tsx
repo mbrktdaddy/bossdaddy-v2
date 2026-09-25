@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { buttonVariants } from '@/components/ui/Button'
 
 // Triggers POST /api/merch/sync (pull Printful products → merch tables) from the
 // dashboard, so the CLI `npm run merch:sync` isn't needed for routine syncs.
@@ -36,7 +37,7 @@ export function SyncMerchButton({ className = '' }: { className?: string }) {
         type="button"
         onClick={sync}
         disabled={busy}
-        className="px-4 py-2.5 bg-surface-raised hover:bg-surface-hover border border-soft text-prose text-sm font-semibold rounded-xl transition-colors disabled:opacity-50"
+        className={buttonVariants({ variant: 'secondary' })}
         title="Pull the latest products from Printful into the shop"
       >
         {busy ? 'Syncing…' : 'Sync from Printful'}

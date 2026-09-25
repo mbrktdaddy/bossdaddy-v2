@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { compressImage } from '@/lib/compress-image'
 import ImageCropper from '@/components/ui/ImageCropper'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   kidId: string
@@ -135,7 +136,7 @@ export default function KidPhotoUploader({
           type="button"
           onClick={() => fileRef.current?.click()}
           disabled={busy}
-          className="px-3 py-1.5 bg-surface-raised hover:bg-surface disabled:opacity-50 text-xs font-semibold text-prose rounded-lg transition-colors"
+          className={buttonVariants({ variant: 'secondary', size: 'sm' })}
         >
           {busy ? 'Uploading…' : photoUrl ? 'Replace' : 'Upload'}
         </button>

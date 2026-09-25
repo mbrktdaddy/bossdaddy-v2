@@ -344,7 +344,7 @@ export function MerchStudio({ initialApproved }: { initialApproved: ApprovedDesi
                         </button>
                         <button
                           onClick={() => dismiss(idx)}
-                          className="px-3 py-2 bg-surface-raised hover:bg-surface-hover text-prose-muted text-xs font-semibold rounded-lg transition-colors"
+                          className={buttonVariants({ variant: 'secondary', size: 'sm' })}
                         >
                           Dismiss
                         </button>
@@ -622,7 +622,7 @@ function ApprovedDesignCard({ design, onDelete }: { design: ApprovedDesign; onDe
             <a
               href={printUrl}
               download
-              className="px-3 py-2 bg-surface-raised hover:bg-surface-hover border border-soft text-prose text-xs font-semibold rounded-lg transition-colors"
+              className={buttonVariants({ variant: 'secondary', size: 'sm' })}
             >
               Download print file
             </a>
@@ -676,7 +676,7 @@ function ApprovedDesignCard({ design, onDelete }: { design: ApprovedDesign; onDe
                 <button
                   onClick={generateMockup}
                   disabled={mockupBusy}
-                  className="px-3 py-2 bg-surface-raised hover:bg-surface-hover border border-soft text-prose text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
+                  className={buttonVariants({ variant: 'secondary', size: 'sm' })}
                 >
                   {mockupBusy ? 'Working…' : mockups[blank] ? `Regenerate ${blank} mockup` : `Generate ${blank} mockup`}
                 </button>

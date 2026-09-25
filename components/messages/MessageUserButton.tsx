@@ -18,6 +18,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getOrCreateDm } from '@/lib/messaging'
 import { buttonVariants } from '@/components/ui/Button'
+import { EnvelopeIcon } from '@/components/icons'
 
 type State = 'loading' | 'hidden' | 'none' | 'pending_in' | 'pending_out' | 'accepted' | 'blocked'
 
@@ -94,9 +95,7 @@ export default function MessageUserButton({ targetUserId }: { targetUserId: stri
         disabled={busy}
         className={buttonVariants()}
       >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
+        <EnvelopeIcon className="w-4 h-4" strokeWidth={1.8} />
         {busy ? 'Opening…' : 'Message'}
       </button>
       {error && <span className="text-xs text-danger-ink">{error}</span>}

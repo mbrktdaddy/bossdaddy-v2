@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef, type ReactNode, type MouseEvent } from 'react'
+import { ChevronLeftIcon, ChevronRightIcon, XIcon } from '@/components/icons'
 
 interface Props {
   children: ReactNode
@@ -133,9 +134,7 @@ export default function ImageLightbox({ children, className }: Props) {
                   aria-label="Previous image"
                   className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full flex items-center justify-center transition-colors"
                 >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                  </svg>
+                  <ChevronLeftIcon className="w-5 h-5" strokeWidth={2} />
                 </button>
                 <button
                   type="button"
@@ -143,9 +142,7 @@ export default function ImageLightbox({ children, className }: Props) {
                   aria-label="Next image"
                   className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full flex items-center justify-center transition-colors"
                 >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
+                  <ChevronRightIcon className="w-5 h-5" strokeWidth={2} />
                 </button>
                 {/* Counter */}
                 <span className="absolute top-2 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-zinc-900/60 text-white text-xs font-medium rounded-full tabular-nums">
@@ -160,9 +157,7 @@ export default function ImageLightbox({ children, className }: Props) {
               aria-label="Close image"
               className="absolute top-2 right-2 w-9 h-9 bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full flex items-center justify-center transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <XIcon className="w-5 h-5" strokeWidth={2} />
             </button>
           </div>
         </div>

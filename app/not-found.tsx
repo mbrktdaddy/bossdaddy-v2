@@ -25,7 +25,7 @@ export default function NotFound() {
         <Link href="/" className={buttonVariants({ size: 'lg' })}>
           Go Home
         </Link>
-        <Link href="/reviews" className="px-6 py-3 bg-surface-raised hover:bg-surface border border-strong text-prose-muted font-semibold rounded-xl transition-colors text-sm">
+        <Link href="/reviews" className={buttonVariants({ variant: 'secondary', size: 'lg' })}>
           Browse Reviews
         </Link>
       </div>

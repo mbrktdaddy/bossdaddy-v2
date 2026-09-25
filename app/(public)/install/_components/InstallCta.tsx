@@ -15,6 +15,7 @@ import { usePwaInstall } from '@/components/pwa/PwaInstallProvider'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
+import { DownloadIcon } from '@/components/icons'
 
 function StepList({ steps }: { steps: React.ReactNode[] }) {
   return (
@@ -67,9 +68,7 @@ export default function InstallCta() {
             onClick={handleInstall}
             className={buttonVariants({ size: 'lg' })}
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0-4-4m4 4 4-4M4 20h16" />
-            </svg>
+            <DownloadIcon className="w-4 h-4" strokeWidth={2} />
             Get the App
           </button>
           <p className="text-xs text-prose-faint mt-3">One tap — no app store, no download wait.</p>

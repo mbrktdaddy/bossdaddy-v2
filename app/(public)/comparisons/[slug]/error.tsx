@@ -29,7 +29,7 @@ export default function Error({
         >
           Try Again
         </button>
-        <Link href="/comparisons" className="px-5 py-2.5 bg-surface-raised hover:bg-surface border border-strong text-prose-muted font-semibold rounded-xl transition-colors text-sm">
+        <Link href="/comparisons" className={buttonVariants({ variant: 'secondary' })}>
           All Comparisons
         </Link>
       </div>

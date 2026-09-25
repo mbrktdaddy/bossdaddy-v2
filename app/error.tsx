@@ -31,7 +31,7 @@ export default function Error({
         >
           Try Again
         </button>
-        <Link href="/" className="px-6 py-3 bg-surface-raised hover:bg-surface border border-strong text-prose-muted font-semibold rounded-xl transition-colors text-sm">
+        <Link href="/" className={buttonVariants({ variant: 'secondary', size: 'lg' })}>
           Go Home
         </Link>
       </div>

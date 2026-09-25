@@ -526,7 +526,7 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
             </p>
             <button
               type="submit"
-              className="min-h-11 w-full rounded-lg border border-strong bg-surface-raised px-5 py-3 text-xs font-bold text-prose hover:bg-surface-hover transition-colors"
+              className={buttonVariants({ variant: 'secondary', size: 'sm', className: 'w-full' })}
             >
               Make me a calendar link
             </button>

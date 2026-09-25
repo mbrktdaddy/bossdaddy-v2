@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useLoginHref } from '@/lib/use-login-href'
+import { CheckIcon } from '@/components/icons'
 
 interface Props {
   commentId: string
@@ -50,9 +51,7 @@ export default function CommentShareButton({ commentId, shareCount }: Props) {
     >
       {copied ? (
         <>
-          <svg className="w-3.5 h-3.5 text-forest" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
+          <CheckIcon className="w-3.5 h-3.5 text-forest" strokeWidth={2} />
           <span className="text-forest">Copied!</span>
         </>
       ) : (

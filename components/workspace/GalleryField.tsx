@@ -116,7 +116,7 @@ export function GalleryField({
             type="button"
             onClick={() => setShowPicker(true)}
             disabled={atMax}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface disabled:opacity-40 text-prose-muted hover:text-prose rounded-lg transition-colors min-h-[36px]"
+            className={buttonVariants({ variant: 'secondary', size: 'sm' })}
           >
             📁 Add from library
           </button>

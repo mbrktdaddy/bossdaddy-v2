@@ -10,6 +10,7 @@ import { XArticlePreview } from '@/lib/x/preview'
 import type { DroppedTag } from '@/lib/x/serialize'
 import { useSocialArticleWorkspace } from '@/components/workspace/useSocialArticleWorkspace'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
@@ -204,7 +205,7 @@ export function ArticleWorkspace({ article, initialXHtml, initialDropped }: Prop
               type="button"
               onClick={() => ws.setStatus('draft')}
               disabled={ws.busy}
-              className="px-3 py-2 bg-surface-raised hover:bg-surface text-prose-muted text-xs rounded-lg transition-colors disabled:opacity-50"
+              className={buttonVariants({ variant: 'secondary', size: 'sm' })}
             >
               Revert to draft
             </button>

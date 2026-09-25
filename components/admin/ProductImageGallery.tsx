@@ -6,6 +6,7 @@ import Image from 'next/image'
 import dynamic from 'next/dynamic'
 import ImageCropper from '@/components/ui/ImageCropper'
 import { buttonVariants } from '@/components/ui/Button'
+import { CheckIcon, XIcon } from '@/components/icons'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
@@ -344,7 +345,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
             <button
               type="button"
               onClick={() => setSelected(new Set(images.map((i) => i.id)))}
-              className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted font-semibold rounded-lg transition-colors"
+              className={buttonVariants({ variant: 'secondary', size: 'sm' })}
             >
               Select all
             </button>
@@ -360,7 +361,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
               type="button"
               onClick={exitSelectMode}
               disabled={bulkDeleting}
-              className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted font-semibold rounded-lg transition-colors"
+              className={buttonVariants({ variant: 'secondary', size: 'sm' })}
             >
               Done
             </button>
@@ -371,7 +372,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
               <button
                 type="button"
                 onClick={() => setSelectMode(true)}
-                className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted font-semibold rounded-lg transition-colors"
+                className={buttonVariants({ variant: 'secondary', size: 'sm' })}
               >
                 Select
               </button>
@@ -379,7 +380,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
             <button
               type="button"
               onClick={() => setShowPicker(true)}
-              className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted font-semibold rounded-lg transition-colors"
+              className={buttonVariants({ variant: 'secondary', size: 'sm' })}
             >
               Pick from library
             </button>
@@ -466,9 +467,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
                   }`}
                 >
                   {isSelected && (
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
+                    <CheckIcon className="w-3 h-3" strokeWidth={3} />
                   )}
                 </div>
               ) : (
@@ -486,9 +485,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
                   className="absolute top-1.5 right-1.5 p-1 bg-surface/80 hover:bg-red-50 text-prose-faint hover:text-red-700 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                   title="Remove image"
                 >
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <XIcon className="w-3.5 h-3.5" strokeWidth={2} />
                 </button>
               )}
 
@@ -554,7 +551,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
               <button
                 type="button"
                 onClick={() => setUsageModal(null)}
-                className="flex-1 px-4 py-2.5 bg-surface-raised hover:bg-surface text-prose-muted text-sm rounded-xl transition-colors"
+                className={buttonVariants({ variant: 'secondary', className: 'flex-1' })}
               >
                 Cancel
               </button>
@@ -609,7 +606,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
               <button
                 type="button"
                 onClick={() => { setBulkUsage(null); exitSelectMode() }}
-                className="flex-1 px-4 py-2.5 bg-surface-raised hover:bg-surface text-prose-muted text-sm rounded-xl transition-colors"
+                className={buttonVariants({ variant: 'secondary', className: 'flex-1' })}
               >
                 Cancel
               </button>

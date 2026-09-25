@@ -17,6 +17,7 @@ import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { activityTime } from '@/lib/activity-time'
 import { buttonVariants } from '@/components/ui/Button'
+import { CheckIcon } from '@/components/icons'
 
 interface NotificationRow {
   id:              string
@@ -259,9 +260,7 @@ export default function ActivityMenu({ userId }: { userId: string }) {
                               title="Mark as read"
                               className="shrink-0 p-1 -mr-1 text-prose-faint hover:text-accent transition-colors"
                             >
-                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                              </svg>
+                              <CheckIcon className="w-4 h-4" strokeWidth={2} />
                             </button>
                           )}
                         </div>

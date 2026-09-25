@@ -2,6 +2,7 @@
 
 import { useState, useSyncExternalStore } from 'react'
 import { X_HANDLE } from '@/lib/social'
+import { CheckIcon, EnvelopeIcon } from '@/components/icons'
 
 interface Props {
   title: string
@@ -94,9 +95,7 @@ export default function ShareButtons({ title }: Props) {
       </button>
 
       <button type="button" onClick={shareEmail} aria-label="Share by email" title="Share by email" className={SOCIAL}>
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
+        <EnvelopeIcon className="w-4 h-4" strokeWidth={2} />
       </button>
 
       <button
@@ -107,9 +106,7 @@ export default function ShareButtons({ title }: Props) {
         className={`${BTN} ${copied ? 'text-forest border-forest/50' : ''}`}
       >
         {copied ? (
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
+          <CheckIcon className="w-4 h-4" strokeWidth={2.5} />
         ) : (
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />

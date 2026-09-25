@@ -12,6 +12,7 @@ import AccountMenu, { useAuthUser } from '@/components/AccountMenu'
 import ConnectionBadge from '@/components/account/ConnectionBadge'
 import { isImmersiveRoute } from '@/lib/immersive-routes'
 import { buttonVariants } from '@/components/ui/Button'
+import { ChevronDownIcon, CubeIcon, DownloadIcon, EnvelopeIcon, ScaleIcon, SearchIcon, StarIcon, XIcon } from '@/components/icons'
 
 // Vault is intentionally NOT a top-level anchor — its contents
 // (Comparisons / Best Of / Stacks / Gift Guides) live inside the Browse
@@ -46,9 +47,7 @@ const VAULT_LINKS = [
     label: LABELS.comparisons.short,
     blurb: 'Head-to-head scorecards',
     icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z" />
-      </svg>
+      <ScaleIcon className="w-4 h-4" strokeWidth={1.5} />
     ),
   },
   {
@@ -56,9 +55,7 @@ const VAULT_LINKS = [
     label: LABELS.picks.short,
     blurb: 'Ranked category roundups',
     icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-      </svg>
+      <StarIcon className="w-4 h-4" strokeWidth={1.5} />
     ),
   },
   {
@@ -66,9 +63,7 @@ const VAULT_LINKS = [
     label: LABELS.stacks.short,
     blurb: 'Kits built for purpose',
     icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-      </svg>
+      <CubeIcon className="w-4 h-4" strokeWidth={1.5} />
     ),
   },
   {
@@ -242,12 +237,7 @@ export default function Header() {
               }`}
             >
               Browse
-              <svg
-                className={`w-3.5 h-3.5 transition-transform duration-200 ${catOpen ? 'rotate-180' : ''}`}
-                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
+              <ChevronDownIcon className={`w-3.5 h-3.5 transition-transform duration-200 ${catOpen ? 'rotate-180' : ''}`} strokeWidth={2} />
             </button>
 
             {/* Mega-menu panel — elevated zinc-800 to lift from masthead */}
@@ -331,9 +321,7 @@ export default function Header() {
                     onKeyDown={(e) => { if (e.key === 'Escape') setSearchOpen(false) }}
                     className="w-44 lg:w-56 pl-8 pr-3 py-1.5 bg-surface-raised border border-strong focus:border-copper focus-visible:ring-1 focus-visible:ring-copper/50 rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none transition-colors"
                   />
-                  <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
+                  <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-prose-faint" strokeWidth={2} />
                 </div>
               </form>
             ) : (
@@ -343,9 +331,7 @@ export default function Header() {
                 aria-keyshortcuts="Meta+K Ctrl+K"
                 className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-lg bg-surface-raised border border-strong text-prose-muted hover:text-prose hover:border-zinc-600 transition-colors text-sm"
               >
-                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <SearchIcon className="w-4 h-4 shrink-0" strokeWidth={2} />
                 <span className="hidden lg:inline text-xs text-prose-muted">Search</span>
                 <kbd className="text-[10px] font-mono bg-surface-hover border border-zinc-600 rounded px-1.5 py-0.5 leading-none">⌘K</kbd>
               </button>
@@ -368,9 +354,7 @@ export default function Header() {
             aria-label="Toggle menu"
           >
             {mobileOpen ? (
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <XIcon className="w-5 h-5" strokeWidth={2} />
             ) : (
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -399,9 +383,7 @@ export default function Header() {
               placeholder="Search reviews and guides..."
               className="w-full pl-9 pr-3 py-2.5 bg-surface-raised border border-strong rounded-xl text-base text-prose placeholder:text-prose-faint focus:outline-none focus:border-copper focus-visible:ring-1 focus-visible:ring-copper/50 transition-colors"
             />
-            <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-prose-faint" strokeWidth={2} />
           </div>
         </form>
       </div>
@@ -449,9 +431,7 @@ export default function Header() {
                   : 'text-prose-muted hover:text-prose hover:bg-surface-raised'
               }`}
             >
-              <svg className="w-4 h-4 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0-4-4m4 4 4-4M4 20h16" />
-              </svg>
+              <DownloadIcon className="w-4 h-4 text-accent shrink-0" strokeWidth={1.8} />
               {LABELS.app.short}
             </Link>
           </nav>
@@ -463,12 +443,7 @@ export default function Header() {
               className="flex items-center justify-between w-full text-xs text-copper uppercase tracking-widest font-semibold mb-3"
             >
               Browse by Category
-              <svg
-                className={`w-4 h-4 transition-transform ${mobileCatOpen ? 'rotate-180' : ''}`}
-                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
+              <ChevronDownIcon className={`w-4 h-4 transition-transform ${mobileCatOpen ? 'rotate-180' : ''}`} strokeWidth={2} />
             </button>
             {mobileCatOpen && (
               <div className="grid grid-cols-2 gap-2 pb-3">
@@ -509,7 +484,7 @@ export default function Header() {
                   key={v.href}
                   href={v.href}
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-raised hover:bg-surface-hover transition-colors min-h-[44px]"
+                  className={buttonVariants({ variant: 'secondary' })}
                 >
                   <span className="text-copper shrink-0">{v.icon}</span>
                   <span className="text-xs font-semibold text-prose-muted truncate">{v.label}</span>
@@ -576,9 +551,7 @@ export default function Header() {
                   onClick={() => setMobileOpen(false)}
                   className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-prose-muted hover:text-prose hover:bg-surface-raised transition-colors"
                 >
-                  <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
+                  <EnvelopeIcon className="w-4 h-4 text-prose-faint" strokeWidth={1.8} />
                   Messages
                 </Link>
                 {hasDashboard && (

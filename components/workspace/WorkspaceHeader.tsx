@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ReactNode } from 'react'
+import { ChevronLeftIcon } from '@/components/icons'
 
 interface Props {
   backHref: string
@@ -16,9 +17,7 @@ export function WorkspaceHeader({ backHref, backLabel = 'Back', title, subtitle,
         href={backHref}
         className="inline-flex items-center gap-2 text-xs text-prose-faint hover:text-prose transition-colors mb-3"
       >
-        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
+        <ChevronLeftIcon className="w-3 h-3" strokeWidth={2} />
         {backLabel}
       </Link>
       <div className="flex items-start justify-between gap-4 flex-wrap">

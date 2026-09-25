@@ -37,6 +37,7 @@ import ContactsCard from '@/components/account/ContactsCard'
 import MessagesCard from '@/components/account/MessagesCard'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { ChevronRightIcon } from '@/components/icons'
 
 export const metadata: Metadata = {
   title: LABELS.account.pageTitle,
@@ -161,7 +162,7 @@ export default async function AccountHomePage() {
                   className="flex items-center gap-3 px-3 py-2.5 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-lg transition-colors group min-h-[44px]">
                   <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-accent-tint text-accent-text-soft border border-accent-border/60 shrink-0 font-medium">Review</span>
                   <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate min-w-0 flex-1">{r.title}</p>
-                  <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                  <ChevronRightIcon className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 transition-colors" strokeWidth={2} />
                 </Link>
               ))}
               {orderedLikedArticles.slice(0, 5).map((a) => a && (
@@ -169,7 +170,7 @@ export default async function AccountHomePage() {
                   className="flex items-center gap-3 px-3 py-2.5 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-lg transition-colors group min-h-[44px]">
                   <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-info-bg text-info-ink border border-info-line shrink-0 font-medium">Guide</span>
                   <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate min-w-0 flex-1">{a.title}</p>
-                  <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                  <ChevronRightIcon className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 transition-colors" strokeWidth={2} />
                 </Link>
               ))}
               {(orderedLikedReviews.length > 5 || orderedLikedArticles.length > 5) && (
@@ -198,7 +199,7 @@ export default async function AccountHomePage() {
                     {BENCH_STATUS_LABEL[item.status] ?? item.status}
                   </span>
                   <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate min-w-0">{item.title}</p>
-                  <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 ml-auto transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                  <ChevronRightIcon className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 ml-auto transition-colors" strokeWidth={2} />
                 </Link>
               ))}
             </div>

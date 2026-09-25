@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import { fetchAssetAsFile } from '@/lib/images/derive-crop'
 import { downloadImage } from '@/lib/images/download'
 import { buttonVariants } from '@/components/ui/Button'
+import { XIcon } from '@/components/icons'
 const MediaPicker   = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 const ImageCropper  = dynamic(() => import('@/components/ui/ImageCropper'),   { ssr: false })
 
@@ -142,7 +143,7 @@ export function HeroImagePanel({
           <button
             type="button"
             onClick={() => setShowPicker(true)}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose rounded-lg transition-colors min-h-[36px]"
+            className={buttonVariants({ variant: 'secondary', size: 'sm' })}
           >
             📁 Library
           </button>
@@ -184,9 +185,7 @@ export function HeroImagePanel({
             className="absolute top-2 right-2 p-1.5 bg-surface/80 hover:bg-red-50 text-prose-muted hover:text-red-700 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
             title="Remove image"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <XIcon className="w-4 h-4" strokeWidth={2} />
           </button>
         </div>
       ) : (

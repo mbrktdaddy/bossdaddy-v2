@@ -20,6 +20,7 @@ import {
 import { toQuery } from '@/lib/dad-tools/url-params'
 import type { DebtRow } from '@/lib/dad-tools/debt-params'
 import { Card } from '@/components/ui/Card'
+import { XIcon } from '@/components/icons'
 
 const EXTRA_MAX = 2_000
 const EXTRA_STEP = 25
@@ -94,9 +95,7 @@ export default function DebtPayoffTool({ today, initial }: Props) {
                   aria-label={`Remove ${label(r, i)}`}
                   className="shrink-0 h-11 w-11 flex items-center justify-center rounded-xl text-prose-faint hover:text-prose hover:bg-surface-raised transition-colors"
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <XIcon className="w-4 h-4" strokeWidth={2} />
                 </button>
               )}
             </div>

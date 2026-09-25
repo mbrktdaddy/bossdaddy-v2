@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Product {
   id: string
@@ -114,7 +115,7 @@ export function PrimaryProductPanel({ value, onChange }: Props) {
           </div>
           <button
             onClick={() => setPicking(true)}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted rounded-lg transition-colors shrink-0"
+            className={buttonVariants({ variant: 'secondary', size: 'sm', className: 'shrink-0' })}
           >
             Change
           </button>

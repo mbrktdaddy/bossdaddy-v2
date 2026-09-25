@@ -12,7 +12,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
       <p className="text-prose-muted text-sm mb-8 max-w-sm">This profile page hit an error. Try refreshing or head back.</p>
       <div className="flex items-center gap-3 flex-wrap justify-center">
         <button onClick={reset} className={buttonVariants()}>Try Again</button>
-        <Link href="/" className="px-5 py-2.5 bg-surface-raised hover:bg-surface border border-strong text-prose-muted font-semibold rounded-xl transition-colors text-sm">Home</Link>
+        <Link href="/" className={buttonVariants({ variant: 'secondary' })}>Home</Link>
       </div>
     </div>
   )

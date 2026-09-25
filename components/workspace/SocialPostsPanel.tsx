@@ -279,14 +279,14 @@ function PostCard({ post, busy, copied, onCopy, onCommit, onRegenerate, onDelete
             type="button"
             onClick={onCopy}
             disabled={busy}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose text-xs rounded-lg min-h-[36px] transition-colors"
+            className={buttonVariants({ variant: 'secondary', size: 'sm' })}
             title="Copy to clipboard"
           >{copied ? '✓ Copied' : 'Copy'}</button>
           <button
             type="button"
             onClick={onRegenerate}
             disabled={busy}
-            className="px-2.5 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted text-xs rounded-lg min-h-[36px] transition-colors"
+            className={buttonVariants({ variant: 'secondary', size: 'sm' })}
             title="Regenerate just this platform"
           >{busy ? '…' : '🔄'}</button>
           <button

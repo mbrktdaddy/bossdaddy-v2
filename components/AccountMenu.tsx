@@ -24,6 +24,7 @@ import { createClient } from '@/lib/supabase/client'
 import { LABELS } from '@/lib/labels'
 import ConnectionBadge from '@/components/account/ConnectionBadge'
 import ActivityMenu from '@/components/ActivityMenu'
+import { ChevronDownIcon, DownloadIcon, EnvelopeIcon } from '@/components/icons'
 
 interface AuthUser {
   userId: string | null
@@ -162,12 +163,7 @@ export default function AccountMenu({ withBell = true }: { withBell?: boolean } 
             <span className="hidden sm:inline text-sm text-prose-muted max-w-[120px] truncate">
               @{username}
             </span>
-            <svg
-              className={`w-3 h-3 text-prose-faint transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`}
-              fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
+            <ChevronDownIcon className={`w-3 h-3 text-prose-faint transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`} strokeWidth={2.5} />
           </button>
 
           {userMenuOpen && (
@@ -215,9 +211,7 @@ export default function AccountMenu({ withBell = true }: { withBell?: boolean } 
                 onClick={() => setUserMenuOpen(false)}
                 className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-surface-hover hover:text-prose transition-colors"
               >
-                <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
+                <EnvelopeIcon className="w-4 h-4 text-prose-faint" strokeWidth={1.8} />
                 Messages
               </Link>
               {hasDashboard && (
@@ -237,9 +231,7 @@ export default function AccountMenu({ withBell = true }: { withBell?: boolean } 
                 onClick={() => setUserMenuOpen(false)}
                 className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-surface-hover hover:text-prose transition-colors"
               >
-                <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0-4-4m4 4 4-4M4 20h16" />
-                </svg>
+                <DownloadIcon className="w-4 h-4 text-prose-faint" strokeWidth={2} />
                 {LABELS.app.short}
               </Link>
               <div className="border-t border-soft mt-1 pt-1">

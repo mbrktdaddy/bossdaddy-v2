@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { GuideWorkspace } from './_components/GuideWorkspace'
+import { ChevronLeftIcon } from '@/components/icons'
 
 export default async function GuideWorkspacePage({
   params,
@@ -24,9 +25,7 @@ export default async function GuideWorkspacePage({
     return (
       <div className="p-8 max-w-3xl">
         <Link href="/dashboard/guides" className="inline-flex items-center gap-2 text-xs text-prose-faint hover:text-prose transition-colors mb-6">
-          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
+          <ChevronLeftIcon className="w-3 h-3" strokeWidth={2} />
           All articles
         </Link>
         <p className="text-danger-ink">Guide not found. It may have been deleted.</p>

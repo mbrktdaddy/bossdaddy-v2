@@ -118,7 +118,7 @@ export default function AccountDeletion({ accountStatus, deletionDate, hasPublis
               {loading ? 'Submitting…' : 'Schedule deletion'}
             </button>
             <button onClick={() => { setConfirming(false); setConfirmText(''); setError(null) }} disabled={loading}
-              className="px-4 py-2 bg-surface-raised hover:bg-surface text-prose-muted text-sm font-semibold rounded-lg transition-colors">
+              className={buttonVariants({ variant: 'secondary' })}>
               Never mind
             </button>
           </div>

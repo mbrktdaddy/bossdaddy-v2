@@ -6,6 +6,7 @@ import Link from 'next/link'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import RatingScore from '@/components/RatingScore'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { ChevronLeftIcon, ChevronRightIcon } from '@/components/icons'
 
 interface Review {
   id: string
@@ -120,9 +121,7 @@ export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
             opacity-0 group-hover:opacity-100 transition-opacity duration-200"
           aria-label="Previous"
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
+          <ChevronLeftIcon className="w-4 h-4" strokeWidth={2.5} />
         </button>
         <button
           onClick={e => { e.preventDefault(); navigate(1) }}
@@ -132,9 +131,7 @@ export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
             opacity-0 group-hover:opacity-100 transition-opacity duration-200"
           aria-label="Next"
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
+          <ChevronRightIcon className="w-4 h-4" strokeWidth={2.5} />
         </button>
       </div>
 

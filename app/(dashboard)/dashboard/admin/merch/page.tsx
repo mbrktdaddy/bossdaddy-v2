@@ -38,7 +38,7 @@ export default async function AdminMerchListPage() {
           <SyncMerchButton />
           <Link
             href="/dashboard/admin/merch/studio"
-            className="px-4 py-2.5 bg-surface-raised hover:bg-surface-hover border border-soft text-prose text-sm font-semibold rounded-xl transition-colors"
+            className={buttonVariants({ variant: 'secondary' })}
           >
             Studio
           </Link>

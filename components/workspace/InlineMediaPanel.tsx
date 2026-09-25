@@ -29,6 +29,7 @@ import {
   updateSlotMeta,
 } from '@/lib/inlineImages'
 import { buttonVariants } from '@/components/ui/Button'
+import { TrashIcon } from '@/components/icons'
 
 interface Props {
   content: string
@@ -791,7 +792,7 @@ function GalleryCard(p: GalleryCardProps) {
             onClick={p.onRemoveGallery}
             className="px-2.5 py-1.5 bg-transparent hover:bg-red-50 text-prose-faint hover:text-red-700 text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors"
             title="Remove entire gallery"
-          ><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg></button>
+          ><TrashIcon className="w-3.5 h-3.5" strokeWidth={1.5} /></button>
         </div>
       </div>
 
@@ -824,7 +825,7 @@ function GalleryCard(p: GalleryCardProps) {
                     type="button"
                     onClick={() => p.onDetachChild(child.slotId)}
                     disabled={busySlotId === child.slotId}
-                    className="px-2 py-1 bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose text-xs rounded-lg min-h-[32px] transition-colors"
+                    className={buttonVariants({ variant: 'secondary', size: 'sm' })}
                     title="Remove from gallery and place standalone after it"
                   >⤴ Detach</button>
                   <button
@@ -833,7 +834,7 @@ function GalleryCard(p: GalleryCardProps) {
                     disabled={busySlotId === child.slotId}
                     className="px-2 py-1 bg-transparent hover:bg-red-50 text-prose-faint hover:text-red-700 text-xs rounded-lg min-h-[32px] min-w-[32px] transition-colors"
                     title="Remove image"
-                  ><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg></button>
+                  ><TrashIcon className="w-3.5 h-3.5" strokeWidth={1.5} /></button>
                 </div>
               </div>
 
@@ -872,20 +873,20 @@ function GalleryCard(p: GalleryCardProps) {
                   type="button"
                   onClick={() => p.onPickReplaceChild(child)}
                   disabled={busySlotId === child.slotId}
-                  className="px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose text-xs font-semibold rounded-lg min-h-[36px] transition-colors"
+                  className={buttonVariants({ variant: 'secondary', size: 'sm' })}
                 >📁 {child.filled ? 'Replace' : 'Library'}</button>
                 <button
                   type="button"
                   onClick={() => p.onUploadChild(child.slotId)}
                   disabled={busySlotId === child.slotId}
-                  className="px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose text-xs font-semibold rounded-lg min-h-[36px] transition-colors"
+                  className={buttonVariants({ variant: 'secondary', size: 'sm' })}
                 >⬆ Upload</button>
                 {child.filled && (
                   <button
                     type="button"
                     onClick={() => p.onCropChild(child)}
                     disabled={busySlotId === child.slotId}
-                    className="px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose text-xs font-semibold rounded-lg min-h-[36px] transition-colors"
+                    className={buttonVariants({ variant: 'secondary', size: 'sm' })}
                     title="Crop / reframe this image"
                   >✂ Crop</button>
                 )}
@@ -1000,7 +1001,7 @@ function SlotCard(p: SlotCardProps) {
           <button type="button" onClick={() => p.onMove(position + 1)} disabled={busy || position === total}
             className="px-2.5 py-1.5 bg-surface-raised hover:bg-surface disabled:opacity-30 text-prose-muted text-xs rounded-lg min-h-[36px] min-w-[36px] transition-colors" title="Move down">↓</button>
           <button type="button" onClick={p.onRemove} disabled={busy}
-            className="px-2.5 py-1.5 bg-transparent hover:bg-red-50 text-prose-faint hover:text-red-700 text-xs rounded-lg min-h-[36px] min-w-[36px] inline-flex items-center justify-center transition-colors" title="Remove image"><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg></button>
+            className="px-2.5 py-1.5 bg-transparent hover:bg-red-50 text-prose-faint hover:text-red-700 text-xs rounded-lg min-h-[36px] min-w-[36px] inline-flex items-center justify-center transition-colors" title="Remove image"><TrashIcon className="w-3.5 h-3.5" strokeWidth={1.5} /></button>
         </div>
       </div>
 
@@ -1030,16 +1031,16 @@ function SlotCard(p: SlotCardProps) {
           {busy ? '✨ Working…' : filled ? '🔄 Regenerate' : '✨ Generate'}
         </button>
         <button type="button" onClick={p.onPickReplace} disabled={busy}
-          className="px-3 py-2 bg-surface-raised hover:bg-surface text-prose text-xs font-semibold rounded-lg min-h-[36px] transition-colors">
+          className={buttonVariants({ variant: 'secondary', size: 'sm' })}>
           📁 {filled ? 'Replace' : 'Library'}
         </button>
         <button type="button" onClick={p.onUpload} disabled={busy}
-          className="px-3 py-2 bg-surface-raised hover:bg-surface text-prose text-xs font-semibold rounded-lg min-h-[36px] transition-colors">
+          className={buttonVariants({ variant: 'secondary', size: 'sm' })}>
           ⬆ Upload {filled ? 'new' : ''}
         </button>
         {filled && (
           <button type="button" onClick={p.onCrop} disabled={busy}
-            className="px-3 py-2 bg-surface-raised hover:bg-surface text-prose text-xs font-semibold rounded-lg min-h-[36px] transition-colors"
+            className={buttonVariants({ variant: 'secondary', size: 'sm' })}
             title="Crop / reframe this image">✂ Crop</button>
         )}
         {filled && (

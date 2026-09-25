@@ -30,7 +30,7 @@ export default function AccountBlockedPage() {
         </a>
         <Link
           href="/"
-          className="px-6 py-3 bg-surface-raised hover:bg-surface border border-strong text-prose-muted font-semibold rounded-xl transition-colors text-sm"
+          className={buttonVariants({ variant: 'secondary', size: 'lg' })}
         >
           ← Home
         </Link>

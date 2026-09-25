@@ -202,7 +202,7 @@ export function InternalLinkPanel({
                       ) : (
                         <button
                           onClick={() => insertSuggestion(s)}
-                          className="shrink-0 text-xs px-3 py-2 bg-surface-raised hover:bg-surface text-prose-muted rounded-lg min-h-[36px] transition-colors"
+                          className={buttonVariants({ variant: 'secondary', size: 'sm', className: 'shrink-0' })}
                         >
                           + Insert link
                         </button>

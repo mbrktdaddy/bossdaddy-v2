@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { CheckCircleIcon } from '@/components/icons'
 
 interface Props {
   limit?: number
@@ -59,9 +60,7 @@ export default async function OffTheBench({ limit = 3, className = '' }: Props) 
       <div className="mb-5">
         <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
         <h2 className="text-lg font-black inline-flex items-center gap-2 text-prose">
-          <svg className="w-4 h-4 shrink-0 text-accent-text-soft" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+          <CheckCircleIcon className="w-4 h-4 shrink-0 text-accent-text-soft" strokeWidth={1.5} />
           Fresh off the Bench
         </h2>
         <p className="text-xs text-prose-muted mt-0.5">
@@ -87,9 +86,7 @@ export default async function OffTheBench({ limit = 3, className = '' }: Props) 
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center text-accent-text/30">
-                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <CheckCircleIcon className="w-8 h-8" strokeWidth={1.5} />
                 </div>
               )}
               <span className="absolute top-2 left-2 inline-flex items-center bg-surface-sunken/85 backdrop-blur border border-soft rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-accent-text-soft">

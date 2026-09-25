@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { CheckCircleIcon, XIcon } from '@/components/icons'
 
 interface GradVote {
   reviewSlug: string
@@ -58,9 +59,7 @@ export function VotePayoffBanner() {
   return (
     <div className="mb-8 flex items-start gap-3 rounded-xl bg-accent-tint border border-accent-border/50 p-4">
       <span className="mt-0.5 shrink-0 text-accent-text-soft" aria-hidden>
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <CheckCircleIcon className="w-5 h-5" strokeWidth={1.8} />
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-sm text-accent-text/90">
@@ -87,9 +86,7 @@ export function VotePayoffBanner() {
         aria-label="Dismiss"
         className="shrink-0 -mt-1 -mr-1 p-1 text-accent-text/50 hover:text-accent-text-soft transition-colors"
       >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
+        <XIcon className="w-4 h-4" strokeWidth={2} />
       </button>
     </div>
   )

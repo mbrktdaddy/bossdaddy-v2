@@ -7,6 +7,7 @@ import { compressImage } from '@/lib/compress-image'
 import ImageCropper from '@/components/ui/ImageCropper'
 import { MERCH_CATEGORIES, MERCH_STATUSES, type Merch, type MerchCategory, type MerchStatus } from '@/lib/merch'
 import { buttonVariants } from '@/components/ui/Button'
+import { XIcon } from '@/components/icons'
 
 const MediaPicker = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 
@@ -322,9 +323,7 @@ export function MerchForm({ item }: Props) {
                       className="absolute top-1 right-1 p-1 bg-surface/80 hover:bg-danger-bg text-prose-muted hover:text-danger-ink rounded transition-colors"
                       title="Remove image"
                     >
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      <XIcon className="w-3 h-3" strokeWidth={2} />
                     </button>
                   </div>
                   <div className="flex items-center gap-2 mt-1">
@@ -351,7 +350,7 @@ export function MerchForm({ item }: Props) {
           <button
             type="button"
             onClick={() => setShowPicker(true)}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted font-semibold rounded-lg transition-colors"
+            className={buttonVariants({ variant: 'secondary', size: 'sm' })}
           >
             Pick from library
           </button>

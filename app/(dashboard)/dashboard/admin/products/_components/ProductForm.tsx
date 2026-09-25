@@ -832,7 +832,7 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
             type="button"
             onClick={handlePromote}
             disabled={busy}
-            className="px-5 py-2.5 bg-surface-raised hover:bg-surface disabled:opacity-50 border border-strong text-prose text-sm font-semibold rounded-xl transition-colors"
+            className={buttonVariants({ variant: 'secondary' })}
           >
             Promote to Review
           </button>

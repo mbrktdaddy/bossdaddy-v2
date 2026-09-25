@@ -18,6 +18,7 @@ import {
 } from '@/lib/messaging'
 import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
+import { ChevronLeftIcon, ChevronRightIcon, DownloadIcon, PhotoIcon, XIcon } from '@/components/icons'
 
 interface Message {
   id: string
@@ -1030,9 +1031,7 @@ export default function Thread({
                 aria-label="Cancel reply"
                 className="p-1.5 text-prose-faint hover:text-prose rounded-lg hover:bg-surface-raised shrink-0"
               >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <XIcon className="w-3.5 h-3.5" strokeWidth={2} />
               </button>
             </div>
           )}
@@ -1053,9 +1052,7 @@ export default function Thread({
                       aria-label="Remove photo"
                       className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-surface border border-soft text-prose-muted hover:text-prose rounded-full flex items-center justify-center shadow"
                     >
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      <XIcon className="w-3.5 h-3.5" strokeWidth={2} />
                     </button>
                   </div>
                 ))}
@@ -1085,9 +1082,7 @@ export default function Thread({
               aria-label="Attach photos"
               className="p-2.5 text-prose-faint hover:text-accent disabled:opacity-40 rounded-xl hover:bg-surface-raised transition-colors shrink-0"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+              <PhotoIcon className="w-5 h-5" strokeWidth={1.5} />
             </button>
             {/* text-base, not text-sm: iOS Safari zooms the whole page when a
                 focused input's font is under 16px, and there is no zooming back
@@ -1151,9 +1146,7 @@ export default function Thread({
                 aria-label="Save photo"
                 className="w-9 h-9 bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full flex items-center justify-center transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0-4-4m4 4 4-4M4 20h16" />
-                </svg>
+                <DownloadIcon className="w-5 h-5" strokeWidth={2} />
               </a>
               <button
                 type="button"
@@ -1161,9 +1154,7 @@ export default function Thread({
                 aria-label="Close image"
                 className="w-9 h-9 bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full flex items-center justify-center transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <XIcon className="w-5 h-5" strokeWidth={2} />
               </button>
             </div>
 
@@ -1176,9 +1167,7 @@ export default function Thread({
                 aria-label="Previous photo"
                 className="absolute left-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full flex items-center justify-center transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
+                <ChevronLeftIcon className="w-5 h-5" strokeWidth={2} />
               </button>
             )}
             {hasNext && (
@@ -1188,9 +1177,7 @@ export default function Thread({
                 aria-label="Next photo"
                 className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full flex items-center justify-center transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
+                <ChevronRightIcon className="w-5 h-5" strokeWidth={2} />
               </button>
             )}
             {ids.length > 1 && at >= 0 && (

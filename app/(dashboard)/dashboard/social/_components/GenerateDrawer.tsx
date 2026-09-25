@@ -486,7 +486,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                             </button>
                             <button
                               onClick={() => copyText('article', repResult.article.x_html)}
-                              className="text-xs bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose px-3 py-1 rounded-lg font-medium transition-colors"
+                              className={buttonVariants({ variant: 'secondary', size: 'sm' })}
                             >
                               {copied === 'article' ? 'Copied!' : 'Copy X-ready HTML'}
                             </button>
@@ -505,7 +505,7 @@ export default function GenerateDrawer({ reviews, guides, currentPlatform }: Pro
                           <p className="text-xs text-prose-muted uppercase tracking-widest font-medium">Thread ({repResult.thread.posts.length})</p>
                           <button
                             onClick={() => copyText('thread', repResult.thread.posts.map((t, i) => `${i + 1}/${repResult.thread.posts.length} ${t}`).join('\n\n'))}
-                            className="text-xs bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose px-3 py-1 rounded-lg font-medium transition-colors"
+                            className={buttonVariants({ variant: 'secondary', size: 'sm' })}
                           >
                             {copied === 'thread' ? 'Copied!' : 'Copy thread'}
                           </button>

@@ -38,6 +38,7 @@ import MomentsFeed from '@/components/dad-tools/MomentsFeed'
 import WeeklyCheckinOptIn from '@/components/dad-tools/WeeklyCheckinOptIn'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { ChevronRightIcon } from '@/components/icons'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -368,9 +369,7 @@ export default async function KidProfilePage({ params }: PageProps) {
                   <p className="text-sm font-black text-prose tabular-nums shrink-0">
                     {fmtUsdWhole(stats.runningTotal)}
                   </p>
-                  <svg className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+                  <ChevronRightIcon className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 transition-colors" strokeWidth={2} />
                 </Link>
               )
             })}

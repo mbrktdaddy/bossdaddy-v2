@@ -146,7 +146,7 @@ export default async function NewGoalPage({ searchParams }: Props) {
                 <li key={shape.slug}>
                   <Link
                     href={`/goals/new?t=${shape.slug}`}
-                    className="block rounded-lg border border-soft bg-surface-raised px-4 py-3 hover:bg-surface-hover transition-colors"
+                    className={buttonVariants({ variant: 'secondary' })}
                   >
                     <p className="text-sm font-bold text-prose">{shape.label}</p>
                     <p className="mt-1 text-xs text-prose-muted">{shape.blurb}</p>

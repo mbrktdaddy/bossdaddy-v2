@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { XIcon } from '@/components/icons'
 
 // The one modal. Built on the native <dialog> + showModal(), so the browser
 // supplies what every hand-rolled overlay re-implemented (and mostly missed):
@@ -74,9 +75,7 @@ export function CloseButton({ onClick, label = 'Close', className = '' }: { onCl
       aria-label={label}
       className={`inline-flex items-center justify-center w-11 h-11 -m-2.5 rounded-lg text-prose-faint hover:text-prose hover:bg-surface-raised transition-colors ${className}`}
     >
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-      </svg>
+      <XIcon className="w-5 h-5" strokeWidth={2} />
     </button>
   )
 }

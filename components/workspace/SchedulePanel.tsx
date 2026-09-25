@@ -1,5 +1,7 @@
 'use client'
 
+import { buttonVariants } from '@/components/ui/Button'
+
 interface Props {
   scheduledAt: string | null
   onChange: (iso: string | null) => void
@@ -65,7 +67,7 @@ export function SchedulePanel({ scheduledAt, onChange, disabled, hint, note, lab
           <button
             type="button"
             onClick={() => onChange(null)}
-            className="text-xs px-3 py-1.5 bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose rounded-lg transition-colors"
+            className={buttonVariants({ variant: 'secondary', size: 'sm' })}
           >
             Clear schedule
           </button>

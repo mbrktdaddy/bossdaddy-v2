@@ -29,7 +29,7 @@ export default function Error({
         >
           Try Again
         </button>
-        <Link href="/bench" className="px-5 py-2.5 bg-surface-raised hover:bg-surface border border-strong text-prose-muted font-semibold rounded-xl transition-colors text-sm">
+        <Link href="/bench" className={buttonVariants({ variant: 'secondary' })}>
           The Bench
         </Link>
       </div>

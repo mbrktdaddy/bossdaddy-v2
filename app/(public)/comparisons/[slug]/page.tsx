@@ -22,6 +22,7 @@ import FtcDisclosure from '@/components/FtcDisclosure'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
+import { CheckIcon, XIcon } from '@/components/icons'
 
 export const revalidate = 60
 
@@ -565,9 +566,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
                                   <ul className="space-y-1.5">
                                     {review.pros!.slice(0, 4).map((p, i) => (
                                       <li key={i} className="text-xs text-prose-muted flex items-start gap-1.5 leading-snug">
-                                        <svg className="w-3 h-3 mt-0.5 shrink-0 text-forest" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
-                                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                        </svg>
+                                        <CheckIcon className="w-3 h-3 mt-0.5 shrink-0 text-forest" strokeWidth={2.5} />
                                         <span>{p}</span>
                                       </li>
                                     ))}
@@ -580,9 +579,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
                                   <ul className="space-y-1.5">
                                     {review.cons!.slice(0, 4).map((c, i) => (
                                       <li key={i} className="text-xs text-prose-muted flex items-start gap-1.5 leading-snug">
-                                        <svg className="w-3 h-3 mt-0.5 shrink-0 text-red-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
-                                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
+                                        <XIcon className="w-3 h-3 mt-0.5 shrink-0 text-red-700" strokeWidth={2.5} />
                                         <span>{c}</span>
                                       </li>
                                     ))}

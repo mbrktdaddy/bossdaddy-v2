@@ -1,11 +1,13 @@
 'use client'
 
+import { buttonVariants } from '@/components/ui/Button'
+
 export function ExportButton() {
   return (
     <a
       href="/api/admin/export"
       download
-      className="inline-flex items-center gap-2 px-3 py-2 bg-surface-raised hover:bg-surface text-prose-muted hover:text-prose text-xs font-semibold rounded-lg transition-colors"
+      className={buttonVariants({ variant: 'secondary', size: 'sm' })}
       title="Download all content as JSON"
     >
       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
