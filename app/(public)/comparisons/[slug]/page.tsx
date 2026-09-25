@@ -18,6 +18,7 @@ import { ogImageUrl, ogImageMeta, toAbsoluteUrl, aspectVariants, OG_SITE, TWITTE
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
 import VaultBreadcrumb from '@/components/vault/VaultBreadcrumb'
+import FtcDisclosure from '@/components/FtcDisclosure'
 
 export const revalidate = 60
 
@@ -134,6 +135,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
   for (const product of await getProductsBySlugs(supabase, productSlugs)) {
     productMap.set(product.slug, { slug: product.slug, affiliate_url: product.affiliate_url, non_affiliate_url: product.non_affiliate_url, price_cents: product.price_cents, brand: product.brand, specs: product.specs ?? [] })
   }
+  const hasAffiliateLinks = [...productMap.values()].some((p) => p.affiliate_url)
 
   // Spec-comparison columns from the linked products, in scorecard order. Header
   // links jump to each contender's deep dive. Self-suppresses when < 2 products
@@ -287,6 +289,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
 
       <div className="max-w-7xl mx-auto px-6 py-12">
         <VaultBreadcrumb tab="comparisons" current={comparison.title} />
+        {hasAffiliateLinks && <FtcDisclosure />}
 
         <div className="lg:flex lg:gap-10 lg:items-start">
           <main className="lg:flex-1 lg:max-w-3xl min-w-0">

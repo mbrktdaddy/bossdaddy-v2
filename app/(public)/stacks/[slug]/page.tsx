@@ -17,6 +17,7 @@ import { ogImageUrl, ogImageMeta, toAbsoluteUrl, aspectVariants, OG_SITE, TWITTE
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
 import VaultBreadcrumb from '@/components/vault/VaultBreadcrumb'
+import FtcDisclosure from '@/components/FtcDisclosure'
 import { LABELS } from '@/lib/labels'
 
 export const revalidate = 60
@@ -142,6 +143,8 @@ export default async function StackDetailPage({ params }: Props) {
     const product = await getProductBySlug(supabase, ps)
     if (product) productMap.set(ps, product as ProductRow)
   }))
+  const hasAffiliateLinks =
+    items.some((i) => i.product?.affiliate_url) || [...productMap.values()].some((p) => p.affiliate_url)
 
   // Build-cost computation — prefer stored total, else sum known prices.
   const { computedTotal, pricedCount } = items.reduce<{ computedTotal: number; pricedCount: number }>(
@@ -276,6 +279,7 @@ export default async function StackDetailPage({ params }: Props) {
 
       <div className="max-w-7xl mx-auto px-6 py-12">
         <VaultBreadcrumb tab="stacks" current={stack.title} />
+        {hasAffiliateLinks && <FtcDisclosure />}
 
         <div className="lg:flex lg:gap-10 lg:items-start">
           <main className="lg:flex-1 lg:max-w-3xl min-w-0">

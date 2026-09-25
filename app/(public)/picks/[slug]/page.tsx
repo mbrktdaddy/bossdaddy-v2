@@ -16,6 +16,7 @@ import { ogImageUrl, ogImageMeta, toAbsoluteUrl, aspectVariants, OG_SITE, TWITTE
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
 import VaultBreadcrumb from '@/components/vault/VaultBreadcrumb'
+import FtcDisclosure from '@/components/FtcDisclosure'
 import { LABELS } from '@/lib/labels'
 
 export const revalidate = 60
@@ -146,6 +147,8 @@ export default async function PickDetailPage({ params }: Props) {
     const product = await getProductBySlug(admin, ps)
     if (product) productMap.set(ps, { slug: product.slug, affiliate_url: product.affiliate_url, non_affiliate_url: product.non_affiliate_url, description: product.description, price_cents: product.price_cents })
   }))
+  const hasAffiliateLinks =
+    items.some((i) => i.product?.affiliate_url) || [...productMap.values()].some((p) => p.affiliate_url)
 
   // Dominant category drives methodology + FAQ
   const categoryCounts = new Map<string, number>()
@@ -269,6 +272,7 @@ export default async function PickDetailPage({ params }: Props) {
 
       <div className="max-w-7xl mx-auto px-6 py-12">
         <VaultBreadcrumb tab="picks" current={pick.title} />
+        {hasAffiliateLinks && <FtcDisclosure />}
 
         <div className="lg:flex lg:gap-10 lg:items-start">
           <main className="lg:flex-1 lg:max-w-3xl min-w-0">

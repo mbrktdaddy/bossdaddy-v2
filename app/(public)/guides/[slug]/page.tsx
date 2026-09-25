@@ -6,7 +6,7 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { FTC_DISCLOSURE_HTML } from '@/lib/affiliate'
+import FtcDisclosure from '@/components/FtcDisclosure'
 import { getCategoryBySlug } from '@/lib/categories'
 import { ARTICLE_SURFACE_CLASS } from '@/lib/article-surface'
 import { ogImageUrl, ogImageMeta, toAbsoluteUrl, aspectVariants, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
@@ -218,12 +218,7 @@ export default async function GuidePage({ params }: Props) {
         </div>
 
         {/* FTC Disclosure — rendered whenever the guide contains affiliate links */}
-        {guide.has_affiliate_links && (
-          <div
-            className="mb-8 text-xs text-prose-faint bg-surface border border-soft rounded-xl px-4 py-3"
-            dangerouslySetInnerHTML={{ __html: FTC_DISCLOSURE_HTML }}
-          />
-        )}
+        {guide.has_affiliate_links && <FtcDisclosure />}
 
         {/* Header */}
         <div className="mb-10">

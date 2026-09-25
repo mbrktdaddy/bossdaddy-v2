@@ -21,6 +21,7 @@ import { ogImageUrl, ogImageMeta, toAbsoluteUrl, aspectVariants, OG_SITE, TWITTE
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
 import VaultBreadcrumb from '@/components/vault/VaultBreadcrumb'
+import FtcDisclosure from '@/components/FtcDisclosure'
 
 export const revalidate = 60
 
@@ -150,6 +151,8 @@ export default async function GiftOccasionPage({ params }: Props) {
     const product = await getProductBySlug(supabase, ps)
     if (product) productMap.set(ps, { slug: product.slug, affiliate_url: product.affiliate_url, non_affiliate_url: product.non_affiliate_url, price_cents: product.price_cents })
   }))
+  const hasAffiliateLinks =
+    items.some((i) => i.product?.affiliate_url) || [...productMap.values()].some((p) => p.affiliate_url)
 
   // Price range pill for the gift-guide header — readers want the budget at a
   // glance before deciding whether to scroll. Skipped when nothing is priced.
@@ -290,6 +293,7 @@ export default async function GiftOccasionPage({ params }: Props) {
 
       <div className={`${pick ? 'max-w-7xl' : 'max-w-4xl'} mx-auto px-6 py-12`}>
         <VaultBreadcrumb tab="gifts" current={occ.label} className="mb-6" />
+        {hasAffiliateLinks && <FtcDisclosure />}
 
         <div className={pick ? 'lg:flex lg:gap-10 lg:items-start' : ''}>
           <main className={pick ? 'lg:flex-1 lg:max-w-3xl min-w-0' : ''}>

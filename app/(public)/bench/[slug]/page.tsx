@@ -1,6 +1,7 @@
 import { cache } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import FtcDisclosure from '@/components/FtcDisclosure'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { WishlistItem } from '@/lib/wishlist'
 import { getBuyLabel } from '@/lib/wishlist'
@@ -99,6 +100,8 @@ export default async function BenchDetailPage({ params }: Props) {
         <span className="mx-2">→</span>
         <span className="text-prose-muted">{wishlistItem.title}</span>
       </div>
+
+      {hasBuyLink && <FtcDisclosure />}
 
       <BenchGallery
         images={[wishlistItem.image_url, ...(wishlistItem.gallery_images ?? [])].filter(Boolean) as string[]}
