@@ -15,10 +15,19 @@ afterEach(() => {
 })
 
 describe('resolveModel', () => {
-  it('defaults every bucket to Claude Sonnet with no fallback', () => {
-    for (const b of ['content', 'research', 'utility', 'moderation', 'concierge'] as const) {
+  it('defaults every non-concierge bucket to Claude Sonnet with no fallback', () => {
+    for (const b of ['content', 'research', 'utility', 'moderation'] as const) {
       expect(resolveModel(b)).toEqual({ model: MODELS.claudeSonnet, fallback: [] })
     }
+  })
+
+  it('defaults the concierge to Grok (live search) with the Claude fallback', () => {
+    expect(resolveModel('concierge')).toEqual({ model: MODELS.grok, fallback: [MODELS.claudeSonnet] })
+  })
+
+  it('lets the concierge be pointed back at Claude', () => {
+    process.env.AI_MODEL_CONCIERGE = MODELS.claudeSonnet
+    expect(resolveModel('concierge')).toEqual({ model: MODELS.claudeSonnet, fallback: [] })
   })
 
   it('applies an env override and adds Claude as an automatic fallback', () => {

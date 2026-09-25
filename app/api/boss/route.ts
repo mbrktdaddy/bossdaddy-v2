@@ -7,10 +7,10 @@ import { checkRateLimit } from '@/lib/rate-limit'
 import { getEntitlements } from '@/lib/boss/entitlements'
 import { buildBossConciergeSystemBlocks } from '@/lib/boss/prompt'
 import { runBossAgent } from '@/lib/boss/agent'
-import type { BossStreamEvent } from '@/lib/boss/types'
+import type { BossStreamEvent, SourceBlock } from '@/lib/boss/types'
 
-// Streaming keeps the connection open for the turn — one model call, but a long
-// answer (up to MAX_TOKENS in lib/boss/agent.ts) can take a minute or more.
+// Streaming keeps the connection open for the turn — one model call (plus live
+// searches, or a Claude retry), and a long answer can take a minute or more.
 export const maxDuration = 120
 
 // Most recent turns (user + assistant pairs) replayed to the model each request.
@@ -84,6 +84,7 @@ export async function POST(req: Request) {
 
   const encoder = new TextEncoder()
   let assistantText = ''
+  let sources: SourceBlock[] = []
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -92,6 +93,7 @@ export async function POST(req: Request) {
       try {
         for await (const ev of runBossAgent({ system, messages })) {
           if (ev.type === 'text') assistantText += ev.delta
+          if (ev.type === 'sources') sources = ev.sources
 
           if (ev.type === 'done') {
             let messageId: string | null = null
@@ -103,6 +105,7 @@ export async function POST(req: Request) {
                 conversationId: activeConversationId,
                 userMessage: message,
                 assistantText,
+                sources,
               })
               messageId = res.messageId
               convId = res.conversationId
@@ -152,6 +155,7 @@ async function persistTurn(opts: {
   conversationId: string | null
   userMessage: string
   assistantText: string
+  sources: SourceBlock[]
 }): Promise<{ conversationId: string | null; messageId: string | null }> {
   const { supabase, userId } = opts
   try {
@@ -183,6 +187,9 @@ async function persistTurn(opts: {
         user_id: userId,
         role: 'assistant',
         content: opts.assistantText,
+        // Source cards ride the existing `citations` jsonb column (Block[]), so a
+        // reopened chat shows the same sources.
+        citations: opts.sources.length ? opts.sources : null,
       })
       .select('id')
       .single()

@@ -18,6 +18,13 @@
 export function normalizeBossText(text: string): string {
   if (!text) return text
   return text
+    // ── Live-search citations (sources render as cards) ──
+    // Grok's "[[1]](url)" / "[1](url)" markers -> removed; a named markdown link
+    // "[NHTSA](url)" -> just its text; any leftover bare "[1]" marker -> removed.
+    .replace(/[ \t]?\[\[\d{1,3}\]\]\([^)\s]*\)/g, '')
+    .replace(/[ \t]?\[\d{1,3}\]\(https?:[^)\s]*\)/g, '')
+    .replace(/\[([^\]\n]+)\]\((https?:[^)\s]+)\)/g, '$1')
+    .replace(/[ \t]?\[\d{1,3}\](?!\()/g, '')
     // ATX headings: "## Title" / "### Title" -> "Title" (strip the #s + space).
     .replace(/^\s{0,3}#{1,6}[ \t]+/gm, '')
     // Dash / asterisk bullets at line start -> "• " (preserve any indent).

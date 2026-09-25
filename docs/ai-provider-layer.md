@@ -33,9 +33,11 @@ AI calls are grouped into **buckets**, not toggled per-endpoint. Each bucket has
 
 Set any toggle to a gateway slug, e.g. `AI_MODEL_CONTENT=xai/grok-4.5`. Invalid / non-`provider/model` values are ignored (stay on default). Takes effect next deploy.
 
-### Current provider state — **Anthropic on every bucket, every environment** (2026-07-28)
+### Current provider state — **Grok on `concierge`, Anthropic everywhere else** (2026-09-24)
 
-Operator directive: no xAI/Grok calls at this time. **No `AI_MODEL_*` override is set in any environment** — every bucket resolves to its `BUCKET_DEFAULT` (Claude Sonnet 5). The Grok pilot that ran `utility` + `research` on xAI (2026-07-26 → 2026-07-28) is reverted by deleting those two env vars; nothing in code changed then or now.
+The Boss (`concierge`) defaults to `xai/grok-4.5` **in code** (`BUCKET_DEFAULT`), for xAI's server-side `web_search` + `x_search`. Both run through the Gateway (verified live 2026-09-24 with `scripts/xai-search-smoke.mjs`; xAI BYOK is configured in the Gateway, so no `XAI_API_KEY` in the app). Gateway failover is **off** for that call — it would hand xAI's tools to Claude — so `lib/boss/agent.ts` retries once on tool-less Claude itself if xAI fails before any text streams. Through the Gateway the tool results arrive empty (`{}`); only `source` parts (URLs) carry data, which is all the source cards use. Setting `AI_MODEL_CONCIERGE` to a Claude slug runs the Boss tool-less.
+
+Earlier state (2026-07-28 → 2026-09-24): no xAI/Grok calls at all, by operator directive. **No `AI_MODEL_*` override is set in any environment** — every bucket resolves to its `BUCKET_DEFAULT` (Claude Sonnet 5). The Grok pilot that ran `utility` + `research` on xAI (2026-07-26 → 2026-07-28) is reverted by deleting those two env vars; nothing in code changed then or now.
 
 The multi-provider seam is intentionally left intact — `@ai-sdk/xai`, the `MODELS.grok`/`grokFast` registry entries, and `research.ts`'s provider dispatch all still work. Re-enabling is setting one env var; there is no code to un-write. Keep it that way: if this doc ever says "Anthropic everywhere" while a dashboard var says otherwise, **the dashboard wins** — routing is env-driven and this file cannot enforce it.
 
@@ -43,7 +45,7 @@ The multi-provider seam is intentionally left intact — `@ai-sdk/xai`, the `MOD
 
 **`moderation` is pinned to Claude and ignores its overrides.** It's the FTC/affiliate compliance gate (CLAUDE.md §3); it must not be swapped to an unevaluated provider by a stray env var. Un-pin only by editing `PINNED` in `lib/flags.ts` deliberately.
 
-The concierge's former sensitive and fast lanes were removed 2026-09-24 when the Boss became a tool-less general chat: medical / legal / financial / crisis handling is now the model's own behavior, verified by the safety cases in `npm run boss:eval`. **Re-run that eval before pointing `AI_MODEL_CONCIERGE` at any other model or provider** — it is the only check on that behavior.
+The concierge's former sensitive and fast lanes were removed 2026-09-24 when the Boss became a single-call general chat: medical / legal / financial / crisis handling is now the model's own behavior, verified by the safety cases in `npm run boss:eval`. **Re-run that eval before pointing `AI_MODEL_CONCIERGE` at any other model or provider** — it is the only check on that behavior.
 
 ## Model slugs
 

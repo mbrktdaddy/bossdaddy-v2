@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import type { Block, BossStreamEvent } from '@/lib/boss/types'
+import type { Block, BossStatus, BossStreamEvent } from '@/lib/boss/types'
 import { normalizeBossText } from '@/lib/boss/normalizeText'
 import BossBlocks from './BossBlocks'
 import { Card } from '@/components/ui/Card'
@@ -13,15 +13,25 @@ import { buttonVariants } from '@/components/ui/Button'
 // show a short note below it, never wipe the partial answer.
 // `messageId` = the persisted boss_messages id (arrives on `done`, or with a saved
 // conversation); its presence is what gates the thumbs. `feedback` = the rating.
-// `citations` = cards on a saved tool-era turn (nothing streams them today).
+// `citations` = cards under the turn (live-search sources, or tool-era cards on
+// old saved chats). `status` = what the Boss is doing before text arrives.
+// `notice` = a neutral note (e.g. search was down and it answered without it).
 export type BossMsg = {
   role: 'user' | 'assistant'
   content: string
   citations?: Block[]
   errorNote?: string
+  notice?: string
+  status?: BossStatus
   failed?: boolean
   messageId?: string | null
   feedback?: 'up' | 'down' | null
+}
+
+const STATUS_LABEL: Record<BossStatus, string> = {
+  thinking: 'Thinking…',
+  'searching-web': 'Searching the web…',
+  'searching-x': 'Checking X…',
 }
 
 const DRAFT_KEY = 'bd_boss_draft'
@@ -82,6 +92,15 @@ export default function BossChat({
     switch (ev.type) {
       case 'text':
         updateLastAssistant((m) => ({ ...m, content: m.content + ev.delta }))
+        break
+      case 'status':
+        updateLastAssistant((m) => ({ ...m, status: ev.status }))
+        break
+      case 'sources':
+        updateLastAssistant((m) => ({ ...m, citations: ev.sources }))
+        break
+      case 'notice':
+        updateLastAssistant((m) => ({ ...m, notice: ev.message }))
         break
       case 'done':
         if (ev.messageId) {
@@ -224,8 +243,15 @@ export default function BossChat({
               >
                 {/* Assistant prose is normalized (markdown backstop); user text is shown verbatim. */}
                 {(m.role === 'assistant' ? normalizeBossText(m.content) : m.content) ||
-                  (busy && i === msgs.length - 1 ? <span className="text-prose-faint">Thinking…</span> : '')}
+                  (busy && i === msgs.length - 1 ? (
+                    <span className="text-prose-faint" role="status">
+                      {STATUS_LABEL[m.status ?? 'thinking']}
+                    </span>
+                  ) : (
+                    ''
+                  ))}
               </div>
+              {m.notice && <p className="mt-1 text-[11px] text-prose-faint">{m.notice}</p>}
               {m.errorNote && <p className="mt-1 text-[11px] text-danger-ink">{m.errorNote}</p>}
               {m.citations && m.citations.length > 0 && (
                 <BossBlocks items={m.citations} query={i > 0 ? msgs[i - 1]?.content : undefined} />

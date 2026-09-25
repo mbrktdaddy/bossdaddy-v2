@@ -7,7 +7,8 @@ import { getVoiceProfile, voiceProfileFactLines } from '@/lib/voiceProfile'
 // Boss Daddy voice. This is NOT BOSS_DADDY_SYSTEM (a first-person writing prompt
 // that returns JSON). The Boss has no site-content tools (retired 2026-09-24 —
 // see lib/boss/agent.ts), so the prompt forbids claiming anything the site has
-// tested or published; that honesty is prompt-only now.
+// tested or published; that honesty is prompt-only now. Live web/X search rules
+// are a separate block the agent adds only when search tools are attached.
 export const BOSS_CONCIERGE_BASE = `You are "The Boss" — the AI assistant on Boss Daddy (BossDaddyLife.com), a site built by a real dad for fathers and families. Dads "Ask the Boss" about anything: fixing and building, planning weekends, trips, meals, and money, writing a toast or a hard conversation, understanding how something works, or just talking something through.
 
 YOUR JOB: be genuinely, substantively helpful — the way a sharp, experienced older brother would be. Use everything you know. Give the real answer, not a watered-down one.
@@ -32,25 +33,44 @@ FORMAT — the chat shows PLAIN TEXT, not markdown:
 - For a list, put each item on its own line starting with "• ", or number steps "1." "2." when order matters.
 - Use real line breaks to separate thoughts. No tables.`
 
+// Deliberately light-touch (operator decision 2026-09-24): Grok decides when and
+// what to search. Only the rules the SITE needs live here — no links in prose
+// (sources render as cards) and no passing search findings off as tested.
+export const BOSS_SEARCH_RULES = `LIVE SEARCH — you have web search and X search:
+- Use search when the answer depends on recent or live information. Today's date is given below.
+- Check claims from X against the web when possible; if you can't confirm one, say so ("only seeing this on X so far").
+- What you find is the source's reporting, never something Boss Daddy tested or reviewed.
+- Never put links, URLs, or citation markers like [1] in your reply — your sources show as cards under your answer automatically.`
+
+// US-facing site; Central time keeps "today" right for most of the evening.
+function todayLine(): string {
+  const date = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', dateStyle: 'full' }).format(new Date())
+  return `Today is ${date}.`
+}
+
 /**
  * Build the AI-SDK `system` messages for The Boss:
  *   1. BOSS_CONCIERGE_BASE — cached (Anthropic ephemeral breakpoint via
  *      `cachedSystem`). Shared across ALL callers.
- *   2. The member's profile facts — UNCACHED. Small, volatile (ages recompute).
+ *   2. Today's date — UNCACHED; changes daily.
+ *   3. The member's profile facts — UNCACHED. Small, volatile (ages recompute).
  *
  * The facts come from voice_profiles, which exists for the review-writing tools,
  * so they're re-framed here as the dad being HELPED — never as the author. The
  * author's phrase card (voice lexicon) is deliberately not sent: the Boss keeps
  * its own voice rather than parroting the member's phrases back at him.
  *
- * With no userId (the eval harness) only block 1 is sent. Never interpolate
+ * With no userId (the eval harness) only blocks 1–2 are sent. Never interpolate
  * per-request/volatile data into the cached block.
  */
 export async function buildBossConciergeSystemBlocks(
   supabase: SupabaseClient,
   userId: string | null,
 ): Promise<SystemModelMessage[]> {
-  const blocks: SystemModelMessage[] = [cachedSystem(BOSS_CONCIERGE_BASE)]
+  const blocks: SystemModelMessage[] = [
+    cachedSystem(BOSS_CONCIERGE_BASE),
+    { role: 'system', content: todayLine() },
+  ]
   if (!userId) return blocks
 
   const facts = voiceProfileFactLines(await getVoiceProfile(supabase, userId))

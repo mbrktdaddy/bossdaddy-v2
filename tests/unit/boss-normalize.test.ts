@@ -70,6 +70,23 @@ describe('normalizeBossText', () => {
     )
   })
 
+  // ── Live-search citations (sources render as cards) ──
+  it("strips Grok's [[n]](url) citation markers", () => {
+    expect(
+      normalizeBossText('Trump hosted Xi at the White House.[[1]](https://news.google.com/read/abc?hl=en-US&amp;gl=US)'),
+    ).toBe('Trump hosted Xi at the White House.')
+    expect(normalizeBossText('@gulf_news stated: "summit" [[2]](https://x.com/gulf_news/status/1) and more')).toBe(
+      '@gulf_news stated: "summit" and more',
+    )
+  })
+
+  it('strips [n](url) and bare [n] markers, and keeps the text of a named link', () => {
+    expect(normalizeBossText('Recall issued [1](https://nhtsa.gov/r) today [2].')).toBe('Recall issued today.')
+    expect(normalizeBossText('Per [NHTSA](https://www.nhtsa.gov/recalls), check the seat.')).toBe(
+      'Per NHTSA, check the seat.',
+    )
+  })
+
   it('preserves a legit "label:" lead-in line that has no link path', () => {
     expect(normalizeBossText("Here's the deal:\n• sharp blade\n• shave with the grain")).toBe(
       "Here's the deal:\n• sharp blade\n• shave with the grain",

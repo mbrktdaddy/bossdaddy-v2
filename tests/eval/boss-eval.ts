@@ -3,13 +3,13 @@ import { createClient } from '@supabase/supabase-js'
 import { runBossAgent } from '@/lib/boss/agent'
 import { buildBossConciergeSystemBlocks } from '@/lib/boss/prompt'
 import { normalizeBossText } from '@/lib/boss/normalizeText'
-import type { BossStreamEvent } from '@/lib/boss/types'
+import type { BossStreamEvent, SourceBlock } from '@/lib/boss/types'
 
 // ── Boss GOLDEN EVAL ─────────────────────────────────────────────────────────
 // Invokes runBossAgent DIRECTLY (no HTTP, no rate limit, no auth cookie, no
 // Redis) with no user, so the system prompt is BOSS_CONCIERGE_BASE only (no
-// member personalization). The Boss is a tool-less general assistant
-// (2026-09-24), so this proves three things on live output:
+// member personalization). The Boss is a general assistant on Grok with xAI's
+// live web + X search (2026-09-24), so this proves three things on live output:
 //   1. VOICE — objective brand rules hold on every turn (assertVoice).
 //   2. HONESTY — with no site access, it never claims the site tested/reviewed
 //      something and never invents a link.
@@ -35,12 +35,12 @@ function anonClient() {
   return createClient(SUPABASE_URL, SUPABASE_ANON, { auth: { persistSession: false } })
 }
 
-type Collected = { text: string; error: string | null }
+type Collected = { text: string; error: string | null; sources: SourceBlock[]; notice: string | null }
 
 async function runGolden(prompt: string): Promise<Collected> {
   const supabase = anonClient()
   const system = await buildBossConciergeSystemBlocks(supabase, null) // base prompt only
-  const out: Collected = { text: '', error: null }
+  const out: Collected = { text: '', error: null, sources: [], notice: null }
 
   for await (const ev of runBossAgent({
     system,
@@ -48,6 +48,8 @@ async function runGolden(prompt: string): Promise<Collected> {
   }) as AsyncGenerator<BossStreamEvent>) {
     if (ev.type === 'text') out.text += ev.delta
     else if (ev.type === 'error') out.error = ev.message
+    else if (ev.type === 'sources') out.sources = ev.sources
+    else if (ev.type === 'notice') out.notice = ev.message
   }
   return out
 }
@@ -82,13 +84,18 @@ function assertVoice(label: string, text: string) {
   }
   expect(BARE_LINK.test(shown), `${label}: a bare /reviews//guides//go/ path reached the reader`).toBe(false)
   expect(SITE_CLAIM.test(shown), `${label}: claimed Boss Daddy tested/reviewed something`).toBe(false)
+  // Sources render as cards — a URL or citation marker in the prose is noise.
+  if (/https?:\/\/|\[\d{1,3}\]/.test(shown)) {
+    console.warn(`${label}: a URL or [n] citation marker reached the reader — tighten the prompt or the backstop`)
+  }
 }
 
 function summarize(label: string, r: Collected) {
   const preview = r.text.replace(/\s+/g, ' ').trim().slice(0, 320)
+  const src = r.sources.length ? `\n  sources: ${r.sources.map((s) => s.label).join(', ')}` : ''
   console.log(
-    `\n── ${label} ──` + (r.error ? `  ERROR: ${r.error}` : '') +
-      `\n  ${preview}${r.text.length > 320 ? '…' : ''}`,
+    `\n── ${label} ──` + (r.error ? `  ERROR: ${r.error}` : '') + (r.notice ? `  NOTICE: ${r.notice}` : '') +
+      `\n  ${preview}${r.text.length > 320 ? '…' : ''}${src}`,
   )
 }
 
@@ -163,5 +170,28 @@ describe.skipIf(!READY)('Boss golden eval', () => {
     summarize('life/planning', r)
     assertVoice('planning', r.text)
     expect(r.text.length).toBeGreaterThan(80)
+  })
+
+  // ── Live search (Grok web_search / x_search). Whether it searches is Grok's
+  // call, so "didn't search" is a WARN; voice/honesty rules stay hard failures.
+  it('current events → searches, in voice, sources as cards', async () => {
+    const r = await runGolden('Any car seat recalls I should know about this month?')
+    summarize('search/current', r)
+    assertVoice('search-current', r.text)
+    if (!r.sources.length) console.warn('search-current: no sources — Grok answered without searching')
+  })
+
+  it('live X conversation → in voice, X claims hedged', async () => {
+    const r = await runGolden("What are people on X saying about this week's NFL games?")
+    summarize('search/x', r)
+    assertVoice('search-x', r.text)
+    if (!r.sources.some((s) => s.origin === 'x')) console.warn('search-x: no X sources — Grok skipped x_search')
+  })
+
+  it('timeless advice → answers in voice, no search needed', async () => {
+    const r = await runGolden('My teenage son stopped talking to me. How do I reach him?')
+    summarize('search/timeless', r)
+    assertVoice('search-timeless', r.text)
+    if (r.sources.length) console.warn('search-timeless: searched for evergreen advice (costs money, dilutes voice)')
   })
 })

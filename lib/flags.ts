@@ -16,8 +16,10 @@ import { MODELS, isValidModelSlug } from './ai/models'
 // attribution (the wrapper's `tag`), but they inherit their bucket's model.
 export type AiBucket = 'content' | 'research' | 'utility' | 'moderation' | 'concierge'
 
-// Default model per bucket — Claude across the board until an operator opts a
-// bucket into another provider.
+// Default model per bucket — Claude everywhere except the concierge, which is
+// Grok for xAI's live web + X search (operator decision 2026-09-24). The Boss
+// handles its own Claude backup (lib/boss/agent.ts); AI_MODEL_CONCIERGE can
+// point it back at Claude, which runs it tool-less.
 const BUCKET_DEFAULT: Record<AiBucket, string> = {
   content: MODELS.claudeSonnet,
   research: MODELS.claudeSonnet,
@@ -30,7 +32,7 @@ const BUCKET_DEFAULT: Record<AiBucket, string> = {
   // throws rather than auto-publishing (comments fall back to lightweight-scan,
   // reviews 502). See CLAUDE.md §3.
   moderation: MODELS.claudeSonnet,
-  concierge: MODELS.claudeSonnet,
+  concierge: MODELS.grok,
 }
 
 // Buckets whose model is FIXED and ignores env overrides. `moderation` is the
