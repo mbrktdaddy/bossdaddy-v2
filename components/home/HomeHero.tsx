@@ -160,10 +160,15 @@ export default function HomeHero({ motion }: Props) {
         style={{ background: 'linear-gradient(0deg, rgba(9,9,11,0.97) 0%, rgba(9,9,11,0.9) 30%, rgba(9,9,11,0.4) 62%, transparent 100%)' }}
       />
 
-      {/* DESKTOP content — bottom-anchored manifesto block */}
-      <div className="relative z-10 hidden sm:flex flex-1 items-end">
-        <div className="max-w-6xl mx-auto w-full px-6 pb-14">
-          <div className="max-w-2xl">
+      {/* ONE content tree for both layouts, so the page carries exactly one <h1>.
+          (It used to be two CSS-toggled blocks, each with its own Headline — two
+          H1s in the HTML.) Mobile — Option B: tighter split, title top / subhead +
+          CTA bottom (`justify-between`). Desktop: one bottom-anchored manifesto
+          block (`sm:block` drops the split). Only the CTA rows differ per layout;
+          duplicated links are harmless, a duplicated H1 is not. */}
+      <div className="relative z-10 flex flex-1 flex-col sm:flex-row sm:items-end">
+        <div className="max-w-6xl mx-auto w-full px-6 pt-10 pb-7 sm:pt-0 sm:pb-14 flex flex-1 flex-col justify-between sm:flex-none sm:block">
+          <div className="text-center sm:text-left sm:max-w-2xl">
             {/* Positioning, not the credibility line. An eyebrow above the H1 is an
                 IDENTITY slot, and brand-guide §1.7 lists hero sections as
                 positioning's primary usage — while credibility is a *proof* line,
@@ -171,14 +176,27 @@ export default function HomeHero({ motion }: Props) {
                 decorating the hero. Reads as identity-kicker → rallying cry.
                 `positioning` is stored without a period (so it can sit mid-sentence);
                 standing alone as a display line it takes one. */}
-            <p className="text-[11px] font-bold text-eyebrow uppercase tracking-[0.28em] mb-5">
+            <p className="text-[11px] font-bold text-eyebrow uppercase tracking-[0.24em] mb-4 sm:tracking-[0.28em] sm:mb-5">
               {BRAND.positioning}.
             </p>
-            <Headline className="text-7xl md:text-[5.5rem]" />
-            <p className="text-lg text-prose-muted leading-[1.6] max-w-xl mt-6">
+            <Headline className="text-5xl sm:text-7xl md:text-[5.5rem]" />
+          </div>
+          <div className="text-center [text-shadow:0_1px_3px_rgba(0,0,0,0.7)] sm:text-left sm:[text-shadow:none] sm:max-w-2xl">
+            <p className="text-[15px] text-prose leading-[1.6] mb-6 sm:text-lg sm:text-prose-muted sm:max-w-xl sm:mt-6 sm:mb-0">
               {SUBHEAD}
             </p>
-            <div className="flex flex-wrap gap-3 mt-8">
+            {/* Mobile CTA */}
+            <div className="flex flex-col gap-2.5 sm:hidden">
+              <Link
+                href="/about"
+                className={buttonVariants({ size: 'lg', className: 'w-full' })}
+              >
+                Meet the Boss
+                <Arrow />
+              </Link>
+            </div>
+            {/* Desktop CTAs */}
+            <div className="hidden sm:flex flex-wrap gap-3 mt-8">
               <Link
                 href="/reviews"
                 className={buttonVariants({ size: 'lg' })}
@@ -193,29 +211,6 @@ export default function HomeHero({ motion }: Props) {
                 Meet the Boss
               </Link>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* MOBILE content — Option B: tighter split (title top / CTAs bottom, shorter hero) */}
-      <div className="relative z-10 sm:hidden flex flex-1 flex-col justify-between px-6 pt-10 pb-7">
-        <div className="text-center">
-          {/* Same swap as the desktop block above — keep the two in step. */}
-          <p className="text-[11px] font-bold text-eyebrow uppercase tracking-[0.24em] mb-4">
-            {BRAND.positioning}.
-          </p>
-          <Headline className="text-5xl" />
-        </div>
-        <div className="text-center [text-shadow:0_1px_3px_rgba(0,0,0,0.7)]">
-          <p className="text-[15px] text-prose leading-[1.6] mb-6">{SUBHEAD}</p>
-          <div className="flex flex-col gap-2.5">
-            <Link
-              href="/about"
-              className={buttonVariants({ size: 'lg', className: 'w-full' })}
-            >
-              Meet the Boss
-              <Arrow />
-            </Link>
           </div>
         </div>
       </div>

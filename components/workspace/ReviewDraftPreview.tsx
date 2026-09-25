@@ -74,10 +74,11 @@ export function ReviewDraftPreview({
           )}
         </div>
 
-        {/* Title */}
-        <h1 className="text-xl font-black leading-tight text-prose">
+        {/* Title — h2, not h1: this preview sits inside the editor page, whose
+            WorkspaceHeader owns the one <h1>. Styled to mirror the public page. */}
+        <h2 className="text-xl font-black leading-tight text-prose">
           {title || <span className="text-prose-faint italic">Untitled review</span>}
-        </h1>
+        </h2>
 
         {/* Author meta + trust receipt — mirrors the public page layout */}
         <div>
