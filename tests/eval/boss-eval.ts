@@ -51,6 +51,10 @@ async function runGolden(prompt: string): Promise<Collected> {
     else if (ev.type === 'sources') out.sources = ev.sources
     else if (ev.type === 'notice') out.notice = ev.message
   }
+  // A notice means the primary model failed and the turn silently ran on the
+  // Claude backup — that must fail the eval, or a broken Grok setup (bad slug,
+  // rejected parameter) would pass while evaluating the wrong model.
+  expect(out.notice, `primary model failed; answered by the Claude backup ("${out.notice}")`).toBeNull()
   return out
 }
 

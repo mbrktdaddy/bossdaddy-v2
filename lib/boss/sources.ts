@@ -32,8 +32,9 @@ export function toSourceBlock(rawUrl: string, rawTitle?: string | null): SourceB
 
   const host = u.hostname.replace(/^www\./, '')
   const isX = X_HOSTS.has(host)
+  // `x.com/i/status/…` carries no handle — label it generically, not "@i".
   const handle = isX ? u.pathname.split('/')[1] : ''
-  const label = isX && /^\w{1,15}$/.test(handle) ? `@${handle}` : host
+  const label = isX ? (/^\w{1,15}$/.test(handle) && handle !== 'i' ? `@${handle}` : 'Post on X') : host
   const title = decodeEntities(rawTitle?.trim() || label).slice(0, 160)
 
   return { kind: 'source', origin: isX ? 'x' : 'web', slug: u.href, url: u.href, title, label }

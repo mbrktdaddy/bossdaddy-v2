@@ -83,13 +83,18 @@ async function main() {
 
   const availableSet = new Set(available)
   const parsedAvailable = available.map(parseSlug).filter(Boolean)
+  // A provider with ZERO listed models (xAI as of 2026-09-25) is a catalog gap,
+  // not a retirement — its slugs still route. Report those as unverifiable.
+  const listedProviders = new Set(available.map((s) => s.split('/')[0]))
 
   const retired = []
   const drifted = []
+  const unverifiable = []
 
   for (const pin of pins) {
     if (!availableSet.has(pin)) {
-      retired.push(pin)
+      if (listedProviders.has(pin.split('/')[0])) retired.push(pin)
+      else unverifiable.push(pin)
       continue
     }
     const p = parseSlug(pin)
@@ -105,6 +110,11 @@ async function main() {
     } else {
       console.log(`  ok ${pin}`)
     }
+  }
+
+  if (unverifiable.length) {
+    console.warn('\nUNVERIFIABLE — the Gateway lists no models for this provider; confirm with a live call:')
+    for (const u of unverifiable) console.warn(`  ? ${u}`)
   }
 
   if (retired.length) {

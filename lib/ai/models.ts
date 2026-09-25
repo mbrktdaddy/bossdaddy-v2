@@ -47,9 +47,11 @@ export const MODELS = {
   // Registered only so the drift checker tracks it and a future
   // hardest-reasoning surface has a named entry. Nothing points here today.
   claudeFable: 'anthropic/claude-fable-5',
-  // ── xAI / Grok — opt-in second provider (per-bucket, via env). grok-4.5 is
-  //    the current general model; grok-4.1-fast for cheap/low-latency turns. ──
-  grok: 'xai/grok-4.5',
+  // ── xAI / Grok — the Boss's model (live web + X search). The Gateway catalog
+  //    lists NO xai models, so ai:drift can't verify these; confirm a new slug
+  //    with a live call (scripts/xai-search-smoke.mjs). grok-4.7 verified live
+  //    2026-09-25; it rejects reasoningEffort 'none' (low is its floor). ──
+  grok: 'xai/grok-4.7',
   grokFast: 'xai/grok-4.1-fast-non-reasoning',
 } as const
 

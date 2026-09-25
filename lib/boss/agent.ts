@@ -12,6 +12,9 @@ const MAX_TOKENS = 4096
 // Conversational lane: warm and varied, not a deterministic extraction.
 const TEMPERATURE = 0.7
 const CONCIERGE_TAG = 'boss-concierge'
+// grok-4.7 on a search question, measured 2026-09-25: default ≈ 33s / $0.25,
+// low ≈ 21s / $0.15 with the same answer quality. 'none' is rejected (400).
+const XAI_REASONING_EFFORT = 'low'
 const SNAG = 'The Boss hit a snag. Give it another shot in a sec.'
 
 // The Boss is a general-purpose assistant in the Boss Daddy voice: one streamed
@@ -96,6 +99,7 @@ async function* streamTurn(args: {
           tags: [`surface:${CONCIERGE_TAG}`],
           ...(args.fallback.length ? { models: args.fallback } : {}),
         },
+        ...(args.model.startsWith('xai/') ? { xai: { reasoningEffort: XAI_REASONING_EFFORT } } : {}),
       },
     })
 

@@ -8,7 +8,11 @@ import { xai } from '@ai-sdk/xai'
 
 // `--x-only` attaches ONLY x_search, to tell "Gateway drops it" from "model skipped it".
 const X_ONLY = process.argv.includes('--x-only')
-const MODEL = process.argv.slice(2).find((a) => !a.startsWith('--')) ?? 'xai/grok-4.5'
+// `--effort=low|medium|high|none` → xAI reasoningEffort, to compare cost/latency.
+const EFFORT = process.argv.find((a) => a.startsWith('--effort='))?.split('=')[1]
+// `--prompt="…"` replaces the default news prompt (e.g. a typical dad question).
+const PROMPT = process.argv.find((a) => a.startsWith('--prompt='))?.slice('--prompt='.length)
+const MODEL = process.argv.slice(2).find((a) => !a.startsWith('--')) ?? 'xai/grok-4.7'
 
 async function main() {
   const counts = {}
@@ -18,7 +22,9 @@ async function main() {
 
   const result = streamText({
     model: gateway(MODEL),
-    prompt: X_ONLY
+    prompt: PROMPT
+      ? `Today is ${new Date().toISOString().slice(0, 10)}. ${PROMPT}`
+      : X_ONLY
       ? `Today is ${new Date().toISOString().slice(0, 10)}. Search X for posts from the last day about the ` +
         'US-China state visit and quote two real posts with their authors. Keep it to 4 sentences.'
       : `Today is ${new Date().toISOString().slice(0, 10)}. What is one big news story today, ` +
@@ -26,8 +32,12 @@ async function main() {
     tools: X_ONLY
       ? { x_search: xai.tools.xSearch() }
       : { web_search: xai.tools.webSearch(), x_search: xai.tools.xSearch() },
-    providerOptions: { gateway: { tags: ['surface:xai-search-smoke'] } },
+    providerOptions: {
+      gateway: { tags: ['surface:xai-search-smoke'] },
+      ...(EFFORT ? { xai: { reasoningEffort: EFFORT } } : {}),
+    },
   })
+  const started = Date.now()
 
   for await (const part of result.fullStream) {
     counts[part.type] = (counts[part.type] ?? 0) + 1
@@ -38,7 +48,10 @@ async function main() {
     if (part.type === 'error') console.error('STREAM ERROR:', part.error?.message ?? part.error)
   }
 
-  console.log(`model: ${MODEL}`)
+  const usage = await result.usage
+  const ticks = usage.raw?.cost_in_usd_ticks
+  console.log(`model: ${MODEL}  effort: ${EFFORT ?? 'default'}  seconds: ${((Date.now() - started) / 1000).toFixed(1)}`)
+  if (ticks) console.log(`cost: $${(ticks / 1e10).toFixed(4)} (assuming 1 tick = 1e-10 USD)`)
   console.log('stream part counts:', counts)
   console.log('tool calls:', toolCalls.length ? toolCalls : 'NONE')
   console.log(`sources (${sources.length}):`, sources.slice(0, 8))

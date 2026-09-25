@@ -11,6 +11,13 @@ describe('toSourceBlock', () => {
     })
   })
 
+  it('labels a handle-less x.com/i/status link generically', () => {
+    expect(toSourceBlock('https://x.com/i/status/2103066914935468422')).toMatchObject({
+      origin: 'x',
+      label: 'Post on X',
+    })
+  })
+
   it('labels a web page by bare domain and decodes &amp; in the URL', () => {
     const b = toSourceBlock('https://www.news.google.com/read/abc?hl=en-US&amp;gl=US', 'Xi visit &amp; trade')
     expect(b).toMatchObject({ origin: 'web', label: 'news.google.com', title: 'Xi visit & trade' })
