@@ -6,12 +6,15 @@ import { FeaturedMerchCard } from './FeaturedMerchCard'
 export async function MerchCallout() {
   // Cookie-free anon client — public merch only (audit H3).
   const supabase = createAnonClient()
+  // Featured items lead, then the rest of the catalog by position. This used to
+  // filter to featured-only, so with nothing flagged the callout rendered null on
+  // every review and guide, and the store had no presence on the pages people read.
   const { data } = await supabase
     .from('merch')
     .select('id, slug, name, image_url, default_image_url, price_cents, status, printful_sync_product_id, external_url, position')
-    .eq('featured', true)
     .in('status', ['available', 'coming_soon'])
     .is('archived_at', null)
+    .order('featured', { ascending: false })
     .order('position', { ascending: true })
     .limit(3)
 
@@ -22,11 +25,11 @@ export async function MerchCallout() {
     <div className="mt-12 pt-10 border-t border-soft">
       <div className="flex items-end justify-between mb-6">
         <div>
-          <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-1">— Boss Daddy Gear</p>
+          <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-1">— Made by Boss Daddy</p>
           <h3 className="text-lg font-black text-prose">Rep the brand while you&apos;re at it.</h3>
         </div>
         <Link
-          href="/gear"
+          href="/shop"
           className="hidden sm:inline-flex text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold whitespace-nowrap ml-4"
         >
           Shop All →
@@ -54,8 +57,8 @@ export async function MerchCallout() {
       </div>
 
       <div className="mt-5 sm:hidden text-center">
-        <Link href="/gear" className="text-sm text-accent-text-soft hover:text-accent font-semibold transition-colors">
-          Shop All Gear →
+        <Link href="/shop" className="text-sm text-accent-text-soft hover:text-accent font-semibold transition-colors">
+          Shop All →
         </Link>
       </div>
     </div>

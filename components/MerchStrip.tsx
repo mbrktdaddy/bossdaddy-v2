@@ -6,19 +6,18 @@ import { BRAND } from '@/lib/brand'
 import { Card } from '@/components/ui/Card'
 
 /**
- * MerchStrip — slim, proud "Made by Boss Daddy" strip. Shared component used
- * on /gear (right after the #1 Pick, `exploreHref="#merch"`) and on the
- * homepage (`exploreHref="/gear#merch"`), so branded merch rides alongside the
- * content instead of being buried. "Explore →" jumps to the fuller MerchPanel.
+ * MerchStrip — slim, proud "Made by Boss Daddy" strip, the store's discovery
+ * surface. The store itself is /shop (split out of /gear 2026-09-29); this
+ * strip rides on content pages (homepage, /gear, /about) so readers find the
+ * merch without a fifth nav anchor. "Shop →" goes to /shop.
  * Two states: a few live/coming-soon items as a horizontal scroll strip, or a
  * tight branded teaser when nothing is loaded yet.
  */
 /**
- * @param exploreHref where "Explore →", the empty state, and the no-link
- *   fallback point. Defaults to the on-page `#merch` anchor (for /gear); pass
- *   `/gear#merch` when rendering the strip off-page (e.g. the homepage).
+ * @param exploreHref where "Shop →", the empty state, and the no-link
+ *   fallback point. Defaults to /shop.
  */
-export async function MerchStrip({ exploreHref = '#merch' }: { exploreHref?: string } = {}) {
+export async function MerchStrip({ exploreHref = '/shop' }: { exploreHref?: string } = {}) {
   // Cookie-free anon client — public merch only; keeps host pages static (audit H3).
   const supabase = createAnonClient()
 
@@ -34,7 +33,7 @@ export async function MerchStrip({ exploreHref = '#merch' }: { exploreHref?: str
 
   return (
     <section className="relative my-12">
-      {/* Branded top-rule — same architectural cue as the full MerchPanel */}
+      {/* Branded top-rule — the store's architectural cue */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
       <div className="pt-8">
         <div className="flex items-end justify-between gap-3 mb-4">
@@ -45,13 +44,13 @@ export async function MerchStrip({ exploreHref = '#merch' }: { exploreHref?: str
               <h2 className="text-xl font-black text-prose leading-tight">{BRAND.merchVoice}</h2>
             </div>
           </div>
-          <a href={exploreHref} className="text-sm text-accent-text font-semibold hover:text-accent-text-soft transition-colors shrink-0">
-            Explore →
-          </a>
+          <Link href={exploreHref} className="text-sm text-accent-text font-semibold hover:text-accent-text-soft transition-colors shrink-0">
+            Shop →
+          </Link>
         </div>
 
         {products.length === 0 ? (
-          <a
+          <Link
             href={exploreHref}
             className="block bg-surface border border-soft rounded-xl px-5 py-4 hover:border-accent-border/40 transition-colors"
           >
@@ -59,13 +58,13 @@ export async function MerchStrip({ exploreHref = '#merch' }: { exploreHref?: str
               Branded apparel, drinkware &amp; accessories — built for the dads who get it done.{' '}
               <span className="text-accent-text font-semibold">First drop coming soon →</span>
             </p>
-          </a>
+          </Link>
         ) : (
           <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-6 px-6 pb-1">
             {products.map((p) => {
               const img = getMerchDisplayImage(p as Parameters<typeof getMerchDisplayImage>[0]) ?? p.image_url
               const href = p.printful_sync_product_id != null
-                ? `/gear/${p.slug}`
+                ? `/shop/${p.slug}`
                 : (p.external_url ?? exploreHref)
               const isExternal = p.printful_sync_product_id == null && Boolean(p.external_url)
               const inner = (

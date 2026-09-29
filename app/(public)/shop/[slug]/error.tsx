@@ -29,8 +29,8 @@ export default function Error({
         >
           Try Again
         </button>
-        <Link href="/gear" className={buttonVariants({ variant: 'secondary' })}>
-          All Gear
+        <Link href="/shop" className={buttonVariants({ variant: 'secondary' })}>
+          Back to the Shop
         </Link>
       </div>
     </div>

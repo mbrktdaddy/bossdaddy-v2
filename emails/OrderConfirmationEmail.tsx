@@ -131,7 +131,7 @@ export function OrderConfirmationEmail({
         </div>
       )}
 
-      <EmailButton href={`${siteUrl}/gear`}>Keep Shopping →</EmailButton>
+      <EmailButton href={`${siteUrl}/shop`}>Keep Shopping →</EmailButton>
     </EmailLayout>
   )
 }

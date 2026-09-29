@@ -54,11 +54,20 @@ export const LABELS = {
     shortTagline: 'Check out the upcoming items on our bench list',
   },
 
-  // products table → /gear public route. Key was historically `stuff` (an
-  // earlier display name); renamed for code clarity. DB table stays `products`.
+  // /gear public route: the gear hub (tested reviews rated 8+, gift guides, the
+  // Bench). It is NOT the store; merch lives under `shop`. Key was historically
+  // `stuff` (an earlier display name).
   gear: {
     short: 'Gear',
     full: 'Boss Daddy Approved Gear',
+  },
+
+  // `merch` table → /shop public route (Boss Daddy branded merch, Printful).
+  // Split out of /gear on 2026-09-29 so "Gear" means one thing.
+  shop: {
+    short:   'Shop',
+    full:    'The Boss Daddy Shop',
+    tagline: 'Branded apparel, drinkware and accessories, made by a real dad.',
   },
 
   // ── The Vault's four collection types ──────────────────────────────────────

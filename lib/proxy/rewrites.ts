@@ -14,6 +14,11 @@ const LEGACY_CATEGORY_SLUGS: Record<string, string> = {
   'tech-edc': 'tech-gadgets',
 }
 
+// Real single-segment routes under /gear. Anything else at /gear/<x> is a
+// pre-split merch URL and 301s to /shop/<x>. `radar` is reserved for the
+// planned On the Radar archive (/gear/radar).
+const GEAR_ROUTES = new Set(['category', 'radar'])
+
 // Public legacy URL redirects — work for unauthenticated users too.
 // Keep these in sync with sitemap.xml exclusions and any external links.
 export function rewritePublicLegacy(pathname: string): string | null {
@@ -24,13 +29,24 @@ export function rewritePublicLegacy(pathname: string): string | null {
     if (renamed) return `${category[1]}/category/${renamed}`
   }
 
-  // /shop and /shop/* → /gear (shop unified into the gear page)
-  if (pathname === '/shop' || pathname === '/shop/') return '/gear'
-  if (pathname.startsWith('/shop/')) return '/gear'
+  // /gear/<merch-slug> → /shop/<merch-slug>. The store split back out of /gear
+  // on 2026-09-29 (it had been merged in, and /shop 301'd here). /gear/[slug]
+  // only ever served the `merch` table, so every single-segment /gear path that
+  // isn't a real /gear route is an old store link. Add new /gear sub-routes to
+  // GEAR_ROUTES or this will redirect them to the shop.
+  const gearSlug = pathname.match(/^\/gear\/([^/]+)\/?$/)
+  if (gearSlug && !GEAR_ROUTES.has(gearSlug[1])) return `/shop/${gearSlug[1]}`
 
-  // /stuff and /stuff/* → /gear (/gear is now canonical)
+  // /stuff was the old display name for the PRODUCTS page, so /stuff/<product>
+  // is a product link, not merch. A product's page is its bench page, which
+  // 307s on to the review once one is published (slug-redirect.ts). This used
+  // to send /stuff/<product> to /gear/<product>, a merch lookup that 404'd.
   if (pathname === '/stuff' || pathname === '/stuff/') return '/gear'
-  if (pathname.startsWith('/stuff')) return '/gear' + pathname.slice(6)
+  const stuffCategory = pathname.match(/^\/stuff\/category\/([^/]+)\/?$/)
+  if (stuffCategory) return `/gear/category/${stuffCategory[1]}`
+  const stuffSlug = pathname.match(/^\/stuff\/([^/]+)\/?$/)
+  if (stuffSlug) return `/bench/${stuffSlug[1]}`
+  if (pathname.startsWith('/stuff/')) return '/gear'
 
   // /feed/articles.xml → /feed/guides.xml (RSS feed renamed)
   if (pathname === '/feed/articles.xml') return '/feed/guides.xml'

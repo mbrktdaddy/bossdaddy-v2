@@ -22,6 +22,7 @@ const BROWSE: BrowseLink[] = [
   { href: '/stacks',               label: LABELS.stacks.short },
   { href: '/gifts',                label: LABELS.gifts.short },
   { href: '/bench',                label: LABELS.bench.full,  hint: LABELS.bench.tagline },
+  { href: '/shop',                 label: LABELS.shop.short,  hint: LABELS.shop.tagline },
 ]
 
 const TRUST: BrowseLink[] = [

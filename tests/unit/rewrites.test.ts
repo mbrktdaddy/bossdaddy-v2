@@ -23,7 +23,7 @@ describe('rewriteLegacyVaultTab — old /vault?tab= state → the tab\'s real pa
 // Redirect-coverage guardrail for the rename surface (audit Phase 2).
 //
 // The 4 public concept renames (/articles→/guides, /wishlist→/bench,
-// /shop+/stuff→/gear, /tools/kids→/tools/family) must keep 301-ing ~forever —
+// /stuff→/gear, /gear/<merch>→/shop, /tools/kids→/tools/family) must keep 301-ing ~forever —
 // hard-resetting them costs SEO equity + breaks inbound/affiliate links.
 // This locks every documented mapping so an accidental edit to rewrites.ts
 // (or a "cleanup" that drops a case) fails CI instead of silently 404-ing
@@ -32,14 +32,15 @@ describe('rewriteLegacyVaultTab — old /vault?tab= state → the tab\'s real pa
 
 describe('rewritePublicLegacy — public 301s (fire for logged-out users too)', () => {
   it.each([
-    // /shop → /gear
-    ['/shop', '/gear'],
-    ['/shop/', '/gear'],
-    ['/shop/t-shirts', '/gear'],
-    // /stuff → /gear (subpaths preserved)
+    // /gear/<merch-slug> → /shop/<merch-slug> (store split out 2026-09-29)
+    ['/gear/boss-daddy-tee', '/shop/boss-daddy-tee'],
+    ['/gear/boss-daddy-tee/', '/shop/boss-daddy-tee'],
+    // /stuff → /gear; /stuff/<product> → its bench page (→ review via slug-redirect)
     ['/stuff', '/gear'],
     ['/stuff/', '/gear'],
-    ['/stuff/strollers', '/gear/strollers'],
+    ['/stuff/strollers', '/bench/strollers'],
+    ['/stuff/category/grilling', '/gear/category/grilling'],
+    ['/stuff/a/b', '/gear'],
     // RSS feed rename
     ['/feed/articles.xml', '/feed/guides.xml'],
     // /wishlist → /bench
@@ -56,6 +57,11 @@ describe('rewritePublicLegacy — public 301s (fire for logged-out users too)', 
 
   it.each([
     '/gear',
+    '/gear/',
+    '/gear/category/grilling',
+    '/gear/radar',
+    '/shop',
+    '/shop/boss-daddy-tee',
     '/bench',
     '/guides',
     '/tools/family',

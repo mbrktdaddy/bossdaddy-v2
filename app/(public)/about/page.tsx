@@ -7,6 +7,7 @@ import { createAnonClient } from '@/lib/supabase/anon'
 import { NewsletterCard } from '@/components/NewsletterCard'
 import { BRAND } from '@/lib/brand'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { MerchStrip } from '@/components/MerchStrip'
 
 export const revalidate = 3600
 
@@ -185,6 +186,9 @@ export default async function AboutPage() {
  ))}
  </div>
  </div>
+
+ {/* The founder story is the natural "rep the brand" moment → /shop */}
+ <MerchStrip />
 
  <NewsletterCard eyebrow="Join the Crew" heading="Built for Dads Who Show Up." headingAs="h2" />
 

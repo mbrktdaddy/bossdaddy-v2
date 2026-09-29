@@ -4,7 +4,6 @@ import { createAnonClient } from '@/lib/supabase/anon'
 import { CATEGORIES } from '@/lib/categories'
 import { getBadgesByProductSlug } from '@/lib/collection-listings'
 import CategoryIcon from '@/components/CategoryIcon'
-import { MerchPanel } from './_components/MerchPanel'
 import { MerchStrip } from '@/components/MerchStrip'
 import { GearRow, type GearReview } from './_components/GearCards'
 import ReviewCard from '@/components/ReviewCard'
@@ -31,11 +30,11 @@ export const dynamic = 'force-static'
 export const metadata: Metadata = {
   // Absolute — brand already in the title; avoids the template double-branding.
   title: { absolute: "Boss Daddy's Gear — Field-Tested Picks" },
-  description: 'Every product Boss Daddy has personally bought, tested, and stands behind — sorted by rating. The only list where every pick is earned, not sponsored. Plus branded goods, made by a real dad.',
+  description: 'Every product Boss Daddy has personally bought, tested, and stands behind — sorted by rating. The only list where every pick is earned, not sponsored.',
   openGraph: {
     ...OG_SITE,
     title: "Boss Daddy's Gear — Boss Daddy Life",
-    description: 'Every product personally bought, tested, and rated. Field-tested by a real dad. And, soon, made by one.',
+    description: 'Every product personally bought, tested, and rated. Field-tested by a real dad.',
     images: [{ url: ogImageUrl({ title: 'Boss Daddy Gear', type: 'review' }), width: 1200, height: 630 }],
   },
   twitter: { card: 'summary_large_image', site: TWITTER_HANDLE, creator: TWITTER_HANDLE, title: "Boss Daddy's Gear — Boss Daddy Life" },
@@ -177,9 +176,6 @@ export default async function GearPage() {
       </div>
 
       <AskTheBoss context="Boss Daddy's field-tested gear picks" className="mb-12" />
-
-      {/* ── Boss Daddy Merch — slim branded strip. "Explore" → #merch. ──────── */}
-      <MerchStrip />
 
       {/* ── Shop by Occasion ─────────────────────────────────────────── */}
       {liveSeasonalOccasions.length > 0 ? (
@@ -339,9 +335,6 @@ export default async function GearPage() {
         </section>
       )}
 
-      {/* ── Boss Daddy Merch — full section; the #merch target the strip links to ── */}
-      <MerchPanel />
-
       {/* ── Tiers ────────────────────────────────────────────────────────────
           Three distinct geometries for the three rating tiers — a visual
           hierarchy that mirrors the rating hierarchy:
@@ -441,6 +434,9 @@ export default async function GearPage() {
         <p className="text-xs text-prose-faint mb-3">More gear is on the way. Vote on what gets tested next.</p>
         <BenchStrip ctaText="See everything on the bench" />
       </div>
+
+      {/* ── Boss Daddy merch — the store lives at /shop; this is its discovery strip ── */}
+      <MerchStrip />
 
       {/* ── Footer CTA ──────────────────────────────────────────────────────── */}
       <div className="mt-12 text-center">

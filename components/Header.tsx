@@ -12,7 +12,7 @@ import AccountMenu, { useAuthUser } from '@/components/AccountMenu'
 import ConnectionBadge from '@/components/account/ConnectionBadge'
 import { isImmersiveRoute } from '@/lib/immersive-routes'
 import { buttonVariants } from '@/components/ui/Button'
-import { ChevronDownIcon, CubeIcon, DownloadIcon, EnvelopeIcon, ScaleIcon, SearchIcon, StarIcon, XIcon } from '@/components/icons'
+import { BagIcon, ChevronDownIcon, CubeIcon, DownloadIcon, EnvelopeIcon, ScaleIcon, SearchIcon, StarIcon, XIcon } from '@/components/icons'
 
 // Vault is intentionally NOT a top-level anchor — its contents
 // (Comparisons / Best Of / Stacks / Gift Guides) live inside the Browse
@@ -91,6 +91,26 @@ function BenchMenuLink({ onNavigate }: { onNavigate: () => void }) {
       <div className="min-w-0 flex-1">
         <p className="text-xs font-bold text-prose leading-tight">{LABELS.bench.full}</p>
         <p className="text-[11px] text-prose-muted mt-0.5 line-clamp-1">{LABELS.bench.tagline}</p>
+      </div>
+      <span aria-hidden className="text-prose-faint group-hover:text-copper transition-colors">→</span>
+    </Link>
+  )
+}
+
+// The Shop lives in Browse too, not the spine: merch is secondary commerce, and
+// the cart icon only appears once something is in the cart. This row is the
+// store's standing entry point in the nav.
+function ShopMenuLink({ onNavigate }: { onNavigate: () => void }) {
+  return (
+    <Link
+      href="/shop"
+      onClick={onNavigate}
+      className="group flex items-center gap-3 p-2.5 -mx-1 rounded-xl hover:bg-surface-hover transition-colors min-h-[44px]"
+    >
+      <BagIcon className="w-4 h-4 text-copper shrink-0 ml-0.5" strokeWidth={1.5} />
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-bold text-prose leading-tight">{LABELS.shop.full}</p>
+        <p className="text-[11px] text-prose-muted mt-0.5 line-clamp-1">{LABELS.shop.tagline}</p>
       </div>
       <span aria-hidden className="text-prose-faint group-hover:text-copper transition-colors">→</span>
     </Link>
@@ -294,6 +314,7 @@ export default function Header() {
                 {/* The Bench — the review pipeline, one step before Reviews */}
                 <div className="mt-4 pt-4 border-t border-strong">
                   <BenchMenuLink onNavigate={() => setCatOpen(false)} />
+                  <ShopMenuLink onNavigate={() => setCatOpen(false)} />
                 </div>
               </div>
             )}
@@ -496,6 +517,7 @@ export default function Header() {
           {/* The Bench — the review pipeline, one step before Reviews */}
           <div className="px-4 pb-4 border-t border-soft pt-3">
             <BenchMenuLink onNavigate={() => setMobileOpen(false)} />
+            <ShopMenuLink onNavigate={() => setMobileOpen(false)} />
           </div>
 
           {/* Auth / account */}

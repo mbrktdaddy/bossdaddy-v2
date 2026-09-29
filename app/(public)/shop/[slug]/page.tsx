@@ -6,6 +6,7 @@ import MerchProductView from './_components/MerchProductView'
 import { buildSocialMetadata, toAbsoluteUrl } from '@/lib/og'
 import type { Metadata } from 'next'
 import { ChevronLeftIcon } from '@/components/icons'
+import { LABELS } from '@/lib/labels'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -51,7 +52,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${data.name} — Boss Daddy Life`,
     ogTitle: data.name,
     description: data.description,
-    path: `/gear/${slug}`,
+    path: `/shop/${slug}`,
     siteUrl,
     // 'site' = no content-type badge. Merch is neither a review nor an article,
     // and the old `type: 'guide'` stamped a wrong "ARTICLE" badge on the card.
@@ -106,11 +107,11 @@ export default async function MerchDetailPage({ params }: Props) {
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
       <Link
-        href="/gear"
+        href="/shop"
         className="inline-flex items-center gap-1.5 text-sm text-prose-faint hover:text-accent-text-soft transition-colors mb-8"
       >
         <ChevronLeftIcon className="w-3.5 h-3.5" strokeWidth={2} />
-        ← Gear
+        {LABELS.shop.short}
       </Link>
 
       <MerchProductView

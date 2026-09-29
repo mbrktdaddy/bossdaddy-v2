@@ -144,7 +144,7 @@ export default async function OrderPage({ params }: Props) {
 
       <div className="text-center">
         <Link
-          href="/gear"
+          href="/shop"
           className={buttonVariants({ size: 'lg' })}
         >
           Continue Shopping

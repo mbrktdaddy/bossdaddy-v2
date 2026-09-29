@@ -104,8 +104,8 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
       <EmptyState
         title="Your cart is empty."
         action={
-          <Link href="/gear" className={buttonVariants({ size: 'lg' })}>
-            Browse Gear
+          <Link href="/shop" className={buttonVariants({ size: 'lg' })}>
+            Browse the Shop
           </Link>
         }
       />
@@ -127,7 +127,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
               key={item.id}
               className={`flex gap-4 bg-surface rounded-xl p-4 transition-opacity ${isBusy ? 'opacity-50 pointer-events-none' : ''}`}
             >
-              <Link href={`/gear/${item.merch.slug}`} className="shrink-0">
+              <Link href={`/shop/${item.merch.slug}`} className="shrink-0">
                 <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-surface-raised">
                   {imageUrl ? (
                     <Image src={imageUrl} alt={item.merch.name} fill className="object-cover" sizes="80px" />
@@ -138,7 +138,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
               </Link>
 
               <div className="flex-1 min-w-0">
-                <Link href={`/gear/${item.merch.slug}`} className="font-semibold text-prose hover:text-accent-text-soft transition-colors line-clamp-2 leading-snug">
+                <Link href={`/shop/${item.merch.slug}`} className="font-semibold text-prose hover:text-accent-text-soft transition-colors line-clamp-2 leading-snug">
                   {item.merch.name}
                 </Link>
                 {variantLabel && <p className="text-xs text-prose-faint mt-0.5">{variantLabel}</p>}
@@ -209,7 +209,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
       </div>
 
       <div className="flex items-center justify-between text-sm">
-        <Link href="/gear" className="text-prose-faint hover:text-accent-text-soft transition-colors">
+        <Link href="/shop" className="text-prose-faint hover:text-accent-text-soft transition-colors">
           ← Continue Shopping
         </Link>
         <button

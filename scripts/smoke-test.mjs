@@ -13,6 +13,7 @@ const checks = [
   { label: 'Reviews listing',  url: '/reviews',             expect: 200 },
   { label: 'Guides listing',   url: '/guides',              expect: 200 },
   { label: 'Gear page',        url: '/gear',                expect: 200 },
+  { label: 'Shop page',        url: '/shop',                expect: 200 },
   { label: 'Bench page',       url: '/bench',               expect: 200 },
 
   // RSS feeds — expect 200

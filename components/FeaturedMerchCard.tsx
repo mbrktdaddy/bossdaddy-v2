@@ -10,7 +10,7 @@ interface Props {
 export function FeaturedMerchCard({ item, compact = false }: Props) {
   const displayImage = getMerchDisplayImage({ image_url: item.image_url, default_image_url: item.default_image_url })
   const isPrintful = item.printful_sync_product_id != null
-  const href = isPrintful ? `/gear/${item.slug}` : (item.external_url ?? `/gear/${item.slug}`)
+  const href = isPrintful ? `/shop/${item.slug}` : (item.external_url ?? `/shop/${item.slug}`)
   const isExternal = !isPrintful && !!item.external_url
 
   const inner = (

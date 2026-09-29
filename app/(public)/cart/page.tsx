@@ -30,13 +30,13 @@ export default async function CartPage() {
       {items.length === 0 ? (
         <EmptyState
           title="Your cart is empty."
-          body="Add some gear and come back."
+          body="Add something from the shop and come back."
           action={
             <Link
-              href="/gear"
+              href="/shop"
               className={buttonVariants({ size: 'lg' })}
             >
-              Browse Gear
+              Browse the Shop
             </Link>
           }
         />

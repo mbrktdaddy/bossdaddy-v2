@@ -30,8 +30,10 @@ function modeFromUrl(url: string | null, sourceLinks: SourceLinks): { mode: Link
     const found = sourceLinks.guides.find((g) => g.slug === slug)
     return { mode: 'guide', id: found?.id ?? '', custom: '' }
   }
-  if (url.includes('/gear/')) {
-    const slug = url.split('/gear/')[1]
+  // /gear/<merch-slug> is the pre-2026-09-29 store URL; saved posts may still carry it.
+  const merchPrefix = url.includes('/shop/') ? '/shop/' : url.includes('/gear/') ? '/gear/' : null
+  if (merchPrefix) {
+    const slug = url.split(merchPrefix)[1]
     const found = sourceLinks.merch.find((m) => m.slug === slug)
     return { mode: 'gear', id: found?.id ?? '', custom: '' }
   }
@@ -54,7 +56,7 @@ export default function LinkPicker({ value, onChange, sourceLinks }: Props) {
     if (m === 'none') return null
     if (m === 'custom') return c.trim() || null
     const items = m === 'review' ? sourceLinks.reviews : m === 'guide' ? sourceLinks.guides : sourceLinks.merch
-    const prefix = m === 'review' ? '/reviews/' : m === 'guide' ? '/guides/' : '/gear/'
+    const prefix = m === 'review' ? '/reviews/' : m === 'guide' ? '/guides/' : '/shop/'
     const item = items.find((i) => i.id === id)
     return item ? `${SITE}${prefix}${item.slug}` : null
   }
@@ -80,7 +82,7 @@ export default function LinkPicker({ value, onChange, sourceLinks }: Props) {
     { key: 'none',   label: 'None' },
     { key: 'review', label: 'Review' },
     { key: 'guide',  label: 'Guide' },
-    { key: 'gear',   label: 'Gear' },
+    { key: 'gear',   label: 'Shop' },
     { key: 'custom', label: 'Custom' },
   ]
 

@@ -6,14 +6,14 @@ import { CAPTURE_CARD } from '@/components/NewsletterCard'
 import { formatPrice, getMerchDisplayImage, type Merch } from '@/lib/merch'
 
 /**
- * MerchPanel — featured "Made by Boss Daddy" section on the unified /gear page.
- * Sits between the category filter and the gear grid.
+ * MerchGrid — the /shop catalog (was MerchPanel, a section on /gear before the
+ * store split out on 2026-09-29).
  *
  * Two states:
  *   - Empty (no merch live yet): tight callout + inline email capture
  *   - Live (>=1 product available or coming_soon): 3-up grid
  */
-export async function MerchPanel() {
+export async function MerchGrid() {
   const supabase = createAnonClient() // cookie-free: public merch only (audit H3)
 
   const { data } = await supabase
@@ -27,20 +27,7 @@ export async function MerchPanel() {
   const isEmpty = products.length === 0
 
   return (
-    <section id="merch" className="relative my-14 scroll-mt-20">
-      {/* Architectural top-rule — fades at edges, branded */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
-
-      <div className="pt-12">
-        {/* Section opener — vertical orange rule + eyebrow + h2 */}
-        <div className="flex items-stretch gap-4 mb-6">
-          <div className="w-[3px] bg-accent-brand rounded-full" />
-          <div>
-            <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-1">— Made by Boss Daddy</p>
-            <h2 className="text-2xl font-black text-prose leading-tight">Boss Daddy Merch</h2>
-          </div>
-        </div>
-
+    <section>
         {isEmpty ? (
           /* Empty state — tight callout + email capture */
           <div className={CAPTURE_CARD}>
@@ -117,7 +104,7 @@ export async function MerchPanel() {
               // Printful products → internal detail page
               if (isPrintful) {
                 return (
-                  <Link key={p.id} href={`/gear/${p.slug}`} className={className}>
+                  <Link key={p.id} href={`/shop/${p.slug}`} className={className}>
                     {inner}
                   </Link>
                 )
@@ -138,7 +125,6 @@ export async function MerchPanel() {
             })}
           </div>
         )}
-      </div>
     </section>
   )
 }

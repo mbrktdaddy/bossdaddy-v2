@@ -131,17 +131,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const merchRows    = merchItems ?? []
   const newestMerch  = newestOf(merchRows.map((m) => m.updated_at))
 
-  // /gear/category/[slug] lists REVIEWS rated 8+ (not merch, despite the URL
-  // sharing the /gear prefix with the merch detail pages). Date those pages by
+  // /gear/category/[slug] lists REVIEWS rated 8+ (merch lives under /shop since
+  // the 2026-09-29 split, so /gear no longer mixes the two). Date those pages by
   // the newest review that actually clears the bar, so the lastmod matches what
   // the page renders — the whole doctrine at the top of this file.
   const gearGradeRows = reviewRows.filter((r) => (r.rating ?? 0) >= 8)
   const gearCategoryDates = newestByKey(gearGradeRows, (r) => r.category, contentDate)
   const newestGearReview  = newestOf(gearGradeRows.map(contentDate))
-  // Everything the /gear hub actually renders.
+  // Everything the /gear hub actually renders. Its merch strip is a teaser for
+  // /shop, not page content, so merch dates /shop instead.
   const newestGear = newestOf([
     newestGearReview?.toISOString(),
-    newestMerch?.toISOString(),
     newestCollectionOf('gift_guide', 'general', 'best_of')?.toISOString(),
   ])
   const newestAnything = newestOf([
@@ -223,7 +223,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Merch detail pages. These were absent entirely — Google was never told the
   // store existed, and it's why they escaped the OG sweep that reads sitemap.xml.
   const merchUrls: MetadataRoute.Sitemap = merchRows.map((m) => ({
-    url: `${base}/gear/${m.slug}`,
+    url: `${base}/shop/${m.slug}`,
     lastModified: m.updated_at ?? undefined,
     changeFrequency: 'monthly',
     priority: 0.7,
@@ -261,11 +261,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/picks`,        lastModified: newestCollectionOf('best_of', 'general'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${base}/comparisons`,  lastModified: newestCollectionOf('comparison'),      changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${base}/stacks`,       lastModified: newestCollectionOf('stack'),           changeFrequency: 'weekly',  priority: 0.8 },
-    // /gear is a HUB over three sources — reviews scoring 8+ (top picks), the
-    // seasonal gift guides + featured collection, and MerchPanel. It was dated
-    // `newestReview`, which counts reviews below the 8 cutoff that the page never
-    // shows, and misses merch entirely. Date it by the newest of what it renders.
+    // /gear is a HUB over reviews scoring 8+ (top picks) and the seasonal gift
+    // guides + featured collection. It was dated `newestReview`, which counts
+    // reviews below the 8 cutoff that the page never shows. Date it by the newest
+    // of what it renders.
     { url: `${base}/gear`,         lastModified: newestGear,                            changeFrequency: 'weekly',  priority: 0.8 },
+    { url: `${base}/shop`,         lastModified: newestMerch,                           changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${base}/bench`,        lastModified: newestBench,                           changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${base}/about`,                                                             changeFrequency: 'monthly', priority: 0.5 },
     { url: `${base}/how-we-test`,                                                       changeFrequency: 'yearly',  priority: 0.5 },

@@ -600,10 +600,10 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── MERCH STRIP — slim "Made by Boss Daddy" band (reused from /gear) ── */}
+      {/* ── MERCH STRIP — slim "Made by Boss Daddy" band → /shop ── */}
       <section className="border-b border-soft">
         <div className="max-w-6xl mx-auto px-6">
-          <MerchStrip exploreHref="/gear#merch" />
+          <MerchStrip />
         </div>
       </section>
 
