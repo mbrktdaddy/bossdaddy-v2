@@ -32,6 +32,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { LABELS } from '@/lib/labels'
+import { getStatusLabel, type WishlistStatus } from '@/lib/wishlist'
+import { radarAnchorId } from '@/lib/products/radar'
 import MyKidsSection from '@/components/dad-tools/MyKidsSection'
 import ContactsCard from '@/components/account/ContactsCard'
 import MessagesCard from '@/components/account/MessagesCard'
@@ -44,11 +46,20 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-const BENCH_STATUS_LABEL: Record<string, string> = {
-  queued:      'Up next',
-  testing:     'Testing',
-  reviewed:    'Reviewed',
-  passed:      'Not testing',
+// Every stage a followed product is listed at. A vote also follows the item
+// (followChangeForVote), so anything that can email a member shows here from the
+// moment they vote or follow: Radar through review, in the site's own stage
+// words. Catalog and archived have no public page, so they stay hidden.
+const FOLLOW_STAGES = new Set(['radar', 'queued', 'testing', 'reviewed', 'passed'])
+
+function followStageLabel(status: string): string {
+  return status === 'radar' ? LABELS.radar.full : getStatusLabel(status as WishlistStatus)
+}
+
+// Radar items have no page of their own, so the row jumps to the item's card in
+// the archive, where the vote toggle is also the undo.
+function followHref(item: { slug: string; status: string }): string {
+  return item.status === 'radar' ? `/gear/radar#${radarAnchorId(item.slug)}` : `/bench/${item.slug}`
 }
 
 export default async function AccountHomePage() {
@@ -96,12 +107,12 @@ export default async function AccountHomePage() {
   const orderedLikedArticles = likedArticleIds.map((id) => articleMap.get(id)).filter(Boolean)
   const hasLikedContent = orderedLikedReviews.length > 0 || orderedLikedArticles.length > 0
 
-  type BenchItem = { id: string; slug: string; title: string; status: string }
-  // Only stages with a Bench page: a followed product that moved off the Bench
-  // (to Catalog or Radar, mig 158) would otherwise link to a 404.
-  const subscribedItems: BenchItem[] = (benchSubs ?? [])
-    .map((s) => s.products as unknown as BenchItem | null)
-    .filter((item): item is BenchItem => item !== null && item.status in BENCH_STATUS_LABEL)
+  type FollowedItem = { id: string; slug: string; title: string; status: string }
+  // Public stages only (FOLLOW_STAGES): a product pulled back to Catalog or
+  // archived has no page to link to.
+  const subscribedItems: FollowedItem[] = (benchSubs ?? [])
+    .map((s) => s.products as unknown as FollowedItem | null)
+    .filter((item): item is FollowedItem => item !== null && FOLLOW_STAGES.has(item.status))
 
   return (
     <div data-theme="dark" className="bg-background text-prose min-h-[calc(100vh-4rem)]">
@@ -185,20 +196,22 @@ export default async function AccountHomePage() {
         </Card>
 
         <Card className="p-6 mb-6">
-          <Eyebrow className="mb-4">Following on the Bench</Eyebrow>
+          <Eyebrow className="mb-4">Gear You&apos;re Following</Eyebrow>
           {subscribedItems.length === 0 ? (
             <p className="text-sm text-prose-faint text-center py-4">
-              Not following anything yet —{' '}
-              <Link href="/bench" className="text-accent-text-soft hover:underline">visit the Bench</Link>
-              {' '}to subscribe for review updates.
+              Not following anything yet. Vote on the{' '}
+              <Link href="/gear/radar" className="text-accent-text-soft hover:underline">{LABELS.radar.short}</Link>
+              {' '}or follow something on the{' '}
+              <Link href="/bench" className="text-accent-text-soft hover:underline">{LABELS.bench.short}</Link>
+              {' '}to get an email when the review&apos;s out.
             </p>
           ) : (
             <div className="space-y-1">
               {subscribedItems.map((item) => (
-                <Link key={item.id} href={`/bench/${item.slug}`}
+                <Link key={item.id} href={followHref(item)}
                   className="flex items-center gap-3 p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group">
                   <span className="text-xs px-2 py-0.5 rounded-full bg-surface-raised text-prose-muted border border-strong shrink-0">
-                    {BENCH_STATUS_LABEL[item.status] ?? item.status}
+                    {followStageLabel(item.status)}
                   </span>
                   <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate min-w-0">{item.title}</p>
                   <ChevronRightIcon className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 ml-auto transition-colors" strokeWidth={2} />

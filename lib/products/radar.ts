@@ -149,6 +149,15 @@ export async function getRadarArchive(supabase: SupabaseClient, limit = 200): Pr
 }
 
 /**
+ * The archive card's anchor. Radar items have no page of their own, so links to
+ * one (the account page's follow list) jump to its card: /gear/radar#<this>.
+ * Prefixed so a product slug can't collide with another id on the page.
+ */
+export function radarAnchorId(slug: string): string {
+  return `radar-${slug}`
+}
+
+/**
  * "Oct 6, 2026", the day it was spotted. Formatted in the operator's zone (the
  * same one the Boss dates by), so an evening entry doesn't read as tomorrow
  * on a server running in UTC.

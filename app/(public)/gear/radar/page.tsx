@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { createAnonClient } from '@/lib/supabase/anon'
-import { getRadarArchive, radarOutcome, type RadarItem } from '@/lib/products/radar'
+import { getRadarArchive, radarAnchorId, radarOutcome, type RadarItem } from '@/lib/products/radar'
 import { RadarCard } from '@/components/radar/RadarCard'
 import PageHeader from '@/components/PageHeader'
 import SectionHeader from '@/components/SectionHeader'
@@ -29,7 +29,8 @@ function RadarGrid({ items }: { items: RadarItem[] }) {
   return (
     <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
       {items.map((item) => (
-        <li key={item.id}>
+        // Anchored so the account page's follow list can jump to the card.
+        <li key={item.id} id={radarAnchorId(item.slug)} className="scroll-mt-24">
           <RadarCard item={item} />
         </li>
       ))}

@@ -1,8 +1,8 @@
 # Gear IA + On the Radar — plan
 
-> Status 2026-10-06. Operator decisions are locked. Steps 1–2b are shipped (`e6be242`,
-> `b2c1733`). Step 3 (the public surfaces) is BUILT and uncommitted, awaiting the operator's
-> walkthrough. Memory: `project_gear_ia_concerns`.
+> Status 2026-10-06. Operator decisions are locked. Steps 1–3 are shipped (`e6be242`,
+> `b2c1733`, `963ae55`). The `/account` follow list is a later follow-up. Next: the
+> first Radar entries (~3 a week). Memory: `project_gear_ia_concerns`.
 
 ## Why
 
@@ -155,8 +155,8 @@ beats volume: ~3 a week. Old items age off `/gear` but stay in the archive.
    link only. Details and images need PA-API (Associates rules), so the fallback
    is a web lookup by name/ASIN for facts, with no images. Retailer copy is a
    starting point to rewrite, never published verbatim.
-3. **Public surfaces**: BUILT 2026-10-06, uncommitted (check + 582 tests + prebuild
-   green). What shipped:
+3. **Public surfaces**: SHIPPED `963ae55` 2026-10-06 (check, tests, prebuild and
+   `next build` green). What shipped:
    - **Data:** `lib/products/radar.ts`: `getLiveRadar()` (status radar, `spotted_at <= now`),
      `getRadarArchive()` (radar | queued | testing | reviewed | passed, released,
      newest first, cap 200), `toRadarItem()`, and `radarOutcome()` (the precedence
@@ -216,8 +216,12 @@ beats volume: ~3 a week. Old items age off `/gear` but stay in the archive.
      before. The card promises email only while the follow row exists (`following` is
      in both the POST and the batch GET). Every follow row gets its own unsubscribe
      token (DB default), and the email footer now reads "voted for or followed".
-     A Radar follow isn't listed on `/account` until the item reaches the Bench
-     (that list shows Bench stages only).
+   - **`/account` lists every follow (operator, 2026-10-06):** the card is now "Gear
+     You're Following". It covers Radar → Up Next → Testing Now → Reviewed → Not Testing,
+     using the site's stage words (it had its own: "Up next", "Testing", "Not testing").
+     A Radar row links to `/gear/radar#radar-<slug>` (`radarAnchorId()`), where the
+     vote toggle is the undo. Catalog and archived stay hidden because they have no public page.
+     Reason: anything that can email a member must be visible on their account page.
 
    **Open for the operator:** (a) the public name is one label, "Testing Log",
    on both pages (was "Testing Notes" on the Bench); (b) DECIDED, see the vote/follow
