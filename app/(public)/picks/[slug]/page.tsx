@@ -21,6 +21,8 @@ import { LABELS } from '@/lib/labels'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
+import { upgradeReviewedProducts } from '@/lib/collections/product-items'
+import { ProductClaimLine } from '@/components/products/ProductClaimLine'
 
 export const revalidate = 60
 
@@ -107,6 +109,9 @@ type ProductRow = {
   description: string | null
   source: string | null
   research_sources: ResearchSource[] | null
+  status: string | null
+  acquisition: string | null
+  provided_by: string | null
 }
 
 export default async function PickDetailPage({ params }: Props) {
@@ -125,7 +130,7 @@ export default async function PickDetailPage({ params }: Props) {
 
   const { data: pickItems } = await admin
     .from('collection_items')
-    .select('position, blurb, best_for, role_label, product_slug, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, pros, cons, best_for, has_affiliate_links), products(slug, name, brand, image_url, category, price_cents, affiliate_url, non_affiliate_url, description, source, research_sources)')
+    .select('position, blurb, best_for, role_label, product_slug, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, pros, cons, best_for, has_affiliate_links), products(slug, name, brand, image_url, category, price_cents, affiliate_url, non_affiliate_url, description, source, research_sources, status, acquisition, provided_by)')
     .eq('collection_id', pick.id)
     .order('position')
 
@@ -143,6 +148,10 @@ export default async function PickDetailPage({ params }: Props) {
       product:    (product as ProductRow | null) ?? null,
     }
   }).filter((i) => i.review != null || i.product != null)
+
+  // A showcased product that has since been reviewed renders as its review card.
+  // Columns match the reviews(...) join above.
+  await upgradeReviewedProducts(admin, items, 'id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, pros, cons, best_for, has_affiliate_links')
 
   const productSlugs = [...new Set(items.map((i) => i.review?.product_slug).filter(Boolean) as string[])]
   const productMap = new Map<string, { slug: string; affiliate_url: string | null; non_affiliate_url: string | null; description: string | null; price_cents: number | null }>()
@@ -347,9 +356,8 @@ export default async function PickDetailPage({ params }: Props) {
                   if (!review) {
                     if (!standaloneProduct) return null
                     const product = standaloneProduct
-                    // Three tiers of un-reviewed pick: a product adopted from The
-                    // Boss's research is "Researched, not tested" (with sources);
-                    // anything else is an owner pick we own but haven't reviewed.
+                    // A product adopted from The Boss's research keeps its source
+                    // list (information, not a claim).
                     const isResearched = product.source === 'adopted_from_research'
                     const researchSources = (product.research_sources ?? []).filter((s) => s?.url)
                     const href = product.affiliate_url ? `/go/${product.slug}` : product.non_affiliate_url
@@ -381,20 +389,10 @@ export default async function PickDetailPage({ params }: Props) {
                             </div>
                           </div>
 
-                          {/* Provenance chip — distinguishes researched-not-tested
-                              (AI web research, sources below) from an owner pick
-                              we hold but haven't formally reviewed. */}
-                          {isResearched ? (
-                            <span className="inline-flex items-center gap-1.5 mb-2 px-2.5 py-1 rounded-md bg-surface-raised border border-accent-border/40 text-[10px] font-black uppercase tracking-widest text-accent-text">
-                              <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-3 h-3">
-                                <circle cx="11" cy="11" r="7" strokeLinecap="round" />
-                                <path d="M21 21l-4.3-4.3" strokeLinecap="round" />
-                              </svg>
-                              Researched · not tested
-                            </span>
-                          ) : (
-                            <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-surface-raised border border-soft text-[10px] font-black uppercase tracking-widest text-prose-faint">Owner pick · not yet reviewed</span>
-                          )}
+                          {/* Claims only when set (brand-guide §1.9): stage,
+                              "Bought it", the provided-unit disclosure. A plain
+                              showcased product carries no chip at all. */}
+                          <ProductClaimLine product={product} />
 
                           {/* Editor's per-collection "best for" tagline — italic, prominent */}
                           {itemBestFor && (

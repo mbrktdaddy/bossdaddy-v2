@@ -22,6 +22,8 @@ import { LABELS } from '@/lib/labels'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
+import { upgradeReviewedProducts } from '@/lib/collections/product-items'
+import { ProductClaimLine } from '@/components/products/ProductClaimLine'
 
 export const revalidate = 60
 
@@ -103,6 +105,9 @@ type JoinedProduct = {
   affiliate_url: string | null
   non_affiliate_url: string | null
   description: string | null
+  status: string | null
+  acquisition: string | null
+  provided_by: string | null
 }
 
 export default async function StackDetailPage({ params }: Props) {
@@ -122,7 +127,7 @@ export default async function StackDetailPage({ params }: Props) {
   const admin = createAdminClient()
   const { data: rawItems } = await admin
     .from('collection_items')
-    .select('position, blurb, role_label, product_slug, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, best_for), products(slug, name, brand, image_url, category, price_cents, affiliate_url, non_affiliate_url, description)')
+    .select('position, blurb, role_label, product_slug, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, best_for), products(slug, name, brand, image_url, category, price_cents, affiliate_url, non_affiliate_url, description, status, acquisition, provided_by)')
     .eq('collection_id', stack.id)
     .order('position')
 
@@ -139,6 +144,10 @@ export default async function StackDetailPage({ params }: Props) {
       product: product as JoinedProduct | null,
     }
   }).filter((i) => i.review != null || i.product != null)
+
+  // A showcased product that has since been reviewed renders as its review card.
+  // Columns match the reviews(...) join above.
+  await upgradeReviewedProducts(admin, items, 'id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, best_for')
 
   const productSlugs = [...new Set(items.map((i) => i.review?.product_slug).filter(Boolean) as string[])]
   const productMap = new Map<string, ProductRow>()
@@ -383,9 +392,8 @@ export default async function StackDetailPage({ params }: Props) {
                               {role_label}
                             </span>
                           )}
-                          <span className="self-start text-[10px] font-black uppercase tracking-widest text-prose-faint bg-surface-raised border border-soft px-3 py-1 rounded-full mb-2">
-                            Owner pick · not yet reviewed
-                          </span>
+                          {/* Claims only when set (brand-guide §1.9). */}
+                          <ProductClaimLine product={product} />
                           <div className="flex items-start justify-between gap-3 mb-2">
                             <div>
                               <span className="text-lg font-bold text-prose leading-snug block">

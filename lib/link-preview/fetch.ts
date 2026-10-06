@@ -172,6 +172,44 @@ function hop(
 }
 
 /**
+ * Follow a link's redirects WITHOUT reading where it lands: resolve until
+ * `arrived(url)` says the URL is the one we wanted, then stop before fetching it.
+ * Product import uses this for Amazon short links (a.co / amzn.to), whose target
+ * page must not be read (Associates rules) but whose URL carries the ASIN.
+ *
+ * Every hop goes through the same guards as guardedFetch. Redirect bodies are
+ * tiny, so each hop is capped hard.
+ */
+export async function resolveRedirects(
+  rawUrl: string,
+  arrived: (url: string) => boolean,
+): Promise<{ ok: true; url: string } | { ok: false; reason: FetchFailure }> {
+  let current = rawUrl
+
+  for (let redirects = 0; redirects <= MAX_REDIRECTS; redirects++) {
+    const normalized = normalizeUrl(current)
+    if (!normalized.ok) return { ok: false, reason: 'blocked' }
+    if (arrived(normalized.url)) return { ok: true, url: normalized.url }
+
+    const result = await hop(normalized.url, 64 * 1024)
+    if (!result.ok) return { ok: false, reason: result.reason }
+
+    const location = result.headers.location
+    if (result.status < 300 || result.status >= 400 || !location) {
+      // Not a redirect: this is where the link lands, and it isn't what we wanted.
+      return { ok: false, reason: 'bad-status' }
+    }
+    try {
+      current = new URL(location, normalized.url).toString()
+    } catch {
+      return { ok: false, reason: 'blocked' }
+    }
+  }
+
+  return { ok: false, reason: 'too-many-redirects' }
+}
+
+/**
  * Fetch a URL with every guard applied, following redirects manually.
  *
  * ⚠️ EACH HOP GOES BACK THROUGH normalizeUrl AND THE GUARDED RESOLVER. This is the

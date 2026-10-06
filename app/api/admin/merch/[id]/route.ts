@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/auth-cache'
 import { z } from 'zod'
+import { revalidateMerchPaths } from '@/lib/revalidate'
 
 const MerchPatchSchema = z.object({
   slug:         z.string().min(2).max(80).regex(/^[a-z0-9-]+$/).optional(),
@@ -44,6 +45,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     return NextResponse.json({ error: `Update failed: ${error.message}` }, { status: 500 })
   }
 
+  revalidateMerchPaths()
   return NextResponse.json({ item: data })
 }
 
@@ -56,5 +58,6 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   const admin = createAdminClient()
   const { error } = await admin.from('merch').delete().eq('id', id)
   if (error) return NextResponse.json({ error: `Delete failed: ${error.message}` }, { status: 500 })
+  revalidateMerchPaths()
   return NextResponse.json({ success: true })
 }

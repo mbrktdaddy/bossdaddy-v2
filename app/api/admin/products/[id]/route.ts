@@ -4,7 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/auth-cache'
 import { notifyWishlistSubscribers } from '@/lib/wishlist-emails'
-import { ProductUpdateSchema } from '@/lib/products/schema'
+import { ProductUpdateSchema, productCheckViolation } from '@/lib/products/schema'
+import { revalidateProductPaths } from '@/lib/revalidate'
 
 // GET /api/admin/products/[id]
 export async function GET(
@@ -53,6 +54,26 @@ export async function PATCH(
 
   const admin = createAdminClient()
 
+  // 'reviewed' is a verdict the database sets when the review is approved
+  // (mig 158). Hand-setting it would claim a review that doesn't exist.
+  if (updates.status === 'reviewed') {
+    const { data: cur } = await admin.from('products').select('slug, status').eq('id', id).single()
+    if (cur && cur.status !== 'reviewed') {
+      const { count } = await admin
+        .from('reviews')
+        .select('id', { count: 'exact', head: true })
+        .eq('product_slug', cur.slug)
+        .is('parent_review_id', null)
+        .eq('status', 'approved')
+      if (!count) {
+        return NextResponse.json(
+          { error: "Reviewed is set automatically when this product's review is approved." },
+          { status: 400 },
+        )
+      }
+    }
+  }
+
   // Replace the tag set atomically when tags were provided.
   if (tags !== undefined) {
     await admin.from('product_tags').delete().eq('product_id', id)
@@ -78,6 +99,8 @@ export async function PATCH(
     : await admin.from('products').select('*').eq('id', id).single()
   if (error) {
     if (error.code === '23505') return NextResponse.json({ error: 'Slug already in use' }, { status: 409 })
+    const check = productCheckViolation(error)
+    if (check) return NextResponse.json({ error: check }, { status: 400 })
     return NextResponse.json({ error: `Update failed: ${error.message}` }, { status: 500 })
   }
 
@@ -106,6 +129,7 @@ export async function PATCH(
       .eq('status', 'approved')
     for (const r of reviews ?? []) revalidatePath(`/reviews/${r.slug}`)
   }
+  revalidateProductPaths()
 
   return NextResponse.json({ product: data })
 }
@@ -156,5 +180,6 @@ export async function DELETE(
 
   const { error } = await admin.from('products').delete().eq('id', id)
   if (error) return NextResponse.json({ error: `Delete failed: ${error.message}` }, { status: 500 })
+  revalidateProductPaths()
   return NextResponse.json({ success: true })
 }

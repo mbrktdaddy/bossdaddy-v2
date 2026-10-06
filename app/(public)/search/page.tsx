@@ -32,7 +32,6 @@ interface Props {
 
 // Bench-status → reader-facing label for product search hits (mirrors /bench).
 const BENCH_STATUS_LABEL: Record<string, string> = {
- considering: 'Under consideration',
  queued: 'Coming soon',
  testing: 'Testing now',
 }
@@ -65,14 +64,14 @@ export default async function SearchPage({ searchParams }: Props) {
  .eq('is_visible', true)
  .textSearch('search_vector', query, { type: 'websearch', config: 'english' })
  .limit(10),
- // Bench pipeline products (considering/queued/testing) — the items with no
+ // Bench pipeline products (queued/testing) — the items with no
  // review yet, so nothing else in search surfaces them. Reviewed products
  // already appear via their review; archived/passed stay hidden. Admin client
  // mirrors the /bench page (avoids the products-RLS-for-anon trap).
  admin
  .from('products')
  .select('slug, name, brand, category, image_url, description, status')
- .in('status', ['considering', 'queued', 'testing'])
+ .in('status', ['queued', 'testing'])
  .or(`name.ilike.${productLike},slug.ilike.${productLike},brand.ilike.${productLike}`)
  .order('priority', { ascending: false })
  .limit(10),

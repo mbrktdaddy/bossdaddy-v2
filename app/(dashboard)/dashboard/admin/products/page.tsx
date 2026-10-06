@@ -3,7 +3,8 @@ import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
 import type { Product } from '@/lib/products'
-import { PRODUCT_STATUS_OPTIONS } from '@/lib/products'
+import { PRODUCT_STATUS_OPTIONS, isRadarScheduled } from '@/lib/products'
+import { LABELS } from '@/lib/labels'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Badge } from '@/components/ui/Badge'
 import { BENCH_STATUS_TONE } from '@/components/wishlist/StatusBadge'
@@ -17,7 +18,9 @@ export const dynamic = 'force-dynamic'
 // the catalog and the testing pipeline from one place.
 const TABS: { key: string; label: string; statuses: string[] | null; active: string; idle: string }[] = [
   { key: 'all',      label: 'All',      statuses: null,                                  active: 'bg-accent text-white',     idle: 'bg-surface-raised text-prose-muted hover:text-prose' },
-  { key: 'bench',    label: 'Bench',    statuses: ['considering', 'queued', 'testing'],  active: 'bg-blue-600 text-white',   idle: 'bg-surface-raised text-blue-700 hover:text-blue-600' },
+  { key: 'catalog',  label: 'Catalog',  statuses: ['catalog'],                           active: 'bg-zinc-200 text-zinc-900', idle: 'bg-surface-raised text-prose-muted hover:text-prose' },
+  { key: 'radar',    label: LABELS.radar.short, statuses: ['radar'],                    active: 'bg-amber-600 text-white',  idle: 'bg-surface-raised text-amber-700 hover:text-amber-600' },
+  { key: 'bench',    label: 'Bench',    statuses: ['queued', 'testing'],                 active: 'bg-blue-600 text-white',   idle: 'bg-surface-raised text-blue-700 hover:text-blue-600' },
   { key: 'reviewed', label: 'Reviewed', statuses: ['reviewed'],                          active: 'bg-green-600 text-white',  idle: 'bg-surface-raised text-green-700 hover:text-green-600' },
   { key: 'passed',   label: 'Passed',   statuses: ['passed'],                            active: 'bg-zinc-600 text-white',   idle: 'bg-surface-raised text-zinc-500 hover:text-zinc-400' },
   { key: 'archived', label: 'Archived', statuses: ['archived'],                          active: 'bg-rose-700 text-white',   idle: 'bg-surface-raised text-rose-700 hover:text-rose-600' },
@@ -43,14 +46,18 @@ export default async function ProductsListPage({
   let query = admin
     .from('products')
     .select('*, vote_count:wishlist_votes(count)')
-    .order('priority', { ascending: false })
-    .order('created_at', { ascending: false })
+  // Radar has no priority; it reads newest-spotted first (scheduled on top).
+  query = active.key === 'radar'
+    ? query.order('spotted_at', { ascending: false })
+    : query.order('priority', { ascending: false })
+  query = query.order('created_at', { ascending: false })
   if (active.statuses) query = query.in('status', active.statuses)
 
   const { data } = await query
   const rows = ((data ?? []) as unknown as Row[]).map((r) => ({
     ...r,
     votes: r.vote_count?.[0]?.count ?? 0,
+    scheduled: isRadarScheduled(r),
   }))
 
   return (
@@ -128,6 +135,7 @@ export default async function ProductsListPage({
                 <Badge tone={BENCH_STATUS_TONE[p.status] ?? 'neutral'} pulse={p.status === 'testing'}>
                   {STATUS_LABEL.get(p.status) ?? p.status}
                 </Badge>
+                {p.scheduled ? <Badge tone="info">Scheduled</Badge> : null}
                 {!p.affiliate_url && !p.non_affiliate_url ? (
                   <Badge tone="danger">No URL</Badge>
                 ) : null}

@@ -33,7 +33,7 @@ export interface ParsedMetadata {
  * everything a real og:title contains, and an undecoded `&hellip;` renders as
  * literal text rather than as anything dangerous.
  */
-function decodeEntities(input: string): string {
+export function decodeEntities(input: string): string {
   return input
     .replace(/&#x([0-9a-f]+);/gi, (_, hex) => safeFromCodePoint(parseInt(hex, 16)))
     .replace(/&#(\d+);/g, (_, dec) => safeFromCodePoint(parseInt(dec, 10)))
@@ -71,7 +71,7 @@ function clean(value: string | null, max: number): string | null {
  * naive implementations only match the first and quietly return nothing for a
  * chunk of the internet.
  */
-function metaContent(html: string, key: string): string | null {
+export function metaContent(html: string, key: string): string | null {
   const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   // Quoted values (the overwhelming majority), key-then-content and content-then-key.
   const patterns = [

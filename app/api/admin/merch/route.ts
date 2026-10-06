@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/auth-cache'
 import { z } from 'zod'
+import { revalidateMerchPaths } from '@/lib/revalidate'
 
 const MerchSchema = z.object({
   slug:         z.string().min(2).max(80).regex(/^[a-z0-9-]+$/, 'lowercase letters, numbers, and hyphens only'),
@@ -71,5 +72,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: `Create failed: ${error.message}` }, { status: 500 })
   }
 
+  revalidateMerchPaths()
   return NextResponse.json({ item: data }, { status: 201 })
 }

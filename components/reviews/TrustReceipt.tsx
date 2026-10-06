@@ -5,6 +5,10 @@ interface Props {
   testingSince?: string | null
   /** Only meaningful when testingDuration === 'custom' — a free-text duration phrase. */
   testingNote?: string | null
+  /** "Bought it" from the product's How I got it (mig 158). Shown only without a price, which already says it. */
+  bought?: boolean
+  /** The legally required line for a brand-provided or loaned unit (productClaims). */
+  disclosure?: string | null
   className?: string
 }
 
@@ -33,11 +37,14 @@ function formatSince(iso: string): string {
 /**
  * Inline trust-signal line that sits under the author byline.
  * Shows what the author paid + how long they tested — both are differentiating
- * honesty signals most review sites can't make. Renders nothing if both fields
- * are empty so old reviews don't get a half-empty receipt.
+ * honesty signals most review sites can't make — plus, for a brand-provided or
+ * loaned unit, the material-connection disclosure, which the FTC wants next to
+ * the opinion rather than in a footer. Renders nothing when every field is
+ * empty, so old reviews don't get a half-empty receipt.
  */
-export default function TrustReceipt({ pricePaidCents, testingDuration, testingSince, testingNote, className = '' }: Props) {
+export default function TrustReceipt({ pricePaidCents, testingDuration, testingSince, testingNote, bought = false, disclosure = null, className = '' }: Props) {
   const hasPrice = pricePaidCents != null && pricePaidCents > 0
+  const showBought = bought && !hasPrice
 
   // "Tested since Jan 2024" for a custom start date, "Tested 2 summers of camping"
   // for a custom note, otherwise the matching bucket label ("Tested 3+ months").
@@ -54,17 +61,19 @@ export default function TrustReceipt({ pricePaidCents, testingDuration, testingS
     durationLabel = TESTING_DURATION_LABEL[testingDuration] ?? testingDuration
   }
 
-  if (!hasPrice && !durationLabel) return null
+  if (!hasPrice && !showBought && !durationLabel && !disclosure) return null
 
   return (
-    <p className={`text-xs text-prose-muted sm:text-sm ${className}`}>
+    <div className={className}>
+    <p className="text-xs text-prose-muted sm:text-sm">
       {hasPrice && (
         <span className="whitespace-nowrap">
           <span aria-hidden className="text-accent-text">💵</span>{' '}
           Paid ${(pricePaidCents! / 100).toFixed(2)}
         </span>
       )}
-      {hasPrice && durationLabel && (
+      {showBought && <span className="whitespace-nowrap">Bought it</span>}
+      {(hasPrice || showBought) && durationLabel && (
         <span aria-hidden className="mx-2 text-prose-faint">·</span>
       )}
       {durationLabel && (
@@ -74,5 +83,7 @@ export default function TrustReceipt({ pricePaidCents, testingDuration, testingS
         </span>
       )}
     </p>
+    {disclosure && <p className="mt-1.5 text-xs text-prose-faint italic">{disclosure}</p>}
+    </div>
   )
 }

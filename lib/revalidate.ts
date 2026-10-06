@@ -74,3 +74,42 @@ export function revalidateReviewPaths(
   for (const r of items) if (r.slug) revalidatePath(`/reviews/${r.slug}`)
   categoryPaths(items, extraCategories, 'reviews')
 }
+
+/**
+ * Purge every public page a product (a Bench or Radar item) appears on.
+ *
+ * Products render on the Bench (listing + detail), the /gear hub (Radar lane +
+ * Bench strip) and the Bench strips on `/` and `/reviews`. The admin product
+ * routes used to purge none of these, so a Bench edit sat stale for up to an
+ * hour. Detail pages are purged by route pattern, which also covers a slug
+ * rename (the old slug's page is purged too).
+ */
+export function revalidateProductPaths() {
+  revalidatePath('/')
+  revalidatePath('/reviews')
+  revalidatePath('/gear')
+  revalidatePath('/bench')
+  revalidatePath('/(public)/bench/[slug]', 'page')
+  revalidatePath('/(public)/gear/category/[slug]', 'page')
+  // Collections render product-only items with the product's claims (stage,
+  // "Bought it", the provided-unit disclosure — mig 158).
+  revalidatePath('/(public)/picks/[slug]', 'page')
+  revalidatePath('/(public)/stacks/[slug]', 'page')
+  revalidatePath('/(public)/gifts/[occasion]', 'page')
+}
+
+/**
+ * Purge every public page merch appears on: the store (/shop + detail pages),
+ * the MerchStrip on `/`, `/gear` and `/about`, and the MerchCallout at the foot
+ * of every review and guide. The merch admin and Printful sync/publish routes
+ * used to purge none of these.
+ */
+export function revalidateMerchPaths() {
+  revalidatePath('/shop')
+  revalidatePath('/(public)/shop/[slug]', 'page')
+  revalidatePath('/')
+  revalidatePath('/gear')
+  revalidatePath('/about')
+  revalidatePath('/(public)/reviews/[slug]', 'page')
+  revalidatePath('/(public)/guides/[slug]', 'page')
+}

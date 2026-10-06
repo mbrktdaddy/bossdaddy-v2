@@ -37,7 +37,7 @@ export default async function BenchPage() {
     admin
       .from('products')
       .select(`${BENCH_SELECT}, vote_count:wishlist_votes(count)`)
-      .in('status', ['considering', 'queued', 'testing'])
+      .in('status', ['queued', 'testing'])
       .order('priority', { ascending: false })
       .order('created_at', { ascending: false })
       .limit(150),
@@ -57,8 +57,7 @@ export default async function BenchPage() {
   const groups = groupByStatus([...items, ...((passedRaw ?? []) as unknown as WishlistItem[])])
 
   // Status icons — inline SVGs per the brand no-emoji-on-web rule. Beaker
-  // for testing, clock for queued, question for considering, check for
-  // reviewed. Skipped intentionally has no icon.
+  // for testing, clock for queued. Passed intentionally has no icon.
   const iconCls = 'w-4 h-4 inline-block shrink-0 mr-2 align-[-2px]'
   const sections: { key: keyof typeof groups; heading: string; icon: React.ReactNode; sub: string }[] = [
     {
@@ -78,16 +77,6 @@ export default async function BenchPage() {
       icon: (
         <svg className={iconCls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-    },
-    {
-      key: 'considering',
-      heading: getStatusLabel('considering'),
-      sub: 'Vote to move your pick up the queue.',
-      icon: (
-        <svg className={iconCls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
         </svg>
       ),
     },

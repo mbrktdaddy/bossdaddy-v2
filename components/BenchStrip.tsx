@@ -14,7 +14,7 @@ interface Props {
   subhead?: string | null
 }
 
-const STATUS_RANK: Record<string, number> = { testing: 0, queued: 1, considering: 2 }
+const STATUS_RANK: Record<string, number> = { testing: 0, queued: 1 }
 
 export default async function BenchStrip({
   heading = 'On the Bench',
@@ -25,7 +25,7 @@ export default async function BenchStrip({
   const { data } = await admin
     .from('products')
     .select('id, slug, title:name, image_url, status')
-    .in('status', ['testing', 'queued', 'considering'])
+    .in('status', ['testing', 'queued'])
     .order('priority', { ascending: false })
     .limit(20)
 

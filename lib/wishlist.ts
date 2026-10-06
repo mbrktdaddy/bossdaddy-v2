@@ -4,10 +4,11 @@ import type { ProductStore } from '@/lib/products'
 export { STORE_OPTIONS, getStoreLabel }
 export type { ProductStore }
 
-// The bench is a view over the products spine in its early lifecycle states.
-// 'passed' replaces the former bench-only 'skipped' (unified in migration 100/101).
+// The bench is a view over the products spine: what's being tested (queued,
+// testing), plus the outcomes its detail pages show (reviewed, passed).
+// 'passed' replaces the former bench-only 'skipped' (migration 100/101);
+// 'considering' was retired into On the Radar (migration 158).
 export type WishlistStatus =
-  | 'considering'
   | 'queued'
   | 'testing'
   | 'reviewed'
@@ -17,7 +18,6 @@ export type WishlistStatus =
 // homepage ticker all read these. Queued was "Coming Soon", which merch also
 // uses for unreleased products; "Up Next" is unambiguous.
 export const WISHLIST_STATUS_OPTIONS: { value: WishlistStatus; label: string; color: string }[] = [
-  { value: 'considering', label: 'Considering',  color: 'text-accent' },
   { value: 'queued',      label: 'Up Next',      color: 'text-blue-700' },
   { value: 'testing',     label: 'Testing Now',  color: 'text-green-700' },
   { value: 'reviewed',    label: 'Reviewed',     color: 'text-accent' },
@@ -75,15 +75,12 @@ export function groupByStatus(items: WishlistItem[]): Record<WishlistStatus, Wis
   const groups: Record<WishlistStatus, WishlistItem[]> = {
     testing:     [],
     queued:      [],
-    considering: [],
     reviewed:    [],
     passed:      [],
   }
   for (const item of items) {
     groups[item.status].push(item)
   }
-  // Sort "considering" by vote_count desc
-  groups.considering.sort((a, b) => (b.vote_count ?? 0) - (a.vote_count ?? 0))
   // Sort "queued" by estimated_review_date asc
   groups.queued.sort((a, b) => {
     if (!a.estimated_review_date) return 1

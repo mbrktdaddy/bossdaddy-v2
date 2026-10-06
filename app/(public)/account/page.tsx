@@ -47,8 +47,8 @@ export const metadata: Metadata = {
 const BENCH_STATUS_LABEL: Record<string, string> = {
   queued:      'Up next',
   testing:     'Testing',
-  considering: 'Considering',
   reviewed:    'Reviewed',
+  passed:      'Not testing',
 }
 
 export default async function AccountHomePage() {
@@ -97,9 +97,11 @@ export default async function AccountHomePage() {
   const hasLikedContent = orderedLikedReviews.length > 0 || orderedLikedArticles.length > 0
 
   type BenchItem = { id: string; slug: string; title: string; status: string }
+  // Only stages with a Bench page: a followed product that moved off the Bench
+  // (to Catalog or Radar, mig 158) would otherwise link to a 404.
   const subscribedItems: BenchItem[] = (benchSubs ?? [])
     .map((s) => s.products as unknown as BenchItem | null)
-    .filter((item): item is BenchItem => item !== null)
+    .filter((item): item is BenchItem => item !== null && item.status in BENCH_STATUS_LABEL)
 
   return (
     <div data-theme="dark" className="bg-background text-prose min-h-[calc(100vh-4rem)]">

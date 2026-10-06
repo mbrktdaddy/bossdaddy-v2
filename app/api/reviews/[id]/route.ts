@@ -179,19 +179,9 @@ export async function PUT(
       await createNotification({ userId: data.author_id as string, type: map.type, title: map.title, body: map.body, link })
     }
 
-    // Flip linked product status to 'reviewed' when a review is approved
-    if (modParsed.data.action === 'approve' && data?.product_slug) {
-      const productSlugToFlip = data.product_slug as string
-      after(async () => {
-        try {
-          await admin
-            .from('products')
-            .update({ status: 'reviewed' })
-            .eq('slug', productSlugToFlip)
-            .in('status', ['considering', 'queued', 'testing'])  // advance but don't clobber 'passed'/'archived'
-        } catch (err) { console.error('Product status flip failed:', err) }
-      })
-    }
+    // The linked product advances to 'reviewed' in the database itself
+    // (trigger trg_advance_product_on_review_approval, mig 158), so every
+    // approval path — this route, the scheduled-publish cron, SQL — agrees.
 
     // Notify wishlist subscribers when a linked review goes live
     if (modParsed.data.action === 'approve' && data && process.env.RESEND_API_KEY) {

@@ -4,7 +4,8 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 // POST /api/wishlist/[id]/promote — create a review draft from a wishlist item (admin only)
-// Sets products.review_id and status='reviewed'.
+// Links products.review_id. It does NOT change the product's stage: a draft is
+// not a verdict. 'reviewed' is set by the DB when the review is approved (mig 158).
 // Does NOT notify subscribers — that fires when the review actually publishes.
 export async function POST(
   _request: NextRequest,
@@ -57,10 +58,11 @@ export async function POST(
 
   if (reviewError) return NextResponse.json({ error: reviewError.message }, { status: 500 })
 
-  // Link the product to the new review and advance it to 'reviewed'.
+  // Link the product to the new review. (mig 111's trigger mirrors this from
+  // reviews.product_slug too; setting it here keeps the response consistent.)
   await admin
     .from('products')
-    .update({ review_id: review.id, status: 'reviewed' })
+    .update({ review_id: review.id })
     .eq('id', id)
 
   revalidatePath('/bench')

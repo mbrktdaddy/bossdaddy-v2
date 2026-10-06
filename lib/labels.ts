@@ -54,6 +54,13 @@ export const LABELS = {
     shortTagline: 'Check out the upcoming items on our bench list',
   },
 
+  // products.status = 'radar' → the On the Radar lane on /gear (mig 157).
+  // Untested products with a short honest take; the stage before the Bench.
+  radar: {
+    short: 'Radar',
+    full:  'On the Radar',
+  },
+
   // /gear public route: the gear hub (tested reviews rated 8+, gift guides, the
   // Bench). It is NOT the store; merch lives under `shop`. Key was historically
   // `stuff` (an earlier display name).

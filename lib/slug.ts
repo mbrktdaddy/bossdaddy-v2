@@ -39,7 +39,7 @@ export function slugifyTitle(title: string): string {
  */
 export async function generateUniqueSlug(
   supabase: SupabaseClient<Database>,
-  table: 'reviews' | 'guides',
+  table: 'reviews' | 'guides' | 'products',
   title: string
 ): Promise<string> {
   const base = slugifyTitle(title)

@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Product, ProductSpec } from '@/lib/products'
-import { STORE_OPTIONS, PRODUCT_STATUS_OPTIONS } from '@/lib/products'
+import { STORE_OPTIONS, PRODUCT_STATUS_OPTIONS, RADAR_TAKE_MAX, ACQUISITION_OPTIONS, acquisitionDisclosure, type ProductAcquisition } from '@/lib/products'
+import { LABELS } from '@/lib/labels'
 import { CATEGORIES, getCategoryLabel } from '@/lib/categories'
 import { getSpecTemplate } from '@/lib/spec-templates'
 import { ProductImageGallery } from '@/components/admin/ProductImageGallery'
@@ -22,6 +23,14 @@ interface Props {
 
 // Mirror of the `z.array().max(30)` cap in the product create/update API.
 const MAX_SPECS = 30
+
+// ISO timestamp → the `YYYY-MM-DDTHH:mm` a datetime-local input wants, in the
+// browser's local time (toISOString would render it in UTC).
+function toLocalInput(iso: string): string {
+  const d = new Date(iso)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
 
 export function ProductForm({ product, initialTags = [], amazonAssociateTag }: Props) {
   const router = useRouter()
@@ -42,12 +51,32 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
   const [category, setCategory]       = useState(product?.category ?? '')
   const [tags, setTags]               = useState<string[]>(initialTags)
   const [priceCents, setPriceCents]   = useState(product?.price_cents != null ? String(product.price_cents) : '')
-  const [status, setStatus]           = useState<string>(product?.status ?? 'considering')
+  const [status, setStatus]           = useState<string>(product?.status ?? 'catalog')
 
   // Bench pipeline fields (folded in from the former wishlist admin).
   const [priority, setPriority]           = useState(String(product?.priority ?? 0))
   const [estimatedDate, setEstimatedDate] = useState(product?.estimated_review_date ?? '')
   const [skipReason, setSkipReason]       = useState(product?.skip_reason ?? '')
+
+  // How I got it (mig 158). Blank = no claim. provided/loaner render the legal
+  // disclosure wherever the product is reviewed or recommended.
+  const [acquisition, setAcquisition] = useState<ProductAcquisition | ''>(product?.acquisition ?? '')
+  const [providedBy, setProvidedBy]   = useState(product?.provided_by ?? '')
+  const isConnection = acquisition === 'provided' || acquisition === 'loaner'
+
+  // On the Radar (mig 157). The take is kept after the product moves on (the
+  // archive shows it), so it's never nulled by a status change. spotted_at is
+  // the release time: the DB trigger stamps it on entry into Radar, so the
+  // field is only prefilled while the product is on Radar and only sent when
+  // edited (a stale date from an earlier Radar stint must not be resent).
+  const initialGoLive                   = product?.status === 'radar' && product.spotted_at ? toLocalInput(product.spotted_at) : ''
+  const [radarTake, setRadarTake]       = useState(product?.radar_take ?? '')
+  const [goLive, setGoLive]             = useState(initialGoLive)
+  const wasOnRadar                      = !!product?.spotted_at
+  // The server can't know the browser's zone, so the go-live time renders only
+  // after hydration (same pattern as the savings GoalForm). The SSR pass would
+  // otherwise bake in a UTC wall time the client never corrects.
+  const inBrowser = useSyncExternalStore(() => () => {}, () => true, () => false)
 
   const [busy, setBusy]                   = useState(false)
   const [error, setError]                 = useState<string | null>(null)
@@ -64,6 +93,17 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
   // page. createdProductId carries that signal forward.
   const [createdProductId, setCreatedProductId] = useState<string | null>(null)
   const [uploadStatus,     setUploadStatus]     = useState<string | null>(null)
+
+  // Paste-a-link import (step 2b, lib/products/import.ts). Fills EMPTY fields
+  // only; the retailer's own copy is kept as reference, never auto-published.
+  const [linkUrl,       setLinkUrl]       = useState('')
+  const [linkBusy,      setLinkBusy]      = useState<'page' | 'lookup' | null>(null)
+  const [linkNote,      setLinkNote]      = useState<string | null>(null)
+  const [linkCanLookup, setLinkCanLookup] = useState(false)
+  const [retailerRef,   setRetailerRef]   = useState<string | null>(null)
+  // The page the import actually read (short links resolved). The web lookup
+  // uses it, so an a.co link still reaches the lookup with its ASIN.
+  const [linkSource,    setLinkSource]    = useState<string | null>(null)
 
   // AI autofill (paste a spec sheet → structured brand + specs)
   const [factsText,    setFactsText]    = useState('')
@@ -112,6 +152,93 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
     setSpecs((prev) => [...prev, ...additions])
   }
 
+  // Merge incoming specs: fill empty existing values, append new labels (snapped
+  // to canonical casing), never clobber a typed value, respect the cap.
+  // Computed synchronously so the reported counts are accurate.
+  function mergeSpecs(incoming: ProductSpec[]): { added: number; filled: number; capped: number } {
+    const byKey = new Map(specs.map((s) => [s.label.trim().toLowerCase(), { ...s }]))
+    let added = 0, filled = 0, capped = 0
+    for (const s of incoming) {
+      const key = s.label?.trim().toLowerCase()
+      if (!key || !s.value?.trim()) continue
+      const existing = byKey.get(key)
+      if (existing) {
+        if (!existing.value.trim()) { existing.value = s.value.trim(); filled++ }
+      } else if (byKey.size < MAX_SPECS) {
+        byKey.set(key, { label: canonicalLabel(s.label), value: s.value.trim() }); added++
+      } else {
+        capped++
+      }
+    }
+    setSpecs(Array.from(byKey.values()))
+    return { added, filled, capped }
+  }
+
+  async function handleLinkImport(mode: 'page' | 'lookup') {
+    const url = mode === 'lookup' && linkSource ? linkSource : linkUrl.trim()
+    if (!url) return
+    setLinkBusy(mode); setLinkNote(null)
+    try {
+      const res = await fetch('/api/admin/products/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, mode }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Import failed')
+
+      // Only empty fields are filled: an import never overwrites what you typed.
+      const filled: string[] = []
+      const fill = (label: string, current: string, next: string | null | undefined, set: (v: string) => void) => {
+        if (next && !current.trim()) { set(next); filled.push(label) }
+      }
+
+      if (mode === 'page') {
+        const r = json.import
+        fill('name', name, r.name, setName)
+        fill('slug', slug, json.slug, setSlug)
+        fill('brand', brand, r.brand, setBrand)
+        fill('image', imageUrl, r.imageUrl, setImageUrl)
+        fill('price', priceCents, r.priceCents != null ? String(r.priceCents) : null, setPriceCents)
+        // The link group is set together, and only when no link exists yet.
+        if (!affiliateUrl.trim() && !nonAffiliateUrl.trim() && (r.affiliateUrl || r.nonAffiliateUrl)) {
+          setStore(r.store)
+          setCustomStoreName(r.customStoreName ?? '')
+          if (r.asin) setAsin(r.asin)
+          if (r.affiliateUrl) setAffiliateUrl(r.affiliateUrl)
+          if (r.nonAffiliateUrl) setNonAffUrl(r.nonAffiliateUrl)
+          filled.push(r.affiliateUrl ? 'affiliate link' : 'link')
+        }
+        const merged = r.specs?.length ? mergeSpecs(r.specs) : null
+        if (merged && merged.added + merged.filled > 0) filled.push(`${merged.added + merged.filled} specs`)
+        if (r.retailerDescription) setRetailerRef(r.retailerDescription)
+        setLinkSource(r.sourceUrl ?? null)
+        setLinkCanLookup(!!r.canLookup)
+        const notes = (r.notes as string[]).join(' ')
+        setLinkNote(`${filled.length ? `Filled: ${filled.join(', ')}.` : 'Nothing new to fill.'}${notes ? ` ${notes}` : ''}`)
+      } else {
+        const l = json.lookup
+        if (!l.found) {
+          setLinkNote("The web lookup couldn't confirm that exact product.")
+          return
+        }
+        fill('name', name, l.name, setName)
+        fill('slug', slug, json.slug, setSlug)
+        fill('brand', brand, l.brand, setBrand)
+        fill('price', priceCents, l.priceCents != null ? String(l.priceCents) : null, setPriceCents)
+        const merged = l.specs?.length ? mergeSpecs(l.specs) : null
+        if (merged && merged.added + merged.filled > 0) filled.push(`${merged.added + merged.filled} specs`)
+        if (l.summary && !retailerRef) setRetailerRef(l.summary)
+        setLinkCanLookup(false)
+        setLinkNote(`${filled.length ? `Filled from the web: ${filled.join(', ')}.` : 'Nothing new to fill.'} Check the facts before saving.`)
+      }
+    } catch (err) {
+      setLinkNote(err instanceof Error ? err.message : 'Import failed')
+    } finally {
+      setLinkBusy(null)
+    }
+  }
+
   async function handleAutofill() {
     if (!factsText.trim()) { setAutofillNote('Paste some product copy first.'); return }
     setAutofilling(true); setAutofillNote(null)
@@ -125,24 +252,7 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
       if (!res.ok) throw new Error(json.error ?? 'Autofill failed')
 
       const incoming: ProductSpec[] = Array.isArray(json.specs) ? json.specs : []
-      // Merge into current specs: fill empty existing values, append new labels
-      // (snapped to canonical casing), never clobber a typed value, respect the
-      // cap. Computed synchronously so the reported counts are accurate.
-      const byKey = new Map(specs.map((s) => [s.label.trim().toLowerCase(), { ...s }]))
-      let added = 0, filled = 0, capped = 0
-      for (const s of incoming) {
-        const key = s.label?.trim().toLowerCase()
-        if (!key || !s.value?.trim()) continue
-        const existing = byKey.get(key)
-        if (existing) {
-          if (!existing.value.trim()) { existing.value = s.value.trim(); filled++ }
-        } else if (byKey.size < MAX_SPECS) {
-          byKey.set(key, { label: canonicalLabel(s.label), value: s.value.trim() }); added++
-        } else {
-          capped++
-        }
-      }
-      setSpecs(Array.from(byKey.values()))
+      const { added, filled, capped } = mergeSpecs(incoming)
 
       let brandNote = ''
       if (json.brand && !brand.trim()) { setBrand(json.brand); brandNote = ` Brand set to "${json.brand}".` }
@@ -174,6 +284,10 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
       setError('Skip reason is required when status is "Passed".')
       return
     }
+    if (status === 'radar' && !radarTake.trim()) {
+      setError(`A take is required when status is "${LABELS.radar.full}".`)
+      return
+    }
 
     setBusy(true); setError(null); setUploadStatus(null)
 
@@ -203,6 +317,14 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
       priority:              parseInt(priority, 10) || 0,
       estimated_review_date: ['queued', 'testing'].includes(status) ? (estimatedDate || null) : null,
       skip_reason:           status === 'passed' ? (skipReason.trim() || null) : null,
+      radar_take:            radarTake.trim() || null,
+      acquisition:           acquisition || null,
+      provided_by:           isConnection ? (providedBy.trim() || null) : null,
+      // Only an edited schedule is sent. Cleared = go live now; untouched =
+      // omitted, so the trigger stamps entry into Radar.
+      ...(status === 'radar' && goLive !== initialGoLive
+        ? { spotted_at: (goLive ? new Date(goLive) : new Date()).toISOString() }
+        : {}),
       tags,
     }
 
@@ -321,6 +443,48 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
 
   return (
     <form onSubmit={handleSave} className="space-y-5">
+      {/* ── Import from a link ─────────────────────────────────────────── */}
+      <Card tone="sunken" className="p-4 space-y-3">
+        <div>
+          <Eyebrow>Import From a Link</Eyebrow>
+          <p className="mt-0.5 text-xs text-prose-faint">
+            Paste a product page. Fills empty fields only — nothing saves until you do.
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            type="url"
+            value={linkUrl}
+            onChange={(e) => { setLinkUrl(e.target.value); setLinkSource(null); setLinkCanLookup(false) }}
+            onKeyDown={(e) => {
+              // Enter here imports; it must not submit the product form.
+              if (e.key === 'Enter') { e.preventDefault(); handleLinkImport('page') }
+            }}
+            placeholder="https://www.homedepot.com/p/…  or an Amazon /dp/ link"
+            className="flex-1 min-w-0 px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          />
+          <button
+            type="button"
+            onClick={() => handleLinkImport('page')}
+            disabled={!!linkBusy || !linkUrl.trim()}
+            className={buttonVariants({ className: 'shrink-0' })}
+          >
+            {linkBusy === 'page' ? 'Importing…' : 'Import'}
+          </button>
+        </div>
+        {linkNote && <p className="text-xs text-prose-muted">{linkNote}</p>}
+        {linkCanLookup && (
+          <button
+            type="button"
+            onClick={() => handleLinkImport('lookup')}
+            disabled={!!linkBusy}
+            className={buttonVariants({ size: 'sm', variant: 'secondary' })}
+          >
+            {linkBusy === 'lookup' ? 'Searching the web…' : 'Look up details (web search)'}
+          </button>
+        )}
+      </Card>
+
       <div>
         <label className="block text-sm text-prose-muted mb-1.5">
           Slug <span className="text-danger-ink">*</span>
@@ -581,6 +745,24 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
           className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
         />
         <p className="mt-1 text-xs text-prose-faint">{description.length}/400 characters</p>
+        {retailerRef && (
+          <details className="mt-2 text-xs text-prose-faint">
+            <summary className="cursor-pointer hover:text-prose-muted transition-colors">
+              Retailer&apos;s description — reference only, rewrite in your words
+            </summary>
+            <p className="mt-2 text-prose-muted whitespace-pre-line">{retailerRef}</p>
+            <button
+              type="button"
+              onClick={() => {
+                if (description.trim() && !confirm('Replace your description with the retailer text?')) return
+                setDescription(retailerRef.slice(0, 400))
+              }}
+              className="mt-2 text-accent-text-soft hover:text-accent transition-colors py-1"
+            >
+              Use as a starting point
+            </button>
+          </details>
+        )}
       </div>
 
       {/* ── Product Facts (specs) ──────────────────────────────────────── */}
@@ -739,13 +921,99 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
           className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
         >
           {PRODUCT_STATUS_OPTIONS.map((s) => (
-            <option key={s.value} value={s.value}>{s.label}</option>
+            // Reviewed is a fact the database sets when the review is approved
+            // (mig 158), never a choice — selectable only to keep it as-is.
+            <option key={s.value} value={s.value} disabled={s.value === 'reviewed' && product?.status !== 'reviewed'}>
+              {s.label}
+            </option>
           ))}
         </select>
         <p className="mt-1 text-xs text-prose-faint">
-          Bench states (Bench / Coming Soon / Testing) show on the public bench &amp; homepage. Auto-flips to &quot;Reviewed&quot; when a linked review is approved.
+          Catalog = private, no claim (buy links, gift guides, showcasing). {LABELS.radar.full} shows on /gear with your take. Up Next / Testing Now show on the Bench. Reviewed is set automatically when the review is approved.
         </p>
       </div>
+
+      {/* ── On the Radar ───────────────────────────────────────────────── */}
+      {(status === 'radar' || wasOnRadar) && (
+        <Card tone="sunken" className="p-4 space-y-4">
+          <div>
+            <Eyebrow>{LABELS.radar.full}</Eyebrow>
+            {status !== 'radar' && (
+              <p className="mt-0.5 text-xs text-prose-faint">
+                No longer on the radar. The take stays on the archive with its outcome.
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm text-prose-muted mb-1.5">
+              Take {status === 'radar' && <span className="text-danger-ink">*</span>}{' '}
+              <span className="text-prose-faint font-normal">(shown publicly)</span>
+            </label>
+            <textarea
+              value={radarTake}
+              onChange={(e) => setRadarTake(e.target.value)}
+              maxLength={RADAR_TAKE_MAX}
+              rows={4}
+              required={status === 'radar'}
+              placeholder="Why a dad would care, plus one honest reservation. Not tested, so no testing claims."
+              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
+            />
+            <p className="mt-1 text-xs text-prose-faint">{radarTake.length}/{RADAR_TAKE_MAX} characters</p>
+          </div>
+
+          {status === 'radar' && (
+            <div>
+              <label className="block text-sm text-prose-muted mb-1.5">Goes live</label>
+              <input
+                type="datetime-local"
+                value={inBrowser ? goLive : ''}
+                onChange={(e) => setGoLive(e.target.value)}
+                disabled={!inBrowser}
+                className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
+              />
+              <p className="mt-1 text-xs text-prose-faint">
+                Empty = live on save. A future time schedules it: the card stays off /gear until then. Your local time.
+              </p>
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* ── How I got it ───────────────────────────────────────────────── */}
+      <Card tone="sunken" className="p-4 space-y-4">
+        <div>
+          <Eyebrow>How I Got It</Eyebrow>
+          <p className="mt-0.5 text-xs text-prose-faint">
+            Leave blank unless it&apos;s true — blank makes no claim. A brand-provided or loaned unit shows the required disclosure wherever the product is reviewed or recommended.
+          </p>
+        </div>
+        <select
+          value={acquisition}
+          onChange={(e) => setAcquisition(e.target.value as ProductAcquisition | '')}
+          className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent-hover"
+        >
+          <option value="">Not set (no claim)</option>
+          {ACQUISITION_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+        {isConnection && (
+          <div>
+            <label className="block text-sm text-prose-muted mb-1.5">Provided by</label>
+            <input
+              type="text"
+              value={providedBy}
+              onChange={(e) => setProvidedBy(e.target.value)}
+              maxLength={120}
+              placeholder={brand.trim() ? `Blank = ${brand.trim()}` : 'Brand, retailer or PR agency'}
+              className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
+            />
+            <p className="mt-2 text-xs text-prose-muted">
+              Readers see: <span className="italic">{acquisitionDisclosure({ acquisition, provided_by: providedBy, brand })}</span>
+            </p>
+          </div>
+        )}
+      </Card>
 
       {/* ── Bench pipeline ─────────────────────────────────────────────── */}
       <Card tone="sunken" className="p-4 space-y-4">

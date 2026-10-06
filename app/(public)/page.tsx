@@ -77,8 +77,8 @@ export function generateMetadata(): Metadata {
   })
 }
 
-// Bench items are ranked testing → queued → considering (mirrors BenchStrip).
-const BENCH_RANK: Record<string, number> = { testing: 0, queued: 1, considering: 2 }
+// Bench items are ranked testing → queued (mirrors BenchStrip).
+const BENCH_RANK: Record<string, number> = { testing: 0, queued: 1 }
 
 // Safety cap on the guide fetch, not a display budget — the Library shows one
 // block per category, so it needs every published guide, not a recency window.
@@ -170,7 +170,7 @@ function buildTopicBlocks(
 
 export default async function HomePage() {
   const supabase = createAnonClient()
-  // Bench items (statuses testing/queued/considering) aren't publicly readable,
+  // Bench items (statuses testing/queued) aren't publicly readable,
   // so the "On the bench" motion item comes through the admin client — same as
   // BenchStrip. It's read-only, no user data.
   const admin = createAdminClient()
@@ -222,7 +222,7 @@ export default async function HomePage() {
     admin
       .from('products')
       .select('slug, title:name, status, priority')
-      .in('status', ['testing', 'queued', 'considering'])
+      .in('status', ['testing', 'queued'])
       .order('priority', { ascending: false })
       .limit(20),
     // The Vault (picks / comparisons / gift guides / stacks) had NO homepage

@@ -7,7 +7,7 @@ import { CheckCircleIcon } from '@/components/icons'
 // Brand doctrine: no emoji on web surfaces — inline SVGs match the rest of
 // the site (CategoryIcon set, ticker dot in BenchStrip, etc.). Outlined
 // stroke 1.5 currentColor at w-3.5 h-3.5 sizing.
-type IconKind = 'testing' | 'queued' | 'considering' | 'reviewed'
+type IconKind = 'testing' | 'queued' | 'reviewed'
 
 function StatusIcon({ kind, className }: { kind: IconKind; className?: string }) {
   const cls = className ?? 'w-3.5 h-3.5 shrink-0'
@@ -27,14 +27,6 @@ function StatusIcon({ kind, className }: { kind: IconKind; className?: string })
       </svg>
     )
   }
-  if (kind === 'considering') {
-    // Question — decision pending
-    return (
-      <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-      </svg>
-    )
-  }
   // reviewed — check-in-circle, the lifecycle close signal
   return (
     <CheckCircleIcon className={cls} strokeWidth={1.5} />
@@ -46,13 +38,12 @@ function StatusIcon({ kind, className }: { kind: IconKind; className?: string })
 const STATUS_META: Record<string, { label: string; kind: IconKind }> = {
   testing:     { label: getStatusLabel('testing'),     kind: 'testing' },
   queued:      { label: getStatusLabel('queued'),      kind: 'queued' },
-  considering: { label: getStatusLabel('considering'), kind: 'considering' },
   reviewed:    { label: 'Just reviewed',               kind: 'reviewed' },
 }
 
 // Internal status rank so the ticker leads with "testing now" (most active
-// signal) over "considering" (least committed).
-const STATUS_RANK: Record<string, number> = { testing: 0, queued: 1, considering: 2 }
+// signal) over "up next".
+const STATUS_RANK: Record<string, number> = { testing: 0, queued: 1 }
 
 /**
  * Slim editorial band at the top of the homepage signaling "this site is
@@ -82,7 +73,7 @@ export default async function InMotionTicker() {
     admin
       .from('products')
       .select('id, slug, title:name, status')
-      .in('status', ['testing', 'queued', 'considering'])
+      .in('status', ['testing', 'queued'])
       .order('priority', { ascending: false })
       .limit(6),
     admin

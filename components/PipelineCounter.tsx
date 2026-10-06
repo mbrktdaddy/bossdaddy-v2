@@ -23,7 +23,7 @@ export default async function PipelineCounter({ className = '', align = 'center'
     admin
       .from('products')
       .select('id', { count: 'exact', head: true })
-      .in('status', ['testing', 'queued', 'considering']),
+      .in('status', ['testing', 'queued']),
   ])
 
   const tested = testedRaw ?? 0

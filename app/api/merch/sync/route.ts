@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { syncPrintfulToMerch } from '@/lib/merch/sync'
+import { revalidateMerchPaths } from '@/lib/revalidate'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -24,6 +25,7 @@ export async function POST() {
 
   try {
     const result = await syncPrintfulToMerch()
+    revalidateMerchPaths()
     return NextResponse.json({ ok: true, ...result })
   } catch (err) {
     console.error('[merch/sync] failed', err)

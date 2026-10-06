@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { LABELS } from '@/lib/labels'
 
 export type ProductStore =
   | 'amazon' | 'walmart' | 'target' | 'costco' | 'sams-club'
@@ -35,26 +36,100 @@ export function getStoreLabel(store: string, customName?: string | null): string
 }
 
 // Status values are stable (DB column products.status); display labels via lib/labels.
-// Unified lifecycle: the bench is just products in the early states
-// (considering → queued → testing), then reviewed, then passed / archived.
+// Lifecycle v2 (mig 158): catalog (private, no claim — the default) | radar
+// (mig 157) → queued → testing → reviewed (set by a DB trigger when the review
+// is approved), or passed / archived. 'considering' was retired into radar.
 export type ProductStatus =
-  | 'considering'
+  | 'catalog'
+  | 'radar'
   | 'queued'
   | 'testing'
   | 'reviewed'
   | 'passed'
   | 'archived'
 
-// Admin labels. The pipeline three match the public bench vocabulary in
-// lib/wishlist.ts, so the word you pick here is the word readers see.
+// Admin labels. The bench pair matches the public vocabulary in lib/wishlist.ts,
+// so the word you pick here is the word readers see.
 export const PRODUCT_STATUS_OPTIONS: { value: ProductStatus; label: string }[] = [
-  { value: 'considering', label: 'Considering' },
+  { value: 'catalog',     label: 'Catalog' },
+  { value: 'radar',       label: LABELS.radar.full },
   { value: 'queued',      label: 'Up Next' },
   { value: 'testing',     label: 'Testing Now' },
   { value: 'reviewed',    label: 'Reviewed' },
   { value: 'passed',      label: 'Passed' },
   { value: 'archived',    label: 'Archived' },
 ]
+
+// Mirrors the products_radar_take_length CHECK (mig 157). Here, not in
+// lib/products/schema.ts, so the client form can read it without pulling zod.
+export const RADAR_TAKE_MAX = 600
+
+/**
+ * A Radar item whose spotted_at is still in the future: scheduled, not live.
+ * spotted_at doubles as the release time (mig 157), so public Radar queries
+ * filter `spotted_at <= now()` and this is the same test in app code.
+ */
+export function isRadarScheduled(
+  p: Pick<Product, 'status' | 'spotted_at'>,
+  now: number = Date.now(),
+): boolean {
+  return p.status === 'radar' && !!p.spotted_at && new Date(p.spotted_at).getTime() > now
+}
+
+// "How I got it" (mig 158). Blank = no claim, the default: showcasing a product
+// claims nothing. provided / loaner are a material connection, so they render
+// the FTC disclosure wherever the product is reviewed or recommended.
+export type ProductAcquisition = 'purchased' | 'provided' | 'loaner'
+
+export const ACQUISITION_OPTIONS: { value: ProductAcquisition; label: string }[] = [
+  { value: 'purchased', label: 'Bought it' },
+  { value: 'provided',  label: 'Brand provided it' },
+  { value: 'loaner',    label: 'Loaner (sent back)' },
+]
+
+/** What a product card may say about the product. Only claims the operator set. */
+export interface ProductClaims {
+  /** The stage claim, when the stage makes one. Never a disclaimer. */
+  stage: { status: 'queued' | 'testing' | 'reviewed'; label: string } | null
+  /** "Bought it", only when set. */
+  bought: boolean
+  /** The legally required material-connection line, or null. */
+  disclosure: string | null
+}
+
+const STAGE_CLAIMS = new Set<ProductStatus>(['queued', 'testing', 'reviewed'])
+
+/**
+ * The ONE place that decides what a product card claims (brand-guide §1.9).
+ *
+ * Showcasing claims nothing. A product says Up Next / Testing Now / Reviewed or
+ * "Bought it" only because the operator set its stage or "How I got it". No
+ * default disclaimers ("not tested", "owner pick"). The one automatic claim is
+ * legal: a provided or loaned unit gets its disclosure.
+ */
+export function productClaims(
+  p: Pick<Product, 'status' | 'acquisition' | 'provided_by' | 'brand'>,
+): ProductClaims {
+  const stage = STAGE_CLAIMS.has(p.status)
+    ? {
+        status: p.status as 'queued' | 'testing' | 'reviewed',
+        label: PRODUCT_STATUS_OPTIONS.find((o) => o.value === p.status)!.label,
+      }
+    : null
+  return { stage, bought: p.acquisition === 'purchased', disclosure: acquisitionDisclosure(p) }
+}
+
+/** The material-connection disclosure for a provided or loaned unit, else null. */
+export function acquisitionDisclosure(
+  p: Pick<Product, 'acquisition' | 'provided_by' | 'brand'>,
+): string | null {
+  if (p.acquisition !== 'provided' && p.acquisition !== 'loaner') return null
+  const who = p.provided_by?.trim() || p.brand?.trim() || 'The brand'
+  const how = p.acquisition === 'loaner'
+    ? `${who} loaned me this for testing, and it's been sent back.`
+    : `${who} sent me this for testing.`
+  return `${how} They didn't pay for coverage, and they didn't see this before it was published.`
+}
 
 export type TestingDuration =
   | '<1wk' | '1-4wks' | '1-3mo' | '3+mo'
@@ -102,6 +177,13 @@ export interface Product {
   skip_reason: string | null
   estimated_review_date: string | null
   gallery_images: string[]
+  // How I got it (mig 158). null = no claim.
+  acquisition: ProductAcquisition | null
+  provided_by: string | null
+  // On the Radar (mig 157). Both are kept after the product moves on, so the
+  // /gear/radar archive can show what was said and when.
+  radar_take: string | null
+  spotted_at: string | null
   // Provenance: 'hand' | 'pa_api' | 'adopted_from_research'.
   source: string
   created_at: string

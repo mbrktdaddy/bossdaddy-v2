@@ -34,7 +34,7 @@ import StickyMobileCta from '@/components/StickyMobileCta'
 import ReadingProgressBar from '@/components/ReadingProgressBar'
 import { NewsletterCard } from '@/components/NewsletterCard'
 import AuthorBio from '@/components/AuthorBio'
-import { getProductBySlug, getProductsBySlugs, columnHasSpecs, specComparisonRenderable, type SpecComparisonColumn } from '@/lib/products'
+import { getProductBySlug, getProductsBySlugs, columnHasSpecs, specComparisonRenderable, productClaims, type SpecComparisonColumn } from '@/lib/products'
 import SpecComparisonTable from '@/components/products/SpecComparisonTable'
 import BenchStrip from '@/components/BenchStrip'
 import AskTheBoss from '@/components/AskTheBoss'
@@ -179,6 +179,10 @@ export default async function ReviewPage({ params }: Props) {
           .in('slug', mentionedSlugs)
       : Promise.resolve({ data: [] as { slug: string; name: string; affiliate_url: string | null; non_affiliate_url: string | null; store: string; custom_store_name: string | null; image_url: string | null }[], error: null }),
   ])
+
+  // "Bought it" + the provided-unit disclosure, from the product's How I got it
+  // (mig 158). Only claims the operator set — brand-guide §1.9.
+  const productClaimsFor = product ? productClaims(product) : null
 
   // Spec-comparison columns: the review's own product first (highlighted), then
   // each chosen competitor in saved order. The table self-suppresses when there
@@ -417,6 +421,8 @@ export default async function ReviewPage({ params }: Props) {
             testingDuration={review.testing_duration}
             testingSince={review.testing_since}
             testingNote={review.testing_note}
+            bought={productClaimsFor?.bought ?? false}
+            disclosure={productClaimsFor?.disclosure ?? null}
             className="mt-2 pb-6"
           />
         </div>

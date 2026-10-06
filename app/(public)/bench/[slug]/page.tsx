@@ -15,7 +15,14 @@ import BenchStrip from '@/components/BenchStrip'
 import { buildSocialMetadata, toAbsoluteUrl } from '@/lib/og'
 import type { Metadata } from 'next'
 import { Card } from '@/components/ui/Card'
+import { Badge } from '@/components/ui/Badge'
 import { buttonVariants } from '@/components/ui/Button'
+import { productClaims, type ProductAcquisition, type ProductStatus } from '@/lib/products'
+import { withWeeks, formatNoteDate, type TestingNote } from '@/lib/products/testing-notes'
+
+// The stages that have a Bench page. Catalog, Radar and Archived products are
+// not on the Bench, so their slugs 404 here rather than render a stray page.
+const BENCH_PAGE_STATUSES = ['queued', 'testing', 'reviewed', 'passed']
 
 // Per-user vote/subscribe state is fetched CLIENT-side by VoteButton/
 // SubscribeButton (same pattern as LikeButton + the comment widgets), so this
@@ -35,7 +42,7 @@ export async function generateStaticParams() {
   const { data } = await admin
     .from('products')
     .select('slug')
-    .in('status', ['considering', 'queued', 'testing', 'reviewed', 'passed'])
+    .in('status', BENCH_PAGE_STATUSES)
   return (data ?? []).map(({ slug }) => ({ slug }))
 }
 
@@ -45,7 +52,8 @@ const getWishlistItem = cache(async (slug: string) => {
     .from('products')
     .select('*, title:name, vote_count:wishlist_votes(count)')
     .eq('slug', slug)
-    .single()
+    .in('status', BENCH_PAGE_STATUSES)
+    .maybeSingle()
   return data
 })
 
@@ -56,7 +64,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   const meta = buildSocialMetadata({
     title: `${data.title} — On the Bench`,
-    description: data.description ?? `Boss Daddy is considering reviewing ${data.title}. Vote to move it up the queue.`,
+    description: data.description ?? `${data.title} is on the Boss Daddy Bench, lined up for a real-world test.`,
     path: `/bench/${slug}`,
     siteUrl,
     type: 'site',
@@ -80,15 +88,28 @@ export default async function BenchDetailPage({ params }: Props) {
     vote_count: (item.vote_count as { count: number }[])?.[0]?.count ?? 0,
   }
 
-  let linkedReviewSlug: string | null = null
-  if (wishlistItem.review_id) {
-    const { data: linkedReview } = await admin
-      .from('reviews')
-      .select('slug')
-      .eq('id', wishlistItem.review_id)
-      .maybeSingle()
-    linkedReviewSlug = linkedReview?.slug ?? null
-  }
+  const [{ data: linkedReview }, { data: noteRows }] = await Promise.all([
+    wishlistItem.review_id
+      ? admin.from('reviews').select('slug').eq('id', wishlistItem.review_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    admin
+      .from('product_testing_notes')
+      .select('*')
+      .eq('product_id', wishlistItem.id)
+      .order('noted_on', { ascending: false })
+      .order('created_at', { ascending: false }),
+  ])
+  const linkedReviewSlug = (linkedReview as { slug: string } | null)?.slug ?? null
+  const notes = withWeeks((noteRows ?? []) as TestingNote[])
+
+  // Only claims the operator set (brand-guide §1.9): "Bought it", and the legal
+  // disclosure for a provided or loaned unit.
+  const claims = productClaims({
+    status:      item.status as ProductStatus,
+    acquisition: item.acquisition as ProductAcquisition | null,
+    provided_by: item.provided_by as string | null,
+    brand:       item.brand as string | null,
+  })
 
   const isReviewed = wishlistItem.status === 'reviewed'
   const isSkipped  = wishlistItem.status === 'passed'
@@ -112,8 +133,15 @@ export default async function BenchDetailPage({ params }: Props) {
 
       <div className="flex flex-col gap-4">
         <div className="flex-1 min-w-0">
-          <StatusBadge status={wishlistItem.status} className="mb-3" />
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <StatusBadge status={wishlistItem.status} />
+            {claims.bought && <Badge tone="neutral">Bought it</Badge>}
+          </div>
           <h1 className="text-2xl sm:text-3xl font-black leading-tight mb-3">{wishlistItem.title}</h1>
+
+          {claims.disclosure && (
+            <p className="text-xs text-prose-faint italic mb-4">{claims.disclosure}</p>
+          )}
 
           {wishlistItem.description && (
             <p className="text-prose-muted text-sm leading-relaxed mb-4">{wishlistItem.description}</p>
@@ -165,6 +193,24 @@ export default async function BenchDetailPage({ params }: Props) {
           )}
         </div>
       </div>
+
+      {notes.length > 0 && (
+        <section className="mt-10" aria-labelledby="testing-notes">
+          <h2 id="testing-notes" className="text-lg font-black mb-4">Testing Notes</h2>
+          <ol className="space-y-4">
+            {notes.map((n) => (
+              <li key={n.id} className="border-l-2 border-accent-border/50 pl-4">
+                <p className="text-xs text-prose-faint">
+                  <span className="font-bold text-prose-muted">Week {n.week}</span>
+                  <span className="mx-2">·</span>
+                  <time dateTime={n.noted_on}>{formatNoteDate(n.noted_on)}</time>
+                </p>
+                <p className="mt-1 text-sm text-prose leading-relaxed whitespace-pre-line">{n.body}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       {!isReviewed && !isSkipped && (
         <div className="mt-8 p-4 bg-accent-tint border border-soft rounded-xl">

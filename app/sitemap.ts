@@ -86,7 +86,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .eq('guides.is_visible', true),
     admin.from('collections').select('slug, updated_at, collection_type, occasion').eq('is_visible', true),
     // Mirrors the /bench query — the pipeline statuses that page renders.
-    admin.from('products').select('updated_at').in('status', ['considering', 'queued', 'testing']),
+    admin.from('products').select('updated_at').in('status', ['queued', 'testing']),
     // Merch. Mirrors the filter in gear/[slug]'s generateStaticParams so the
     // sitemap lists exactly the pages that actually prerender.
     admin.from('merch').select('slug, updated_at')

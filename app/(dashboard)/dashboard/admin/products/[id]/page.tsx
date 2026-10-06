@@ -3,7 +3,9 @@ import { notFound } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth-cache'
 import type { Product } from '@/lib/products'
+import type { TestingNote } from '@/lib/products/testing-notes'
 import { ProductForm } from '../_components/ProductForm'
+import { TestingNotesPanel } from '../_components/TestingNotesPanel'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,13 +20,19 @@ export default async function ProductEditPage({
   const isNew = id === 'new'
   let product: Product | null = null
   let initialTags: string[] = []
+  let notes: TestingNote[] = []
   if (!isNew) {
     const admin = createAdminClient()
     const { data } = await admin.from('products').select('*').eq('id', id).single()
     if (!data) notFound()
     product = data as unknown as Product
-    const { data: tagRows } = await admin.from('product_tags').select('tag_slug').eq('product_id', id)
+    const [{ data: tagRows }, { data: noteRows }] = await Promise.all([
+      admin.from('product_tags').select('tag_slug').eq('product_id', id),
+      admin.from('product_testing_notes').select('*').eq('product_id', id)
+        .order('noted_on', { ascending: false }).order('created_at', { ascending: false }),
+    ])
     initialTags = (tagRows ?? []).map((r) => r.tag_slug)
+    notes = (noteRows ?? []) as TestingNote[]
   }
 
   return (
@@ -49,6 +57,8 @@ export default async function ProductEditPage({
         initialTags={initialTags}
         amazonAssociateTag={process.env.AMAZON_ASSOCIATE_TAG ?? ''}
       />
+
+      {product && <TestingNotesPanel productId={product.id} initialNotes={notes} />}
     </div>
   )
 }

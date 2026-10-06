@@ -5,8 +5,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 // POST /api/gear-candidates/[id]/adopt — promote a researched candidate into the
 // product spine (admin only). This is the deliberate "editorial firewall" bridge:
-// a candidate (AI-researched, never public) becomes a real bench item only when an
-// admin chooses to adopt it. Sets the new product to status='considering' with
+// a candidate (AI-researched, never public) becomes a real product only when an
+// admin chooses to adopt it. Sets the new product to status='catalog' (private,
+// no claim — mig 158; the admin moves it to Radar with a take, or the Bench) with
 // source='adopted_from_research', and FLAGS the candidate (adopted_at +
 // adopted_product_id) rather than deleting it, preserving provenance.
 export async function POST(
@@ -57,7 +58,7 @@ export async function POST(
         category:      candidate.category,
         affiliate_url: candidate.affiliate_url,
         store:         candidate.store,
-        status:        'considering',
+        status:        'catalog',
         source:        'adopted_from_research',
         // Carry the research provenance onto the public spine so a roundup can
         // render this as "Researched, not tested" WITH citations (gear_candidates
