@@ -8,7 +8,8 @@ interface Props {
   align?: 'center' | 'left'
 }
 
-// Pipeline transparency line — "N products tested · M on the bench · vote".
+// Pipeline transparency line — "N products tested · M on the bench · follow".
+// The Bench's one job is follow (votes are cast on the Radar), so the CTA says so.
 // One honest trust signal that proves a real, moving pipeline (real dad, real
 // testing). Counts come from the admin client with NO per-user read, so this
 // renders fine on statically cached pages (homepage, /vault, author bio).
@@ -51,7 +52,7 @@ export default async function PipelineCounter({ className = '', align = 'center'
               href="/bench"
               className="font-semibold text-accent hover:text-accent-hover transition-colors"
             >
-              vote on the next one →
+              follow along →
             </Link>
           </>
         )}

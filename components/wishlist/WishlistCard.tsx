@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import type { WishlistItem } from '@/lib/wishlist'
-import { getBuyLabel } from '@/lib/wishlist'
+import { getBuyLabel, requestedByLabel } from '@/lib/wishlist'
 import { StatusBadge } from './StatusBadge'
 import { Card } from '@/components/ui/Card'
 import { PhotoIcon } from '@/components/icons'
@@ -50,27 +50,18 @@ export function WishlistCard({ item }: Props) {
         )}
 
         <div className="mt-auto flex items-center justify-between gap-2 pt-1">
-          {/* Vote count — promoted visually so the engagement signal
-              (popularity) is the first thing a scanner notices. Tabular nums
-              keep the digit width stable as counts grow. */}
-          <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold tabular-nums ${
-              voteCount > 0
-                ? 'bg-accent-tint border border-accent/40 text-accent'
-                : 'bg-surface-raised border border-soft text-prose-faint'
-            }`}
-            title={voteCount > 0 ? `${voteCount} ${voteCount === 1 ? 'reader has' : 'readers have'} voted for this` : 'No votes yet — be the first'}
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-            </svg>
-            {voteCount}
-            <span className="font-medium text-[10px] uppercase tracking-wider">{voteCount === 1 ? 'vote' : 'votes'}</span>
-          </span>
+          {/* Votes are cast on the Radar ("Want me to test it?") and carry over
+              here, so the Bench shows who asked for it. Nothing at zero: the
+              Bench's one job is follow, not a vote to chase. The empty span
+              keeps the CTA right-aligned. */}
+          {voteCount > 0 ? (
+            <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold tabular-nums bg-surface-raised border border-soft text-prose-muted">
+              {requestedByLabel(voteCount)}
+            </span>
+          ) : <span />}
 
-          {/* CTA — Vote feels inviting (orange) rather than buried (gray) so
-              the engagement loop is the more obvious call. Affiliate buy
-              link is the deflection path when the item isn't yet under test. */}
+          {/* CTA — the affiliate buy link when there is one, otherwise the
+              detail page, where the follow button lives. */}
           {item.status === 'reviewed' && item.review_id ? (
             <Link
               href={detailHref}
@@ -92,7 +83,7 @@ export function WishlistCard({ item }: Props) {
               href={detailHref}
               className="text-xs font-bold text-accent-text-soft hover:text-accent transition-colors uppercase tracking-widest"
             >
-              Vote →
+              Follow →
             </Link>
           )}
         </div>

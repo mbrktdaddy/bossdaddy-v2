@@ -16,13 +16,14 @@ export const revalidate = 300
 
 export const metadata: Metadata = {
   // Absolute — brand already in the title; avoids the template double-branding.
-  title: { absolute: "On the Bench — Vote on What Boss Daddy Tests Next" },
-  description: "See what Boss Daddy is currently testing, what's coming next, and vote on what you want reviewed. Get notified when it goes live.",
+  // The Bench's one job is follow; voting moved to On the Radar (2026-10-06).
+  title: { absolute: "On the Bench — What Boss Daddy Is Testing Now" },
+  description: "What Boss Daddy is testing now, what's up next, and what he passed on, with the reasons. Follow anything on the bench to get the review the day it's out.",
   alternates: { canonical: '/bench' },
   openGraph: {
     ...OG_SITE,
     title: 'On the Bench | Boss Daddy',
-    description: "Vote on what Boss Daddy tests next. See what's in progress, coming soon, and already reviewed.",
+    description: "What Boss Daddy is testing now, what's up next, and what he passed on.",
     images: [{ url: ogImageUrl({ title: 'On the Bench', type: 'guide' }), width: 1200, height: 630 }],
   },
   twitter: { card: 'summary_large_image', site: TWITTER_HANDLE, creator: TWITTER_HANDLE },
@@ -106,7 +107,7 @@ export default async function BenchPage() {
           </>
         }
         title={LABELS.bench.full}
-        deck="Everything I'm testing now, what's up next, and what I decided to skip — with the reasons. Vote on what gets reviewed next."
+        deck="Everything I'm testing now, what's up next, and what I decided to skip — with the reasons. Follow anything here and I'll email you when the review's out."
       />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">

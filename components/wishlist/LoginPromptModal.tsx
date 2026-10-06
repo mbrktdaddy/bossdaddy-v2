@@ -7,9 +7,26 @@ import { Modal, CloseButton } from '@/components/ui/Modal'
 interface Props {
   onClose: () => void
   returnPath: string
+  /** What the reader tried to do: vote on a Radar item, or follow a Bench item. */
+  intent: 'vote' | 'follow'
 }
 
-export function LoginPromptModal({ onClose, returnPath }: Props) {
+// Each promise matches what the action really does. A vote asks for a test and
+// also follows the item (followChangeForVote), so both promise the email. The
+// vote copy says so BEFORE a new member signs up: guardrail 1.
+const COPY = {
+  vote: {
+    title: 'Join to vote',
+    body:  'Create a free account to tell Boss Daddy what to test next, and get an email when he tests it.',
+  },
+  follow: {
+    title: 'Join to follow',
+    body:  "Create a free account and Boss Daddy will email you when the review's out.",
+  },
+} as const
+
+export function LoginPromptModal({ onClose, returnPath, intent }: Props) {
+  const copy = COPY[intent]
   return (
     <Modal onClose={onClose} labelledBy="login-modal-title" size="sm" className="relative p-6">
         <CloseButton onClick={onClose} className="absolute top-4 right-4" />
@@ -21,10 +38,8 @@ export function LoginPromptModal({ onClose, returnPath }: Props) {
             </svg>
           </div>
 
-          <h3 id="login-modal-title" className="text-lg font-black mb-1">Join to vote</h3>
-          <p className="text-sm text-prose-muted mb-6">
-            Create a free account to vote on what Boss Daddy reviews next and get notified when it&apos;s live.
-          </p>
+          <h3 id="login-modal-title" className="text-lg font-black mb-1">{copy.title}</h3>
+          <p className="text-sm text-prose-muted mb-6">{copy.body}</p>
 
           <div className="space-y-3">
             <Link

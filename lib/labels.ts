@@ -48,8 +48,9 @@ export const LABELS = {
     short:        'Bench',
     full:         'On the Bench',
     addCta:       'Add to Bench',
-    // Long form — for /bench dek and hover tooltips. One sentence.
-    tagline:      'Products lined up for testing — vote on what gets reviewed next.',
+    // Long form — for /bench dek and hover tooltips. One sentence. The Bench's
+    // one job is follow; voting happens on the Radar (2026-10-06).
+    tagline:      "Products I'm testing now or lining up next — follow one and get the review the day it's out.",
     // Invitation-style — for BenchStrip subhead on /reviews + /gear.
     shortTagline: 'Check out the upcoming items on our bench list',
   },
@@ -61,12 +62,20 @@ export const LABELS = {
     full:  'On the Radar',
   },
 
-  // /gear public route: the gear hub (tested reviews rated 8+, gift guides, the
-  // Bench). It is NOT the store; merch lives under `shop`. Key was historically
-  // `stuff` (an earlier display name).
+  // /gear public route: the gear hub (reviews rated 8+, On the Radar, the Bench,
+  // gift guides). It is NOT the store; merch lives under `shop`. Key was
+  // historically `stuff` (an earlier display name). `full` is the /gear H1. It
+  // was "Boss Daddy Approved Gear", which Radar items (not reviewed) made false.
   gear: {
     short: 'Gear',
-    full: 'Boss Daddy Approved Gear',
+    full: "Boss Daddy's Gear",
+  },
+
+  // product_testing_notes (mig 158) → the dated timeline on /bench/[slug], and
+  // on the review page once the product is reviewed (/bench/<slug> then 307s
+  // to the review). One name in both places.
+  testingLog: {
+    full: 'Testing Log',
   },
 
   // `merch` table → /shop public route (Boss Daddy branded merch, Printful).

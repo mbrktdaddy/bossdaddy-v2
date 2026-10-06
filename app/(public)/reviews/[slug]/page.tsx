@@ -36,6 +36,9 @@ import { NewsletterCard } from '@/components/NewsletterCard'
 import AuthorBio from '@/components/AuthorBio'
 import { getProductBySlug, getProductsBySlugs, columnHasSpecs, specComparisonRenderable, productClaims, type SpecComparisonColumn } from '@/lib/products'
 import SpecComparisonTable from '@/components/products/SpecComparisonTable'
+import { TestingLog } from '@/components/products/TestingLog'
+import { withWeeks, type TestingNote } from '@/lib/products/testing-notes'
+import { LABELS } from '@/lib/labels'
 import BenchStrip from '@/components/BenchStrip'
 import AskTheBoss from '@/components/AskTheBoss'
 import CategoryIcon from '@/components/CategoryIcon'
@@ -142,7 +145,7 @@ export default async function ReviewPage({ params }: Props) {
   // inflate them into ProductCtaCards, at parity with guides.
   const mentionedSlugs = extractProductSlugs(review.content)
 
-  const [{ data: related }, { data: relatedGuides }, product, { data: benchItem }, timeline, competitorProducts, { data: mentionedProducts }] = await Promise.all([
+  const [{ data: related }, { data: relatedGuides }, product, { data: benchItem }, timeline, competitorProducts, { data: mentionedProducts }, { data: noteRows, error: notesError }] = await Promise.all([
     supabase
       .from('reviews')
       .select('id, slug, title, product_name, rating, excerpt')
@@ -178,7 +181,20 @@ export default async function ReviewPage({ params }: Props) {
           .select('slug, name, affiliate_url, non_affiliate_url, store, custom_store_name, image_url')
           .in('slug', mentionedSlugs)
       : Promise.resolve({ data: [] as { slug: string; name: string; affiliate_url: string | null; non_affiliate_url: string | null; store: string; custom_store_name: string | null; image_url: string | null }[], error: null }),
+    // The product's Testing Log. /bench/<slug> 307s here once it's reviewed, so
+    // the notes would otherwise vanish with the Bench page. Joined by slug so
+    // it runs in this batch instead of waiting on the product row.
+    review.product_slug
+      ? supabase
+          .from('product_testing_notes')
+          .select('id, product_id, noted_on, body, created_at, updated_at, products!inner(slug)')
+          .eq('products.slug', review.product_slug)
+      : Promise.resolve({ data: [] as TestingNote[], error: null }),
   ])
+
+  // Logged, not thrown: a failed lookup just hides the log, so make it visible.
+  if (notesError) console.error('Testing log lookup failed:', notesError)
+  const testingLog = withWeeks((noteRows ?? []) as unknown as TestingNote[])
 
   // "Bought it" + the provided-unit disclosure, from the product's How I got it
   // (mig 158). Only claims the operator set — brand-guide §1.9.
@@ -372,11 +388,13 @@ export default async function ReviewPage({ params }: Props) {
             {/* "From the Bench" — closes the lifecycle loop when this review
                 was promoted from a wishlist item. Trust signal: shows the
                 product went through the testing pipeline, not the listicle
-                pipeline. Hover tooltip carries the bench tagline. */}
+                pipeline. Hover tooltip carries the bench tagline. It jumps to
+                the Testing Log below when there is one. NOT to /bench/<slug>:
+                that 307s straight back to this review once it's reviewed. */}
             {benchItem && (
               <Link
-                href={`/bench/${benchItem.slug}`}
-                title="Products lined up for testing — vote on what gets reviewed next."
+                href={testingLog.length > 0 ? '#testing-log' : '/bench'}
+                title={LABELS.bench.tagline}
                 className="flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-accent-tint border border-accent-border/40 text-accent-text hover:border-accent-border/60 hover:bg-accent-tint hover:text-accent transition-colors"
               >
                 <CheckCircleIcon className="w-3.5 h-3.5 text-accent-text-soft" strokeWidth={1.5} />
@@ -425,6 +443,7 @@ export default async function ReviewPage({ params }: Props) {
             disclosure={productClaimsFor?.disclosure ?? null}
             className="mt-2 pb-6"
           />
+          <TestingLog notes={testingLog} collapsible className="mb-6" />
         </div>
 
         {/* Hero image — moved above the verdict so readers see the product first.

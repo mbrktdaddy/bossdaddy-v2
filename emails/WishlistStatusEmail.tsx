@@ -22,11 +22,13 @@ const CONFIG: Record<WishlistStatus, {
   ctaPath: (item: { slug: string; reviewSlug?: string | null }) => string
   accent: string
 }> = {
+  // Sent to FOLLOWERS (wishlist_subscriptions), who may never have voted — votes
+  // are cast on the Radar and send nothing. So no "your vote" copy here.
   queued: {
-    subject: (t) => `Your vote moved ${t} up the list`,
-    eyebrow: 'ON DECK',
-    headline: 'Your vote bumped this up',
-    subtext: 'Thanks for the input — this one\'s moved up the queue. Boss Daddy is picking it up soon for real-world testing.',
+    subject: (t) => `${t} is up next on the Bench`,
+    eyebrow: 'UP NEXT',
+    headline: 'This one\'s up next',
+    subtext: 'It\'s in line for real-world testing. You\'ll hear from me again when testing starts and when the review\'s out.',
     cta: 'See where it stands',
     ctaPath: (item) => `/bench/${item.slug}`,
     accent: '#60a5fa',
@@ -63,7 +65,7 @@ export function WishlistStatusEmail({ status, itemTitle, itemSlug, itemImageUrl,
       footer={
         <>
           <p style={{ margin: '0 0 6px 0', fontSize: '11px', color: '#6b6b6b', lineHeight: 1.6 }}>
-            You&apos;re receiving this because you asked to be notified about <a href={benchUrl} style={{ color: '#9ca3af', textDecoration: 'underline' }}>{itemTitle}</a> on the Boss Daddy bench.
+            You&apos;re receiving this because you voted for or followed <a href={benchUrl} style={{ color: '#9ca3af', textDecoration: 'underline' }}>{itemTitle}</a> on Boss Daddy.
           </p>
           <p style={{ margin: 0, fontSize: '11px', color: '#6b6b6b' }}>
             <a href={`${siteUrl}/account/settings`} style={{ color: '#9ca3af', textDecoration: 'underline' }}>Manage notifications</a>

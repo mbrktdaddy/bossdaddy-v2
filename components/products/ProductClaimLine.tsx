@@ -10,6 +10,9 @@ interface Props {
     brand?: string | null
   }
   className?: string
+  /** Show the stage chip. Off where the surface already shows the stage (a
+   *  Radar card's outcome footer), so the same claim isn't printed twice. */
+  stage?: boolean
 }
 
 /**
@@ -19,13 +22,14 @@ interface Props {
  * Renders nothing for a plain showcased product: showcasing claims nothing, so
  * there is no default "not tested" or "owner pick" chip.
  */
-export function ProductClaimLine({ product, className = '' }: Props) {
-  const claims = productClaims({
+export function ProductClaimLine({ product, className = '', stage: showStage = true }: Props) {
+  const all = productClaims({
     status:      (product.status ?? 'catalog') as ProductStatus,
     acquisition: (product.acquisition ?? null) as ProductAcquisition | null,
     provided_by: product.provided_by ?? null,
     brand:       product.brand ?? null,
   })
+  const claims = showStage ? all : { ...all, stage: null }
   if (!claims.stage && !claims.bought && !claims.disclosure) return null
 
   return (

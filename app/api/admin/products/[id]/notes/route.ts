@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/auth-cache'
 import { TestingNoteCreateSchema } from '@/lib/products/schema'
-import { revalidateProductPaths } from '@/lib/revalidate'
+import { revalidateProductPaths, revalidateProductReviewPages } from '@/lib/revalidate'
 
 // Testing notes (mig 158): dated public field notes on a product under test.
 
@@ -43,7 +43,8 @@ export async function POST(
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { data, error } = await createAdminClient()
+  const admin = createAdminClient()
+  const { data, error } = await admin
     .from('product_testing_notes')
     .insert({ product_id: id, noted_on: parsed.data.noted_on, body: parsed.data.body })
     .select()
@@ -55,6 +56,8 @@ export async function POST(
     return NextResponse.json({ error: `Create failed: ${error.message}` }, { status: 500 })
   }
 
+  // The Testing Log shows on the Bench page and, once reviewed, on the review.
+  await revalidateProductReviewPages(admin, { id })
   revalidateProductPaths()
   return NextResponse.json({ note: data }, { status: 201 })
 }

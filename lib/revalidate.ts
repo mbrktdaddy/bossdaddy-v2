@@ -1,4 +1,5 @@
 import { revalidatePath } from 'next/cache'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 /**
  * Boss Daddy v2 — public-surface revalidation.
@@ -88,6 +89,7 @@ export function revalidateProductPaths() {
   revalidatePath('/')
   revalidatePath('/reviews')
   revalidatePath('/gear')
+  revalidatePath('/gear/radar')
   revalidatePath('/bench')
   revalidatePath('/(public)/bench/[slug]', 'page')
   revalidatePath('/(public)/gear/category/[slug]', 'page')
@@ -96,6 +98,42 @@ export function revalidateProductPaths() {
   revalidatePath('/(public)/picks/[slug]', 'page')
   revalidatePath('/(public)/stacks/[slug]', 'page')
   revalidatePath('/(public)/gifts/[occasion]', 'page')
+}
+
+/**
+ * Purge the review pages for one product. They render its claims ("Bought it",
+ * the provided-unit disclosure) and its Testing Log, so a product or testing-note
+ * edit has to reach them. Targeted by slug rather than purging every review.
+ */
+export async function revalidateProductReviewPages(
+  supabase: SupabaseClient,
+  product: { slug?: string | null; id?: string | null },
+) {
+  let slug = product.slug
+  if (!slug && product.id) {
+    const { data } = await supabase.from('products').select('slug').eq('id', product.id).maybeSingle()
+    slug = (data as { slug: string } | null)?.slug
+  }
+  if (!slug) return
+  const { data } = await supabase
+    .from('reviews')
+    .select('slug')
+    .eq('product_slug', slug)
+    .eq('status', 'approved')
+  for (const r of (data ?? []) as { slug: string }[]) revalidatePath(`/reviews/${r.slug}`)
+}
+
+/**
+ * Purge the pages that print a product's vote count: the Radar cards on /gear,
+ * /gear/radar and the category pages ("Want me to test it?"), and the Bench,
+ * where carried-over votes read "Requested by N dads".
+ */
+export function revalidateVotePaths() {
+  revalidatePath('/gear')
+  revalidatePath('/gear/radar')
+  revalidatePath('/(public)/gear/category/[slug]', 'page')
+  revalidatePath('/bench')
+  revalidatePath('/(public)/bench/[slug]', 'page')
 }
 
 /**

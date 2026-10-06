@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/auth-cache'
 import { TestingNoteUpdateSchema } from '@/lib/products/schema'
-import { revalidateProductPaths } from '@/lib/revalidate'
+import { revalidateProductPaths, revalidateProductReviewPages } from '@/lib/revalidate'
 
 type Params = { params: Promise<{ id: string; noteId: string }> }
 
@@ -27,7 +27,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
   // Scoped to the product too, so a note id can't be edited through another
   // product's URL.
-  const { data, error } = await createAdminClient()
+  const admin = createAdminClient()
+  const { data, error } = await admin
     .from('product_testing_notes')
     .update(updates)
     .eq('id', noteId)
@@ -38,6 +39,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   if (error) return NextResponse.json({ error: `Update failed: ${error.message}` }, { status: 500 })
   if (!data) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
+  // The Testing Log shows on the Bench page and, once reviewed, on the review.
+  await revalidateProductReviewPages(admin, { id })
   revalidateProductPaths()
   return NextResponse.json({ note: data })
 }
@@ -49,7 +52,8 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
   const gate = await requireAdminApi(supabase)
   if ('error' in gate) return gate.error
 
-  const { error } = await createAdminClient()
+  const admin = createAdminClient()
+  const { error } = await admin
     .from('product_testing_notes')
     .delete()
     .eq('id', noteId)
@@ -57,6 +61,7 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
 
   if (error) return NextResponse.json({ error: `Delete failed: ${error.message}` }, { status: 500 })
 
+  await revalidateProductReviewPages(admin, { id })
   revalidateProductPaths()
   return NextResponse.json({ success: true })
 }

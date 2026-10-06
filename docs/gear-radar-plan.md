@@ -1,8 +1,8 @@
 # Gear IA + On the Radar — plan
 
-> Status 2026-10-06. Operator decisions are locked. Steps 1, 2, 2a and 2b are built (2–2b
-> uncommitted, awaiting the operator's walkthrough); the public surfaces (step 3) are next.
-> Memory: `project_gear_ia_concerns`.
+> Status 2026-10-06. Operator decisions are locked. Steps 1–2b are shipped (`e6be242`,
+> `b2c1733`). Step 3 (the public surfaces) is BUILT and uncommitted, awaiting the operator's
+> walkthrough. Memory: `project_gear_ia_concerns`.
 
 ## Why
 
@@ -15,8 +15,11 @@ interesting or trending but that Boss Daddy hasn't bought or tested.
 1. **Merch moves to `/shop`.** `/gear` means tested and watched gear only.
 2. **New lane: "On the Radar"**, inside `/gear`. Untested products with a short,
    honest take in the Boss Daddy voice: why a dad would care, plus one honest
-   reservation. Never dressed up as a review: no score, no "tested" badge, a
-   clear "not tested" chip. FTC disclosure still applies to buy links.
+   reservation. Never dressed up as a review: no score, no "tested" badge. FTC
+   disclosure still applies to buy links. (The original "clear 'not tested'
+   chip" was superseded on 2026-10-06 by *claims only when set*, brand-guide
+   §1.9: showcasing claims nothing, so there's no default chip either way. The
+   lane name and the "Want me to test it?" vote say it.)
 3. **Radar cards carry a "Want me to test it?" vote.**
 4. **Radar sits above Boss Approved** on `/gear`.
 
@@ -152,9 +155,78 @@ beats volume: ~3 a week. Old items age off `/gear` but stay in the archive.
    link only. Details and images need PA-API (Associates rules), so the fallback
    is a web lookup by name/ASIN for facts, with no images. Retailer copy is a
    starting point to rewrite, never published verbatim.
-3. **Public surfaces**: the Radar section on `/gear` (with the vote), the
-   `/gear/radar` archive, the category-page section, the header and deck rewrite,
-   and the "Boss Picks" → "Boss Approved" rename.
+3. **Public surfaces**: BUILT 2026-10-06, uncommitted (check + 582 tests + prebuild
+   green). What shipped:
+   - **Data:** `lib/products/radar.ts`: `getLiveRadar()` (status radar, `spotted_at <= now`),
+     `getRadarArchive()` (radar | queued | testing | reviewed | passed, released,
+     newest first, cap 200), `toRadarItem()`, and `radarOutcome()` (the precedence
+     below; `null` = no honest outcome, so the item is left out). The review embed
+     names its FK (`reviews!products_review_id_fkey`): products↔reviews are linked
+     both ways, so a bare embed is ambiguous.
+   - **Components:** `components/radar/RadarCard` (category eyebrow, "Spotted <date>"
+     in America/Chicago, the take, `ProductClaimLine stage={false}`, then an outcome
+     footer: the vote + buy link while live, else *Moved to the Bench* / *Reviewed N/10*
+     / *Not Testing* + reason) and `RadarLane` (the section: FTC line above the first
+     buy link, 3 cards on phones and 6 from `sm`, always rendered, with a slim line
+     when empty per the uniformity rule).
+   - **Vote:** `components/wishlist/RadarVote` ("Want me to test it?", *Test it* /
+     *Requested*, "Requested by N dads") replaced `VoteButton`. The per-user reads
+     are batched (`vote-state.ts` → `GET /api/wishlist/votes?ids=`, cap 50, chunked),
+     so a grid costs one request. The old per-item GET is gone. `POST
+     /api/wishlist/[id]/vote` takes a NEW vote only when `isRadarLive()` (409
+     otherwise; un-voting is always allowed) and now checks its write errors.
+     `revalidateVotePaths()` purges the pages that print counts.
+   - **Pages:** `/gear` restructured to the trust ladder (#1 Pick → pills → Perfect
+     Score → **On the Radar** → **Boss Approved** (was "Boss Picks", anchor
+     `#boss-approved`) → Solid Gear → Bench strip → Ask the Boss → gift guides →
+     featured collection → merch strip). The header is now eyebrow "Rated · Testing ·
+     Watching", H1 `LABELS.gear.full` ("Boss Daddy's Gear"), and a deck built on the house line.
+     `/gear/category/[slug]` got a category-scoped lane under its rated gear. The new
+     `/gear/radar` archive has a *Live* section (votes), then *Where They Went*.
+     Sitemap: `/gear/radar` added, and Radar rows now date `/gear` + the listed category pages.
+   - **Bench = follow:** no vote on `/bench/[slug]`. `SubscribeButton` now reads
+     "Notify me when the review's out" / "You're on the list" (and lost its banned
+     `bg-blue-50`). Carried-over votes show as "Requested by N dads" on Bench cards
+     + detail. Vote copy was moved off the Bench everywhere: `/bench` meta + deck, `LABELS.bench.tagline`,
+     the BenchStrip default CTA, PipelineCounter ("follow along"), the login modal
+     (`intent` vote | follow), the queued follower email (it said "your vote"), and
+     the Boss chat's researched-list link (→ `/gear/radar`).
+   - **Testing Log:** `components/products/TestingLog` is shared by `/bench/[slug]`
+     (open section) and the review page (closed `<details>` under the TrustReceipt).
+     The review's "From the Bench" pill linked to `/bench/<slug>`, which 307s back
+     to the same review. It now jumps to `#testing-log` (or `/bench` when there's no
+     log). Note edits purge the product's review pages
+     (`revalidateProductReviewPages()`).
+   - **Category empty state (found in the operator's walkthrough):** gear pages list
+     reviews rated 8+. Tools & DIY has 3 published reviews (7.2 / 7.0 / 6.25), so its
+     page showed "No rated tools & diy gear yet", which was false. It now states the bar
+     and links "See all 3 Tools & DIY reviews" (`/reviews/category/<slug>`), and the
+     footer link is category-scoped ("every score"). **The 8+ bar stays** (operator,
+     2026-10-06): a gear page means "what I'd recommend". No "Also reviewed" tier.
+   - **Copy fixed under §1.9 as a side effect:** "Dad-tested gift guides" → "Hand-picked";
+     Solid Gear's "Good enough that I kept them" (an ownership claim a loaner breaks).
+
+   - **A vote also follows (operator, 2026-10-06, built same day):** voting inserts
+     the follow too (`followChangeForVote()` in `lib/wishlist.ts`; upsert on the
+     existing unique key, no migration), so voters get the follower emails (up next →
+     testing → review's out). Guardrails: (1) the card says "I'll email you when I test
+     it." the moment they vote, and the vote sign-up modal says it before they join;
+     (2) un-voting while the item is still on the Radar deletes the follow too, and once it has
+     moved on the follow is left alone; (3) no backfill of the 4 votes that existed
+     before. The card promises email only while the follow row exists (`following` is
+     in both the POST and the batch GET). Every follow row gets its own unsubscribe
+     token (DB default), and the email footer now reads "voted for or followed".
+     A Radar follow isn't listed on `/account` until the item reaches the Bench
+     (that list shows Bench stages only).
+
+   **Open for the operator:** (a) the public name is one label, "Testing Log",
+   on both pages (was "Testing Notes" on the Bench); (b) DECIDED, see the vote/follow
+   bullet above. Optional later: a "passed, here's why" email (no one is told about
+   a pass today). (c) the indexed titles changed on purpose:
+   `/gear` ("…— Rated Picks and What's on the Radar") and `/bench` ("…— What Boss
+   Daddy Is Testing Now"). Left alone on purpose: the gift-occasion "— Boss Daddy
+   Picks" SEO titles, and the "Boss Pick" + "own money" line in the Tools & DIY POV
+   (`lib/categories.ts`), which belongs to the own-money copy gate.
 
    Also for step 3 (decided 2026-10-06): **the Bench gets one job.** Radar
    cards carry the vote ("Want me to test it?"). Bench items carry **follow**
@@ -164,10 +236,8 @@ beats volume: ~3 a week. Old items age off `/gear` but stay in the archive.
    should also show on the review page as a "Testing log", because
    `/bench/<slug>` 307s to the review once reviewed, which hides them.
 
-   Found while building step 2:
-   - "Promote to Review" (`/api/wishlist/[id]/promote`) sets `status = 'reviewed'`
-     as soon as the review *draft* exists. Status alone doesn't prove a verdict,
-     so the archive must check for an **approved** review before showing "Reviewed".
-   - Add `/gear/radar` to `revalidateProductPaths()` when the route exists.
-   - The vote route (`/api/wishlist/[id]/vote`) has no status gate, so Radar votes
-     work as-is.
+   Found while building step 2 (all handled in step 3):
+   - "Promote to Review" set `status = 'reviewed'` on the *draft* (fixed in 2a). The
+     archive still derives "Reviewed" from an approved + visible review, never the status alone.
+   - `/gear/radar` is in `revalidateProductPaths()`.
+   - The vote route had no status gate. It now takes new votes only on live Radar items.

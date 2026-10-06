@@ -76,6 +76,17 @@ export function isRadarScheduled(
   return p.status === 'radar' && !!p.spotted_at && new Date(p.spotted_at).getTime() > now
 }
 
+/**
+ * A Radar item that is public right now: on Radar and released (spotted_at
+ * <= now). The only state that takes a "Want me to test it?" vote.
+ */
+export function isRadarLive(
+  p: { status: string; spotted_at: string | null },
+  now: number = Date.now(),
+): boolean {
+  return p.status === 'radar' && !!p.spotted_at && new Date(p.spotted_at).getTime() <= now
+}
+
 // "How I got it" (mig 158). Blank = no claim, the default: showcasing a product
 // claims nothing. provided / loaner are a material connection, so they render
 // the FTC disclosure wherever the product is reviewed or recommended.

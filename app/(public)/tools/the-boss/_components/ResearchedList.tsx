@@ -71,8 +71,9 @@ export function ResearchedList({ items, query }: { items: ProductBlock[]; query?
 
       <div className="mt-2 pt-2 border-t border-soft flex flex-wrap items-center gap-x-4 gap-y-2">
         <ResearchedNotify query={query} />
-        <Link href="/bench" className="text-[12px] font-semibold text-accent hover:underline">
-          Vote onto the bench →
+        {/* Voting happens on the Radar ("Want me to test it?"), not the Bench. */}
+        <Link href="/gear/radar" className="text-[12px] font-semibold text-accent hover:underline">
+          Vote on what gets tested next →
         </Link>
       </div>
     </Card>

@@ -65,6 +65,46 @@ export function getStatusColor(status: WishlistStatus): string {
   return WISHLIST_STATUS_OPTIONS.find((s) => s.value === status)?.color ?? 'text-zinc-400'
 }
 
+/**
+ * The vote count, said one way everywhere. Readers vote on Radar ("Want me to
+ * test it?"), and the votes carry over when the item moves to the Bench.
+ */
+export function requestedByLabel(count: number): string {
+  return `Requested by ${count} ${count === 1 ? 'dad' : 'dads'}`
+}
+
+/**
+ * What toggling a vote does to the voter's follow (operator, 2026-10-06).
+ *
+ * A vote asks for the test, so it also follows the item: the voter gets the
+ * follower emails (up next → testing → review's out), and the card says so the
+ * moment they vote. Taking the vote back while the item is still on the Radar
+ * drops that follow too, so a withdrawn request never emails. Once the item has
+ * moved on, the follow is left alone: it may be a deliberate Bench follow, and
+ * every email carries an unsubscribe link. Existing votes were NOT backfilled.
+ */
+export function followChangeForVote(adding: boolean, itemStatus: string | null): 'follow' | 'unfollow' | 'none' {
+  if (adding) return 'follow'
+  return itemStatus === 'radar' ? 'unfollow' : 'none'
+}
+
+// GET /api/wishlist/votes?ids=… — the cap is shared with the client batcher
+// (components/wishlist/vote-state.ts), which splits bigger batches into chunks.
+export const VOTE_IDS_MAX = 50
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/** Parse the comma-separated `ids` param: UUIDs only, deduped, capped at VOTE_IDS_MAX. */
+export function parseVoteIds(param: string | null): string[] {
+  const ids = new Set<string>()
+  for (const raw of (param ?? '').split(',')) {
+    const id = raw.trim()
+    if (UUID_RE.test(id)) ids.add(id)
+    if (ids.size === VOTE_IDS_MAX) break
+  }
+  return [...ids]
+}
+
 export function getBuyLabel(store: string | null, customName: string | null): string {
   if (!store) return 'Check Price'
   return `Check Price at ${getStoreLabel(store, customName)}`

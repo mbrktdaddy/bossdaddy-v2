@@ -18,7 +18,7 @@ const STATUS_RANK: Record<string, number> = { testing: 0, queued: 1 }
 
 export default async function BenchStrip({
   heading = 'On the Bench',
-  ctaText = "Vote on what's next",
+  ctaText = "See what's on the bench",
   subhead = LABELS.bench.shortTagline,
 }: Props) {
   const admin = createAdminClient()

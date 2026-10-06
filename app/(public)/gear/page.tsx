@@ -3,6 +3,8 @@ import Image from 'next/image'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { CATEGORIES } from '@/lib/categories'
 import { getBadgesByProductSlug } from '@/lib/collection-listings'
+import { getLiveRadar } from '@/lib/products/radar'
+import { LABELS } from '@/lib/labels'
 import CategoryIcon from '@/components/CategoryIcon'
 import { MerchStrip } from '@/components/MerchStrip'
 import { GearRow, type GearReview } from './_components/GearCards'
@@ -12,6 +14,7 @@ import BenchStrip from '@/components/BenchStrip'
 import AskTheBoss from '@/components/AskTheBoss'
 import SectionHeader from '@/components/SectionHeader'
 import PageHeader from '@/components/PageHeader'
+import { RadarLane } from '@/components/radar/RadarLane'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { getSeasonalOccasions } from '@/lib/gift-occasions'
 import OccasionIcon from '@/components/OccasionIcon'
@@ -21,20 +24,25 @@ import { Eyebrow } from '@/components/ui/Eyebrow'
 import { StarIcon } from '@/components/icons'
 
 export const revalidate = 3600
-// getSeasonalOccasions() reads the current date, which otherwise nudges Next
-// into rendering this hub dynamically. There's no request-varying input here
-// (no cookies/searchParams — verified with dynamic='error'), so pin it static;
-// the seasonal gift-guide set refreshes on the hourly ISR revalidate.
+// getSeasonalOccasions() and the Radar's "released by now" filter read the
+// current date, which otherwise nudges Next into rendering this hub
+// dynamically. There's no request-varying input here (no cookies/searchParams —
+// verified with dynamic='error'), so pin it static; the seasonal gift-guide set
+// and newly released Radar items arrive on the hourly ISR revalidate (product
+// edits purge it sooner, via revalidateProductPaths).
 export const dynamic = 'force-static'
 
+// Copy rule (brand-guide §1.9): this hub mixes reviews with On the Radar
+// picks that haven't been tested, so no page-level "tested" or "bought with my
+// own money" claim. Testing claims belong to the reviews themselves.
 export const metadata: Metadata = {
   // Absolute — brand already in the title; avoids the template double-branding.
-  title: { absolute: "Boss Daddy's Gear — Field-Tested Picks" },
-  description: 'Every product Boss Daddy has personally bought, tested, and stands behind — sorted by rating. The only list where every pick is earned, not sponsored.',
+  title: { absolute: "Boss Daddy's Gear — Rated Picks and What's on the Radar" },
+  description: "Gear Boss Daddy rated 8 or higher, what's on his test bench, and new gear that caught his eye. Every review is earned. Every pick is independently chosen.",
   openGraph: {
     ...OG_SITE,
     title: "Boss Daddy's Gear — Boss Daddy Life",
-    description: 'Every product personally bought, tested, and rated. Field-tested by a real dad.',
+    description: "Rated gear, what's on the test bench, and new gear that caught a dad's eye.",
     images: [{ url: ogImageUrl({ title: 'Boss Daddy Gear', type: 'review' }), width: 1200, height: 630 }],
   },
   twitter: { card: 'summary_large_image', site: TWITTER_HANDLE, creator: TWITTER_HANDLE, title: "Boss Daddy's Gear — Boss Daddy Life" },
@@ -44,6 +52,11 @@ export const metadata: Metadata = {
 // Static gear index (audit H3): no searchParams, cookie-free anon reads.
 // Category filtering lives on the path-based /gear/category/[slug] routes the
 // pills link to, so this hub prerenders as static HTML.
+//
+// Layout is a trust ladder (docs/gear-radar-plan.md): the tested lead (#1 Pick,
+// Perfect Score), then On the Radar, then Boss Approved + Solid Gear, then the
+// Bench. So the page tells the whole journey (Radar → Bench → Boss Approved);
+// gift guides and the featured collection sit lower.
 export default async function GearPage() {
   const supabase = createAnonClient()
 
@@ -54,6 +67,7 @@ export default async function GearPage() {
     { data: reviews },
     { data: giftPickLists },
     { data: featuredPickRows },
+    radar,
   ] = await Promise.all([
     supabase
       .from('reviews')
@@ -79,6 +93,8 @@ export default async function GearPage() {
       .eq('is_visible', true)
       .order('published_at', { ascending: false })
       .limit(1),
+    // The newest 6 (plan: 6–9). Older ones age off here but stay in /gear/radar.
+    getLiveRadar(supabase, { limit: 6 }),
   ])
 
   const rawTopPicks = (reviews ?? []) as GearReview[]
@@ -112,7 +128,7 @@ export default async function GearPage() {
     (giftPickLists ?? []).map((p) => [p.occasion, p])
   )
   // Only surface gift guides that actually have picks — an empty collection
-  // routes to a "Coming Soon" dead-end, which we don't want in this prime slot.
+  // routes to a "Coming Soon" dead-end, which we don't want in this slot.
   // The section auto-collapses to a slim link when nothing is live yet.
   const populatedOccasions = new Set(
     (giftPickLists ?? [])
@@ -126,7 +142,7 @@ export default async function GearPage() {
   )
   const liveSeasonalOccasions = seasonalOccasions.filter((o) => populatedOccasions.has(o.value))
 
-  const bossPicks = topPicks.filter((r) => (r.rating ?? 0) >= 9).length
+  const bossApproved = topPicks.filter((r) => (r.rating ?? 0) >= 9).length
   // #1 Pick: admin-flagged all-time champion wins. Fall back to the prior
   // algorithmic pick (first high-rated review with an image) so the slot
   // never goes empty if nothing has been flagged.
@@ -142,9 +158,9 @@ export default async function GearPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Daddy Tested, Boss Approved"
-        title="Boss Daddy's Gear"
-        deck="Every pick here I bought with my own money, used hard, and rated 8 or higher. Earned, not sponsored."
+        eyebrow="Rated · Testing · Watching"
+        title={LABELS.gear.full}
+        deck="The gear I've rated 8 or higher, what's on the bench right now, and what's caught my eye. Every review is earned. Every pick is independently chosen."
       />
       <div className="max-w-6xl mx-auto px-6 py-12">
 
@@ -175,7 +191,119 @@ export default async function GearPage() {
         ))}
       </div>
 
-      <AskTheBoss context="Boss Daddy's field-tested gear picks" className="mb-12" />
+      {/* ── Tier summary — quick jump to each rating band ─────────────────── */}
+      {(tens.length > 0 || bossApproved > 0) && (
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 mb-8 text-sm text-prose-faint">
+          <Eyebrow as="span">Jump to</Eyebrow>
+          {tens.length > 0 && (
+            <a href="#perfect-score" className="hover:text-prose transition-colors">
+              <span className="text-prose font-bold tabular-nums">{tens.length}</span> perfect {tens.length === 1 ? 'score' : 'scores'}
+            </a>
+          )}
+          {tens.length > 0 && bossApproved > 0 && <span className="hidden sm:block">·</span>}
+          {bossApproved > 0 && (
+            <a href="#boss-approved" className="hover:text-prose transition-colors">
+              <span className="text-accent-text-soft font-bold tabular-nums">{bossApproved}</span> Boss Approved
+            </a>
+          )}
+        </div>
+      )}
+
+      {/* ── Tiers ────────────────────────────────────────────────────────────
+          Three distinct geometries for the three rating tiers — a visual
+          hierarchy that mirrors the rating hierarchy:
+            10:  asymmetric magazine 1+2 (most editorial, top of pyramid)
+            9+:  standard 3-col card grid (workhorse middle)
+            8+:  compact editorial rows (browse-and-scan base)
+          On the Radar sits between the tested lead and Boss Approved
+          (operator's call, 2026-09-29). */}
+
+      {/* ── Perfect Score — asymmetric magazine grid + radial glow ──── */}
+      {tens.length > 0 && (
+        <section id="perfect-score" className="relative mb-24">
+          <div
+            aria-hidden
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                'radial-gradient(ellipse 60% 50% at 50% 0%, rgba(204,85,0,0.10), transparent 60%)',
+            }}
+          />
+          <div className="relative">
+            <SectionHeader
+              label="Top Tier"
+              heading="Perfect Score"
+              sub="Flawless. Nothing I tested came close."
+            />
+            {tens.length === 1 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {tens.map((r) => <ReviewCard key={r.id} review={r} headingLevel="h3" />)}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-2 gap-5">
+                {tens.slice(0, 3).map((r, i) => (
+                  <ReviewCard key={r.id} review={r} hero={i === 0} headingLevel="h3" />
+                ))}
+              </div>
+            )}
+            {tens.length > 3 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-5">
+                {tens.slice(3).map((r) => <ReviewCard key={r.id} review={r} headingLevel="h3" />)}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ── On the Radar — untested picks with a take + "Want me to test it?" ── */}
+      <RadarLane
+        items={radar}
+        sub="New gear that caught my eye, and why. Want me to put one to the test? Say the word."
+        emptyText="Nothing on the radar right now. When something new catches my eye, it lands here first."
+        className="mb-16"
+      />
+
+      {/* ── Boss Approved — standard 3-col card grid ───────────────── */}
+      {nines.length > 0 && (
+        <section id="boss-approved" className="mb-16">
+          <SectionHeader
+            label="Earned It"
+            heading="Boss Approved"
+            sub="The ones I recommend without hesitation."
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {nines.map((r) => <ReviewCard key={r.id} review={r} headingLevel="h3" />)}
+          </div>
+        </section>
+      )}
+
+      {/* ── Solid Gear — compact editorial rows ────────────────────── */}
+      {eights.length > 0 && (
+        <section className="mb-16">
+          <SectionHeader
+            label="Worth It"
+            heading="Solid Gear"
+            sub="Not perfect, but worth your money."
+          />
+          <div className="divide-y divide-soft">
+            {eights.map((r) => <GearRow key={r.id} review={r} />)}
+          </div>
+        </section>
+      )}
+
+      {!topPicks.length && (
+        <EmptyState title="Nothing has rated 8 or higher yet." body="Reviews are being added." />
+      )}
+
+      {/* ── Bench strip — the middle of the journey: being tested now ──────── */}
+      <div className="mt-16">
+        <p className="text-xs text-prose-faint mb-3">What I&apos;m testing now. Follow one and you&apos;ll get the review the day it&apos;s out.</p>
+        <BenchStrip ctaText="See everything on the bench" />
+      </div>
+
+      {/* Topic hint for the Boss's first turn. Not "field-tested": the hub now
+          holds Radar picks too, and the hint shouldn't prime a testing claim. */}
+      <AskTheBoss context="Boss Daddy's gear picks" className="mt-16 mb-16" />
 
       {/* ── Shop by Occasion ─────────────────────────────────────────── */}
       {liveSeasonalOccasions.length > 0 ? (
@@ -254,7 +382,7 @@ export default async function GearPage() {
         >
           <div>
             <Eyebrow className="mb-1">Gift Guides</Eyebrow>
-            <p className="text-sm font-bold text-prose">Dad-tested gift guides for every occasion</p>
+            <p className="text-sm font-bold text-prose">Hand-picked gift guides for every occasion</p>
           </div>
           <span className="shrink-0 text-sm font-semibold text-accent-text-soft group-hover:text-accent transition-colors">Explore →</span>
         </Link>
@@ -334,106 +462,6 @@ export default async function GearPage() {
           </div>
         </section>
       )}
-
-      {/* ── Tiers ────────────────────────────────────────────────────────────
-          Three distinct geometries for the three rating tiers — a visual
-          hierarchy that mirrors the rating hierarchy:
-            10:  asymmetric magazine 1+2 (most editorial, top of pyramid)
-            9+:  standard 3-col card grid (workhorse middle)
-            8+:  compact editorial rows (browse-and-scan base) */}
-      {!topPicks.length ? (
-        <EmptyState title="Nothing here yet." body="Reviews are being added." />
-      ) : (
-        <div>
-          {/* ── Tier summary — quick jump to each rating band ─────────────── */}
-          {(tens.length > 0 || bossPicks > 0) && (
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-1 mb-8 text-sm text-prose-faint">
-              <Eyebrow as="span">Jump to</Eyebrow>
-              {tens.length > 0 && (
-                <a href="#perfect-score" className="hover:text-prose transition-colors">
-                  <span className="text-prose font-bold tabular-nums">{tens.length}</span> perfect {tens.length === 1 ? 'score' : 'scores'}
-                </a>
-              )}
-              {tens.length > 0 && bossPicks > 0 && <span className="hidden sm:block">·</span>}
-              {bossPicks > 0 && (
-                <a href="#boss-picks" className="hover:text-prose transition-colors">
-                  <span className="text-accent-text-soft font-bold tabular-nums">{bossPicks}</span> Boss {bossPicks === 1 ? 'Pick' : 'Picks'}
-                </a>
-              )}
-            </div>
-          )}
-          {/* ── Perfect Score — asymmetric magazine grid + radial glow ──── */}
-          {tens.length > 0 && (
-            <section id="perfect-score" className="relative mb-24">
-              <div
-                aria-hidden
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background:
-                    'radial-gradient(ellipse 60% 50% at 50% 0%, rgba(204,85,0,0.10), transparent 60%)',
-                }}
-              />
-              <div className="relative">
-                <SectionHeader
-                  label="Top Tier"
-                  heading="Perfect Score"
-                  sub="Flawless. Nothing I tested came close."
-                />
-                {tens.length === 1 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {tens.map((r) => <ReviewCard key={r.id} review={r} headingLevel="h3" />)}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-2 gap-5">
-                    {tens.slice(0, 3).map((r, i) => (
-                      <ReviewCard key={r.id} review={r} hero={i === 0} headingLevel="h3" />
-                    ))}
-                  </div>
-                )}
-                {tens.length > 3 && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-5">
-                    {tens.slice(3).map((r) => <ReviewCard key={r.id} review={r} headingLevel="h3" />)}
-                  </div>
-                )}
-              </div>
-            </section>
-          )}
-
-          {/* ── Boss Picks — standard 3-col card grid ──────────────────── */}
-          {nines.length > 0 && (
-            <section id="boss-picks" className="mb-16">
-              <SectionHeader
-                label="Boss Approved"
-                heading="Boss Picks"
-                sub="Earned it. These are the ones I recommend without hesitation."
-              />
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {nines.map((r) => <ReviewCard key={r.id} review={r} headingLevel="h3" />)}
-              </div>
-            </section>
-          )}
-
-          {/* ── Solid Gear — compact editorial rows ────────────────────── */}
-          {eights.length > 0 && (
-            <section className="mb-16">
-              <SectionHeader
-                label="Worth It"
-                heading="Solid Gear"
-                sub="Good enough that I kept them. Not perfect, but worth it."
-              />
-              <div className="divide-y divide-soft">
-                {eights.map((r) => <GearRow key={r.id} review={r} />)}
-              </div>
-            </section>
-          )}
-        </div>
-      )}
-
-      {/* ── Bench strip ─────────────────────────────────────────────────────── */}
-      <div className="mt-16">
-        <p className="text-xs text-prose-faint mb-3">More gear is on the way. Vote on what gets tested next.</p>
-        <BenchStrip ctaText="See everything on the bench" />
-      </div>
 
       {/* ── Boss Daddy merch — the store lives at /shop; this is its discovery strip ── */}
       <MerchStrip />

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { CATEGORY_SLUGS } from '@/lib/categories'
 import { OCCASIONS } from '@/lib/gift-occasions'
+import { RADAR_PUBLIC_STATUSES } from '@/lib/products/radar'
 
 /*
  * `lastModified` must be derived from the content a URL actually renders.
@@ -61,6 +62,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { data: picks },
     { data: benchItems },
     { data: merchItems },
+    { data: radarItems },
   ] = await Promise.all([
     supabase
       .from('reviews')
@@ -92,6 +94,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     admin.from('merch').select('slug, updated_at')
       .in('status', ['available', 'coming_soon'])
       .is('archived_at', null),
+    // Everything /gear/radar renders — the same filter as getRadarArchive().
+    // Live rows (status 'radar') also feed the Radar lane on /gear and on the
+    // gear category pages.
+    admin.from('products').select('status, category, updated_at')
+      .in('status', [...RADAR_PUBLIC_STATUSES])
+      .lte('spotted_at', new Date().toISOString()),
   ])
 
   const reviewRows = reviews ?? []
@@ -138,11 +146,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const gearGradeRows = reviewRows.filter((r) => (r.rating ?? 0) >= 8)
   const gearCategoryDates = newestByKey(gearGradeRows, (r) => r.category, contentDate)
   const newestGearReview  = newestOf(gearGradeRows.map(contentDate))
+
+  // On the Radar. The archive renders every public Radar row; the lanes on
+  // /gear and the category pages render only the live ones.
+  const radarRows      = radarItems ?? []
+  const liveRadarRows  = radarRows.filter((r) => r.status === 'radar')
+  const newestRadar    = newestOf(radarRows.map((r) => r.updated_at))
+  const radarCategoryDates = newestByKey(liveRadarRows, (r) => r.category, (r) => r.updated_at)
+  // A category page is LISTED only when it has rated gear (a Radar-only page
+  // is thin), but once listed its lastmod counts its Radar lane too.
+  for (const [cat, date] of gearCategoryDates) {
+    const radarDate = radarCategoryDates.get(cat)
+    if (radarDate && radarDate > date) gearCategoryDates.set(cat, radarDate)
+  }
+
   // Everything the /gear hub actually renders. Its merch strip is a teaser for
   // /shop, not page content, so merch dates /shop instead.
   const newestGear = newestOf([
     newestGearReview?.toISOString(),
     newestCollectionOf('gift_guide', 'general', 'best_of')?.toISOString(),
+    ...liveRadarRows.map((r) => r.updated_at),
   ])
   const newestAnything = newestOf([
     newestReview?.toISOString(),
@@ -266,6 +289,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // reviews below the 8 cutoff that the page never shows. Date it by the newest
     // of what it renders.
     { url: `${base}/gear`,         lastModified: newestGear,                            changeFrequency: 'weekly',  priority: 0.8 },
+    { url: `${base}/gear/radar`,   lastModified: newestRadar,                           changeFrequency: 'weekly',  priority: 0.6 },
     { url: `${base}/shop`,         lastModified: newestMerch,                           changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${base}/bench`,        lastModified: newestBench,                           changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${base}/about`,                                                             changeFrequency: 'monthly', priority: 0.5 },

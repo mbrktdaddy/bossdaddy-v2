@@ -4,10 +4,10 @@ import Link from 'next/link'
 import FtcDisclosure from '@/components/FtcDisclosure'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { WishlistItem } from '@/lib/wishlist'
-import { getBuyLabel } from '@/lib/wishlist'
+import { getBuyLabel, requestedByLabel } from '@/lib/wishlist'
 import { StatusBadge } from '@/components/wishlist/StatusBadge'
-import { VoteButton } from '@/components/wishlist/VoteButton'
 import { SubscribeButton } from '@/components/wishlist/SubscribeButton'
+import { TestingLog } from '@/components/products/TestingLog'
 import CommentForm from '@/components/CommentForm'
 import CommentList from '@/components/CommentList'
 import { BenchGallery } from '@/components/BenchGallery'
@@ -18,14 +18,15 @@ import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { buttonVariants } from '@/components/ui/Button'
 import { productClaims, type ProductAcquisition, type ProductStatus } from '@/lib/products'
-import { withWeeks, formatNoteDate, type TestingNote } from '@/lib/products/testing-notes'
+import { withWeeks, type TestingNote } from '@/lib/products/testing-notes'
 
 // The stages that have a Bench page. Catalog, Radar and Archived products are
 // not on the Bench, so their slugs 404 here rather than render a stray page.
 const BENCH_PAGE_STATUSES = ['queued', 'testing', 'reviewed', 'passed']
 
-// Per-user vote/subscribe state is fetched CLIENT-side by VoteButton/
-// SubscribeButton (same pattern as LikeButton + the comment widgets), so this
+// The Bench's one job is follow: votes are cast on the Radar, and the ones that
+// carried over show as "Requested by N dads". Per-user follow state is fetched
+// CLIENT-side by SubscribeButton (same pattern as LikeButton + the comment widgets), so this
 // server render does no per-user cookie read of its own. The route still
 // renders dynamically (ƒ) like reviews/guides because the shared CommentList
 // reads the session — that's expected and fine. Do NOT reintroduce a
@@ -68,7 +69,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     path: `/bench/${slug}`,
     siteUrl,
     type: 'site',
-    cta: 'Vote on the Bench',
+    cta: 'Follow the test',
     heroUrl: toAbsoluteUrl(data.image_url as string | null, siteUrl),
   })
   // Bench items stay out of search (noindex) but still get a rich share preview.
@@ -114,6 +115,7 @@ export default async function BenchDetailPage({ params }: Props) {
   const isReviewed = wishlistItem.status === 'reviewed'
   const isSkipped  = wishlistItem.status === 'passed'
   const hasBuyLink = !!wishlistItem.affiliate_url && !!wishlistItem.store
+  const voteCount  = wishlistItem.vote_count as number
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
@@ -136,6 +138,9 @@ export default async function BenchDetailPage({ params }: Props) {
           <div className="flex flex-wrap items-center gap-2 mb-3">
             <StatusBadge status={wishlistItem.status} />
             {claims.bought && <Badge tone="neutral">Bought it</Badge>}
+            {voteCount > 0 && (
+              <span className="text-xs text-prose-faint tabular-nums">{requestedByLabel(voteCount)}</span>
+            )}
           </div>
           <h1 className="text-2xl sm:text-3xl font-black leading-tight mb-3">{wishlistItem.title}</h1>
 
@@ -173,10 +178,6 @@ export default async function BenchDetailPage({ params }: Props) {
           ) : (
             !isSkipped && (
               <div className="flex flex-wrap gap-3 mt-4">
-                <VoteButton
-                  itemId={wishlistItem.id}
-                  initialCount={wishlistItem.vote_count as number}
-                />
                 <SubscribeButton itemId={wishlistItem.id} />
                 {hasBuyLink && (
                   <a
@@ -194,32 +195,7 @@ export default async function BenchDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {notes.length > 0 && (
-        <section className="mt-10" aria-labelledby="testing-notes">
-          <h2 id="testing-notes" className="text-lg font-black mb-4">Testing Notes</h2>
-          <ol className="space-y-4">
-            {notes.map((n) => (
-              <li key={n.id} className="border-l-2 border-accent-border/50 pl-4">
-                <p className="text-xs text-prose-faint">
-                  <span className="font-bold text-prose-muted">Week {n.week}</span>
-                  <span className="mx-2">·</span>
-                  <time dateTime={n.noted_on}>{formatNoteDate(n.noted_on)}</time>
-                </p>
-                <p className="mt-1 text-sm text-prose leading-relaxed whitespace-pre-line">{n.body}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
-
-      {!isReviewed && !isSkipped && (
-        <div className="mt-8 p-4 bg-accent-tint border border-soft rounded-xl">
-          <p className="text-sm text-accent-text/80">
-            <strong className="text-accent-text-soft">{wishlistItem.vote_count as number} {wishlistItem.vote_count === 1 ? 'person has' : 'people have'} voted</strong> for this review.
-            The more votes, the sooner it gets done.
-          </p>
-        </div>
-      )}
+      <TestingLog notes={notes} className="mt-10" />
 
       {/* Discussion */}
       {!isSkipped && (

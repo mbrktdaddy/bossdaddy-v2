@@ -1,11 +1,10 @@
 import { NextResponse, type NextRequest, after } from 'next/server'
-import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/auth-cache'
 import { notifyWishlistSubscribers } from '@/lib/wishlist-emails'
 import { ProductUpdateSchema, productCheckViolation } from '@/lib/products/schema'
-import { revalidateProductPaths } from '@/lib/revalidate'
+import { revalidateProductPaths, revalidateProductReviewPages } from '@/lib/revalidate'
 
 // GET /api/admin/products/[id]
 export async function GET(
@@ -120,15 +119,7 @@ export async function PATCH(
 
   // Flush every review that references this product so updated
   // URLs / images / names appear without waiting for the ISR window
-  const productSlug = (data as { slug?: string })?.slug
-  if (productSlug) {
-    const { data: reviews } = await admin
-      .from('reviews')
-      .select('slug')
-      .eq('product_slug', productSlug)
-      .eq('status', 'approved')
-    for (const r of reviews ?? []) revalidatePath(`/reviews/${r.slug}`)
-  }
+  await revalidateProductReviewPages(admin, { slug: (data as { slug?: string })?.slug })
   revalidateProductPaths()
 
   return NextResponse.json({ product: data })
