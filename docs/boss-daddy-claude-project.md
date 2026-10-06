@@ -1,6 +1,6 @@
 # Boss Daddy — Project Brief
 
-> **Version 3.5 — Updated 2026-09-23** (messaging v3.5 from 2026-07-24; roadmap refreshed 2026-09-23). This is the single source of truth for mission, messaging, brand voice, design system, and technical context. It supersedes all prior briefs and brand summaries.
+> **Version 3.6 — Updated 2026-10-06** (scope, the claims rule and the product journey settled 2026-10-06; messaging v3.5 from 2026-07-24). This is the single source of truth for mission, messaging, brand voice, design system, and technical context. It supersedes all prior briefs and brand summaries.
 >
 > **Purpose of this file.** A single, self-contained briefing you can upload to a Claude Project (works on the phone app) so any conversation about Boss Daddy starts fully grounded — strategy, brand voice, and technical context in one place. No codebase access required.
 >
@@ -12,7 +12,7 @@
 
 ## 1. What Boss Daddy Is
 
-Boss Daddy is a brand and trusted hub for fathers and dad life — honest product reviews, practical guides, tools, and community for men committed to being great dads ("Boss Dads"). Built and run by a real first-time dad, not a faceless review farm.
+Boss Daddy is a brand and trusted hub for fathers and dad life — products worth knowing about, honest reviews, practical guides, useful tools, and community for men committed to being great dads ("Boss Dads"). Built and run by a real first-time dad, not a faceless review farm. Trust comes from **accuracy**: the site says exactly what's true about each product, nothing more.
 
 **Mission:** Establish Boss Daddy as the gold-standard, trusted hub for men of all ages committed to being the ultimate dads — strong, present, and proud fathers. Rooted in an uncompromising duty to God, Family, and Country, we stand for honesty, loyalty, and brotherhood. By leveraging advanced tools and real-world testing, we deliver the most comprehensive product reviews, practical guides, authentic community, and real support.
 
@@ -31,6 +31,8 @@ Boss Daddy is a brand and trusted hub for fathers and dad life — honest produc
 - **Primary:** fathers 25–55 — new dads through seasoned ones — who want to level up as leaders at home.
 - **Secondary:** aspiring fathers, young men seeking mentorship, and grandfathers passing down wisdom.
 - **Psychographics:** value faith, family, competence, traditional masculine virtues, and balanced strength. Want practical tools, smart tech, community, and accountability. Frustrated with soft masculinity and mediocrity.
+
+**Scope (settled 2026-10-06):** anything a man might be interested in or buy, plus everything dad- and family-related. The filter for any product or topic: *would a man, a dad, or his family want this?* What sets Boss Daddy apart is what it's built around — the Boss Dad Standard, a real community, and genuinely useful tools — not a narrow product range.
 
 ---
 
@@ -52,7 +54,7 @@ Boss Daddy is a brand and trusted hub for fathers and dad life — honest produc
 **Philosophy / Manifesto (canonical wording — do not paraphrase in hero/about placements):**
 > Boss Daddy isn't just another men's fashion, fitness, or lifestyle brand. It is the gold standard and trusted hub for men living The Boss Dad Standard — men who believe being a proud and present father who shows up every day isn't a compromise of strength, but the ultimate expression of it.
 
-*(The "fashion, fitness, or lifestyle" phrasing is contrast/positioning framing — it elevates us above generic lifestyle brands. It is **not** a commitment to ship fashion or fitness content pillars.)*
+*(The "fashion, fitness, or lifestyle" phrasing is contrast/positioning framing: the difference is the standard, the community and the tools, not the product range. Men's products of any kind are in scope (§1 Scope); new content pillars still get added deliberately.)*
 
 **Capitalization:** the core lines use **Title Case with periods** (lowercase articles — "Dad Like a Boss."). All-caps `BOSS DADDY` is reserved strictly for the wordmark/logo; use title-case *Boss Daddy* everywhere else. `BOSS` may be used sparingly as a noun of address ("Stay locked in, BOSS").
 
@@ -62,7 +64,7 @@ Boss Daddy is a brand and trusted hub for fathers and dad life — honest produc
 - Sentences 15–25 words; paragraphs 3–5 sentences. Lead with the useful info.
 - Address the reader as a peer: *"Brother," "Friends," "Fellow Dads,"* direct *"you."* `BOSS` as a noun of address, sparingly. *(Note: "Boss Dads" stays a third-person identity term — "the hub for Boss Dads" — never a greeting like "hey boss dads.")*
 - Direct openers welcome: *"Here's the deal:", "Bottom line:", "Real talk:".*
-- Every claim has specifics. Reviews require a real-testing reference. Only review what was actually bought and used.
+- Every claim has specifics. Reviews require a real-testing reference. Only review what was actually used — bought, or provided by a brand and disclosed.
 
 **Banlist — never use:**
 - Hype: "revolutionary."
@@ -83,6 +85,8 @@ Boss Daddy is a brand and trusted hub for fathers and dad life — honest produc
 
 **Trust & legal (non-negotiable):**
 - Zero sponsors. Affiliate is fine, disclosed, and earned. Sponsored-as-honest-review is forbidden.
+- **Provided products yes, paid coverage never.** Brands may send products for testing or review. That never buys coverage, a score, or a preview of the piece. A provided or loaned unit is disclosed on the page, next to the opinion.
+- **Claims only when set.** Showcasing a product ("hey, look at this") claims nothing about owning or testing it. A product says *Up Next*, *Testing Now*, *Reviewed* or *Bought it* only when the founder sets that. No default disclaimers ("not tested", "owner pick"). Automatic claims are only the ones the law requires: the affiliate disclosure and the provided-unit disclosure. Full rule: `docs/brand-guide.md` §1.9.
 - FTC affiliate disclosure is auto-injected on reviews with affiliate links and must never be bypassed (legal compliance gate).
 
 ---
@@ -93,15 +97,20 @@ Primary domain: **bossdaddylife.com**. Core surfaces:
 
 - **Reviews** — honest, field-tested product reviews (4-axis rating plus an AI "Specs Grade" axis). Affiliate links disclosed.
 - **Guides** — all long-form editorial: how-tos, skills, advice, essays. (Never call it a "blog.")
-- **Gear** (`/gear`) — curated "Boss Daddy Approved" picks (rating ≥ 8.0) **+** branded merch ("Made by Boss Daddy"). `/shop` 301-redirects here. ⚠️ **Known problem, top priority:** "Gear" currently means two things — `/gear` is tested gear, but `/gear/[slug]` is a merch product page. See §6.
-- **The Bench** (`/bench`, internal `products` statuses) — the public product-testing pipeline; members vote on what gets tested next. Statuses readers see: Considering → Up Next → Testing Now → (reviewed) or Not Testing. It's the step *before* Reviews, reached from the Browse menu rather than the main nav; once a product's review publishes, its bench page forwards to the review.
-- **The Vault** (`/vault`) — curated multi-product collections built from tested gear, in four types, each with exactly one name: **Comparisons** (`/comparisons`), **Best Of** (`/picks`), **Stacks** (`/stacks`), **Gift Guides** (`/gifts`, organized by occasion). `/vault` shows everything; the four type pages are its tabs, sharing one header and tab bar. The name "The Vault" is **final** (decided 2026-09-23).
+- **Gear** (`/gear`) — the product hub, telling the whole journey on one page: **On the Radar** ("hey, look at this" — cool, trendy or interesting products with a short take; readers vote *Want me to test it?*) → **Boss Approved / Solid Gear** (reviewed 9s and 8s) → **the Bench** → gift guides. Merch moved out to **Shop** on 2026-09-29, so "Gear" means one thing.
+- **The Bench** (`/bench`) — the proof that real testing is happening: **Up Next** → **Testing Now** (with dated testing notes — "Week 2: battery's holding up") → the review, or **Not Testing** with the reason. Readers follow an item to hear when the verdict lands. Reached from Gear and the Browse menu; once a product's review publishes, its bench page forwards to the review.
+- **The Vault** (`/vault`) — curated multi-product collections mixing reviewed and showcased products (no implied claims), in four types, each with exactly one name: **Comparisons** (`/comparisons`), **Best Of** (`/picks`), **Stacks** (`/stacks`), **Gift Guides** (`/gifts`, organized by occasion). `/vault` shows everything; the four type pages are its tabs, sharing one header and tab bar. The name "The Vault" is **final** (decided 2026-09-23).
 - **The Boss** (`/tools/the-boss`) — the member AI concierge: a tool-using assistant that searches the site's gear/guides and helps with dad-life questions; can do member-gated web research for products not yet tested ("Researched, not tested").
 - **Dad Tools** — free utilities (savings tracker, "weekends-until" countdown) to drive habit and signups.
-- **Merch Shop** — print-on-demand via Printful, payments via Stripe. End-to-end fulfillment is working.
+- **Shop** (`/shop`) — Boss Daddy merch ("Boss Stuff for Boss Dads"), print-on-demand via Printful, payments via Stripe. End-to-end fulfillment is working.
 - **Community/account** — member accounts, comments, likes, direct messages, notifications (in-app + email digest + web push).
 
-**Content standards:** only review products personally bought/used or with direct firsthand knowledge. Zero sponsored reviews. Affiliate links disclosed. AI (Claude) assists drafting; human editors review.
+**Content standards:** only review products actually used (bought, or brand-provided and disclosed). Showcase anything relevant, claiming nothing that isn't set. Zero sponsored reviews, zero paid placements. Affiliate links disclosed. AI assists drafting; the founder edits.
+
+**The product journey (one record per product):**
+- **Stage**, set by the founder: *Catalog* (private, no claim — for buy links, gift guides, showcasing) · *On the Radar* · *Up Next* · *Testing Now* · *Reviewed* (automatic when the review publishes) · *Not Testing* (with the reason) · *Archived*.
+- **How I got it**, set by the founder, blank by default: *Bought it* · *Brand provided it* · *Loaner (sent back)*. The last two auto-render the legal disclosure.
+- **Placement**, where it's showcased: Radar, collections, guides. Placement never changes the stage and never claims anything.
 
 ---
 
@@ -126,7 +135,7 @@ Full reference lives in `docs/brand-guide.md` (deeper than this summary, and aut
 **Stack:**
 - **Framework:** Next.js 16 (App Router), TypeScript strict.
 - **Auth + DB:** Supabase (`@supabase/ssr`) with Row-Level Security enforced at the DB level.
-- **AI:** the **Vercel AI Gateway via the AI SDK v6** (`ai` package). Generation goes through `lib/ai/*` (`aiGenerateObject`/`aiGenerateText`, and `streamText` for the concierge); models are addressed as gateway slugs pinned by hand in `lib/ai/models.ts` (`anthropic/claude-sonnet-5`, `anthropic/claude-haiku-4.5`, `anthropic/claude-opus-5`, `anthropic/claude-fable-5`). **Every bucket (content, utility, moderation, research, concierge) runs on Anthropic — `claude-sonnet-5` by default.** The xAI/Grok slugs remain in the registry but nothing uses them (pilot reverted 2026-07-28). Per-bucket overrides via `AI_MODEL_*` env vars (none set; moderation is locked to Claude); auth via `AI_GATEWAY_API_KEY`/`VERCEL_OIDC_TOKEN`. (`@anthropic-ai/sdk` + `lib/claude/client.ts` remain only as legacy: the exported system-prompt strings like `BOSS_DADDY_SYSTEM` are still consumed by the new stack.)
+- **AI:** the **Vercel AI Gateway via the AI SDK v6** (`ai` package). Generation goes through `lib/ai/*` (`aiGenerateObject`/`aiGenerateText`, and `streamText` for the concierge); models are addressed as gateway slugs pinned by hand in `lib/ai/models.ts` (`anthropic/claude-sonnet-5`, `anthropic/claude-haiku-4.5`, `anthropic/claude-opus-5`, `anthropic/claude-fable-5`). **Every bucket runs on Anthropic — `claude-sonnet-5` by default — except the concierge (The Boss), which runs on xAI Grok for live web + X search since 2026-09-24** (see `docs/ai-provider-layer.md`). Per-bucket overrides via `AI_MODEL_*` env vars (none set; moderation is locked to Claude); auth via `AI_GATEWAY_API_KEY`/`VERCEL_OIDC_TOKEN`. (`@anthropic-ai/sdk` + `lib/claude/client.ts` remain only as legacy: the exported system-prompt strings like `BOSS_DADDY_SYSTEM` are still consumed by the new stack.)
 - **Email:** Resend (templates in `emails/`).
 - **Rate limiting:** Upstash Redis.
 - **Payments:** Stripe. **Merch fulfillment:** Printful (POD).
@@ -161,11 +170,12 @@ Full reference lives in `docs/brand-guide.md` (deeper than this summary, and aut
 - **Full AI provider layer migrated** to the Vercel AI Gateway + AI SDK v6 across every bucket (content, utility, moderation, research, concierge).
 
 **Open / in flight (confirm current state before acting):**
-- **▶ TOP PRIORITY: sort out what "Gear" means.** Today `/gear` lists tested gear (reviews rated 8+) while `/gear/[slug]` is a merch product page, and the cart links there too. Old `/stuff/{product}` links redirect into that merch lookup and 404. Leftover "Boss Picks" wording remains on `/gear` and in some gift-guide search titles. Three options on the table, no decision yet: **(A)** move the store to its own address (e.g. `/shop`) so Gear means only tested gear (current leaning), **(B)** make `/gear` the store and move tested-gear browsing under Reviews, **(C)** keep both under `/gear` with separate sub-paths. The `/stuff` redirect fix is independent and can ship first. Careful: `/shop` was once merged *into* `/gear`, so splitting it back out must not break cart, checkout or order links.
+- **▶ TOP PRIORITY: Gear + On the Radar** (plan: `docs/gear-radar-plan.md`). Decided 2026-09-29: merch moved to `/shop` (**shipped**), and `/gear` becomes the product hub with a new On the Radar lane. Done since: Radar admin, the product lifecycle v2 (Catalog stage, Considering retired, "reviewed" set automatically, "How I got it" + testing notes — migration 158). Next: the public surfaces — the Radar lane + vote on `/gear`, the `/gear/radar` archive, the Bench as follow + testing notes, the "Boss Picks" → "Boss Approved" rename.
+- **Gate — before the first brand-provided review:** rewrite the "no PR samples / bought with my own money / no free products" copy (footer, Editorial Standards, Affiliate Disclosure, About, homepage, `/reviews` meta, `/gear` deck, category FAQs). Until then the site promises the opposite of the 2026-10-06 policy.
 - **v3.5 messaging** (2026-07-24): "The Boss Dad Standard" positioning replaces the retired "Built Different"; roll the lines across interior pages, emails, and merch.
 - Merch polish: verify shipped-order tracking/email path; Sentry on swallowed webhook errors.
 - Gear "provenance spine" rebuild: an `adopt` admin UI for researched candidates; reconcile admin overlap.
-- The Boss: Tier-3 action tools (read/write with confirm-before-commit). The first write tools (logging goal entries) have shipped; creating things still goes through a confirm step. (The Grok pilot ran and was **reverted 2026-07-28**: higher variance, not better. The plumbing remains, so re-trying it is one environment variable.)
+- The Boss: Tier-3 action tools (read/write with confirm-before-commit). The first write tools (logging goal entries) have shipped; creating things still goes through a confirm step. (A first Grok pilot was reverted 2026-07-28; the Boss moved to Grok for good on 2026-09-24 for live web + X search.)
 - Voice-learning system (pgvector exemplar few-shot).
 - Monitoring: set `CRON_SECRET` (embed cron) and confirm Sentry DSN in Vercel.
 - ~~Pending naming decision for the "Tools" / "Vault" area~~ — **settled 2026-09-23:** "The Vault" stays the collections hub; Tools never takes the name. A different name for Tools is optional and only if the operator raises it.
