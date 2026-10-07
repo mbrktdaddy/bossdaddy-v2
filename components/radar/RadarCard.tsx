@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Card } from '@/components/ui/Card'
+import { LightboxImage } from '@/components/LightboxImage'
 import CategoryIcon from '@/components/CategoryIcon'
 import { PhotoIcon } from '@/components/icons'
 import { ProductClaimLine } from '@/components/products/ProductClaimLine'
@@ -33,17 +34,26 @@ export function RadarCard({ item, headingLevel: Heading = 'h3' }: Props) {
     <Card className="h-full overflow-hidden flex flex-col">
       <div className="relative aspect-[4/3] bg-surface-raised">
         {item.image_url ? (
-          <Image
-            src={item.image_url}
-            alt={item.name}
-            fill
-            className="object-contain p-4"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          />
+          <LightboxImage src={item.image_url} alt={item.name} images={item.images}>
+            <div className="relative aspect-[4/3]">
+              <Image
+                src={item.image_url}
+                alt={item.name}
+                fill
+                className="object-contain p-4"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              />
+            </div>
+          </LightboxImage>
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <PhotoIcon className="w-12 h-12 text-prose-faint" strokeWidth={1} />
           </div>
+        )}
+        {item.images.length > 1 && (
+          <span className="pointer-events-none absolute bottom-2 right-2 px-2.5 py-1 bg-zinc-900/60 text-white text-xs font-medium rounded-full tabular-nums">
+            {item.images.length} photos
+          </span>
         )}
       </div>
 
@@ -60,7 +70,10 @@ export function RadarCard({ item, headingLevel: Heading = 'h3' }: Props) {
               Spotted <time dateTime={item.spotted_at}>{formatSpotted(item.spotted_at)}</time>
             </span>
           </div>
-          <Heading className="mt-2 text-base font-bold text-prose leading-snug">{item.name}</Heading>
+          {item.brand && (
+            <p className="mt-2 text-[10px] uppercase tracking-widest text-prose-faint leading-tight">{item.brand}</p>
+          )}
+          <Heading className={`${item.brand ? 'mt-1' : 'mt-2'} text-base font-bold text-prose leading-snug`}>{item.name}</Heading>
         </div>
 
         {item.take && (

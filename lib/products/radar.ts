@@ -18,7 +18,7 @@ export const RADAR_PUBLIC_STATUSES = ['radar', 'queued', 'testing', 'reviewed', 
 // both ways (products.review_id → reviews, and reviews.product_slug → products),
 // so a bare `reviews(...)` embed is ambiguous and PostgREST rejects the query.
 const RADAR_SELECT =
-  'id, slug, name, brand, image_url, category, radar_take, spotted_at, status, skip_reason, affiliate_url, store, custom_store_name, acquisition, provided_by, vote_count:wishlist_votes(count), review:reviews!products_review_id_fkey(slug, rating, status, is_visible)'
+  'id, slug, name, brand, image_url, gallery_images, category, radar_take, spotted_at, status, skip_reason, affiliate_url, store, custom_store_name, acquisition, provided_by, vote_count:wishlist_votes(count), review:reviews!products_review_id_fkey(slug, rating, status, is_visible)'
 
 /** A Radar card's data: one product, live on Radar or moved on. */
 export interface RadarItem {
@@ -27,6 +27,8 @@ export interface RadarItem {
   name: string
   brand: string | null
   image_url: string | null
+  /** Cover first, then gallery photos; blanks and duplicates removed. */
+  images: string[]
   category: string | null
   /** The take written when it was spotted. Kept after the product moves on. */
   take: string | null
@@ -46,19 +48,26 @@ export interface RadarItem {
 
 type EmbeddedReview = { slug: string; rating: number | null; status: string; is_visible: boolean }
 
-type RadarRow = Omit<RadarItem, 'take' | 'vote_count' | 'review'> & {
+type RadarRow = Omit<RadarItem, 'take' | 'vote_count' | 'review' | 'images'> & {
+  gallery_images: string[] | null
   radar_take: string | null
   vote_count: { count: number }[] | null
   review: EmbeddedReview | EmbeddedReview[] | null
 }
 
+/** Cover first, then the gallery, with falsy and duplicate URLs dropped. */
+export function radarImages(cover: string | null | undefined, gallery: (string | null | undefined)[] | null | undefined): string[] {
+  return [...new Set([cover, ...(gallery ?? [])].filter((u): u is string => !!u))]
+}
+
 /** Normalise a row from RADAR_SELECT: flatten the vote count, keep only a public review. */
 export function toRadarItem(row: RadarRow): RadarItem {
-  const { radar_take, vote_count, review: embedded, ...rest } = row
+  const { radar_take, vote_count, review: embedded, gallery_images, ...rest } = row
   // A many-to-one embed comes back as an object; tolerate an array too.
   const review = Array.isArray(embedded) ? embedded[0] ?? null : embedded
   return {
     ...rest,
+    images: radarImages(rest.image_url, gallery_images),
     take: radar_take?.trim() || null,
     vote_count: vote_count?.[0]?.count ?? 0,
     review: review && review.status === 'approved' && review.is_visible

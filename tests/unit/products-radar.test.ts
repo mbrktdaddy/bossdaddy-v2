@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { isRadarScheduled, isRadarLive, RADAR_TAKE_MAX } from '@/lib/products'
 import { ProductCreateSchema, ProductUpdateSchema, productCheckViolation } from '@/lib/products/schema'
-import { toRadarItem, radarOutcome, formatSpotted } from '@/lib/products/radar'
+import { toRadarItem, radarOutcome, formatSpotted, radarImages } from '@/lib/products/radar'
 import { parseVoteIds, requestedByLabel, followChangeForVote, VOTE_IDS_MAX } from '@/lib/wishlist'
 
 describe('productCheckViolation — mig 157 CHECKs → readable 400s', () => {
@@ -87,7 +87,7 @@ describe('isRadarLive — the only state that takes a new vote', () => {
 
 describe('toRadarItem — normalising a RADAR_SELECT row', () => {
   const row = {
-    id: 'p1', slug: 'cool-thing', name: 'Cool Thing', brand: 'Acme', image_url: null, category: 'grilling',
+    id: 'p1', slug: 'cool-thing', name: 'Cool Thing', brand: 'Acme', image_url: null, gallery_images: null, category: 'grilling',
     radar_take: '  Worth a look.  ', spotted_at: '2026-10-01T09:00:00Z', status: 'radar' as const,
     skip_reason: null, affiliate_url: null, store: 'amazon', custom_store_name: null,
     acquisition: null, provided_by: null,
@@ -99,6 +99,11 @@ describe('toRadarItem — normalising a RADAR_SELECT row', () => {
     const item = toRadarItem(row)
     expect(item.vote_count).toBe(3)
     expect(item.take).toBe('Worth a look.')
+  })
+
+  it('builds images from the cover then the gallery, without blanks or duplicates', () => {
+    const item = toRadarItem({ ...row, image_url: 'a.jpg', gallery_images: ['b.jpg', 'a.jpg', '', 'b.jpg', 'c.jpg'] })
+    expect(item.images).toEqual(['a.jpg', 'b.jpg', 'c.jpg'])
   })
 
   it('treats a missing count or a blank take as zero / none', () => {
@@ -118,6 +123,14 @@ describe('toRadarItem — normalising a RADAR_SELECT row', () => {
     const approved = { slug: 'r', rating: 8, status: 'approved', is_visible: true }
     expect(toRadarItem({ ...row, review: [approved] }).review).toEqual({ slug: 'r', rating: 8 })
     expect(toRadarItem({ ...row, review: [] }).review).toBeNull()
+  })
+})
+
+describe('radarImages', () => {
+  it('handles a missing cover and a null gallery', () => {
+    expect(radarImages(null, null)).toEqual([])
+    expect(radarImages(null, ['x.jpg'])).toEqual(['x.jpg'])
+    expect(radarImages('a.jpg', undefined)).toEqual(['a.jpg'])
   })
 })
 

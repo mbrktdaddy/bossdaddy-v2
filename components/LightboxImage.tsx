@@ -1,76 +1,51 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createPortal } from 'react-dom'
-import Image from 'next/image'
-import { XIcon } from '@/components/icons'
+import GalleryViewer from '@/components/GalleryViewer'
 
 interface Props {
   src: string
   alt: string
   children: React.ReactNode
+  /** Open the viewer across all of these (when more than one). Default: just `src`. */
+  images?: string[]
+  /** Starting position within `images`. Default: where `src` sits in it, else 0. */
+  index?: number
 }
 
-export function LightboxImage({ src, alt, children }: Props) {
+export function LightboxImage({ src, alt, children, images, index }: Props) {
   const [open, setOpen] = useState(false)
+  const [current, setCurrent] = useState(0)
 
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
-    document.addEventListener('keydown', onKey)
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = ''
-    }
-  }, [open])
+  const list = images && images.length > 1 ? images : [src]
+  const items = list.map((s) => ({ src: s, alt }))
+
+  function openViewer() {
+    const start = index ?? Math.max(0, list.indexOf(src))
+    setCurrent(Math.min(Math.max(start, 0), list.length - 1))
+    setOpen(true)
+  }
 
   return (
     <>
-      <div onClick={() => setOpen(true)} className="cursor-zoom-in">
+      <div onClick={openViewer} className="cursor-zoom-in">
         {children}
       </div>
 
+      {/*
+        optimized: next/image routes through /_next/image so the browser only
+        sees a same-origin request — bypasses CSP img-src restrictions and
+        handles upstream redirect chains (Amazon's media hosts).
+      */}
       {open && createPortal(
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label={alt || 'Image preview'}
-          className="fixed inset-0 z-50 bg-zinc-900/90 flex items-center justify-center p-4 animate-in fade-in duration-150"
-          onClick={() => setOpen(false)}
-        >
-          {/* Close button */}
-          <button
-            className="absolute top-4 right-4 z-10 text-white/70 hover:text-white transition-colors p-2"
-            onClick={() => setOpen(false)}
-            aria-label="Close"
-          >
-            <XIcon className="w-6 h-6" strokeWidth={2} />
-          </button>
-
-          {/*
-            Next/Image routes through /_next/image?url=... so the browser
-            only sees a same-origin request — bypasses CSP img-src
-            restrictions AND handles upstream redirect chains (Amazon's
-            m.media-amazon.com → images-na.ssl-images-amazon.com pattern)
-            that break a raw <img> tag. Container takes 92vw × 92vh so
-            object-contain scales the image to fit while preserving its
-            aspect ratio.
-          */}
-          <div
-            className="relative w-[92vw] h-[92vh] cursor-zoom-out"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Image
-              src={src}
-              alt={alt}
-              fill
-              priority
-              sizes="92vw"
-              className="object-contain rounded-lg shadow-2xl"
-            />
-          </div>
-        </div>,
+        <GalleryViewer
+          items={items}
+          index={current}
+          onIndexChange={setCurrent}
+          onClose={() => setOpen(false)}
+          optimized
+        />,
         document.body
       )}
     </>
