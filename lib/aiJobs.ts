@@ -9,7 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 // is rerun after applying migration 092. We access it through an untyped client
 // cast so this module compiles now and the rest of the app stays fully typed.
 
-export type AiJobKind = 'specs_grade'
+export type AiJobKind = 'specs_grade' | 'product_lookup'
 export type AiJobStatus = 'pending' | 'running' | 'done' | 'error'
 
 export interface AiJob {

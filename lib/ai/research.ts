@@ -22,6 +22,7 @@
 import {
   gateway,
   generateText,
+  NoOutputGeneratedError,
   Output,
   stepCountIs,
   type FlexibleSchema,
@@ -41,6 +42,14 @@ export interface ResearchSearchConfig {
   allowedDomains?: string[]
   /** Exclude these domains (Anthropic blockedDomains / xAI excludedDomains). */
   blockedDomains?: string[]
+  /**
+   * Anthropic only. true (default): web_search_20260209, which filters results
+   * by running code server-side. Better results, but a single request can run
+   * past a minute. false: web_search_20250305, plain search, much faster.
+   * Interactive callers inside a short timeout want false: with filtering on,
+   * the product lookup never finished inside 50s (measured 2026-10-06).
+   */
+  dynamicFiltering?: boolean
 }
 
 // Which provider's native web-search tool a resolved gateway slug maps to. xAI
@@ -75,6 +84,13 @@ function webSearchToolFor(model: string, cfg: ResearchSearchConfig): Tool {
     }) as unknown as Tool
   }
   // Anthropic native web search — the default provider and the fallback provider.
+  if (cfg.dynamicFiltering === false) {
+    return anthropic.tools.webSearch_20250305({
+      ...(cfg.maxUses != null ? { maxUses: cfg.maxUses } : {}),
+      ...(cfg.allowedDomains ? { allowedDomains: cfg.allowedDomains } : {}),
+      ...(cfg.blockedDomains ? { blockedDomains: cfg.blockedDomains } : {}),
+    }) as unknown as Tool
+  }
   return anthropic.tools.webSearch_20260209({
     ...(cfg.maxUses != null ? { maxUses: cfg.maxUses } : {}),
     ...(cfg.allowedDomains ? { allowedDomains: cfg.allowedDomains } : {}),
@@ -133,7 +149,7 @@ export async function aiResearch<T>(opts: {
   const search = opts.search ?? {}
 
   const run = async (m: string): Promise<AiResearchResult<T>> => {
-    const { output, sources } = await generateText({
+    const result = await generateText({
       model: gateway(m),
       tools: { web_search: webSearchToolFor(m, search) },
       output: Output.object({ schema: opts.schema }),
@@ -146,6 +162,15 @@ export async function aiResearch<T>(opts: {
       ...(opts.timeout != null ? { timeout: opts.timeout } : {}),
       providerOptions: { gateway: { tags: [`surface:${opts.tag}`] } },
     })
+    // The SDK parses the object only when the last step ends on a normal stop;
+    // otherwise `output` throws a bare "No output generated." Say why instead:
+    // length = out of output tokens, tool-calls = out of steps mid-search.
+    if (result.finishReason !== 'stop') {
+      throw new NoOutputGeneratedError({
+        message: `No output: finishReason=${result.finishReason} after ${result.steps.length} step(s), ${result.usage.outputTokens ?? '?'} output tokens in the last step`,
+      })
+    }
+    const { output, sources } = result
     return {
       object: output as T,
       model: m,

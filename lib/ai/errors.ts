@@ -1,4 +1,4 @@
-import { APICallError, NoObjectGeneratedError, NoOutputGeneratedError } from 'ai'
+import { APICallError, NoObjectGeneratedError, NoOutputGeneratedError, RetryError } from 'ai'
 
 // Consolidates the timeout/overload error-classification regex that was
 // copy-pasted across the Claude routes, and maps AI SDK error types
@@ -39,8 +39,22 @@ const MSG: Record<AiErrorKind, string> = {
   unknown: 'AI service error — please try again.',
 }
 
+/**
+ * The HTTP status on a provider or Gateway error. Duck-typed: the Gateway's own
+ * GatewayError (rate limit, timeout, internal) carries `statusCode` like
+ * APICallError does, but `ai` doesn't re-export it.
+ */
+function statusOf(err: unknown): number | null {
+  const code = (err as { statusCode?: unknown } | null)?.statusCode
+  return typeof code === 'number' ? code : null
+}
+
 function detailOf(err: unknown): string {
-  return (err instanceof Error ? err.message : String(err)).slice(0, 200)
+  const status = statusOf(err)
+  const name = (err as { name?: unknown } | null)?.name
+  const message = err instanceof Error ? err.message : String(err)
+  // Status and error class first: "unknown - Delay was aborted" told us nothing.
+  return `${status != null ? `[${status}] ` : ''}${typeof name === 'string' && name !== 'Error' ? `${name}: ` : ''}${message}`.slice(0, 300)
 }
 
 function classified(kind: AiErrorKind, status: number, detail: string): ClassifiedAiError {
@@ -52,7 +66,18 @@ function classified(kind: AiErrorKind, status: number, detail: string): Classifi
  * Use in a route's catch: log `detail`, return `{ error: userMessage }` with `status`.
  */
 export function classifyClaudeError(err: unknown): ClassifiedAiError {
+  // The SDK's own retries ran out: classify the last real failure, not the wrapper.
+  if (RetryError.isInstance(err) && err.lastError != null) {
+    const last = classifyClaudeError(err.lastError)
+    return { ...last, detail: `after ${err.errors.length} attempts: ${last.detail}`.slice(0, 300) }
+  }
+
   const detail = detailOf(err)
+
+  // The call's `timeout` (or a caller's abort) fired. If it lands while the SDK
+  // waits to retry, the error is a bare "Delay was aborted" AbortError.
+  const name = (err as { name?: unknown } | null)?.name
+  if (name === 'AbortError' || name === 'TimeoutError') return classified('timeout', 502, detail)
 
   // Schema/format failures — generateObject throws this. `length` finish means
   // the model was cut off mid-object (truncation); anything else is an
@@ -65,13 +90,17 @@ export function classifyClaudeError(err: unknown): ClassifiedAiError {
 
   // generateText + `Output.object` (the research bucket) throws this when the run
   // ended without producing the structured output — same class of failure.
+  // finishReason=length (see aiResearch) is truncation: out of output tokens.
   if (NoOutputGeneratedError.isInstance(err)) {
-    return classified('no_object', 502, detail)
+    return /finishReason=length/.test(detail)
+      ? classified('truncated', 502, detail)
+      : classified('no_object', 502, detail)
   }
 
-  // Transport / provider errors surfaced by the gateway.
-  if (APICallError.isInstance(err)) {
-    const code = err.statusCode
+  // Transport / provider errors surfaced by the gateway (APICallError), or the
+  // Gateway's own errors (GatewayError, same `statusCode`).
+  if (APICallError.isInstance(err) || statusOf(err) != null) {
+    const code = statusOf(err)
     if (code === 429) return classified('rate_limit', 429, detail)
     if (code === 402) return classified('budget', 503, detail)
     if (code === 408 || code === 504 || /timeout|timed.?out|deadline/i.test(detail)) {
