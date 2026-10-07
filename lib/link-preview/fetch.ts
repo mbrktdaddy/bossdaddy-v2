@@ -92,6 +92,8 @@ const guardedLookup: LookupFunction = (hostname, options, callback) => {
 function hop(
   target: string,
   maxBytes: number,
+  expect: 'html' | 'image' | 'json',
+  referer: string | undefined,
 ): Promise<
   | { ok: true; status: number; headers: http.IncomingHttpHeaders; body: Buffer }
   | { ok: false; reason: FetchFailure }
@@ -117,9 +119,16 @@ function hop(
           'User-Agent': USER_AGENT,
           // Ask for what we can actually use. Some sites serve a very different
           // (and much smaller) document to a client that doesn't claim to want
-          // everything.
-          Accept: 'text/html,application/xhtml+xml,image/*;q=0.8,*/*;q=0.5',
+          // everything. An image request asks for images, as a browser's does.
+          Accept: expect === 'image'
+            ? 'image/avif,image/webp,image/png,image/jpeg,image/*;q=0.8'
+            : expect === 'json'
+              ? 'application/json, text/javascript;q=0.9, */*;q=0.5'
+              : 'text/html,application/xhtml+xml,image/*;q=0.8,*/*;q=0.5',
           'Accept-Language': 'en',
+          // The page the image was found on, exactly what a browser sends when
+          // it shows that image. Image CDNs commonly refuse hotlinks without it.
+          ...(referer ? { Referer: referer } : {}),
         },
         // Never send or store credentials for a third party.
         agent: false,
@@ -191,7 +200,7 @@ export async function resolveRedirects(
     if (!normalized.ok) return { ok: false, reason: 'blocked' }
     if (arrived(normalized.url)) return { ok: true, url: normalized.url }
 
-    const result = await hop(normalized.url, 64 * 1024)
+    const result = await hop(normalized.url, 64 * 1024, 'html', undefined)
     if (!result.ok) return { ok: false, reason: result.reason }
 
     const location = result.headers.location
@@ -220,15 +229,15 @@ export async function resolveRedirects(
  */
 export async function guardedFetch(
   rawUrl: string,
-  { maxBytes, expect }: { maxBytes: number; expect: 'html' | 'image' },
-): Promise<{ ok: true; data: GuardedResponse } | { ok: false; reason: FetchFailure }> {
+  { maxBytes, expect, referer }: { maxBytes: number; expect: 'html' | 'image' | 'json'; referer?: string },
+): Promise<{ ok: true; data: GuardedResponse } | { ok: false; reason: FetchFailure; status?: number }> {
   let current = rawUrl
 
   for (let redirects = 0; redirects <= MAX_REDIRECTS; redirects++) {
     const normalized = normalizeUrl(current)
     if (!normalized.ok) return { ok: false, reason: 'blocked' }
 
-    const result = await hop(normalized.url, maxBytes)
+    const result = await hop(normalized.url, maxBytes, expect, referer)
     if (!result.ok) return { ok: false, reason: result.reason }
 
     const { status, headers, body } = result
@@ -246,12 +255,15 @@ export async function guardedFetch(
       continue
     }
 
-    if (status < 200 || status >= 300) return { ok: false, reason: 'bad-status' }
+    // The status travels with the failure so callers can log WHY a site refused.
+    if (status < 200 || status >= 300) return { ok: false, reason: 'bad-status', status }
 
     const contentType = String(headers['content-type'] ?? '').toLowerCase()
     const typeOk = expect === 'html'
       ? contentType.includes('text/html') || contentType.includes('application/xhtml')
-      : contentType.startsWith('image/')
+      : expect === 'json'
+        ? contentType.includes('json') || contentType.includes('javascript')
+        : contentType.startsWith('image/')
     if (!typeOk) return { ok: false, reason: 'bad-type' }
 
     return { ok: true, data: { url: normalized.url, contentType, body } }
