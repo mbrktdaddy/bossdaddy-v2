@@ -20,6 +20,9 @@ export type PendingImage =
       file:        File
       previewUrl:  string   // URL.createObjectURL — must be revoked on remove/unmount
       isPrimary:   boolean
+      /** Provenance, only when known (migration 160). Plain file picks leave it unset. */
+      origin?:     'own' | 'web'
+      originUrl?:  string
     }
   | {
       kind:        'library'
@@ -321,8 +324,8 @@ export function PendingImageGallery({ images, onChange, category, disabled }: Pr
 /**
  * Flush a list of pending images against a newly-created product. Uploads
  * fresh Files via POST /api/media (multipart), and re-tags library picks via
- * PATCH /api/media/{id}. Runs in parallel via Promise.allSettled — one bad
- * file doesn't sink the rest, and the parent gets a clean count for UX.
+ * PATCH /api/media/{id}. Runs one at a time in staged order (see below) — one
+ * bad file doesn't sink the rest, and the parent gets a clean count for UX.
  */
 export async function flushPendingImages(
   images:     PendingImage[],
@@ -333,8 +336,7 @@ export async function flushPendingImages(
     return { uploaded: 0, failed: 0, primaryUrl: null }
   }
 
-  const results = await Promise.allSettled(
-    images.map(async (img) => {
+  const uploadOne = async (img: PendingImage): Promise<{ url: string; isPrimary: boolean }> => {
       if (img.kind === 'upload') {
         const compressed = await compressImage(img.file)
         const fd = new FormData()
@@ -342,6 +344,8 @@ export async function flushPendingImages(
         fd.append('product_id', productId)
         if (category) fd.append('category', category)
         if (img.isPrimary) fd.append('is_primary', 'true')
+        if (img.origin) fd.append('origin', img.origin)
+        if (img.originUrl) fd.append('origin_url', img.originUrl)
         const res = await fetch('/api/media', { method: 'POST', body: fd })
         const json = await res.json()
         if (!res.ok) throw new Error(json.error ?? 'Upload failed')
@@ -356,8 +360,19 @@ export async function flushPendingImages(
       const json = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(json.error ?? 'Could not attach library image')
       return { url: img.url, isPrimary: img.isPrimary }
-    }),
-  )
+  }
+
+  // One at a time, in staged order: the database numbers a product's gallery
+  // in arrival order (mig 162), so parallel uploads would scramble it. One bad
+  // file still doesn't sink the rest.
+  const results: PromiseSettledResult<{ url: string; isPrimary: boolean }>[] = []
+  for (const img of images) {
+    try {
+      results.push({ status: 'fulfilled', value: await uploadOne(img) })
+    } catch (reason) {
+      results.push({ status: 'rejected', reason })
+    }
+  }
 
   const fulfilled = results.filter(
     (r): r is PromiseFulfilledResult<{ url: string; isPrimary: boolean }> => r.status === 'fulfilled',

@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { z } from 'zod'
+import { revalidateProductPaths } from '@/lib/revalidate'
 
 const PatchSchema = z.object({
   alt_text:   z.string().max(300).nullable().optional(),
@@ -75,6 +76,9 @@ export async function PATCH(
     .select('id, url, filename, alt_text, product_id, label, is_primary, position')
     .eq('id', id)
     .single()
+
+  // Primary, order or product changes reshape a public gallery (mig 161).
+  if (asset.product_id || updated?.product_id) revalidateProductPaths()
 
   return NextResponse.json({ asset: updated })
 }
@@ -189,6 +193,8 @@ export async function DELETE(
     // Not the gallery primary, but may still be the manual products.image_url — cascade null it
     await admin.from('products').update({ image_url: null }).eq('image_url', asset.url)
   }
+
+  if (asset.product_id) revalidateProductPaths()
 
   return NextResponse.json({ success: true })
 }

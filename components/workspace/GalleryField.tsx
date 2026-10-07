@@ -87,6 +87,7 @@ export function GalleryField({
       fd.append('file', file)
       if (category)  fd.append('category', category)
       if (productId) fd.append('product_id', productId)
+      fd.append('origin', 'own') // only reachable from the camera capture
       const res = await fetch('/api/media', { method: 'POST', body: fd })
       const json = await readJsonResponse<{ asset?: { url?: string } }>(res, 'Upload failed')
       if (json.asset?.url) append([json.asset.url])

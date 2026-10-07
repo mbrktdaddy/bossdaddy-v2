@@ -83,6 +83,7 @@ export async function POST(request: NextRequest) {
         mime_type:   'image/webp',
         source_type: content_type,
         source_id:   source_id ?? null,
+        origin:      'ai',
       })
     } catch (indexErr) {
       console.error('Hero media_assets index failed (non-fatal):', indexErr)

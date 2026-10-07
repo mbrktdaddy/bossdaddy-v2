@@ -3,6 +3,8 @@ import { normalizeImage } from '@/lib/images/normalize'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { toStorageBody } from '@/lib/storage-body'
+import { parseUploadOrigin } from '@/lib/media/origin'
+import { revalidateProductPaths } from '@/lib/revalidate'
 
 const ALLOWED_TYPES  = ['image/jpeg', 'image/png', 'image/webp']
 const MAX_SIZE_BYTES = 8 * 1024 * 1024 // 8 MB
@@ -43,7 +45,7 @@ export async function GET(request: NextRequest) {
   let query = admin
     .from('media_assets')
     .select(
-      'id, url, filename, alt_text, uploaded_by, file_size, mime_type, created_at, product_id, label, is_primary, position, category, tags, profiles(username)',
+      'id, url, filename, alt_text, uploaded_by, file_size, mime_type, created_at, product_id, label, is_primary, position, category, tags, origin, origin_url, profiles(username)',
       { count: 'exact' },
     )
     .order('created_at', { ascending: false })
@@ -109,6 +111,7 @@ export async function POST(request: NextRequest) {
   const category = (formData.get('category') as string | null)?.trim() || null
   const tagsRaw = (formData.get('tags') as string | null)?.trim() || ''
   const tags = tagsRaw ? tagsRaw.split(',').map((t) => t.trim()).filter(Boolean) : []
+  const mediaOrigin = parseUploadOrigin(formData.get('origin'), formData.get('origin_url'))
 
   if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
   if (!ALLOWED_TYPES.includes(file.type)) {
@@ -149,25 +152,9 @@ export async function POST(request: NextRequest) {
 
   const { data: { publicUrl } } = admin.storage.from('media').getPublicUrl(filename)
 
-  // If setting as primary, clear existing primary for this product first
-  if (isPrimary && productId) {
-    await admin
-      .from('media_assets')
-      .update({ is_primary: false })
-      .eq('product_id', productId)
-      .eq('is_primary', true)
-  }
-
-  // Determine position: count existing product images
-  let position: number | null = null
-  if (productId) {
-    const { count } = await admin
-      .from('media_assets')
-      .select('id', { count: 'exact', head: true })
-      .eq('product_id', productId)
-    position = (count ?? 0) + 1
-  }
-
+  // Position, the first-image-is-primary rule, demoting the old primary and the
+  // product's hero are the database's job (mig 162): it serialises a product's
+  // uploads, so parallel uploads can't race "count + 1" into several primaries.
   const { data: asset, error: dbError } = await admin
     .from('media_assets')
     .insert({
@@ -181,11 +168,12 @@ export async function POST(request: NextRequest) {
       product_id: productId,
       label,
       is_primary: isPrimary,
-      position,
       category,
       tags,
+      origin: mediaOrigin.origin,
+      origin_url: mediaOrigin.origin_url,
     })
-    .select('id, url, filename, alt_text, uploaded_by, file_size, mime_type, created_at, product_id, label, is_primary, position, category, tags')
+    .select('id, url, filename, alt_text, uploaded_by, file_size, mime_type, created_at, product_id, label, is_primary, position, category, tags, origin, origin_url')
     .single()
 
   if (dbError) {
@@ -193,17 +181,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Upload succeeded but metadata save failed' }, { status: 500 })
   }
 
-  // Sync products.image_url if this is the primary
-  if (isPrimary && productId) {
-    await admin.from('products').update({ image_url: publicUrl }).eq('id', productId)
-  }
-
-  // Auto-primary: if this is the first image for the product, make it primary
-  if (productId && !isPrimary && position === 1) {
-    await admin.from('media_assets').update({ is_primary: true }).eq('id', asset.id)
-    await admin.from('products').update({ image_url: publicUrl }).eq('id', productId)
-    asset.is_primary = true
-  }
+  // A product image changes its public gallery (mig 161) and maybe its hero.
+  if (productId) revalidateProductPaths()
 
   return NextResponse.json({ asset }, { status: 201 })
 }

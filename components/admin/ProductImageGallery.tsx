@@ -26,6 +26,29 @@ interface ProductImage {
   alt_text: string | null
   position: number | null
   is_primary: boolean
+  origin?: string | null
+  origin_url?: string | null
+}
+
+// Provenance caption — shown only when the origin is known.
+function OriginCaption({ origin, url }: { origin?: string | null; url?: string | null }) {
+  const cls = 'text-xs text-prose-faint'
+  if (origin === 'web' && url) {
+    let host: string | null = null
+    try { host = new URL(url).hostname.replace(/^www\./, '') } catch { host = null }
+    if (host) {
+      return (
+        <a href={url} target="_blank" rel="noopener noreferrer nofollow" className={`${cls} hover:underline block truncate`}>
+          From {host}
+        </a>
+      )
+    }
+    return null
+  }
+  if (origin === 'amazon') return <p className={cls}>From Amazon</p>
+  if (origin === 'ai') return <p className={cls}>AI image</p>
+  if (origin === 'own') return <p className={cls}>Your photo</p>
+  return null
 }
 
 interface Props {
@@ -500,6 +523,7 @@ export function ProductImageGallery({ productId, onPrimaryChange }: Props) {
                     placeholder="Label (e.g. front)"
                     className="w-full px-2 py-1 text-xs bg-surface border border-soft rounded text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover"
                   />
+                  <OriginCaption origin={img.origin} url={img.origin_url} />
                   {!img.is_primary && (
                     <button
                       type="button"

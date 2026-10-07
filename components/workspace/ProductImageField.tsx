@@ -38,6 +38,9 @@ export function ProductImageField({
   const [uploading, setUploading]     = useState(false)
   const [error, setError]             = useState<string | null>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
+  // True only while the crop in flight came from the camera — a reframe of an
+  // existing image must not be recorded as the author's own photo.
+  const cropFromCameraRef = useRef(false)
 
   // Read text first, try-parse, fall back to a readable error — mirrors
   // HeroImagePanel so a non-JSON error body (serverless timeout, HTML page)
@@ -59,6 +62,7 @@ export function ProductImageField({
     if (!raw) return
     // Compress before cropping so a 12MP phone shot doesn't choke the cropper.
     const compressed = await compressImage(raw).catch(() => raw)
+    cropFromCameraRef.current = true
     setPendingCrop(compressed)
   }
 
@@ -66,12 +70,15 @@ export function ProductImageField({
     setPendingCrop(null)
     setUploading(true)
     setError(null)
+    const fromCamera = cropFromCameraRef.current
+    cropFromCameraRef.current = false
     try {
       const file = new File([blob], 'photo.webp', { type: 'image/webp' })
       const fd = new FormData()
       fd.append('file', file)
       if (category)  fd.append('category', category)
       if (productId) fd.append('product_id', productId)
+      if (fromCamera) fd.append('origin', 'own')
       const res = await fetch('/api/media', { method: 'POST', body: fd })
       const json = await readJsonResponse<{ asset?: { url?: string } }>(res, 'Upload failed')
       onChange(json.asset?.url ?? null)
@@ -86,6 +93,7 @@ export function ProductImageField({
   async function handleCropExisting() {
     if (!imageUrl) return
     setError(null)
+    cropFromCameraRef.current = false
     try {
       const file = await fetchAssetAsFile(imageUrl)
       setPendingCrop(file)

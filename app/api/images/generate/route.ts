@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
       uploaded_by: user.id,
       file_size:   null,
       mime_type:   'image/webp',
+      origin:      'ai',
     })
     .select('id, url, filename, alt_text, file_size, mime_type, created_at')
     .single()

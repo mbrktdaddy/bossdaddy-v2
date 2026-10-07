@@ -100,6 +100,7 @@ export async function POST(
         position:   i + 1,
         file_size:  buffer.length,
         mime_type:  'image/webp',
+        origin:     'amazon',
       })
 
       if (assetError) continue

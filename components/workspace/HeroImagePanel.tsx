@@ -42,6 +42,9 @@ export function HeroImagePanel({
   const [premium, setPremium] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
+  // True only while the crop in flight came from the camera — a reframe of an
+  // existing image must not be recorded as the author's own photo.
+  const cropFromCameraRef = useRef(false)
 
   // Defensive response reader. When an API route throws an uncaught error or
   // Vercel hits the serverless maxDuration, the body comes back as plain
@@ -61,6 +64,7 @@ export function HeroImagePanel({
   function handleCameraCapture(e: React.ChangeEvent<HTMLInputElement>) {
     const raw = e.target.files?.[0]
     if (!raw) return
+    cropFromCameraRef.current = true
     setPendingCrop(raw)
     e.target.value = ''
   }
@@ -69,10 +73,13 @@ export function HeroImagePanel({
     setPendingCrop(null)
     setUploading(true)
     setError(null)
+    const fromCamera = cropFromCameraRef.current
+    cropFromCameraRef.current = false
     try {
       const file = new File([blob], 'hero.webp', { type: 'image/webp' })
       const fd = new FormData()
       fd.append('file', file)
+      if (fromCamera) fd.append('origin', 'own')
       const res = await fetch('/api/media', { method: 'POST', body: fd })
       const json = await readJsonResponse<{ asset?: { url?: string } }>(res, 'Upload failed')
       onChange(json.asset?.url ?? null)
@@ -88,6 +95,7 @@ export function HeroImagePanel({
   async function handleCropExisting() {
     if (!imageUrl) return
     setError(null)
+    cropFromCameraRef.current = false
     try {
       const file = await fetchAssetAsFile(imageUrl)
       setPendingCrop(file)
