@@ -95,6 +95,37 @@ describe('importProductFromUrl — retailer pages', () => {
     expect(r).toMatchObject({ store: 'other', customStoreName: 'Gorilla Playsets', name: 'Wilderness Gym' })
   })
 
+  it('merges a Shopify store\'s product JSON: images after JSON-LD, identifiers where the page has none', async () => {
+    const ld = JSON.stringify({ '@type': 'Product', name: 'Trail Chair', image: 'https://shop.example/ld.jpg' })
+    const json = JSON.stringify({
+      title: 'Trail Chair', vendor: 'Campco', images: ['//cdn.shopify.com/s/a.jpg'],
+      variants: [{ id: 22, sku: 'TC-200X', barcode: '012345678905', price: 14999 }],
+    })
+    fetchMock.mockImplementation(async (u) => String(u).endsWith('.js')
+      ? { ok: true as const, data: { url: String(u), contentType: 'application/json', body: Buffer.from(json) } }
+      : htmlPage(
+        'https://shop.example/products/trail-chair?variant=22',
+        `<html><head><script type="application/ld+json">${ld}</script><meta property="og:image" content="https://shop.example/og.jpg"><link href="https://cdn.shopify.com/x.css"></head></html>`,
+      ))
+    const r = await importProductFromUrl('https://shop.example/products/trail-chair?variant=22', '')
+    expect(fetchMock).toHaveBeenCalledWith('https://shop.example/products/trail-chair.js', { maxBytes: 1_000_000, expect: 'json' })
+    expect(r.imageCandidates).toEqual(['https://shop.example/ld.jpg', 'https://cdn.shopify.com/s/a.jpg', 'https://shop.example/og.jpg'])
+    expect(r).toMatchObject({ brand: 'Campco', modelNumber: 'TC-200X', gtin: '012345678905', priceCents: 14999 })
+    expect(r.found).toContain('Shopify product data')
+  })
+
+  it('falls back to the page alone when the Shopify JSON fails', async () => {
+    fetchMock.mockImplementation(async (u) => String(u).endsWith('.js')
+      ? { ok: false as const, reason: 'bad-status' as const }
+      : htmlPage(
+        'https://shop.example/products/trail-chair',
+        '<html><head><meta property="og:title" content="Trail Chair"><link href="https://cdn.shopify.com/x.css"></head></html>',
+      ))
+    const r = await importProductFromUrl('https://shop.example/products/trail-chair', '')
+    expect(r.name).toBe('Trail Chair')
+    expect(r.found).not.toContain('Shopify product data')
+  })
+
   it('a blocked retailer page explains itself and offers the web lookup', async () => {
     fetchMock.mockResolvedValue({ ok: false, reason: 'bad-status' })
     const r = await importProductFromUrl('https://www.kohls.com/product/prd-6939775/x.jsp', '')
@@ -103,9 +134,30 @@ describe('importProductFromUrl — retailer pages', () => {
     expect(r.notes[0]).toMatch(/block automated reads/)
   })
 
-  it('a private-network address is refused with no lookup offered', async () => {
+  it('keeps the cleaned link and its store when the page refuses the read', async () => {
+    fetchMock.mockResolvedValue({ ok: false, reason: 'bad-status' })
+    const r = await importProductFromUrl(
+      'https://www.lowes.com/pd/DEWALT-Drill/5018269031?irclickid=1Pl&irgwc=1&afsrc=1&cm_mmc=aff-_-c', '',
+    )
+    expect(r).toMatchObject({
+      store: 'lowes',
+      nonAffiliateUrl: 'https://www.lowes.com/pd/DEWALT-Drill/5018269031',
+      customStoreName: null,
+      canLookup: true,
+    })
+    expect(r.notes.join(' ')).toMatch(/Saved as a plain link/)
+  })
+
+  it('an unknown store keeps its hostname as the store name when the read fails', async () => {
+    fetchMock.mockResolvedValue({ ok: false, reason: 'timeout' })
+    const r = await importProductFromUrl('https://www.campco.example/p/chair', '')
+    expect(r).toMatchObject({ store: 'other', customStoreName: 'campco.example', nonAffiliateUrl: 'https://www.campco.example/p/chair' })
+  })
+
+  it('a private-network address is refused with no lookup offered and no link kept', async () => {
     fetchMock.mockResolvedValue({ ok: false, reason: 'blocked' })
     const r = await importProductFromUrl('http://192.168.1.1/admin', '')
     expect(r.canLookup).toBe(false)
+    expect(r.nonAffiliateUrl).toBeNull()
   })
 })

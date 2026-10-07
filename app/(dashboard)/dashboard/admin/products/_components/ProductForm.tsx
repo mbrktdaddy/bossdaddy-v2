@@ -1,12 +1,17 @@
 'use client'
 
-import { useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Product, ProductSpec } from '@/lib/products'
 import { STORE_OPTIONS, PRODUCT_STATUS_OPTIONS, RADAR_TAKE_MAX, ACQUISITION_OPTIONS, acquisitionDisclosure, type ProductAcquisition } from '@/lib/products'
 import { LABELS } from '@/lib/labels'
 import { CATEGORIES, getCategoryLabel } from '@/lib/categories'
 import { getSpecTemplate } from '@/lib/spec-templates'
+import { MODEL_NUMBER_MAX, normalizeGtin, productSlugSource, splitIdentifierSpecs } from '@/lib/products/identifiers'
+import { slugifyTitle } from '@/lib/slug'
+import { imageHost, isRenderableImageUrl } from '@/lib/images/remote-hosts'
+import { isLikelyGraphic } from '@/lib/images/candidates'
+import type { LookupSource, ProductLookup } from '@/lib/products/import'
 import { ProductImageGallery } from '@/components/admin/ProductImageGallery'
 import { PendingImageGallery, flushPendingImages, type PendingImage } from '@/components/admin/PendingImageGallery'
 import { buildAmazonAffiliateUrl, extractAsin, isValidAsin } from '@/lib/amazon-tag'
@@ -14,6 +19,7 @@ import { TagPicker } from '@/components/workspace/TagPicker'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
+import { Badge } from '@/components/ui/Badge'
 
 interface Props {
   product: Product | null
@@ -32,6 +38,46 @@ function toLocalInput(iso: string): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
+// One page-image candidate, downloaded through the guarded fetcher for the picker.
+interface PickerItem { url: string; blob: Blob; previewUrl: string; w: number; h: number }
+
+const PICKER_CONCURRENCY = 3
+
+// Shortest edge uploads accept: mirrors MIN_DIMENSION in lib/images/normalize.ts
+// (server-only, not exported). Smaller previews would be rejected on add.
+const MIN_IMAGE_EDGE = 400
+
+// Download one candidate and read its pixel size. A failed download resolves
+// to null and an undersized image to 'small'; neither appears in the picker.
+async function loadPickerItem(url: string, pageUrl: string | undefined): Promise<PickerItem | 'small' | null> {
+  let previewUrl = ''
+  try {
+    const res = await fetch('/api/admin/products/import-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ urls: [url], ...(pageUrl ? { pageUrl } : {}) }),
+    })
+    if (!res.ok) return null
+    const blob = await res.blob()
+    previewUrl = URL.createObjectURL(blob)
+    const src = previewUrl
+    const size = await new Promise<{ w: number; h: number }>((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight })
+      img.onerror = () => reject(new Error('decode'))
+      img.src = src
+    })
+    if (Math.min(size.w, size.h) < MIN_IMAGE_EDGE) {
+      URL.revokeObjectURL(previewUrl)
+      return 'small'
+    }
+    return { url, blob, previewUrl, ...size }
+  } catch {
+    if (previewUrl) URL.revokeObjectURL(previewUrl)
+    return null
+  }
+}
+
 export function ProductForm({ product, initialTags = [], amazonAssociateTag }: Props) {
   const router = useRouter()
   const isNew = !product
@@ -39,6 +85,11 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
   const [slug, setSlug]                         = useState(product?.slug ?? '')
   const [name, setName]                         = useState(product?.name ?? '')
   const [brand, setBrand]                       = useState(product?.brand ?? '')
+  // Identifiers (mig 159). The API answers a model already in the catalog with
+  // a 409; dupWarning holds it until the admin saves anyway or changes it.
+  const [modelNumber, setModelNumber]           = useState(product?.model_number ?? '')
+  const [gtin, setGtin]                         = useState(product?.gtin ?? '')
+  const [dupWarning, setDupWarning]             = useState<string | null>(null)
   const [specs, setSpecs]                       = useState<ProductSpec[]>(product?.specs ?? [])
   const [asin, setAsin]                         = useState(product?.asin ?? '')
   const [store, setStore]                       = useState<string>(product?.store ?? 'amazon')
@@ -99,11 +150,33 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
   const [linkUrl,       setLinkUrl]       = useState('')
   const [linkBusy,      setLinkBusy]      = useState<'page' | 'lookup' | null>(null)
   const [linkNote,      setLinkNote]      = useState<string | null>(null)
-  const [linkCanLookup, setLinkCanLookup] = useState(false)
   const [retailerRef,   setRetailerRef]   = useState<string | null>(null)
   // The page the import actually read (short links resolved). The web lookup
   // uses it, so an a.co link still reaches the lookup with its ASIN.
   const [linkSource,    setLinkSource]    = useState<string | null>(null)
+  // The page's own product images, when the lead one is on a host the site
+  // can't render. Offered, not attached: "Choose images" opens a picker, and
+  // "Add selected" uploads the ticked ones like any other photo.
+  const [pageImages,    setPageImages]    = useState<string[]>([])
+  // The page those candidates came from: Referer for the downloads and the
+  // provenance URL of whatever gets added (a lookup source, not always linkUrl).
+  const [pageImagesFrom, setPageImagesFrom] = useState<string | null>(null)
+  // Which source's "Get images" is running (its URL), if any.
+  const [sourceBusy,    setSourceBusy]    = useState<string | null>(null)
+  // Candidates dropped from the picker: download failed / under the minimum edge.
+  const [pickerSkipped, setPickerSkipped] = useState({ failed: 0, small: 0 })
+  // Picker previews (null = closed). The blobs are kept so adding a tick never
+  // downloads twice; the object URLs are revoked on close/unmount.
+  const [picker,        setPicker]        = useState<PickerItem[] | null>(null)
+  const [pickerLoading, setPickerLoading] = useState(false)
+  const [pickerAdding,  setPickerAdding]  = useState(false)
+  const [picked,        setPicked]        = useState<Set<string>>(new Set())
+  const pickerUrls = useRef<string[]>([])
+  const pickerRun  = useRef(0)
+  // Where the web lookup's facts came from, so they can be checked before saving.
+  const [lookupSources, setLookupSources] = useState<LookupSource[]>([])
+  // Bumped to remount ProductImageGallery (it loads on mount) after an add.
+  const [galleryKey,    setGalleryKey]    = useState(0)
 
   // AI autofill (paste a spec sheet → structured brand + specs)
   const [factsText,    setFactsText]    = useState('')
@@ -111,6 +184,53 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
   const [autofillNote, setAutofillNote] = useState<string | null>(null)
 
   const atSpecCap = specs.length >= MAX_SPECS
+
+  function closePicker() {
+    pickerRun.current++
+    pickerUrls.current.forEach((u) => URL.revokeObjectURL(u))
+    pickerUrls.current = []
+    setPicker(null)
+    setPickerSkipped({ failed: 0, small: 0 })
+    setPickerLoading(false)
+    setPicked(new Set())
+  }
+
+  useEffect(() => {
+    const urls = pickerUrls
+    const run = pickerRun
+    return () => {
+      run.current++
+      urls.current.forEach((u) => URL.revokeObjectURL(u))
+    }
+  }, [])
+
+  // What the web lookup will search with. Brand alone isn't enough to find a
+  // product; a link, model number, GTIN or name is (mirrors hasLookupInput).
+  const lookupUses = [
+    modelNumber.trim() && 'model number',
+    gtin.trim() && 'GTIN',
+    brand.trim() && 'brand',
+    name.trim() && 'name',
+    linkUrl.trim() && 'link',
+  ].filter((x): x is string => !!x)
+  const skippedNote = [
+    pickerSkipped.failed > 0 && `${pickerSkipped.failed} couldn't be downloaded`,
+    pickerSkipped.small > 0 && `${pickerSkipped.small} too small (under ${MIN_IMAGE_EDGE}px)`,
+  ].filter((x): x is string => !!x).join(' · ')
+  const canLookup =!!(linkUrl.trim() || modelNumber.trim() || gtin.trim() || name.trim())
+
+  // Shown under both image-URL overrides: next/image throws on any other host.
+  const unrenderableImage = imageUrl.trim() && !isRenderableImageUrl(imageUrl.trim()) ? (
+    <p className="text-warn-ink">
+      The site can&apos;t show images hosted on {imageHost(imageUrl.trim()) ?? 'that site'}. Upload it to the gallery instead.
+    </p>
+  ) : null
+
+  // The brand + model slug (dewalt-dcd801b), offered while the product is new.
+  // Not checked for collisions here: the save answers a taken slug with a 409.
+  const suggestedSlug = brand.trim() && modelNumber.trim()
+    ? slugifyTitle(productSlugSource({ name, brand, modelNumber }))
+    : ''
 
   function addSpec() {
     setSpecs((prev) => (prev.length >= MAX_SPECS ? prev : [...prev, { label: '', value: '' }]))
@@ -154,11 +274,17 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
 
   // Merge incoming specs: fill empty existing values, append new labels (snapped
   // to canonical casing), never clobber a typed value, respect the cap.
-  // Computed synchronously so the reported counts are accurate.
-  function mergeSpecs(incoming: ProductSpec[]): { added: number; filled: number; capped: number } {
+  // Computed synchronously so the reported counts are accurate. A "Model" or
+  // "UPC" row is an identifier, not a spec: it fills its own field (if empty).
+  function mergeSpecs(incoming: ProductSpec[]): { added: number; filled: number; capped: number; ids: string[] } {
+    const split = splitIdentifierSpecs(incoming)
+    const ids: string[] = []
+    if (split.modelNumber && !modelNumber.trim()) { setModelNumber(split.modelNumber); ids.push('model number') }
+    if (split.gtin && !gtin.trim()) { setGtin(split.gtin); ids.push('GTIN') }
+
     const byKey = new Map(specs.map((s) => [s.label.trim().toLowerCase(), { ...s }]))
     let added = 0, filled = 0, capped = 0
-    for (const s of incoming) {
+    for (const s of split.specs) {
       const key = s.label?.trim().toLowerCase()
       if (!key || !s.value?.trim()) continue
       const existing = byKey.get(key)
@@ -171,21 +297,62 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
       }
     }
     setSpecs(Array.from(byKey.values()))
-    return { added, filled, capped }
+    return { added, filled, capped, ids }
+  }
+
+  // The web lookup runs as a background job (the route answers with a jobId);
+  // poll it every 2.5s for up to ~3.5 min. A failed poll is a hiccup, not a
+  // failure: keep polling until the deadline.
+  async function runLookupJob(): Promise<{ lookup: ProductLookup; slug: string | null }> {
+    const url = linkSource ?? (linkUrl.trim() || undefined)
+    const res = await fetch('/api/admin/products/import', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode: 'lookup',
+        ...(url ? { url } : {}),
+        hints: {
+          ...(name.trim() ? { name: name.trim() } : {}),
+          ...(brand.trim() ? { brand: brand.trim() } : {}),
+          ...(modelNumber.trim() ? { modelNumber: modelNumber.trim() } : {}),
+          ...(gtin.trim() ? { gtin: gtin.trim() } : {}),
+        },
+      }),
+    })
+    const start = await res.json().catch(() => null)
+    if (!res.ok || !start?.jobId) throw new Error(start?.error ?? `Couldn't start the lookup (${res.status}).`)
+
+    const startedAt = Date.now()
+    for (let i = 0; i < 84; i++) {
+      await new Promise((r) => setTimeout(r, 2500))
+      setLinkNote(`Searching the web… ${Math.round((Date.now() - startedAt) / 1000)}s (usually under a minute)`)
+      const poll = await fetch(`/api/admin/products/import?jobId=${encodeURIComponent(start.jobId)}`)
+      if (poll.status === 404) throw new Error('The lookup went missing. Run it again.')
+      const job = await poll.json().catch(() => null)
+      if (!poll.ok || !job) continue
+      if (job.status === 'error') throw new Error(job.error ?? 'The lookup failed. Run it again.')
+      if (job.status === 'done') return job.result
+    }
+    throw new Error('The lookup is taking unusually long. Run it again in a moment.')
   }
 
   async function handleLinkImport(mode: 'page' | 'lookup') {
-    const url = mode === 'lookup' && linkSource ? linkSource : linkUrl.trim()
-    if (!url) return
-    setLinkBusy(mode); setLinkNote(null)
+    if (mode === 'page' && !linkUrl.trim()) return
+    setLinkBusy(mode)
+    setLinkNote(mode === 'lookup' ? 'Searching the web…' : null)
     try {
-      const res = await fetch('/api/admin/products/import', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, mode }),
-      })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Import failed')
+      let json
+      if (mode === 'lookup') {
+        json = await runLookupJob()
+      } else {
+        const res = await fetch('/api/admin/products/import', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: linkUrl.trim(), mode }),
+        })
+        json = await res.json()
+        if (!res.ok) throw new Error(json.error ?? 'Import failed')
+      }
 
       // Only empty fields are filled: an import never overwrites what you typed.
       const filled: string[] = []
@@ -198,7 +365,16 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
         fill('name', name, r.name, setName)
         fill('slug', slug, json.slug, setSlug)
         fill('brand', brand, r.brand, setBrand)
-        fill('image', imageUrl, r.imageUrl, setImageUrl)
+        fill('model number', modelNumber, r.modelNumber, setModelNumber)
+        fill('GTIN', gtin, r.gtin, setGtin)
+        // Only a host the site can render is used as-is; a store's image has
+        // to be uploaded first, and only if the admin chooses it.
+        if (r.imageUrl && isRenderableImageUrl(r.imageUrl)) fill('image', imageUrl, r.imageUrl, setImageUrl)
+        else {
+          closePicker()
+          setPageImages((r.imageCandidates ?? []).filter(Boolean))
+          setPageImagesFrom(r.sourceUrl ?? linkUrl.trim())
+        }
         fill('price', priceCents, r.priceCents != null ? String(r.priceCents) : null, setPriceCents)
         // The link group is set together, and only when no link exists yet.
         if (!affiliateUrl.trim() && !nonAffiliateUrl.trim() && (r.affiliateUrl || r.nonAffiliateUrl)) {
@@ -210,12 +386,13 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
           filled.push(r.affiliateUrl ? 'affiliate link' : 'link')
         }
         const merged = r.specs?.length ? mergeSpecs(r.specs) : null
+        if (merged) filled.push(...merged.ids)
         if (merged && merged.added + merged.filled > 0) filled.push(`${merged.added + merged.filled} specs`)
         if (r.retailerDescription) setRetailerRef(r.retailerDescription)
         setLinkSource(r.sourceUrl ?? null)
-        setLinkCanLookup(!!r.canLookup)
+        setLookupSources([])
         const notes = (r.notes as string[]).join(' ')
-        setLinkNote(`${filled.length ? `Filled: ${filled.join(', ')}.` : 'Nothing new to fill.'}${notes ? ` ${notes}` : ''}`)
+        setLinkNote(`${filled.length ? `Filled: ${[...new Set(filled)].join(', ')}.` : 'Nothing new to fill.'}${notes ? ` ${notes}` : ''}`)
       } else {
         const l = json.lookup
         if (!l.found) {
@@ -225,17 +402,130 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
         fill('name', name, l.name, setName)
         fill('slug', slug, json.slug, setSlug)
         fill('brand', brand, l.brand, setBrand)
+        fill('model number', modelNumber, l.modelNumber, setModelNumber)
+        fill('GTIN', gtin, l.gtin, setGtin)
         fill('price', priceCents, l.priceCents != null ? String(l.priceCents) : null, setPriceCents)
         const merged = l.specs?.length ? mergeSpecs(l.specs) : null
+        if (merged) filled.push(...merged.ids)
         if (merged && merged.added + merged.filled > 0) filled.push(`${merged.added + merged.filled} specs`)
         if (l.summary && !retailerRef) setRetailerRef(l.summary)
-        setLinkCanLookup(false)
-        setLinkNote(`${filled.length ? `Filled from the web: ${filled.join(', ')}.` : 'Nothing new to fill.'} Check the facts before saving.`)
+        const sources: LookupSource[] = Array.isArray(l.sources) ? l.sources : []
+        setLookupSources(sources)
+        setLinkNote(`${filled.length ? `Filled from the web: ${[...new Set(filled)].join(', ')}.` : 'Nothing new to fill.'} ${sources.length ? 'Check the facts against the sources below before saving.' : 'No sources came back, so check the facts yourself before saving.'}`)
       }
     } catch (err) {
       setLinkNote(err instanceof Error ? err.message : 'Import failed')
     } finally {
       setLinkBusy(null)
+    }
+  }
+
+  // Download every candidate through our guarded fetcher (a few at a time) so
+  // the admin can see what they're picking. Failed candidates are dropped.
+  async function handleChooseImages(candidates: string[] = pageImages, from: string | null = pageImagesFrom) {
+    if (candidates.length === 0) return
+    const run = ++pickerRun.current
+    const pageUrl = from || undefined
+    setPicker([]); setPicked(new Set()); setPickerLoading(true)
+    setPickerSkipped({ failed: 0, small: 0 })
+    const results: (PickerItem | 'small' | null)[] = new Array(candidates.length).fill(null)
+    let next = 0
+    const worker = async () => {
+      while (next < candidates.length) {
+        const i = next++
+        results[i] = await loadPickerItem(candidates[i], pageUrl)
+      }
+    }
+    await Promise.all(Array.from({ length: Math.min(PICKER_CONCURRENCY, candidates.length) }, worker))
+    const loaded = results.filter((r): r is PickerItem => typeof r === 'object' && r !== null)
+    if (run !== pickerRun.current) { loaded.forEach((l) => URL.revokeObjectURL(l.previewUrl)); return }
+    pickerUrls.current = loaded.map((l) => l.previewUrl)
+    setPickerSkipped({
+      failed: results.filter((r) => r === null).length,
+      small: results.filter((r) => r === 'small').length,
+    })
+    setPicker(loaded)
+    setPickerLoading(false)
+  }
+
+  // "Get images" on a lookup source: read that page's images only. Nothing else
+  // from the response fills the form.
+  async function handleSourceImages(source: LookupSource) {
+    if (sourceBusy) return
+    setSourceBusy(source.url)
+    setLinkNote(null)
+    try {
+      const res = await fetch('/api/admin/products/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: source.url, mode: 'page' }),
+      })
+      const json = await res.json().catch(() => null)
+      if (!res.ok) throw new Error(json?.error ?? 'Import failed')
+      const candidates: string[] = ((json?.import?.imageCandidates ?? []) as string[]).filter(Boolean)
+      if (candidates.length > 0) {
+        const from: string = json.import.sourceUrl ?? source.url
+        closePicker()
+        setPageImages(candidates)
+        setPageImagesFrom(from)
+        void handleChooseImages(candidates, from)
+      } else {
+        let host = source.url
+        try { host = new URL(source.url).hostname } catch { /* keep the raw url */ }
+        const note = (json?.import?.notes as string[] | undefined)?.[0]
+        setLinkNote(`No usable images on ${host}.${note ? ` ${note}` : ''}`)
+      }
+    } catch (err) {
+      setLinkNote(err instanceof Error ? err.message : 'Import failed')
+    } finally {
+      setSourceBusy(null)
+    }
+  }
+
+  function togglePicked(url: string) {
+    setPicked((prev) => {
+      const next = new Set(prev)
+      if (next.has(url)) next.delete(url); else next.add(url)
+      return next
+    })
+  }
+
+  // Stage the ticked previews as ordinary uploads: compressed, EXIF stripped,
+  // stored in our bucket. Reuses the downloaded blobs.
+  async function handleAddSelected() {
+    const chosen = (picker ?? []).filter((p) => picked.has(p.url))
+    if (chosen.length === 0) return
+    setPickerAdding(true)
+    try {
+      const files = chosen.map((c) => new File([c.blob], `imported.${c.blob.type.split('/')[1] ?? 'jpg'}`, { type: c.blob.type }))
+      // Provenance: these images came from a web page, not the camera or disk.
+      const sourcePage = pageImagesFrom || undefined
+      const provenance = { origin: 'web' as const, ...(sourcePage ? { originUrl: sourcePage } : {}) }
+      if (isNew) {
+        const staged: PendingImage[] = files.map((file) => ({
+          kind: 'upload', file, previewUrl: URL.createObjectURL(file), isPrimary: false, ...provenance,
+        }))
+        setPendingImages((prev) => {
+          const claim = !prev.some((p) => p.isPrimary)
+          return [...prev, ...staged.map((s, i) => (claim && i === 0 ? { ...s, isPrimary: true } : s))]
+        })
+      } else {
+        const result = await flushPendingImages(
+          files.map((file, i): PendingImage => ({ kind: 'upload', file, previewUrl: '', isPrimary: i === 0 && !imageUrl.trim(), ...provenance })),
+          product!.id,
+          category || null,
+        )
+        if (result.failed) throw new Error(result.firstError ?? 'Upload failed.')
+        setGalleryKey((k) => k + 1)
+      }
+      closePicker()
+      setPageImages([])
+      setPageImagesFrom(null)
+      setLinkNote(`Added ${files.length} ${files.length === 1 ? 'image' : 'images'} to the gallery below.`)
+    } catch (err) {
+      setLinkNote(err instanceof Error ? err.message : "Couldn't add those images.")
+    } finally {
+      setPickerAdding(false)
     }
   }
 
@@ -252,15 +542,16 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
       if (!res.ok) throw new Error(json.error ?? 'Autofill failed')
 
       const incoming: ProductSpec[] = Array.isArray(json.specs) ? json.specs : []
-      const { added, filled, capped } = mergeSpecs(incoming)
+      const { added, filled, capped, ids } = mergeSpecs(incoming)
 
       let brandNote = ''
       if (json.brand && !brand.trim()) { setBrand(json.brand); brandNote = ` Brand set to "${json.brand}".` }
+      const idsNote = ids.length ? ` Set the ${ids.join(' and ')}.` : ''
       const cappedNote = capped ? ` ${capped} skipped (${MAX_SPECS}-spec limit).` : ''
       setAutofillNote(
-        added + filled === 0 && !brandNote
+        added + filled === 0 && !brandNote && !idsNote
           ? `No new facts found in that text.${cappedNote}`
-          : `Added ${added}, filled ${filled}.${brandNote}${cappedNote} Review before saving.`,
+          : `Added ${added}, filled ${filled}.${brandNote}${idsNote}${cappedNote} Review before saving.`,
       )
     } catch (err) {
       setAutofillNote(err instanceof Error ? err.message : 'Autofill failed')
@@ -269,7 +560,8 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
     }
   }
 
-  async function handleSave(e: React.FormEvent) {
+  // `allowDuplicateModel` is the "Save anyway" answer to the duplicate-model 409.
+  async function handleSave(e: React.SyntheticEvent, { allowDuplicateModel = false } = {}) {
     e.preventDefault()
 
     // Special branch: product was already created in a prior submit attempt
@@ -288,8 +580,17 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
       setError(`A take is required when status is "${LABELS.radar.full}".`)
       return
     }
+    if (imageUrl.trim() && !isRenderableImageUrl(imageUrl.trim())) {
+      setError(`The site can't show images hosted on ${imageHost(imageUrl.trim()) ?? 'that site'}. Clear the image URL and upload the image to the gallery instead.`)
+      return
+    }
+    const gtinDigits = gtin.trim() ? normalizeGtin(gtin) : null
+    if (gtin.trim() && !gtinDigits) {
+      setError('That GTIN / UPC isn\'t valid. It should be 8, 12, 13 or 14 digits, and the last digit is a check digit, so one wrong digit fails. Copy it from under the barcode or clear the field.')
+      return
+    }
 
-    setBusy(true); setError(null); setUploadStatus(null)
+    setBusy(true); setError(null); setUploadStatus(null); setDupWarning(null)
 
     const parsedPrice = priceCents.trim() ? parseInt(priceCents.trim(), 10) : null
 
@@ -303,6 +604,9 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
       slug:              slug.trim().toLowerCase(),
       name:              name.trim(),
       brand:             brand.trim() || null,
+      model_number:      modelNumber.trim() || null,
+      gtin:              gtinDigits,
+      ...(allowDuplicateModel ? { allow_duplicate_model: true } : {}),
       specs:             cleanSpecs,
       asin:              asin.trim() || null,
       store,
@@ -338,6 +642,12 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
         },
       )
       const json = await res.json()
+      // Same model already in the catalog: a question, not a failure.
+      if (res.status === 409 && json.duplicate) {
+        setDupWarning(json.error)
+        setBusy(false)
+        return
+      }
       if (!res.ok) throw new Error(json.error ?? 'Save failed')
 
       // Edit mode: simple redirect, no images to flush.
@@ -448,14 +758,14 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
         <div>
           <Eyebrow>Import From a Link</Eyebrow>
           <p className="mt-0.5 text-xs text-prose-faint">
-            Paste a product page. Fills empty fields only — nothing saves until you do.
+            Paste a product page, or look it up by the model number you type below. Fills empty fields only — nothing saves until you do.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="url"
             value={linkUrl}
-            onChange={(e) => { setLinkUrl(e.target.value); setLinkSource(null); setLinkCanLookup(false) }}
+            onChange={(e) => { setLinkUrl(e.target.value); setLinkSource(null); closePicker(); setPageImages([]); setPageImagesFrom(null); setLookupSources([]) }}
             onKeyDown={(e) => {
               // Enter here imports; it must not submit the product form.
               if (e.key === 'Enter') { e.preventDefault(); handleLinkImport('page') }
@@ -473,16 +783,126 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
           </button>
         </div>
         {linkNote && <p className="text-xs text-prose-muted">{linkNote}</p>}
-        {linkCanLookup && (
+        {lookupSources.length > 0 && (
+          <div className="text-xs text-prose-muted">
+            <p className="mb-1">Sources:</p>
+            <ul className="space-y-1.5">
+              {lookupSources.map((s) => (
+                <li key={s.url} className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <button
+                    type="button"
+                    onClick={() => handleSourceImages(s)}
+                    disabled={!!sourceBusy || !!linkBusy}
+                    className={buttonVariants({ size: 'sm', variant: 'secondary', className: 'shrink-0' })}
+                  >
+                    {sourceBusy === s.url ? 'Getting…' : 'Get images'}
+                  </button>
+                  <span className="min-w-0">
+                  <a
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="text-accent-text hover:underline break-all"
+                  >
+                    {s.title ?? s.url}
+                  </a>
+                  {s.supports && <span className="text-prose-faint">{` — ${s.supports}`}</span>}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {pageImages.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-xs text-prose-muted">
+                The page has {pageImages.length} product {pageImages.length === 1 ? 'image' : 'images'} ({imageHost(pageImages[0])}). They&apos;re the site&apos;s own photos; yours are better.
+              </p>
+              {picker === null && (
+                <button
+                  type="button"
+                  onClick={() => handleChooseImages()}
+                  disabled={busy}
+                  className={buttonVariants({ size: 'sm', variant: 'secondary' })}
+                >
+                  Choose images ({pageImages.length})
+                </button>
+              )}
+            </div>
+            {pickerLoading && <p className="text-xs text-prose-faint">Loading images…</p>}
+            {picker !== null && !pickerLoading && picker.length === 0 && (
+              <p className="text-xs text-prose-faint">
+                None of those images could be used.{skippedNote && ` ${skippedNote}`}
+              </p>
+            )}
+            {picker !== null && picker.length > 0 && (
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                {picker.map((p) => {
+                  const on = picked.has(p.url)
+                  return (
+                    <label key={p.url} className="block cursor-pointer">
+                      <div className={`relative aspect-square overflow-hidden rounded-lg border bg-surface ${on ? 'border-accent ring-2 ring-accent' : 'border-soft'}`}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={p.previewUrl} alt="" className="w-full h-full object-contain" />
+                        <input
+                          type="checkbox"
+                          checked={on}
+                          onChange={() => togglePicked(p.url)}
+                          className="absolute top-1.5 left-1.5 h-5 w-5 accent-accent"
+                          aria-label={`Select image ${p.w} by ${p.h}`}
+                        />
+                      </div>
+                      <div className="mt-1 flex flex-wrap items-center gap-1 text-xs text-prose-faint">
+                        <span>{p.w}×{p.h}</span>
+                        {isLikelyGraphic(p.url) && <Badge tone="muted" size="sm">Graphic</Badge>}
+                      </div>
+                    </label>
+                  )
+                })}
+              </div>
+            )}
+            {picker !== null && picker.length > 0 && !pickerLoading && skippedNote && (
+              <p className="text-xs text-prose-faint">{skippedNote}</p>
+            )}
+            {picker !== null && !pickerLoading && (
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleAddSelected}
+                  disabled={picked.size === 0 || pickerAdding || busy}
+                  className={buttonVariants({ size: 'sm', variant: 'secondary' })}
+                >
+                  {pickerAdding ? 'Adding…' : `Add selected (${picked.size})`}
+                </button>
+                <button
+                  type="button"
+                  onClick={closePicker}
+                  disabled={pickerAdding}
+                  className={buttonVariants({ size: 'sm', variant: 'secondary' })}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+        {/* The web lookup uses everything entered so far; a typed model number
+            turns a guess from a store link into one exact search. */}
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => handleLinkImport('lookup')}
-            disabled={!!linkBusy}
+            disabled={!!linkBusy || !canLookup}
             className={buttonVariants({ size: 'sm', variant: 'secondary' })}
           >
             {linkBusy === 'lookup' ? 'Searching the web…' : 'Look up details (web search)'}
           </button>
-        )}
+          <p className="text-xs text-prose-faint">
+            {canLookup ? `Uses: ${lookupUses.join(', ')}.` : 'Paste a link, or type a model number below, to look it up.'}
+            {canLookup && !modelNumber.trim() ? ' Type the model number below for an exact match.' : ''}
+          </p>
+        </div>
       </Card>
 
       <div>
@@ -501,6 +921,18 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
         <p className="mt-1 text-xs text-prose-faint">
           Used in tokens: <code className="text-accent-text-soft">[[BUY:{slug || 'your-slug'}]]</code>. Lowercase letters, numbers, hyphens only.
         </p>
+        {/* New products only: once saved, tokens and links use the slug. Hidden
+            when the slug already is it, or its numbered form (the import's
+            dewalt-dcd801b-2 means dewalt-dcd801b is taken). */}
+        {isNew && suggestedSlug && !slug.startsWith(suggestedSlug) && (
+          <button
+            type="button"
+            onClick={() => setSlug(suggestedSlug)}
+            className={buttonVariants({ size: 'sm', variant: 'secondary', className: 'mt-2' })}
+          >
+            Use brand + model: {suggestedSlug}
+          </button>
+        )}
       </div>
 
       <div>
@@ -522,13 +954,50 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
         <input
           type="text"
           value={brand}
-          onChange={(e) => setBrand(e.target.value)}
+          onChange={(e) => { setBrand(e.target.value); setDupWarning(null) }}
           placeholder="e.g. Enfamil, DeWalt, Graco"
           className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
         />
         <p className="mt-1 text-xs text-prose-faint">
           Manufacturer / brand, separate from the product name. Used to ground reviews and compare against other brands.
         </p>
+      </div>
+
+      {/* ── Identifiers (mig 159) ─────────────────────────────────────────── */}
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label className="block text-sm text-prose-muted mb-1.5">Model number</label>
+          <input
+            type="text"
+            value={modelNumber}
+            onChange={(e) => { setModelNumber(e.target.value); setDupWarning(null) }}
+            maxLength={MODEL_NUMBER_MAX}
+            placeholder="e.g. DCD801B"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          />
+          <p className="mt-1 text-xs text-prose-faint">
+            The maker&apos;s model / part number for this exact version (tool-only and kit differ). Not a store&apos;s SKU. Shown on the review.
+          </p>
+        </div>
+        <div>
+          <label className="block text-sm text-prose-muted mb-1.5">GTIN / UPC</label>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={gtin}
+            onChange={(e) => setGtin(e.target.value)}
+            maxLength={20}
+            placeholder="12-digit UPC or 13-digit EAN"
+            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          />
+          {gtin.trim() && !normalizeGtin(gtin) ? (
+            <p className="mt-1 text-xs text-warn-ink">Not a valid barcode number yet: wrong length or check digit.</p>
+          ) : (
+            <p className="mt-1 text-xs text-prose-faint">
+              The number under the barcode. Optional; tells Google exactly which product the review covers.
+            </p>
+          )}
+        </div>
       </div>
 
       <div>
@@ -684,6 +1153,7 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
       {!isNew ? (
         <div className="space-y-3">
           <ProductImageGallery
+            key={galleryKey}
             productId={product!.id}
             onPrimaryChange={(url) => setImageUrl(url ?? '')}
           />
@@ -697,8 +1167,9 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
                 placeholder="https://... paste a URL directly"
                 className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
               />
+              {unrenderableImage}
               <p className="text-prose-faint">
-                Overrides the gallery primary. Useful for external image URLs (e.g. Amazon CDN).
+                Overrides the gallery primary. The site can only show images from our storage, Amazon (m.media-amazon.com) and Unsplash; upload anything else.
                 {store === 'amazon' && ' On the Amazon product page, right-click the main image → Copy image address.'}
               </p>
             </div>
@@ -723,6 +1194,7 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
                 placeholder="https://... paste a URL directly"
                 className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
               />
+              {unrenderableImage}
               <p className="text-prose-faint">
                 Sets the product&apos;s hero directly. If you also stage gallery images above,
                 the one marked Primary will overwrite this on save.
@@ -1069,6 +1541,20 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
 
       {error && (
         <p className="text-danger-ink text-sm bg-danger-bg border border-danger-line rounded-lg px-4 py-3">{error}</p>
+      )}
+
+      {dupWarning && (
+        <div className="text-sm text-warn-ink bg-warn-bg border border-amber-900/40 rounded-lg px-4 py-3 space-y-3">
+          <p>{dupWarning}</p>
+          <button
+            type="button"
+            onClick={(e) => handleSave(e, { allowDuplicateModel: true })}
+            disabled={busy}
+            className={buttonVariants({ size: 'sm', variant: 'secondary' })}
+          >
+            Save anyway
+          </button>
+        </div>
       )}
 
       {uploadStatus && (
