@@ -59,6 +59,9 @@ export default function SpecComparisonTable({ columns, eyebrow, heading, id, cla
                   <p className={`text-[11px] font-bold leading-tight line-clamp-2 transition-colors ${col.isPrimary ? 'text-accent' : 'text-accent-text-soft group-hover:text-accent'}`}>
                     {col.name}
                   </p>
+                  {col.modelNumber && (
+                    <p className="mt-0.5 text-[10px] text-prose-faint leading-tight">Model {col.modelNumber}</p>
+                  )}
                 </>
               )
               return (

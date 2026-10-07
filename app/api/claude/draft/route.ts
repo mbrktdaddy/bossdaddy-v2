@@ -181,9 +181,15 @@ export async function POST(request: NextRequest) {
   // DB-driven tag vocabulary (killed the hardcoded slug list that used to drift).
   const tagVocab = await fetchTagVocabulary(supabase)
 
+  // The exact model tested (mig 159), from the catalog: readers search by it.
+  const { data: linkedProduct } = productSlug
+    ? await supabase.from('products').select('model_number').eq('slug', productSlug).maybeSingle()
+    : { data: null }
+  const modelNumber = linkedProduct?.model_number ?? null
+
   const prompt = `Write a product review:
 
-Product: ${productName}${brand ? `\nBrand: ${brand}` : ''}
+Product: ${productName}${brand ? `\nBrand: ${brand}` : ''}${modelNumber ? `\nModel number: ${modelNumber}` : ''}
 Category: ${category}${keyFeatures.length ? `\nKey Features: ${keyFeatures.join(', ')}` : ''}${targetAudience ? `\nTarget Audience: ${targetAudience}` : ''}${productSlug ? `\nProduct slug: ${productSlug}` : ''}${specsBlock}${competitorsBlock}
 
 AUTHOR EXPERIENCE (ground truth — write the review as if you lived this):

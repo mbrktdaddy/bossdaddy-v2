@@ -3,7 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/auth-cache'
 import { notifyWishlistSubscribers } from '@/lib/wishlist-emails'
-import { ProductUpdateSchema, productCheckViolation } from '@/lib/products/schema'
+import { ProductUpdateSchema, invalidProductInput, productCheckViolation, productUniqueViolation } from '@/lib/products/schema'
+import { findModelDuplicate, modelDuplicateResponse } from '@/lib/products/duplicates'
 import { revalidateProductPaths, revalidateProductReviewPages } from '@/lib/revalidate'
 
 // GET /api/admin/products/[id]
@@ -35,13 +36,15 @@ export async function PATCH(
   const body = await request.json().catch(() => null)
   const parsed = ProductUpdateSchema.safeParse(body)
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
+    return NextResponse.json({ error: invalidProductInput(parsed.error), details: parsed.error.flatten() }, { status: 400 })
   }
 
   // `tags` is not a products column — it's the product_tags join (mig 122).
   // Pull it out so it doesn't land in the column update, and handle it as a
   // set-replace below. undefined = leave tags untouched; [] = clear all.
-  const { tags, ...columnFields } = parsed.data
+  // allow_duplicate_model isn't a column either: it's the "Save anyway" answer
+  // to the duplicate-model 409 below.
+  const { tags, allow_duplicate_model, ...columnFields } = parsed.data
 
   const updates: Record<string, unknown> = {}
   for (const [k, v] of Object.entries(columnFields)) {
@@ -52,6 +55,18 @@ export async function PATCH(
   }
 
   const admin = createAdminClient()
+
+  // Duplicate-model warning (mig 159), only when the model or brand actually
+  // changes: an existing duplicate the admin already accepted shouldn't nag on
+  // every save. Checked before the tag replace so a 409 leaves nothing written.
+  if (updates.model_number && !allow_duplicate_model) {
+    const { data: cur } = await admin.from('products').select('brand, model_number').eq('id', id).single()
+    const brand = 'brand' in updates ? (updates.brand as string | null) : cur?.brand ?? null
+    if (!cur || cur.model_number !== updates.model_number || (cur.brand ?? null) !== brand) {
+      const dup = await findModelDuplicate(admin, { brand, modelNumber: updates.model_number as string, excludeId: id })
+      if (dup) return NextResponse.json(modelDuplicateResponse(dup), { status: 409 })
+    }
+  }
 
   // 'reviewed' is a verdict the database sets when the review is approved
   // (mig 158). Hand-setting it would claim a review that doesn't exist.
@@ -97,7 +112,8 @@ export async function PATCH(
     ? await admin.from('products').update(updates as any).eq('id', id).select().single()
     : await admin.from('products').select('*').eq('id', id).single()
   if (error) {
-    if (error.code === '23505') return NextResponse.json({ error: 'Slug already in use' }, { status: 409 })
+    const unique = productUniqueViolation(error)
+    if (unique) return NextResponse.json({ error: unique }, { status: 409 })
     const check = productCheckViolation(error)
     if (check) return NextResponse.json({ error: check }, { status: 400 })
     return NextResponse.json({ error: `Update failed: ${error.message}` }, { status: 500 })

@@ -1994,6 +1994,8 @@ export type Database = {
           is_primary: boolean
           label: string | null
           mime_type: string | null
+          origin: string | null
+          origin_url: string | null
           position: number | null
           product_id: string | null
           source_id: string | null
@@ -2013,6 +2015,8 @@ export type Database = {
           is_primary?: boolean
           label?: string | null
           mime_type?: string | null
+          origin?: string | null
+          origin_url?: string | null
           position?: number | null
           product_id?: string | null
           source_id?: string | null
@@ -2032,6 +2036,8 @@ export type Database = {
           is_primary?: boolean
           label?: string | null
           mime_type?: string | null
+          origin?: string | null
+          origin_url?: string | null
           position?: number | null
           product_id?: string | null
           source_id?: string | null
@@ -2763,8 +2769,10 @@ export type Database = {
           description: string | null
           estimated_review_date: string | null
           gallery_images: string[]
+          gtin: string | null
           id: string
           image_url: string | null
+          model_number: string | null
           name: string
           non_affiliate_url: string | null
           price_cents: number | null
@@ -2793,8 +2801,10 @@ export type Database = {
           description?: string | null
           estimated_review_date?: string | null
           gallery_images?: string[]
+          gtin?: string | null
           id?: string
           image_url?: string | null
+          model_number?: string | null
           name: string
           non_affiliate_url?: string | null
           price_cents?: number | null
@@ -2823,8 +2833,10 @@ export type Database = {
           description?: string | null
           estimated_review_date?: string | null
           gallery_images?: string[]
+          gtin?: string | null
           id?: string
           image_url?: string | null
+          model_number?: string | null
           name?: string
           non_affiliate_url?: string | null
           price_cents?: number | null

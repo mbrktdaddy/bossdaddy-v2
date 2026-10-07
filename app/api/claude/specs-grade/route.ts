@@ -186,12 +186,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Catalog is authoritative — load the subject's brand + specs + price.
     let effBrand = brand?.trim() || null
+    // The exact model (mig 159) keeps the search on this product, not its kit
+    // or last year's version.
+    let effModel: string | null = null
     let effSpecs = specs.filter((s) => s.label.trim() && s.value.trim())
     let effPrice: number | null = null
     if (productSlug) {
       const p = await getProductBySlug(supabase, productSlug)
       if (p) {
         if (!effBrand && p.brand) effBrand = p.brand
+        effModel = p.model_number ?? null
         const ps = (Array.isArray(p.specs) ? p.specs : []).filter((s) => s?.label?.trim() && s?.value?.trim())
         if (ps.length) effSpecs = ps
         effPrice = p.price_cents ?? null
@@ -234,7 +238,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const prompt = `Grade the specs of this product against comparable models in its category.
 
-Product: ${effBrand ? `${effBrand} ` : ''}${productName}${usd(effPrice) ? ` (~${usd(effPrice)})` : ''}
+Product: ${effBrand ? `${effBrand} ` : ''}${productName}${effModel ? ` (model ${effModel})` : ''}${usd(effPrice) ? ` (~${usd(effPrice)})` : ''}
 Category: ${categoryLabel}${nameHints.length ? `\nAuthor-suggested competitors (prioritize these): ${nameHints.join(', ')}` : ''}${tierLine}
 
 Subject product specs (verified — treat as the subject's facts):

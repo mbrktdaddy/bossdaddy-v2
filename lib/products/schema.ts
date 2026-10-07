@@ -2,6 +2,8 @@ import { z } from 'zod'
 import { LABELS } from '@/lib/labels'
 import { RADAR_TAKE_MAX } from '@/lib/products'
 import { TESTING_NOTE_MAX } from '@/lib/products/testing-notes'
+import { MODEL_NUMBER_MAX, cleanModelNumber, normalizeGtin } from '@/lib/products/identifiers'
+import { imageHost, isRenderableImageUrl } from '@/lib/images/remote-hosts'
 
 // Shared product validation schemas. Routes import these instead of
 // re-declaring drifting copies (see workspace-unification Phase 0).
@@ -28,7 +30,16 @@ const sharedProductFields = {
   custom_store_name:     z.string().max(80).optional().nullable(),
   affiliate_url:         z.string().url().max(2048).optional().nullable(),
   non_affiliate_url:     z.string().url().max(2048).optional().nullable(),
-  image_url:             z.string().url().max(2048).optional().nullable(),
+  // Only a host next/image can render: anything else throws on the Radar card
+  // and spec tables. Store images are uploaded (the import's "Add this image"),
+  // never hotlinked.
+  image_url:             z.string().url().max(2048).optional().nullable()
+                           .transform((v, ctx) => {
+                             if (v && !isRenderableImageUrl(v)) {
+                               ctx.addIssue({ code: 'custom', message: `Images hosted on ${imageHost(v) ?? 'that site'} can't be shown on the site. Upload the image instead.` })
+                             }
+                             return v
+                           }),
   description:           z.string().max(400).optional().nullable(),
   category:              z.string().max(80).optional().nullable(),
   price_cents:           z.number().int().min(0).optional().nullable(),
@@ -44,6 +55,20 @@ const sharedProductFields = {
   // How I got it (mig 158). null = no claim.
   acquisition:           z.enum(ACQUISITIONS).optional().nullable(),
   provided_by:           z.string().max(120).optional().nullable(),
+  // Identifiers (mig 159). Blank → null; a GTIN is stored as digits only and
+  // must carry a valid check digit (the DB CHECK guards the shape only).
+  model_number:          z.string().max(MODEL_NUMBER_MAX).nullable().optional()
+                           .transform((v) => (v == null ? v : cleanModelNumber(v))),
+  gtin:                  z.string().max(20).nullable().optional()
+                           .transform((v, ctx) => {
+                             if (v == null) return v
+                             if (!v.trim()) return null
+                             const g = normalizeGtin(v)
+                             if (!g) ctx.addIssue({ code: 'custom', message: 'Not a valid UPC / EAN / GTIN (8, 12, 13 or 14 digits with a correct check digit).' })
+                             return g
+                           }),
+  // Not a column: "save anyway" after the duplicate-model warning (409).
+  allow_duplicate_model: z.boolean().optional(),
 }
 
 // Postgres CHECK violations (23514) the admin can cause with valid-looking
@@ -51,6 +76,8 @@ const sharedProductFields = {
 const CHECK_MESSAGES: Record<string, string> = {
   products_radar_requires_take: `A ${LABELS.radar.short} item needs a take before it can go live.`,
   products_radar_take_length:   `The ${LABELS.radar.short} take is capped at ${RADAR_TAKE_MAX} characters.`,
+  products_model_number_format: `Model number must be 1–${MODEL_NUMBER_MAX} characters.`,
+  products_gtin_format:         'GTIN must be 8, 12, 13 or 14 digits.',
 }
 
 /** A readable message for a product CHECK violation, or null if `error` isn't one. */
@@ -58,6 +85,21 @@ export function productCheckViolation(error: { code?: string; message: string })
   if (error.code !== '23514') return null
   const hit = Object.keys(CHECK_MESSAGES).find((name) => error.message.includes(name))
   return hit ? CHECK_MESSAGES[hit] : `Invalid product: ${error.message}`
+}
+
+/** The first validation problem, readable ("gtin: Not a valid UPC…"), for the form's error line. */
+export function invalidProductInput(error: z.ZodError): string {
+  const first = error.issues[0]
+  if (!first) return 'Invalid input'
+  return first.path.length ? `${first.path.join('.')}: ${first.message}` : first.message
+}
+
+/** A readable message for a product unique violation (23505 → 409), or null. */
+export function productUniqueViolation(error: { code?: string; message: string }): string | null {
+  if (error.code !== '23505') return null
+  return error.message.includes('products_gtin_key')
+    ? 'Another product already has that GTIN. A GTIN names exactly one product, so this would be a duplicate.'
+    : 'Slug already in use'
 }
 
 // POST /api/admin/products — create. Defaults applied at insert time.

@@ -195,6 +195,10 @@ export interface Product {
   // /gear/radar archive can show what was said and when.
   radar_take: string | null
   spotted_at: string | null
+  // Identifiers (mig 159): manufacturer model number (schema.org mpn) + GTIN,
+  // digits only. Rules in lib/products/identifiers.ts.
+  model_number: string | null
+  gtin: string | null
   // Provenance: 'hand' | 'pa_api' | 'adopted_from_research'.
   source: string
   created_at: string
@@ -254,6 +258,8 @@ export interface SpecComparisonColumn {
   slug: string
   name: string
   brand: string | null
+  /** Manufacturer model number (mig 159), shown under the name. */
+  modelNumber?: string | null
   imageUrl?: string | null
   /** Link target for the column header (review or product page). */
   href?: string | null

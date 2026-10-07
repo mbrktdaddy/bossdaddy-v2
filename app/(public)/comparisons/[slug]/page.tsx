@@ -23,6 +23,7 @@ import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
 import { CheckIcon, XIcon } from '@/components/icons'
+import { productIdentifiersJsonLd } from '@/lib/products/identifiers'
 
 export const revalidate = 60
 
@@ -135,9 +136,9 @@ export default async function ComparisonDetailPage({ params }: Props) {
 
   // Affiliate CTAs + per-item price lookup
   const productSlugs = [...new Set(items.map((i) => i.review?.product_slug).filter(Boolean) as string[])]
-  const productMap = new Map<string, { slug: string; affiliate_url: string | null; non_affiliate_url: string | null; price_cents: number | null; brand: string | null; specs: ProductSpec[] }>()
+  const productMap = new Map<string, { slug: string; affiliate_url: string | null; non_affiliate_url: string | null; price_cents: number | null; brand: string | null; model_number: string | null; gtin: string | null; specs: ProductSpec[] }>()
   for (const product of await getProductsBySlugs(supabase, productSlugs)) {
-    productMap.set(product.slug, { slug: product.slug, affiliate_url: product.affiliate_url, non_affiliate_url: product.non_affiliate_url, price_cents: product.price_cents, brand: product.brand, specs: product.specs ?? [] })
+    productMap.set(product.slug, { slug: product.slug, affiliate_url: product.affiliate_url, non_affiliate_url: product.non_affiliate_url, price_cents: product.price_cents, brand: product.brand, model_number: product.model_number, gtin: product.gtin, specs: product.specs ?? [] })
   }
   const hasAffiliateLinks = [...productMap.values()].some((p) => p.affiliate_url)
 
@@ -151,6 +152,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
       slug: review.slug,
       name: review.product_name,
       brand: p.brand,
+      modelNumber: p.model_number,
       imageUrl: review.image_url,
       href: `#dive-${review.slug}`,
       specs: p.specs,
@@ -269,6 +271,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
           name:            entry.review!.product_name,
           image:           toAbsoluteUrl(entry.review!.image_url, siteUrl),
           ...(p?.brand ? { brand: { '@type': 'Brand', name: p.brand } } : {}),
+          ...productIdentifiersJsonLd(p),
           ...(props.length ? { additionalProperty: props.map((s) => ({ '@type': 'PropertyValue', name: s.label, value: s.value })) } : {}),
           aggregateRating: entry.review!.rating != null ? {
             '@type':       'AggregateRating',

@@ -50,6 +50,7 @@ import RecentlyViewedStrip from '@/components/RecentlyViewedStrip'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { CheckCircleIcon, ChevronLeftIcon } from '@/components/icons'
+import { productIdentifiersJsonLd } from '@/lib/products/identifiers'
 
 const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
 
@@ -213,13 +214,14 @@ export default async function ReviewPage({ params }: Props) {
       slug: product.slug,
       name: review.product_name,
       brand: product.brand,
+      modelNumber: product.model_number,
       imageUrl: product.image_url,
       isPrimary: true,
       specs: product.specs ?? [],
     })
     for (const cs of comparisonSlugs) {
       const cp = competitorProducts.find((p) => p.slug === cs)
-      if (cp) specColumns.push({ slug: cp.slug, name: cp.name, brand: cp.brand, imageUrl: cp.image_url, specs: cp.specs ?? [] })
+      if (cp) specColumns.push({ slug: cp.slug, name: cp.name, brand: cp.brand, modelNumber: cp.model_number, imageUrl: cp.image_url, specs: cp.specs ?? [] })
     }
   }
   // Show the review's comparison table only when the reviewed product itself
@@ -284,6 +286,7 @@ export default async function ReviewPage({ params }: Props) {
       name: review.product_name,
       image: productImage,
       ...(product?.brand ? { brand: { '@type': 'Brand', name: product.brand } } : {}),
+      ...productIdentifiersJsonLd(product),
       ...(product?.specs?.length
         ? {
             additionalProperty: product.specs
@@ -441,6 +444,7 @@ export default async function ReviewPage({ params }: Props) {
             testingNote={review.testing_note}
             bought={productClaimsFor?.bought ?? false}
             disclosure={productClaimsFor?.disclosure ?? null}
+            modelNumber={product?.model_number ?? null}
             className="mt-2 pb-6"
           />
           <TestingLog notes={testingLog} collapsible className="mb-6" />

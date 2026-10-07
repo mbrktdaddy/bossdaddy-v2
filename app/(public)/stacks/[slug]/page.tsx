@@ -24,6 +24,7 @@ import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
 import { upgradeReviewedProducts } from '@/lib/collections/product-items'
 import { ProductClaimLine } from '@/components/products/ProductClaimLine'
+import { productIdentifiersJsonLd } from '@/lib/products/identifiers'
 
 export const revalidate = 60
 
@@ -99,6 +100,8 @@ type JoinedProduct = {
   slug: string
   name: string
   brand: string | null
+  model_number: string | null
+  gtin: string | null
   image_url: string | null
   category: string | null
   price_cents: number | null
@@ -127,7 +130,7 @@ export default async function StackDetailPage({ params }: Props) {
   const admin = createAdminClient()
   const { data: rawItems } = await admin
     .from('collection_items')
-    .select('position, blurb, role_label, product_slug, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, best_for), products(slug, name, brand, image_url, category, price_cents, affiliate_url, non_affiliate_url, description, status, acquisition, provided_by)')
+    .select('position, blurb, role_label, product_slug, reviews(id, slug, title, product_name, category, rating, excerpt, tldr, image_url, product_slug, best_for), products(slug, name, brand, model_number, gtin, image_url, category, price_cents, affiliate_url, non_affiliate_url, description, status, acquisition, provided_by)')
     .eq('collection_id', stack.id)
     .order('position')
 
@@ -257,6 +260,7 @@ export default async function StackDetailPage({ params }: Props) {
             name:    p.name,
             image:   toAbsoluteUrl(p.image_url, siteUrl),
             brand:   p.brand ? { '@type': 'Brand', name: p.brand } : undefined,
+            ...productIdentifiersJsonLd(p),
           },
         }
       }

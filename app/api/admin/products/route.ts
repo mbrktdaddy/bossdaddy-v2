@@ -2,7 +2,8 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/auth-cache'
-import { ProductCreateSchema, productCheckViolation } from '@/lib/products/schema'
+import { ProductCreateSchema, invalidProductInput, productCheckViolation, productUniqueViolation } from '@/lib/products/schema'
+import { findModelDuplicate, modelDuplicateResponse } from '@/lib/products/duplicates'
 import { revalidateProductPaths } from '@/lib/revalidate'
 
 // GET /api/admin/products — list all products (admin only)
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null)
   const parsed = ProductCreateSchema.safeParse(body)
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
+    return NextResponse.json({ error: invalidProductInput(parsed.error), details: parsed.error.flatten() }, { status: 400 })
   }
 
   // A new product can't have an approved review yet; 'reviewed' is set by the
@@ -43,6 +44,14 @@ export async function POST(request: NextRequest) {
   }
 
   const admin = createAdminClient()
+
+  // Same model already in the catalog? Ask first; "Save anyway" resends with
+  // allow_duplicate_model (a kit and a tool-only unit can share one).
+  if (parsed.data.model_number && !parsed.data.allow_duplicate_model) {
+    const dup = await findModelDuplicate(admin, { brand: parsed.data.brand, modelNumber: parsed.data.model_number })
+    if (dup) return NextResponse.json(modelDuplicateResponse(dup), { status: 409 })
+  }
+
   const { data, error } = await admin
     .from('products')
     .insert({
@@ -66,6 +75,8 @@ export async function POST(request: NextRequest) {
       radar_take:            parsed.data.radar_take ?? null,
       acquisition:           parsed.data.acquisition ?? null,
       provided_by:           parsed.data.provided_by ?? null,
+      model_number:          parsed.data.model_number ?? null,
+      gtin:                  parsed.data.gtin ?? null,
       // Omitted = the trigger stamps now() for a Radar insert (mig 157).
       ...(parsed.data.spotted_at ? { spotted_at: parsed.data.spotted_at } : {}),
       source:                'hand',
@@ -75,7 +86,8 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (error) {
-    if (error.code === '23505') return NextResponse.json({ error: 'Slug already in use' }, { status: 409 })
+    const unique = productUniqueViolation(error)
+    if (unique) return NextResponse.json({ error: unique }, { status: 409 })
     const check = productCheckViolation(error)
     if (check) return NextResponse.json({ error: check }, { status: 400 })
     return NextResponse.json({ error: `Create failed: ${error.message}` }, { status: 500 })
