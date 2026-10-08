@@ -20,29 +20,25 @@ import { BagIcon, ChevronDownIcon, ChevronRightIcon, EnvelopeIcon, SearchIcon, X
 // hubs, stacks and gift guides through /gear. The Vault hub that used to sit
 // over them 301s to /gear.
 //
-// ⚠️ CANONICAL SPINE ORDER: Reviews · Guides · Tools · Gear. Every surface that lists
-// these four renders them in this sequence — this array (which feeds BOTH the desktop
-// nav and the mobile drawer), `MobileBottomNav`'s tabs, and the Footer's Browse column.
-// Tools used to sit last here and last in the footer, which put the most-used signed-in
-// surface at the end of every list on the site. If you add a fifth spine anchor, add it
-// in all three places or it will read as a different site depending on where you look.
+// ⚠️ THE PILLARS (nav-ia-plan Phase I, 2026-10-08): Topics · Gear · Shop · Tools.
+// A nav slot goes to a TOPIC or an INTENT (gear, shop, tools, seasonal gifts) — never
+// to a content FORMAT (invariant 10). Reviews and Guides used to be spine anchors
+// here; they are article shapes inside Topics now, reached through the mega-menu,
+// the category hubs and /explore. Every surface that lists the pillars renders them
+// in this order — this bar, the Footer's Browse column, and (as Home · Explore ·
+// [Ask] · Gear · Tools) `MobileBottomNav`. Add a pillar in all three places or the
+// site reads differently depending on where you look.
 //
-// DESKTOP EXCEPTION (2026-10-08, operator decision): the desktop bar splits by
-// audience — Topics · Reviews · Guides · Gear on the left (the publication), Tools
-// on the right beside the account (the members' home). The drawer keeps this order.
+// DESKTOP splits by audience: Topics ▾ · Gear · Shop on the left (the publication
+// and its places), Tools on the right beside the account (the members' home).
+// Home is omitted — the logo is the home affordance.
 //
-// MOBILE: `MobileBottomNav` carries Home · Explore · [Ask] · Gear · Tools (Phase I,
-// 2026-10-08). Reviews and Guides reach mobile through the Explore tab — they are
-// formats, not places (nav-ia-plan invariant 10). Every spine anchor is on the strip,
-// so the drawer below carries NO lead rows; it holds only the groups (Topics,
-// Collections, From Boss Daddy) and the account door. Reasoning is in
-// `MobileBottomNav.tsx`. The desktop bar still lists Reviews · Guides until step I-5.
+// MOBILE: every pillar is on the bottom strip, so the drawer below carries NO lead
+// rows; it holds only the Browse groups (Topics, From Boss Daddy) and the account
+// door. Reasoning is in `MobileBottomNav.tsx`.
 const NAV_LINKS = [
-  { href: '/',        label: 'Home' },
-  { href: '/reviews', label: LABELS.reviews.plural },
-  { href: '/guides',  label: LABELS.guides.plural },
-  { href: '/tools',   label: LABELS.tools.short },
-  { href: '/gear',    label: LABELS.gear.short },
+  { href: '/gear', label: LABELS.gear.short },
+  { href: '/shop', label: LABELS.shop.short },
 ]
 
 // "From Boss Daddy" — the Browse menu's second column: places that are Boss
@@ -221,10 +217,10 @@ export default function Header() {
         </Link>
 
         {/* Desktop nav */}
-        {/* Desktop splits by AUDIENCE: the publication sits here on the left —
-            Topics first, then Reviews · Guides · Gear — and Tools (the members'
-            home) sits on the right with the account. Home is omitted (the logo
-            is the home affordance); the mobile drawer keeps the full spine. */}
+        {/* Desktop splits by AUDIENCE: the publication and its places sit here
+            on the left — Topics first, then Gear · Shop — and Tools (the
+            members' home) sits on the right with the account. Home is omitted
+            (the logo is the home affordance). */}
         <nav aria-label="Site navigation" className="hidden md:flex items-center gap-1">
           {/* Topics mega-menu trigger — first, because readers navigate by
               subject. NOT `relative`: the panel anchors to the header container
@@ -273,7 +269,7 @@ export default function Header() {
             )}
           </div>
 
-          {NAV_LINKS.filter((l) => l.href !== '/' && l.href !== TOOLS_HREF).map(({ href, label }) => (
+          {NAV_LINKS.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
@@ -342,19 +338,9 @@ export default function Header() {
             <span className="sr-only lg:not-sr-only">{LABELS.tools.short}</span>
           </Link>
 
-          {/* Shop — the store's standing entry point, where every major site keeps
-              it: top-right, beside the cart. Not a spine anchor (merch is
-              secondary), and the cart icon still only appears once it has items. */}
-          <Link
-            href="/shop"
-            className={`hidden md:flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-              isActive(pathname, '/shop') ? 'text-prose' : 'text-prose-muted hover:text-prose hover:bg-surface-raised'
-            }`}
-          >
-            <BagIcon className="w-4 h-4" strokeWidth={1.5} />
-            <span className="sr-only lg:not-sr-only">{LABELS.shop.short}</span>
-          </Link>
-
+          {/* Shop lives in the left bar as a pillar (Phase I-5); the cart icon
+              stays here beside the account and still only appears once it has
+              items. */}
           <CartIcon />
 
           <AccountMenu />

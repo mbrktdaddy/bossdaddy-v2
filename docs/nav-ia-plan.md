@@ -436,8 +436,11 @@ Profile tab, because `/tools` IS the signed-in home (invariant 8).
   (`CollectionBreadcrumb`). `lib/vault.ts` keeps its name — the Vault is the
   concept's final name and still labels the admin side; the `all` tab is gone and
   every tab carries `parent` + `eyebrow`. `/vault` was never in the sitemap.
-- **I-5 Desktop bar + footer** to the pillar set. Reviews/Guides links out of
-  `NAV_LINKS`; `Footer.BROWSE` → pillars.
+- **I-5 Desktop bar + footer — SHIPPED 2026-10-08.** Desktop bar is Topics ▾ · Gear ·
+  Shop on the left, Tools on the right beside the account; `NAV_LINKS` is just Gear +
+  Shop (Shop moved from its right-side icon slot to a left-bar pillar; the cart icon
+  stays right). `Footer.BROWSE` is four links — Topics (→ `/explore`), Gear, Shop,
+  Tools — down from eleven. Gifts joins both in season with I-6.
 - **I-6 Gifts seasonal switch** (`isGiftSeason()`), homepage band, nav slot.
 
 **Invariant 10 (new):** a content FORMAT never gets a nav slot; a TOPIC or an INTENT

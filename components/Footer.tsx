@@ -7,21 +7,17 @@ import { DownloadIcon } from '@/components/icons'
 
 interface BrowseLink { href: string; label: string; hint?: string }
 
-// The four spine anchors lead, in the canonical order the header nav and the mobile tab
-// strip both use — Reviews · Guides · Tools · Gear (see the note on NAV_LINKS in
-// Header.tsx). Tools was last in this column, which buried the most-used signed-in
-// surface at the bottom of a ten-item list. The collections follow.
+// The pillars only, in the order the desktop bar renders them — Topics · Gear ·
+// Shop · Tools (see the note on NAV_LINKS in Header.tsx; nav-ia-plan Phase I-5).
+// This column used to carry eleven links, six of them collection formats; a
+// format never gets a nav slot (invariant 10). Topics links the /explore index,
+// whose first section is the topic grid. Radar, Bench and the gift guides are
+// reached inside Gear; comparisons and best-of inside Topics/Explore.
 const BROWSE: BrowseLink[] = [
-  { href: '/reviews',              label: LABELS.reviews.plural },
-  { href: '/guides',               label: LABELS.guides.plural },
-  { href: '/tools',                label: LABELS.tools.short, hint: LABELS.tools.hub.metaDescription },
-  { href: '/gear',                 label: LABELS.gear.short },
-  { href: '/comparisons',          label: LABELS.comparisons.short },
-  { href: '/picks',                label: LABELS.picks.short },
-  { href: '/stacks',               label: LABELS.stacks.short },
-  { href: '/gifts',                label: LABELS.gifts.short },
-  { href: '/bench',                label: LABELS.bench.full,  hint: LABELS.bench.tagline },
-  { href: '/shop',                 label: LABELS.shop.short,  hint: LABELS.shop.tagline },
+  { href: '/explore', label: 'Topics',           hint: LABELS.explore.tagline },
+  { href: '/gear',    label: LABELS.gear.short },
+  { href: '/shop',    label: LABELS.shop.short,  hint: LABELS.shop.tagline },
+  { href: '/tools',   label: LABELS.tools.short, hint: LABELS.tools.hub.metaDescription },
 ]
 
 const TRUST: BrowseLink[] = [
