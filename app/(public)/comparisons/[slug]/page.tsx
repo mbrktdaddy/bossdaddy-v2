@@ -17,7 +17,7 @@ import { faqPageLd } from '@/lib/seo/faq-ld'
 import { ogImageUrl, ogImageMeta, toAbsoluteUrl, aspectVariants, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
-import VaultBreadcrumb from '@/components/vault/VaultBreadcrumb'
+import CollectionBreadcrumb from '@/components/collections/CollectionBreadcrumb'
 import FtcDisclosure from '@/components/FtcDisclosure'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
@@ -295,7 +295,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
       {faqLd      && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <VaultBreadcrumb tab="comparisons" current={comparison.title} />
+        <CollectionBreadcrumb tab="comparisons" current={comparison.title} />
         {hasAffiliateLinks && <FtcDisclosure />}
 
         <div className="lg:flex lg:gap-10 lg:items-start">

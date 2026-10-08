@@ -5,7 +5,7 @@ import { buildSocialMetadata } from '@/lib/og'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { OCCASIONS, OCCASION_GROUPS } from '@/lib/gift-occasions'
 import OccasionIcon from '@/components/OccasionIcon'
-import VaultShell from '@/components/vault/VaultShell'
+import CollectionListingHeader from '@/components/collections/CollectionListingHeader'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
 
@@ -62,10 +62,12 @@ export default async function GiftsIndexPage() {
     .flatMap((group) => OCCASIONS.filter((o) => o.group === group.id))
     .find((o) => liveByOccasion.get(o.value)?.hero_image_url)?.value
 
-  // Gift guides keep their occasion grid rather than VaultGrid's flat list: a
+  // Gift guides keep their occasion grid rather than CollectionGrid's flat list: a
   // reader shops by occasion, and unwritten occasions still earn a "Coming Soon" tile.
   return (
-    <VaultShell active="gifts">
+    <>
+      <CollectionListingHeader tab="gifts" />
+      <div className="max-w-6xl mx-auto px-6 pt-8 pb-12">
       {/* Grouped occasion grid */}
       {OCCASION_GROUPS.map((group) => (
         <section key={group.id} className="mb-14">
@@ -140,6 +142,7 @@ export default async function GiftsIndexPage() {
           Get on the list →
         </Link>
       </div>
-    </VaultShell>
+      </div>
+    </>
   )
 }

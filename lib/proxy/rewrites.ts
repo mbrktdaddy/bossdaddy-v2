@@ -112,8 +112,9 @@ export function rewriteLegacyRoute(pathname: string): string | null {
   return null
 }
 
-// /vault?tab=<id> was the Vault's old client-side tab state. Each tab is now a
-// real page (/comparisons, /picks, /stacks, /gifts) rendered in the Vault shell.
+// The Vault hub is gone (nav-ia-plan Phase I-4, 2026-10-08): /vault 301s to
+// /gear. A `?tab=` from the hub's even older client-side tab state still lands
+// on that tab's real page so no old link degrades to the hub's replacement.
 const LEGACY_VAULT_TABS: Record<string, string> = {
   comparisons: '/comparisons',
   'best-of':   '/picks',
@@ -123,7 +124,7 @@ const LEGACY_VAULT_TABS: Record<string, string> = {
 
 export function rewriteLegacyVaultTab(pathname: string, tab: string | null): string | null {
   if (pathname !== '/vault' && pathname !== '/vault/') return null
-  return tab ? LEGACY_VAULT_TABS[tab] ?? null : null
+  return (tab && LEGACY_VAULT_TABS[tab]) || '/gear'
 }
 
 // Returns a 301 NextResponse if the path matches a public legacy URL, else null.

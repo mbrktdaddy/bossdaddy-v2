@@ -16,7 +16,6 @@ const BROWSE: BrowseLink[] = [
   { href: '/guides',               label: LABELS.guides.plural },
   { href: '/tools',                label: LABELS.tools.short, hint: LABELS.tools.hub.metaDescription },
   { href: '/gear',                 label: LABELS.gear.short },
-  { href: '/vault',                label: LABELS.vault.full,  hint: LABELS.vault.tagline },
   { href: '/comparisons',          label: LABELS.comparisons.short },
   { href: '/picks',                label: LABELS.picks.short },
   { href: '/stacks',               label: LABELS.stacks.short },

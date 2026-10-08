@@ -10,11 +10,17 @@ interface Props {
   cat: string | null
 }
 
-export default async function VaultGrid({ tab: tabId, cat }: Props) {
+/**
+ * The body of a collection listing (/comparisons, /picks, /stacks): category
+ * pills + card grid + empty state. Was `components/vault/VaultGrid` under the
+ * Vault shell; the shell is gone (Phase I-4) and each listing now renders its
+ * own PageHeader above this.
+ */
+export default async function CollectionGrid({ tab: tabId, cat }: Props) {
   const tab = getVaultTab(tabId)
   const all = (await getVaultCollections()).filter((c) => tab.types.includes(c.collection_type))
 
-  // Counts come from the unfiltered tab so the pills don't shrink as you filter.
+  // Counts come from the unfiltered listing so the pills don't shrink as you filter.
   const counts = new Map<string, number>()
   for (const c of all) {
     if (c.dominant_category) counts.set(c.dominant_category, (counts.get(c.dominant_category) ?? 0) + 1)
@@ -39,7 +45,7 @@ export default async function VaultGrid({ tab: tabId, cat }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {/* Index 0 only gets priority: it's the LCP candidate on a one-column phone grid. */}
           {filtered.map((c, i) => (
-            <VaultCard key={c.id} col={c} priority={i === 0} cta={tab.id === 'all' ? undefined : tab.cardCta} />
+            <VaultCard key={c.id} col={c} priority={i === 0} cta={tab.cardCta} />
           ))}
         </div>
       )}

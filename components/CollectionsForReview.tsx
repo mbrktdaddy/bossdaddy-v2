@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { createAnonClient } from '@/lib/supabase/anon'
-import { LABELS } from '@/lib/labels'
 import { vaultHref, vaultTypeLabel } from '@/lib/vault'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { CubeIcon, ScaleIcon, StarIcon } from '@/components/icons'
@@ -67,9 +66,9 @@ export default async function CollectionsForReview({ reviewId }: Props) {
       <div className="mb-5">
         <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
         <Eyebrow className="mb-1">Featured in</Eyebrow>
-        <h2 className="text-lg font-black">
-          <Link href="/vault" className="hover:text-accent-text-soft transition-colors">{LABELS.vault.full}</Link>
-        </h2>
+        {/* No hub link: the Vault stopped being a place (Phase I-4). Each row
+            below links its own listing's detail page. */}
+        <h2 className="text-lg font-black">Collections</h2>
       </div>
       <ul className="space-y-2">
         {collections.map((c) => {

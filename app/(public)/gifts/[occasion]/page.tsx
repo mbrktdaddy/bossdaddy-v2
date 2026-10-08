@@ -20,7 +20,7 @@ import { faqPageLd } from '@/lib/seo/faq-ld'
 import { ogImageUrl, ogImageMeta, toAbsoluteUrl, aspectVariants, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
-import VaultBreadcrumb from '@/components/vault/VaultBreadcrumb'
+import CollectionBreadcrumb from '@/components/collections/CollectionBreadcrumb'
 import FtcDisclosure from '@/components/FtcDisclosure'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
@@ -308,7 +308,7 @@ export default async function GiftOccasionPage({ params }: Props) {
       {faqLd      && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
       <div className={`${pick ? 'max-w-7xl' : 'max-w-4xl'} mx-auto px-6 py-12`}>
-        <VaultBreadcrumb tab="gifts" current={occ.label} className="mb-6" />
+        <CollectionBreadcrumb tab="gifts" current={occ.label} className="mb-6" />
         {hasAffiliateLinks && <FtcDisclosure />}
 
         <div className={pick ? 'lg:flex lg:gap-10 lg:items-start' : ''}>

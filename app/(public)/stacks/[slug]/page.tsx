@@ -16,7 +16,7 @@ import { faqPageLd } from '@/lib/seo/faq-ld'
 import { ogImageUrl, ogImageMeta, toAbsoluteUrl, aspectVariants, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
-import VaultBreadcrumb from '@/components/vault/VaultBreadcrumb'
+import CollectionBreadcrumb from '@/components/collections/CollectionBreadcrumb'
 import FtcDisclosure from '@/components/FtcDisclosure'
 import { LABELS } from '@/lib/labels'
 import { Card } from '@/components/ui/Card'
@@ -294,7 +294,7 @@ export default async function StackDetailPage({ params }: Props) {
       {faqLd      && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <VaultBreadcrumb tab="stacks" current={stack.title} />
+        <CollectionBreadcrumb tab="stacks" current={stack.title} />
         {hasAffiliateLinks && <FtcDisclosure />}
 
         <div className="lg:flex lg:gap-10 lg:items-start">

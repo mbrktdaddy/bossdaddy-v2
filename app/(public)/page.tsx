@@ -14,14 +14,12 @@ import TopicBlock, { type TopicItem } from '@/components/TopicBlock'
 import LatestRail from '@/components/home/LatestRail'
 import { mergeByRecency, formatPublished, type LatestItem } from '@/lib/latest'
 import BossToolsSection from '@/components/home/BossToolsSection'
-import VaultCard from '@/components/VaultCard'
 import EmailCaptureSection from '@/components/EmailCaptureSection'
 import HomeHero from '@/components/home/HomeHero'
 import { MerchStrip } from '@/components/MerchStrip'
 import CodeRedirect from './_components/CodeRedirect'
 import { buildSocialMetadata } from '@/lib/og'
 import { BRAND } from '@/lib/brand'
-import { LABELS } from '@/lib/labels'
 import type { Metadata } from 'next'
 import { buttonVariants } from '@/components/ui/Button'
 
@@ -46,18 +44,6 @@ interface Guide {
   image_url: string | null
   published_at: string | null
   reading_time_minutes: number | null
-}
-
-// Shape VaultCard consumes — it owns the per-type routing (/stacks, /comparisons,
-// /picks, /gifts/[occasion]), so `occasion` has to come along.
-interface VaultCollection {
-  slug: string
-  title: string
-  description: string | null
-  hero_image_url: string | null
-  collection_type: string
-  occasion: string | null
-  published_at: string | null
 }
 
 export const revalidate = 3600
@@ -97,10 +83,6 @@ const GUIDE_FETCH_CAP = 200
 // Both were tried; both trade the uniformity for a tidier empty state, and the
 // uniformity is what was asked for.
 const TOPIC_BLOCK_SIZE = 4 // 1 lead + 3 rows
-
-// The Vault strip hides below this many live collections — a one-card strip reads
-// as broken rather than sparse.
-const VAULT_MIN_ITEMS = 2
 
 // Just Dropped runs the same "Template A" shape as the Library: 1 lead + 3 rows.
 // Four reviews, two weights. It used to be a flat 2/4-up card grid, which put two
@@ -182,7 +164,6 @@ export default async function HomePage() {
     { data: recentRaw },
     { data: guidesRaw },
     { data: benchRaw },
-    { data: vaultRaw },
   ] = await Promise.all([
     supabase
       .from('reviews')
@@ -226,18 +207,6 @@ export default async function HomePage() {
       .in('status', ['testing', 'queued'])
       .order('priority', { ascending: false })
       .limit(20),
-    // The Vault (picks / comparisons / gift guides / stacks) had NO homepage
-    // presence — a new stack was reachable only by nav or direct link. Safe on the
-    // anon client: collections_public_read is `to anon, authenticated` gated on
-    // is_visible, so this matches what a logged-out visitor can actually see.
-    // published_at is also required — is_visible alone would leak scheduled items.
-    supabase
-      .from('collections')
-      .select('slug, title, description, hero_image_url, collection_type, occasion, published_at')
-      .eq('is_visible', true)
-      .not('published_at', 'is', null)
-      .order('published_at', { ascending: false })
-      .limit(6),
   ])
 
   const featured: Review | null = (featuredHero as Review | null) ?? (topRatedOne as Review | null)
@@ -266,8 +235,6 @@ export default async function HomePage() {
     ...guideFeed.map((g) => ({ kind: 'Guide', title: g.title, href: `/guides/${g.slug}`, published_at: g.published_at })),
     ...recent.map((r) => ({ kind: 'Review', title: r.product_name, href: `/reviews/${r.slug}`, published_at: r.published_at })),
   ], LATEST_RAIL_SLOTS)
-
-  const vaultItems = (vaultRaw ?? []) as VaultCollection[]
 
   // ── Hero "In Motion" band — real recent activity, not inventory counts.
   // Shows momentum (latest tested · next on the bench · newest guide) so the
@@ -504,36 +471,13 @@ export default async function HomePage() {
             slot for the same reason. ──────────────────────────────────────── */}
       <BossToolsSection />
 
-      {/* ── THE VAULT — picks / comparisons / gift guides / stacks. Sits between
-            the Library and Just Dropped so the page runs widest-to-narrowest:
-            guides (deep reading) → collections (curated sets) → single reviews.
-            Hidden below VAULT_MIN_ITEMS because a one-card strip reads broken. ── */}
-      {vaultItems.length >= VAULT_MIN_ITEMS && (
-        <section className="border-b border-soft">
-          <div className="max-w-6xl mx-auto px-6 py-12 md:py-16">
-            <EditorialHeader
-              eyebrow="From the vault"
-              title={LABELS.vault.full}
-              right={{ label: `All ${LABELS.vault.short.toLowerCase()} items`, href: '/vault' }}
-            />
-            {/* The canonical tagline — LABELS.vault exists precisely so the metaphor
-                teaches itself wherever "Vault" lands cold, this strip included. */}
-            <p className="text-base text-prose-muted leading-[1.7] max-w-2xl -mt-2 mb-8">
-              {LABELS.vault.tagline}
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {vaultItems.slice(0, 3).map((col) => (
-                <VaultCard key={`${col.collection_type}:${col.slug}`} col={col} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      {/* (The "From the vault" collections strip sat here until Phase I-4. Its
+          job is covered by /explore's latest index — comparisons and best-of
+          lists are reading formats — and by /gear's Kits + gift-guide sections.) */}
 
-      {/* ── JUST DROPPED — Template A: one lead + 3 rows. Deliberately NOT the
-            Vault's shape: the Vault above is a flat 3-up card grid, and two
-            equal-weight grids in a row is where the page went monotonous. Shape
-            alternates between adjacent sections. ─────────────────────────────── */}
+      {/* ── JUST DROPPED — Template A: one lead + 3 rows. Shape alternates
+            between adjacent sections: the Boss Tools band above is a tile grid,
+            so this is a lead card plus rows, not another equal-weight grid. ── */}
       {droppedLead && (
         <section className="border-b border-soft">
           <div className="max-w-6xl mx-auto px-6 py-12 md:py-16">

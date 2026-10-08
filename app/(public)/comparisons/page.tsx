@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { ogImageUrl, OG_SITE, TWITTER_HANDLE } from '@/lib/og'
-import VaultShell from '@/components/vault/VaultShell'
-import VaultGrid from '@/components/vault/VaultGrid'
+import CollectionListingHeader from '@/components/collections/CollectionListingHeader'
+import CollectionGrid from '@/components/collections/CollectionGrid'
 import BenchStrip from '@/components/BenchStrip'
 
 export const revalidate = 60
@@ -25,11 +25,14 @@ interface Props { searchParams: Promise<{ cat?: string }> }
 export default async function ComparisonsIndexPage({ searchParams }: Props) {
   const { cat } = await searchParams
   return (
-    <VaultShell active="comparisons">
-      <VaultGrid tab="comparisons" cat={cat ?? null} />
-      <div className="mt-16">
-        <BenchStrip ctaText="See all on the bench" />
+    <>
+      <CollectionListingHeader tab="comparisons" />
+      <div className="max-w-6xl mx-auto px-6 pt-8 pb-12">
+        <CollectionGrid tab="comparisons" cat={cat ?? null} />
+        <div className="mt-16">
+          <BenchStrip ctaText="See all on the bench" />
+        </div>
       </div>
-    </VaultShell>
+    </>
   )
 }

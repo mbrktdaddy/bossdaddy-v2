@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import { ogImageUrl, OG_SITE, TWITTER_HANDLE } from '@/lib/og'
 import { LABELS } from '@/lib/labels'
-import VaultShell from '@/components/vault/VaultShell'
-import VaultGrid from '@/components/vault/VaultGrid'
+import CollectionListingHeader from '@/components/collections/CollectionListingHeader'
+import CollectionGrid from '@/components/collections/CollectionGrid'
 import BenchStrip from '@/components/BenchStrip'
 
 export const revalidate = 60
@@ -29,11 +29,14 @@ interface Props { searchParams: Promise<{ cat?: string }> }
 export default async function PicksIndexPage({ searchParams }: Props) {
   const { cat } = await searchParams
   return (
-    <VaultShell active="picks">
-      <VaultGrid tab="picks" cat={cat ?? null} />
-      <div className="mt-16">
-        <BenchStrip ctaText="See all on the bench" />
+    <>
+      <CollectionListingHeader tab="picks" />
+      <div className="max-w-6xl mx-auto px-6 pt-8 pb-12">
+        <CollectionGrid tab="picks" cat={cat ?? null} />
+        <div className="mt-16">
+          <BenchStrip ctaText="See all on the bench" />
+        </div>
       </div>
-    </VaultShell>
+    </>
   )
 }

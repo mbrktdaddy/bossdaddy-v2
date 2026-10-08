@@ -12,12 +12,13 @@ import AccountMenu, { useAuthUser } from '@/components/AccountMenu'
 import ConnectionBadge from '@/components/account/ConnectionBadge'
 import { isImmersiveRoute } from '@/lib/immersive-routes'
 import { buttonVariants } from '@/components/ui/Button'
-import { BagIcon, ChevronDownIcon, ChevronRightIcon, CubeIcon, EnvelopeIcon, ScaleIcon, SearchIcon, StarIcon, XIcon } from '@/components/icons'
+import { BagIcon, ChevronDownIcon, ChevronRightIcon, EnvelopeIcon, SearchIcon, XIcon } from '@/components/icons'
 
-// Vault is intentionally NOT a top-level anchor — its contents
-// (Comparisons / Best Of / Stacks / Gift Guides) live inside the Browse
-// mega-menu's "From The Vault" section, and that menu's "See all →" link
-// is the canonical path to /vault itself.
+// Collections (comparisons / best-of / stacks / gift guides) are NOT in this
+// chrome at all (nav-ia-plan Phase I-4, 2026-10-08). They are formats, not
+// places: comparisons and best-of are reached through /explore and the category
+// hubs, stacks and gift guides through /gear. The Vault hub that used to sit
+// over them 301s to /gear.
 //
 // ⚠️ CANONICAL SPINE ORDER: Reviews · Guides · Tools · Gear. Every surface that lists
 // these four renders them in this sequence — this array (which feeds BOTH the desktop
@@ -44,50 +45,12 @@ const NAV_LINKS = [
   { href: '/gear',    label: LABELS.gear.short },
 ]
 
-// Sub-links surfaced in the "Browse" mega-menu footer + mobile drawer.
-// Source of truth for which collection types are user-visible in nav.
-const VAULT_LINKS = [
-  {
-    href: '/comparisons',
-    label: LABELS.comparisons.short,
-    blurb: 'Head-to-head scorecards',
-    icon: (
-      <ScaleIcon className="w-4 h-4" strokeWidth={1.5} />
-    ),
-  },
-  {
-    href: '/picks',
-    label: LABELS.picks.short,
-    blurb: 'Ranked category roundups',
-    icon: (
-      <StarIcon className="w-4 h-4" strokeWidth={1.5} />
-    ),
-  },
-  {
-    href: '/stacks',
-    label: LABELS.stacks.short,
-    blurb: 'Kits built for purpose',
-    icon: (
-      <CubeIcon className="w-4 h-4" strokeWidth={1.5} />
-    ),
-  },
-  {
-    href: '/gifts',
-    label: LABELS.gifts.short,
-    blurb: 'Real-tested ideas',
-    icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-      </svg>
-    ),
-  },
-]
-
-// "From Boss Daddy" — the Browse menu's third column: places that are Boss
-// Daddy's own (the gear pipeline + the store), as opposed to topics (column 1)
-// or content formats (column 2). Each column is ONE kind of thing, and all three
-// get the same heading weight — the old menu stacked these as two small rows
-// under two dividers, which read as an afterthought.
+// "From Boss Daddy" — the Browse menu's second column: places that are Boss
+// Daddy's own (the gear pipeline + the store), as opposed to topics (column 1).
+// Each column is ONE kind of thing, and both get the same heading weight — the
+// old menu stacked these as two small rows under two dividers, which read as
+// an afterthought. (A third "Collections" column sat between them until Phase
+// I-4 — formats, not places, so it went.)
 const BOSS_LINKS = [
   {
     href: '/gear/radar',
@@ -120,7 +83,7 @@ const BOSS_LINKS = [
 const MENU_HEADING = 'text-xs text-copper uppercase tracking-widest font-semibold'
 
 // Pages that live inside the Browse menu — the trigger lights up on these.
-const BROWSE_PREFIXES = ['/category/', '/reviews/category', '/guides/category', '/vault', '/comparisons', '/picks', '/stacks', '/gifts', '/bench', '/shop']
+const BROWSE_PREFIXES = ['/category/', '/reviews/category', '/guides/category', '/gear/radar', '/bench', '/shop']
 
 const TOOLS_HREF = '/tools'
 
@@ -279,10 +242,10 @@ export default function Header() {
               <ChevronDownIcon className={`w-3.5 h-3.5 transition-transform duration-200 ${catOpen ? 'rotate-180' : ''}`} strokeWidth={2} />
             </button>
 
-            {/* Mega-menu panel — three columns, ONE kind of thing per column,
-                equal heading weight: Topics · Collections · From Boss Daddy. */}
+            {/* Mega-menu panel — two columns, ONE kind of thing per column,
+                equal heading weight: Topics · From Boss Daddy. */}
             {catOpen && (
-              <div className="absolute right-4 sm:right-6 top-full mt-2 w-[min(860px,calc(100%-3rem))] bg-surface-raised border border-strong rounded-xl p-6 z-50 grid grid-cols-[1.6fr_1fr_1fr] gap-6">
+              <div className="absolute right-4 sm:right-6 top-full mt-2 w-[min(680px,calc(100%-3rem))] bg-surface-raised border border-strong rounded-xl p-6 z-50 grid grid-cols-[1.6fr_1fr] gap-6">
                 <div>
                   <p className={`${MENU_HEADING} mb-3`}>Topics</p>
                   <div className="grid grid-cols-2 gap-x-2">
@@ -298,22 +261,6 @@ export default function Header() {
                       </Link>
                     ))}
                   </div>
-                </div>
-
-                <div className="border-l border-strong pl-6">
-                  <div className="flex items-baseline justify-between mb-3">
-                    <p className={MENU_HEADING}>Collections</p>
-                    <Link
-                      href="/vault"
-                      onClick={() => setCatOpen(false)}
-                      className="text-xs text-prose-muted hover:text-copper font-semibold transition-colors"
-                    >
-                      {LABELS.vault.full} →
-                    </Link>
-                  </div>
-                  {VAULT_LINKS.map((v) => (
-                    <BrowseRow key={v.href} {...v} onNavigate={() => setCatOpen(false)} />
-                  ))}
                 </div>
 
                 <div className="border-l border-strong pl-6">
@@ -495,9 +442,9 @@ export default function Header() {
               the three Browse groups and the account door. Get the App moved to
               InstallPrompt — a one-time nudge beats a permanent row. */}
 
-          {/* Browse — the same three groups as the desktop mega-menu, same
-              heading style. Topics stays collapsible (10 rows); the other two
-              are short enough to show open. */}
+          {/* Browse — the same two groups as the desktop mega-menu, same
+              heading style. Topics stays collapsible (10 rows); the other is
+              short enough to show open. */}
           <div className="px-4 pt-3 pb-2">
             <button
               onClick={() => setMobileCat(!mobileCatOpen)}
@@ -526,28 +473,6 @@ export default function Header() {
                 ))}
               </div>
             )}
-          </div>
-
-          <div className="px-4 pb-4 border-t border-soft pt-4">
-            <div className="flex items-baseline justify-between mb-2">
-              <p className={MENU_HEADING}>Collections</p>
-              <Link
-                href="/vault"
-                onClick={() => setMobileOpen(false)}
-                className="py-2 text-xs text-prose-muted hover:text-copper font-semibold transition-colors"
-              >
-                {LABELS.vault.full} →
-              </Link>
-            </div>
-            {/* Compact tiles, not blurb rows — a phone can't afford two lines each. */}
-            <div className="grid grid-cols-2 gap-2">
-              {VAULT_LINKS.map((v) => (
-                <Link key={v.href} href={v.href} onClick={() => setMobileOpen(false)} className={buttonVariants({ variant: 'secondary' })}>
-                  <span className="text-copper shrink-0">{v.icon}</span>
-                  <span className="text-xs font-semibold text-prose-muted truncate">{v.label}</span>
-                </Link>
-              ))}
-            </div>
           </div>
 
           <div className="px-4 pb-4 border-t border-soft pt-4">

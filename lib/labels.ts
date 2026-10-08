@@ -147,10 +147,11 @@ export const LABELS = {
     kits:     'Kits',
   },
 
-  // The hub over the four types above. /vault is "All"; /comparisons, /picks,
-  // /stacks and /gifts are its tabs, rendered by one shell (components/vault/
-  // VaultShell). NAME IS FINAL (operator, 2026-09-23) — never reuse "Vault" for
-  // another surface, including in eyebrow copy.
+  // The collections concept's name. The public /vault hub over the four types
+  // above was removed 2026-10-08 (nav-ia-plan Phase I-4 — /vault 301s to /gear;
+  // the four listings stand alone under Explore or Gear). The label survives
+  // for the admin side (DashboardNav). NAME IS FINAL (operator, 2026-09-23) —
+  // never reuse "Vault" for another surface, including in eyebrow copy.
   vault: {
     short:   'Vault',
     full:    'The Vault',

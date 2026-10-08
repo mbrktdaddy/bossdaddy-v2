@@ -424,11 +424,18 @@ Profile tab, because `/tools` IS the signed-in home (invariant 8).
   directly after "Shop by Occasion". *As built:* newest three live stacks (visible +
   published + at least one item, the gift-guide rule), `VaultCard` grid, self-suppresses
   at zero, "All stacks →" to `/stacks`. The `/stacks` route and H1 keep the canonical word.
-- **I-4 Vault removal.** Delete `VaultShell`/`VaultGrid` usage from the four listing
-  pages (each gets a plain `PageHeader` + grid), delete `app/(public)/vault`, 301, strip
-  Collections from Header/drawer, prune `BROWSE_PREFIXES`, drop `/vault` from
-  `app/sitemap.ts`, remove the homepage "From the vault" strip (I-1's latest rail and
-  I-3 cover it).
+- **I-4 Vault removal — SHIPPED 2026-10-08.** `VaultShell` deleted; the four listings
+  render `CollectionListingHeader` (a `PageHeader` with an UP link to the listing's
+  parent — Explore for comparisons/picks, Gear for stacks/gifts — plus role eyebrow,
+  H1, deck, all from one `VAULT_TABS` entry) over `CollectionGrid` (the old grid,
+  moved to `components/collections/`). `app/(public)/vault` deleted; `/vault` 301s to
+  `/gear` (`?tab=` still lands on its real page). Collections column + `VAULT_LINKS`
+  gone from mega-menu and drawer (menu is two columns now); `BROWSE_PREFIXES` pruned
+  to what the menu actually links. Footer's Vault row gone (rest of footer is I-5).
+  Homepage "From the vault" strip gone. Detail-page breadcrumbs root at the parent
+  (`CollectionBreadcrumb`). `lib/vault.ts` keeps its name — the Vault is the
+  concept's final name and still labels the admin side; the `all` tab is gone and
+  every tab carries `parent` + `eyebrow`. `/vault` was never in the sitemap.
 - **I-5 Desktop bar + footer** to the pillar set. Reviews/Guides links out of
   `NAV_LINKS`; `Footer.BROWSE` → pillars.
 - **I-6 Gifts seasonal switch** (`isGiftSeason()`), homepage band, nav slot.

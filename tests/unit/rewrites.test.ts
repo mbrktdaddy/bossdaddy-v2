@@ -1,22 +1,27 @@
 import { describe, it, expect } from 'vitest'
 import { rewritePublicLegacy, rewriteLegacyRoute, rewriteLegacyVaultTab } from '@/lib/proxy/rewrites'
 
-describe('rewriteLegacyVaultTab — old /vault?tab= state → the tab\'s real page', () => {
+describe('rewriteLegacyVaultTab — the retired /vault hub', () => {
   it.each([
     ['comparisons', '/comparisons'],
     ['best-of',     '/picks'],
     ['gifts',       '/gifts'],
     ['stacks',      '/stacks'],
-  ])('/vault?tab=%s → %s', (tab, to) => {
+  ])('/vault?tab=%s → %s (old tab state still lands on its real page)', (tab, to) => {
     expect(rewriteLegacyVaultTab('/vault', tab)).toBe(to)
     expect(rewriteLegacyVaultTab('/vault/', tab)).toBe(to)
   })
 
-  it('leaves the hub, unknown tabs and other paths alone', () => {
-    expect(rewriteLegacyVaultTab('/vault', null)).toBeNull()
-    expect(rewriteLegacyVaultTab('/vault', 'all')).toBeNull()
-    expect(rewriteLegacyVaultTab('/vault', 'nope')).toBeNull()
+  it('sends the hub itself, and any unknown tab, to /gear (Phase I-4)', () => {
+    expect(rewriteLegacyVaultTab('/vault', null)).toBe('/gear')
+    expect(rewriteLegacyVaultTab('/vault/', null)).toBe('/gear')
+    expect(rewriteLegacyVaultTab('/vault', 'all')).toBe('/gear')
+    expect(rewriteLegacyVaultTab('/vault', 'nope')).toBe('/gear')
+  })
+
+  it('leaves other paths alone', () => {
     expect(rewriteLegacyVaultTab('/picks', 'stacks')).toBeNull()
+    expect(rewriteLegacyVaultTab('/vaults', null)).toBeNull()
   })
 })
 
