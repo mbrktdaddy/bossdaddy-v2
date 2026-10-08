@@ -386,7 +386,10 @@ The prior wording ("every section heading sitewide uses `SectionHeader`") was wr
 
 ## 3. Typography
 
-### Fonts (loaded via next/font in `app/layout.tsx`)
+### Fonts (self-hosted via `next/font/local` — defined in `app/fonts/fonts.ts`, files in `app/fonts/`)
+
+Never switch back to `next/font/google`: it fetches Google's CSS on every build, and a response-shape change from Google broke Turbopack builds on 2026-10-08. Each family ships a Latin + Latin Extended face; the font stacks in `app/globals.css` list the `-ext` variable first.
+
 - **Display / Headings (default)**: `var(--font-montserrat)` — heavy weight (`font-black` 900) for hero, `font-bold` 700 elsewhere. Default for every `h1–h4` via the global rule in `globals.css`.
 - **Editorial display serif (Manifesto v2)**: `var(--font-editorial-display)` = **Fraunces**. **Scoped opt-in** via the `.font-editorial-display` class — see the exception below. Carries the magazine / "cover story" voice.
 - **Body / UI**: `var(--font-geist-sans)` — neutral grotesk.

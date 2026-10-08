@@ -1,12 +1,6 @@
-import { Geist_Mono } from 'next/font/google'
 import { requireUser, getCurrentProfile } from '@/lib/auth-cache'
 import DashboardNav from '@/components/DashboardNav'
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-  display: 'swap',
-})
+import { geistMono, geistMonoExt } from '@/app/fonts/fonts'
 
 export default async function DashboardLayout({
   children,
@@ -21,7 +15,7 @@ export default async function DashboardLayout({
   return (
     <div
       data-theme="dark"
-      className={`${geistMono.variable} min-h-screen bg-background text-prose md:flex`}
+      className={`${geistMono.variable} ${geistMonoExt.variable} min-h-screen bg-background text-prose md:flex`}
     >
       <a
         href="#main-content"

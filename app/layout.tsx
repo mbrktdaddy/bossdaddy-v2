@@ -1,61 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Montserrat, Source_Serif_4, Fraunces } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import PwaInstallProvider from "@/components/pwa/PwaInstallProvider";
 import { ogImageMeta } from "@/lib/og";
 import { BRAND } from "@/lib/brand";
+import { rootFontVariables } from "./fonts/fonts";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
-  subsets: ["latin"],
-  weight: ["700", "800", "900"],
-  display: "swap",
-});
-
-// Article blockquotes + prose emphasis. `preload: false` — see the note on
-// `fraunces` below.
-const sourceSerif4 = Source_Serif_4({
-  variable: "--font-serif",
-  subsets: ["latin"],
-  weight: ["400", "600"],
-  style: ["normal", "italic"],
-  display: "swap",
-  preload: false,
-});
-
-// Editorial display serif — Manifesto v2 design system. Carries the
-// magazine/"cover story" voice on Cover Story, editorial section H2s, guide
-// titles, and the mission Creed. Scoped opt-in via `font-editorial-display`
-// (see docs/brand-guide.md §3 + docs/home-manifesto-spec.md) — headings stay
-// Montserrat font-black by default. Source Serif 4 remains for article
-// blockquotes.
-//
-// PERF — `preload: false` on both serifs is deliberate, do not remove.
-// next/font emits a high-priority <link rel="preload"> for every family by
-// default. Neither serif renders above the fold (Fraunces starts at the Cover
-// Story; Source Serif is blockquote-only), yet the four woff2 files they pull
-// in were ~180 KB racing the hero image on the LCP critical path — measured as
-// the dominant cost of a 5.6s mobile LCP (Moto G Power / Slow 4G, 2026-08-02).
-// Dropping the preload keeps `display: swap` and the size-adjusted fallback
-// metrics (so CLS stays 0); the fonts simply load at normal priority once the
-// CSS references them, well before either surface scrolls into view. Only add
-// a preload back for a family that actually paints above the fold.
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  style: ["normal", "italic"],
-  display: "swap",
-  preload: false,
-});
+// Fonts are self-hosted — definitions, subsets and the serif no-preload PERF
+// note live in app/fonts/fonts.ts.
 
 // Social/search domain-verification meta tags. Env-gated — each is a no-op
 // until you claim the domain and set its code:
@@ -135,7 +88,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-theme="dark"
-      className={`${geistSans.variable} ${montserrat.variable} ${sourceSerif4.variable} ${fraunces.variable} h-full antialiased`}
+      className={`${rootFontVariables} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <PwaInstallProvider>

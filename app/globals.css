@@ -130,13 +130,19 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
-  --font-display: var(--font-montserrat), system-ui, sans-serif;
-  --font-editorial: var(--font-serif), Georgia, 'Times New Roman', serif;
+  /* Self-hosted fonts (app/fonts/fonts.ts): each family is a Latin face plus a
+     Latin Extended face with disjoint unicode-ranges, so every stack lists the
+     `-ext` family first — Latin characters skip it, accented ones use it, and
+     its file downloads only when a page needs it. Keep the -ext var first. */
+  --font-sans: var(--font-geist-sans-ext), var(--font-geist-sans);
+  /* Geist Mono is dashboard-only, so both vars carry fallbacks for pages
+     outside the dashboard. */
+  --font-mono: var(--font-geist-mono-ext, ui-monospace), var(--font-geist-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  --font-display: var(--font-montserrat-ext), var(--font-montserrat), system-ui, sans-serif;
+  --font-editorial: var(--font-serif-ext), var(--font-serif), Georgia, 'Times New Roman', serif;
   /* Editorial DISPLAY serif (Fraunces) — Manifesto v2. Opt-in via the
      .font-editorial-display class below (NOT the global h* rule). */
-  --font-editorial-display: var(--font-fraunces), Georgia, 'Times New Roman', serif;
+  --font-editorial-display: var(--font-fraunces-ext), var(--font-fraunces), Georgia, 'Times New Roman', serif;
 
   /* Brand orange scale */
   --color-orange-300: #fdba74;
@@ -225,7 +231,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans-ext), var(--font-geist-sans), Arial, Helvetica, sans-serif;
   overflow-x: clip;
 }
 
