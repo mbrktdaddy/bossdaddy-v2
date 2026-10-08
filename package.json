@@ -63,7 +63,7 @@
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "ai": "^6.0.230",
-    "next": "^16.3.8",
+    "next": "^16.4.0",
     "openai": "^6.49.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -78,7 +78,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^16.2.12",
+    "@next/bundle-analyzer": "^16.4.0",
     "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
