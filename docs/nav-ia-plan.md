@@ -346,6 +346,82 @@ decisions, and that D's own rename never happened.
 
 ---
 
+### Phase I — formats are not destinations (DECIDED 2026-10-08, not built)
+
+A review of the pillars against what the major review publications do (Wirecutter,
+The Strategist, Gear Patrol, RTINGS) and against what the site actually holds.
+
+**The inventory that forced it (prod, 2026-10-08):** 28 reviews, 28 guides, 45 products
+— and behind the Vault's five addresses and four hand-built detail pages, **three**
+published collections (2 stacks, 1 gift guide). Comparisons and Best Of both showed a
+visible `0` on the tab strip. The footer gave the Vault six of its eleven Browse links.
+`/gear` already carried a gift-guide section and a Best Of link, so Gear was quietly
+duplicating the hub.
+
+**The shape every major review site shares:** topics are the primary navigation, and
+content FORMATS (review, roundup, comparison, guide) are article shapes inside a topic,
+not destinations. The only format-like items that earn a top-level slot are intent-driven
+and seasonal — Gifts in Q4, Deals year-round. A store is top-level when one exists.
+Member products sit in their own lane (the NYT Cooking/Games model). Boss Daddy already
+matched on Topics-first, Gear, Shop and Tools; it did not match on Reviews/Guides as nav
+items or on the Vault.
+
+**Why the Vault's four lanes felt like separate things: they are.** The hub grouped them by
+database table (`collections.collection_type`), not by what the reader is doing.
+Comparisons and Best Of are READING formats, siblings of a review or guide. Stacks and
+Gift Guides are SHOPPING formats. The read/buy split is the desktop bar's audience split
+and the mobile strip's Explore/Gear split; the Vault cut across it.
+
+**The four decisions (operator: "I like all four"):**
+
+1. **Reviews and Guides stop being top-level destinations.** They become format filters on
+   ONE content index — the Explore page — and sections inside each `/category/[slug]`
+   hub. Comparisons and Best Of are two more formats on the same index. Desktop bar:
+   **Topics ▾ · Gear · Shop** left, **Tools** right. Mobile strip: **Home · Explore · [Ask]
+   · Gear · Tools** (Phase H's anticipated trade, taken). `/reviews`, `/guides`,
+   `/comparisons`, `/picks` stay live as the format-filtered views the index links to —
+   they are what search has indexed — but no chrome points at them as destinations.
+2. **The Vault goes entirely.** Stacks become a Kits section under `/gear`. The
+   `VaultShell` tab strip, the zero counts, the mega-menu/drawer "Collections" column and
+   `VAULT_LINKS` are removed. `/vault` 301s to `/gear` in `lib/proxy/rewrites.ts`
+   (replace the `?tab=` rewriter). The NAME stays final — nothing is renamed, the hub
+   is just no longer a place. `lib/vault.ts` survives as the collections loader
+   (`vaultHref`/`vaultTabForType` still route detail pages); rename later if it grates.
+3. **Gifts is seasonal.** Under Gear most of the year; **1 Oct – 26 Dec** it takes a
+   top-level slot in the desktop bar + drawer and a homepage band. Window lives in ONE
+   helper (`lib/gift-occasions.ts`) read by Header, Footer and homepage — never three
+   date checks. Same pattern as every major site's Q4 nav swap.
+4. **Footer mirrors the pillars only.** Topics (hub link), Gear, Shop, Tools, Gifts (in
+   season), then Trust. Not eleven browse links.
+
+**Kept against conformity, on purpose:** Radar + Bench stay visible inside Gear (the
+differentiator); the centre Ask FAB; Tools as the fifth mobile slot instead of a
+Profile tab, because `/tools` IS the signed-in home (invariant 8).
+
+**Build order (each step ships alone, master, no PR ceremony):**
+
+- **I-1 Explore page.** `/explore`: topic grid → format rows (Reviews · Guides ·
+  Comparisons · Best Of, each linking its listing) → latest mixed rail. `LABELS.explore`.
+  Explore tab lights on `/explore`, `/reviews*`, `/guides*`, `/comparisons*`, `/picks*`,
+  `/category/*`; NOT `/search`. Compass icon from primitives. Gear tab lights on
+  `/gear*` + `/stacks*` + `/gifts*` (+ `/bench*`); Shop stays its own thing. Drawer
+  drops its Gear lead row (strip now has it). `BackLink` parents unchanged.
+- **I-2 Category hubs** gain Comparisons + Best Of sections (self-suppress at 0 — these
+  are inside a hub, not a tab strip, so empty means absent, not a `0`).
+- **I-3 Gear absorbs Stacks** as "Kits" beside "Shop by Occasion".
+- **I-4 Vault removal.** Delete `VaultShell`/`VaultGrid` usage from the four listing
+  pages (each gets a plain `PageHeader` + grid), delete `app/(public)/vault`, 301, strip
+  Collections from Header/drawer, prune `BROWSE_PREFIXES`, drop `/vault` from
+  `app/sitemap.ts`, remove the homepage "From the vault" strip (I-1's latest rail and
+  I-3 cover it).
+- **I-5 Desktop bar + footer** to the pillar set. Reviews/Guides links out of
+  `NAV_LINKS`; `Footer.BROWSE` → pillars.
+- **I-6 Gifts seasonal switch** (`isGiftSeason()`), homepage band, nav slot.
+
+**Invariant 10 (new):** a content FORMAT never gets a nav slot; a TOPIC or an INTENT
+(gifts, deals, shop) does. If a format's count would show `0` anywhere in chrome, the
+format is in the wrong layer.
+
 ## Next session
 
 **EVERY PHASE OF THIS PLAN HAS SHIPPED.** A, B and D on 2026-08-15 (`c636c11`,
@@ -417,3 +493,7 @@ a year per POP. A rename without a 301 breaks both.
 9. **Bottom-nav slots are earned by revisit frequency, and there are five.** A destination
    reached *through* content doesn't need a tab; a destination returned to daily does.
    Adding a tab means naming the one it replaces — never widen the strip to six.
+10. **A content format never gets a nav slot; a topic or an intent does.** Reviews,
+    guides, comparisons and best-of lists are article shapes inside Topics/Explore.
+    Gear, Shop, Tools and seasonal Gifts are places. If a format's count would read `0`
+    anywhere in chrome, the format is in the wrong layer. (Phase I.)
