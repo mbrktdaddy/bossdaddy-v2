@@ -414,8 +414,12 @@ Profile tab, because `/tools` IS the signed-in home (invariant 8).
   Explore's index so the two can't disagree; `ContentRow` gained an optional `kind`
   prefix ("Review · Kids & Family") for mixed-format lists only. `/explore` is in the
   sitemap at 0.9, dated by the newest of anything.
-- **I-2 Category hubs** gain Comparisons + Best Of sections (self-suppress at 0 — these
-  are inside a hub, not a tab strip, so empty means absent, not a `0`).
+- **I-2 Category hubs — SHIPPED 2026-10-08.** Comparisons + Best Of sections (self-suppress
+  at 0 — these are inside a hub, not a tab strip, so empty means absent, not a `0`).
+  *As built:* a collection belongs to a hub by its `dominant_category` (derived from the
+  reviews inside it — `lib/collection-listings.ts`), read through the same cached
+  `getVaultCollections()` the listings use. Three cards per section, "All →" links to
+  the listing's existing `?cat=` filter. The hub's empty state now also counts them.
 - **I-3 Gear absorbs Stacks** as "Kits" beside "Shop by Occasion".
 - **I-4 Vault removal.** Delete `VaultShell`/`VaultGrid` usage from the four listing
   pages (each gets a plain `PageHeader` + grid), delete `app/(public)/vault`, 301, strip

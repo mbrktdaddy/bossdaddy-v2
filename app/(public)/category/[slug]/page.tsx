@@ -9,6 +9,10 @@ import BossApprovedBadge from '@/components/BossApprovedBadge'
 import CategoryIcon from '@/components/CategoryIcon'
 import RatingScore from '@/components/RatingScore'
 import PageHeader from '@/components/PageHeader'
+import VaultCard from '@/components/VaultCard'
+import { getVaultCollections, getVaultTab } from '@/lib/vault'
+import { formatPublished } from '@/lib/latest'
+import { LABELS } from '@/lib/labels'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
@@ -45,7 +49,7 @@ export default async function CategoryHubPage({ params }: Props) {
 
   const supabase = createAnonClient()
 
-  const [{ data: topReviews }, { data: latestGuides }] = await Promise.all([
+  const [{ data: topReviews }, { data: latestGuides }, collections] = await Promise.all([
     supabase
       .from('reviews')
       .select('id, slug, title, product_name, rating, excerpt, image_url, published_at')
@@ -63,7 +67,15 @@ export default async function CategoryHubPage({ params }: Props) {
       .eq('category', slug)
       .order('published_at', { ascending: false })
       .limit(3),
+    // Reading-format collections (comparisons, best-of) belong to a topic by
+    // their DOMINANT category — collections carry no category column; it is
+    // derived from the reviews inside them (lib/collection-listings). Same
+    // cached loader the listings use, so hub and listing agree on what's live.
+    getVaultCollections(),
   ])
+
+  const comparisons = collections.filter((c) => c.dominant_category === slug && c.collection_type === 'comparison').slice(0, 3)
+  const picks = collections.filter((c) => c.dominant_category === slug && (c.collection_type === 'best_of' || c.collection_type === 'general')).slice(0, 3)
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
   const breadcrumbLd = {
@@ -90,6 +102,11 @@ export default async function CategoryHubPage({ params }: Props) {
 
   const hasReviews = topReviews && topReviews.length > 0
   const hasGuides = latestGuides && latestGuides.length > 0
+  // Phase I-2: the two reading FORMATS that used to live only in the Vault.
+  // Each section self-suppresses at zero — this is a hub, not a tab strip, so
+  // empty means absent, never a `0` (nav-ia-plan invariant 10).
+  const hasComparisons = comparisons.length > 0
+  const hasPicks = picks.length > 0
 
   return (
     <>
@@ -227,13 +244,7 @@ export default async function CategoryHubPage({ params }: Props) {
                         <p className="hidden sm:block text-sm text-prose-faint mt-1.5 line-clamp-1">{g.excerpt}</p>
                       )}
                       <div className="flex items-center gap-3 mt-2 text-xs text-prose-faint">
-                        {g.published_at && (
-                          <span>
-                            {new Date(g.published_at).toLocaleDateString('en-US', {
-                              month: 'short', day: 'numeric', year: 'numeric',
-                            })}
-                          </span>
-                        )}
+                        {g.published_at && <span>{formatPublished(g.published_at)}</span>}
                         {g.reading_time_minutes && (
                           <span aria-hidden>·</span>
                         )}
@@ -254,8 +265,56 @@ export default async function CategoryHubPage({ params }: Props) {
           </section>
         )}
 
+        {/* ── Comparisons — head-to-head, built from this topic's reviews ── */}
+        {hasComparisons && (
+          <section className="mb-20">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
+                <Eyebrow className="mb-2">Head to Head</Eyebrow>
+                <h2 className="text-2xl font-black text-prose leading-tight">{cat.label} {LABELS.comparisons.short}</h2>
+              </div>
+              <Link
+                href={`/comparisons?cat=${slug}`}
+                className="hidden sm:inline-flex text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold"
+              >
+                All {LABELS.comparisons.short} →
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              {comparisons.map((c) => (
+                <VaultCard key={c.id} col={c} cta={getVaultTab('comparisons').cardCta} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── Best Of — ranked roundups for this topic ─────────────────── */}
+        {hasPicks && (
+          <section className="mb-20">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
+                <Eyebrow className="mb-2">Ranked</Eyebrow>
+                <h2 className="text-2xl font-black text-prose leading-tight">{cat.label} {LABELS.picks.full}</h2>
+              </div>
+              <Link
+                href={`/picks?cat=${slug}`}
+                className="hidden sm:inline-flex text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold"
+              >
+                All {LABELS.picks.short} →
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              {picks.map((c) => (
+                <VaultCard key={c.id} col={c} cta={getVaultTab('picks').cardCta} />
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* ── Empty state ───────────────────────────────────────────────── */}
-        {!hasReviews && !hasGuides && (
+        {!hasReviews && !hasGuides && !hasComparisons && !hasPicks && (
           <EmptyState
             icon={<CategoryIcon slug={cat.slug} className="w-10 h-10 text-accent-text" />}
             title={<>No {cat.label} content yet.</>}
