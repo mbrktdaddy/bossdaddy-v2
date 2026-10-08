@@ -11,7 +11,8 @@ import ContentRow from '@/components/ContentRow'
 import CredibilityBreak from '@/components/CredibilityBreak'
 import LeadCard from '@/components/LeadCard'
 import TopicBlock, { type TopicItem } from '@/components/TopicBlock'
-import LatestRail, { type LatestItem } from '@/components/home/LatestRail'
+import LatestRail from '@/components/home/LatestRail'
+import { mergeByRecency, formatPublished, type LatestItem } from '@/lib/latest'
 import BossToolsSection from '@/components/home/BossToolsSection'
 import VaultCard from '@/components/VaultCard'
 import EmailCaptureSection from '@/components/EmailCaptureSection'
@@ -259,16 +260,12 @@ export default async function HomePage() {
 
   // The Latest rail — one merged recency index across both content types, which is
   // the one question no other section on this page answers (every other section is
-  // scoped to a single type). Sorted on the raw ISO strings: they're same-format
-  // and UTC out of Postgres, so lexical order IS chronological order, and it
-  // avoids constructing Dates during render.
-  const latestItems: LatestItem[] = [
+  // scoped to a single type). The merge rule lives in lib/latest.ts, shared with
+  // /explore's fuller index so the two surfaces can't disagree on order.
+  const latestItems: LatestItem[] = mergeByRecency<LatestItem>([
     ...guideFeed.map((g) => ({ kind: 'Guide', title: g.title, href: `/guides/${g.slug}`, published_at: g.published_at })),
     ...recent.map((r) => ({ kind: 'Review', title: r.product_name, href: `/reviews/${r.slug}`, published_at: r.published_at })),
-  ]
-    .filter((i): i is LatestItem & { published_at: string } => Boolean(i.published_at))
-    .sort((a, b) => b.published_at.localeCompare(a.published_at))
-    .slice(0, LATEST_RAIL_SLOTS)
+  ], LATEST_RAIL_SLOTS)
 
   const vaultItems = (vaultRaw ?? []) as VaultCollection[]
 
@@ -553,9 +550,7 @@ export default async function HomePage() {
                 eyebrow={getCategoryBySlug(droppedLead.category)?.label ?? droppedLead.category}
                 badge="Newest"
                 excerpt={droppedLead.excerpt}
-                meta={droppedLead.published_at
-                  ? new Date(droppedLead.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
-                  : null}
+                meta={formatPublished(droppedLead.published_at)}
                 cta="Read the review"
                 on="background"
               />
@@ -568,9 +563,7 @@ export default async function HomePage() {
                       eyebrow={getCategoryBySlug(r.category)?.label ?? r.category}
                       headline={r.product_name}
                       excerpt={r.excerpt}
-                      meta={r.published_at
-                        ? new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
-                        : null}
+                      meta={formatPublished(r.published_at)}
                       imageUrl={r.image_url}
                       isLast={i === droppedRows.length - 1}
                     />

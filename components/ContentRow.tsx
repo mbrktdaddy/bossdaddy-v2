@@ -7,6 +7,11 @@ interface Props {
   href: string
   /** Role kicker — the category label. Never a repeat of the headline. */
   eyebrow: string
+  /** Content FORMAT ("Review", "Guide"), shown ahead of the eyebrow on MIXED
+   *  lists only — /explore's latest index, where the format is the one thing the
+   *  headline doesn't already say. Single-type lists (/reviews, /guides, the
+   *  homepage topic blocks) omit it: there the format is the page. */
+  kind?: string
   headline: string
   /** Small line under the headline. `/reviews` puts the product name here, where
    *  the headline is the review's own title. */
@@ -50,7 +55,7 @@ interface Props {
  * push that decision in here where it doesn't belong.
  */
 export default function ContentRow({
-  href, eyebrow, headline, sub, excerpt, meta, imageUrl, rating, isLast, flip,
+  href, eyebrow, kind, headline, sub, excerpt, meta, imageUrl, rating, isLast, flip,
 }: Props) {
   return (
     <Link
@@ -59,6 +64,7 @@ export default function ContentRow({
     >
       <div className="flex-1 min-w-0">
         <p className="text-[10px] font-bold text-accent uppercase tracking-[0.16em] mb-1.5">
+          {kind && <span className="text-eyebrow">{kind} · </span>}
           {eyebrow}
         </p>
         <h3 className="text-base sm:text-lg font-extrabold text-prose leading-snug mb-1.5 group-hover:text-accent transition-colors">

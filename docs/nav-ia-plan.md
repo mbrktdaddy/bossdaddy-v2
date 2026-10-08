@@ -400,12 +400,20 @@ Profile tab, because `/tools` IS the signed-in home (invariant 8).
 
 **Build order (each step ships alone, master, no PR ceremony):**
 
-- **I-1 Explore page.** `/explore`: topic grid → format rows (Reviews · Guides ·
-  Comparisons · Best Of, each linking its listing) → latest mixed rail. `LABELS.explore`.
-  Explore tab lights on `/explore`, `/reviews*`, `/guides*`, `/comparisons*`, `/picks*`,
-  `/category/*`; NOT `/search`. Compass icon from primitives. Gear tab lights on
-  `/gear*` + `/stacks*` + `/gifts*` (+ `/bench*`); Shop stays its own thing. Drawer
-  drops its Gear lead row (strip now has it). `BackLink` parents unchanged.
+- **I-1 Explore page — SHIPPED 2026-10-08.** `/explore`: topic grid → format rows
+  (Reviews · Guides · Comparisons · Best Of, each linking its listing) → latest mixed
+  rail. `LABELS.explore`. Explore tab lights on `/explore`, `/reviews*`, `/guides*`,
+  `/comparisons*`, `/picks*`, `/category/*`; NOT `/search`. Compass icon from
+  primitives. Gear tab lights on `/gear*` + `/stacks*` + `/gifts*` (+ `/bench*`); Shop
+  stays its own thing. Drawer drops its Gear lead row (strip now has it). `BackLink`
+  parents unchanged.
+  *As built:* format rows self-suppress while their listing is empty (same rule as
+  I-2 — a page, not chrome, so absent beats a `0`); today that hides Comparisons and
+  Best Of until the first one publishes. The merge-by-recency rule and the published
+  date format moved to `lib/latest.ts`, shared by the homepage Latest rail and
+  Explore's index so the two can't disagree; `ContentRow` gained an optional `kind`
+  prefix ("Review · Kids & Family") for mixed-format lists only. `/explore` is in the
+  sitemap at 0.9, dated by the newest of anything.
 - **I-2 Category hubs** gain Comparisons + Best Of sections (self-suppress at 0 — these
   are inside a hub, not a tab strip, so empty means absent, not a `0`).
 - **I-3 Gear absorbs Stacks** as "Kits" beside "Shop by Occasion".

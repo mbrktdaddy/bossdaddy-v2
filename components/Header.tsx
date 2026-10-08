@@ -30,11 +30,12 @@ import { BagIcon, ChevronDownIcon, ChevronRightIcon, CubeIcon, EnvelopeIcon, Sca
 // audience — Topics · Reviews · Guides · Gear on the left (the publication), Tools
 // on the right beside the account (the members' home). The drawer keeps this order.
 //
-// ONE SANCTIONED EXCEPTION: `MobileBottomNav` carries Home · Reviews · [Ask] · Guides ·
-// Tools — it has five slots and the elevated Ask FAB owns the middle one, so Gear is
-// deliberately absent there and reaches mobile through THIS array's drawer instead. That
-// is an operator decision (2026-08-17), not drift — don't "restore" Gear to the strip
-// without cutting another tab. Reasoning is in `MobileBottomNav.tsx`.
+// MOBILE: `MobileBottomNav` carries Home · Explore · [Ask] · Gear · Tools (Phase I,
+// 2026-10-08). Reviews and Guides reach mobile through the Explore tab — they are
+// formats, not places (nav-ia-plan invariant 10). Every spine anchor is on the strip,
+// so the drawer below carries NO lead rows; it holds only the groups (Topics,
+// Collections, From Boss Daddy) and the account door. Reasoning is in
+// `MobileBottomNav.tsx`. The desktop bar still lists Reviews · Guides until step I-5.
 const NAV_LINKS = [
   { href: '/',        label: 'Home' },
   { href: '/reviews', label: LABELS.reviews.plural },
@@ -42,10 +43,6 @@ const NAV_LINKS = [
   { href: '/tools',   label: LABELS.tools.short },
   { href: '/gear',    label: LABELS.gear.short },
 ]
-
-// The mobile drawer's own links: only the spine anchors the bottom tab strip
-// does NOT carry (it has Home · Reviews · Guides · Tools). Today that's Gear.
-const DRAWER_LINKS = NAV_LINKS.filter((l) => ['/gear'].includes(l.href))
 
 // Sub-links surfaced in the "Browse" mega-menu footer + mobile drawer.
 // Source of truth for which collection types are user-visible in nav.
@@ -492,33 +489,16 @@ export default function Header() {
             paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
           }}
         >
-          {/* The drawer holds ONLY what the bottom tab strip doesn't. Home ·
-              Reviews · Guides · Tools are one tap away down there, so repeating
-              them here just doubled the list. Gear is the one spine anchor the
-              strip omits, so it leads. Get the App moved to InstallPrompt — a
-              one-time nudge beats a permanent row. */}
-          <nav aria-label="Mobile navigation" className="px-4 pt-3">
-            {DRAWER_LINKS.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => setMobileOpen(false)}
-                className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                  isActive(pathname, href)
-                    ? 'bg-accent text-white'
-                    : 'text-prose hover:bg-surface-raised'
-                }`}
-              >
-                {label}
-                <ChevronRightIcon className="w-4 h-4 text-prose-faint" strokeWidth={2} />
-              </Link>
-            ))}
-          </nav>
+          {/* The drawer holds ONLY what the bottom tab strip doesn't. Since
+              Phase I the strip carries every spine anchor (Home · Explore · Ask ·
+              Gear · Tools), so there is no lead row here at all — the drawer is
+              the three Browse groups and the account door. Get the App moved to
+              InstallPrompt — a one-time nudge beats a permanent row. */}
 
           {/* Browse — the same three groups as the desktop mega-menu, same
               heading style. Topics stays collapsible (10 rows); the other two
               are short enough to show open. */}
-          <div className="px-4 pt-5 pb-2 border-t border-soft mt-3">
+          <div className="px-4 pt-3 pb-2">
             <button
               onClick={() => setMobileCat(!mobileCatOpen)}
               aria-expanded={mobileCatOpen}

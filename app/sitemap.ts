@@ -278,6 +278,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // /how-we-test change on deploy rather than in the database, so they get no
     // lastmod at all rather than a fabricated one.
     { url: base,                   lastModified: newestAnything,                        changeFrequency: 'daily',   priority: 1.0 },
+    // /explore is the merged index over reviews + guides + collections, so it is
+    // dated by whichever of them moved last.
+    { url: `${base}/explore`,      lastModified: newestAnything,                        changeFrequency: 'daily',   priority: 0.9 },
     { url: `${base}/reviews`,      lastModified: newestReview,                          changeFrequency: 'daily',   priority: 0.9 },
     { url: `${base}/guides`,       lastModified: newestGuide,                           changeFrequency: 'daily',   priority: 0.9 },
     { url: `${base}/gifts`,        lastModified: newestCollectionOf('gift_guide'),      changeFrequency: 'weekly',  priority: 0.9 },

@@ -1,15 +1,10 @@
 import Link from 'next/link'
 import { Card } from '@/components/ui/Card'
+import { formatPublished, type LatestItem } from '@/lib/latest'
 
-export interface LatestItem {
-  /** Content-type role label — "Guide" or "Review". Never the category: the rail's
-   *  job is "what's new here", and type is the distinction that isn't already in
-   *  the headline. */
-  kind: string
-  title: string
-  href: string
-  published_at: string | null
-}
+// The item shape lives in lib/latest.ts (shared with /explore's index); re-exported
+// so existing imports keep working.
+export type { LatestItem }
 
 /**
  * Text-only recency index. The lightest tier on the homepage and the only one
@@ -50,9 +45,7 @@ export default function LatestRail({ items, allHref }: { items: LatestItem[]; al
           At `lg` the flex row becomes a divided column and the breakout is undone. */}
       <ul className="mt-4 flex gap-3 overflow-x-auto scrollbar-hide -mx-6 px-6 pb-1 lg:mt-4 lg:flex-col lg:gap-0 lg:overflow-visible lg:mx-0 lg:px-0 lg:pb-0 lg:divide-y lg:divide-soft">
         {items.map((it) => {
-          const date = it.published_at
-            ? new Date(it.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
-            : null
+          const date = formatPublished(it.published_at, 'short')
           return (
             <Card as="li"
               key={it.href}

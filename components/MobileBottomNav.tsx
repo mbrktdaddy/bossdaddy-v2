@@ -52,63 +52,89 @@ function HomeIcon({ active }: { active: boolean }) {
   )
 }
 
-function StarIcon({ active }: { active: boolean }) {
+// A COMPASS FROM PRIMITIVES — a ring and a needle (one four-point diamond at 45°).
+// Solid fills the ring and cuts the needle out of it (evenodd); outline strokes both.
+// Same silhouette in both states, like every other icon here.
+const NEEDLE_PATH = 'M15.5 8.5 L13.4 13.4 L8.5 15.5 L10.6 10.6 Z'
+
+function CompassIcon({ active }: { active: boolean }) {
   return active ? (
     <svg className={ICON_CLS} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clipRule="evenodd" />
+      <path fillRule="evenodd" d={`M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z ${NEEDLE_PATH}`} clipRule="evenodd" />
     </svg>
   ) : (
     <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+      <circle cx="12" cy="12" r="9" />
+      <path strokeLinejoin="round" d={NEEDLE_PATH} />
     </svg>
   )
 }
 
-function BookIcon({ active }: { active: boolean }) {
+// A PRICE TAG FROM PRIMITIVES — a pentagon with one corner cut square and a hole
+// for the string. Gear is the buying side of the strip; the tag says "a thing
+// with a price" without borrowing a bag or a cart (the cart is the Shop's icon).
+const TAG_PATH = 'M4 4 L11.5 4 L20.5 13 L13 20.5 L4 11.5 Z'
+const TAG_HOLE = 'M8.5 7 A1.5 1.5 0 1 0 8.5 10 A1.5 1.5 0 1 0 8.5 7 Z'
+
+function TagIcon({ active }: { active: boolean }) {
   return active ? (
     <svg className={ICON_CLS} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M11.25 4.533A9.707 9.707 0 0 0 6 3a9.735 9.735 0 0 0-3.25.555.75.75 0 0 0-.5.707v14.25a.75.75 0 0 0 1 .707A8.237 8.237 0 0 1 6 18.75c1.995 0 3.823.707 5.25 1.886V4.533ZM12.75 20.636A8.214 8.214 0 0 1 18 18.75c.966 0 1.89.166 2.75.47a.75.75 0 0 0 1-.708V4.262a.75.75 0 0 0-.5-.707A9.735 9.735 0 0 0 18 3a9.707 9.707 0 0 0-5.25 1.533v16.103Z" />
+      <path fillRule="evenodd" d={`${TAG_PATH} ${TAG_HOLE}`} clipRule="evenodd" />
     </svg>
   ) : (
     <svg className={ICON_CLS} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+      <path strokeLinejoin="round" d={TAG_PATH} />
+      <circle cx="8.5" cy="8.5" r="1.5" />
     </svg>
   )
 }
 
-// HOME / READ / ASK / READ / DO: Home and Reviews on the left, "Ask the Boss" in the
-// elevated center slot, Guides and Tools on the right. Search isn't here (header ⌘K pill +
+// HOME / READ / ASK / BUY / DO: Home and Explore on the left, "Ask the Boss" in the
+// elevated center slot, Gear and Tools on the right. Search isn't here (header ⌘K pill +
 // the mobile search bar own it).
 //
-// ── WHY GEAR IS NOT A TAB, AND HOME IS (operator reversal, 2026-08-17) ───────────────
+// ── EXPLORE = EVERYTHING YOU READ, GEAR = EVERYTHING YOU BUY (Phase I, 2026-10-08) ───
+// This strip used to carry Reviews and Guides as two tabs, with Gear deliberately left
+// out (operator decision, 2026-08-17: tabs are earned by revisit frequency, and gear is
+// reached THROUGH content). Phase I of docs/nav-ia-plan.md revised that knowingly:
+// a content FORMAT never gets a nav slot (invariant 10) — reviews, guides, comparisons
+// and best-of lists are article shapes inside Topics, so they collapse into ONE Explore
+// tab that lands on the /explore index. The freed slot goes to Gear, which makes the
+// strip's split match the desktop bar's: the publication on the left, the places on the
+// right. Home stays leftmost (a wordmark is not a thumb target); Ask and Tools stay
+// protected (Ask is the differentiator, Tools is the daily-return surface).
+//
 // Five slots, not six: six is crowded at 393px, and the elevated FAB has to sit dead
-// centre, which an even count can't give it. So one of the five spine anchors yields.
-//
-// It was Home for a few hours, on the reasoning that the header wordmark already goes
-// home. The operator overruled that: a wordmark is not a thumb target, and on mobile the
-// header is at the top of a tall scroll while the strip is under the thumb. Home is where
-// every phone-trained user reaches first, so it takes the leftmost slot.
-//
-// GEAR yields instead, because tabs are earned by REVISIT FREQUENCY and gear is reached
-// THROUGH content, not cold: a review convinces you, then you look at the product. It
-// keeps four paths — the header drawer (which renders the full spine, Gear included), the
-// Footer's Browse column, contextual [[BUY:slug]] links inside reviews, and the homepage
-// merch strip, which is a real mobile entry point again now that Home is one tap away.
-// Ask and Tools are protected: Ask is the differentiator and mirrors the desktop chat
-// badge, Tools is the daily-return surface and the reason this strip exists at all.
-//
-// If Gear ever earns cold traffic (Amazon Associates going live would do it), the slot to
-// reclaim is one of the two reading tabs — not this one.
+// centre, which an even count can't give it. Adding a tab means naming the one it
+// replaces (invariant 9).
 //
 // Home is `exact` on purpose: a prefix test on '/' lights up on every page of the site.
 //
 // `match` overrides the default prefix test where a tab owns more than its own subtree:
-// Tools covers the whole spine (/tools, /goals, /today) but NOT /tools/the-boss, which
-// belongs to the Ask slot — otherwise two things light up for one page.
+// Explore lights on every READING surface (the index, the four format listings, the
+// category hubs) but NOT /search — search is the header's, and lighting a tab for it
+// would claim the result page lives inside Explore. Gear lights on the buying surfaces
+// (/gear, the Bench, stacks, gifts); /shop is the store and stays its own thing. Tools
+// covers the whole spine (/tools, /goals, /today) but NOT /tools/the-boss, which belongs
+// to the Ask slot — otherwise two things light up for one page.
+const under = (p: string, ...roots: string[]) => roots.some((r) => p === r || p.startsWith(r + '/'))
+
 const TABS = [
   { href: '/',        label: 'Home',                exact: true,  Icon: HomeIcon },
-  { href: '/reviews', label: LABELS.reviews.plural, exact: false, Icon: StarIcon },
-  { href: '/guides',  label: LABELS.guides.plural,  exact: false, Icon: BookIcon },
+  {
+    href: '/explore',
+    label: LABELS.explore.short,
+    exact: false,
+    Icon: CompassIcon,
+    match: (p: string) => under(p, '/explore', '/reviews', '/guides', '/comparisons', '/picks', '/category'),
+  },
+  {
+    href: '/gear',
+    label: LABELS.gear.short,
+    exact: false,
+    Icon: TagIcon,
+    match: (p: string) => under(p, '/gear', '/bench', '/stacks', '/gifts'),
+  },
   {
     href: '/tools',
     label: LABELS.tools.short,

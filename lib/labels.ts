@@ -99,6 +99,17 @@ export const LABELS = {
     singular: 'Best Of',
   },
 
+  // /explore — the ONE content index (nav-ia-plan Phase I, invariant 10). Topics
+  // first, then the four reading FORMATS (reviews, guides, comparisons, best-of)
+  // as filters that link their listings, then a merged latest index. Formats are
+  // article shapes, not destinations, so this is the page the mobile strip's
+  // Explore tab lands on instead of /reviews or /guides.
+  explore: {
+    short:   'Explore',
+    full:    'Explore',
+    tagline: 'Every topic and every format in one place — reviews, guides, comparisons and best-of lists, newest first.',
+  },
+
   // guides table (formerly articles) → /guides
   guides: {
     singular: 'Guide',
