@@ -1,6 +1,6 @@
 # Light Editorial Canvas — decision, palette, rollout
 
-> **Status:** Phases 1–5 DONE 2026-10-08 (uncommitted at time of writing). **Light is the default**; `BD_CANVAS=dark` restores the dark page for a side-by-side. The brand-band pass remains.
+> **Status:** Phases 1–5 SHIPPED `2372b0d` 2026-10-08. **Light is the default**; `BD_CANVAS=dark` restores the dark page for a side-by-side. The brand-band pass remains.
 > **Owner of token values:** `app/globals.css` (this doc explains; the CSS wins).
 > **Supersedes:** the "dark-first everywhere" direction in `docs/brand-guide.md` §2 and the Vercel/Linear/Apple reference points. Those docs get rewritten at the flip (Phase 4), not before, because production is still dark.
 
