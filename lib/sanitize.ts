@@ -20,9 +20,10 @@ const ALLOWED_ATTRIBUTES: Record<string, string[]> = {
   '*':    ['class', 'id'],
 }
 
-// `div` is allowed only when it carries one of our known content-component
-// classes — keeps user-pasted layout junk out. Other tags (figure, etc.) are
-// left unrestricted.
+// On `div`, only our known content-component classes survive — any other class
+// (user-pasted layout junk) is stripped, leaving a bare <div>; the element and
+// its content are kept. Other tags' classes (figure, etc.) are unrestricted.
+// Pinned in tests/unit/sanitize-html.test.ts.
 const ALLOWED_CLASSES: Record<string, string[]> = {
   div: ['bd-image-grid', 'bd-collection-embed', 'bd-content-link'],
 }
