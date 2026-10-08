@@ -266,6 +266,7 @@ export default function GoalForm({ mode, initial, kids }: Props) {
             Name
           </label>
           <input
+            autoComplete="off"
             id="goal-name"
             type="text"
             required

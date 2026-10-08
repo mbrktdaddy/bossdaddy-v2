@@ -67,6 +67,7 @@ export default function WeeklyCheckinOptIn({ kidProfileId, defaultEmail }: Props
       </p>
       <div className="flex items-stretch gap-2 flex-wrap sm:flex-nowrap">
         <input
+          autoComplete="email"
           type="email"
           required
           value={email}

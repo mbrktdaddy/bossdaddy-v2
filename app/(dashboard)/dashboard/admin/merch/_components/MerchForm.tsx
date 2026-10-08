@@ -182,6 +182,7 @@ export function MerchForm({ item }: Props) {
           Name <span className="text-danger-ink">*</span>
         </label>
         <input
+          autoComplete="off"
           id="mf-name"
           type="text"
           required

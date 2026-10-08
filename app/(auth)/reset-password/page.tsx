@@ -98,6 +98,7 @@ export default function ResetPasswordPage() {
           <div>
             <label htmlFor="password" className="block text-sm text-prose-muted mb-1">New password</label>
             <input
+              autoComplete="new-password"
               id="password"
               type="password"
               required
@@ -112,6 +113,7 @@ export default function ResetPasswordPage() {
           <div>
             <label htmlFor="confirm" className="block text-sm text-prose-muted mb-1">Confirm password</label>
             <input
+              autoComplete="new-password"
               id="confirm"
               type="password"
               required

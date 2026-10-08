@@ -111,6 +111,7 @@ function ResearchedNotify({ query }: { query?: string }) {
     <form onSubmit={notify} className="flex flex-wrap items-center gap-2">
       <span className="text-[12px] text-prose-muted">Want the Boss to test one?</span>
       <input
+        autoComplete="email"
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}

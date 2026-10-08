@@ -179,6 +179,7 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
               Recipient email <span className="normal-case text-prose-faint">(optional — we&apos;ll send it)</span>
             </label>
             <input
+              autoComplete="off"
               id="invite-email"
               type="email"
               maxLength={200}

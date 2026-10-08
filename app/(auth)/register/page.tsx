@@ -117,6 +117,7 @@ function RegisterForm() {
               Username
             </label>
             <input
+              autoComplete="off"
               id="username"
               type="text"
               required
@@ -133,6 +134,7 @@ function RegisterForm() {
               Email
             </label>
             <input
+              autoComplete="username"
               id="email"
               type="email"
               required
@@ -148,6 +150,7 @@ function RegisterForm() {
               Password
             </label>
             <input
+              autoComplete="new-password"
               id="password"
               type="password"
               required

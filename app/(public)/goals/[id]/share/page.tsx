@@ -296,6 +296,7 @@ export default async function GoalSharePage({ params, searchParams }: Props) {
               {contacts.length > 0 ? 'Or their email' : 'Their email'}
             </span>
             <input
+              autoComplete="off"
               type="email"
               name="email"
               maxLength={200}

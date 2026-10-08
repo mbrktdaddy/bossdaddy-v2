@@ -82,6 +82,7 @@ export default function EditEmailForm({ current }: { current: string }) {
     return (
       <form onSubmit={handleEmailSubmit} className="space-y-3">
         <input type="email" value={email} onChange={e => { setEmail(e.target.value); setError(null) }}
+          autoComplete="email"
           placeholder="New email address" required
           className="w-full px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm focus:outline-none transition-colors placeholder:text-prose-faint"
         />

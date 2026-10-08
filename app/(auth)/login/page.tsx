@@ -75,6 +75,7 @@ function LoginForm() {
       <div>
         <label htmlFor="email" className="block text-sm text-prose-muted mb-1">Email</label>
         <input
+          autoComplete="username"
           id="email"
           type="email"
           required
@@ -93,6 +94,7 @@ function LoginForm() {
           </Link>
         </div>
         <input
+          autoComplete="current-password"
           id="password"
           type="password"
           required

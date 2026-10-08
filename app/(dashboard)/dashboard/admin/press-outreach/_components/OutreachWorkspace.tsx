@@ -377,6 +377,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
               <div>
                 <label htmlFor="ow-product-name" className="block text-xs text-prose-faint mb-1.5">Product name <span className="text-accent-text">*</span></label>
                 <input
+                  autoComplete="off"
                   id="ow-product-name"
                   value={productName}
                   onChange={e => setProductName(e.target.value)}
@@ -388,6 +389,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
               <div>
                 <label htmlFor="ow-brand-name" className="block text-xs text-prose-faint mb-1.5">Brand name <span className="text-accent-text">*</span></label>
                 <input
+                  autoComplete="off"
                   id="ow-brand-name"
                   value={brandName}
                   onChange={e => setBrandName(e.target.value)}
@@ -436,6 +438,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
               <div>
                 <label htmlFor="ow-contact-name" className="block text-xs text-prose-faint mb-1.5">Contact name <span className="text-prose-faint">(optional)</span></label>
                 <input
+                  autoComplete="off"
                   id="ow-contact-name"
                   value={contactName}
                   onChange={e => setContactName(e.target.value)}
@@ -485,6 +488,7 @@ export default function OutreachWorkspace({ products, initialHistory }: Props) {
                 <div>
                   <label htmlFor="ow-contact-phone" className="block text-xs text-prose-faint mb-1.5">Phone number <span className="text-prose-faint">(optional)</span></label>
                   <input
+                    autoComplete="off"
                     id="ow-contact-phone"
                     type="tel"
                     inputMode="tel"

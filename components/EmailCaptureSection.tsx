@@ -54,6 +54,7 @@ export default function EmailCaptureSection({
             id="email-capture-input"
             type="email"
             name="email"
+            autoComplete="email"
             required
             placeholder="you@example.com"
             className="flex-1 min-w-0 basis-60 px-4 py-3.5 text-sm bg-surface border border-strong rounded-xl text-prose placeholder:text-prose-faint focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors"
