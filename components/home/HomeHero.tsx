@@ -36,13 +36,15 @@ interface MotionItem {
   href: string
 }
 
-/* "In Motion" row — recent ACTIVITY (latest tested · next on the bench · newest
+/* "In Motion" row — DESKTOP ONLY since 2026-10-08: on a phone it stacked into three
+   rows under the headline band and read as a second header, while the Latest list
+   two scrolls down carries the same recency. Recent ACTIVITY (latest tested · next on the bench · newest
    guide), not inventory totals, so it reads as alive rather than advertising
    small counts. Each item links out. Falls back to the independence line if
    nothing's live yet. */
 function Ticker({ items }: { items: MotionItem[] }) {
   return (
-    <div className="border-t border-soft">
+    <div className="hidden sm:block border-t border-soft">
       <div className="max-w-6xl mx-auto px-6">
         {items.length === 0 ? (
           <p className="py-4 text-[13px] font-semibold text-prose-muted inline-flex items-center gap-2.5">
@@ -51,9 +53,9 @@ function Ticker({ items }: { items: MotionItem[] }) {
             Every review is earned. Every pick is independently chosen.
           </p>
         ) : (
-          // Mobile: stacked full-width rows. Desktop: one non-wrapping line of
+          // Desktop only (`hidden sm:block` on the wrapper): one non-wrapping line of
           // equal segments — long titles truncate rather than pushing a second row.
-          <ul className="grid grid-cols-1 gap-y-2.5 py-4 text-[13px] min-w-0 sm:flex sm:items-center sm:gap-x-6 sm:gap-y-0">
+          <ul className="flex items-center gap-x-6 py-4 text-[13px] min-w-0">
             {items.map((it) => (
               <li key={it.label} className="min-w-0 sm:flex-1">
                 <Link href={it.href} className="group flex items-center gap-2.5 min-w-0">
