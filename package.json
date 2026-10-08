@@ -109,5 +109,10 @@
     "iOS >= 15.4",
     "not dead",
     "not op_mini all"
-  ]
+  ],
+  "allowScripts": {
+    "@sentry/cli@2.58.6": true,
+    "esbuild@0.28.1": true,
+    "unrs-resolver@1.11.1": true
+  }
 }
