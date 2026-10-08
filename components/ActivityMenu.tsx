@@ -221,7 +221,12 @@ export default function ActivityMenu({ userId }: { userId: string }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-80 max-w-[90vw] bg-surface-raised border border-strong rounded-xl shadow-2xl z-50 overflow-hidden">
+        /* Phones: pinned to the viewport (the bell sits left of the search + menu
+            icons, so a panel anchored to its right edge ran off the LEFT of the
+            screen). sm+: the anchored dropdown. The sticky header is at top:0, so
+            `top-[4.25rem]` lands just under it whether `fixed` resolves against
+            the viewport or against the blurred header box. */
+        <div className="fixed inset-x-3 top-[4.25rem] w-auto sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-80 sm:max-w-[90vw] bg-surface-raised border border-strong rounded-xl shadow-2xl z-50 overflow-hidden">
           {/* Tabs */}
           <div className="flex">
             {tabBtn('notifications', 'Notifications', notifUnread)}
