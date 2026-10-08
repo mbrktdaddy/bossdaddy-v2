@@ -126,7 +126,7 @@ export default async function CollectionEmbed({ slug }: Props) {
                 >
                   <div className="relative w-full aspect-square bg-surface">
                     {r.image_url ? (
-                      <Image src={r.image_url} alt={r.product_name} fill className="object-cover" sizes="120px" />
+                      <Image src={r.image_url} alt="" /* decorative: the link's text already names it — an alt here gets read twice */ fill className="object-cover" sizes="120px" />
                     ) : null}
                     {badge && (
                       <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-zinc-900/85 to-transparent px-1.5 py-1">

@@ -56,7 +56,7 @@ export default async function ContentLinkCard({ contentType, slug }: Props) {
       <Link href={href} className="group flex items-stretch gap-4">
         {t.image_url && (
           <div className="relative w-24 sm:w-32 shrink-0 bg-surface-sunken self-stretch">
-            <Image src={t.image_url} alt={t.product_name || t.title} fill className="object-cover" sizes="128px" />
+            <Image src={t.image_url} alt="" /* decorative: the link's text already names it — an alt here gets read twice */ fill className="object-cover" sizes="128px" />
           </div>
         )}
         <div className="flex-1 min-w-0 py-4 pr-4 sm:py-5">

@@ -45,7 +45,7 @@ export default function LibraryGuideCard({
         {g.image_url && (
           <Image
             src={g.image_url}
-            alt={g.title}
+            alt="" /* decorative: the link's text already names it — an alt here gets read twice */
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

@@ -71,7 +71,7 @@ export async function MerchStrip({ exploreHref = '/shop' }: { exploreHref?: stri
                 <>
                   <Card tone="raised" className="relative w-36 h-36 overflow-hidden">
                     {img ? (
-                      <Image src={img} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="144px" />
+                      <Image src={img} alt="" /* decorative: the link's text already names it — an alt here gets read twice */ fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="144px" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <svg className="w-9 h-9 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1} aria-hidden>

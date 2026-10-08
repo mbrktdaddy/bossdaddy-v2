@@ -34,7 +34,7 @@ export default function VaultCard({ col, priority = false, cta }: Props) {
         {col.hero_image_url && (
           <Image
             src={col.hero_image_url}
-            alt={col.title}
+            alt="" /* decorative: the link's text already names it — an alt here gets read twice */
             fill
             priority={priority}
             className="object-cover group-hover:scale-105 transition-transform duration-300"

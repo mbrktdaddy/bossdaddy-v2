@@ -19,7 +19,7 @@ export function FeaturedMerchCard({ item, compact = false }: Props) {
         {displayImage ? (
           <Image
             src={displayImage}
-            alt={item.name}
+            alt="" /* decorative: the link's text already names it — an alt here gets read twice */
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
             sizes="(max-width: 640px) 208px, (max-width: 1024px) 33vw, 25vw"

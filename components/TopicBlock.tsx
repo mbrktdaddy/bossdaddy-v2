@@ -122,7 +122,6 @@ export default function TopicBlock({
                 excerpt={it.excerpt}
                 meta={it.meta}
                 imageUrl={it.imageUrl}
-                imageAlt={it.headline}
                 rating={it.rating}
                 isLast={i === rows.length - 1}
                 flip={flip}

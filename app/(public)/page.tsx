@@ -572,7 +572,6 @@ export default async function HomePage() {
                         ? new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
                         : null}
                       imageUrl={r.image_url}
-                      imageAlt={r.product_name}
                       isLast={i === droppedRows.length - 1}
                     />
                   ))}

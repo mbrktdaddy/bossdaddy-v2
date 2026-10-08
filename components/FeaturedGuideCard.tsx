@@ -17,7 +17,7 @@ export default function FeaturedGuideCard({ guide: g }: { guide: GuideRow }) {
         {g.image_url ? (
           <Image
             src={g.image_url}
-            alt={g.title}
+            alt="" /* decorative: the link's text already names it — an alt here gets read twice */
             fill
             priority
             className="object-cover group-hover:scale-105 transition-transform duration-500"

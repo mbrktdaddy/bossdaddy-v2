@@ -79,7 +79,7 @@ export default async function OffTheBench({ limit = 3, className = '' }: Props) 
               {item.image ? (
                 <Image
                   src={item.image}
-                  alt={item.benchTitle}
+                  alt="" /* decorative: the link's text already names it — an alt here gets read twice */
                   fill
                   className="object-cover"
                   sizes="(max-width: 640px) 80px, 33vw"

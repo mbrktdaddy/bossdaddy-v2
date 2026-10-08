@@ -48,7 +48,7 @@ export default function LeadCard({
         {imageUrl && (
           <Image
             src={imageUrl}
-            alt={title}
+            alt="" /* decorative: the link's text already names it — an alt here gets read twice */
             fill
             sizes={sizes}
             className="object-cover group-hover:scale-[1.03] transition-transform duration-300"

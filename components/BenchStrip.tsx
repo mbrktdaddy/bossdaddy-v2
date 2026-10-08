@@ -69,7 +69,7 @@ export default async function BenchStrip({
                 {item.image_url ? (
                   <Image
                     src={item.image_url}
-                    alt={item.title}
+                    alt="" /* decorative: the link's text already names it — an alt here gets read twice */
                     fill
                     className="object-cover"
                     sizes="64px"

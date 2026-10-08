@@ -216,7 +216,7 @@ export default function Header() {
         <Link href="/" className="flex items-center gap-2 font-black text-xl tracking-tight shrink-0">
           <Image
             src="/images/bd-logo-icon.png"
-            alt="Boss Daddy"
+            alt="" /* decorative: the link's text already names it — an alt here gets read twice */
             width={36}
             height={36}
             priority

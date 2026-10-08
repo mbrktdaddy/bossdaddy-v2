@@ -77,7 +77,7 @@ function RelatedCard({ item, className }: { item: RelatedItem; className?: strin
     >
       <div className="relative aspect-[4/3] bg-surface-sunken">
         {item.hero_image_url ? (
-          <Image src={item.hero_image_url} alt={item.title} fill className="object-cover" sizes="(max-width: 640px) 256px, (max-width: 1024px) 50vw, 33vw" />
+          <Image src={item.hero_image_url} alt="" /* decorative: the link's text already names it — an alt here gets read twice */ fill className="object-cover" sizes="(max-width: 640px) 256px, (max-width: 1024px) 50vw, 33vw" />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-accent-text/30">
             <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>

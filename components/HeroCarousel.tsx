@@ -85,7 +85,7 @@ export default function HeroCarousel({ reviews }: { reviews: Review[] }) {
             <div className="relative w-full h-44 bg-surface-raised">
               <Image
                 src={r.image_url}
-                alt={r.product_name}
+                alt="" /* decorative: the link's text already names it — an alt here gets read twice */
                 fill
                 draggable={false}
                 priority={current === 0}

@@ -15,7 +15,6 @@ interface Props {
   /** Footer detail — a date, or "8 min read". */
   meta?: string | null
   imageUrl: string | null
-  imageAlt: string
   /** Renders a RatingScore when supplied. Omit on recency surfaces: "Just dropped"
    *  is a date, not a verdict. */
   rating?: number | null
@@ -51,7 +50,7 @@ interface Props {
  * push that decision in here where it doesn't belong.
  */
 export default function ContentRow({
-  href, eyebrow, headline, sub, excerpt, meta, imageUrl, imageAlt, rating, isLast, flip,
+  href, eyebrow, headline, sub, excerpt, meta, imageUrl, rating, isLast, flip,
 }: Props) {
   return (
     <Link
@@ -82,7 +81,7 @@ export default function ContentRow({
         {imageUrl ? (
           <Image
             src={imageUrl}
-            alt={imageAlt}
+            alt="" /* decorative: the link's text already names it — an alt here gets read twice */
             width={112}
             height={80}
             className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
