@@ -6,6 +6,8 @@ import ConversationList from './_components/ConversationList'
 import type { Metadata } from 'next'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { BackLink } from '@/components/ui/BackLink'
+import { LABELS } from '@/lib/labels'
 
 export const metadata: Metadata = {
   title: 'Messages',
@@ -23,6 +25,7 @@ export default async function MessagesPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
+      <BackLink href="/account" label={LABELS.account.short} className="mb-4" />
       <h1 className="text-2xl font-black text-prose mb-4">Messages</h1>
 
       {/* Compose — the obvious "start a conversation" entry point. */}

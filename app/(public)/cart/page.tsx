@@ -5,6 +5,8 @@ import CartItems from './_components/CartItems'
 import { EmptyState } from '@/components/ui/EmptyState'
 import type { Metadata } from 'next'
 import { buttonVariants } from '@/components/ui/Button'
+import { BackLink } from '@/components/ui/BackLink'
+import { LABELS } from '@/lib/labels'
 
 export const metadata: Metadata = {
   title: 'Your Cart — Boss Daddy Life',
@@ -19,6 +21,7 @@ export default async function CartPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-12">
+      <BackLink href="/shop" label={LABELS.shop.short} className="mb-4" />
       <div className="mb-8">
         <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-2">— Boss Daddy Merch</p>
         <h1 className="text-3xl font-black text-prose">Your Cart</h1>

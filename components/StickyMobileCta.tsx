@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import type { Product } from '@/lib/products'
 import { buttonVariants } from '@/components/ui/Button'
+import { MOBILE_BOTTOM_NAV_OFFSET } from '@/components/MobileBottomNav'
+import { useBottomNavHidden } from '@/components/useBottomNavHidden'
 
 interface Props {
   product: Pick<Product, 'slug' | 'name' | 'affiliate_url' | 'non_affiliate_url' | 'image_url' | 'store' | 'custom_store_name'>
@@ -45,6 +47,9 @@ export default function StickyMobileCta({ product }: Props) {
     return () => observer.disconnect()
   }, [])
 
+  // While the tab strip is scrolled away, drop to the screen's bottom edge.
+  // (Called before the early return below — hooks must run every render.)
+  const navHidden = useBottomNavHidden()
   const href = product.affiliate_url ? `/go/${product.slug}` : product.non_affiliate_url
   if (!href) return null
 
@@ -53,9 +58,15 @@ export default function StickyMobileCta({ product }: Props) {
   const show = scrolled && !otherCtaVisible
 
   return (
+    // Stacks ABOVE the bottom tab strip (z-30 under its z-40) rather than covering
+    // it — both used to sit at bottom-0, so the buy bar hid the tabs. The extra
+    // bottom padding clears the Ask button, which bulges ~1rem above the strip.
+    // Hidden = slid down behind the strip AND faded, so no ghost shows through it.
     <div
-      className={`md:hidden fixed bottom-0 left-0 right-0 z-40 bg-chrome/95 backdrop-blur-md border-t border-soft px-4 pt-3 transition-transform duration-300 ${show ?'translate-y-0':'translate-y-full'}`}
-      style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 0.75rem)' }}
+      className={`md:hidden fixed left-0 right-0 z-30 bg-chrome/95 backdrop-blur-md border-t border-soft px-4 pt-3 pb-5 transition-[transform,opacity,bottom] duration-300 ${show ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}
+      style={navHidden
+        ? { bottom: 0, paddingBottom: 'max(env(safe-area-inset-bottom), 0.75rem)' }
+        : { bottom: MOBILE_BOTTOM_NAV_OFFSET }}
       aria-hidden={!show}
     >
       <div className="flex items-center gap-3">

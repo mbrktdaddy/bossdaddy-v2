@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, type ReactNode } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -12,7 +12,7 @@ import AccountMenu, { useAuthUser } from '@/components/AccountMenu'
 import ConnectionBadge from '@/components/account/ConnectionBadge'
 import { isImmersiveRoute } from '@/lib/immersive-routes'
 import { buttonVariants } from '@/components/ui/Button'
-import { BagIcon, ChevronDownIcon, CubeIcon, DownloadIcon, EnvelopeIcon, ScaleIcon, SearchIcon, StarIcon, XIcon } from '@/components/icons'
+import { BagIcon, ChevronDownIcon, ChevronRightIcon, CubeIcon, EnvelopeIcon, ScaleIcon, SearchIcon, StarIcon, XIcon } from '@/components/icons'
 
 // Vault is intentionally NOT a top-level anchor — its contents
 // (Comparisons / Best Of / Stacks / Gift Guides) live inside the Browse
@@ -26,6 +26,10 @@ import { BagIcon, ChevronDownIcon, CubeIcon, DownloadIcon, EnvelopeIcon, ScaleIc
 // surface at the end of every list on the site. If you add a fifth spine anchor, add it
 // in all three places or it will read as a different site depending on where you look.
 //
+// DESKTOP EXCEPTION (2026-10-08, operator decision): the desktop bar splits by
+// audience — Topics · Reviews · Guides · Gear on the left (the publication), Tools
+// on the right beside the account (the members' home). The drawer keeps this order.
+//
 // ONE SANCTIONED EXCEPTION: `MobileBottomNav` carries Home · Reviews · [Ask] · Guides ·
 // Tools — it has five slots and the elevated Ask FAB owns the middle one, so Gear is
 // deliberately absent there and reaches mobile through THIS array's drawer instead. That
@@ -38,6 +42,10 @@ const NAV_LINKS = [
   { href: '/tools',   label: LABELS.tools.short },
   { href: '/gear',    label: LABELS.gear.short },
 ]
+
+// The mobile drawer's own links: only the spine anchors the bottom tab strip
+// does NOT carry (it has Home · Reviews · Guides · Tools). Today that's Gear.
+const DRAWER_LINKS = NAV_LINKS.filter((l) => ['/gear'].includes(l.href))
 
 // Sub-links surfaced in the "Browse" mega-menu footer + mobile drawer.
 // Source of truth for which collection types are user-visible in nav.
@@ -78,43 +86,52 @@ const VAULT_LINKS = [
   },
 ]
 
-// The Bench lives in Browse, not the primary spine: it's the pipeline that feeds
-// Reviews (being tested → tested), not a top-level place of its own.
-function BenchMenuLink({ onNavigate }: { onNavigate: () => void }) {
-  return (
-    <Link
-      href="/bench"
-      onClick={onNavigate}
-      className="group flex items-center gap-3 p-2.5 -mx-1 rounded-xl hover:bg-surface-hover transition-colors min-h-[44px]"
-    >
-      <span aria-hidden className="w-2 h-2 rounded-full bg-accent animate-pulse shrink-0 ml-1" />
-      <div className="min-w-0 flex-1">
-        <p className="text-xs font-bold text-prose leading-tight">{LABELS.bench.full}</p>
-        <p className="text-[11px] text-prose-muted mt-0.5 line-clamp-1">{LABELS.bench.tagline}</p>
-      </div>
-      <span aria-hidden className="text-prose-faint group-hover:text-copper transition-colors">→</span>
-    </Link>
-  )
-}
+// "From Boss Daddy" — the Browse menu's third column: places that are Boss
+// Daddy's own (the gear pipeline + the store), as opposed to topics (column 1)
+// or content formats (column 2). Each column is ONE kind of thing, and all three
+// get the same heading weight — the old menu stacked these as two small rows
+// under two dividers, which read as an afterthought.
+const BOSS_LINKS = [
+  {
+    href: '/gear/radar',
+    label: LABELS.radar.full,
+    short: LABELS.radar.short,
+    blurb: 'Spotted, not yet tested',
+    icon: (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 12l6-6M21 12a9 9 0 11-9-9m5 9a5 5 0 11-5-5" />
+      </svg>
+    ),
+  },
+  {
+    href: '/bench',
+    label: LABELS.bench.full,
+    short: LABELS.bench.short,
+    blurb: 'Testing now — follow along',
+    icon: <span aria-hidden className="block w-2 h-2 m-1 rounded-full bg-accent animate-pulse" />,
+  },
+  {
+    href: '/shop',
+    label: LABELS.shop.full,
+    short: LABELS.shop.short,
+    blurb: 'Apparel, drinkware, accessories',
+    icon: <BagIcon className="w-4 h-4" strokeWidth={1.5} />,
+  },
+]
 
-// The Shop lives in Browse too, not the spine: merch is secondary commerce, and
-// the cart icon only appears once something is in the cart. This row is the
-// store's standing entry point in the nav.
-function ShopMenuLink({ onNavigate }: { onNavigate: () => void }) {
-  return (
-    <Link
-      href="/shop"
-      onClick={onNavigate}
-      className="group flex items-center gap-3 p-2.5 -mx-1 rounded-xl hover:bg-surface-hover transition-colors min-h-[44px]"
-    >
-      <BagIcon className="w-4 h-4 text-copper shrink-0 ml-0.5" strokeWidth={1.5} />
-      <div className="min-w-0 flex-1">
-        <p className="text-xs font-bold text-prose leading-tight">{LABELS.shop.full}</p>
-        <p className="text-[11px] text-prose-muted mt-0.5 line-clamp-1">{LABELS.shop.tagline}</p>
-      </div>
-      <span aria-hidden className="text-prose-faint group-hover:text-copper transition-colors">→</span>
-    </Link>
-  )
+// One heading style for every Browse group, desktop and mobile alike.
+const MENU_HEADING = 'text-xs text-copper uppercase tracking-widest font-semibold'
+
+// Pages that live inside the Browse menu — the trigger lights up on these.
+const BROWSE_PREFIXES = ['/category/', '/reviews/category', '/guides/category', '/vault', '/comparisons', '/picks', '/stacks', '/gifts', '/bench', '/shop']
+
+const TOOLS_HREF = '/tools'
+
+// Mirrors MobileBottomNav's Tools `match`: /goals and /today belong to Tools; the
+// Boss (/tools/the-boss) belongs to Ask.
+function isToolsActive(pathname: string) {
+  if (pathname.startsWith('/tools/the-boss')) return false
+  return ['/tools', '/goals', '/today'].some((p) => pathname.startsWith(p))
 }
 
 function isActive(pathname: string, href: string) {
@@ -122,18 +139,33 @@ function isActive(pathname: string, href: string) {
   return pathname.startsWith(href)
 }
 
+function BrowseRow({ href, label, blurb, icon, onNavigate }: {
+  href: string; label: string; blurb: string; icon: ReactNode; onNavigate: () => void
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onNavigate}
+      className="flex items-start gap-2.5 p-2.5 -mx-1 rounded-xl hover:bg-surface-hover transition-colors min-h-[44px]"
+    >
+      <span className="text-copper mt-0.5 shrink-0">{icon}</span>
+      <div className="min-w-0">
+        <p className="text-sm font-bold text-prose leading-tight">{label}</p>
+        <p className="text-xs text-prose-muted mt-0.5 line-clamp-1">{blurb}</p>
+      </div>
+    </Link>
+  )
+}
+
 export default function Header() {
   const { username, role, avatarUrl } = useAuthUser()
-  // The SETTINGS item specifically — profile fields, sign-in, notification and
-  // privacy toggles. Account (/account) is a separate item above it, and holds
-  // everything that isn't configuration. Same for every role; the dashboard is
-  // workspace-only.
-  const profileHref = '/account/settings'
   const hasDashboard = role === 'author' || role === 'admin'
 
   const [mobileOpen, setMobileOpen]   = useState(false)
   const [catOpen, setCatOpen]         = useState(false)
   const [searchOpen, setSearchOpen]   = useState(false)
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const mobileSearchRef = useRef<HTMLInputElement>(null)
   const [mobileCatOpen, setMobileCat] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -185,7 +217,7 @@ export default function Header() {
 
   // Close menus on route change
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { setMobileOpen(false); setCatOpen(false); setSearchOpen(false); setUserMenuOpen(false) }, [pathname])
+  useEffect(() => { setMobileOpen(false); setCatOpen(false); setSearchOpen(false); setMobileSearchOpen(false); setUserMenuOpen(false) }, [pathname])
 
   // Masthead floats transparent over the homepage hero, then solidifies once
   // the user scrolls past the top. Only the homepage has a full-bleed hero
@@ -197,7 +229,7 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const isCategoryActive = pathname.startsWith('/reviews/category') || pathname.startsWith('/guides/category') || pathname.startsWith('/category/')
+  const isBrowseActive = BROWSE_PREFIXES.some((p) => pathname.startsWith(p))
 
   // Homepage masthead floats transparent over the hero until the user scrolls.
   const transparent = pathname === '/' && !scrolled
@@ -210,7 +242,7 @@ export default function Header() {
           : 'bg-chrome/95 backdrop-blur-md border-b border-soft'
       }`}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 font-black text-xl tracking-tight shrink-0">
@@ -229,10 +261,75 @@ export default function Header() {
         </Link>
 
         {/* Desktop nav */}
+        {/* Desktop splits by AUDIENCE: the publication sits here on the left —
+            Topics first, then Reviews · Guides · Gear — and Tools (the members'
+            home) sits on the right with the account. Home is omitted (the logo
+            is the home affordance); the mobile drawer keeps the full spine. */}
         <nav aria-label="Site navigation" className="hidden md:flex items-center gap-1">
-          {/* Home omitted on desktop — the logo is the home affordance. Kept in
-              the mobile drawer (conventional there). */}
-          {NAV_LINKS.filter((l) => l.href !== '/').map(({ href, label }) => (
+          {/* Topics mega-menu trigger — first, because readers navigate by
+              subject. NOT `relative`: the panel anchors to the header container
+              so its full width never runs off-screen at md. */}
+          <div ref={browseRef}>
+            <button
+              onClick={() => setCatOpen(!catOpen)}
+              className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                catOpen || isBrowseActive
+                  ? 'bg-accent text-white'
+                  : 'text-prose-muted hover:text-prose hover:bg-surface-raised'
+              }`}
+            >
+              Topics
+              <ChevronDownIcon className={`w-3.5 h-3.5 transition-transform duration-200 ${catOpen ? 'rotate-180' : ''}`} strokeWidth={2} />
+            </button>
+
+            {/* Mega-menu panel — three columns, ONE kind of thing per column,
+                equal heading weight: Topics · Collections · From Boss Daddy. */}
+            {catOpen && (
+              <div className="absolute right-4 sm:right-6 top-full mt-2 w-[min(860px,calc(100%-3rem))] bg-surface-raised border border-strong rounded-xl p-6 z-50 grid grid-cols-[1.6fr_1fr_1fr] gap-6">
+                <div>
+                  <p className={`${MENU_HEADING} mb-3`}>Topics</p>
+                  <div className="grid grid-cols-2 gap-x-2">
+                    {CATEGORIES.map((cat) => (
+                      <Link
+                        key={cat.slug}
+                        href={`/category/${cat.slug}`}
+                        onClick={() => setCatOpen(false)}
+                        className="flex items-center gap-2.5 px-2.5 py-2 -mx-1 rounded-xl hover:bg-surface-hover transition-colors min-h-[44px]"
+                      >
+                        <CategoryIcon slug={cat.slug} className="w-5 h-5 text-copper shrink-0" />
+                        <span className="text-sm font-semibold text-prose leading-tight">{cat.label}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border-l border-strong pl-6">
+                  <div className="flex items-baseline justify-between mb-3">
+                    <p className={MENU_HEADING}>Collections</p>
+                    <Link
+                      href="/vault"
+                      onClick={() => setCatOpen(false)}
+                      className="text-xs text-prose-muted hover:text-copper font-semibold transition-colors"
+                    >
+                      {LABELS.vault.full} →
+                    </Link>
+                  </div>
+                  {VAULT_LINKS.map((v) => (
+                    <BrowseRow key={v.href} {...v} onNavigate={() => setCatOpen(false)} />
+                  ))}
+                </div>
+
+                <div className="border-l border-strong pl-6">
+                  <p className={`${MENU_HEADING} mb-3`}>From Boss Daddy</p>
+                  {BOSS_LINKS.map((b) => (
+                    <BrowseRow key={b.href} {...b} onNavigate={() => setCatOpen(false)} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {NAV_LINKS.filter((l) => l.href !== '/' && l.href !== TOOLS_HREF).map(({ href, label }) => (
             <Link
               key={href}
               href={href}
@@ -245,80 +342,6 @@ export default function Header() {
               {label}
             </Link>
           ))}
-
-          {/* Browse mega-menu trigger */}
-          <div ref={browseRef} className="relative">
-            <button
-              onClick={() => setCatOpen(!catOpen)}
-              className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                catOpen || isCategoryActive
-                  ? 'bg-accent text-white'
-                  : 'text-prose-muted hover:text-prose hover:bg-surface-raised'
-              }`}
-            >
-              Browse
-              <ChevronDownIcon className={`w-3.5 h-3.5 transition-transform duration-200 ${catOpen ? 'rotate-180' : ''}`} strokeWidth={2} />
-            </button>
-
-            {/* Mega-menu panel — elevated zinc-800 to lift from masthead */}
-            {catOpen && (
-              <div className="absolute right-0 top-full mt-2 w-[580px] bg-surface-raised border border-strong rounded-xl p-5 z-50">
-                <p className="text-xs text-copper uppercase tracking-widest font-semibold mb-4">Browse by Category</p>
-                <div className="grid grid-cols-2 gap-1">
-                  {CATEGORIES.map((cat) => (
-                    <Link
-                      key={cat.slug}
-                      href={`/category/${cat.slug}`}
-                      onClick={() => setCatOpen(false)}
-                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-surface-hover transition-colors group"
-                    >
-                      <CategoryIcon slug={cat.slug} className="w-6 h-6 text-copper mt-0.5 shrink-0" />
-                      <div className="min-w-0">
-                        <p className="text-sm font-bold text-prose group-hover:text-prose transition-colors leading-tight">
-                          {cat.label}
-                        </p>
-                        <p className="text-xs text-prose-muted mt-0.5 line-clamp-1">{cat.description}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-                {/* The Vault — sibling discovery section for collection types */}
-                <div className="mt-5 pt-4 border-t border-strong">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-xs text-copper uppercase tracking-widest font-semibold">From {LABELS.vault.full}</p>
-                    <Link
-                      href="/vault"
-                      onClick={() => setCatOpen(false)}
-                      className="text-xs text-prose-muted hover:text-copper font-semibold transition-colors"
-                    >
-                      See all →
-                    </Link>
-                  </div>
-                  <div className="grid grid-cols-2 gap-1">
-                    {VAULT_LINKS.map((v) => (
-                      <Link
-                        key={v.href}
-                        href={v.href}
-                        onClick={() => setCatOpen(false)}
-                        className="flex items-start gap-2.5 p-2.5 rounded-xl hover:bg-surface-hover transition-colors group"
-                      >
-                        <span className="text-copper mt-0.5 shrink-0">{v.icon}</span>
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-prose group-hover:text-prose transition-colors leading-tight">{v.label}</p>
-                          <p className="text-[11px] text-prose-muted mt-0.5 line-clamp-1">{v.blurb}</p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-                {/* The Bench — the review pipeline, one step before Reviews */}
-                <div className="mt-4 pt-4 border-t border-strong">
-                  <BenchMenuLink onNavigate={() => setCatOpen(false)} />
-                  <ShopMenuLink onNavigate={() => setCatOpen(false)} />
-                </div>
-              </div>
-            )}
-          </div>
         </nav>
 
         {/* Right side */}
@@ -359,6 +382,35 @@ export default function Header() {
             )}
           </div>
 
+          {/* Tools — the members' home (Today, goals, savings) plus the public
+              calculators. Right side, with the account, because it's "yours"
+              rather than the publication. Same glyph as the mobile Tools tab. */}
+          <Link
+            href={TOOLS_HREF}
+            className={`hidden md:flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              isToolsActive(pathname) ? 'text-prose' : 'text-prose-muted hover:text-prose hover:bg-surface-raised'
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+              <rect x="3" y="8.25" width="18" height="12" rx="1.5" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25V6.75A2.25 2.25 0 0 1 11.25 4.5h1.5A2.25 2.25 0 0 1 15 6.75v1.5M3 13.5h6v1.5a.75.75 0 0 0 .75.75h4.5a.75.75 0 0 0 .75-.75v-1.5h6" />
+            </svg>
+            <span className="sr-only lg:not-sr-only">{LABELS.tools.short}</span>
+          </Link>
+
+          {/* Shop — the store's standing entry point, where every major site keeps
+              it: top-right, beside the cart. Not a spine anchor (merch is
+              secondary), and the cart icon still only appears once it has items. */}
+          <Link
+            href="/shop"
+            className={`hidden md:flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              isActive(pathname, '/shop') ? 'text-prose' : 'text-prose-muted hover:text-prose hover:bg-surface-raised'
+            }`}
+          >
+            <BagIcon className="w-4 h-4" strokeWidth={1.5} />
+            <span className="sr-only lg:not-sr-only">{LABELS.shop.short}</span>
+          </Link>
+
           <CartIcon />
 
           <AccountMenu />
@@ -368,9 +420,27 @@ export default function Header() {
               the bell already shows at every width while the avatar trigger stays
               desktop-only. Adding a second one for "mobile" puts two bells in the row. */}
 
+          {/* Mobile search — an icon that opens the search row, instead of a
+              permanent field on every page (it made the mobile header ~7.5rem). */}
+          {!isImmersiveRoute(pathname) && pathname !== '/search' && (
+            <button
+              onClick={() => {
+                const next = !mobileSearchOpen
+                setMobileSearchOpen(next)
+                setMobileOpen(false)
+                if (next) setTimeout(() => mobileSearchRef.current?.focus(), 50)
+              }}
+              aria-label={mobileSearchOpen ? 'Close search' : 'Search'}
+              aria-expanded={mobileSearchOpen}
+              className="md:hidden p-3 rounded-lg text-prose-muted hover:text-prose hover:bg-surface-raised/60 transition-colors"
+            >
+              {mobileSearchOpen ? <XIcon className="w-5 h-5" strokeWidth={2} /> : <SearchIcon className="w-5 h-5" strokeWidth={2} />}
+            </button>
+          )}
+
           {/* Hamburger */}
           <button
-            onClick={() => setMobileOpen(!mobileOpen)}
+            onClick={() => { setMobileOpen(!mobileOpen); setMobileSearchOpen(false) }}
             className="md:hidden p-3 rounded-lg text-prose-muted hover:text-prose hover:bg-surface-raised/60 transition-colors"
             aria-label="Toggle menu"
           >
@@ -385,19 +455,16 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile search bar — dark recessed surface.
-          HIDDEN ON IMMERSIVE ROUTES (the DM thread), for two reasons. The IA one:
-          an immersive surface is app-like and carries minimal chrome — the bottom
-          nav already hides here, and a site-wide "search reviews and guides" field
-          has no business sitting above a conversation. The load-bearing one: this
-          row makes the mobile header ~7.5rem instead of 4rem, and a fixed-height
-          surface below it that assumed 4rem had its composer pushed clean off the
-          bottom of the screen. Thread now measures rather than assuming, but the
-          CSS fallback still needs this to be true. */}
-      <div className={`md:hidden px-4 pb-3 ${pathname === '/search' ? 'hidden' : ''} ${transparent ? 'hidden' : ''} ${isImmersiveRoute(pathname) ? 'hidden' : ''}`}>
+      {/* Mobile search row — opened by the header's search icon, closed by
+          default. NEVER on immersive routes (the DM thread): an app-like surface
+          carries minimal chrome, and that fixed-height surface's CSS fallback
+          assumes a 4rem header — this row would push its composer off-screen. */}
+      {mobileSearchOpen && !isImmersiveRoute(pathname) && (
+      <div className="md:hidden px-4 pb-3">
         <form action="/search">
           <div className="relative">
             <input
+              ref={mobileSearchRef}
               name="q"
               type="search"
               autoComplete="off"
@@ -408,6 +475,7 @@ export default function Header() {
           </div>
         </form>
       </div>
+      )}
 
       {/* Mobile drawer — dark to match nav.
           max-h subtracts the 4rem sticky header AND the iOS safe-area
@@ -424,50 +492,43 @@ export default function Header() {
             paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
           }}
         >
-          {/* Main nav links */}
-          <nav aria-label="Mobile navigation" className="flex flex-col px-4 pt-3 gap-1">
-            {NAV_LINKS.map(({ href, label }) => (
+          {/* The drawer holds ONLY what the bottom tab strip doesn't. Home ·
+              Reviews · Guides · Tools are one tap away down there, so repeating
+              them here just doubled the list. Gear is the one spine anchor the
+              strip omits, so it leads. Get the App moved to InstallPrompt — a
+              one-time nudge beats a permanent row. */}
+          <nav aria-label="Mobile navigation" className="px-4 pt-3">
+            {DRAWER_LINKS.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
                 onClick={() => setMobileOpen(false)}
-                className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                   isActive(pathname, href)
                     ? 'bg-accent text-white'
-                    : 'text-prose-muted hover:text-prose hover:bg-surface-raised'
+                    : 'text-prose hover:bg-surface-raised'
                 }`}
               >
                 {label}
+                <ChevronRightIcon className="w-4 h-4 text-prose-faint" strokeWidth={2} />
               </Link>
             ))}
-            {/* Get the App — shown to everyone (logged in or out) so the PWA
-                install is discoverable from the primary nav, not buried in the
-                account menu. */}
-            <Link
-              href="/install"
-              onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                isActive(pathname, '/install')
-                  ? 'bg-accent text-white'
-                  : 'text-prose-muted hover:text-prose hover:bg-surface-raised'
-              }`}
-            >
-              <DownloadIcon className="w-4 h-4 text-accent shrink-0" strokeWidth={1.8} />
-              {LABELS.app.short}
-            </Link>
           </nav>
 
-          {/* Browse by Category — mobile primary discovery */}
-          <div className="px-4 pt-5 pb-2">
+          {/* Browse — the same three groups as the desktop mega-menu, same
+              heading style. Topics stays collapsible (10 rows); the other two
+              are short enough to show open. */}
+          <div className="px-4 pt-5 pb-2 border-t border-soft mt-3">
             <button
               onClick={() => setMobileCat(!mobileCatOpen)}
-              className="flex items-center justify-between w-full text-xs text-copper uppercase tracking-widest font-semibold mb-3"
+              aria-expanded={mobileCatOpen}
+              className={`flex items-center justify-between w-full min-h-[44px] ${MENU_HEADING}`}
             >
-              Browse by Category
+              Topics
               <ChevronDownIcon className={`w-4 h-4 transition-transform ${mobileCatOpen ? 'rotate-180' : ''}`} strokeWidth={2} />
             </button>
             {mobileCatOpen && (
-              <div className="grid grid-cols-2 gap-2 pb-3">
+              <div className="grid grid-cols-2 gap-2 pt-1 pb-3">
                 {CATEGORIES.map((cat) => (
                   <Link
                     key={cat.slug}
@@ -487,26 +548,21 @@ export default function Header() {
             )}
           </div>
 
-          {/* From The Vault — collection types as a 2x2 grid */}
-          <div className="px-4 pb-4 border-t border-soft pt-3">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] font-bold text-copper uppercase tracking-widest">From {LABELS.vault.full}</p>
+          <div className="px-4 pb-4 border-t border-soft pt-4">
+            <div className="flex items-baseline justify-between mb-2">
+              <p className={MENU_HEADING}>Collections</p>
               <Link
                 href="/vault"
                 onClick={() => setMobileOpen(false)}
-                className="text-xs text-prose-muted hover:text-copper font-semibold transition-colors"
+                className="py-2 text-xs text-prose-muted hover:text-copper font-semibold transition-colors"
               >
-                See all →
+                {LABELS.vault.full} →
               </Link>
             </div>
+            {/* Compact tiles, not blurb rows — a phone can't afford two lines each. */}
             <div className="grid grid-cols-2 gap-2">
               {VAULT_LINKS.map((v) => (
-                <Link
-                  key={v.href}
-                  href={v.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={buttonVariants({ variant: 'secondary' })}
-                >
+                <Link key={v.href} href={v.href} onClick={() => setMobileOpen(false)} className={buttonVariants({ variant: 'secondary' })}>
                   <span className="text-copper shrink-0">{v.icon}</span>
                   <span className="text-xs font-semibold text-prose-muted truncate">{v.label}</span>
                 </Link>
@@ -514,97 +570,73 @@ export default function Header() {
             </div>
           </div>
 
-          {/* The Bench — the review pipeline, one step before Reviews */}
-          <div className="px-4 pb-4 border-t border-soft pt-3">
-            <BenchMenuLink onNavigate={() => setMobileOpen(false)} />
-            <ShopMenuLink onNavigate={() => setMobileOpen(false)} />
+          <div className="px-4 pb-4 border-t border-soft pt-4">
+            <p className={`${MENU_HEADING} mb-2`}>From Boss Daddy</p>
+            <div className="grid grid-cols-3 gap-2">
+              {BOSS_LINKS.map((b) => (
+                <Link key={b.href} href={b.href} onClick={() => setMobileOpen(false)} className={buttonVariants({ variant: 'secondary', className: 'px-2' })}>
+                  <span className="text-copper shrink-0">{b.icon}</span>
+                  <span className="text-xs font-semibold text-prose-muted truncate">{b.short}</span>
+                </Link>
+              ))}
+            </div>
           </div>
 
           {/* Auth / account */}
           <div className="px-4 pb-4 border-t border-soft pt-3 mt-1">
             {username ? (
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-3 px-4 py-3">
-                  <div className="w-10 h-10 rounded-full overflow-hidden bg-accent flex items-center justify-center text-base font-bold text-white shrink-0">
+              // One row for the account, not seven. Settings and Connections are
+              // linked from /account itself, so the drawer only needs the door in;
+              // the pending-requests badge rides on that row so it isn't lost.
+              // Messages keeps its own tile — it's the one people want fast.
+              <div className="flex flex-col gap-2">
+                <Link
+                  href="/account"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-surface-raised transition-colors"
+                >
+                  <div className="w-9 h-9 rounded-full overflow-hidden bg-accent flex items-center justify-center text-sm font-bold text-white shrink-0">
                     {avatarUrl ? (
-                      <Image src={avatarUrl} alt="" width={40} height={40} className="object-cover w-full h-full" unoptimized />
+                      <Image src={avatarUrl} alt="" width={36} height={36} className="object-cover w-full h-full" unoptimized />
                     ) : (
                       username[0].toUpperCase()
                     )}
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-[10px] uppercase tracking-widest text-prose-muted font-semibold">Signed in as</p>
+                  <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold text-prose truncate">@{username}</p>
+                    <p className="text-xs text-prose-muted">{LABELS.account.short}</p>
                   </div>
-                </div>
-                <Link
-                  href={profileHref}
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-prose-muted hover:text-prose hover:bg-surface-raised transition-colors"
-                >
-                  <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  Account Settings
-                </Link>
-                <Link
-                  href="/account"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-prose-muted hover:text-prose hover:bg-surface-raised transition-colors"
-                >
-                  <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm4 4h8M8 14h5" />
-                  </svg>
-                  {LABELS.account.short}
-                </Link>
-                <Link
-                  href="/account/connections"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-prose-muted hover:text-prose hover:bg-surface-raised transition-colors"
-                >
-                  <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-1a4 4 0 00-3-3.87M9 20H4v-1a4 4 0 013-3.87m10-4.63a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  {LABELS.contacts.short}
                   <ConnectionBadge />
+                  <ChevronRightIcon className="w-4 h-4 text-prose-faint shrink-0" strokeWidth={2} />
                 </Link>
-                <Link
-                  href="/account/messages"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-prose-muted hover:text-prose hover:bg-surface-raised transition-colors"
-                >
-                  <EnvelopeIcon className="w-4 h-4 text-prose-faint" strokeWidth={1.8} />
-                  Messages
-                </Link>
-                {hasDashboard && (
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-prose-muted hover:text-prose hover:bg-surface-raised transition-colors"
-                  >
-                    <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h6v6H4zM14 6h6v4h-6zM14 14h6v4h-6zM4 16h6v2H4z" />
-                    </svg>
-                    Dashboard
+                <div className={`grid gap-2 ${hasDashboard ? 'grid-cols-3' : 'grid-cols-2'}`}>
+                  <Link href="/account/messages" onClick={() => setMobileOpen(false)} className={buttonVariants({ variant: 'secondary', className: 'px-2' })}>
+                    <EnvelopeIcon className="w-4 h-4 text-copper shrink-0" strokeWidth={1.8} />
+                    <span className="text-xs font-semibold text-prose-muted">Messages</span>
                   </Link>
-                )}
-                <form action="/api/auth/signout" method="POST" className="mt-1">
-                  <button
-                    type="submit"
-                    className="w-full flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-prose-muted hover:bg-danger-bg hover:text-danger-ink transition-colors text-left border-t border-soft pt-3"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    Sign Out
-                  </button>
-                </form>
+                  {hasDashboard && (
+                    <Link href="/dashboard" onClick={() => setMobileOpen(false)} className={buttonVariants({ variant: 'secondary', className: 'px-2' })}>
+                      <span className="text-xs font-semibold text-prose-muted">Dashboard</span>
+                    </Link>
+                  )}
+                  <form action="/api/auth/signout" method="POST" className="contents">
+                    <button type="submit" className={buttonVariants({ variant: 'secondary', className: 'px-2' })}>
+                      <span className="text-xs font-semibold text-prose-muted">Sign Out</span>
+                    </button>
+                  </form>
+                </div>
               </div>
             ) : (
-              <Link href={`/login?next=${encodeURIComponent(pathname)}`} onClick={() => setMobileOpen(false)}
-                className={buttonVariants()}>
-                Sign In
-              </Link>
+              <div className="grid grid-cols-2 gap-2">
+                <Link href={`/register?next=${encodeURIComponent(pathname)}`} onClick={() => setMobileOpen(false)}
+                  className={buttonVariants()}>
+                  Join free
+                </Link>
+                <Link href={`/login?next=${encodeURIComponent(pathname)}`} onClick={() => setMobileOpen(false)}
+                  className={buttonVariants({ variant: 'secondary' })}>
+                  Sign In
+                </Link>
+              </div>
             )}
           </div>
         </div>

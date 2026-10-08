@@ -19,6 +19,7 @@ export default async function VaultShell({ active, children }: Props) {
   return (
     <>
       <PageHeader
+        back={active === 'all' ? undefined : { href: '/vault', label: LABELS.vault.full }}
         eyebrow={active === 'all' ? 'Collections built from tested gear' : LABELS.vault.full}
         title={tab.title}
         deck={tab.deck}

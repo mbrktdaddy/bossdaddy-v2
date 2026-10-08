@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import NotificationFeed from '@/components/notifications/NotificationFeed'
 import type { Metadata } from 'next'
+import { BackLink } from '@/components/ui/BackLink'
+import { LABELS } from '@/lib/labels'
 
 export const metadata: Metadata = {
   title: 'Notifications',
@@ -21,6 +23,7 @@ export default async function NotificationsPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
+      <BackLink href="/account" label={LABELS.account.short} className="mb-4" />
       <h1 className="text-2xl font-black text-prose mb-6">Notifications</h1>
       <NotificationFeed initial={data ?? []} />
     </div>

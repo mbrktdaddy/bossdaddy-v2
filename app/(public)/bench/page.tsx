@@ -94,6 +94,7 @@ export default async function BenchPage() {
   return (
     <>
       <PageHeader
+        back={{ href: '/gear', label: LABELS.gear.short }}
         eyebrow={
           <>
             {/* Live pulse — the one status glyph the eyebrow carries. Kept in the

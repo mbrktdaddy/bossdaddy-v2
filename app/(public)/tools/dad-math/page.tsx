@@ -16,6 +16,7 @@ import { LABELS } from '@/lib/labels'
 import { pickAmounts, LIFE_INSURANCE_KEYS } from '@/lib/dad-tools/url-params'
 import DadMathTool from './_components/DadMathTool'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { BackLink } from '@/components/ui/BackLink'
 
 interface PageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>
@@ -73,6 +74,7 @@ export default async function DadMathPage({ searchParams }: PageProps) {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
+      <BackLink href="/tools" label={LABELS.tools.short} className="mb-4" />
 
       <header className="space-y-3">
         <Eyebrow>

@@ -3,8 +3,15 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { isImmersiveRoute } from '@/lib/immersive-routes'
 import { LABELS } from '@/lib/labels'
+import { useBottomNavHidden } from '@/components/useBottomNavHidden'
 
 const ICON_CLS = 'w-5 h-5'
+
+// The strip's full height (h-14 row + 1px top border + the safe-area pad below it).
+// Anything else pinned to the mobile bottom edge — the review buy bar, the install
+// prompt — sits at `bottom: MOBILE_BOTTOM_NAV_OFFSET` so it stacks ABOVE the strip
+// instead of covering it. Change the row height here and they follow.
+export const MOBILE_BOTTOM_NAV_OFFSET = 'calc(3.5rem + 1px + env(safe-area-inset-bottom))'
 
 // A TOOLBOX, DRAWN FROM PRIMITIVES — a rounded rect, a handle, a clasp line — rather
 // than a traced wrench. Same call the launcher tiles made: at 20px a multi-path wrench
@@ -115,6 +122,7 @@ const TABS = [
 
 export default function MobileBottomNav() {
   const pathname = usePathname()
+  const scrolledAway = useBottomNavHidden()
 
   // Immersive surfaces (e.g. the DM conversation view) hide the strip so the
   // composer sits flush at the bottom. PublicMain drops its clearance in step.
@@ -130,7 +138,7 @@ export default function MobileBottomNav() {
       <Link
         key={href}
         href={href}
-        className={`flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold uppercase tracking-wider transition-colors ${
+        className={`flex flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors ${
           active ? 'text-copper' : 'text-prose-faint hover:text-prose-muted'
         }`}
         aria-current={active ? 'page' : undefined}
@@ -147,7 +155,11 @@ export default function MobileBottomNav() {
   return (
     <nav
       aria-label="Primary mobile navigation"
-      className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-chrome/95 backdrop-blur-sm border-t border-soft"
+      // Slides away while reading (useBottomNavHidden). The extra 1.5rem carries the
+      // Ask button, which bulges above the strip, fully off-screen with it.
+      className={`fixed bottom-0 left-0 right-0 z-40 md:hidden bg-chrome/95 backdrop-blur-sm border-t border-soft transition-transform duration-300 ${
+        scrolledAway ? 'translate-y-[calc(100%+1.5rem)]' : 'translate-y-0'
+      }`}
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="grid grid-cols-5 h-14">
@@ -164,7 +176,7 @@ export default function MobileBottomNav() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
           </span>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-accent">Ask</span>
+          <span className="text-[11px] font-semibold text-accent">Ask</span>
         </Link>
 
         {TABS.slice(2).map(renderTab)}

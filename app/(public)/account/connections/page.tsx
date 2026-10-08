@@ -29,6 +29,7 @@ import {
 } from '@/lib/connections'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
+import { BackLink } from '@/components/ui/BackLink'
 
 export const metadata: Metadata = {
   title: LABELS.contacts.short,
@@ -62,6 +63,7 @@ export default async function ConnectionsPage({ searchParams }: Props) {
 
   return (
     <Wrap>
+      <BackLink href="/account" label={LABELS.account.short} className="mb-4" />
       <header className="space-y-2">
         <Eyebrow>
           {LABELS.contacts.eyebrow}

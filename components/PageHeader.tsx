@@ -1,4 +1,11 @@
+import { BackLink } from '@/components/ui/BackLink'
+
 interface Props {
+  /**
+   * Optional "‹ Parent" up-link rendered above the eyebrow, for app-like pages
+   * with no breadcrumb (installed-PWA users have no browser Back button).
+   */
+  back?: { href: string; label: string }
   /**
    * Small uppercase kicker above the H1 (the page's ROLE / section). Normally a
    * plain string. ReactNode is allowed ONLY to prefix the label with a status
@@ -22,10 +29,11 @@ interface Props {
  * required. This is the site-wide replacement for ad-hoc page titles so
  * interior pages carry the same DNA as the homepage. (docs/home-manifesto-spec.md)
  */
-export default function PageHeader({ eyebrow, title, deck, actions }: Props) {
+export default function PageHeader({ back, eyebrow, title, deck, actions }: Props) {
   return (
     <header className="border-b border-soft">
       <div className="max-w-6xl mx-auto px-6 py-12 md:py-16">
+        {back && <BackLink href={back.href} label={back.label} className="mb-2" />}
         <div className="flex items-end justify-between gap-6">
           <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-eyebrow">

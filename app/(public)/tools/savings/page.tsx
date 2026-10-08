@@ -7,6 +7,7 @@ import type { Metadata } from 'next'
 import { OG_SITE } from '@/lib/og'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { LABELS } from '@/lib/labels'
+import { BackLink } from '@/components/ui/BackLink'
 import { getGoals } from '@/lib/dad-tools/savings-actions'
 import { getKids } from '@/lib/dad-tools/kid-actions'
 import { unreadNoteCounts } from '@/lib/goals/notes'
@@ -89,6 +90,7 @@ export default async function SavingsIndexPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
+      <BackLink href="/tools" label={LABELS.tools.short} className="mb-4" />
 
       <header className="space-y-3">
         <Eyebrow>

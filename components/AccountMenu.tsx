@@ -24,6 +24,7 @@ import { createClient } from '@/lib/supabase/client'
 import { LABELS } from '@/lib/labels'
 import ConnectionBadge from '@/components/account/ConnectionBadge'
 import ActivityMenu from '@/components/ActivityMenu'
+import { buttonVariants } from '@/components/ui/Button'
 import { ChevronDownIcon, DownloadIcon, EnvelopeIcon } from '@/components/icons'
 
 interface AuthUser {
@@ -251,12 +252,22 @@ export default function AccountMenu({ withBell = true }: { withBell?: boolean } 
           )}
         </div>
       ) : (
-        <Link
-          href={`/login?next=${encodeURIComponent(pathname)}`}
-          className={`${vis} text-sm px-4 py-2 rounded-lg border border-strong text-prose-muted hover:border-copper hover:text-prose transition-colors`}
-        >
-          Sign In
-        </Link>
+        // Join is the visitor's reason to sign up — "Sign In" alone only speaks
+        // to people who already have an account.
+        <div className="hidden md:flex items-center gap-2">
+          <Link
+            href={`/login?next=${encodeURIComponent(pathname)}`}
+            className="text-sm px-3 py-2 rounded-lg text-prose-muted hover:text-prose transition-colors"
+          >
+            Sign In
+          </Link>
+          <Link
+            href={`/register?next=${encodeURIComponent(pathname)}`}
+            className={buttonVariants({ size: 'sm' })}
+          >
+            Join free
+          </Link>
+        </div>
       )}
     </>
   )

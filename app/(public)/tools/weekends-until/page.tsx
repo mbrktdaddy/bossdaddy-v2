@@ -3,6 +3,7 @@ import { OG_SITE, OG_CARD_PATH, TWITTER_HANDLE, OG_TEMPLATE_VERSION } from '@/li
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { getKids } from '@/lib/dad-tools/kid-actions'
 import { LABELS } from '@/lib/labels'
+import { BackLink } from '@/components/ui/BackLink'
 import {
   milestoneDate,
   unitsRemaining,
@@ -127,6 +128,7 @@ export default async function WeekendsUntilPage({ searchParams }: PageProps) {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
+      <BackLink href="/tools" label={LABELS.tools.short} className="mb-4" />
 
       <header className="space-y-3">
         <Eyebrow>

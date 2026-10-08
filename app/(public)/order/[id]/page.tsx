@@ -8,6 +8,8 @@ import OrderPoller from './_components/OrderPoller'
 import CartClearer from './_components/CartClearer'
 import type { Metadata } from 'next'
 import { buttonVariants } from '@/components/ui/Button'
+import { BackLink } from '@/components/ui/BackLink'
+import { LABELS } from '@/lib/labels'
 
 export const metadata: Metadata = {
   title: 'Order Confirmed — Boss Daddy Life',
@@ -67,6 +69,7 @@ export default async function OrderPage({ params }: Props) {
   return (
     <div className="max-w-2xl mx-auto px-6 py-16">
       <CartClearer />
+      <BackLink href="/shop" label={LABELS.shop.short} className="mb-4" />
 
       {/* Header */}
       <div className="mb-10 text-center">

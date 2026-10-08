@@ -12,6 +12,7 @@ import { RadarLane } from '@/components/radar/RadarLane'
 import { getLiveRadar } from '@/lib/products/radar'
 import AskTheBoss from '@/components/AskTheBoss'
 import PageHeader from '@/components/PageHeader'
+import { LABELS } from '@/lib/labels'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { buttonVariants } from '@/components/ui/Button'
 import { buildSocialMetadata, SITE_URL } from '@/lib/og'
@@ -93,6 +94,7 @@ export default async function GearCategoryPage({ params }: Props) {
   return (
     <>
       <PageHeader
+        back={{ href: '/gear', label: LABELS.gear.short }}
         eyebrow={`Gear / ${cat.label}`}
         title={`${cat.label} Gear`}
         deck={`${cat.label} gear I've rated 8 or higher, plus what's caught my eye. Every review is earned. Every pick is independently chosen.`}

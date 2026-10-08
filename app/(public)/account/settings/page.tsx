@@ -13,6 +13,8 @@ import BioForm from '@/components/account/BioForm'
 import type { Metadata } from 'next'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { BackLink } from '@/components/ui/BackLink'
+import { LABELS } from '@/lib/labels'
 
 export const metadata: Metadata = {
   title: 'Account Settings',
@@ -58,6 +60,7 @@ export default async function AccountSettingsPage() {
   return (
     <div data-theme="dark" className="bg-background text-prose min-h-[calc(100vh-4rem)]">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
+      <BackLink href="/account" label={LABELS.account.short} className="mb-4" />
 
       <div className="mb-8">
         {/* Settings is now ONLY settings. Your family, goals, activity, likes and
