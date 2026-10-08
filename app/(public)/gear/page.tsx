@@ -16,8 +16,8 @@ import SectionHeader from '@/components/SectionHeader'
 import PageHeader from '@/components/PageHeader'
 import { RadarLane } from '@/components/radar/RadarLane'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { getSeasonalOccasions } from '@/lib/gift-occasions'
-import OccasionIcon from '@/components/OccasionIcon'
+import { getLiveSeasonalGifts } from '@/lib/collections/seasonal-gifts'
+import OccasionTiles from '@/components/collections/OccasionTiles'
 import { ogImageUrl, OG_SITE, TWITTER_HANDLE } from '@/lib/og'
 import type { Metadata } from 'next'
 import { Eyebrow } from '@/components/ui/Eyebrow'
@@ -62,12 +62,9 @@ export const metadata: Metadata = {
 export default async function GearPage() {
   const supabase = createAnonClient()
 
-  const seasonalOccasions = getSeasonalOccasions()
-  const seasonalValues = seasonalOccasions.map((o) => o.value)
-
   const [
     { data: reviews },
-    { data: giftPickLists },
+    liveGifts,
     { data: featuredPickRows },
     { data: stackRows },
     radar,
@@ -81,13 +78,9 @@ export default async function GearPage() {
       .order('rating', { ascending: false })
       .order('published_at', { ascending: false })
       .limit(120),
-    supabase
-      .from('collections')
-      .select('id, slug, title, hero_image_url, occasion, collection_items(count)')
-      .eq('collection_type', 'gift_guide')
-      .eq('is_visible', true)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .in('occasion', seasonalValues as any),
+    // Live seasonal gift guides (visible + published + at least one pick),
+    // shared with the homepage band so the two shelves can't disagree.
+    getLiveSeasonalGifts(supabase),
     supabase
       .from('collections')
       .select('id, slug, title, description, hero_image_url')
@@ -138,24 +131,6 @@ export default async function GearPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     featuredItems = (data ?? []) as any
   }
-
-  const giftPickMap = new Map(
-    (giftPickLists ?? []).map((p) => [p.occasion, p])
-  )
-  // Only surface gift guides that actually have picks — an empty collection
-  // routes to a "Coming Soon" dead-end, which we don't want in this slot.
-  // The section auto-collapses to a slim link when nothing is live yet.
-  const populatedOccasions = new Set(
-    (giftPickLists ?? [])
-      .filter((p) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const ci = (p as any).collection_items
-        const count = Array.isArray(ci) ? (ci[0]?.count ?? 0) : 0
-        return count > 0
-      })
-      .map((p) => p.occasion)
-  )
-  const liveSeasonalOccasions = seasonalOccasions.filter((o) => populatedOccasions.has(o.value))
 
   // Self-suppresses at zero (a hub section, not a tab — empty means absent).
   const kits = (stackRows ?? []).filter((s) => {
@@ -328,7 +303,7 @@ export default async function GearPage() {
       <AskTheBoss context="Boss Daddy's gear picks" className="mt-16 mb-16" />
 
       {/* ── Shop by Occasion ─────────────────────────────────────────── */}
-      {liveSeasonalOccasions.length > 0 ? (
+      {liveGifts.length > 0 ? (
       <section className="mb-16">
         <SectionHeader
           label="Gift Guides"
@@ -336,57 +311,7 @@ export default async function GearPage() {
           right={{ label: 'All gift guides', href: '/gifts' }}
         />
 
-        {/* Mobile: horizontal scroll */}
-        <div className="sm:hidden flex gap-3 overflow-x-auto scrollbar-hide -mx-6 px-6 pb-1">
-          {liveSeasonalOccasions.map((occ) => {
-            const pick = giftPickMap.get(occ.value)
-            return (
-              <Link
-                key={occ.slug}
-                href={`/gifts/${occ.slug}`}
-                className="shrink-0 w-40 rounded-xl overflow-hidden bg-surface border border-soft hover:border-accent-border/40 hover:-translate-y-1 transition-all"
-              >
-                <div className="relative w-full h-24 bg-surface-raised">
-                  {pick?.hero_image_url ? (
-                    <Image src={pick.hero_image_url} alt={occ.label} fill className="object-cover" sizes="160px" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center"><OccasionIcon value={occ.value} className="w-9 h-9 text-accent-text/60" /></div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/60 to-transparent" />
-                  <p className="absolute bottom-2 left-3 right-3 text-white text-xs font-black leading-tight">{occ.label}</p>
-                </div>
-                <p className="px-3 py-2 text-xs text-prose-muted line-clamp-2 leading-relaxed">{occ.shortBlurb}</p>
-              </Link>
-            )
-          })}
-        </div>
-
-        {/* Desktop: 3-col grid */}
-        <div className="hidden sm:grid grid-cols-3 gap-4">
-          {liveSeasonalOccasions.map((occ) => {
-            const pick = giftPickMap.get(occ.value)
-            return (
-              <Link
-                key={occ.slug}
-                href={`/gifts/${occ.slug}`}
-                className="group relative rounded-xl overflow-hidden border border-soft hover:border-accent-border/40 hover:-translate-y-1 transition-all"
-              >
-                <div className="relative w-full h-36 bg-surface-raised">
-                  {pick?.hero_image_url ? (
-                    <Image src={pick.hero_image_url} alt={occ.label} fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="(max-width: 1024px) 33vw, 320px" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center"><OccasionIcon value={occ.value} className="w-12 h-12 text-accent-text/60" /></div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/60 via-zinc-900/20 to-transparent" />
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <p className="text-white font-black text-sm leading-tight mb-0.5">{occ.label}</p>
-                  <p className="text-zinc-200 text-xs line-clamp-1">{occ.shortBlurb}</p>
-                </div>
-              </Link>
-            )
-          })}
-        </div>
+        <OccasionTiles gifts={liveGifts} />
 
         <div className="mt-4 sm:hidden text-right">
           <Link href="/gifts" className="text-xs text-accent-text-soft hover:text-accent font-semibold transition-colors">

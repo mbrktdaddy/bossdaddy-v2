@@ -346,7 +346,7 @@ decisions, and that D's own rename never happened.
 
 ---
 
-### Phase I — formats are not destinations (DECIDED 2026-10-08, not built)
+### Phase I — formats are not destinations (DECIDED and SHIPPED 2026-10-08, I-1…I-6)
 
 A review of the pillars against what the major review publications do (Wirecutter,
 The Strategist, Gear Patrol, RTINGS) and against what the site actually holds.
@@ -441,7 +441,16 @@ Profile tab, because `/tools` IS the signed-in home (invariant 8).
   Shop (Shop moved from its right-side icon slot to a left-bar pillar; the cart icon
   stays right). `Footer.BROWSE` is four links — Topics (→ `/explore`), Gear, Shop,
   Tools — down from eleven. Gifts joins both in season with I-6.
-- **I-6 Gifts seasonal switch** (`isGiftSeason()`), homepage band, nav slot.
+- **I-6 Gifts seasonal switch — SHIPPED 2026-10-08.** `isGiftSeason(date?)` in
+  `lib/gift-occasions.ts` (1 Oct–26 Dec inclusive, server-local clock, unit-tested at
+  both edges) is the ONE window. Read by: the public layout (passes `giftSeason` into
+  the client `Header` as a prop, so hydration can't disagree) → desktop-bar Gifts link
+  after Shop + a drawer lead row; the `Footer` (appends Gifts after Tools); the
+  homepage (gift-season band in the old Vault slot, self-suppressing at zero live
+  guides). The occasion tiles and the "live seasonal guides" query were extracted from
+  `/gear` into `components/collections/OccasionTiles` + `lib/collections/seasonal-gifts`
+  so hub and band can't disagree. Flag is evaluated at render: ISR pages pick a flip up
+  on next revalidate, fully static ones on next deploy — fine for twice a year.
 
 **Invariant 10 (new):** a content FORMAT never gets a nav slot; a TOPIC or an INTENT
 (gifts, deals, shop) does. If a format's count would show `0` anywhere in chrome, the

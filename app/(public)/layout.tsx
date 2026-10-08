@@ -6,6 +6,7 @@ import InstallPrompt from '@/components/InstallPrompt'
 import AskBossFab from '@/components/AskBossFab'
 import PublicMain from '@/components/PublicMain'
 import HideOnImmersive from '@/components/HideOnImmersive'
+import { isGiftSeason } from '@/lib/gift-occasions'
 
 const WelcomeToast = dynamic(() => import('@/components/WelcomeToast'))
 
@@ -22,7 +23,9 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       >
         Skip to content
       </a>
-      <Header />
+      {/* Gift season (1 Oct – 26 Dec) is decided here on the server — one
+          helper, one answer — and handed to the client Header as a prop. */}
+      <Header giftSeason={isGiftSeason()} />
       <PublicMain>{children}</PublicMain>
       <HideOnImmersive><Footer /></HideOnImmersive>
       <MobileBottomNav />

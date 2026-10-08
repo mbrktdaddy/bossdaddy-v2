@@ -283,3 +283,27 @@ export function getOccasion(slug: string): OccasionConfig | null {
 export function getOccasionByValue(value: string): OccasionConfig | null {
   return OCCASIONS.find((o) => o.value === value) ?? null
 }
+
+/**
+ * GIFT SEASON — 1 October through 26 December, inclusive. The ONE place the
+ * window is defined (nav-ia-plan Phase I-6): the desktop bar, the mobile
+ * drawer, the footer and the homepage band all ask this function, never their
+ * own date check. Same pattern as every major site's Q4 nav swap.
+ *
+ * Month/day in the server's local clock — the Vercel function region is pinned
+ * to pdx1, so "today" is US-west; a day's drift at the edges is acceptable, a
+ * mid-season false is not. Pass a date for deterministic tests.
+ *
+ * Evaluated at render. Pages behind ISR pick up a change on their next
+ * revalidate; fully static pages pick it up on the next deploy — fine for a
+ * window that flips twice a year.
+ */
+export const GIFT_SEASON = { start: { month: 10, day: 1 }, end: { month: 12, day: 26 } } as const
+
+export function isGiftSeason(date: Date = new Date()): boolean {
+  const m = date.getMonth() + 1
+  const d = date.getDate()
+  const afterStart = m > GIFT_SEASON.start.month || (m === GIFT_SEASON.start.month && d >= GIFT_SEASON.start.day)
+  const beforeEnd  = m < GIFT_SEASON.end.month   || (m === GIFT_SEASON.end.month   && d <= GIFT_SEASON.end.day)
+  return afterStart && beforeEnd
+}

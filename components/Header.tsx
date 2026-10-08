@@ -113,7 +113,11 @@ function BrowseRow({ href, label, blurb, icon, onNavigate }: {
   )
 }
 
-export default function Header() {
+// `giftSeason` comes from the server layout (`isGiftSeason()` in
+// lib/gift-occasions.ts — the ONE window definition). Computed there, not here:
+// this is a client component, and a date read on both sides of hydration can
+// disagree across the midnight edge and trip a mismatch.
+export default function Header({ giftSeason = false }: { giftSeason?: boolean }) {
   const { username, role, avatarUrl } = useAuthUser()
   const hasDashboard = role === 'author' || role === 'admin'
 
@@ -282,6 +286,21 @@ export default function Header() {
               {label}
             </Link>
           ))}
+
+          {/* Gifts — an INTENT, so it earns a slot, but only in season (1 Oct –
+              26 Dec; Phase I-6). The rest of the year it lives inside Gear. */}
+          {giftSeason && (
+            <Link
+              href="/gifts"
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                isActive(pathname, '/gifts')
+                  ? 'bg-accent text-white'
+                  : 'text-prose-muted hover:text-prose hover:bg-surface-raised'
+              }`}
+            >
+              {LABELS.gifts.short}
+            </Link>
+          )}
         </nav>
 
         {/* Right side */}
@@ -428,10 +447,30 @@ export default function Header() {
               the three Browse groups and the account door. Get the App moved to
               InstallPrompt — a one-time nudge beats a permanent row. */}
 
+          {/* Gifts in season is the one pillar the bottom strip doesn't carry
+              (it lives under the strip's Gear tab), so it gets the drawer's
+              single lead row — same slot Gear used before Phase I. */}
+          {giftSeason && (
+            <nav aria-label="Seasonal" className="px-4 pt-3">
+              <Link
+                href="/gifts"
+                onClick={() => setMobileOpen(false)}
+                className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                  isActive(pathname, '/gifts')
+                    ? 'bg-accent text-white'
+                    : 'text-prose hover:bg-surface-raised'
+                }`}
+              >
+                {LABELS.gifts.short}
+                <ChevronRightIcon className="w-4 h-4 text-prose-faint" strokeWidth={2} />
+              </Link>
+            </nav>
+          )}
+
           {/* Browse — the same two groups as the desktop mega-menu, same
               heading style. Topics stays collapsible (10 rows); the other is
               short enough to show open. */}
-          <div className="px-4 pt-3 pb-2">
+          <div className={`px-4 pb-2 ${giftSeason ? 'pt-5 border-t border-soft mt-3' : 'pt-3'}`}>
             <button
               onClick={() => setMobileCat(!mobileCatOpen)}
               aria-expanded={mobileCatOpen}

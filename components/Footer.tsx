@@ -4,6 +4,7 @@ import { SOCIAL } from '@/lib/social'
 import { LABELS } from '@/lib/labels'
 import { BRAND } from '@/lib/brand'
 import { DownloadIcon } from '@/components/icons'
+import { isGiftSeason } from '@/lib/gift-occasions'
 
 interface BrowseLink { href: string; label: string; hint?: string }
 
@@ -19,6 +20,10 @@ const BROWSE: BrowseLink[] = [
   { href: '/shop',    label: LABELS.shop.short,  hint: LABELS.shop.tagline },
   { href: '/tools',   label: LABELS.tools.short, hint: LABELS.tools.hub.metaDescription },
 ]
+
+// Appended in gift season only (1 Oct – 26 Dec, `isGiftSeason()`), matching
+// the desktop bar's seasonal slot. Off-season, gifts are reached inside Gear.
+const GIFTS_LINK: BrowseLink = { href: '/gifts', label: LABELS.gifts.short }
 
 const TRUST: BrowseLink[] = [
   { href: '/about',                label: 'About' },
@@ -93,6 +98,7 @@ function SocialIcon({ icon }: { icon: SocialDef }) {
 
 export default function Footer() {
   const year = new Date().getUTCFullYear()
+  const browse = isGiftSeason() ? [...BROWSE, GIFTS_LINK] : BROWSE
 
   return (
     <footer className="bg-chrome border-t-[3px] border-accent text-prose-muted">
@@ -138,7 +144,7 @@ export default function Footer() {
               Browse
             </p>
             <ul className="flex flex-col gap-3">
-              {BROWSE.map(({ href, label, hint }) => (
+              {browse.map(({ href, label, hint }) => (
                 <li key={href}>
                   <Link href={href} title={hint} className="text-sm text-prose-muted hover:text-white transition-colors">
                     {label}

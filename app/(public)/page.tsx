@@ -17,6 +17,9 @@ import BossToolsSection from '@/components/home/BossToolsSection'
 import EmailCaptureSection from '@/components/EmailCaptureSection'
 import HomeHero from '@/components/home/HomeHero'
 import { MerchStrip } from '@/components/MerchStrip'
+import OccasionTiles from '@/components/collections/OccasionTiles'
+import { getLiveSeasonalGifts, type SeasonalGift } from '@/lib/collections/seasonal-gifts'
+import { isGiftSeason } from '@/lib/gift-occasions'
 import CodeRedirect from './_components/CodeRedirect'
 import { buildSocialMetadata } from '@/lib/og'
 import { BRAND } from '@/lib/brand'
@@ -164,6 +167,7 @@ export default async function HomePage() {
     { data: recentRaw },
     { data: guidesRaw },
     { data: benchRaw },
+    liveGifts,
   ] = await Promise.all([
     supabase
       .from('reviews')
@@ -207,6 +211,9 @@ export default async function HomePage() {
       .in('status', ['testing', 'queued'])
       .order('priority', { ascending: false })
       .limit(20),
+    // Gift-season band (Phase I-6): only queried inside the window — the rest
+    // of the year the homepage doesn't pay for a shelf it won't render.
+    isGiftSeason() ? getLiveSeasonalGifts(supabase) : Promise.resolve([] as SeasonalGift[]),
   ])
 
   const featured: Review | null = (featuredHero as Review | null) ?? (topRatedOne as Review | null)
@@ -471,9 +478,22 @@ export default async function HomePage() {
             slot for the same reason. ──────────────────────────────────────── */}
       <BossToolsSection />
 
-      {/* (The "From the vault" collections strip sat here until Phase I-4. Its
-          job is covered by /explore's latest index — comparisons and best-of
-          lists are reading formats — and by /gear's Kits + gift-guide sections.) */}
+      {/* ── GIFT SEASON — 1 Oct–26 Dec only (`isGiftSeason()`), and only when a
+            seasonal guide is actually live: self-suppresses at zero, no "coming
+            soon" on the front page. Same slot the "From the vault" strip held
+            until Phase I-4; an intent band, not a format band. ───────────── */}
+      {liveGifts.length > 0 && (
+        <section className="border-b border-soft">
+          <div className="max-w-6xl mx-auto px-6 py-12 md:py-16">
+            <EditorialHeader
+              eyebrow="Gift season"
+              title="Gifts that earn their keep"
+              right={{ label: 'All gift guides', href: '/gifts' }}
+            />
+            <OccasionTiles gifts={liveGifts} />
+          </div>
+        </section>
+      )}
 
       {/* ── JUST DROPPED — Template A: one lead + 3 rows. Shape alternates
             between adjacent sections: the Boss Tools band above is a tile grid,
