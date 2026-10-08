@@ -420,7 +420,10 @@ Profile tab, because `/tools` IS the signed-in home (invariant 8).
   reviews inside it — `lib/collection-listings.ts`), read through the same cached
   `getVaultCollections()` the listings use. Three cards per section, "All →" links to
   the listing's existing `?cat=` filter. The hub's empty state now also counts them.
-- **I-3 Gear absorbs Stacks** as "Kits" beside "Shop by Occasion".
+- **I-3 Gear absorbs Stacks — SHIPPED 2026-10-08** as "Kits" (`LABELS.stacks.kits`)
+  directly after "Shop by Occasion". *As built:* newest three live stacks (visible +
+  published + at least one item, the gift-guide rule), `VaultCard` grid, self-suppresses
+  at zero, "All stacks →" to `/stacks`. The `/stacks` route and H1 keep the canonical word.
 - **I-4 Vault removal.** Delete `VaultShell`/`VaultGrid` usage from the four listing
   pages (each gets a plain `PageHeader` + grid), delete `app/(public)/vault`, 301, strip
   Collections from Header/drawer, prune `BROWSE_PREFIXES`, drop `/vault` from

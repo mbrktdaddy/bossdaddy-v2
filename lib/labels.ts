@@ -141,6 +141,10 @@ export const LABELS = {
     short:    'Stacks',
     full:     'Boss Daddy Stacks',
     singular: 'Stack',
+    // The /gear hub's section name for stacks (nav-ia-plan Phase I-3): a stack
+    // is a SHOPPING format — "the kit for the job" — so on the buying hub it is
+    // named for what you do with it. Route (/stacks) and H1 keep the canonical word.
+    kits:     'Kits',
   },
 
   // The hub over the four types above. /vault is "All"; /comparisons, /picks,

@@ -22,6 +22,8 @@ import { ogImageUrl, OG_SITE, TWITTER_HANDLE } from '@/lib/og'
 import type { Metadata } from 'next'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { StarIcon } from '@/components/icons'
+import VaultCard from '@/components/VaultCard'
+import { getVaultTab } from '@/lib/vault'
 
 export const revalidate = 3600
 // getSeasonalOccasions() and the Radar's "released by now" filter read the
@@ -67,6 +69,7 @@ export default async function GearPage() {
     { data: reviews },
     { data: giftPickLists },
     { data: featuredPickRows },
+    { data: stackRows },
     radar,
   ] = await Promise.all([
     supabase
@@ -93,6 +96,18 @@ export default async function GearPage() {
       .eq('is_visible', true)
       .order('published_at', { ascending: false })
       .limit(1),
+    // Kits (Phase I-3): stacks are a SHOPPING format, so they live here beside
+    // the gift guides, not in a reading index. Same live rule as everywhere
+    // else — visible AND published (is_visible alone would leak scheduled
+    // ones) — plus the gift-guide rule that an empty collection is not live.
+    supabase
+      .from('collections')
+      .select('id, slug, title, description, hero_image_url, collection_type, occasion, collection_items(count)')
+      .eq('collection_type', 'stack')
+      .eq('is_visible', true)
+      .not('published_at', 'is', null)
+      .order('published_at', { ascending: false })
+      .limit(3),
     // The newest 6 (plan: 6–9). Older ones age off here but stay in /gear/radar.
     getLiveRadar(supabase, { limit: 6 }),
   ])
@@ -141,6 +156,13 @@ export default async function GearPage() {
       .map((p) => p.occasion)
   )
   const liveSeasonalOccasions = seasonalOccasions.filter((o) => populatedOccasions.has(o.value))
+
+  // Self-suppresses at zero (a hub section, not a tab — empty means absent).
+  const kits = (stackRows ?? []).filter((s) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ci = (s as any).collection_items
+    return Array.isArray(ci) && (ci[0]?.count ?? 0) > 0
+  })
 
   const bossApproved = topPicks.filter((r) => (r.rating ?? 0) >= 9).length
   // #1 Pick: admin-flagged all-time champion wins. Fall back to the prior
@@ -386,6 +408,23 @@ export default async function GearPage() {
           </div>
           <span className="shrink-0 text-sm font-semibold text-accent-text-soft group-hover:text-accent transition-colors">Explore →</span>
         </Link>
+      )}
+
+      {/* ── Kits — stacks, the kit for the job (Phase I-3) ─────────────── */}
+      {kits.length > 0 && (
+        <section className="mb-16">
+          <SectionHeader
+            label={LABELS.stacks.kits}
+            heading="Built for the job"
+            sub="Every piece earned its spot — the newborn-night setup, the weekend cookout, the first toolbox."
+            right={{ label: `All ${LABELS.stacks.short.toLowerCase()}`, href: '/stacks' }}
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {kits.map((k) => (
+              <VaultCard key={k.id} col={k} cta={getVaultTab('stacks').cardCta} />
+            ))}
+          </div>
+        </section>
       )}
 
       {/* ── Featured Collection ──────────────────────────────────────── */}

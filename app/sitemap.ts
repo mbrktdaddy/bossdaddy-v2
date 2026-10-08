@@ -164,7 +164,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // /shop, not page content, so merch dates /shop instead.
   const newestGear = newestOf([
     newestGearReview?.toISOString(),
-    newestCollectionOf('gift_guide', 'general', 'best_of')?.toISOString(),
+    // 'stack' since Phase I-3 — the Kits section renders the newest stacks.
+    newestCollectionOf('gift_guide', 'general', 'best_of', 'stack')?.toISOString(),
     ...liveRadarRows.map((r) => r.updated_at),
   ])
   const newestAnything = newestOf([
