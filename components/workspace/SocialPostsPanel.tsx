@@ -37,7 +37,10 @@ const DEFAULT_PLATFORMS: SocialPlatform[] = ['x', 'instagram', 'facebook']
 export function SocialPostsPanel({ contentType, contentId }: Props) {
   const [posts,    setPosts]    = useState<SocialPost[]>([])
   const [selected, setSelected] = useState<SocialPlatform[]>(DEFAULT_PLATFORMS)
-  const [loading,  setLoading]  = useState(true)
+  // `loading` is derived: true until the fetch for the current source settles.
+  const sourceKey = `${contentType}:${contentId}`
+  const [loadedKey, setLoadedKey] = useState<string | null>(null)
+  const loading = loadedKey !== sourceKey
   const [busy,     setBusy]     = useState(false)
   const [busyPlatform, setBusyPlatform] = useState<SocialPlatform | null>(null)
   const [error,    setError]    = useState<string | null>(null)
@@ -46,14 +49,13 @@ export function SocialPostsPanel({ contentType, contentId }: Props) {
 
   useEffect(() => {
     let active = true
-    setLoading(true)
     fetch(`/api/social-posts?source_type=${contentType}&source_id=${contentId}`)
       .then((r) => r.ok ? r.json() : { posts: [] })
       .then((j) => { if (active) setPosts(j.posts ?? []) })
       .catch(() => {})
-      .finally(() => { if (active) setLoading(false) })
+      .finally(() => { if (active) setLoadedKey(sourceKey) })
     return () => { active = false }
-  }, [contentType, contentId])
+  }, [contentType, contentId, sourceKey])
 
   function togglePlatform(p: SocialPlatform) {
     setSelected((s) => s.includes(p) ? s.filter((x) => x !== p) : [...s, p])

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { CATEGORIES, isInquiryCategory } from '@/lib/categories'
@@ -27,51 +27,55 @@ interface ProductOption {
   non_affiliate_url: string | null
 }
 
+type GuideDraft = Partial<{
+  description: string; topic: string; keyPoints: string; context: string; category: string
+  pieceType: PieceType; imageSlots: number | 'auto'; inquiryOverride: boolean | null
+}>
+
+function readDraft(): GuideDraft {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? JSON.parse(raw) : {}
+  } catch { return {} }
+}
+
+// The saved draft lives in localStorage, which the server can't read. SSR and
+// hydration render the empty form; once in the browser the form remounts (new
+// key) with the draft as its initial state — no setState-on-mount effect, and
+// on a client-side navigation it mounts once, already restored.
 export function GuideCreateWizard() {
+  const inBrowser = useSyncExternalStore(() => () => {}, () => true, () => false)
+  return <GuideWizardForm key={inBrowser ? 'browser' : 'server'} restore={inBrowser} />
+}
+
+function GuideWizardForm({ restore }: { restore: boolean }) {
   const router = useRouter()
+  const [draft] = useState<GuideDraft>(() => (restore ? readDraft() : {}))
   const [step, setStep] = useState<Step>('idea')
   const [error, setError] = useState<string | null>(null)
 
   // Step 1 state
-  const [description, setDescription] = useState('')
-  const [topic, setTopic]             = useState('')
-  const [keyPoints, setKeyPoints]     = useState('')
-  const [context, setContext]         = useState('')
-  const [category, setCategory]       = useState('')
-  const [pieceType, setPieceType]     = useState<PieceType>('guide')
-  const [imageSlots, setImageSlots]   = useState<number | 'auto'>('auto')
+  const [description, setDescription] = useState(draft.description || '')
+  const [topic, setTopic]             = useState(draft.topic || '')
+  const [keyPoints, setKeyPoints]     = useState(draft.keyPoints || '')
+  const [context, setContext]         = useState(draft.context || '')
+  const [category, setCategory]       = useState(draft.category || '')
+  const [pieceType, setPieceType]     = useState<PieceType>(draft.pieceType || 'guide')
+  const [imageSlots, setImageSlots]   = useState<number | 'auto'>(draft.imageSlots !== undefined ? draft.imageSlots : 'auto')
   // null = follow the category default (on for Table Duty / Watch Duty); an
   // explicit true/false is the operator overriding it either way.
-  const [inquiryOverride, setInquiryOverride] = useState<boolean | null>(null)
+  const [inquiryOverride, setInquiryOverride] = useState<boolean | null>(draft.inquiryOverride !== undefined ? draft.inquiryOverride : null)
   const [suggesting, setSuggesting]   = useState(false)
   const [suggestions, setSuggestions] = useState<{ topic: string; angle: string; keyPoints: string[] }[]>([])
 
-  // Restore from localStorage on first mount
-  const restoredRef = useRef(false)
+  // Persist form state to localStorage on change. Skipped for the pre-hydration
+  // (server-keyed) form so its empty state never overwrites the saved draft.
   useEffect(() => {
-    if (restoredRef.current) return
-    restoredRef.current = true
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      if (!raw) return
-      const saved = JSON.parse(raw)
-      if (saved.topic)       setTopic(saved.topic)
-      if (saved.keyPoints)   setKeyPoints(saved.keyPoints)
-      if (saved.context)     setContext(saved.context)
-      if (saved.category)    setCategory(saved.category)
-      if (saved.description) setDescription(saved.description)
-      if (saved.pieceType)   setPieceType(saved.pieceType)
-      if (saved.imageSlots !== undefined) setImageSlots(saved.imageSlots)
-      if (saved.inquiryOverride !== undefined) setInquiryOverride(saved.inquiryOverride)
-    } catch { /* ignore */ }
-  }, [])
-
-  // Persist form state to localStorage on change
-  useEffect(() => {
+    if (!restore) return
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, topic, keyPoints, context, category, pieceType, imageSlots, inquiryOverride }))
     } catch { /* ignore */ }
-  }, [description, topic, keyPoints, context, category, pieceType, imageSlots, inquiryOverride])
+  }, [restore, description, topic, keyPoints, context, category, pieceType, imageSlots, inquiryOverride])
 
   // Inquiry register: student-first, Socratic voice for philosophical/moral
   // topics. Defaults on for Table Duty / Watch Duty, off elsewhere — and the

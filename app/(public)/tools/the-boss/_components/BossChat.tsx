@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Block, BossStatus, BossStreamEvent } from '@/lib/boss/types'
 import { normalizeBossText } from '@/lib/boss/normalizeText'
@@ -42,21 +42,34 @@ const EXAMPLES = [
   'Help me write a quick birthday toast for my dad.',
 ]
 
-// Members only — the page renders a sign-in panel for visitors instead of this.
-// A saved conversation arrives as props (the page loads it from ?c=); the page
-// remounts this component (key) when the active conversation changes.
-export default function BossChat({
-  conversationId,
-  initialMessages = [],
-  seedContext,
-}: {
+type BossChatProps = {
   conversationId?: string | null
   initialMessages?: BossMsg[]
   seedContext?: string
-}) {
+}
+
+// Members only — the page renders a sign-in panel for visitors instead of this.
+// A saved conversation arrives as props (the page loads it from ?c=); the page
+// remounts this component (key) when the active conversation changes.
+//
+// The unsent composer draft lives in localStorage, which the server can't read.
+// SSR and hydration render an empty composer; once in the browser the chat
+// remounts (new key) with the draft as its initial state — no setState-on-mount
+// effect, and on a client-side navigation it mounts once, already restored.
+export default function BossChat(props: BossChatProps) {
+  const inBrowser = useSyncExternalStore(() => () => {}, () => true, () => false)
+  return <BossChatSession key={inBrowser ? 'browser' : 'server'} restoreDraft={inBrowser} {...props} />
+}
+
+function BossChatSession({
+  conversationId,
+  initialMessages = [],
+  seedContext,
+  restoreDraft,
+}: BossChatProps & { restoreDraft: boolean }) {
   const router = useRouter()
   const [msgs, setMsgs] = useState<BossMsg[]>(initialMessages)
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState(() => (restoreDraft ? window.localStorage.getItem(DRAFT_KEY) ?? '' : ''))
   const [busy, setBusy] = useState(false)
   const [convId, setConvId] = useState<string | null>(conversationId ?? null)
   // True while the router swaps a just-saved new chat onto its ?c= URL. The page
@@ -65,11 +78,6 @@ export default function BossChat({
   const [navigating, startNavigation] = useTransition()
   const locked = busy || navigating
   const bottomRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const saved = typeof window !== 'undefined' ? window.localStorage.getItem(DRAFT_KEY) : null
-    if (saved) setInput(saved)
-  }, [])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })

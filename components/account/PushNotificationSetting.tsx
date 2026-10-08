@@ -5,11 +5,40 @@
 // configured, so it never shows a dead control. The permission prompt fires
 // only on the explicit "Enable" tap — never on page load.
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 
 const VAPID_PUBLIC = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+
+// Push support and the notification permission are browser state, read with
+// useSyncExternalStore: hydration-safe (the server snapshot says "unsupported",
+// so SSR renders nothing) without a setState-on-mount effect. The permission
+// store also follows changes the user makes in browser settings.
+const noopSubscribe = () => () => {}
+const getPushSupported = () =>
+  'serviceWorker' in navigator && 'PushManager' in window && !!VAPID_PUBLIC
+const getPermission = (): NotificationPermission | null =>
+  typeof Notification === 'undefined' ? null : Notification.permission
+
+function subscribePermission(onChange: () => void) {
+  let status: PermissionStatus | null = null
+  let active = true
+  try {
+    navigator.permissions
+      ?.query({ name: 'notifications' as PermissionName })
+      .then((s) => {
+        if (!active) return
+        status = s
+        s.addEventListener('change', onChange)
+      })
+      .catch(() => {})
+  } catch { /* Permissions API unavailable — the snapshot still re-reads on render */ }
+  return () => {
+    active = false
+    status?.removeEventListener('change', onChange)
+  }
+}
 
 // Returns an ArrayBuffer-backed Uint8Array (inferred Uint8Array<ArrayBuffer>)
 // so it satisfies BufferSource for applicationServerKey under TS 5.7+ lib types.
@@ -23,26 +52,20 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export default function PushNotificationSetting() {
-  const [supported, setSupported] = useState(false)
+  const supported = useSyncExternalStore(noopSubscribe, getPushSupported, () => false)
+  const permission = useSyncExternalStore(subscribePermission, getPermission, () => null)
+  const denied = permission === 'denied'
   const [enabled, setEnabled] = useState(false)
   const [busy, setBusy] = useState(false)
-  const [denied, setDenied] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const ok =
-      typeof window !== 'undefined' &&
-      'serviceWorker' in navigator &&
-      'PushManager' in window &&
-      !!VAPID_PUBLIC
-    setSupported(ok)
-    if (!ok) return
-    setDenied(Notification.permission === 'denied')
+    if (!supported) return
     navigator.serviceWorker.ready
       .then((reg) => reg.pushManager.getSubscription())
       .then((sub) => setEnabled(!!sub))
       .catch(() => {})
-  }, [])
+  }, [supported])
 
   async function enable() {
     setBusy(true)
@@ -50,7 +73,7 @@ export default function PushNotificationSetting() {
     try {
       const perm = await Notification.requestPermission()
       if (perm !== 'granted') {
-        setDenied(perm === 'denied')
+        // `denied` re-reads Notification.permission on this re-render.
         setBusy(false)
         return
       }

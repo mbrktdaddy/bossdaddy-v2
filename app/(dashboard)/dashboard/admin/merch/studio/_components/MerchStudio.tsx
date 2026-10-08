@@ -443,36 +443,40 @@ function ApprovedDesignCard({ design, onDelete }: { design: ApprovedDesign; onDe
     }
   }
 
-  // Catalog color/size options for the current blank.
-  const [options, setOptions] = useState<CatalogOptions | null>(null)
+  // Catalog color/size options for the current blank. Stored with the blank they
+  // were fetched for and derived here, so switching blanks shows "no options"
+  // until the matching fetch lands — no synchronous reset inside the effect.
+  const [catalog, setCatalog] = useState<{ blank: Blank; options: CatalogOptions } | null>(null)
+  const options = catalog?.blank === blank ? catalog.options : null
   const [selectedColors, setSelectedColors] = useState<string[]>([])
   const [selectedSizes, setSelectedSizes] = useState<string[]>([])
 
   // Fetch catalog options when the blank changes (publishable blanks only).
   useEffect(() => {
-    if (!PUBLISHABLE[blank]) { setOptions(null); return }
+    if (!PUBLISHABLE[blank]) return
     let cancelled = false
-    setOptions(null)
     fetch(`/api/merch/catalog/${blank}`)
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error('catalog'))))
       .then((json: CatalogOptions) => {
         if (cancelled) return
-        setOptions(json)
+        setCatalog({ blank, options: json })
         const defColors = colorway === 'dark' ? json.defaults.colorsDark : json.defaults.colorsLight
         setSelectedColors(defColors)
         setSelectedSizes(json.defaults.sizes)
       })
-      .catch(() => { if (!cancelled) setOptions(null) })
+      .catch(() => { if (!cancelled) setCatalog(null) })
     return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [blank])
 
-  // When colorway flips, reset colors to that colorway's sensible defaults.
-  useEffect(() => {
-    if (!options) return
-    setSelectedColors(colorway === 'dark' ? options.defaults.colorsDark : options.defaults.colorsLight)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colorway])
+  // When colorway flips, reset colors to that colorway's sensible defaults —
+  // done in the click handler that flips it, not an effect reacting to it.
+  function changeColorway(c: Colorway) {
+    if (c !== colorway && options) {
+      setSelectedColors(c === 'dark' ? options.defaults.colorsDark : options.defaults.colorsLight)
+    }
+    setColorway(c)
+  }
 
   function toggle(list: string[], set: (v: string[]) => void, val: string) {
     set(list.includes(val) ? list.filter((x) => x !== val) : [...list, val])
@@ -565,7 +569,7 @@ function ApprovedDesignCard({ design, onDelete }: { design: ApprovedDesign; onDe
               {(['dark', 'light'] as Colorway[]).map((c) => (
                 <button
                   key={c}
-                  onClick={() => { setColorway(c); persist({ colorway: c }) }}
+                  onClick={() => { changeColorway(c); persist({ colorway: c }) }}
                   className={`px-3 py-1.5 text-xs font-semibold transition-colors ${
                     colorway === c ? 'bg-accent text-white' : 'bg-surface-raised text-prose-muted hover:bg-surface-hover'
                   }`}

@@ -1067,7 +1067,14 @@ interface EditableFieldProps {
 
 function EditableField({ label, value, placeholder, multiline, disabled, onCommit }: EditableFieldProps) {
   const [local, setLocal] = useState(value)
-  useEffect(() => { setLocal(value) }, [value])
+  // Re-seed the draft when the committed value changes upstream — adjusted
+  // during render (React's "storing information from previous renders"), not
+  // in an effect, so there's no extra render with a stale draft.
+  const [seededFrom, setSeededFrom] = useState(value)
+  if (value !== seededFrom) {
+    setSeededFrom(value)
+    setLocal(value)
+  }
 
   function commit() { if (local !== value) onCommit(local) }
 

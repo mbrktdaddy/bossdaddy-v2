@@ -208,7 +208,7 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [searching, setSearching] = useState(false)
-  const [slugTaken, setSlugTaken] = useState<{ type: string } | null>(null)
+  const [slugCheck, setSlugCheck] = useState<{ slug: string; taken: { type: string } | null } | null>(null)
 
   // ── Readiness checklist ───────────────────────────────────────────────────
   // The list of checks depends on collection_type because each flavor needs
@@ -266,21 +266,26 @@ export function CollectionWorkspace({ pick, initialItems }: Props) {
 
   // ── Slug uniqueness pre-check (debounced) ─────────────────────────────────
   // Friendly warning before autosave hits a 409. Skips its own id.
+  // Each result is stored with the slug it checked; the warning is derived, so
+  // it only ever shows for the slug currently in the field (no stale warning
+  // while a new check is pending, and no synchronous reset in the effect).
+  const normalizedSlug = slug.trim().toLowerCase()
+  const slugNeedsCheck = normalizedSlug.length >= 2 && normalizedSlug !== pick.slug
+  const slugTaken = slugNeedsCheck && slugCheck?.slug === normalizedSlug ? slugCheck.taken : null
   useEffect(() => {
-    const s = slug.trim().toLowerCase()
-    if (s.length < 2) { setSlugTaken(null); return }
-    if (pick.slug === s) { setSlugTaken(null); return }
+    if (!slugNeedsCheck) return
+    const s = normalizedSlug
     const handle = setTimeout(async () => {
       try {
         const url = `/api/admin/picks/slug-check?slug=${encodeURIComponent(s)}&exclude=${pick.id}`
         const res = await fetch(url)
         if (!res.ok) return
         const json = await res.json()
-        setSlugTaken(json.exists ? { type: json.type ?? 'general' } : null)
+        setSlugCheck({ slug: s, taken: json.exists ? { type: json.type ?? 'general' } : null })
       } catch { /* network blip — silently skip */ }
     }, 350)
     return () => clearTimeout(handle)
-  }, [slug, pick.slug, pick.id])
+  }, [normalizedSlug, slugNeedsCheck, pick.id])
 
   // ── AI intro generation + refine ──────────────────────────────────────────
   const [aiBusy, setAiBusy] = useState(false)

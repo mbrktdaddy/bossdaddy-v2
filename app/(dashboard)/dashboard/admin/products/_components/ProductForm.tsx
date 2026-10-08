@@ -47,6 +47,27 @@ const PICKER_CONCURRENCY = 3
 // (server-only, not exported). Smaller previews would be rejected on add.
 const MIN_IMAGE_EDGE = 400
 
+// Poll a background web-lookup job every 2.5s for up to ~3.5 min. A failed poll
+// is a hiccup, not a failure: keep polling until the deadline. Module-level (not
+// inside the component) so the wall-clock reads are plainly outside render.
+async function pollLookupJob(
+  jobId: string,
+  onProgress: (elapsedSeconds: number) => void,
+): Promise<{ lookup: ProductLookup; slug: string | null }> {
+  const startedAt = Date.now()
+  for (let i = 0; i < 84; i++) {
+    await new Promise((r) => setTimeout(r, 2500))
+    onProgress(Math.round((Date.now() - startedAt) / 1000))
+    const poll = await fetch(`/api/admin/products/import?jobId=${encodeURIComponent(jobId)}`)
+    if (poll.status === 404) throw new Error('The lookup went missing. Run it again.')
+    const job = await poll.json().catch(() => null)
+    if (!poll.ok || !job) continue
+    if (job.status === 'error') throw new Error(job.error ?? 'The lookup failed. Run it again.')
+    if (job.status === 'done') return job.result
+  }
+  throw new Error('The lookup is taking unusually long. Run it again in a moment.')
+}
+
 // Download one candidate and read its pixel size. A failed download resolves
 // to null and an undersized image to 'small'; neither appears in the picker.
 async function loadPickerItem(url: string, pageUrl: string | undefined): Promise<PickerItem | 'small' | null> {
@@ -301,8 +322,7 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
   }
 
   // The web lookup runs as a background job (the route answers with a jobId);
-  // poll it every 2.5s for up to ~3.5 min. A failed poll is a hiccup, not a
-  // failure: keep polling until the deadline.
+  // pollLookupJob (module level) waits for it.
   async function runLookupJob(): Promise<{ lookup: ProductLookup; slug: string | null }> {
     const url = linkSource ?? (linkUrl.trim() || undefined)
     const res = await fetch('/api/admin/products/import', {
@@ -322,18 +342,9 @@ export function ProductForm({ product, initialTags = [], amazonAssociateTag }: P
     const start = await res.json().catch(() => null)
     if (!res.ok || !start?.jobId) throw new Error(start?.error ?? `Couldn't start the lookup (${res.status}).`)
 
-    const startedAt = Date.now()
-    for (let i = 0; i < 84; i++) {
-      await new Promise((r) => setTimeout(r, 2500))
-      setLinkNote(`Searching the web… ${Math.round((Date.now() - startedAt) / 1000)}s (usually under a minute)`)
-      const poll = await fetch(`/api/admin/products/import?jobId=${encodeURIComponent(start.jobId)}`)
-      if (poll.status === 404) throw new Error('The lookup went missing. Run it again.')
-      const job = await poll.json().catch(() => null)
-      if (!poll.ok || !job) continue
-      if (job.status === 'error') throw new Error(job.error ?? 'The lookup failed. Run it again.')
-      if (job.status === 'done') return job.result
-    }
-    throw new Error('The lookup is taking unusually long. Run it again in a moment.')
+    return pollLookupJob(start.jobId, (s) =>
+      setLinkNote(`Searching the web… ${s}s (usually under a minute)`),
+    )
   }
 
   async function handleLinkImport(mode: 'page' | 'lookup') {

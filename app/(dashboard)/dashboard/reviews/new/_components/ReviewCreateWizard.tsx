@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { CATEGORIES } from '@/lib/categories'
@@ -26,60 +26,62 @@ interface ProductOption {
   price_cents: number | null
 }
 
+type ReviewDraft = Partial<{
+  description: string; productName: string; productSlug: string; keyFeatures: string; category: string
+  comparisonSlugs: string[]; imageSlots: number | 'auto'; inputRating: number | null
+  testingDuration: string; testingSince: string; testingNote: string
+  howYouUsedIt: string; standoutMoment: string; pricePaid: string
+}>
+
+function readDraft(): ReviewDraft {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? JSON.parse(raw) : {}
+  } catch { return {} }
+}
+
+// The saved draft lives in localStorage, which the server can't read. SSR and
+// hydration render the empty form; once in the browser the form remounts (new
+// key) with the draft as its initial state — no setState-on-mount effect, and
+// on a client-side navigation it mounts once, already restored.
 export function ReviewCreateWizard() {
+  const inBrowser = useSyncExternalStore(() => () => {}, () => true, () => false)
+  return <ReviewWizardForm key={inBrowser ? 'browser' : 'server'} restore={inBrowser} />
+}
+
+function ReviewWizardForm({ restore }: { restore: boolean }) {
   const router = useRouter()
+  const [draft] = useState<ReviewDraft>(() => (restore ? readDraft() : {}))
   const [step, setStep] = useState<Step>('idea')
   const [error, setError] = useState<string | null>(null)
 
-  const [description, setDescription]   = useState('')
-  const [productName, setProductName]   = useState('')
-  const [productSlug, setProductSlug]   = useState('')
-  const [keyFeatures, setKeyFeatures]   = useState('')
-  const [category, setCategory]         = useState('')
-  const [comparisonSlugs, setComparisonSlugs] = useState<string[]>([])
-  const [imageSlots, setImageSlots]     = useState<number | 'auto'>('auto')
+  const [description, setDescription]   = useState(draft.description || '')
+  const [productName, setProductName]   = useState(draft.productName || '')
+  const [productSlug, setProductSlug]   = useState(draft.productSlug || '')
+  const [keyFeatures, setKeyFeatures]   = useState(draft.keyFeatures || '')
+  const [category, setCategory]         = useState(draft.category || '')
+  const [comparisonSlugs, setComparisonSlugs] = useState<string[]>(Array.isArray(draft.comparisonSlugs) ? draft.comparisonSlugs : [])
+  const [imageSlots, setImageSlots]     = useState<number | 'auto'>(draft.imageSlots !== undefined ? draft.imageSlots : 'auto')
   const [suggesting, setSuggesting]     = useState(false)
   const [suggestions, setSuggestions]   = useState<{ productName: string; angle: string; keyFeatures: string[] }[]>([])
 
   // Your Experience fields — drive Claude's tone and persist to the review row
-  const [inputRating, setInputRating]       = useState<number | null>(null)
-  const [testingDuration, setTestingDuration] = useState('')
-  const [testingSince, setTestingSince]     = useState('')
-  const [testingNote, setTestingNote]       = useState('')
-  const [howYouUsedIt, setHowYouUsedIt]     = useState('')
-  const [standoutMoment, setStandoutMoment] = useState('')
-  const [pricePaid, setPricePaid]           = useState('')
+  const [inputRating, setInputRating]       = useState<number | null>(draft.inputRating ?? null)
+  const [testingDuration, setTestingDuration] = useState(draft.testingDuration || '')
+  const [testingSince, setTestingSince]     = useState(draft.testingSince || '')
+  const [testingNote, setTestingNote]       = useState(draft.testingNote || '')
+  const [howYouUsedIt, setHowYouUsedIt]     = useState(draft.howYouUsedIt || '')
+  const [standoutMoment, setStandoutMoment] = useState(draft.standoutMoment || '')
+  const [pricePaid, setPricePaid]           = useState(draft.pricePaid || '')
 
-  const restoredRef = useRef(false)
+  // Persist form state to localStorage on change. Skipped for the pre-hydration
+  // (server-keyed) form so its empty state never overwrites the saved draft.
   useEffect(() => {
-    if (restoredRef.current) return
-    restoredRef.current = true
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      if (!raw) return
-      const saved = JSON.parse(raw)
-      if (saved.description)            setDescription(saved.description)
-      if (saved.productName)            setProductName(saved.productName)
-      if (saved.productSlug)            setProductSlug(saved.productSlug)
-      if (saved.keyFeatures)            setKeyFeatures(saved.keyFeatures)
-      if (saved.category)               setCategory(saved.category)
-      if (Array.isArray(saved.comparisonSlugs)) setComparisonSlugs(saved.comparisonSlugs)
-      if (saved.imageSlots !== undefined) setImageSlots(saved.imageSlots)
-      if (saved.inputRating != null)    setInputRating(saved.inputRating)
-      if (saved.testingDuration)        setTestingDuration(saved.testingDuration)
-      if (saved.testingSince)           setTestingSince(saved.testingSince)
-      if (saved.testingNote)            setTestingNote(saved.testingNote)
-      if (saved.howYouUsedIt)           setHowYouUsedIt(saved.howYouUsedIt)
-      if (saved.standoutMoment)         setStandoutMoment(saved.standoutMoment)
-      if (saved.pricePaid)              setPricePaid(saved.pricePaid)
-    } catch { /* ignore */ }
-  }, [])
-
-  useEffect(() => {
+    if (!restore) return
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, productName, productSlug, keyFeatures, category, comparisonSlugs, imageSlots, inputRating, testingDuration, testingSince, testingNote, howYouUsedIt, standoutMoment, pricePaid }))
     } catch { /* ignore */ }
-  }, [description, productName, productSlug, keyFeatures, category, comparisonSlugs, imageSlots, inputRating, testingDuration, testingSince, testingNote, howYouUsedIt, standoutMoment, pricePaid])
+  }, [restore, description, productName, productSlug, keyFeatures, category, comparisonSlugs, imageSlots, inputRating, testingDuration, testingSince, testingNote, howYouUsedIt, standoutMoment, pricePaid])
 
   const [previewDraft, setPreviewDraft] = useState<{
     title: string; excerpt: string; content: string

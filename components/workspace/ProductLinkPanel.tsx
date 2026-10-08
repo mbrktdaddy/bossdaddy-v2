@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { extractH2Headings, insertAtPosition } from '@/lib/inlineImages'
 import {
@@ -28,7 +28,7 @@ interface Props {
 export function ProductLinkPanel({ content, onChangeContent }: Props) {
   const [products, setProducts] = useState<Product[]>([])
   const [loaded, setLoaded] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [posKey, setPosKey] = useState<string>('end')
@@ -42,23 +42,33 @@ export function ProductLinkPanel({ content, onChangeContent }: Props) {
     return { kind: 'afterHeading' as const, index: Number(posKey.replace('h-', '')) }
   }
 
-  // useCallback so `load` is referentially stable across renders — lets the
-  // mount-effect declare it as a dep cleanly without re-firing on every render.
-  const load = useCallback(async () => {
-    setLoading(true); setError(null)
-    try {
-      const res = await fetch('/api/products')
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Failed to load products')
-      setProducts((json.products ?? []) as Product[])
-      setLoaded(true)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed')
-    }
-    setLoading(false)
-  }, [])
+  // Products fetch. Every setState lands after the await, so there's no
+  // synchronous render cascade; `loading` starts true for the mount fetch.
+  // reload() (the button) resets loading/error and bumps reloadKey to refetch.
+  const [reloadKey, setReloadKey] = useState(0)
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch('/api/products')
+        const json = await res.json()
+        if (!res.ok) throw new Error(json.error ?? 'Failed to load products')
+        if (cancelled) return
+        setProducts((json.products ?? []) as Product[])
+        setLoaded(true)
+      } catch (err) {
+        if (cancelled) return
+        setError(err instanceof Error ? err.message : 'Failed')
+      }
+      setLoading(false)
+    })()
+    return () => { cancelled = true }
+  }, [reloadKey])
 
-  useEffect(() => { load() }, [load])
+  function reload() {
+    setLoading(true); setError(null)
+    setReloadKey((k) => k + 1)
+  }
 
   function insertProduct(slug: string) {
     onChangeContent(insertAtPosition(content, `<p>[[BUY:${slug}]]</p>`, resolvePosition()))
@@ -209,7 +219,7 @@ export function ProductLinkPanel({ content, onChangeContent }: Props) {
               </div>
 
               <button
-                onClick={load}
+                onClick={reload}
                 className="text-xs text-prose-faint hover:text-prose transition-colors"
               >
                 ↻ Refresh

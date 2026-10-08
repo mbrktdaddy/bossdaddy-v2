@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { compressImage } from '@/lib/compress-image'
 import { fetchAssetAsFile } from '@/lib/images/derive-crop'
 import { CATEGORIES } from '@/lib/categories'
@@ -78,7 +78,6 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
   const [assets, setAssets] = useState<MediaAsset[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
-  const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<string | null>(null)          // single mode
   const [multiSelected, setMultiSelected] = useState<Set<string>>(new Set()) // multi mode
   const [uploading, setUploading] = useState(false)
@@ -222,40 +221,51 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
   // Default to the source's own images when a source context was passed.
   const [sourceOnly, setSourceOnly] = useState<boolean>(!!sourceId)
 
-  const fetchAssets = useCallback(async (p: number, productId: string, category: string, bySource: boolean) => {
-    setLoading(true)
-    const qs = new URLSearchParams({ page: String(p) })
-    if (productId) qs.set('product_id', productId)
-    if (category)  qs.set('category',   category)
-    if (bySource && sourceType && sourceId) {
-      qs.set('source_type', sourceType)
-      qs.set('source_id',   sourceId)
-    }
-    const res = await fetch(`/api/media?${qs}`)
-    let nextTotal = 0
-    if (res.ok) {
-      const json = await res.json()
-      setAssets(json.assets)
-      setTotal(json.total)
-      nextTotal = json.total
-    }
-    setLoading(false)
+  // Library fetch. `loading` is derived — true until the response for the
+  // current query lands — so the effect never sets state synchronously, and a
+  // superseded request is cancelled instead of overwriting a newer one.
+  const assetsQuery = new URLSearchParams({ page: String(page) })
+  if (filterProductId) assetsQuery.set('product_id', filterProductId)
+  if (filterCategory)  assetsQuery.set('category',   filterCategory)
+  if (sourceOnly && sourceType && sourceId) {
+    assetsQuery.set('source_type', sourceType)
+    assetsQuery.set('source_id',   sourceId)
+  }
+  const assetsQs = assetsQuery.toString()
+  const [loadedQs, setLoadedQs] = useState<string | null>(null)
+  const loading = loadedQs !== assetsQs
 
-    // One-time only: if the caller pre-seeded a product/category/source filter and
-    // it came back empty, drop to "All" so the editor sees the library immediately
-    // instead of an empty grid they have to clear by hand. Never fires again, so
-    // a filter the user deliberately picks later is respected.
-    if (firstLoadRef.current) {
-      firstLoadRef.current = false
-      if (nextTotal === 0 && (productId || category || bySource)) {
-        setFilterProductId('')
-        setFilterCategory('')
-        setSourceOnly(false)
+  useEffect(() => {
+    let cancelled = false
+    const seeded = !!(filterProductId || filterCategory || sourceOnly)
+    ;(async () => {
+      const res = await fetch(`/api/media?${assetsQs}`)
+      let nextTotal = 0
+      if (res.ok) {
+        const json = await res.json()
+        if (cancelled) return
+        setAssets(json.assets)
+        setTotal(json.total)
+        nextTotal = json.total
       }
-    }
-  }, [sourceType, sourceId])
+      if (cancelled) return
+      setLoadedQs(assetsQs)
 
-  useEffect(() => { fetchAssets(page, filterProductId, filterCategory, sourceOnly) }, [fetchAssets, page, filterProductId, filterCategory, sourceOnly])
+      // One-time only: if the caller pre-seeded a product/category/source filter and
+      // it came back empty, drop to "All" so the editor sees the library immediately
+      // instead of an empty grid they have to clear by hand. Never fires again, so
+      // a filter the user deliberately picks later is respected.
+      if (firstLoadRef.current) {
+        firstLoadRef.current = false
+        if (nextTotal === 0 && seeded) {
+          setFilterProductId('')
+          setFilterCategory('')
+          setSourceOnly(false)
+        }
+      }
+    })()
+    return () => { cancelled = true }
+  }, [assetsQs, filterProductId, filterCategory, sourceOnly])
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose() }

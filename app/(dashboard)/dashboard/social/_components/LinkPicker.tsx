@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 export interface SourceLinks {
   reviews: { id: string; title: string; slug: string }[]
@@ -46,11 +46,14 @@ export default function LinkPicker({ value, onChange, sourceLinks }: Props) {
   const [itemId, setItemId]   = useState(parsed.id)
   const [custom, setCustom]   = useState(parsed.custom)
 
-  useEffect(() => {
+  // Re-parse when `value` changes upstream — adjusted during render (React's
+  // "storing information from previous renders"), not in an effect.
+  const [parsedValue, setParsedValue] = useState(value)
+  if (value !== parsedValue) {
+    setParsedValue(value)
     const p = modeFromUrl(value, sourceLinks)
     setMode(p.mode); setItemId(p.id); setCustom(p.custom)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value])
+  }
 
   function buildUrl(m: LinkMode, id: string, c: string): string | null {
     if (m === 'none') return null

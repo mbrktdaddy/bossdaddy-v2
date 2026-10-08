@@ -28,16 +28,21 @@ interface RefinedDraft {
 }
 
 export function AIRefinePanel({ title, category, content, productName, contentType, onRefined, externalInstruction, onExternalInstructionUsed }: Props) {
-  const [instruction, setInstruction] = useState('')
+  const [instruction, setInstruction] = useState(externalInstruction || '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // When a flag "Fix with AI" button sets an external instruction, adopt it
+  // When a flag "Fix with AI" button sets an external instruction, adopt it.
+  // Adopted during render when the prop changes (no extra effect render); the
+  // parent then clears it to '' via onExternalInstructionUsed, so tracking the
+  // previous value — '' included — lets the same instruction be sent again.
+  const [prevExternal, setPrevExternal] = useState(externalInstruction)
+  if (externalInstruction !== prevExternal) {
+    setPrevExternal(externalInstruction)
+    if (externalInstruction) setInstruction(externalInstruction)
+  }
   useEffect(() => {
-    if (externalInstruction) {
-      setInstruction(externalInstruction)
-      onExternalInstructionUsed?.()
-    }
+    if (externalInstruction) onExternalInstructionUsed?.()
   }, [externalInstruction]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleRefine() {
