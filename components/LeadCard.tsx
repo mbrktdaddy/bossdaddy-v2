@@ -7,8 +7,8 @@ interface Props {
   imageUrl: string | null
   /** Role kicker — the category label. Never a repeat of the title. */
   eyebrow: string
-  /** Optional image-overlay pill ("Newest"). Max one per card; the Cover Story
-   *  already owns "Editor's Pick", so keep these distinct. */
+  /** Optional image-overlay tag ("Newest"). Max one per card, and it is the
+   *  only mark the image carries — no second badge, no sticker beside it. */
   badge?: string
   excerpt?: string | null
   /** Footer right-hand detail — a date, or "8 min read". */
@@ -16,8 +16,8 @@ interface Props {
   cta: string
   /**
    * Which surface this card sits ON, which decides the card's own background.
-   * Getting this wrong is the classic dark-canvas bug: a `bg-surface` card inside
-   * a `bg-surface` section is invisible except for its border.
+   * On the light canvas both resolve to white and nothing shows; inside a dark
+   * zone the card reads as a soft panel one step off its section.
    */
   on?: 'background' | 'surface'
   sizes?: string
@@ -30,8 +30,12 @@ interface Props {
  * at a glance; that sameness is what makes the page's alternating rhythm read as
  * a system rather than as improvisation.
  *
- * Elevation is border + hover lift, never shadow — black shadows are invisible on
- * a near-black canvas (brand-guide §2).
+ * BORDERLESS on purpose (light-editorial pass, 2026-10-08). On a white canvas a
+ * 1px grey box around every card is the whole "component library" feeling; the
+ * publications this site is measured against (Wirecutter, Strategist, Gear
+ * Patrol) let the image and the type carry the card and use hairline rules only
+ * between rows. The copy sits flush with the image's left edge, and the single
+ * hairline above the footer is the one rule the card keeps. Don't re-add the box.
  */
 export default function LeadCard({
   href, title, imageUrl, eyebrow, badge, excerpt, meta, cta,
@@ -40,11 +44,11 @@ export default function LeadCard({
   return (
     <Link
       href={href}
-      className={`group flex flex-col border border-soft rounded-2xl overflow-hidden hover:border-accent hover:-translate-y-0.5 transition-all duration-200 ${
+      className={`group flex flex-col hover:-translate-y-0.5 transition-transform duration-200 ${
         on === 'surface' ? 'bg-background' : 'bg-surface'
       }`}
     >
-      <div className="relative aspect-[16/10] bg-surface-raised shrink-0">
+      <div className="relative aspect-[16/10] bg-surface-raised shrink-0 rounded-xl overflow-hidden">
         {imageUrl && (
           <Image
             src={imageUrl}
@@ -55,19 +59,20 @@ export default function LeadCard({
           />
         )}
         {badge && (
-          <span className="absolute top-4 left-4 bg-accent text-white text-[10px] font-black uppercase tracking-[0.1em] px-3 py-1.5 rounded-full">
+          /* A small square tag, not a pill: pills over photos are the SaaS tell. */
+          <span className="absolute top-3 left-3 bg-chrome text-white text-[10px] font-bold uppercase tracking-[0.12em] px-2 py-1 rounded-sm">
             {badge}
           </span>
         )}
       </div>
-      <div className="p-6 sm:p-7 flex flex-col flex-1">
+      <div className="pt-5 flex flex-col flex-1">
         <div className="inline-flex items-center gap-1.5 mb-2.5">
           <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-          <span className="text-[10px] font-extrabold text-accent uppercase tracking-[0.16em]">
+          <span className="text-[10px] font-extrabold text-eyebrow uppercase tracking-[0.16em]">
             {eyebrow}
           </span>
         </div>
-        <h3 className="font-editorial-display font-semibold text-prose text-2xl leading-[1.15] tracking-tight group-hover:text-accent transition-colors">
+        <h3 className="font-black text-prose text-2xl leading-[1.1] tracking-tight group-hover:text-accent transition-colors">
           {title}
         </h3>
         {excerpt && (

@@ -39,7 +39,7 @@ export default function PageHeader({ back, eyebrow, title, deck, actions }: Prop
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-eyebrow">
               {eyebrow}
             </p>
-            <h1 className="font-editorial-display font-semibold text-prose text-4xl md:text-5xl leading-[1.03] tracking-tight mt-3">
+            <h1 className="font-black text-prose text-4xl md:text-5xl leading-[1.0] tracking-tight mt-3">
               {title}
             </h1>
             {deck && (

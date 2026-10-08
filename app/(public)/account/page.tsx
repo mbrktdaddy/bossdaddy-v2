@@ -115,7 +115,7 @@ export default async function AccountHomePage() {
     .filter((item): item is FollowedItem => item !== null && FOLLOW_STAGES.has(item.status))
 
   return (
-    <div data-theme="dark" className="bg-background text-prose min-h-[calc(100vh-4rem)]">
+    <div className="bg-background text-prose min-h-[calc(100vh-4rem)]">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
 
         {/* "Account", not "Your Stuff" — and both strings now come from

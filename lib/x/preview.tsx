@@ -69,9 +69,9 @@ export function XArticlePreview({ html, dropped, title, coverImageUrl, className
 
         {html ? (
           <div
-            /* prose-invert is load-bearing — plain prose-zinc makes headings
-               zinc-900 on a zinc-900 surface. See TiptapEditor. */
-            className="prose prose-sm prose-zinc prose-invert prose-orange max-w-none
+            /* Prose colours come from the role tokens (app/globals.css `.prose`),
+               so the block reads correctly on either canvas. */
+            className="prose prose-sm prose-zinc prose-orange max-w-none
               prose-headings:font-black prose-headings:font-sans prose-headings:tracking-tight
               prose-h1:text-lg prose-h1:mt-6 prose-h1:mb-2
               prose-h2:text-base prose-h2:mt-5 prose-h2:mb-2

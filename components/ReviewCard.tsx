@@ -6,7 +6,6 @@ import BossApprovedBadge from '@/components/BossApprovedBadge'
 import RatingScore from '@/components/RatingScore'
 import BadgesForProduct from '@/components/collections/BadgesForProduct'
 import type { ProductBadge } from '@/lib/collection-listings'
-import { Card } from '@/components/ui/Card'
 
 // THE review card — /reviews grids and the /gear tiers both render this, so a
 // tested product looks (and earns its Boss Approved badge) the same everywhere.
@@ -52,9 +51,9 @@ export default function ReviewCard({
   const Heading = headingLevel
   const mediaHeight = hero ? 'h-64 sm:h-80 lg:h-[420px]' : 'h-44'
   return (
-    <Card as="article" className={`group relative flex flex-col overflow-hidden hover:border-copper hover:-translate-y-1 transition-all duration-200 ${hero ? 'lg:col-span-2 lg:row-span-2' : ''}`}>
+    <article className={`group relative flex flex-col overflow-hidden rounded-xl hover:-translate-y-1 transition-all duration-200 ${hero ? 'lg:col-span-2 lg:row-span-2' : ''}`}>
       {r.image_url ? (
-        <div className={`relative w-full ${mediaHeight} bg-surface-raised shrink-0`}>
+        <div className={`relative w-full ${mediaHeight} bg-surface-raised shrink-0 rounded-xl overflow-hidden`}>
           <Image
             src={r.image_url}
             alt={r.product_name}
@@ -86,7 +85,7 @@ export default function ReviewCard({
           )}
         </div>
       )}
-      <div className={`flex flex-col flex-1 ${hero ? 'p-6 lg:p-7' : 'p-5'}`}>
+      <div className={`flex flex-col flex-1 ${hero ? 'pt-5' : 'pt-4'}`}>
         <div className="flex items-center justify-between gap-3 mb-3">
           <div className="flex items-center gap-1.5 min-w-0">
             {resolvedEyebrow && (
@@ -102,7 +101,7 @@ export default function ReviewCard({
           </div>
           <RatingScore rating={rating} />
         </div>
-        <Heading className={`leading-snug text-prose flex-1 ${hero ? 'text-xl md:text-2xl font-black' : 'text-base font-bold'}`}>
+        <Heading className={`leading-snug tracking-tight text-prose flex-1 ${hero ? 'text-2xl md:text-3xl font-black' : 'text-base font-extrabold'}`}>
           <Link
             href={`/reviews/${r.slug}`}
             className="after:absolute after:inset-0 group-hover:text-accent-text-soft transition-colors"
@@ -127,6 +126,6 @@ export default function ReviewCard({
           <span className="text-xs text-accent-text font-medium">Read review</span>
         </div>
       </div>
-    </Card>
+    </article>
   )
 }

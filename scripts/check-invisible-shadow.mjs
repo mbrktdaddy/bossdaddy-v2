@@ -1,3 +1,10 @@
+// 2026-10-08 — LIGHT EDITORIAL CANVAS: the physics argument below is now true only
+// inside the dark ZONES (header, footer, brand band, Creed, dashboard). On the white
+// page a black shadow renders fine — and the ban stays anyway, as a DESIGN rule:
+// content cards are borderless and separate by whitespace + hairline rules, never
+// by drop-shadow (docs/light-editorial-plan.md §2). Overlay surfaces (modals,
+// dropdowns, lightboxes) may use bare `shadow-*`, exactly as before.
+//
 // Fails the build on `shadow-black/*` — a shadow that cannot render on this
 // dark-first app.
 //

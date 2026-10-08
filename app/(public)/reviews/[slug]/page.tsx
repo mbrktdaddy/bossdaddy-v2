@@ -58,7 +58,7 @@ export const revalidate = 60
 
 
 // Shared prose treatment for review body segments (and the follow-up plain render).
-const REVIEW_PROSE_CLASS = `bd-editorial prose prose-lg prose-invert prose-orange mx-auto max-w-[68ch]
+const REVIEW_PROSE_CLASS = `bd-editorial prose prose-lg prose-orange mx-auto max-w-[68ch]
   prose-headings:font-black prose-headings:tracking-tight prose-headings:font-sans prose-headings:leading-[1.15] prose-headings:text-prose
   prose-h2:text-2xl prose-h2:mt-14 prose-h2:mb-5
   prose-h3:mt-10 prose-h3:mb-3
@@ -418,7 +418,7 @@ export default async function ReviewPage({ params }: Props) {
             </div>
           )}
 
-          <h1 className="text-4xl md:text-5xl font-black leading-tight mb-4 tracking-tight">{review.title}</h1>
+          <h1 className="font-black text-4xl md:text-5xl leading-[1.05] mb-4 tracking-tight">{review.title}</h1>
 
           {/* Author + date meta */}
           <div className="flex flex-wrap items-center gap-4 text-sm text-prose-muted">

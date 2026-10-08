@@ -61,8 +61,8 @@ export default function CredibilityBreak() {
   const lines = beats(BRAND.credibility)
 
   return (
-    <div className="mt-12 pt-12 border-t border-soft">
-      <div className="relative rounded-2xl overflow-hidden border border-soft min-h-[220px] md:min-h-[260px] flex items-center">
+    <div className="mt-8 pt-8 border-t border-soft">
+      <div className="relative rounded-2xl overflow-hidden min-h-[220px] md:min-h-[260px] flex items-center">
         <Image
           src="/images/credibility-texture.webp"
           alt=""

@@ -180,6 +180,7 @@ export default function MobileBottomNav() {
 
   return (
     <nav
+      data-theme="dark" /* chrome ZONE — stays near-black on the light canvas (lib/canvas.ts) */
       aria-label="Primary mobile navigation"
       // Slides away while reading (useBottomNavHidden). The extra 1.5rem carries the
       // Ask button, which bulges above the strip, fully off-screen with it.

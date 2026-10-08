@@ -101,6 +101,7 @@ export default async function InMotionTicker() {
 
   return (
     <section
+      data-theme="dark" /* dark BAND — stays near-black on the light canvas (lib/canvas.ts) */
       aria-label="Currently in motion on Boss Daddy"
       className="relative bg-chrome border-b border-copper/40"
     >

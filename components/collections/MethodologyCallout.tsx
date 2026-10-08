@@ -56,7 +56,7 @@ export default function MethodologyCallout({
           <Eyebrow className="mb-2">{eyebrowLabel}</Eyebrow>
           {html ? (
             <div
-              className="prose prose-zinc prose-invert prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-p:text-sm sm:prose-p:text-base prose-p:my-0 prose-p:mb-3 last:prose-p:mb-0"
+              className="prose prose-zinc prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-p:text-sm sm:prose-p:text-base prose-p:my-0 prose-p:mb-3 last:prose-p:mb-0"
               dangerouslySetInnerHTML={{ __html: html }}
             />
           ) : (

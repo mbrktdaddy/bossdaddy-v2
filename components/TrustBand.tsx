@@ -17,15 +17,15 @@ export default function TrustBand() {
         {STATS.map((s) => (
           <div key={s.label} className="px-2 md:px-8 py-5 md:py-0 text-center">
             <div
-              className="text-5xl font-black text-white leading-none"
+              className="text-5xl font-black text-prose leading-none"
               style={{ letterSpacing: s.num === '100%' ? '-1px' : '-0.5px' }}
             >
               {s.num}
             </div>
-            <div className="mt-3 text-sm font-extrabold text-white tracking-tight">
+            <div className="mt-3 text-sm font-extrabold text-prose tracking-tight">
               {s.label}
             </div>
-            <div className="mt-1 text-[11px] text-zinc-400">
+            <div className="mt-1 text-[11px] text-prose-faint">
               {s.sub}
             </div>
           </div>

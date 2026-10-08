@@ -116,11 +116,13 @@ Primary domain: **bossdaddylife.com**. Core surfaces:
 
 ## 4. Design System (so on-phone ideas stay on-brand)
 
-**Dark-first, everywhere** (`data-theme="dark"` on `<html>`). Near-black canvas, elevated charcoal surfaces, off-white text, a single warm-orange accent. No gold, no per-category rainbow, no cream/peach/brown.
+**Light editorial canvas** (since 2026-10-08). White page, near-black text, hairline rules, a single warm-orange accent — and the chrome (masthead, footer, bottom nav, the homepage brand band, the Creed) stays **near-black**, so the black / orange / white edge lives in the frame, not in the reading surface. Modelled on the publications we're measured against (Wirecutter, Strategist, Gear Patrol, Fatherly). No gold, no per-category rainbow, no cream/peach/brown.
 
-- **Accent — Hot orange `#E55A1A`** on dark (primary CTAs, active nav). Hover = core `#CC5500`. Inline links/eyebrows = `#f48a4a`. **Never** the default vivid Tailwind orange `#f97316`.
-- **Surfaces:** chrome/canvas `#09090b`, surface `#18181b`, raised `#27272a`, hover `#3f3f46`. **Elevation comes from borders + raised surfaces**, with only a *soft* shadow (`shadow-black/5`–`black/10`) — black drop-shadows vanish on near-black.
-- **Text:** body `#f4f4f5`, muted `#d4d4d8`, faint `#a1a1aa`.
+- **Accent — core orange `#CC5500`** on the white page (hot `#E55A1A` inside the dark chrome). Inline links / opt-in kickers `#B85A14`. Eyebrows are quiet grey by default. **Never** the default vivid Tailwind orange `#f97316`.
+- **Primary buttons are black** with white text and an orange hover; inside the dark chrome they are orange.
+- **Surfaces:** page `#ffffff`, soft panels `#fafafa`, hover `#f4f4f5`, hairlines `#e4e4e7`. **Content cards are borderless** — image, type, one hairline; no boxes, no drop-shadows.
+- **Text:** headlines + body `#18181b`, muted `#52525b`, faint `#71717a`. Every heading is Montserrat, heavy — one voice; the Fraunces serif is the Creed only.
+- Corners are tight (8px cards and buttons). Image badges are one small square black tag at most — never an orange pill.
 - **Type:** Montserrat for display/headings (`font-black` for heroes); Geist Sans for body/UI; Fraunces (serif) scoped to editorial headings (Manifesto v2); Source Serif 4 for pull-quotes only.
 - **Shape:** cards/panels/buttons are `rounded-xl` (12px); pills are `rounded-full`.
 - **Tokens over raw shades:** components consume semantic role tokens (`bg-surface`, `text-prose`, `text-accent`, `border-soft`), enforced by an ESLint rule. Icons are inline SVGs (no emoji on web).
@@ -157,7 +159,8 @@ Full reference lives in `docs/brand-guide.md` (deeper than this summary, and aut
 ## 6. Where Things Stand (roadmap snapshot — update as it moves)
 
 **Shipped / working:**
-- Dark-first brand redesign, homepage, navigation + PWA install.
+- **Light editorial canvas (2026-10-08).** The dark-first site re-skinned as a white editorial publication with near-black chrome zones: borderless cards, one heavy Montserrat heading voice, quiet eyebrows, black CTAs, 8px corners, and the homepage poster hero replaced by a slim brand band so the cover story is the first screen. Next: a top-picks product board, plain section labels, and a dedicated pass on the brand band.
+- Dark-first brand redesign (2026-06, superseded above), homepage, navigation + PWA install.
 - Reviews + Guides editorial pipeline with AI drafting, content blocks, tags, categories.
 - Collections with spec-comparison tables; AI Specs Grade (5th rating axis).
 - The Bench (product pipeline) → member voting.

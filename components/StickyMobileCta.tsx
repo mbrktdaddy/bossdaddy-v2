@@ -63,6 +63,7 @@ export default function StickyMobileCta({ product }: Props) {
     // bottom padding clears the Ask button, which bulges ~1rem above the strip.
     // Hidden = slid down behind the strip AND faded, so no ghost shows through it.
     <div
+      data-theme="dark" /* chrome ZONE — stays near-black on the light canvas (lib/canvas.ts) */
       className={`md:hidden fixed left-0 right-0 z-30 bg-chrome/95 backdrop-blur-md border-t border-soft px-4 pt-3 pb-5 transition-[transform,opacity,bottom] duration-300 ${show ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}
       style={navHidden
         ? { bottom: 0, paddingBottom: 'max(env(safe-area-inset-bottom), 0.75rem)' }

@@ -5,6 +5,7 @@ import PwaInstallProvider from "@/components/pwa/PwaInstallProvider";
 import { ogImageMeta } from "@/lib/og";
 import { BRAND } from "@/lib/brand";
 import { rootFontVariables } from "./fonts/fonts";
+import { HTML_THEME } from "@/lib/canvas";
 import "./globals.css";
 
 // Fonts are self-hosted — definitions, subsets and the serif no-preload PERF
@@ -84,10 +85,14 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Canvas: light editorial by default (flipped 2026-10-08) — no attribute, so the
+  // :root light tokens take the page while the chrome (header, footer, bottom nav,
+  // brand band, Creed) keeps its own data-theme="dark" zone. `BD_CANVAS=dark` puts
+  // the dark palette back on <html>. One place decides; see lib/canvas.ts.
   return (
     <html
       lang="en"
-      data-theme="dark"
+      data-theme={HTML_THEME}
       className={`${rootFontVariables} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">

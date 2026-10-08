@@ -224,7 +224,7 @@ export default async function GuidePage({ params }: Props) {
 
         {/* Header */}
         <div className="mb-10">
-          <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6 tracking-tight">{guide.title}</h1>
+          <h1 className="font-black text-4xl md:text-5xl leading-[1.05] mb-6 tracking-tight">{guide.title}</h1>
           <div className="flex flex-wrap items-center gap-4 text-sm text-prose-muted pb-6">
             <span>by <Link href={`/author/${author}`} className="text-prose-muted hover:text-accent-text-soft transition-colors">@{author}</Link></span>
             {guide.published_at && (
@@ -305,7 +305,7 @@ export default async function GuidePage({ params }: Props) {
                   return segment.content ? (
                     <div
                       key={`html-${i}`}
-                      className="bd-editorial prose prose-lg prose-invert prose-orange mx-auto max-w-[68ch]
+                      className="bd-editorial prose prose-lg prose-orange mx-auto max-w-[68ch]
                         prose-headings:font-black prose-headings:tracking-tight prose-headings:font-sans prose-headings:leading-[1.15]
                         prose-h2:text-2xl prose-h2:mt-14 prose-h2:mb-5
                         prose-h3:mt-10 prose-h3:mb-3

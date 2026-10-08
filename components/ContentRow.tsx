@@ -63,14 +63,19 @@ export default function ContentRow({
       className={`group flex items-center gap-4 sm:gap-5 py-5 ${flip ? 'lg:flex-row-reverse' : ''} ${isLast ? '' : 'border-b border-soft'}`}
     >
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-bold text-accent uppercase tracking-[0.16em] mb-1.5">
+        <p className="text-[10px] font-bold text-eyebrow uppercase tracking-[0.16em] mb-1.5">
           {kind && <span className="text-eyebrow">{kind} · </span>}
           {eyebrow}
         </p>
-        <h3 className="text-base sm:text-lg font-extrabold text-prose leading-snug mb-1.5 group-hover:text-accent transition-colors">
+        <h3 className="font-extrabold text-base sm:text-lg text-prose leading-snug tracking-tight mb-1.5 group-hover:text-accent transition-colors">
           {headline}
         </h3>
-        {sub && <p className="text-xs text-prose-faint mb-1.5 truncate">{sub}</p>}
+        {/* /reviews passes the product name as `sub`, and most review titles already
+            contain it ("Vmaisi … Cabinet Locks Review (6-Month Test)") — showing it
+            again read as the same thing twice. Only render it when it adds a word. */}
+        {sub && !headline.toLowerCase().includes(sub.trim().toLowerCase()) && (
+          <p className="text-xs text-prose-faint mb-1.5 truncate">{sub}</p>
+        )}
         {excerpt && (
           <p className="text-sm text-prose-muted leading-relaxed line-clamp-2 mb-2 hidden sm:block">
             {excerpt}

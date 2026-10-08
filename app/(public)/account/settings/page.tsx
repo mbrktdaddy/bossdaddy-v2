@@ -58,7 +58,7 @@ export default async function AccountSettingsPage() {
     : null
 
   return (
-    <div data-theme="dark" className="bg-background text-prose min-h-[calc(100vh-4rem)]">
+    <div className="bg-background text-prose min-h-[calc(100vh-4rem)]">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
       <BackLink href="/account" label={LABELS.account.short} className="mb-4" />
 

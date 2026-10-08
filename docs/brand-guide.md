@@ -256,7 +256,7 @@ for any reader-facing surface. Don't find it a slot.
 Keep it a display/CTA line — don't drop "boss up" into the middle of editorial prose as filler (that's what makes hype hype). Title Case with a period when it stands alone: *Boss Up.*
 
 ### 1.8 What we never do
-- Use the default vivid Tailwind orange (`#f97316`). Our accent is `#E55A1A` (Hot, on dark) / `#CC5500` (core) — warm and earthy, never the loud default.
+- Use the default vivid Tailwind orange (`#f97316`). Our accent is `#CC5500` (core, on the light page) / `#E55A1A` (Hot, inside dark zones) — warm and earthy, never the loud default.
 - Per-category rainbow colors. All categories share one unified treatment (`lib/categories.ts`).
 - Sponsored content positioned as honest reviews. Affiliate is fine and disclosed; sponsored is not.
 - Preach faith — it's the foundation, not the lecture.
@@ -286,47 +286,52 @@ Industry standard, same as Wirecutter / CNN Underscored / Gear Patrol: **one aff
 
 ---
 
-## 2. Color System (Dark-First — 2026-06)
+## 2. Color System (Light Editorial — 2026-10-08)
 
-The site is **dark-first everywhere** (`data-theme="dark"` on `<html>` in `app/layout.tsx`). Near-black canvas, elevated charcoal surfaces, off-white text. Brand orange is the ONLY accent — shifted to **Hot `#E55A1A`** on dark (the core `#CC5500` reads muddy on near-black). No gold, no per-type rainbow, no cream/peach/brown. The light values in `:root` are a vestigial opt-in base (emails/print) — app chrome never renders light.
+The site runs a **light editorial canvas**: no `data-theme` on `<html>` (`lib/canvas.ts` decides; `BD_CANVAS=dark` restores the dark page for a side-by-side). White page, near-black text, hairline borders, orange as the ONLY accent — core `#CC5500` on white. **The chrome stays near-black.** `Header`, `Footer`, `MobileBottomNav`, `StickyMobileCta`, the homepage brand band (`HomeHero`), `InMotionTicker`, the Creed, and the `(dashboard)` layout wrap themselves in `data-theme="dark"`, so the black / orange / white edge lives in the frame and in one dark band per page — not in the reading surface. No gold, no per-type rainbow, no cream/peach/brown, no vivid `#f97316`.
 
-> **Elevation comes from borders + raised surfaces, NOT shadows.** Black drop-shadows are invisible on near-black; use `border-soft` (+ `hover:border-strong`/`hover:border-accent`) and the raised surface tiers.
+Why: every comparable publication (Wirecutter, Strategist, Gear Patrol, Fatherly, Uncrate) runs light; the dark-first build (2026-06 → 2026-10) read as software, not as a magazine. Full rationale and rollout: `docs/light-editorial-plan.md`.
 
-### Tokens — `app/globals.css` (dark values)
+> **Elevation = whitespace + hairline rules.** Content cards are **borderless** (image + type + one hairline above the footer). Utility surfaces (forms, menus, tool tiles, dashboard) keep `border-soft` + the raised tier. No drop-shadows on content — `check:shadow` still bans `shadow-black/*` as a design rule; overlays may use bare `shadow-*`.
 
-| Variable | Hex (dark) | Usage |
-|---|---|---|
-| `--bd-chrome` / `--color-chrome` | `#09090b` | Masthead / footer / bottom-nav — flush with canvas |
-| `--bd-bg` / `--background` | `#09090b` | Page canvas (zinc-950) |
-| `--bd-surface` / `--color-surface` | `#18181b` | Card/panel surface, reading panel (zinc-900) |
-| `--bd-surface-raised` | `#27272a` | Elevated cards, alt sections, logo tiles (zinc-800) |
-| `--bd-surface-hover` / `--color-surface-hover` | `#3f3f46` | Interactive hover lift (zinc-700) |
-| `--bd-surface-sunken` | `#09090b` | Wells, recessed (zinc-950) |
-| `--bd-border` / `--color-soft` | `#27272a` | Hairlines, card edges (zinc-800) |
-| `--bd-border-strong` / `--color-strong` | `#3f3f46` | Confident edges (zinc-700) |
-| `--bd-text` / `--foreground` | `#f4f4f5` | Body text (zinc-100) |
-| `--bd-text-muted` | `#d4d4d8` | Captions, muted nav (zinc-300) |
-| `--bd-text-faint` | `#71717a` | Timestamps, decorative (zinc-500) |
-| `--bd-orange` / `--color-accent` | `#E55A1A` | **Primary brand accent — Hot, on dark** |
-| `--bd-orange-hover` / `--color-accent-hover` | `#CC5500` | Button hover (core orange) |
-| `--bd-orange-text` / `--color-accent-text` / `--color-eyebrow` | `#f48a4a` | Inline links / eyebrows on dark (orange-400) |
-| `--bd-accent-tint` / `--color-accent-tint` | `#27272a` | Brand-territory surface (zinc-800) |
+### Tokens — `app/globals.css` (`:root` = light page · `[data-theme="dark"]` = zones)
 
-### The surfaces (dark)
+| Variable | Light (page) | Dark (zones) | Usage |
+|---|---|---|---|
+| `--bd-bg` / `--background` | `#ffffff` | `#09090b` | Page canvas |
+| `--bd-chrome` / `--color-chrome` | `#09090b` | `#09090b` | Masthead / footer / bottom nav — always near-black |
+| `--bd-surface` / `--color-surface` | `#ffffff` | `#18181b` | Cards — white on white on purpose; a content card is its image and its type |
+| `--bd-surface-raised` | `#fafafa` | `#27272a` | Soft panels: tool tiles, Key Takeaways, alt sections |
+| `--bd-surface-hover` | `#f4f4f5` | `#3f3f46` | Interactive hover lift |
+| `--bd-surface-sunken` | `#f4f4f5` | `#09090b` | Wells, code blocks, search / modal panels |
+| `--bd-border` / `--color-soft` | `#e4e4e7` | `#27272a` | Hairlines, row dividers |
+| `--bd-border-strong` / `--color-strong` | `#d4d4d8` | `#3f3f46` | Outline buttons, chips, menu edges |
+| `--bd-text` / `--foreground` | `#18181b` | `#f4f4f5` | Headlines + body — near-black, never grey |
+| `--bd-text-muted` | `#52525b` | `#d4d4d8` | Decks, captions, **eyebrows** |
+| `--bd-text-faint` | `#71717a` | `#a1a1aa` | Timestamps, decorative (AA on both) |
+| `--bd-prose-body` | `#18181b` | `#d4d4d8` | Long-form body |
+| `--bd-orange` / `--color-accent` | `#CC5500` | `#E55A1A` | Orange fills, rules, score rings, active states |
+| `--bd-orange-hover` / `--color-accent-hover` | `#B85A14` | `#CC5500` | Hover on orange fills |
+| `--bd-orange-text` / `--color-accent-text` | `#B85A14` | `#f48a4a` | Inline links; the opt-in orange kicker (4.67:1 on white — the core `#CC5500` misses AA at eyebrow size) |
+| `--color-eyebrow` | = text-muted | = text-muted | Eyebrows are **quiet by default** |
+| `--bd-cta` / `-hover` / `-ink` | `#09090b` / `#CC5500` / `#fff` | `#E55A1A` / `#CC5500` / `#fff` | **Primary button: black on the page, orange in zones.** Consumed by `buttonVariants('primary')` only |
+| `--bd-accent-tint` | `#f4f4f5` | `#27272a` | Neutral brand-territory surface — never peach |
 
-1. **Chrome** (`--color-chrome`, #09090b) — masthead/footer/bottom-nav; flush with canvas, separated by border + blur. (Replaced the legacy `--color-drama`.)
-2. **Canvas** (`--bd-bg`, #09090b) — page background.
-3. **Surface** (`--bd-surface`, #18181b) — cards; the long-form reading panel on phone/tablet.
-4. **Raised** (`--bd-surface-raised`, #27272a) — elevated cards, alt-section bands, logo tiles.
-5. **Hover** (`--bd-surface-hover`, #3f3f46) — interactive hover lift.
+### The surfaces (light page)
+
+1. **Chrome** (`bg-chrome`, near-black, inside a dark zone) — masthead / footer / bottom nav / brand band / Creed.
+2. **Canvas** (`bg-background`, white) — the page.
+3. **Surface** (`bg-surface`, white) — cards. Same value as the canvas on purpose.
+4. **Raised** (`bg-surface-raised`, zinc-50) — soft panels: tool tiles, takeaways, alt sections.
+5. **Hover** (`bg-surface-hover`, zinc-100) — interactive lift.
 
 ### Tailwind utilities (mapped via `@theme inline`)
-- `bg-chrome` → masthead / footer / bottom-nav
-- `bg-background` → page canvas
-- `bg-surface` / `bg-surface-raised` / `bg-surface-hover` → surface tiers
-- `text-prose` / `text-prose-muted` / `text-prose-faint` → text tiers
-- `text-accent` → inline orange text/links · `bg-accent` / `bg-accent-hover` → CTA buttons
-- `border-soft` → card edges · `border-strong` → confident edges
+- `bg-chrome` → masthead / footer / bottom-nav (always inside a `data-theme="dark"` zone)
+- `bg-background` → page canvas · `bg-surface` / `bg-surface-raised` / `bg-surface-hover` → surface tiers
+- `text-prose` / `text-prose-muted` / `text-prose-faint` → text tiers · `text-eyebrow` → the quiet kicker
+- `text-accent` → orange text ("Read the guide →", scores) · `text-accent-text` → inline links / opt-in orange kicker
+- `bg-cta text-cta-ink hover:bg-cta-hover` → the primary button (via `buttonVariants`, never by hand)
+- `border-soft` → hairlines · `border-strong` → outline controls
 
 ### State is encoded with colour, never with geometry
 
@@ -356,9 +361,9 @@ for horizontal scroll strips (§5) — and for hit-area clawback on a lone contr
 (`p-1 -mr-1`). The rule is about *items in an aligned set*, not about the utility.
 
 ### Reading surface (reviews / guides)
-Long-form body sits on **bare canvas at every breakpoint** (reversed 2026-09-23 — phone/tablet used to get an elevated panel, which washed out nested `bg-surface` elements against its same-color fill). Single source of truth: `ARTICLE_SURFACE_CLASS` in `lib/article-surface.ts`. Body is **sans**; the *body* editorial serif (Source Serif 4) is reserved for blockquotes/pull-quotes only. The *display* editorial serif (Fraunces via `.font-editorial-display`) is used for editorial headings per the Manifesto v2 exception (§3). Article images get a subtle frame (`border` + rounded) so white-bg product shots don't glare.
+Long-form body sits on **bare canvas at every breakpoint** (reversed 2026-09-23 — phone/tablet used to get an elevated panel, which washed out nested `bg-surface` elements against its same-color fill). Single source of truth: `ARTICLE_SURFACE_CLASS` in `lib/article-surface.ts`. Body is **sans**; the *body* editorial serif (Source Serif 4) is reserved for blockquotes/pull-quotes only. The *display* serif (Fraunces via `.font-editorial-display`) is used for the Creed only (§3, "One voice"). Article images get a subtle frame (`border` + rounded) so white-bg product shots don't glare.
 
-### Status colors (chips / pipeline indicators on dark)
+### Status colors (chips / pipeline indicators)
 | Status | Color | Use |
 |---|---|---|
 | `testing` | `text-green-400` | Live testing pulse |
@@ -366,10 +371,10 @@ Long-form body sits on **bare canvas at every breakpoint** (reversed 2026-09-23 
 | `considering` | `text-amber-400` | Voting / pipeline |
 | `reviewed` | `text-accent` | Done / shipped |
 
-For bordered chips prefer the token recipe (`bg-{danger,success,warn,info}-bg` + `border-…-line` + `text-…-ink`) — it inverts correctly on dark.
+For bordered chips prefer the token recipe (`bg-{danger,success,warn,info}-bg` + `border-…-line` + `text-…-ink`) — it inverts correctly inside the dark zones.
 
-### The accent band (replaced the dark-island rule)
-Everything is dark now, so the old "one dark island per page" rule is retired. Its successor: **one elevated accent band** per page (e.g., the homepage TrustBand) — `bg-surface-raised` + a 3px orange top rule — as the single punctuating moment.
+### The dark band (one per page)
+On the light canvas the old "one dark island per page" idea is back with a sharper definition: **one near-black band** per page as the punctuating moment — the homepage brand band + ticker, the Creed, the credibility band, the sticky price bar on a review. A band is a `data-theme="dark"` zone, so every token inside it inverts by itself; never fake one with `bg-zinc-950` and hand-set text colours. The elevated accent band (`bg-surface-raised` + a 3px orange top rule) remains available for utility surfaces (e.g. the newsletter section).
 
 ### The section header convention — two lanes (settled 2026-07-27)
 
@@ -377,7 +382,7 @@ There are **two** sanctioned section-header shapes. Pick by surface, never by ta
 
 | Lane | Component | Shape | Use on |
 |---|---|---|---|
-| **Editorial** | `EditorialHeader` | sans eyebrow (role) + Fraunces serif title + optional right link | public editorial surfaces — homepage, listings, editorial pages |
+| **Editorial** | `EditorialHeader` | quiet eyebrow (role) + Montserrat black title + optional right link | public editorial surfaces — homepage, listings, editorial pages |
 | **Utility** | `SectionHeader` | 3px × 18px brand-orange vertical rule + uppercase tracked `font-black` label | utility surfaces — **`/gear`** (the sanctioned utility public page), dashboard/admin, compact panels |
 
 The prior wording ("every section heading sitewide uses `SectionHeader`") was written before Manifesto v2 and is retired: it contradicted the editorial rollout and described an admin population that no longer used the component. **`/gear` is deliberately utility-styled** — it's a working gear list, not an editorial read, and it stays on `SectionHeader` (5 call sites). That is a decision, not drift; don't "fix" it to `EditorialHeader`.
@@ -391,26 +396,27 @@ The prior wording ("every section heading sitewide uses `SectionHeader`") was wr
 Never switch back to `next/font/google`: it fetches Google's CSS on every build, and a response-shape change from Google broke Turbopack builds on 2026-10-08. Each family ships a Latin + Latin Extended face; the font stacks in `app/globals.css` list the `-ext` variable first.
 
 - **Display / Headings (default)**: `var(--font-montserrat)` — heavy weight (`font-black` 900) for hero, `font-bold` 700 elsewhere. Default for every `h1–h4` via the global rule in `globals.css`.
-- **Editorial display serif (Manifesto v2)**: `var(--font-editorial-display)` = **Fraunces**. **Scoped opt-in** via the `.font-editorial-display` class — see the exception below. Carries the magazine / "cover story" voice.
+- **Display serif**: `var(--font-editorial-display)` = **Fraunces**. **The Creed only** (`.font-editorial-display`). Not a headline face — see "One voice" below.
 - **Body / UI**: `var(--font-geist-sans)` — neutral grotesk.
 - **Editorial body** (`.bd-editorial` prose): `var(--font-serif)` = Source Serif 4 — serif voice for review/article **blockquotes / pull-quotes only**.
 
-> **Editorial-serif heading exception (Manifesto v2, 2026-07-06).** The prior rule ("all headings are `font-black` Montserrat; serif is pull-quotes only") is amended. Headings still **default** to Montserrat `font-black`; specific **editorial** headings opt into Fraunces with `font-editorial-display font-semibold`. Allowed ONLY on: homepage Cover Story H2/H3, `EditorialHeader` section titles, `PageHeader` H1s, guide titles, and the mission Creed. Do **not** blanket-apply serif to card titles, eyebrows, nav, or UI labels — those stay sans. Reference impl: `app/(public)/page.tsx` + `docs/home-manifesto-spec.md`.
+> **One voice (2026-10-08).** Boss Daddy is bold and heavy, and its headings say so: **every heading is Montserrat** — `font-black` for the brand-band tagline, section titles (`EditorialHeader`), page H1s (`PageHeader`), review/guide titles, the cover story and lead cards; `font-extrabold` for card, row, and list titles. The Fraunces serif lives in exactly one place, the mission Creed; article pull-quotes use the body serif (Source Serif 4). The Manifesto v2 "editorial serif heading" exception and the same-day "serif = content" pass are both retired — the serif headlines were tried live and read as a mismatch with the brand. Editorial feel comes from layout, whitespace, and the black chrome, not from a typeface. Don't re-propose serif headlines.
 
 ### Type scale
 
 | Element | Class | Notes |
 |---|---|---|
-| Hero H1 (homepage) | `text-6xl md:text-[7.5rem] leading-[0.92] tracking-tight` | "Dad Like a Boss." energy |
+| Brand-band H1 (homepage) | `font-black text-4xl sm:text-5xl md:text-6xl leading-[0.98] tracking-tight` | "Dad Like a Boss." — Montserrat stays; slim band, not a poster |
 | Page H1 (app chrome: account, cart, order) | `text-4xl md:text-5xl font-black tracking-tight` | Sans. **Public pages do NOT use this** — they use the `PageHeader` row below (Manifesto v2 Phase 2/2.5 migrated every public listing to it). |
 | Section H2 | `text-2xl font-black` | Big-Quiet rhythm — sections stay quiet so content can breathe |
-| Card H3 | `text-base font-semibold leading-snug` | Card titles |
-| Hero/Featured H3 | `text-2xl md:text-3xl font-black` | Featured-card titles |
-| Editorial section H2 (`EditorialHeader`) | `font-editorial-display font-semibold text-3xl md:text-4xl tracking-tight` | Manifesto section titles — **serif** |
-| Editorial page H1 (`PageHeader`) | `font-editorial-display font-semibold text-4xl md:text-5xl tracking-tight` | Interior "slim editorial band" — **serif** |
+| Card / row H3 | `font-extrabold text-base sm:text-lg leading-snug tracking-tight` | Content card and row titles |
+| Lead / cover H3 | `font-black text-2xl md:text-4xl leading-[1.05] tracking-tight` | Lead cards, cover story |
+| Detail H1 (review / guide) | `font-black text-4xl md:text-5xl leading-[1.05] tracking-tight` | |
+| Editorial section H2 (`EditorialHeader`) | `font-black text-3xl md:text-4xl leading-[1.02] tracking-tight` | Section titles |
+| Editorial page H1 (`PageHeader`) | `font-black text-4xl md:text-5xl leading-[1.0] tracking-tight` | Interior "slim editorial band" |
 | Body | `text-base leading-relaxed` | 16px, comfortable line-height |
 | Small / metadata | `text-sm text-gray-500` | |
-| Eyebrow | `text-[11px] text-orange-500 uppercase tracking-[0.2em] font-bold` | Editorial section opener |
+| Eyebrow | `text-[11px] text-eyebrow uppercase tracking-[0.2em] font-bold` | Quiet grey by default; orange only on dark bands via `text-accent-text` |
 | Tracked caps utility | `text-xs uppercase tracking-widest font-semibold` | Used on "View all →" links, eyebrow lines |
 
 ### Numerical type
@@ -449,35 +455,26 @@ The v3.4 messaging lines (§1.7) are the **one place headline copy is set in Tit
 
 ## 4. Shape Language
 
-### Corner radius
-- **Cards, panels, buttons, inputs**: `rounded-xl` (12px). One number, used everywhere.
-- **Pills**: `rounded-full` (badges, filter buttons, status pills).
-- **Small avatar / image holder**: `rounded-xl` on hero card swatches; `rounded-full` on user avatars.
+### Corner radius (tightened 2026-10-08)
+The Tailwind radius scale is **overridden globally** in `app/globals.css` `@theme inline`, so every `rounded-*` call site tightens together and the ratio between tiers holds. Keep writing `rounded-xl` / `rounded-2xl`; the values are the design's:
 
-We landed on 12px (`rounded-xl`) for the balance of *modern* and *not blocky* — tightened from the earlier 16px (`rounded-2xl`). Sharper reads cold; softer reads consumer.
+| Class | Renders | Use |
+|---|---|---|
+| `rounded-sm` | 2px | square tags on images |
+| `rounded-md` | 4px | inputs, small badges |
+| `rounded-lg` | 6px | sm buttons, rows, thumbnails |
+| `rounded-xl` / `rounded-2xl` | 8px | buttons, cards, images (one card radius) |
+| `rounded-3xl` | 10px | hero / cover packages |
+| `rounded-full` | pill | chips, avatars, dots — **not** badges over photos |
 
-### Border principle — Border + soft shadow (dark-first)
-On the dark canvas, **elevation comes from a visible border plus a *soft* shadow** — pure black drop-shadows vanish on near-black. The shipping card skin is:
+Tailwind's defaults (12 / 16 / 24px) are the SaaS silhouette; editorial and gear publications run 0–8px. Tune in one place, never per component.
 
-```
-bg-surface rounded-xl border border-soft shadow-lg shadow-black/5
-hover:border-copper hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1
-```
-
-1. `border border-soft` — the primary separator (→ `border-copper`/`border-strong` on hover).
-2. A soft shadow at low opacity (`shadow-black/5` → `shadow-black/10` on hover) for a subtle lift.
-3. A small hover translate (`-translate-y-0.5` / `-translate-y-1`).
-4. Surface-color contrast (raised surfaces) + whitespace.
-
-The shared primitive `components/ui/Card.tsx` is border-only (`bg-surface rounded-xl border border-soft`, no shadow). The old "Shadow Skin / no borders / `shadow-black/40`" system is **retired**.
-
-### Shadow scale (soft — dark-first)
-Shadows are low-opacity accents *on top of* the border, not the primary separator.
-| Class | Use |
-|---|---|
-| `shadow-md shadow-black/5` | Subtle — pills, list rows, wishlist cards |
-| `shadow-lg shadow-black/5` | Standard cards (review/guide) |
-| `shadow-xl shadow-black/10` | Card hover (paired with `hover:border-copper` + `-translate-y-1`) |
+### Border principle — hairlines, no boxes
+- **Content cards are borderless.** `LeadCard`, `LibraryGuideCard`, `ReviewCard`, the cover story, the lead guide: the image carries `rounded-xl overflow-hidden`, the copy sits flush with the image's left edge, and the only rule is the hairline above the footer. Hover = title to `text-accent` + a 2px lift.
+- **Rows separate by hairline** (`border-b border-soft`), never by card.
+- **Utility surfaces keep the box.** `components/ui/Card.tsx` stays `bg-surface rounded-xl border border-soft` for forms, menus, tool tiles, dashboard panels. Soft panels (`bg-surface-raised`, no border) are the middle option — Boss Tools tiles, Key Takeaways.
+- **No drop-shadows on content.** `check:shadow` bans `shadow-black/*`; bare `shadow-*` is for overlays (modals, dropdowns, lightboxes) only.
+- **One mark per image.** The Boss Approved badge, or a small square black tag (`rounded-sm bg-chrome text-white`). Never an orange pill over a photo.
 
 ---
 
@@ -503,15 +500,9 @@ The only exceptions:
 - **Hero**: hybrid radial + linear orange gradient overlay (homepage only).
 - **Featured Review section** (homepage): single orange hairline rule at the top fading at edges, plus a 3px vertical orange rule next to the section header.
 
-### Hero composition (homepage)
-- Centered, single-column layout (no asymmetric carousel right).
-- Trust pill → H1 → subhead → CTAs (4 elements, each doing one job).
-- Hero gradient overlay (atmospheric):
-  ```css
-  background:
-    radial-gradient(ellipse 70% 60% at 50% -10%, rgba(204,85,0,0.18), transparent 70%),
-    linear-gradient(180deg, rgba(204,85,0,0.10), transparent 70%);
-  ```
+### Brand band (homepage)
+- A slim near-black band under the masthead: kicker → tagline (one line on desktop, two on a phone) → one-line subhead → "Meet the Boss" text link → the in-motion ticker. No photo, no gradient, no full-height poster: the cover story sits on the first screen.
+- **Placeholder composition (2026-10-08).** The operator wants a dedicated design pass on the band. Keep it slim when you do — content on the first screen is the point. The hero photographs stay in `public/images` for `/about`.
 
 ### Section opener pattern (sitewide)
 Every meaningful section uses this structure:
@@ -539,7 +530,7 @@ The page ends with a deliberate punctuation:
 ## 6. Component Patterns
 
 ### Card skeleton (review / guide / wishlist / shop)
-Real pattern (see `ReviewCard.tsx` / `LibraryGuideCard.tsx`): semantic tokens only, `rounded-xl`/`rounded-2xl`, **border + hover lift — no shadow.** Black shadows are invisible on the near-black canvas; `shadow-lg shadow-black/5` is decoration that renders as nothing. See §2 and `feedback_dark_canvas_anti_patterns`.
+Real pattern (see `LeadCard.tsx` / `LibraryGuideCard.tsx` / `ReviewCard.tsx`): semantic tokens only, **borderless**, image carries the radius, serif title, quiet eyebrow, one hairline above the footer, hover = title colour + lift. See §4.
 
 > **Enforced since 2026-08-03.** `npm run check:shadow` (in `prebuild`) fails the build on
 > any `shadow-black/*`. The pattern had reached 63 occurrences across 46 files precisely
@@ -557,33 +548,24 @@ Real pattern (see `ReviewCard.tsx` / `LibraryGuideCard.tsx`): semantic tokens on
 ```jsx
 <Link
   href="..."
-  className="group relative flex flex-col bg-surface rounded-xl overflow-hidden border border-soft hover:border-accent hover:-translate-y-0.5 transition-all duration-200"
-  /* NO shadow-*: black shadows are invisible on near-black. Elevation = border
-     colour change + a small lift. `hover:border-accent`, not the legacy
-     `hover:border-copper` alias. */
+  className="group flex flex-col hover:-translate-y-0.5 transition-transform duration-200"
+  /* NO border, NO shadow: a content card is its image and its type. */
 >
-  {/* Image — h-44, object-cover, hover scale */}
-  <div className="relative w-full h-44 bg-surface-raised shrink-0">
-    <Image ... className="object-cover group-hover:scale-105 transition-transform duration-300" />
-    {/* Boss Approved badge top-right when rating >= 8 */}
+  {/* Image carries the radius — one mark on it at most (Approved badge or a square tag) */}
+  <div className="relative aspect-[16/10] bg-surface-raised shrink-0 rounded-xl overflow-hidden">
+    <Image ... className="object-cover group-hover:scale-[1.03] transition-transform duration-300" />
   </div>
-  <div className="p-5 flex flex-col flex-1">
-    {/* Top row: category (CategoryIcon SVG) + rating score */}
-    <div className="flex items-center justify-between mb-3">
-      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-eyebrow uppercase tracking-widest truncate max-w-[60%]">
-        <CategoryIcon slug={cat.slug} className="w-4 h-4" />
-        {cat.label}
-      </span>
-      <RatingScore rating={rating} />
-    </div>
-    <h3 className="text-base font-semibold leading-snug text-prose group-hover:text-accent-text transition-colors flex-1">
+  {/* Copy flush with the image's left edge — no inset padding without a box */}
+  <div className="pt-4 flex flex-col flex-1">
+    <span className="text-[10px] font-extrabold text-eyebrow uppercase tracking-[0.16em] mb-2">{cat.label}</span>
+    <h3 className="font-extrabold text-base leading-snug tracking-tight text-prose group-hover:text-accent transition-colors">
       {title}
     </h3>
-    <p className="text-prose-faint text-sm mt-2 line-clamp-2">{excerpt}</p>
-    {/* Foot row: date + action link */}
-    <div className="flex items-center justify-between mt-4 pt-4">
-      <span className="text-xs text-prose-faint">{date}</span>
-      <span className="text-xs text-accent-text font-medium">Read review →</span>
+    <p className="text-sm text-prose-muted mt-2 line-clamp-2">{excerpt}</p>
+    {/* The one hairline the card keeps */}
+    <div className="flex items-center justify-between mt-4 pt-3 border-t border-soft text-[11px] text-prose-faint">
+      <span className="text-sm font-semibold text-accent">Read review →</span>
+      <span>{date}</span>
     </div>
   </div>
 </Link>
@@ -591,10 +573,10 @@ Real pattern (see `ReviewCard.tsx` / `LibraryGuideCard.tsx`): semantic tokens on
 
 ### Featured (horizontal hero) card pattern
 - `flex flex-col md:flex-row` — image left 50%, content right
-- Image gets `Featured` orange pill badge top-left
-- Larger H3 (`text-2xl md:text-3xl font-black`)
+- One mark on the image at most: the Boss Approved badge, or a small square black tag — never an orange pill
+- Larger H3 — `font-black text-2xl md:text-4xl`
 - 3-line excerpt (`line-clamp-3`)
-- More generous padding (`p-8 md:p-10`)
+- Copy sits flush with the image edge on a phone; on desktop the text column takes a gap, not a box
 
 ### Filter pills
 ```jsx
@@ -664,8 +646,10 @@ must not be tinted.
 ## 8. Hero Patterns by Page
 
 ### Homepage (`app/(public)/page.tsx`)
-- Centered hero with hybrid radial+linear orange gradient.
-- Story-led narrative: Hero → Featured Review → Stats (inline-removed) → On Deck → Articles → Categories → More Reviews → Shop → Newsletter → Closing.
+- Desktop topic row under the masthead (`CategoryBar`, scrolls away), slim near-black brand band + ticker (§5), then the **featured review** package (cover story + the Latest list) on the first screen.
+- Then, in order: **Boss Approved gear** (the product board — rated 8+, "Paid $X", score), **Guides** (topic chips, the newest guide, ONE spotlight module on the deepest category), gift season (in window), **Tools** (three tiles), the newsletter, **On the bench**, the **About band** (portrait + the Creed + Meet the Boss / How I test — the closing dark moment), the shop strip.
+- Plain section labels: Featured review · Top picks · Guides · Tools · On the bench · About. No "Cover Story / Library / Creed" vocabulary on the page.
+- Column footer: Brand · Topics · Browse · Trust & Legal.
 
 ### Listing pages (`/reviews`, `/articles`, `/wishlist`, `/gear`)
 - Page header pattern: eyebrow + h1 + count line. No hero gradient.
@@ -682,15 +666,15 @@ must not be tinted.
 ### Detail pages (`/reviews/[slug]`, `/articles/[slug]`)
 - Article header with rating + meta (no border-b under it — spacing carries).
 - Hero image at `rounded-2xl`.
-- Pros/Cons cards in green-950/30 + red-950/30 backgrounds, no borders, `shadow-md`.
-- ProductCtaCard: `bg-gradient-to-br from-orange-950/60 to-gray-900`, `shadow-xl shadow-black/40`.
+- Title Montserrat `font-black`, body sans on bare canvas.
+- Verdict card, pros/cons, takeaways use the status-chip token recipe and `bg-surface-raised` panels — no hand-set shades, no shadows.
 - Author bio at the end uses shared `<AuthorBio />` component.
 - Related reviews/articles sidebar (xl breakpoint+) uses the standard card pattern.
 
 ### Static / legal pages (`/about`, `/terms`, `/privacy-policy`, etc.)
 - Inherit Forge Base palette globally.
 - No card system needed — text-led pages.
-- `prose prose-invert prose-orange max-w-none` for body copy.
+- `prose prose-orange max-w-none` for body copy — colours come from the role tokens (`.prose` in `app/globals.css`); no `prose-invert`.
 
 ---
 
@@ -745,6 +729,11 @@ A short history of key choices and why — useful when reconsidering trade-offs 
 | **On Deck section pulls 3 statuses** | testing/queued/considering blended with status pills so the section always renders 3 items balanced. |
 | **Inline mini-stats deleted from hero** | Trust pill at the top already carries the "no sponsors" signal. Repeating as numbers is redundant. |
 | **HeroCarousel deleted** | Featured Review section directly below was carrying the proof. Centered hero composition is more confident. |
+| **Light editorial canvas** (2026-10-08, replaces dark-first) | The operator's read: the site "does not look or feel like most other major sites." Root cause: the Vercel/Linear touchstones are software products; the content is a magazine, and every comparable publication runs light. White page + near-black chrome zones keeps the black/orange/white edge. `docs/light-editorial-plan.md`. |
+| **Black primary CTA** (2026-10-08) | Orange-on-white buttons shout; black buttons that go orange on hover cut. Orange fill returns inside dark zones via the `cta` tokens. |
+| **Borderless content cards · quiet eyebrows · 8px radius** (2026-10-08) | On a white canvas the 1px grey box, the orange kicker on every card, and 16–24px corners were the "component library" tells. Removed as a set after a live render against Wirecutter / Strategist / Gear Patrol. |
+| **One voice — every heading Montserrat** (2026-10-08) | A serif-content-headline pass (Fraunces on cards, rows, detail titles) was rendered live the same day and rejected by the operator as a mismatch with the bold, heavy brand. Headings are Montserrat black/extrabold everywhere; Fraunces is the Creed only. Editorial feel comes from layout and the black chrome, not a typeface. |
+| **Poster hero retired** (2026-10-08) | No comparable publication leads with a brand poster; the cover story is now the first screen. The slim brand band is a placeholder owed a dedicated pass. |
 
 ---
 
@@ -760,23 +749,28 @@ A short history of key choices and why — useful when reconsidering trade-offs 
 ## 12. Quick Reference (cheat sheet)
 
 ```
-Canvas (dark)    bg-background / #09090b            (token — not bg-gray-950)
-Card surface     bg-surface #18181b · raised bg-surface-raised #27272a
-Brand accent     text-accent / bg-accent = #E55A1A (Hot, on dark) · hover #CC5500
-Inline links     text-accent-text / text-eyebrow = #f48a4a
-Text             text-prose #f4f4f5 · text-prose-muted #d4d4d8 · text-prose-faint #a1a1aa
-Borders          border-soft #27272a · border-strong #3f3f46
+Canvas (light)   bg-background / #ffffff            (token — not bg-white)
+Chrome (zones)   data-theme="dark" + bg-chrome #09090b   (header, footer, nav, brand band, Creed)
+Card surface     bg-surface #ffffff · raised bg-surface-raised #fafafa · hover #f4f4f5
+Brand accent     text-accent / bg-accent = #CC5500 (page) · #E55A1A (zones) · hover #B85A14
+Inline links     text-accent-text = #B85A14 (page) · #f48a4a (zones)
+Eyebrow          text-eyebrow = muted grey (quiet by default)
+Primary button   buttonVariants('primary') → bg-cta (black on page, orange in zones)
+Text             text-prose #18181b · text-prose-muted #52525b · text-prose-faint #71717a
+Borders          border-soft #e4e4e7 · border-strong #d4d4d8
 
-Cards            bg-surface rounded-xl border border-soft shadow-lg shadow-black/5
-Cards hover      hover:border-copper hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1
-Empty state      bg-surface/40 rounded-xl (no dashed border)
+Content cards    borderless · image rounded-xl overflow-hidden · copy flush · one hairline footer
+Cards hover      group-hover:text-accent on the title + hover:-translate-y-0.5
+Utility cards    bg-surface rounded-xl border border-soft (components/ui/Card)
+Image marks      one at most — Approved badge, or rounded-sm bg-chrome text-white tag
+Empty state      bg-surface-raised rounded-xl (no dashed border)
 
-Hero H1          text-5xl (mobile) · text-7xl md:text-[5.5rem] (desktop) font-black leading-[0.98]
-Page H1          text-4xl md:text-5xl font-black tracking-tight
-Editorial H1     font-editorial-display font-semibold (PageHeader — Fraunces)
-Section H2       text-2xl font-black
+Brand-band H1    font-black text-4xl sm:text-5xl md:text-6xl leading-[0.98]   (Montserrat)
+Page H1          font-black text-4xl md:text-5xl leading-[1.0] tracking-tight  (Montserrat)
+Content H3       font-extrabold text-base leading-snug tracking-tight          (Montserrat)
+Section H2       font-black text-3xl md:text-4xl (EditorialHeader) · utility: SectionHeader
+Serif            Fraunces = the Creed ONLY · Source Serif = pull-quotes ONLY
 Eyebrow          text-[11px] text-eyebrow uppercase tracking-[0.2em] font-bold
-                 (prefix with em-dash: "— Just In")
 
 Section opener   3px vertical accent rule + eyebrow + h2  (use SectionHeader)
 Icons            inline SVG (CategoryIcon) — no emoji

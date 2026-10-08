@@ -1,3 +1,5 @@
+> **Superseded in part (2026-10-08).** The light-editorial canvas and its Phase 5 front page (`docs/light-editorial-plan.md` §5, brand-guide §8) replaced the section order, the poster hero, the serif headings, and the bordered cards described below. This file is kept for the primitives (`EditorialHeader`, `PageHeader`, `ScoreBlock`) and the history.
+
 # Home / Manifesto v2 — Design System Spec
 
 > **Status:** Phase 1 built on branch `design-v2` (2026-07-06). This is the build source-of-truth for the editorial "Manifesto" redesign, which applies **site-wide** for uniformity. The homepage is the *reference implementation*; every other page inherits these primitives.

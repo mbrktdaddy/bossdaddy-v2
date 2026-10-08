@@ -37,11 +37,12 @@ export default function LibraryGuideCard({
   return (
     <Link
       href={`/guides/${g.slug}`}
-      className={`group flex flex-col border border-soft rounded-2xl overflow-hidden hover:border-accent hover:-translate-y-0.5 transition-all duration-200 ${
+      /* Borderless — see LeadCard for why. The image carries its own radius. */
+      className={`group flex flex-col hover:-translate-y-0.5 transition-transform duration-200 ${
         on === 'surface' ? 'bg-background' : 'bg-surface'
       }`}
     >
-      <div className="relative h-40 bg-surface-raised shrink-0">
+      <div className="relative h-40 bg-surface-raised shrink-0 rounded-xl overflow-hidden">
         {g.image_url && (
           <Image
             src={g.image_url}
@@ -52,14 +53,14 @@ export default function LibraryGuideCard({
           />
         )}
       </div>
-      <div className="p-5 flex flex-col flex-1">
+      <div className="pt-4 flex flex-col flex-1">
         <div className="inline-flex items-center gap-1.5 mb-2">
           <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-          <span className="text-[10px] font-extrabold text-accent uppercase tracking-[0.16em]">
+          <span className="text-[10px] font-extrabold text-eyebrow uppercase tracking-[0.16em]">
             {cat?.label ?? 'Guide'}
           </span>
         </div>
-        <h3 className="text-[15px] font-extrabold text-prose leading-snug mb-2 group-hover:text-accent transition-colors line-clamp-2">
+        <h3 className="font-extrabold text-base text-prose leading-snug tracking-tight mb-2 group-hover:text-accent transition-colors line-clamp-2">
           {g.title}
         </h3>
         {g.excerpt && (

@@ -102,11 +102,11 @@ export default async function GiftsIndexPage() {
                     )}
                     <div className="absolute top-2 right-2">
                       {populated ? (
-                        <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-accent text-white">
+                        <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm bg-accent text-white">
                           Live
                         </span>
                       ) : (
-                        <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-chrome/80 text-prose-faint border border-soft backdrop-blur-sm">
+                        <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm bg-chrome/80 text-white/80 backdrop-blur-sm">
                           Coming Soon
                         </span>
                       )}

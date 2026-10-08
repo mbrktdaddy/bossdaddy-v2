@@ -70,7 +70,7 @@ export default function TopicBlock({
   const flip = index % 2 === 1
 
   return (
-    <section className="mt-12 pt-10 border-t border-soft">
+    <section className="mt-8 pt-8 border-t border-soft">
       {/* Stacks on mobile. Side by side, the link's `shrink-0 whitespace-nowrap` won
           the row and squeezed the title into a narrow ragged column — and with a long
           label ("View all in Grilling & Cooking") the nowrap could push past the
@@ -79,7 +79,7 @@ export default function TopicBlock({
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 sm:gap-4 mb-6">
         <div className="min-w-0">
           <span aria-hidden className="block h-px w-6 bg-accent mb-3" />
-          <h3 className="font-editorial-display font-semibold text-prose text-2xl md:text-[1.75rem] leading-tight tracking-tight text-balance">
+          <h3 className="font-black text-prose text-2xl md:text-[1.75rem] leading-tight tracking-tight text-balance">
             {label}
           </h3>
           {description && (
@@ -88,7 +88,7 @@ export default function TopicBlock({
         </div>
         <Link
           href={viewAllHref}
-          className="sm:shrink-0 sm:whitespace-nowrap text-[11px] sm:text-xs font-bold uppercase tracking-[0.08em] text-accent hover:text-accent-hover transition-colors"
+          className="sm:shrink-0 sm:whitespace-nowrap text-[11px] sm:text-xs font-bold uppercase tracking-[0.08em] text-prose hover:text-accent-text transition-colors"
         >
           {viewAllCount ? `View all ${viewAllCount}` : `View all in ${label}`} →
         </Link>

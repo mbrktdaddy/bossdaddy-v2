@@ -190,7 +190,7 @@ export default function ActivityMenu({ userId }: { userId: string }) {
       className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
         tab === key
           ? 'border-accent text-prose'
-          : 'border-transparent text-prose-muted hover:text-zinc-200'
+          : 'border-transparent text-prose-muted hover:text-prose'
       }`}
     >
       {label}
@@ -271,7 +271,7 @@ export default function ActivityMenu({ userId }: { userId: string }) {
                               {busyId === n.id ? '…' : 'Accept'}
                             </button>
                             <button type="button" onClick={() => act(n.id, 'decline')} disabled={busyId === n.id}
-                              className="px-3 py-1.5 bg-surface-hover hover:bg-zinc-600 disabled:opacity-40 text-zinc-200 text-xs font-semibold rounded-lg transition-colors">
+                              className="px-3 py-1.5 bg-surface-raised hover:bg-surface-hover disabled:opacity-40 text-prose text-xs font-semibold rounded-lg transition-colors">
                               Decline
                             </button>
                           </div>

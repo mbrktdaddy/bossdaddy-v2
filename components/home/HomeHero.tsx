@@ -1,69 +1,26 @@
-import { getImageProps } from 'next/image'
 import Link from 'next/link'
 import { BRAND, splitLastWord } from '@/lib/brand'
-import { buttonVariants } from '@/components/ui/Button'
 
-/* Homepage full-bleed Photo hero — Manifesto v2 (docs/home-manifesto-spec.md).
-   DESKTOP: wide workshop shot, subject right, manifesto in the dark-left column.
-   MOBILE: portrait shot, subject low — copy sits over top+bottom washes.
-   An "In Motion" activity strip sits directly BELOW the hero (latest tested ·
-   next on the bench · newest guide — real, DB-backed; momentum, not totals) so
-   it never covers the photo, and reads as the transition into the content.
-   Accent = Hot orange. Swap the placeholder art for the hero shoot later:
-   only the two <Image src> values change. */
+/* Homepage brand band — light-editorial pass, 2026-10-08.
+
+   This used to be an 80–88vh full-bleed photo poster: tagline, subhead, a
+   "Meet the Boss" button, and not one piece of content on the first screen.
+   No comparable publication (Wirecutter, Strategist, Gear Patrol, Fatherly)
+   leads with a brand poster; they lead with the lead story. So the band is now
+   SLIM: kicker · tagline · one-line subhead · a text link to /about · the
+   in-motion ticker. On a phone the cover story's image is inside the first
+   screen; on desktop the whole cover package is.
+
+   It stays a dark ZONE on purpose — one near-black band under the masthead is
+   the black/orange/white punctuation the brand keeps on the white canvas.
+
+   The hero photographs (public/images/hero-workshop*.webp) are no longer
+   rendered here. They are kept on disk for /about, which is where "Meet the
+   Boss" lands and where a full-bleed portrait earns its space. The homepage
+   og:image still points at the desktop crop (see generateMetadata). */
 
 const SUBHEAD =
-  'Field-tested gear, no-fluff guides, and free tools for men who show up every day. If it can’t survive my house, it doesn’t get a score.'
-
-/* Art-directed hero — two crops, but only ONE is ever downloaded.
-   `<picture>` + `<source media>` lets the browser's preload scanner pick the
-   right file per viewport at parse time, which is why this needs no
-   `<link rel="preload">` at all. `getImageProps` is Next's supported escape
-   hatch for art direction (`<Image>` can't emit `<source media>` itself) — we
-   still get the /_next/image srcset, AVIF/WebP negotiation and deviceSizes.
-
-   DO NOT go back to two <Image> elements toggled by `hidden sm:block`. That
-   cost us in both directions: the desktop crop had to drop `priority` (so it
-   went lazy while being the desktop LCP element), and the mobile crop's
-   `priority` emitted an unconditional preload that fired on desktop too, where
-   it is display:none — 86 KB fetched and thrown away. Both showed up as
-   next/image console warnings. Swapping in the real hero shoot = change the two
-   `src` values (and the intrinsic width/height) here, nothing else. */
-/* NB: `priority: true` is deliberately NOT used. On <Image> it does two jobs —
-   un-lazy the img AND emit <link rel="preload"> — but `getImageProps` only
-   returns the second as `meta.preload` for the caller to render, and a plain
-   preload link has no media query, so it would re-create the exact
-   fetch-both-crops bug this markup exists to kill. `loading`/`fetchPriority`
-   are set by hand instead; the preload scanner covers discovery. */
-const HERO_PRIORITY = {
-  alt: '',
-  sizes: '100vw',
-  loading: 'eager',
-  fetchPriority: 'high',
-} as const
-
-const { props: desktopHero } = getImageProps({
-  ...HERO_PRIORITY,
-  src: '/images/hero-workshop.webp',
-  width: 3072,
-  height: 1024,
-})
-
-const { props: mobileHero } = getImageProps({
-  ...HERO_PRIORITY,
-  src: '/images/hero-workshop-mobile.webp',
-  width: 1290,
-  height: 1935,
-})
-
-function Headline({ className = '' }: { className?: string }) {
-  const { lead, last } = splitLastWord(BRAND.tagline)
-  return (
-    <h1 className={`font-black tracking-tight leading-[0.98] text-prose ${className}`}>
-      {lead} <br className="sm:hidden" /><span className="text-accent">{last}</span>
-    </h1>
-  )
-}
+  'Field-tested gear, no-fluff guides, and free tools for men who show up every day.'
 
 const Arrow = () => (
   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
@@ -72,20 +29,20 @@ const Arrow = () => (
 )
 
 interface MotionItem {
-  /** Uppercase eyebrow — the activity verb ("Just tested", "On the bench"). */
+  /** Uppercase kicker — the activity verb ("Just tested", "On the bench"). */
   label: string
   /** The subject — product / bench item / guide title. */
   title: string
   href: string
 }
 
-/* "In Motion" band — pins to the hero's bottom edge. Shows recent ACTIVITY
-   (latest tested · next on the bench · newest guide), not inventory totals, so
-   it reads as alive/current rather than advertising small counts. Each item
-   links out. Falls back to the independence line if nothing's live yet. */
+/* "In Motion" row — recent ACTIVITY (latest tested · next on the bench · newest
+   guide), not inventory totals, so it reads as alive rather than advertising
+   small counts. Each item links out. Falls back to the independence line if
+   nothing's live yet. */
 function Ticker({ items }: { items: MotionItem[] }) {
   return (
-    <div className="border-b border-soft bg-chrome">
+    <div className="border-t border-soft">
       <div className="max-w-6xl mx-auto px-6">
         {items.length === 0 ? (
           <p className="py-4 text-[13px] font-semibold text-prose-muted inline-flex items-center gap-2.5">
@@ -101,7 +58,7 @@ function Ticker({ items }: { items: MotionItem[] }) {
               <li key={it.label} className="min-w-0 sm:flex-1">
                 <Link href={it.href} className="group flex items-center gap-2.5 min-w-0">
                   <span className="text-accent shrink-0" aria-hidden>●</span>
-                  <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.18em] text-eyebrow">{it.label}</span>
+                  <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.18em] text-accent-text">{it.label}</span>
                   <span className="min-w-0 truncate font-semibold text-prose group-hover:text-accent-text-soft transition-colors">{it.title}</span>
                 </Link>
               </li>
@@ -118,105 +75,37 @@ interface Props {
 }
 
 export default function HomeHero({ motion }: Props) {
+  const { lead, last } = splitLastWord(BRAND.tagline)
   return (
-    <>
-    <section className="relative min-h-[80svh] sm:min-h-[88vh] flex flex-col overflow-hidden border-b border-soft">
-      {/* Hero art. Desktop: wide crop, subject right, dark left for the text.
-          Mobile: portrait crop whose subject sits low in the source (top ~half
-          is empty wall), so we zoom + anchor to the bottom to lift the man into
-          the clear middle band of the split (between the top title and the
-          bottom CTAs). Tune `scale-*` to taste; re-crop for the real shoot.
-          One <img>, so the two treatments are responsive classes on it. */}
-      <picture>
-        <source media="(min-width: 640px)" srcSet={desktopHero.srcSet} sizes="100vw" />
-        <source media="(max-width: 639px)" srcSet={mobileHero.srcSet} sizes="100vw" />
-        <img
-          {...mobileHero}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover object-center scale-[1.35] origin-bottom -translate-y-[5%] sm:object-right sm:scale-100 sm:translate-y-0"
-        />
-      </picture>
-
-      {/* Desktop wash — anchors the left manifesto column on near-black */}
-      <div
-        className="absolute inset-0 hidden sm:block"
-        style={{
-          background:
-            'linear-gradient(90deg, #09090b 0%, rgba(9,9,11,0.92) 26%, rgba(9,9,11,0.55) 48%, rgba(9,9,11,0.1) 68%, transparent 82%)',
-        }}
-      />
-      {/* Hot glow, top-right, matches the mock */}
-      <div
-        className="absolute inset-0 hidden sm:block pointer-events-none"
-        style={{ background: 'radial-gradient(120% 90% at 74% 16%, rgba(229,90,26,0.20), transparent 55%)' }}
-      />
-      {/* Mobile washes — top (title) + bottom (subhead + CTA) */}
-      <div
-        className="absolute inset-x-0 top-0 h-[42%] sm:hidden"
-        style={{ background: 'linear-gradient(180deg, #09090b 0%, rgba(9,9,11,0.82) 36%, transparent 100%)' }}
-      />
-      <div
-        className="absolute inset-x-0 bottom-0 h-[58%] sm:hidden"
-        style={{ background: 'linear-gradient(0deg, rgba(9,9,11,0.97) 0%, rgba(9,9,11,0.9) 30%, rgba(9,9,11,0.4) 62%, transparent 100%)' }}
-      />
-
-      {/* ONE content tree for both layouts, so the page carries exactly one <h1>.
-          (It used to be two CSS-toggled blocks, each with its own Headline — two
-          H1s in the HTML.) Mobile — Option B: tighter split, title top / subhead +
-          CTA bottom (`justify-between`). Desktop: one bottom-anchored manifesto
-          block (`sm:block` drops the split). Only the CTA rows differ per layout;
-          duplicated links are harmless, a duplicated H1 is not. */}
-      <div className="relative z-10 flex flex-1 flex-col sm:flex-row sm:items-end">
-        <div className="max-w-6xl mx-auto w-full px-6 pt-10 pb-7 sm:pt-0 sm:pb-14 flex flex-1 flex-col justify-between sm:flex-none sm:block">
-          <div className="text-center sm:text-left sm:max-w-2xl">
-            {/* Positioning, not the credibility line. An eyebrow above the H1 is an
-                IDENTITY slot, and brand-guide §1.7 lists hero sections as
-                positioning's primary usage — while credibility is a *proof* line,
-                which now does its work mid-browse in the Library instead of
-                decorating the hero. Reads as identity-kicker → rallying cry.
-                `positioning` is stored without a period (so it can sit mid-sentence);
-                standing alone as a display line it takes one. */}
-            <p className="text-[11px] font-bold text-eyebrow uppercase tracking-[0.24em] mb-4 sm:tracking-[0.28em] sm:mb-5">
+    <section data-theme="dark" className="bg-chrome border-b border-soft">
+      <div className="max-w-6xl mx-auto px-6 pt-8 pb-7 sm:pt-10 sm:pb-9">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between sm:gap-10">
+          <div className="min-w-0">
+            {/* Positioning, not the credibility line — an eyebrow above the H1 is an
+                IDENTITY slot (brand-guide §1.7). `positioning` is stored without a
+                period so it can sit mid-sentence; standing alone it takes one. */}
+            <p className="text-[11px] font-bold text-accent-text uppercase tracking-[0.24em] sm:tracking-[0.28em]">
               {BRAND.positioning}.
             </p>
-            <Headline className="text-5xl sm:text-7xl md:text-[5.5rem]" />
-          </div>
-          <div className="text-center [text-shadow:0_1px_3px_rgba(0,0,0,0.7)] sm:text-left sm:[text-shadow:none] sm:max-w-2xl">
-            <p className="text-[15px] text-prose leading-[1.6] mb-6 sm:text-lg sm:text-prose-muted sm:max-w-xl sm:mt-6 sm:mb-0">
+            {/* The page's one <h1>. Montserrat stays here: the tagline is the
+                wordmark's voice, not a content headline. */}
+            <h1 className="font-black tracking-tight leading-[0.98] text-prose text-4xl sm:text-5xl md:text-6xl mt-3">
+              {lead} <br className="sm:hidden" /><span className="text-accent">{last}</span>
+            </h1>
+            <p className="text-[15px] sm:text-base text-prose-muted leading-[1.6] mt-3 max-w-xl">
               {SUBHEAD}
             </p>
-            {/* Mobile CTA */}
-            <div className="flex flex-col gap-2.5 sm:hidden">
-              <Link
-                href="/about"
-                className={buttonVariants({ size: 'lg', className: 'w-full' })}
-              >
-                Meet the Boss
-                <Arrow />
-              </Link>
-            </div>
-            {/* Desktop CTAs */}
-            <div className="hidden sm:flex flex-wrap gap-3 mt-8">
-              <Link
-                href="/reviews"
-                className={buttonVariants({ size: 'lg' })}
-              >
-                Browse the reviews
-                <Arrow />
-              </Link>
-              <Link
-                href="/about"
-                className="inline-flex items-center gap-2 border border-strong text-prose hover:border-accent hover:text-accent font-bold text-sm px-7 py-3.5 rounded-xl min-h-[48px] transition-colors"
-              >
-                Meet the Boss
-              </Link>
-            </div>
           </div>
+          <Link
+            href="/about"
+            className="inline-flex items-center gap-2 self-start sm:self-end shrink-0 text-sm font-bold text-prose hover:text-accent-text transition-colors min-h-[44px] sm:min-h-0"
+          >
+            Meet the Boss
+            <Arrow />
+          </Link>
         </div>
       </div>
-
+      <Ticker items={motion} />
     </section>
-    <Ticker items={motion} />
-    </>
   )
 }

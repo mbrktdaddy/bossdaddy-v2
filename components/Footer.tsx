@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { SOCIAL } from '@/lib/social'
 import { LABELS } from '@/lib/labels'
+import { CATEGORIES } from '@/lib/categories'
 import { BRAND } from '@/lib/brand'
 import { DownloadIcon } from '@/components/icons'
 import { isGiftSeason } from '@/lib/gift-occasions'
@@ -101,14 +102,16 @@ export default function Footer() {
   const browse = isGiftSeason() ? [...BROWSE, GIFTS_LINK] : BROWSE
 
   return (
-    <footer className="bg-chrome border-t-[3px] border-accent text-prose-muted">
+    <footer data-theme="dark" className="bg-chrome border-t-[3px] border-accent text-prose-muted">
       <div className="max-w-6xl mx-auto px-6 py-14">
 
         {/* Top: 3-column grid */}
-        <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr_1fr] gap-10 md:gap-12">
+        {/* Phones: the brand block full-width, then the three link columns two-up
+            (a single stacked column of 22 links ran ~1,100px). md+: four columns. */}
+        <div className="grid grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr_1fr] gap-x-6 gap-y-10 md:gap-12">
 
           {/* Brand */}
-          <div>
+          <div className="col-span-2 md:col-span-1">
             <Link href="/" className="inline-flex items-center gap-2.5 mb-4">
               <Image
                 src="/images/bd-logo-icon.png"
@@ -128,7 +131,7 @@ export default function Footer() {
             </p>
             <Link
               href="/install"
-              className="inline-flex items-center gap-2 mb-5 px-4 py-2.5 rounded-xl border border-strong hover:border-accent text-sm font-semibold text-zinc-200 hover:text-white transition-colors"
+              className="inline-flex items-center gap-2 mb-5 px-4 py-2.5 rounded-xl border border-strong hover:border-accent text-sm font-semibold text-prose-muted hover:text-prose transition-colors"
             >
               <DownloadIcon className="w-4 h-4 text-accent shrink-0" strokeWidth={1.8} />
               {LABELS.app.short}
@@ -136,6 +139,22 @@ export default function Footer() {
             <div className="flex items-center gap-1 -ml-1.5">
               {SOCIAL_ICONS.map((i) => <SocialIcon key={i.key} icon={i} />)}
             </div>
+          </div>
+
+          {/* Topics — the column footer every publication carries */}
+          <div>
+            <p className="text-[11px] font-extrabold text-prose-faint uppercase tracking-[0.18em] mb-4">
+              Topics
+            </p>
+            <ul className="flex flex-col gap-3">
+              {CATEGORIES.map((c) => (
+                <li key={c.slug}>
+                  <Link href={`/category/${c.slug}`} className="text-sm text-prose-muted hover:text-white transition-colors">
+                    {c.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Browse */}

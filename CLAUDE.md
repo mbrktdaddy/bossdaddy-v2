@@ -142,25 +142,29 @@ Tailwind v4 — no `tailwind.config.ts`. All tokens defined in `app/globals.css`
 
 > **Manifesto v2 (2026-07-06)** — the site-wide editorial redesign. The homepage (`app/(public)/page.tsx`) is the reference implementation; interior pages inherit its primitives (`EditorialHeader`, `PageHeader`, `ScoreBlock variant="ring"`) for uniformity. Full spec: [`docs/home-manifesto-spec.md`](docs/home-manifesto-spec.md). Rolling out incrementally on `master` (the old `design-v2` branch was absorbed 2026-07-06 — there is no unmerged design branch). Phases 1–2.5 done (homepage + every public listing + `/how-we-test`); Phase 3 = detail pages. Note: `@theme inline` does **not** emit `--color-*` as runtime CSS vars — in inline `style={{}}` use the raw `--bd-*` vars (e.g. `var(--bd-orange)`), not `var(--color-accent)`.
 
-**Dark-first** (`data-theme="dark"` on `<html>`): near-black canvas, charcoal surfaces, off-white text, Hot-orange accent. Prefer the semantic role tokens (`bg-surface`, `text-prose`, `text-accent`, `border-soft`…) over raw shades. Elevation comes from **borders + raised surfaces, not shadows** (black shadows vanish on near-black). Full reference: `docs/brand-guide.md` §2.
+**Light editorial canvas** (flipped 2026-10-08; `lib/canvas.ts` decides, `BD_CANVAS=dark` restores the dark page): white page, near-black text, hairline borders, orange as the only accent, **black primary CTAs**. The chrome — `Header`, `Footer`, `MobileBottomNav`, `StickyMobileCta`, `HomeHero` (the brand band), `InMotionTicker`, the homepage Creed, the `(dashboard)` layout — carries `data-theme="dark"` **on purpose**: those are zones, not drift. Prefer the semantic role tokens (`bg-surface`, `text-prose`, `text-accent`, `border-soft`…) over raw shades. **Content cards are borderless** (image + type + one hairline); utility surfaces keep border + raised tier; no drop-shadows on content. Full reference: `docs/brand-guide.md` §2; rationale + rollout: `docs/light-editorial-plan.md`.
+
+> **Mechanics.** `buttonVariants('primary')` uses the `cta` tokens (black on light, hot orange inside dark zones). `--color-eyebrow` is muted grey by default; opt into orange per element with `text-accent-text` (dark bands only). `.prose` follows the role tokens in both directions, so `prose-invert` is a no-op on public pages (the old guard is retired). The radius scale is tightened globally in `@theme inline` (cards and buttons 8px) — don't add per-component radius overrides. The homepage poster hero is retired: `HomeHero` is a slim dark brand band (placeholder composition, a dedicated pass is owed) and the cover story is the first screen. Palette, rationale, phases: `docs/light-editorial-plan.md`. The dark-first wording above is rewritten at the flip, not before.
 
 ### Color Palette (accent)
-| Token | Value | Use |
-|---|---|---|
-| `--color-accent` / `bg-accent` | `#E55A1A` | **Primary brand accent — Hot, on dark** (CTAs, active nav, buttons) |
-| `--color-accent-hover` | `#CC5500` | Button hover (core orange) |
-| `--color-accent-text` / `--color-eyebrow` | `#f48a4a` | Inline links / eyebrows on dark (orange-400) |
-| `orange-600 … 950` | earthy scale | Decorative tints/gradients only — prefer tokens for UI |
+| Token | Light page | Dark zones | Use |
+|---|---|---|---|
+| `--color-accent` / `bg-accent` | `#CC5500` | `#E55A1A` | **The brand accent** — orange fills, rules, score rings, active nav |
+| `--color-accent-hover` | `#B85A14` | `#CC5500` | Hover on orange fills |
+| `--color-accent-text` | `#B85A14` | `#f48a4a` | Inline links; the opt-in orange kicker (AA on white) |
+| `--color-eyebrow` | muted grey | muted grey | Eyebrows are quiet by default |
+| `bg-cta text-cta-ink` | black / white | `#E55A1A` / white | **Primary button** — via `buttonVariants('primary')` only |
+| `orange-600 … 950` | earthy scale | | Decorative tints/gradients only — prefer tokens for UI |
 
-Surface/text/border tokens: `--color-chrome` (masthead/footer, `#09090b`), `--color-surface` (`#18181b`), `--color-surface-raised` (`#27272a`), `--color-surface-hover` (`#3f3f46`), `--color-soft`/`--color-strong` (borders), `--color-prose`/`-muted`/`-faint` (text).
+Surface/text/border tokens (light page): `--color-chrome` (masthead/footer, always `#09090b`), `--color-surface` (`#ffffff`), `--color-surface-raised` (`#fafafa`), `--color-surface-hover` (`#f4f4f5`), `--color-soft` (`#e4e4e7`) / `--color-strong` (`#d4d4d8`) borders, `--color-prose` (`#18181b`) / `-muted` (`#52525b`) / `-faint` (`#71717a`) text. Dark-zone values live beside them in `app/globals.css`.
 
 ### Rules
-- **No vivid orange.** Never use Tailwind's default `#f97316`. The accent is `#E55A1A` (Hot, on dark) / `#CC5500` (core) — route through `text-accent`/`bg-accent`, not raw `orange-*`.
+- **No vivid orange.** Never use Tailwind's default `#f97316`. The accent is `#CC5500` (core, on the light page) / `#E55A1A` (Hot, inside dark zones) — route through `text-accent`/`bg-accent`, not raw `orange-*`.
 - **No per-category rainbow colors.** All categories use one unified treatment. Source of truth: `lib/categories.ts`.
-- **Section headings:** default `font-black` (Montserrat). **Manifesto v2 exception:** editorial section titles use `font-editorial-display font-semibold` (Fraunces) via `EditorialHeader` — scoped to editorial surfaces only (Cover Story, section headers, `PageHeader` H1s, guide titles, Creed). Never blanket-apply serif to cards/nav/UI. See `docs/brand-guide.md` §3.
+- **Headings — one voice:** every heading is Montserrat. `font-black` for the brand-band tagline, section titles (`EditorialHeader`), page H1s (`PageHeader`), review/guide titles, cover story and lead cards; `font-extrabold` for card, row, and list titles. Fraunces (`font-editorial-display`) is the mission Creed **only**; pull-quotes use the body serif. Serif headlines were tried 2026-10-08 and rejected as a mismatch with the heavy brand — don't re-propose them. See `docs/brand-guide.md` §3.
 - **Two section-header lanes (settled 2026-07-27):** `EditorialHeader` on editorial surfaces, `SectionHeader` (3px rule) on utility surfaces. **`/gear` is deliberately utility-styled** — don't convert it. **`/about` is exempt from `PageHeader`** — it's a story page with a bespoke two-line H1, a second reference impl like the homepage. Both are decisions, not drift.
-- **Card titles** in pillar/feature grids: `text-orange-500` — **except** the homepage Manifesto pillars ("In this issue"), which use `text-prose` (white) editorial titles by design.
-- **Eyebrow labels:** `text-xs text-orange-500 uppercase tracking-widest`.
+- **Card titles:** `text-prose`, `group-hover:text-accent`. Never orange at rest.
+- **Eyebrow labels:** `text-xs text-eyebrow uppercase tracking-widest` — muted grey by default; orange only via `text-accent-text` on dark bands.
 - **Mobile tap targets:** minimum 44px. Use `py-2.5` on pills, `py-3` on buttons/pagination/nav links.
 - **Filter tabs** on listing pages: `overflow-x-auto scrollbar-hide` — never `flex-wrap`.
 - **Horizontal scroll sections:** Never use `overflow-x-auto` inside a padded container — it bleeds to page level and breaks the layout. Always split into `sm:hidden` scroll strip (with `overflow-x-auto` + padding inside the scrollable div) and `hidden sm:grid` desktop grid. If inside a padded parent, use `-mx-{n}` to break out and restore padding inside.

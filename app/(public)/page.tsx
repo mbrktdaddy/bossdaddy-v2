@@ -1,21 +1,21 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Fragment, Suspense } from 'react'
+import { Suspense } from 'react'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { CATEGORIES, getCategoryBySlug } from '@/lib/categories'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import EditorialHeader from '@/components/EditorialHeader'
 import ScoreBlock from '@/components/ScoreBlock'
-import ContentRow from '@/components/ContentRow'
-import CredibilityBreak from '@/components/CredibilityBreak'
-import LeadCard from '@/components/LeadCard'
 import TopicBlock, { type TopicItem } from '@/components/TopicBlock'
 import LatestRail from '@/components/home/LatestRail'
-import { mergeByRecency, formatPublished, type LatestItem } from '@/lib/latest'
+import { mergeByRecency, type LatestItem } from '@/lib/latest'
 import BossToolsSection from '@/components/home/BossToolsSection'
+import TopPicksBoard, { type TopPick } from '@/components/home/TopPicksBoard'
+import AboutBand from '@/components/home/AboutBand'
 import EmailCaptureSection from '@/components/EmailCaptureSection'
 import HomeHero from '@/components/home/HomeHero'
+import BenchStrip from '@/components/BenchStrip'
 import { MerchStrip } from '@/components/MerchStrip'
 import OccasionTiles from '@/components/collections/OccasionTiles'
 import { getLiveSeasonalGifts, type SeasonalGift } from '@/lib/collections/seasonal-gifts'
@@ -67,66 +67,49 @@ export function generateMetadata(): Metadata {
   })
 }
 
+// ── Front page, Phase 5 (light-editorial plan §5, 2026-10-08) ─────────────────
+// Brand band → Featured review + Latest → Boss Approved board → Guides (chips,
+// lead, ONE spotlight module) → Gift season (in window) → Tools → Newsletter →
+// On the bench → About band → Shop strip. Plain section labels throughout.
+//
+// What this replaced, and why: the Library ran one lead+rows module per
+// category (seven of them, ~3,500px) and the page carried a second review
+// module ("Just dropped") below the tools. With 28 guides the homepage WAS the
+// archive, and the repetition read as a template. Major fronts show 12–20
+// strong items with hierarchy and let the category pages carry the rest.
+
 // Bench items are ranked testing → queued (mirrors BenchStrip).
 const BENCH_RANK: Record<string, number> = { testing: 0, queued: 1 }
 
-// Safety cap on the guide fetch, not a display budget — the Library shows one
-// block per category, so it needs every published guide, not a recency window.
-// See the query comment.
+// Safety cap on the guide fetch, not a display budget: the spotlight picks the
+// DEEPEST category, which needs every published guide to count, not a window.
 const GUIDE_FETCH_CAP = 200
 
-// ── Topic blocks — one per category, ungated, all the same shape ──────────────
-// Every category with at least one live guide gets a block, and every block is
-// the same module: lead card + up to 3 compact rows. Thin topics render with a
-// short (or empty) row column, which is an accepted, temporary state — the
-// categories are being filled in. Uniform shape is the point: this is the format
-// Grilling & Cooking has, applied everywhere, so the section reads as one system.
-//
-// Deliberately NOT depth-gated and deliberately NOT template-switched by count.
-// Both were tried; both trade the uniformity for a tidier empty state, and the
-// uniformity is what was asked for.
-const TOPIC_BLOCK_SIZE = 4 // 1 lead + 3 rows
+// The spotlight module is Template A: 1 lead + 3 rows.
+const TOPIC_BLOCK_SIZE = 4
 
-// Just Dropped runs the same "Template A" shape as the Library: 1 lead + 3 rows.
-// Four reviews, two weights. It used to be a flat 2/4-up card grid, which put two
-// same-weight card grids back to back (Vault, then this) — the page's flattest
-// stretch. Alternating shape between adjacent sections is the cadence mechanism.
-const DROPPED_SLOTS = 4
+// Boss Approved board — the product object, 2-up / 4-up. Two rows of four.
+const TOP_PICKS = 8
 
-// The Latest rail — a text-only recency index beside the Cover Story. No images, so
-// it costs one screen-third and works at any library size.
-//
-// 6, down from 7: at 7 the rail overshot the cover card badly enough to leave an
-// obvious void beside it. The columns now stretch to each other (see the section's
-// grid), so this no longer has to match the card's height exactly — but 6 keeps the
-// gap between their natural heights small, which stops the stretch from inflating
-// the cover photo to an odd aspect on wide screens.
+// The Latest rail beside the cover story: text-only recency index. Six keeps
+// the list and the cover package close to the same height on desktop.
 const LATEST_RAIL_SLOTS = 6
 
+interface TopicBlockData {
+  slug: string
+  label: string
+  /** Total live guides in the category — the spotlight is the deepest one. */
+  count: number
+  items: TopicItem[]
+}
+
 /**
- * One block per category with a live guide, in taxonomy order, all in the same
- * shape. No count thresholds, no per-topic variants: a category with one guide
- * gets the same module as a category with nine, just with fewer rows in it.
- *
- * Taxonomy order — not recency, not guide count — because with every category on
- * show the Library has become wayfinding, and the same reasoning that pins the
- * topic chips applies: an index that reshuffles between visits is worse than one
- * that's imperfectly ranked. It also keeps the blocks in step with the nav.
- *
- * The lead feature is NOT held back from the blocks. It used to be — the thinking
- * was that repeating it would headline the same guide twice — but the lead is the
- * newest guide site-wide, so excluding it silently docked one item from whichever
- * category happened to own it. Table Duty had 4 live guides and rendered 3, and the
- * hole moved between categories as new guides published, which reads as a bug.
- *
- * A block is an index of its category and has to be complete; the lead card is a
- * promotional slot above it. Editorial homepages (NYT, Guardian, Wirecutter) repeat
- * the hero in its section list for the same reason. Don't "fix" this by re-adding
- * the exclusion.
+ * One block per category with a live guide, in taxonomy order. The homepage
+ * now shows only ONE of these (the deepest category); /guides still renders
+ * them all. The lead feature is NOT held back from the blocks — a block is an
+ * index of its category and has to be complete.
  */
-function buildTopicBlocks(
-  guides: Guide[],
-): { slug: string; label: string; items: TopicItem[] }[] {
+function buildTopicBlocks(guides: Guide[]): TopicBlockData[] {
   const byTopic = new Map<string, Guide[]>()
   for (const g of guides) {
     if (!g.category) continue
@@ -141,6 +124,7 @@ function buildTopicBlocks(
     return [{
       slug: cat.slug,
       label: cat.label,
+      count: topicGuides.length,
       items: topicGuides.slice(0, TOPIC_BLOCK_SIZE).map((g) => ({
         id: g.id,
         href: `/guides/${g.slug}`,
@@ -156,9 +140,9 @@ function buildTopicBlocks(
 
 export default async function HomePage() {
   const supabase = createAnonClient()
-  // Bench items (statuses testing/queued) aren't publicly readable,
-  // so the "On the bench" motion item comes through the admin client — same as
-  // BenchStrip. It's read-only, no user data.
+  // Bench items (statuses testing/queued) aren't publicly readable, so the
+  // "On the bench" ticker item comes through the admin client — same as
+  // BenchStrip. Read-only, no user data.
   const admin = createAdminClient()
 
   const [
@@ -166,6 +150,7 @@ export default async function HomePage() {
     { data: topRatedOne },
     { data: recentRaw },
     { data: guidesRaw },
+    { data: topPicksRaw },
     { data: benchRaw },
     liveGifts,
   ] = await Promise.all([
@@ -180,72 +165,60 @@ export default async function HomePage() {
       .eq('status', 'approved').eq('is_visible', true)
       .order('rating', { ascending: false }).order('published_at', { ascending: false })
       .limit(1).maybeSingle(),
-    // Just Dropped is Template A now (one lead card + 3 rows), so it needs
-    // `excerpt` for the lead and one spare row: the Cover Story review is filtered
-    // out of this list, and without the spare a featured-and-recent review would
-    // leave the module a row short.
+    // Newest reviews: the ticker's "Just tested" + the Latest rail's review half.
     supabase
       .from('reviews')
       .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
       .eq('status', 'approved').eq('is_visible', true)
       .order('published_at', { ascending: false })
-      .limit(DROPPED_SLOTS + 1),
-    // Every published guide, not a recency window. The Library is a topic
-    // directory now — one block per category — so a slice of the newest N can't
-    // feed it: a thin topic's only guide is often nowhere near the front of the
-    // feed. This one query replaces both the old feed-window query AND the
-    // separate category-only query the topic chips used to need.
-    //
-    // Unbounded in spirit, capped for safety. At a few dozen guides this is a
-    // handful of KB behind an hourly revalidate; if the library ever approaches
-    // the cap, the Library section wants paging, not a bigger number.
+      .limit(LATEST_RAIL_SLOTS + 1),
+    // Every published guide: the chips, the lead, and the deepest-category
+    // spotlight all need the full set, not a recency window.
     supabase
       .from('guides')
       .select('id, slug, title, category, excerpt, image_url, published_at, reading_time_minutes')
       .eq('status', 'approved').eq('is_visible', true)
       .order('published_at', { ascending: false })
       .limit(GUIDE_FETCH_CAP),
+    // Boss Approved board: rated 8+ (the /gear rule), operator top picks first.
+    supabase
+      .from('reviews')
+      .select('id, slug, product_name, category, rating, image_url, price_paid_cents, is_top_pick')
+      .eq('status', 'approved').eq('is_visible', true)
+      .gte('rating', 8)
+      .order('is_top_pick', { ascending: false })
+      .order('rating', { ascending: false })
+      .order('published_at', { ascending: false })
+      .limit(TOP_PICKS),
     admin
       .from('products')
       .select('slug, title:name, status, priority')
       .in('status', ['testing', 'queued'])
       .order('priority', { ascending: false })
       .limit(20),
-    // Gift-season band (Phase I-6): only queried inside the window — the rest
-    // of the year the homepage doesn't pay for a shelf it won't render.
+    // Gift-season band (Phase I-6): only queried inside the window.
     isGiftSeason() ? getLiveSeasonalGifts(supabase) : Promise.resolve([] as SeasonalGift[]),
   ])
 
   const featured: Review | null = (featuredHero as Review | null) ?? (topRatedOne as Review | null)
   const recent: Review[] = (recentRaw ?? []) as Review[]
   const guideFeed: Guide[] = (guidesRaw ?? []) as Guide[]
+  const topPicks: TopPick[] = (topPicksRaw ?? []) as TopPick[]
 
-  // `guideFeed` is every published guide, newest first. The lead feature is the
-  // newest of them, and it also still appears in its own topic block below — see
-  // buildTopicBlocks. The hero's "New guide" motion item reads the same guide.
+  // The lead guide is the newest site-wide; it also appears in its own topic
+  // block when that block is the spotlight — a block is a complete index.
   const leadGuide = guideFeed[0] ?? null
   const topicBlocks = buildTopicBlocks(guideFeed)
+  // ONE spotlight: the deepest category (ties → taxonomy order, stable sort).
+  const spotlight = topicBlocks.slice().sort((a, b) => b.count - a.count)[0] ?? null
 
-  // Just Dropped leads with the newest review the Cover Story isn't already
-  // showing. `featured` is the admin-flagged review and falls back to top-rated —
-  // either can also be the most recent, and without this filter both sections
-  // would open on the same product.
-  const droppedFeed = recent.filter((r) => r.id !== featured?.id).slice(0, DROPPED_SLOTS)
-  const droppedLead = droppedFeed[0] ?? null
-  const droppedRows = droppedFeed.slice(1)
-
-  // The Latest rail — one merged recency index across both content types, which is
-  // the one question no other section on this page answers (every other section is
-  // scoped to a single type). The merge rule lives in lib/latest.ts, shared with
-  // /explore's fuller index so the two surfaces can't disagree on order.
+  // The Latest rail — one merged recency index across both content types.
   const latestItems: LatestItem[] = mergeByRecency<LatestItem>([
     ...guideFeed.map((g) => ({ kind: 'Guide', title: g.title, href: `/guides/${g.slug}`, published_at: g.published_at })),
     ...recent.map((r) => ({ kind: 'Review', title: r.product_name, href: `/reviews/${r.slug}`, published_at: r.published_at })),
   ], LATEST_RAIL_SLOTS)
 
-  // ── Hero "In Motion" band — real recent activity, not inventory counts.
-  // Shows momentum (latest tested · next on the bench · newest guide) so the
-  // band reads as alive rather than advertising small totals. Each links out.
+  // Brand-band ticker — real recent activity, not inventory counts.
   const benchItem =
     (benchRaw ?? [])
       .slice()
@@ -255,18 +228,8 @@ export default async function HomePage() {
   if (benchItem) motion.push({ label: 'On the bench', title: benchItem.title, href: `/bench/${benchItem.slug}` })
   if (leadGuide) motion.push({ label: 'New guide', title: leadGuide.title, href: `/guides/${leadGuide.slug}` })
 
-  // Topic chips — every category holding at least one live guide, in
-  // lib/categories.ts taxonomy order so the row matches the nav and doesn't
-  // reshuffle between visits. Now derived from the full guide fetch: it's every
-  // published guide, so it answers "which categories are live" directly and the
-  // separate category-only query it used to need is gone.
-  //
-  // Labels come from the taxonomy, never the row data, so a category rename can't
-  // leave a stale label stranded here.
-  //
-  // These stay even though every category also has a block below: the chips are the
-  // section's jump index, and Wirecutter likewise repeats subcategory links in every
-  // module head. Cheap, and they sit above the fold of the section.
+  // Topic chips — every category holding at least one live guide, in taxonomy
+  // order so the row matches the nav and doesn't reshuffle between visits.
   const liveTopics = new Set(
     guideFeed.map((g) => g.category).filter((c): c is string => Boolean(c)),
   )
@@ -280,91 +243,79 @@ export default async function HomePage() {
         <CodeRedirect />
       </Suspense>
 
-      {/* ── HERO — full-bleed photo cover + live-number ticker ─────────────── */}
+      {/* ── BRAND BAND + ticker (placeholder composition — a dedicated pass is owed) */}
       <HomeHero motion={motion} />
 
-      {/* ── COVER STORY — the featured review as an editorial split ────────── */}
+      {/* ── FEATURED REVIEW — the lead package: cover story + the Latest list ── */}
       {featured && (
         <section className="border-b border-soft">
-          <div className="max-w-6xl mx-auto px-6 py-12 md:py-16">
+          <div className="max-w-6xl mx-auto px-6 py-8 md:py-12">
             <EditorialHeader
-              eyebrow="The cover story"
+              eyebrow="Featured review"
               title="This week’s verdict"
               right={{ label: 'All reviews', href: '/reviews' }}
             />
-            {/* Cover story + The Latest rail. Wirecutter's front page runs three
-                simultaneous registers above the fold (text recency index, lead
-                editorial, deals); this is the two-register version of that idea —
-                one heavy image package plus a text-only index, so the first screen
-                offers ~8 entry points instead of 1. */}
-            {/* NO `items-start` here. The rail's natural height and the cover card's
-                natural height never match — the card's depends on the review's
-                excerpt length — so a fixed rail length can't square them. Letting
-                both columns stretch to the row means the taller one sets the height
-                and the shorter one grows into it, instead of leaving a void under
-                whichever came up short. */}
+            {/* Both columns stretch to the row so neither leaves a void under the
+                other; the copy centres in whatever height the row settles on. */}
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8 lg:gap-10">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 border border-soft rounded-3xl overflow-hidden bg-surface">
-              <div className="relative min-h-[280px] lg:min-h-[440px] bg-surface-raised">
-                {featured.image_url && (
-                  <Image
-                    src={featured.image_url}
-                    alt={featured.product_name}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 420px"
-                    className="object-cover"
-                    // Desktop LCP (Next dev warns without it). Eager, not `priority`:
-                    // a preload here would compete with HomeHero's art-directed
-                    // hero on mobile — see the note in components/home/HomeHero.tsx.
-                    loading="eager"
-                  />
-                )}
-                <span className="absolute top-4 left-4 bg-accent text-white text-[10px] font-black uppercase tracking-[0.1em] px-3 py-1.5 rounded-full">
-                  Editor’s Pick
-                </span>
-                {(featured.rating ?? 0) >= 8 && (
-                  <div className="absolute top-4 right-4">
-                    <BossApprovedBadge size="sm" variant="card" />
-                  </div>
-                )}
-              </div>
-              {/* `justify-center` so the copy sits centred when the card stretches to
-                  match a taller rail, rather than top-aligned over its own gap. */}
-              <div className="p-8 lg:p-11 flex flex-col justify-center">
-                {(() => {
-                  const cat = getCategoryBySlug(featured.category)
-                  return (
-                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-prose-faint">
-                      {cat?.label ?? featured.category}
-                    </p>
-                  )
-                })()}
-                <h3 className="font-editorial-display font-semibold text-prose text-3xl md:text-4xl leading-[1.1] tracking-tight mt-3">
-                  {featured.product_name}
-                </h3>
-                {featured.excerpt && (
-                  <p className="text-base md:text-lg text-prose-muted leading-[1.75] mt-5">
-                    {featured.excerpt.length > 240 ? featured.excerpt.slice(0, 240).trimEnd() + '…' : featured.excerpt}
-                  </p>
-                )}
-                <div className="flex items-center gap-4 mt-7">
-                  <ScoreBlock rating={featured.rating} variant="ring" size="lg" />
-                  <div className="min-w-0">
-                    <div className="text-sm font-black text-prose leading-tight">Boss Daddy score</div>
-                    <div className="text-xs text-prose-faint mt-0.5">Field-tested, bought with my own money</div>
-                  </div>
+              {/* Borderless: the photo and the type carry the package. One mark on
+                  the image — the Approved badge — and no "Editor's Pick" pill. */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-8">
+                <div className="relative min-h-[280px] lg:min-h-[440px] bg-surface-raised rounded-2xl overflow-hidden">
+                  {featured.image_url && (
+                    <Image
+                      src={featured.image_url}
+                      alt={featured.product_name}
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 420px"
+                      className="object-cover"
+                      // Desktop LCP. Eager, not `priority`: the brand band has no image
+                      // now, so nothing competes, but a preload here would still fire
+                      // on phones where this sits below the fold.
+                      loading="eager"
+                    />
+                  )}
+                  {(featured.rating ?? 0) >= 8 && (
+                    <div className="absolute top-4 right-4">
+                      <BossApprovedBadge size="sm" variant="card" />
+                    </div>
+                  )}
                 </div>
-                <Link
-                  href={`/reviews/${featured.slug}`}
-                  className={buttonVariants({ size: 'lg', className: 'mt-8 self-start' })}
-                >
-                  Read the full verdict
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </Link>
+                <div className="py-6 lg:py-4 lg:pr-6 flex flex-col justify-center">
+                  {(() => {
+                    const cat = getCategoryBySlug(featured.category)
+                    return (
+                      <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-prose-faint">
+                        {cat?.label ?? featured.category}
+                      </p>
+                    )
+                  })()}
+                  <h3 className="font-black text-prose text-3xl md:text-4xl leading-[1.05] tracking-tight mt-3">
+                    {featured.product_name}
+                  </h3>
+                  {featured.excerpt && (
+                    <p className="text-base md:text-lg text-prose-muted leading-[1.75] mt-5">
+                      {featured.excerpt.length > 240 ? featured.excerpt.slice(0, 240).trimEnd() + '…' : featured.excerpt}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-4 mt-7">
+                    <ScoreBlock rating={featured.rating} variant="ring" size="lg" />
+                    <div className="min-w-0">
+                      <div className="text-sm font-black text-prose leading-tight">Boss Daddy score</div>
+                      <div className="text-xs text-prose-faint mt-0.5">Field-tested, bought with my own money</div>
+                    </div>
+                  </div>
+                  <Link
+                    href={`/reviews/${featured.slug}`}
+                    className={buttonVariants({ size: 'lg', className: 'mt-8 self-start' })}
+                  >
+                    Read the full verdict
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </Link>
+                </div>
               </div>
-            </div>
 
               <LatestRail items={latestItems} />
             </div>
@@ -372,19 +323,28 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ── THE LIBRARY — the guides footprint (the growth engine), organised as a
-            topic directory: chips, a lead feature, then one module per category.
-            Was a recency feed (lead + 3-up grid + compact rows); the per-category
-            structure replaced it so every topic has a shelf of its own.
-            Eyebrow says "Every topic", not "Latest guides" — the section is no
-            longer recency-ordered below the lead, and the old eyebrow would be
-            writing a cheque the layout stopped cashing. ────────────────────── */}
+      {/* ── BOSS APPROVED — the product board. Self-suppresses at zero. ─────── */}
+      {topPicks.length > 0 && (
+        <section className="border-b border-soft">
+          <div className="max-w-6xl mx-auto px-6 py-8 md:py-12">
+            <EditorialHeader
+              eyebrow="Top picks"
+              title="Boss Approved gear"
+              right={{ label: 'All gear', href: '/gear' }}
+            />
+            <TopPicksBoard items={topPicks} />
+          </div>
+        </section>
+      )}
+
+      {/* ── GUIDES — chips (wayfinding), the newest guide, ONE spotlight module.
+            /guides carries the full per-category directory. ────────────────── */}
       {leadGuide && (
         <section className="border-b border-soft">
-          <div className="max-w-6xl mx-auto px-6 py-12 md:py-16">
+          <div className="max-w-6xl mx-auto px-6 py-8 md:py-12">
             <EditorialHeader
-              eyebrow="Every topic"
-              title="The Library"
+              eyebrow="By topic"
+              title="Guides"
               right={{ label: 'All guides', href: '/guides' }}
             />
 
@@ -408,12 +368,12 @@ export default async function HomePage() {
               </div>
             )}
 
-            {/* Lead feature guide */}
+            {/* Lead guide — the newest, site-wide. Borderless split. */}
             <Link
               href={`/guides/${leadGuide.slug}`}
-              className="group grid grid-cols-1 md:grid-cols-2 rounded-2xl border border-soft bg-surface overflow-hidden hover:border-accent transition-colors"
+              className="group grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-8"
             >
-              <div className="relative aspect-[16/10] md:aspect-auto md:min-h-[300px] bg-surface-raised">
+              <div className="relative aspect-[16/10] md:aspect-auto md:min-h-[300px] bg-surface-raised rounded-2xl overflow-hidden">
                 {leadGuide.image_url && (
                   <Image
                     src={leadGuide.image_url}
@@ -423,16 +383,13 @@ export default async function HomePage() {
                     className="object-cover group-hover:scale-[1.03] transition-transform duration-300"
                   />
                 )}
-                <span className="absolute top-4 left-4 bg-accent text-white text-[10px] font-black uppercase tracking-[0.1em] px-3 py-1.5 rounded-full">
-                  Featured guide
-                </span>
               </div>
-              <div className="p-7 lg:p-10 flex flex-col justify-center">
+              <div className="pt-5 md:pt-0 md:pr-6 flex flex-col justify-center">
                 <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-eyebrow">
                   {(leadGuide.category ? getCategoryBySlug(leadGuide.category)?.label : null) ?? leadGuide.category ?? 'Guide'}
                   {leadGuide.reading_time_minutes ? ` · ${leadGuide.reading_time_minutes} min read` : ''}
                 </p>
-                <h3 className="font-editorial-display font-semibold text-prose text-2xl md:text-3xl leading-[1.15] tracking-tight mt-3">
+                <h3 className="font-black text-prose text-2xl md:text-3xl leading-[1.1] tracking-tight mt-3">
                   {leadGuide.title}
                 </h3>
                 {leadGuide.excerpt && (
@@ -447,44 +404,25 @@ export default async function HomePage() {
               </div>
             </Link>
 
-            {/* One module per category, in taxonomy order, every one the same shape.
-                No general "everything else" list any more: with every category on
-                show, a mixed remainder list would just be the same guides again.
-                CredibilityBreak lands at the halfway mark — it self-centres as
-                categories are added, and it's the only thing in ~3,500px of repeated
-                module that isn't a bordered card. */}
-            {topicBlocks.map((b, i) => (
-              <Fragment key={b.slug}>
-                {i === Math.ceil(topicBlocks.length / 2) && <CredibilityBreak />}
-                <TopicBlock
-                  index={i}
-                  label={b.label}
-                  viewAllHref={`/guides/category/${b.slug}`}
-                  items={b.items}
-                  cta="Read the guide"
-                  on="background"
-                />
-              </Fragment>
-            ))}
+            {/* ONE spotlight module — the deepest category. */}
+            {spotlight && (
+              <TopicBlock
+                index={0}
+                label={spotlight.label}
+                viewAllHref={`/guides/category/${spotlight.slug}`}
+                items={spotlight.items}
+                cta="Read the guide"
+                on="background"
+              />
+            )}
           </div>
         </section>
       )}
 
-      {/* ── BOSS TOOLS — moved up from below the Creed. It's the only image-free
-            content section, so it's the page's natural mid-scroll breath: the
-            Library above and the Vault below are both image grids, and everything
-            from the hero to Just Dropped used to run five image sections deep
-            before anything interrupted. Wirecutter's Finder sits in this same
-            slot for the same reason. ──────────────────────────────────────── */}
-      <BossToolsSection />
-
-      {/* ── GIFT SEASON — 1 Oct–26 Dec only (`isGiftSeason()`), and only when a
-            seasonal guide is actually live: self-suppresses at zero, no "coming
-            soon" on the front page. Same slot the "From the vault" strip held
-            until Phase I-4; an intent band, not a format band. ───────────── */}
+      {/* ── GIFT SEASON — 1 Oct–26 Dec only, and only with a live guide. ──── */}
       {liveGifts.length > 0 && (
         <section className="border-b border-soft">
-          <div className="max-w-6xl mx-auto px-6 py-12 md:py-16">
+          <div className="max-w-6xl mx-auto px-6 py-8 md:py-12">
             <EditorialHeader
               eyebrow="Gift season"
               title="Gifts that earn their keep"
@@ -495,76 +433,28 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ── JUST DROPPED — Template A: one lead + 3 rows. Shape alternates
-            between adjacent sections: the Boss Tools band above is a tile grid,
-            so this is a lead card plus rows, not another equal-weight grid. ── */}
-      {droppedLead && (
-        <section className="border-b border-soft">
-          <div className="max-w-6xl mx-auto px-6 py-12 md:py-16">
-            <EditorialHeader
-              eyebrow="Latest reviews"
-              title="Just dropped"
-              right={{ label: 'All reviews', href: '/reviews' }}
-            />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
-              <LeadCard
-                href={`/reviews/${droppedLead.slug}`}
-                title={droppedLead.product_name}
-                imageUrl={droppedLead.image_url}
-                eyebrow={getCategoryBySlug(droppedLead.category)?.label ?? droppedLead.category}
-                badge="Newest"
-                excerpt={droppedLead.excerpt}
-                meta={formatPublished(droppedLead.published_at)}
-                cta="Read the review"
-                on="background"
-              />
-              {droppedRows.length > 0 && (
-                <div className="flex flex-col lg:-mt-5">
-                  {droppedRows.map((r, i) => (
-                    <ContentRow
-                      key={r.id}
-                      href={`/reviews/${r.slug}`}
-                      eyebrow={getCategoryBySlug(r.category)?.label ?? r.category}
-                      headline={r.product_name}
-                      excerpt={r.excerpt}
-                      meta={formatPublished(r.published_at)}
-                      imageUrl={r.image_url}
-                      isLast={i === droppedRows.length - 1}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-      )}
+      {/* ── TOOLS — three tiles, the image-free breath mid-page ─────────────── */}
+      <BossToolsSection />
 
-      {/* ── THE CREED — mission statement, the dark editorial moment ───────── */}
-      <section className="bg-chrome border-b border-soft">
-        <div className="max-w-3xl mx-auto px-6 py-16 md:py-24 text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-eyebrow mb-6">The mission</p>
-          <blockquote className="font-editorial-display font-semibold text-prose text-2xl md:text-4xl leading-[1.3] tracking-tight">
-            {BRAND.creed}
-            {/* `block` (not a <br/> or a wrap-dependent trick) so the payoff line
-                lands on its own line at EVERY breakpoint — inline, it wrapped into
-                the creed and read as an accident. The preceding {' '} is gone on
-                purpose: a block element needs no inline separator, and leaving it
-                would trail a stray space at the end of the creed. */}
-            <span className="block text-accent mt-3 md:mt-4">That&rsquo;s {BRAND.positioning}.</span>
-          </blockquote>
-          <p className="mt-8 text-xs font-bold uppercase tracking-[0.16em] text-prose-faint">— The Boss</p>
+      {/* ── NEWSLETTER — inline, mid-page, where major fronts put it ────────── */}
+      <EmailCaptureSection />
+
+      {/* ── ON THE BENCH — what's being tested now; self-suppresses at zero ── */}
+      <section className="border-b border-soft">
+        <div className="max-w-6xl mx-auto px-6 py-8 md:py-12">
+          <BenchStrip heading="On the bench" ctaText="See the bench" />
         </div>
       </section>
 
-      {/* ── MERCH STRIP — slim "Made by Boss Daddy" band → /shop ── */}
+      {/* ── ABOUT — the closing dark band: portrait + the Creed + two links ── */}
+      <AboutBand />
+
+      {/* ── SHOP STRIP — slim "Made by Boss Daddy" band → /shop ─────────────── */}
       <section className="border-b border-soft">
         <div className="max-w-6xl mx-auto px-6">
           <MerchStrip />
         </div>
       </section>
-
-      {/* ── EMAIL CAPTURE — newsletter conversion ─────────────────────────── */}
-      <EmailCaptureSection />
     </>
   )
 }

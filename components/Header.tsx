@@ -179,9 +179,9 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMobileOpen(false); setCatOpen(false); setSearchOpen(false); setMobileSearchOpen(false); setUserMenuOpen(false) }, [pathname])
 
-  // Masthead floats transparent over the homepage hero, then solidifies once
-  // the user scrolls past the top. Only the homepage has a full-bleed hero
-  // behind the nav — every other page is solid from the top.
+  // Homepage masthead: flush with the hero at the top (solid chrome, no hairline),
+  // then gains the blur + border once the user scrolls. Every other page is
+  // bordered from the top.
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24)
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -191,14 +191,19 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
 
   const isBrowseActive = BROWSE_PREFIXES.some((p) => pathname.startsWith(p))
 
-  // Homepage masthead floats transparent over the hero until the user scrolls.
-  const transparent = pathname === '/' && !scrolled
+  // Flush = SOLID chrome with no border, NOT transparent. The header is sticky
+  // in normal flow, so it sits ABOVE the hero, not over it — a transparent
+  // header shows the page canvas behind it, which on the dark canvas happened
+  // to match the hero and on the light canvas is white (the "white until you
+  // scroll" bug, 2026-10-08). Solid chrome reads identically on both.
+  const flush = pathname === '/' && !scrolled
 
   return (
     <header
+      data-theme="dark" /* chrome ZONE — stays near-black on the light canvas (lib/canvas.ts) */
       className={`sticky top-0 z-50 transition-colors duration-300 ${
-        transparent
-          ? 'bg-transparent border-b border-transparent'
+        flush
+          ? 'bg-chrome border-b border-transparent'
           : 'bg-chrome/95 backdrop-blur-md border-b border-soft'
       }`}
     >

@@ -308,7 +308,7 @@ export default function NotificationFeed({ initial }: { initial: NotificationRow
       {/* Sticky on mobile so the bar is reachable without scrolling back up a long
           feed; it breaks out of the page's px-4 and restores the padding inside. */}
       {selectMode && (
-        <div className="sticky bottom-0 -mx-4 border-t border-strong bg-chrome/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-xl sm:border">
+        <div data-theme="dark" className="sticky bottom-0 -mx-4 border-t border-strong bg-chrome/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-xl sm:border">
           <div className="flex items-center justify-between gap-3">
             <span className="text-xs text-prose-muted">
               {chosen.length} selected

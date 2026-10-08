@@ -12,7 +12,9 @@ const BASE =
   'disabled:opacity-50 disabled:cursor-not-allowed'
 
 const VARIANT = {
-  primary:   'bg-accent hover:bg-accent-hover text-white',
+  // `cta` tokens, not `accent`: black with orange hover on the light canvas,
+  // hot-orange fill inside dark zones (app/globals.css). Only consumer.
+  primary:   'bg-cta hover:bg-cta-hover text-cta-ink',
   secondary: 'bg-surface-raised hover:bg-surface border border-soft text-prose-muted hover:text-prose',
   ghost:     'text-prose-muted hover:text-prose hover:bg-surface-raised',
   danger:    'bg-danger-bg hover:bg-danger-bg/80 border border-danger-line text-danger-ink',
