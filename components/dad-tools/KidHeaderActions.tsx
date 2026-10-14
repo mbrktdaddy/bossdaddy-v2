@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation'
 import { deleteKid, type Kid } from '@/lib/dad-tools/kid-actions'
 import KidProfileForm from './KidProfileForm'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { Modal } from '@/components/ui/Modal'
 
 interface Props {
   kid: Kid
@@ -63,14 +64,7 @@ export default function KidHeaderActions({ kid }: Props) {
       {/* Edit form — fixed overlay so it doesn't compress the header's flex
           row when expanded. Backdrop closes the panel on click. */}
       {editing && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm"
-          onClick={() => setEditing(false)}
-        >
-          <div
-            className="bg-surface border border-soft rounded-2xl p-5 sm:p-6 w-full max-w-md shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <Modal onClose={() => setEditing(false)} label="Edit kid" className="p-5 sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <Eyebrow>
                 Edit kid
@@ -91,8 +85,7 @@ export default function KidHeaderActions({ kid }: Props) {
               onSuccess={() => setEditing(false)}
               onCancel={() => setEditing(false)}
             />
-          </div>
-        </div>
+        </Modal>
       )}
     </>
   )

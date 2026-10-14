@@ -89,9 +89,9 @@ export default function InstallPrompt() {
 
   return (
     <div
-      role="region"
+      data-theme="dark" role="region"
       aria-label="Install Boss Daddy"
-      className="md:hidden fixed left-3 right-3 z-40 bg-surface-raised border border-strong rounded-xl p-3 flex items-center gap-3 transition-[bottom] duration-300"
+      className="md:hidden fixed left-3 right-3 z-40 bg-chrome border-t-4 border-accent rounded-xl p-3 flex items-center gap-3 transition-[bottom] duration-300"
       // Follows the tab strip: above it normally, at the screen edge while it's scrolled away.
       style={{ bottom: navHidden ? 'calc(env(safe-area-inset-bottom) + 0.75rem)' : `calc(${MOBILE_BOTTOM_NAV_OFFSET} + 1.25rem)` }}
     >

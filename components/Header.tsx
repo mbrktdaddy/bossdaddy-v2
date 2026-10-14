@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { CATEGORIES } from '@/lib/categories'
 import { LABELS } from '@/lib/labels'
+import { BRAND } from '@/lib/brand'
 import CartIcon from '@/components/CartIcon'
 import CategoryIcon from '@/components/CategoryIcon'
 import AccountMenu, { useAuthUser } from '@/components/AccountMenu'
@@ -128,7 +129,6 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
   const mobileSearchRef = useRef<HTMLInputElement>(null)
   const [mobileCatOpen, setMobileCat] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
   const pathname    = usePathname()
   const browseRef   = useRef<HTMLDivElement>(null)
   const searchRef   = useRef<HTMLInputElement>(null)
@@ -179,33 +179,18 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMobileOpen(false); setCatOpen(false); setSearchOpen(false); setMobileSearchOpen(false); setUserMenuOpen(false) }, [pathname])
 
-  // Homepage masthead: flush with the hero at the top (solid chrome, no hairline),
-  // then gains the blur + border once the user scrolls. Every other page is
-  // bordered from the top.
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    onScroll()
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
   const isBrowseActive = BROWSE_PREFIXES.some((p) => pathname.startsWith(p))
-
-  // Flush = SOLID chrome with no border, NOT transparent. The header is sticky
-  // in normal flow, so it sits ABOVE the hero, not over it — a transparent
-  // header shows the page canvas behind it, which on the dark canvas happened
-  // to match the hero and on the light canvas is white (the "white until you
-  // scroll" bug, 2026-10-08). Solid chrome reads identically on both.
-  const flush = pathname === '/' && !scrolled
 
   return (
     <header
       data-theme="dark" /* chrome ZONE — stays near-black on the light canvas (lib/canvas.ts) */
-      className={`sticky top-0 z-50 transition-colors duration-300 ${
-        flush
-          ? 'bg-chrome border-b border-transparent'
-          : 'bg-chrome/95 backdrop-blur-md border-b border-soft'
-      }`}
+      /* Hard Goods (2026-10-14): SOLID chrome at every scroll position with the
+         4px orange rule under it — the DeWalt / STIHL stripe, the brand's edge on
+         the white page. The old "flush at the top, blur + hairline once scrolled"
+         state and its scroll listener went with the dark brand band it was
+         matching (brand-guide §5/§10). Solid, never transparent: the header is
+         sticky in normal flow, so a transparent one would show the page canvas. */
+      className="sticky top-0 z-50 bg-chrome border-b-4 border-accent"
     >
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 
@@ -219,9 +204,15 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
             priority
             className="h-9 w-9 object-contain"
           />
-          <span>
-            <span className="text-accent-brand">BOSS</span>
-            <span className="text-prose"> DADDY</span>
+          <span className="flex flex-col leading-none">
+            <span className="text-prose">BOSS DADDY</span>
+            {/* The folded masthead (A2, 2026-10-14; brand-guide §5): on a phone the
+                tagline is a small orange signature under the wordmark — one band,
+                not two. On lg+ it moves into the orange brand band under the
+                masthead (HomeHero) and this line hides. */}
+            <span className="lg:hidden mt-1 text-[9px] font-extrabold uppercase tracking-[0.22em] text-accent">
+              {BRAND.tagline}
+            </span>
           </span>
         </Link>
 

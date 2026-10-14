@@ -9,7 +9,7 @@ import PageHeader from '@/components/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ogImageUrl, OG_SITE, TWITTER_HANDLE } from '@/lib/og'
 import type { Metadata } from 'next'
-import { Card } from '@/components/ui/Card'
+import EditorialHeader from '@/components/EditorialHeader'
 import { ChevronDownIcon } from '@/components/icons'
 
 export const revalidate = 300
@@ -120,7 +120,7 @@ export default async function BenchPage() {
           <EmptyState title="Nothing on the bench yet. Check back soon." />
         ) : (
           <div className="space-y-12">
-            {sections.map(({ key, heading, sub, icon }) => {
+            {sections.map(({ key, heading, sub }) => {
               const sectionItems = groups[key]
               if (sectionItems.length === 0) return null
 
@@ -132,14 +132,14 @@ export default async function BenchPage() {
                       <span className="text-xs text-prose-faint">({sectionItems.length})</span>
                       <ChevronDownIcon className="w-3 h-3 text-prose-faint group-open:rotate-180 transition-transform ml-1" strokeWidth={2} />
                     </summary>
-                    <div className="space-y-3">
+                    <div className="border-t border-soft">
                       {sectionItems.map((item) => (
-                        <Card key={item.id} className="p-4">
+                        <div key={item.id} className="py-4 border-b border-soft">
                           <p className="text-sm font-semibold text-prose-muted">{item.title}</p>
                           {item.skip_reason && (
                             <p className="text-xs text-prose-faint mt-1">{item.skip_reason}</p>
                           )}
-                        </Card>
+                        </div>
                       ))}
                     </div>
                   </details>
@@ -148,14 +148,8 @@ export default async function BenchPage() {
 
               return (
                 <section key={key}>
-                  <div className="mb-5">
-                    <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                    <h2 className="text-lg font-black inline-flex items-center">
-                      {icon && <span className="text-accent-text-soft">{icon}</span>}
-                      {heading}
-                    </h2>
-                    <p className="text-xs text-prose-muted mt-0.5">{sub}</p>
-                  </div>
+                  <EditorialHeader eyebrow="The pipeline" title={heading} />
+                  <p className="-mt-3 mb-5 text-xs text-prose-muted">{sub}</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {sectionItems.map((item) => (
                       <WishlistCard key={item.id} item={item} />

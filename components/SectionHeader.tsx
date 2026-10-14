@@ -1,5 +1,14 @@
 import Link from 'next/link'
+import { buttonVariants } from '@/components/ui/Button'
 
+/**
+ * The UTILITY-lane section header (two lanes, settled 2026-07-27): a 3px
+ * orange vertical rule + uppercase tracked label (+ optional heading / sub).
+ * /gear, dashboard, admin, compact panels. Editorial surfaces use
+ * `EditorialHeader`. Hard Goods (2026-10-14): the right action is the outline
+ * button at every width, matching `EditorialHeader`; the rule stays orange so
+ * the two lanes stay tellable.
+ */
 interface Props {
   label: string
   heading?: string
@@ -30,9 +39,9 @@ export default function SectionHeader({ label, heading, sub, right }: Props) {
         <Link
           href={right.href}
           title={right.title}
-          className="hidden sm:inline-flex items-center text-xs text-accent hover:text-accent-hover transition-colors uppercase tracking-[0.08em] font-bold shrink-0 whitespace-nowrap"
+          className={buttonVariants({ variant: 'outline', size: 'sm', className: 'shrink-0 whitespace-nowrap' })}
         >
-          {right.label} →
+          {right.label}
         </Link>
       )}
     </div>

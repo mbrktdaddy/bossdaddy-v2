@@ -3,6 +3,8 @@ import type { Product } from '@/lib/products'
 import { getStoreLabel } from '@/lib/products'
 import RatingScore from './RatingScore'
 import { buttonVariants } from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
+import { LabelBlock } from '@/components/ui/LabelBlock'
 
 interface Props {
   product: Pick<Product, 'slug' | 'name' | 'affiliate_url' | 'non_affiliate_url' | 'image_url' | 'store' | 'custom_store_name'>
@@ -22,14 +24,16 @@ export default function ProductCtaCard({ product, rating, variant = 'prominent' 
   const heading = variant === 'final' ? 'Ready to grab one?' : 'Get This Product'
 
   return (
-    <aside
+    <Card
+      as="aside"
+      tone="chrome"
       data-product-cta
-      className="my-8 bg-accent-tint border-l-[3px] border-accent border-y border-r border-soft rounded-xl p-5 sm:p-6"
+      className="my-8 p-5 sm:p-6"
       aria-label="Product offer"
     >
-      <p className="text-[11px] font-black text-accent uppercase tracking-[0.22em] mb-4">
+      <LabelBlock as="p" className="mb-4">
         {heading}
-      </p>
+      </LabelBlock>
 
       <div className="flex flex-col sm:flex-row gap-5 sm:items-center">
         {product.image_url && (
@@ -69,6 +73,6 @@ export default function ProductCtaCard({ product, rating, variant = 'prominent' 
           )}
         </div>
       </div>
-    </aside>
+    </Card>
   )
 }

@@ -17,6 +17,7 @@ import KidProfileForm from './KidProfileForm'
 import CaptureMomentForm from './CaptureMomentForm'
 import MomentsFeed from './MomentsFeed'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   kid: Kid
@@ -60,7 +61,7 @@ export default function KidCard({ kid, initialMoments, momentCount, isAuthentica
   const photoSrc = familyPhotoSrc(kid)
 
   return (
-    <article className="bg-surface border border-faint rounded-2xl p-4 sm:p-5 space-y-4">
+    <Card as="article" tone="chrome" className="p-4 sm:p-5 space-y-4">
 
       {/* Header: avatar + name + age */}
       <header className="flex items-start gap-3">
@@ -73,7 +74,7 @@ export default function KidCard({ kid, initialMoments, momentCount, isAuthentica
           />
         ) : (
           <div
-            className="h-12 w-12 rounded-full bg-accent/15 text-accent flex items-center justify-center text-lg font-black shrink-0"
+            className="h-12 w-12 rounded-full bg-chrome text-white flex items-center justify-center text-lg font-black shrink-0"
             aria-hidden="true"
           >
             {initial}
@@ -197,7 +198,7 @@ export default function KidCard({ kid, initialMoments, momentCount, isAuthentica
         </div>
       )}
 
-    </article>
+    </Card>
   )
 }
 

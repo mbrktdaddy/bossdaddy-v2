@@ -1,5 +1,5 @@
 import type { FAQ } from '@/lib/seo/faq-ld'
-import { Eyebrow } from '@/components/ui/Eyebrow'
+import SectionHeader from '@/components/SectionHeader'
 
 export type { FAQ }
 
@@ -26,22 +26,18 @@ export default function FAQAccordion({
 
   return (
     <section id={id} aria-label={heading} className={className}>
-      <div className="mb-4">
-        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-        <Eyebrow className="mb-1">FAQ</Eyebrow>
-        <h2 className="text-2xl font-black text-prose leading-tight">{heading}</h2>
-      </div>
+      <SectionHeader label="FAQ" heading={heading} />
 
       <div className="border-y border-soft divide-y divide-soft">
         {faqs.map((faq, idx) => (
           <details key={`${idx}-${faq.question.slice(0, 30)}`} className="group">
             <summary className="flex items-center justify-between gap-4 cursor-pointer list-none py-4 min-h-[56px] [&::-webkit-details-marker]:hidden">
-              <span className="text-sm sm:text-base font-bold text-prose leading-snug group-hover:text-accent-text-soft transition-colors">
+              <span className="text-sm sm:text-base font-bold text-prose leading-snug group-hover:text-accent transition-colors">
                 {faq.question}
               </span>
               <span
                 aria-hidden
-                className="shrink-0 grid place-items-center w-7 h-7 rounded-full border border-soft text-accent-text-soft transition-transform duration-200 group-open:rotate-45"
+                className="shrink-0 grid place-items-center w-7 h-7 rounded-md bg-chrome text-white transition-transform duration-200 group-open:rotate-45"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />

@@ -28,6 +28,8 @@ import ToolTiles from '@/components/dad-tools/ToolTiles'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
+import { Badge } from '@/components/ui/Badge'
+import SectionHeader from '@/components/SectionHeader'
 import { ChevronRightIcon } from '@/components/icons'
 
 export function generateMetadata(): Metadata {
@@ -208,7 +210,7 @@ export default async function ToolsHubPage() {
             <h1 className="text-3xl sm:text-5xl font-black text-prose leading-[1.05] tracking-tight">
               {LABELS.tools.hub.heroTitle}
             </h1>
-            <h2 className="text-3xl sm:text-5xl font-black text-accent leading-[1.05] tracking-tight mb-5">
+            <h2 className="text-3xl sm:text-5xl font-black text-prose leading-[1.05] tracking-tight mb-5">
               {LABELS.tools.hub.heroTitleSecond}
             </h2>
             <p className="text-base sm:text-lg text-prose-muted leading-[1.7] max-w-2xl">
@@ -281,8 +283,9 @@ export default async function ToolsHubPage() {
                 <Link
                   key={kid.id}
                   href={`/tools/family/${kid.id}`}
-                  className="flex items-center gap-3 px-3 py-3 bg-surface border border-soft hover:border-accent-border/60 rounded-xl transition-colors group min-h-[44px]"
+                  className="block group"
                 >
+                  <Card tone="chrome" className="flex items-center gap-3 px-3 py-3 min-h-[44px]">
                   {familyPhotoSrc(kid) ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -292,7 +295,7 @@ export default async function ToolsHubPage() {
                     />
                   ) : (
                     <div
-                      className="h-10 w-10 rounded-full bg-accent/15 text-accent flex items-center justify-center text-base font-black shrink-0"
+                      className="h-10 w-10 rounded-full bg-chrome text-white flex items-center justify-center text-base font-black shrink-0"
                       aria-hidden="true"
                     >
                       {initial}
@@ -307,6 +310,7 @@ export default async function ToolsHubPage() {
                     </p>
                   </div>
                   <ChevronRightIcon className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 transition-colors" strokeWidth={2} />
+                  </Card>
                 </Link>
               )
             })}
@@ -315,7 +319,7 @@ export default async function ToolsHubPage() {
           <div className="mt-5 flex items-center justify-between gap-3 flex-wrap">
             <Link
               href={manageKidsHref}
-              className="text-sm font-semibold text-accent hover:underline"
+              className={buttonVariants({ variant: 'outline', size: 'sm' })}
             >
               {LABELS.tools.hub.manageKidsCta}
             </Link>
@@ -325,10 +329,10 @@ export default async function ToolsHubPage() {
 
       {/* ── NO KIDS YET — short prompt to add one ───────────────────────── */}
       {user && kids.length === 0 && (
-        <Card as="section" tone="raised" className="mb-10 sm:mb-14 p-6 sm:p-8">
-          <Eyebrow className="mb-3">
+        <section data-theme="dark" className="mb-10 sm:mb-14 p-6 sm:p-8 bg-chrome text-prose border-t-4 border-accent rounded-xl">
+          <p className="text-xs text-accent-text uppercase tracking-widest mb-3">
             Get started
-          </Eyebrow>
+          </p>
           <p className="text-lg sm:text-xl font-black text-prose leading-snug mb-2">
             Add a family member to unlock personalized numbers.
           </p>
@@ -342,7 +346,7 @@ export default async function ToolsHubPage() {
           >
             {LABELS.tools.hub.addFirstKidCta}
           </Link>
-        </Card>
+        </section>
       )}
 
       {/* ── WHAT YOU'RE CARRYING ─────────────────────────────────────────────
@@ -383,9 +387,7 @@ export default async function ToolsHubPage() {
           already has them as the launcher row at the top of the page. */}
       {isSignedIn ? null : (
         <section className="mb-10 sm:mb-14">
-          <h2 className="mb-5 text-xl sm:text-2xl font-black text-prose tracking-tight">
-            The tools
-          </h2>
+          <SectionHeader label="The tools" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {MAIN_SPOKES.map((spoke) => renderSpoke(spoke, 'main'))}
           </div>
@@ -400,9 +402,7 @@ export default async function ToolsHubPage() {
           instead of surprising. The "More coming" placeholder retired when the money
           path filled the section (2026-09-24). */}
       <section>
-        <h2 className="mb-5 text-xl sm:text-2xl font-black text-prose tracking-tight">
-          Calculators
-        </h2>
+        <SectionHeader label="Calculators" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {REFERENCE_TOOLS.map((spoke) => renderSpoke(spoke, 'reference'))}
         </div>
@@ -420,20 +420,15 @@ function renderSpoke(spoke: SpokeCard, weight: 'main' | 'reference') {
   const titleSize = isReference
     ? 'text-lg sm:text-xl'
     : 'text-xl sm:text-2xl'
-  const cardBase = isReference
-    ? 'bg-surface-sunken border border-soft hover:border-accent-border/60'
-    : 'bg-surface border border-soft hover:border-accent'
 
-  const inner = (
+  const body = (
     <>
       <div className="flex items-baseline justify-between gap-2 mb-2">
         <Eyebrow>
           {spoke.role}
         </Eyebrow>
         {spoke.badge && (
-          <span className="text-[10px] uppercase tracking-widest font-semibold text-accent-text border border-accent/30 rounded-full px-2 py-0.5">
-            {spoke.badge}
-          </span>
+          <Badge tone="neutral" size="sm">{spoke.badge}</Badge>
         )}
       </div>
       <p className={`${titleSize} font-black text-prose group-hover:text-accent transition-colors leading-tight mb-2`}>
@@ -451,24 +446,19 @@ function renderSpoke(spoke: SpokeCard, weight: 'main' | 'reference') {
 
   if (spoke.href) {
     return (
-      <Link
-        key={spoke.title}
-        href={spoke.href}
-        className={`block ${cardBase} rounded-2xl p-6 transition-colors group`}
-      >
-        {inner}
+      <Link key={spoke.title} href={spoke.href} className="block group">
+        <Card tone="chrome" className="h-full p-6">{body}</Card>
       </Link>
     )
   }
   const dimmed = !!spoke.badge
   return (
-    <div
+    <Card
       key={spoke.title}
-      className={`block bg-surface-raised border border-soft rounded-2xl p-6 ${
-        dimmed ? 'opacity-70 cursor-not-allowed' : ''
-      }`}
+      tone="chrome"
+      className={`p-6 ${dimmed ? 'opacity-60 cursor-not-allowed' : ''}`}
     >
-      {inner}
-    </div>
+      {body}
+    </Card>
   )
 }

@@ -27,7 +27,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       {/* Gift season (1 Oct – 26 Dec) is decided here on the server — one
           helper, one answer — and handed to the client Header as a prop. */}
       <Header giftSeason={isGiftSeason()} />
-      {/* Desktop topic row — scrolls away with the page while the masthead sticks. */}
+      {/* Topics row (every width since Hard Goods) — scrolls away with the page while the masthead sticks. */}
       <HideOnImmersive><CategoryBar /></HideOnImmersive>
       <PublicMain>{children}</PublicMain>
       <HideOnImmersive><Footer /></HideOnImmersive>

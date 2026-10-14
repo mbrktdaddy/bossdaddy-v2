@@ -7,6 +7,8 @@ import { createAnonClient } from '@/lib/supabase/anon'
 import { NewsletterCard } from '@/components/NewsletterCard'
 import { BRAND } from '@/lib/brand'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import EditorialHeader from '@/components/EditorialHeader'
+import { PILL_BASE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 import { MerchStrip } from '@/components/MerchStrip'
 
 export const revalidate = 3600
@@ -50,7 +52,7 @@ export default async function AboutPage() {
  <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6">
  The Dad Who Thought
  <br />
- <span className="text-accent-text">He&apos;d Never Be One.</span>
+ <span className="text-prose">He&apos;d Never Be One.</span>
  </h1>
  <p className="text-prose-muted text-lg leading-relaxed max-w-2xl">
  After separating from my ex-wife of 13 years — who was unable to have children — and
@@ -61,10 +63,10 @@ export default async function AboutPage() {
  </div>
 
  {/* Stats */}
- <div className="grid grid-cols-3 gap-4 mb-16">
+ <div data-theme="dark" className="bg-chrome text-prose border-t-4 border-accent rounded-xl grid grid-cols-3 gap-4 p-6 mb-16">
  {STATS.map((s) => (
- <div key={s.label} className="bg-surface border border-soft rounded-xl p-5 text-center">
- <p className="text-3xl font-black text-accent-text mb-1">{s.value}</p>
+ <div key={s.label} className="text-center">
+ <p className="text-3xl font-black text-accent mb-1">{s.value}</p>
  <p className="text-xs text-prose-faint uppercase tracking-wide">{s.label}</p>
  </div>
  ))}
@@ -169,18 +171,16 @@ export default async function AboutPage() {
 
  {/* Pillars */}
  <div className="mb-16">
- <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
- <Eyebrow className="mb-2">Categories</Eyebrow>
- <h2 className="text-2xl font-black mb-2">What We Cover</h2>
+ <EditorialHeader eyebrow="Categories" title="What We Cover" />
  <p className="text-prose-faint text-sm mb-6">Reviews, guides, and picks across everything modern dads actually love.</p>
- <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+ <div className="flex flex-wrap gap-2">
  {CATEGORIES.map((cat) => (
  <Link
  key={cat.slug}
  href={`/category/${cat.slug}`}
- className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium bg-surface border border-soft text-prose-muted hover:bg-surface-raised hover:text-prose hover:border-accent-border/40 transition-colors"
+ className={`${PILL_BASE} ${PILL_INACTIVE} gap-2`}
  >
- <CategoryIcon slug={cat.slug} className="w-4 h-4 text-accent-text shrink-0" />
+ <CategoryIcon slug={cat.slug} className="w-4 h-4 shrink-0" />
  <span className="truncate">{cat.label}</span>
  </Link>
  ))}

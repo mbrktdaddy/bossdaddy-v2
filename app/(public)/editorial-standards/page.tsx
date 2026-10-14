@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { buildSocialMetadata } from '@/lib/og'
 import Link from 'next/link'
+import PageHeader from '@/components/PageHeader'
 
 export function generateMetadata(): Metadata {
  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
@@ -19,9 +20,9 @@ const CONTACT_EMAIL = 'hello@bossdaddylife.com'
 
 export default function EditorialStandardsPage() {
  return (
- <div className="max-w-3xl mx-auto px-6 py-16">
-
- <h1 className="text-3xl font-black mb-2">Editorial Standards</h1>
+ <div>
+ <PageHeader eyebrow="Standards" title="Editorial Standards" />
+ <div className="max-w-3xl mx-auto px-6 pt-8 pb-16">
  <p className="text-prose-faint text-sm mb-10">Last updated: {LAST_UPDATED}</p>
 
  <div className="prose max-w-none
@@ -188,6 +189,7 @@ export default function EditorialStandardsPage() {
  </Link>
  </div>
 
+ </div>
  </div>
  )
 }

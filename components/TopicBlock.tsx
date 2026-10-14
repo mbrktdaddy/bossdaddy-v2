@@ -1,6 +1,6 @@
-import Link from 'next/link'
 import ContentRow from '@/components/ContentRow'
 import LeadCard from '@/components/LeadCard'
+import EditorialHeader from '@/components/EditorialHeader'
 
 /** One entry in a topic block, already normalized by the caller. */
 export interface TopicItem {
@@ -71,28 +71,14 @@ export default function TopicBlock({
 
   return (
     <section className="mt-8 pt-8 border-t border-soft">
-      {/* Stacks on mobile. Side by side, the link's `shrink-0 whitespace-nowrap` won
-          the row and squeezed the title into a narrow ragged column — and with a long
-          label ("View all in Grilling & Cooking") the nowrap could push past the
-          viewport. On mobile the title gets the full width and the link sits under it,
-          free to wrap; `sm` and up is the original single row. */}
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 sm:gap-4 mb-6">
-        <div className="min-w-0">
-          <span aria-hidden className="block h-px w-6 bg-accent mb-3" />
-          <h3 className="font-black text-prose text-2xl md:text-[1.75rem] leading-tight tracking-tight text-balance">
-            {label}
-          </h3>
-          {description && (
-            <p className="text-sm text-prose-faint mt-1.5 line-clamp-1">{description}</p>
-          )}
-        </div>
-        <Link
-          href={viewAllHref}
-          className="sm:shrink-0 sm:whitespace-nowrap text-[11px] sm:text-xs font-bold uppercase tracking-[0.08em] text-prose hover:text-accent-text transition-colors"
-        >
-          {viewAllCount ? `View all ${viewAllCount}` : `View all in ${label}`} →
-        </Link>
-      </div>
+      <EditorialHeader
+        eyebrow="Topic"
+        title={label}
+        right={{ label: viewAllCount ? `View all ${viewAllCount}` : `View all in ${label}`, href: viewAllHref }}
+      />
+      {description && (
+        <p className="-mt-3 mb-6 text-sm text-prose-faint line-clamp-1">{description}</p>
+      )}
 
       {/* Ordering is done with `lg:order-*`, NOT by reordering the children. DOM
           order stays lead-then-rows so the single-column mobile stack always opens

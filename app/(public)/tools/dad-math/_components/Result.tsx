@@ -1,6 +1,8 @@
 'use client'
 
 import Link from 'next/link'
+import { Badge, type BadgeTone } from '@/components/ui/Badge'
+import { buttonVariants } from '@/components/ui/Button'
 import { LABELS } from '@/lib/labels'
 import {
   fmtUsd,
@@ -29,33 +31,21 @@ interface Props {
   lifeInsurance?: Record<string, number>
 }
 
-// Verdict → background + border accent. Keeps the visual signal aligned
-// with the copy without using rainbow colors (per project rule: no
-// per-category color zoo — single accent palette).
-function verdictTone(verdict: DadMathResult['verdict']): {
-  border: string
-  badge:  string
-} {
+// Verdict → Badge tone. Keeps the visual signal aligned with the copy:
+// good = brand accent, behind = warn, real gap = danger, quiet states = muted.
+function verdictTone(verdict: DadMathResult['verdict']): BadgeTone {
   switch (verdict) {
     case 'locked_in':
     case 'surplus':
     case 'on_track':
-      return {
-        border: 'border-accent/40',
-        badge:  'bg-accent-tint text-accent-text-soft border border-accent-border/60',
-      }
+      return 'accent'
     case 'behind':
+      return 'warn'
     case 'real_gap':
-      return {
-        border: 'border-strong',
-        badge:  'bg-surface-raised text-prose-muted border border-strong',
-      }
+      return 'danger'
     case 'just_starting':
     case 'past_18':
-      return {
-        border: 'border-soft',
-        badge:  'bg-surface-raised text-prose-faint border border-soft',
-      }
+      return 'muted'
   }
 }
 
@@ -126,13 +116,12 @@ export default function Result({ result, name, targetBy18, kidId, monthlyContrib
 
   return (
     <section
-      className={`bg-surface rounded-2xl p-6 sm:p-8 space-y-5 border-2 ${tone.border}`}
+      data-theme="dark"
+      className="bg-chrome text-prose border-t-4 border-accent rounded-xl p-6 sm:p-8 space-y-5"
     >
       {/* Tagline pill — short, share-friendly verdict */}
       <div>
-        <span className={`inline-block text-xs uppercase tracking-widest font-semibold px-3 py-1 rounded-full ${tone.badge}`}>
-          {tagline}
-        </span>
+        <Badge tone={tone}>{tagline}</Badge>
       </div>
 
       {/* Boss Daddy headline */}
@@ -171,10 +160,9 @@ export default function Result({ result, name, targetBy18, kidId, monthlyContrib
         <div className="border-t border-soft pt-4">
           <Link
             href={habitHref}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:text-accent-hover transition-colors"
+            className={buttonVariants({ variant: 'outline', size: 'sm' })}
           >
             Make this a habit
-            <span aria-hidden>→</span>
           </Link>
           <p className="text-xs text-prose-faint mt-1 leading-snug">
             Set up a {habitAmount > 0 ? `${fmtUsd(habitAmount)}/month` : 'monthly'}{' '}
@@ -189,10 +177,9 @@ export default function Result({ result, name, targetBy18, kidId, monthlyContrib
         <div className="border-t border-soft pt-4">
           <Link
             href={`/tools/life-insurance${toQuery({ ...lifeInsurance, edu: targetBy18 })}`}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:text-accent-hover transition-colors"
+            className={buttonVariants({ variant: 'outline', size: 'sm' })}
           >
             Use this in {LABELS.tools.lifeInsurance.full}
-            <span aria-hidden>→</span>
           </Link>
           <p className="text-xs text-prose-faint mt-1 leading-snug">
             Your {fmtUsd(targetBy18)} target becomes the education line, so college is still paid for if you aren’t here to pay it.

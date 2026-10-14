@@ -54,9 +54,7 @@ export default function GoalCard({ data, kidName, isOwner = false, unreadNotes =
                 than in the stats row below — this is the one thing on the card
                 that's about a person rather than a number. */}
             {unreadNotes > 0 && (
-              <span className="text-xs px-2 py-0.5 rounded-full font-bold border border-strong bg-surface-raised text-accent-text shrink-0">
-                {unreadNotes} new
-              </span>
+              <Badge tone="accent" size="sm">{unreadNotes} new</Badge>
             )}
           </div>
         </div>

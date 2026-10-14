@@ -82,3 +82,7 @@ What is zoned dark on purpose (carries `data-theme="dark"`): `Header`, `Footer`,
 ## 7. Comparables used for the review
 
 Wirecutter, The Strategist, Gear Patrol, Fatherly, Men's Health, Uncrate, Huckberry, Art of Manliness, Everyday Carry. Content volume at decision time: 28 reviews, 28 guides (7 of 10 categories), 4 collections — the structure in §5 is sized to look full at that volume and scale without re-architecting.
+
+## 8. Design commit — Hard Goods, folded masthead (2026-10-14)
+
+Five days after the flip the light page felt "plain" on its utility surfaces (tools, bench, author). The four-step design-commit process (brief → three directions on real content in `docs/mockups/directions/` → comparison → recommendation) ended in **A Hard Goods / A2 folded masthead**: the light canvas stays and gets LOUD through solid black and orange blocks in the utility lane; on a phone the tagline folds into the masthead and the topics row takes the band's slot. The lock list, the flexible items, and the moratorium (90 days or 12 pieces, whichever is later; reader-evidence reopen only) live in `docs/brand-guide.md` §10.1 — that section is the authority from here. This plan is the history of how the canvas got light; the "brand band pass" it left open closed with A2.

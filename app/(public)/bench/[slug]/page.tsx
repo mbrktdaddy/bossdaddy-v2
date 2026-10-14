@@ -16,6 +16,7 @@ import { buildSocialMetadata, toAbsoluteUrl } from '@/lib/og'
 import type { Metadata } from 'next'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
+import SectionHeader from '@/components/SectionHeader'
 import { buttonVariants } from '@/components/ui/Button'
 import { productClaims, type ProductAcquisition, type ProductStatus } from '@/lib/products'
 import { withWeeks, type TestingNote } from '@/lib/products/testing-notes'
@@ -153,8 +154,7 @@ export default async function BenchDetailPage({ params }: Props) {
           )}
 
           {isSkipped && wishlistItem.skip_reason && (
-            <Card tone="raised" className="p-4 mb-4">
-              <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
+            <Card tone="chrome" className="p-4 mb-4">
               <p className="text-xs font-black uppercase tracking-widest text-prose-muted mb-1">Why I&apos;m not testing this</p>
               <p className="text-sm text-prose-muted">{wishlistItem.skip_reason}</p>
             </Card>
@@ -200,7 +200,7 @@ export default async function BenchDetailPage({ params }: Props) {
       {/* Discussion */}
       {!isSkipped && (
         <div className="mt-12 pt-8 border-t border-soft">
-          <h2 className="text-lg font-black mb-6">Are you familiar with this product?</h2>
+          <SectionHeader label="Discussion" heading="Are you familiar with this product?" />
           <div className="mb-8">
             <CommentForm
               contentType="product"

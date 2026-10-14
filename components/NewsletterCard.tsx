@@ -1,5 +1,5 @@
 import { EmailSignup } from '@/components/EmailSignup'
-import { Eyebrow } from '@/components/ui/Eyebrow'
+import { LabelBlock } from '@/components/ui/LabelBlock'
 
 // The one newsletter signup card — reviews, guides, About. Only the eyebrow
 // (and optionally the heading) varies by context; the promise and the button
@@ -10,7 +10,7 @@ import { Eyebrow } from '@/components/ui/Eyebrow'
 // "Notify me" captures (empty gift guides, merch launch) make a different
 // promise and keep their own copy — reuse CAPTURE_CARD for their shell.
 
-export const CAPTURE_CARD = 'bg-surface-raised border-t-[3px] border-accent rounded-xl p-6 sm:p-8'
+export const CAPTURE_CARD = 'bg-surface border-2 border-chrome rounded-xl p-6 sm:p-8'
 
 export function NewsletterCard({
   eyebrow,
@@ -27,9 +27,8 @@ export function NewsletterCard({
 }) {
   return (
     <div className={`${CAPTURE_CARD} text-center ${className}`}>
-      <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3 mx-auto" />
-      <Eyebrow className="mb-2">{eyebrow}</Eyebrow>
-      <Heading className="text-xl font-black text-prose mb-2">{heading}</Heading>
+      <LabelBlock className="mb-3">{eyebrow}</LabelBlock>
+      <Heading className="text-xl font-black uppercase text-prose mb-2">{heading}</Heading>
       <p className="text-sm text-prose-muted mb-5 max-w-md mx-auto">
         One email a week — only when there&apos;s something new. No spam. No sponsors.
       </p>

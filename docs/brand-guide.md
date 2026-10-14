@@ -288,11 +288,13 @@ Industry standard, same as Wirecutter / CNN Underscored / Gear Patrol: **one aff
 
 ## 2. Color System (Light Editorial — 2026-10-08)
 
-The site runs a **light editorial canvas**: no `data-theme` on `<html>` (`lib/canvas.ts` decides; `BD_CANVAS=dark` restores the dark page for a side-by-side). White page, near-black text, hairline borders, orange as the ONLY accent — core `#CC5500` on white. **The chrome stays near-black.** `Header`, `Footer`, `MobileBottomNav`, `StickyMobileCta`, the homepage brand band (`HomeHero`), `InMotionTicker`, the Creed, and the `(dashboard)` layout wrap themselves in `data-theme="dark"`, so the black / orange / white edge lives in the frame and in one dark band per page — not in the reading surface. No gold, no per-type rainbow, no cream/peach/brown, no vivid `#f97316`.
+The site runs a **light editorial canvas**: no `data-theme` on `<html>` (`lib/canvas.ts` decides; `BD_CANVAS=dark` restores the dark page for a side-by-side). White page, near-black text, hairline borders, orange as the ONLY accent — core `#CC5500` on white. **The chrome stays near-black.** `Header` (with its 4px orange rule), `Footer`, `MobileBottomNav`, `StickyMobileCta`, the About band (the Creed's home), the `(dashboard)` layout, and the utility-lane black panels (the Tools tiles, the bench header strip) wrap themselves in `data-theme="dark"`, so the black / orange / white edge lives in the frame and in the blocks — not in the reading surface. No gold, no per-type rainbow, no cream/peach/brown, no vivid `#f97316`.
 
-Why: every comparable publication (Wirecutter, Strategist, Gear Patrol, Fatherly, Uncrate) runs light; the dark-first build (2026-06 → 2026-10) read as software, not as a magazine. Full rationale and rollout: `docs/light-editorial-plan.md`.
+**Hard Goods (committed 2026-10-14 — §10.1).** The light page is LOUD through **solid blocks**: black panels and orange fills in the utility lane and at brand moments, never a dark canvas, never a wash. The homepage brand band is an ORANGE block with chrome-black ink (desktop only; on a phone the tagline folds into the masthead). Reference brands: STIHL (the palette twin), DeWalt (black panel + hot accent), Men's Health (loud editorial).
 
-> **Elevation = whitespace + hairline rules.** Content cards are **borderless** (image + type + one hairline above the footer). Utility surfaces (forms, menus, tool tiles, dashboard) keep `border-soft` + the raised tier. No drop-shadows on content — `check:shadow` still bans `shadow-black/*` as a design rule; overlays may use bare `shadow-*`.
+Why light: every comparable publication (Wirecutter, Strategist, Gear Patrol, Fatherly, Uncrate) runs light; the dark-first build (2026-06 → 2026-10) read as software, not as a magazine. Why loud: five days on the quiet light page the utility surfaces (tools, bench, author) "felt plain" — grey panels, muted eyebrows and hairline chips vanish on white. Full rationale and rollout: `docs/light-editorial-plan.md`; the commit, lock list and moratorium: §10.1.
+
+> **Elevation = whitespace, rules, and blocks.** Content cards are **borderless** (image + type + one hairline above the footer). The utility lane is **boxed or solid**: 2px chrome-black boxes (the bench, the author card), black panels (Tools), orange blocks (the newsletter, the desktop brand band). Forms, menus and dashboard panels keep `border-soft` + the raised tier. No drop-shadows on content — `check:shadow` still bans `shadow-black/*` as a design rule; overlays may use bare `shadow-*`.
 
 ### Tokens — `app/globals.css` (`:root` = light page · `[data-theme="dark"]` = zones)
 
@@ -373,8 +375,12 @@ Long-form body sits on **bare canvas at every breakpoint** (reversed 2026-09-23 
 
 For bordered chips prefer the token recipe (`bg-{danger,success,warn,info}-bg` + `border-…-line` + `text-…-ink`) — it inverts correctly inside the dark zones.
 
-### The dark band (one per page)
-On the light canvas the old "one dark island per page" idea is back with a sharper definition: **one near-black band** per page as the punctuating moment — the homepage brand band + ticker, the Creed, the credibility band, the sticky price bar on a review. A band is a `data-theme="dark"` zone, so every token inside it inverts by itself; never fake one with `bg-zinc-950` and hand-set text colours. The elevated accent band (`bg-surface-raised` + a 3px orange top rule) remains available for utility surfaces (e.g. the newsletter section).
+### Blocks — where black and orange fills are allowed (Hard Goods, 2026-10-14)
+The loudness mechanism is **solid blocks on the white page**. A black panel is a `data-theme="dark"` zone — every token inside it inverts by itself; never fake one with `bg-zinc-950` and hand-set colours. An orange block is `bg-accent` with **chrome-black ink** (`text-chrome`: 4.6:1 on `#CC5500`; the prose black is 4.1:1 and white is 4.3:1, both miss AA at body size), so an orange block is never a dark zone and never carries white body text.
+
+**Allowed:** the masthead's 4px orange rule · the desktop brand band (orange) · section label blocks (black) · the Tools panels (black) · the newsletter block (orange) · the bench header strip (black) and its status chips (orange = testing, black = queued) · the square score chip (orange) · the "Top pick" tag (black, orange type) · the About band (black, orange top rule) · the Footer (black, orange top rule) · buttons.
+
+**Never:** inside an editorial card, a listing row, or an article body; as a section background on an editorial surface; as a tint or wash. One orange block on a screen at a time is the ceiling.
 
 ### The section header convention — two lanes (settled 2026-07-27)
 
@@ -382,7 +388,7 @@ There are **two** sanctioned section-header shapes. Pick by surface, never by ta
 
 | Lane | Component | Shape | Use on |
 |---|---|---|---|
-| **Editorial** | `EditorialHeader` | quiet eyebrow (role) + Montserrat black title + optional right link | public editorial surfaces — homepage, listings, editorial pages |
+| **Editorial** | `EditorialHeader` | **black label block** (role) + uppercase Montserrat black title + 3px black rule under the lockup + optional **outline button** (Hard Goods, 2026-10-14) | public editorial surfaces — homepage, listings, editorial pages |
 | **Utility** | `SectionHeader` | 3px × 18px brand-orange vertical rule + uppercase tracked `font-black` label | utility surfaces — **`/gear`** (the sanctioned utility public page), dashboard/admin, compact panels |
 
 The prior wording ("every section heading sitewide uses `SectionHeader`") was written before Manifesto v2 and is retired: it contradicted the editorial rollout and described an admin population that no longer used the component. **`/gear` is deliberately utility-styled** — it's a working gear list, not an editorial read, and it stays on `SectionHeader` (5 call sites). That is a decision, not drift; don't "fix" it to `EditorialHeader`.
@@ -413,7 +419,7 @@ Never switch back to `next/font/google`: it fetches Google's CSS on every build,
 | Lead / cover H3 | `font-black text-2xl md:text-4xl leading-[1.05] tracking-tight` | Lead cards, cover story |
 | Detail H1 (review / guide) | `font-black text-4xl md:text-5xl leading-[1.05] tracking-tight` | |
 | Editorial section H2 (`EditorialHeader`) | `font-black text-3xl md:text-4xl leading-[1.02] tracking-tight` | Section titles |
-| Editorial page H1 (`PageHeader`) | `font-black text-4xl md:text-5xl leading-[1.0] tracking-tight` | Interior "slim editorial band" |
+| Editorial page H1 (`PageHeader`) | `font-black uppercase text-4xl md:text-5xl leading-[1.0] tracking-[-0.01em]` under a `LabelBlock`, closed by a 3px chrome rule | Interior page band (Hard Goods, 2026-10-14) — the `EditorialHeader` lockup one size up |
 | Body | `text-base leading-relaxed` | 16px, comfortable line-height |
 | Small / metadata | `text-sm text-gray-500` | |
 | Eyebrow | `text-[11px] text-eyebrow uppercase tracking-[0.2em] font-bold` | Quiet grey by default; orange only on dark bands via `text-accent-text` |
@@ -455,24 +461,22 @@ The v3.4 messaging lines (§1.7) are the **one place headline copy is set in Tit
 
 ## 4. Shape Language
 
-### Corner radius (tightened 2026-10-08)
+### Corner radius (squared 2026-10-14 — Hard Goods)
 The Tailwind radius scale is **overridden globally** in `app/globals.css` `@theme inline`, so every `rounded-*` call site tightens together and the ratio between tiers holds. Keep writing `rounded-xl` / `rounded-2xl`; the values are the design's:
 
 | Class | Renders | Use |
 |---|---|---|
-| `rounded-sm` | 2px | square tags on images |
-| `rounded-md` | 4px | inputs, small badges |
-| `rounded-lg` | 6px | sm buttons, rows, thumbnails |
-| `rounded-xl` / `rounded-2xl` | 8px | buttons, cards, images (one card radius) |
-| `rounded-3xl` | 10px | hero / cover packages |
-| `rounded-full` | pill | chips, avatars, dots — **not** badges over photos |
+| `rounded-sm` | 2px | square tags, status chips, thumbnails |
+| `rounded-md` / `-lg` / `-xl` / `-2xl` | 4px | inputs, buttons, cards, images, panels, boxes (one radius) |
+| `rounded-3xl` | 6px | hero / cover packages |
+| `rounded-full` | pill | avatars in chrome, dots, the live-testing dot — **not** filter chips (square since 2026-10-14) and **not** badges over photos |
 
-Tailwind's defaults (12 / 16 / 24px) are the SaaS silhouette; editorial and gear publications run 0–8px. Tune in one place, never per component.
+Tailwind's defaults (12 / 16 / 24px) are the SaaS silhouette; the 2026-10-08 editorial pass ran 8px; the approved Hard Goods mockup ran 4px on every image, tile, panel and button, and the scale follows it **sitewide** (left flexible at the commit — the utility-only alternative is a seven-line revert in `globals.css`). Tune in one place, never per component.
 
 ### Border principle — hairlines, no boxes
 - **Content cards are borderless.** `LeadCard`, `LibraryGuideCard`, `ReviewCard`, the cover story, the lead guide: the image carries `rounded-xl overflow-hidden`, the copy sits flush with the image's left edge, and the only rule is the hairline above the footer. Hover = title to `text-accent` + a 2px lift.
 - **Rows separate by hairline** (`border-b border-soft`), never by card.
-- **Utility surfaces keep the box.** `components/ui/Card.tsx` stays `bg-surface rounded-xl border border-soft` for forms, menus, tool tiles, dashboard panels. Soft panels (`bg-surface-raised`, no border) are the middle option — Boss Tools tiles, Key Takeaways.
+- **Utility surfaces keep the box — and since Hard Goods the box is heavy.** Public utility modules are `border-2 border-chrome rounded-xl` (the bench, the author card) or solid blocks (the Tools panels — §2 "Blocks"). `components/ui/Card.tsx` stays `bg-surface rounded-xl border border-soft` for forms, menus, dashboard panels. Soft panels (`bg-surface-raised`, no border) remain for Key Takeaways and similar in-article asides — not for a module that has to hold its own on the white page.
 - **No drop-shadows on content.** `check:shadow` bans `shadow-black/*`; bare `shadow-*` is for overlays (modals, dropdowns, lightboxes) only.
 - **One mark per image.** The Boss Approved badge, or a small square black tag (`rounded-sm bg-chrome text-white`). Never an orange pill over a photo.
 
@@ -490,33 +494,21 @@ Tailwind's defaults (12 / 16 / 24px) are the SaaS silhouette; editorial and gear
 - Section H2s stay quiet (`text-2xl` = 24px) so editorial *content* (review titles, article headlines) carries equal weight.
 - Hero hits, sections breathe, content earns attention.
 
-### No alternating-BG
-The whole site sits on the uniform base bg (`bg-gray-950`). Section separation comes from:
-- Whitespace (consistent section padding)
-- Shadow elevation on cards
-- Architectural rules where deliberate
+### Blocks, not alternating tints
+Editorial sections sit on the white canvas and separate by whitespace + a hairline (`border-b border-soft`) — never by alternating grey tints (tested and dropped early as amateurish). The loud moments are **solid blocks** in the utility lane (§2 "Blocks"): the Tools panels, the orange newsletter block, the bench box, the About band. A block is a *different kind* of treatment, not the same tint turned up.
 
-The only exceptions:
-- **Hero**: hybrid radial + linear orange gradient overlay (homepage only).
-- **Featured Review section** (homepage): single orange hairline rule at the top fading at edges, plus a 3px vertical orange rule next to the section header.
+### Masthead + brand band (Hard Goods A2, the folded masthead — 2026-10-14)
+- **Masthead** (`Header`): solid near-black at every scroll position, white uppercase wordmark, a **4px orange rule** beneath — the stripe. On a phone the tagline sits under the wordmark as a 9px orange signature line; on lg+ that line hides.
+- **Topics row** (`CategoryBar`): white, 44px, uppercase Montserrat labels, directly under the masthead at every width. A scroller on a phone, a divided strip on lg+. Active topic = 3px orange underline. Scrolls away with the page (the masthead sticks).
+- **Brand band** (`HomeHero`, homepage, **lg+ only**): a solid orange block, 72px — the tagline in uppercase Montserrat black on the left, the in-motion ticker on the right, chrome-black ink. No photo, no subhead, no link; the cover story is the first screen.
+- **No band on a phone.** The black masthead + an orange stripe stacked read as "two header nav bands" (his one objection at the Step 2 read); the fold is the fix. Don't reintroduce a mobile band. The hero photographs stay in `public/images` for `/about`.
 
-### Brand band (homepage)
-- A slim near-black band under the masthead: kicker → tagline (one line on desktop, two on a phone) → one-line subhead → "Meet the Boss" text link → the in-motion ticker. No photo, no gradient, no full-height poster: the cover story sits on the first screen.
-- **Placeholder composition (2026-10-08).** The operator wants a dedicated design pass on the band. Keep it slim when you do — content on the first screen is the point. The hero photographs stay in `public/images` for `/about`.
-
-### Section opener pattern (sitewide)
-Every meaningful section uses this structure:
+### Section opener pattern (editorial surfaces)
+Every editorial section opens with `EditorialHeader` — never inline the pattern:
 ```jsx
-<div className="flex items-stretch gap-4">
-  <div className="w-[3px] bg-orange-600 rounded-full" />
-  <div>
-    <p className="text-[11px] text-orange-500 uppercase tracking-[0.18em] font-bold mb-1">— Eyebrow</p>
-    <h2 className="text-2xl font-black text-white">Section Heading</h2>
-    <p className="text-sm text-gray-500 mt-1">Optional subtitle</p>
-  </div>
-</div>
+<EditorialHeader eyebrow="Tools" title="Built for the job" right={{ label: 'All tools', href: '/tools' }} />
 ```
-With an optional right-aligned `View all →` link in tracked caps.
+Renders: a black **label block** (`LabelBlock`, the role) → uppercase Montserrat black title (26px / 34px) → a 3px chrome-black rule under the lockup, with the optional right action as the **outline button** (`buttonVariants({ variant: 'outline', size: 'sm' })`). Utility/admin surfaces use `SectionHeader` (§2, two lanes).
 
 ### Closing (homepage)
 The page ends with a deliberate punctuation:
@@ -530,7 +522,7 @@ The page ends with a deliberate punctuation:
 ## 6. Component Patterns
 
 ### Card skeleton (review / guide / wishlist / shop)
-Real pattern (see `LeadCard.tsx` / `LibraryGuideCard.tsx` / `ReviewCard.tsx`): semantic tokens only, **borderless**, image carries the radius, serif title, quiet eyebrow, one hairline above the footer, hover = title colour + lift. See §4.
+Real pattern (see `LeadCard.tsx` / `LibraryGuideCard.tsx` / `ReviewCard.tsx`): semantic tokens only, **borderless**, image carries the radius, Montserrat extrabold title, quiet eyebrow, one hairline above the footer, hover = title colour. At most ONE square tag over the image (the Boss Approved tag, or a `bg-chrome text-white rounded-sm` tag). No border, no shadow, no lift transform. See §4.
 
 > **Enforced since 2026-08-03.** `npm run check:shadow` (in `prebuild`) fails the build on
 > any `shadow-black/*`. The pattern had reached 63 occurrences across 46 files precisely
@@ -578,20 +570,34 @@ Real pattern (see `LeadCard.tsx` / `LibraryGuideCard.tsx` / `ReviewCard.tsx`): s
 - 3-line excerpt (`line-clamp-3`)
 - Copy sits flush with the image edge on a phone; on desktop the text column takes a gap, not a box
 
-### Filter pills
+### Filter chips (square since Hard Goods, 2026-10-14)
+One primitive, never inline: `PillFilterStrip` + `PILL_BASE` / `PILL_ACTIVE` / `PILL_INACTIVE` from `components/ui/PillFilterStrip.tsx`. The chip is the outline button one size down — 2px border in the text colour, uppercase Montserrat 11px, 4px corners, 44px tall, black fill when active. The `rounded-full` pill was the SaaS tell on white; the approved mockup ran square chips, so the homepage topic chips and every listing filter strip (`/reviews`, `/guides`, `/gear`, the category pages, `CategoryFilterPills`) match.
 ```jsx
-{/* Active */}
-className="px-4 py-2.5 rounded-full text-sm font-semibold bg-accent text-white"
-
-{/* Inactive */}
-className="px-4 py-2.5 rounded-full text-sm font-medium bg-surface text-prose-muted border border-soft hover:border-strong hover:text-prose transition-all"
+<PillFilterStrip className="mb-12">
+  <Link href="/guides" className={`${PILL_BASE} ${PILL_ACTIVE}`}>All Guides</Link>
+  <Link href={`/guides/category/${slug}`} className={`${PILL_BASE} ${PILL_INACTIVE}`}>{label}</Link>
+</PillFilterStrip>
 ```
 
-### Buttons
-- **Primary** (CTAs): `bg-accent hover:bg-accent-hover text-white font-extrabold rounded-xl px-7 py-3.5 min-h-[48px]`
-- **Secondary**: `border border-strong text-prose hover:border-accent hover:text-accent font-bold rounded-xl px-7 py-3.5 min-h-[48px]`
-- **Tertiary / link**: `text-accent-text hover:text-accent transition-colors` (text-only)
-- **Tracked-caps action link**: `text-xs text-prose-faint hover:text-accent-text transition-colors uppercase tracking-widest font-semibold`
+### Buttons (Hard Goods, 2026-10-14 — `components/ui/Button.tsx`, never by hand)
+Every button is **Montserrat, uppercase, tracked `0.08em`, 4px corners** — a stamp, not a pill. Pick a variant + size; `className` is for layout only.
+- **`primary`** — `bg-cta` (black on the page, hot orange inside dark zones), orange hover.
+- **`outline`** — 2px border in the text colour, inverts on hover (black-on-white on the page, white-on-black in zones). The section-header action, "How I test".
+- **`onBlock`** — the primary button when it sits on an ORANGE block: black, hover inverts to white (a `primary` would hover to orange and vanish). The newsletter.
+- **`success`** — a confirmation state ("Added to cart"), the success token recipe; not a call to action.
+- **`secondary` / `ghost` / `danger`** — forms, toolbars, destructive. Unchanged roles.
+- **Tracked-caps action link** (not a button): `font-display font-extrabold text-[11px] uppercase tracking-[0.1em] text-accent-text hover:text-accent` — the bench "See the bench", "More from …".
+
+### Blocks & utility-lane recipes (Hard Goods, 2026-10-14)
+- **Label block** — `LabelBlock` (`components/ui/LabelBlock.tsx`): `bg-chrome text-white font-display font-black text-[11px] uppercase tracking-[0.16em] px-2.5 py-1.5`; `tone="accent"` inside dark bands. Names the ROLE.
+- **Black panel** (Tools): `data-theme="dark" bg-chrome text-prose border-t-4 border-accent rounded-xl p-5` → orange kicker `text-accent-text`, white title, `text-prose-faint` blurb, `buttonVariants('primary')` (hot orange in the zone).
+- **Orange block** (newsletter, the desktop band): `bg-accent text-chrome`; fields `bg-surface border-2 border-chrome`; button `onBlock`.
+- **Bench box**: `border-2 border-chrome rounded-xl overflow-hidden` → black header strip (`data-theme="dark" bg-chrome`, live dot, uppercase label, orange link) → hairline rows → **solid status chip** `font-display font-black text-[10px] uppercase tracking-[0.14em] px-2.5 py-1.5 rounded-sm text-white` + `bg-accent` (testing) / `bg-chrome` (queued).
+- **Product tile** (`TopPicksBoard`): `aspect-square rounded-xl bg-surface-sunken border-b-[3px] border-chrome` image well; "Top pick" tag `bg-chrome text-accent` top-left; quiet eyebrow; `font-extrabold text-[15px]` name; **square score chip** `RatingScore variant="chip"` + "Paid $X" in ink.
+- **Author card**: `border-2 border-chrome rounded-xl p-4` → square 52px portrait, uppercase name stamp, muted tagline, bio, tracked-caps link.
+- **Utility box** — `Card tone="chrome"` (`components/ui/Card.tsx`): `bg-surface border-2 border-chrome rounded-xl`. Every public utility module (verdict, product CTA, testing log, specs, comment form, tool tiles, chat). `tone="surface"` (hairline) stays for forms, menus, dashboard panels.
+- **Status chip** — `Badge` (`components/ui/Badge.tsx`): square `rounded-sm`, Montserrat 10px caps. `neutral` = the inverted stamp (black on the page, white in zones), `accent` = orange, `muted` = quiet grey; `info/success/warn/danger` keep the bg/line/ink token recipe (it inverts in zones; a solid ink fill would not). Domain files map status → tone; this file owns the look.
+- **Dialog** — `Modal`: `bg-surface border-2 border-chrome`, no shadow, `backdrop:bg-chrome/80`. **Toasts / banners** (welcome, install): black panels. **Empty state** — `EmptyState variant="subtle"`: 2px chrome box.
 
 ### Index numbers (More Reviews TOC treatment)
 ```jsx
@@ -602,17 +608,13 @@ className="px-4 py-2.5 rounded-full text-sm font-medium bg-surface text-prose-mu
 Magazine table-of-contents detail. Used on the More Reviews grid on the homepage.
 
 ### Empty states
-```jsx
-<div className="text-center py-24 bg-surface/40 rounded-xl">
-  <p className="text-prose-faint text-lg font-semibold">No items here yet.</p>
-  <p className="text-prose-faint text-sm mt-2">Check back soon, Boss.</p>
-</div>
-```
-No dashed borders. Soft panel that reads as "this is intentional" not "this is broken."
+One primitive: `EmptyState` (`components/ui/EmptyState.tsx`). `variant="subtle"` (public listings, search) is a **2px chrome box** with a Montserrat-black title — the quiet grey tint it replaced vanished on white and read as broken. `dashed` invites creation on member surfaces; `panel` is the hairline box inside admin lists. Never hand-roll one.
 
-### Boss Approved badge
-- Card variant: top-right of card image when `rating >= 8`.
-- Component: `components/BossApprovedBadge.tsx`.
+### Boss Approved mark (flat since 2026-10-14)
+- `size="sm" variant="card"` — the square orange tag over a review thumbnail (`bg-accent text-white rounded-sm`, 10px Montserrat caps, "✓ Approved"). It is the card's ONE image mark, top-left.
+- `size="sm" variant="page"` — the inline chip in sidebars / Quick Verdict.
+- `size="lg"` — the round seal on the review detail header: the one brand moment that keeps a circle. No shadow, no ring, no rotation on any variant.
+- Component: `components/BossApprovedBadge.tsx`. Shown when `rating >= 8`.
 
 ---
 
@@ -651,10 +653,11 @@ must not be tinted.
 - Plain section labels: Featured review · Top picks · Guides · Tools · On the bench · About. No "Cover Story / Library / Creed" vocabulary on the page.
 - Column footer: Brand · Topics · Browse · Trust & Legal.
 
-### Listing pages (`/reviews`, `/articles`, `/wishlist`, `/gear`)
-- Page header pattern: eyebrow + h1 + count line. No hero gradient.
-- Filter pills below header (where applicable).
-- Section openers use the vertical orange rule pattern.
+### Listing pages (`/reviews`, `/guides`, `/bench`, `/gear`, category + tag pages)
+- `PageHeader`: black label block (the role) → uppercase Montserrat black H1 → optional deck → 3px chrome rule. No hero gradient, no count line (no vanity metrics).
+- Square filter chips below the header via `PillFilterStrip` (where applicable).
+- Section openers: `EditorialHeader` on editorial listings; `SectionHeader` (orange vertical rule) on `/gear` only.
+- Cards are the borderless editorial card (`ReviewCard` / `LibraryGuideCard` / `LeadCard`) — reuse them; don't re-skin a bordered copy per page.
 
 ### `/gear` — unified Gear + Merch page
 - "Shop" is **not** a separate top-level concept. The unified `/gear` page hosts both:
@@ -663,18 +666,19 @@ must not be tinted.
 - Hero copy: *"Boss Daddy Approved Gear"* H1 + *"Field-tested by a real dad. And, soon, made by one."* tagline.
 - `/shop` 301-redirects to `/gear` for SEO + bookmark continuity.
 
-### Detail pages (`/reviews/[slug]`, `/articles/[slug]`)
-- Article header with rating + meta (no border-b under it — spacing carries).
-- Hero image at `rounded-2xl`.
-- Title Montserrat `font-black`, body sans on bare canvas.
-- Verdict card, pros/cons, takeaways use the status-chip token recipe and `bg-surface-raised` panels — no hand-set shades, no shadows.
-- Author bio at the end uses shared `<AuthorBio />` component.
-- Related reviews/articles sidebar (xl breakpoint+) uses the standard card pattern.
+### Detail pages (`/reviews/[slug]`, `/guides/[slug]`, comparisons, picks, stacks, bench)
+- Article header with the score ring (`ScoreBlock variant="ring"` / `ScoreArc` — the sanctioned hero moment) + meta; category and bench links are square chips.
+- Hero image at `rounded-xl` (4px). Title Montserrat `font-black`, body sans on bare canvas; the article prose stays clean — no blocks inside it.
+- **Utility modules are chrome boxes** (`Card tone="chrome"`): the verdict, the product CTA, the testing log, specs (table frame + `bg-chrome` header row), the comment form, "Products mentioned". The sidebar verdict may be the page's one black panel. Status/state chips (`Badge`): would-rebuy, "From the bench", "Best for", roles, winners. No shadows, no tints.
+- Key Takeaways and the in-page TOC stay quiet asides (`bg-surface-sunken`, hairline) — they are in-article, not modules.
+- Author bio at the end is the shared `<AuthorBio />` 2px box.
+- Related / More rails: `EditorialHeader` (outline button for "see all") over borderless cards or flush hairline rows. Comments are flush rows under a `SectionHeader`.
 
-### Static / legal pages (`/about`, `/terms`, `/privacy-policy`, etc.)
-- Inherit Forge Base palette globally.
-- No card system needed — text-led pages.
-- `prose prose-orange max-w-none` for body copy — colours come from the role tokens (`.prose` in `app/globals.css`); no `prose-invert`.
+### Static / legal pages (`/about`, `/how-we-test`, `/terms`, `/privacy-policy`, etc.)
+- Legal and policy pages open with `PageHeader` (eyebrow = the page's role), then prose. Text-led: no card system.
+- `/about` keeps its bespoke two-line H1 (exempt from `PageHeader`); its stats sit in ONE black panel (orange numbers are legal inside it), topics are square chips, section headers are `EditorialHeader`.
+- `/how-we-test`: tiles are chrome boxes; the "Boss Daddy Approved" callout is the page's one black panel.
+- `prose max-w-none` for body copy — colours come from the role tokens (`.prose` in `app/globals.css`); no `prose-invert`.
 
 ---
 
@@ -699,7 +703,10 @@ must not be tinted.
 | `AuthorBio` | `components/AuthorBio.tsx` | Article + review detail |
 | `EmailSignup` | `components/EmailSignup.tsx` | Newsletter sections |
 | `Header` / `Footer` | `components/Header.tsx`, `Footer.tsx` | Site shell |
-| `ReviewCard` | `app/(public)/reviews/_components/ReviewCard.tsx` | `/reviews`, homepage |
+| `ReviewCard` | `components/ReviewCard.tsx` | `/reviews`, category + tag pages, `/gear` |
+| `LabelBlock` | `components/ui/LabelBlock.tsx` | The black (or orange, in zones) role stamp — `PageHeader`, `EditorialHeader`, module headers |
+| `PillFilterStrip` + `PILL_*` | `components/ui/PillFilterStrip.tsx` | Every square filter / selector chip strip |
+| `Badge` | `components/ui/Badge.tsx` | Every status / state chip |
 | `LibraryGuideCard` | `components/LibraryGuideCard.tsx` | `/guides/category/[slug]` 3-up grid. Takes `on={'background' \| 'surface'}`. Replaced `guides/_components/GuideCard.tsx` (deleted 2026-08-03). |
 | `LeadCard` | `components/LeadCard.tsx` | Lead half of a "Template A" module. Takes the same `on` prop. |
 | `ContentRow` | `components/ContentRow.tsx` | The compact directory row, site-wide: text left, thumbnail right. **The editorial lane.** `/gear` keeps its own image-left rows on purpose — don't convert it. |
@@ -734,6 +741,30 @@ A short history of key choices and why — useful when reconsidering trade-offs 
 | **Borderless content cards · quiet eyebrows · 8px radius** (2026-10-08) | On a white canvas the 1px grey box, the orange kicker on every card, and 16–24px corners were the "component library" tells. Removed as a set after a live render against Wirecutter / Strategist / Gear Patrol. |
 | **One voice — every heading Montserrat** (2026-10-08) | A serif-content-headline pass (Fraunces on cards, rows, detail titles) was rendered live the same day and rejected by the operator as a mismatch with the bold, heavy brand. Headings are Montserrat black/extrabold everywhere; Fraunces is the Creed only. Editorial feel comes from layout and the black chrome, not a typeface. |
 | **Poster hero retired** (2026-10-08) | No comparable publication leads with a brand poster; the cover story is now the first screen. The slim brand band is a placeholder owed a dedicated pass. |
+| **Hard Goods — the design commit** (2026-10-14) | Five days after the light flip the operator was "unsure about our recent editorial commitment"; the utility surfaces (tools, bench, author) read as plain. A four-step process (brief → three directions on real content → comparison → recommendation) ended in **A Hard Goods** — "I really like the usage of colors and contrast"; "all three are an upgrade" — loud through SOLID BLOCKS (STIHL / DeWalt), not through type (B Newsstand) or scale (C Showroom). Mockups: `docs/mockups/directions/`. Lock list + moratorium: §10.1. |
+| **A2 — the folded masthead** (2026-10-14) | His one objection to A: on a phone the black masthead + orange stripe "looks like two header nav bands". Fix borrowed from B: the tagline folds under the wordmark as a 9px orange signature and the topics row takes the band's slot; the orange band + ticker stay on desktop. Chosen over A3 (a taller fused masthead). |
+| **4px radius sitewide · uppercase section titles** (2026-10-14) | Both left flexible at the commit; built to match the approved mockup. Each is a one-place revert (`globals.css` radius scale; `EditorialHeader`). |
+| **Orange-block ink is chrome-black** (2026-10-14) | White on the core orange is 4.3:1 and the prose black 4.1:1 — both miss AA at body size; `#09090b` clears it at 4.6:1. So an orange block is never a dark zone and never carries white body text. |
+
+### 10.1 Design commit — Hard Goods, folded masthead (A2) · 2026-10-14
+
+**Process.** Four steps, 2026-10-13 → 14, pausing for the operator after each: (1) discovery brief — light stays; LOUDER; two lanes; premium / clean / rugged; likes = STIHL, DeWalt, Men's Health, AppleInsider, Brickell; cringes = GQ, PCMag, Reviewed, Ape to Gentleman; (2) three directions rendered on REAL content — A Hard Goods (loud through blocks), B Newsstand (type + density), C Showroom (scale + space) — `docs/mockups/directions/` (`node docs/mockups/directions/build.mjs` regenerates); (3) comparison table; (4) recommendation. **He picked A** with one objection (two stacked bands on the phone), fixed by folding the tagline into the masthead with B's masthead handling. **A2 chosen 2026-10-14.** Spec = `a2-hard-goods-folded.html` and the `A_CSS` / `CATROW_CSS` / `A2_CSS` strings in `build.mjs`.
+
+**LOCKED** — not reopened inside the moratorium:
+- Light canvas (white page, near-black text).
+- Montserrat-only headings (Fraunces = the Creed only).
+- One orange (`#CC5500` page / `#E55A1A` zones); black is the second colour.
+- **Loud through blocks** is the mechanism — solid black and orange panels on the white page; never a dark canvas, never washes.
+- **Two lanes + the blocks rule** (§2 "Blocks"): editorial surfaces are type- and photo-led; black panels / orange fills belong to the utility lane and brand moments ONLY — Tools, the newsletter, the bench header strip, score chips, status chips, section label blocks, the About band, the masthead rule. **Never inside editorial cards or article bodies.**
+- Phone masthead = folded (wordmark + small orange tagline) + the topics row. **No band on a phone.**
+- Desktop = the orange band + ticker under the masthead.
+- Black Tools panels · boxed bench with a black header strip + solid status chips · grey product tiles + square orange score chip · orange newsletter block · black section label blocks · uppercase buttons at 4px.
+
+**FLEXIBLE during the build** — settle on the phone, no process needed: 4px radius sitewide vs utility-only (built sitewide) · uppercase vs sentence-case section titles (built uppercase) · exact grey tiers · Latest-list density · author card detail · shop strip · the "best for" line · whether `SectionHeader` (utility/admin) adopts the label block · the cover story's score treatment (ring today; the mockup had a square orange block).
+
+**MORATORIUM.** Clock starts **2026-10-14**. No change to the canvas, the heading face, the loudness mechanism, or the mobile masthead for **90 days or until 12 new pieces publish, whichever is LATER** — earliest reopen **2027-01-12**, later if fewer than 12 pieces are out by then. It reopens ONLY on (a) reader evidence — analytics, or three or more unprompted reader comments on the look — or (b) the implemented masthead failing the operator's own phone walkthrough. **"Looked at it and felt unsure" is explicitly NOT a trigger**; that doubt is what this process was for. `BD_CANVAS=dark` stays as the escape hatch (default-safe, keep the knob) but is not a reopen path.
+
+**Built 2026-10-14** (the implementation of the lock list): `Button` (uppercase Montserrat; `outline` + `onBlock` variants), `LabelBlock`, `EditorialHeader` (label block + 3px rule + outline action), `Header` (4px orange rule, phone tagline under the wordmark, scroll-state removed), `CategoryBar` (every width), `HomeHero` (orange band, lg+), `BossToolsSection` (black panels), `BenchStrip` (box + black head + solid chips), `AuthorBio` (2px box), `EmailCaptureSection` (orange block), `RatingScore variant="chip"`, `TopPicksBoard` (square grey tiles), `AboutBand` + `Footer` (4px orange rule), radius scale 4px.
 
 ---
 
@@ -750,29 +781,36 @@ A short history of key choices and why — useful when reconsidering trade-offs 
 
 ```
 Canvas (light)   bg-background / #ffffff            (token — not bg-white)
-Chrome (zones)   data-theme="dark" + bg-chrome #09090b   (header, footer, nav, brand band, Creed)
+Chrome (zones)   data-theme="dark" + bg-chrome #09090b   (header, footer, nav, About band, Tools panels, bench head)
+Masthead         solid chrome + border-b-4 border-accent · phone: 9px orange tagline under the wordmark · topics row beneath (CategoryBar)
+Brand band       HomeHero — lg+ ONLY: bg-accent text-chrome, uppercase tagline + ticker · no band on a phone
+Blocks           black/orange fills = utility lane + brand moments ONLY (§2) · orange-block ink = text-chrome, never white body text
 Card surface     bg-surface #ffffff · raised bg-surface-raised #fafafa · hover #f4f4f5
 Brand accent     text-accent / bg-accent = #CC5500 (page) · #E55A1A (zones) · hover #B85A14
 Inline links     text-accent-text = #B85A14 (page) · #f48a4a (zones)
 Eyebrow          text-eyebrow = muted grey (quiet by default)
-Primary button   buttonVariants('primary') → bg-cta (black on page, orange in zones)
+Buttons          buttonVariants() — Montserrat UPPERCASE, 4px: primary (bg-cta: black on page / orange in zones) · outline (2px, inverts) · onBlock (black on an orange block)
 Text             text-prose #18181b · text-prose-muted #52525b · text-prose-faint #71717a
 Borders          border-soft #e4e4e7 · border-strong #d4d4d8
 
 Content cards    borderless · image rounded-xl overflow-hidden · copy flush · one hairline footer
 Cards hover      group-hover:text-accent on the title + hover:-translate-y-0.5
-Utility cards    bg-surface rounded-xl border border-soft (components/ui/Card)
+Utility boxes    border-2 border-chrome rounded-xl (bench, author) · black panel = data-theme="dark" bg-chrome border-t-4 border-accent (Tools)
+Forms / menus    bg-surface rounded-xl border border-soft (components/ui/Card)
+Label block      LabelBlock — bg-chrome text-white 11px black caps (tone="accent" in dark bands) · names the ROLE
+Score chip       RatingScore variant="chip" — square bg-accent text-white · status chips bg-accent (testing) / bg-chrome (queued)
 Image marks      one at most — Approved badge, or rounded-sm bg-chrome text-white tag
 Empty state      bg-surface-raised rounded-xl (no dashed border)
 
-Brand-band H1    font-black text-4xl sm:text-5xl md:text-6xl leading-[0.98]   (Montserrat)
+Brand-band H1    font-black uppercase text-[26px] leading-none (Montserrat) — on the orange band, lg+; sr-only twin on a phone
 Page H1          font-black text-4xl md:text-5xl leading-[1.0] tracking-tight  (Montserrat)
 Content H3       font-extrabold text-base leading-snug tracking-tight          (Montserrat)
-Section H2       font-black text-3xl md:text-4xl (EditorialHeader) · utility: SectionHeader
+Section H2       EditorialHeader: LabelBlock + UPPERCASE font-black 26/34px + 3px chrome rule + outline button · utility/admin: SectionHeader
 Serif            Fraunces = the Creed ONLY · Source Serif = pull-quotes ONLY
 Eyebrow          text-[11px] text-eyebrow uppercase tracking-[0.2em] font-bold
 
-Section opener   3px vertical accent rule + eyebrow + h2  (use SectionHeader)
+Section opener   EditorialHeader (editorial) · SectionHeader (utility/admin) · never inline either
+Radius           4px everywhere (rounded-sm 2px tags/chips · rounded-full pills only) — one scale in globals.css
 Icons            inline SVG (CategoryIcon) — no emoji
 
 Container        max-w-6xl mx-auto px-6   (detail pages max-w-7xl)

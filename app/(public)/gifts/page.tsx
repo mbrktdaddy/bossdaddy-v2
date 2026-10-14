@@ -6,7 +6,8 @@ import { createAnonClient } from '@/lib/supabase/anon'
 import { OCCASIONS, OCCASION_GROUPS } from '@/lib/gift-occasions'
 import OccasionIcon from '@/components/OccasionIcon'
 import CollectionListingHeader from '@/components/collections/CollectionListingHeader'
-import { Eyebrow } from '@/components/ui/Eyebrow'
+import EditorialHeader from '@/components/EditorialHeader'
+import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
 
 export const revalidate = 60
@@ -71,11 +72,7 @@ export default async function GiftsIndexPage() {
       {/* Grouped occasion grid */}
       {OCCASION_GROUPS.map((group) => (
         <section key={group.id} className="mb-14">
-          <div className="mb-6">
-            <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-            <Eyebrow className="mb-1">{group.label}</Eyebrow>
-            <h2 className="text-2xl font-black text-prose">{group.label}</h2>
-          </div>
+          <EditorialHeader eyebrow="Gift guides" title={group.label} />
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {OCCASIONS.filter((o) => o.group === group.id).map((occ) => {
@@ -85,9 +82,9 @@ export default async function GiftsIndexPage() {
                 <Link
                   key={occ.value}
                   href={`/gifts/${occ.slug}`}
-                  className="group flex flex-col bg-surface border border-soft hover:bg-surface-raised/90 hover:border-accent-border/40 hover:-translate-y-1 rounded-xl overflow-hidden transition-all"
+                  className="group flex flex-col"
                 >
-                  <div className="relative aspect-[4/3] bg-surface-sunken flex items-center justify-center">
+                  <div className="relative aspect-[4/3] bg-surface-raised rounded-xl overflow-hidden flex items-center justify-center">
                     {guide?.hero_image_url ? (
                       <Image
                         src={guide.hero_image_url}
@@ -98,22 +95,16 @@ export default async function GiftsIndexPage() {
                         loading={occ.value === eagerOccasion ? 'eager' : undefined}
                       />
                     ) : (
-                      <OccasionIcon value={occ.value} className="w-12 h-12 text-accent-text/70" />
+                      <OccasionIcon value={occ.value} className="w-12 h-12 text-prose-faint" />
                     )}
-                    <div className="absolute top-2 right-2">
-                      {populated ? (
-                        <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm bg-accent text-white">
-                          Live
-                        </span>
-                      ) : (
-                        <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm bg-chrome/80 text-white/80 backdrop-blur-sm">
-                          Coming Soon
-                        </span>
-                      )}
-                    </div>
+                    {!populated && (
+                      <span className="absolute top-2 left-2 bg-chrome text-white rounded-sm px-2 py-1 text-[10px] font-display font-black uppercase tracking-[0.14em]">
+                        Coming soon
+                      </span>
+                    )}
                   </div>
-                  <div className="p-4 flex-1 flex flex-col">
-                    <p className="text-sm font-bold text-prose group-hover:text-accent-text-soft transition-colors leading-snug mb-1">
+                  <div className="pt-3 flex-1 flex flex-col">
+                    <p className="text-sm font-extrabold text-prose group-hover:text-accent transition-colors leading-snug mb-1">
                       {occ.label}
                     </p>
                     <p className="text-xs text-prose-faint leading-relaxed line-clamp-2 flex-1">
@@ -128,9 +119,7 @@ export default async function GiftsIndexPage() {
       ))}
 
       {/* Newsletter pitch */}
-      <div className="mt-16 pt-10 border-t border-soft text-center max-w-2xl mx-auto">
-        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3 mx-auto" />
-        <Eyebrow className="mb-2">Stay in the loop</Eyebrow>
+      <Card tone="chrome" className="mt-16 p-8 text-center max-w-2xl mx-auto">
         <h3 className="text-xl font-black text-prose mb-2">New gift guides drop with the seasons</h3>
         <p className="text-sm text-prose-muted mb-4">
           Subscribe to the Boss Daddy Crew for fresh gift picks before each major holiday.
@@ -141,7 +130,7 @@ export default async function GiftsIndexPage() {
         >
           Get on the list →
         </Link>
-      </div>
+      </Card>
       </div>
     </>
   )

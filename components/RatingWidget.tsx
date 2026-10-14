@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 
 interface Props {
   reviewId: string
@@ -73,13 +74,7 @@ export default function RatingWidget({ reviewId }: Props) {
                   disabled={submitting}
                   onClick={() => submitRating(r)}
                   onMouseEnter={() => setHovered(r)}
-                  className={`w-7 h-7 text-xs font-bold rounded-md border transition-all disabled:opacity-50
-                    ${filled
-                      ? 'bg-accent border-accent text-white'
-                      : 'bg-surface border-strong text-prose-faint hover:border-accent hover:text-accent-text-soft'
-                    }
-                    ${isChosen ? 'ring-1 ring-orange-300 ring-offset-1 ring-offset-black' : ''}
-                  `}
+                  className={`${PILL_BASE} justify-center !px-0 w-9 disabled:opacity-50 ${filled ? PILL_ACTIVE : PILL_INACTIVE} ${isChosen ? 'ring-2 ring-accent ring-offset-1 ring-offset-surface' : ''}`}
                 >
                   {r}
                 </button>

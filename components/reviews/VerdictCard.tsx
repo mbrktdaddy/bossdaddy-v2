@@ -1,6 +1,9 @@
 import type { Product } from '@/lib/products'
 import { getStoreLabel } from '@/lib/products'
 import { Card } from '@/components/ui/Card'
+import { Badge } from '@/components/ui/Badge'
+import { LabelBlock } from '@/components/ui/LabelBlock'
+import { buttonVariants } from '@/components/ui/Button'
 
 type Variant = 'inbody' | 'sidebar' | 'preview'
 
@@ -83,20 +86,19 @@ function ScoreArc({ rating, size }: { rating: number; size: 'lg' | 'md' }) {
 }
 
 function RebuyChip({ rebuy, size = 'md' }: { rebuy: boolean; size?: 'sm' | 'md' }) {
-  const padding = size === 'sm' ? 'px-2.5 py-1 text-[11px]' : 'px-3 py-1.5 text-xs'
   if (rebuy) {
     return (
-      <span className={`inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 font-semibold text-emerald-700 ${padding}`}>
+      <Badge tone="success" size={size}>
         <span aria-hidden>✓</span>
         I&apos;d buy it again
-      </span>
+      </Badge>
     )
   }
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border border-red-300 bg-red-50 font-semibold text-red-700 ${padding}`}>
+    <Badge tone="danger" size={size}>
       <span aria-hidden>✗</span>
       Wouldn&apos;t buy again
-    </span>
+    </Badge>
   )
 }
 
@@ -158,7 +160,6 @@ function ProductCtaButton({
   const rel = isAffiliate ? 'sponsored nofollow noopener' : 'noopener'
   const storeName = getStoreLabel(product.store, product.custom_store_name)
   const label = isAffiliate ? `Check Price at ${storeName}` : `View ${product.name}`
-  const padding = size === 'sm' ? 'px-4 py-2.5 text-sm' : 'px-5 py-3 text-base'
 
   return (
     <div className="mt-1 w-full">
@@ -167,7 +168,7 @@ function ProductCtaButton({
         target="_blank"
         rel={rel}
         data-product-slug={product.slug}
-        className={`inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-xl bg-accent font-bold text-white transition-colors hover:bg-accent-hover ${padding}`}
+        className={buttonVariants({ size: size === 'sm' ? 'md' : 'lg', className: 'w-full' })}
       >
         {label}
         <span aria-hidden>→</span>
@@ -214,12 +215,13 @@ export default function VerdictCard({
   // The props still arrive (call shape is uniform across variants) — unused here.
   if (variant === 'sidebar') {
     return (
-      <Card as="section"
-        className="p-5"
+      <section
+        data-theme="dark"
+        className="bg-chrome text-prose border-t-4 border-accent rounded-xl p-5"
         aria-label="Quick verdict"
       >
-        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-accent">Quick Verdict</p>
-        <p className="mt-1 mb-4 text-xs font-black uppercase tracking-wide text-prose/90 line-clamp-2">{productName}</p>
+        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-accent-text">Quick Verdict</p>
+        <p className="mt-1 mb-4 text-xs font-black uppercase tracking-wide text-prose-faint line-clamp-2">{productName}</p>
 
         <div className="flex flex-col items-center gap-3">
           <ScoreArc rating={rating} size="md" />
@@ -231,7 +233,7 @@ export default function VerdictCard({
             <ProductCtaButton product={product} size="sm" />
           </div>
         )}
-      </Card>
+      </section>
     )
   }
 
@@ -268,6 +270,7 @@ export default function VerdictCard({
   // ── In-body variant — primary mobile/desktop placement on the public page ──
   return (
     <Card as="section"
+      tone="chrome"
       className="mb-8 p-5 sm:p-6"
       aria-label="The verdict"
     >
@@ -275,8 +278,8 @@ export default function VerdictCard({
           search/AI overviews can extract the verdict as the summary section
           (in-body is the primary, always-rendered placement; the sidebar
           "Quick Verdict" stays a <p> to avoid a duplicate heading). */}
-      <h2 className="text-[11px] font-black uppercase tracking-[0.22em] text-accent">The Verdict</h2>
-      <p className="mt-1 mb-5 text-sm font-black uppercase tracking-wide text-prose/90 sm:text-base">{productName}</p>
+      <LabelBlock as="div"><h2>The Verdict</h2></LabelBlock>
+      <p className="mt-3 mb-5 text-sm font-black uppercase tracking-wide text-prose/90 sm:text-base">{productName}</p>
 
       {/* Conclusion cluster — arc (with approved check baked in) + rebuy chip */}
       <div className="flex flex-wrap items-center justify-center gap-5 sm:flex-nowrap sm:justify-start sm:gap-6">

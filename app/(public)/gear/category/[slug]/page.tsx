@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { PillFilterStrip, PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createAnonClient } from '@/lib/supabase/anon'
@@ -102,28 +103,21 @@ export default async function GearCategoryPage({ params }: Props) {
       <div className="max-w-6xl mx-auto px-6 py-12">
 
       {/* ── Category filter pills ──────────────────────────────────────────── */}
-      <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
-        <Link
-          href="/gear"
-          className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose transition-colors"
-        >
+      <PillFilterStrip className="mb-12">
+        <Link href="/gear" className={`${PILL_BASE} ${PILL_INACTIVE}`}>
           All Gear
         </Link>
         {CATEGORIES.map((c) => (
           <Link
             key={c.slug}
             href={`/gear/category/${c.slug}`}
-            className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
-              slug === c.slug
-                ? 'bg-accent text-white border border-accent'
-                : 'bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose'
-            }`}
+            className={`${PILL_BASE} ${slug === c.slug ? PILL_ACTIVE : PILL_INACTIVE}`}
           >
             <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
             <span>{c.label}</span>
           </Link>
         ))}
-      </div>
+      </PillFilterStrip>
 
       <AskTheBoss context={`${cat.label} gear picks`} className="mb-12" />
 

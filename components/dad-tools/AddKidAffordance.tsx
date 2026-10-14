@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { LABELS } from '@/lib/labels'
 import KidProfileForm from './KidProfileForm'
 import { buttonVariants } from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
 
 interface Props {
   ctaLabel?: string
@@ -20,20 +21,20 @@ export default function AddKidAffordance({
 
   if (adding) {
     return (
-      <div className="bg-surface border border-faint rounded-2xl p-4 sm:p-5">
+      <Card tone="chrome" className="p-4 sm:p-5">
         <KidProfileForm
           mode="add"
           isAuthenticated={isAuthenticated}
           onSuccess={() => setAdding(false)}
           onCancel={() => setAdding(false)}
         />
-      </div>
+      </Card>
     )
   }
 
   if (variant === 'empty') {
     return (
-      <div className="bg-surface border border-faint rounded-2xl p-6 text-center space-y-3">
+      <Card tone="chrome" className="p-6 text-center space-y-3">
         <p className="text-sm text-prose-faint">
           {LABELS.tools.kids.empty}
         </p>
@@ -48,12 +49,12 @@ export default function AddKidAffordance({
           <span className="text-xs text-prose-faint">or</span>
           <a
             href="/tools/weekends-until"
-            className="text-sm text-accent hover:underline font-medium"
+            className={buttonVariants({ variant: 'outline', size: 'sm' })}
           >
-            Try {LABELS.tools.weekendsUntil.short} →
+            Try {LABELS.tools.weekendsUntil.short}
           </a>
         </div>
-      </div>
+      </Card>
     )
   }
 

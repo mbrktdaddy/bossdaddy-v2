@@ -1,6 +1,12 @@
 interface Props {
   rating: number
   size?: 'sm' | 'lg'
+  /**
+   * 'text' — the colour-coded number + "/10" (default; rows, lists, dense grids).
+   * 'chip' — the square solid orange score chip (Hard Goods, 2026-10-14): white
+   *          Montserrat black on `bg-accent`, one size. Product tiles and boards.
+   */
+  variant?: 'text' | 'chip'
 }
 
 function scoreColor(r: number) {
@@ -14,7 +20,16 @@ function fmt(r: number) {
   return r % 1 === 0 ? `${r}.0` : String(r)
 }
 
-export default function RatingScore({ rating, size = 'sm' }: Props) {
+export default function RatingScore({ rating, size = 'sm', variant = 'text' }: Props) {
+  if (variant === 'chip') {
+    return (
+      <span className="inline-grid place-items-center min-w-[40px] h-[30px] px-1.5 bg-accent text-white font-display font-black text-[13px] rounded-sm tabular-nums">
+        {fmt(rating)}
+        <span className="sr-only"> out of 10</span>
+      </span>
+    )
+  }
+
   const color = scoreColor(rating)
 
   if (size === 'lg') {

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { vaultHref, vaultTypeLabel } from '@/lib/vault'
-import { Eyebrow } from '@/components/ui/Eyebrow'
+import SectionHeader from '@/components/SectionHeader'
 import { CubeIcon, ScaleIcon, StarIcon } from '@/components/icons'
 
 interface Props {
@@ -63,14 +63,10 @@ export default async function CollectionsForReview({ reviewId }: Props) {
 
   return (
     <section className="mt-12 pt-8 border-t border-soft" aria-label="Featured in collections">
-      <div className="mb-5">
-        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-        <Eyebrow className="mb-1">Featured in</Eyebrow>
-        {/* No hub link: the Vault stopped being a place (Phase I-4). Each row
-            below links its own listing's detail page. */}
-        <h2 className="text-lg font-black">Collections</h2>
-      </div>
-      <ul className="space-y-2">
+      {/* No hub link: the Vault stopped being a place (Phase I-4). Each row
+          below links its own listing's detail page. */}
+      <SectionHeader label="Featured in" heading="Collections" />
+      <ul>
         {collections.map((c) => {
           const icon = TYPE_ICONS[c.collection_type ?? 'general'] ?? TYPE_ICONS.general
           const href = vaultHref({ collection_type: c.collection_type, slug: c.slug })
@@ -78,14 +74,14 @@ export default async function CollectionsForReview({ reviewId }: Props) {
             <li key={c.id}>
               <Link
                 href={href}
-                className="group flex items-center gap-4 p-4 bg-surface border border-soft hover:border-accent-border/40 hover:-translate-y-1 rounded-xl transition-all"
+                className="group flex items-center gap-4 py-4 border-t border-soft transition-colors"
               >
-                <span className="text-accent-text-soft shrink-0">{icon}</span>
+                <span className="text-prose shrink-0">{icon}</span>
                 <div className="min-w-0 flex-1">
                   <p className="text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-bold mb-0.5">{vaultTypeLabel(c.collection_type)}</p>
-                  <p className="text-sm sm:text-base font-bold text-prose group-hover:text-accent-text-soft transition-colors line-clamp-1">{c.title}</p>
+                  <p className="text-sm sm:text-base font-bold text-prose group-hover:text-accent transition-colors line-clamp-1">{c.title}</p>
                 </div>
-                <span aria-hidden className="text-prose-faint group-hover:text-accent-text-soft transition-colors text-xl shrink-0">→</span>
+                <span aria-hidden className="text-prose-faint group-hover:text-accent transition-colors text-xl shrink-0">→</span>
               </Link>
             </li>
           )

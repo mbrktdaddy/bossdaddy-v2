@@ -1,34 +1,50 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { CATEGORIES } from '@/lib/categories'
 
 /**
- * Desktop topic row under the masthead — the visible category strip every
- * major publication carries (Wirecutter, Gear Patrol, Men's Health). Phones
- * keep the bottom nav + the Topics menu, so this is `lg:` and up only.
+ * The topics row under the masthead — every width since Hard Goods (A2, the
+ * folded masthead, 2026-10-14). On a phone it is the scroller that replaced
+ * the brand band (the band under the black masthead read as "two header nav
+ * bands"); on lg+ it is the Wirecutter / Men's Health category strip with
+ * hairline dividers. White, not a dark zone: the masthead's 4px orange rule is
+ * the edge, and the row sits under it on the page.
  *
  * Rendered by the public layout right AFTER <Header>, not inside it, so the
- * masthead stays sticky and this row scrolls away with the page — the
- * Wirecutter behaviour. A dark ZONE like the rest of the chrome.
+ * masthead stays sticky and this row scrolls away with the page.
  *
- * Short labels so all ten fit on one line at lg without a scroll strip
- * (a scroll strip inside a padded container is the bleed bug CLAUDE.md warns
- * about, and a wrapping row would push the brand band down).
+ * The scroller owns the overflow and the gutter padding lives INSIDE it (the
+ * CLAUDE.md horizontal-scroll rule) so the strip can never bleed to page level.
+ * A client component only for `usePathname` — no data, static labels.
  */
 export default function CategoryBar() {
+  const pathname = usePathname()
   return (
-    <nav data-theme="dark" aria-label="Topics" className="hidden lg:block bg-chrome border-b border-soft">
-      <div className="max-w-6xl mx-auto px-6">
-        <ul className="flex items-center justify-between -mx-2">
-          {CATEGORIES.map((c) => (
-            <li key={c.slug}>
-              <Link
-                href={`/category/${c.slug}`}
-                className="block px-2 py-2.5 text-[13px] font-semibold text-prose-muted hover:text-prose whitespace-nowrap transition-colors"
-              >
-                {c.shortLabel}
-              </Link>
-            </li>
-          ))}
+    <nav aria-label="Topics" className="bg-background border-b border-soft">
+      <div className="overflow-x-auto scrollbar-hide">
+        {/* Phone: left-packed scroller, first label flush with the gutter.
+            lg+: the group is CENTRED in the container with dividers between
+            cells (he read the left-packed desktop row as misaligned). */}
+        <ul className="flex w-max min-w-full max-w-6xl mx-auto px-6 h-11 items-stretch lg:justify-center">
+          {CATEGORIES.map((c, i) => {
+            const href = `/category/${c.slug}`
+            const active = pathname === href || pathname.startsWith(`${href}/`)
+            return (
+              <li key={c.slug} className="flex lg:border-r lg:border-soft lg:last:border-r-0">
+                <Link
+                  href={href}
+                  aria-current={active ? 'page' : undefined}
+                  className={`flex items-center ${i === 0 ? 'pr-3 lg:px-3.5' : 'px-3 lg:px-3.5'} font-display font-extrabold text-[11px] uppercase tracking-[0.12em] whitespace-nowrap text-prose border-b-[3px] -mb-px transition-colors ${
+                    active ? 'border-accent' : 'border-transparent hover:border-accent'
+                  }`}
+                >
+                  {c.shortLabel}
+                </Link>
+              </li>
+            )
+          })}
         </ul>
       </div>
     </nav>

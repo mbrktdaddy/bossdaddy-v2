@@ -185,7 +185,7 @@ export default async function ExplorePage() {
               per-topic variants (uniformity over tidy empty states). */}
           <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {CATEGORIES.map((cat) => (
-              <Card as="li" key={cat.slug} className="hover:border-strong transition-colors">
+              <Card as="li" tone="chrome" key={cat.slug}>
                 <Link href={`/category/${cat.slug}`} className="group flex flex-col gap-3 p-4 sm:p-5 h-full min-h-[44px]">
                   <CategoryIcon slug={cat.slug} className="w-6 h-6 text-copper shrink-0" />
                   <div className="min-w-0">
@@ -210,9 +210,9 @@ export default async function ExplorePage() {
             <EditorialHeader eyebrow="By format" title="Pick a shape" />
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {formats.map((f) => (
-                <Card as="li" key={f.href} className="hover:border-strong transition-colors">
+                <Card as="li" tone="chrome" key={f.href}>
                   <Link href={f.href} className="group flex items-center gap-4 p-4 sm:p-5">
-                    <span className="shrink-0 w-10 h-10 rounded-full bg-surface-raised border border-soft flex items-center justify-center text-copper">
+                    <span className="shrink-0 w-10 h-10 rounded-md bg-chrome text-white flex items-center justify-center">
                       {f.icon}
                     </span>
                     <span className="flex-1 min-w-0">

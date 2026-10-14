@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Badge } from '@/components/ui/Badge'
 import type { ReviewTimelineNode, VerdictChange } from '@/lib/reviews'
 
 interface Props {
@@ -51,13 +52,17 @@ export function ReviewTimelineStrip({ nodes, activeId }: Props) {
             <div
               className={`flex flex-col items-center justify-center min-w-[88px] sm:min-w-[104px] px-3 py-2 rounded-xl border transition-colors ${
                 active
-                  ? 'bg-accent-tint border-accent text-prose'
-                  : 'bg-surface border-strong text-prose-muted hover:bg-surface-raised hover:border-accent-border/60'
+                  ? 'bg-surface border-chrome border-2 text-prose'
+                  : 'bg-surface border-strong text-prose-muted hover:bg-surface-raised hover:border-chrome'
               }`}
             >
-              <span className={`text-[10px] uppercase tracking-widest font-semibold leading-none mb-1 ${active ? 'text-accent-text' : 'text-prose-faint'}`}>
-                {nodeLabel(node)}
-              </span>
+              {active ? (
+                <Badge tone="accent" size="sm" className="mb-1">{nodeLabel(node)}</Badge>
+              ) : (
+                <span className="text-[10px] uppercase tracking-widest font-semibold leading-none mb-1 text-prose-faint">
+                  {nodeLabel(node)}
+                </span>
+              )}
               <span className="flex items-baseline gap-1">
                 <span className="text-sm font-black tabular-nums">{ratingStr}</span>
                 <span className="text-[10px] text-prose-faint">/10</span>

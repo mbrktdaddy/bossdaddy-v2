@@ -128,6 +128,7 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
   }
 
   return (
+    <Card tone="chrome" className="p-5">
     <form onSubmit={handleSubmit} className="space-y-3">
       {prompt && (
         <p className="text-sm text-prose-muted italic">{prompt}</p>
@@ -152,5 +153,6 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
         </button>
       </div>
     </form>
+    </Card>
   )
 }

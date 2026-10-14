@@ -3,7 +3,7 @@ import Image from 'next/image'
 import type { WishlistItem } from '@/lib/wishlist'
 import { getBuyLabel, requestedByLabel } from '@/lib/wishlist'
 import { StatusBadge } from './StatusBadge'
-import { Card } from '@/components/ui/Card'
+import { Badge } from '@/components/ui/Badge'
 import { PhotoIcon } from '@/components/icons'
 
 interface Props {
@@ -18,9 +18,9 @@ export function WishlistCard({ item }: Props) {
   const detailHref = `/bench/${item.slug}`
 
   return (
-    <Card className="overflow-hidden flex flex-col hover:border-strong/60 hover:-translate-y-0.5 transition-all duration-200">
+    <article className="flex flex-col">
       {/* Image */}
-      <Link href={detailHref} className="block relative aspect-[4/3] bg-surface-raised">
+      <Link href={detailHref} className="block relative aspect-[4/3] bg-surface-raised rounded-xl overflow-hidden">
         {item.image_url ? (
           <Image
             src={item.image_url}
@@ -37,9 +37,9 @@ export function WishlistCard({ item }: Props) {
       </Link>
 
       {/* Body */}
-      <div className="p-4 flex flex-col flex-1 gap-3">
+      <div className="pt-4 flex flex-col flex-1 gap-3">
         <div className="flex items-start justify-between gap-2">
-          <Link href={detailHref} className="text-sm font-bold leading-snug hover:text-accent-text-soft transition-colors line-clamp-2">
+          <Link href={detailHref} className="text-sm font-extrabold text-prose leading-snug hover:text-accent transition-colors line-clamp-2">
             {item.title}
           </Link>
           <StatusBadge status={item.status} className="shrink-0" />
@@ -55,9 +55,9 @@ export function WishlistCard({ item }: Props) {
               Bench's one job is follow, not a vote to chase. The empty span
               keeps the CTA right-aligned. */}
           {voteCount > 0 ? (
-            <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold tabular-nums bg-surface-raised border border-soft text-prose-muted">
+            <Badge tone="muted" className="tabular-nums">
               {requestedByLabel(voteCount)}
-            </span>
+            </Badge>
           ) : <span />}
 
           {/* CTA — the affiliate buy link when there is one, otherwise the
@@ -88,6 +88,6 @@ export function WishlistCard({ item }: Props) {
           )}
         </div>
       </div>
-    </Card>
+    </article>
   )
 }

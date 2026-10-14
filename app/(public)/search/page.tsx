@@ -9,7 +9,7 @@ import BenchStrip from '@/components/BenchStrip'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { buildSocialMetadata } from '@/lib/og'
 import type { Metadata } from 'next'
-import { Eyebrow } from '@/components/ui/Eyebrow'
+import EditorialHeader from '@/components/EditorialHeader'
 import { buttonVariants } from '@/components/ui/Button'
 import { SearchIcon } from '@/components/icons'
 
@@ -125,22 +125,21 @@ export default async function SearchPage({ searchParams }: Props) {
  {/* Review results */}
  {(reviews?.length ?? 0) > 0 && (
  <div className="mb-10">
- <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
- <Eyebrow className="mb-3">Reviews</Eyebrow>
- <div className="space-y-2">
+ <EditorialHeader eyebrow="Results" title="Reviews" />
+ <div>
  {reviews!.map((r) => {
  const cat = getCategoryBySlug(r.category)
  return (
  <Link
  key={r.id}
  href={`/reviews/${r.slug}`}
- className="flex items-start justify-between p-4 bg-surface border border-soft hover:border-accent-border/40 rounded-xl transition-colors group"
+ className="flex items-start justify-between py-4 border-b border-soft group"
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1 flex-wrap">
  {cat && <span className="flex items-center gap-1.5 text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-semibold"><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text shrink-0" /> {cat.label}</span>}
  </div>
- <p className="font-semibold text-sm group-hover:text-accent-text-soft transition-colors">{r.title}</p>
+ <p className="font-semibold text-sm group-hover:text-accent transition-colors">{r.title}</p>
  {r.excerpt && <p className="text-prose-faint text-xs mt-1 line-clamp-1">{r.excerpt}</p>}
  </div>
  <RatingScore rating={r.rating ?? 0} />
@@ -154,22 +153,21 @@ export default async function SearchPage({ searchParams }: Props) {
  {/* Product results — bench pipeline items */}
  {(products?.length ?? 0) > 0 && (
  <div className="mb-10">
- <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
- <Eyebrow className="mb-3">On the Bench</Eyebrow>
- <div className="space-y-2">
+ <EditorialHeader eyebrow="Results" title="On the Bench" />
+ <div>
  {products!.map((p) => {
  const cat = getCategoryBySlug(p.category ?? '')
  return (
  <Link
  key={p.slug}
  href={`/bench/${p.slug}`}
- className="flex items-start justify-between p-4 bg-surface border border-soft hover:border-accent-border/40 rounded-xl transition-colors group"
+ className="flex items-start justify-between py-4 border-b border-soft group"
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1 flex-wrap">
  {cat && <span className="flex items-center gap-1.5 text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-semibold"><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text shrink-0" /> {cat.label}</span>}
  </div>
- <p className="font-semibold text-sm group-hover:text-accent-text-soft transition-colors">{p.name}</p>
+ <p className="font-semibold text-sm group-hover:text-accent transition-colors">{p.name}</p>
  {p.description && <p className="text-prose-faint text-xs mt-1 line-clamp-1">{p.description}</p>}
  </div>
  <span className="text-xs text-accent-text font-medium ml-4 shrink-0 whitespace-nowrap">{BENCH_STATUS_LABEL[p.status] ?? 'On the bench'}</span>
@@ -183,16 +181,15 @@ export default async function SearchPage({ searchParams }: Props) {
  {/* Article results */}
  {(articles?.length ?? 0) > 0 && (
  <div>
- <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
- <Eyebrow className="mb-3">Guides</Eyebrow>
- <div className="space-y-2">
+ <EditorialHeader eyebrow="Results" title="Guides" />
+ <div>
  {articles!.map((a) => {
  const cat = getCategoryBySlug(a.category)
  return (
  <Link
  key={a.id}
  href={`/guides/${a.slug}`}
- className="flex items-start justify-between p-4 bg-surface border border-soft hover:border-accent-border/40 rounded-xl transition-colors group"
+ className="flex items-start justify-between py-4 border-b border-soft group"
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -201,7 +198,7 @@ export default async function SearchPage({ searchParams }: Props) {
  <span className="text-xs text-prose-faint">{a.reading_time_minutes} min read</span>
  )}
  </div>
- <p className="font-semibold text-sm group-hover:text-accent-text-soft transition-colors">{a.title}</p>
+ <p className="font-semibold text-sm group-hover:text-accent transition-colors">{a.title}</p>
  {a.excerpt && <p className="text-prose-faint text-xs mt-1 line-clamp-1">{a.excerpt}</p>}
  </div>
  <span className="text-xs text-accent-text font-medium ml-4 shrink-0">Read</span>

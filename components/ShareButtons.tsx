@@ -10,7 +10,7 @@ interface Props {
 }
 
 const BTN_BASE =
-  'place-items-center w-11 h-11 rounded-full border border-soft bg-surface text-prose-muted hover:text-prose hover:border-strong hover:bg-surface-raised transition-colors'
+  'place-items-center w-11 h-11 rounded-md border-2 border-prose text-prose hover:bg-prose hover:text-surface transition-colors'
 const BTN = `grid ${BTN_BASE}`
 
 const noopSubscribe = () => () => {}
@@ -103,7 +103,7 @@ export default function ShareButtons({ title }: Props) {
         onClick={copyLink}
         aria-label={copied ? 'Link copied' : 'Copy link'}
         title={copied ? 'Link copied' : 'Copy link'}
-        className={`${BTN} ${copied ? 'text-forest border-forest/50' : ''}`}
+        className={`${BTN} ${copied ? 'bg-prose text-surface' : ''}`}
       >
         {copied ? (
           <CheckIcon className="w-4 h-4" strokeWidth={2.5} />

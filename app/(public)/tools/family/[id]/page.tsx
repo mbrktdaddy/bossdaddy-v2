@@ -38,6 +38,7 @@ import MomentsFeed from '@/components/dad-tools/MomentsFeed'
 import WeeklyCheckinOptIn from '@/components/dad-tools/WeeklyCheckinOptIn'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import SectionHeader from '@/components/SectionHeader'
 import { ChevronRightIcon } from '@/components/icons'
 
 interface PageProps {
@@ -211,20 +212,11 @@ export default async function KidProfilePage({ params }: PageProps) {
 
       {/* Time card — child-only (the Milestones tool, counting to 18) */}
       {isChild && (
-        <Card as="section" className="p-5 sm:p-6">
-          <div className="flex items-baseline justify-between gap-3">
-            <Eyebrow>
-              {LABELS.tools.weekendsUntil.spokeRole}
-            </Eyebrow>
-            {!past18 && (
-              <Link
-                href={weekendsHref}
-                className="text-xs font-semibold text-accent hover:underline"
-              >
-                Open {LABELS.tools.weekendsUntil.short} →
-              </Link>
-            )}
-          </div>
+        <Card as="section" tone="chrome" className="p-5 sm:p-6">
+          <SectionHeader
+            label={LABELS.tools.weekendsUntil.spokeRole}
+            right={past18 ? undefined : { label: `Open ${LABELS.tools.weekendsUntil.short}`, href: weekendsHref }}
+          />
           {past18 ? (
             <p className="mt-3 text-2xl font-black text-prose-muted leading-tight">
               {displayName} is past 18.
@@ -244,18 +236,11 @@ export default async function KidProfilePage({ params }: PageProps) {
 
       {/* Time card — adults: a custom-milestone Weekends launcher (no age math) */}
       {!isChild && (
-        <Card as="section" className="p-5 sm:p-6">
-          <div className="flex items-baseline justify-between gap-3">
-            <Eyebrow>
-              {LABELS.tools.weekendsUntil.spokeRole}
-            </Eyebrow>
-            <Link
-              href={weekendsHref}
-              className="text-xs font-semibold text-accent hover:underline"
-            >
-              Open {LABELS.tools.weekendsUntil.short} →
-            </Link>
-          </div>
+        <Card as="section" tone="chrome" className="p-5 sm:p-6">
+          <SectionHeader
+            label={LABELS.tools.weekendsUntil.spokeRole}
+            right={{ label: `Open ${LABELS.tools.weekendsUntil.short}`, href: weekendsHref }}
+          />
           <p className="mt-3 text-sm text-prose-muted leading-relaxed">
             Pick a milestone that matters with {displayName} — an anniversary, a
             trip, a season — and see how many weekends are left.
@@ -268,18 +253,11 @@ export default async function KidProfilePage({ params }: PageProps) {
           using the kid's persisted Dad Math inputs (migration 077). A brand-new
           kid with default 0/0/$94k/6% reads as "Just getting started". */}
       {isChild && dadMath && !past18 && (
-        <Card as="section" className="p-5 sm:p-6">
-          <div className="flex items-baseline justify-between gap-3">
-            <Eyebrow>
-              {LABELS.tools.dadMath.spokeRole}
-            </Eyebrow>
-            <Link
-              href={dadMathHref}
-              className="text-xs font-semibold text-accent hover:underline"
-            >
-              Open Dad Math →
-            </Link>
-          </div>
+        <Card as="section" tone="chrome" className="p-5 sm:p-6">
+          <SectionHeader
+            label={LABELS.tools.dadMath.spokeRole}
+            right={{ label: 'Open Dad Math', href: dadMathHref }}
+          />
           <p className="mt-3 text-xl sm:text-2xl font-black text-prose leading-snug">
             {dadMathTagline({
               verdict:          dadMath.verdict,
@@ -328,18 +306,14 @@ export default async function KidProfilePage({ params }: PageProps) {
       )}
 
       {/* Savings card — goals tied to this kid */}
-      <Card as="section" className="p-5 sm:p-6">
-        <div className="flex items-baseline justify-between gap-3">
-          <Eyebrow>
-            {LABELS.tools.savings.full}
-          </Eyebrow>
-          <Link
-            href={`/tools/savings/new?kid=${kidRow.id}${kidRow.name ? `&name=${encodeURIComponent(`Savings for ${kidRow.name}`)}` : ''}`}
-            className="text-xs font-semibold text-accent hover:underline"
-          >
-            New goal for {displayName} →
-          </Link>
-        </div>
+      <Card as="section" tone="chrome" className="p-5 sm:p-6">
+        <SectionHeader
+          label={LABELS.tools.savings.full}
+          right={{
+            label: `New goal for ${displayName}`,
+            href: `/tools/savings/new?kid=${kidRow.id}${kidRow.name ? `&name=${encodeURIComponent(`Savings for ${kidRow.name}`)}` : ''}`,
+          }}
+        />
         {kidGoals.length === 0 ? (
           <p className="mt-3 text-sm text-prose-muted leading-relaxed">
             No savings goals tied to {displayName} yet. Tap above to start one — a tiny daily commitment compounds fast.
@@ -378,17 +352,13 @@ export default async function KidProfilePage({ params }: PageProps) {
       </Card>
 
       {/* Presence card */}
-      <Card as="section" className="p-5 sm:p-6">
-        <div className="flex items-baseline justify-between gap-3">
-          <Eyebrow>
-            {LABELS.tools.presence.spokeRole}
-          </Eyebrow>
-          <span className="text-xs text-prose-faint">
-            {momentCount === 0
-              ? 'No moments yet'
-              : `${momentCount} ${momentCount === 1 ? 'moment' : 'moments'} captured`}
-          </span>
-        </div>
+      <Card as="section" tone="chrome" className="p-5 sm:p-6">
+        <SectionHeader
+          label={LABELS.tools.presence.spokeRole}
+          sub={momentCount === 0
+            ? 'No moments yet'
+            : `${momentCount} ${momentCount === 1 ? 'moment' : 'moments'} captured`}
+        />
         <p className="mt-3 text-xl sm:text-2xl font-black text-prose leading-snug">
           {daysSinceLast === null
             ? `Start ${logTitle(kidRow.name)}.`

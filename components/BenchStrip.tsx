@@ -1,21 +1,29 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getStatusColor, getStatusLabel, type WishlistStatus } from '@/lib/wishlist'
+import { getStatusLabel, type WishlistStatus } from '@/lib/wishlist'
+import { getCategoryBySlug } from '@/lib/categories'
 import { LABELS } from '@/lib/labels'
-import { Card } from '@/components/ui/Card'
 import { PhotoIcon } from '@/components/icons'
 
 interface Props {
   heading?: string
   ctaText?: string
-  /** Subhead under the eyebrow — defaults to the canonical bench tagline.
-   *  Pass null to hide; pass a string to override. */
+  /** One-liner after the heading in the black strip (sm+ only) — defaults to the
+   *  canonical bench tagline. Pass null to hide; pass a string to override. */
   subhead?: string | null
 }
 
 const STATUS_RANK: Record<string, number> = { testing: 0, queued: 1 }
 
+/**
+ * On the bench — the boxed utility module (Hard Goods, 2026-10-14; brand-guide
+ * §6/§10). A 2px black box with a BLACK header strip (live dot · label · link)
+ * and SOLID status chips — orange for testing, black for queued. The
+ * 2026-10-08 version was a soft card with hairline pills and read as plain on
+ * white; the bench is a work surface, so it gets the tool-like treatment.
+ * Self-suppresses at zero items.
+ */
 export default async function BenchStrip({
   heading = 'On the Bench',
   ctaText = "See what's on the bench",
@@ -24,7 +32,7 @@ export default async function BenchStrip({
   const admin = createAdminClient()
   const { data } = await admin
     .from('products')
-    .select('id, slug, title:name, image_url, status')
+    .select('id, slug, title:name, image_url, status, category')
     .in('status', ['testing', 'queued'])
     .order('priority', { ascending: false })
     .limit(20)
@@ -37,74 +45,72 @@ export default async function BenchStrip({
   if (items.length === 0) return null
 
   return (
-    <Card className="p-5 sm:p-6">
-      {/* Header — eyebrow + invitation tagline + CTA. The pulsing dot
-          uses the action orange (vibrant) for "live testing signal"
-          while the eyebrow text stays in the orange-700 brand voice. */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4 mb-5">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse shadow-[0_0_10px_rgba(229,90,26,0.7)]" />
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-eyebrow">{heading}</span>
-          </div>
-          {subhead && (
-            <p className="mt-1.5 text-xs text-prose-muted leading-snug">{subhead}</p>
-          )}
-        </div>
-        <Link href="/bench" className="self-start shrink-0 text-xs text-prose-muted hover:text-copper transition-colors font-semibold whitespace-nowrap uppercase tracking-widest">
-          {ctaText} →
+    <div className="border-2 border-chrome rounded-xl overflow-hidden bg-surface">
+      {/* Header strip — a dark ZONE: the pulsing dot is the live-testing signal,
+          the label is the module's name, the link is the one action. */}
+      <div data-theme="dark" className="bg-chrome text-prose flex items-center gap-2.5 px-4 min-h-[44px]">
+        <span aria-hidden className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse shadow-[0_0_0_4px_rgba(229,90,26,0.25)]" />
+        <span className="font-display font-black text-xs uppercase tracking-[0.16em]">{heading}</span>
+        {subhead && (
+          <span className="hidden sm:inline min-w-0 truncate text-xs text-prose-faint">· {subhead}</span>
+        )}
+        <Link
+          href="/bench"
+          className="ml-auto shrink-0 inline-flex items-center min-h-[44px] font-display font-extrabold text-[11px] uppercase tracking-[0.1em] text-accent-text hover:text-prose transition-colors whitespace-nowrap"
+        >
+          {ctaText}
         </Link>
       </div>
 
       {/* Queue rows */}
       <ul className="divide-y divide-soft">
-        {items.map((item) => (
-          <li key={item.id}>
-            <Link
-              href={`/bench/${item.slug}`}
-              className="group flex items-center gap-3 sm:gap-4 py-3 -mx-2 px-2 rounded-lg hover:bg-surface-raised transition-colors min-h-[64px]"
-            >
-              {/* Thumbnail — square, fills */}
-              <div className="relative shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-surface-sunken border border-soft">
-                {item.image_url ? (
-                  <Image
-                    src={item.image_url}
-                    alt="" /* decorative: the link's text already names it — an alt here gets read twice */
-                    fill
-                    className="object-cover"
-                    sizes="64px"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <PhotoIcon className="w-5 h-5 text-prose-faint" strokeWidth={1.5} />
-                  </div>
-                )}
-              </div>
+        {items.map((item) => {
+          const testing = item.status === 'testing'
+          const cat = item.category ? getCategoryBySlug(item.category) : null
+          return (
+            <li key={item.id}>
+              <Link
+                href={`/bench/${item.slug}`}
+                className="group flex items-center gap-3.5 px-4 py-3 hover:bg-surface-raised transition-colors min-h-[72px]"
+              >
+                {/* Thumbnail — square, fills */}
+                <div className="relative shrink-0 w-14 h-14 rounded-sm overflow-hidden bg-surface-sunken">
+                  {item.image_url ? (
+                    <Image
+                      src={item.image_url}
+                      alt="" /* decorative: the link's text already names it — an alt here gets read twice */
+                      fill
+                      className="object-cover"
+                      sizes="56px"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <PhotoIcon className="w-5 h-5 text-prose-faint" strokeWidth={1.5} />
+                    </div>
+                  )}
+                </div>
 
-              {/* Pill + title. On mobile they stack: in one row the fixed-width pill
-                  left the title ~40% of a 320px screen, so `line-clamp-1` chopped
-                  nearly every product name. Stacked, the title gets the full width and
-                  two lines. From `sm` up it's the original single row, where the pill's
-                  min-width keeps titles aligned down the list. */}
-              <div className="min-w-0 flex-1 flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-4">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-prose leading-snug line-clamp-2 group-hover:text-accent-text transition-colors">
+                    {item.title}
+                  </p>
+                  {cat && <p className="mt-0.5 text-xs text-prose-faint">{cat.shortLabel}</p>}
+                </div>
+
+                {/* Solid status chip — orange = testing now, black = up next.
+                    Colour carries the state; the box never changes (brand-guide §2). */}
                 <span
-                  className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-surface-raised border border-soft shrink-0 text-center sm:min-w-[88px] ${getStatusColor(item.status as WishlistStatus)}`}
+                  className={`shrink-0 font-display font-black text-[10px] uppercase tracking-[0.14em] px-2.5 py-1.5 rounded-sm text-white whitespace-nowrap ${
+                    testing ? 'bg-accent' : 'bg-chrome'
+                  }`}
                 >
                   {getStatusLabel(item.status as WishlistStatus)}
                 </span>
-                <p className="min-w-0 text-sm font-bold text-prose group-hover:text-accent-text-soft transition-colors line-clamp-2 sm:line-clamp-1 sm:flex-1">
-                  {item.title}
-                </p>
-              </div>
-
-              {/* Arrow */}
-              <span aria-hidden className="text-prose-faint group-hover:text-copper transition-colors text-lg shrink-0">
-                →
-              </span>
-            </Link>
-          </li>
-        ))}
+              </Link>
+            </li>
+          )
+        })}
       </ul>
-    </Card>
+    </div>
   )
 }

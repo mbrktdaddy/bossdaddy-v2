@@ -49,6 +49,10 @@ import TrackView from '@/components/TrackView'
 import RecentlyViewedStrip from '@/components/RecentlyViewedStrip'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import EditorialHeader from '@/components/EditorialHeader'
+import SectionHeader from '@/components/SectionHeader'
+import { Badge } from '@/components/ui/Badge'
+import { PILL_BASE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 import { CheckCircleIcon, ChevronLeftIcon } from '@/components/icons'
 import { productIdentifiersJsonLd } from '@/lib/products/identifiers'
 
@@ -383,9 +387,9 @@ export default async function ReviewPage({ params }: Props) {
             {category && (
               <Link
                 href={`/category/${category.slug}`}
-                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-surface border border-soft text-prose-muted hover:border-strong hover:text-prose transition-colors"
+                className={`${PILL_BASE} ${PILL_INACTIVE}`}
               >
-                <CategoryIcon slug={category.slug} className="w-4 h-4 text-accent-text" /> {category.label}
+                <CategoryIcon slug={category.slug} className="w-4 h-4" /> {category.label}
               </Link>
             )}
             {/* "From the Bench" — closes the lifecycle loop when this review
@@ -398,10 +402,12 @@ export default async function ReviewPage({ params }: Props) {
               <Link
                 href={testingLog.length > 0 ? '#testing-log' : '/bench'}
                 title={LABELS.bench.tagline}
-                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-accent-tint border border-accent-border/40 text-accent-text hover:border-accent-border/60 hover:bg-accent-tint hover:text-accent transition-colors"
+                className="inline-flex"
               >
-                <CheckCircleIcon className="w-3.5 h-3.5 text-accent-text-soft" strokeWidth={1.5} />
-                From the Bench
+                <Badge tone="neutral" size="md">
+                  <CheckCircleIcon className="w-3.5 h-3.5" strokeWidth={1.5} />
+                  From the Bench
+                </Badge>
               </Link>
             )}
           </div>
@@ -545,12 +551,8 @@ export default async function ReviewPage({ params }: Props) {
             sources/models it was based on. Independent of the opt-in table below. */}
         {hasSpecsGrade && (
           <section className="mt-12 pt-8 border-t border-soft" aria-label="Specs grade">
-            <div className="mb-4">
-              <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-              <Eyebrow className="mb-1">Specs Grade</Eyebrow>
-              <h2 className="text-2xl font-black text-prose leading-tight">How the specs stack up</h2>
-            </div>
-            <Card className="p-5 sm:p-6">
+            <SectionHeader label="Specs Grade" heading="How the specs stack up" />
+            <Card tone="chrome" className="p-5 sm:p-6">
               <div className="flex items-baseline gap-3 mb-3">
                 <span className="text-3xl font-black text-prose tabular-nums leading-none">
                   {review.score_specs}<span className="text-base text-prose-faint font-bold">/10</span>
@@ -561,7 +563,7 @@ export default async function ReviewPage({ params }: Props) {
 
               {(specsData.comparedAgainst.length > 0 || specsData.sources.length > 0) && (
                 <details className="mt-4 text-sm">
-                  <summary className="cursor-pointer text-prose-muted hover:text-accent-text-soft font-medium">
+                  <summary className="cursor-pointer text-prose-muted hover:text-accent font-medium">
                     What this was compared against
                   </summary>
                   <div className="mt-3 space-y-2">
@@ -634,30 +636,22 @@ export default async function ReviewPage({ params }: Props) {
             back into how-to/explainer content in the same category. */}
         {relatedGuides && relatedGuides.length > 0 && (
           <div className="mt-12">
-            <div className="mb-5 flex items-stretch gap-3">
-              <div className="w-[3px] bg-accent rounded-full shrink-0" />
-              <div>
-                <p className="text-[13px] uppercase tracking-[0.18em] font-black text-prose">Related Guides</p>
-                <h2 className="mt-1 text-lg font-black text-prose">
-                  {category ? `${category.label} guides` : 'Go deeper'}
-                </h2>
-              </div>
-            </div>
+            <EditorialHeader eyebrow="Related Guides" title={category ? `${category.label} guides` : 'Go deeper'} />
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {relatedGuides.map((g) => (
                 <Link
                   key={g.id}
                   href={`/guides/${g.slug}`}
-                  className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden hover:border-accent hover:-translate-y-0.5 transition-all"
+                  className="group flex flex-col"
                 >
                   {g.image_url && (
-                    <div className="relative w-full aspect-[16/9] bg-surface-sunken">
+                    <div className="relative w-full aspect-[16/10] rounded-xl overflow-hidden bg-surface-raised">
                       <Image src={g.image_url} alt={g.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 240px" />
                     </div>
                   )}
-                  <div className="p-4 flex flex-col flex-1">
-                    <p className="text-[10px] text-accent-text-soft uppercase tracking-[0.2em] font-black mb-1.5">Guide</p>
-                    <h3 className="text-sm font-black text-prose leading-snug group-hover:text-accent-text-soft transition-colors line-clamp-2">{g.title}</h3>
+                  <div className="pt-3 flex flex-col flex-1">
+                    <p className="text-[10px] text-eyebrow uppercase tracking-[0.2em] font-black mb-1.5">Guide</p>
+                    <h3 className="text-sm font-extrabold text-prose leading-snug group-hover:text-accent transition-colors line-clamp-2">{g.title}</h3>
                     {g.excerpt && (
                       <p className="mt-1.5 text-xs text-prose-muted leading-relaxed line-clamp-2">{g.excerpt}</p>
                     )}
@@ -674,19 +668,13 @@ export default async function ReviewPage({ params }: Props) {
         {/* Related reviews — mobile only */}
         {related && related.length > 0 && (
           <div className="mt-12 xl:hidden">
-            <div className="mb-4 flex items-stretch gap-3">
-              <div className="w-[3px] bg-accent rounded-full shrink-0" />
-              <div>
-                <p className="text-[13px] uppercase tracking-[0.18em] font-black text-prose">More Reviews</p>
-                <h2 className="mt-1 text-lg font-black text-prose">Keep reading</h2>
-              </div>
-            </div>
-            <div className="space-y-2">
+            <EditorialHeader eyebrow="More Reviews" title="Keep reading" />
+            <div>
               {related.map((r) => (
                 <Link
                   key={r.id}
                   href={`/reviews/${r.slug}`}
-                  className="flex items-center justify-between p-4 bg-surface border border-soft rounded-xl hover:border-accent hover:-translate-y-0.5 transition-all group"
+                  className="flex items-center justify-between py-4 border-t border-soft group"
                 >
                   <p className="text-sm font-semibold text-prose group-hover:text-accent transition-colors truncate min-w-0 mr-4">{r.title}</p>
                   <RatingScore rating={r.rating ?? 0} size="sm" />
@@ -700,8 +688,8 @@ export default async function ReviewPage({ params }: Props) {
 
         {/* ── Community ── Related content sits above comments: while volume is
             low, an empty thread high on the page reads as a ghost town. */}
-        <section className="mt-12 pt-8 border-t border-soft" aria-labelledby="comments-heading">
-          <h2 id="comments-heading" className="text-xl font-black mb-5">Comments</h2>
+        <section className="mt-12 pt-8 border-t border-soft" aria-label="Comments">
+          <SectionHeader label="Comments" />
           <div className="space-y-4">
             <RatingWidget reviewId={review.id} />
             <CommentForm contentType="review" contentId={review.id} />
@@ -757,11 +745,8 @@ export default async function ReviewPage({ params }: Props) {
 
           {/* Related Reviews */}
           {related && related.length > 0 && (
-            <Card className="p-5">
-              <div className="flex items-stretch gap-3 mb-4">
-                <div className="w-[3px] bg-accent rounded-full shrink-0" />
-                <p className="text-[12px] uppercase tracking-[0.18em] font-black text-prose self-center">More Reviews</p>
-              </div>
+            <div>
+              <SectionHeader label="More Reviews" />
               <div className="space-y-4">
                 {related.map((r) => (
                   <Link
@@ -774,7 +759,7 @@ export default async function ReviewPage({ params }: Props) {
                   </Link>
                 ))}
               </div>
-            </Card>
+            </div>
           )}
 
         </aside>

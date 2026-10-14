@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { vaultHref, vaultTypeLabel } from '@/lib/vault'
-import { Eyebrow } from '@/components/ui/Eyebrow'
+import EditorialHeader from '@/components/EditorialHeader'
 import { CubeIcon, ScaleIcon, StarIcon } from '@/components/icons'
 
 export type RelatedCollectionType = 'comparison' | 'general' | 'best_of' | 'stack' | 'gift_guide'
@@ -42,11 +42,7 @@ export default function RelatedRail({
 
   return (
     <section id={id} aria-label={heading} className="mt-14 pt-10 border-t border-soft">
-      <div className="mb-6">
-        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-        <Eyebrow className="mb-1">{eyebrow}</Eyebrow>
-        <h2 className="text-2xl font-black text-prose leading-tight">{heading}</h2>
-      </div>
+      <EditorialHeader eyebrow={eyebrow} title={heading} />
 
       {/* Mobile: horizontal scroll strip */}
       <div className="sm:hidden -mx-6 px-6">
@@ -73,9 +69,9 @@ function RelatedCard({ item, className }: { item: RelatedItem; className?: strin
   return (
     <Link
       href={href}
-      className={`group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden hover:border-accent-border/40 hover:-translate-y-1 transition-all ${className ??''}`}
+      className={`group flex flex-col ${className ??''}`}
     >
-      <div className="relative aspect-[4/3] bg-surface-sunken">
+      <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-surface-raised">
         {item.hero_image_url ? (
           <Image src={item.hero_image_url} alt="" /* decorative: the link's text already names it — an alt here gets read twice */ fill className="object-cover" sizes="(max-width: 640px) 256px, (max-width: 1024px) 50vw, 33vw" />
         ) : (
@@ -85,19 +81,19 @@ function RelatedCard({ item, className }: { item: RelatedItem; className?: strin
             </svg>
           </div>
         )}
-        <span className="absolute top-2 left-2 inline-flex items-center gap-1 bg-surface-sunken/85 backdrop-blur border border-soft rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-accent-text-soft">
+        <span className="absolute top-2 left-2 inline-flex items-center gap-1 bg-chrome text-white rounded-sm px-2 py-1 text-[10px] font-display font-black uppercase tracking-[0.14em]">
           {icon}
           {vaultTypeLabel(item.collection_type)}
         </span>
       </div>
-      <div className="p-4 flex-1 flex flex-col">
-        <p className="text-sm font-bold text-prose group-hover:text-accent-text-soft transition-colors leading-snug line-clamp-2 mb-1">
+      <div className="pt-3 flex-1 flex flex-col">
+        <p className="text-sm font-extrabold text-prose group-hover:text-accent transition-colors leading-snug line-clamp-2 mb-1">
           {item.title}
         </p>
         {item.description && (
           <p className="text-xs text-prose-faint line-clamp-2 leading-relaxed flex-1">{item.description}</p>
         )}
-        <p className="mt-3 text-[10px] text-prose-faint uppercase tracking-widest font-semibold group-hover:text-accent-text-soft transition-colors">
+        <p className="mt-3 text-[10px] text-prose-faint uppercase tracking-widest font-semibold group-hover:text-accent transition-colors">
           Read →
         </p>
       </div>

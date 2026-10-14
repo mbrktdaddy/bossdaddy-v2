@@ -1,3 +1,5 @@
+import { Card } from '@/components/ui/Card'
+import { LabelBlock } from '@/components/ui/LabelBlock'
 import { ChevronDownIcon } from '@/components/icons'
 import { LABELS } from '@/lib/labels'
 import { formatNoteDate, type TestingNoteWithWeek } from '@/lib/products/testing-notes'
@@ -37,9 +39,10 @@ export function TestingLog({ notes, collapsible = false, className = '' }: Props
 
   if (collapsible) {
     return (
-      <details id="testing-log" className={`group rounded-xl border border-soft bg-surface ${className}`}>
+      <Card as="div" tone="chrome" className={className}>
+      <details id="testing-log" className="group">
         <summary className="flex items-center justify-between gap-3 cursor-pointer list-none px-4 py-3 min-h-[44px]">
-          <span className="text-xs font-black uppercase tracking-widest text-prose-muted">{LABELS.testingLog.full}</span>
+          <LabelBlock>{LABELS.testingLog.full}</LabelBlock>
           <span className="flex items-center gap-2 text-xs text-prose-faint">
             {notes.length} {notes.length === 1 ? 'entry' : 'entries'}
             <ChevronDownIcon className="w-3 h-3 group-open:rotate-180 transition-transform" strokeWidth={2} />
@@ -47,13 +50,14 @@ export function TestingLog({ notes, collapsible = false, className = '' }: Props
         </summary>
         <div className="px-4 pb-4 pt-1">{list}</div>
       </details>
+      </Card>
     )
   }
 
   return (
-    <section id="testing-log" className={className} aria-labelledby="testing-log-heading">
-      <h2 id="testing-log-heading" className="text-lg font-black mb-4">{LABELS.testingLog.full}</h2>
+    <Card as="section" tone="chrome" id="testing-log" className={`p-5 ${className}`} aria-labelledby="testing-log-heading">
+      <LabelBlock as="div" className="mb-4"><h2 id="testing-log-heading">{LABELS.testingLog.full}</h2></LabelBlock>
       {list}
-    </section>
+    </Card>
   )
 }

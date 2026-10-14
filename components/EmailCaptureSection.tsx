@@ -22,6 +22,15 @@ interface Props {
   interests?: string
 }
 
+/**
+ * The newsletter block — Hard Goods (2026-10-14; brand-guide §6/§10). The
+ * page's one solid ORANGE block: uppercase Montserrat black headline, a white
+ * field with a 2px black edge, a black button. Ink is the chrome black
+ * (4.6:1 on the core orange — the page's prose black misses AA here, and
+ * white-on-orange misses it everywhere, so this is not a dark zone). Two
+ * columns on lg, stacked on a phone. The 2026-10-08 version was a centred
+ * white section with a 3px orange top rule; it read as a form, not a moment.
+ */
 export default function EmailCaptureSection({
   eyebrow = 'The Weekly Drop',
   heading = 'Sunday morning. One email.',
@@ -31,23 +40,23 @@ export default function EmailCaptureSection({
   interests = 'newsletter',
 }: Props) {
   return (
-    <section className="bg-background border-t-[3px] border-accent border-b border-soft">
-      <div className="max-w-2xl mx-auto px-6 py-16 text-center">
-        <p className="text-[11px] font-black text-accent uppercase tracking-[0.22em] mb-4">
-          {eyebrow}
-        </p>
-        <h2 className="text-3xl font-black text-prose leading-tight tracking-tight mb-3">
-          {heading}
-        </h2>
-        <p className="text-base text-prose-muted leading-relaxed mb-8 max-w-md mx-auto">
-          {subhead}
-        </p>
-        {/* `justify-center` because the button WRAPS to its own line on mobile (the
-            input's basis-60 leaves no room beside it) and would otherwise sit
-            flex-start — reading as misaligned under a centred section. Paired with
-            `basis-full` on the button below, so on mobile it's a full-width CTA
-            rather than a small centred one. */}
-        <form action={action} method="POST" className="flex flex-wrap justify-center gap-2 max-w-md mx-auto">
+    <section className="bg-accent text-chrome border-b border-soft">
+      <div className="max-w-6xl mx-auto px-6 py-11 md:py-16 grid gap-5 lg:grid-cols-2 lg:items-center lg:gap-10">
+        <div>
+          <p className="font-display font-extrabold text-[11px] uppercase tracking-[0.2em]">
+            {eyebrow}
+          </p>
+          <h2 className="font-black uppercase text-[40px] md:text-[56px] leading-[0.95] tracking-[-0.03em] mt-2">
+            {heading}
+          </h2>
+          <p className="font-semibold text-[15px] leading-relaxed mt-3 max-w-[46ch]">
+            {subhead}
+          </p>
+        </div>
+        {/* The button WRAPS to its own line on a phone (the input's basis-60 leaves
+            no room beside it) and takes the full width there; from sm up the two
+            sit in one row. */}
+        <form action={action} method="POST" className="flex flex-wrap gap-2">
           <input type="hidden" name="interests" value={interests} />
           <label htmlFor="email-capture-input" className="sr-only">Email address</label>
           <input
@@ -57,13 +66,13 @@ export default function EmailCaptureSection({
             autoComplete="email"
             required
             placeholder="you@example.com"
-            className="flex-1 min-w-0 basis-60 px-4 py-3.5 text-sm bg-surface border border-strong rounded-xl text-prose placeholder:text-prose-faint focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-colors"
+            className="flex-1 min-w-0 basis-60 min-h-[48px] px-3.5 text-[15px] bg-surface border-2 border-chrome rounded-md text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-chrome/30 transition-shadow"
           />
           <button
             type="submit"
-            className={buttonVariants({ size: 'lg', className: 'basis-full sm:basis-auto' })}
+            className={buttonVariants({ variant: 'onBlock', size: 'lg', className: 'basis-full sm:basis-auto' })}
           >
-            {buttonLabel} →
+            {buttonLabel}
           </button>
         </form>
       </div>

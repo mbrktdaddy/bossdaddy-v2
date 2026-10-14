@@ -9,6 +9,8 @@ import Link from 'next/link'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { BackLink } from '@/components/ui/BackLink'
 import { LABELS } from '@/lib/labels'
+import { buttonVariants } from '@/components/ui/Button'
+import { PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 
 export function CalculatorPage({
   role, short, h1, tagline, disclosure, children,
@@ -43,7 +45,7 @@ export function CalculatorPage({
 // ONE NUMBER PER PAGE: `headline` is the big number, `label` names it, and
 // everything in `stats` is supporting.
 export function ResultCard({
-  label, headline, subhead, voice, stats, tone = 'neutral', children,
+  label, headline, subhead, voice, stats, children,
 }: {
   label:     string
   headline:  string
@@ -53,14 +55,11 @@ export function ResultCard({
   tone?:     'good' | 'neutral' | 'warn'
   children?: React.ReactNode
 }) {
-  const border =
-    tone === 'good' ? 'border-accent/40' :
-    tone === 'warn' ? 'border-strong' :
-                      'border-soft'
+  // The ONE black panel per screen (Hard Goods): tokens invert inside the zone.
   return (
-    <section className={`bg-surface rounded-2xl p-6 sm:p-8 space-y-5 border-2 ${border}`}>
+    <section data-theme="dark" className="bg-chrome text-prose border-t-4 border-accent rounded-xl p-6 sm:p-8 space-y-5">
       <div>
-        <p className="text-[10px] uppercase tracking-widest font-semibold text-prose-faint">{label}</p>
+        <p className="text-[10px] uppercase tracking-widest font-semibold text-accent-text">{label}</p>
         <p className="mt-1 text-4xl sm:text-5xl font-black text-accent tabular-nums leading-none">
           {headline}
         </p>
@@ -108,7 +107,7 @@ export function ResultLinks({
           )}
           <Link
             href={l.href}
-            className="inline-flex items-center gap-2 py-1 text-sm font-semibold text-accent hover:text-accent-hover transition-colors"
+            className={buttonVariants({ variant: 'outline', size: 'sm' })}
           >
             {l.label}
             <span aria-hidden>→</span>
@@ -130,7 +129,7 @@ export function Segmented<T extends string>({
   label:    string
 }) {
   return (
-    <div role="radiogroup" aria-label={label} className="inline-flex gap-1 p-1 bg-surface border border-soft rounded-full">
+    <div role="radiogroup" aria-label={label} className="flex flex-wrap gap-2">
       {options.map((o) => (
         <button
           key={o.value}
@@ -138,9 +137,7 @@ export function Segmented<T extends string>({
           role="radio"
           aria-checked={value === o.value}
           onClick={() => onChange(o.value)}
-          className={`px-4 py-2.5 rounded-full text-sm font-semibold transition-colors ${
-            value === o.value ? 'bg-accent text-white' : 'text-prose-faint hover:text-prose'
-          }`}
+          className={`${PILL_BASE} ${value === o.value ? PILL_ACTIVE : PILL_INACTIVE}`}
         >
           {o.label}
         </button>

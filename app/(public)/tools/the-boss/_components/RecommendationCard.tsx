@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { ReviewBlock } from '@/lib/boss/types'
 import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
+import { Badge } from '@/components/ui/Badge'
 
 // The rich pick card for a real, hands-on TESTED review (kind 'review') — verdict
 // scores + buy link + FTC line. Guides render in GuideCard, researched picks in
@@ -51,9 +52,8 @@ export default function RecommendationCard({ c }: { c: ReviewBlock }) {
 function Pill({ label, v }: { label: string; v: number | null }) {
   if (typeof v !== 'number') return null
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-soft px-2 py-0.5">
-      <span className="text-prose-faint">{label}</span>
-      <span className="font-semibold text-prose tabular-nums">{v}</span>
-    </span>
+    <Badge tone="neutral" size="sm">
+      {label} <span className="tabular-nums">{v}</span>
+    </Badge>
   )
 }

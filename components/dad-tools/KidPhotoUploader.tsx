@@ -97,7 +97,7 @@ export default function KidPhotoUploader({
     return (
       <div className="flex flex-col items-center sm:items-start sm:flex-row gap-3">
         <div
-          className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-700 to-orange-950 flex items-center justify-center text-3xl font-black text-white shrink-0"
+          className="w-20 h-20 rounded-full bg-chrome flex items-center justify-center text-3xl font-black text-white shrink-0"
           aria-hidden="true"
         >
           {initial}
@@ -118,7 +118,7 @@ export default function KidPhotoUploader({
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) pickForCrop(f) }}
         title="Click or drop a JPG, PNG, or WebP"
-        className="group relative w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-orange-700 to-orange-950 flex items-center justify-center text-3xl font-black text-white shrink-0 hover:ring-orange-700 transition-all disabled:opacity-50 disabled:cursor-wait"
+        className="group relative w-20 h-20 rounded-full overflow-hidden bg-chrome flex items-center justify-center text-3xl font-black text-white shrink-0 transition-all disabled:opacity-50 disabled:cursor-wait"
         aria-label={photoUrl ? 'Change kid photo' : 'Upload kid photo'}
       >
         {photoUrl ? (

@@ -7,6 +7,7 @@ import { familyPhotoSrc } from '@/lib/dad-tools/family-photo'
 import { LABELS } from '@/lib/labels'
 import KidPhotoUploader from './KidPhotoUploader'
 import { buttonVariants } from '@/components/ui/Button'
+import { PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 
 const MEMBER_TYPES: MemberType[] = ['child', 'partner', 'other']
 const NAME_PLACEHOLDER: Record<MemberType, string> = {
@@ -106,11 +107,7 @@ export default function KidProfileForm(props: Props) {
               key={t}
               type="button"
               onClick={() => { setMemberType(t); setError(null) }}
-              className={`px-3 py-2.5 rounded-xl text-sm font-semibold border transition-colors min-h-[44px] ${
-                memberType === t
-                  ? 'bg-accent border-accent text-white'
-                  : 'bg-surface-sunken border-strong text-prose-muted hover:text-prose'
-              }`}
+              className={`${PILL_BASE} justify-center ${memberType === t ? PILL_ACTIVE : PILL_INACTIVE}`}
             >
               {LABELS.tools.kids.memberType[t]}
             </button>

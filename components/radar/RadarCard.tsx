@@ -1,6 +1,5 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { Card } from '@/components/ui/Card'
 import { LightboxImage } from '@/components/LightboxImage'
 import CategoryIcon from '@/components/CategoryIcon'
 import { PhotoIcon } from '@/components/icons'
@@ -31,8 +30,8 @@ export function RadarCard({ item, headingLevel: Heading = 'h3' }: Props) {
   const cat = item.category ? getCategoryBySlug(item.category) : null
 
   return (
-    <Card className="h-full overflow-hidden flex flex-col">
-      <div className="relative aspect-[4/3] bg-surface-raised">
+    <article className="h-full flex flex-col">
+      <div className="relative aspect-[4/3] bg-surface-raised rounded-xl overflow-hidden">
         {item.image_url ? (
           <LightboxImage src={item.image_url} alt={item.name} images={item.images}>
             <div className="relative aspect-[4/3]">
@@ -51,13 +50,13 @@ export function RadarCard({ item, headingLevel: Heading = 'h3' }: Props) {
           </div>
         )}
         {item.images.length > 1 && (
-          <span className="pointer-events-none absolute bottom-2 right-2 px-2.5 py-1 bg-zinc-900/60 text-white text-xs font-medium rounded-full tabular-nums">
+          <span className="pointer-events-none absolute bottom-2 right-2 bg-chrome text-white rounded-sm px-2 py-1 text-[10px] font-display font-black uppercase tracking-[0.14em] tabular-nums">
             {item.images.length} photos
           </span>
         )}
       </div>
 
-      <div className="p-4 sm:p-5 flex flex-col flex-1 gap-3">
+      <div className="pt-4 flex flex-col flex-1 gap-3">
         <div>
           <div className="flex items-center justify-between gap-3">
             {cat ? (
@@ -142,6 +141,6 @@ export function RadarCard({ item, headingLevel: Heading = 'h3' }: Props) {
           )}
         </div>
       </div>
-    </Card>
+    </article>
   )
 }

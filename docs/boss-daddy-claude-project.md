@@ -116,15 +116,15 @@ Primary domain: **bossdaddylife.com**. Core surfaces:
 
 ## 4. Design System (so on-phone ideas stay on-brand)
 
-**Light editorial canvas** (since 2026-10-08). White page, near-black text, hairline rules, a single warm-orange accent — and the chrome (masthead, footer, bottom nav, the homepage brand band, the Creed) stays **near-black**, so the black / orange / white edge lives in the frame, not in the reading surface. Modelled on the publications we're measured against (Wirecutter, Strategist, Gear Patrol, Fatherly). No gold, no per-category rainbow, no cream/peach/brown.
+**Light editorial canvas, loud through blocks — "Hard Goods"** (light since 2026-10-08; Hard Goods committed 2026-10-14 and locked until at least 2027-01-12 — `docs/brand-guide.md` §10.1). White page, near-black text, hairline rules, one orange — and the loud moments are **solid blocks**: black panels and orange fills in the utility lane (tools, bench, newsletter, score and status chips, section labels) and at brand moments (the masthead's 4px orange rule, the About band). Never a dark canvas, never a wash. Reference brands: STIHL, DeWalt, Men's Health. The chrome (masthead, footer, bottom nav, About band) stays **near-black**. No gold, no per-category rainbow, no cream/peach/brown.
 
-- **Accent — core orange `#CC5500`** on the white page (hot `#E55A1A` inside the dark chrome). Inline links / opt-in kickers `#B85A14`. Eyebrows are quiet grey by default. **Never** the default vivid Tailwind orange `#f97316`.
-- **Primary buttons are black** with white text and an orange hover; inside the dark chrome they are orange.
-- **Surfaces:** page `#ffffff`, soft panels `#fafafa`, hover `#f4f4f5`, hairlines `#e4e4e7`. **Content cards are borderless** — image, type, one hairline; no boxes, no drop-shadows.
-- **Text:** headlines + body `#18181b`, muted `#52525b`, faint `#71717a`. Every heading is Montserrat, heavy — one voice; the Fraunces serif is the Creed only.
-- Corners are tight (8px cards and buttons). Image badges are one small square black tag at most — never an orange pill.
-- **Type:** Montserrat for display/headings (`font-black` for heroes); Geist Sans for body/UI; Fraunces (serif) scoped to editorial headings (Manifesto v2); Source Serif 4 for pull-quotes only.
-- **Shape:** cards/panels/buttons are `rounded-xl` (12px); pills are `rounded-full`.
+- **Accent — core orange `#CC5500`** on the white page (hot `#E55A1A` inside the dark chrome). Inline links / opt-in kickers `#B85A14`. Ink on an orange block is the chrome black `#09090b` — never white body text on the core orange. **Never** the default vivid Tailwind orange `#f97316`.
+- **Buttons are Montserrat, UPPERCASE, square (4px):** black with an orange hover on the page, orange inside dark zones, a 2px outline for secondary actions.
+- **Masthead:** solid black with a 4px orange rule under it. On a phone the tagline is a small orange line under the wordmark and a topics scroller sits beneath; on desktop an orange brand band (tagline + what's in motion) sits under the masthead. **No brand band on a phone.**
+- **Surfaces:** page `#ffffff`, hairlines `#e4e4e7`. **Content cards are borderless** — image, type, one hairline. **Utility modules are heavy** — 2px black boxes (bench, author card), black panels (tools), one orange block (newsletter). Product tiles: square grey well, 3px black base rule, square orange score chip, "Paid $X".
+- **Section headers:** a black label block naming the role + an uppercase Montserrat black title + a 3px black rule.
+- **Text:** headlines + body `#18181b`, muted `#52525b`, faint `#71717a`. Every heading is Montserrat, heavy — one voice; the Fraunces serif is the Creed only; Source Serif 4 for pull-quotes only; Geist Sans for body/UI.
+- **Shape:** 4px corners everywhere; pills are `rounded-full`. Image badges are one small square black tag at most — never an orange pill.
 - **Tokens over raw shades:** components consume semantic role tokens (`bg-surface`, `text-prose`, `text-accent`, `border-soft`), enforced by an ESLint rule. Icons are inline SVGs (no emoji on web).
 - **Mobile-first** — min 44px tap targets; test mobile before desktop.
 

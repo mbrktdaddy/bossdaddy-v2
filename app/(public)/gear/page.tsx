@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { PillFilterStrip, PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 import Image from 'next/image'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { CATEGORIES } from '@/lib/categories'
@@ -21,6 +22,8 @@ import OccasionTiles from '@/components/collections/OccasionTiles'
 import { ogImageUrl, OG_SITE, TWITTER_HANDLE } from '@/lib/og'
 import type { Metadata } from 'next'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 import { StarIcon } from '@/components/icons'
 import VaultCard from '@/components/VaultCard'
 import { getVaultTab } from '@/lib/vault'
@@ -169,24 +172,17 @@ export default async function GearPage() {
       )}
 
       {/* ── Category filter pills — link to static path-based category routes ── */}
-      <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
-        <Link
-          href="/gear"
-          className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-accent text-white border border-accent transition-colors"
-        >
+      <PillFilterStrip className="mb-12">
+        <Link href="/gear" className={`${PILL_BASE} ${PILL_ACTIVE}`}>
           All Gear
         </Link>
         {CATEGORIES.map((c) => (
-          <Link
-            key={c.slug}
-            href={`/gear/category/${c.slug}`}
-            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose transition-colors"
-          >
+          <Link key={c.slug} href={`/gear/category/${c.slug}`} className={`${PILL_BASE} ${PILL_INACTIVE}`}>
             <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
             <span>{c.label}</span>
           </Link>
         ))}
-      </div>
+      </PillFilterStrip>
 
       {/* ── Tier summary — quick jump to each rating band ─────────────────── */}
       {(tens.length > 0 || bossApproved > 0) && (
@@ -323,16 +319,13 @@ export default async function GearPage() {
         /* No live gift guides yet — collapse to a single slim entry point
            instead of a grid of "Coming Soon" dead-ends. Self-heals into the
            full grid above once any seasonal guide gets its first pick. */
-        <Link
-          href="/gifts"
-          className="group mb-16 flex items-center justify-between gap-4 rounded-xl border border-soft bg-surface px-5 py-4 hover:border-accent-border/40 hover:bg-surface-raised transition-colors"
-        >
+        <Card tone="chrome" className="mb-16 flex items-center justify-between gap-4 px-5 py-4">
           <div>
             <Eyebrow className="mb-1">Gift Guides</Eyebrow>
             <p className="text-sm font-bold text-prose">Hand-picked gift guides for every occasion</p>
           </div>
-          <span className="shrink-0 text-sm font-semibold text-accent-text-soft group-hover:text-accent transition-colors">Explore →</span>
-        </Link>
+          <Link href="/gifts" className={buttonVariants({ variant: 'outline', size: 'sm', className: 'shrink-0' })}>Explore →</Link>
+        </Card>
       )}
 
       {/* ── Kits — stacks, the kit for the job (Phase I-3) ─────────────── */}
@@ -363,10 +356,10 @@ export default async function GearPage() {
 
           <Link
             href={`/picks/${featuredPick.slug}`}
-            className="group block bg-surface rounded-xl overflow-hidden border border-soft hover:border-accent-border/40 hover:-translate-y-1 transition-all"
+            className="group block"
           >
-            <div className="flex flex-col sm:flex-row">
-              <div className="relative w-full sm:w-72 h-48 sm:h-auto sm:min-h-[220px] shrink-0 bg-surface-raised">
+            <div className="flex flex-col sm:flex-row sm:gap-6">
+              <div className="relative w-full sm:w-72 h-48 sm:h-auto sm:min-h-[220px] shrink-0 bg-surface-raised rounded-xl overflow-hidden">
                 {featuredPick.hero_image_url ? (
                   <Image
                     src={featuredPick.hero_image_url}
@@ -377,13 +370,13 @@ export default async function GearPage() {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-surface-raised">
-                    <StarIcon className="w-12 h-12 text-accent-text/40" strokeWidth={1.5} />
+                    <StarIcon className="w-12 h-12 text-prose-faint" strokeWidth={1.5} />
                   </div>
                 )}
               </div>
-              <div className="flex-1 p-5 sm:p-6 flex flex-col justify-between">
+              <div className="flex-1 pt-4 sm:pt-0 flex flex-col justify-between">
                 <div>
-                  <h3 className="text-lg font-black text-prose leading-snug mb-2 group-hover:text-accent-text-soft transition-colors">
+                  <h3 className="text-lg font-black text-prose leading-snug mb-2 group-hover:text-accent transition-colors">
                     {featuredPick.title}
                   </h3>
                   {featuredPick.description && (
@@ -397,7 +390,7 @@ export default async function GearPage() {
                         const r = item.reviews
                         if (!r) return null
                         return (
-                          <div key={i} className="flex items-center gap-1.5 bg-surface-raised rounded-lg px-2.5 py-1.5">
+                          <div key={i} className="flex items-center gap-1.5">
                             {r.image_url && (
                               <div className="relative w-6 h-6 rounded overflow-hidden shrink-0">
                                 <Image src={r.image_url} alt={r.product_name} fill className="object-cover" sizes="24px" />

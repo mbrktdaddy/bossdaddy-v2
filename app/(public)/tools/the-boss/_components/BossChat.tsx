@@ -7,6 +7,7 @@ import { normalizeBossText } from '@/lib/boss/normalizeText'
 import BossBlocks from './BossBlocks'
 import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
+import { PILL_BASE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 
 // `failed` = a hard failure with no streamed text (the whole bubble is the error).
 // `errorNote` = a mid-stream cutoff AFTER text arrived — keep what streamed and
@@ -217,7 +218,7 @@ function BossChatSession({
   }
 
   return (
-    <Card tone="raised" className="flex flex-col overflow-hidden">
+    <Card tone="chrome" className="flex flex-col overflow-hidden">
       <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[42vh] max-h-[60vh]">
         {msgs.length === 0 && (
           <div className="py-6">
@@ -228,7 +229,7 @@ function BossChatSession({
                   key={ex}
                   type="button"
                   onClick={() => send(ex)}
-                  className="text-sm text-prose border border-soft hover:border-accent rounded-full px-3 py-2 bg-surface transition-colors min-h-[44px]"
+                  className={`${PILL_BASE} ${PILL_INACTIVE}`}
                 >
                   {ex}
                 </button>
@@ -243,7 +244,7 @@ function BossChatSession({
               <div
                 className={
                   m.role === 'user'
-                    ? 'bg-accent text-white rounded-2xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap'
+                    ? 'bg-chrome text-white rounded-xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap'
                     : `rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
                         m.failed ? 'bg-danger-bg text-danger-ink border border-danger-line' : 'bg-surface text-prose border border-soft'
                       }`

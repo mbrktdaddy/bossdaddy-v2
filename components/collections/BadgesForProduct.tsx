@@ -74,17 +74,19 @@ export default function BadgesForProduct({ badges, max = 2, compact = false }: P
             <Link
               href={`${meta.section}/${b.slug}`}
               onClick={(e) => e.stopPropagation()}
-              className={`inline-flex items-center gap-1.5 rounded-full bg-accent-tint border border-accent-border/40 hover:border-accent-border/60 hover:bg-accent-tint transition-colors group/badge ${
+              /* Square, QUIET chip (Hard Goods): grey block, no orange — the
+                 orange pill under every card was the accent turned to noise. */
+              className={`inline-flex items-center gap-1.5 rounded-sm bg-surface-raised hover:bg-surface-hover transition-colors group/badge ${
                 compact
-                  ? 'px-2 py-0.5 text-[10px]'
-                  : 'px-2.5 py-1 text-[11px]'
+                  ? 'px-2 py-1 text-[10px]'
+                  : 'px-2.5 py-1.5 text-[11px]'
               }`}
             >
-              <span className="text-accent-text-soft group-hover/badge:text-accent transition-colors">{meta.icon}</span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-accent-text-soft group-hover/badge:text-accent transition-colors">
+              <span className="text-prose-faint group-hover/badge:text-prose transition-colors">{meta.icon}</span>
+              <span className="font-display text-[10px] font-extrabold uppercase tracking-[0.12em] text-prose-muted group-hover/badge:text-prose transition-colors">
                 {meta.label}
               </span>
-              <span className={`font-semibold text-prose-muted group-hover/badge:text-prose transition-colors truncate max-w-[160px] ${compact ? '' : 'max-w-[200px]'}`}>
+              <span className={`font-semibold text-prose group-hover/badge:text-accent transition-colors truncate max-w-[160px] ${compact ? '' : 'max-w-[200px]'}`}>
                 {b.title}
               </span>
             </Link>

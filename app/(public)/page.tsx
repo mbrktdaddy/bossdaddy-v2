@@ -25,6 +25,7 @@ import { buildSocialMetadata } from '@/lib/og'
 import { BRAND } from '@/lib/brand'
 import type { Metadata } from 'next'
 import { buttonVariants } from '@/components/ui/Button'
+import { PillFilterStrip, PILL_BASE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 
 interface Review {
   id: string
@@ -243,7 +244,8 @@ export default async function HomePage() {
         <CodeRedirect />
       </Suspense>
 
-      {/* ── BRAND BAND + ticker (placeholder composition — a dedicated pass is owed) */}
+      {/* ── BRAND BAND + ticker — orange, desktop-only (Hard Goods A2, 2026-10-14);
+             on a phone the tagline is in the masthead and the topics row takes this slot */}
       <HomeHero motion={motion} />
 
       {/* ── FEATURED REVIEW — the lead package: cover story + the Latest list ── */}
@@ -349,23 +351,18 @@ export default async function HomePage() {
             />
 
             {guideTopics.length > 1 && (
-              <div className="flex gap-2 mb-8 overflow-x-auto scrollbar-hide -mx-6 px-6 pb-1 md:mx-0 md:px-0 md:overflow-visible md:flex-wrap">
-                <Link
-                  href="/guides"
-                  className="shrink-0 whitespace-nowrap text-[13px] font-semibold text-prose bg-surface border border-strong rounded-full px-4 py-2.5 hover:border-accent hover:text-accent transition-colors"
-                >
+              /* Square Hard Goods chips via the one primitive — a scroller on a
+                 phone, a wrapped row from md. Nothing is "active" on the homepage. */
+              <PillFilterStrip className="mb-8 md:mx-0 md:px-0 md:overflow-visible md:flex-wrap">
+                <Link href="/guides" className={`${PILL_BASE} ${PILL_INACTIVE}`}>
                   All topics
                 </Link>
                 {guideTopics.map(([slug, label]) => (
-                  <Link
-                    key={slug}
-                    href={`/guides/category/${slug}`}
-                    className="shrink-0 whitespace-nowrap text-[13px] font-semibold text-prose-muted bg-surface border border-soft rounded-full px-4 py-2.5 hover:border-accent hover:text-accent transition-colors"
-                  >
+                  <Link key={slug} href={`/guides/category/${slug}`} className={`${PILL_BASE} ${PILL_INACTIVE}`}>
                     {label}
                   </Link>
                 ))}
-              </div>
+              </PillFilterStrip>
             )}
 
             {/* Lead guide — the newest, site-wide. Borderless split. */}

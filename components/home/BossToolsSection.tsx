@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import EditorialHeader from '@/components/EditorialHeader'
 import { LABELS } from '@/lib/labels'
-import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 const TOOLS = [
   {
@@ -28,36 +28,42 @@ const TOOLS = [
 ]
 
 /**
- * Tools — three equal tiles (Phase 5, 2026-10-08). Was a full-width Ask card
- * over a 2-up; the equal row is shorter and reads as one shelf. Soft raised
- * panels, not outlined boxes — the tiles are image-free, so the panel is what
- * separates them from the canvas. The only image-free content section on the
- * page, which is why it sits mid-scroll as the breath between image sections.
+ * Tools — three BLACK panels (Hard Goods, 2026-10-14; brand-guide §6/§10).
+ * The utility lane is where the dark moments live on the white page: each
+ * tile is a `data-theme="dark"` zone with a 4px orange top rule, an orange
+ * kicker, white title, faint blurb and the hot-orange button. The 2026-10-08
+ * soft grey panels were the first thing he named as "plain" — a tool should
+ * look like a tool, not a paragraph. Still image-free on purpose: the black
+ * is what carries the tiles.
  */
 export default function BossToolsSection() {
   return (
     <section className="border-b border-soft">
       <div className="max-w-6xl mx-auto px-6 py-8 md:py-12">
         <EditorialHeader
-          eyebrow="Free · No login wall"
-          title="Tools"
+          eyebrow="Tools"
+          title="Built for the job"
           right={{ label: 'All tools', href: '/tools' }}
         />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 md:gap-5">
           {TOOLS.map((t) => (
             <Link
               key={t.href}
               href={t.href}
-              className="flex flex-col bg-surface-raised hover:bg-surface-hover rounded-2xl p-6 transition-colors group"
+              data-theme="dark" /* a dark ZONE per tile — tokens invert inside */
+              className="group flex flex-col bg-chrome text-prose border-t-4 border-accent rounded-xl p-5 sm:p-6"
             >
-              <Eyebrow>{t.kicker}</Eyebrow>
-              <h3 className="text-xl font-black mt-2 text-prose group-hover:text-accent transition-colors leading-tight tracking-tight">
+              <p className="font-display font-extrabold text-[11px] uppercase tracking-[0.16em] text-accent-text">
+                {t.kicker}
+              </p>
+              <h3 className="text-[21px] font-black mt-2.5 text-prose leading-[1.1] tracking-[-0.02em] group-hover:text-accent-text transition-colors">
                 {t.title}
               </h3>
-              <p className="text-prose-muted mt-3 text-sm flex-1">{t.blurb}</p>
-              <p className="text-sm text-accent font-semibold mt-5 inline-flex items-center gap-1 group-hover:underline">
-                {t.cta} <span aria-hidden>→</span>
-              </p>
+              <p className="text-prose-faint mt-2.5 text-sm flex-1">{t.blurb}</p>
+              {/* A styled span, not a nested control — the whole tile is the link. */}
+              <span className={buttonVariants({ size: 'sm', className: 'self-start mt-5' })}>
+                {t.cta}
+              </span>
             </Link>
           ))}
         </div>

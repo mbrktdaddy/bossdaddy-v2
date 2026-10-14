@@ -90,12 +90,12 @@ export default function GlobalSearch() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-zinc-900/70 flex items-start justify-center pt-20 px-4" onClick={() => setOpen(false)}>
+    <div className="fixed inset-0 z-50 bg-chrome/80 flex items-start justify-center pt-20 px-4" onClick={() => setOpen(false)}>
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Site search"
-        className="bg-surface-sunken border border-soft rounded-xl w-full max-w-2xl max-h-[70vh] flex flex-col shadow-2xl"
+        className="bg-surface border-2 border-chrome rounded-xl w-full max-w-2xl max-h-[70vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 px-4 py-3 border-b border-soft shrink-0">
@@ -110,7 +110,7 @@ export default function GlobalSearch() {
             aria-label="Search"
             className="flex-1 bg-transparent text-prose placeholder:text-prose-faint focus:outline-none focus-visible:ring-1 focus-visible:ring-accent-hover rounded text-sm"
           />
-          {loading && <span className="w-3 h-3 border-2 border-strong border-t-orange-500 rounded-full animate-spin shrink-0" />}
+          {loading && <span className="w-3 h-3 border-2 border-strong border-t-accent rounded-full animate-spin shrink-0" />}
           <button onClick={() => setOpen(false)} className="text-xs text-prose-faint hover:text-prose-muted">Esc</button>
         </div>
 

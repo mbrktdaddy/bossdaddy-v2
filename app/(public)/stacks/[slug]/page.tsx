@@ -19,7 +19,8 @@ import BenchStrip from '@/components/BenchStrip'
 import CollectionBreadcrumb from '@/components/collections/CollectionBreadcrumb'
 import FtcDisclosure from '@/components/FtcDisclosure'
 import { LABELS } from '@/lib/labels'
-import { Card } from '@/components/ui/Card'
+import EditorialHeader from '@/components/EditorialHeader'
+import { Badge } from '@/components/ui/Badge'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
 import { upgradeReviewedProducts } from '@/lib/collections/product-items'
@@ -313,14 +314,13 @@ export default async function StackDetailPage({ params }: Props) {
               />
               {/* Build-cost pill in the header — quick-jumps to the breakdown */}
               {total != null && total > 0 && (
-                <a
-                  href="#cost"
-                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-accent-tint border border-accent-border/40 hover:border-accent-border/60 rounded-full text-xs font-bold text-accent-text hover:text-accent transition-colors min-h-[36px]"
-                >
-                  <span className="text-eyebrow/80 uppercase tracking-widest text-[10px]">Build cost</span>
-                  <span className="tabular-nums">${(total / 100).toFixed(0)}</span>
-                  <span className="text-accent-text/60">·</span>
-                  <span className="text-eyebrow/80 text-[10px] uppercase tracking-widest">{items.length} pieces</span>
+                <a href="#cost" className="inline-flex items-center min-h-[36px]">
+                  <Badge tone="accent" size="md">
+                    <span>Build cost</span>
+                    <span className="tabular-nums">${(total / 100).toFixed(0)}</span>
+                    <span aria-hidden>·</span>
+                    <span>{items.length} pieces</span>
+                  </Badge>
                 </a>
               )}
             </header>
@@ -336,11 +336,7 @@ export default async function StackDetailPage({ params }: Props) {
             {/* Why These — the editorial framing leads, before methodology + lineup. */}
             {stack.intro_html && (
               <section id="overview" className="mb-10">
-                <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                  <Eyebrow className="mb-1">Why These</Eyebrow>
-                  <h2 className="text-2xl font-black text-prose leading-tight">Why this kit works together</h2>
-                </div>
+                <EditorialHeader eyebrow="Why These" title="Why this kit works together" />
                 <div
                   className="prose prose-zinc prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
                   dangerouslySetInnerHTML={{ __html: stack.intro_html }}
@@ -359,15 +355,12 @@ export default async function StackDetailPage({ params }: Props) {
 
             {/* Lineup */}
             <section id="lineup" className="mb-12" aria-label="Stack lineup">
-              <div className="mb-5">
-                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                <Eyebrow className="mb-1">The Lineup</Eyebrow>
-                <h2 className="text-2xl font-black text-prose leading-tight">
-                  {items.length} {items.length === 1 ? 'piece' : 'pieces'} in this kit
-                </h2>
-              </div>
+              <EditorialHeader
+                eyebrow="The Lineup"
+                title={`${items.length} ${items.length === 1 ? 'piece' : 'pieces'} in this kit`}
+              />
 
-              <div className="space-y-5">
+              <div className="divide-y divide-soft">
                 {items.map(({ review, product: joinedProduct, blurb, role_label }, idx) => {
                   if (!review && !joinedProduct) return null
 
@@ -375,15 +368,10 @@ export default async function StackDetailPage({ params }: Props) {
                     const product = joinedProduct
                     const href = product.affiliate_url ? `/go/${product.slug}` : product.non_affiliate_url ?? null
                     return (
-                      <Card as="article"
+                      <article
                         key={`product-${product.slug}`}
-                        className="relative flex flex-col sm:flex-row gap-5 hover:border-accent-border/40 p-5 hover:-translate-y-0.5 transition-all duration-200"
+                        className="relative flex flex-col sm:flex-row gap-5 py-6 first:pt-0 last:pb-0"
                       >
-                        {/* Position number — subtle ordering signal */}
-                        <span aria-hidden className="absolute top-3 left-3 text-[10px] font-black text-accent-text/30 tabular-nums tracking-widest">
-                          {String(idx + 1).padStart(2, '0')}
-                        </span>
-
                         {product.image_url && (
                           <div className="relative w-full sm:w-44 h-44 sm:h-36 shrink-0 rounded-xl overflow-hidden bg-surface-raised">
                             <Image src={product.image_url} alt={product.name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 176px" />
@@ -391,16 +379,15 @@ export default async function StackDetailPage({ params }: Props) {
                         )}
 
                         <div className="flex-1 min-w-0 flex flex-col">
+                          <span aria-hidden className="mb-1 text-[11px] font-display font-black text-prose-faint tabular-nums tracking-widest">{String(idx + 1).padStart(2, '0')}</span>
                           {role_label && (
-                            <span className="self-start text-[10px] font-black uppercase tracking-[0.2em] text-accent-text bg-accent-tint border border-accent-border/40 px-3 py-1 rounded-full mb-2">
-                              {role_label}
-                            </span>
+                            <Badge tone="neutral" className="self-start mb-2">{role_label}</Badge>
                           )}
                           {/* Claims only when set (brand-guide §1.9). */}
                           <ProductClaimLine product={product} />
                           <div className="flex items-start justify-between gap-3 mb-2">
                             <div>
-                              <span className="text-lg font-bold text-prose leading-snug block">
+                              <span className="text-lg font-extrabold text-prose leading-snug block">
                                 {product.name}
                               </span>
                             </div>
@@ -425,7 +412,7 @@ export default async function StackDetailPage({ params }: Props) {
                             )}
                           </div>
                         </div>
-                      </Card>
+                      </article>
                     )
                   }
 
@@ -433,15 +420,10 @@ export default async function StackDetailPage({ params }: Props) {
                   const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                   const priceCents = product?.price_cents ?? null
                   return (
-                    <Card as="article"
+                    <article
                       key={review!.id}
-                      className="relative flex flex-col sm:flex-row gap-5 hover:border-accent-border/40 p-5 hover:-translate-y-0.5 transition-all duration-200"
+                      className="relative flex flex-col sm:flex-row gap-5 py-6 first:pt-0 last:pb-0"
                     >
-                      {/* Position number — subtle ordering signal */}
-                      <span aria-hidden className="absolute top-3 left-3 text-[10px] font-black text-accent-text/30 tabular-nums tracking-widest">
-                        {String(idx + 1).padStart(2, '0')}
-                      </span>
-
                       {review!.image_url && (
                         <div className="relative w-full sm:w-44 h-44 sm:h-36 shrink-0 rounded-xl overflow-hidden bg-surface-raised">
                           <Image src={review!.image_url} alt={review!.product_name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 176px" />
@@ -452,14 +434,13 @@ export default async function StackDetailPage({ params }: Props) {
                       )}
 
                       <div className="flex-1 min-w-0 flex flex-col">
+                        <span aria-hidden className="mb-1 text-[11px] font-display font-black text-prose-faint tabular-nums tracking-widest">{String(idx + 1).padStart(2, '0')}</span>
                         {role_label && (
-                          <span className="self-start text-[10px] font-black uppercase tracking-[0.2em] text-accent-text bg-accent-tint border border-accent-border/40 px-3 py-1 rounded-full mb-2">
-                            {role_label}
-                          </span>
+                          <Badge tone="neutral" className="self-start mb-2">{role_label}</Badge>
                         )}
                         <div className="flex items-start justify-between gap-3 mb-2">
                           <div>
-                            <Link href={`/reviews/${review!.slug}`} className="text-lg font-bold text-prose hover:text-accent-text-soft transition-colors leading-snug block">
+                            <Link href={`/reviews/${review!.slug}`} className="text-lg font-extrabold text-prose hover:text-accent transition-colors leading-snug block">
                               {review!.title}
                             </Link>
                           </div>
@@ -470,7 +451,7 @@ export default async function StackDetailPage({ params }: Props) {
                         )}
                         {(review!.best_for?.length ?? 0) > 0 && (
                           <p className="text-xs text-prose-faint mb-3">
-                            <span className="text-accent-text-soft font-bold uppercase tracking-widest">Best for:</span> {review!.best_for!.slice(0, 3).join(' · ')}
+                            <span className="text-eyebrow font-bold uppercase tracking-widest">Best for:</span> {review!.best_for!.slice(0, 3).join(' · ')}
                           </p>
                         )}
                         <div className="flex flex-wrap items-center gap-3 mt-auto pt-1">
@@ -493,7 +474,7 @@ export default async function StackDetailPage({ params }: Props) {
                           )}
                         </div>
                       </div>
-                    </Card>
+                    </article>
                   )
                 })}
               </div>
@@ -504,7 +485,7 @@ export default async function StackDetailPage({ params }: Props) {
               <section
                 id="cost"
                 aria-label="Build cost"
-                className="mb-12 rounded-xl border border-accent-border/40 bg-accent-tint p-6 sm:p-8 text-center"
+                className="mb-12 rounded-xl border-2 border-chrome bg-surface p-6 sm:p-8 text-center"
               >
                 <Eyebrow className="mb-3">Build Cost</Eyebrow>
                 <p className="text-4xl sm:text-5xl font-black text-prose tabular-nums mb-2">${(total / 100).toFixed(2)}</p>

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import PageHeader from '@/components/PageHeader'
 import { buildSocialMetadata, SITE_URL } from '@/lib/og'
 
 // See the note in affiliate-disclosure: the hand-rolled `twitter: { card }` block
@@ -19,9 +20,9 @@ const CONTACT_EMAIL = 'hello@bossdaddylife.com'
 
 export default function PrivacyPolicyPage() {
  return (
- <div className="max-w-3xl mx-auto px-6 py-16">
-
- <h1 className="text-3xl font-black mb-2">Privacy Policy</h1>
+ <div>
+ <PageHeader eyebrow="Policy" title="Privacy Policy" />
+ <div className="max-w-3xl mx-auto px-6 pt-8 pb-16">
  <p className="text-prose-faint text-sm mb-10">Last updated: {LAST_UPDATED}</p>
 
  <div className="prose max-w-none
@@ -263,6 +264,7 @@ export default function PrivacyPolicyPage() {
  </Link>
  </div>
 
+ </div>
  </div>
  )
 }

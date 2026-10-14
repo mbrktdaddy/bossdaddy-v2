@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { formatPrice } from '@/lib/merch'
 import { dispatchCartUpdated } from '@/lib/cart-events'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
+import { PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 
 interface Variant {
   id: string
@@ -75,7 +77,9 @@ export default function AddToCartForm({
   }
 
   async function handleAddToCart() {
-    if (!selected?.in_stock) return
+    // `added` is a 3s confirmation window — the button stays enabled so it can
+    // show the success look at full opacity, so guard the double-add here.
+    if (!selected?.in_stock || added) return
     setLoading(true)
     setError(null)
     try {
@@ -116,12 +120,12 @@ export default function AddToCartForm({
                   key={c}
                   onClick={() => selectColor(c)}
                   disabled={!avail}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold border transition-colors ${
+                  className={`${PILL_BASE} ${
                     color === c
-                      ? 'bg-accent border-accent text-white'
+                      ? PILL_ACTIVE
                       : avail
-                      ? 'bg-surface border-strong text-prose-muted hover:border-accent hover:text-prose'
-                      : 'bg-surface/50 border-soft text-prose-faint cursor-not-allowed line-through'
+                      ? PILL_INACTIVE
+                      : 'bg-transparent text-prose-faint border-soft cursor-not-allowed line-through'
                   }`}
                 >
                   {c}
@@ -144,12 +148,12 @@ export default function AddToCartForm({
                   key={s}
                   onClick={() => setSize(s)}
                   disabled={!avail}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold border transition-colors min-w-[52px] ${
+                  className={`${PILL_BASE} min-w-[52px] justify-center ${
                     size === s
-                      ? 'bg-accent border-accent text-white'
+                      ? PILL_ACTIVE
                       : avail
-                      ? 'bg-surface border-strong text-prose-muted hover:border-accent hover:text-prose'
-                      : 'bg-surface/50 border-soft text-prose-faint cursor-not-allowed line-through'
+                      ? PILL_INACTIVE
+                      : 'bg-transparent text-prose-faint border-soft cursor-not-allowed line-through'
                   }`}
                 >
                   {s}
@@ -191,14 +195,9 @@ export default function AddToCartForm({
       {/* Add to cart */}
       <button
         onClick={handleAddToCart}
-        disabled={!selected?.in_stock || loading || added}
-        className={`py-3.5 px-6 rounded-xl font-bold text-base transition-all ${
-          added
-            ? 'bg-green-700 text-white cursor-default'
-            : selected?.in_stock
-            ? 'bg-accent hover:bg-accent-hover active:bg-accent-hover text-white disabled:opacity-60'
-            : 'bg-surface-raised text-prose-faint cursor-not-allowed'
-        }`}
+        disabled={!selected?.in_stock || loading}
+        aria-live="polite"
+        className={buttonVariants({ variant: added ? 'success' : 'primary', size: 'lg', className: 'w-full' })}
       >
         {loading
           ? 'Adding…'
@@ -214,7 +213,7 @@ export default function AddToCartForm({
       {error && <p className="text-sm text-red-700">{error}</p>}
 
       {added && (
-        <a href="/cart" className="text-center text-sm text-accent-text-soft hover:text-accent transition-colors font-medium">
+        <a href="/cart" className="text-center text-sm text-prose-muted hover:text-accent transition-colors font-medium">
           View Cart →
         </a>
       )}

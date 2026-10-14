@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { LABELS } from '@/lib/labels'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   slug: string
@@ -95,7 +96,7 @@ export default async function CollectionEmbed({ slug }: Props) {
     >
       <div className="mb-4">
         <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-        <p className="text-[10px] sm:text-xs text-accent-text-soft uppercase tracking-[0.2em] font-black mb-2">
+        <p className="text-[10px] sm:text-xs text-eyebrow uppercase tracking-[0.2em] font-black mb-2">
           {meta.eyebrow}
         </p>
         <Link href={finalHref} className="group inline-block">
@@ -103,7 +104,7 @@ export default async function CollectionEmbed({ slug }: Props) {
               collection's title is a link target, not a section of this guide. */}
           <h3
             data-toc-skip
-            className="text-xl sm:text-2xl font-black text-prose leading-snug group-hover:text-accent-text-soft transition-colors"
+            className="text-xl sm:text-2xl font-black text-prose leading-snug group-hover:text-accent transition-colors"
           >
             {c.title}
           </h3>
@@ -122,22 +123,20 @@ export default async function CollectionEmbed({ slug }: Props) {
               <li key={r.id}>
                 <Link
                   href={`/reviews/${r.slug}`}
-                  className="group flex flex-col bg-surface-sunken/60 border border-soft/60 rounded-xl overflow-hidden hover:border-accent-border/40 transition-colors"
+                  className="group flex flex-col"
                 >
-                  <div className="relative w-full aspect-square bg-surface">
+                  <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-surface-raised">
                     {r.image_url ? (
                       <Image src={r.image_url} alt="" /* decorative: the link's text already names it — an alt here gets read twice */ fill className="object-cover" sizes="120px" />
                     ) : null}
                     {badge && (
-                      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-zinc-900/85 to-transparent px-1.5 py-1">
-                        <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-accent leading-tight line-clamp-1">
-                          {badge}
-                        </p>
-                      </div>
+                      <span className="absolute bottom-1.5 left-1.5 max-w-[calc(100%-0.75rem)] truncate bg-chrome text-white rounded-sm px-1.5 py-0.5 text-[8px] sm:text-[9px] font-display font-black uppercase tracking-[0.14em]">
+                        {badge}
+                      </span>
                     )}
                   </div>
-                  <div className="p-2">
-                    <p className="text-[10px] sm:text-xs font-semibold text-prose group-hover:text-accent-text-soft transition-colors line-clamp-2 leading-tight">
+                  <div className="pt-2">
+                    <p className="text-[10px] sm:text-xs font-extrabold text-prose group-hover:text-accent transition-colors line-clamp-2 leading-tight">
                       {r.product_name}
                     </p>
                   </div>
@@ -150,7 +149,7 @@ export default async function CollectionEmbed({ slug }: Props) {
 
       <Link
         href={finalHref}
-        className="inline-flex items-center gap-1.5 text-sm font-bold text-accent-text-soft hover:text-accent transition-colors uppercase tracking-widest"
+        className={buttonVariants({ variant: 'outline', size: 'sm' })}
       >
         {meta.cta}
       </Link>

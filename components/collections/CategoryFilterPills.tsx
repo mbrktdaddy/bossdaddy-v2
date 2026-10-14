@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 import { CATEGORIES, getCategoryBySlug } from '@/lib/categories'
 
 interface Props {
@@ -72,15 +73,11 @@ function FilterPill({
     <Link
       href={href}
       scroll={false}
-      className={`shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-colors min-h-[44px] ${
-        active
-          ?'bg-prose text-background border-prose'
-          : 'bg-transparent text-prose-muted border-strong hover:border-copper hover:text-prose'
-      }`}
+      className={`${PILL_BASE} ${active ? PILL_ACTIVE : PILL_INACTIVE}`}
     >
       {label}
-      <span className={`text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-full ${
-        active ? 'bg-copper text-background' : 'bg-background/40 text-prose-faint border border-soft'
+      <span className={`text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-sm ${
+        active ? 'bg-accent text-white' : 'bg-surface-raised text-prose-faint'
       }`}>
         {count}
       </span>

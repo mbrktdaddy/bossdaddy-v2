@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { PillFilterStrip, PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 import { Fragment } from 'react'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { CATEGORIES } from '@/lib/categories'
@@ -83,19 +84,17 @@ export default async function GuidesPage() {
 
       {/* Category filter — horizontal scroll strip. Pills link to the static
           path-based category routes (indexable, prerendered). */}
-      <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 mb-12 pb-1">
-        <Link href="/guides"
-          className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-prose text-background border border-prose transition-colors">
+      <PillFilterStrip className="mb-12">
+        <Link href="/guides" className={`${PILL_BASE} ${PILL_ACTIVE}`}>
           All Guides
         </Link>
         {CATEGORIES.map((c) => (
-          <Link key={c.slug} href={`/guides/category/${c.slug}`}
-            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium bg-transparent text-prose-muted border border-strong hover:border-copper hover:text-prose transition-colors">
+          <Link key={c.slug} href={`/guides/category/${c.slug}`} className={`${PILL_BASE} ${PILL_INACTIVE}`}>
             <CategoryIcon slug={c.slug} className="w-4 h-4 text-accent-text" />
             <span>{c.label}</span>
           </Link>
         ))}
-      </div>
+      </PillFilterStrip>
 
       <AskTheBoss context="Browsing dad how-to guides across every category" className="mb-12" />
 

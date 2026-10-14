@@ -1,4 +1,5 @@
 import { BackLink } from '@/components/ui/BackLink'
+import { LabelBlock } from '@/components/ui/LabelBlock'
 
 interface Props {
   /**
@@ -7,14 +8,14 @@ interface Props {
    */
   back?: { href: string; label: string }
   /**
-   * Small uppercase kicker above the H1 (the page's ROLE / section). Normally a
-   * plain string. ReactNode is allowed ONLY to prefix the label with a status
-   * glyph — /bench's live-testing pulse is the sanctioned case. It is NOT a slot
-   * for chips, links, or a second line: the eyebrow names the role once
-   * (eyebrow doctrine, brand-guide §3).
+   * The label block above the H1 (the page's ROLE / section). Normally a plain
+   * string. ReactNode is allowed ONLY to prefix the label with a status glyph —
+   * /bench's live-testing pulse is the sanctioned case. It is NOT a slot for
+   * chips, links, or a second line: the label names the role once (eyebrow
+   * doctrine, brand-guide §3).
    */
   eyebrow: React.ReactNode
-  /** Page title — rendered in the Fraunces editorial serif. */
+  /** Page title — uppercase Montserrat black (one voice; Hard Goods). */
   title: string
   /** Optional one- or two-line deck under the title. */
   deck?: string
@@ -23,23 +24,23 @@ interface Props {
 }
 
 /**
- * Manifesto v2 interior page header — the "slim editorial band" used on every
- * non-homepage page (listings, detail, tools, editorial). Eyebrow + big
- * Fraunces H1 + optional deck + hairline rule, on the dark canvas, no photo
- * required. This is the site-wide replacement for ad-hoc page titles so
- * interior pages carry the same DNA as the homepage. (docs/home-manifesto-spec.md)
+ * The interior page header — every listing, category, tag and editorial page
+ * (homepage and /about excepted). Hard Goods (2026-10-14, brand-guide §5/§10.1):
+ * a black label block (the role) → uppercase Montserrat black H1 → optional
+ * deck, closed by a 3px chrome-black rule — the same lockup `EditorialHeader`
+ * draws at section level, one size up. The quiet grey eyebrow + hairline it
+ * replaces was the main reason the listings read "plain" after the light flip.
+ * Consumers are all short-titled pages; long detail titles have their own H1.
  */
 export default function PageHeader({ back, eyebrow, title, deck, actions }: Props) {
   return (
-    <header className="border-b border-soft">
-      <div className="max-w-6xl mx-auto px-6 py-12 md:py-16">
-        {back && <BackLink href={back.href} label={back.label} className="mb-2" />}
+    <header>
+      <div className="max-w-6xl mx-auto px-6 pt-10 pb-6 md:pt-14 md:pb-8 border-b-[3px] border-chrome">
+        {back && <BackLink href={back.href} label={back.label} className="mb-3" />}
         <div className="flex items-end justify-between gap-6">
           <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-eyebrow">
-              {eyebrow}
-            </p>
-            <h1 className="font-black text-prose text-4xl md:text-5xl leading-[1.0] tracking-tight mt-3">
+            <LabelBlock>{eyebrow}</LabelBlock>
+            <h1 className="font-black text-prose uppercase text-4xl md:text-5xl leading-[1.0] tracking-[-0.01em] mt-3">
               {title}
             </h1>
             {deck && (

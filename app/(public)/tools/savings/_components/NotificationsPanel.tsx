@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation'
 import { updateGoal, setParticipantMute } from '@/lib/dad-tools/savings-actions'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 
 interface Props {
   goalId:                 string
@@ -121,11 +122,7 @@ function Row({
         aria-label={title}
         disabled={disabled}
         onClick={onToggle}
-        className={`shrink-0 min-h-[44px] px-4 rounded-lg text-sm font-semibold border transition-colors disabled:opacity-50 ${
-          on
-            ? 'bg-accent border-accent text-white hover:bg-accent-hover'
-            : 'bg-surface-sunken border-soft text-prose-muted hover:text-prose'
-        }`}
+        className={`${PILL_BASE} disabled:opacity-50 ${on ? PILL_ACTIVE : PILL_INACTIVE}`}
       >
         {on ? onLabel : offLabel}
       </button>

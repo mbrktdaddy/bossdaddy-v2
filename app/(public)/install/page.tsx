@@ -3,8 +3,7 @@ import type { Metadata } from 'next'
 import { LABELS } from '@/lib/labels'
 import { buildSocialMetadata } from '@/lib/og'
 import InstallCta from './_components/InstallCta'
-import { Card } from '@/components/ui/Card'
-import { Eyebrow } from '@/components/ui/Eyebrow'
+import { LabelBlock } from '@/components/ui/LabelBlock'
 
 export function generateMetadata(): Metadata {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
@@ -41,7 +40,7 @@ export default function InstallPage() {
     <div className="max-w-3xl mx-auto px-6 py-14 md:py-20">
       {/* Header */}
       <div className="flex flex-col items-center text-center mb-10">
-        <div className="w-20 h-20 rounded-2xl bg-surface-raised flex items-center justify-center mb-6">
+        <div className="w-20 h-20 rounded-xl bg-chrome flex items-center justify-center mb-6">
           <Image
             src="/images/bd-logo-icon.png"
             alt="Boss Daddy"
@@ -50,8 +49,8 @@ export default function InstallPage() {
             className="w-14 h-14 object-contain"
           />
         </div>
-        <Eyebrow className="mb-3">Boss Daddy App</Eyebrow>
-        <h1 className="text-3xl md:text-4xl font-black text-prose leading-[1.1] tracking-tight mb-4">
+        <LabelBlock className="mb-3">Boss Daddy App</LabelBlock>
+        <h1 className="text-3xl md:text-4xl font-black uppercase text-prose leading-[1.1] tracking-tight mb-4">
           Keep Boss Daddy one tap away.
         </h1>
         <p className="text-base md:text-lg text-prose-muted leading-[1.7] max-w-xl">
@@ -68,11 +67,11 @@ export default function InstallPage() {
       <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6">
         {PERKS.map((perk) => (
           <div key={perk.title}>
-            <Card className="w-10 h-10 flex items-center justify-center text-accent mb-3">
+            <div className="w-10 h-10 rounded-md bg-chrome text-white flex items-center justify-center mb-3">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden>
                 {perk.icon}
               </svg>
-            </Card>
+            </div>
             <h2 className="text-sm font-black text-prose leading-tight mb-1.5">{perk.title}</h2>
             <p className="text-sm text-prose-faint leading-snug">{perk.body}</p>
           </div>

@@ -22,7 +22,7 @@ function StepList({ steps }: { steps: React.ReactNode[] }) {
     <ol className="flex flex-col gap-3">
       {steps.map((step, i) => (
         <li key={i} className="flex items-start gap-3">
-          <span className="shrink-0 w-6 h-6 rounded-full bg-accent text-white text-xs font-bold flex items-center justify-center mt-0.5">
+          <span className="shrink-0 w-6 h-6 rounded-md bg-chrome text-white text-xs font-bold flex items-center justify-center mt-0.5">
             {i + 1}
           </span>
           <span className="text-sm text-prose-muted leading-snug pt-0.5">{step}</span>
@@ -39,8 +39,8 @@ export default function InstallCta() {
   // Already running as an installed app — nothing left to do.
   if (isStandalone || installed) {
     return (
-      <Card className="p-6 sm:p-8 flex items-start gap-4">
-        <svg className="w-7 h-7 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+      <Card tone="chrome" className="p-6 sm:p-8 flex items-start gap-4">
+        <svg className="w-7 h-7 text-prose shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
         </svg>
         <div>
@@ -59,7 +59,7 @@ export default function InstallCta() {
   }
 
   return (
-    <Card className="p-6 sm:p-8">
+    <Card tone="chrome" className="p-6 sm:p-8">
       {/* Native one-tap path — Chrome, Edge, Android. */}
       {canPrompt && (
         <div className="mb-6">

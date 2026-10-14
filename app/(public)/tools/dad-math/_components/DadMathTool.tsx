@@ -13,6 +13,7 @@
 // writes back to that kid's row.
 
 import { useState, useTransition, useMemo } from 'react'
+import { PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 import { LABELS } from '@/lib/labels'
 import { type Kid, updateKidMoneyState } from '@/lib/dad-tools/kid-actions'
 import {
@@ -173,11 +174,7 @@ export default function DadMathTool({ isAuthenticated, initialKids, initialKidId
               key={k.id}
               type="button"
               onClick={() => selectKid(k.id)}
-              className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedKidId === k.id
-                  ? 'bg-accent text-white'
-                  : 'bg-surface border border-faint text-prose-faint hover:text-prose'
-              }`}
+              className={`${PILL_BASE} ${selectedKidId === k.id ? PILL_ACTIVE : PILL_INACTIVE}`}
             >
               {k.name?.trim() || 'Kid'}
             </button>
@@ -185,11 +182,7 @@ export default function DadMathTool({ isAuthenticated, initialKids, initialKidId
           <button
             type="button"
             onClick={() => selectKid(null)}
-            className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${
-              selectedKidId === null
-                ? 'bg-accent text-white'
-                : 'bg-surface border border-faint text-prose-faint hover:text-prose'
-            }`}
+            className={`${PILL_BASE} ${selectedKidId === null ? PILL_ACTIVE : PILL_INACTIVE}`}
           >
             Try another date
           </button>

@@ -18,7 +18,8 @@ import BenchStrip from '@/components/BenchStrip'
 import CollectionBreadcrumb from '@/components/collections/CollectionBreadcrumb'
 import FtcDisclosure from '@/components/FtcDisclosure'
 import { LABELS } from '@/lib/labels'
-import { Card } from '@/components/ui/Card'
+import EditorialHeader from '@/components/EditorialHeader'
+import { Badge } from '@/components/ui/Badge'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
 import { upgradeReviewedProducts } from '@/lib/collections/product-items'
@@ -317,11 +318,7 @@ export default async function PickDetailPage({ params }: Props) {
             {/* Why These — the editorial hook leads, before methodology + picks. */}
             {pick.intro_html && (
               <section id="overview" className="mb-10">
-                <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                  <Eyebrow className="mb-1">Why These</Eyebrow>
-                  <h2 className="text-2xl font-black text-prose leading-tight">Behind the picks</h2>
-                </div>
+                <EditorialHeader eyebrow="Why These" title="Behind the picks" />
                 <div
                   className="prose prose-zinc prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
                   dangerouslySetInnerHTML={{ __html: pick.intro_html }}
@@ -340,17 +337,12 @@ export default async function PickDetailPage({ params }: Props) {
 
             {/* The Picks — eyebrow matches the TOC entry. */}
             <section id="picks" className="mb-12" aria-label="The picks">
-              <div className="mb-5">
-                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                <Eyebrow className="mb-1">
-                  {items.length === 1 ? 'The Pick' : 'The Picks'}
-                </Eyebrow>
-                <h2 className="text-2xl font-black text-prose leading-tight">
-                  {items.length} dad-picked {items.length === 1 ? 'pick' : 'picks'}
-                </h2>
-              </div>
+              <EditorialHeader
+                eyebrow={items.length === 1 ? 'The Pick' : 'The Picks'}
+                title={`${items.length} dad-picked ${items.length === 1 ? 'pick' : 'picks'}`}
+              />
 
-              <div className="space-y-5">
+              <div className="divide-y divide-soft">
                 {items.map(({ review, product: standaloneProduct, blurb, best_for: itemBestFor, role_label: itemRoleLabel }, idx) => {
                   const rank = idx + 1
 
@@ -366,7 +358,7 @@ export default async function PickDetailPage({ params }: Props) {
                     const researchSources = (product.research_sources ?? []).filter((s) => s?.url)
                     const href = product.affiliate_url ? `/go/${product.slug}` : product.non_affiliate_url
                     return (
-                      <Card as="article" key={`product-${product.slug}`} className="flex flex-col sm:flex-row gap-5 hover:border-accent-border/40 p-5 hover:-translate-y-0.5 transition-all duration-200">
+                      <article key={`product-${product.slug}`} className="flex flex-col sm:flex-row gap-5 py-6 first:pt-0 last:pb-0">
                         {/* Rank — medal for top 3, number for the rest */}
                         <div className="flex sm:flex-col items-center gap-3 sm:gap-1 shrink-0">
                           <RankMedal rank={rank} />
@@ -383,11 +375,9 @@ export default async function PickDetailPage({ params }: Props) {
                             <div className="min-w-0">
                               {/* Role chip — editorial tag from the workspace. */}
                               {itemRoleLabel && (
-                                <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-accent/15 border border-accent-border/40 text-[10px] font-black uppercase tracking-widest text-accent-text">
-                                  {itemRoleLabel}
-                                </span>
+                                <Badge tone="neutral" className="mb-2">{itemRoleLabel}</Badge>
                               )}
-                              <span className="text-lg font-bold text-prose leading-snug block">
+                              <span className="text-lg font-extrabold text-prose leading-snug block">
                                 {product.name}
                               </span>
                             </div>
@@ -400,7 +390,7 @@ export default async function PickDetailPage({ params }: Props) {
 
                           {/* Editor's per-collection "best for" tagline — italic, prominent */}
                           {itemBestFor && (
-                            <p className="text-sm italic text-accent-text/90 mb-2">Best for {itemBestFor}</p>
+                            <p className="mb-2"><Badge tone="accent">Best for {itemBestFor}</Badge></p>
                           )}
 
                           <p className="text-sm text-prose-muted leading-relaxed mb-3">
@@ -439,14 +429,14 @@ export default async function PickDetailPage({ params }: Props) {
                             )}
                           </div>
                         </div>
-                      </Card>
+                      </article>
                     )
                   }
 
                   const product = review.product_slug ? productMap.get(review.product_slug) : null
                   const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                   return (
-                    <Card as="article" key={review.id} className="flex flex-col sm:flex-row gap-5 hover:border-accent-border/40 p-5 hover:-translate-y-0.5 transition-all duration-200">
+                    <article key={review.id} className="flex flex-col sm:flex-row gap-5 py-6 first:pt-0 last:pb-0">
                       {/* Rank — medal for top 3, number for the rest */}
                       <div className="flex sm:flex-col items-center gap-3 sm:gap-1 shrink-0">
                         <RankMedal rank={rank} />
@@ -466,11 +456,9 @@ export default async function PickDetailPage({ params }: Props) {
                           <div className="min-w-0">
                             {/* Role chip — editorial tag from the workspace. */}
                             {itemRoleLabel && (
-                              <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-accent/15 border border-accent-border/40 text-[10px] font-black uppercase tracking-widest text-accent-text">
-                                {itemRoleLabel}
-                              </span>
+                              <Badge tone="neutral" className="mb-2">{itemRoleLabel}</Badge>
                             )}
-                            <Link href={`/reviews/${review.slug}`} className="text-lg font-bold text-prose hover:text-accent-text-soft transition-colors leading-snug block">
+                            <Link href={`/reviews/${review.slug}`} className="text-lg font-extrabold text-prose hover:text-accent transition-colors leading-snug block">
                               {review.title}
                             </Link>
                           </div>
@@ -479,7 +467,7 @@ export default async function PickDetailPage({ params }: Props) {
 
                         {/* Editor's per-collection "best for" tagline — italic, prominent */}
                         {itemBestFor && (
-                          <p className="text-sm italic text-accent-text/90 mb-2">Best for {itemBestFor}</p>
+                          <p className="mb-2"><Badge tone="accent">Best for {itemBestFor}</Badge></p>
                         )}
 
                         <p className="text-sm text-prose-muted leading-relaxed mb-3">
@@ -489,7 +477,7 @@ export default async function PickDetailPage({ params }: Props) {
                         {/* Review's own best_for tags — generic audience hints */}
                         {(review.best_for?.length ?? 0) > 0 && (
                           <p className="text-xs text-prose-faint mb-3">
-                            <span className="text-accent-text-soft font-bold uppercase tracking-widest">Also good for:</span> {review.best_for!.slice(0, 3).join(' · ')}
+                            <span className="text-eyebrow font-bold uppercase tracking-widest">Also good for:</span> {review.best_for!.slice(0, 3).join(' · ')}
                           </p>
                         )}
 
@@ -513,7 +501,7 @@ export default async function PickDetailPage({ params }: Props) {
                           )}
                         </div>
                       </div>
-                    </Card>
+                    </article>
                   )
                 })}
               </div>
@@ -547,27 +535,16 @@ export default async function PickDetailPage({ params }: Props) {
 }
 
 function RankMedal({ rank }: { rank: number }) {
-  if (rank <= 3) {
-    const colors = {
-      1: { bg: 'bg-gradient-to-br from-amber-400 to-amber-600', text: 'text-amber-900', label: 'No. 1' },
-      2: { bg: 'bg-gradient-to-br from-gray-300 to-gray-500',   text: 'text-gray-800',  label: 'No. 2' },
-      3: { bg: 'bg-gradient-to-br from-orange-700 to-orange-900', text: 'text-orange-100', label: 'No. 3' },
-    }[rank as 1 | 2 | 3]!
-    return (
-      <div className="flex sm:flex-col items-center gap-2">
-        <span className={`relative w-12 h-12 rounded-full ${colors.bg} flex items-center justify-center font-black text-base ${colors.text} ring-2 ring-zinc-900/30`}>
-          <svg className="absolute -top-1 -right-1 w-4 h-4 text-accent-text-soft drop-shadow" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-          </svg>
-          {rank}
-        </span>
-        <span className="hidden sm:block text-[10px] text-prose-faint uppercase tracking-widest font-bold">{colors.label}</span>
-      </div>
-    )
-  }
+  // Square rank stamp (Hard Goods): orange for No. 1, black for the rest.
+  const tone = rank === 1 ? 'bg-accent text-white' : 'bg-chrome text-white'
   return (
-    <span className="w-12 h-12 rounded-full bg-accent-tint border border-accent-border/40 flex items-center justify-center text-accent-text-soft font-black text-sm tabular-nums">
-      {rank}
-    </span>
+    <div className="flex sm:flex-col items-center gap-2">
+      <span className={`w-12 h-12 rounded-md ${tone} flex items-center justify-center font-display font-black text-lg tabular-nums`}>
+        {rank}
+      </span>
+      {rank <= 3 && (
+        <span className="hidden sm:block text-[10px] text-prose-faint uppercase tracking-widest font-bold">No. {rank}</span>
+      )}
+    </div>
   )
 }

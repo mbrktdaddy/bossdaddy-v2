@@ -2,13 +2,12 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { buildSocialMetadata } from '@/lib/og'
 import Link from 'next/link'
-import Image from 'next/image'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCategoryBySlug, CATEGORIES } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
 import PageHeader from '@/components/PageHeader'
-import RatingScore from '@/components/RatingScore'
+import ReviewCard from '@/components/ReviewCard'
 import { PillFilterStrip, PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 import { EmptyState } from '@/components/ui/EmptyState'
 import BenchStrip from '@/components/BenchStrip'
@@ -104,36 +103,7 @@ export default async function CategoryPage({ params }: Props) {
         {reviews && reviews.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {reviews.map((r) => (
-              <Link
-                key={r.id}
-                href={`/reviews/${r.slug}`}
-                className="group bg-surface border border-soft rounded-xl overflow-hidden hover:border-accent-border/40 hover:-translate-y-1 transition-all"
-              >
-                {r.image_url ? (
-                  <div className="relative w-full h-48">
-                    <Image
-                      src={r.image_url}
-                      alt={r.product_name}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full h-48 bg-surface-raised flex items-center justify-center">
-                    <CategoryIcon slug={cat.slug} className="w-8 h-8 text-accent-text" />
-                  </div>
-                )}
-                <div className="p-5 space-y-2">
-                  <h2 className="font-black text-base leading-snug group-hover:text-accent-text-soft transition-colors line-clamp-2">
-                    {r.title}
-                  </h2>
-                  {r.excerpt && (
-                    <p className="text-sm text-prose-faint line-clamp-2 leading-relaxed">{r.excerpt}</p>
-                  )}
-                  <RatingScore rating={r.rating ?? 0} size="sm" />
-                </div>
-              </Link>
+              <ReviewCard key={r.id} review={{ ...r, category: slug }} eyebrow={null} />
             ))}
           </div>
         ) : (

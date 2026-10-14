@@ -7,6 +7,7 @@
 
 import { useState } from 'react'
 import CaptureMomentForm from './CaptureMomentForm'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   kidProfileId: string
@@ -35,7 +36,7 @@ export default function InlineCapture({
     <button
       type="button"
       onClick={() => setOpen(true)}
-      className="w-full sm:w-auto text-left px-4 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-xl transition-colors"
+      className={buttonVariants({ className: 'w-full sm:w-auto' })}
     >
       {ctaLabel}
     </button>

@@ -58,7 +58,7 @@ export async function MerchGrid() {
               const displayImage = getMerchDisplayImage(p as Parameters<typeof getMerchDisplayImage>[0]) ?? p.image_url
               const inner = (
                 <>
-                  <div className="relative w-full aspect-square bg-surface-raised/40">
+                  <div className="relative w-full aspect-square bg-surface-raised rounded-xl overflow-hidden">
                     {displayImage ? (
                       <Image
                         src={displayImage}
@@ -69,19 +69,17 @@ export async function MerchGrid() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <svg className="w-12 h-12 text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1} aria-hidden>
+                        <svg className="w-12 h-12 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1} aria-hidden>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                         </svg>
                       </div>
                     )}
                     {!isAvailable && (
-                      <div className="absolute top-3 left-3 bg-accent-tint/90 backdrop-blur-sm px-2.5 py-1 rounded-full">
-                        <p className="text-[10px] font-bold text-accent-text-soft uppercase tracking-widest">Coming soon</p>
-                      </div>
+                      <span className="absolute top-3 left-3 bg-chrome text-white rounded-sm px-2 py-1 text-[10px] font-display font-black uppercase tracking-[0.14em]">Coming soon</span>
                     )}
                   </div>
-                  <div className="p-5 flex flex-col flex-1">
-                    <h3 className="text-base font-semibold leading-snug mb-1.5 group-hover:text-accent-text-soft transition-colors">
+                  <div className="pt-4 flex flex-col flex-1">
+                    <h3 className="text-base font-extrabold text-prose leading-snug mb-1.5 group-hover:text-accent transition-colors">
                       {p.name}
                     </h3>
                     {p.description && (
@@ -99,7 +97,7 @@ export async function MerchGrid() {
                 </>
               )
 
-              const className = 'group flex flex-col bg-surface border border-soft hover:border-accent rounded-xl overflow-hidden transition-all duration-200'
+              const className = 'group flex flex-col'
 
               // Printful products → internal detail page
               if (isPrintful) {

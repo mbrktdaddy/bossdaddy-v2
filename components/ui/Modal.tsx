@@ -58,7 +58,9 @@ export function Modal({ onClose, label, labelledBy, size = 'md', dismissible = t
       onCancel={(e) => { e.preventDefault(); if (dismissible) onClose() }}
       // A click whose target is the <dialog> itself landed on the ::backdrop.
       onClick={(e) => { if (e.target === e.currentTarget && dismissible && closeOnBackdrop) onClose() }}
-      className={`m-auto w-[calc(100%-2rem)] ${SIZE[size]} max-h-[calc(100dvh-2rem)] p-0 text-prose bg-surface-sunken border border-soft rounded-xl shadow-2xl backdrop:bg-zinc-900/75 backdrop:backdrop-blur-sm`}
+      /* Hard Goods: the dialog is a 2px chrome box, no shadow — the backdrop
+         scrim does the separating. Chrome token for the scrim, not a raw shade. */
+      className={`m-auto w-[calc(100%-2rem)] ${SIZE[size]} max-h-[calc(100dvh-2rem)] p-0 text-prose bg-surface border-2 border-chrome rounded-xl backdrop:bg-chrome/80 backdrop:backdrop-blur-sm`}
     >
       {/* The inner box covers the whole dialog, so only the ::backdrop is "outside". */}
       <div className={className}>{children}</div>

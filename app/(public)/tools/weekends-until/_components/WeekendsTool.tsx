@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 import { LABELS } from '@/lib/labels'
 import { type Kid } from '@/lib/dad-tools/kid-actions'
 import { recordWeekendsRun } from '@/lib/dad-tools/moment-actions'
@@ -158,11 +159,7 @@ export default function WeekendsTool({ isAuthenticated, initialKids, initialKidI
               key={k.id}
               type="button"
               onClick={() => setSelectedKidId(k.id)}
-              className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedKidId === k.id
-                  ? 'bg-accent text-white'
-                  : 'bg-surface border border-faint text-prose-faint hover:text-prose'
-              }`}
+              className={`${PILL_BASE} ${selectedKidId === k.id ? PILL_ACTIVE : PILL_INACTIVE}`}
             >
               {k.name?.trim() || 'Kid'}
             </button>
@@ -170,11 +167,7 @@ export default function WeekendsTool({ isAuthenticated, initialKids, initialKidI
           <button
             type="button"
             onClick={() => setSelectedKidId(null)}
-            className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${
-              selectedKidId === null
-                ? 'bg-accent text-white'
-                : 'bg-surface border border-faint text-prose-faint hover:text-prose'
-            }`}
+            className={`${PILL_BASE} ${selectedKidId === null ? PILL_ACTIVE : PILL_INACTIVE}`}
           >
             Try another date
           </button>
@@ -228,11 +221,7 @@ export default function WeekendsTool({ isAuthenticated, initialKids, initialKidI
                   key={m.id}
                   type="button"
                   onClick={() => setMilestone(m.id)}
-                  className={`px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors shrink-0 ${
-                    milestone === m.id
-                      ? 'bg-accent text-white'
-                      : 'bg-surface border border-faint text-prose-faint hover:text-prose'
-                  }`}
+                  className={`${PILL_BASE} ${milestone === m.id ? PILL_ACTIVE : PILL_INACTIVE}`}
                 >
                   {m.label}
                 </button>
@@ -276,17 +265,13 @@ export default function WeekendsTool({ isAuthenticated, initialKids, initialKidI
       {hasInput && (
         <section className="flex items-center gap-3">
           <span className="text-xs text-prose-faint uppercase tracking-widest font-medium">Show as</span>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             {UNITS.map((u) => (
               <button
                 key={u.id}
                 type="button"
                 onClick={() => setUnit(u.id)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                  unit === u.id
-                    ? 'bg-prose text-background'
-                    : 'text-prose-faint hover:text-prose'
-                }`}
+                className={`${PILL_BASE} ${unit === u.id ? PILL_ACTIVE : PILL_INACTIVE}`}
               >
                 {u.label}
               </button>

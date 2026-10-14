@@ -22,7 +22,8 @@ import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedR
 import BenchStrip from '@/components/BenchStrip'
 import CollectionBreadcrumb from '@/components/collections/CollectionBreadcrumb'
 import FtcDisclosure from '@/components/FtcDisclosure'
-import { Card } from '@/components/ui/Card'
+import { Badge } from '@/components/ui/Badge'
+import { LabelBlock } from '@/components/ui/LabelBlock'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
 import { upgradeReviewedProducts } from '@/lib/collections/product-items'
@@ -342,10 +343,10 @@ export default async function GiftOccasionPage({ params }: Props) {
                     readingMinutes={readingMinutes}
                   />
                   {priceRangeLabel && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-tint border border-accent-border/40 text-xs font-bold text-accent-text tabular-nums">
-                      <span className="text-eyebrow/70 uppercase tracking-widest text-[10px]">Range</span>
+                    <Badge tone="muted" className="tabular-nums">
+                      <span className="text-prose-faint">Range</span>
                       {priceRangeLabel}
-                    </span>
+                    </Badge>
                   )}
                 </div>
               )}
@@ -401,9 +402,9 @@ export default async function GiftOccasionPage({ params }: Props) {
                       const product = joinedProduct!
                       const href = product.affiliate_url ? `/go/${product.slug}` : product.non_affiliate_url
                       return (
-                        <Card as="article" key={`product-${product.slug}`} className="flex flex-col sm:flex-row gap-5 hover:border-accent-border/40 p-5 transition-colors">
+                        <article key={`product-${product.slug}`} className="flex flex-col sm:flex-row gap-5 pb-6 border-b border-soft">
                           <div className="flex sm:flex-col items-center gap-3 sm:gap-0 shrink-0">
-                            <span className="w-10 h-10 rounded-full bg-accent-tint border border-accent-border/40 flex items-center justify-center text-accent-text-soft font-black text-sm tabular-nums">
+                            <span className="w-10 h-10 rounded-md bg-chrome text-white flex items-center justify-center font-display font-black text-sm tabular-nums">
                               {idx + 1}
                             </span>
                           </div>
@@ -418,9 +419,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                             <div className="flex items-start justify-between gap-3 mb-2">
                               <div className="min-w-0">
                                 {itemRoleLabel && (
-                                  <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-accent/15 border border-accent-border/40 text-[10px] font-black uppercase tracking-widest text-accent-text">
-                                    {itemRoleLabel}
-                                  </span>
+                                  <Badge tone="accent" className="mb-2">{itemRoleLabel}</Badge>
                                 )}
                                 {/* Claims only when set (brand-guide §1.9). */}
                                 <ProductClaimLine product={product} />
@@ -455,16 +454,16 @@ export default async function GiftOccasionPage({ params }: Props) {
                               )}
                             </div>
                           </div>
-                        </Card>
+                        </article>
                       )
                     }
 
                     const product = review.product_slug ? productMap.get(review.product_slug) : null
                     const href = product?.affiliate_url ? `/go/${product.slug}` : product?.non_affiliate_url ?? null
                     return (
-                      <Card as="article" key={review.id} className="flex flex-col sm:flex-row gap-5 hover:border-accent-border/40 p-5 transition-colors">
+                      <article key={review.id} className="flex flex-col sm:flex-row gap-5 pb-6 border-b border-soft">
                         <div className="flex sm:flex-col items-center gap-3 sm:gap-0 shrink-0">
-                          <span className="w-10 h-10 rounded-full bg-accent-tint border border-accent-border/40 flex items-center justify-center text-accent-text-soft font-black text-sm tabular-nums">
+                          <span className="w-10 h-10 rounded-md bg-chrome text-white flex items-center justify-center font-display font-black text-sm tabular-nums">
                             {idx + 1}
                           </span>
                         </div>
@@ -473,7 +472,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                           <div className="relative w-full sm:w-40 h-40 sm:h-32 shrink-0 rounded-xl overflow-hidden bg-surface-raised">
                             <Image src={review.image_url} alt={review.product_name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 160px" />
                             {review.rating != null && review.rating >= 8 && (
-                              <div className="absolute top-2 right-2"><BossApprovedBadge size="sm" variant="card" /></div>
+                              <div className="absolute top-2 left-2"><BossApprovedBadge size="sm" variant="card" /></div>
                             )}
                           </div>
                         )}
@@ -486,9 +485,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                                   the product name eyebrow so it lands as the
                                   first thing the eye catches. */}
                               {itemRoleLabel && (
-                                <span className="inline-block mb-2 px-2.5 py-1 rounded-md bg-accent/15 border border-accent-border/40 text-[10px] font-black uppercase tracking-widest text-accent-text">
-                                  {itemRoleLabel}
-                                </span>
+                                <Badge tone="accent" className="mb-2">{itemRoleLabel}</Badge>
                               )}
                               <Link href={`/reviews/${review.slug}`} className="text-base font-bold text-prose hover:text-accent-text-soft transition-colors leading-snug block">
                                 {review.title}
@@ -508,7 +505,7 @@ export default async function GiftOccasionPage({ params }: Props) {
 
                           {(review.best_for?.length ?? 0) > 0 && (
                             <p className="text-xs text-prose-faint mb-3">
-                              <span className="text-accent-text-soft font-bold uppercase tracking-widest">Also good for:</span> {review.best_for!.slice(0, 3).join(' · ')}
+                              <span className="text-eyebrow font-bold uppercase tracking-widest">Also good for:</span> {review.best_for!.slice(0, 3).join(' · ')}
                             </p>
                           )}
 
@@ -532,7 +529,7 @@ export default async function GiftOccasionPage({ params }: Props) {
                             )}
                           </div>
                         </div>
-                      </Card>
+                      </article>
                     )
                   })}
                 </div>
@@ -567,22 +564,21 @@ export default async function GiftOccasionPage({ params }: Props) {
             {/* Related occasions strip — siblings in the same occasion group */}
             {relatedOccasions.length > 0 && (
               <section className="mt-14 pt-10 border-t border-soft">
-                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                <Eyebrow className="mb-5">More Gift Guides</Eyebrow>
+                <LabelBlock as="p" className="mb-5">More Gift Guides</LabelBlock>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {relatedOccasions.map((r) => (
                     <Link
                       key={r.value}
                       href={`/gifts/${r.slug}`}
-                      className="flex items-center gap-3 px-4 py-3 bg-surface border border-soft hover:bg-surface-raised hover:border-accent-border/40 rounded-xl transition-colors min-h-[44px]"
+                      className="flex items-center gap-3 px-4 py-3 bg-surface border-2 border-chrome rounded-xl min-h-[44px]"
                     >
-                      <OccasionIcon value={r.value} className="w-6 h-6 shrink-0 text-accent-text-soft" />
+                      <OccasionIcon value={r.value} className="w-6 h-6 shrink-0 text-prose" />
                       <span className="text-sm font-semibold text-prose-muted hover:text-prose transition-colors truncate">{r.label}</span>
                     </Link>
                   ))}
                 </div>
                 <div className="mt-4 text-center">
-                  <Link href="/gifts" className="text-sm text-prose-faint hover:text-accent-text-soft transition-colors">
+                  <Link href="/gifts" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
                     See all gift guides →
                   </Link>
                 </div>

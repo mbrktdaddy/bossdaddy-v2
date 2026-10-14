@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import type { ProductBlock } from '@/lib/boss/types'
 import { Card } from '@/components/ui/Card'
+import { buttonVariants } from '@/components/ui/Button'
 
 // The gap-fallback shortlist. Deliberately LIGHTER than RecommendationCard (the
 // rich, bordered card used for real Boss-tested reviews) — researched picks get
@@ -121,7 +122,7 @@ function ResearchedNotify({ query }: { query?: string }) {
       <button
         type="submit"
         disabled={state === 'busy' || !email.trim()}
-        className="text-[13px] font-semibold text-white bg-accent hover:bg-accent-hover disabled:opacity-40 rounded-lg px-3 py-2 min-h-[40px] transition-colors"
+        className={buttonVariants({ size: 'sm' })}
       >
         {state === 'busy' ? '…' : 'Notify me'}
       </button>

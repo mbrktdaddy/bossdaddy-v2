@@ -1,5 +1,6 @@
 // The one "nothing here yet" block. Pick the variant by context, not taste:
-//   subtle — public listing/search pages (quiet tint + hairline)
+//   subtle — public listing/search pages: the 2px chrome box (Hard Goods —
+//            the quiet grey tint vanished on white and read as broken)
 //   dashed — author/member surfaces where the empty state invites creation
 //   panel  — admin/dashboard lists that normally render inside a surface panel
 // size="md" for empty states nested inside a section; "lg" for page-level.
@@ -16,8 +17,8 @@ interface EmptyStateProps {
 }
 
 const VARIANT = {
-  subtle: 'bg-surface/40 border border-soft',
-  dashed: 'border border-dashed border-soft',
+  subtle: 'bg-surface border-2 border-chrome',
+  dashed: 'border-2 border-dashed border-strong',
   panel:  'bg-surface border border-soft',
 } as const
 
@@ -26,7 +27,7 @@ export function EmptyState({ title, icon, body, action, variant = 'subtle', size
   return (
     <div className={`text-center rounded-xl px-6 ${lg ? 'py-24' : 'py-10'} ${VARIANT[variant]} ${className}`}>
       {icon && <div className="flex justify-center mb-4" aria-hidden>{icon}</div>}
-      <p className={`text-prose-muted font-semibold ${lg ? 'text-lg' : 'text-base'}`}>{title}</p>
+      <p className={`text-prose font-display font-black ${lg ? 'text-lg' : 'text-base'}`}>{title}</p>
       {body && <p className="text-prose-faint text-sm mt-2">{body}</p>}
       {action && <div className={lg ? 'mt-6' : 'mt-4'}>{action}</div>}
     </div>

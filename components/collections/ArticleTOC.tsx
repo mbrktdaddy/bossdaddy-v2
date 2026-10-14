@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 
 export interface TOCItem {
   id:    string
@@ -56,7 +57,7 @@ export default function ArticleTOC({ items, variant }: Props) {
       // behind it as the user scrolls. z-10 stays under the header z-50.
       <nav
         aria-label="On this page"
-        className="lg:hidden -mx-6 mb-8 px-6 sticky top-16 z-10 bg-surface-sunken/95 backdrop-blur py-3 border-y border-soft"
+        className="lg:hidden -mx-6 mb-8 px-6 sticky top-16 z-10 bg-surface/95 backdrop-blur py-2 border-y border-soft"
       >
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
           <span className="shrink-0 text-[10px] font-bold text-eyebrow uppercase tracking-widest mr-1">
@@ -66,11 +67,7 @@ export default function ArticleTOC({ items, variant }: Props) {
             <a
               key={item.id}
               href={`#${item.id}`}
-              className={`shrink-0 px-3 py-1.5 text-xs font-semibold rounded-full border transition-colors min-h-[36px] inline-flex items-center ${
-                activeId === item.id
-                  ? 'bg-accent text-white border-accent'
-                  : 'bg-surface text-prose-muted border-soft hover:border-strong hover:text-prose'
-              }`}
+              className={`${PILL_BASE} ${activeId === item.id ? PILL_ACTIVE : PILL_INACTIVE}`}
             >
               {item.label}
             </a>

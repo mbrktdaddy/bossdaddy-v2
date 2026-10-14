@@ -1,32 +1,24 @@
 import Link from 'next/link'
-import { BRAND, splitLastWord } from '@/lib/brand'
+import { BRAND } from '@/lib/brand'
 
-/* Homepage brand band — light-editorial pass, 2026-10-08.
+/* Homepage brand band — Hard Goods, A2 "folded masthead" (2026-10-14,
+   brand-guide §5/§10, mockup docs/mockups/directions/a2-hard-goods-folded.html).
 
-   This used to be an 80–88vh full-bleed photo poster: tagline, subhead, a
-   "Meet the Boss" button, and not one piece of content on the first screen.
-   No comparable publication (Wirecutter, Strategist, Gear Patrol, Fatherly)
-   leads with a brand poster; they lead with the lead story. So the band is now
-   SLIM: kicker · tagline · one-line subhead · a text link to /about · the
-   in-motion ticker. On a phone the cover story's image is inside the first
-   screen; on desktop the whole cover package is.
+   DESKTOP ONLY. A solid orange band under the black masthead: the tagline in
+   uppercase Montserrat black on the left, the in-motion ticker on the right.
+   It is the one orange block on the first screen — black masthead, orange
+   band, white page — the STIHL / DeWalt stripe.
 
-   It stays a dark ZONE on purpose — one near-black band under the masthead is
-   the black/orange/white punctuation the brand keeps on the white canvas.
+   On a phone the band is gone: it stacked under the black masthead and read
+   as a second header (his one objection to Hard Goods). The tagline folds
+   into the masthead as a small orange signature under the wordmark (Header)
+   and the topics row (CategoryBar) takes the band's slot. The cover story is
+   the first screen.
 
-   The hero photographs (public/images/hero-workshop*.webp) are no longer
-   rendered here. They are kept on disk for /about, which is where "Meet the
-   Boss" lands and where a full-bleed portrait earns its space. The homepage
-   og:image still points at the desktop crop (see generateMetadata). */
-
-const SUBHEAD =
-  'Field-tested gear, no-fluff guides, and free tools for men who show up every day.'
-
-const Arrow = () => (
-  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-  </svg>
-)
+   Ink on the orange block is the chrome black (#09090b, 4.6:1 on #CC5500).
+   The page's prose black misses AA at ticker size, and white-on-orange misses
+   it everywhere, so this block is NOT a dark zone — never put white type on
+   the core orange at body size. */
 
 interface MotionItem {
   /** Uppercase kicker — the activity verb ("Just tested", "On the bench"). */
@@ -36,39 +28,30 @@ interface MotionItem {
   href: string
 }
 
-/* "In Motion" row — DESKTOP ONLY since 2026-10-08: on a phone it stacked into three
-   rows under the headline band and read as a second header, while the Latest list
-   two scrolls down carries the same recency. Recent ACTIVITY (latest tested · next on the bench · newest
-   guide), not inventory totals, so it reads as alive rather than advertising
-   small counts. Each item links out. Falls back to the independence line if
-   nothing's live yet. */
+/* Recent ACTIVITY (latest tested · next on the bench · newest guide), not
+   inventory totals, so the band reads as alive rather than advertising small
+   counts. One non-wrapping line of equal segments — long titles truncate.
+   Falls back to the independence line when nothing is live. */
 function Ticker({ items }: { items: MotionItem[] }) {
+  if (items.length === 0) {
+    return (
+      <p className="min-w-0 truncate text-[13px] font-semibold">
+        <span className="font-display font-black uppercase tracking-[0.14em] text-[10px] mr-2">Zero paid placements.</span>
+        Every review is earned. Every pick is independently chosen.
+      </p>
+    )
+  }
   return (
-    <div className="hidden sm:block border-t border-soft">
-      <div className="max-w-6xl mx-auto px-6">
-        {items.length === 0 ? (
-          <p className="py-4 text-[13px] font-semibold text-prose-muted inline-flex items-center gap-2.5">
-            <span className="text-accent" aria-hidden>●</span>
-            <span className="font-black text-prose">Zero paid placements.</span>
-            Every review is earned. Every pick is independently chosen.
-          </p>
-        ) : (
-          // Desktop only (`hidden sm:block` on the wrapper): one non-wrapping line of
-          // equal segments — long titles truncate rather than pushing a second row.
-          <ul className="flex items-center gap-x-6 py-4 text-[13px] min-w-0">
-            {items.map((it) => (
-              <li key={it.label} className="min-w-0 sm:flex-1">
-                <Link href={it.href} className="group flex items-center gap-2.5 min-w-0">
-                  <span className="text-accent shrink-0" aria-hidden>●</span>
-                  <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.18em] text-accent-text">{it.label}</span>
-                  <span className="min-w-0 truncate font-semibold text-prose group-hover:text-accent-text-soft transition-colors">{it.title}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
+    <ul className="flex items-center gap-x-7 min-w-0 flex-1 justify-end text-xs font-semibold">
+      {items.map((it) => (
+        <li key={it.label} className="min-w-0">
+          <Link href={it.href} className="flex items-center gap-2 min-w-0 hover:underline underline-offset-4 decoration-2">
+            <span className="shrink-0 font-display font-black text-[10px] uppercase tracking-[0.14em]">{it.label}</span>
+            <span className="min-w-0 truncate max-w-[260px]">{it.title}</span>
+          </Link>
+        </li>
+      ))}
+    </ul>
   )
 }
 
@@ -77,37 +60,23 @@ interface Props {
 }
 
 export default function HomeHero({ motion }: Props) {
-  const { lead, last } = splitLastWord(BRAND.tagline)
   return (
-    <section data-theme="dark" className="bg-chrome border-b border-soft">
-      <div className="max-w-6xl mx-auto px-6 pt-8 pb-7 sm:pt-10 sm:pb-9">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between sm:gap-10">
-          <div className="min-w-0">
-            {/* Positioning, not the credibility line — an eyebrow above the H1 is an
-                IDENTITY slot (brand-guide §1.7). `positioning` is stored without a
-                period so it can sit mid-sentence; standing alone it takes one. */}
-            <p className="text-[11px] font-bold text-accent-text uppercase tracking-[0.24em] sm:tracking-[0.28em]">
-              {BRAND.positioning}.
-            </p>
-            {/* The page's one <h1>. Montserrat stays here: the tagline is the
-                wordmark's voice, not a content headline. */}
-            <h1 className="font-black tracking-tight leading-[0.98] text-prose text-4xl sm:text-5xl md:text-6xl mt-3">
-              {lead} <br className="sm:hidden" /><span className="text-accent">{last}</span>
-            </h1>
-            <p className="text-[15px] sm:text-base text-prose-muted leading-[1.6] mt-3 max-w-xl">
-              {SUBHEAD}
-            </p>
-          </div>
-          <Link
-            href="/about"
-            className="inline-flex items-center gap-2 self-start sm:self-end shrink-0 text-sm font-bold text-prose hover:text-accent-text transition-colors min-h-[44px] sm:min-h-0"
-          >
-            Meet the Boss
-            <Arrow />
-          </Link>
+    <>
+      {/* The page's one <h1> on a phone. The band (and its visible h1) is
+          display:none below lg, which also removes it from the accessibility
+          tree, so this visually-hidden twin carries the heading there; it is
+          display:none on lg+ in turn, so only one h1 is ever exposed. */}
+      <h1 className="sr-only lg:hidden">{BRAND.tagline}</h1>
+      <section aria-label="Boss Daddy" className="hidden lg:block bg-accent text-chrome border-b border-soft">
+        <div className="max-w-6xl mx-auto px-6 min-h-[72px] py-3 flex items-center justify-between gap-10">
+          {/* Montserrat stays here: the tagline is the wordmark's voice, not a
+              content headline. Uppercase is the Hard Goods register. */}
+          <h1 className="shrink-0 font-black uppercase text-[26px] leading-none tracking-[-0.01em] whitespace-nowrap">
+            {BRAND.tagline}
+          </h1>
+          <Ticker items={motion} />
         </div>
-      </div>
-      <Ticker items={motion} />
-    </section>
+      </section>
+    </>
   )
 }

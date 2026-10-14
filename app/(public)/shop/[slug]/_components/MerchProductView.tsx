@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { MerchImageGallery } from '@/components/MerchImageGallery'
 import AddToCartForm from './AddToCartForm'
+import { LabelBlock } from '@/components/ui/LabelBlock'
 
 interface Variant {
   id: string
@@ -55,7 +56,7 @@ export default function MerchProductView({
       />
 
       <div className="flex flex-col">
-        <p className="text-xs text-accent-text uppercase tracking-[0.2em] font-bold mb-2">Boss Daddy Merch</p>
+        <LabelBlock className="self-start mb-3">Boss Daddy Merch</LabelBlock>
         <h1 className="text-3xl font-black text-prose mb-3">{name}</h1>
         <p className="text-2xl font-bold text-accent-text-soft mb-1">{priceDisplay}</p>
         <p className="text-sm text-prose-faint mb-6">Free US shipping included</p>

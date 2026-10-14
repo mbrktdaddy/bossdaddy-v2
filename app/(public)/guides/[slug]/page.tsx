@@ -36,6 +36,9 @@ import TakeawaysCard from '@/components/reviews/TakeawaysCard'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import EditorialHeader from '@/components/EditorialHeader'
+import { LabelBlock } from '@/components/ui/LabelBlock'
+import { buttonVariants } from '@/components/ui/Button'
 
 const TableOfContents = dynamic(() => import('@/components/TableOfContents'))
 const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
@@ -346,29 +349,20 @@ export default async function GuidePage({ params }: Props) {
             {/* Related reviews */}
             {relatedReviews && relatedReviews.length > 0 && (
               <div className="mt-12">
-                <div className="flex items-end justify-between mb-5">
-                  <div>
-                    <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                    <Eyebrow className="mb-1">Reviews</Eyebrow>
-                    <h2 className="text-lg font-black">
-                      {category ? `${category.label} Reviews` : 'Related Reviews'}
-                    </h2>
-                  </div>
-                  {category && (
-                    <Link href={`/category/${category.slug}`} className="text-xs text-prose-faint hover:text-accent-text-soft transition-colors font-medium">
-                      Browse all →
-                    </Link>
-                  )}
-                </div>
+                <EditorialHeader
+                  eyebrow="Reviews"
+                  title={category ? `${category.label} Reviews` : 'Related Reviews'}
+                  right={category ? { label: 'Browse all', href: `/category/${category.slug}` } : undefined}
+                />
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {relatedReviews.map((r, i) => (
                     <Link
                       key={r.id}
                       href={`/reviews/${r.slug}`}
-                      className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
+                      className="group flex flex-col"
                     >
                       {r.image_url ? (
-                        <div className="relative w-full h-36 bg-surface-raised shrink-0">
+                        <div className="relative w-full aspect-[16/10] rounded-xl overflow-hidden bg-surface-raised shrink-0">
                           <Image
                             src={r.image_url}
                             alt={r.product_name}
@@ -384,15 +378,15 @@ export default async function GuidePage({ params }: Props) {
                           )}
                         </div>
                       ) : (
-                        <div className="w-full h-36 bg-surface-raised flex items-center justify-center shrink-0">
+                        <div className="w-full aspect-[16/10] rounded-xl bg-surface-raised flex items-center justify-center shrink-0">
                           {category && <CategoryIcon slug={category.slug} className="w-7 h-7 text-accent-text opacity-30" />}
                         </div>
                       )}
-                      <div className="p-4 flex flex-col flex-1">
+                      <div className="pt-3 flex flex-col flex-1">
                         <div className="flex items-center justify-end mb-2">
                           <RatingScore rating={r.rating ?? 0} size="sm" />
                         </div>
-                        <p className="text-sm font-semibold leading-snug group-hover:text-accent-text-soft transition-colors flex-1">
+                        <p className="text-sm font-extrabold text-prose leading-snug group-hover:text-accent transition-colors flex-1">
                           {r.title}
                         </p>
                       </div>
@@ -405,20 +399,16 @@ export default async function GuidePage({ params }: Props) {
             {/* Related guides */}
             {related && related.length > 0 && (
               <div className="mt-12">
-                <div className="mb-5">
-                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                  <Eyebrow className="mb-1">Guides</Eyebrow>
-                  <h2 className="text-lg font-black">More Guides</h2>
-                </div>
+                <EditorialHeader eyebrow="Guides" title="More Guides" />
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {related.map((a, i) => (
                     <Link
                       key={a.id}
                       href={`/guides/${a.slug}`}
-                      className="group flex flex-col bg-surface border border-soft rounded-xl overflow-hidden hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
+                      className="group flex flex-col"
                     >
                       {a.image_url ? (
-                        <div className="relative w-full h-36 bg-surface-raised shrink-0 overflow-hidden">
+                        <div className="relative w-full aspect-[16/10] rounded-xl overflow-hidden bg-surface-raised shrink-0 overflow-hidden">
                           <Image
                             src={a.image_url}
                             alt={a.title}
@@ -429,12 +419,12 @@ export default async function GuidePage({ params }: Props) {
                           />
                         </div>
                       ) : (
-                        <div className="w-full h-36 bg-surface-raised flex items-center justify-center shrink-0">
+                        <div className="w-full aspect-[16/10] rounded-xl bg-surface-raised flex items-center justify-center shrink-0">
                           {category && <CategoryIcon slug={category.slug} className="w-7 h-7 text-accent-text opacity-30" />}
                         </div>
                       )}
-                      <div className="p-4 flex flex-col flex-1">
-                        <p className="text-sm font-semibold leading-snug group-hover:text-accent-text-soft transition-colors flex-1">
+                      <div className="pt-3 flex flex-col flex-1">
+                        <p className="text-sm font-extrabold text-prose leading-snug group-hover:text-accent transition-colors flex-1">
                           {a.title}
                         </p>
                         {a.excerpt && (
@@ -490,9 +480,8 @@ export default async function GuidePage({ params }: Props) {
 
               {/* Compact products panel — in mention order */}
               {mentionedProducts && mentionedProducts.length > 0 && (
-                <Card className="hover:border-accent-border/40 transition-colors p-4">
-                  <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                  <Eyebrow className="mb-3">Products Mentioned</Eyebrow>
+                <Card tone="chrome" className="p-4">
+                  <LabelBlock className="mb-3">Products Mentioned</LabelBlock>
                   <ul className="space-y-3">
                     {mentionedSlugs
                       .map((s) => mentionedProducts.find((p) => p.slug === s))
@@ -521,7 +510,7 @@ export default async function GuidePage({ params }: Props) {
                                 target="_blank"
                                 rel={isAffiliate ? 'sponsored nofollow noopener' : 'noopener'}
                                 data-product-slug={product!.slug}
-                                className="text-[10px] font-bold text-accent-text-soft hover:text-accent transition-colors uppercase tracking-wide"
+                                className={buttonVariants({ variant: 'outline', size: 'sm' })}
                               >
                                 Check Price →
                               </a>

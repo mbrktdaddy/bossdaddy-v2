@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getCategoryBySlug } from '@/lib/categories'
 import CategoryIcon from '@/components/CategoryIcon'
+import { LabelBlock } from '@/components/ui/LabelBlock'
 import type { GuideRow } from '@/app/(public)/guides/actions'
 
 export default function FeaturedGuideCard({ guide: g }: { guide: GuideRow }) {
@@ -10,10 +11,10 @@ export default function FeaturedGuideCard({ guide: g }: { guide: GuideRow }) {
   return (
     <Link
       href={`/guides/${g.slug}`}
-      className="group relative flex flex-col sm:flex-row overflow-hidden rounded-xl bg-surface border border-soft hover:border-copper hover:-translate-y-1 transition-all duration-300 mt-2 mb-20"
+      className="group relative flex flex-col sm:flex-row sm:gap-8 mt-2 mb-20"
     >
       {/* Image */}
-      <div className="relative w-full sm:w-[55%] h-56 sm:h-auto shrink-0 bg-surface-raised">
+      <div className="relative w-full sm:w-[55%] h-56 sm:h-auto shrink-0 bg-surface-raised rounded-xl overflow-hidden">
         {g.image_url ? (
           <Image
             src={g.image_url}
@@ -24,9 +25,9 @@ export default function FeaturedGuideCard({ guide: g }: { guide: GuideRow }) {
             sizes="(max-width: 640px) 100vw, 55vw"
           />
         ) : (
-          <div className={`w-full h-full bg-gradient-to-br ${cat?.color ?? 'from-surface-raised to-surface'} flex items-center justify-center`}>
+          <div className="w-full h-full bg-surface-raised flex items-center justify-center">
             {cat ? (
-              <CategoryIcon slug={cat.slug} className="w-10 h-10 text-accent-text opacity-30" />
+              <CategoryIcon slug={cat.slug} className="w-10 h-10 text-prose-faint" />
             ) : (
               <svg className="w-10 h-10 text-prose-faint opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -36,23 +37,19 @@ export default function FeaturedGuideCard({ guide: g }: { guide: GuideRow }) {
             )}
           </div>
         )}
-        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-surface to-transparent sm:hidden" />
       </div>
 
       {/* Content */}
-      <div className="flex flex-col justify-between p-6 sm:p-8 flex-1 min-w-0">
+      <div className="flex flex-col justify-between pt-5 sm:pt-0 flex-1 min-w-0">
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <span className="inline-flex items-center gap-1.5">
-              <span className="w-4 h-0.5 bg-accent" aria-hidden />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">Featured Guide</span>
-            </span>
+<LabelBlock>Featured Guide</LabelBlock>
             {cat && (
               <span className="flex items-center gap-1 text-[10px] text-prose-faint uppercase tracking-widest"><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-prose-faint" /> {cat.label}</span>
             )}
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-black leading-snug text-prose group-hover:text-accent-text-soft transition-colors mb-3">
+          <h2 className="text-xl sm:text-2xl font-black leading-snug text-prose group-hover:text-accent transition-colors mb-3">
             {g.title}
           </h2>
           {g.excerpt && (

@@ -10,6 +10,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { buttonVariants } from '@/components/ui/Button'
 import NumberField from '@/components/dad-tools/NumberField'
 import { ResultCard, ResultLinks } from '@/components/dad-tools/CalculatorParts'
 import { LABELS } from '@/lib/labels'
@@ -95,8 +96,8 @@ export default function LifeInsuranceTool({ initial }: Props) {
               label="Education" prefix="$" value={education} placeholder="0" onChange={setEducation}
               help="College or trade school for the kids, in today’s dollars."
             />
-            <Link href={dadMathHref} className="inline-flex items-center gap-1.5 py-2 text-xs font-semibold text-accent hover:text-accent-hover transition-colors">
-              Figure your college number in {LABELS.tools.dadMath.full} <span aria-hidden>→</span>
+            <Link href={dadMathHref} className={buttonVariants({ variant: 'outline', size: 'sm', className: 'mt-2' })}>
+              Figure your college number in {LABELS.tools.dadMath.full}
             </Link>
           </div>
         </div>

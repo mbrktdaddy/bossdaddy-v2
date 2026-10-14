@@ -49,8 +49,8 @@ export default async function ContentLinkCard({ contentType, slug }: Props) {
   const eyebrow = isReview ? 'Read the Review' : 'Read the Guide'
 
   return (
-    <Card as="aside"
-      className="not-prose my-8 hover:border-accent-border/40 overflow-hidden transition-colors"
+    <Card as="aside" tone="chrome"
+      className="not-prose my-8 overflow-hidden"
       aria-label={`${eyebrow}: ${t.title}`}
     >
       <Link href={href} className="group flex items-stretch gap-4">
@@ -60,7 +60,7 @@ export default async function ContentLinkCard({ contentType, slug }: Props) {
           </div>
         )}
         <div className="flex-1 min-w-0 py-4 pr-4 sm:py-5">
-          <p className="text-[10px] sm:text-xs text-accent-text-soft uppercase tracking-[0.2em] font-black mb-1.5">
+          <p className="text-[10px] sm:text-xs text-eyebrow uppercase tracking-[0.2em] font-black mb-1.5">
             {eyebrow}
           </p>
           {/* data-toc-skip: this is ANOTHER article's title, not a section of the
@@ -68,7 +68,7 @@ export default async function ContentLinkCard({ contentType, slug }: Props) {
               the guide TOC must not list it. See components/TableOfContents.tsx. */}
           <h3
             data-toc-skip
-            className="text-base sm:text-lg font-black text-prose leading-snug group-hover:text-accent-text-soft transition-colors line-clamp-2"
+            className="text-base sm:text-lg font-black text-prose leading-snug group-hover:text-accent transition-colors line-clamp-2"
           >
             {t.title}
           </h3>

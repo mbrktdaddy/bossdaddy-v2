@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import SectionHeader from '@/components/SectionHeader'
+import { EmptyState } from '@/components/ui/EmptyState'
 import FtcDisclosure from '@/components/FtcDisclosure'
 import { RadarCard } from './RadarCard'
 import { LABELS } from '@/lib/labels'
@@ -34,7 +35,7 @@ export function RadarLane({ items, sub, emptyText, className = '' }: Props) {
       <SectionHeader label="Caught My Eye" heading={LABELS.radar.full} sub={sub} right={ARCHIVE} />
 
       {items.length === 0 ? (
-        <p className="rounded-xl border border-soft bg-surface px-5 py-4 text-sm text-prose-muted">{emptyText}</p>
+        <EmptyState size="md" title={emptyText} />
       ) : (
         <>
           {items.some((item) => item.affiliate_url) && <FtcDisclosure />}

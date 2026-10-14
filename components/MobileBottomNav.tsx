@@ -198,7 +198,7 @@ export default function MobileBottomNav() {
           aria-current={askActive ? 'page' : undefined}
           className="relative flex flex-col items-center justify-end pb-1.5"
         >
-          <span className="absolute -top-4 w-12 h-12 rounded-full bg-accent text-white flex items-center justify-center shadow-lg shadow-accent/30 ring-4 ring-background">
+          <span className="absolute -top-4 w-12 h-12 rounded-md bg-accent text-white flex items-center justify-center">
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>

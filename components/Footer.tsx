@@ -5,6 +5,7 @@ import { LABELS } from '@/lib/labels'
 import { CATEGORIES } from '@/lib/categories'
 import { BRAND } from '@/lib/brand'
 import { DownloadIcon } from '@/components/icons'
+import { buttonVariants } from '@/components/ui/Button'
 import { isGiftSeason } from '@/lib/gift-occasions'
 
 interface BrowseLink { href: string; label: string; hint?: string }
@@ -102,7 +103,7 @@ export default function Footer() {
   const browse = isGiftSeason() ? [...BROWSE, GIFTS_LINK] : BROWSE
 
   return (
-    <footer data-theme="dark" className="bg-chrome border-t-[3px] border-accent text-prose-muted">
+    <footer data-theme="dark" className="bg-chrome border-t-4 border-accent text-prose-muted">
       <div className="max-w-6xl mx-auto px-6 py-14">
 
         {/* Top: 3-column grid */}
@@ -131,7 +132,7 @@ export default function Footer() {
             </p>
             <Link
               href="/install"
-              className="inline-flex items-center gap-2 mb-5 px-4 py-2.5 rounded-xl border border-strong hover:border-accent text-sm font-semibold text-prose-muted hover:text-prose transition-colors"
+              className={buttonVariants({ variant: 'outline', size: 'sm', className: 'mb-5 gap-2' })}
             >
               <DownloadIcon className="w-4 h-4 text-accent shrink-0" strokeWidth={1.8} />
               {LABELS.app.short}

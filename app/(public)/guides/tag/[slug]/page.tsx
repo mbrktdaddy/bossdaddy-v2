@@ -2,10 +2,8 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { buildSocialMetadata } from '@/lib/og'
 import Link from 'next/link'
-import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getCategoryBySlug } from '@/lib/categories'
-import CategoryIcon from '@/components/CategoryIcon'
+import LibraryGuideCard from '@/components/LibraryGuideCard'
 import { EmptyState } from '@/components/ui/EmptyState'
 import BenchStrip from '@/components/BenchStrip'
 import PageHeader from '@/components/PageHeader'
@@ -102,43 +100,9 @@ export default async function GuideTagPage({ params }: Props) {
 
         {guides.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {guides.map((g) => {
-              const cat = getCategoryBySlug(g.category)
-              return (
-                <Link
-                  key={g.id}
-                  href={`/guides/${g.slug}`}
-                  className="group bg-surface border border-soft rounded-xl overflow-hidden hover:border-accent-border/40 hover:-translate-y-1 transition-all duration-200"
-                >
-                  {g.image_url ? (
-                    <div className="relative w-full h-48">
-                      <Image
-                        src={g.image_url}
-                        alt={g.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-full h-48 bg-surface-raised flex items-center justify-center">
-                      {cat && <CategoryIcon slug={cat.slug} className="w-8 h-8 text-accent-text opacity-40" />}
-                    </div>
-                  )}
-                  <div className="p-5 space-y-2">
-                    <h2 className="font-black text-base leading-snug group-hover:text-accent-text-soft transition-colors line-clamp-2">
-                      {g.title}
-                    </h2>
-                    {g.excerpt && (
-                      <p className="text-sm text-prose-faint line-clamp-2 leading-relaxed">{g.excerpt}</p>
-                    )}
-                    {g.reading_time_minutes && (
-                      <p className="text-xs text-prose-faint">{g.reading_time_minutes} min read</p>
-                    )}
-                  </div>
-                </Link>
-              )
-            })}
+            {guides.map((g) => (
+              <LibraryGuideCard key={g.id} guide={g} />
+            ))}
           </div>
         ) : (
           <EmptyState

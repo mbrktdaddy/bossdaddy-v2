@@ -9,6 +9,7 @@ import BenchStrip from '@/components/BenchStrip'
 import PipelineCounter from '@/components/PipelineCounter'
 import MessageUserButton from '@/components/messages/MessageUserButton'
 import { EmptyState } from '@/components/ui/EmptyState'
+import EditorialHeader from '@/components/EditorialHeader'
 import type { Metadata } from 'next'
 import { buildSocialMetadata } from '@/lib/og'
 
@@ -122,7 +123,7 @@ export default async function AuthorPage({ params }: Props) {
  className="w-16 h-16 rounded-xl object-cover shrink-0"
  />
  ) : (
- <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-orange-700 to-orange-950 flex items-center justify-center text-2xl font-black text-white shrink-0">
+ <div className="w-16 h-16 rounded-xl bg-chrome flex items-center justify-center text-2xl font-black text-white shrink-0">
  {(profile.display_name ?? username)[0].toUpperCase()}
  </div>
  )}
@@ -155,24 +156,21 @@ export default async function AuthorPage({ params }: Props) {
  {/* Reviews */}
  {totalReviews > 0 && (
  <div className="mb-12">
- <div className="mb-5">
- <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
- <h2 className="text-lg font-black">Reviews</h2>
- </div>
- <div className="space-y-2">
+ <EditorialHeader eyebrow="By this author" title="Reviews" />
+ <div className="divide-y divide-soft border-y border-soft">
  {reviews!.map((r) => {
  const cat = getCategoryBySlug(r.category)
  return (
  <Link
  key={r.id}
  href={`/reviews/${r.slug}`}
- className="flex items-center justify-between p-4 bg-surface border border-soft hover:border-accent-border/40 rounded-xl transition-colors group"
+ className="flex items-center justify-between py-4 transition-colors group"
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1 flex-wrap">
  {cat && <span className="flex items-center gap-1.5 text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-semibold"><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text shrink-0" /> {cat.label}</span>}
  </div>
- <p className="text-sm font-semibold group-hover:text-accent-text-soft transition-colors truncate">{r.title}</p>
+ <p className="text-sm font-extrabold text-prose group-hover:text-accent transition-colors truncate">{r.title}</p>
  {r.published_at && (
  <p className="text-xs text-prose-faint mt-0.5">
  {new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -190,24 +188,21 @@ export default async function AuthorPage({ params }: Props) {
  {/* Articles */}
  {totalGuides > 0 && (
  <div>
- <div className="mb-5">
- <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
- <h2 className="text-lg font-black">Guides</h2>
- </div>
- <div className="space-y-2">
+ <EditorialHeader eyebrow="By this author" title="Guides" />
+ <div className="divide-y divide-soft border-y border-soft">
  {articles!.map((a) => {
  const cat = getCategoryBySlug(a.category)
  return (
  <Link
  key={a.id}
  href={`/guides/${a.slug}`}
- className="flex items-center justify-between p-4 bg-surface border border-soft hover:border-accent-border/40 rounded-xl transition-colors group"
+ className="flex items-center justify-between py-4 transition-colors group"
  >
  <div className="min-w-0">
  <div className="flex items-center gap-2 mb-1">
  {cat && <span className={`flex items-center gap-1 text-xs ${cat.accent}`}><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text" /> {cat.label}</span>}
  </div>
- <p className="text-sm font-semibold group-hover:text-accent-text-soft transition-colors truncate">{a.title}</p>
+ <p className="text-sm font-extrabold text-prose group-hover:text-accent transition-colors truncate">{a.title}</p>
  {a.published_at && (
  <p className="text-xs text-prose-faint mt-0.5">
  {new Date(a.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}

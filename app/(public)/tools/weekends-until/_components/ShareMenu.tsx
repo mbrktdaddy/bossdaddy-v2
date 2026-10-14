@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useSyncExternalStore } from 'react'
+import { buttonVariants } from '@/components/ui/Button'
 import type { Milestone, Unit } from '@/lib/dad-tools/calc'
 import { LABELS } from '@/lib/labels'
 
@@ -119,7 +120,7 @@ export default function ShareMenu({
         <button
           type="button"
           onClick={handleNativeShare}
-          className="px-3 py-1.5 rounded-full border border-faint text-prose-faint hover:text-prose hover:border-accent transition-colors"
+          className={buttonVariants({ variant: 'outline', size: 'sm' })}
         >
           Share…
         </button>
@@ -128,14 +129,14 @@ export default function ShareMenu({
       <button
         type="button"
         onClick={handleCopy}
-        className="px-3 py-1.5 rounded-full border border-faint text-prose-faint hover:text-prose hover:border-accent transition-colors"
+        className={buttonVariants({ variant: 'outline', size: 'sm' })}
       >
         {copied ? 'Copied!' : 'Copy link'}
       </button>
 
       <a
         href={mailtoHref}
-        className="px-3 py-1.5 rounded-full border border-faint text-prose-faint hover:text-prose hover:border-accent transition-colors"
+        className={buttonVariants({ variant: 'outline', size: 'sm' })}
       >
         Send to spouse
       </a>

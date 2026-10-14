@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { LabelBlock } from '@/components/ui/LabelBlock'
+import { buttonVariants } from '@/components/ui/Button'
 import { formatPublished, type LatestItem } from '@/lib/latest'
 
 // The item shape lives in lib/latest.ts (shared with /explore's index); re-exported
@@ -26,12 +28,14 @@ export default function LatestRail({ items, allHref }: { items: LatestItem[]; al
 
   return (
     <aside className="lg:h-full">
-      <span aria-hidden className="block h-px w-6 bg-accent mb-4" />
-      <h3 className="font-black text-prose text-xl leading-tight tracking-tight">
-        The latest
-      </h3>
+      <div className="pb-3 border-b-[3px] border-chrome">
+        <LabelBlock>Newest first</LabelBlock>
+        <h3 className="mt-2.5 font-black text-prose uppercase text-xl leading-tight tracking-[-0.01em]">
+          The latest
+        </h3>
+      </div>
 
-      <ul className="mt-2 flex flex-col divide-y divide-soft">
+      <ul className="flex flex-col divide-y divide-soft">
         {items.map((it) => {
           const date = formatPublished(it.published_at, 'short')
           return (
@@ -61,7 +65,7 @@ export default function LatestRail({ items, allHref }: { items: LatestItem[]; al
       {allHref && (
         <Link
           href={allHref}
-          className="mt-5 pt-4 border-t border-soft block text-[11px] font-bold uppercase tracking-[0.1em] text-prose hover:text-accent-text transition-colors"
+          className={buttonVariants({ variant: 'outline', size: 'sm', className: 'mt-5' })}
         >
           See everything →
         </Link>

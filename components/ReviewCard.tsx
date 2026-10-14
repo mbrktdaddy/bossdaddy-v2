@@ -65,17 +65,15 @@ export default function ReviewCard({
               : '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'}
           />
           {rating >= 8 && (
-            <div className="absolute top-3 right-3">
+            <div className="absolute top-3 left-3">
               <BossApprovedBadge size="sm" variant="card" />
             </div>
           )}
         </div>
       ) : (
-        <div className={`w-full ${mediaHeight} shrink-0 bg-gradient-to-br ${
-          cat?.color ?? 'from-surface-raised to-surface'
-        } flex items-center justify-center`}>
+        <div className={`w-full ${mediaHeight} shrink-0 bg-surface-raised rounded-xl flex items-center justify-center`}>
           {cat ? (
-            <CategoryIcon slug={cat.slug} className={`${hero ? 'w-12 h-12' : 'w-10 h-10'} text-accent-text opacity-40`} />
+            <CategoryIcon slug={cat.slug} className={`${hero ? 'w-12 h-12' : 'w-10 h-10'} text-prose-faint`} />
           ) : (
             <svg className="w-10 h-10 text-prose-faint opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <rect x="3" y="3" width="18" height="18" rx="2" />

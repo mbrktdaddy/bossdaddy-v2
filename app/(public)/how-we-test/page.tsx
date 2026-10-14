@@ -4,7 +4,8 @@ import CategoryIcon from '@/components/CategoryIcon'
 import PageHeader from '@/components/PageHeader'
 import { getCategoryLabel } from '@/lib/categories'
 import { buildSocialMetadata, SITE_URL } from '@/lib/og'
-import { Eyebrow } from '@/components/ui/Eyebrow'
+import { Card } from '@/components/ui/Card'
+import { LabelBlock } from '@/components/ui/LabelBlock'
 
 // See the note in about/page.tsx: the hand-rolled `twitter: { card }` block dropped
 // the layout's site/creator handles and twitter:image.
@@ -20,7 +21,7 @@ export const metadata: Metadata = buildSocialMetadata({
 
 export const revalidate = 86400
 
-const ICON_CLS = 'w-7 h-7 text-accent-text'
+const ICON_CLS = 'w-7 h-7 text-prose'
 
 // Keyed by category slug so titles and icons come from the source of truth
 // (lib/categories.ts + CategoryIcon). A label rename there propagates here —
@@ -159,11 +160,11 @@ export default function HowWeTestPage() {
 
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 not-prose mb-12">
  {PILLAR_TESTING.map(({ slug, description }) => (
- <div key={slug} className="bg-surface rounded-xl p-5">
+ <Card tone="chrome" key={slug} className="p-5">
  <div className="mb-3"><CategoryIcon slug={slug} className={ICON_CLS} /></div>
  <h3 className="font-bold text-card-title text-base mb-2">{getCategoryLabel(slug)}</h3>
  <p className="text-prose-faint text-sm leading-relaxed">{description}</p>
- </div>
+ </Card>
  ))}
  </div>
 
@@ -188,11 +189,11 @@ export default function HowWeTestPage() {
 
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 not-prose mb-12">
  {EDITORIAL_PILLARS.map(({ slug, description }) => (
- <div key={slug} className="bg-surface rounded-xl p-5">
+ <Card tone="chrome" key={slug} className="p-5">
  <div className="mb-3"><CategoryIcon slug={slug} className={ICON_CLS} /></div>
  <h3 className="font-bold text-card-title text-base mb-2">{getCategoryLabel(slug)}</h3>
  <p className="text-prose-faint text-sm leading-relaxed">{description}</p>
- </div>
+ </Card>
  ))}
  </div>
 
@@ -229,11 +230,11 @@ export default function HowWeTestPage() {
 
  </div>
 
- <div className="not-prose bg-accent-tint rounded-xl p-6 mb-12">
- <Eyebrow as="div" className="mb-2">
+ <div data-theme="dark" className="not-prose bg-chrome text-prose border-t-4 border-accent rounded-xl p-6 mb-12">
+ <LabelBlock tone="accent" as="div" className="mb-3">
  The Highest Designation
- </Eyebrow>
- <h2 className="text-3xl font-black text-prose mb-4">Boss Daddy Approved</h2>
+ </LabelBlock>
+ <h2 className="text-3xl font-black uppercase text-prose mb-4">Boss Daddy Approved</h2>
  <p className="text-prose-muted leading-relaxed mb-4">
  <strong className="text-prose">Boss Daddy Approved</strong>{' '}is the top designation on
  this site. It&apos;s not a sticker we slap on anything we want to sell. It&apos;s earned.

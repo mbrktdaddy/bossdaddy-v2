@@ -7,14 +7,15 @@ import type { SavingsEntry } from '@/lib/dad-tools/savings'
 import { fmtUsd, fmtYMDForDisplay } from '@/lib/dad-tools/savings'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { Badge, type BadgeTone } from '@/components/ui/Badge'
 
-const KIND_BADGE: Record<SavingsEntry['kind'], { label: string; className: string; sign: '+' | '-' | '' }> = {
-  contribution:      { label: 'Contribution', className: 'bg-accent-tint text-accent-text-soft border-accent-border/60', sign: '+' },
-  catchup:           { label: 'Catch-up',     className: 'bg-info-bg text-info-ink border-info-line',                    sign: '+' },
-  withdrawal:        { label: 'Withdrawal',   className: 'bg-danger-bg text-danger-ink border-danger-line',              sign: '-' },
-  adjustment_credit: { label: 'Adjustment',   className: 'bg-success-bg text-success-ink border-success-line',           sign: '+' },
-  adjustment_debit:  { label: 'Adjustment',   className: 'bg-danger-bg text-danger-ink border-danger-line',              sign: '-' },
-  skip:              { label: 'Skip',         className: 'bg-surface-raised text-prose-muted border-strong',             sign: '' },
+const KIND_BADGE: Record<SavingsEntry['kind'], { label: string; tone: BadgeTone; sign: '+' | '-' | '' }> = {
+  contribution:      { label: 'Contribution', tone: 'accent',  sign: '+' },
+  catchup:           { label: 'Catch-up',     tone: 'info',    sign: '+' },
+  withdrawal:        { label: 'Withdrawal',   tone: 'danger',  sign: '-' },
+  adjustment_credit: { label: 'Adjustment',   tone: 'success', sign: '+' },
+  adjustment_debit:  { label: 'Adjustment',   tone: 'danger',  sign: '-' },
+  skip:              { label: 'Skip',         tone: 'muted',   sign: '' },
 }
 
 export interface ContributorProfile {
@@ -67,9 +68,7 @@ export default function ContributionLog({ entries, emptyMessage, profileById, sh
               key={e.id}
               className="flex items-center gap-3 p-3"
             >
-              <span className={`text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full border font-medium shrink-0 ${meta.className}`}>
-                {meta.label}
-              </span>
+              <Badge tone={meta.tone} size="sm">{meta.label}</Badge>
               <div className="min-w-0 flex-1">
                 <p className="text-sm text-prose">
                   {meta.sign && (

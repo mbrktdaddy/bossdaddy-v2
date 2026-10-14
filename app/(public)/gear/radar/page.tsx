@@ -74,9 +74,11 @@ export default async function RadarArchivePage() {
               {live.length > 0 ? (
                 <RadarGrid items={live} />
               ) : (
-                <p className="rounded-xl border border-soft bg-surface px-5 py-4 text-sm text-prose-muted">
-                  Nothing on the radar right now. When something new catches my eye, it lands here first.
-                </p>
+                <EmptyState
+                  size="md"
+                  title="Nothing on the radar right now."
+                  body="When something new catches my eye, it lands here first."
+                />
               )}
             </section>
 
